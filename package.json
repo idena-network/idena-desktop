@@ -1,0 +1,32 @@
+{
+  "name": "idena-desktop",
+  "productName": "Idena",
+  "version": "0.0.1",
+  "main": "main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "next build renderer && next export renderer",
+    "dist": "npm run build && build --dir"
+  },
+  "build": {
+    "asar": false,
+    "extraResources": [
+      {
+        "from": "renderer/out",
+        "to": "app/renderer"
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^2.0.0",
+    "electron-builder": "^20.13.4",
+    "eslint": "^5.13.0",
+    "next": "latest",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1"
+  },
+  "dependencies": {
+    "electron-is-dev": "0.3.0",
+    "electron-next": "3.1.4"
+  }
+}
