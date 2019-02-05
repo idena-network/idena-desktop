@@ -26,7 +26,14 @@
     "react-dom": "^16.1.1"
   },
   "dependencies": {
+    "ansi-to-html": "^0.6.10",
     "electron-is-dev": "0.3.0",
     "electron-next": "3.1.4"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "semi": false,
+    "singleQuote": true,
+    "bracketSpacing": false
   }
 }
