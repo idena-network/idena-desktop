@@ -4,16 +4,15 @@ const {spawn} = require('child_process')
 
 const channels = require('./channels')
 
-const IDENA_NODE_BIN = 'idena-go'
+const idenaBin = 'idena-go'
 
 const getBinarySuffix = () => (process.platform === 'win32' ? '.exe' : '')
 
-const getFile = () =>
-  path.join(__dirname, '..', IDENA_NODE_BIN + getBinarySuffix())
+const getFile = () => path.join(__dirname, '..', idenaBin + getBinarySuffix())
 
 const isBundled = () => fs.existsSync(getFile())
 
-const getBinary = async () => (isBundled() ? getFile() : IDENA_NODE_BIN)
+const getBinary = async () => (isBundled() ? getFile() : idenaBin)
 
 module.exports.startNode = async (
   window,

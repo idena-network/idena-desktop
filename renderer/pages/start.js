@@ -3,7 +3,6 @@ import channels from '../../main/channels'
 import {ab2str} from '../utils/string'
 import * as api from '../services/api'
 import Convert from 'ansi-to-html'
-// import {startNode} from '../../main/idenaNode'
 
 const convert = new Convert()
 
@@ -70,14 +69,14 @@ export default class extends Component {
                   href="#"
                   onClick={async () => {
                     const caller = api[toMethod(p)]
-                    const params =
-                      p === 'balance' && this.state.address
-                        ? JSON.parse(this.state.address)
-                        : undefined
+                    const params = p === 'balance' && this.state.address
                     if (caller) {
                       const resp = await caller(params)
                       this.setState({
-                        [p]: JSON.stringify(resp) || '💩',
+                        [p]:
+                          (typeof resp === 'object'
+                            ? JSON.stringify(resp)
+                            : resp) || '💩',
                       })
                     }
                   }}
