@@ -37,6 +37,12 @@ const createMainWindow = () => {
 
   mainWindow.loadURL(url)
 
+  if (isDev) {
+    mainWindow.webContents.openDevTools({
+      mode: 'detach',
+    })
+  }
+
   // Hide the window when it loses focus
   mainWindow.on('blur', () => {
     if (!mainWindow.webContents.isDevToolsOpened()) {

@@ -4,7 +4,7 @@ import {abToStr, bufferToHex} from '../utils/string'
 import * as api from '../services/api'
 import Convert from 'ansi-to-html'
 import FlipDrop from '../components/flips/flip-drop'
-import {arrToFormData} from '../utils/api'
+import {arrToFormData} from '../utils/req'
 
 const convert = new Convert()
 
@@ -58,8 +58,7 @@ export default class extends Component {
         reader.addEventListener('load', e => {
           hex += bufferToHex(e.target.result)
           if (i === files.length - 1) {
-            console.log(hex)
-            // api.submitFlip(hex)
+            api.submitFlip(hex).then(console.log)
           }
         })
         reader.readAsArrayBuffer(file)

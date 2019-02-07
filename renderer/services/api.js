@@ -52,11 +52,11 @@ export const getLastBlock = () =>
     .then(response => response.json())
     .then(data => data.result)
 
-export const submitFlip = formData =>
+export const submitFlip = hex =>
   fetch(baseUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: formData,
-  }).then(r => r.json())
+    body: JSON.stringify({method: 'flip_submitFlip', params: [hex], id: 1}),
+  }).then(r => r.text())
