@@ -51,3 +51,12 @@ export const getLastBlock = () =>
   })
     .then(response => response.json())
     .then(data => data.result)
+
+export const submitFlip = formData =>
+  fetch(baseUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: formData,
+  }).then(r => r.json())

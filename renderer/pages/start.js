@@ -1,8 +1,10 @@
 import {Component, Fragment} from 'react'
 import channels from '../../main/channels'
-import {ab2str} from '../utils/string'
+import {abToStr} from '../utils/string'
 import * as api from '../services/api'
 import Convert from 'ansi-to-html'
+import FlipDrop from '../components/flips/flip-drop'
+import {arrToFormData} from '../utils/api'
 
 const convert = new Convert()
 
@@ -16,6 +18,7 @@ export default class extends Component {
     status: 'off',
     log: '',
     lastBlock: null,
+    showDropZone: false,
   }
 
   componentDidMount() {
@@ -28,18 +31,33 @@ export default class extends Component {
     global.ipcRenderer.removeListener(channels.node, this.handleNodeOutput)
   }
 
-  handleNodeOutput = (event, message) => {
+  handleNodeOutput = (_event, message) => {
     // receive a message from the main process and save it in the local state
     this.setState(({log}) => ({
       status: 'on',
-      log: ab2str(message.log).concat(log),
+      log: abToStr(message.log).concat(log),
     }))
   }
 
-  handleStartNode = event => {
+  handleStartNode = () => {
     if (this.state.status !== 'on') {
       global.ipcRenderer.send(channels.node, 'start')
     }
+  }
+
+  handleChangeFile = e => {
+    // var reader = new FileReader()
+    // reader.addEventListener('load', e => {
+    //   const arrayBuffer = e.target.result
+    //   const array = new Uint8Array(arrayBuffer)
+    //   const binaryString = String.fromCharCode.apply(null, array)
+    // })
+    // reader.readAsArrayBuffer(e.target.files[0])
+    api.submitFlip(arrToFormData(e.target.files))
+  }
+
+  handleDrop = files => {
+    api.submitFlip(arrToFormData(files))
   }
 
   render() {
@@ -58,7 +76,7 @@ export default class extends Component {
           )}
         />
 
-        <b>Network</b>
+        <h2>Network</h2>
         <dl>
           {networkParams.map(p => (
             <Fragment key={p}>
@@ -89,8 +107,31 @@ export default class extends Component {
           ))}
         </dl>
 
+        <h2>FLIPs</h2>
+        <div
+          onDragEnter={() =>
+            this.setState({
+              showDropZone: true,
+            })
+          }
+          className="flips"
+        >
+          {this.state.showDropZone && (
+            <FlipDrop
+              darkMode={false}
+              onDrop={this.handleDrop}
+              onHide={() => {
+                this.setState({showDropZone: false})
+              }}
+            />
+          )}
+          Drag and drop your pics here or upload manually{' '}
+          <input type="file" onChange={this.handleChangeFile} />
+        </div>
+
         <style jsx>{`
           main {
+            box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
               Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Helvetica, Arial,
               sans-serif;
@@ -115,9 +156,14 @@ export default class extends Component {
             cursor: pointer;
           }
           pre {
-            height: 300px;
-            max-height: 300px;
+            height: 200px;
+            max-height: 200px;
             overflow: auto;
+          }
+
+          .flips {
+            position: relative;
+            min-height: 350px;
           }
         `}</style>
       </main>

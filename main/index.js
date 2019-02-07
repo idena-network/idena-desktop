@@ -37,6 +37,13 @@ const createMainWindow = () => {
 
   mainWindow.loadURL(url)
 
+  // Hide the window when it loses focus
+  mainWindow.on('blur', () => {
+    if (!mainWindow.webContents.isDevToolsOpened()) {
+      mainWindow.hide()
+    }
+  })
+
   mainWindow.on('close', e => {
     if (mainWindow.forceClose) {
       return
