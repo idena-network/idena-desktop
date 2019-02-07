@@ -6,28 +6,16 @@ import {submitFlip} from '../../services/api'
 
 class FlipDrop extends Component {
   handleDragLeave = () => {
-    if (this.props.onHide) {
-      this.props.onHide()
-    }
+    this.onHide()
   }
 
   handleDragOver = e => {
     this.preventDefault(e)
   }
 
-  handleDrop = event => {
-    this.handleDragLeave()
-
-    if (!event.dataTransfer || !event.dataTransfer.files) {
-      return
-    }
-
-    const {files} = event.dataTransfer
-
-    this.props.onDrop(files)
-
-    // And prevent the window from loading the file inside it
-    event.preventDefault()
+  handleDrop = e => {
+    this.onHide()
+    this.props.onDrop(e)
   }
 
   render() {
@@ -58,6 +46,8 @@ class FlipDrop extends Component {
 
     event.preventDefault()
   }
+
+  onHide = () => this.props.onHide && this.props.onHide()
 }
 
 FlipDrop.propTypes = {

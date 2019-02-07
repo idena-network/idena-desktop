@@ -17,7 +17,7 @@ export default css`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 300px;
+    height: 200px;
     padding: 1em;
     width: 100%;
     pointer-events: none;

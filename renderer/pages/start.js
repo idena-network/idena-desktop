@@ -1,6 +1,6 @@
 import {Component, Fragment} from 'react'
 import channels from '../../main/channels'
-import {abToStr} from '../utils/string'
+import {abToStr, bufferToHex} from '../utils/string'
 import * as api from '../services/api'
 import Convert from 'ansi-to-html'
 import FlipDrop from '../components/flips/flip-drop'
@@ -45,15 +45,26 @@ export default class extends Component {
     }
   }
 
-  handleChangeFile = e => {
-    // var reader = new FileReader()
-    // reader.addEventListener('load', e => {
-    //   const arrayBuffer = e.target.result
-    //   const array = new Uint8Array(arrayBuffer)
-    //   const binaryString = String.fromCharCode.apply(null, array)
-    // })
-    // reader.readAsArrayBuffer(e.target.files[0])
-    api.submitFlip(arrToFormData(e.target.files))
+  handleUpload = e => {
+    e.preventDefault()
+
+    const files = e.target.files || e.dataTransfer.files
+    let hex = ''
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      if (file.type.indexOf('image') == 0) {
+        const reader = new FileReader()
+        reader.addEventListener('load', e => {
+          hex += bufferToHex(e.target.result)
+          if (i === files.length - 1) {
+            console.log(hex)
+            // api.submitFlip(hex)
+          }
+        })
+        reader.readAsArrayBuffer(file)
+      }
+    }
   }
 
   handleDrop = files => {
@@ -119,14 +130,14 @@ export default class extends Component {
           {this.state.showDropZone && (
             <FlipDrop
               darkMode={false}
-              onDrop={this.handleDrop}
+              onDrop={this.handleUpload}
               onHide={() => {
                 this.setState({showDropZone: false})
               }}
             />
           )}
           Drag and drop your pics here or upload manually{' '}
-          <input type="file" onChange={this.handleChangeFile} />
+          <input type="file" onChange={this.handleUpload} />
         </div>
 
         <style jsx>{`
