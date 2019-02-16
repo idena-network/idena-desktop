@@ -6,5 +6,7 @@ export const bufferToHex = buffer => {
   new Uint8Array(buffer).forEach(v => {
     s += h[v >> 4] + h[v & 15]
   })
-  return s
+  return `0x${s}`
 }
+
+export const capitalize = str => str[0].toUpperCase() + str.substr(1)

@@ -2,15 +2,17 @@ import {Component} from 'react'
 import {func, bool} from 'prop-types'
 
 import styles from '../../styles/components/flips/flip-drop'
-import {submitFlip} from '../../services/api'
+import {throwIfSet} from '../../utils/fn'
 
-class FlipDrop extends Component {
-  handleDragLeave = () => {
-    this.onHide()
-  }
+export class FlipDrop extends Component {
+  onHide = throwIfSet(this.props.onHide)
 
   handleDragOver = e => {
-    this.preventDefault(e)
+    // Make the cursor look good
+    e.dataTransfer.effectAllowed = 'copyMove'
+    e.dataTransfer.dropEffect = 'copy'
+
+    e.preventDefault()
   }
 
   handleDrop = e => {
@@ -23,7 +25,7 @@ class FlipDrop extends Component {
       <aside
         onDragLeave={this.handleDragLeave}
         onDragOver={this.handleDragOver}
-        onDrop={this.handleDrop}
+        onDrop={this.onHide}
       >
         <section className={this.props.darkMode ? 'dark' : ''}>
           <span>
@@ -38,16 +40,6 @@ class FlipDrop extends Component {
       </aside>
     )
   }
-
-  preventDefault = event => {
-    // Make the cursor look good
-    event.dataTransfer.effectAllowed = 'copyMove'
-    event.dataTransfer.dropEffect = 'copy'
-
-    event.preventDefault()
-  }
-
-  onHide = () => this.props.onHide && this.props.onHide()
 }
 
 FlipDrop.propTypes = {
@@ -55,5 +47,3 @@ FlipDrop.propTypes = {
   onDrop: func.isRequired,
   onHide: func,
 }
-
-export default FlipDrop
