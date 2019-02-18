@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import ReactCrop from 'react-image-crop'
+import {useSafe} from '../../utils/fn'
 
 export class FlipCrop extends Component {
   state = {
@@ -12,6 +13,8 @@ export class FlipCrop extends Component {
     pixelCrop: {},
   }
 
+  onChange = useSafe(this.props.onChange)
+
   handleImageLoad = (image, _pixelCrop) => {
     this.imageRef = image
     this.imageSrc = image.getAttribute('src')
@@ -19,11 +22,12 @@ export class FlipCrop extends Component {
 
   handleCropComplete = (_crop, pixelCrop) => {
     this.setState({pixelCrop})
-    this.props.onCropChange(this.imageSrc, pixelCrop)
+    this.onChange(this.imageSrc, pixelCrop)
   }
 
   handleCropChange = crop => {
     this.setState({crop})
+    this.onChange(this.imageSrc, crop)
   }
 
   handleCropSave = () => {

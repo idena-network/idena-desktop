@@ -1,7 +1,7 @@
 import css from 'styled-jsx/css'
 
 export default css`
-  .flips {
+  div {
     position: relative;
     min-height: 350px;
   }

@@ -2,10 +2,10 @@ import {Component} from 'react'
 import {func, bool} from 'prop-types'
 
 import styles from '../../styles/components/flips/flip-drop'
-import {throwIfSet} from '../../utils/fn'
+import {useSafe} from '../../utils/fn'
 
 export class FlipDrop extends Component {
-  onHide = throwIfSet(this.props.onHide)
+  onHide = useSafe(this.props.onHide)
 
   handleDragOver = e => {
     // Make the cursor look good

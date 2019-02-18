@@ -1,1 +1,1 @@
-export const throwIfSet = fn => (...args) => fn && fn(...args)
+export const useSafe = fn => (...args) => fn && fn(...args)

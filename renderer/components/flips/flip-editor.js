@@ -7,7 +7,7 @@ import {FlipDrop} from './flip-drop'
 import {FlipRenderer} from './flip-renderer'
 
 import * as api from '../../services/api'
-import '../../styles/components/flips/flip-editor'
+import styles from '../../styles/components/flips/flip-editor'
 import {arrToFormData} from '../../utils/req'
 import {bufferToHex} from '../../utils/string'
 
@@ -15,68 +15,66 @@ export class FlipEditor extends Component {
   state = {
     showDropZone: false,
     origSrc: '',
-    src: '',
-    pixelCrop: {},
-    imgIdx: -1,
+    first: {
+      src: '',
+      crop: '',
+    },
+    second: {
+      src: '',
+      crop: '',
+    },
+    category: 'before/after',
+    idx: 0,
   }
 
   handleUpload = e => {
     e.preventDefault()
 
-    const files = e.target.files || e.dataTransfer.files
+    const file = (e.target.files || e.dataTransfer.files)[0]
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      if (file.type.indexOf('image') == 0) {
-        const reader = new FileReader()
-        reader.addEventListener('load', e => {
-          if (i === files.length - 1) {
-            this.setState(() => ({
-              origSrc: e.target.result,
-            }))
-            // api.submitFlip(hex).then(console.log)
-          }
-        })
-        // reader.readAsArrayBuffer(file)
-        reader.readAsDataURL(file)
-      }
+    if (file.type.indexOf('image') !== 0) {
+      return
     }
+
+    const reader = new FileReader()
+    reader.addEventListener('load', e => {
+      this.setState({
+        // @ts-ignore
+        origSrc: e.target.result,
+      })
+    })
+    reader.readAsDataURL(file)
   }
 
   handleDrop = files => {
     api.submitFlip(arrToFormData(files))
   }
 
-  handleCropChange = (image, crop) => {
-    // console.log(image, crop)
-  }
-
-  handleCropSave = (image, crop) => {
-    this.setState(({imgIdx}) => ({
-      src: image,
-      crop,
-      imgIdx: imgIdx + 1,
+  handleCropSave = (src, crop) => {
+    this.setState(({idx}) => ({
+      [idx % 2 === 0 ? 'first' : 'second']: {
+        src,
+        crop,
+      },
+      idx: idx + 1,
     }))
   }
 
   handleSubmitFlip = () => {
-    const ctx = this.canvasRef.getContext('2d')
-    const buff = ctx.getImageData(
-      0,
-      0,
-      this.canvasRef.width,
-      this.canvasRef.height
-    ).data.buffer
-    const hex = bufferToHex(buff)
-    console.log(hex)
+    let hexList = []
+    for (const canvas of [this.canvasRef, this.canvasRef2]) {
+      const ctx = canvas.getContext('2d')
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+      hexList.push(bufferToHex(data.buffer))
+    }
   }
 
   render() {
-    const {showDropZone, origSrc, src, crop, imgIdx} = this.state
+    const {showDropZone, origSrc, first, second, category} = this.state
     return (
       <>
         <h2>FLIPs</h2>
-        <div onDragEnter={this.showDropZone} className="flips">
+        <div onDragEnter={this.showDropZone}>
           {showDropZone && (
             <FlipDrop
               darkMode={false}
@@ -86,23 +84,25 @@ export class FlipEditor extends Component {
           )}
           Drag and drop your pics here or upload manually{' '}
           <input type="file" onChange={this.handleUpload} />
-          {origSrc && (
-            <div>
-              <FlipCrop
-                src={origSrc}
-                onCropChange={this.handleCropChange}
-                onCropSave={this.handleCropSave}
-              />
-              <button onClick={this.handleSubmitFlip}>submit</button>
-              <FlipRenderer
-                src={src}
-                crop={crop}
-                imgIdx={imgIdx}
-                canvasRef={node => (this.canvasRef = node)}
-              />
-            </div>
-          )}
         </div>
+        {origSrc && (
+          <div>
+            <FlipCrop src={origSrc} onCropSave={this.handleCropSave} />
+            <button onClick={this.handleSubmitFlip}>Submit</button>
+            <h2>{category}</h2>
+            <FlipRenderer
+              {...first}
+              idx={'canvas0'}
+              canvasRef={node => (this.canvasRef = node)}
+            />
+            <FlipRenderer
+              {...second}
+              idx={'canvas1'}
+              canvasRef={node => (this.canvasRef2 = node)}
+            />
+          </div>
+        )}
+        <style jsx>{styles}</style>
       </>
     )
   }

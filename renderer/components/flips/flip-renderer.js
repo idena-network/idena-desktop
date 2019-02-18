@@ -1,9 +1,12 @@
 import React, {Component} from 'react'
 import styles from '../../styles/components/flips/flip-renderer'
+import {useSafe} from '../../utils/fn'
 
 export class FlipRenderer extends Component {
+  canvasId = `canvas${this.props.idx}`
+
   componentDidMount() {
-    this.props.canvasRef(document.querySelector('canvas'))
+    useSafe(this.props.canvasRef)(document.getElementById(this.canvasId))
     this.renderCanvas()
   }
 
@@ -14,34 +17,25 @@ export class FlipRenderer extends Component {
   render() {
     return (
       <>
-        <canvas width={1024} height={768} />
+        <canvas id={this.canvasId} />
         <style jsx>{styles}</style>
       </>
     )
   }
 
   renderCanvas = () => {
-    const {src, crop, imgIdx} = this.props
+    const {src, crop} = this.props
 
-    const canvas = document.querySelector('canvas')
+    const canvas = document.getElementById(this.canvasId)
     const ctx = canvas.getContext('2d')
 
     const image = new Image()
-
-    image.onload = function() {
+    image.onload = () => {
       const {x, y, width, height} = crop
       ctx.restore()
-      ctx.drawImage(
-        image,
-        x,
-        y,
-        width,
-        height,
-        width * imgIdx + (imgIdx > 0 ? 50 : 0),
-        0,
-        width,
-        height
-      )
+      canvas.width = width
+      canvas.height = height
+      ctx.drawImage(image, x, y, width, height, 0, 0, width, height)
       ctx.save()
     }
     image.src = src
