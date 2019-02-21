@@ -30,7 +30,8 @@
     "electron-is-dev": "0.3.0",
     "electron-next": "3.1.4",
     "prop-types": "^15.6.2",
-    "react-image-crop": "^6.0.12"
+    "react-image-crop": "^6.0.12",
+    "rlp": "^2.2.2"
   },
   "prettier": {
     "trailingComma": "es5",

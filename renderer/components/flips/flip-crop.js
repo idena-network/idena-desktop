@@ -1,6 +1,8 @@
 import React, {Component} from 'react'
 import ReactCrop from 'react-image-crop'
+
 import {useSafe} from '../../utils/fn'
+import styles from '../../styles/components/flips/flip-crop'
 
 export class FlipCrop extends Component {
   state = {
@@ -38,7 +40,7 @@ export class FlipCrop extends Component {
   }
 
   render() {
-    const {src} = this.props
+    const {src, disabled} = this.props
     const {crop} = this.state
     return (
       <>
@@ -49,7 +51,10 @@ export class FlipCrop extends Component {
           onComplete={this.handleCropComplete}
           onChange={this.handleCropChange}
         />
-        <button onClick={this.handleCropSave}>Save</button>
+        <button onClick={this.handleCropSave} disabled={disabled}>
+          Crop
+        </button>
+        <style jsx>{styles}</style>
       </>
     )
   }
