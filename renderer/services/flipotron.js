@@ -49,10 +49,16 @@ const Guard = {
   },
 }
 
+/**
+ * Scheme definition for the FLIP
+ * @param {string} name
+ * @param {Array.<object>} flips
+ * @param {{options: Array.<number>, useSame: Boolean}} compare
+ */
 export const schemeDefs = [
   {
     name: 'story',
-    flips: [1, 2, 3, 4],
+    flips: [null, null, null, null],
     // TODO: think of the `solver` entity with the `compare` defined as a solver name
     compare: {
       options: [[1, 2, 3, 4], [4, 3, 2, 1]],
@@ -61,7 +67,7 @@ export const schemeDefs = [
   },
   {
     name: 'beforeAfter',
-    flips: [1, 2],
+    flips: [null, null],
     compare: {
       options: [[1], [2]],
       useSame: false,
@@ -77,8 +83,8 @@ export const schemeDefs = [
  */
 export const createFlip = (
   flips,
-  schemeName = defaultCategory,
-  options = []
+  options = [],
+  schemeName = defaultCategory
 ) => {
   Guard.flips(flips)
   Guard.name(schemeName)
