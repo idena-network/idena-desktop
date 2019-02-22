@@ -8,7 +8,7 @@ export class FlipCrop extends Component {
   state = {
     crop: {
       aspect: 1,
-      width: 100,
+      width: 10,
       x: 0,
       y: 0,
     },
@@ -50,9 +50,10 @@ export class FlipCrop extends Component {
           onImageLoaded={this.handleImageLoad}
           onComplete={this.handleCropComplete}
           onChange={this.handleCropChange}
+          locked
         />
         <button onClick={this.handleCropSave} disabled={disabled}>
-          Crop
+          Add to set
         </button>
         <style jsx>{styles}</style>
       </>

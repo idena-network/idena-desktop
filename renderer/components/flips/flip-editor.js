@@ -1,7 +1,7 @@
 //@ts-check
 
 import React, {Component} from 'react'
-import {encode} from 'rlp'
+import {encode, decode} from 'rlp'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 
 import * as api from '../../services/api'
@@ -11,6 +11,9 @@ import {FlipCrop} from './flip-crop'
 import {FlipDrop} from './flip-drop'
 import {FlipRenderer} from './flip-renderer'
 import {createFlip} from '../../services/flipotron'
+// @ts-ignore
+import {bufferToHex, base64ArrayBuffer} from '../../utils/string'
+import {FlipDisplay} from './flip-display'
 
 const grid = 8
 
@@ -47,6 +50,12 @@ export class FlipEditor extends Component {
     origSrc: '',
     canUpload: true,
     flip: createFlip(new Array(4), [new Array(4), new Array(4)]),
+    flipHash: '',
+    fetchedFlips: [],
+    dims: {
+      w: 0,
+      h: 0,
+    },
   }
 
   canvasRefs = []
@@ -93,21 +102,8 @@ export class FlipEditor extends Component {
       },
       () => {
         this.idx++
-        console.log(this.state.flip.compare)
       }
     )
-
-  handleSubmitFlip = () => {
-    let arr = []
-    for (const canvas of this.canvasRefs) {
-      const ctx = canvas.getContext('2d')
-      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
-      arr.push(Buffer.from(data))
-    }
-    const hex = encode([...arr, this.state.flip.compare.options])
-    const hash = api.submitFlip(hex)
-    console.log(hash)
-  }
 
   handleDragEnd = idx => result => {
     // dropped outside the list
@@ -121,17 +117,49 @@ export class FlipEditor extends Component {
       result.destination.index
     )
 
-    this.setState(
-      ({flip}) => {
-        flip.compare.options[idx] = items
-        return {
-          flip,
-        }
-      },
-      () => {
-        console.log(this.state)
+    this.setState(({flip}) => {
+      flip.compare.options[idx] = items
+      return {
+        flip,
       }
+    })
+  }
+
+  handleSubmitFlip = async () => {
+    const srcBuff = this.canvasRefs.map(
+      c =>
+        new Buffer(
+          c.getContext('2d').getImageData(0, 0, c.width, c.height).data.buffer
+        )
     )
+
+    const hexBuff = encode(
+      // @ts-ignore
+      srcBuff.concat(this.state.flip.compare.options)
+    )
+    const hex = '0x' + hexBuff.toString('hex')
+
+    this.setState({
+      flipHash: (await api.submitFlip(hex)).result.flipHash,
+      dims: {
+        w: this.canvasRefs[0].width,
+        h: this.canvasRefs[0].height,
+      },
+    })
+  }
+
+  handleFetchFlip = async () => {
+    const {
+      result: {hex},
+    } = await api.fetchFlip(this.state.flipHash)
+
+    const destBuff = decode(new Buffer(hex.substr(2), 'hex'))
+    this.setState(({dims: {w, h}}) => ({
+      fetchedFlips: destBuff.slice(0, 4).map(
+        // @ts-ignore
+        arr => new ImageData(new Uint8ClampedArray(arr), w, h)
+      ),
+    }))
   }
 
   render() {
@@ -143,6 +171,7 @@ export class FlipEditor extends Component {
         flips,
         compare: {options},
       },
+      fetchedFlips,
     } = this.state
     return (
       <>
@@ -182,7 +211,7 @@ export class FlipEditor extends Component {
             <h3>Options</h3>
             <div className="row">
               {options.map((option, optionIdx) => (
-                <div>
+                <div key={`col-${optionIdx}`}>
                   <DragDropContext onDragEnd={this.handleDragEnd(optionIdx)}>
                     <Droppable droppableId={`droppable${optionIdx}`}>
                       {(provided, snapshot) => (
@@ -225,11 +254,21 @@ export class FlipEditor extends Component {
                 </div>
               ))}
             </div>
-            <button onClick={this.handleSubmitFlip} className="btn--primary">
+            <button
+              onClick={this.handleSubmitFlip}
+              className="btn btn--primary"
+            >
               Submit
             </button>
           </div>
         )}
+        <h2>Fetched flips</h2>
+        <button onClick={this.handleFetchFlip} className="btn">
+          Get Flip
+        </button>
+        {fetchedFlips.map((src, idx) => (
+          <FlipDisplay key={idx} imageData={src} />
+        ))}
         <style jsx>{`
           ${styles}
           .row {
@@ -238,10 +277,14 @@ export class FlipEditor extends Component {
           .row > div {
             width: 50%;
           }
+
+          .btn {
+            border: none;
+            padding: 0.5em;
+          }
           .btn--primary {
             background: blue;
             color: white;
-            padding: 0.5em;
             font-size: 1.6em;
             font-weight: 600;
           }
