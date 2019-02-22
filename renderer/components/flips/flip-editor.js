@@ -53,8 +53,8 @@ export class FlipEditor extends Component {
     flipHash: '',
     fetchedFlips: [],
     dims: {
-      w: 0,
-      h: 0,
+      w: 108,
+      h: 108,
     },
   }
 
@@ -151,15 +151,30 @@ export class FlipEditor extends Component {
   handleFetchFlip = async () => {
     const {
       result: {hex},
-    } = await api.fetchFlip(this.state.flipHash)
+    } = await api.fetchFlip(this.flipHashText.value || this.state.flipHash)
 
-    const destBuff = decode(new Buffer(hex.substr(2), 'hex'))
-    this.setState(({dims: {w, h}}) => ({
-      fetchedFlips: destBuff.slice(0, 4).map(
-        // @ts-ignore
-        arr => new ImageData(new Uint8ClampedArray(arr), w, h)
-      ),
-    }))
+    const decodedBuff = decode(new Buffer(hex.substr(2), 'hex'))
+    const flipPics = decodedBuff.slice(0, 4)
+    const flipOrder = decodedBuff.slice(4)
+
+    const orderedFlipPics = []
+    for (let i = 0; i < flipOrder.length; i++) {
+      orderedFlipPics.push([])
+      // @ts-ignore
+      for (let k = 0; k < flipOrder[i].length; k++) {
+        const origSrc = flipPics[flipOrder[i][k][0] || 0]
+        const origImageData = new ImageData(
+          new Uint8ClampedArray(origSrc),
+          this.state.dims.w,
+          this.state.dims.h
+        )
+        orderedFlipPics[i].push(origImageData)
+      }
+    }
+
+    this.setState({
+      fetchedFlips: orderedFlipPics,
+    })
   }
 
   render() {
@@ -260,15 +275,23 @@ export class FlipEditor extends Component {
             >
               Submit
             </button>
+            <pre>{this.state.flipHash}</pre>
           </div>
         )}
         <h2>Fetched flips</h2>
+        <input type="text" ref={input => (this.flipHashText = input)} />
         <button onClick={this.handleFetchFlip} className="btn">
           Get Flip
         </button>
-        {fetchedFlips.map((src, idx) => (
-          <FlipDisplay key={idx} imageData={src} />
-        ))}
+        <div className="row">
+          {fetchedFlips.map((flips, i) => (
+            <div key={`cf-${i}`}>
+              {flips.map((src, k) => (
+                <FlipDisplay key={`df${i}${k}`} imageData={src} />
+              ))}
+            </div>
+          ))}
+        </div>
         <style jsx>{`
           ${styles}
           .row {
