@@ -8,11 +8,10 @@ export class FlipCrop extends Component {
   state = {
     crop: {
       aspect: 1,
-      width: 10,
+      width: 25,
       x: 0,
       y: 0,
     },
-    pixelCrop: {},
   }
 
   onChange = useSafe(this.props.onChange)
@@ -47,10 +46,11 @@ export class FlipCrop extends Component {
         <ReactCrop
           src={src}
           crop={crop}
+          minWidth={25}
+          maxWidth={100}
           onImageLoaded={this.handleImageLoad}
           onComplete={this.handleCropComplete}
           onChange={this.handleCropChange}
-          locked
         />
         <button onClick={this.handleCropSave} disabled={disabled}>
           Add to set

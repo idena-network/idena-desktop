@@ -14,6 +14,7 @@ import {createFlip} from '../../services/flipotron'
 // @ts-ignore
 import {bufferToHex, base64ArrayBuffer} from '../../utils/string'
 import {FlipDisplay} from './flip-display'
+import channels from '../../../main/channels'
 
 const grid = 8
 
@@ -61,6 +62,27 @@ export class FlipEditor extends Component {
   canvasRefs = []
   idx = 0
 
+  componentDidMount() {
+    this.compressListenerId = global.ipcRenderer.on(
+      channels.uploadFlipPic,
+      (ev, message) => {
+        this.handleCompress(message.data)
+      }
+    )
+  }
+
+  componentWillUnmount() {
+    global.ipcRenderer.removeListener(
+      channels.uploadFlipPic,
+      this.compressListenerId
+    )
+  }
+
+  handleCompress = data =>
+    this.setState({
+      origSrc: URL.createObjectURL(new Blob([data], {type: 'image/jpeg'})),
+    })
+
   handleUpload = e => {
     e.preventDefault()
 
@@ -72,12 +94,12 @@ export class FlipEditor extends Component {
 
     const reader = new FileReader()
     reader.addEventListener('load', e => {
-      this.setState({
-        // @ts-ignore
-        origSrc: e.target.result,
-      })
+      const buff = Buffer.from(e.target.result)
+      console.log(buff.byteLength)
+      global.ipcRenderer.send(channels.uploadFlipPic, buff)
     })
-    reader.readAsDataURL(file)
+    reader.readAsArrayBuffer(file)
+    // reader.readAsDataURL(file)
   }
 
   handleDrop = files => {

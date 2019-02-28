@@ -32,7 +32,8 @@
     "prop-types": "^15.6.2",
     "react-beautiful-dnd": "^10.0.4",
     "react-image-crop": "^6.0.12",
-    "rlp": "^2.2.2"
+    "rlp": "^2.2.2",
+    "sharp": "^0.21.3"
   },
   "prettier": {
     "trailingComma": "es5",

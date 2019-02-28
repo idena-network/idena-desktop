@@ -1,6 +1,7 @@
 // Native
 const {join, resolve} = require('path')
 const {format} = require('url')
+const sharp = require('sharp')
 
 // Packages
 const {BrowserWindow, app, ipcMain, Tray, Menu} = require('electron')
@@ -111,4 +112,23 @@ ipcMain.on(channels.node, (event, message) => {
     return
   }
   event.sender.send(channels.node, message)
+})
+
+ipcMain.on(channels.uploadFlipPic, (ev, message) => {
+  sharp(message)
+    .resize(300)
+    .jpeg({
+      quality: 50,
+      progressive: true,
+      trellisQuantisation: true,
+      quantizationTable: 5,
+    })
+    .toBuffer((err, data, info) => {
+      if (err) {
+        console.error(err)
+        ev.sender.send(channels.uploadFlipPic, {err})
+      } else {
+        ev.sender.send(channels.uploadFlipPic, {data, info})
+      }
+    })
 })
