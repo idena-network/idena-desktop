@@ -8,7 +8,7 @@ export class FlipCrop extends Component {
   state = {
     crop: {
       aspect: 1,
-      width: 25,
+      width: 50,
       x: 0,
       y: 0,
     },

@@ -11,8 +11,6 @@ import {FlipCrop} from './flip-crop'
 import {FlipDrop} from './flip-drop'
 import {FlipRenderer} from './flip-renderer'
 import {createFlip} from '../../services/flipotron'
-// @ts-ignore
-import {bufferToHex, base64ArrayBuffer} from '../../utils/string'
 import {FlipDisplay} from './flip-display'
 import channels from '../../../main/channels'
 
@@ -34,7 +32,7 @@ const getItemStyle = (isDragging, draggableStyle) => ({
 const getListStyle = isDraggingOver => ({
   background: isDraggingOver ? 'lightblue' : 'lightgrey',
   padding: grid,
-  width: 250,
+  width: 300,
 })
 
 const reorder = (list, startIndex, endIndex) => {
@@ -45,37 +43,32 @@ const reorder = (list, startIndex, endIndex) => {
   return result
 }
 
-export class FlipEditor extends Component {
-  state = {
-    showDropZone: false,
-    origSrc: '',
-    canUpload: true,
-    flip: createFlip(new Array(4), [new Array(4), new Array(4)]),
-    flipHash: '',
-    fetchedFlips: [],
-    dims: {
-      w: 108,
-      h: 108,
-    },
-  }
+const initialState = {
+  showDropZone: false,
+  origSrc: '',
+  canUpload: true,
+  flip: createFlip(new Array(4), [new Array(4), new Array(4)]),
+  flipHash: '',
+  fetchedFlips: [],
+  dims: {
+    w: 300,
+    h: 300,
+  },
+}
 
+export class FlipEditor extends Component {
+  state = initialState
   canvasRefs = []
   idx = 0
 
   componentDidMount() {
-    this.compressListenerId = global.ipcRenderer.on(
-      channels.uploadFlipPic,
-      (ev, message) => {
-        this.handleCompress(message.data)
-      }
-    )
+    global.ipcRenderer.on(channels.uploadFlipPic, (_ev, message) => {
+      this.handleCompress(message.data)
+    })
   }
 
   componentWillUnmount() {
-    global.ipcRenderer.removeListener(
-      channels.uploadFlipPic,
-      this.compressListenerId
-    )
+    global.ipcRenderer.removeAllListeners(channels.uploadFlipPic)
   }
 
   handleCompress = data =>
@@ -159,10 +152,16 @@ export class FlipEditor extends Component {
       // @ts-ignore
       srcBuff.concat(this.state.flip.compare.options)
     )
-    const hex = '0x' + hexBuff.toString('hex')
+    let res = ''
+    try {
+      res = (await api.submitFlip(`0x${hexBuff.toString('hex')}`)).result
+        .flipHash
+    } catch {
+      res = 'Maximum image size exceeded'
+    }
 
     this.setState({
-      flipHash: (await api.submitFlip(hex)).result.flipHash,
+      flipHash: res,
       dims: {
         w: this.canvasRefs[0].width,
         h: this.canvasRefs[0].height,
@@ -227,6 +226,9 @@ export class FlipEditor extends Component {
             onChange={this.handleUpload}
             disabled={!this.state.canUpload}
           />
+          <div>
+            <button onClick={this.reset}>Reset</button>
+          </div>
         </div>
         {origSrc && (
           <div>
@@ -341,4 +343,11 @@ export class FlipEditor extends Component {
   showDropZone = () => this.setState({showDropZone: true})
 
   hideDropZone = () => this.setState({showDropZone: false})
+
+  reset = () => {
+    this.setState(initialState)
+
+    this.canvasRefs = []
+    this.idx = 0
+  }
 }
