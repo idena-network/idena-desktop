@@ -6,3 +6,5 @@ export const arrToFormData = arr => {
   }
   return formData
 }
+
+export const toHex = data => `0x${data.toString('hex')}`

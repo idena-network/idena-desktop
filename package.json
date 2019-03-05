@@ -26,12 +26,13 @@
     "react-dom": "^16.1.1"
   },
   "dependencies": {
+    "@zeit/next-css": "^1.0.1",
     "ansi-to-html": "^0.6.10",
     "electron-is-dev": "0.3.0",
     "electron-next": "3.1.4",
     "prop-types": "^15.6.2",
     "react-beautiful-dnd": "^10.0.4",
-    "react-image-crop": "^6.0.12",
+    "react-cropper": "^1.2.0",
     "rlp": "^2.2.2",
     "sharp": "^0.21.3"
   },

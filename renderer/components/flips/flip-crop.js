@@ -1,62 +1,51 @@
 import React, {Component} from 'react'
-import ReactCrop from 'react-image-crop'
+import Cropper from 'react-cropper'
+import PropTypes from 'prop-types'
 
-import {useSafe} from '../../utils/fn'
-import styles from '../../styles/components/flips/flip-crop'
+import 'cropperjs/dist/cropper.css'
 
 export class FlipCrop extends Component {
-  state = {
-    crop: {
-      aspect: 1,
-      width: 50,
-      x: 0,
-      y: 0,
-    },
-  }
-
-  onChange = useSafe(this.props.onChange)
-
-  handleImageLoad = (image, _pixelCrop) => {
-    this.imageRef = image
-    this.imageSrc = image.getAttribute('src')
-  }
-
-  handleCropComplete = (_crop, pixelCrop) => {
-    this.setState({pixelCrop})
-    this.onChange(this.imageSrc, pixelCrop)
-  }
-
-  handleCropChange = crop => {
-    this.setState({crop})
-    this.onChange(this.imageSrc, crop)
-  }
-
-  handleCropSave = () => {
-    const {crop, pixelCrop} = this.state
-    if (this.imageRef && crop.width && crop.height) {
-      this.props.onCropSave(this.imageSrc, pixelCrop)
+  handleCrop = ev => {
+    const {width, height} = ev.detail
+    const {cropSize} = this.props
+    if (width !== cropSize || height !== cropSize) {
+      this.refs.cropper.setData({
+        width: cropSize,
+        height: cropSize,
+      })
     }
+  }
+
+  handleSubmitCrop = () => {
+    this.refs.cropper.getCroppedCanvas().toBlob(blob => {
+      this.props.onSubmit(blob)
+    })
   }
 
   render() {
     const {src, disabled} = this.props
-    const {crop} = this.state
     return (
       <>
-        <ReactCrop
+        <Cropper
+          ref="cropper"
           src={src}
-          crop={crop}
-          minWidth={25}
-          maxWidth={100}
-          onImageLoaded={this.handleImageLoad}
-          onComplete={this.handleCropComplete}
-          onChange={this.handleCropChange}
+          viewMode={0}
+          aspectRatio={1}
+          cropBoxResizable={false}
+          crop={this.handleCrop}
         />
-        <button onClick={this.handleCropSave} disabled={disabled}>
+        <button onClick={this.handleSubmitCrop} disabled={disabled}>
           Add to set
         </button>
-        <style jsx>{styles}</style>
       </>
     )
   }
+}
+
+FlipCrop.defaultProps = {
+  cropSize: 300,
+}
+
+FlipCrop.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
 }

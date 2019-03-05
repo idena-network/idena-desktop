@@ -114,21 +114,19 @@ ipcMain.on(channels.node, (event, message) => {
   event.sender.send(channels.node, message)
 })
 
-ipcMain.on(channels.uploadFlipPic, (ev, message) => {
+ipcMain.on(channels.compressFlipSource, (ev, message) => {
   sharp(message)
-    .resize(300)
+    // .resize(300)
     .jpeg({
       quality: 50,
       progressive: true,
       trellisQuantisation: true,
       quantizationTable: 5,
     })
-    .toBuffer((err, data, info) => {
-      if (err) {
-        console.error(err)
-        ev.sender.send(channels.uploadFlipPic, {err})
-      } else {
-        ev.sender.send(channels.uploadFlipPic, {data, info})
-      }
+    .toBuffer()
+    .then(data => ev.sender.send(channels.compressFlipSource, data))
+    .catch(err => {
+      console.error(err)
+      throw new Error(err)
     })
 })
