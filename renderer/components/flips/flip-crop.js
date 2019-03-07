@@ -29,8 +29,9 @@ export class FlipCrop extends Component {
         <Cropper
           ref="cropper"
           src={src}
-          viewMode={0}
-          aspectRatio={1}
+          // aspectRatio={1}
+          dragMode="move"
+          background={false}
           cropBoxResizable={false}
           crop={this.handleCrop}
         />

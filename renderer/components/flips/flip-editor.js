@@ -2,13 +2,10 @@ import React, {Component} from 'react'
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import {decode, encode} from 'rlp'
 import channels from '../../../main/channels'
-import {fetchFlip, submitFlip} from '../../services/api'
-import {createFlip, createStoryFlip, flipDefs} from '../../services/flipper'
-import styles from '../../styles/components/flips/flip-editor'
+import {fetchFlip, submitFlip, getAddress, getBalance} from '../../services/api'
+import {createStoryFlip, flipDefs} from '../../services/flipper'
 import {reorder} from '../../utils/arr'
 import {FlipCrop} from './flip-crop'
-import {FlipDisplay} from './flip-display'
-import {FlipDrop} from './flip-drop'
 import {getItemStyle, getListStyle} from './flip-editor.styles'
 import Guard from './guard'
 import {toHex} from '../../utils/req'
@@ -27,6 +24,9 @@ export class FlipEditor extends Component {
 
   componentDidMount() {
     global.ipcRenderer.on(channels.compressFlipSource, this.onCompress)
+    getAddress().then(addr => {
+      console.log(addr)
+    })
   }
 
   componentWillUnmount() {
@@ -52,7 +52,7 @@ export class FlipEditor extends Component {
     reader.addEventListener('loadend', ev => {
       global.ipcRenderer.send(
         channels.compressFlipSource,
-        new Int8Array(ev.target.result)
+        new Uint8Array(ev.target.result)
       )
     })
     reader.readAsArrayBuffer(file)
@@ -63,13 +63,17 @@ export class FlipEditor extends Component {
       return
     }
 
-    this.setState(({flip: {pics, order: [correct, wrong]}}) => ({
-      flip: createStoryFlip(pics.concat(blob), [
+    this.setState(({flip: {pics, order: [correct, wrong]}}) => {
+      const nextPics = pics.concat(blob)
+      const nextOrder = [
         correct.concat(correct.length),
         wrong.concat(wrong.length),
-      ]),
-      flipSizeExceeded: pics.length < flipDefs[0].pics.length,
-    }))
+      ]
+      return {
+        flip: createStoryFlip(nextPics, nextOrder),
+        flipSizeExceeded: nextPics.length > flipDefs[0].pics.length - 1,
+      }
+    })
   }
 
   handleDragEnd = idx => result => {
@@ -78,50 +82,63 @@ export class FlipEditor extends Component {
       return
     }
 
-    const nextOrder = reorder(
-      this.state.flip.order[idx],
+    const {
+      flip: {pics, order},
+    } = this.state
+
+    order[idx] = reorder(
+      order[idx],
       result.source.index,
       result.destination.index
     )
 
-    this.setState(({flip}) => ({
-      flip: {...flip, order: nextOrder},
-    }))
+    this.setState({
+      flip: createStoryFlip(pics, order),
+    })
   }
 
   handleSubmitFlip = async () => {
-    const hexBuff = encode(this.state.flip)
+    const {pics, order} = this.state.flip
+
+    const promises = pics.map(blob => new Response(blob).arrayBuffer())
+    const arrayBuffers = await Promise.all(promises)
+
+    const hexBuff = encode([arrayBuffers.map(ab => new Uint8Array(ab)), order])
+    console.log(hexBuff.byteLength)
     try {
-      const {result} = await submitFlip(toHex(hexBuff))
+      const resp = await submitFlip(toHex(hexBuff))
+      if (resp.ok) {
+        const {result, error} = await resp.json()
+        this.setState({
+          flipHash: (result && result.flipHash) || error.message,
+        })
+      } else {
+        this.setState({
+          flipHash:
+            resp.status === 413
+              ? 'Maximum image size exceeded'
+              : 'Unexpected error occurred',
+        })
+      }
+    } catch (err) {
       this.setState({
-        flipHash: result.flipHash,
-      })
-    } catch {
-      this.setState({
-        flipHash: 'Maximum image size exceeded',
+        flipHash: err.message,
       })
     }
   }
 
   handleFetchFlip = async () => {
-    const hash = this.flipHashText.value || this.state.flipHash
+    const hash = this.flipHashRef.value || this.state.flipHash
     const {result} = await fetchFlip(hash)
 
-    const decodedBuff = decode(fromHexString(result.hex.substr(2)))
-    const flipPics = decodedBuff.slice(0, 4)
-    const flipOrder = decodedBuff.slice(4)
+    const [flipPics, flipOrder] = decode(fromHexString(result.hex.substr(2)))
 
     const orderedFlipPics = []
     for (let i = 0; i < flipOrder.length; i++) {
       orderedFlipPics.push([])
       for (let k = 0; k < flipOrder[i].length; k++) {
-        const uploadedSrc = flipPics[flipOrder[i][k][0] || 0]
-        const origImageData = new ImageData(
-          new Uint8ClampedArray(uploadedSrc),
-          this.state.dims.w,
-          this.state.dims.h
-        )
-        orderedFlipPics[i].push(origImageData)
+        const picArrayBuffer = flipPics[flipOrder[i][k][0] || 0]
+        orderedFlipPics[i].push(picArrayBuffer)
       }
     }
 
@@ -177,7 +194,7 @@ export class FlipEditor extends Component {
             )}
             <h3>Options</h3>
             <div className="row">
-              {flip.order.map((order, orderIdx) => (
+              {flip.order.map((currOrder, orderIdx) => (
                 <div key={`ord-${orderIdx}`}>
                   <DragDropContext onDragEnd={this.handleDragEnd(orderIdx)}>
                     <Droppable droppableId={`droppable-ord${orderIdx}`}>
@@ -186,37 +203,34 @@ export class FlipEditor extends Component {
                           ref={provided.innerRef}
                           style={getListStyle(snapshot.isDraggingOver)}
                         >
-                          {order.map((refIdx, idx) => (
+                          {currOrder.map((refIdx, idx) => (
                             <Draggable
                               key={`flip-pic-draggable-${refIdx}-${orderIdx}`}
                               draggableId={`flip-pic-${refIdx}-${orderIdx}`}
                               index={idx}
                             >
-                              {(provided, snapshot) =>
-                                flip.pics[refIdx] && (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    style={getItemStyle(
-                                      snapshot.isDragging,
-                                      provided.draggableProps.style
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  style={getItemStyle(
+                                    snapshot.isDragging,
+                                    provided.draggableProps.style
+                                  )}
+                                >
+                                  <img
+                                    key={`flip-${refIdx}-${orderIdx}`}
+                                    src={URL.createObjectURL(
+                                      new Blob([flip.pics[refIdx]], {
+                                        type: 'image/jpeg',
+                                      })
                                     )}
-                                  >
-                                    <img
-                                      key={`flip-${refIdx}-${orderIdx}`}
-                                      src={URL.createObjectURL(
-                                        new Blob([flip.pics[refIdx]], {
-                                          type: 'image/jpeg',
-                                        })
-                                      )}
-                                    />
-                                  </div>
-                                )
-                              }
+                                  />
+                                </div>
+                              )}
                             </Draggable>
                           ))}
-                          {provided.placeholder}
                         </div>
                       )}
                     </Droppable>
@@ -241,14 +255,18 @@ export class FlipEditor extends Component {
         <div className="row">
           {fetchedFlip.map((pics, i) => (
             <div key={`cf-${i}`}>
-              {pics.map((pic, k) => (
-                <FlipDisplay key={`df${i}${k}`} imageData={pic} />
+              {pics.map((picSrc, k) => (
+                <img
+                  key={`df${i}${k}`}
+                  src={URL.createObjectURL(
+                    new Blob([picSrc], {type: 'image/jpeg'})
+                  )}
+                />
               ))}
             </div>
           ))}
         </div>
         <style jsx>{`
-          ${styles}
           .row {
             display: flex;
           }

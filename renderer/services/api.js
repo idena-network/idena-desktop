@@ -59,7 +59,7 @@ export const submitFlip = hex =>
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({method: 'flip_submitFlip', params: [hex], id: 1}),
-  }).then(r => r.json())
+  })
 
 export const fetchFlip = hash =>
   fetch(baseUrl, {
