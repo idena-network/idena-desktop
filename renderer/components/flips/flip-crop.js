@@ -10,6 +10,8 @@ export class FlipCrop extends Component {
     const {cropSize} = this.props
     if (width !== cropSize || height !== cropSize) {
       this.refs.cropper.setData({
+        left: 0,
+        top: 0,
         width: cropSize,
         height: cropSize,
       })
@@ -29,7 +31,6 @@ export class FlipCrop extends Component {
         <Cropper
           ref="cropper"
           src={src}
-          // aspectRatio={1}
           dragMode="move"
           background={false}
           cropBoxResizable={false}

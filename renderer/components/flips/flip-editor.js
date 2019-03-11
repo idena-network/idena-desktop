@@ -4,7 +4,7 @@ import {decode, encode} from 'rlp'
 import channels from '../../../main/channels'
 import {fetchFlip, submitFlip, getAddress, getBalance} from '../../services/api'
 import {createStoryFlip, flipDefs} from '../../services/flipper'
-import {reorder} from '../../utils/arr'
+import {reorder, shuffle} from '../../utils/arr'
 import {FlipCrop} from './flip-crop'
 import {getItemStyle, getListStyle} from './flip-editor.styles'
 import Guard from './guard'
@@ -24,9 +24,6 @@ export class FlipEditor extends Component {
 
   componentDidMount() {
     global.ipcRenderer.on(channels.compressFlipSource, this.onCompress)
-    getAddress().then(addr => {
-      console.log(addr)
-    })
   }
 
   componentWillUnmount() {
@@ -104,7 +101,6 @@ export class FlipEditor extends Component {
     const arrayBuffers = await Promise.all(promises)
 
     const hexBuff = encode([arrayBuffers.map(ab => new Uint8Array(ab)), order])
-    console.log(hexBuff.byteLength)
     try {
       const resp = await submitFlip(toHex(hexBuff))
       if (resp.ok) {
@@ -128,7 +124,7 @@ export class FlipEditor extends Component {
   }
 
   handleFetchFlip = async () => {
-    const hash = this.flipHashRef.value || this.state.flipHash
+    const hash = this.flipHashRef.current.value || this.state.flipHash
     const {result} = await fetchFlip(hash)
 
     const [flipPics, flipOrder] = decode(fromHexString(result.hex.substr(2)))
@@ -152,6 +148,19 @@ export class FlipEditor extends Component {
       uploadedSrc: '',
       flipSizeExceeded: false,
       flip: createStoryFlip(),
+    })
+  }
+
+  handleClickShuffle = () => {
+    const {
+      flip: {
+        pics,
+        order: [firstOrder, lastOrder],
+      },
+    } = this.state
+
+    this.setState({
+      flip: createStoryFlip(pics, [firstOrder, shuffle(lastOrder)]),
     })
   }
 
@@ -231,6 +240,11 @@ export class FlipEditor extends Component {
                               )}
                             </Draggable>
                           ))}
+                          {orderIdx === 1 && (
+                            <button onClick={this.handleClickShuffle}>
+                              Shuffle
+                            </button>
+                          )}
                         </div>
                       )}
                     </Droppable>
@@ -258,6 +272,7 @@ export class FlipEditor extends Component {
               {pics.map((picSrc, k) => (
                 <img
                   key={`df${i}${k}`}
+                  width={200}
                   src={URL.createObjectURL(
                     new Blob([picSrc], {type: 'image/jpeg'})
                   )}
