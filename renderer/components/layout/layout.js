@@ -1,19 +1,28 @@
 import Nav from './nav'
 import createStore from '../../store'
+import GlobalStyle from '../../global-style'
 
 const {user} = createStore()
 
 export const Layout = ({NavMenu = Nav, children}) => (
-  <main>
-    <NavMenu user={user} />
-    <div>{children}</div>
-    <style jsx>{`
-      main {
-        display: flex;
-        padding: 0;
-        margin: 0;
-        height: 100%;
-      }
-    `}</style>
-  </main>
+  <>
+    <GlobalStyle />
+    <main>
+      <NavMenu user={user} />
+      <div>{children}</div>
+      <style jsx>{`
+        main {
+          display: flex;
+          height: 100%;
+          padding: 0;
+          margin: 0;
+        }
+
+        div {
+          padding: 2em 3em;
+          width: 100%;
+        }
+      `}</style>
+    </main>
+  </>
 )

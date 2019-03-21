@@ -7,6 +7,10 @@ const config = {
     // in the production version of your app
     return {
       '/start': {page: '/start'},
+      '/contacts': {page: '/contacts'},
+      '/chats': {page: '/chats'},
+      '/wallets': {page: '/wallets'},
+      '/dashboard': {page: '/dashboard'},
     }
   },
 }

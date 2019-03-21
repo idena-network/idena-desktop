@@ -16,6 +16,7 @@ export default () => (
     body,
     body > div {
       height: 100%;
+      min-height: 100%;
     }
   `}</style>
 )

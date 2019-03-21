@@ -1,4 +1,4 @@
-export const user = {name: 'optimusway'}
+export const user = {name: 'optimusway', address: '0xafdafdafadfkjhkdjhas'}
 
 export default () => ({
   user,

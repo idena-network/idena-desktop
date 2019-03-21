@@ -2,26 +2,32 @@ import React from 'react'
 import Link from 'next/link'
 import {Text} from '../atoms'
 
+const activeLinkStyle = `
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  `
+
 const NavItem = ({href, active = false, children}) => (
   <Link href={href}>
     <li>
-      {children}
+      <a href={href}>{children}</a>
       <style jsx>
         {`
           li {
             color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
             margin: 0 0 0.5em;
             padding: 0.5em 1em;
-
-            ${active &&
-              `
-                background: rgba(255, 255, 255, 0.1);
-                color: rgb(255, 255, 255);
-                border-radius: 3pt;
-              `}
+            ${active && activeLinkStyle};
           }
 
-          li.accent {
+          a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            ${active && 'color: rgb(255, 255, 255);'};
+          }
+
+          a:hover {
             color: rgb(255, 255, 255);
           }
         `}
@@ -36,8 +42,10 @@ export const Nav = ({user}) => (
       <img src="../static/logo.svg" />
     </div>
     <ul>
-      <Text color="white">{user.name}</Text>
-      <NavItem href="/contacts">Settings</NavItem>
+      <Text color="white" padded>
+        {user.name}
+      </Text>
+      <NavItem href="/dashboard">Settings</NavItem>
     </ul>
     <ul>
       <NavItem href="/contacts">Contacts</NavItem>
@@ -64,7 +72,6 @@ export const Nav = ({user}) => (
 
       img {
         width: 96px;
-        -webkit-filter: invert(1);
         filter: invert(1);
       }
     `}</style>
