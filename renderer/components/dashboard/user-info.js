@@ -7,7 +7,9 @@ export const UserInfo = ({user}) => (
     </div>
     <div>
       <SubHeading>{user.name}</SubHeading>
-      <Text color="gray">{user.address}</Text>
+      <Text color="gray" wrap>
+        {user.address}
+      </Text>
     </div>
     <style jsx>{`
       div {

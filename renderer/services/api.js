@@ -1,6 +1,6 @@
 const baseUrl = '//localhost:9009'
 
-export const getAddress = () =>
+export const fetchAddress = () =>
   fetch(baseUrl, {
     method: 'POST',
     headers: {
@@ -12,7 +12,7 @@ export const getAddress = () =>
     .then(response => response.json())
     .then(data => data.result)
 
-export const getBalance = address =>
+export const fetchBalance = address =>
   fetch(baseUrl, {
     method: 'POST',
     headers: {

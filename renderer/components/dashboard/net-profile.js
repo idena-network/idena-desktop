@@ -1,10 +1,10 @@
 import {Text} from '../atoms'
 import theme from '../../../theme'
 
-const Figure = ({label, value}) => (
+const Figure = ({label, value, postfix = ''}) => (
   <div>
     <label>{label}</label>
-    <Text>{value}</Text>
+    <Text wrap>{value}</Text> {postfix && <Text>{postfix}</Text>}
     <style jsx>{`
       div {
         margin: 0 0 1em;
@@ -19,10 +19,12 @@ const Figure = ({label, value}) => (
   </div>
 )
 
-export const NetProfile = () => (
+export const NetProfile = ({addr, balance}) => (
   <div>
+    <Figure label="Address" value={addr} />
     <Figure label="Status" value="Validated" />
-    <Figure label="Stake" value="Validated" />
+    <Figure label="Stake" value={balance.stake} postfix="DNA" />
+    <Figure label="Balance" value={balance.balance} postfix="DNA" />
     <Figure label="Age" value="24 epochs" />
     <Figure label="Next validation" value={new Date().toLocaleString()} />
     <style jsx>{`

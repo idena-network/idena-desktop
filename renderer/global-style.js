@@ -1,7 +1,9 @@
 export default () => (
   <style jsx global>{`
     html {
+      box-sizing: border-box;
       font-size: 14px;
+      height: 100%;
     }
     body {
       box-sizing: border-box;
@@ -11,12 +13,16 @@ export default () => (
       font-size: 1rem;
       margin: 0;
       padding: 0;
+      min-height: 100vh;
     }
-    html,
-    body,
-    body > div {
-      height: 100%;
-      min-height: 100%;
+    *,
+    *::before,
+    *::after {
+      box-sizing: inherit;
+    }
+    body > div,
+    main {
+      min-height: 100vh;
     }
   `}</style>
 )

@@ -1,10 +1,7 @@
-import React, {Component, createContext, useState, useEffect} from 'react'
+import React, {createContext, useState, useEffect} from 'react'
 import {decode} from 'rlp'
 import {fromHexString} from '../utils/string'
 import {fetchFlip} from '../services/api'
-import axios from 'axios'
-
-const toFlip = ({id, url}) => ({id, url})
 
 const FlipContext = createContext()
 
@@ -15,14 +12,17 @@ export const FlipProvider = ({children}) => {
     let ignore = false
 
     async function fetchData() {
-      const {data} = await axios('https://jsonplaceholder.typicode.com/photos')
-      if (!ignore) {
-        const mappedFlips = data.map(toFlip)
-        setFlips([
-          mappedFlips.slice(0, 10),
-          mappedFlips.slice(10, 20),
-          mappedFlips.slice(20, 30),
-        ])
+      const hash = 'QmRacGdq6f2hj4H8A1hZkVQZ83MgHmsxKwfqn8QmWXiKyj'
+      const {result} = await fetchFlip(hash)
+
+      if (result) {
+        const [flipPics, flipOrder] = decode(
+          fromHexString(result.hex.substr(2))
+        )
+
+        if (!ignore) {
+          setFlips([flipPics])
+        }
       }
     }
 

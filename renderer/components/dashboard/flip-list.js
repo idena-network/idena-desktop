@@ -5,9 +5,9 @@ const fromBlob = src =>
 
 const Flip = ({pics = []}) => (
   <Row>
-    {pics.map(({id, url}) => (
-      <Col key={id}>
-        <img width={200} src={url} />
+    {pics.map((src, idx) => (
+      <Col key={idx}>
+        <img width={150} src={fromBlob(src)} />
       </Col>
     ))}
   </Row>

@@ -3,7 +3,9 @@ import React from 'react'
 export const Row = ({justify, align = 'initial', children}) => (
   <div>
     {React.Children.map(children, child =>
-      React.cloneElement(child, {w: 100 / React.Children.count(children)})
+      React.cloneElement(child, {
+        w: child.props.w || 100 / React.Children.count(children),
+      })
     )}
     <style jsx>{`
       div {
@@ -23,7 +25,7 @@ export const Col = ({m, p, w, children}) => (
         display: block;
         ${m && `margin: ${m}`};
         ${p && `margin: ${p}`};
-        width: ${w < 1 ? `${w * 100}%` : `${w}%`};
+        width: ${w < 12 ? `${(w / 12) * 100}%` : `${w}%`};
       }
     `}</style>
   </div>

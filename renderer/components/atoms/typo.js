@@ -28,7 +28,7 @@ export const SubHeading = ({children}) => (
   </h2>
 )
 
-export const Text = ({color, bold, padded, children}) => (
+export const Text = ({color, bold, padded, wrap, children}) => (
   <span>
     {children}
     <style jsx>
@@ -39,6 +39,7 @@ export const Text = ({color, bold, padded, children}) => (
         ${padded &&
           `padding: 0.5em 1em;
         margin: 0 0 0.5em;`};
+        ${wrap && `word-break: break-all;`}
       `}
     </style>
   </span>
