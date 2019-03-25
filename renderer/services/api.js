@@ -91,3 +91,37 @@ export const fetchContactList = () =>
       age: 3,
     },
   ])
+
+export const fetchChatList = () =>
+  Promise.resolve([
+    {
+      sender: {fullName: 'Q'},
+      messages: [
+        {sender: 'Q', text: `hi! what's up`, timestamp: Date.now()},
+        {
+          sender: 'QQ',
+          text: 'could you plz help me with flips',
+          timestamp: Date.now(),
+        },
+        {sender: 'Q', text: 'for sure', timestamp: Date.now()},
+        {sender: 'Q', text: 'what is your question', timestamp: Date.now()},
+        {sender: 'QQ', text: 'how can i reverse flip', timestamp: Date.now()},
+        {sender: 'Q', text: `you shouldn't`, timestamp: Date.now()},
+        {sender: 'Q', text: 'there is a shuffle button', timestamp: Date.now()},
+      ],
+    },
+    {
+      sender: {fullName: 'QQ'},
+      messages: [
+        {sender: 'Q', text: 'hi there', timestamp: Date.now()},
+        {sender: 'QQ', text: 'there we go', timestamp: Date.now()},
+      ],
+    },
+    {
+      sender: {fullName: 'QQQ'},
+      messages: [
+        {sender: 'Q', text: 'hi there', timestamp: Date.now()},
+        {sender: 'QQ', text: 'there we go', timestamp: Date.now()},
+      ],
+    },
+  ])
