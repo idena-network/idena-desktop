@@ -4,6 +4,13 @@ import {Layout} from '../components/layout'
 
 export default () => (
   <Layout>
-    <FlipEditor />
+    <div>
+      <FlipEditor />
+    </div>
+    <style jsx>{`
+      div {
+        padding: 1em;
+      }
+    `}</style>
   </Layout>
 )

@@ -1,7 +1,10 @@
 import App, {Container} from 'next/app'
-import {FlipProvider} from '../providers/flip-provider'
-import {NetProvider} from '../providers/net-provider'
-import {ContactProvider, ChatProvider} from '../providers'
+import {
+  ContactProvider,
+  ChatProvider,
+  NetProvider,
+  FlipProvider,
+} from '../providers'
 
 class MyApp extends App {
   render() {

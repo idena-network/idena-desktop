@@ -13,7 +13,7 @@ import Link from 'next/link'
 import NetContext from '../providers/net-provider'
 
 export default () => {
-  const flips = useContext(FlipContext)
+  const {drafts, published} = useContext(FlipContext)
   const netInfo = useContext(NetContext)
   return (
     <Layout>
@@ -29,14 +29,14 @@ export default () => {
             <Row>
               <Col w={11}>My FLIPs</Col>
               <Col w={1}>
-                <Link href="/flip">
+                <Link href="/submit-flip">
                   <AddFlipButton />
                 </Link>
               </Col>
             </Row>
           </SubHeading>
-          <FlipGroup name="Drafts" flips={flips} />
-          <FlipGroup name="Published" flips={flips} />
+          <FlipGroup name="Drafts" flips={drafts} />
+          <FlipGroup name="Published" flips={published} />
         </Col>
       </Row>
     </Layout>

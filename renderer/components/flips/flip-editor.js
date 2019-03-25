@@ -10,6 +10,7 @@ import {getItemStyle, getListStyle} from './flip-editor.styles'
 import Guard from './guard'
 import {toHex} from '../../utils/req'
 import {fromHexString} from '../../utils/string'
+import {flipsStorageKey} from '../../providers/flip-provider'
 
 export class FlipEditor extends Component {
   state = {
@@ -108,6 +109,16 @@ export class FlipEditor extends Component {
         this.setState({
           flipHash: (result && result.flipHash) || error.message,
         })
+        try {
+          const storedFlips =
+            JSON.parse(localStorage.getItem(flipsStorageKey)) || []
+          localStorage.setItem(
+            flipsStorageKey,
+            JSON.stringify([result.flipHash, ...storedFlips])
+          )
+        } catch (error) {
+          console.log(error)
+        }
       } else {
         this.setState({
           flipHash:

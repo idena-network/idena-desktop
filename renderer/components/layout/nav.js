@@ -56,7 +56,7 @@ export const Nav = ({user}) => (
       <NavItem href="/dashboard" active>
         My Idena
       </NavItem>
-      <NavItem href="/flip">+ flip</NavItem>
+      <NavItem href="/submit-flip">+ flip</NavItem>
     </ul>
     <style jsx>{`
       nav {

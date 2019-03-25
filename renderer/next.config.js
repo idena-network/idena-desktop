@@ -11,7 +11,7 @@ const config = {
       '/chats': {page: '/chats'},
       '/wallets': {page: '/wallets'},
       '/dashboard': {page: '/dashboard'},
-      '/flip': {page: '/flip'},
+      '/submit-flip': {page: '/submit-flip'},
     }
   },
 }
