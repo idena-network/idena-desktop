@@ -1,38 +1,42 @@
 import React from 'react'
 import Link from 'next/link'
 import {Text} from '../atoms'
+import {withRouter} from 'next/router'
 
 const activeLinkStyle = `
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   `
 
-const NavItem = ({href, active = false, children}) => (
-  <Link href={href}>
-    <li>
-      <a href={href}>{children}</a>
-      <style jsx>{`
-        li {
-          color: rgba(255, 255, 255, 0.5);
-          cursor: pointer;
-          margin: 0 0 0.5em;
-          padding: 0.5em 1em;
-          ${active && activeLinkStyle};
-        }
+const NavItem = withRouter(({href, router, children}) => {
+  const active = router.pathname === href
+  return (
+    <Link href={href}>
+      <li>
+        <a href={href}>{children}</a>
+        <style jsx>{`
+          li {
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            margin: 0 0 0.5em;
+            padding: 0.5em 1em;
+            ${active && activeLinkStyle};
+          }
 
-        a {
-          color: rgba(255, 255, 255, 0.5);
-          text-decoration: none;
-          ${active && 'color: rgb(255, 255, 255);'};
-        }
+          a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            ${active && 'color: rgb(255, 255, 255);'};
+          }
 
-        a:hover {
-          color: rgb(255, 255, 255);
-        }
-      `}</style>
-    </li>
-  </Link>
-)
+          a:hover {
+            color: rgb(255, 255, 255);
+          }
+        `}</style>
+      </li>
+    </Link>
+  )
+})
 
 export const Nav = ({user}) => (
   <nav>
