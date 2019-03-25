@@ -1,7 +1,7 @@
 import React from 'react'
 import {Text} from '../atoms'
 import {FlipList} from './flip-list'
-import theme from '../../../theme'
+import theme from '../../theme'
 
 export default ({name, flips = []}) => (
   <div>

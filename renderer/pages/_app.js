@@ -1,6 +1,7 @@
 import App, {Container} from 'next/app'
 import {FlipProvider} from '../providers/flip-provider'
 import {NetProvider} from '../providers/net-provider'
+import {ContactProvider} from '../providers'
 
 class MyApp extends App {
   render() {
@@ -8,9 +9,11 @@ class MyApp extends App {
     return (
       <Container>
         <NetProvider>
-          <FlipProvider>
-            <Component {...pageProps} />
-          </FlipProvider>
+          <ContactProvider>
+            <FlipProvider>
+              <Component {...pageProps} />
+            </FlipProvider>
+          </ContactProvider>
         </NetProvider>
       </Container>
     )

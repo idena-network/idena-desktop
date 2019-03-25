@@ -7,7 +7,7 @@ const Flip = ({pics = []}) => (
   <Row>
     {pics.map((src, idx) => (
       <Col key={idx}>
-        <img width={150} src={fromBlob(src)} />
+        <img height={100} src={fromBlob(src)} />
       </Col>
     ))}
   </Row>

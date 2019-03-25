@@ -11,27 +11,25 @@ const NavItem = ({href, active = false, children}) => (
   <Link href={href}>
     <li>
       <a href={href}>{children}</a>
-      <style jsx>
-        {`
-          li {
-            color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            margin: 0 0 0.5em;
-            padding: 0.5em 1em;
-            ${active && activeLinkStyle};
-          }
+      <style jsx>{`
+        li {
+          color: rgba(255, 255, 255, 0.5);
+          cursor: pointer;
+          margin: 0 0 0.5em;
+          padding: 0.5em 1em;
+          ${active && activeLinkStyle};
+        }
 
-          a {
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: none;
-            ${active && 'color: rgb(255, 255, 255);'};
-          }
+        a {
+          color: rgba(255, 255, 255, 0.5);
+          text-decoration: none;
+          ${active && 'color: rgb(255, 255, 255);'};
+        }
 
-          a:hover {
-            color: rgb(255, 255, 255);
-          }
-        `}
-      </style>
+        a:hover {
+          color: rgb(255, 255, 255);
+        }
+      `}</style>
     </li>
   </Link>
 )
@@ -61,9 +59,10 @@ export const Nav = ({user}) => (
         background: rgb(83, 86, 92);
         color: white;
         padding: 2em;
-        width: 150px;
+        width: 250px;
         text-align: center;
       }
+
       ul {
         list-style-type: none;
         padding: 0;

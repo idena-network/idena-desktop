@@ -17,18 +17,18 @@ export default () => {
   const netInfo = useContext(NetContext)
   return (
     <Layout>
-      <Heading>My Idena</Heading>
       <Row>
-        <Col w={4}>
+        <Col w={6} p={'3em 2em'}>
+          <Heading>My Idena</Heading>
           <UserInfo user={{name: 'mmmkey', address: netInfo.addr}} />
           <UserActions />
           <NetProfile {...netInfo} />
         </Col>
-        <Col p="2em 1em" w={8}>
+        <Col w={6} p="10em 1em">
           <SubHeading>
             <Row>
-              <Col w={10}>My FLIPs</Col>
-              <Col w={2}>
+              <Col w={11}>My FLIPs</Col>
+              <Col w={1}>
                 <Link href="/flip">
                   <AddFlipButton />
                 </Link>

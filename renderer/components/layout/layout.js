@@ -19,7 +19,6 @@ export const Layout = ({NavMenu = Nav, children}) => (
         }
 
         div {
-          padding: 2em 3em;
           width: 100%;
         }
       `}</style>
