@@ -20,7 +20,11 @@
   "devDependencies": {
     "electron": "^2.0.18",
     "electron-builder": "^20.39.0",
-    "eslint": "^5.13.0",
+    "eslint": "^5.15.3",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4",
     "next": "^8.0.3",
     "react": "^16.8.4",
     "react-dom": "^16.8.4"
