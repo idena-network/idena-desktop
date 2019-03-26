@@ -3,7 +3,7 @@ module.exports = {
     browser: true,
     es6: true,
   },
-  extends: 'airbnb',
+  extends: ['airbnb', 'plugin:prettier/recommended', 'prettier/react'],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
@@ -17,5 +17,7 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['react'],
-  rules: {},
+  rules: {
+    'react/jsx-filename-extension': [1, {extensions: ['.js', '.jsx']}],
+  },
 }
