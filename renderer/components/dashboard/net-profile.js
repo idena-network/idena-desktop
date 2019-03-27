@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import {Figure} from '../atoms'
 
 export const NetProfile = ({addr, balance}) => (
@@ -18,3 +19,10 @@ export const NetProfile = ({addr, balance}) => (
     `}</style>
   </div>
 )
+
+NetProfile.propTypes = {
+  addr: PropTypes.string.isRequired,
+  balance: PropTypes.shape({stake: PropTypes.number, balance: PropTypes.number}).isRequired,
+}
+
+export default NetProfile

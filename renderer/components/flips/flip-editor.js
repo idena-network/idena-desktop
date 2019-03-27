@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React, {Component} from 'react'
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
 import {decode, encode} from 'rlp'
@@ -44,13 +45,14 @@ export class FlipEditor extends Component {
     guard.type(file)
 
     const reader = new FileReader()
-    reader.addEventListener('loadend', ev => {
-      global.ipcRenderer.send(channels.compressFlipSource, new Uint8Array(ev.target.result))
+    reader.addEventListener('loadend', readerEvent => {
+      global.ipcRenderer.send(channels.compressFlipSource, new Uint8Array(readerEvent.target.result))
     })
     reader.readAsArrayBuffer(file)
   }
 
   handleSubmitCrop = blob => {
+    // eslint-disable-next-line react/destructuring-assignment
     if (this.state.flipSizeExceeded) {
       return
     }
@@ -83,7 +85,9 @@ export class FlipEditor extends Component {
   }
 
   handleSubmitFlip = async () => {
-    const {pics, order} = this.state.flip
+    const {
+      flips: {pics, order},
+    } = this.state
 
     const promises = pics.map(blob => new Response(blob).arrayBuffer())
     const arrayBuffers = await Promise.all(promises)
@@ -99,8 +103,9 @@ export class FlipEditor extends Component {
         try {
           const storedFlips = JSON.parse(localStorage.getItem(flipsStorageKey)) || []
           localStorage.setItem(flipsStorageKey, JSON.stringify([result.flipHash, ...storedFlips]))
-        } catch (error) {
-          console.log(error)
+        } catch (storageError) {
+          // eslint-disable-next-line no-console
+          console.error(storageError)
         }
       } else {
         this.setState({
@@ -115,15 +120,15 @@ export class FlipEditor extends Component {
   }
 
   handleFetchFlip = async () => {
-    const hash = this.flipHashRef.current.value || this.state.flipHash
+    const {flipHash: hash = this.flipHashRef.current.value} = this.state
     const {result} = await fetchFlip(hash)
 
     const [flipPics, flipOrder] = decode(fromHexString(result.hex.substr(2)))
 
     const orderedFlipPics = []
-    for (let i = 0; i < flipOrder.length; i++) {
+    for (let i = 0; i < flipOrder.length; i += 1) {
       orderedFlipPics.push([])
-      for (let k = 0; k < flipOrder[i].length; k++) {
+      for (let k = 0; k < flipOrder[i].length; k += 1) {
         const picArrayBuffer = flipPics[flipOrder[i][k][0] || 0]
         orderedFlipPics[i].push(picArrayBuffer)
       }
@@ -156,25 +161,33 @@ export class FlipEditor extends Component {
   }
 
   render() {
-    const {uploadedSrc, flip, fetchedFlip} = this.state
+    const {uploadedSrc, flip, fetchedFlip, flipSizeExceeded, flipHash} = this.state
     return (
       <>
         <h2>FLIPs</h2>
         <div>
           Drag and drop your pics here or upload manually{' '}
-          <input type="file" accept="image/*" onChange={this.handleUpload} disabled={this.state.flipSizeExceeded} />
+          <input type="file" accept="image/*" onChange={this.handleUpload} disabled={flipSizeExceeded} />
           <div>
-            <button onClick={this.reset}>Reset</button>
+            <button type="button" onClick={this.reset}>
+              Reset
+            </button>
           </div>
         </div>
         {uploadedSrc && (
           <div>
-            <FlipCrop src={uploadedSrc} disabled={this.state.flipSizeExceeded} onSubmit={this.handleSubmitCrop} />
+            <FlipCrop src={uploadedSrc} disabled={flipSizeExceeded} onSubmit={this.handleSubmitCrop} />
             <h2>{flip.type}</h2>
             <h3>Reference pics</h3>
             {flip.pics.map(
               (pic, idx) =>
-                pic && <img key={`flip-pic-${idx}`} src={URL.createObjectURL(new Blob([pic], {type: 'image/jpeg'}))} />
+                pic && (
+                  <img
+                    key={`flip-pic-${idx}`}
+                    alt={`flip-pic-${idx}`}
+                    src={URL.createObjectURL(new Blob([pic], {type: 'image/jpeg'}))}
+                  />
+                )
             )}
             <h3>Options</h3>
             <div className="row">
@@ -190,15 +203,16 @@ export class FlipEditor extends Component {
                               draggableId={`flip-pic-${refIdx}-${orderIdx}`}
                               index={idx}
                             >
-                              {(provided, snapshot) => (
+                              {(providedInner, snapshotInner) => (
                                 <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+                                  ref={providedInner.innerRef}
+                                  {...providedInner.draggableProps}
+                                  {...providedInner.dragHandleProps}
+                                  style={getItemStyle(snapshotInner.isDragging, providedInner.draggableProps.style)}
                                 >
                                   <img
                                     key={`flip-${refIdx}-${orderIdx}`}
+                                    alt={`flip-${refIdx}-${orderIdx}`}
                                     src={URL.createObjectURL(
                                       new Blob([flip.pics[refIdx]], {
                                         type: 'image/jpeg',
@@ -209,7 +223,11 @@ export class FlipEditor extends Component {
                               )}
                             </Draggable>
                           ))}
-                          {orderIdx === 1 && <button onClick={this.handleClickShuffle}>Shuffle</button>}
+                          {orderIdx === 1 && (
+                            <button type="button" onClick={this.handleClickShuffle}>
+                              Shuffle
+                            </button>
+                          )}
                         </div>
                       )}
                     </Droppable>
@@ -217,15 +235,15 @@ export class FlipEditor extends Component {
                 </div>
               ))}
             </div>
-            <button onClick={this.handleSubmitFlip} className="btn btn--primary">
+            <button type="button" onClick={this.handleSubmitFlip} className="btn btn--primary">
               Submit
             </button>
-            <pre>{this.state.flipHash}</pre>
+            <pre>{flipHash}</pre>
           </div>
         )}
         <h2>Fetched flips</h2>
         <input type="text" ref={this.flipHashRef} />
-        <button onClick={this.handleFetchFlip} className="btn">
+        <button type="button" onClick={this.handleFetchFlip} className="btn">
           Get Flip
         </button>
         <div className="row">
@@ -234,6 +252,7 @@ export class FlipEditor extends Component {
               {pics.map((picSrc, k) => (
                 <img
                   key={`df${i}${k}`}
+                  alt={`df${i}${k}`}
                   width={200}
                   src={URL.createObjectURL(new Blob([picSrc], {type: 'image/jpeg'}))}
                 />

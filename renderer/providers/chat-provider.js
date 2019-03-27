@@ -10,9 +10,9 @@ export const ChatProvider = ({children}) => {
     let ignore = false
 
     async function fetchChats() {
-      const chats = await fetchChatList()
+      const fetchedChats = await fetchChatList()
       if (!ignore) {
-        setChats(chats)
+        setChats(fetchedChats)
       }
     }
 
