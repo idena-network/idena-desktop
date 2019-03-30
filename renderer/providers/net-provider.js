@@ -1,4 +1,5 @@
 import React, {createContext, useState, useEffect} from 'react'
+import PropTypes from 'prop-types'
 import {fetchAddress, fetchBalance} from '../services/api'
 
 const initialState = {
@@ -33,6 +34,10 @@ export const NetProvider = ({children}) => {
     }
   }, [])
   return <NetContext.Provider value={info}>{children}</NetContext.Provider>
+}
+
+NetProvider.propTypes = {
+  children: PropTypes.node,
 }
 
 export default NetContext

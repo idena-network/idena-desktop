@@ -1,6 +1,8 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import {Box} from './box'
 
-export const Row = ({justify, align = 'initial', children}) => (
+export const Row = ({justify = 'initial', align = 'initial', children}) => (
   <div>
     {React.Children.map(children, child =>
       React.cloneElement(child, {
@@ -10,23 +12,23 @@ export const Row = ({justify, align = 'initial', children}) => (
     <style jsx>{`
       div {
         display: flex;
-        ${justify && `justify-content: ${justify}`};
-        ${align && `align-items: ${align}`};
+        justify-content: ${justify};
+        align-items: ${align};
       }
     `}</style>
   </div>
 )
 
-export const Col = ({m, p, w, children}) => (
-  <div>
-    {children}
-    <style jsx>{`
-      div {
-        display: block;
-        ${m && `margin: ${m}`};
-        ${p && `margin: ${p}`};
-        width: ${w < 12 ? `${(w / 12) * 100}%` : `${w}%`};
-      }
-    `}</style>
-  </div>
+Row.propTypes = {
+  children: PropTypes.node,
+  justify: PropTypes.string,
+  align: PropTypes.string,
+}
+
+export const Col = ({children, ...boxProps}) => (
+  <Box {...boxProps}>{children}</Box>
 )
+
+Col.propTypes = {
+  children: PropTypes.node,
+}

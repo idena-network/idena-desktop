@@ -1,4 +1,5 @@
 import React, {createContext, useState, useEffect} from 'react'
+import PropTypes from 'prop-types'
 import {fetchChatList} from '../services/api'
 
 const ChatContext = createContext()
@@ -23,6 +24,10 @@ export const ChatProvider = ({children}) => {
     }
   }, [])
   return <ChatContext.Provider value={chats}>{children}</ChatContext.Provider>
+}
+
+ChatProvider.propTypes = {
+  children: PropTypes.node,
 }
 
 export default ChatContext
