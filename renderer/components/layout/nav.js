@@ -1,7 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
-import {Text} from '../atoms'
 import {withRouter} from 'next/router'
+import {Text, Box} from '../atoms'
+import {Button} from '../atoms/button'
 
 const activeLinkStyle = `
   background: rgba(255, 255, 255, 0.1);
@@ -41,14 +42,13 @@ const NavItem = withRouter(({href, router, children}) => {
 export const Nav = ({user}) => (
   <nav>
     <div>
-      <img src="../static/logo.svg" />
+      <img src="../static/logo.svg" alt="idena logo" />
     </div>
-    <ul>
-      <Text color="white" padded>
-        {user.name}
-      </Text>
-      <NavItem href="/dashboard">Settings</NavItem>
-    </ul>
+    <Box m="3em 0">
+      <Box m="1em 0">
+        <Text color="white">{user.name}</Text>
+      </Box>
+    </Box>
     <ul>
       <NavItem href="/contacts">Contacts</NavItem>
       <NavItem href="/chats">Chats</NavItem>

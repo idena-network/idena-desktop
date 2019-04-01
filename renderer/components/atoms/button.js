@@ -1,16 +1,13 @@
+/* eslint-disable react/button-has-type */
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
 import theme from '../../theme'
 
-export const Button = ({type = 'button', ...props}) => {
+export const Button = ({type = 'button', size = '1em', ...props}) => {
   return (
     <>
-      {type === 'submit' ? (
-        <input type="submit" {...props} />
-      ) : (
-        <button type="button" {...props} />
-      )}
+      <button type={type} {...props} />
       <style jsx>{`
         button,
         input {
@@ -19,8 +16,8 @@ export const Button = ({type = 'button', ...props}) => {
           cursor: pointer;
           border: none;
           border-radius: 6px;
-          font-size: 1em;
-          padding: 0.5em 1em;
+          font-size: ${size};
+          padding: ${`${0.5 * size}em ${size}em`};
           outline: none;
         }
         button:hover,
@@ -34,5 +31,6 @@ export const Button = ({type = 'button', ...props}) => {
 
 Button.propTypes = {
   primary: PropTypes.bool,
+  size: PropTypes.string,
   type: PropTypes.oneOf(['button', 'submit', 'reset']),
 }

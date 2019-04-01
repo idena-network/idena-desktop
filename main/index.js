@@ -105,13 +105,13 @@ app.on('window-all-closed', () => {
   }
 })
 
+ipcMain.on('node-start', ({sender}) => {
+  startNode(sender, false)
+})
+
 // listen specific `node` messages
-ipcMain.on(channels.node, (event, message) => {
-  if (message === 'start') {
-    startNode(mainWindow, channels.node, false)
-    return
-  }
-  event.sender.send(channels.node, message)
+ipcMain.on('node-log', ({sender}, message) => {
+  sender.send('node-log', message)
 })
 
 ipcMain.on(channels.compressFlipSource, (ev, message) => {
@@ -126,6 +126,7 @@ ipcMain.on(channels.compressFlipSource, (ev, message) => {
     .toBuffer()
     .then(data => ev.sender.send(channels.compressFlipSource, data))
     .catch(err => {
+      // eslint-disable-next-line no-console
       console.error(err)
       throw new Error(err)
     })

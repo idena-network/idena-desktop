@@ -34,11 +34,11 @@ export const Text = ({
   color,
   size = '1em',
   weight = 'normal',
-  style,
+  css,
   ...props
 }) => (
   <>
-    <span {...props} style={style} />
+    <span {...props} style={css} />
     <style jsx>{`
       span {
         display: inline-block;
@@ -55,5 +55,5 @@ Text.propTypes = {
   size: PropTypes.string,
   weight: PropTypes.string,
   // eslint-disable-next-line react/forbid-prop-types
-  style: PropTypes.object,
+  css: PropTypes.object,
 }

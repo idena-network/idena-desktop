@@ -6,21 +6,18 @@ import theme from '../../theme'
 import {Box, StyleDim} from './box'
 
 export const Figure = ({label, value, postfix}) => (
-  <div>
-    <label>{label}</label>
-    <Text wrap>{value}</Text> {postfix && <Text>{postfix}</Text>}
+  <Box m="0 0 1em">
+    <span>{label}</span>
+    <Text css={{wordBreak: 'break-all'}}>{value}</Text>{' '}
+    {postfix && <Text>{postfix}</Text>}
     <style jsx>{`
-      div {
-        margin: 0 0 1em;
-      }
-
-      label {
+      span {
         color: ${theme.colors.muted};
         display: block;
         margin-bottom: 0.5em;
       }
     `}</style>
-  </div>
+  </Box>
 )
 
 Figure.propTypes = {

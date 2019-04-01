@@ -62,7 +62,7 @@ export const InviteDrawer = ({
           <Text
             color={theme.colors.muted}
             size="1.6em"
-            style={{cursor: 'pointer'}}
+            css={{cursor: 'pointer'}}
             onClick={onInviteClose}
           >
             &times;
