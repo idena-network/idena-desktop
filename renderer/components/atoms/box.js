@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
@@ -8,9 +7,9 @@ export const StyleDim = PropTypes.oneOfType([
   PropTypes.number,
 ])
 
-export const Box = ({bg, m, p, w, children}) => (
-  <div>
-    {children}
+export const Box = ({bg, m, p, w, css, ...props}) => (
+  <>
+    <div style={css} {...props} />
     <style jsx>{`
       div {
         background: ${bg};
@@ -20,7 +19,7 @@ export const Box = ({bg, m, p, w, children}) => (
         width: ${w < 12 ? `${(w / 12) * 100}%` : `${w}%`};
       }
     `}</style>
-  </div>
+  </>
 )
 
 Box.propTypes = {
@@ -28,5 +27,6 @@ Box.propTypes = {
   m: StyleDim,
   p: StyleDim,
   w: StyleDim,
-  children: PropTypes.node,
+  // eslint-disable-next-line react/forbid-prop-types
+  css: PropTypes.object,
 }

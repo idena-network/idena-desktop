@@ -1,19 +1,34 @@
-export const UserActions = () => (
-  <div>
-    <a href="/">Share Idena</a>
-    <a href="/">Invite people</a>
-    <style jsx>
-      {`
-        div {
-          padding: 1.5em 0.5em;
-        }
-        a {
-          color: rgb(87, 143, 255);
+import React from 'react'
+import PropTypes from 'prop-types'
+import theme from '../../theme'
+import {Box} from '../atoms'
+
+export function UserActions({onActivateInviteShow}) {
+  return (
+    <Box p="1.5em 0.5em">
+      <button type="button">Share Idena</button>
+      <button type="button">Invite people</button>
+      <button type="button" onClick={onActivateInviteShow}>
+        Activate invite
+      </button>
+      <style jsx>{`
+        button {
+          background: none;
+          border: none;
+          color: ${theme.colors.primary};
+          cursor: pointer;
+          font-size: 1em;
           display: inline-block;
-          margin-right: 2em;
+          margin-right: 1em;
           text-decoration: none;
         }
-      `}
-    </style>
-  </div>
-)
+      `}</style>
+    </Box>
+  )
+}
+
+UserActions.propTypes = {
+  onActivateInviteShow: PropTypes.func,
+}
+
+export default UserActions

@@ -15,7 +15,7 @@ export const ContactCard = ({fullName, status}) => (
         <Text>{fullName}</Text>
       </Box>
       <Box>
-        <Text color={theme.colors.primary} small>
+        <Text color={theme.colors.primary} size="0.72em">
           {status}
         </Text>
       </Box>

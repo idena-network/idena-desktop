@@ -1,4 +1,5 @@
 import React, {createContext, useState, useEffect} from 'react'
+import PropTypes from 'prop-types'
 import {decode} from 'rlp'
 import {fromHexString} from '../utils/string'
 import {fetchFlip} from '../services/api'
@@ -12,7 +13,7 @@ const initialState = {
 
 const FlipContext = createContext()
 
-export const FlipProvider = ({children}) => {
+export function FlipProvider({children}) {
   const [flips, setFlips] = useState(initialState)
 
   useEffect(() => {
@@ -22,14 +23,12 @@ export const FlipProvider = ({children}) => {
       const hashes = JSON.parse(localStorage.getItem(flipsStorageKey)) || []
       const responses = await Promise.all(hashes.map(hash => fetchFlip(hash)))
 
-      if (responses) {
-        const fetchedFlips = responses.map(
-          ({result}) => decode(fromHexString(result.hex.substr(2)))[0]
-        )
+      const fetchedFlips = responses.map(({result}) =>
+        result ? decode(fromHexString(result.hex.substr(2)))[0] : []
+      )
 
-        if (!ignore) {
-          setFlips({drafts: [], published: fetchedFlips})
-        }
+      if (!ignore) {
+        setFlips({drafts: [], published: fetchedFlips})
       }
     }
 
@@ -40,6 +39,10 @@ export const FlipProvider = ({children}) => {
     }
   }, [])
   return <FlipContext.Provider value={flips}>{children}</FlipContext.Provider>
+}
+
+FlipProvider.propTypes = {
+  children: PropTypes.node,
 }
 
 export default FlipContext

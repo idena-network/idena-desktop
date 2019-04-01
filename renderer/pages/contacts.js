@@ -6,17 +6,17 @@ import {
   Actions,
   ContactSearch,
   ContactDetails,
+  SendInviteForm,
 } from '../components/contacts'
 import {ContactContext} from '../providers'
-import {Row, Col} from '../components/atoms'
+import {Row, Col, Drawer} from '../components/atoms'
 // eslint-disable-next-line import/no-named-as-default
-import InviteDrawer from '../components/contacts/invite-drawer'
 import {sendInvite} from '../api'
 
 export default () => {
   const contacts = useContext(ContactContext)
   const [showDrawer, setDrawerState] = useState(false)
-  const [inviteData, setInviteData] = useState()
+  const [inviteResult, setInviteResult] = useState()
   return (
     <Layout>
       <>
@@ -36,17 +36,24 @@ export default () => {
             <ContactDetails {...contacts[0]} />
           </Col>
         </Row>
-        <InviteDrawer
-          show={showDrawer}
-          addr=""
-          available={1000}
-          onInviteSend={async (addr, amount) => {
-            const resp = await sendInvite(addr, amount)
-            setInviteData(resp)
-          }}
-          onInviteClose={() => setDrawerState(false)}
-          inviteData={inviteData}
-        />
+        <Drawer show={showDrawer}>
+          <SendInviteForm
+            addr=""
+            available={1000}
+            inviteResult={inviteResult}
+            onInviteSend={async (addr, amount) => {
+              const invite = await sendInvite(addr, amount)
+              setInviteResult(invite)
+
+              const storedInvites =
+                JSON.parse(localStorage.getItem('idena-invites-sent')) || []
+              localStorage.setItem(
+                'idena-invites-sent',
+                JSON.stringify(storedInvites.concat(invite))
+              )
+            }}
+          />
+        </Drawer>
       </>
     </Layout>
   )

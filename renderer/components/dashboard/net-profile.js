@@ -1,28 +1,40 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Figure} from '../atoms'
+import {Figure, Box} from '../atoms'
+import theme from '../../theme'
 
-export const NetProfile = ({addr, balance}) => (
-  <div>
+export const NetProfile = ({
+  addr,
+  balance,
+  age,
+  state: status,
+  onActivateInviteShow,
+}) => (
+  <Box bg={theme.colors.gray} p="1em" css={{borderRadius: '4px'}}>
     <Figure label="Address" value={addr} />
-    <Figure label="Status" value="Validated" />
+    <Figure
+      label="Status"
+      value={status}
+      postfix={
+        <button type="button" onClick={onActivateInviteShow}>
+          Activate
+        </button>
+      }
+    />
     <Figure label="Stake" value={balance.stake} postfix="DNA" />
     <Figure label="Balance" value={balance.balance} postfix="DNA" />
-    <Figure label="Age" value="24 epochs" />
+    <Figure label="Age" value={age} postfix="epochs" />
     <Figure label="Next validation" value={new Date().toLocaleString()} />
-    <style jsx>{`
-      div {
-        background: rgb(245, 246, 247);
-        border-radius: 4px;
-        padding: 2em;
-      }
-    `}</style>
-  </div>
+  </Box>
 )
 
 NetProfile.propTypes = {
   addr: PropTypes.string.isRequired,
-  balance: PropTypes.shape({stake: PropTypes.number, balance: PropTypes.number}).isRequired,
+  balance: PropTypes.shape({stake: PropTypes.number, balance: PropTypes.number})
+    .isRequired,
+  age: PropTypes.number,
+  state: PropTypes.string,
+  onActivateInviteShow: PropTypes.func,
 }
 
 export default NetProfile

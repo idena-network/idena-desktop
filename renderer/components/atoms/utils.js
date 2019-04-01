@@ -23,7 +23,7 @@ export const Figure = ({label, value, postfix}) => (
 Figure.propTypes = {
   label: PropTypes.string,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  postfix: PropTypes.string,
+  postfix: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 }
 
 export const Absolute = ({

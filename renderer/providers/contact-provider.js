@@ -1,18 +1,19 @@
 import React, {createContext, useState, useEffect} from 'react'
+import PropTypes from 'prop-types'
 import {fetchContactList} from '../services/api'
 
 const ContactContext = createContext()
 
-export const ContactProvider = ({children}) => {
+export function ContactProvider({children}) {
   const [contacts, setContacts] = useState([])
 
   useEffect(() => {
     let ignore = false
 
     async function fetchContacts() {
-      const contacts = await fetchContactList()
+      const fetchedContacts = await fetchContactList()
       if (!ignore) {
-        setContacts(contacts)
+        setContacts(fetchedContacts)
       }
     }
 
@@ -27,6 +28,10 @@ export const ContactProvider = ({children}) => {
       {children}
     </ContactContext.Provider>
   )
+}
+
+ContactProvider.propTypes = {
+  children: PropTypes.node,
 }
 
 export default ContactContext

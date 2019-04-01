@@ -1,18 +1,20 @@
 import React, {useContext, useState, useEffect} from 'react'
 import Link from 'next/link'
 import {Layout} from '../components/layout'
-import {Heading, Row, Col, SubHeading, Box} from '../components/atoms'
+import {Heading, Row, Col, SubHeading, Box, Drawer} from '../components/atoms'
 import {
   UserInfo,
   UserActions,
   NetProfile,
   FlipGroup,
+  ActivateInviteForm,
 } from '../components/dashboard'
 import FlipContext from '../providers/flip-provider'
 import {AddFlipButton} from '../components/dashboard/add-flip-button'
 import NetContext from '../providers/net-provider'
 import {Button} from '../components/atoms/button'
 import {abToStr} from '../utils/string'
+import {activateInvite} from '../api'
 
 const Convert = require('ansi-to-html')
 
@@ -38,6 +40,10 @@ export default () => {
       global.ipcRenderer.removeAllListeners('node-log')
     }
   }, [])
+  const [showActivateInviteForm, setActivateInviteFormVisibility] = useState(
+    false
+  )
+  const [activateResult, setActivateResult] = useState()
   return (
     <Layout>
       <Row>
@@ -56,8 +62,13 @@ export default () => {
             </Button>
           </Heading>
           <UserInfo user={{name: 'optimusway', address: netInfo.addr}} />
-          <UserActions />
-          <NetProfile {...netInfo} />
+          <UserActions
+            onActivateInviteShow={() => setActivateInviteFormVisibility(true)}
+          />
+          <NetProfile
+            {...netInfo}
+            onActivateInviteShow={() => setActivateInviteFormVisibility(true)}
+          />
           <Box>
             <pre
               // eslint-disable-next-line react/no-danger
@@ -92,6 +103,15 @@ export default () => {
           <FlipGroup name="Published" flips={published} />
         </Col>
       </Row>
+      <Drawer show={showActivateInviteForm}>
+        <ActivateInviteForm
+          activateResult={activateResult}
+          onActivateInviteSend={(to, key) => {
+            const result = activateInvite(to, key)
+            setActivateResult(result)
+          }}
+        />
+      </Drawer>
     </Layout>
   )
 }
