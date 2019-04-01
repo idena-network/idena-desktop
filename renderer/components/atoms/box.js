@@ -16,7 +16,7 @@ export const Box = ({bg, m, p, w, children}) => (
         background: ${bg};
         display: block;
         ${m && `margin: ${m}`};
-        ${p && `margin: ${p}`};
+        ${p && `padding: ${p}`};
         width: ${w < 12 ? `${(w / 12) * 100}%` : `${w}%`};
       }
     `}</style>

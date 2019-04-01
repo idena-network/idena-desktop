@@ -1,12 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import theme from '../../theme'
 
 // eslint-disable-next-line react/prop-types
 export const Heading = ({children, ...props}) => (
   <h1 {...props}>
+    {children}
     <style jsx>{`
       h1 {
-        color: rgb(83, 86, 92);
+        color: ${theme.colors.primary2};
         font-size: 1.7em;
         margin: 0 0 2em;
       }
@@ -20,7 +22,7 @@ export const SubHeading = ({children, ...props}) => (
     {children}
     <style jsx>{`
       h2 {
-        color: rgb(83, 86, 92);
+        color: ${theme.colors.primary2};
         font-size: 1.2em;
         margin: 0 0 0.5em;
       }
@@ -30,35 +32,28 @@ export const SubHeading = ({children, ...props}) => (
 
 export const Text = ({
   color,
-  bold,
-  padded,
-  wrap,
-  small,
-  children,
+  size = '1em',
+  weight = 'normal',
+  style,
   ...props
 }) => (
-  <span {...props}>
-    {children}
+  <>
+    <span {...props} style={style} />
     <style jsx>{`
       span {
         display: inline-block;
-        ${color && `color: ${color}`};
-        ${bold && 'font-weight: bold'};
-        ${padded &&
-          `padding: 0.5em 1em;
-        margin: 0 0 0.5em;`};
-        ${wrap && `word-break: break-all;`};
-        ${small && `font-size: 0.8em;`}
+        color: ${color};
+        font-size: ${size};
+        font-weight: ${weight};
       }
     `}</style>
-  </span>
+  </>
 )
 
 Text.propTypes = {
-  children: PropTypes.node,
   color: PropTypes.string,
-  bold: PropTypes.bool,
-  padded: PropTypes.bool,
-  wrap: PropTypes.bool,
-  small: PropTypes.bool,
+  size: PropTypes.string,
+  weight: PropTypes.string,
+  // eslint-disable-next-line react/forbid-prop-types
+  style: PropTypes.object,
 }

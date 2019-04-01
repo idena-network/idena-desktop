@@ -1,7 +1,7 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
 import {Box} from '../atoms/box'
-import {Figure, SubHeading, Fill, Absolute} from '../atoms'
+import {Figure, SubHeading, Fill, Absolute, Text} from '../atoms'
 import {FormGroup, Label, Input} from '../atoms/form'
 import {Button} from '../atoms/button'
 import Avatar from './contact-avatar'
@@ -14,6 +14,7 @@ export const InviteDrawer = ({
   available,
   onInviteSend,
   onInviteClose,
+  inviteData,
 }) => {
   const addrInputRef = useRef(null)
   const amountInputRef = useRef(null)
@@ -33,12 +34,12 @@ export const InviteDrawer = ({
             <SubHeading>Invite Unknown person</SubHeading>
           </Box>
           <FormGroup>
-            <Label>Address</Label>
-            <Input defaultValue={addr} ref={addrInputRef} />
+            <Label htmlFor="addr">Address</Label>
+            <Input defaultValue={addr} ref={addrInputRef} id="addr" />
           </FormGroup>
           <FormGroup>
-            <Label>Amount</Label>
-            <Input defaultValue={amount} ref={amountInputRef} />
+            <Label htmlFor="amount">Amount</Label>
+            <Input defaultValue={amount} ref={amountInputRef} id="amount" />
           </FormGroup>
           <Figure label="Available" value={available} />
           <Button
@@ -51,11 +52,29 @@ export const InviteDrawer = ({
           >
             Send invite
           </Button>
-          <button type="button" onClick={onInviteClose}>
-            Close
-          </button>
+          {inviteData && (
+            <Box bg={theme.colors.gray} p="1em" m="1em 0" w={100}>
+              <pre>{JSON.stringify(inviteData)}</pre>
+            </Box>
+          )}
         </Box>
+        <Absolute top="1em" right="1em">
+          <Text
+            color={theme.colors.muted}
+            size="1.6em"
+            style={{cursor: 'pointer'}}
+            onClick={onInviteClose}
+          >
+            &times;
+          </Text>
+        </Absolute>
       </Absolute>
+      <style jsx>{`
+        pre {
+          white-space: pre-wrap;
+          word-break: break-word;
+        }
+      `}</style>
     </Fill>
   ) : null
 }
@@ -67,6 +86,8 @@ InviteDrawer.propTypes = {
   available: PropTypes.number,
   onInviteSend: PropTypes.func.isRequired,
   onInviteClose: PropTypes.func,
+  // eslint-disable-next-line react/forbid-prop-types
+  inviteData: PropTypes.object,
 }
 
 export default InviteDrawer

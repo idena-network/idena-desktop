@@ -11,10 +11,12 @@ import {ContactContext} from '../providers'
 import {Row, Col} from '../components/atoms'
 // eslint-disable-next-line import/no-named-as-default
 import InviteDrawer from '../components/contacts/invite-drawer'
+import {sendInvite} from '../api'
 
 export default () => {
   const contacts = useContext(ContactContext)
   const [showDrawer, setDrawerState] = useState(false)
+  const [inviteData, setInviteData] = useState()
   return (
     <Layout>
       <>
@@ -38,10 +40,12 @@ export default () => {
           show={showDrawer}
           addr=""
           available={1000}
-          onInviteSend={(addr, amount) => {
-            alert(addr, amount)
+          onInviteSend={async (addr, amount) => {
+            const resp = await sendInvite(addr, amount)
+            setInviteData(resp)
           }}
           onInviteClose={() => setDrawerState(false)}
+          inviteData={inviteData}
         />
       </>
     </Layout>

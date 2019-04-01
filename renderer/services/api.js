@@ -1,4 +1,4 @@
-const baseUrl = '//localhost:9009'
+import {baseUrl} from '../api/setup'
 
 export const fetchAddress = () =>
   fetch(baseUrl, {
