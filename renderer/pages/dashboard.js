@@ -44,6 +44,10 @@ export default () => {
     false
   )
   const [activateResult, setActivateResult] = useState()
+  const shouldShowActivate =
+    !netInfo.state ||
+    netInfo.state === 'Undefined' ||
+    netInfo.state === 'Invite'
   return (
     <Layout>
       <Row>
@@ -51,7 +55,7 @@ export default () => {
           <Heading>
             My Idena &nbsp;
             <Button
-              size="0.72em"
+              size={0.7}
               onClick={() => {
                 global.ipcRenderer.send('node-start', true)
               }}
@@ -63,10 +67,12 @@ export default () => {
           </Heading>
           <UserInfo user={{name: 'optimusway', address: netInfo.addr}} />
           <UserActions
+            showActivateInvite={shouldShowActivate}
             onActivateInviteShow={() => setActivateInviteFormVisibility(true)}
           />
           <NetProfile
             {...netInfo}
+            showActivateInvite={shouldShowActivate}
             onActivateInviteShow={() => setActivateInviteFormVisibility(true)}
           />
           <Box>
@@ -103,12 +109,18 @@ export default () => {
           <FlipGroup name="Published" flips={published} />
         </Col>
       </Row>
-      <Drawer show={showActivateInviteForm}>
+      <Drawer
+        show={showActivateInviteForm}
+        onHide={() => {
+          setActivateInviteFormVisibility(false)
+        }}
+      >
         <ActivateInviteForm
+          to={netInfo.addr}
           activateResult={activateResult}
-          onActivateInviteSend={(to, key) => {
-            const result = activateInvite(to, key)
-            setActivateResult(result)
+          onActivateInviteSend={async (to, key) => {
+            const result = await activateInvite(to, key)
+            setActivateResult({result})
           }}
         />
       </Drawer>

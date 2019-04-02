@@ -15,7 +15,7 @@ import {sendInvite} from '../api'
 
 export default () => {
   const contacts = useContext(ContactContext)
-  const [showDrawer, setDrawerState] = useState(false)
+  const [showSendInviteForm, setSendInviteFormVisibility] = useState(false)
   const [inviteResult, setInviteResult] = useState()
   return (
     <Layout>
@@ -26,17 +26,20 @@ export default () => {
               <ContactSearch />
               <Actions
                 onInvite={() => {
-                  setDrawerState(true)
+                  setSendInviteFormVisibility(true)
                 }}
               />
               <ContactList contacts={contacts} />
             </ContactNav>
           </Col>
           <Col w={8}>
-            <ContactDetails {...contacts[0]} />
+            <ContactDetails fullName="optimusway" />
           </Col>
         </Row>
-        <Drawer show={showDrawer}>
+        <Drawer
+          show={showSendInviteForm}
+          onHide={() => setSendInviteFormVisibility(false)}
+        >
           <SendInviteForm
             addr=""
             available={1000}

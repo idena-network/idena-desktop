@@ -3,14 +3,16 @@ import PropTypes from 'prop-types'
 import theme from '../../theme'
 import {Box} from '../atoms'
 
-export function UserActions({onActivateInviteShow}) {
+export function UserActions({showActivateInvite, onActivateInviteShow}) {
   return (
     <Box p="1.5em 0.5em">
       <button type="button">Share Idena</button>
       <button type="button">Invite people</button>
-      <button type="button" onClick={onActivateInviteShow}>
-        Activate invite
-      </button>
+      {showActivateInvite && (
+        <button type="button" onClick={onActivateInviteShow}>
+          Activate invite
+        </button>
+      )}
       <style jsx>{`
         button {
           background: none;
@@ -29,6 +31,7 @@ export function UserActions({onActivateInviteShow}) {
 
 UserActions.propTypes = {
   onActivateInviteShow: PropTypes.func,
+  showActivateInvite: PropTypes.bool,
 }
 
 export default UserActions

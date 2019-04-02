@@ -1,15 +1,11 @@
-import React, {useState, useEffect} from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import {Absolute, Fill} from './utils'
 import theme from '../../theme'
 import {Text} from './typo'
 
-export function Drawer({show, ...props}) {
-  const [showDrawer, setDrawerVisibility] = useState(false)
-  useEffect(() => {
-    setDrawerVisibility(show)
-  }, [show])
-  return showDrawer ? (
+export function Drawer({show, onHide, ...props}) {
+  return show ? (
     <Fill bg={theme.colors.gray3} zIndex={1}>
       <Absolute
         bg={theme.colors.white}
@@ -25,7 +21,7 @@ export function Drawer({show, ...props}) {
           color={theme.colors.muted}
           size="1.6em"
           css={{cursor: 'pointer'}}
-          onClick={() => setDrawerVisibility(false)}
+          onClick={onHide}
         >
           &times;
         </Text>
@@ -36,6 +32,7 @@ export function Drawer({show, ...props}) {
 
 Drawer.propTypes = {
   show: PropTypes.bool,
+  onHide: PropTypes.func,
 }
 
 export default Drawer

@@ -3,30 +3,35 @@ import PropTypes from 'prop-types'
 import {Figure, Box} from '../atoms'
 import theme from '../../theme'
 
-export const NetProfile = ({
+export function NetProfile({
   addr,
   balance,
   age,
   state: status,
   onActivateInviteShow,
-}) => (
-  <Box bg={theme.colors.gray} p="1em" css={{borderRadius: '4px'}}>
-    <Figure label="Address" value={addr} />
-    <Figure
-      label="Status"
-      value={status}
-      postfix={
-        <button type="button" onClick={onActivateInviteShow}>
-          Activate
-        </button>
-      }
-    />
-    <Figure label="Stake" value={balance.stake} postfix="DNA" />
-    <Figure label="Balance" value={balance.balance} postfix="DNA" />
-    <Figure label="Age" value={age} postfix="epochs" />
-    <Figure label="Next validation" value={new Date().toLocaleString()} />
-  </Box>
-)
+  showActivateInvite,
+}) {
+  return (
+    <Box bg={theme.colors.gray} p="1em" css={{borderRadius: '4px'}}>
+      <Figure label="Address" value={addr} />
+      <Figure
+        label="Status"
+        value={status}
+        postfix={
+          showActivateInvite ? (
+            <button type="button" onClick={onActivateInviteShow}>
+              Activate
+            </button>
+          ) : null
+        }
+      />
+      <Figure label="Stake" value={balance.stake} postfix="DNA" />
+      <Figure label="Balance" value={balance.balance} postfix="DNA" />
+      <Figure label="Age" value={age} postfix="epochs" />
+      <Figure label="Next validation" value={new Date().toLocaleString()} />
+    </Box>
+  )
+}
 
 NetProfile.propTypes = {
   addr: PropTypes.string.isRequired,
@@ -34,6 +39,7 @@ NetProfile.propTypes = {
     .isRequired,
   age: PropTypes.number,
   state: PropTypes.string,
+  showActivateInvite: PropTypes.bool,
   onActivateInviteShow: PropTypes.func,
 }
 

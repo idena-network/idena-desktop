@@ -5,7 +5,7 @@ import {FormGroup, Label, Input} from '../atoms/form'
 import {Button} from '../atoms/button'
 import theme from '../../theme'
 
-export function ActivateInviteForm({activateResult, onActivateInviteSend}) {
+export function ActivateInviteForm({to, activateResult, onActivateInviteSend}) {
   const toInputRef = useRef(null)
   const keyInputRef = useRef(null)
   return (
@@ -15,7 +15,7 @@ export function ActivateInviteForm({activateResult, onActivateInviteSend}) {
       </Box>
       <FormGroup>
         <Label htmlFor="activateInviteTo">To</Label>
-        <Input ref={toInputRef} id="activateInviteTo" />
+        <Input defaultValue={to} ref={toInputRef} id="activateInviteTo" />
       </FormGroup>
       <FormGroup>
         <Label htmlFor="activateInviteKey">Key</Label>
@@ -47,6 +47,7 @@ export function ActivateInviteForm({activateResult, onActivateInviteSend}) {
 }
 
 ActivateInviteForm.propTypes = {
+  to: PropTypes.string,
   activateResult: PropTypes.string,
   onActivateInviteSend: PropTypes.func,
 }

@@ -4,7 +4,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import theme from '../../theme'
 
-export const Button = ({type = 'button', size = '1em', ...props}) => {
+export const Button = ({type = 'button', size = 1, ...props}) => {
   return (
     <>
       <button type={type} {...props} />
@@ -16,7 +16,7 @@ export const Button = ({type = 'button', size = '1em', ...props}) => {
           cursor: pointer;
           border: none;
           border-radius: 6px;
-          font-size: ${size};
+          font-size: ${`${size}em`};
           padding: ${`${0.5 * size}em ${size}em`};
           outline: none;
         }
