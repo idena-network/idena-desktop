@@ -14,7 +14,10 @@ import {AddFlipButton} from '../components/dashboard/add-flip-button'
 import NetContext from '../providers/net-provider'
 import {Button} from '../components/atoms/button'
 import {abToStr} from '../utils/string'
-import {activateInvite} from '../api'
+import {activateInvite, sendInvite} from '../api'
+import {allowedToActivateInvite} from '../utils'
+// eslint-disable-next-line import/no-named-as-default
+import SendInviteForm from '../components/contacts/send-invite-form'
 
 const Convert = require('ansi-to-html')
 
@@ -44,10 +47,8 @@ export default () => {
     false
   )
   const [activateResult, setActivateResult] = useState()
-  const shouldShowActivate =
-    !netInfo.state ||
-    netInfo.state === 'Undefined' ||
-    netInfo.state === 'Invite'
+  const [showSendInviteForm, setSendInviteFormVisibility] = useState(false)
+  const [inviteResult, setInviteResult] = useState()
   return (
     <Layout>
       <Row>
@@ -67,12 +68,13 @@ export default () => {
           </Heading>
           <UserInfo user={{name: 'optimusway', address: netInfo.addr}} />
           <UserActions
-            showActivateInvite={shouldShowActivate}
+            onSendInviteShow={() => setSendInviteFormVisibility(true)}
+            allowedToActivateInvite={allowedToActivateInvite(netInfo.state)}
             onActivateInviteShow={() => setActivateInviteFormVisibility(true)}
           />
           <NetProfile
             {...netInfo}
-            showActivateInvite={shouldShowActivate}
+            allowedToActivateInvite={allowedToActivateInvite(netInfo.state)}
             onActivateInviteShow={() => setActivateInviteFormVisibility(true)}
           />
           <Box>
@@ -121,6 +123,20 @@ export default () => {
           onActivateInviteSend={async (to, key) => {
             const result = await activateInvite(to, key)
             setActivateResult({result})
+          }}
+        />
+      </Drawer>
+      <Drawer
+        show={showSendInviteForm}
+        onHide={() => {
+          setSendInviteFormVisibility(false)
+        }}
+      >
+        <SendInviteForm
+          inviteResult={inviteResult}
+          onInviteSend={async (to, key) => {
+            const result = await sendInvite(to, key)
+            setInviteResult({result})
           }}
         />
       </Drawer>

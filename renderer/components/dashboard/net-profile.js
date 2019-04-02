@@ -9,7 +9,7 @@ export function NetProfile({
   age,
   state: status,
   onActivateInviteShow,
-  showActivateInvite,
+  allowedToActivateInvite,
 }) {
   return (
     <Box bg={theme.colors.gray} p="1em" css={{borderRadius: '4px'}}>
@@ -18,7 +18,7 @@ export function NetProfile({
         label="Status"
         value={status}
         postfix={
-          showActivateInvite ? (
+          allowedToActivateInvite ? (
             <button type="button" onClick={onActivateInviteShow}>
               Activate
             </button>
@@ -39,7 +39,7 @@ NetProfile.propTypes = {
     .isRequired,
   age: PropTypes.number,
   state: PropTypes.string,
-  showActivateInvite: PropTypes.bool,
+  allowedToActivateInvite: PropTypes.bool,
   onActivateInviteShow: PropTypes.func,
 }
 
