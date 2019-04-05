@@ -61,7 +61,7 @@ const createMainWindow = () => {
 }
 
 const createTray = () => {
-  tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-white.png'))
+  tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-dark-2.png'))
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Open Idena',

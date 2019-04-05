@@ -1,5 +1,6 @@
 import React from 'react'
 import App, {Container} from 'next/app'
+import Router from 'next/router'
 import {
   ContactProvider,
   ChatProvider,
@@ -7,12 +8,18 @@ import {
   FlipProvider,
 } from '../providers'
 
+let idx = 0
+
+Router.events.on('routeChangeComplete', () => {
+  idx += 1
+})
+
 class MyApp extends App {
   render() {
     const {Component, pageProps} = this.props
     return (
       <Container>
-        <NetProvider>
+        <NetProvider key={`net-provider-${idx}`}>
           <ContactProvider>
             <ChatProvider>
               <FlipProvider>
