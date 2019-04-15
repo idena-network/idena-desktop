@@ -5,20 +5,21 @@ import {SubHeading, Text, Row, Col} from '../atoms'
 import theme from '../../theme'
 import Avatar from './user-avatar'
 
-export const UserInfo = ({user}) => (
+export const UserInfo = ({fullName, address}) => (
   <Row align="center">
     <Col w={3}>
-      <Avatar name={user.name} />
+      <Avatar name={fullName} />
     </Col>
     <Col w={9}>
-      <SubHeading>{user.name}</SubHeading>
+      <SubHeading>{fullName}</SubHeading>
       <Text color={theme.colors.muted} css={{wordBreak: 'break-all'}}>
-        {user.address}
+        {address}
       </Text>
     </Col>
   </Row>
 )
 
 UserInfo.propTypes = {
-  user: PropTypes.shape({name: PropTypes.string, address: PropTypes.string}),
+  fullName: PropTypes.string.isRequired,
+  address: PropTypes.string.isRequired,
 }

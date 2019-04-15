@@ -1,8 +1,9 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Link from 'next/link'
 import {withRouter} from 'next/router'
-import {Text, Box} from '../atoms'
-import {Button} from '../atoms/button'
+import {Text} from '../atoms'
+import {Box} from '../../shared/components'
 
 const activeLinkStyle = `
   background: rgba(255, 255, 255, 0.1);
@@ -81,5 +82,9 @@ export const Nav = ({user}) => (
     `}</style>
   </nav>
 )
+
+Nav.propTypes = {
+  user: PropTypes.string.isRequired,
+}
 
 export default Nav

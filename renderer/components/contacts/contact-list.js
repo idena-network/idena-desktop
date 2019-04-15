@@ -1,29 +1,38 @@
-import React, {useContext} from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
-// eslint-disable-next-line import/no-named-as-default
-import ContactCard from './contact-card'
-import {NetContext} from '../../providers'
-import {Text, Box} from '../atoms'
-import theme from '../../theme'
+import {ContactCard} from './contact-card'
+import {Box, Group} from '../../shared/components'
 
-export const ContactList = ({contacts}) => {
-  const {invites} = useContext(NetContext)
+function ContactList({remainingInvites, sentInvites = [], contacts = []}) {
   return (
     <Box>
-      <Text color={theme.colors.muted}>Invites ({invites} left)</Text>
-      <Box m="1em 0">
-        {contacts.map(contact => (
-          <ContactCard key={contact.fullName} {...contact} />
-        ))}
-      </Box>
+      <Group title={`Invites (${remainingInvites} left)`}>
+        <Box m="1em 0">
+          {sentInvites.map(contact => (
+            <ContactCard key={contact.fullName} {...contact} />
+          ))}
+        </Box>
+      </Group>
+      <Group title="Contacts">
+        <Box m="1em 0">
+          {contacts.map(contact => (
+            <ContactCard key={contact.fullName} {...contact} />
+          ))}
+        </Box>
+      </Group>
     </Box>
   )
 }
 
+const inviteType = PropTypes.shape({
+  fullName: PropTypes.string,
+  status: PropTypes.string,
+})
+
 ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({fullName: PropTypes.string, status: PropTypes.string})
-  ).isRequired,
+  contacts: PropTypes.arrayOf(inviteType).isRequired,
+  sentInvites: PropTypes.arrayOf(inviteType),
+  remainingInvites: PropTypes.number,
 }
 
 export default ContactList

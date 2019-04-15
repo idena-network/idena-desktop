@@ -1,8 +1,8 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Box} from '.'
 import theme from '../../theme'
+import {Box} from '../../shared/components'
 
 export const FormGroup = ({children}) => <Box m="0 0 1em">{children}</Box>
 

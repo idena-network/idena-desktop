@@ -1,6 +1,6 @@
-export * from './typo'
+export * from '../../shared/components/typo'
 export * from './grid'
-export * from './box'
+export * from '../../shared/components/box'
 export * from './drawer'
 
 export * from './icons'

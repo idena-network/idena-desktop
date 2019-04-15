@@ -1,7 +1,7 @@
 import React, {useContext, useState, useEffect} from 'react'
 import Link from 'next/link'
 import {Layout} from '../components/layout'
-import {Heading, Row, Col, SubHeading, Box, Drawer} from '../components/atoms'
+import {Heading, Row, Col, SubHeading, Drawer} from '../components/atoms'
 import {
   UserInfo,
   UserActions,
@@ -18,6 +18,7 @@ import {activateInvite, sendInvite} from '../api'
 import {allowedToActivateInvite} from '../utils'
 // eslint-disable-next-line import/no-named-as-default
 import SendInviteForm from '../components/contacts/send-invite-form'
+import {Box} from '../shared/components'
 
 const Convert = require('ansi-to-html')
 

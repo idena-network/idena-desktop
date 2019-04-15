@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Figure, Box} from '../atoms'
+import {Figure} from '../atoms'
 import theme from '../../theme'
+import {Box} from '../../shared/components'
 
 export function NetProfile({
   addr,

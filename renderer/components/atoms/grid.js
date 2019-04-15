@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Box} from './box'
+import {Box} from '../../shared/components'
 
 export const Row = ({justify = 'initial', align = 'initial', children}) => (
   <div>

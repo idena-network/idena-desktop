@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {Row, Col, Text} from '../atoms'
 import theme from '../../theme'
 import Avatar from './contact-avatar'
-import {Box} from '../atoms/box'
+import {Box} from '../../shared/components'
 
 export const ContactCard = ({fullName, status}) => (
   <Row align="center">
@@ -12,10 +12,10 @@ export const ContactCard = ({fullName, status}) => (
     </Col>
     <Col w={9}>
       <Box>
-        <Text>{fullName}</Text>
+        <Text css={{wordBreak: 'break-all'}}>{fullName}</Text>
       </Box>
       <Box>
-        <Text color={theme.colors.primary} size="0.72em">
+        <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
           {status}
         </Text>
       </Box>

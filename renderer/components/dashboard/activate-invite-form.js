@@ -1,6 +1,6 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
-import {Box, SubHeading} from '../atoms'
+import {Box, SubHeading} from '../../shared/components'
 import {FormGroup, Label, Input} from '../atoms/form'
 import {Button} from '../atoms/button'
 import theme from '../../theme'

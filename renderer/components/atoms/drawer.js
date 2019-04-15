@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {Absolute, Fill} from './utils'
 import theme from '../../theme'
-import {Text} from './typo'
+import {Text} from '../../shared/components/typo'
 
 export function Drawer({show, onHide, ...props}) {
   return show ? (

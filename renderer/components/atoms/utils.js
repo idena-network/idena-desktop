@@ -1,9 +1,10 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Text} from './typo'
+import {Text} from '../../shared/components/typo'
 import theme from '../../theme'
-import {Box, StyleDim} from './box'
+import {Box} from '../../shared/components'
+import {Dim} from '../../shared/components/box'
 
 export const Figure = ({label, value, postfix}) => (
   <Box m="0 0 1em">
@@ -55,10 +56,10 @@ export const Absolute = ({
 
 Absolute.propTypes = {
   bg: PropTypes.string,
-  top: StyleDim,
-  left: StyleDim,
-  bottom: StyleDim,
-  right: StyleDim,
+  top: Dim,
+  left: Dim,
+  bottom: Dim,
+  right: Dim,
   zIndex: PropTypes.number,
   children: PropTypes.node,
 }

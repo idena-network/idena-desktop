@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import theme from '../../theme'
-import {Box} from '../atoms'
+import {Box} from '../../shared/components'
 
 export function UserActions({
   allowedToActivateInvite,
