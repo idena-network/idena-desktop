@@ -2,7 +2,7 @@ import React, {useContext} from 'react'
 import {Layout} from '../components/layout'
 import {ChatList, ChatSearch, Room, ChatNav} from '../components/chats'
 import {ChatContext} from '../providers'
-import {Row, Col} from '../components/atoms'
+import {Row, Col} from '../shared/components'
 
 export default () => {
   const chats = useContext(ChatContext)

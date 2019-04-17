@@ -22,12 +22,12 @@ export async function activateInvite(to, key) {
   return result
 }
 
-export async function fetchIdentity(address) {
+export async function fetchIdentities() {
   const {data} = await api.post('/', {
     method: 'dna_identities',
     params: [],
     id: 1,
   })
   const {result} = data
-  return result.find(id => id.address === address)
+  return result
 }

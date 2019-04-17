@@ -1,8 +1,13 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
-import {Box, SubHeading} from '../../shared/components'
-import {FormGroup, Label, Input} from '../atoms/form'
-import {Button} from '../atoms/button'
+import {
+  Box,
+  SubHeading,
+  FormGroup,
+  Label,
+  Input,
+  Button,
+} from '../../shared/components'
 import theme from '../../theme'
 
 export function ActivateInviteForm({to, activateResult, onActivateInviteSend}) {

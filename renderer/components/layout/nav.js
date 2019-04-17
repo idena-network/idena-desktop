@@ -2,8 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Link from 'next/link'
 import {withRouter} from 'next/router'
-import {Text} from '../atoms'
-import {Box} from '../../shared/components'
+import {Box, Text} from '../../shared/components'
 
 const activeLinkStyle = `
   background: rgba(255, 255, 255, 0.1);

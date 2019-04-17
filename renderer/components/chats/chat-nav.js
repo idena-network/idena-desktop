@@ -1,14 +1,13 @@
 import React from 'react'
+import {Box} from '../../shared/components'
+import theme from '../../theme'
 
-export default ({children}) => (
-  <div>
-    {children}
-    <style jsx>{`
-      div {
-        border-right: solid 1px rgb(232, 234, 237);
-        min-height: 100vh;
-        padding: 1em;
-      }
-    `}</style>
-  </div>
-)
+export default function(props) {
+  return (
+    <Box
+      css={{borderRight: `solid 1px ${theme.colors.gray}`, minHeight: '100vh'}}
+      p={theme.spacings.normal}
+      {...props}
+    />
+  )
+}

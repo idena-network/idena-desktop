@@ -9,23 +9,52 @@ import {
   SendInviteForm,
 } from '../components/contacts'
 import {ContactContext, NetContext} from '../providers'
-import {Row, Col, Drawer} from '../components/atoms'
 import {sendInvite} from '../api'
+import {Row, Col, Drawer} from '../shared/components'
+import {fetchTx} from '../api/chain'
+import DisplayInvite from '../components/contacts/display-invite'
 
 export default () => {
   const contacts = useContext(ContactContext)
-  const {addr, age, state: status, invites} = useContext(NetContext)
+  const {
+    addr,
+    age,
+    state: status,
+    invites: remainingInvites,
+    identities,
+  } = useContext(NetContext)
   const [showSendInviteForm, setSendInviteFormVisibility] = useState(false)
   const [inviteResult, setInviteResult] = useState()
-  const [sentInvites, setInvites] = useState([])
+  const [sentInvites, setSentInvites] = useState([])
+  const [selectedInvite, setSelectedInvite] = useState(null)
 
   useEffect(() => {
-    setInvites(
-      JSON.parse(localStorage.getItem('idena-invites-sent')).map(
-        ({receiver}) => ({fullName: receiver, status: 'Pending'})
+    const savedInvites =
+      JSON.parse(localStorage.getItem('idena-invites-sent')) || []
+
+    async function fetchTxs() {
+      const txs = await Promise.all(savedInvites.map(({hash}) => fetchTx(hash)))
+      const existingTxs = txs.filter(({tx}) => tx)
+
+      const existingInvites = savedInvites.filter(
+        ({hash}) => existingTxs.findIndex(tx => tx.hash === hash) > -1
       )
-    )
-  }, [])
+
+      setSentInvites(
+        existingInvites.map(({hash, receiver}) => ({
+          id: hash,
+          to: receiver,
+          fullName: receiver,
+          status:
+            (identities &&
+              identities.find(i => i.address === receiver).state) ||
+            'Pending',
+        }))
+      )
+    }
+
+    fetchTxs()
+  }, [identities])
 
   return (
     <Layout>
@@ -40,9 +69,14 @@ export default () => {
                 }}
               />
               <ContactList
-                remainingInvites={invites}
+                remainingInvites={remainingInvites}
                 sentInvites={sentInvites}
                 contacts={contacts}
+                onSelectInvite={id => {
+                  setSelectedInvite(
+                    sentInvites.find(invite => invite.id === id)
+                  )
+                }}
               />
             </ContactNav>
           </Col>
@@ -75,6 +109,12 @@ export default () => {
               )
             }}
           />
+        </Drawer>
+        <Drawer
+          show={selectedInvite && selectedInvite.id}
+          onHide={() => setSelectedInvite(null)}
+        >
+          <DisplayInvite {...selectedInvite} />
         </Drawer>
       </>
     </Layout>

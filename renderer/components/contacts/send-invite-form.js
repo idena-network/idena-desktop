@@ -1,9 +1,14 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
-import {Box, SubHeading} from '../../shared/components'
 import {Figure} from '../atoms'
-import {FormGroup, Label, Input} from '../atoms/form'
-import {Button} from '../atoms/button'
+import {
+  Box,
+  SubHeading,
+  Button,
+  FormGroup,
+  Label,
+  Input,
+} from '../../shared/components'
 import Avatar from './contact-avatar'
 import theme from '../../theme'
 

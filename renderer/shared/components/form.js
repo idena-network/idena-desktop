@@ -1,27 +1,33 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable jsx-a11y/label-has-for */
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
 import theme from '../../theme'
-import {Box} from '../../shared/components'
+import {Box} from '.'
 
-export const FormGroup = ({children}) => <Box m="0 0 1em">{children}</Box>
+export function FormGroup(props) {
+  return <Box m="0 0 1em" {...props} />
+}
 
 FormGroup.propTypes = {
   children: PropTypes.node,
 }
 
-export const Label = ({htmlFor, ...otherProps}) => (
-  <>
-    <label htmlFor={htmlFor} {...otherProps} />
-    <style jsx>{`
-      label {
-        color: ${theme.colors.muted};
-        display: block;
-        margin-bottom: 0.5em;
-      }
-    `}</style>
-  </>
-)
+export function Label({htmlFor, ...otherProps}) {
+  return (
+    <>
+      <label htmlFor={htmlFor} {...otherProps} />
+      <style jsx>{`
+        label {
+          color: ${theme.colors.muted};
+          display: block;
+          margin-bottom: ${theme.spacings.normal};
+        }
+      `}</style>
+    </>
+  )
+}
 
 Label.propTypes = {
   htmlFor: PropTypes.string.isRequired,

@@ -1,5 +1,5 @@
 import React from 'react'
-import {AddIcon} from '../atoms'
+import {AddIcon} from '../../shared/components'
 import theme from '../../theme'
 
 export default () => (

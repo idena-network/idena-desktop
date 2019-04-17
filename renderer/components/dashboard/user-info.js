@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {SubHeading, Text, Row, Col} from '../atoms'
+import {SubHeading, Text, Row, Col} from '../../shared/components'
 import theme from '../../theme'
 import Avatar from './user-avatar'
 

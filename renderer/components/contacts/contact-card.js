@@ -1,12 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Row, Col, Text} from '../atoms'
 import theme from '../../theme'
 import Avatar from './contact-avatar'
-import {Box} from '../../shared/components'
+import {Box, Row, Col, Text} from '../../shared/components'
 
-export const ContactCard = ({fullName, status}) => (
-  <Row align="center">
+export const ContactCard = ({id, fullName, status, onSelectInvite}) => (
+  <Row
+    align="center"
+    onClick={() => onSelectInvite(id)}
+    css={{cursor: 'pointer', marginBottom: '1em'}}
+  >
     <Col w={3}>
       <Avatar name={fullName} />
     </Col>
@@ -24,8 +27,10 @@ export const ContactCard = ({fullName, status}) => (
 )
 
 ContactCard.propTypes = {
+  id: PropTypes.string.isRequired,
   fullName: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
+  onSelectInvite: PropTypes.func,
 }
 
 export default ContactCard

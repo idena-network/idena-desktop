@@ -1,4 +1,3 @@
-import {strip} from '../../../utils/obj'
 import {transformToMarginStyleObj} from './transform'
 import {px} from './dims'
 

@@ -1,11 +1,15 @@
 import React from 'react'
-import {Row, Col, Text} from '../atoms'
+import {Row, Col, Text} from '../../shared/components'
 import theme from '../../theme'
 
 export default ({chat}) => (
   <Row align="center">
     <Col w={3}>
-      <div>🤖</div>
+      <div>
+        <span role="img" aria-label="userName">
+          🤖
+        </span>
+      </div>
     </Col>
     <Col w={9}>
       <Text>{chat.sender.fullName}</Text>

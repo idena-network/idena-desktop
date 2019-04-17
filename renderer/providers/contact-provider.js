@@ -13,7 +13,7 @@ export function ContactProvider({children}) {
     async function fetchContacts() {
       const fetchedContacts = await fetchContactList()
       if (!ignore) {
-        setContacts(fetchedContacts)
+        setContacts(fetchedContacts.map(x => ({...x, status: 'Verified'})))
       }
     }
 

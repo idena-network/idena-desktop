@@ -42,11 +42,11 @@ export function SubHeading({
   fontSize,
   fontWeight,
   margin,
+  css,
   children,
-  ...props
 }) {
   return (
-    <h2 {...props}>
+    <h2 style={css}>
       {children}
       <style jsx>{`
         h2 {
@@ -55,6 +55,7 @@ export function SubHeading({
           font-size: ${fontSize};
           font-weight: ${fontWeight};
           ${margin};
+          margin: 0.25em 0;
         }
       `}</style>
     </h2>
@@ -70,6 +71,8 @@ SubHeading.propTypes = {
   fontSize: PropTypes.string,
   fontWeight: PropTypes.number,
   margin: Dim,
+  // eslint-disable-next-line react/forbid-prop-types
+  css: PropTypes.object,
   children: PropTypes.node,
 }
 

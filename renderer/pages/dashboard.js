@@ -1,7 +1,6 @@
 import React, {useContext, useState, useEffect} from 'react'
 import Link from 'next/link'
 import {Layout} from '../components/layout'
-import {Heading, Row, Col, SubHeading, Drawer} from '../components/atoms'
 import {
   UserInfo,
   UserActions,
@@ -12,13 +11,20 @@ import {
 import FlipContext from '../providers/flip-provider'
 import {AddFlipButton} from '../components/dashboard/add-flip-button'
 import NetContext from '../providers/net-provider'
-import {Button} from '../components/atoms/button'
 import {abToStr} from '../utils/string'
 import {activateInvite, sendInvite} from '../api'
 import {allowedToActivateInvite} from '../utils'
 // eslint-disable-next-line import/no-named-as-default
 import SendInviteForm from '../components/contacts/send-invite-form'
-import {Box} from '../shared/components'
+import {
+  Box,
+  Heading,
+  Row,
+  Col,
+  SubHeading,
+  Drawer,
+  Button,
+} from '../shared/components'
 
 const Convert = require('ansi-to-html')
 

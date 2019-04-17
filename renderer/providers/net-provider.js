@@ -1,7 +1,7 @@
 import React, {createContext, useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {fetchAddress, fetchBalance} from '../services/api'
-import {fetchIdentity} from '../api/dna'
+import {fetchIdentities} from '../api/dna'
 
 const initialState = {
   addr: '',
@@ -22,10 +22,11 @@ export const NetProvider = ({children}) => {
     async function fetchInfo() {
       const addr = await fetchAddress()
       const balance = await fetchBalance(addr)
-      const identity = await fetchIdentity(addr)
+      const identities = await fetchIdentities(addr)
+      const identity = identities.find(id => id.address === addr)
 
       if (!ignore) {
-        setInfo({...identity, addr, balance})
+        setInfo({...identity, addr, balance, identities})
       }
     }
 
