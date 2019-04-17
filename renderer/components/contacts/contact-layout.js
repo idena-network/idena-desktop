@@ -1,32 +1,41 @@
 import React, {useContext, useState, useEffect} from 'react'
-import {Layout} from '../components/layout'
+import PropTypes from 'prop-types'
+import {Layout} from '../layout'
 import {
   ContactNav,
   ContactList,
   Actions,
   ContactSearch,
-  ContactDetails,
   SendInviteForm,
-} from '../components/contacts'
-import {ContactContext, NetContext} from '../providers'
-import {sendInvite} from '../api'
-import {Row, Col, Drawer} from '../shared/components'
-import {fetchTx} from '../api/chain'
-import DisplayInvite from '../components/contacts/display-invite'
+} from '.'
+import {ContactContext, NetContext} from '../../providers'
+import {sendInvite} from '../../api'
+import {Row, Col, Drawer} from '../../shared/components'
+import {fetchTx} from '../../api/chain'
+import DisplayInvite from './display-invite'
 
-export default () => {
-  const contacts = useContext(ContactContext)
-  const {
-    addr,
-    age,
-    state: status,
-    invites: remainingInvites,
-    identities,
-  } = useContext(NetContext)
+function ContactLayout({children}) {
+  const savedContacts = useContext(ContactContext)
+  const {invites: remainingInvites, identities} = useContext(NetContext)
   const [showSendInviteForm, setSendInviteFormVisibility] = useState(false)
   const [inviteResult, setInviteResult] = useState()
   const [sentInvites, setSentInvites] = useState([])
   const [selectedInvite, setSelectedInvite] = useState(null)
+  const [showNewContactForm, toggleNewContactForm] = useState(false)
+  const [contacts, setContacts] = useState(savedContacts)
+  const [, setSelectedContact] = useState(null)
+
+  useEffect(() => {
+    setContacts(
+      savedContacts.map(c => {
+        const id = identities && identities.find(i => i.address === c.addr)
+        return {
+          ...c,
+          status: (id && id.state) || 'Undefined',
+        }
+      })
+    )
+  }, [identities, savedContacts])
 
   useEffect(() => {
     const savedInvites =
@@ -48,7 +57,7 @@ export default () => {
           status:
             (identities &&
               identities.find(i => i.address === receiver).state) ||
-            'Pending',
+            'Fetching...',
         }))
       )
     }
@@ -62,7 +71,11 @@ export default () => {
         <Row>
           <Col w={4}>
             <ContactNav>
-              <ContactSearch />
+              <ContactSearch
+                onNewContact={() => {
+                  toggleNewContactForm(true)
+                }}
+              />
               <Actions
                 onInvite={() => {
                   setSendInviteFormVisibility(true)
@@ -77,16 +90,16 @@ export default () => {
                     sentInvites.find(invite => invite.id === id)
                   )
                 }}
+                onSelectContact={id => {
+                  setSelectedContact(
+                    contacts.find(contact => contact.addr === id)
+                  )
+                }}
               />
             </ContactNav>
           </Col>
-          <Col w={8}>
-            <ContactDetails
-              fullName="optimusway"
-              address={addr}
-              age={age}
-              status={status}
-            />
+          <Col w={8} p="1em">
+            {children}
           </Col>
         </Row>
         <Drawer
@@ -116,7 +129,17 @@ export default () => {
         >
           <DisplayInvite {...selectedInvite} />
         </Drawer>
+        <Drawer
+          show={showNewContactForm}
+          onHide={() => toggleNewContactForm(false)}
+        />
       </>
     </Layout>
   )
 }
+
+ContactLayout.propTypes = {
+  children: PropTypes.node,
+}
+
+export default ContactLayout

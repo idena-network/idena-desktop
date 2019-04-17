@@ -50,7 +50,7 @@ export const Nav = ({user}) => (
       </Box>
     </Box>
     <ul>
-      <NavItem href="/contacts">Contacts</NavItem>
+      <NavItem href="/contact-list">Contacts</NavItem>
       <NavItem href="/chats">Chats</NavItem>
       <NavItem href="/wallets">Wallets</NavItem>
       <NavItem href="/dashboard" active>

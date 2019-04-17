@@ -1,6 +1,6 @@
 import React, {createContext, useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
-import {fetchContactList} from '../services/api'
+import {getContacts} from '../api'
 
 const ContactContext = createContext()
 
@@ -11,9 +11,9 @@ export function ContactProvider({children}) {
     let ignore = false
 
     async function fetchContacts() {
-      const fetchedContacts = await fetchContactList()
+      const savedContacts = await getContacts()
       if (!ignore) {
-        setContacts(fetchedContacts.map(x => ({...x, status: 'Verified'})))
+        setContacts(savedContacts)
       }
     }
 

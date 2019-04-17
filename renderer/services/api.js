@@ -70,28 +70,6 @@ export const fetchFlip = hash =>
     body: JSON.stringify({method: 'flip_getFlip', params: [hash], id: 1}),
   }).then(r => r.json())
 
-export const fetchContactList = () =>
-  Promise.resolve([
-    {
-      fullName: 'Q',
-      status: 'Validated',
-      address: '0xb7fc5b9b34b8328460d79981abee1d278611fa1a',
-      age: 1,
-    },
-    {
-      fullName: 'QQ',
-      status: 'Validated',
-      address: '0xb7fc5b9b34b8328460d79981abee1d278611fa1a',
-      age: 2,
-    },
-    {
-      fullName: 'QQQ',
-      status: 'Invited',
-      address: '0xb7fc5b9b34b8328460d79981abee1d278611fa1a',
-      age: 3,
-    },
-  ])
-
 export const fetchChatList = () =>
   Promise.resolve([
     {
