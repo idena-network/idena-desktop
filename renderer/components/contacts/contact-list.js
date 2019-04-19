@@ -1,8 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Link from 'next/link'
 import {ContactCard} from './contact-card'
-import {Box, Group, Text} from '../../shared/components'
+import {Box, Group, Text, Link} from '../../shared/components'
 
 function ContactList({
   remainingInvites,
@@ -31,10 +30,8 @@ function ContactList({
       <Group title="Contacts">
         <Box m="1em 0">
           {contacts.map(({addr, ...contactProps}) => (
-            <Link href={`/contact-view?addr=${addr}`}>
-              <a href={`/contact-view?addr=${addr}`}>
-                <ContactCard key={addr} id={addr} {...contactProps} />
-              </a>
+            <Link key={addr} href={`/contact-view?addr=${addr}`}>
+              <ContactCard key={addr} id={addr} {...contactProps} />
             </Link>
           ))}
         </Box>

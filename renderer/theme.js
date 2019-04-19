@@ -3,7 +3,7 @@ import {margin} from './shared/components/system/spacings'
 const colors = {
   primary: 'rgb(87, 143, 255)',
   primary2: 'rgb(83, 86, 92)',
-  text: 'rgb (83, 86, 92)',
+  text: 'rgb(83, 86, 92)',
   muted: 'rgb(150, 153, 158)',
   gray: 'rgb(245, 246, 247)',
   gray2: 'rgb(232, 234, 237)',
@@ -52,5 +52,11 @@ export default {
     color: colors.text,
     fontSize: fontSizes.normal,
     fontWeight: fontWeights.normal,
+  },
+  Link: {
+    color: colors.text,
+    fontSize: fontSizes.normal,
+    fontWeight: fontWeights.normal,
+    textDecoration: 'none',
   },
 }

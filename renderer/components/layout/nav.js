@@ -4,11 +4,6 @@ import Link from 'next/link'
 import {withRouter} from 'next/router'
 import {Box, Text} from '../../shared/components'
 
-const activeLinkStyle = `
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  `
-
 const NavItem = withRouter(({href, router, children}) => {
   const active = router.pathname === href
   return (
@@ -17,11 +12,12 @@ const NavItem = withRouter(({href, router, children}) => {
         <a href={href}>{children}</a>
         <style jsx>{`
           li {
+            ${active && `background: rgba(255, 255, 255, 0.1);`}
+            ${active && `border-radius: 4px;`};
             color: rgba(255, 255, 255, 0.5);
             cursor: pointer;
             margin: 0 0 0.5em;
             padding: 0.5em 1em;
-            ${active && activeLinkStyle};
           }
 
           a {
@@ -86,4 +82,4 @@ Nav.propTypes = {
   user: PropTypes.string.isRequired,
 }
 
-export default Nav
+export default React.memo(Nav)

@@ -11,8 +11,8 @@ function ContactDetails({
   lastName,
   fullName = `${name} ${lastName}`,
   addr,
-  status,
-  age,
+  status = 'Undefined',
+  age = 0,
 }) {
   return (
     <div>

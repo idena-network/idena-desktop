@@ -1,21 +1,32 @@
-import React, {useContext} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import {withRouter} from 'next/router'
 import PropTypes from 'prop-types'
 import {ContactLayout, ContactDetails} from '../components/contacts'
-import {ContactContext} from '../providers'
+import {ContactContext, NetContext} from '../providers'
 
 function ContactView({router: {query}}) {
-  if (query) {
-    const contacts = useContext(ContactContext)
-    const {addr} = query
-    const contact = contacts.find(c => c.addr === addr)
-    return contact ? (
-      <ContactLayout>
-        <ContactDetails {...contact} />
-      </ContactLayout>
-    ) : null
-  }
-  return null
+  const {addr} = query
+  const {identities} = useContext(NetContext)
+  const contacts = useContext(ContactContext)
+
+  const [contact, setContact] = useState(null)
+
+  useEffect(() => {
+    if (!contacts || !identities || !addr) {
+      return
+    }
+    const identity = identities.find(id => id.address === addr)
+    setContact({
+      ...contacts.find(c => c.addr === addr),
+      status: identity && identity.state,
+    })
+  }, [addr, identities, contacts])
+
+  return (
+    <ContactLayout>
+      <ContactDetails {...contact} />
+    </ContactLayout>
+  )
 }
 
 ContactView.propTypes = {
