@@ -9,7 +9,7 @@ export default function() {
       <NewContactForm
         onSave={contact => {
           addContact(contact)
-          Router.push('/contact-list')
+          Router.push('/contacts')
         }}
       />
     </ContactLayout>

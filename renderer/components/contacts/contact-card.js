@@ -9,7 +9,7 @@ export const ContactCard = ({
   name,
   lastName,
   fullName = `${name} ${lastName}`,
-  status,
+  status = 'Undefined',
   onSelectInvite,
   // onSelectContact,
 }) => {

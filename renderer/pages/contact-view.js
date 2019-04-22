@@ -30,9 +30,8 @@ function ContactView({router: {query}}) {
 }
 
 ContactView.propTypes = {
-  router: PropTypes.objectOf({
-    query: PropTypes.objectOf({addr: PropTypes.string}),
-  }),
+  // eslint-disable-next-line react/forbid-prop-types
+  router: PropTypes.object.isRequired,
 }
 
 export default withRouter(ContactView)

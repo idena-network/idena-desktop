@@ -7,7 +7,7 @@ const config = {
     // in the production version of your app
     return {
       '/start': {page: '/start'},
-      '/contacts': {page: '/contact-list'},
+      '/contacts': {page: '/contacts'},
       '/contact/new': {page: '/contact-new'},
       '/contact': {page: '/contact-view'},
       '/chats': {page: '/chats'},
