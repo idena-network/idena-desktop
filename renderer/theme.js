@@ -38,6 +38,10 @@ export default {
   spacings,
   fontSizes,
   fontWeights,
+  Box: {
+    w: 100,
+    bg: 'inherit',
+  },
   Heading: {
     color: colors.text,
     fontSize: fontSizes.heading,

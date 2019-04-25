@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import theme from '../../theme'
 
 export const Dim = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 
@@ -18,6 +19,10 @@ function Box({bg, m, p, w, css: style, ...props}) {
       `}</style>
     </>
   )
+}
+
+Box.defaultProps = {
+  ...theme.Box,
 }
 
 Box.propTypes = {

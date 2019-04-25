@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react'
 import PropTypes from 'prop-types'
 import NextLink from 'next/link'
@@ -7,8 +8,8 @@ import theme from '../../theme'
 function Link({href, color, children}) {
   return (
     <NextLink href={href}>
-      <>
-        <a href={href}>{children}</a>
+      <a>
+        {children}
         <style jsx>{`
           a,
           a:hover,
@@ -18,7 +19,7 @@ function Link({href, color, children}) {
             text-decoration: none;
           }
         `}</style>
-      </>
+      </a>
     </NextLink>
   )
 }

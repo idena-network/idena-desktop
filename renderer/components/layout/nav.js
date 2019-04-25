@@ -5,7 +5,7 @@ import {Box, Text, List, Link} from '../../shared/components'
 import theme from '../../theme'
 
 const NavItem = withRouter(({href, router, children}) => {
-  const active = router.pathname === href
+  const active = router.pathname.startsWith(href)
   return (
     <li>
       <Link

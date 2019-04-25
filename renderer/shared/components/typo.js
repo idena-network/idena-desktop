@@ -3,16 +3,9 @@ import PropTypes from 'prop-types'
 import theme from '../../theme'
 import {Dim} from './box'
 
-export function Heading({
-  color,
-  fontSize,
-  fontWeight,
-  margin,
-  children,
-  ...props
-}) {
+export function Heading({color, fontSize, fontWeight, margin, children}) {
   return (
-    <h1 {...props}>
+    <h1>
       {children}
       <style jsx>{`
         h1 {
@@ -26,9 +19,11 @@ export function Heading({
     </h1>
   )
 }
+
 Heading.defaultProps = {
   ...theme.Heading,
 }
+
 Heading.propTypes = {
   color: PropTypes.string,
   fontSize: PropTypes.string,

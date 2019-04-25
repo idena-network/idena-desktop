@@ -16,24 +16,36 @@ function ContactDetails({
 }) {
   return (
     <div>
-      <UserInfo fullName={fullName} address={addr} />
-      <ContactToolbar />
-      <div>
-        <Figure label="Status" value={status} />
-        <Figure label="Age" value={age} postfix="epochs" />
-        <Figure label="Address" value={addr} />
-      </div>
-      <Box>
-        <Link href={`/contact-edit?addr=${addr}`}>Edit</Link>
-      </Box>
+      <section>
+        <UserInfo fullName={fullName} address={addr} />
+        <ContactToolbar />
+        <div>
+          <Figure label="Status" value={status} />
+          <Figure label="Age" value={age} postfix="epochs" />
+          <Figure label="Address" value={addr} />
+        </div>
+      </section>
+      <section>
+        <Box>
+          <Link href={`/contact-edit?addr=${addr}`}>Edit</Link>
+        </Box>
+      </section>
       <style jsx>{`
         div {
-          padding: 4em 3em;
+          padding: 3em;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
         }
-        div > div {
+        section > div {
           background: ${theme.colors.gray};
           border-radius: 4px;
           padding: ${theme.spacings.xlarge};
+        }
+        div > section:nth-child(2) {
+          display: flex;
+          align-items: flex-end;
+          flex: 1;
         }
       `}</style>
     </div>
