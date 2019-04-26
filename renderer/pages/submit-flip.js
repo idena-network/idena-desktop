@@ -1,6 +1,6 @@
 import React from 'react'
-import {FlipEditor} from '../components/flips'
-import {Layout} from '../components/layout'
+import {FlipEditor} from '../screens/flips/components'
+import Layout from '../components/layout'
 
 export default () => (
   <Layout>

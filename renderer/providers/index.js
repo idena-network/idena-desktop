@@ -1,8 +1,0 @@
-export * from './contact-provider'
-export {default as ContactContext} from './contact-provider'
-export * from './chat-provider'
-export {default as ChatContext} from './chat-provider'
-export * from './flip-provider'
-export {default as FlipContext} from './flip-provider'
-export * from './net-provider'
-export {default as NetContext} from './net-provider'

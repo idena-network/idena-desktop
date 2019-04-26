@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import theme from '../../theme'
+import theme from '../theme'
 
 export const Dim = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 

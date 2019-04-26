@@ -1,8 +1,10 @@
 import React, {useContext, useEffect, useState} from 'react'
 import {withRouter} from 'next/router'
 import PropTypes from 'prop-types'
-import {ContactLayout, ContactDetails} from '../components/contacts'
-import {ContactContext, NetContext} from '../providers'
+import NetContext from '../shared/providers/net-provider'
+import ContactContext from '../screens/contacts/providers/contact-provider'
+import Layout from '../screens/contacts/shared/contact-layout'
+import {ContactDetails} from '../screens/contacts/components'
 
 function ContactView({router: {query}}) {
   const {addr} = query
@@ -23,9 +25,9 @@ function ContactView({router: {query}}) {
   }, [addr, identities, contacts])
 
   return (
-    <ContactLayout>
+    <Layout>
       <ContactDetails {...contact} />
-    </ContactLayout>
+    </Layout>
   )
 }
 

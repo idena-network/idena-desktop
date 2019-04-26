@@ -1,13 +1,6 @@
-import {Component} from 'react'
-import {FlipEditor} from '../components/flips'
-import {Layout} from '../components/layout'
+import React from 'react'
+import Layout from '../components/layout'
 
-export default class extends Component {
-  render() {
-    return (
-      <Layout>
-        <FlipEditor />
-      </Layout>
-    )
-  }
+export default function() {
+  return <Layout>Idena Desktop</Layout>
 }

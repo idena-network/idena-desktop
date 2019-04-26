@@ -2,10 +2,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import NextLink from 'next/link'
-import theme from '../../theme'
+import theme from '../theme'
 
 // eslint-disable-next-line react/prop-types
-function Link({href, color, children}) {
+function Link({href, color, fontSize, children}) {
   return (
     <NextLink href={href}>
       <a>
@@ -16,6 +16,7 @@ function Link({href, color, children}) {
           a:visited,
           a:active {
             color: ${color};
+            font-size: ${fontSize};
             text-decoration: none;
           }
         `}</style>

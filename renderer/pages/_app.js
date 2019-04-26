@@ -1,12 +1,7 @@
 import React from 'react'
 import App, {Container} from 'next/app'
 import Router from 'next/router'
-import {
-  ContactProvider,
-  ChatProvider,
-  NetProvider,
-  FlipProvider,
-} from '../providers'
+import {NetProvider} from '../shared/providers/net-provider'
 
 let idx = 0
 
@@ -20,13 +15,7 @@ class MyApp extends App {
     return (
       <Container>
         <NetProvider key={`net-provider-${idx}`}>
-          <ContactProvider>
-            <ChatProvider>
-              <FlipProvider>
-                <Component {...pageProps} />
-              </FlipProvider>
-            </ChatProvider>
-          </ContactProvider>
+          <Component {...pageProps} />
         </NetProvider>
       </Container>
     )

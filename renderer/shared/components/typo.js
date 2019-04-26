@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import theme from '../../theme'
+import theme from '../theme'
 import {Dim} from './box'
 
 export function Heading({color, fontSize, fontWeight, margin, children}) {
@@ -51,6 +51,7 @@ export function SubHeading({
           font-weight: ${fontWeight};
           ${margin};
           margin: 0.25em 0;
+          width: 100%;
         }
       `}</style>
     </h2>

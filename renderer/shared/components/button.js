@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import theme from '../../theme'
+import theme from '../theme'
 
 function Button({size = 1, ...props}) {
   return (

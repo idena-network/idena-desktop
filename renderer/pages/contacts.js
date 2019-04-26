@@ -1,11 +1,3 @@
-import React from 'react'
-import {ContactLayout} from '../components/contacts'
-import {SubHeading} from '../shared/components'
+import Contacts from '../screens/contacts'
 
-export default () => {
-  return (
-    <ContactLayout>
-      <SubHeading>Select contact to the left</SubHeading>
-    </ContactLayout>
-  )
-}
+export default Contacts

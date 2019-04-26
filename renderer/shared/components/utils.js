@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import theme from '../../theme'
+import theme from '../theme'
 import {Box, Text} from '.'
 
 export const Figure = ({label, value, postfix}) => (
