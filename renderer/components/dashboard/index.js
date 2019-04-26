@@ -1,4 +1,4 @@
-export * from './user-info'
+export {default as UserInfo} from './user-info'
 export * from './user-actions'
 export * from './net-profile'
 export * from './flip-list'

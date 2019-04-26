@@ -1,4 +1,4 @@
-import React, {useContext, useState, useEffect} from 'react'
+import React, {useContext, useState} from 'react'
 import Link from 'next/link'
 import {Layout} from '../components/layout'
 import {
@@ -11,97 +11,38 @@ import {
 import FlipContext from '../providers/flip-provider'
 import {AddFlipButton} from '../components/dashboard/add-flip-button'
 import NetContext from '../providers/net-provider'
-import {abToStr} from '../utils/string'
 import {activateInvite, sendInvite} from '../api'
 import {allowedToActivateInvite} from '../utils'
 // eslint-disable-next-line import/no-named-as-default
 import SendInviteForm from '../components/contacts/send-invite-form'
-import {
-  Box,
-  Heading,
-  Row,
-  Col,
-  SubHeading,
-  Drawer,
-  Button,
-} from '../shared/components'
-
-const Convert = require('ansi-to-html')
-
-const convert = new Convert()
-const createLogMarkup = log => ({__html: log})
+import {Heading, Row, Col, SubHeading, Drawer} from '../shared/components'
 
 export default () => {
   const {drafts, published} = useContext(FlipContext)
   const netInfo = useContext(NetContext)
-  const [nodeState, setNodeState] = useState({
-    log: '',
-    status: 'offline',
-  })
-  useEffect(() => {
-    global.ipcRenderer.on('node-log', (_, message) => {
-      setNodeState(prevState => ({
-        ...prevState,
-        status: 'on',
-        log: abToStr(message.log).concat(prevState.log),
-      }))
-    })
-    return () => {
-      global.ipcRenderer.removeAllListeners('node-log')
-    }
-  }, [])
-  const [showActivateInviteForm, setActivateInviteFormVisibility] = useState(
-    false
-  )
+
   const [activateResult, setActivateResult] = useState()
-  const [showSendInviteForm, setSendInviteFormVisibility] = useState(false)
   const [inviteResult, setInviteResult] = useState()
+
+  const [showSendInvite, toggleSendInvite] = useState(false)
+  const [showActivateInvite, toggleActivateInvite] = useState(false)
+
   return (
     <Layout>
       <Row>
         <Col p="3em 2em" w={6}>
-          <Heading>
-            My Idena &nbsp;
-            <Button
-              size={0.7}
-              onClick={() => {
-                global.ipcRenderer.send('node-start', true)
-              }}
-            >
-              <span role="img" aria-label="Start node">
-                ▶️
-              </span>
-            </Button>
-          </Heading>
-          <UserInfo user={{name: 'optimusway', address: netInfo.addr}} />
+          <Heading>Profile</Heading>
           <UserActions
-            onSendInviteShow={() => setSendInviteFormVisibility(true)}
-            allowedToActivateInvite={allowedToActivateInvite(netInfo.state)}
-            onActivateInviteShow={() => setActivateInviteFormVisibility(true)}
+            onToggleSendInvite={() => toggleSendInvite(true)}
+            canActivateInvite={allowedToActivateInvite(netInfo.state)}
+            onToggleActivateInvite={() => toggleActivateInvite(true)}
           />
+          <UserInfo fullName="Aleksandr Skakovskiy" address={netInfo.addr} />
           <NetProfile
             {...netInfo}
-            allowedToActivateInvite={allowedToActivateInvite(netInfo.state)}
-            onActivateInviteShow={() => setActivateInviteFormVisibility(true)}
+            canActivateInvite={allowedToActivateInvite(netInfo.state)}
+            onToggleActivateInvite={() => toggleActivateInvite(true)}
           />
-          <Box>
-            <pre
-              // eslint-disable-next-line react/no-danger
-              dangerouslySetInnerHTML={createLogMarkup(
-                convert.toHtml(nodeState.log) || 'waiting for logs...'
-              )}
-            />
-            <style jsx>{`
-              pre {
-                height: 200px;
-                max-height: 200px;
-                max-width: 350px;
-                overflow: auto;
-                word-break: break-all;
-                white-space: pre-line;
-              }
-            `}</style>
-          </Box>
         </Col>
         <Col p="10em 1em" w={6}>
           <SubHeading>
@@ -119,9 +60,9 @@ export default () => {
         </Col>
       </Row>
       <Drawer
-        show={showActivateInviteForm}
+        show={showActivateInvite}
         onHide={() => {
-          setActivateInviteFormVisibility(false)
+          toggleActivateInvite(false)
         }}
       >
         <ActivateInviteForm
@@ -134,9 +75,9 @@ export default () => {
         />
       </Drawer>
       <Drawer
-        show={showSendInviteForm}
+        show={showSendInvite}
         onHide={() => {
-          setSendInviteFormVisibility(false)
+          toggleSendInvite(false)
         }}
       >
         <SendInviteForm

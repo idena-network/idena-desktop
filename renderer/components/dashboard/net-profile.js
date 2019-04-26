@@ -9,8 +9,8 @@ export function NetProfile({
   balance,
   age,
   state: status,
-  onActivateInviteShow,
-  allowedToActivateInvite,
+  onToggleActivateInvite,
+  canActivateInvite,
 }) {
   return (
     <Box bg={theme.colors.gray} p="1em" css={{borderRadius: '4px'}}>
@@ -19,8 +19,8 @@ export function NetProfile({
         label="Status"
         value={status}
         postfix={
-          allowedToActivateInvite ? (
-            <button type="button" onClick={onActivateInviteShow}>
+          canActivateInvite ? (
+            <button type="button" onClick={onToggleActivateInvite}>
               Activate
             </button>
           ) : null
@@ -34,14 +34,15 @@ export function NetProfile({
   )
 }
 
+const balanceShape = {stake: PropTypes.string, balance: PropTypes.string}
+
 NetProfile.propTypes = {
   addr: PropTypes.string.isRequired,
-  balance: PropTypes.shape({stake: PropTypes.number, balance: PropTypes.number})
-    .isRequired,
+  balance: PropTypes.shape(balanceShape).isRequired,
   age: PropTypes.number,
   state: PropTypes.string,
-  allowedToActivateInvite: PropTypes.bool,
-  onActivateInviteShow: PropTypes.func,
+  canActivateInvite: PropTypes.bool,
+  onToggleActivateInvite: PropTypes.func,
 }
 
 export default NetProfile

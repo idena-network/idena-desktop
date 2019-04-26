@@ -4,18 +4,18 @@ import theme from '../../theme'
 import {Box} from '../../shared/components'
 
 export function UserActions({
-  allowedToActivateInvite,
-  onActivateInviteShow,
-  onSendInviteShow,
+  canActivateInvite,
+  onToggleActivateInvite,
+  onToggleSendInvite,
 }) {
   return (
-    <Box p="1.5em 0.5em">
+    <Box p="1em 0">
       <button type="button">Share Idena</button>
-      <button type="button" onClick={onSendInviteShow}>
+      <button type="button" onClick={onToggleSendInvite}>
         Invite people
       </button>
-      {allowedToActivateInvite && (
-        <button type="button" onClick={onActivateInviteShow}>
+      {canActivateInvite && (
+        <button type="button" onClick={onToggleActivateInvite}>
           Activate invite
         </button>
       )}
@@ -28,6 +28,7 @@ export function UserActions({
           font-size: 1em;
           display: inline-block;
           margin-right: 1em;
+          padding: 0;
           text-decoration: none;
         }
       `}</style>
@@ -36,9 +37,9 @@ export function UserActions({
 }
 
 UserActions.propTypes = {
-  allowedToActivateInvite: PropTypes.bool,
-  onActivateInviteShow: PropTypes.func,
-  onSendInviteShow: PropTypes.func,
+  canActivateInvite: PropTypes.bool,
+  onToggleActivateInvite: PropTypes.func,
+  onToggleSendInvite: PropTypes.func,
 }
 
 export default UserActions

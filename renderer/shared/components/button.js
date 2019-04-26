@@ -26,7 +26,7 @@ function Button({size = 1, ...props}) {
 }
 
 Button.propTypes = {
-  size: PropTypes.string,
+  size: PropTypes.number,
 }
 
 export default Button
