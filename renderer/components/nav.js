@@ -1,6 +1,6 @@
 import React from 'react'
 import {withRouter} from 'next/router'
-import {Box, Text, List, Link} from '../shared/components'
+import {Box, List, Link} from '../shared/components'
 import userScheme from '../shared/types/user'
 import theme from '../shared/theme'
 
@@ -31,22 +31,17 @@ const NavItem = withRouter(({href, router, children}) => {
 function Nav({user}) {
   return (
     <nav>
-      <div>
+      <Box m="2em 0">
         <img src="../static/logo.svg" alt="idena logo" />
-      </div>
-      <Box m="3em 0">
-        <Box m="1em 0">
-          <Text color="white">{user.name}</Text>
-        </Box>
       </Box>
       <List>
+        <NavItem href="/dashboard" active>
+          {user.name}
+        </NavItem>
+        <NavItem href="/flips">Flips</NavItem>
         <NavItem href="/contacts">Contacts</NavItem>
         <NavItem href="/chats">Chats</NavItem>
         <NavItem href="/wallets">Wallets</NavItem>
-        <NavItem href="/dashboard" active>
-          My Idena
-        </NavItem>
-        <NavItem href="/submit-flip">+ flip</NavItem>
       </List>
       <style jsx>{`
         nav {

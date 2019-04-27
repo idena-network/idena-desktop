@@ -28,7 +28,7 @@ function ContactDetails({
       </section>
       <section>
         <Box>
-          <Link href={`/contact-edit?addr=${addr}`}>Edit</Link>
+          <Link href={`/contacts/screens/contact-edit?addr=${addr}`}>Edit</Link>
         </Box>
       </section>
       <style jsx>{`

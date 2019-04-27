@@ -1,10 +1,10 @@
 import React, {useContext, useEffect, useState} from 'react'
 import {withRouter} from 'next/router'
 import PropTypes from 'prop-types'
-import NetContext from '../shared/providers/net-provider'
-import ContactContext from '../screens/contacts/providers/contact-provider'
-import Layout from '../screens/contacts/shared/contact-layout'
-import {ContactDetails} from '../screens/contacts/components'
+import NetContext from '../../../shared/providers/net-provider'
+import ContactContext, {ContactProvider} from '../providers/contact-provider'
+import Layout from '../shared/contact-layout'
+import {ContactDetails} from '../components'
 
 function ContactView({router: {query}}) {
   const {addr} = query
@@ -25,9 +25,11 @@ function ContactView({router: {query}}) {
   }, [addr, identities, contacts])
 
   return (
-    <Layout>
-      <ContactDetails {...contact} />
-    </Layout>
+    <ContactProvider>
+      <Layout>
+        <ContactDetails {...contact} />
+      </Layout>
+    </ContactProvider>
   )
 }
 

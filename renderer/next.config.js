@@ -8,8 +8,9 @@ const config = {
     return {
       '/start': {page: '/start'},
       '/contacts': {page: '/contacts'},
-      '/contact/new': {page: '/contact-new'},
-      '/contact': {page: '/contact-view'},
+      '/contacts/new': {page: '/contacts/contact-new'},
+      '/contacts/edit': {page: '/contacts/contact-edit'},
+      '/contacts/view': {page: '/contacts/contact-view'},
       '/chats': {page: '/chats'},
       '/wallets': {page: '/wallets'},
       '/dashboard': {page: '/dashboard'},

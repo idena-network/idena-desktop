@@ -1,17 +1,18 @@
 import React from 'react'
 import Router from 'next/router'
-import {NewContactForm, ContactLayout} from '../components/contacts'
-import {addContact} from '../api'
+import Layout from '../shared/contact-layout'
+import {NewContactForm} from '../components'
+import {addContact} from '../../../shared/api'
 
 export default function() {
   return (
-    <ContactLayout>
+    <Layout>
       <NewContactForm
         onSave={contact => {
           addContact(contact)
           Router.push('/contacts')
         }}
       />
-    </ContactLayout>
+    </Layout>
   )
 }

@@ -30,7 +30,10 @@ function ContactList({
       <Group title="Contacts">
         <Box m="1em 0">
           {contacts.map(({addr, ...contactProps}) => (
-            <Link key={addr} href={`/contact-view?addr=${addr}`}>
+            <Link
+              key={addr}
+              href={`/contacts/screens/contact-view?addr=${addr}`}
+            >
               <ContactCard key={addr} id={addr} {...contactProps} />
             </Link>
           ))}
