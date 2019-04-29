@@ -14,7 +14,7 @@ function Box({bg, m, p, w, css: style, ...props}) {
           display: block;
           ${m && `margin: ${m}`};
           ${p && `padding: ${p}`};
-          width: ${w < 12 ? `${(w / 12) * 100}%` : `${w}%`};
+          ${w && `width: ${w}`};
         }
       `}</style>
     </>

@@ -35,8 +35,13 @@ Row.propTypes = {
   css: PropTypes.object,
 }
 
-export function Col(props) {
-  return <Box {...props} />
+const calculateColWidth = width => {
+  return width >= 1 && width <= 12 ? `${(width / 12) * 100}%` : `${width}%`
+}
+
+// eslint-disable-next-line react/prop-types
+export function Col({w, ...props}) {
+  return <Box w={calculateColWidth(w)} {...props} />
 }
 
 Col.propTypes = {

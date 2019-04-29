@@ -42,6 +42,7 @@ function Nav({user}) {
         <NavItem href="/contacts">Contacts</NavItem>
         <NavItem href="/chats">Chats</NavItem>
         <NavItem href="/wallets">Wallets</NavItem>
+        <NavItem href="/validation">Validation</NavItem>
       </List>
       <style jsx>{`
         nav {

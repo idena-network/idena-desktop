@@ -42,6 +42,11 @@ export default {
     w: 100,
     bg: 'inherit',
   },
+  Flex: {
+    direction: 'initial',
+    justify: 'initial',
+    align: 'initial',
+  },
   Heading: {
     color: colors.text,
     fontSize: fontSizes.heading,
