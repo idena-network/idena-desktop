@@ -13,6 +13,7 @@ import {
   fetchFlipHashes,
   submitShortAnswers,
 } from '../../shared/api/__mocks__/validation-api'
+import {answered, types as answerTypes} from '../../shared/utils/answers'
 
 export default function() {
   const [flips, setFlips] = useState([])
@@ -31,6 +32,8 @@ export default function() {
     setCurrentFlipIdx(nextFlipIdx)
   }
 
+  const handlePick = idx => setCurrentFlipIdx(idx)
+
   const handleAnswer = option => {
     const nextAnswers = [
       ...answers.slice(0, currentFlipIdx),
@@ -40,15 +43,23 @@ export default function() {
     setAnswers(nextAnswers)
   }
 
+  const handleReportAbuse = () => {
+    const nextAnswers = [
+      ...answers.slice(0, currentFlipIdx),
+      answerTypes.inappropriate,
+      ...answers.slice(currentFlipIdx + 1),
+    ]
+    setAnswers(nextAnswers)
+    setCurrentFlipIdx(Math.min(currentFlipIdx + 1, flips.length - 1))
+  }
+
   const handleSubmitAnswers = async () => {
-    // [{hash: "0x123", easy: false, answer: 1}]
-    const anwsersInput = flipHashes.map((hash, idx) => ({
+    const answersPayload = flipHashes.map((hash, idx) => ({
       hash,
       easy: false,
-      answer: answers[idx] != null ? answers[idx] + 1 : 0,
+      answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
     }))
-    const result = await submitShortAnswers(anwsersInput, 0, 0)
-    console.log(result)
+    submitShortAnswers(answersPayload, 0, 0)
   }
 
   useEffect(() => {
@@ -56,9 +67,9 @@ export default function() {
 
     async function fetchData() {
       const flipHashesResult = await fetchFlipHashes()
-      const flipHashes = flipHashesResult.map(({hash}) => hash)
+      const mappedFlipHashes = flipHashesResult.map(({hash}) => hash)
 
-      const flipsResult = await Promise.all(flipHashes.map(fetchFlip))
+      const flipsResult = await Promise.all(mappedFlipHashes.map(fetchFlip))
       const flipHexes = flipsResult
         .filter(x => x)
         .map(({result}) => result.hex.substr(2))
@@ -71,7 +82,7 @@ export default function() {
 
       if (!ignore) {
         setFlips(decodedFlips)
-        setFlipHashes(flipHashes)
+        setFlipHashes(mappedFlipHashes)
         setOrders(decodedOrders)
         setAnswers(decodedFlips.map(() => null))
       }
@@ -103,15 +114,17 @@ export default function() {
             selectedOption={answers[currentFlipIdx]}
           />
           <ValidationActions
-            canSubmit={
-              answers.length > 0 && answers.every(a => Number.isFinite(a))
-            }
+            onReportAbuse={handleReportAbuse}
+            canSubmit={answers.length > 0 && answers.every(answered)}
             onSubmitAnswers={handleSubmitAnswers}
           />
         </Flex>
-        <Flex align="center" justify="center">
-          <FlipThumbnails currentIndex={currentFlipIdx} flips={flips} />
-        </Flex>
+        <FlipThumbnails
+          currentIndex={currentFlipIdx}
+          flips={flips}
+          answers={answers}
+          onPick={handlePick}
+        />
       </Flex>
     </Layout>
   )

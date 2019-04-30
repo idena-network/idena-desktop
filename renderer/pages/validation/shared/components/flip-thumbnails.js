@@ -1,13 +1,29 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Flex from '../../../../shared/components/flex'
-import {Box} from '../../../../shared/components'
+import {Box, Fill} from '../../../../shared/components'
+import theme from '../../../../shared/theme'
+import {inappropriate, appropriate} from '../utils/answers'
 
-function FlipThumbnails({currentIndex, flips}) {
+const activeStyle = {
+  border: `solid 2px ${theme.colors.primary}`,
+}
+
+function FlipThumbnails({currentIndex, flips, answers, onPick}) {
   return (
     <Flex justify="center" align="center" css={{minHeight: '80px'}}>
       {flips.map((flip, idx) => (
-        <Box css={currentIndex === idx ? {border: 'solid 2px red'} : null}>
+        <Box
+          css={{
+            ...(currentIndex === idx ? activeStyle : {}),
+            borderRadius: '4px',
+            padding: theme.spacings.xxsmall,
+            position: 'relative',
+          }}
+          onClick={() => onPick(idx)}
+        >
+          {appropriate(answers[idx]) && <Fill bg={theme.colors.white05} />}
+          {inappropriate(answers[idx]) && <Fill bg={theme.colors.danger} />}
           <img
             // eslint-disable-next-line react/no-array-index-key
             key={`flip-${idx}`}
@@ -24,6 +40,8 @@ function FlipThumbnails({currentIndex, flips}) {
 FlipThumbnails.propTypes = {
   currentIndex: PropTypes.number.isRequired,
   flips: PropTypes.arrayOf(PropTypes.array).isRequired,
+  answers: PropTypes.arrayOf(PropTypes.number).isRequired,
+  onPick: PropTypes.func,
 }
 
 export default FlipThumbnails

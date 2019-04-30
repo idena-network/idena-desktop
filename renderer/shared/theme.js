@@ -11,6 +11,7 @@ const colors = {
   white: 'rgb(255, 255, 255)',
   white05: 'rgba(255, 255, 255, 0.5)',
   white01: 'rgba(255, 255, 255, 0.1)',
+  danger: 'rgba(255, 102, 102, 0.3)',
 }
 
 const fontSizes = {
@@ -27,6 +28,7 @@ const fontWeights = {
 }
 
 const spacings = {
+  xxsmall: '0.1em',
   small: '0.5em',
   normal: '1em',
   large: '1.5em',
