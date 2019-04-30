@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Heading, Box} from '../../../shared/components'
-import Flex from '../../../shared/components/flex'
+import {Heading, Box} from '../../../../shared/components'
+import Flex from '../../../../shared/components/flex'
 
 function ValidationHeader({currentIndex, total, children}) {
   return (

@@ -1,4 +1,4 @@
-import {baseUrl} from '../api/setup-api'
+import api, {baseUrl} from '../api/setup-api'
 
 export const fetchAddress = () =>
   fetch(baseUrl, {
@@ -69,6 +69,24 @@ export const fetchFlip = hash =>
     },
     body: JSON.stringify({method: 'flip_getFlip', params: [hash], id: 1}),
   }).then(r => r.json())
+
+/**
+ * Fetches validation flip by hash
+ *
+ * @param {string} hash Flip address
+ *
+ * @returns {Flip} Flip representation in binary (hex) format
+ * @example {hex: "0x123", epoch: 10}
+ */
+export async function fetchVlidationFlip(hash) {
+  const {data} = await api.post('/', {
+    method: 'flip_flip',
+    params: [hash],
+    id: 1,
+  })
+  const {result} = data
+  return result
+}
 
 export const fetchChatList = () =>
   Promise.resolve([

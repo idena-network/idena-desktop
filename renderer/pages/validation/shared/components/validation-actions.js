@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Button, Box} from '../../../shared/components'
-import Flex from '../../../shared/components/flex'
+import {Button, Box} from '../../../../shared/components'
+import Flex from '../../../../shared/components/flex'
 
 function ValidationActions({onReportAbuse, onSubmitAnswers, canSubmit}) {
   return (

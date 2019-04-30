@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Box} from '../../../shared/components'
-import Layout from '../../../components/layout'
+import {Box} from '../../../../shared/components'
+import Layout from '../../../../components/layout'
 
 function ValidationLayout({children}) {
   return (

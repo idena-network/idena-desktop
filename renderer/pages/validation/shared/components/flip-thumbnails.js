@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Flex from '../../../shared/components/flex'
-import {Box} from '../../../shared/components'
+import Flex from '../../../../shared/components/flex'
+import {Box} from '../../../../shared/components'
 
 function FlipThumbnails({currentIndex, flips}) {
   return (

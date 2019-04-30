@@ -1,8 +1,8 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Col, Box} from '../../../shared/components'
-import Flex from '../../../shared/components/flex'
+import {Col, Box} from '../../../../shared/components'
+import Flex from '../../../../shared/components/flex'
 
 const reorderList = (list, nextOrder) => {
   const nextList = []
