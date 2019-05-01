@@ -3,6 +3,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {Col, Box} from '../../../../shared/components'
 import Flex from '../../../../shared/components/flex'
+import Arrow from './arrow'
 
 const reorderList = (list, nextOrder) => {
   const nextList = []
@@ -25,9 +26,9 @@ function ValidationScene({
   selectedOption,
 }) {
   return (
-    <Flex justify="space-between" align="center" flex="1">
-      <Col onClick={onPrev} p="0 1em" w={4} css={{lineHeight: 10}}>
-        {`<`}
+    <Flex justify="space-between" flex="1">
+      <Col onClick={onPrev} w={4}>
+        <Arrow dir="prev" />
       </Col>
       <Flex align="center">
         <Flex
@@ -66,13 +67,8 @@ function ValidationScene({
           ))}
         </Flex>
       </Flex>
-      <Col
-        onClick={onNext}
-        p="0 1em"
-        w={4}
-        css={{lineHeight: 10, textAlign: 'right'}}
-      >
-        {'>'}
+      <Col onClick={onNext} w={4}>
+        <Arrow dir="next" />
       </Col>
     </Flex>
   )
