@@ -25,8 +25,6 @@ function FlipThumbnails({currentIndex, flips, answers, onPick}) {
           {appropriate(answers[idx]) && <Fill bg={theme.colors.white05} />}
           {inappropriate(answers[idx]) && <Fill bg={theme.colors.danger} />}
           <img
-            // eslint-disable-next-line react/no-array-index-key
-            key={`flip-${idx}`}
             alt={`flip-${idx}`}
             width={50}
             src={URL.createObjectURL(new Blob([flip[0]], {type: 'image/jpeg'}))}

@@ -26,7 +26,7 @@ function ValidationScene({
 }) {
   return (
     <Flex justify="space-between" align="center" flex="1">
-      <Col onClick={onPrev} p="0 1em">
+      <Col onClick={onPrev} p="0 1em" w={4} css={{lineHeight: 10}}>
         {`<`}
       </Col>
       <Flex align="center">
@@ -66,7 +66,12 @@ function ValidationScene({
           ))}
         </Flex>
       </Flex>
-      <Col onClick={onNext} p="0 1em">
+      <Col
+        onClick={onNext}
+        p="0 1em"
+        w={4}
+        css={{lineHeight: 10, textAlign: 'right'}}
+      >
         {'>'}
       </Col>
     </Flex>
