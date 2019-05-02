@@ -11,7 +11,6 @@ import {
 } from './components'
 import {activateInvite, sendInvite} from '../../shared/api'
 import {SendInviteForm} from '../contacts/components'
-import Flips from './components/flips'
 
 export default () => {
   const netInfo = useContext(NetContext)
@@ -39,9 +38,6 @@ export default () => {
               canActivateInvite
               onToggleActivateInvite={() => toggleActivateInvite(true)}
             />
-          </Col>
-          <Col p="10em 1em" w={6}>
-            <Flips />
           </Col>
         </Row>
         <Drawer

@@ -13,6 +13,7 @@ export function appropriate(answer) {
   return answered(answer) && answer !== types.inappropriate
 }
 
+// Answers that are abusive, inappropriate or spam.
 export function inappropriate(answer) {
   return answered(answer) && answer === types.inappropriate
 }

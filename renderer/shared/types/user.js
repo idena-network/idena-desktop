@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types'
 
-export const scheme = PropTypes.objectOf({
+export const scheme = PropTypes.shape({
   nick: PropTypes.string,
   name: PropTypes.string.isRequired,
   lastName: PropTypes.string,
-  fullName: PropTypes.string.isRequired,
+  fullName: PropTypes.string,
 })
 
 export const initialState = {
