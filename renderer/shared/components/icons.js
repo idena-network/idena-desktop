@@ -3,23 +3,33 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import theme from '../theme'
 
-export function AddIcon({width = '24px', ...props}) {
+export function AddIcon({width = '32px', ...props}) {
   return (
-    <div {...props}>
-      +
+    <i {...props}>
+      <span>+</span>
       <style jsx>{`
-        div {
+        i {
           background: ${theme.colors.primary};
           border-radius: 10px;
-          color: white;
-          cursor: pointer;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+          color: ${theme.colors.white};
+          display: inline-block;
+          font-style: normal;
+          text-align: center;
+          height: 24px;
           width: ${width};
         }
+        i::before {
+          content: '';
+          display: inline-block;
+          height: 100%;
+          vertical-align: middle;
+        }
+        span {
+          display: inline-block;
+          vertical-align: middle;
+        }
       `}</style>
-    </div>
+    </i>
   )
 }
 

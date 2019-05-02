@@ -2,10 +2,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import theme from '../theme'
 
-function Button({size = 1, ...props}) {
+function Button({size = 1, css, ...props}) {
   return (
     <>
-      <button type="button" {...props} />
+      <button type="button" style={css} {...props} />
       <style jsx>{`
         button {
           background: ${theme.colors.primary};
@@ -27,6 +27,8 @@ function Button({size = 1, ...props}) {
 
 Button.propTypes = {
   size: PropTypes.number,
+  // eslint-disable-next-line react/forbid-prop-types
+  css: PropTypes.object,
 }
 
 export default Button
