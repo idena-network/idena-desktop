@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from 'react'
 import {decode} from 'rlp'
-import Layout from '../../shared/components/validation-layout'
-import ValidationHeader from '../../shared/components/validation-header'
-import Timer from './components/timer'
-import ValidationScene from '../../shared/components/validation-scene'
-import ValidationActions from '../../shared/components/validation-actions'
-import FlipThumbnails from '../../shared/components/flip-thumbnails'
-import {fetchFlip} from '../../../../shared/services/api'
-import {fromHexString} from '../../../../shared/utils/string'
-import Flex from '../../../../shared/components/flex'
+import Layout from './shared/components/validation-layout'
+import ValidationHeader from './shared/components/validation-header'
+import Timer from './screens/short/components/timer'
+import ValidationScene from './shared/components/validation-scene'
+import ValidationActions from './shared/components/validation-actions'
+import FlipThumbnails from './shared/components/flip-thumbnails'
+import {fetchFlip} from '../../shared/services/api'
+import {fromHexString} from '../../shared/utils/string'
+import Flex from '../../shared/components/flex'
 import {
   fetchFlipHashes,
   submitShortAnswers,
-} from '../../shared/api/__mocks__/validation-api'
-import {answered, types as answerTypes} from '../../shared/utils/answers'
+} from './shared/api/__mocks__/validation-api'
+import {answered, types as answerTypes} from './shared/utils/answers'
 
 export default function() {
   const [flips, setFlips] = useState([])

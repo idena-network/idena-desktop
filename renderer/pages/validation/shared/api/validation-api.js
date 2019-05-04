@@ -11,13 +11,15 @@ import api from '../../../../shared/api/setup-api'
 /**
  * Returns list of flip hashes participating in validation session
  *
+ * @param {string} type Type of the hash
+ *
  * @returns {FlipHash[]} List of flip hashes
  *
  * @example [{hash: "0x123", ready: true}, {hash: "0x99999", ready: false}]
  */
-export async function fetchFlipHashes() {
+export async function fetchFlipHashes(type) {
   const {data} = await api.post('/', {
-    method: 'flip_flipHashes',
+    method: `flip_${type}Hashes`,
     params: [],
     id: 1,
   })

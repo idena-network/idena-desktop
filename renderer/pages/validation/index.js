@@ -6,10 +6,10 @@ export default function() {
   return (
     <Layout>
       <Box>
-        <Link href="/validation/screens/short">Short</Link>
+        <Link href="/validation/short">Short</Link>
       </Box>
       <Box>
-        <Link href="/validation/screens/long">Long</Link>
+        <Link href="/validation/long">Long</Link>
       </Box>
     </Layout>
   )
