@@ -20,7 +20,7 @@ export const shuffle = arr => {
   let randomIndex
 
   // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
+  while (currentIndex !== 0) {
     // Pick a remaining element...
     randomIndex = Math.floor(Math.random() * currentIndex)
     currentIndex -= 1
@@ -32,4 +32,12 @@ export const shuffle = arr => {
   }
 
   return arr
+}
+
+export const reorderList = (list, nextOrder) => {
+  const nextList = []
+  nextOrder.forEach(ord => {
+    nextList.push(list[ord])
+  })
+  return nextList
 }

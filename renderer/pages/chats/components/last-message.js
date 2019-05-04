@@ -1,6 +1,6 @@
 import React from 'react'
-import {Row, Col, Text} from '../../shared/components'
-import theme from '../../theme'
+import {Row, Col, Text} from '../../../shared/components'
+import theme from '../../../shared/theme'
 
 export default ({chat}) => (
   <Row align="center">

@@ -4,14 +4,7 @@ import PropTypes from 'prop-types'
 import {Col, Box} from '../../../../shared/components'
 import Flex from '../../../../shared/components/flex'
 import Arrow from './arrow'
-
-const reorderList = (list, nextOrder) => {
-  const nextList = []
-  nextOrder.forEach(ord => {
-    nextList.push(list[ord])
-  })
-  return nextList
-}
+import {reorderList} from '../../../../shared/utils/arr'
 
 const selectedStyle = {
   border: 'solid 2px red',

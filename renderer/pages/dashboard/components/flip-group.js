@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {FlipList} from './flip-list'
+// import {FlipList} from './flip-list'
 import theme from '../../../shared/theme'
 import {Text} from '../../../shared/components'
 
@@ -9,8 +9,9 @@ function FlipGroup({name, flips = []}) {
     <div>
       <Text color={theme.colors.muted}>{name}</Text>
       {flips.length ? (
-        <FlipList flips={flips} />
+        'Flips'
       ) : (
+        // <FlipList flips={flips} />
         <div>
           <Text>No drafts here yet...</Text>
         </div>

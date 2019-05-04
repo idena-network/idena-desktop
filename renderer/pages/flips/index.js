@@ -6,13 +6,11 @@ import FlipToolbar from './components/toolbar'
 import FlipList from './components/flip-list'
 import {fromHexString} from '../../shared/utils/string'
 import {fetchFlip} from '../../shared/services/api'
-
-const FLIPS_STORAGE_KEY = 'idena-flips'
-const FLIP_DRAFTS_STORAGE_KEY = 'idena/flips/drafts'
-
-function getFromLocalStorage(key) {
-  return JSON.parse(localStorage.getItem(key)) || []
-}
+import {
+  getFromLocalStorage,
+  FLIPS_STORAGE_KEY,
+  FLIP_DRAFTS_STORAGE_KEY,
+} from './utils/storage'
 
 export default function() {
   const [flips, setFlips] = useState({flips: [], drafts: []})

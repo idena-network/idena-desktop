@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Text} from '../../shared/components'
-import theme from '../../theme'
+import {Text} from '../../../shared/components'
+import theme from '../../../shared/theme'
 
 function RoomHeader({name = 'Julia', status = 'Online'}) {
   return (

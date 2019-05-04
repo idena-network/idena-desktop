@@ -1,6 +1,6 @@
 import React from 'react'
-import {AddIcon} from '../../shared/components'
-import theme from '../../theme'
+import {AddIcon} from '../../../shared/components'
+import theme from '../../../shared/theme'
 
 export default () => (
   <div>

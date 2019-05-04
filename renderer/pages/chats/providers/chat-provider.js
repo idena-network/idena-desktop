@@ -1,6 +1,6 @@
 import React, {createContext, useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
-import {fetchChatList} from '../services/api'
+import {fetchChatList} from '../../../shared/services/api'
 
 const ChatContext = createContext()
 

@@ -1,6 +1,6 @@
 import React from 'react'
-import {Box} from '../../shared/components'
-import theme from '../../theme'
+import {Box} from '../../../shared/components'
+import theme from '../../../shared/theme'
 
 export default function(props) {
   return (
