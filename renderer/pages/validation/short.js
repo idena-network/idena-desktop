@@ -71,7 +71,7 @@ export default function() {
 
       const flipsResult = await Promise.all(mappedFlipHashes.map(fetchFlip))
       const flipHexes = flipsResult
-        .filter(x => x)
+        .filter(({result}) => result && result.hex)
         .map(({result}) => result.hex.substr(2))
 
       const decodedFlipHexes = flipHexes.map(hex => decode(fromHexString(hex)))

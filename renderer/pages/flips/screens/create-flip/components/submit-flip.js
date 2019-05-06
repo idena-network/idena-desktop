@@ -4,7 +4,7 @@ import {Box, Button, Text} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import theme from '../../../../../shared/theme'
 
-function SubmitFlip({pics, randomOrder, result, onSubmitFlip}) {
+function SubmitFlip({pics, randomOrder, submitFlipResult, onSubmitFlip}) {
   return (
     <Box>
       <Flex justify="center">
@@ -25,7 +25,13 @@ function SubmitFlip({pics, randomOrder, result, onSubmitFlip}) {
         </Flex>
       </Flex>
       <Button onClick={onSubmitFlip}>Submit flip</Button>
-      <Text color={theme.colors.text}>{result}</Text>
+      <Box bg={theme.colors.gray1} p={theme.spacings.normal}>
+        <Text color={theme.colors.text}>
+          {typeof submitFlipResult === 'object'
+            ? JSON.stringify(submitFlipResult)
+            : submitFlipResult}
+        </Text>
+      </Box>
     </Box>
   )
 }
@@ -33,7 +39,7 @@ function SubmitFlip({pics, randomOrder, result, onSubmitFlip}) {
 SubmitFlip.propTypes = {
   pics: PropTypes.arrayOf(PropTypes.string),
   randomOrder: PropTypes.arrayOf(PropTypes.number),
-  result: PropTypes.string,
+  submitFlipResult: PropTypes.string,
   onSubmitFlip: PropTypes.func.isRequired,
 }
 

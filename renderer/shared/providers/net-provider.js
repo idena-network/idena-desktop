@@ -23,7 +23,9 @@ export const NetProvider = ({children}) => {
       const addr = await fetchAddress()
       const balance = await fetchBalance(addr)
       const identities = await fetchIdentities(addr)
-      const identity = identities.find(id => id.address === addr)
+      const identity = identities.length
+        ? identities.find(id => id.address === addr)
+        : {}
 
       if (!ignore) {
         setInfo({...identity, addr, balance, identities})

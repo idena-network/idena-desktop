@@ -31,3 +31,13 @@ export async function fetchIdentities() {
   const {result} = data
   return result
 }
+
+export async function fetchEpoch() {
+  const {data} = await api.post('/', {
+    method: 'dna_epoch',
+    params: [],
+    id: 1,
+  })
+  const {result} = data
+  return result
+}

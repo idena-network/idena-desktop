@@ -30,7 +30,8 @@ function CreateFlipMaster() {
   const [pics, setPics] = useState(initialPics)
   const [hint, setHint] = useState(getRandomHint())
   const [randomOrder, setRandomOrder] = useState([0, 1, 2, 3])
-  const [flipResult, setFlipResult] = useState()
+
+  const [submitFlipResult, setSubmitFlipResult] = useState()
 
   const [step, setStep] = useState(0)
 
@@ -51,25 +52,25 @@ function CreateFlipMaster() {
     ])
 
     try {
-      const resp = await submitFlip(toHex(hexBuff))
-      if (resp.ok) {
-        const {
-          result,
-          result: {flipHash},
-          error,
-        } = await resp.json()
-        setFlipResult(result ? flipHash : error)
-        appendToLocalStorage(FLIPS_STORAGE_KEY, result.flipHash)
-        Router.replace('/flips')
+      const response = await submitFlip(toHex(hexBuff))
+      if (response.ok) {
+        const {result, error} = await response.json()
+        if (error) {
+          setSubmitFlipResult(error.message)
+        } else {
+          appendToLocalStorage(FLIPS_STORAGE_KEY, result.flipHash)
+          setSubmitFlipResult(result)
+          Router.replace('/flips')
+        }
       } else {
-        setFlipResult(
-          resp.status === 413
+        setSubmitFlipResult(
+          response.status === 413
             ? 'Maximum image size exceeded'
             : 'Unexpected error occurred'
         )
       }
     } catch (err) {
-      setFlipResult(err.message)
+      setSubmitFlipResult(err)
     }
   }
 
@@ -103,7 +104,7 @@ function CreateFlipMaster() {
           randomOrder={randomOrder}
           pics={pics}
           onSubmitFlip={handleSubmitFlip}
-          flipResult={flipResult}
+          submitFlipResult={submitFlipResult}
         />
       ),
     },

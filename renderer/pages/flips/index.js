@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {decode} from 'rlp'
 import Layout from '../../components/layout'
-import {Heading} from '../../shared/components'
+import {Heading, Box} from '../../shared/components'
 import FlipToolbar from './components/toolbar'
 import FlipList from './components/flip-list'
 import {fromHexString} from '../../shared/utils/string'
@@ -11,6 +11,7 @@ import {
   FLIPS_STORAGE_KEY,
   FLIP_DRAFTS_STORAGE_KEY,
 } from './utils/storage'
+import theme from '../../shared/theme'
 
 export default function() {
   const [flips, setFlips] = useState({flips: [], drafts: []})
@@ -46,9 +47,13 @@ export default function() {
 
   return (
     <Layout>
-      <Heading>My Flips</Heading>
-      <FlipToolbar activeFilter={filter} onFilter={setFilter} />
-      <FlipList flips={flips[filter]} />
+      <Box p={theme.spacings.xlarge}>
+        <Heading margin={`0 0 ${theme.spacings.normal}`}>My Flips</Heading>
+        <Box css={{marginBottom: theme.spacings.normal}}>
+          <FlipToolbar activeFilter={filter} onFilter={setFilter} />
+        </Box>
+        <FlipList flips={flips[filter]} />
+      </Box>
     </Layout>
   )
 }

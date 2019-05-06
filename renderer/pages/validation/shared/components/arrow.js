@@ -22,7 +22,7 @@ function Arrow({dir}) {
           width: 100%;
         }
         div:hover {
-          background: ${theme.colors.gray3};
+          background: ${theme.colors.gray2};
           ${borderRadius(dir)};
           transition: all cubic-bezier(0.075, 0.82, 0.165, 1);
         }
