@@ -58,8 +58,8 @@ function CreateFlipMaster() {
         if (error) {
           setSubmitFlipResult(error.message)
         } else {
-          appendToLocalStorage(FLIPS_STORAGE_KEY, result.flipHash)
-          setSubmitFlipResult(result)
+          appendToLocalStorage(FLIPS_STORAGE_KEY, result.hash)
+          setSubmitFlipResult(result.hash)
           Router.replace('/flips')
         }
       } else {

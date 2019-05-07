@@ -73,10 +73,10 @@ export async function submitShortAnswers(answers, nonce, epoch) {
  * @returns {string} Tx hash
  * @example 0xfe516a684f99c8f6ef7674a08a81eb6b856efd76141cf97eb83ee323897af7e8
  */
-export async function submitLongAnswers(input) {
+export async function submitLongAnswers(answers, nonce, epoch) {
   const {data} = await api.post('/', {
-    method: 'flip_submitShortAnswers',
-    params: [input],
+    method: 'flip_submitLongAnswers',
+    params: [{answers, nonce, epoch}],
     id: 1,
   })
   const {result} = data
