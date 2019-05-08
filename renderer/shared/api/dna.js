@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import api from './setup-api'
+import api from './api-client'
 import {strip} from '../utils/obj'
 
 export async function sendInvite(addr, amount) {
@@ -32,6 +32,25 @@ export async function fetchIdentities() {
   return result
 }
 
+/**
+ * Epoch
+ * @typedef {Object}
+ * @property {String} epoch Current epoch
+ * @property {String} nextValidation Next validation timestamp
+ * @property {String} currentPeriod Current period
+ */
+
+/**
+ * Fetches current epoch, next validation time and current period
+ *
+ * @returns {Epoch} Epoch details
+ * @example
+ * {
+ *   "epoch": 184,
+ *   "nextValidation": "2019-05-08T19:40:00+02:00",
+ *   "currentPeriod": "None"
+ * }
+ */
 export async function fetchEpoch() {
   const {data} = await api.post('/', {
     method: 'dna_epoch',

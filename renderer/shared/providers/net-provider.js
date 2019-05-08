@@ -1,7 +1,8 @@
 import React, {createContext, useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {fetchAddress, fetchBalance} from '../services/api'
-import {fetchIdentities} from '../api/dna'
+import {fetchIdentities, fetchEpoch} from '../api/dna'
+import {useInterval} from '../../pages/validation/shared/utils/useInterval'
 
 const initialState = {
   addr: '',
@@ -16,6 +17,36 @@ const NetContext = createContext()
 export const NetProvider = ({children}) => {
   const [info, setInfo] = useState(initialState)
 
+  const [epoch, setEpoch] = useState()
+
+  useInterval(() => {
+    let ignore = false
+
+    async function fetchData() {
+      if (!ignore) {
+        const epochResult = await fetchEpoch()
+        const {currentPeriod, nextValidation} = epochResult
+        const validationRunning = currentPeriod.toLowerCase() !== 'none'
+        const secondsLeft =
+          new Date(nextValidation).getTime() - new Date().getTime()
+        const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
+
+        setEpoch({
+          ...epochResult,
+          validationRunning,
+          validationSoon,
+          secondsLeft,
+        })
+      }
+    }
+
+    fetchData()
+
+    return () => {
+      ignore = true
+    }
+  }, 5000)
+
   useEffect(() => {
     let ignore = false
 
@@ -28,7 +59,12 @@ export const NetProvider = ({children}) => {
         : {}
 
       if (!ignore) {
-        setInfo({...identity, addr, balance, identities})
+        setInfo({
+          ...identity,
+          addr,
+          balance,
+          identities,
+        })
       }
     }
 
@@ -38,7 +74,11 @@ export const NetProvider = ({children}) => {
       ignore = true
     }
   }, [])
-  return <NetContext.Provider value={info}>{children}</NetContext.Provider>
+  return (
+    <NetContext.Provider value={{...info, ...epoch}}>
+      {children}
+    </NetContext.Provider>
+  )
 }
 
 NetProvider.propTypes = {

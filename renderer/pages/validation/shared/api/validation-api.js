@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import api from '../../../../shared/api/setup-api'
+import api from '../../../../shared/api/api-client'
 
 /**
  * Flip hash

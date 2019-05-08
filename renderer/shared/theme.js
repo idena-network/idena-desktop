@@ -15,8 +15,8 @@ const colors = {
 }
 
 const fontSizes = {
-  heading: '1.7rem',
-  subHeading: '1.2rem',
+  heading: '2rem',
+  subHeading: '1.4em',
   normal: '1rem',
   small: '0.72rem',
 }
@@ -57,7 +57,7 @@ export default {
   },
   SubHeading: {
     color: colors.text,
-    fontSize: fontSizes.heading,
+    fontSize: fontSizes.subHeading,
     fontWeight: fontWeights.semi,
     ...margin(0),
   },

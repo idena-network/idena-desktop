@@ -18,7 +18,7 @@ export const Figure = ({label, value, postfix}) => (
       span {
         color: ${theme.colors.muted};
         display: block;
-        margin-bottom: ${theme.spacings.normal};
+        margin-bottom: ${theme.spacings.small};
       }
     `}</style>
   </Box>

@@ -1,4 +1,4 @@
-import api, {baseUrl} from '../api/setup-api'
+import api, {baseUrl} from '../api/api-client'
 
 export const fetchAddress = () =>
   fetch(baseUrl, {

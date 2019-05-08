@@ -9,6 +9,8 @@ export function NetProfile({
   balance,
   age,
   state: status,
+  nextValidation,
+  validationRunning,
   onToggleActivateInvite,
   canActivateInvite,
 }) {
@@ -29,7 +31,14 @@ export function NetProfile({
       <Figure label="Stake" value={balance.stake} postfix="DNA" />
       <Figure label="Balance" value={balance.balance} postfix="DNA" />
       <Figure label="Age" value={age} postfix="epochs" />
-      <Figure label="Next validation" value={new Date().toLocaleString()} />
+      <Figure
+        label="Next validation"
+        value={
+          validationRunning
+            ? 'TBD...'
+            : new Date(nextValidation).toLocaleString()
+        }
+      />
     </Box>
   )
 }
@@ -41,6 +50,8 @@ NetProfile.propTypes = {
   balance: PropTypes.shape(balanceShape).isRequired,
   age: PropTypes.number,
   state: PropTypes.string,
+  nextValidation: PropTypes.string.isRequired,
+  validationRunning: PropTypes.bool.isRequired,
   canActivateInvite: PropTypes.bool,
   onToggleActivateInvite: PropTypes.func,
 }

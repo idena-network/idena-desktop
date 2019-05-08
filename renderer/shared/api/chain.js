@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import api from './setup-api'
+import api from './api-client'
 
 export async function fetchTx(hash) {
   const {data} = await api.post('/', {
