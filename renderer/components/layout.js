@@ -8,7 +8,7 @@ import theme from '../shared/theme'
 import Flex from '../shared/components/flex'
 
 function Layout({NavMenu = SidebarNav, children}) {
-  const {currentPeriod, secondsLeft, validationSoon} = useContext(NetContext)
+  const {currentPeriod, validationSoon} = useContext(NetContext)
   return (
     <>
       <GlobalStyle />

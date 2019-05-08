@@ -29,7 +29,8 @@ export const NetProvider = ({children}) => {
         const validationRunning = currentPeriod.toLowerCase() !== 'none'
         const secondsLeft =
           new Date(nextValidation).getTime() - new Date().getTime()
-        const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
+        const validationSoon =
+          secondsLeft < 60 * 1000 && secondsLeft > 30 * 1000
 
         setEpoch({
           ...epochResult,
@@ -54,9 +55,10 @@ export const NetProvider = ({children}) => {
       const addr = await fetchAddress()
       const balance = await fetchBalance(addr)
       const identities = await fetchIdentities(addr)
-      const identity = identities.length
-        ? identities.find(id => id.address === addr)
-        : {}
+      const identity =
+        identities && identities.length
+          ? identities.find(id => id.address === addr)
+          : {}
 
       if (!ignore) {
         setInfo({

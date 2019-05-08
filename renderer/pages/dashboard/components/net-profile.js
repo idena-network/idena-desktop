@@ -56,4 +56,4 @@ NetProfile.propTypes = {
   onToggleActivateInvite: PropTypes.func,
 }
 
-export default NetProfile
+export default React.memo(NetProfile)

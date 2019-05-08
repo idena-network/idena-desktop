@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useContext, useState} from 'react'
 import {decode} from 'rlp'
 import Layout from '../../components/layout'
 import {Heading, Box} from '../../shared/components'
@@ -12,10 +12,13 @@ import {
   FLIP_DRAFTS_STORAGE_KEY,
 } from './utils/storage'
 import theme from '../../shared/theme'
+import NetContext from '../../shared/providers/net-provider'
 
 export default function() {
   const [flips, setFlips] = useState({flips: [], drafts: []})
   const [filter, setFilter] = useState('flips')
+
+  const {validationRunning} = useContext(NetContext)
 
   useEffect(() => {
     let ignore = false
@@ -50,7 +53,11 @@ export default function() {
       <Box p={theme.spacings.xlarge}>
         <Heading margin={`0 0 ${theme.spacings.normal}`}>My Flips</Heading>
         <Box css={{marginBottom: theme.spacings.normal}}>
-          <FlipToolbar activeFilter={filter} onFilter={setFilter} />
+          <FlipToolbar
+            activeFilter={filter}
+            onFilter={setFilter}
+            shouldShowAddFlip={!validationRunning}
+          />
         </Box>
         <FlipList flips={flips[filter]} />
       </Box>

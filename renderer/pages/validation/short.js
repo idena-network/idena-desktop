@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react'
+import Router from 'next/router'
 import {decode} from 'rlp'
 import Layout from './shared/components/validation-layout'
 import ValidationHeader from './shared/components/validation-header'
@@ -12,6 +13,8 @@ import Flex from '../../shared/components/flex'
 import {fetchFlipHashes, submitShortAnswers} from './shared/api/validation-api'
 import {answered, types as answerTypes} from './shared/utils/answers'
 import {useInterval} from './shared/utils/useInterval'
+import theme from '../../shared/theme'
+import {FLIPS_STORAGE_KEY} from '../flips/utils/storage'
 
 export default function() {
   const [flips, setFlips] = useState([])
@@ -57,7 +60,9 @@ export default function() {
       easy: false,
       answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
     }))
-    submitShortAnswers(answersPayload, 0, 0)
+    await submitShortAnswers(answersPayload, 0, 0)
+    localStorage.removeItem(FLIPS_STORAGE_KEY)
+    Router.push('/validation/long')
   }
 
   useEffect(() => {
@@ -127,8 +132,12 @@ export default function() {
 
   return (
     <Layout>
-      <Flex direction="column" css={{minHeight: '100vh'}}>
+      <Flex
+        direction="column"
+        css={{minHeight: '100vh', padding: theme.spacings.normal}}
+      >
         <ValidationHeader
+          type="Short"
           currentIndex={currentFlipIdx + 1}
           total={flips.length}
         >

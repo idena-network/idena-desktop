@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react'
+import Router from 'next/router'
 import {decode} from 'rlp'
 import Layout from './shared/components/validation-layout'
 import ValidationHeader from './shared/components/validation-header'
@@ -56,7 +57,8 @@ export default function() {
       easy: false,
       answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
     }))
-    submitLongAnswers(answersPayload, 0, 0)
+    await submitLongAnswers(answersPayload, 0, 0)
+    Router.replace('/dashboard')
   }
 
   useEffect(() => {
@@ -100,6 +102,7 @@ export default function() {
     <Layout>
       <Flex direction="column" css={{minHeight: '100vh'}}>
         <ValidationHeader
+          type="Long"
           currentIndex={currentFlipIdx + 1}
           total={flips.length}
         >

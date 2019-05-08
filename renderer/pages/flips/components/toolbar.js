@@ -6,7 +6,7 @@ import theme from '../../../shared/theme'
 
 const NavItem = props => <Button {...props} />
 
-function FlipToolbar({activeFilter, onFilter}) {
+function FlipToolbar({activeFilter, onFilter, shouldShowAddFlip}) {
   return (
     <Flex justify="space-between" align="center">
       <Flex>
@@ -28,11 +28,13 @@ function FlipToolbar({activeFilter, onFilter}) {
           )
         })}
       </Flex>
-      <Flex>
-        <Link href="/flips/new">
-          <AddIcon /> New Flip
-        </Link>
-      </Flex>
+      {shouldShowAddFlip && (
+        <Flex>
+          <Link href="/flips/new">
+            <AddIcon /> New Flip
+          </Link>
+        </Flex>
+      )}
     </Flex>
   )
 }
@@ -40,6 +42,7 @@ function FlipToolbar({activeFilter, onFilter}) {
 FlipToolbar.propTypes = {
   activeFilter: PropTypes.string,
   onFilter: PropTypes.func,
+  shouldShowAddFlip: PropTypes.bool.isRequired,
 }
 
 export default FlipToolbar
