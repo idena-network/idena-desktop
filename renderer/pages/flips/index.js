@@ -24,12 +24,19 @@ export default function() {
     let ignore = false
 
     async function fetchData() {
-      const hashes = getFromLocalStorage(FLIPS_STORAGE_KEY)
-      const responses = await Promise.all(hashes.map(hash => fetchFlip(hash)))
-
-      const fetchedFlips = responses.map(({result}) =>
-        result ? decode(fromHexString(result.hex.substr(2)))[0] : []
+      const responses = await Promise.all(
+        getFromLocalStorage(FLIPS_STORAGE_KEY).map(flip =>
+          fetchFlip(flip.hash).then(data => ({
+            ...flip,
+            data,
+          }))
+        )
       )
+
+      const fetchedFlips = responses.map(({data: {result}, ...rest}) => ({
+        ...rest,
+        pics: result ? decode(fromHexString(result.hex.substr(2)))[0] : [],
+      }))
 
       if (!ignore) {
         setFlips({...flips, flips: fetchedFlips})
@@ -50,9 +57,9 @@ export default function() {
 
   return (
     <Layout>
-      <Box p={theme.spacings.xlarge}>
+      <Box p="3rem">
         <Heading margin={`0 0 ${theme.spacings.normal}`}>My Flips</Heading>
-        <Box css={{marginBottom: theme.spacings.normal}}>
+        <Box css={{marginBottom: theme.spacings.large}}>
           <FlipToolbar
             activeFilter={filter}
             onFilter={setFilter}

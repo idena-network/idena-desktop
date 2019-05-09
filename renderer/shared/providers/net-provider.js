@@ -29,8 +29,7 @@ export const NetProvider = ({children}) => {
         const validationRunning = currentPeriod.toLowerCase() !== 'none'
         const secondsLeft =
           new Date(nextValidation).getTime() - new Date().getTime()
-        const validationSoon =
-          secondsLeft < 60 * 1000 && secondsLeft > 30 * 1000
+        const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
 
         setEpoch({
           ...epochResult,
@@ -46,7 +45,7 @@ export const NetProvider = ({children}) => {
     return () => {
       ignore = true
     }
-  }, 5000)
+  }, 1000)
 
   useEffect(() => {
     let ignore = false

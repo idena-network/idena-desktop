@@ -50,8 +50,8 @@ NetProfile.propTypes = {
   balance: PropTypes.shape(balanceShape).isRequired,
   age: PropTypes.number,
   state: PropTypes.string,
-  nextValidation: PropTypes.string.isRequired,
-  validationRunning: PropTypes.bool.isRequired,
+  nextValidation: PropTypes.string,
+  validationRunning: PropTypes.bool,
   canActivateInvite: PropTypes.bool,
   onToggleActivateInvite: PropTypes.func,
 }

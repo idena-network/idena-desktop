@@ -8,13 +8,16 @@ const config = {
     return {
       '/start': {page: '/start'},
       '/contacts': {page: '/contacts'},
-      '/contacts/new': {page: '/contacts/contact-new'},
-      '/contacts/edit': {page: '/contacts/contact-edit'},
-      '/contacts/view': {page: '/contacts/contact-view'},
+      '/contacts/new': {page: '/contacts/new'},
+      '/contacts/edit': {page: '/contacts/edit'},
+      '/contacts/view': {page: '/contacts/view'},
       '/chats': {page: '/chats'},
       '/wallets': {page: '/wallets'},
       '/dashboard': {page: '/dashboard'},
-      '/submit-flip': {page: '/submit-flip'},
+      '/flips': {page: '/flips'},
+      '/validation': {page: '/validation'},
+      '/validation/short': {page: '/validation/short'},
+      '/validation/long': {page: '/validation/long'},
     }
   },
 }

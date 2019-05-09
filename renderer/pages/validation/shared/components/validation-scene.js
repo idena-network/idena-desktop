@@ -30,8 +30,8 @@ function ValidationScene({
           align="center"
           css={selectedOption === 0 ? selectedStyle : null}
         >
-          {reorderList(flip, orders[0]).map(src => (
-            <Box onClick={() => onAnswer(0)}>
+          {reorderList(flip, orders[0]).map((src, idx) => (
+            <Box key={orders[0][idx]} onClick={() => onAnswer(0)}>
               <img
                 // eslint-disable-next-line react/no-array-index-key
                 alt="currentFlip"
@@ -48,8 +48,8 @@ function ValidationScene({
           align="center"
           css={selectedOption === 1 ? selectedStyle : null}
         >
-          {reorderList(flip, orders[1]).map(src => (
-            <Box onClick={() => onAnswer(1)}>
+          {reorderList(flip, orders[1]).map((src, idx) => (
+            <Box key={orders[1][idx]} onClick={() => onAnswer(1)}>
               <img
                 // eslint-disable-next-line react/no-array-index-key
                 alt="currentFlip"
@@ -68,7 +68,7 @@ function ValidationScene({
 }
 
 ValidationScene.propTypes = {
-  flip: PropTypes.arrayOf(PropTypes.array),
+  flip: PropTypes.arrayOf(PropTypes.object),
   orders: PropTypes.arrayOf(PropTypes.array),
   onPrev: PropTypes.func,
   onNext: PropTypes.func,

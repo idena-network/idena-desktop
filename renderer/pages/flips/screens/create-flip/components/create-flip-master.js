@@ -18,6 +18,7 @@ import {getRandomHint} from '../utils/hints'
 import SubmitFlip from './submit-flip'
 import {submitFlip} from '../../../../../shared/services/api'
 import {toHex} from '../../../../../shared/utils/req'
+import words from '../utils/words'
 
 const initialPics = [
   `https://placehold.it/480?text=1`,
@@ -58,7 +59,11 @@ function CreateFlipMaster() {
         if (error) {
           setSubmitFlipResult(error.message)
         } else {
-          appendToLocalStorage(FLIPS_STORAGE_KEY, result.hash)
+          appendToLocalStorage(FLIPS_STORAGE_KEY, {
+            hash: result.hash,
+            caption: hint.join('/'),
+            createdAt: Date.now(),
+          })
           setSubmitFlipResult(result.hash)
           Router.replace('/flips')
         }

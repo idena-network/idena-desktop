@@ -5,17 +5,16 @@ import Flex from '../../../shared/components/flex'
 
 function FlipList({flips}) {
   return (
-    <Flex justify="space-between" css={{flexWrap: 'wrap'}}>
-      {flips.map((flip, idx) => (
-        // eslint-disable-next-line react/no-array-index-key
-        <Flip key={`flip-${idx}`} pics={flip} dir="row" />
+    <Flex css={{flexWrap: 'wrap'}}>
+      {flips.map(flip => (
+        <Flip key={flip.hash} {...flip} />
       ))}
     </Flex>
   )
 }
 
 FlipList.propTypes = {
-  flips: PropTypes.arrayOf(PropTypes.array),
+  flips: PropTypes.arrayOf(PropTypes.object),
 }
 
 export default FlipList

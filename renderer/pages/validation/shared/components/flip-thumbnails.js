@@ -11,7 +11,7 @@ const activeStyle = {
 
 function FlipThumbnails({currentIndex, flips, answers, onPick}) {
   return (
-    <Flex justify="center" align="center" css={{minHeight: '80px'}}>
+    <Flex justify="center" align="center" css={{minHeight: '100px'}}>
       {flips.map((flip, idx) => (
         <Box
           css={{
