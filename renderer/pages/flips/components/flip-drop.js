@@ -1,10 +1,9 @@
-import {Component} from 'react'
+import React, {Component} from 'react'
 import {func, bool} from 'prop-types'
 
-import styles from '../../styles/components/flips/flip-drop'
-import {useSafe} from '../../utils/fn'
+import {useSafe} from '../../../shared/utils/fn'
 
-export class FlipDrop extends Component {
+class FlipDrop extends Component {
   onHide = useSafe(this.props.onHide)
 
   handleDragOver = e => {
@@ -35,8 +34,6 @@ export class FlipDrop extends Component {
             </p>
           </span>
         </section>
-
-        <style jsx>{styles}</style>
       </aside>
     )
   }

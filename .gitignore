@@ -68,6 +68,8 @@ typings/
 
 # next.js build output
 .next
+**/renderer/out
+**/dist
 
 # nuxt.js build output
 .nuxt

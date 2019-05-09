@@ -1,10 +1,10 @@
 import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
-import {Box} from '../../shared/components'
+import {Box} from '../../../shared/components'
 import NodeOutput from '../components/log'
 import StartButton from '../components/start-button'
 import {initialState} from '../types'
-import {abToStr} from '../../utils/string'
+import {abToStr} from '../../../shared/utils/string'
 
 function NodeStarter({address = '//localhost:9009'}) {
   const [log, setLog] = useState(initialState)

@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
-import styles from '../../styles/components/flips/flip-renderer'
-import {useSafe} from '../../utils/fn'
+import {useSafe} from '../../../shared/utils/fn'
 
 export class FlipRenderer extends Component {
   componentDidMount() {
@@ -16,7 +15,6 @@ export class FlipRenderer extends Component {
     return (
       <>
         <canvas id={this.props.id} />
-        <style jsx>{styles}</style>
       </>
     )
   }
