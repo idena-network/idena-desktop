@@ -29,7 +29,7 @@ export default function() {
 
   useEffect(() => {
     if (localStorage) {
-      const savedFilter = getFromLocalStorage(FLIPS_FILTER)
+      const savedFilter = getFromLocalStorage(FLIPS_FILTER, '')
       if (savedFilter) {
         setFilter(savedFilter)
       }
