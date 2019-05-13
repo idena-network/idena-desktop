@@ -10,15 +10,31 @@ import {
   getFromLocalStorage,
   FLIPS_STORAGE_KEY,
   FLIP_DRAFTS_STORAGE_KEY,
+  FLIPS_FILTER,
+  setToLocalStorage,
 } from './utils/storage'
 import theme from '../../shared/theme'
 import NetContext from '../../shared/providers/net-provider'
 
+const filters = {
+  flips: 'flips',
+  drafts: 'drafts',
+}
+
 export default function() {
   const [flips, setFlips] = useState({flips: [], drafts: []})
-  const [filter, setFilter] = useState('flips')
+  const [filter, setFilter] = useState(filters.flips)
 
   const {validationRunning} = useContext(NetContext)
+
+  useEffect(() => {
+    if (localStorage) {
+      const savedFilter = getFromLocalStorage(FLIPS_FILTER)
+      if (savedFilter) {
+        setFilter(savedFilter)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     let ignore = false
@@ -43,7 +59,7 @@ export default function() {
       }
     }
 
-    if (filter === 'drafts') {
+    if (filter === filters.drafts) {
       const drafts = getFromLocalStorage(FLIP_DRAFTS_STORAGE_KEY)
       setFlips({...flips, drafts})
     } else {
@@ -62,11 +78,19 @@ export default function() {
         <Box css={{marginBottom: theme.spacings.large}}>
           <FlipToolbar
             activeFilter={filter}
-            onFilter={setFilter}
+            onFilter={nextFilter => {
+              setFilter(nextFilter)
+              setToLocalStorage(FLIPS_FILTER, nextFilter)
+            }}
             shouldShowAddFlip={!validationRunning}
           />
         </Box>
-        <FlipList flips={flips[filter]} onUpdateFlips={setFlips(flips)} />
+        <FlipList
+          flips={flips[filter]}
+          onUpdateFlips={nextDrafts => {
+            setFlips({...flips, drafts: nextDrafts})
+          }}
+        />
       </Box>
     </Layout>
   )
