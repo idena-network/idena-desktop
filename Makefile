@@ -10,12 +10,15 @@ help:
 	@echo ''
 	@echo 'Usage: make [TARGET]'
 	@echo 'Targets:'
-	@echo ' node         run standalone idena node'
-	@echo ' node-full    run full idena node'
+	@echo ' node-auto		run standalone idena node'
+	@echo ' node				run full idena node'
 	@echo ''
 
-node-self:
+node-auto:
 	cd $(NODE_DIR) && go run main.go --automine --bootnode="" --ipfsbootnode="" --nodiscovery --godaddress=$(SELF_ADDR)
 
 node:
 	cd $(NODE_DIR) && go run main.go
+
+clean:
+	cd $(NODE_DIR) && rm -rf datadir/idenachain.db

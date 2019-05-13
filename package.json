@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "node": "make node",
-    "node:self": "make node-self",
+    "node:auto": "make node-auto",
+    "node:clean": "make clean",
     "build": "next build renderer && next export renderer",
     "dist": "npm run build && build --dir",
     "lint": "eslint .",
