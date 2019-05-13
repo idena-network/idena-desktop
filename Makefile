@@ -14,8 +14,8 @@ help:
 	@echo ' node-full    run full idena node'
 	@echo ''
 
-node:
+node-self:
 	cd $(NODE_DIR) && go run main.go --automine --bootnode="" --ipfsbootnode="" --nodiscovery --godaddress=$(SELF_ADDR)
 
-node-standalone:
+node:
 	cd $(NODE_DIR) && go run main.go
