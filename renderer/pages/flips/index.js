@@ -66,7 +66,7 @@ export default function() {
             shouldShowAddFlip={!validationRunning}
           />
         </Box>
-        <FlipList flips={flips[filter]} />
+        <FlipList flips={flips[filter]} onUpdateFlips={setFlips(flips)} />
       </Box>
     </Layout>
   )
