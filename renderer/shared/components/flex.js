@@ -2,9 +2,25 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import theme from '../theme'
 
-function Flex({direction, justify, align, flex, width, css, children}) {
+function Flex({
+  direction,
+  justify,
+  align,
+  flex,
+  width,
+  css,
+  onClick,
+  children,
+}) {
   return (
-    <div style={css}>
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+    <div
+      style={css}
+      onKeyPress={onClick}
+      role="button"
+      tabIndex="0"
+      onClick={onClick}
+    >
       {children}
       <style jsx>{`
         div {
@@ -31,6 +47,7 @@ Flex.propTypes = {
   align: PropTypes.string,
   flex: PropTypes.string,
   width: PropTypes.string,
+  onClick: PropTypes.func,
   // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,
 }

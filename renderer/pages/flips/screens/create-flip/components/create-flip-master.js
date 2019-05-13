@@ -154,6 +154,7 @@ function CreateFlipMaster({pics: savedPics, caption, id}) {
               padding: theme.spacings.normal,
               paddingLeft: idx === 0 ? 0 : '',
             }}
+            onClick={() => setStep(idx)}
           >
             <Text
               color={theme.colors.white}
