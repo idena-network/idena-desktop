@@ -32,7 +32,9 @@ function Flip({id, caption, pics, createdAt}) {
 Flip.propTypes = {
   id: PropTypes.string,
   caption: PropTypes.string.isRequired,
-  pics: PropTypes.arrayOf(PropTypes.object).isRequired,
+  pics: PropTypes.arrayOf(
+    PropTypes.oneOfType([PropTypes.object, PropTypes.string])
+  ).isRequired,
   createdAt: PropTypes.number.isRequired,
 }
 

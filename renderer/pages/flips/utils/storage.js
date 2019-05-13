@@ -1,8 +1,12 @@
-export const FLIPS_STORAGE_KEY = 'idena-flips'
+export const FLIPS_STORAGE_KEY = 'idena/flips'
 export const FLIP_DRAFTS_STORAGE_KEY = 'idena/flips/drafts'
 
 export function getFromLocalStorage(key) {
   return JSON.parse(localStorage.getItem(key)) || []
+}
+
+export function setToLocalStorage(key, item) {
+  return localStorage.setItem(key, JSON.stringify(item))
 }
 
 export function appendToLocalStorage(key, newItem) {

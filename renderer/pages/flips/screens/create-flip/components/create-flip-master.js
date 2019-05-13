@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {encode} from 'rlp'
 import nanoid from 'nanoid'
@@ -9,6 +10,8 @@ import {
   FLIPS_STORAGE_KEY,
   appendToLocalStorage,
   FLIP_DRAFTS_STORAGE_KEY,
+  getFromLocalStorage,
+  setToLocalStorage,
 } from '../../../utils/storage'
 import theme from '../../../../../shared/theme'
 import CreateFlipForm from './create-flip-form'
@@ -26,9 +29,11 @@ const initialPics = [
   `https://placehold.it/480?text=4`,
 ]
 
-function CreateFlipMaster() {
-  const [pics, setPics] = useState(initialPics)
-  const [hint, setHint] = useState(getRandomHint())
+function CreateFlipMaster({pics: savedPics, caption, id}) {
+  const [pics, setPics] = useState(savedPics || initialPics)
+  const [hint, setHint] = useState(
+    (caption && caption.split('/')) || getRandomHint()
+  )
   const [randomOrder, setRandomOrder] = useState([0, 1, 2, 3])
 
   const [submitFlipResult, setSubmitFlipResult] = useState()
@@ -36,12 +41,28 @@ function CreateFlipMaster() {
   const [step, setStep] = useState(0)
 
   const handleSaveDraft = () => {
-    appendToLocalStorage(FLIP_DRAFTS_STORAGE_KEY, {
-      id: nanoid(),
-      caption: hint.join('/'),
-      createdAt: Date.now(),
-      pics,
-    })
+    if (id) {
+      const drafts = getFromLocalStorage(FLIP_DRAFTS_STORAGE_KEY)
+      const draftIdx = drafts.findIndex(d => d.id === id)
+
+      setToLocalStorage(FLIP_DRAFTS_STORAGE_KEY, [
+        ...drafts.slice(0, draftIdx),
+        {
+          id,
+          caption: hint.join('/'),
+          createdAt: Date.now(),
+          pics,
+        },
+        ...drafts.slice(draftIdx + 1),
+      ])
+    } else {
+      appendToLocalStorage(FLIP_DRAFTS_STORAGE_KEY, {
+        id: nanoid(),
+        caption: hint.join('/'),
+        createdAt: Date.now(),
+        pics,
+      })
+    }
     Router.replace('/flips')
   }
 
@@ -170,6 +191,10 @@ function CreateFlipMaster() {
   )
 }
 
-CreateFlipMaster.propTypes = {}
+CreateFlipMaster.propTypes = {
+  id: PropTypes.string,
+  caption: PropTypes.string,
+  pics: PropTypes.arrayOf(PropTypes.string),
+}
 
 export default CreateFlipMaster
