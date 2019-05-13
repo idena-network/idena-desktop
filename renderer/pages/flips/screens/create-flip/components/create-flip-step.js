@@ -12,7 +12,7 @@ function CreateFlipStep({children, desc, onPrev, onNext, onSaveDraft}) {
         {children}
       </Box>
       <Flex justify="space-between">
-        <Button onClick={() => onSaveDraft({})}>Save as draft</Button>
+        <Button onClick={onSaveDraft}>Save as draft</Button>
         <Box>
           <Button onClick={onPrev}>Previous</Button>
           <Button onClick={onNext}>Next</Button>

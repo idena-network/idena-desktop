@@ -1,14 +1,14 @@
 import React, {useState} from 'react'
 import Router from 'next/router'
 import {encode} from 'rlp'
+import nanoid from 'nanoid'
 import CreateFlipStep from './create-flip-step'
 import {Box, SubHeading, Text} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import {
-  getFromLocalStorage,
-  FLIP_DRAFTS_STORAGE_KEY,
   FLIPS_STORAGE_KEY,
   appendToLocalStorage,
+  FLIP_DRAFTS_STORAGE_KEY,
 } from '../../../utils/storage'
 import theme from '../../../../../shared/theme'
 import CreateFlipForm from './create-flip-form'
@@ -18,7 +18,6 @@ import {getRandomHint} from '../utils/hints'
 import SubmitFlip from './submit-flip'
 import {submitFlip} from '../../../../../shared/services/api'
 import {toHex} from '../../../../../shared/utils/req'
-import words from '../utils/words'
 
 const initialPics = [
   `https://placehold.it/480?text=1`,
@@ -36,9 +35,14 @@ function CreateFlipMaster() {
 
   const [step, setStep] = useState(0)
 
-  const handleSaveDraft = currentState => {
-    const drafts = getFromLocalStorage(FLIP_DRAFTS_STORAGE_KEY)
-    localStorage.setItem(FLIP_DRAFTS_STORAGE_KEY, drafts.concat(currentState))
+  const handleSaveDraft = () => {
+    appendToLocalStorage(FLIP_DRAFTS_STORAGE_KEY, {
+      id: nanoid(),
+      caption: hint.join('/'),
+      createdAt: Date.now(),
+      pics,
+    })
+    Router.replace('/flips')
   }
 
   const handleSubmitFlip = async () => {
@@ -154,7 +158,7 @@ function CreateFlipMaster() {
           <CreateFlipStep
             key={title}
             desc={desc}
-            onSaveDraft={() => handleSaveDraft}
+            onSaveDraft={handleSaveDraft}
             onPrev={() => setStep(step - 1)}
             onNext={() => setStep(step + 1)}
           >
