@@ -29,3 +29,13 @@ Figure.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   postfix: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 }
+
+export function If({condition, fallback = null, children}) {
+  return <>{condition ? children : fallback}</>
+}
+
+If.propTypes = {
+  condition: PropTypes.bool,
+  fallback: PropTypes.node,
+  children: PropTypes.node,
+}

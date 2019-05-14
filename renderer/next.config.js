@@ -1,6 +1,9 @@
 const withCSS = require('@zeit/next-css')
 
 const config = {
+  publicRuntimeConfig: {
+    baseUrl: process.env.BASE_URL,
+  },
   exportPathMap() {
     // Let Next.js know where to find the entry page
     // when it's exporting the static bundle for the use

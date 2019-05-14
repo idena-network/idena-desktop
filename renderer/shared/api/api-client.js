@@ -1,6 +1,9 @@
 import axios from 'axios'
+import getConfig from 'next/config'
 
-export const baseUrl = '//localhost:9009'
+const {publicRuntimeConfig} = getConfig()
+
+export const {baseUrl = '//localhost:9009'} = publicRuntimeConfig
 
 export const {MOCK = true} = process.env
 
