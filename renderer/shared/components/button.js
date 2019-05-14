@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import theme from '../theme'
 
-function Button({size = 1, css, ...props}) {
+function Button({size = 1, disabled, css, ...props}) {
   return (
     <>
       <button type="button" style={css} {...props} />
@@ -16,6 +16,7 @@ function Button({size = 1, css, ...props}) {
           font-size: ${`${size}em`};
           padding: ${`${0.5 * size}em ${size}em`};
           outline: none;
+          ${disabled && `opacity: 0.5`};
         }
         button:hover {
           opacity: 0.9;
@@ -27,6 +28,7 @@ function Button({size = 1, css, ...props}) {
 
 Button.propTypes = {
   size: PropTypes.number,
+  disabled: PropTypes.bool,
   // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,
 }

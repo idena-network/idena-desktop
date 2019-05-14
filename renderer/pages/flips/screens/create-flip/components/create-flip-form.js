@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from 'react'
+/* eslint-disable no-undef */
+import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {Box, Button} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import ImageEditor from './image-editor'
 import theme from '../../../../../shared/theme'
-
-const compressChannel = 'compress-flip-source'
+import useScript from '../../../utils/useScript'
+import {useDataUrl} from '../../../utils/useDataUrl'
 
 const activeStyle = {
   border: `solid 2px ${theme.colors.primary}`,
@@ -13,6 +14,8 @@ const activeStyle = {
 
 function CreateFlipForm({pics, onUpdateFlip}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [pickerLoaded, setPickerLoaded] = useState(false)
+  const [imageUrl, setImageUrl] = useState(null)
 
   // const onCompressEnd = (_ev, data) => {
   //   setPics([
@@ -62,6 +65,51 @@ function CreateFlipForm({pics, onUpdateFlip}) {
     ])
   }
 
+  const [gapiLoaded, gapiError] = useScript('https://apis.google.com/js/api.js')
+
+  useEffect(() => {
+    // gapi.load('auth2', onAuthApiLoad)
+    if (gapiLoaded && !gapiError) {
+      gapi.load('picker', () => setPickerLoaded(true))
+    }
+  }, [gapiLoaded, gapiError])
+
+  const base64Url = useDataUrl(imageUrl)
+
+  useEffect(() => {
+    if (base64Url) {
+      onUpdateFlip([
+        ...pics.slice(0, selectedIndex),
+        base64Url,
+        ...pics.slice(selectedIndex + 1),
+      ])
+    }
+  }, [base64Url])
+
+  // A simple callback implementation.
+  function pickerCallback(data) {
+    if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
+      const doc = data[google.picker.Response.DOCUMENTS][0]
+      const [{url}] = doc[google.picker.Document.THUMBNAILS]
+      setImageUrl(url)
+    }
+  }
+
+  // Create and render a Picker object for picking user Photos.
+  function createPicker() {
+    const view = new google.picker.View(google.picker.ViewId.IMAGE_SEARCH)
+    view.setMimeTypes('image/png,image/jpeg,image/jpg')
+
+    const picker = new google.picker.PickerBuilder()
+      .addView(view)
+      // .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+      .enableFeature(google.picker.Feature.NAV_HIDDEN)
+      .hideTitleBar()
+      .setCallback(pickerCallback)
+      .build()
+    picker.setVisible(true)
+  }
+
   return (
     <Flex>
       <Box p={theme.spacings.normal}>
@@ -86,7 +134,15 @@ function CreateFlipForm({pics, onUpdateFlip}) {
             onChange={handleUpload}
             disabled={false}
           />
-          <Button>Search on Google</Button>
+
+          <Button
+            disabled={!pickerLoaded}
+            onClick={() => {
+              createPicker()
+            }}
+          >
+            {pickerLoaded ? 'Search on Google' : 'Waiting...'}
+          </Button>
         </Flex>
       </Box>
     </Flex>
