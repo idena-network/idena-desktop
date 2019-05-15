@@ -20,8 +20,10 @@ export default function() {
   const [flips, setFlips] = useState([])
   const [flipHashes, setFlipHashes] = useState([])
   const [orders, setOrders] = useState([])
+  const [loadedStates, setLoadedStates] = useState([])
   const [currentFlipIdx, setCurrentFlipIdx] = useState(0)
   const [answers, setAnswers] = useState([])
+  const [flipsLoaded, setFlipsLoaded] = useState(false)
 
   const handlePrev = () => {
     const prevFlipIdx = Math.max(0, currentFlipIdx - 1)
@@ -33,7 +35,9 @@ export default function() {
     setCurrentFlipIdx(nextFlipIdx)
   }
 
-  const handlePick = idx => setCurrentFlipIdx(idx)
+  const handlePick = idx => {
+    setCurrentFlipIdx(idx)
+  }
 
   const handleAnswer = option => {
     const nextAnswers = [
@@ -87,11 +91,14 @@ export default function() {
         f[1].map(x => x.map(xx => xx[0] || 0))
       )
 
+      const nextLoadedState = flipHashesResult.map(({ready}) => ready)
+
       if (!ignore) {
         setFlips(decodedFlips)
         setFlipHashes(mappedFlipHashes)
         setOrders(decodedOrders)
         setAnswers(decodedFlips.map(() => null))
+        setLoadedStates(nextLoadedState)
       }
     }
 
@@ -102,33 +109,42 @@ export default function() {
     }
   }, [])
 
-  // useInterval(() => {
-  //   async function fetchData() {
-  //     const flipHashesResult = await fetchFlipHashes()
-  //     if (!flipHashesResult || !flipHashesResult.length) {
-  //       return
-  //     }
+  useInterval(
+    () => {
+      async function fetchData() {
+        const flipHashesResult = await fetchFlipHashes('short')
+        if (!flipHashesResult || !flipHashesResult.length) {
+          return
+        }
 
-  //     const mappedFlipHashes = flipHashesResult.map(({hash}) => hash)
+        const mappedFlipHashes = flipHashesResult.map(({hash}) => hash)
 
-  //     const flipsResult = await Promise.all(mappedFlipHashes.map(fetchFlip))
-  //     const flipHexes = flipsResult
-  //       .filter(({result}) => result && result.hex)
-  //       .map(({result}) => result.hex.substr(2))
+        const flipsResult = await Promise.all(mappedFlipHashes.map(fetchFlip))
+        const flipHexes = flipsResult
+          .filter(({result}) => result && result.hex)
+          .map(({result}) => result.hex.substr(2))
 
-  //     const decodedFlipHexes = flipHexes.map(hex => decode(fromHexString(hex)))
-  //     const decodedFlips = decodedFlipHexes.map(f => f[0])
-  //     const decodedOrders = decodedFlipHexes.map(f =>
-  //       f[1].map(x => x.map(xx => xx[0] || 0))
-  //     )
+        const decodedFlipHexes = flipHexes.map(hex =>
+          decode(fromHexString(hex))
+        )
+        const decodedFlips = decodedFlipHexes.map(f => f[0])
+        const decodedOrders = decodedFlipHexes.map(f =>
+          f[1].map(x => x.map(xx => xx[0] || 0))
+        )
 
-  //     setFlips(decodedFlips)
-  //     setFlipHashes(mappedFlipHashes)
-  //     setOrders(decodedOrders)
-  //   }
+        setFlips(decodedFlips)
+        setFlipHashes(mappedFlipHashes)
+        setOrders(decodedOrders)
 
-  //   fetchData()
-  // }, 10000)
+        const nextLoadedState = flipHashesResult.map(({ready}) => ready)
+        setFlipsLoaded(nextLoadedState.every(x => x))
+        setLoadedStates(nextLoadedState)
+      }
+
+      fetchData()
+    },
+    flipsLoaded ? null : 1000
+  )
 
   return (
     <Layout>
@@ -151,6 +167,7 @@ export default function() {
             onNext={handleNext}
             onAnswer={handleAnswer}
             selectedOption={answers[currentFlipIdx]}
+            loaded={loadedStates[currentFlipIdx]}
           />
           <ValidationActions
             onReportAbuse={handleReportAbuse}

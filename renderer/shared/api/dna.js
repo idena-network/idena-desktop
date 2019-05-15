@@ -60,3 +60,25 @@ export async function fetchEpoch() {
   const {result} = data
   return result
 }
+
+/**
+ * Fetches timings specific to validation ceremony
+ * 
+ * @returns {object}
+ * @example {
+    "ValidationInterval": 600,
+    "FlipLotteryDuration": 60,
+    "ShortSessionDuration": 60,
+    "LongSessionDuration": 60,
+    "AfterLongSessionDuration": 30
+  }
+ */
+export async function fetchCeremonyIntervals() {
+  const {data} = await api.post('/', {
+    method: 'dna_ceremonyIntervals',
+    params: [],
+    id: 1,
+  })
+  const {result} = data
+  return result
+}

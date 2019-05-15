@@ -1,10 +1,11 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Col, Box} from '../../../../shared/components'
+import {Col, Box, Fill} from '../../../../shared/components'
 import Flex from '../../../../shared/components/flex'
 import Arrow from './arrow'
 import {reorderList} from '../../../../shared/utils/arr'
+import theme from '../../../../shared/theme'
 
 const selectedStyle = {
   border: 'solid 2px red',
@@ -17,47 +18,72 @@ function ValidationScene({
   onNext,
   onAnswer,
   selectedOption,
+  loaded,
 }) {
   return (
     <Flex justify="space-between" flex="1">
       <Col onClick={onPrev} w={4}>
         <Arrow dir="prev" />
       </Col>
-      <Flex align="center">
+      <Flex align="center" width="33%">
         <Flex
           direction="column"
           justify="center"
           align="center"
-          css={selectedOption === 0 ? selectedStyle : null}
+          css={
+            selectedOption === 0
+              ? {...selectedStyle, position: 'relative', height: '100%'}
+              : {position: 'relative', height: '100%'}
+          }
+          width="100%"
+          onClick={() => onAnswer(0)}
         >
-          {reorderList(flip, orders[0]).map((src, idx) => (
-            <Box key={orders[0][idx]} onClick={() => onAnswer(0)}>
-              <img
-                // eslint-disable-next-line react/no-array-index-key
-                alt="currentFlip"
-                width={100}
-                src={URL.createObjectURL(new Blob([src], {type: 'image/jpeg'}))}
-              />
-            </Box>
-          ))}
+          {loaded ? (
+            reorderList(flip, orders[0]).map((src, idx) => (
+              <Box key={orders[0][idx]}>
+                <img
+                  // eslint-disable-next-line react/no-array-index-key
+                  alt="currentFlip"
+                  width={100}
+                  src={URL.createObjectURL(
+                    new Blob([src], {type: 'image/jpeg'})
+                  )}
+                />
+                )
+              </Box>
+            ))
+          ) : (
+            <Fill bg={theme.colors.gray2}>Loading...</Fill>
+          )}
         </Flex>
         <Box w="2em">&nbsp;</Box>
         <Flex
           direction="column"
           justify="center"
           align="center"
-          css={selectedOption === 1 ? selectedStyle : null}
+          css={
+            selectedOption === 1
+              ? {...selectedStyle, position: 'relative', height: '100%'}
+              : {position: 'relative', height: '100%'}
+          }
+          width="100%"
         >
-          {reorderList(flip, orders[1]).map((src, idx) => (
-            <Box key={orders[1][idx]} onClick={() => onAnswer(1)}>
-              <img
-                // eslint-disable-next-line react/no-array-index-key
-                alt="currentFlip"
-                width={100}
-                src={URL.createObjectURL(new Blob([src], {type: 'image/jpeg'}))}
-              />
-            </Box>
-          ))}
+          {loaded ? (
+            reorderList(flip, orders[1]).map((src, idx) => (
+              <Box key={orders[1][idx]} onClick={() => onAnswer(1)}>
+                <img
+                  // eslint-disable-next-line react/no-array-index-key
+                  alt="currentFlip"
+                  width={100}
+                  src={URL.createObjectURL(
+                    new Blob([src], {type: 'image/jpeg'})
+                  )}
+                />
+              </Box>
+            ))
+          ) : (
+            <Fill bg={theme.colors.gray2}>Loading...</Fill>
+          )}
         </Flex>
       </Flex>
       <Col onClick={onNext} w={4}>
@@ -74,6 +100,7 @@ ValidationScene.propTypes = {
   onNext: PropTypes.func,
   onAnswer: PropTypes.func,
   selectedOption: PropTypes.number,
+  loaded: PropTypes.bool,
 }
 
 export default ValidationScene

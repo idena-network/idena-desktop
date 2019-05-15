@@ -29,13 +29,13 @@ export default () => {
             <Heading>Profile</Heading>
             <UserActions
               onToggleSendInvite={() => toggleSendInvite(true)}
-              canActivateInvite={netInfo.state === 'Invite'}
+              canActivateInvite
               onToggleActivateInvite={() => toggleActivateInvite(true)}
             />
             <UserInfo fullName="Me" address={netInfo.addr} />
             <NetProfile
               {...netInfo}
-              canActivateInvite={netInfo.state === 'Invite'}
+              canActivateInvite
               onToggleActivateInvite={() => toggleActivateInvite(true)}
             />
           </Col>

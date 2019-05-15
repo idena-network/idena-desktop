@@ -75,11 +75,8 @@ function Nav({user}) {
         <NavItem href="/chats">Chats</NavItem>
         <NavItem href="/wallets">Wallets</NavItem>
         {/* TODO: for internal testing purposes only, remove then */}
-        <If condition={validationRunning}>
+        <If condition={true || validationRunning}>
           <NavItem href="/validation">Validation (helper)</NavItem>
-        </If>
-        <If condition={2 + 2 === 4}>
-          <NavItem href="/debug">Debug</NavItem>
         </If>
         <Box
           bg={theme.colors.white01}

@@ -14,13 +14,7 @@ function Flex({
 }) {
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <div
-      style={css}
-      onKeyPress={onClick}
-      role="button"
-      tabIndex="0"
-      onClick={onClick}
-    >
+    <div style={css} onKeyPress={onClick} onClick={onClick}>
       {children}
       <style jsx>{`
         div {
