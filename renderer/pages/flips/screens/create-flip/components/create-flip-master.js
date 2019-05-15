@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {encode} from 'rlp'
@@ -21,6 +21,7 @@ import {getRandomHint} from '../utils/hints'
 import SubmitFlip from './submit-flip'
 import {submitFlip} from '../../../../../shared/services/api'
 import {toHex} from '../../../../../shared/utils/req'
+import {set as setToCache} from '../utils/cache'
 
 const initialPics = [
   `https://placehold.it/480?text=1`,
@@ -35,36 +36,19 @@ function CreateFlipMaster({pics: savedPics, caption, id}) {
     (caption && caption.split('/')) || getRandomHint()
   )
   const [randomOrder, setRandomOrder] = useState([0, 1, 2, 3])
-
   const [submitFlipResult, setSubmitFlipResult] = useState()
-
   const [step, setStep] = useState(0)
+  const [lastSaved, setLastSaved] = useState()
 
-  const handleSaveDraft = () => {
-    if (id) {
-      const drafts = getFromLocalStorage(FLIP_DRAFTS_STORAGE_KEY)
-      const draftIdx = drafts.findIndex(d => d.id === id)
-
-      setToLocalStorage(FLIP_DRAFTS_STORAGE_KEY, [
-        ...drafts.slice(0, draftIdx),
-        {
-          id,
-          caption: hint.join('/'),
-          createdAt: Date.now(),
-          pics,
-        },
-        ...drafts.slice(draftIdx + 1),
-      ])
-    } else {
-      appendToLocalStorage(FLIP_DRAFTS_STORAGE_KEY, {
-        id: nanoid(),
-        caption: hint.join('/'),
-        createdAt: Date.now(),
-        pics,
-      })
-    }
-    Router.replace('/flips')
-  }
+  useEffect(() => {
+    setToCache({
+      id,
+      caption: hint.join('/'),
+      createdAt: Date.now(),
+      pics,
+    })
+    setLastSaved(Date.now())
+  }, [step, pics])
 
   const handleSubmitFlip = async () => {
     const arrayBuffers = pics.map(src => {
@@ -133,7 +117,6 @@ function CreateFlipMaster({pics: savedPics, caption, id}) {
         <SubmitFlip
           randomOrder={randomOrder}
           pics={pics}
-          onSubmitFlip={handleSubmitFlip}
           submitFlipResult={submitFlipResult}
         />
       ),
@@ -176,17 +159,36 @@ function CreateFlipMaster({pics: savedPics, caption, id}) {
         ))}
       </Flex>
       {
-        steps.map(({title, desc, children}) => (
-          <CreateFlipStep
-            key={title}
-            desc={desc}
-            onSaveDraft={handleSaveDraft}
-            onPrev={() => setStep(step - 1)}
-            onNext={() => setStep(step + 1)}
-          >
-            {children}
-          </CreateFlipStep>
-        ))[step]
+        steps.map(({title, desc, children}) => {
+          const last = step === steps.length - 1
+          return (
+            <CreateFlipStep
+              key={title}
+              desc={desc}
+              onPrev={() => setStep(step - 1)}
+              onSaveDraft={() => {
+                setToCache({
+                  id,
+                  caption: hint.join('/'),
+                  createdAt: Date.now(),
+                  pics,
+                })
+                setLastSaved(Date.now())
+              }}
+              onNext={
+                last
+                  ? handleSubmitFlip
+                  : () => {
+                      setStep(step + 1)
+                    }
+              }
+              last={last}
+              lastSaved={lastSaved}
+            >
+              {children}
+            </CreateFlipStep>
+          )
+        })[step]
       }
     </Box>
   )

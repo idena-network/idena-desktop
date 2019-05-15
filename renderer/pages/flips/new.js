@@ -1,4 +1,5 @@
 import React from 'react'
+import nanoid from 'nanoid'
 import {Heading, Box} from '../../shared/components'
 import CreateFlipMaster from './screens/create-flip/components/create-flip-master'
 import Layout from '../../components/layout'
@@ -9,7 +10,7 @@ export default function() {
     <Layout>
       <Box p={theme.spacings.large}>
         <Heading>New flip</Heading>
-        <CreateFlipMaster />
+        <CreateFlipMaster id={nanoid()} />
       </Box>
     </Layout>
   )

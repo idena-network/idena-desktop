@@ -22,19 +22,12 @@ const filters = {
 }
 
 export default function() {
-  const [flips, setFlips] = useState({flips: [], drafts: []})
-  const [filter, setFilter] = useState(filters.flips)
-
   const {validationRunning} = useContext(NetContext)
 
-  useEffect(() => {
-    if (localStorage) {
-      const savedFilter = getFromLocalStorage(FLIPS_FILTER, '')
-      if (savedFilter) {
-        setFilter(savedFilter)
-      }
-    }
-  }, [])
+  const [flips, setFlips] = useState({flips: [], drafts: []})
+  const [filter, setFilter] = useState(
+    getFromLocalStorage(FLIPS_FILTER, filters.flips)
+  )
 
   useEffect(() => {
     let ignore = false

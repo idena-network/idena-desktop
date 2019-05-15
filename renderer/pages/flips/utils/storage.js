@@ -7,10 +7,18 @@ export function getFromLocalStorage(key, fallbackValue = []) {
 }
 
 export function setToLocalStorage(key, item) {
-  return localStorage.setItem(key, JSON.stringify(item))
+  try {
+    localStorage.setItem(key, JSON.stringify(item))
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 export function appendToLocalStorage(key, newItem) {
-  const prevItem = getFromLocalStorage(key)
-  localStorage.setItem(key, JSON.stringify(prevItem.concat(newItem)))
+  try {
+    const prevItem = getFromLocalStorage(key)
+    localStorage.setItem(key, JSON.stringify(prevItem.concat(newItem)))
+  } catch (error) {
+    console.error(error)
+  }
 }
