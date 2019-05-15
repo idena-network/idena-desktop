@@ -18,6 +18,9 @@ function Link({href, color, fontSize, children}) {
             color: ${color};
             font-size: ${fontSize};
             text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            height: 100%;
           }
         `}</style>
       </a>

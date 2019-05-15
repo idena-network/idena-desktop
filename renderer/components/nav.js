@@ -20,11 +20,15 @@ const NavItem = withRouter(({href, router, children}) => {
       <style jsx>{`
         li {
           ${active && `background: ${theme.colors.white01}`};
-          ${active && `border-radius: 4px;`};
+          border-radius: 4px;
           color: ${theme.colors.white05};
           cursor: pointer;
           margin: 0 0 0.5em;
           padding: 0.5em 1em;
+        }
+        li:hover {
+          border-radius: 4px;
+          background: ${theme.colors.white01};
         }
       `}</style>
     </li>
