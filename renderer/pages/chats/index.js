@@ -1,7 +1,12 @@
 import React, {useState, useEffect} from 'react'
 import Layout from '../../components/layout'
 import {Row, Col} from '../../shared/components'
-import {ChatNav, ChatSearch, ChatList, Room} from './components'
+import {
+  ChatNav,
+  ChatSearch,
+  ChatList,
+  Room,
+} from '../../screens/chats/components'
 import {fetchChatList} from '../../shared/services/api'
 
 export default () => {

@@ -19,6 +19,7 @@ const fontSizes = {
   subHeading: '1.4em',
   normal: '1rem',
   small: '0.72rem',
+  large: 24,
 }
 
 const fontWeights = {
@@ -32,6 +33,7 @@ const spacings = {
   small: '0.5em',
   normal: '1em',
   large: '1.5em',
+  largePx: '24px',
   xlarge: '2em',
 }
 
@@ -41,7 +43,7 @@ export default {
   fontSizes,
   fontWeights,
   Box: {
-    w: 100,
+    w: '',
     bg: 'inherit',
   },
   Flex: {

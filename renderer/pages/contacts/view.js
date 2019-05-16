@@ -1,3 +1,3 @@
-import page from './screens/contact-view'
+import page from '../../screens/contacts/screens/contact-view'
 
 export default page

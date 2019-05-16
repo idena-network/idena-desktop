@@ -1,18 +1,24 @@
 import React, {useEffect, useState} from 'react'
 import Router from 'next/router'
 import {decode} from 'rlp'
-import Layout from './shared/components/validation-layout'
-import ValidationHeader from './shared/components/validation-header'
-import Timer from './screens/short/components/timer'
-import ValidationScene from './shared/components/validation-scene'
-import ValidationActions from './shared/components/validation-actions'
-import FlipThumbnails from './shared/components/flip-thumbnails'
+import Layout from '../../screens/validation/shared/components/validation-layout'
+import ValidationHeader from '../../screens/validation/shared/components/validation-header'
+import Timer from '../../screens/validation/screens/short/components/timer'
+import ValidationScene from '../../screens/validation/shared/components/validation-scene'
+import ValidationActions from '../../screens/validation/shared/components/validation-actions'
+import FlipThumbnails from '../../screens/validation/shared/components/flip-thumbnails'
 import {fetchFlip} from '../../shared/services/api'
 import {fromHexString} from '../../shared/utils/string'
 import Flex from '../../shared/components/flex'
-import {fetchFlipHashes, submitLongAnswers} from './shared/api/validation-api'
-import {answered, types as answerTypes} from './shared/utils/answers'
-import {useInterval} from './shared/utils/useInterval'
+import {
+  fetchFlipHashes,
+  submitLongAnswers,
+} from '../../screens/validation/shared/api/validation-api'
+import {
+  answered,
+  types as answerTypes,
+} from '../../screens/validation/shared/utils/answers'
+import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 
 export default function() {
   const [flips, setFlips] = useState([])

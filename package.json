@@ -43,6 +43,7 @@
     "electron-next": "3.1.4",
     "nanoid": "^2.0.1",
     "next": "^8.0.3",
+    "polished": "^3.3.0",
     "prop-types": "^15.6.2",
     "react": "^16.8.4",
     "react-beautiful-dnd": "^10.0.4",

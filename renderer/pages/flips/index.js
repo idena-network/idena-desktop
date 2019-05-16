@@ -2,8 +2,6 @@ import React, {useEffect, useContext, useState} from 'react'
 import {decode} from 'rlp'
 import Layout from '../../components/layout'
 import {Heading, Box} from '../../shared/components'
-import FlipToolbar from './components/toolbar'
-import FlipList from './components/flip-list'
 import {fromHexString} from '../../shared/utils/string'
 import {fetchFlip} from '../../shared/services/api'
 import {
@@ -12,9 +10,11 @@ import {
   FLIP_DRAFTS_STORAGE_KEY,
   FLIPS_FILTER,
   setToLocalStorage,
-} from './utils/storage'
+} from '../../screens/flips/utils/storage'
 import theme from '../../shared/theme'
 import NetContext from '../../shared/providers/net-provider'
+import FlipToolbar from '../../screens/flips/components/toolbar'
+import FlipList from '../../screens/flips/components/flip-list'
 
 const filters = {
   flips: 'flips',

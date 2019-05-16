@@ -1,6 +1,7 @@
 import React from 'react'
 import {Text} from './typo'
 
-export default function() {
-  return <Text color="white">Loading...</Text>
+// eslint-disable-next-line react/prop-types
+export default function({color = 'white'}) {
+  return <Text color={color}>Loading...</Text>
 }

@@ -1,5 +1,5 @@
 import React, {useContext, useState} from 'react'
-import {FlipProvider} from '../flips/providers/flip-provider'
+import {FlipProvider} from '../../screens/flips/providers/flip-provider'
 import NetContext from '../../shared/providers/net-provider'
 import Layout from '../../components/layout'
 import {Row, Col, Heading, Drawer} from '../../shared/components'
@@ -8,9 +8,9 @@ import {
   UserInfo,
   NetProfile,
   ActivateInviteForm,
-} from './components'
+} from '../../screens/dashboard/components'
 import {activateInvite, sendInvite} from '../../shared/api'
-import {SendInviteForm} from '../contacts/components'
+import {SendInviteForm} from '../../screens/contacts/components'
 
 export default () => {
   const netInfo = useContext(NetContext)

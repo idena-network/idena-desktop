@@ -2,7 +2,7 @@ import React, {createContext, useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {fetchAddress, fetchBalance} from '../services/api'
 import {fetchIdentities, fetchEpoch} from '../api/dna'
-import {useInterval} from '../../pages/validation/shared/utils/useInterval'
+import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 
 const initialState = {
   addr: '',
@@ -45,7 +45,7 @@ export const NetProvider = ({children}) => {
     return () => {
       ignore = true
     }
-  }, 1000)
+  }, null)
 
   useEffect(() => {
     let ignore = false
