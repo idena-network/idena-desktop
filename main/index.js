@@ -1,7 +1,7 @@
 // Native
 const {join, resolve} = require('path')
 const {format} = require('url')
-const sharp = require('sharp')
+// const sharp = require('sharp')
 
 // Packages
 const {BrowserWindow, app, ipcMain, Tray, Menu} = require('electron')
@@ -115,19 +115,19 @@ ipcMain.on('node-log', ({sender}, message) => {
 })
 
 ipcMain.on(channels.compressFlipSource, (ev, message) => {
-  sharp(message)
-    // .resize(300)
-    .jpeg({
-      quality: 50,
-      progressive: true,
-      trellisQuantisation: true,
-      quantizationTable: 5,
-    })
-    .toBuffer()
-    .then(data => ev.sender.send(channels.compressFlipSource, data))
-    .catch(err => {
-      // eslint-disable-next-line no-console
-      console.error(err)
-      throw new Error(err)
-    })
+  // sharp(message)
+  //   // .resize(300)
+  //   .jpeg({
+  //     quality: 50,
+  //     progressive: true,
+  //     trellisQuantisation: true,
+  //     quantizationTable: 5,
+  //   })
+  //   .toBuffer()
+  //   .then(data => ev.sender.send(channels.compressFlipSource, data))
+  //   .catch(err => {
+  //     // eslint-disable-next-line no-console
+  //     console.error(err)
+  //     throw new Error(err)
+  //   })
 })
