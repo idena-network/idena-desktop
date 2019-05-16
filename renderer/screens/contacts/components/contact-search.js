@@ -7,7 +7,7 @@ function ContactSearch() {
   return (
     <div>
       <input type="search" placeholder="Search" />
-      <Link href="/contact-new">
+      <Link href="/contacts/new">
         <AddIcon />
       </Link>
       <style jsx>{`

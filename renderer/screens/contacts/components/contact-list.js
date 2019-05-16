@@ -32,7 +32,7 @@ function ContactList({
           {contacts.map(({addr, ...contactProps}) => (
             <Link
               key={addr}
-              href={`/contacts/screens/contact-view?addr=${addr}`}
+              href={`/contacts/screens/contacts/view?addr=${addr}`}
             >
               <ContactCard key={addr} id={addr} {...contactProps} />
             </Link>

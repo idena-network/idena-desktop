@@ -45,7 +45,7 @@ export const NetProvider = ({children}) => {
     return () => {
       ignore = true
     }
-  }, null)
+  }, 10000)
 
   useEffect(() => {
     let ignore = false

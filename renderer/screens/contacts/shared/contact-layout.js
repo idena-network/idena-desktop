@@ -26,15 +26,17 @@ function ContactLayout({children}) {
   const [, setSelectedContact] = useState(null)
 
   useEffect(() => {
-    setContacts(
-      savedContacts.map(c => {
-        const id = identities && identities.find(i => i.address === c.addr)
-        return {
-          ...c,
-          status: (id && id.state) || 'Undefined',
-        }
-      })
-    )
+    if (savedContacts) {
+      setContacts(
+        savedContacts.map(c => {
+          const id = identities && identities.find(i => i.address === c.addr)
+          return {
+            ...c,
+            status: (id && id.state) || 'Undefined',
+          }
+        })
+      )
+    }
   }, [identities, savedContacts])
 
   useEffect(() => {

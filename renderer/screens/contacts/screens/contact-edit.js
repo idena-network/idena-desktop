@@ -18,7 +18,7 @@ function ContactEdit({router: {query}}) {
             {...contact}
             onSave={editContact => {
               updateContact(addr, editContact)
-              Router.push(`/contacts/screens/contact-view?addr=${addr}`)
+              Router.push(`/contacts/screens/contacts/view?addr=${addr}`)
             }}
           />
         </Layout>

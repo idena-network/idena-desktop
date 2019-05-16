@@ -10,7 +10,6 @@ export function UserActions({
 }) {
   return (
     <Box p="1em 0">
-      <button type="button">Share Idena</button>
       <button type="button" onClick={onToggleSendInvite}>
         Invite people
       </button>
