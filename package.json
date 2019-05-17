@@ -33,9 +33,6 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
-    "next": "^8.1.0",
-    "react": "^16.8.4",
-    "react-dom": "^16.8.4",
     "prettier": "^1.16.4"
   },
   "dependencies": {
@@ -45,8 +42,11 @@
     "electron-is-dev": "^1.0.1",
     "electron-next": "^3.1.5",
     "nanoid": "^2.0.1",
+    "next": "^8.1.0",
     "polished": "^3.3.0",
     "prop-types": "^15.6.2",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
     "react-beautiful-dnd": "^10.0.4",
     "react-cropper": "^1.2.0",
     "rlp": "^2.2.2",

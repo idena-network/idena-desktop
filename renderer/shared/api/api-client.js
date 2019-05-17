@@ -3,7 +3,7 @@ import getConfig from 'next/config'
 
 const {publicRuntimeConfig} = getConfig()
 
-export const {baseUrl = '//localhost:9009'} = publicRuntimeConfig
+export const {baseUrl = 'http://localhost:9009'} = publicRuntimeConfig
 
 export const {MOCK = true} = process.env
 
