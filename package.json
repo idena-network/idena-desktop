@@ -46,11 +46,10 @@
     "polished": "^3.3.0",
     "prop-types": "^15.6.2",
     "react": "^16.8.4",
-    "react-dom": "^16.8.4",
     "react-beautiful-dnd": "^10.0.4",
     "react-cropper": "^1.2.0",
-    "rlp": "^2.2.2",
-    "sharp": "^0.21.3"
+    "react-dom": "^16.8.4",
+    "rlp": "^2.2.2"
   },
   "prettier": {
     "trailingComma": "es5",
