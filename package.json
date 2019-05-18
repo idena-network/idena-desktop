@@ -52,9 +52,6 @@
     "rlp": "^2.2.2",
     "sharp": "^0.21.3"
   },
-  "optionalDependencies": {
-    "preact": "^8.4.2"
-  },
   "prettier": {
     "trailingComma": "es5",
     "semi": false,
