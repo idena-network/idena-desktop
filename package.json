@@ -5,6 +5,7 @@
   "main": "main/index.js",
   "scripts": {
     "start": "electron .",
+    "postinstall": "electron-builder install-app-deps",
     "build": "next build renderer && next export renderer",
     "dist": "npm run build && build --dir",
     "lint": "eslint .",
@@ -14,15 +15,25 @@
     "node:clean": "make clean"
   },
   "build": {
+    "appId": "io.idena",
     "asar": false,
+    "files": [
+      "**/*",
+      "!renderer",
+      "renderer/out"
+    ],
     "extraResources": [
       {
         "from": "renderer/out",
         "to": "app/renderer"
       }
-    ]
+    ],
+    "mac": {
+      "icon": "main/static/icons/mac.icns"
+    }
   },
   "devDependencies": {
+    "@zeit/next-css": "^1.0.1",
     "babel-eslint": "^10.0.1",
     "electron": "^4.1.0",
     "electron-builder": "^20.39.0",
@@ -33,22 +44,21 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
-    "prettier": "^1.16.4"
+    "prettier": "^1.16.4",
+    "next": "^8.1.0",
+    "prop-types": "^15.6.2",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4"
   },
   "dependencies": {
-    "@zeit/next-css": "^1.0.1",
     "ansi-to-html": "^0.6.10",
     "axios": "^0.18.0",
     "electron-is-dev": "^1.0.1",
     "electron-next": "^3.1.5",
     "nanoid": "^2.0.1",
-    "next": "^8.1.0",
     "polished": "^3.3.0",
-    "prop-types": "^15.6.2",
-    "react": "^16.8.4",
     "react-beautiful-dnd": "^10.0.4",
     "react-cropper": "^1.2.0",
-    "react-dom": "^16.8.4",
     "rlp": "^2.2.2"
   },
   "prettier": {
