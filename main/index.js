@@ -14,6 +14,9 @@ const {startNode} = require('./idenaNode')
 let mainWindow
 let tray
 
+// Possible values are: 'darwin', 'freebsd', 'linux', 'sunos' or 'win32'
+const isWin = process.platform === 'win32'
+
 const createMainWindow = () => {
   mainWindow = new BrowserWindow({
     title: app.getName(),
@@ -55,6 +58,11 @@ const createMainWindow = () => {
 
 const createTray = () => {
   tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-dark-2.png'))
+
+  if (isWin) {
+    tray.on('click', openMainWindow)
+  }
+
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Open Idena',
