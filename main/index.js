@@ -60,7 +60,7 @@ const createTray = () => {
   tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-dark-2.png'))
 
   if (isWin) {
-    tray.on('click', openMainWindow)
+    tray.on('click', showMainWindow)
   }
 
   const contextMenu = Menu.buildFromTemplate([
