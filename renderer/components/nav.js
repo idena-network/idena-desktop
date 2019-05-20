@@ -23,8 +23,9 @@ const NavItem = withRouter(({href, router, children}) => {
           border-radius: 4px;
           color: ${theme.colors.white05};
           cursor: pointer;
+          padding: 0 1em;
+          line-height: 2.2em;
           margin: 0 0 0.5em;
-          padding: 0.5em 1em;
         }
         li:hover {
           border-radius: 4px;
