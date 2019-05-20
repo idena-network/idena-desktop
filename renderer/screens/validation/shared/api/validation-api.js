@@ -18,7 +18,7 @@ import api from '../../../../shared/api/api-client'
  * @example [{hash: "0x123", ready: true}, {hash: "0x99999", ready: false}]
  */
 export async function fetchFlipHashes(type) {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: `flip_${type}Hashes`,
     params: [],
     id: 1,
@@ -56,7 +56,7 @@ export async function fetchFlipHashes(type) {
  *  ({answers: [{hash: "0x123", easy: false, answer: 1}], nonce: 0, epoch: 0}) => '0xfe516a684f99c8f6ef7674a08a81eb6b856efd76141cf97eb83ee323897af7e8'
  */
 export async function submitShortAnswers(answers, nonce, epoch) {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: 'flip_submitShortAnswers',
     params: [{answers, nonce, epoch}],
     id: 1,
@@ -74,7 +74,7 @@ export async function submitShortAnswers(answers, nonce, epoch) {
  * @example 0xfe516a684f99c8f6ef7674a08a81eb6b856efd76141cf97eb83ee323897af7e8
  */
 export async function submitLongAnswers(answers, nonce, epoch) {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: 'flip_submitLongAnswers',
     params: [{answers, nonce, epoch}],
     id: 1,

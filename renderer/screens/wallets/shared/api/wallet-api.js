@@ -8,7 +8,7 @@ import api from '../../../../shared/api/api-client'
  * @example ["0xb7d1f23705abecb50fdd010a881647227153b8ac"]
  */
 export async function fetchAccountList() {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: `account_list`,
     params: [],
     id: 1,

@@ -3,7 +3,7 @@ import api from './api-client'
 import {strip} from '../utils/obj'
 
 export async function sendInvite(addr, amount) {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: 'dna_sendInvite',
     params: [strip({to: addr, amount})],
     id: 1,
@@ -13,7 +13,7 @@ export async function sendInvite(addr, amount) {
 }
 
 export async function activateInvite(to, key) {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: 'dna_activateInvite',
     params: [strip({to, key})],
     id: 1,
@@ -23,7 +23,7 @@ export async function activateInvite(to, key) {
 }
 
 export async function fetchIdentities() {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: 'dna_identities',
     params: [],
     id: 1,
@@ -52,7 +52,7 @@ export async function fetchIdentities() {
  * }
  */
 export async function fetchEpoch() {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: 'dna_epoch',
     params: [],
     id: 1,
@@ -74,7 +74,7 @@ export async function fetchEpoch() {
   }
  */
 export async function fetchCeremonyIntervals() {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: 'dna_ceremonyIntervals',
     params: [],
     id: 1,

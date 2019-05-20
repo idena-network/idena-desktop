@@ -78,6 +78,7 @@ function Nav({user}) {
         <NavItem href="/contacts">Contacts</NavItem>
         <NavItem href="/chats">Chats</NavItem>
         <NavItem href="/wallets">Wallets</NavItem>
+        <NavItem href="/settings">Settings</NavItem>
         {/* TODO: for internal testing purposes only, remove then */}
         <If condition={true || validationRunning}>
           <NavItem href="/validation">Validation (helper)</NavItem>

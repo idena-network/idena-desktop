@@ -2,7 +2,7 @@
 import api from './api-client'
 
 export async function fetchTx(hash) {
-  const {data} = await api.post('/', {
+  const {data} = await api().post('/', {
     method: 'bcn_transaction',
     params: [hash],
     id: 1,
