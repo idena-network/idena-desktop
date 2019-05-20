@@ -8,6 +8,7 @@
     "postinstall": "electron-builder install-app-deps",
     "build": "next build renderer && next export renderer",
     "dist": "npm run build && build --dir",
+    "clean": "rm -rf renderer/out dist",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "node": "make node",
