@@ -57,6 +57,7 @@
     "electron-is-dev": "^1.0.1",
     "electron-next": "^3.1.5",
     "nanoid": "^2.0.1",
+    "nprogress": "^0.2.0",
     "polished": "^3.3.0",
     "react-beautiful-dnd": "^10.0.4",
     "react-cropper": "^1.2.0",

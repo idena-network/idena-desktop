@@ -1,6 +1,5 @@
 import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
-import GlobalStyle from './global-style'
 import SidebarNav from './nav'
 import NetContext from '../shared/providers/net-provider'
 import {Absolute, Box, Link, Fill} from '../shared/components'
@@ -11,7 +10,6 @@ function Layout({NavMenu = SidebarNav, children}) {
   const {currentPeriod, validationSoon} = useContext(NetContext)
   return (
     <>
-      <GlobalStyle />
       <main>
         <NavMenu user={{name: 'Alex'}} />
         <div>{children}</div>
