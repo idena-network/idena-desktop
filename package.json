@@ -45,13 +45,13 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
-    "prettier": "^1.16.4",
+    "prettier": "^1.16.4"
+  },
+  "dependencies": {
     "next": "^8.1.0",
     "prop-types": "^15.6.2",
     "react": "^16.8.4",
-    "react-dom": "^16.8.4"
-  },
-  "dependencies": {
+    "react-dom": "^16.8.4",
     "ansi-to-html": "^0.6.10",
     "axios": "^0.18.0",
     "electron-is-dev": "^1.0.1",
