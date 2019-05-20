@@ -2,17 +2,10 @@ import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {encode} from 'rlp'
-import nanoid from 'nanoid'
 import CreateFlipStep from './create-flip-step'
 import {Box, SubHeading, Text} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
-import {
-  FLIPS_STORAGE_KEY,
-  appendToLocalStorage,
-  FLIP_DRAFTS_STORAGE_KEY,
-  getFromLocalStorage,
-  setToLocalStorage,
-} from '../../../utils/storage'
+import {FLIPS_STORAGE_KEY, appendToLocalStorage} from '../../../utils/storage'
 import theme from '../../../../../shared/theme'
 import CreateFlipForm from './create-flip-form'
 import FlipShuffle from './flip-shuffle'
@@ -22,6 +15,7 @@ import SubmitFlip from './submit-flip'
 import {submitFlip} from '../../../../../shared/services/api'
 import {toHex} from '../../../../../shared/utils/req'
 import {set as setToCache} from '../utils/cache'
+import {randomFlipOrder} from '../utils/order'
 
 const initialPics = [
   `https://placehold.it/480?text=1`,
@@ -58,7 +52,7 @@ function CreateFlipMaster({pics: savedPics, caption, id}) {
 
     const hexBuff = encode([
       arrayBuffers.map(ab => new Uint8Array(ab)),
-      [pics.map((_, i) => i), randomOrder],
+      randomFlipOrder(pics, randomOrder),
     ])
 
     try {
