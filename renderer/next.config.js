@@ -1,5 +1,3 @@
-const withCSS = require('@zeit/next-css')
-
 const config = {
   publicRuntimeConfig: {
     baseUrl: process.env.BASE_URL,
@@ -35,4 +33,4 @@ const config = {
   },
 }
 
-module.exports = withCSS(config)
+module.exports = config
