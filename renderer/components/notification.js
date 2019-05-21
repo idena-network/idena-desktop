@@ -4,12 +4,14 @@ import Flex from '../shared/components/flex'
 import {Box, Text} from '../shared/components'
 import theme from '../shared/theme'
 
-function Notification({title, body}) {
+function Notification({title, body, type = 'notification'}) {
+  const {danger, gray} = theme.colors
+  const regular = type === 'notification'
   return (
     <div>
       <Flex width="100%" justify="center">
         <Box
-          bg={theme.colors.gray}
+          bg={regular ? gray : danger}
           p={theme.spacings.normal}
           css={{borderRadius: '10px'}}
         >
@@ -25,6 +27,7 @@ function Notification({title, body}) {
 Notification.propTypes = {
   title: PropTypes.string.isRequired,
   body: PropTypes.string,
+  type: PropTypes.oneOf(['notification', 'alert']),
 }
 
 export default Notification

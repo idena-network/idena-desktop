@@ -10,7 +10,7 @@ import Notification from './notification'
 
 function Layout({NavMenu = SidebarNav, children}) {
   const {currentPeriod, validationSoon} = useContext(NetContext)
-  const {notifications} = useContext(NotificationContext)
+  const {notifications, alerts} = useContext(NotificationContext)
   return (
     <>
       <main>
@@ -60,6 +60,17 @@ function Layout({NavMenu = SidebarNav, children}) {
         <Absolute top="1em" left="0" right="0">
           {notifications.map(notification => (
             <Notification key={notification.title} {...notification} />
+          ))}
+        </Absolute>
+      )}
+      {alerts && (
+        <Absolute top="1em" left="0" right="0">
+          {alerts.map(notification => (
+            <Notification
+              type="alert"
+              key={notification.title}
+              {...notification}
+            />
           ))}
         </Absolute>
       )}

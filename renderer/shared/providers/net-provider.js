@@ -1,8 +1,9 @@
-import React, {createContext, useState, useEffect} from 'react'
+import React, {createContext, useState, useEffect, useContext} from 'react'
 import PropTypes from 'prop-types'
 import {fetchAddress, fetchBalance} from '../services/api'
 import {fetchIdentities, fetchEpoch} from '../api/dna'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+import {NotificationContext} from './notification-provider'
 
 const initialState = {
   addr: '',
@@ -15,8 +16,9 @@ const initialState = {
 const NetContext = createContext()
 
 export const NetProvider = ({children}) => {
-  const [info, setInfo] = useState(initialState)
+  const {onAddAlert, onClearAlert} = useContext(NotificationContext)
 
+  const [info, setInfo] = useState(initialState)
   const [epoch, setEpoch] = useState()
 
   useInterval(() => {
@@ -24,19 +26,27 @@ export const NetProvider = ({children}) => {
 
     async function fetchData() {
       if (!ignore) {
-        const epochResult = await fetchEpoch()
-        const {currentPeriod, nextValidation} = epochResult
-        const validationRunning = currentPeriod.toLowerCase() !== 'none'
-        const secondsLeft =
-          new Date(nextValidation).getTime() - new Date().getTime()
-        const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
+        try {
+          const epochResult = await fetchEpoch()
+          const {currentPeriod, nextValidation} = epochResult
+          const validationRunning = currentPeriod.toLowerCase() !== 'none'
+          const secondsLeft =
+            new Date(nextValidation).getTime() - new Date().getTime()
+          const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
 
-        setEpoch({
-          ...epochResult,
-          validationRunning,
-          validationSoon,
-          secondsLeft,
-        })
+          setEpoch({
+            ...epochResult,
+            validationRunning,
+            validationSoon,
+            secondsLeft,
+          })
+          onClearAlert()
+        } catch (error) {
+          onAddAlert({
+            title: 'Cannot connect to node',
+            body: error.message,
+          })
+        }
       }
     }
 
