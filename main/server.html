@@ -6,6 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Image search</title>
     <script type="text/javascript">
+      const {IMAGE_SEARCH_TOGGLE, IMAGE_SEARCH_PICK} = require('./channels.js')
+
       let pickerApiLoaded = false
 
       function onApiLoad() {
@@ -44,14 +46,13 @@
         let url = ''
         const action = data[google.picker.Response.ACTION]
         if (action === google.picker.Action.PICKED) {
-          const doc = data[google.picker.Response.DOCUMENTS][0]
           if (ipcRenderer) {
-            ipcRenderer.send('image-search/picked', doc)
-            ipcRenderer.send('image-search/toggle', 0)
+            ipcRenderer.send(IMAGE_SEARCH_PICK, data)
+            ipcRenderer.send(IMAGE_SEARCH_TOGGLE, 0)
           }
         } else if (action === google.picker.Action.CANCEL) {
           if (ipcRenderer) {
-            ipcRenderer.send('image-search/toggle', 0)
+            ipcRenderer.send(IMAGE_SEARCH_TOGGLE, 0)
           }
         }
       }

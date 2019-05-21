@@ -34,7 +34,7 @@ export function useDataUrl(imageUrl) {
   return dataUrl
 }
 
-export function convertImgToBase64URL(url, callback, outputFormat) {
+export function convertToBase64Url(url, callback, outputFormat) {
   const img = new Image()
   img.crossOrigin = 'anonymous'
   img.onload = () => {

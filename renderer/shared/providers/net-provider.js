@@ -21,38 +21,10 @@ export const NetProvider = ({children}) => {
   const [info, setInfo] = useState(initialState)
   const [epoch, setEpoch] = useState()
 
-  async function fetchEpochData(ignore) {
-    if (!ignore) {
-      try {
-        const epochResult = await fetchEpoch()
-        const {currentPeriod, nextValidation} = epochResult
-        const validationRunning = currentPeriod.toLowerCase() !== 'none'
-        const secondsLeft =
-          new Date(nextValidation).getTime() - new Date().getTime()
-        const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
-
-        setEpoch({
-          ...epochResult,
-          validationRunning,
-          validationSoon,
-          secondsLeft,
-        })
-        onClearAlert()
-      } catch (error) {
-        onAddAlert({
-          title: 'Cannot connect to node',
-          body: error.message,
-        })
-      }
-    }
-  }
-
   useEffect(() => {
     let ignore = false
 
     async function fetchInfo() {
-      fetchEpochData(ignore)
-
       if (!ignore) {
         const addr = await fetchAddress()
         const balance = await fetchBalance(addr)
@@ -79,17 +51,44 @@ export const NetProvider = ({children}) => {
     return () => {
       ignore = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useInterval(() => {
     let ignore = false
 
-    fetchEpochData(ignore)
+    async function fetchData() {
+      if (!ignore) {
+        try {
+          const epochResult = await fetchEpoch()
+          const {currentPeriod, nextValidation} = epochResult
+          const validationRunning = currentPeriod.toLowerCase() !== 'none'
+          const secondsLeft =
+            new Date(nextValidation).getTime() - new Date().getTime()
+          const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
+
+          setEpoch({
+            ...epochResult,
+            validationRunning,
+            validationSoon,
+            secondsLeft,
+          })
+          onClearAlert()
+        } catch (error) {
+          onAddAlert({
+            title: 'Cannot connect to node',
+            body: error.message,
+          })
+        }
+      }
+    }
+
+    fetchData()
 
     return () => {
       ignore = true
     }
-  }, 3000)
+  }, 5000)
 
   return (
     <NetContext.Provider value={{...info, ...epoch}}>

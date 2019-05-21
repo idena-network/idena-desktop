@@ -5,8 +5,11 @@ import {Box, Button} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import ImageEditor from './image-editor'
 import theme from '../../../../../shared/theme'
-import useScript from '../../../utils/useScript'
-import {useDataUrl} from '../../../utils/useDataUrl'
+import {convertToBase64Url} from '../../../utils/useDataUrl'
+import {
+  IMAGE_SEARCH_PICK,
+  IMAGE_SEARCH_TOGGLE,
+} from '../../../../../../main/channels'
 
 const activeStyle = {
   border: `solid 2px ${theme.colors.primary}`,
@@ -14,24 +17,22 @@ const activeStyle = {
 
 function CreateFlipForm({pics, onUpdateFlip}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [pickerLoaded, setPickerLoaded] = useState(false)
-  const [imageUrl, setImageUrl] = useState(null)
+  const [pickedUrl, setPickedUrl] = useState('')
 
-  // const onCompressEnd = (_ev, data) => {
-  //   setPics([
-  //     ...pics.slice(0, globIdx),
-  //     URL.createObjectURL(new Blob([data], {type: 'image/jpeg'})),
-  //     ...pics.slice(globIdx + 1),
-  //   ])
-  // }
+  const handleImageSearchPick = (_, data) => {
+    const [{url}] = data.docs[0].thumbnails
+    setPickedUrl(url)
+  }
 
-  // useEffect(() => {
-  //   global.ipcRenderer.on(compressChannel, onCompressEnd)
-
-  //   return () => {
-  //     global.ipcRenderer.removeListener(compressChannel, onCompressEnd)
-  //   }
-  // }, [])
+  useEffect(() => {
+    global.ipcRenderer.on(IMAGE_SEARCH_PICK, handleImageSearchPick)
+    return () => {
+      global.ipcRenderer.removeListener(
+        IMAGE_SEARCH_PICK,
+        handleImageSearchPick
+      )
+    }
+  }, [])
 
   const handleUpload = e => {
     e.preventDefault()
@@ -49,66 +50,22 @@ function CreateFlipForm({pics, onUpdateFlip}) {
         re.target.result,
         ...pics.slice(selectedIndex + 1),
       ])
-      // global.ipcRenderer.send(
-      //   compressChannel,
-      //   new Uint8Array(readerEvent.target.result)
-      // )
     })
     reader.readAsDataURL(file)
   }
 
-  const handleEdit = img => {
-    onUpdateFlip([
-      ...pics.slice(0, selectedIndex),
-      img,
-      ...pics.slice(selectedIndex + 1),
-    ])
-  }
-
-  const [gapiLoaded, gapiError] = useScript('https://apis.google.com/js/api.js')
-
   useEffect(() => {
-    // gapi.load('auth2', onAuthApiLoad)
-    if (gapiLoaded && !gapiError) {
-      gapi.load('picker', () => setPickerLoaded(true))
+    if (pickedUrl) {
+      convertToBase64Url(pickedUrl, base64Url => {
+        onUpdateFlip([
+          ...pics.slice(0, selectedIndex),
+          base64Url,
+          ...pics.slice(selectedIndex + 1),
+        ])
+      })
     }
-  }, [gapiLoaded, gapiError])
-
-  const base64Url = useDataUrl(imageUrl)
-
-  useEffect(() => {
-    if (base64Url) {
-      onUpdateFlip([
-        ...pics.slice(0, selectedIndex),
-        base64Url,
-        ...pics.slice(selectedIndex + 1),
-      ])
-    }
-  }, [base64Url, onUpdateFlip, pics, selectedIndex])
-
-  // A simple callback implementation.
-  function pickerCallback(data) {
-    if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
-      const doc = data[google.picker.Response.DOCUMENTS][0]
-      const [{url}] = doc[google.picker.Document.THUMBNAILS]
-      setImageUrl(url)
-    }
-  }
-
-  // Create and render a Picker object for picking user Photos.
-  function createPicker() {
-    const view = new google.picker.View(google.picker.ViewId.IMAGE_SEARCH)
-    view.setMimeTypes('image/png,image/jpeg,image/jpg')
-
-    const picker = new google.picker.PickerBuilder()
-      .addView(view)
-      // .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-      .enableFeature(google.picker.Feature.NAV_HIDDEN)
-      .hideTitleBar()
-      .setCallback(pickerCallback)
-      .build()
-    picker.setVisible(true)
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickedUrl])
 
   return (
     <Flex>
@@ -126,7 +83,7 @@ function CreateFlipForm({pics, onUpdateFlip}) {
         ))}
       </Box>
       <Box p={theme.spacings.normal}>
-        <ImageEditor src={pics[selectedIndex]} onEdit={handleEdit} />
+        <ImageEditor src={pics[selectedIndex]} />
         <Flex justify="space-around">
           <input
             type="file"
@@ -136,12 +93,11 @@ function CreateFlipForm({pics, onUpdateFlip}) {
           />
 
           <Button
-            disabled={!pickerLoaded}
             onClick={() => {
-              createPicker()
+              global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, 1)
             }}
           >
-            {pickerLoaded ? 'Search on Google' : 'Waiting...'}
+            Search on Google
           </Button>
         </Flex>
       </Box>
@@ -154,4 +110,4 @@ CreateFlipForm.propTypes = {
   onUpdateFlip: PropTypes.func.isRequired,
 }
 
-export default CreateFlipForm
+export default React.memo(CreateFlipForm)

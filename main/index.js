@@ -1,15 +1,11 @@
-// Native
 const {join, resolve} = require('path')
 const {format} = require('url')
-// const sharp = require('sharp')
-
-// Packages
 const {BrowserWindow, app, ipcMain, Tray, Menu} = require('electron')
 const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
 const express = require('express')
 
-const channels = require('./channels')
+const {IMAGE_SEARCH_TOGGLE, IMAGE_SEARCH_PICK} = require('./channels')
 const {startNode} = require('./idenaNode')
 
 let mainWindow
@@ -116,24 +112,6 @@ ipcMain.on('node-log', ({sender}, message) => {
   sender.send('node-log', message)
 })
 
-ipcMain.on(channels.compressFlipSource, (ev, message) => {
-  // sharp(message)
-  //   // .resize(300)
-  //   .jpeg({
-  //     quality: 50,
-  //     progressive: true,
-  //     trellisQuantisation: true,
-  //     quantizationTable: 5,
-  //   })
-  //   .toBuffer()
-  //   .then(data => ev.sender.send(channels.compressFlipSource, data))
-  //   .catch(err => {
-  //     // eslint-disable-next-line no-console
-  //     console.error(err)
-  //     throw new Error(err)
-  //   })
-})
-
 const server = express()
 server.get('/', (_, res) => {
   res.sendFile(resolve(__dirname, './server.html'))
@@ -145,7 +123,7 @@ server.listen(3000, () => {
 })
 
 let searchWindow
-ipcMain.on('image-search/toggle', (event, message) => {
+ipcMain.on(IMAGE_SEARCH_TOGGLE, (event, message) => {
   if (message) {
     searchWindow = new BrowserWindow({
       width: 800,
@@ -160,11 +138,11 @@ ipcMain.on('image-search/toggle', (event, message) => {
     searchWindow.loadURL('http://localhost:3000/')
   }
 })
-ipcMain.on('image-search/toggle', (event, message) => {
+ipcMain.on(IMAGE_SEARCH_TOGGLE, (event, message) => {
   if (!message) {
     searchWindow.close()
   }
 })
-ipcMain.on('image-search/picked', (event, message) => {
-  mainWindow.webContents.send('image-search/picked-main', message)
+ipcMain.on(IMAGE_SEARCH_PICK, (event, message) => {
+  mainWindow.webContents.send(IMAGE_SEARCH_PICK, message)
 })

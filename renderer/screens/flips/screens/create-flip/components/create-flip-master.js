@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from 'react'
+import React, {useState, useEffect, useContext, useCallback} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {encode} from 'rlp'
@@ -43,12 +43,13 @@ function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
       createdAt: Date.now(),
       pics,
     })
-  }, [step, pics])
+  }, [step, pics, hint, id])
 
   useEffect(() => {
     return () => {
       onAddNotification({title: 'Flip has been saved to drafts'})
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSubmitFlip = async () => {
@@ -100,7 +101,14 @@ function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
     {
       title: 'Create a story',
       desc: `Select 4 images to create a story with words: ${hint.join(',')}`,
-      children: <CreateFlipForm pics={pics} onUpdateFlip={setPics} />,
+      children: (
+        <CreateFlipForm
+          pics={pics}
+          onUpdateFlip={nextPics => {
+            setPics(nextPics)
+          }}
+        />
+      ),
     },
     {
       title: 'Shuffle images',
@@ -176,7 +184,7 @@ function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
               }
               last={last}
               allowSubmit={pics.every(
-                src => src.startsWith('data') && validated
+                src => src && src.startsWith('data') && validated
               )}
             >
               {children}
