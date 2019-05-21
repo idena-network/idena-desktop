@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {encode} from 'rlp'
 import CreateFlipStep from './create-flip-step'
-import {Box, SubHeading, Text} from '../../../../../shared/components'
+import {Box, SubHeading, Text, Absolute} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import {FLIPS_STORAGE_KEY, appendToLocalStorage} from '../../../utils/storage'
 import theme from '../../../../../shared/theme'
@@ -24,7 +24,7 @@ const initialPics = [
   `https://placehold.it/480?text=4`,
 ]
 
-function CreateFlipMaster({pics: savedPics, caption, id}) {
+function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
   const [pics, setPics] = useState(savedPics || initialPics)
   const [hint, setHint] = useState(
     (caption && caption.split('/')) || getRandomHint()
@@ -32,7 +32,6 @@ function CreateFlipMaster({pics: savedPics, caption, id}) {
   const [randomOrder, setRandomOrder] = useState([0, 1, 2, 3])
   const [submitFlipResult, setSubmitFlipResult] = useState()
   const [step, setStep] = useState(0)
-  const [lastSaved, setLastSaved] = useState()
 
   useEffect(() => {
     setToCache({
@@ -41,8 +40,13 @@ function CreateFlipMaster({pics: savedPics, caption, id}) {
       createdAt: Date.now(),
       pics,
     })
-    setLastSaved(Date.now())
   }, [step, pics])
+
+  useEffect(() => {
+    return () => {
+      onAddNotification({title: 'Flip has been saved to drafts'})
+    }
+  }, [])
 
   const handleSubmitFlip = async () => {
     const arrayBuffers = pics.map(src => {
@@ -160,15 +164,6 @@ function CreateFlipMaster({pics: savedPics, caption, id}) {
               key={title}
               desc={desc}
               onPrev={() => setStep(step - 1)}
-              onSaveDraft={() => {
-                setToCache({
-                  id,
-                  caption: hint.join('/'),
-                  createdAt: Date.now(),
-                  pics,
-                })
-                setLastSaved(Date.now())
-              }}
               onNext={
                 last
                   ? handleSubmitFlip
@@ -177,13 +172,26 @@ function CreateFlipMaster({pics: savedPics, caption, id}) {
                     }
               }
               last={last}
-              lastSaved={lastSaved}
             >
               {children}
             </CreateFlipStep>
           )
         })[step]
       }
+      <Absolute top="1em" right="2em">
+        <Text
+          fontSize="3em"
+          css={{cursor: 'pointer'}}
+          onClick={() => {
+            if (onAddNotification) {
+              onAddNotification({title: 'Flip has been saved to drafts'})
+            }
+            Router.push('/flips')
+          }}
+        >
+          &times;
+        </Text>
+      </Absolute>
     </Box>
   )
 }
@@ -192,6 +200,7 @@ CreateFlipMaster.propTypes = {
   id: PropTypes.string,
   caption: PropTypes.string,
   pics: PropTypes.arrayOf(PropTypes.string),
+  onAddNotification: PropTypes.func,
 }
 
 export default CreateFlipMaster

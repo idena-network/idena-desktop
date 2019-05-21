@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
 import {Heading, Box} from '../../shared/components'
@@ -9,6 +9,7 @@ import {
   getFromLocalStorage,
   FLIP_DRAFTS_STORAGE_KEY,
 } from '../../screens/flips/utils/storage'
+import {NotificationContext} from '../../shared/providers/notification-provider'
 
 function EditFlip({router}) {
   if (router && router.query) {
@@ -16,11 +17,18 @@ function EditFlip({router}) {
     const draft = getFromLocalStorage(FLIP_DRAFTS_STORAGE_KEY).find(
       ({id}) => id === draftId
     )
+
+    const {onAddNotification} = useContext(NotificationContext)
+
     return (
       <Layout>
         <Box p={theme.spacings.large}>
           <Heading>Edit flip</Heading>
-          <CreateFlipMaster id={draftId} {...draft} />
+          <CreateFlipMaster
+            id={draftId}
+            {...draft}
+            onAddNotification={onAddNotification}
+          />
         </Box>
       </Layout>
     )

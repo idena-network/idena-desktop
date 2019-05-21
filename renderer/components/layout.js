@@ -5,9 +5,12 @@ import NetContext from '../shared/providers/net-provider'
 import {Absolute, Box, Link, Fill} from '../shared/components'
 import theme from '../shared/theme'
 import Flex from '../shared/components/flex'
+import {NotificationContext} from '../shared/providers/notification-provider'
+import Notification from './notification'
 
 function Layout({NavMenu = SidebarNav, children}) {
   const {currentPeriod, validationSoon} = useContext(NetContext)
+  const {notifications} = useContext(NotificationContext)
   return (
     <>
       <main>
@@ -53,6 +56,13 @@ function Layout({NavMenu = SidebarNav, children}) {
           </Box>
         )}
       </Absolute>
+      {notifications && (
+        <Absolute top="1em" left="0" right="0">
+          {notifications.map(notification => (
+            <Notification key={notification.title} {...notification} />
+          ))}
+        </Absolute>
+      )}
     </>
   )
 }
