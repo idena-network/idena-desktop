@@ -11,7 +11,6 @@ import {
 import theme from '../../../shared/theme'
 
 export function ActivateInviteForm({to, activateResult, onActivateInviteSend}) {
-  const toInputRef = useRef(null)
   const keyInputRef = useRef(null)
   return (
     <Box p="2em">
@@ -19,19 +18,12 @@ export function ActivateInviteForm({to, activateResult, onActivateInviteSend}) {
         <SubHeading>Activate invite</SubHeading>
       </Box>
       <FormGroup>
-        <Label htmlFor="activateInviteTo">To</Label>
-        <Input defaultValue={to} ref={toInputRef} id="activateInviteTo" />
-      </FormGroup>
-      <FormGroup>
         <Label htmlFor="activateInviteKey">Key</Label>
         <Input ref={keyInputRef} id="activateInviteKey" />
       </FormGroup>
       <Button
         onClick={() => {
-          onActivateInviteSend(
-            toInputRef.current.value,
-            keyInputRef.current.value
-          )
+          onActivateInviteSend(to, keyInputRef.current.value)
         }}
       >
         Activate invite
