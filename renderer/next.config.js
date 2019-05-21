@@ -4,6 +4,10 @@ const config = {
   publicRuntimeConfig: {
     baseUrl: process.env.BASE_URL,
   },
+  env: {
+    cseCx: process.env.CSE_CX,
+    cseKey: process.env.CSE_KEY,
+  },
   exportPathMap() {
     // Let Next.js know where to find the entry page
     // when it's exporting the static bundle for the use

@@ -14,8 +14,8 @@ export default function() {
         .get('https://www.googleapis.com/customsearch/v1', {
           params: {
             q: term,
-            cx: '006922306588275877551:z2lxdzbssb4',
-            key: 'AIzaSyBd_1sOuiXVyp8GXnmUY1N-ZCNQoDLcUEY',
+            cx: process.env.cseCx,
+            key: process.env.cseKey,
             searchType: 'image',
           },
         })
