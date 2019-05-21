@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useContext} from 'react'
 import Router from 'next/router'
 import {decode} from 'rlp'
 import Layout from '../../screens/validation/shared/components/validation-layout'
@@ -19,6 +19,7 @@ import {
   types as answerTypes,
 } from '../../screens/validation/shared/utils/answers'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+import {ValidationContext} from '../../shared/providers/validation-provider'
 
 export default function() {
   const [flips, setFlips] = useState([])
@@ -28,6 +29,8 @@ export default function() {
   const [answers, setAnswers] = useState([])
   const [flipsLoaded, setFlipsLoaded] = useState(false)
   const [loadedStates, setLoadedStates] = useState([])
+
+  const {onSubmitLongAnswers} = useContext(ValidationContext)
 
   const handlePrev = () => {
     const prevFlipIdx = Math.max(0, currentFlipIdx - 1)
@@ -67,6 +70,7 @@ export default function() {
       answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
     }))
     await submitLongAnswers(answersPayload, 0, 0)
+    onSubmitLongAnswers()
     Router.replace('/dashboard')
   }
 

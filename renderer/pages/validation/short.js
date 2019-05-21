@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useContext} from 'react'
 import Router from 'next/router'
 import {decode} from 'rlp'
 import Layout from '../../screens/validation/shared/components/validation-layout'
@@ -21,6 +21,7 @@ import {
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import theme from '../../shared/theme'
 import {FLIPS_STORAGE_KEY} from '../../screens/flips/utils/storage'
+import {ValidationContext} from '../../shared/providers/validation-provider'
 
 export default function() {
   const [flips, setFlips] = useState([])
@@ -30,6 +31,8 @@ export default function() {
   const [currentFlipIdx, setCurrentFlipIdx] = useState(0)
   const [answers, setAnswers] = useState([])
   const [flipsLoaded, setFlipsLoaded] = useState(false)
+
+  const {onSubmitShortAnswers} = useContext(ValidationContext)
 
   const handlePrev = () => {
     const prevFlipIdx = Math.max(0, currentFlipIdx - 1)
@@ -72,7 +75,8 @@ export default function() {
     }))
     await submitShortAnswers(answersPayload, 0, 0)
     localStorage.removeItem(FLIPS_STORAGE_KEY)
-    Router.push('/validation/long')
+    onSubmitShortAnswers()
+    Router.push('/dashboard')
   }
 
   useEffect(() => {

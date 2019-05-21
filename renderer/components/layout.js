@@ -2,15 +2,24 @@ import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import SidebarNav from './nav'
 import NetContext from '../shared/providers/net-provider'
-import {Absolute, Box, Link, Fill} from '../shared/components'
+import {Absolute, Box, Text} from '../shared/components'
 import theme from '../shared/theme'
-import Flex from '../shared/components/flex'
 import {NotificationContext} from '../shared/providers/notification-provider'
 import Notification from './notification'
+import ValidationBanner from './validation-banner'
+import {ValidationContext} from '../shared/providers/validation-provider'
 
 function Layout({NavMenu = SidebarNav, children}) {
-  const {currentPeriod, validationSoon} = useContext(NetContext)
+  const {currentPeriod} = useContext(NetContext)
+
   const {notifications, alerts} = useContext(NotificationContext)
+
+  const {
+    shortSessionAnswersSubmitted,
+    longSessionAnswersSubmitted,
+    intervals,
+  } = useContext(ValidationContext)
+
   return (
     <>
       <main>
@@ -30,30 +39,26 @@ function Layout({NavMenu = SidebarNav, children}) {
         `}</style>
       </main>
       <Absolute bottom={0} left={0} right={0}>
-        {validationSoon && (
-          <Box bg="red" p={theme.spacings.normal}>
-            Validation starts in a minute
+        {currentPeriod === 'FlipLottery' && (
+          <Box bg={theme.colors.danger} p={theme.spacings.normal}>
+            <Text color={theme.colors.white}>
+              {`Validation starts in ${intervals.FlipLotteryDuration} min`}
+            </Text>
           </Box>
         )}
         {currentPeriod === 'ShortSession' && (
-          <Box bg={theme.colors.primary} css={{color: theme.colors.white}}>
-            <Flex justify="space-between" align="center">
-              <Flex>
-                <Box p={theme.spacings.normal} css={{position: 'relative'}}>
-                  5 min left
-                  <Fill bg="rgba(0,0,0,0.1)" css={{display: 'none'}}>
-                    &nbsp;
-                  </Fill>
-                </Box>
-                <Box p={theme.spacings.normal}>Idena validation started</Box>
-              </Flex>
-              <Box p={theme.spacings.normal}>
-                <Link href="/validation/short" color={theme.colors.white}>
-                  Validate
-                </Link>
-              </Box>
-            </Flex>
-          </Box>
+          <ValidationBanner
+            shouldValidate={!shortSessionAnswersSubmitted}
+            duration={intervals.ShortSessionDuration}
+            type="short"
+          />
+        )}
+        {currentPeriod === 'LongSession' && (
+          <ValidationBanner
+            shouldValidate={!longSessionAnswersSubmitted}
+            duration={intervals.LongSessionDuration}
+            type="long"
+          />
         )}
       </Absolute>
       {notifications && (

@@ -7,6 +7,7 @@ import {NetProvider} from '../shared/providers/net-provider'
 import GlobalStyle from '../components/global-style'
 import NProgressStyle from '../components/nprogress-style'
 import NotificationProvider from '../shared/providers/notification-provider'
+import ValidationProvider from '../shared/providers/validation-provider'
 
 let idx = 0
 
@@ -32,7 +33,9 @@ class MyApp extends App {
         <NProgressStyle />
         <NotificationProvider>
           <NetProvider key={`net-provider-${idx}`}>
-            <Component {...pageProps} />
+            <ValidationProvider>
+              <Component {...pageProps} />
+            </ValidationProvider>
           </NetProvider>
         </NotificationProvider>
       </Container>
