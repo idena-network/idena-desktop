@@ -1,48 +1,35 @@
-import React, {useState, useEffect} from 'react'
-import axios from 'axios'
+import React, {useEffect} from 'react'
 import Layout from '../components/layout'
-import {Input, Box} from '../shared/components'
-import Flex from '../shared/components/flex'
+import {Box, Button} from '../shared/components'
 
 export default function() {
-  const [images, setImages] = useState([])
-  const [term, setTerm] = useState('')
-
   useEffect(() => {
-    if (term.length > 3) {
-      axios
-        .get('https://www.googleapis.com/customsearch/v1', {
-          params: {
-            q: term,
-            cx: process.env.cseCx,
-            key: process.env.cseKey,
-            searchType: 'image',
-          },
-        })
-        .then(resp => {
-          const {data} = resp
-          const {items} = data
-          setImages(items.map(item => item.image))
-        })
-    }
-  }, [term])
+    global.ipcRenderer.on('image-search/picked-main', (ev, data) => {
+      console.log(`from main: ${data}`)
+    })
+    global.ipcRenderer.on('image-search/picked', (ev, data) => {
+      console.log(`from renderer:${data}`)
+    })
+  }, [])
 
   return (
     <Layout>
       Idena Desktop
       <Box>
-        <Input
-          onInput={e => {
-            setTerm(e.currentTarget.value)
+        <Button
+          onClick={() => {
+            global.ipcRenderer.send('image-search/toggle', 1)
           }}
-        />
-        <Flex css={{flexWrap: 'wrap'}}>
-          {images.map(image => (
-            <Box>
-              <img src={image.thumbnailLink} alt={image.thumbnailLink} />
-            </Box>
-          ))}
-        </Flex>
+        >
+          Open picker
+        </Button>
+        <Button
+          onClick={() => {
+            global.ipcRenderer.send('image-search/toggle', 0)
+          }}
+        >
+          Close picker
+        </Button>
       </Box>
     </Layout>
   )

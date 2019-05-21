@@ -7,6 +7,7 @@ const {format} = require('url')
 const {BrowserWindow, app, ipcMain, Tray, Menu} = require('electron')
 const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
+const express = require('express')
 
 const channels = require('./channels')
 const {startNode} = require('./idenaNode')
@@ -131,4 +132,39 @@ ipcMain.on(channels.compressFlipSource, (ev, message) => {
   //     console.error(err)
   //     throw new Error(err)
   //   })
+})
+
+const server = express()
+server.get('/', (_, res) => {
+  res.sendFile(resolve(__dirname, './server.html'))
+})
+
+server.listen(3000, () => {
+  // eslint-disable-next-line no-console
+  console.log('Running on localhost:3000')
+})
+
+let searchWindow
+ipcMain.on('image-search/toggle', (event, message) => {
+  if (message) {
+    searchWindow = new BrowserWindow({
+      width: 800,
+      height: 600,
+      frame: false,
+      webPreferences: {
+        nodeIntegration: false,
+        preload: join(__dirname, 'preload.js'),
+      },
+    })
+    searchWindow.setParentWindow(mainWindow)
+    searchWindow.loadURL('http://localhost:3000/')
+  }
+})
+ipcMain.on('image-search/toggle', (event, message) => {
+  if (!message) {
+    searchWindow.close()
+  }
+})
+ipcMain.on('image-search/picked', (event, message) => {
+  mainWindow.webContents.send('image-search/picked-main', message)
 })

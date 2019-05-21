@@ -84,7 +84,7 @@ function CreateFlipForm({pics, onUpdateFlip}) {
         ...pics.slice(selectedIndex + 1),
       ])
     }
-  }, [base64Url])
+  }, [base64Url, onUpdateFlip, pics, selectedIndex])
 
   // A simple callback implementation.
   function pickerCallback(data) {
