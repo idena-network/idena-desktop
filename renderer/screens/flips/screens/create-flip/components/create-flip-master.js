@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {encode} from 'rlp'
@@ -16,6 +16,7 @@ import {submitFlip} from '../../../../../shared/services/api'
 import {toHex} from '../../../../../shared/utils/req'
 import {set as setToCache} from '../utils/cache'
 import {randomFlipOrder} from '../utils/order'
+import NetContext from '../../../../../shared/providers/net-provider'
 
 const initialPics = [
   `https://placehold.it/480?text=1`,
@@ -25,6 +26,8 @@ const initialPics = [
 ]
 
 function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
+  const {validated} = useContext(NetContext)
+
   const [pics, setPics] = useState(savedPics || initialPics)
   const [hint, setHint] = useState(
     (caption && caption.split('/')) || getRandomHint()
@@ -172,6 +175,9 @@ function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
                     }
               }
               last={last}
+              allowSubmit={pics.every(
+                src => src.startsWith('data') && validated
+              )}
             >
               {children}
             </CreateFlipStep>

@@ -4,7 +4,7 @@ import {Box, Button, SubHeading} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import theme from '../../../../../shared/theme'
 
-function CreateFlipStep({children, desc, onPrev, onNext, last}) {
+function CreateFlipStep({children, desc, onPrev, onNext, last, allowSubmit}) {
   return (
     <Box>
       <Box p={theme.spacings.large}>
@@ -16,7 +16,9 @@ function CreateFlipStep({children, desc, onPrev, onNext, last}) {
           <Button onClick={onPrev}>Previous</Button>&nbsp;
         </Box>
         <Box>
-          <Button onClick={onNext}>{last ? 'Submit flip' : 'Next'}</Button>
+          <Button onClick={onNext} disabled={last && !allowSubmit}>
+            {last ? 'Submit flip' : 'Next'}
+          </Button>
         </Box>
       </Flex>
     </Box>
@@ -29,6 +31,7 @@ CreateFlipStep.propTypes = {
   onNext: PropTypes.func.isRequired,
   last: PropTypes.bool,
   children: PropTypes.node,
+  allowSubmit: PropTypes.bool.isRequired,
 }
 
 export default CreateFlipStep

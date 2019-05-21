@@ -5,7 +5,7 @@ import theme from '../theme'
 function Button({size = 1, disabled, css, ...props}) {
   return (
     <>
-      <button type="button" style={css} {...props} />
+      <button type="button" disabled={disabled} style={css} {...props} />
       <style jsx>{`
         button {
           background: ${theme.colors.primary};
@@ -20,6 +20,7 @@ function Button({size = 1, disabled, css, ...props}) {
         }
         button:hover {
           opacity: 0.9;
+          ${disabled && `opacity: 0.5`};
         }
       `}</style>
     </>

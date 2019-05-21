@@ -59,9 +59,12 @@ export const NetProvider = ({children}) => {
           ? identities.find(id => id.address === addr)
           : {}
 
+      const validated = identity && identity.state !== 'Undefined'
+
       if (!ignore) {
         setInfo({
           ...identity,
+          validated,
           addr,
           balance,
           identities,
