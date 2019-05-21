@@ -33,11 +33,7 @@ export default () => {
               onToggleActivateInvite={() => toggleActivateInvite(true)}
             />
             <UserInfo fullName="Me" address={netInfo.addr} />
-            <NetProfile
-              {...netInfo}
-              canActivateInvite
-              onToggleActivateInvite={() => toggleActivateInvite(true)}
-            />
+            <NetProfile {...netInfo} />
           </Col>
         </Row>
         <Drawer

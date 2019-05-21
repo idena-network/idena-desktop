@@ -11,23 +11,12 @@ export function NetProfile({
   state: status,
   nextValidation,
   validationRunning,
-  onToggleActivateInvite,
-  canActivateInvite,
+  validated,
 }) {
   return (
     <Box bg={theme.colors.gray} p="1em" css={{borderRadius: '4px'}}>
       <Figure label="Address" value={addr} />
-      <Figure
-        label="Status"
-        value={status}
-        postfix={
-          canActivateInvite ? (
-            <button type="button" onClick={onToggleActivateInvite}>
-              Activate
-            </button>
-          ) : null
-        }
-      />
+      <Figure label="Status" value={validated ? status : 'Not validated'} />
       <Figure label="Stake" value={balance.stake} postfix="DNA" />
       <Figure label="Balance" value={balance.balance} postfix="DNA" />
       <Figure label="Age" value={age} postfix="epochs" />
@@ -52,8 +41,7 @@ NetProfile.propTypes = {
   state: PropTypes.string,
   nextValidation: PropTypes.string,
   validationRunning: PropTypes.bool,
-  canActivateInvite: PropTypes.bool,
-  onToggleActivateInvite: PropTypes.func,
+  validated: PropTypes.bool,
 }
 
 export default React.memo(NetProfile)
