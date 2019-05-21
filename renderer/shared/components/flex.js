@@ -13,7 +13,7 @@ function Flex({
   children,
 }) {
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div style={css} onKeyPress={onClick} onClick={onClick}>
       {children}
       <style jsx>{`
