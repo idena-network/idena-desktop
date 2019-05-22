@@ -88,7 +88,7 @@ export const NetProvider = ({children}) => {
     return () => {
       ignore = true
     }
-  }, 5000)
+  }, null)
 
   return (
     <NetContext.Provider value={{...info, ...epoch}}>

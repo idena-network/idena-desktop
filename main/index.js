@@ -136,6 +136,11 @@ ipcMain.on(IMAGE_SEARCH_TOGGLE, (event, message) => {
     })
     searchWindow.setParentWindow(mainWindow)
     searchWindow.loadURL('http://localhost:3000/')
+    if (isDev && false) {
+      searchWindow.webContents.openDevTools({
+        mode: 'detach',
+      })
+    }
   }
 })
 ipcMain.on(IMAGE_SEARCH_TOGGLE, (event, message) => {

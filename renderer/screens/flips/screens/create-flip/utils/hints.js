@@ -7,11 +7,11 @@ export function getRandomHint() {
   const nextIndex = randomIndex(words.length)
 
   const firstWord = words[nextIndex]
-  let secondWord = firstWord
+  const secondWord = words[randomIndex(nextIndex)]
 
-  while (secondWord === firstWord) {
-    secondWord = words[randomIndex(nextIndex)]
-  }
+  // while (secondWord === firstWord) {
+  //   secondWord = words[randomIndex(nextIndex)]
+  // }
 
   return [firstWord, secondWord]
 }

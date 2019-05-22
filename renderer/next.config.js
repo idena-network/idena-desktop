@@ -20,6 +20,8 @@ const config = {
       '/wallets': {page: '/wallets'},
       '/dashboard': {page: '/dashboard'},
       '/flips': {page: '/flips'},
+      '/flips/new': {page: '/flips/new'},
+      '/flips/edit': {page: '/flips/edit'},
       '/validation': {page: '/validation'},
       '/validation/short': {page: '/validation/short'},
       '/validation/long': {page: '/validation/long'},
