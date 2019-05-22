@@ -43,6 +43,28 @@ export const NetProvider = ({children}) => {
           balance,
           identities,
         })
+
+        try {
+          const epochResult = await fetchEpoch()
+          const {currentPeriod, nextValidation} = epochResult
+          const validationRunning = currentPeriod.toLowerCase() !== 'none'
+          const secondsLeft =
+            new Date(nextValidation).getTime() - new Date().getTime()
+          const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
+
+          setEpoch({
+            ...epochResult,
+            validationRunning,
+            validationSoon,
+            secondsLeft,
+          })
+          onClearAlert()
+        } catch (error) {
+          onAddAlert({
+            title: 'Cannot connect to node',
+            body: error.message,
+          })
+        }
       }
     }
 
@@ -88,7 +110,7 @@ export const NetProvider = ({children}) => {
     return () => {
       ignore = true
     }
-  }, null)
+  }, 1000)
 
   return (
     <NetContext.Provider value={{...info, ...epoch}}>
