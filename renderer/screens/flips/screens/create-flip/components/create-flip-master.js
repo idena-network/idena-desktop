@@ -26,7 +26,7 @@ const initialPics = [
 ]
 
 function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
-  const {validated} = useContext(NetContext)
+  const {validated, requiredFlips} = useContext(NetContext)
 
   const [pics, setPics] = useState(savedPics || initialPics)
   const [hint, setHint] = useState(
@@ -142,7 +142,7 @@ function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
   }
 
   const picsLoaded = pics.every(src => src && src.startsWith('data'))
-  const allowSubmit = picsLoaded && validated
+  const allowSubmit = picsLoaded && validated && requiredFlips > 0
 
   return (
     <Box>

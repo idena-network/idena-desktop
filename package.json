@@ -63,6 +63,7 @@
     "react": "^16.8.4",
     "react-beautiful-dnd": "^10.0.4",
     "react-dom": "^16.8.4",
+    "react-use": "^9.0.0",
     "rlp": "^2.2.2"
   },
   "prettier": {

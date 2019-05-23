@@ -1,11 +1,16 @@
 import React, {useContext} from 'react'
 import {withRouter} from 'next/router'
+import useLocalStorage from 'react-use/lib/useLocalStorage'
 import {Box, List, Link, Text} from '../shared/components'
 import userScheme from '../shared/types/user'
 import theme from '../shared/theme'
 import NetContext from '../shared/providers/net-provider'
 import Loading from '../shared/components/loading'
 import {If} from '../shared/components/utils'
+import {
+  FLIPS_STORAGE_KEY,
+  getFromLocalStorage,
+} from '../screens/flips/utils/storage'
 
 const NavItem = withRouter(({href, router, children}) => {
   const active = router.pathname.startsWith(href)
@@ -63,9 +68,14 @@ const Block = ({title, value}) => (
 )
 
 function Nav({user}) {
-  const {currentPeriod, nextValidation, validationRunning} = useContext(
-    NetContext
-  )
+  const {
+    currentPeriod,
+    nextValidation,
+    validationRunning,
+    requiredFlips,
+    madeFlips,
+  } = useContext(NetContext)
+
   return (
     <nav>
       <Box m="2em 0">
@@ -77,12 +87,10 @@ function Nav({user}) {
         </NavItem>
         <NavItem href="/flips">Flips</NavItem>
         <NavItem href="/contacts">Contacts</NavItem>
-        <NavItem href="/chats">Chats</NavItem>
-        <NavItem href="/wallets">Wallets</NavItem>
         <NavItem href="/settings">Settings</NavItem>
         {/* TODO: for internal testing purposes only, remove then */}
         <If condition={true || validationRunning}>
-          <NavItem href="/validation">Validation (helper)</NavItem>
+          <NavItem href="/validation">Validation</NavItem>
         </If>
         <Box
           bg={theme.colors.white01}
@@ -90,6 +98,15 @@ function Nav({user}) {
           css={{borderRadius: '10px'}}
         >
           <Block title="Current period" value={currentPeriod || <Loading />} />
+          {!validationRunning && (
+            <Block
+              title="My current task"
+              value={
+                Number.isFinite(requiredFlips) &&
+                `Create ${requiredFlips - madeFlips} flips`
+              }
+            />
+          )}
           {!validationRunning && (
             <Block
               title="Next validation"
