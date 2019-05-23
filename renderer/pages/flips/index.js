@@ -22,7 +22,7 @@ const filters = {
 }
 
 export default function() {
-  const {validationRunning} = useContext(NetContext)
+  const {validationRunning, requiredFlips} = useContext(NetContext)
 
   const [flips, setFlips] = useState({flips: [], drafts: []})
   const [filter, setFilter] = useState(
@@ -48,7 +48,13 @@ export default function() {
       }))
 
       if (!ignore) {
-        setFlips({...flips, flips: fetchedFlips})
+        setFlips({
+          ...flips,
+          flips: [
+            ...fetchedFlips,
+            ...new Array(requiredFlips).fill(null),
+          ].slice(requiredFlips),
+        })
       }
     }
 
@@ -62,6 +68,7 @@ export default function() {
     return () => {
       ignore = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter])
 
   return (

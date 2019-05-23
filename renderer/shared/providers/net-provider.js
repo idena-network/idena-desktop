@@ -11,6 +11,15 @@ const initialState = {
     stake: '',
     balance: '',
   },
+  address: '',
+  nickname: '',
+  stake: '',
+  invites: 0,
+  age: 0,
+  state: '',
+  pubkey: '',
+  requiredFlips: 0,
+  madeFlips: 0,
 }
 
 const NetContext = createContext()
