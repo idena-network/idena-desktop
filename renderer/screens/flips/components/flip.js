@@ -13,7 +13,7 @@ import {
 const fromBlob = src =>
   URL.createObjectURL(new Blob([src], {type: 'image/jpeg'}))
 
-function Flip({id, caption, pics, createdAt, onUpdateFlips}) {
+function Flip({id, hash, caption, pics, createdAt, onUpdateFlips}) {
   const draft = !!id
   const storageKey = draft ? FLIP_DRAFTS_STORAGE_KEY : FLIPS_STORAGE_KEY
   return (
@@ -36,24 +36,26 @@ function Flip({id, caption, pics, createdAt, onUpdateFlips}) {
       </Box>
       <Box p={theme.spacings.small}>
         {draft && (
-          <Button
-            onClick={() => {
-              Router.push(`/flips/edit?id=${id}`)
-            }}
-          >
-            Edit
-          </Button>
+          <>
+            <Button
+              onClick={() => {
+                Router.push(`/flips/edit?id=${id}`)
+              }}
+            >
+              Edit
+            </Button>
+            <Button
+              onClick={() => {
+                const flips = getFromLocalStorage(storageKey)
+                const nextFlips = flips.filter(d => d.id !== id)
+                setToLocalStorage(storageKey, nextFlips)
+                onUpdateFlips(nextFlips)
+              }}
+            >
+              Delete
+            </Button>
+          </>
         )}
-        <Button
-          onClick={() => {
-            const drafts = getFromLocalStorage(storageKey)
-            const nextDrafts = drafts.filter(d => d.id !== id)
-            setToLocalStorage(storageKey, nextDrafts)
-            onUpdateFlips(nextDrafts)
-          }}
-        >
-          Delete {draft ? '' : 'from cache'}
-        </Button>
       </Box>
     </Box>
   )
@@ -63,6 +65,7 @@ const flipImageType = PropTypes.oneOfType([PropTypes.object, PropTypes.string])
 
 Flip.propTypes = {
   id: PropTypes.string,
+  hash: PropTypes.string,
   caption: PropTypes.string.isRequired,
   pics: PropTypes.arrayOf(flipImageType).isRequired,
   createdAt: PropTypes.number.isRequired,

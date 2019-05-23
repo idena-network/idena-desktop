@@ -33,6 +33,33 @@ export async function fetchIdentities() {
 }
 
 /**
+ * Fetch identity info for the address
+ *
+ * @param {string} address Address
+ * @returns {object} Identity details
+ * @example {
+    "address": "0x994cf4cccf6463a903f339ea87288fe253e23b98",
+    "nickname": "",
+    "stake": "1998",
+    "invites": 0,
+    "age": 0,
+    "state": "Undefined",
+    "pubkey": "",
+    "requiredFlips": 0,
+    "madeFlips": 0
+  }
+ */
+export async function fetchIdentity(address) {
+  const {data} = await api().post('/', {
+    method: 'dna_identity',
+    params: [address],
+    id: 1,
+  })
+  const {result} = data
+  return result
+}
+
+/**
  * Epoch
  * @typedef {Object}
  * @property {String} epoch Current epoch

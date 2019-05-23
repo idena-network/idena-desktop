@@ -2,9 +2,10 @@ import React, {createContext, useState, useEffect} from 'react'
 
 const initialState = {
   notifications: [],
-  onAddNotification: () => {},
+  onAddNotification: null,
   alerts: [],
-  onAddAlert: () => {},
+  setAlert: null,
+  clearAlert: null,
 }
 
 export const NotificationContext = createContext(initialState)
@@ -28,11 +29,11 @@ function NotificationProvider({children}) {
     setNotifications([...notifications, {title, body}])
   }
 
-  const onAddAlert = ({title, body}) => {
+  const setAlert = ({title, body}) => {
     setAlerts([{title, body}])
   }
 
-  const onClearAlert = () => {
+  const clearAlert = () => {
     setAlerts([])
   }
 
@@ -42,8 +43,8 @@ function NotificationProvider({children}) {
         notifications,
         alerts,
         onAddNotification,
-        onAddAlert,
-        onClearAlert,
+        setAlert,
+        clearAlert,
       }}
     >
       {children}

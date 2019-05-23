@@ -1,7 +1,7 @@
 import React, {createContext, useState, useEffect, useContext} from 'react'
 import PropTypes from 'prop-types'
 import {fetchAddress, fetchBalance} from '../services/api'
-import {fetchIdentities, fetchEpoch} from '../api/dna'
+import {fetchEpoch, fetchIdentity} from '../api/dna'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {NotificationContext} from './notification-provider'
 
@@ -16,7 +16,7 @@ const initialState = {
 const NetContext = createContext()
 
 export const NetProvider = ({children}) => {
-  const {onAddAlert, onClearAlert} = useContext(NotificationContext)
+  const {setAlert, clearAlert} = useContext(NotificationContext)
 
   const [info, setInfo] = useState(initialState)
   const [epoch, setEpoch] = useState()
@@ -26,25 +26,20 @@ export const NetProvider = ({children}) => {
 
     async function fetchInfo() {
       if (!ignore) {
-        const addr = await fetchAddress()
-        const balance = await fetchBalance(addr)
-        const identities = await fetchIdentities(addr)
-        const identity =
-          identities && identities.length
-            ? identities.find(id => id.address === addr)
-            : {}
-
-        const validated = identity && identity.state !== 'Undefined'
-
-        setInfo({
-          ...identity,
-          validated,
-          addr,
-          balance,
-          identities,
-        })
-
         try {
+          const addr = await fetchAddress()
+          const balance = await fetchBalance(addr)
+          const identity = await fetchIdentity(addr)
+
+          const validated = identity && identity.state !== 'Undefined'
+
+          setInfo({
+            ...identity,
+            validated,
+            addr,
+            balance,
+          })
+
           const epochResult = await fetchEpoch()
           const {currentPeriod, nextValidation} = epochResult
           const validationRunning = currentPeriod.toLowerCase() !== 'none'
@@ -58,9 +53,9 @@ export const NetProvider = ({children}) => {
             validationSoon,
             secondsLeft,
           })
-          onClearAlert()
+          clearAlert()
         } catch (error) {
-          onAddAlert({
+          setAlert({
             title: 'Cannot connect to node',
             body: error.message,
           })
@@ -95,9 +90,9 @@ export const NetProvider = ({children}) => {
             validationSoon,
             secondsLeft,
           })
-          onClearAlert()
+          clearAlert()
         } catch (error) {
-          onAddAlert({
+          setAlert({
             title: 'Cannot connect to node',
             body: error.message,
           })

@@ -4,7 +4,19 @@ import {Box, Button, SubHeading} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import theme from '../../../../../shared/theme'
 
-function CreateFlipStep({children, desc, onPrev, onNext, last, allowSubmit}) {
+function CreateFlipStep({
+  children,
+  desc,
+  onPrev,
+  onNext,
+  onClose,
+  onSubmit,
+  last,
+  allowSubmit,
+}) {
+  const shouldClose = last && !allowSubmit
+  const shouldSubmit = last && allowSubmit
+  const shouldNext = !last
   return (
     <Box>
       <Box p={theme.spacings.large}>
@@ -16,9 +28,9 @@ function CreateFlipStep({children, desc, onPrev, onNext, last, allowSubmit}) {
           <Button onClick={onPrev}>Previous</Button>&nbsp;
         </Box>
         <Box>
-          <Button onClick={onNext} disabled={last && !allowSubmit}>
-            {last ? 'Submit flip' : 'Next'}
-          </Button>
+          {shouldNext && <Button onClick={onNext}>Next</Button>}
+          {shouldClose && <Button onClick={onClose}>Close</Button>}
+          {shouldSubmit && <Button onClick={onSubmit}>Submit</Button>}
         </Box>
       </Flex>
     </Box>
@@ -29,6 +41,8 @@ CreateFlipStep.propTypes = {
   desc: PropTypes.string,
   onPrev: PropTypes.func.isRequired,
   onNext: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   last: PropTypes.bool,
   children: PropTypes.node,
   allowSubmit: PropTypes.bool.isRequired,

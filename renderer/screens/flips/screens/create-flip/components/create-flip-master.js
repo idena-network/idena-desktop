@@ -132,6 +132,18 @@ function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
     },
   ]
 
+  const handleClose = () => {
+    if (onAddNotification) {
+      onAddNotification({
+        title: 'Flip has been saved to drafts',
+      })
+    }
+    Router.push('/flips')
+  }
+
+  const picsLoaded = pics.every(src => src && src.startsWith('data'))
+  const allowSubmit = picsLoaded && validated
+
   return (
     <Box>
       <Flex>
@@ -168,41 +180,25 @@ function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
         ))}
       </Flex>
       {
-        steps.map(({title, desc, children}) => {
-          const last = step === steps.length - 1
-          return (
-            <CreateFlipStep
-              key={title}
-              desc={desc}
-              onPrev={() => setStep(step - 1)}
-              onNext={
-                last
-                  ? handleSubmitFlip
-                  : () => {
-                      setStep(step + 1)
-                    }
-              }
-              last={last}
-              allowSubmit={pics.every(
-                src => src && src.startsWith('data') && validated
-              )}
-            >
-              {children}
-            </CreateFlipStep>
-          )
-        })[step]
+        steps.map(({title, desc, children}) => (
+          <CreateFlipStep
+            key={title}
+            desc={desc}
+            onPrev={() => setStep(step - 1)}
+            onNext={() => {
+              setStep(step + 1)
+            }}
+            onClose={handleClose}
+            onSubmit={handleSubmitFlip}
+            last={step === steps.length - 1}
+            allowSubmit={allowSubmit}
+          >
+            {children}
+          </CreateFlipStep>
+        ))[step]
       }
       <Absolute top="1em" right="2em">
-        <Text
-          fontSize="3em"
-          css={{cursor: 'pointer'}}
-          onClick={() => {
-            if (onAddNotification) {
-              onAddNotification({title: 'Flip has been saved to drafts'})
-            }
-            Router.push('/flips')
-          }}
-        >
+        <Text fontSize="3em" css={{cursor: 'pointer'}} onClick={handleClose}>
           &times;
         </Text>
       </Absolute>
