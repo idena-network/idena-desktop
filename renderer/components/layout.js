@@ -11,14 +11,10 @@ import {ValidationContext} from '../shared/providers/validation-provider'
 
 function Layout({NavMenu = SidebarNav, children}) {
   const {currentPeriod} = useContext(NetContext)
-
   const {notifications, alerts} = useContext(NotificationContext)
-
-  const {
-    shortSessionAnswersSubmitted,
-    longSessionAnswersSubmitted,
-    intervals,
-  } = useContext(ValidationContext)
+  const {shortAnswers, longAnswers, intervals, timer, setTimer} = useContext(
+    ValidationContext
+  )
 
   return (
     <>
@@ -48,16 +44,18 @@ function Layout({NavMenu = SidebarNav, children}) {
         )}
         {currentPeriod === 'ShortSession' && (
           <ValidationBanner
-            shouldValidate={!shortSessionAnswersSubmitted}
-            duration={intervals.ShortSessionDuration}
             type="short"
+            shouldValidate={!shortAnswers}
+            duration={timer || intervals.ShortSessionDuration}
+            onTick={setTimer}
           />
         )}
         {currentPeriod === 'LongSession' && (
           <ValidationBanner
-            shouldValidate={!longSessionAnswersSubmitted}
-            duration={intervals.LongSessionDuration}
             type="long"
+            shouldValidate={!longAnswers}
+            duration={timer || intervals.LongSessionDuration}
+            onTick={setTimer}
           />
         )}
       </Absolute>

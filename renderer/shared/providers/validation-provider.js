@@ -1,31 +1,20 @@
 import React, {createContext, useState, useEffect} from 'react'
+import useLocalStorage from 'react-use/lib/useLocalStorage'
 import {fetchCeremonyIntervals} from '../api/dna'
 
-const initialState = {
-  shortSessionAnswersSubmitted: false,
-  longSessionAnswersSubmitted: false,
-  onSubmitShortAnswers: null,
-  onSubmitLongAnswers: null,
-  onTick: null,
-}
-
-export const ValidationContext = createContext(initialState)
+export const ValidationContext = createContext()
 
 // eslint-disable-next-line react/prop-types
 function ValidationProvider({children}) {
-  const [
-    shortSessionAnswersSubmitted,
-    setShortSessionAnswersSubmitted,
-  ] = useState(false)
-
-  const [
-    longSessionAnswersSubmitted,
-    setLongSessionAnswersSubmitted,
-  ] = useState(false)
+  const [shortAnswers, setShortAnswers] = useLocalStorage(
+    'idena/validation/shortAnswers'
+  )
+  const [longAnswers, setLongAnswers] = useLocalStorage(
+    'idena/validation/longAnswers'
+  )
+  const [timer, setTimer] = useLocalStorage('idena/validation/timer')
 
   const [intervals, setIntervals] = useState({})
-
-  const [timeLeft, setTimeLeft] = useState(0)
 
   useEffect(() => {
     let ignore = false
@@ -50,28 +39,16 @@ function ValidationProvider({children}) {
     }
   }, [])
 
-  const onSubmitShortAnswers = () => {
-    setShortSessionAnswersSubmitted(true)
-  }
-
-  const onSubmitLongAnswers = () => {
-    setLongSessionAnswersSubmitted(true)
-  }
-
-  const onTick = sec => {
-    setTimeLeft(sec)
-  }
-
   return (
     <ValidationContext.Provider
       value={{
-        shortSessionAnswersSubmitted,
-        longSessionAnswersSubmitted,
-        onSubmitShortAnswers,
-        onSubmitLongAnswers,
         intervals,
-        timeLeft,
-        onTick,
+        shortAnswers,
+        longAnswers,
+        setShortAnswers,
+        setLongAnswers,
+        timer,
+        setTimer,
       }}
     >
       {children}

@@ -19,6 +19,7 @@ function ValidationScene({
   onAnswer,
   selectedOption,
   loaded,
+  last,
 }) {
   return (
     <Flex justify="space-between" flex="1">
@@ -49,7 +50,6 @@ function ValidationScene({
                     new Blob([src], {type: 'image/jpeg'})
                   )}
                 />
-                )
               </Box>
             ))
           ) : (
@@ -67,10 +67,11 @@ function ValidationScene({
               : {position: 'relative', height: '100%'}
           }
           width="100%"
+          onClick={() => onAnswer(1)}
         >
           {loaded ? (
             reorderList(flip, orders[1]).map((src, idx) => (
-              <Box key={orders[1][idx]} onClick={() => onAnswer(1)}>
+              <Box key={orders[1][idx]}>
                 <img
                   // eslint-disable-next-line react/no-array-index-key
                   alt="currentFlip"
@@ -86,8 +87,8 @@ function ValidationScene({
           )}
         </Flex>
       </Flex>
-      <Col onClick={onNext} w={4}>
-        <Arrow dir="next" />
+      <Col onClick={last ? null : onNext} w={4}>
+        {!last && <Arrow dir="next" />}
       </Col>
     </Flex>
   )
@@ -101,6 +102,7 @@ ValidationScene.propTypes = {
   onAnswer: PropTypes.func,
   selectedOption: PropTypes.number,
   loaded: PropTypes.bool,
+  last: PropTypes.bool,
 }
 
 export default ValidationScene

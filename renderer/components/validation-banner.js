@@ -1,25 +1,25 @@
-import React, {useState, useContext, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {Box, Fill, Link} from '../shared/components'
 import Flex from '../shared/components/flex'
 import theme from '../shared/theme'
 import {useInterval} from '../screens/validation/shared/utils/useInterval'
-import {ValidationContext} from '../shared/providers/validation-provider'
 
-function ValidationBanner({shouldValidate, duration, type}) {
-  const {timeLeft, onTick} = useContext(ValidationContext)
-  const [secondsLeft, setSecondsLeft] = useState(timeLeft || duration * 60)
+function ValidationBanner({shouldValidate, type, duration, onTick}) {
+  const [secondsLeft, setSecondsLeft] = useState(duration)
 
   useInterval(
     () => {
-      setSecondsLeft(secondsLeft - 1)
+      if (secondsLeft > 0) {
+        setSecondsLeft(secondsLeft - 1)
+      }
     },
     secondsLeft > 0 ? 1000 : null
   )
 
   useEffect(() => {
     onTick(secondsLeft)
-  }, [secondsLeft])
+  }, [onTick, secondsLeft])
 
   const [fl, ...letters] = type
 
@@ -53,8 +53,9 @@ function ValidationBanner({shouldValidate, duration, type}) {
 
 ValidationBanner.propTypes = {
   shouldValidate: PropTypes.bool.isRequired,
-  duration: PropTypes.number.isRequired,
   type: PropTypes.oneOf(['short', 'long']).isRequired,
+  duration: PropTypes.number.isRequired,
+  onTick: PropTypes.func,
 }
 
 export default ValidationBanner

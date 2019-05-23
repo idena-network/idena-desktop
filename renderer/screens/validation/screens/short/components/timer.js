@@ -1,21 +1,31 @@
-import React, {useState} from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import {Box} from '../../../../../shared/components'
 import {useInterval} from '../../../shared/utils/useInterval'
 
-function Timer() {
-  const [time, setTime] = useState(5 * 60 * 1000)
+function Timer({time, onTick}) {
+  useInterval(
+    () => {
+      if (time > 0) {
+        onTick(time - 1)
+      }
+    },
+    time > 0 ? 1000 : null
+  )
 
-  useInterval(() => {
-    setTime(time - 1000)
-  }, 1000)
+  const mins = Math.floor(time / 60)
+  const secs = time - mins * 60
 
   return (
-    <Box>
-      {new Date(time).getMinutes()}:{new Date(time).getSeconds()} left
-    </Box>
+    <Box>{`${mins}:${secs.toLocaleString(undefined, {
+      minimumIntegerDigits: 2,
+    })} left`}</Box>
   )
 }
 
-Timer.propTypes = {}
+Timer.propTypes = {
+  time: PropTypes.number.isRequired,
+  onTick: PropTypes.func.isRequired,
+}
 
 export default Timer

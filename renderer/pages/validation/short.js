@@ -32,7 +32,7 @@ export default function() {
   const [answers, setAnswers] = useState([])
   const [flipsLoaded, setFlipsLoaded] = useState(false)
 
-  const {onSubmitShortAnswers} = useContext(ValidationContext)
+  const {setShortAnswers, timer, setTimer} = useContext(ValidationContext)
 
   const handlePrev = () => {
     const prevFlipIdx = Math.max(0, currentFlipIdx - 1)
@@ -75,7 +75,7 @@ export default function() {
     }))
     await submitShortAnswers(answersPayload, 0, 0)
     localStorage.removeItem(FLIPS_STORAGE_KEY)
-    onSubmitShortAnswers()
+    setShortAnswers(answersPayload)
     Router.push('/dashboard')
   }
 
@@ -164,10 +164,10 @@ export default function() {
       >
         <ValidationHeader
           type="Short"
-          currentIndex={currentFlipIdx + 1}
+          currentIndex={flips.length > 0 ? currentFlipIdx + 1 : 0}
           total={flips.length}
         >
-          <Timer />
+          <Timer time={timer} onTick={setTimer} />
         </ValidationHeader>
         <Flex direction="column" flex="1">
           <ValidationScene
@@ -178,6 +178,7 @@ export default function() {
             onAnswer={handleAnswer}
             selectedOption={answers[currentFlipIdx]}
             loaded={loadedStates[currentFlipIdx]}
+            last={currentFlipIdx > flips.length - 1}
           />
           <ValidationActions
             onReportAbuse={handleReportAbuse}

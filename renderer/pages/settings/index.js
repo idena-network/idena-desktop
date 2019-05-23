@@ -37,8 +37,13 @@ export default function Settings() {
         <Heading>Settings</Heading>
         <Box>
           <SubHeading>Node settings</SubHeading>
-          <Label>Address</Label>
-          <Input defaultValue={nodeSettings.url} ref={addrRef} />
+          <Label htmlFor="url">Address</Label>
+          <Input
+            defaultValue={nodeSettings.url}
+            ref={addrRef}
+            id="url"
+            name="url"
+          />
           <Button onClick={handleSaveNodeAddr}>Save</Button>
           {saved && (
             <Text color={theme.colors.success}>Now running against {addr}</Text>
