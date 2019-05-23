@@ -4,16 +4,12 @@
   "version": "0.0.1",
   "main": "main/index.js",
   "scripts": {
-    "start": "dotenv electron .",
-    "postinstall": "electron-builder install-app-deps",
-    "build": "dotenv next build renderer && next export renderer",
+    "start": "electron .",
+    "build": "next build renderer && next export renderer",
     "dist": "npm run build && build --dir",
     "clean": "rm -rf renderer/out dist",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "node": "make node",
-    "node:auto": "make node-auto",
-    "node:clean": "make clean"
+    "lint:fix": "eslint . --fix"
   },
   "build": {
     "appId": "io.idena",
@@ -36,7 +32,6 @@
   "devDependencies": {
     "babel-eslint": "^10.0.1",
     "devtron": "^1.4.0",
-    "dotenv-cli": "^2.0.0",
     "electron": "^4.1.0",
     "electron-builder": "^20.39.0",
     "eslint": "^5.15.3",
