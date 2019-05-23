@@ -25,7 +25,7 @@ function ValidationProvider({children}) {
         const intervals = await fetchCeremonyIntervals()
 
         const minIntervals = Object.entries(intervals)
-          .map(([k, v]) => ({[k]: v / 60}))
+          .map(([k, v]) => ({[k]: v}))
           .reduce((curr, acc) => ({...acc, ...curr}), {})
 
         setIntervals(minIntervals)
