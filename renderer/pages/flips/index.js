@@ -65,6 +65,9 @@ export default function() {
       fetchData()
     }
 
+    const {store, getDrafts} = global.flips
+    console.log(getDrafts().length)
+
     return () => {
       ignore = true
     }

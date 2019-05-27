@@ -185,11 +185,13 @@ ipcMain.on(IMAGE_SEARCH_TOGGLE, (event, message) => {
     }
   }
 })
+
 ipcMain.on(IMAGE_SEARCH_TOGGLE, (event, message) => {
   if (!message) {
     searchWindow.close()
   }
 })
+
 ipcMain.on(IMAGE_SEARCH_PICK, (event, message) => {
   mainWindow.webContents.send(IMAGE_SEARCH_PICK, message)
 })
