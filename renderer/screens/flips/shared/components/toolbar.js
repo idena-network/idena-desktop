@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Flex from '../../../shared/components/flex'
-import {Button, Link, AddIcon} from '../../../shared/components'
-import theme from '../../../shared/theme'
+import {Button, Link, AddIcon} from '../../../../shared/components'
+import theme from '../../../../shared/theme'
+import Flex from '../../../../shared/components/flex'
 
 const NavItem = props => <Button {...props} />
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
-import {Box, SubHeading, Text} from '../../../shared/components'
-import theme from '../../../shared/theme'
+import {Box, SubHeading, Text} from '../../../../shared/components'
+import theme from '../../../../shared/theme'
 
 // eslint-disable-next-line react/prop-types
 function FlipPlaceholder({idx}) {

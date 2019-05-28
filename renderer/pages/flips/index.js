@@ -1,6 +1,6 @@
 import React, {useEffect, useContext, useState} from 'react'
 import {decode} from 'rlp'
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useLocalStorage from 'react-use/lib/useLocalStorage'
 import Layout from '../../components/layout'
 import {Heading, Box} from '../../shared/components'
 import {fromHexString} from '../../shared/utils/string'
@@ -13,8 +13,8 @@ import {
 } from '../../screens/flips/utils/storage'
 import theme from '../../shared/theme'
 import NetContext from '../../shared/providers/net-provider'
-import FlipToolbar from '../../screens/flips/components/toolbar'
-import FlipList from '../../screens/flips/components/flip-list'
+import FlipToolbar from '../../screens/flips/shared/components/toolbar'
+import FlipList from '../../screens/flips/shared/components/flip-list'
 
 const filters = {
   flips: 'flips',

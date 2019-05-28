@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Flip from './flip'
-import Flex from '../../../shared/components/flex'
+import Flex from '../../../../shared/components/flex'
 import FlipPlaceholder from './flip-placeholder'
 
 function FlipList({flips, onUpdateFlips}) {

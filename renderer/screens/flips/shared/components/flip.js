@@ -1,9 +1,9 @@
 import React, {memo} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
-import {Box, Text, Button} from '../../../shared/components'
-import theme from '../../../shared/theme'
-import FlipImage from '../shared/components/flip-image'
+import theme from '../../../../shared/theme'
+import FlipImage from './flip-image'
+import {Box, Text, Button} from '../../../../shared/components'
 
 const fromBlob = src =>
   URL.createObjectURL(new Blob([src], {type: 'image/jpeg'}))

@@ -1,5 +1,4 @@
 import React, {useContext, useState} from 'react'
-import {FlipProvider} from '../../screens/flips/providers/flip-provider'
 import NetContext from '../../shared/providers/net-provider'
 import Layout from '../../components/layout'
 import {Row, Col, Heading, Drawer} from '../../shared/components'
@@ -22,50 +21,48 @@ export default () => {
   const [showActivateInvite, toggleActivateInvite] = useState(false)
 
   return (
-    <FlipProvider>
-      <Layout>
-        <Row>
-          <Col p="3em 2em" w={6}>
-            <Heading>Profile</Heading>
-            <UserActions
-              onToggleSendInvite={() => toggleSendInvite(true)}
-              canActivateInvite
-              onToggleActivateInvite={() => toggleActivateInvite(true)}
-            />
-            <UserInfo fullName="Me" address={netInfo.addr} />
-            <NetProfile {...netInfo} />
-          </Col>
-        </Row>
-        <Drawer
-          show={showActivateInvite}
-          onHide={() => {
-            toggleActivateInvite(false)
-          }}
-        >
-          <ActivateInviteForm
-            to={netInfo.addr}
-            activateResult={activateResult}
-            onActivateInviteSend={async (to, key) => {
-              const result = await activateInvite(to, key)
-              setActivateResult({result})
-            }}
+    <Layout>
+      <Row>
+        <Col p="3em 2em" w={6}>
+          <Heading>Profile</Heading>
+          <UserActions
+            onToggleSendInvite={() => toggleSendInvite(true)}
+            canActivateInvite
+            onToggleActivateInvite={() => toggleActivateInvite(true)}
           />
-        </Drawer>
-        <Drawer
-          show={showSendInvite}
-          onHide={() => {
-            toggleSendInvite(false)
+          <UserInfo fullName="Me" address={netInfo.addr} />
+          <NetProfile {...netInfo} />
+        </Col>
+      </Row>
+      <Drawer
+        show={showActivateInvite}
+        onHide={() => {
+          toggleActivateInvite(false)
+        }}
+      >
+        <ActivateInviteForm
+          to={netInfo.addr}
+          activateResult={activateResult}
+          onActivateInviteSend={async (to, key) => {
+            const result = await activateInvite(to, key)
+            setActivateResult({result})
           }}
-        >
-          <SendInviteForm
-            inviteResult={inviteResult}
-            onInviteSend={async (to, key) => {
-              const result = await sendInvite(to, key)
-              setInviteResult({result})
-            }}
-          />
-        </Drawer>
-      </Layout>
-    </FlipProvider>
+        />
+      </Drawer>
+      <Drawer
+        show={showSendInvite}
+        onHide={() => {
+          toggleSendInvite(false)
+        }}
+      >
+        <SendInviteForm
+          inviteResult={inviteResult}
+          onInviteSend={async (to, key) => {
+            const result = await sendInvite(to, key)
+            setInviteResult({result})
+          }}
+        />
+      </Drawer>
+    </Layout>
   )
 }

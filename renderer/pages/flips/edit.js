@@ -9,9 +9,9 @@ import {NotificationContext} from '../../shared/providers/notification-provider'
 
 const defaultRouter = {query: {id: ''}}
 
-const {getDraft} = global.flips
-
 function EditFlip({router: {query: {id}} = defaultRouter}) {
+  const {getDraft} = global.flips
+
   const {onAddNotification} = useContext(NotificationContext)
   const draft = getDraft(id)
 
