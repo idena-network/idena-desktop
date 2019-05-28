@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {Box, Text, Button} from '../../../shared/components'
 import theme from '../../../shared/theme'
+import FlipImage from '../shared/components/flip-image'
 
 const fromBlob = src =>
   URL.createObjectURL(new Blob([src], {type: 'image/jpeg'}))
@@ -13,11 +14,9 @@ function Flip({id, caption, pics, createdAt, onUpdateFlips}) {
   return (
     <Box m={`${theme.spacings.normal} 0`} w="25%">
       <Box m={`0 0 ${theme.spacings.small}`}>
-        <img
-          width={150}
+        <FlipImage
           src={draft ? pics[0] : fromBlob(pics[0])}
-          alt="flip-cover"
-          style={{borderRadius: '4px'}}
+          css={{borderRadius: '4px'}}
         />
       </Box>
       <Box m={`0 0 ${theme.spacings.small}`}>

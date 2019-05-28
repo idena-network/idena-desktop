@@ -1,8 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import FlipImage from '../../../shared/components/flip-image'
 
 function ImageEditor({src}) {
-  return <img src={src} alt={src} height={400} />
+  return <FlipImage src={src} size={400} />
 }
 
 ImageEditor.propTypes = {
