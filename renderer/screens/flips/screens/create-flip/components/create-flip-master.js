@@ -14,23 +14,24 @@ import {getRandomHint} from '../utils/hints'
 import SubmitFlip from './submit-flip'
 import {submitFlip} from '../../../../../shared/services/api'
 import {toHex} from '../../../../../shared/utils/req'
-import {set as setToCache} from '../utils/cache'
 import {randomFlipOrder} from '../utils/order'
 import NetContext from '../../../../../shared/providers/net-provider'
+import {NotificationContext} from '../../../../../shared/providers/notification-provider'
 
-const initialPics = [
+const defaultPics = [
   `https://placehold.it/480?text=1`,
   `https://placehold.it/480?text=2`,
   `https://placehold.it/480?text=3`,
   `https://placehold.it/480?text=4`,
 ]
 
-function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
+function CreateFlipMaster({pics: initialPics, caption, id}) {
   const {getDraft, addDraft, updateDraft} = global.flips
 
   const {validated, requiredFlips} = useContext(NetContext)
+  const {onAddNotification} = useContext(NotificationContext)
 
-  const [pics, setPics] = useState(savedPics || initialPics)
+  const [pics, setPics] = useState(initialPics || defaultPics)
   const [hint, setHint] = useState(
     (caption && caption.split('/')) || getRandomHint()
   )
@@ -224,7 +225,6 @@ CreateFlipMaster.propTypes = {
   id: PropTypes.string,
   caption: PropTypes.string,
   pics: PropTypes.arrayOf(PropTypes.string),
-  onAddNotification: PropTypes.func,
 }
 
 export default CreateFlipMaster

@@ -7,10 +7,11 @@ import Layout from '../../components/layout'
 import theme from '../../shared/theme'
 import {NotificationContext} from '../../shared/providers/notification-provider'
 
-const fallbackRouter = {query: {id: ''}}
+const defaultRouter = {query: {id: ''}}
 
-function EditFlip({router: {query: {id}} = fallbackRouter}) {
-  const {getDraft} = global.flips
+const {getDraft} = global.flips
+
+function EditFlip({router: {query: {id}} = defaultRouter}) {
   const {onAddNotification} = useContext(NotificationContext)
   const draft = getDraft(id)
 
