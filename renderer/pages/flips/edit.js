@@ -5,35 +5,27 @@ import {Heading, Box} from '../../shared/components'
 import CreateFlipMaster from '../../screens/flips/screens/create-flip/components/create-flip-master'
 import Layout from '../../components/layout'
 import theme from '../../shared/theme'
-import {
-  getFromLocalStorage,
-  FLIP_DRAFTS_STORAGE_KEY,
-} from '../../screens/flips/utils/storage'
 import {NotificationContext} from '../../shared/providers/notification-provider'
 
-function EditFlip({router}) {
-  if (router && router.query) {
-    const {id: draftId} = router.query
-    const draft = getFromLocalStorage(FLIP_DRAFTS_STORAGE_KEY).find(
-      ({id}) => id === draftId
-    )
+const fallbackRouter = {query: {id: ''}}
 
-    const {onAddNotification} = useContext(NotificationContext)
+function EditFlip({router: {query: {id}} = fallbackRouter}) {
+  const {getDraft} = global.flips
+  const {onAddNotification} = useContext(NotificationContext)
+  const draft = getDraft(id)
 
-    return (
-      <Layout>
-        <Box p={theme.spacings.large}>
-          <Heading>Edit flip</Heading>
-          <CreateFlipMaster
-            id={draftId}
-            {...draft}
-            onAddNotification={onAddNotification}
-          />
-        </Box>
-      </Layout>
-    )
-  }
-  return null
+  return id ? (
+    <Layout>
+      <Box p={theme.spacings.large}>
+        <Heading>Edit flip</Heading>
+        <CreateFlipMaster
+          id={id}
+          {...draft}
+          onAddNotification={onAddNotification}
+        />
+      </Box>
+    </Layout>
+  ) : null
 }
 
 EditFlip.propTypes = {

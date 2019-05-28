@@ -3,19 +3,13 @@ import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {Box, Text, Button} from '../../../shared/components'
 import theme from '../../../shared/theme'
-import {
-  getFromLocalStorage,
-  FLIP_DRAFTS_STORAGE_KEY,
-  setToLocalStorage,
-  FLIPS_STORAGE_KEY,
-} from '../utils/storage'
 
 const fromBlob = src =>
   URL.createObjectURL(new Blob([src], {type: 'image/jpeg'}))
 
-function Flip({id, hash, caption, pics, createdAt, onUpdateFlips}) {
+function Flip({id, caption, pics, createdAt, onUpdateFlips}) {
+  const {deleteDraft} = global.flips
   const draft = !!id
-  const storageKey = draft ? FLIP_DRAFTS_STORAGE_KEY : FLIPS_STORAGE_KEY
   return (
     <Box m={`${theme.spacings.normal} 0`} w="25%">
       <Box m={`0 0 ${theme.spacings.small}`}>
@@ -46,9 +40,7 @@ function Flip({id, hash, caption, pics, createdAt, onUpdateFlips}) {
             </Button>
             <Button
               onClick={() => {
-                const flips = getFromLocalStorage(storageKey)
-                const nextFlips = flips.filter(d => d.id !== id)
-                setToLocalStorage(storageKey, nextFlips)
+                const nextFlips = deleteDraft(id)
                 onUpdateFlips(nextFlips)
               }}
             >

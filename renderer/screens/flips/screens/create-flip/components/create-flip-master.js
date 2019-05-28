@@ -26,6 +26,8 @@ const initialPics = [
 ]
 
 function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
+  const {getDraft, addDraft, updateDraft} = global.flips
+
   const {validated, requiredFlips} = useContext(NetContext)
 
   const [pics, setPics] = useState(savedPics || initialPics)
@@ -37,12 +39,24 @@ function CreateFlipMaster({pics: savedPics, caption, id, onAddNotification}) {
   const [step, setStep] = useState(0)
 
   useEffect(() => {
-    setToCache({
-      id,
-      caption: hint.join('/'),
-      createdAt: Date.now(),
-      pics,
-    })
+    if (pics.some(src => src && src.startsWith('data'))) {
+      const draft = getDraft(id)
+      if (draft) {
+        updateDraft({
+          ...draft,
+          caption: hint.join('/'),
+          createdAt: Date.now(),
+          pics,
+        })
+      } else {
+        addDraft({
+          id,
+          caption: hint.join('/'),
+          createdAt: Date.now(),
+          pics,
+        })
+      }
+    }
   }, [step, pics, hint, id])
 
   useEffect(() => {

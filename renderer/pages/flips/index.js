@@ -1,5 +1,6 @@
 import React, {useEffect, useContext, useState} from 'react'
 import {decode} from 'rlp'
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import Layout from '../../components/layout'
 import {Heading, Box} from '../../shared/components'
 import {fromHexString} from '../../shared/utils/string'
@@ -7,7 +8,6 @@ import {fetchFlip} from '../../shared/services/api'
 import {
   getFromLocalStorage,
   FLIPS_STORAGE_KEY,
-  FLIP_DRAFTS_STORAGE_KEY,
   FLIPS_FILTER,
   setToLocalStorage,
 } from '../../screens/flips/utils/storage'
@@ -25,9 +25,9 @@ export default function() {
   const {validationRunning, requiredFlips} = useContext(NetContext)
 
   const [flips, setFlips] = useState({flips: [], drafts: []})
-  const [filter, setFilter] = useState(
-    getFromLocalStorage(FLIPS_FILTER, filters.flips)
-  )
+  const [filter, setFilter] = useLocalStorage(FLIPS_FILTER, filters.flips)
+
+  const {getDrafts} = global.flips
 
   useEffect(() => {
     let ignore = false
@@ -59,14 +59,10 @@ export default function() {
     }
 
     if (filter === filters.drafts) {
-      const drafts = getFromLocalStorage(FLIP_DRAFTS_STORAGE_KEY)
-      setFlips({...flips, drafts})
+      setFlips({...flips, drafts: getDrafts()})
     } else {
       fetchData()
     }
-
-    const {store, getDrafts} = global.flips
-    console.log(getDrafts().length)
 
     return () => {
       ignore = true
