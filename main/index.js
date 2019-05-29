@@ -1,10 +1,10 @@
 const {join, resolve} = require('path')
-const {format} = require('url')
 const {BrowserWindow, app, ipcMain, Tray, Menu} = require('electron')
 const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
 const express = require('express')
 const net = require('net')
+const loadRoute = require('./utils/routes')
 
 const {IMAGE_SEARCH_TOGGLE, IMAGE_SEARCH_PICK} = require('./channels')
 const {startNode} = require('./idenaNode')
@@ -28,23 +28,7 @@ const createMainWindow = () => {
     icon: resolve(__dirname, 'static', '64x64.png'),
   })
 
-  const devPath = 'http://localhost:8000/start'
-
-  const prodPath = format({
-    pathname: join(__dirname, '../renderer/start/index.html'),
-    protocol: 'file:',
-    slashes: true,
-  })
-
-  const url = isDev ? devPath : prodPath
-
-  mainWindow.loadURL(url)
-
-  if (isDev) {
-    mainWindow.webContents.openDevTools({
-      mode: 'detach',
-    })
-  }
+  loadRoute(mainWindow, 'dashboard')
 
   mainWindow.on('close', e => {
     if (mainWindow.forceClose) {

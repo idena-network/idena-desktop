@@ -11,14 +11,13 @@ const config = {
     // when it's exporting the static bundle for the use
     // in the production version of your app
     return {
-      '/start': {page: '/start'},
+      '/dashboard': {page: '/dashboard'},
       '/contacts': {page: '/contacts'},
       '/contacts/new': {page: '/contacts/new'},
       '/contacts/edit': {page: '/contacts/edit'},
       '/contacts/view': {page: '/contacts/view'},
       '/chats': {page: '/chats'},
       '/wallets': {page: '/wallets'},
-      '/dashboard': {page: '/dashboard'},
       '/flips': {page: '/flips'},
       '/flips/new': {page: '/flips/new'},
       '/flips/edit': {page: '/flips/edit'},
