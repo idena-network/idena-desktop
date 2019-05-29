@@ -1,16 +1,11 @@
 import React, {useContext} from 'react'
 import {withRouter} from 'next/router'
-import useLocalStorage from 'react-use/lib/useLocalStorage'
 import {Box, List, Link, Text} from '../shared/components'
 import userScheme from '../shared/types/user'
 import theme from '../shared/theme'
 import NetContext from '../shared/providers/net-provider'
 import Loading from '../shared/components/loading'
 import {If} from '../shared/components/utils'
-import {
-  FLIPS_STORAGE_KEY,
-  getFromLocalStorage,
-} from '../screens/flips/utils/storage'
 
 const NavItem = withRouter(({href, router, children}) => {
   const active = router.pathname.startsWith(href)

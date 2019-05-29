@@ -1,11 +1,10 @@
-/* eslint-disable no-undef */
 import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {Box, Button} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import ImageEditor from './image-editor'
 import theme from '../../../../../shared/theme'
-import {convertToBase64Url} from '../../../utils/useDataUrl'
+import {convertToBase64Url} from '../../../shared/utils/useDataUrl'
 import {
   IMAGE_SEARCH_PICK,
   IMAGE_SEARCH_TOGGLE,
@@ -15,7 +14,7 @@ const activeStyle = {
   border: `solid 2px ${theme.colors.primary}`,
 }
 
-function CreateFlipForm({pics, onUpdateFlip}) {
+function FlipPics({pics, onUpdateFlip}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [pickedUrl, setPickedUrl] = useState('')
 
@@ -105,9 +104,9 @@ function CreateFlipForm({pics, onUpdateFlip}) {
   )
 }
 
-CreateFlipForm.propTypes = {
+FlipPics.propTypes = {
   pics: PropTypes.arrayOf(PropTypes.string),
   onUpdateFlip: PropTypes.func.isRequired,
 }
 
-export default React.memo(CreateFlipForm)
+export default React.memo(FlipPics)

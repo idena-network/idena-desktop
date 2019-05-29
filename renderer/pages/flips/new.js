@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import nanoid from 'nanoid'
 import {Heading, Box} from '../../shared/components'
-import CreateFlipMaster from '../../screens/flips/screens/create-flip/components/create-flip-master'
+import CreateFlipMaster from '../../screens/flips/screens/create-flip/components/flip-master'
 import Layout from '../../components/layout'
 import theme from '../../shared/theme'
 

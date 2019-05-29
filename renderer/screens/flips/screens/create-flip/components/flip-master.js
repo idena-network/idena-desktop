@@ -1,22 +1,22 @@
-import React, {useState, useEffect, useContext, useCallback} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
-import {encode} from 'rlp'
-import CreateFlipStep from './create-flip-step'
+import CreateFlipStep from './flip-step'
 import {Box, SubHeading, Text, Absolute} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
-import {FLIPS_STORAGE_KEY, appendToLocalStorage} from '../../../utils/storage'
 import theme from '../../../../../shared/theme'
-import CreateFlipForm from './create-flip-form'
+import FlipPics from './flip-pics'
 import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import {getRandomHint} from '../utils/hints'
 import SubmitFlip from './submit-flip'
 import {submitFlip} from '../../../../../shared/services/api'
-import {toHex} from '../../../../../shared/utils/req'
-import {randomFlipOrder} from '../utils/order'
 import NetContext from '../../../../../shared/providers/net-provider'
 import {NotificationContext} from '../../../../../shared/providers/notification-provider'
+import useUnmount from 'react-use/lib/useUnmount'
+import {flipToHex, hasDataUrl} from '../../../shared/utils/flip'
+
+const defaultOrder = Array.from({length: 4}, (_, i) => i)
 
 const defaultPics = [
   `https://placehold.it/480?text=1`,
@@ -25,84 +25,72 @@ const defaultPics = [
   `https://placehold.it/480?text=4`,
 ]
 
-function CreateFlipMaster({pics: initialPics, caption, id}) {
-  const {getDraft, addDraft, updateDraft} = global.flips
+function CreateFlipMaster({
+  pics: initialPics,
+  hint: initialHint,
+  order: initialOrder,
+  id,
+}) {
+  const {getDraft, addDraft, updateDraft, publishFlip} = global.flips
 
   const {validated, requiredFlips} = useContext(NetContext)
   const {onAddNotification} = useContext(NotificationContext)
 
   const [pics, setPics] = useState(initialPics || defaultPics)
-  const [hint, setHint] = useState(
-    (caption && caption.split('/')) || getRandomHint()
-  )
-  const [randomOrder, setRandomOrder] = useState([0, 1, 2, 3])
+  const [hint, setHint] = useState(initialHint || getRandomHint())
+  const [order, setOrder] = useState(initialOrder || defaultOrder)
   const [submitFlipResult, setSubmitFlipResult] = useState()
   const [step, setStep] = useState(0)
 
-  useEffect(() => {
-    if (pics.some(src => src && src.startsWith('data'))) {
-      const draft = getDraft(id)
-      if (draft) {
-        updateDraft({
-          ...draft,
-          caption: hint.join('/'),
-          createdAt: Date.now(),
-          pics,
-        })
-      } else {
-        addDraft({
-          id,
-          caption: hint.join('/'),
-          createdAt: Date.now(),
-          pics,
-        })
-      }
-    }
-  }, [step, pics, hint, id])
+  const flipStarted = pics.some(hasDataUrl)
+  const flipCompleted = pics.every(hasDataUrl)
+  const allowSubmit = true || (flipCompleted && validated && requiredFlips > 0)
 
   useEffect(() => {
-    return () => {
-      onAddNotification({title: 'Flip has been saved to drafts'})
+    if (flipStarted) {
+      const nextDraft = {id, hint, pics, order}
+      const currDraft = getDraft(id)
+      if (currDraft) {
+        updateDraft({...currDraft, ...nextDraft, modifiedAt: Date.now()})
+      } else {
+        addDraft({...nextDraft, createdAt: Date.now()})
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [pics, hint, order, id])
+
+  useUnmount(() => onAddNotification({title: 'Flip has been saved to drafts'}))
 
   const handleSubmitFlip = async () => {
-    const arrayBuffers = pics.map(src => {
-      const byteString = src.split(',')[1]
-      return Uint8Array.from(atob(byteString), c => c.charCodeAt(0))
-    })
+    const encodedFlip = flipToHex(pics, order)
+    const resp = await submitFlip(encodedFlip)
 
-    const hexBuff = encode([
-      arrayBuffers.map(ab => new Uint8Array(ab)),
-      randomFlipOrder(pics, randomOrder),
-    ])
-
-    try {
-      const response = await submitFlip(toHex(hexBuff))
-      if (response.ok) {
-        const {result, error} = await response.json()
-        if (error) {
-          setSubmitFlipResult(error.message)
-        } else {
-          appendToLocalStorage(FLIPS_STORAGE_KEY, {
-            hash: result.hash,
-            caption: hint.join('/'),
-            createdAt: Date.now(),
-          })
-          setSubmitFlipResult(result.hash)
-          Router.replace('/flips')
-        }
+    if (resp.ok) {
+      const {result, error} = await resp.json()
+      if (error) {
+        setSubmitFlipResult(error.message)
       } else {
-        setSubmitFlipResult(
-          response.status === 413
-            ? 'Maximum image size exceeded'
-            : 'Unexpected error occurred'
-        )
+        publishFlip({hash: result.hash, hint, order, createdAt: Date.now()})
+        setSubmitFlipResult(result.hash)
+        Router.replace('/flips')
       }
-    } catch (err) {
-      setSubmitFlipResult(err)
+    } else {
+      switch (resp.status) {
+        case 413:
+          setSubmitFlipResult('Maximum image size exceeded')
+          break
+        default:
+          setSubmitFlipResult('Unexpected error occurred')
+          break
+      }
     }
+  }
+  const handleClose = () => {
+    if (onAddNotification) {
+      onAddNotification({
+        title: 'Flip has been saved to drafts',
+      })
+    }
+    Router.push('/flips')
   }
 
   const steps = [
@@ -117,7 +105,7 @@ function CreateFlipMaster({pics: initialPics, caption, id}) {
       title: 'Create a story',
       desc: `Select 4 images to create a story with words: ${hint.join(',')}`,
       children: (
-        <CreateFlipForm
+        <FlipPics
           pics={pics}
           onUpdateFlip={nextPics => {
             setPics(nextPics)
@@ -128,36 +116,20 @@ function CreateFlipMaster({pics: initialPics, caption, id}) {
     {
       title: 'Shuffle images',
       children: (
-        <FlipShuffle
-          randomOrder={randomOrder}
-          pics={pics}
-          onShuffleFlip={setRandomOrder}
-        />
+        <FlipShuffle order={order} pics={pics} onShuffleFlip={setOrder} />
       ),
     },
     {
       title: 'Submit story',
       children: (
         <SubmitFlip
-          randomOrder={randomOrder}
+          randomOrder={order}
           pics={pics}
           submitFlipResult={submitFlipResult}
         />
       ),
     },
   ]
-
-  const handleClose = () => {
-    if (onAddNotification) {
-      onAddNotification({
-        title: 'Flip has been saved to drafts',
-      })
-    }
-    Router.push('/flips')
-  }
-
-  const picsLoaded = pics.every(src => src && src.startsWith('data'))
-  const allowSubmit = picsLoaded && validated && requiredFlips > 0
 
   return (
     <Box>
@@ -223,7 +195,7 @@ function CreateFlipMaster({pics: initialPics, caption, id}) {
 
 CreateFlipMaster.propTypes = {
   id: PropTypes.string,
-  caption: PropTypes.string,
+  hint: PropTypes.arrayOf(PropTypes.string),
   pics: PropTypes.arrayOf(PropTypes.string),
 }
 

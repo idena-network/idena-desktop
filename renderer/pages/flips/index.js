@@ -5,36 +5,29 @@ import Layout from '../../components/layout'
 import {Heading, Box} from '../../shared/components'
 import {fromHexString} from '../../shared/utils/string'
 import {fetchFlip} from '../../shared/services/api'
-import {
-  getFromLocalStorage,
-  FLIPS_STORAGE_KEY,
-  FLIPS_FILTER,
-  setToLocalStorage,
-} from '../../screens/flips/utils/storage'
 import theme from '../../shared/theme'
 import NetContext from '../../shared/providers/net-provider'
 import FlipToolbar from '../../screens/flips/shared/components/toolbar'
 import FlipList from '../../screens/flips/shared/components/flip-list'
 
 const filters = {
-  flips: 'flips',
+  flips: 'published',
   drafts: 'drafts',
 }
 
-export default function() {
+function Flips() {
+  const {getDrafts, getPublishedFlips} = global.flips
+
   const {validationRunning, requiredFlips} = useContext(NetContext)
 
   const [flips, setFlips] = useState({flips: [], drafts: []})
-  const [filter, setFilter] = useLocalStorage(FLIPS_FILTER, filters.flips)
-
-  const {getDrafts} = global.flips
+  const [filter, setFilter] = useLocalStorage('flips/filter', filters.flips)
 
   useEffect(() => {
     let ignore = false
-
     async function fetchData() {
       const responses = await Promise.all(
-        getFromLocalStorage(FLIPS_STORAGE_KEY).map(flip =>
+        getPublishedFlips().map(flip =>
           fetchFlip(flip.hash).then(data => ({
             ...flip,
             data,
@@ -77,10 +70,7 @@ export default function() {
         <Box css={{marginBottom: theme.spacings.large}}>
           <FlipToolbar
             activeFilter={filter}
-            onFilter={nextFilter => {
-              setFilter(nextFilter)
-              setToLocalStorage(FLIPS_FILTER, nextFilter)
-            }}
+            onFilter={setFilter}
             shouldShowAddFlip={!validationRunning}
           />
         </Box>
@@ -94,3 +84,5 @@ export default function() {
     </Layout>
   )
 }
+
+export default Flips
