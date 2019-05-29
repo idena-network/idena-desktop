@@ -26,7 +26,7 @@ function NotificationProvider({children}) {
   }, [notifications])
 
   const onAddNotification = ({title, body}) => {
-    setNotifications([...notifications, {title, body}])
+    setNotifications([...notifications, {title, body, timestamp: Date.now()}])
   }
 
   const setAlert = ({title, body}) => {

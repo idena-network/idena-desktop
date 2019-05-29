@@ -52,6 +52,15 @@ function deleteDraft(id) {
   return drafts
 }
 
+function clearDrafts() {
+  store.set('drafts', [])
+}
+
+function publishFlip(flip) {
+  const flips = store.get('flips', [])
+  store.set(flips.concat(flip))
+}
+
 function clear() {
   store.clear()
 }
@@ -64,5 +73,7 @@ module.exports = {
   addDraft,
   updateDraft,
   deleteDraft,
+  clearDrafts,
+  publishFlip,
   clear,
 }

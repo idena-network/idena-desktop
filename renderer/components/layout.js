@@ -62,7 +62,7 @@ function Layout({NavMenu = SidebarNav, children}) {
       {notifications && (
         <Absolute top="1em" left="0" right="0">
           {notifications.map(notification => (
-            <Notification key={notification.title} {...notification} />
+            <Notification key={notification.timestamp} {...notification} />
           ))}
         </Absolute>
       )}
