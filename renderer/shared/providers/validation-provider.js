@@ -1,4 +1,5 @@
 import React, {createContext, useState, useEffect} from 'react'
+import useLocalStorage from 'react-use/lib/useLocalStorage'
 import {fetchCeremonyIntervals} from '../api/dna'
 
 const initialValidationStore = {
@@ -6,6 +7,7 @@ const initialValidationStore = {
   markValidationFinished: null,
   saveShortAnswers: null,
   saveLongAnswers: null,
+  getCurrentValidation: null,
 }
 
 export const ValidationContext = createContext()
@@ -17,11 +19,12 @@ function ValidationProvider({children}) {
     markValidationFinished,
     saveShortAnswers,
     saveLongAnswers,
-  } = global.validation || initialValidationStore
+    getCurrentValidation,
+  } = global.validationStore || initialValidationStore
 
   const [shortAnswers, setShortAnswers] = useState()
   const [longAnswers, setLongAnswers] = useState()
-  const [validationTimer, setValidationTimer] = useState()
+  const [validationTimer, setValidationTimer] = useLocalStorage()
 
   const [intervals, setIntervals] = useState({})
 
@@ -38,6 +41,15 @@ function ValidationProvider({children}) {
           .reduce((curr, acc) => ({...acc, ...curr}), {})
 
         setIntervals(minIntervals)
+
+        if (getCurrentValidation) {
+          // eslint-disable-next-line no-shadow
+          const validation = getCurrentValidation()
+          if (validation) {
+            setShortAnswers(validation.shortAnswers)
+            setLongAnswers(validation.longAnswers)
+          }
+        }
       }
     }
 
@@ -46,10 +58,17 @@ function ValidationProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [getCurrentValidation])
 
   const startValidation = () => {
-    markValidationStarted()
+    const {
+      ShortSessionDuration,
+      LongSessionDuration,
+      AfterLongSessionDuration,
+    } = intervals
+    markValidationStarted(
+      ShortSessionDuration + LongSessionDuration + AfterLongSessionDuration
+    )
   }
 
   const finishValidation = () => {
@@ -58,13 +77,13 @@ function ValidationProvider({children}) {
 
   useEffect(() => {
     if (saveShortAnswers && shortAnswers) {
-      saveShortAnswers()
+      saveShortAnswers(shortAnswers)
     }
-  }, [saveShortAnswers, shortAnswers])
+  }, [shortAnswers, saveShortAnswers])
 
   useEffect(() => {
     if (saveLongAnswers && longAnswers) {
-      saveLongAnswers()
+      saveLongAnswers(longAnswers)
     }
   }, [longAnswers, saveLongAnswers])
 
@@ -78,8 +97,8 @@ function ValidationProvider({children}) {
         setShortAnswers,
         setLongAnswers,
         finishValidation,
-        timer: validationTimer,
-        setTimer: setValidationTimer,
+        validationTimer,
+        setValidationTimer,
       }}
     >
       {children}

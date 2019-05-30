@@ -1,5 +1,6 @@
 import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
+import {withRouter} from 'next/router'
 import SidebarNav from './nav'
 import NetContext from '../shared/providers/net-provider'
 import {Absolute, Box, Text} from '../shared/components'
@@ -9,7 +10,7 @@ import ValidationBanner from './validation-banner'
 import {ValidationContext} from '../shared/providers/validation-provider'
 import Notifications from './notifications'
 
-function Layout({NavMenu = SidebarNav, children}) {
+function Layout({NavMenu = SidebarNav, router, children}) {
   const {currentPeriod} = useContext(NetContext)
   const {notifications, alerts} = useContext(NotificationContext)
   const {
@@ -35,11 +36,11 @@ function Layout({NavMenu = SidebarNav, children}) {
         {currentPeriod === 'FlipLottery' && (
           <Box bg={theme.colors.danger} p={theme.spacings.normal}>
             <Text color={theme.colors.white}>
-              {`Validation starts in ${intervals.FlipLotteryDuration} min`}
+              {`Validation starts in ${intervals.FlipLotteryDuration} sec`}
             </Text>
           </Box>
         )}
-        {validationRunning && (
+        {!router.pathname.startsWith('/validation') && validationRunning && (
           <ValidationBanner
             type={shortSessionRunning ? 'short' : 'long'}
             shouldValidate={
@@ -71,6 +72,9 @@ function Layout({NavMenu = SidebarNav, children}) {
 Layout.propTypes = {
   NavMenu: PropTypes.node,
   children: PropTypes.node,
+  router: PropTypes.shape({
+    pathname: PropTypes.string.isRequired,
+  }),
 }
 
-export default Layout
+export default withRouter(Layout)

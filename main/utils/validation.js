@@ -43,10 +43,15 @@ function saveLongAnswers(answers) {
   store.set('validation.longAnswers', answers)
 }
 
+function deleteValidation() {
+  store.delete('validation')
+}
+
 module.exports = {
   getCurrentValidation,
   markValidationStarted,
   markValidationFinished,
   saveShortAnswers,
   saveLongAnswers,
+  deleteValidation,
 }

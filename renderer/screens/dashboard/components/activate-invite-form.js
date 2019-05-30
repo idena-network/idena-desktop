@@ -45,7 +45,8 @@ export function ActivateInviteForm({to, activateResult, onActivateInviteSend}) {
 
 ActivateInviteForm.propTypes = {
   to: PropTypes.string,
-  activateResult: PropTypes.string,
+  // eslint-disable-next-line react/forbid-prop-types
+  activateResult: PropTypes.object,
   onActivateInviteSend: PropTypes.func,
 }
 

@@ -25,6 +25,7 @@ function Flips() {
 
   useEffect(() => {
     let ignore = false
+
     async function fetchData() {
       const responses = await Promise.all(
         getPublishedFlips().map(flip =>

@@ -22,6 +22,10 @@ import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {ValidationContext} from '../../shared/providers/validation-provider'
 
 export default function() {
+  const {setLongAnswers, validationTimer, setValidationTimer} = useContext(
+    ValidationContext
+  )
+
   const [flips, setFlips] = useState([])
   const [flipHashes, setFlipHashes] = useState([])
   const [orders, setOrders] = useState([])
@@ -29,8 +33,6 @@ export default function() {
   const [answers, setAnswers] = useState([])
   const [flipsLoaded, setFlipsLoaded] = useState(false)
   const [loadedStates, setLoadedStates] = useState([])
-
-  const {setLongAnswers, timer, setTimer} = useContext(ValidationContext)
 
   const handlePrev = () => {
     const prevFlipIdx = Math.max(0, currentFlipIdx - 1)
@@ -159,7 +161,7 @@ export default function() {
           currentIndex={flips.length > 0 ? currentFlipIdx + 1 : 0}
           total={flips.length}
         >
-          <Timer time={timer} onTick={setTimer} />
+          <Timer time={validationTimer} onTick={setValidationTimer} />
         </ValidationHeader>
         <Flex direction="column" flex="1">
           <ValidationScene

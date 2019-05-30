@@ -36,7 +36,7 @@ function ValidationBanner({shouldValidate, type, duration, onTick}) {
           <Box p={theme.spacings.normal}>
             {shouldValidate
               ? `${fl.toUpperCase().concat(...letters)} session running`
-              : `Waiting for the end of validation session`}
+              : `Waiting for the end of ${type} session`}
           </Box>
         </Flex>
         {shouldValidate && (

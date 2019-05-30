@@ -7,7 +7,7 @@ const validation = require('./utils/validation')
 process.once('loaded', () => {
   global.ipcRenderer = ipcRenderer
   global.flips = flips
-  global.validation = validation
+  global.validationStore = validation
 
   if (isDev) {
     global.require = require

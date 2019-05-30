@@ -4,11 +4,12 @@ import Router from 'next/router'
 import theme from '../../../../shared/theme'
 import FlipImage from './flip-image'
 import {Box, Text, Button} from '../../../../shared/components'
+import {composeHint} from '../utils/flip'
 
 const fromBlob = src =>
   URL.createObjectURL(new Blob([src], {type: 'image/jpeg'}))
 
-function Flip({id, caption, pics, createdAt, onUpdateFlips}) {
+function Flip({id, hint, pics, createdAt, onUpdateFlips}) {
   const {deleteDraft} = global.flips
   const draft = !!id
   return (
@@ -20,7 +21,7 @@ function Flip({id, caption, pics, createdAt, onUpdateFlips}) {
         />
       </Box>
       <Box m={`0 0 ${theme.spacings.small}`}>
-        <Text>{caption}</Text>
+        <Text>{composeHint(hint)}</Text>
       </Box>
       <Box m={`0 0 ${theme.spacings.small}`}>
         <Text color={theme.colors.muted}>
@@ -56,8 +57,7 @@ const flipImageType = PropTypes.oneOfType([PropTypes.object, PropTypes.string])
 
 Flip.propTypes = {
   id: PropTypes.string,
-  hash: PropTypes.string,
-  caption: PropTypes.string.isRequired,
+  hint: PropTypes.arrayOf(PropTypes.string).isRequired,
   pics: PropTypes.arrayOf(flipImageType).isRequired,
   createdAt: PropTypes.number.isRequired,
   onUpdateFlips: PropTypes.func,

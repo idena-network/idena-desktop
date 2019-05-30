@@ -2,5 +2,5 @@
 import Router from 'next/router'
 
 export function goToLongSession() {
-  Router.push('/long')
+  Router.push('/validation/long')
 }

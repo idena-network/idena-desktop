@@ -1,12 +1,12 @@
+import {encode} from 'rlp'
 import {toHex} from '../../../../shared/utils/req'
 import {randomFlipOrder} from '../../screens/create-flip/utils/order'
-import {encode} from 'rlp'
 
 /**
  * Composes hint for the flip
  * @param {string[]} words List of two words
  */
-function composeHint(words) {
+export function composeHint(words) {
   return words.join('/')
 }
 
@@ -14,7 +14,7 @@ function composeHint(words) {
  * Decomposes flip hint into two words
  * @param {string} hint Flip hint
  */
-function decomposeHint(words) {
+export function decomposeHint(words) {
   return words.split('/')
 }
 
