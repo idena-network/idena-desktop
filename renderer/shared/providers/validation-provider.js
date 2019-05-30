@@ -1,18 +1,27 @@
 import React, {createContext, useState, useEffect} from 'react'
-import useLocalStorage from 'react-use/lib/useLocalStorage'
 import {fetchCeremonyIntervals} from '../api/dna'
+
+const initialValidationStore = {
+  markValidationStarted: null,
+  markValidationFinished: null,
+  saveShortAnswers: null,
+  saveLongAnswers: null,
+}
 
 export const ValidationContext = createContext()
 
 // eslint-disable-next-line react/prop-types
 function ValidationProvider({children}) {
-  const [shortAnswers, setShortAnswers] = useLocalStorage(
-    'idena/validation/shortAnswers'
-  )
-  const [longAnswers, setLongAnswers] = useLocalStorage(
-    'idena/validation/longAnswers'
-  )
-  const [timer, setTimer] = useLocalStorage('idena/validation/timer')
+  const {
+    markValidationStarted,
+    markValidationFinished,
+    saveShortAnswers,
+    saveLongAnswers,
+  } = global.validation || initialValidationStore
+
+  const [shortAnswers, setShortAnswers] = useState()
+  const [longAnswers, setLongAnswers] = useState()
+  const [validationTimer, setValidationTimer] = useState()
 
   const [intervals, setIntervals] = useState({})
 
@@ -39,16 +48,38 @@ function ValidationProvider({children}) {
     }
   }, [])
 
+  const startValidation = () => {
+    markValidationStarted()
+  }
+
+  const finishValidation = () => {
+    markValidationFinished()
+  }
+
+  useEffect(() => {
+    if (saveShortAnswers && shortAnswers) {
+      saveShortAnswers()
+    }
+  }, [saveShortAnswers, shortAnswers])
+
+  useEffect(() => {
+    if (saveLongAnswers && longAnswers) {
+      saveLongAnswers()
+    }
+  }, [longAnswers, saveLongAnswers])
+
   return (
     <ValidationContext.Provider
       value={{
         intervals,
         shortAnswers,
         longAnswers,
+        startValidation,
         setShortAnswers,
         setLongAnswers,
-        timer,
-        setTimer,
+        finishValidation,
+        timer: validationTimer,
+        setTimer: setValidationTimer,
       }}
     >
       {children}

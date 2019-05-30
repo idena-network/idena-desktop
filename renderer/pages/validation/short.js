@@ -1,5 +1,4 @@
 import React, {useEffect, useState, useContext} from 'react'
-import Router from 'next/router'
 import {decode} from 'rlp'
 import Layout from '../../screens/validation/shared/components/validation-layout'
 import ValidationHeader from '../../screens/validation/shared/components/validation-header'
@@ -20,8 +19,8 @@ import {
 } from '../../screens/validation/shared/utils/answers'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import theme from '../../shared/theme'
-import {FLIPS_STORAGE_KEY} from '../../screens/flips/utils/storage'
 import {ValidationContext} from '../../shared/providers/validation-provider'
+import {goToLongSession} from '../../screens/validation/shared/utils/router'
 
 export default function() {
   const [flips, setFlips] = useState([])
@@ -74,9 +73,8 @@ export default function() {
       answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
     }))
     await submitShortAnswers(answersPayload, 0, 0)
-    localStorage.removeItem(FLIPS_STORAGE_KEY)
     setShortAnswers(answersPayload)
-    Router.push('/dashboard')
+    goToLongSession()
   }
 
   useEffect(() => {

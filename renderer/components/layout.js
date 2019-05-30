@@ -5,34 +5,31 @@ import NetContext from '../shared/providers/net-provider'
 import {Absolute, Box, Text} from '../shared/components'
 import theme from '../shared/theme'
 import {NotificationContext} from '../shared/providers/notification-provider'
-import Notification from './notification'
 import ValidationBanner from './validation-banner'
 import {ValidationContext} from '../shared/providers/validation-provider'
+import Notifications from './notifications'
 
 function Layout({NavMenu = SidebarNav, children}) {
   const {currentPeriod} = useContext(NetContext)
   const {notifications, alerts} = useContext(NotificationContext)
-  const {shortAnswers, longAnswers, intervals, timer, setTimer} = useContext(
-    ValidationContext
-  )
+  const {
+    shortAnswers,
+    longAnswers,
+    intervals,
+    validationTimer,
+    setValidationTimer,
+  } = useContext(ValidationContext)
+
+  const validationRunning =
+    currentPeriod === 'ShortSession' || currentPeriod === 'LongSession'
+  const shortSessionRunning = currentPeriod === 'ShortSession'
+  const longSessionRunning = currentPeriod === 'LongSession'
 
   return (
     <>
       <main>
-        <NavMenu user={{name: 'Alex'}} />
+        <NavMenu />
         <div>{children}</div>
-        <style jsx>{`
-          main {
-            display: flex;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-          }
-
-          div {
-            width: 100%;
-          }
-        `}</style>
       </main>
       <Absolute bottom={0} left={0} right={0}>
         {currentPeriod === 'FlipLottery' && (
@@ -42,41 +39,31 @@ function Layout({NavMenu = SidebarNav, children}) {
             </Text>
           </Box>
         )}
-        {currentPeriod === 'ShortSession' && (
+        {validationRunning && (
           <ValidationBanner
-            type="short"
-            shouldValidate={!shortAnswers}
-            duration={timer || intervals.ShortSessionDuration}
-            onTick={setTimer}
-          />
-        )}
-        {currentPeriod === 'LongSession' && (
-          <ValidationBanner
-            type="long"
-            shouldValidate={!longAnswers}
-            duration={timer || intervals.LongSessionDuration}
-            onTick={setTimer}
+            type={shortSessionRunning ? 'short' : 'long'}
+            shouldValidate={
+              (shortSessionRunning && !shortAnswers) ||
+              (longSessionRunning && !longAnswers)
+            }
+            duration={validationTimer || intervals.ShortSessionDuration}
+            onTick={setValidationTimer}
           />
         )}
       </Absolute>
-      {notifications && (
-        <Absolute top="1em" left="0" right="0">
-          {notifications.map(notification => (
-            <Notification key={notification.timestamp} {...notification} />
-          ))}
-        </Absolute>
-      )}
-      {alerts && (
-        <Absolute top="1em" left="0" right="0">
-          {alerts.map(notification => (
-            <Notification
-              type="alert"
-              key={notification.title}
-              {...notification}
-            />
-          ))}
-        </Absolute>
-      )}
+      <Notifications notifications={notifications} alerts={alerts} />
+      <style jsx>{`
+        main {
+          display: flex;
+          height: 100%;
+          padding: 0;
+          margin: 0;
+        }
+
+        div {
+          width: 100%;
+        }
+      `}</style>
     </>
   )
 }
