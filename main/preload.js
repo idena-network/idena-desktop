@@ -1,8 +1,8 @@
 const {ipcRenderer} = require('electron')
 const isDev = require('electron-is-dev')
 
-const flips = require('./utils/flips')
-const validation = require('./utils/validation')
+const flips = require('./stores/flips')
+const validation = require('./stores/validation')
 
 process.once('loaded', () => {
   global.ipcRenderer = ipcRenderer
