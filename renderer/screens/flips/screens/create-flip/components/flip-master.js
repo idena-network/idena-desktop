@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useContext} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
+import useUnmount from 'react-use/lib/useUnmount'
 import CreateFlipStep from './flip-step'
 import {Box, SubHeading, Text, Absolute} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
@@ -13,7 +14,6 @@ import SubmitFlip from './submit-flip'
 import {submitFlip} from '../../../../../shared/services/api'
 import NetContext from '../../../../../shared/providers/net-provider'
 import {NotificationContext} from '../../../../../shared/providers/notification-provider'
-import useUnmount from 'react-use/lib/useUnmount'
 import {flipToHex, hasDataUrl} from '../../../shared/utils/flip'
 
 const defaultOrder = Array.from({length: 4}, (_, i) => i)
@@ -31,7 +31,7 @@ function CreateFlipMaster({
   order: initialOrder,
   id,
 }) {
-  const {getDraft, addDraft, updateDraft, publishFlip} = global.flips
+  const {getDraft, addDraft, updateDraft, publishFlip} = global.flipStore
 
   const {validated, requiredFlips} = useContext(NetContext)
   const {onAddNotification} = useContext(NotificationContext)
@@ -56,7 +56,7 @@ function CreateFlipMaster({
         addDraft({...nextDraft, createdAt: Date.now()})
       }
     }
-  }, [pics, hint, order, id])
+  }, [pics, hint, order, id, flipStarted, getDraft, updateDraft, addDraft])
 
   useUnmount(() => onAddNotification({title: 'Flip has been saved to drafts'}))
 
@@ -197,6 +197,7 @@ CreateFlipMaster.propTypes = {
   id: PropTypes.string,
   hint: PropTypes.arrayOf(PropTypes.string),
   pics: PropTypes.arrayOf(PropTypes.string),
+  order: PropTypes.arrayOf(PropTypes.number),
 }
 
 export default CreateFlipMaster

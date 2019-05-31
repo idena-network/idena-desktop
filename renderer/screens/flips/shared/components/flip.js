@@ -10,7 +10,7 @@ const fromBlob = src =>
   URL.createObjectURL(new Blob([src], {type: 'image/jpeg'}))
 
 function Flip({id, hint, pics, createdAt, onUpdateFlips}) {
-  const {deleteDraft} = global.flips
+  const {deleteDraft} = global.flipStore
   const draft = !!id
   return (
     <Box m={`${theme.spacings.normal} 0`} w="25%">
