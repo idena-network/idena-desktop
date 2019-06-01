@@ -50,17 +50,12 @@ export const NetProvider = ({children}) => {
           })
 
           const epochResult = await fetchEpoch()
-          const {currentPeriod, nextValidation} = epochResult
+          const {currentPeriod} = epochResult
           const validationRunning = currentPeriod.toLowerCase() !== 'none'
-          const secondsLeft =
-            new Date(nextValidation).getTime() - new Date().getTime()
-          const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
 
           setEpoch({
             ...epochResult,
             validationRunning,
-            validationSoon,
-            secondsLeft,
           })
           clearAlert()
         } catch (error) {
@@ -87,17 +82,12 @@ export const NetProvider = ({children}) => {
       if (!ignore) {
         try {
           const epochResult = await fetchEpoch()
-          const {currentPeriod, nextValidation} = epochResult
+          const {currentPeriod} = epochResult
           const validationRunning = currentPeriod.toLowerCase() !== 'none'
-          const secondsLeft =
-            new Date(nextValidation).getTime() - new Date().getTime()
-          const validationSoon = secondsLeft < 60 * 1000 && secondsLeft > 0
 
           setEpoch({
             ...epochResult,
             validationRunning,
-            validationSoon,
-            secondsLeft,
           })
           clearAlert()
         } catch (error) {

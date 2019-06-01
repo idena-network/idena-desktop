@@ -4,7 +4,7 @@ import Flip from './flip'
 import Flex from '../../../../shared/components/flex'
 import FlipPlaceholder from './flip-placeholder'
 
-function FlipList({flips, onUpdateFlips}) {
+function FlipList({flips = [], onUpdateFlips}) {
   return (
     <Flex css={{flexWrap: 'wrap'}}>
       {flips.map((flip, idx) =>

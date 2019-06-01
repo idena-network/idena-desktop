@@ -9,22 +9,17 @@ import {NotificationContext} from '../shared/providers/notification-provider'
 import ValidationBanner from './validation-banner'
 import {ValidationContext} from '../shared/providers/validation-provider'
 import Notifications from './notifications'
+import {
+  sessionRunning,
+  flipLotteryRunning,
+  shortSessionRunning,
+  longSessionRunning,
+} from '../shared/utils/validation'
 
 function Layout({NavMenu = SidebarNav, router, children}) {
   const {currentPeriod} = useContext(NetContext)
   const {notifications, alerts} = useContext(NotificationContext)
-  const {
-    shortAnswers,
-    longAnswers,
-    intervals,
-    validationTimer,
-    setValidationTimer,
-  } = useContext(ValidationContext)
-
-  const validationRunning =
-    currentPeriod === 'ShortSession' || currentPeriod === 'LongSession'
-  const shortSessionRunning = currentPeriod === 'ShortSession'
-  const longSessionRunning = currentPeriod === 'LongSession'
+  const {shortAnswers, longAnswers, intervals} = useContext(ValidationContext)
 
   return (
     <>
@@ -33,24 +28,25 @@ function Layout({NavMenu = SidebarNav, router, children}) {
         <div>{children}</div>
       </main>
       <Absolute bottom={0} left={0} right={0}>
-        {currentPeriod === 'FlipLottery' && (
+        {flipLotteryRunning(currentPeriod) && (
           <Box bg={theme.colors.danger} p={theme.spacings.normal}>
             <Text color={theme.colors.white}>
-              {`Validation starts in ${intervals.FlipLotteryDuration} sec`}
+              {`Validation starts in ${Math.round(
+                intervals.FlipLotteryDuration / 60
+              )} min`}
             </Text>
           </Box>
         )}
-        {!router.pathname.startsWith('/validation') && validationRunning && (
-          <ValidationBanner
-            type={shortSessionRunning ? 'short' : 'long'}
-            shouldValidate={
-              (shortSessionRunning && !shortAnswers) ||
-              (longSessionRunning && !longAnswers)
-            }
-            duration={validationTimer || intervals.ShortSessionDuration}
-            onTick={setValidationTimer}
-          />
-        )}
+        {!router.pathname.startsWith('/validation') &&
+          sessionRunning(currentPeriod) && (
+            <ValidationBanner
+              type={shortSessionRunning(currentPeriod) ? 'short' : 'long'}
+              shouldValidate={
+                (shortSessionRunning(currentPeriod) && !shortAnswers) ||
+                (longSessionRunning(currentPeriod) && !longAnswers)
+              }
+            />
+          )}
       </Absolute>
       <Notifications notifications={notifications} alerts={alerts} />
       <style jsx>{`
@@ -60,7 +56,6 @@ function Layout({NavMenu = SidebarNav, router, children}) {
           padding: 0;
           margin: 0;
         }
-
         div {
           width: 100%;
         }

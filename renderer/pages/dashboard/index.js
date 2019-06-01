@@ -23,7 +23,7 @@ export default () => {
   return (
     <Layout>
       <Row>
-        <Col p="3em 2em" w={6}>
+        <Col p="3em 2em" w={12}>
           <Heading>Profile</Heading>
           <UserActions
             onToggleSendInvite={() => toggleSendInvite(true)}

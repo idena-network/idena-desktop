@@ -65,6 +65,10 @@ function getPublishedFlips() {
   return store.get('published', [])
 }
 
+function clearPublished() {
+  store.set('published', [])
+}
+
 function clear() {
   store.clear()
 }
@@ -80,5 +84,6 @@ module.exports = {
   clearDrafts,
   publishFlip,
   getPublishedFlips,
+  clearPublished,
   clear,
 }

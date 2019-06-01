@@ -6,6 +6,8 @@ import theme from '../shared/theme'
 import NetContext from '../shared/providers/net-provider'
 import Loading from '../shared/components/loading'
 import {If} from '../shared/components/utils'
+import {ValidationContext} from '../shared/providers/validation-provider'
+import {isValidationRunning} from '../shared/utils/validation'
 
 const NavItem = withRouter(({href, router, children}) => {
   const active = router.pathname.startsWith(href)
@@ -63,13 +65,9 @@ const Block = ({title, value}) => (
 )
 
 function Nav({user}) {
-  const {
-    currentPeriod,
-    nextValidation,
-    validationRunning,
-    requiredFlips,
-    madeFlips,
-  } = useContext(NetContext)
+  const {currentPeriod, nextValidation, requiredFlips, madeFlips} = useContext(
+    NetContext
+  )
 
   return (
     <nav>
@@ -83,17 +81,13 @@ function Nav({user}) {
         <NavItem href="/flips">Flips</NavItem>
         <NavItem href="/contacts">Contacts</NavItem>
         <NavItem href="/settings">Settings</NavItem>
-        {/* TODO: for internal testing purposes only, remove then */}
-        <If condition={true || validationRunning}>
-          <NavItem href="/validation">Validation</NavItem>
-        </If>
         <Box
           bg={theme.colors.white01}
           m={`${theme.spacings.xlarge} 0`}
           css={{borderRadius: '10px'}}
         >
           <Block title="Current period" value={currentPeriod || <Loading />} />
-          {!validationRunning && (
+          {!isValidationRunning(currentPeriod) && (
             <Block
               title="My current task"
               value={
@@ -102,7 +96,7 @@ function Nav({user}) {
               }
             />
           )}
-          {!validationRunning && (
+          {!isValidationRunning(currentPeriod) && (
             <Block
               title="Next validation"
               value={

@@ -10,7 +10,8 @@ const store = new Store({
  */
 function markValidationStarted(durationInSec) {
   store.set('validation.running', true)
-  store.set('validation.ttl', durationInSec)
+  store.set('validation.startedAt', Date.now())
+  store.set('validation.ttl', Date.now() + durationInSec * 1000)
 }
 
 /**

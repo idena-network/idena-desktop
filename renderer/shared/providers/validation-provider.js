@@ -1,6 +1,19 @@
-import React, {createContext, useState, useEffect} from 'react'
-import useLocalStorage from 'react-use/lib/useLocalStorage'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react'
+import PropTypes from 'prop-types'
 import {fetchCeremonyIntervals} from '../api/dna'
+import NetContext from './net-provider'
+import {
+  isValidationRunning,
+  shortSessionRunning,
+  longSessionRunning,
+  sessionRunning,
+} from '../utils/validation'
 
 const initialValidationStore = {
   markValidationStarted: null,
@@ -10,21 +23,24 @@ const initialValidationStore = {
   getCurrentValidation: null,
 }
 
+const {
+  markValidationStarted,
+  markValidationFinished,
+  saveShortAnswers,
+  saveLongAnswers,
+  getCurrentValidation,
+  deleteValidation,
+} = global.validationStore || initialValidationStore
+
 export const ValidationContext = createContext()
 
-// eslint-disable-next-line react/prop-types
 function ValidationProvider({children}) {
-  const {
-    markValidationStarted,
-    markValidationFinished,
-    saveShortAnswers,
-    saveLongAnswers,
-    getCurrentValidation,
-  } = global.validationStore || initialValidationStore
+  const {currentPeriod} = useContext(NetContext)
 
   const [shortAnswers, setShortAnswers] = useState()
   const [longAnswers, setLongAnswers] = useState()
-  const [validationTimer, setValidationTimer] = useLocalStorage()
+  const [validationRunning, setValidationRunning] = useState(false)
+  const [validationTimer, setValidationTimer] = useState()
 
   const [intervals, setIntervals] = useState({})
 
@@ -46,8 +62,18 @@ function ValidationProvider({children}) {
           // eslint-disable-next-line no-shadow
           const validation = getCurrentValidation()
           if (validation) {
-            setShortAnswers(validation.shortAnswers)
-            setLongAnswers(validation.longAnswers)
+            const {ShortSessionDuration, LongSessionDuration} = intervals
+            let secondsLeft = Math.round((validation.ttl - Date.now()) / 1000)
+            if (shortSessionRunning(currentPeriod)) {
+              secondsLeft -= LongSessionDuration
+            } else if (longSessionRunning(currentPeriod)) {
+              secondsLeft -= ShortSessionDuration
+            }
+            if (secondsLeft > 0) {
+              setShortAnswers(validation.shortAnswers)
+              setLongAnswers(validation.longAnswers)
+            }
+            setValidationTimer(secondsLeft)
           }
         }
       }
@@ -58,34 +84,45 @@ function ValidationProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [getCurrentValidation])
-
-  const startValidation = () => {
-    const {
-      ShortSessionDuration,
-      LongSessionDuration,
-      AfterLongSessionDuration,
-    } = intervals
-    markValidationStarted(
-      ShortSessionDuration + LongSessionDuration + AfterLongSessionDuration
-    )
-  }
-
-  const finishValidation = () => {
-    markValidationFinished()
-  }
+  }, [currentPeriod, setValidationTimer, validationRunning])
 
   useEffect(() => {
     if (saveShortAnswers && shortAnswers) {
       saveShortAnswers(shortAnswers)
     }
-  }, [shortAnswers, saveShortAnswers])
+  }, [shortAnswers])
 
   useEffect(() => {
     if (saveLongAnswers && longAnswers) {
       saveLongAnswers(longAnswers)
     }
-  }, [longAnswers, saveLongAnswers])
+  }, [longAnswers])
+
+  const startValidation = useCallback(() => {
+    const {ShortSessionDuration, LongSessionDuration} = intervals
+    markValidationStarted(ShortSessionDuration + LongSessionDuration)
+  }, [intervals])
+
+  const finishValidation = useCallback(() => {
+    markValidationFinished()
+    deleteValidation()
+
+    const {clearPublished: clearPublishedFlips} = global && global.flipStore
+    if (clearPublishedFlips) {
+      clearPublishedFlips()
+    }
+  }, [])
+
+  useEffect(() => {
+    const running = sessionRunning(currentPeriod)
+    if (validationRunning && !running) {
+      finishValidation()
+    }
+    if (!validationRunning && running) {
+      startValidation()
+    }
+    setValidationRunning(running)
+  }, [currentPeriod, finishValidation, startValidation, validationRunning])
 
   return (
     <ValidationContext.Provider
@@ -99,11 +136,16 @@ function ValidationProvider({children}) {
         finishValidation,
         validationTimer,
         setValidationTimer,
+        validationRunning,
       }}
     >
       {children}
     </ValidationContext.Provider>
   )
+}
+
+ValidationProvider.propTypes = {
+  children: PropTypes.node,
 }
 
 export default ValidationProvider
