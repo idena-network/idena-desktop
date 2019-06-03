@@ -19,7 +19,13 @@ import {
 function Layout({NavMenu = SidebarNav, router, children}) {
   const {currentPeriod} = useContext(NetContext)
   const {notifications, alerts} = useContext(NotificationContext)
-  const {shortAnswers, longAnswers, intervals} = useContext(ValidationContext)
+  const {
+    shortAnswers,
+    longAnswers,
+    intervals,
+    validationTimer,
+    setValidationTimer,
+  } = useContext(ValidationContext)
 
   return (
     <>
@@ -40,6 +46,8 @@ function Layout({NavMenu = SidebarNav, router, children}) {
         {!router.pathname.startsWith('/validation') &&
           sessionRunning(currentPeriod) && (
             <ValidationBanner
+              seconds={validationTimer}
+              onTick={setValidationTimer}
               type={shortSessionRunning(currentPeriod) ? 'short' : 'long'}
               shouldValidate={
                 (shortSessionRunning(currentPeriod) && !shortAnswers) ||

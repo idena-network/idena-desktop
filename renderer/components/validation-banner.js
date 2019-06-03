@@ -1,28 +1,26 @@
-import React, {useContext} from 'react'
+import React, {useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {Box, Fill, Link} from '../shared/components'
 import Flex from '../shared/components/flex'
 import theme from '../shared/theme'
-import {useInterval} from '../screens/validation/shared/utils/useInterval'
 import {capitalize} from '../shared/utils/string'
-import {ValidationContext} from '../shared/providers/validation-provider'
+import useTimer from '../screens/validation/shared/utils/useTimer'
 
-function ValidationBanner({shouldValidate, type}) {
-  const {validationTimer, setValidationTimer} = useContext(ValidationContext)
+function ValidationBanner({shouldValidate, type, seconds, onTick}) {
+  const {secondsLeft} = useTimer({seconds})
 
-  useInterval(
-    () => {
-      setValidationTimer(validationTimer - 1)
-    },
-    validationTimer > 1 ? 1000 : null
-  )
+  useEffect(() => {
+    if (onTick) {
+      onTick(secondsLeft)
+    }
+  }, [onTick, secondsLeft])
 
   return (
     <Box bg={theme.colors.primary} css={{color: theme.colors.white}}>
       <Flex justify="space-between" align="center">
         <Flex>
           <Box p={theme.spacings.normal} css={{position: 'relative'}}>
-            {validationTimer} seconds left
+            {secondsLeft} seconds left
             <Fill bg="rgba(0,0,0,0.1)" css={{display: 'none'}}>
               &nbsp;
             </Fill>
@@ -33,13 +31,13 @@ function ValidationBanner({shouldValidate, type}) {
               : `Waiting for the end of ${type} session`}
           </Box>
         </Flex>
-        {shouldValidate && (
-          <Box p={theme.spacings.normal}>
+        <Box p={theme.spacings.normal}>
+          {shouldValidate && (
             <Link href={`/validation/${type}`} color={theme.colors.white}>
               Validate
             </Link>
-          </Box>
-        )}
+          )}
+        </Box>
       </Flex>
     </Box>
   )
@@ -48,6 +46,8 @@ function ValidationBanner({shouldValidate, type}) {
 ValidationBanner.propTypes = {
   shouldValidate: PropTypes.bool.isRequired,
   type: PropTypes.oneOf(['short', 'long']).isRequired,
+  seconds: PropTypes.number.isRequired,
+  onTick: PropTypes.func,
 }
 
 export default ValidationBanner
