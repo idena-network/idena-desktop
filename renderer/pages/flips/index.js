@@ -16,8 +16,6 @@ const filters = {
 }
 
 function Flips() {
-  const {getDrafts, getPublishedFlips} = global.flipStore
-
   const {validationRunning, requiredFlips} = useContext(NetContext)
 
   const [flips, setFlips] = useState({flips: [], drafts: []})

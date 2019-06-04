@@ -36,6 +36,8 @@ const spacings = {
   large: '1.5em',
   largePx: '24px',
   xlarge: '2em',
+  xxlarge: '3em',
+  xxxlarge: '4em',
 }
 
 export default {

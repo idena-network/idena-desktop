@@ -25,7 +25,7 @@ export default () => {
 
   return (
     <Layout>
-      <Box p={theme.spacings.large}>
+      <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Heading>Profile</Heading>
         <UserActions
           onToggleSendInvite={() => toggleSendInvite(true)}

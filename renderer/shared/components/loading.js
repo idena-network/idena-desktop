@@ -1,7 +1,18 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import {Text} from './typo'
+import theme from '../theme'
 
-// eslint-disable-next-line react/prop-types
-export default function({color = 'white'}) {
+function Loading({color}) {
   return <Text color={color}>Loading...</Text>
 }
+
+Loading.defaultProps = {
+  color: theme.colors.white,
+}
+
+Loading.propTypes = {
+  color: PropTypes.string,
+}
+
+export default Loading
