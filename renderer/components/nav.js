@@ -8,6 +8,7 @@ import Loading from '../shared/components/loading'
 import {If} from '../shared/components/utils'
 import {ValidationContext} from '../shared/providers/validation-provider'
 import {isValidationRunning} from '../shared/utils/validation'
+import useValidation from '../shared/utils/useValidation'
 
 const NavItem = withRouter(({href, router, children}) => {
   const active = router.pathname.startsWith(href)
@@ -65,9 +66,12 @@ const Block = ({title, value}) => (
 )
 
 function Nav({user}) {
-  const {currentPeriod, nextValidation, requiredFlips, madeFlips} = useContext(
-    NetContext
-  )
+  const {nextValidation, requiredFlips, madeFlips} = {
+    nextValidation: new Date(),
+    requiredFlips: 3,
+    madeFlips: 0,
+  } // useContext(NetContext)
+  const {running: validationRunning, currentStage} = useValidation()
 
   return (
     <nav>
@@ -86,8 +90,11 @@ function Nav({user}) {
           m={`${theme.spacings.xlarge} 0`}
           css={{borderRadius: '10px'}}
         >
-          <Block title="Current period" value={currentPeriod || <Loading />} />
-          {!isValidationRunning(currentPeriod) && (
+          <Block
+            title="Current period"
+            value={currentStage.type || <Loading />}
+          />
+          {validationRunning && (
             <Block
               title="My current task"
               value={
@@ -96,7 +103,7 @@ function Nav({user}) {
               }
             />
           )}
-          {!isValidationRunning(currentPeriod) && (
+          {validationRunning && (
             <Block
               title="Next validation"
               value={

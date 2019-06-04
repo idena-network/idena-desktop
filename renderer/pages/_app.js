@@ -32,11 +32,11 @@ class MyApp extends App {
         <GlobalStyle />
         <NProgressStyle />
         <NotificationProvider>
-          <NetProvider key={`net-provider-${idx}`}>
-            <ValidationProvider>
-              <Component {...pageProps} />
-            </ValidationProvider>
-          </NetProvider>
+          {/* <NetProvider key={`net-provider-${idx}`}> */}
+          {/* <ValidationProvider> */}
+          <Component {...pageProps} />
+          {/* </ValidationProvider> */}
+          {/* </NetProvider> */}
         </NotificationProvider>
       </Container>
     )

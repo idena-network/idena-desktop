@@ -15,17 +15,19 @@ import {
   shortSessionRunning,
   longSessionRunning,
 } from '../shared/utils/validation'
+import useValidation, {ValidationStage} from '../shared/utils/useValidation'
+import useValidationTiming from '../shared/utils/useValidationTiming'
 
 function Layout({NavMenu = SidebarNav, router, children}) {
-  const {currentPeriod} = useContext(NetContext)
+  // const {currentPeriod} = useContext(NetContext)
   const {notifications, alerts} = useContext(NotificationContext)
-  const {
-    shortAnswers,
-    longAnswers,
-    intervals,
-    validationTimer,
-    setValidationTimer,
-  } = useContext(ValidationContext)
+  const {running, currentStage, shortAnswers, longAnswers} = useValidation()
+  const timing = useValidationTiming()
+
+  const shortSessionRunning = currentStage.type === ValidationStage.ShortSession
+  const longSessionRunning = currentStage.type === ValidationStage.LongSession
+
+  const insideValidationForm = router.pathname.startsWith('/validation')
 
   return (
     <>
@@ -34,24 +36,22 @@ function Layout({NavMenu = SidebarNav, router, children}) {
         <div>{children}</div>
       </main>
       <Absolute bottom={0} left={0} right={0}>
-        {flipLotteryRunning(currentPeriod) && (
+        {currentStage.type === ValidationStage.FlipLottery && (
           <Box bg={theme.colors.danger} p={theme.spacings.normal}>
             <Text color={theme.colors.white}>
-              {`Validation starts in ${Math.round(
-                intervals.FlipLotteryDuration / 60
-              )} min`}
+              {`Validation starts in ${timing.flipLottery} sec`}
             </Text>
           </Box>
         )}
-        {!router.pathname.startsWith('/validation') &&
-          sessionRunning(currentPeriod) && (
+        {!insideValidationForm &&
+          (shortSessionRunning || longSessionRunning) && (
             <ValidationBanner
-              seconds={validationTimer}
-              onTick={setValidationTimer}
-              type={shortSessionRunning(currentPeriod) ? 'short' : 'long'}
+              seconds={timing.shortSession}
+              onTick={console.log}
+              type={shortSessionRunning ? 'short' : 'long'}
               shouldValidate={
-                (shortSessionRunning(currentPeriod) && !shortAnswers) ||
-                (longSessionRunning(currentPeriod) && !longAnswers)
+                (shortSessionRunning && !shortAnswers) ||
+                (longSessionRunning && !longAnswers)
               }
             />
           )}

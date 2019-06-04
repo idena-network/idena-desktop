@@ -1,9 +1,10 @@
 import React, {createContext, useState, useEffect, useContext} from 'react'
 import PropTypes from 'prop-types'
-import {fetchAddress, fetchBalance} from '../services/api'
-import {fetchEpoch, fetchIdentity} from '../api/dna'
+import {fetchBalance} from '../services/api'
+import {fetchEpoch, fetchIdentity, fetchCoinbaseAddress} from '../api/dna'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {NotificationContext} from './notification-provider'
+import useCoinbaseAddress from '../utils/useCoinbaseAddress'
 
 const initialState = {
   addr: '',
@@ -25,6 +26,8 @@ const initialState = {
 const NetContext = createContext()
 
 export const NetProvider = ({children}) => {
+  const address = useCoinbaseAddress()
+
   const {setAlert, clearAlert} = useContext(NotificationContext)
 
   const [info, setInfo] = useState(initialState)
@@ -36,16 +39,15 @@ export const NetProvider = ({children}) => {
     async function fetchInfo() {
       if (!ignore) {
         try {
-          const addr = await fetchAddress()
-          const balance = await fetchBalance(addr)
-          const identity = await fetchIdentity(addr)
+          const balance = await fetchBalance(address)
+          const identity = await fetchIdentity(address)
 
           const validated = identity && identity.state !== 'Undefined'
 
           setInfo({
             ...identity,
             validated,
-            addr,
+            address,
             balance,
           })
 

@@ -1,7 +1,6 @@
-import React, {useContext, useState} from 'react'
-import NetContext from '../../shared/providers/net-provider'
+import React, {useState} from 'react'
 import Layout from '../../components/layout'
-import {Row, Col, Heading, Drawer} from '../../shared/components'
+import {Heading, Drawer, Box} from '../../shared/components'
 import {
   UserActions,
   UserInfo,
@@ -10,9 +9,13 @@ import {
 } from '../../screens/dashboard/components'
 import {activateInvite, sendInvite} from '../../shared/api'
 import {SendInviteForm} from '../../screens/contacts/components'
+import theme from '../../shared/theme'
+import useCoinbaseAddress from '../../shared/utils/useCoinbaseAddress'
+import useIdentity from '../../shared/utils/useIdentity'
 
 export default () => {
-  const netInfo = useContext(NetContext)
+  const address = useCoinbaseAddress()
+  const identity = useIdentity(address)
 
   const [activateResult, setActivateResult] = useState()
   const [inviteResult, setInviteResult] = useState()
@@ -22,18 +25,16 @@ export default () => {
 
   return (
     <Layout>
-      <Row>
-        <Col p="3em 2em" w={12}>
-          <Heading>Profile</Heading>
-          <UserActions
-            onToggleSendInvite={() => toggleSendInvite(true)}
-            canActivateInvite
-            onToggleActivateInvite={() => toggleActivateInvite(true)}
-          />
-          <UserInfo fullName="Me" address={netInfo.addr} />
-          <NetProfile {...netInfo} />
-        </Col>
-      </Row>
+      <Box p={theme.spacings.large}>
+        <Heading>Profile</Heading>
+        <UserActions
+          onToggleSendInvite={() => toggleSendInvite(true)}
+          canActivateInvite
+          onToggleActivateInvite={() => toggleActivateInvite(true)}
+        />
+        <UserInfo {...identity} />
+        <NetProfile {...identity} />
+      </Box>
       <Drawer
         show={showActivateInvite}
         onHide={() => {
@@ -41,7 +42,7 @@ export default () => {
         }}
       >
         <ActivateInviteForm
-          to={netInfo.addr}
+          to={address}
           activateResult={activateResult}
           onActivateInviteSend={async (to, key) => {
             const result = await activateInvite(to, key)

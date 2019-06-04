@@ -109,3 +109,32 @@ export async function fetchCeremonyIntervals() {
   const {result} = data
   return result
 }
+
+/**
+ * Fetches coinbase address
+ *
+ * @returns {string} Address
+ * @example 0xf228fa1e9236343c7d44283b5ffcf9ba50df37e8
+ */
+export async function fetchCoinbaseAddress() {
+  const {data} = await api().post('/', {
+    method: 'dna_getCoinbaseAddr',
+    params: [],
+    id: 1,
+  })
+  const {result} = data
+  return result
+}
+
+/**
+ * Fetches hex representation of the FLIP published in the network
+ * @param {string} hash Flip hash
+ */
+export async function fetchFlip(hash) {
+  const {data} = await api().post('/', {
+    method: 'flip_get',
+    params: [hash],
+    id: 1,
+  })
+  return data
+}

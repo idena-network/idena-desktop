@@ -1,17 +1,5 @@
 import api, {baseUrl} from '../api/api-client'
 
-export const fetchAddress = () =>
-  fetch(baseUrl, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({method: 'dna_getCoinbaseAddr', params: [], id: 1}),
-  })
-    .then(response => response.json())
-    .then(data => data.result)
-
 export const fetchBalance = address =>
   fetch(baseUrl, {
     method: 'POST',
@@ -78,7 +66,7 @@ export const fetchFlip = hash =>
  * @returns {Flip} Flip representation in binary (hex) format
  * @example {hex: "0x123", epoch: 10}
  */
-export async function fetchVlidationFlip(hash) {
+export async function fetchValidationFlip(hash) {
   const {data} = await api.post('/', {
     method: 'flip_flip',
     params: [hash],
