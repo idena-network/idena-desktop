@@ -4,7 +4,20 @@ import theme from '../theme'
 
 export const Dim = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 
-function Box({bg, m, margin, p, padding, w, css: style, ...props}) {
+function Box({
+  bg,
+  m,
+  margin,
+  mx,
+  my,
+  p,
+  padding,
+  px,
+  py,
+  w,
+  css: style,
+  ...props
+}) {
   const marginProp = m || margin
   const paddingProp = p || padding
   return (
@@ -12,10 +25,14 @@ function Box({bg, m, margin, p, padding, w, css: style, ...props}) {
       <div style={style} {...props} />
       <style jsx>{`
         div {
-          background: ${bg};
           display: block;
+          background: ${bg};
           ${marginProp && `margin: ${marginProp}`};
+          ${mx && `margin-left: ${mx}; margin-right: ${mx}`};
+          ${my && `margin-top: ${my}; margin-bottom: ${my}`};
           ${paddingProp && `padding: ${paddingProp}`};
+          ${px && `padding-left: ${px}; padding-right: ${px}`};
+          ${py && `padding-top: ${py}; padding-bottom: ${py}`};
           ${w && `width: ${w}`};
         }
       `}</style>
@@ -32,7 +49,11 @@ Box.propTypes = {
   m: Dim,
   p: Dim,
   margin: Dim,
+  mx: Dim,
+  my: Dim,
   padding: Dim,
+  px: Dim,
+  py: Dim,
   w: Dim,
   // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,

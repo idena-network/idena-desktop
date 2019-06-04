@@ -5,7 +5,7 @@ import theme from '../../../shared/theme'
 
 function UserInfo({nickname, address}) {
   return (
-    <Box m="0 0 2em">
+    <Box my={theme.spacings.large}>
       <SubHeading>{nickname || address}</SubHeading>
       <Box>
         <Text color={theme.colors.muted} css={{wordBreak: 'break-all'}}>
