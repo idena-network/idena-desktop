@@ -1,5 +1,5 @@
-import {useEffect, useState} from 'react'
-import {fetchIdentity} from '../api'
+import {useEffect, useState, useRef} from 'react'
+import {fetchIdentity, fetchCoinbaseAddress} from '../api'
 
 const initialIdentity = {
   address: '',
@@ -19,28 +19,35 @@ const initialIdentity = {
 
 function useIdentity(address) {
   const [identity, setIdentity] = useState(initialIdentity)
+  const addressRef = useRef(address)
+
+  const friendlyStatus =
+    identity.state === 'Undefined' ? 'Not validated' : identity.state
+  const validated = friendlyStatus === 'Validated'
 
   useEffect(() => {
     let ignore = false
 
     async function fetchData() {
+      if (!address) {
+        addressRef.current = await fetchCoinbaseAddress()
+      }
+
       // eslint-disable-next-line no-shadow
-      const identity = await fetchIdentity(address)
+      const identity = await fetchIdentity(addressRef.current)
       if (!ignore) {
         setIdentity(identity)
       }
     }
 
-    if (address) {
-      fetchData()
-    }
+    fetchData()
 
     return () => {
       ignore = true
     }
-  }, [address])
+  }, [address, friendlyStatus])
 
-  return identity
+  return {...identity, friendlyStatus, validated}
 }
 
 export default useIdentity

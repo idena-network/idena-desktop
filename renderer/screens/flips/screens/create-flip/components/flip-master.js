@@ -15,6 +15,8 @@ import {submitFlip} from '../../../../../shared/services/api'
 import NetContext from '../../../../../shared/providers/net-provider'
 import {NotificationContext} from '../../../../../shared/providers/notification-provider'
 import {flipToHex, hasDataUrl} from '../../../shared/utils/flip'
+import useFlips from '../../../../../shared/utils/useFlips'
+import useIdentity from '../../../../../shared/utils/useIdentity'
 
 const defaultOrder = Array.from({length: 4}, (_, i) => i)
 
@@ -31,9 +33,14 @@ function CreateFlipMaster({
   order: initialOrder,
   id,
 }) {
-  const {getDraft, addDraft, updateDraft, publishFlip} = global.flipStore
+  const {getDraft, addDraft, updateDraft, publishFlip} = global.flipStore || {
+    getDraft: () => {},
+    addDraft: () => {},
+    updateDraft: () => {},
+    publishFlip: () => {},
+  }
 
-  const {validated, requiredFlips} = useContext(NetContext)
+  const {validated, requiredFlips} = useIdentity()
   const {onAddNotification} = useContext(NotificationContext)
 
   const [pics, setPics] = useState(initialPics || defaultPics)
@@ -42,13 +49,15 @@ function CreateFlipMaster({
   const [submitFlipResult, setSubmitFlipResult] = useState()
   const [step, setStep] = useState(0)
 
+  const {types} = useFlips()
+
   const flipStarted = pics.some(hasDataUrl)
   const flipCompleted = pics.every(hasDataUrl)
   const allowSubmit = true || (flipCompleted && validated && requiredFlips > 0)
 
   useEffect(() => {
     if (flipStarted) {
-      const nextDraft = {id, hint, pics, order}
+      const nextDraft = {id, hint, pics, order, type: types.drafts}
       const currDraft = getDraft(id)
       if (currDraft) {
         updateDraft({...currDraft, ...nextDraft, modifiedAt: Date.now()})
@@ -56,7 +65,17 @@ function CreateFlipMaster({
         addDraft({...nextDraft, createdAt: Date.now()})
       }
     }
-  }, [pics, hint, order, id, flipStarted, getDraft, updateDraft, addDraft])
+  }, [
+    pics,
+    hint,
+    order,
+    id,
+    flipStarted,
+    getDraft,
+    updateDraft,
+    addDraft,
+    types.drafts,
+  ])
 
   useUnmount(() => onAddNotification({title: 'Flip has been saved to drafts'}))
 

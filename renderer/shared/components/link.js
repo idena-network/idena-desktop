@@ -4,7 +4,6 @@ import PropTypes from 'prop-types'
 import NextLink from 'next/link'
 import theme from '../theme'
 
-// eslint-disable-next-line react/prop-types
 function Link({href, color, fontSize, children}) {
   return (
     <NextLink href={href}>
@@ -34,6 +33,8 @@ Link.defaultProps = {
 
 Link.propTypes = {
   href: PropTypes.string.isRequired,
+  color: PropTypes.string,
+  fontSize: PropTypes.string,
   children: PropTypes.node,
 }
 

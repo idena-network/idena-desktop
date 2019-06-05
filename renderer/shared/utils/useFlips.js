@@ -1,23 +1,73 @@
 import {useState, useEffect} from 'react'
 
-const {getDrafts, getPublishedFlips} = global.flipStore
+const {
+  getDrafts: getDraftsFromStore,
+  getPublishedFlips: getPublishedFromStore,
+} = global.flipStore || {
+  getDrafts: () => [],
+  getPublishedFlips: () => [],
+}
+
+// async function fetchData() {
+//   const responses = await Promise.all(
+//     getPublishedFlips().map(flip =>
+//       fetchFlip(flip.hash).then(data => ({
+//         ...flip,
+//         data,
+//       }))
+//     )
+//   )
+
+//   const fetchedFlips = responses.map(({data: {result}, ...rest}) => ({
+//     ...rest,
+//     pics: result ? decode(fromHexString(result.hex.substr(2)))[0] : [],
+//   }))
+
+//   if (!ignore) {
+//     setFlips({
+//       ...flips,
+//       flips: [
+//         ...fetchedFlips,
+//         ...new Array(requiredFlips).fill(null),
+//       ].slice(requiredFlips),
+//     })
+//   }
+// }
+
+const initialTypes = {
+  published: 'published',
+  drafts: 'drafts',
+  archived: 'archived',
+}
 
 function useFlips() {
-  const [drafts, setDrafts] = useState([])
+  const [flips, setFlips] = useState([])
   useEffect(() => {
     // eslint-disable-next-line no-shadow
-    const drafts = getDrafts()
-    setDrafts(drafts)
+    const flips = getDraftsFromStore()
+    setFlips(flips)
   }, [])
 
-  const [published, setPublished] = useState([])
+  const [types, setTypes] = useState(initialTypes)
   useEffect(() => {
-    // eslint-disable-next-line no-shadow
-    const published = getPublishedFlips()
-    setPublished(published)
-  }, [])
+    const uniqTypes = flips
+      .map(f => f.type)
+      .filter(t => t)
+      .filter((v, i, a) => a.indexOf(v) === i)
 
-  return {drafts, published}
+    const typesObj = uniqTypes.reduce((acc, curr) => {
+      acc[curr] = curr
+      return acc
+    }, {})
+
+    setTypes({...types, ...typesObj})
+  }, [flips, types])
+
+  const getDrafts = () => {
+    return flips
+  }
+
+  return {flips, types, getDrafts}
 }
 
 export default useFlips
