@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react'
-import useDna from './useEpoch'
+import useEpoch from './useEpoch'
 import useValidationTiming from './useValidationTiming'
 
 export const ValidationStage = {
@@ -24,7 +24,7 @@ const initialValidation = {
 const getCurrentValidation = () => initialValidation
 
 function useValidation() {
-  const {epoch} = useDna()
+  const {epoch} = useEpoch()
   const validationTiming = useValidationTiming()
 
   const [validation, setValidation] = useState(initialValidation)

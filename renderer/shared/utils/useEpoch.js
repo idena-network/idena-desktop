@@ -2,7 +2,7 @@ import {useState} from 'react'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {fetchEpoch} from '../api/dna'
 
-function useDna() {
+function useEpoch() {
   const [epoch, setEpoch] = useState()
 
   useInterval(() => {
@@ -27,4 +27,4 @@ function useDna() {
   }
 }
 
-export default useDna
+export default useEpoch

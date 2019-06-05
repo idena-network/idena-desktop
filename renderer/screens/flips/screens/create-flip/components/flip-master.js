@@ -12,7 +12,6 @@ import FlipHint from './flip-hint'
 import {getRandomHint} from '../utils/hints'
 import SubmitFlip from './submit-flip'
 import {submitFlip} from '../../../../../shared/services/api'
-import NetContext from '../../../../../shared/providers/net-provider'
 import {NotificationContext} from '../../../../../shared/providers/notification-provider'
 import {flipToHex, hasDataUrl} from '../../../shared/utils/flip'
 import useFlips from '../../../../../shared/utils/useFlips'
@@ -27,7 +26,7 @@ const defaultPics = [
   `https://placehold.it/480?text=4`,
 ]
 
-function CreateFlipMaster({
+function FlipMaster({
   pics: initialPics,
   hint: initialHint,
   order: initialOrder,
@@ -212,11 +211,11 @@ function CreateFlipMaster({
   )
 }
 
-CreateFlipMaster.propTypes = {
+FlipMaster.propTypes = {
   id: PropTypes.string,
   hint: PropTypes.arrayOf(PropTypes.string),
   pics: PropTypes.arrayOf(PropTypes.string),
   order: PropTypes.arrayOf(PropTypes.number),
 }
 
-export default CreateFlipMaster
+export default FlipMaster
