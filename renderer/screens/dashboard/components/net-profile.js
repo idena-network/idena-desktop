@@ -7,7 +7,11 @@ import {Figure} from '../../../shared/components/utils'
 export function NetProfile({address, state, stake, age}) {
   const status = state === 'Undefined' ? 'Not validated' : state
   return (
-    <Box bg={theme.colors.gray} p="1em" css={{borderRadius: '4px'}}>
+    <Box
+      bg={theme.colors.gray}
+      p={theme.spacings.xlarge}
+      css={{borderRadius: '10px'}}
+    >
       <Figure label="Address" value={address} />
       <Figure label="Status" value={status} />
       <Figure label="Stake" value={stake} postfix="DNA" />

@@ -34,7 +34,6 @@ const spacings = {
   small: '0.5em',
   normal: '1em',
   large: '1.5em',
-  largePx: '24px',
   xlarge: '2em',
   xxlarge: '3em',
   xxxlarge: '4em',
