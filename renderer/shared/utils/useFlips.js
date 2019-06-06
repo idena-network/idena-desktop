@@ -1,4 +1,6 @@
 import {useState, useEffect} from 'react'
+import {encode} from 'rlp'
+import {submitFlip} from '../api/dna'
 
 const {
   getDrafts: getDraftsFromStore,
@@ -6,6 +8,31 @@ const {
 } = global.flipStore || {
   getDrafts: () => [],
   getPublishedFlips: () => [],
+}
+
+function shuffleOrder(pics, randomOrder) {
+  const directOrder = pics.map((_, i) => i)
+  return Math.random() < 0.5
+    ? [directOrder, randomOrder]
+    : [randomOrder, directOrder]
+}
+
+/**
+ * Encodes flips pics into hex with `rlp`
+ * @param {string[]} pics List of flip pics to encode into hex
+ * @param {number[]} order Shuffled flip pics indices
+ */
+function toHex(pics, order) {
+  const buffs = pics.map(src =>
+    Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
+  )
+
+  const hexBuffs = encode([
+    buffs.map(ab => new Uint8Array(ab)),
+    shuffleOrder(pics, order),
+  ])
+
+  return `0x${hexBuffs.toString('hex')}`
 }
 
 // async function fetchData() {
@@ -67,7 +94,13 @@ function useFlips() {
     return flips
   }
 
-  return {flips, types, getDrafts}
+  async function publish({pics, order}) {
+    const encodedFlip = toHex(pics, order)
+    const resp = await submitFlip(encodedFlip)
+    return resp
+  }
+
+  return {flips, types, getDrafts, publish}
 }
 
 export default useFlips

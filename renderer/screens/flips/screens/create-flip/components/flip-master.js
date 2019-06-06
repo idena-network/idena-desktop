@@ -11,9 +11,8 @@ import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import {getRandomHint} from '../utils/hints'
 import SubmitFlip from './submit-flip'
-import {submitFlip} from '../../../../../shared/services/api'
 import {NotificationContext} from '../../../../../shared/providers/notification-provider'
-import {flipToHex, hasDataUrl} from '../../../shared/utils/flip'
+import {hasDataUrl} from '../../../shared/utils/flip'
 import useFlips from '../../../../../shared/utils/useFlips'
 import useIdentity from '../../../../../shared/utils/useIdentity'
 
@@ -32,7 +31,7 @@ function FlipMaster({
   order: initialOrder,
   id,
 }) {
-  const {getDraft, addDraft, updateDraft, publishFlip} = global.flipStore || {
+  const {getDraft, addDraft, updateDraft} = global.flipStore || {
     getDraft: () => {},
     addDraft: () => {},
     updateDraft: () => {},
@@ -48,7 +47,7 @@ function FlipMaster({
   const [submitFlipResult, setSubmitFlipResult] = useState()
   const [step, setStep] = useState(0)
 
-  const {types} = useFlips()
+  const {types, publish} = useFlips()
 
   const flipStarted = pics.some(hasDataUrl)
   const flipCompleted = pics.every(hasDataUrl)
@@ -79,29 +78,20 @@ function FlipMaster({
   useUnmount(() => onAddNotification({title: 'Flip has been saved to drafts'}))
 
   const handleSubmitFlip = async () => {
-    const encodedFlip = flipToHex(pics, order)
-    const resp = await submitFlip(encodedFlip)
+    let message = 'Unexpected error occurred'
 
-    if (resp.ok) {
-      const {result, error} = await resp.json()
-      if (error) {
-        setSubmitFlipResult(error.message)
-      } else {
-        publishFlip({hash: result.hash, hint, order, createdAt: Date.now()})
-        setSubmitFlipResult(result.hash)
-        Router.replace('/flips')
-      }
-    } else {
-      switch (resp.status) {
-        case 413:
-          setSubmitFlipResult('Maximum image size exceeded')
-          break
-        default:
-          setSubmitFlipResult('Unexpected error occurred')
-          break
+    try {
+      const {result, error} = await publish({pics, order})
+      message = error ? error.message : result.hash
+    } catch ({response: {status}}) {
+      if (status === 413) {
+        message = 'Maximum image size exceeded'
       }
     }
+
+    setSubmitFlipResult(message)
   }
+
   const handleClose = () => {
     if (onAddNotification) {
       onAddNotification({

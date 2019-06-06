@@ -15,9 +15,7 @@ export function UserActions({onToggleSendInvite}) {
         Invite
       </IconLink>
       <Link href="/flips/new">
-        <IconLink icon={<FiCamera />} last>
-          Submit flip
-        </IconLink>
+        <IconLink icon={<FiCamera />}>Submit flip</IconLink>
       </Link>
     </Flex>
   )
