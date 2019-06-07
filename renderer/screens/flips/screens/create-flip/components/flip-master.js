@@ -1,7 +1,7 @@
-import React, {useState, useEffect, useContext} from 'react'
+import React, {useState, useEffect, useContext, useRef} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
-import useUnmount from 'react-use/lib/useUnmount'
+import {FiX} from 'react-icons/fi'
 import CreateFlipStep from './flip-step'
 import {Box, SubHeading, Text, Absolute} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
@@ -12,111 +12,94 @@ import FlipHint from './flip-hint'
 import {getRandomHint} from '../utils/hints'
 import SubmitFlip from './submit-flip'
 import {NotificationContext} from '../../../../../shared/providers/notification-provider'
-import {hasDataUrl} from '../../../shared/utils/flip'
+import {hasDataUrl, composeHint} from '../../../shared/utils/flip'
 import useFlips from '../../../../../shared/utils/useFlips'
 import useIdentity from '../../../../../shared/utils/useIdentity'
 
-const defaultOrder = Array.from({length: 4}, (_, i) => i)
-
-const defaultPics = [
-  `https://placehold.it/480?text=1`,
-  `https://placehold.it/480?text=2`,
-  `https://placehold.it/480?text=3`,
-  `https://placehold.it/480?text=4`,
-]
-
-function FlipMaster({
-  pics: initialPics,
-  hint: initialHint,
-  order: initialOrder,
-  id,
-}) {
-  const {getDraft, addDraft, updateDraft} = global.flipStore || {
-    getDraft: () => {},
-    addDraft: () => {},
-    updateDraft: () => {},
-    publishFlip: () => {},
-  }
-
+function FlipMaster({id}) {
   const {validated, requiredFlips} = useIdentity()
-  const {onAddNotification} = useContext(NotificationContext)
 
-  const [pics, setPics] = useState(initialPics || defaultPics)
-  const [hint, setHint] = useState(initialHint || getRandomHint())
-  const [order, setOrder] = useState(initialOrder || defaultOrder)
-  const [submitFlipResult, setSubmitFlipResult] = useState()
+  const {getDraft, saveDraft, publish} = useFlips()
+
+  const [flip, setFlip] = useState({
+    pics: [
+      `https://placehold.it/480?text=1`,
+      `https://placehold.it/480?text=2`,
+      `https://placehold.it/480?text=3`,
+      `https://placehold.it/480?text=4`,
+    ],
+    order: Array.from({length: 4}, (_, i) => i),
+    hint: getRandomHint(),
+  })
+
   const [step, setStep] = useState(0)
-
-  const {types, publish} = useFlips()
-
-  const flipStarted = pics.some(hasDataUrl)
-  const flipCompleted = pics.every(hasDataUrl)
-  const allowSubmit = true || (flipCompleted && validated && requiredFlips > 0)
+  const [result, setResult] = useState()
 
   useEffect(() => {
-    if (flipStarted) {
-      const nextDraft = {id, hint, pics, order, type: types.drafts}
-      const currDraft = getDraft(id)
-      if (currDraft) {
-        updateDraft({...currDraft, ...nextDraft, modifiedAt: Date.now()})
-      } else {
-        addDraft({...nextDraft, createdAt: Date.now()})
-      }
+    const draft = getDraft(id)
+    if (draft) {
+      setFlip(draft)
     }
-  }, [
-    pics,
-    hint,
-    order,
-    id,
-    flipStarted,
-    getDraft,
-    updateDraft,
-    addDraft,
-    types.drafts,
-  ])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
 
-  useUnmount(() => onAddNotification({title: 'Flip has been saved to drafts'}))
+  const shouldSaveDraft = flip.pics.some(hasDataUrl)
+  const shouldPublish =
+    flip.pics.every(hasDataUrl) && validated && requiredFlips > 0
+
+  useEffect(() => {
+    if (shouldSaveDraft) {
+      saveDraft({id, ...flip})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, flip, shouldSaveDraft])
+
+  const {onAddNotification} = useContext(NotificationContext)
 
   const handleSubmitFlip = async () => {
-    let message = 'Unexpected error occurred'
-
     try {
-      const {result, error} = await publish({pics, order})
-      message = error ? error.message : result.hash
-    } catch ({response: {status}}) {
-      if (status === 413) {
-        message = 'Maximum image size exceeded'
-      }
+      // eslint-disable-next-line no-shadow
+      const {result, error} = await publish(flip)
+      setResult(error ? error.message : result.hash)
+    } catch (error) {
+      setResult(
+        error.response.status === 413
+          ? 'Maximum image size exceeded'
+          : 'Unexpected error occurred'
+      )
     }
-
-    setSubmitFlipResult(message)
   }
 
   const handleClose = () => {
-    if (onAddNotification) {
-      onAddNotification({
-        title: 'Flip has been saved to drafts',
-      })
-    }
+    onAddNotification({
+      title: 'Flip has been saved to drafts',
+    })
     Router.push('/flips')
   }
 
   const steps = [
     {
-      title: 'Choose the hints',
+      title: 'Choose the hint',
       desc: 'Choose key words',
       children: (
-        <FlipHint hint={hint} onChange={() => setHint(getRandomHint())} />
+        <FlipHint
+          {...flip}
+          onChange={() => setFlip({...flip, hint: getRandomHint()})}
+        />
       ),
     },
     {
       title: 'Create a story',
-      desc: `Select 4 images to create a story with words: ${hint.join(',')}`,
+      desc: flip
+        ? `Select ${
+            flip.pics.length
+          } images to create a story with words: ${composeHint(flip.hint)}`
+        : '',
       children: (
         <FlipPics
-          pics={pics}
+          {...flip}
           onUpdateFlip={nextPics => {
-            setPics(nextPics)
+            setFlip({...flip, pics: nextPics})
           }}
         />
       ),
@@ -124,18 +107,17 @@ function FlipMaster({
     {
       title: 'Shuffle images',
       children: (
-        <FlipShuffle order={order} pics={pics} onShuffleFlip={setOrder} />
+        <FlipShuffle
+          {...flip}
+          onShuffleFlip={order => {
+            setFlip({...flip, order})
+          }}
+        />
       ),
     },
     {
       title: 'Submit story',
-      children: (
-        <SubmitFlip
-          randomOrder={order}
-          pics={pics}
-          submitFlipResult={submitFlipResult}
-        />
-      ),
+      children: <SubmitFlip {...flip} submitFlipResult={result} />,
     },
   ]
 
@@ -186,16 +168,14 @@ function FlipMaster({
             onClose={handleClose}
             onSubmit={handleSubmitFlip}
             last={step === steps.length - 1}
-            allowSubmit={allowSubmit}
+            allowSubmit={shouldPublish}
           >
             {children}
           </CreateFlipStep>
         ))[step]
       }
       <Absolute top="1em" right="2em">
-        <Text fontSize="3em" css={{cursor: 'pointer'}} onClick={handleClose}>
-          &times;
-        </Text>
+        <FiX onClick={handleClose} />
       </Absolute>
     </Box>
   )
@@ -203,9 +183,6 @@ function FlipMaster({
 
 FlipMaster.propTypes = {
   id: PropTypes.string,
-  hint: PropTypes.arrayOf(PropTypes.string),
-  pics: PropTypes.arrayOf(PropTypes.string),
-  order: PropTypes.arrayOf(PropTypes.number),
 }
 
 export default FlipMaster

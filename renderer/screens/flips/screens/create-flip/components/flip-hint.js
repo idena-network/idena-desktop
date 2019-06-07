@@ -9,7 +9,7 @@ function FlipHint({hint, onChange}) {
     <Flex direction="column" align="center">
       {hint.map((word, idx) => (
         <Box
-          key={idx}
+          key={word}
           p={theme.spacings.xlarge}
           m={theme.spacings.normal}
           w="300px"

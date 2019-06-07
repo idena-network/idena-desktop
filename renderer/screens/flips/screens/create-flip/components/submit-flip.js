@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {Box} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 
-function SubmitFlip({pics, randomOrder, submitFlipResult}) {
+function SubmitFlip({pics, order, submitFlipResult}) {
   return (
     <>
       <Box>
@@ -18,7 +18,7 @@ function SubmitFlip({pics, randomOrder, submitFlipResult}) {
           </Flex>
           <Box w="2em">&nbsp;</Box>
           <Flex direction="column" justify="center" align="center">
-            {randomOrder.map(idx => (
+            {order.map(idx => (
               <Box key={idx}>
                 <img alt={`flip-${idx}`} width={100} src={pics[idx]} />
               </Box>
@@ -41,7 +41,7 @@ function SubmitFlip({pics, randomOrder, submitFlipResult}) {
 
 SubmitFlip.propTypes = {
   pics: PropTypes.arrayOf(PropTypes.string),
-  randomOrder: PropTypes.arrayOf(PropTypes.number),
+  order: PropTypes.arrayOf(PropTypes.number),
   submitFlipResult: PropTypes.string,
 }
 
