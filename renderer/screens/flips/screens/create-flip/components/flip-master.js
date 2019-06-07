@@ -51,8 +51,7 @@ function FlipMaster({id}) {
     if (shouldSaveDraft) {
       saveDraft({id, ...flip})
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, flip])
+  }, [id, flip, shouldSaveDraft, saveDraft])
 
   const {onAddNotification} = useContext(NotificationContext)
 

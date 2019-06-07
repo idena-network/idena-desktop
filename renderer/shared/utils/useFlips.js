@@ -60,6 +60,12 @@ function useFlips() {
     setFlips(flips)
   }, [])
 
+  useEffect(() => {
+    if (flips.length > 0) {
+      saveDrafts(flips)
+    }
+  }, [flips])
+
   const getDrafts = useCallback(
     () => flips.filter(f => f.type === initialTypes.drafts),
     [flips]
@@ -70,47 +76,41 @@ function useFlips() {
     [flips]
   )
 
-  const saveDraft = useCallback(
-    draft => {
-      const draftIdx = flips.findIndex(f => f.id === draft.id)
-      const nextDraft = {...draft, type: initialTypes.drafts}
+  const saveDraft = useCallback(draft => {
+    const nextDraft = {...draft, type: initialTypes.drafts}
+    setFlips(prevFlips => {
+      const draftIdx = prevFlips.findIndex(f => f.id === draft.id)
       let nextFlips = []
       if (draftIdx > -1) {
         nextFlips = [
-          ...flips.slice(0, draftIdx),
+          ...prevFlips.slice(0, draftIdx),
           {...nextDraft, modifiedAt: Date.now()},
-          ...flips.slice(draftIdx + 1),
+          ...prevFlips.slice(draftIdx + 1),
         ]
       } else {
-        nextFlips = flips.concat({...nextDraft, createdAt: Date.now()})
+        nextFlips = prevFlips.concat({...nextDraft, createdAt: Date.now()})
       }
-      saveDrafts(nextFlips)
-      setFlips(nextFlips)
-    },
-    [flips]
-  )
+      return nextFlips
+    })
+  }, [])
 
-  const publish = useCallback(
-    async ({id, pics, order}) => {
-      const encodedFlip = toHex(pics, order)
-      const resp = await submitFlip(encodedFlip)
-
-      const flipIdx = flips.findIndex(f => f.id === id)
-      setFlips([
-        ...flips.slice(0, flipIdx),
+  const publish = useCallback(async ({id, pics, order}) => {
+    const encodedFlip = toHex(pics, order)
+    const resp = await submitFlip(encodedFlip)
+    setFlips(prevFlips => {
+      const flipIdx = prevFlips.findIndex(f => f.id === id)
+      return [
+        ...prevFlips.slice(0, flipIdx),
         {
-          ...flips[flipIdx],
+          ...prevFlips[flipIdx],
           type: initialTypes.published,
           modifiedAt: Date.now(),
         },
-        ...flips.slice(flipIdx + 1),
-      ])
-
-      return resp
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
+        ...prevFlips.slice(flipIdx + 1),
+      ]
+    })
+    return resp
+  }, [])
 
   return {
     flips,

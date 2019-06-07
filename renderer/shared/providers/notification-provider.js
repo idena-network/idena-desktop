@@ -17,8 +17,10 @@ function NotificationProvider({children}) {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      const [, ...last] = notifications
-      setNotifications(last)
+      if (notifications.length) {
+        const [, ...last] = notifications
+        setNotifications(last)
+      }
     }, 2000)
     return () => {
       clearTimeout(timeoutId)
