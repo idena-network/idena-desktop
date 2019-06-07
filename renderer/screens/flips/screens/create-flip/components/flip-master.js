@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext, useRef} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {FiX} from 'react-icons/fi'
@@ -52,7 +52,7 @@ function FlipMaster({id}) {
       saveDraft({id, ...flip})
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, flip, shouldSaveDraft])
+  }, [id, flip])
 
   const {onAddNotification} = useContext(NotificationContext)
 

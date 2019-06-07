@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useCallback} from 'react'
 import {encode} from 'rlp'
 import {submitFlip} from '../api/dna'
 
@@ -60,67 +60,61 @@ function useFlips() {
     setFlips(flips)
   }, [])
 
-  const [types, setTypes] = useState(initialTypes)
+  const getDrafts = useCallback(
+    () => flips.filter(f => f.type === initialTypes.drafts),
+    [flips]
+  )
 
-  useEffect(() => {
-    const uniqTypes = flips
-      .map(f => f.type)
-      .filter(t => t)
-      .filter((v, i, a) => a.indexOf(v) === i)
+  const getDraft = useCallback(
+    id => flips.find(f => f.id === id) || getDraftFromStore(id),
+    [flips]
+  )
 
-    const typesObj = uniqTypes.reduce((acc, curr) => {
-      acc[curr] = curr
-      return acc
-    }, {})
+  const saveDraft = useCallback(
+    draft => {
+      const draftIdx = flips.findIndex(f => f.id === draft.id)
+      const nextDraft = {...draft, type: initialTypes.drafts}
+      let nextFlips = []
+      if (draftIdx > -1) {
+        nextFlips = [
+          ...flips.slice(0, draftIdx),
+          {...nextDraft, modifiedAt: Date.now()},
+          ...flips.slice(draftIdx + 1),
+        ]
+      } else {
+        nextFlips = flips.concat({...nextDraft, createdAt: Date.now()})
+      }
+      saveDrafts(nextFlips)
+      setFlips(nextFlips)
+    },
+    [flips]
+  )
 
-    setTypes({...types, ...typesObj})
-  }, [flips, types])
+  const publish = useCallback(
+    async ({id, pics, order}) => {
+      const encodedFlip = toHex(pics, order)
+      const resp = await submitFlip(encodedFlip)
 
-  useEffect(() => {
-    if (flips && flips.length > 0) {
-      saveDrafts(flips)
-    }
-  }, [flips])
-
-  const getDrafts = () => {
-    return flips.filter(f => f.type === types.drafts)
-  }
-
-  function getDraft(id) {
-    return flips.find(f => f.id === id) || getDraftFromStore(id)
-  }
-
-  function saveDraft(draft) {
-    const draftIdx = flips.findIndex(f => f.id === draft.id)
-    const nextDraft = {...draft, type: types.drafts}
-    if (draftIdx > -1) {
+      const flipIdx = flips.findIndex(f => f.id === id)
       setFlips([
-        ...flips.slice(0, draftIdx),
-        {...nextDraft, modifiedAt: Date.now()},
-        ...flips.slice(draftIdx + 1),
+        ...flips.slice(0, flipIdx),
+        {
+          ...flips[flipIdx],
+          type: initialTypes.published,
+          modifiedAt: Date.now(),
+        },
+        ...flips.slice(flipIdx + 1),
       ])
-    } else {
-      setFlips(flips.concat({...draft, createdAt: Date.now()}))
-    }
-  }
 
-  async function publish({id, pics, order}) {
-    const encodedFlip = toHex(pics, order)
-    const resp = await submitFlip(encodedFlip)
-
-    const flipIdx = flips.findIndex(f => f.id === id)
-    setFlips([
-      ...flips.slice(0, flipIdx),
-      {...flips[flipIdx], type: types.published, modifiedAt: Date.now()},
-      ...flips.slice(flipIdx + 1),
-    ])
-
-    return resp
-  }
+      return resp
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
 
   return {
     flips,
-    types,
+    types: initialTypes,
     getDrafts,
     getDraft,
     saveDraft,

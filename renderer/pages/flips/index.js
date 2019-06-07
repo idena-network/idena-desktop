@@ -6,7 +6,6 @@ import {Heading, Box} from '../../shared/components'
 import theme from '../../shared/theme'
 import FlipToolbar, {
   FlipToolbarItem,
-  FlipToolbarIconLink,
 } from '../../screens/flips/shared/components/toolbar'
 import FlipList from '../../screens/flips/shared/components/flip-list'
 import useFlips from '../../shared/utils/useFlips'
@@ -21,9 +20,7 @@ function Flips() {
   const [filteredFlips, setFilteredFlips] = useState()
 
   useEffect(() => {
-    // eslint-disable-next-line no-shadow
-    const filteredFlips = flips.filter(flip => flip.type === filter)
-    setFilteredFlips(filteredFlips)
+    setFilteredFlips(flips.filter(flip => flip.type === filter))
   }, [filter, flips])
 
   const flipTypes = Object.keys(types)
