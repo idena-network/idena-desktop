@@ -1,6 +1,7 @@
 import {useState, useEffect, useCallback} from 'react'
 import {encode} from 'rlp'
 import {submitFlip} from '../api/dna'
+import FlipType from '../../screens/flips/shared/types/flip-type'
 
 // async function fetchData() {
 //   const responses = await Promise.all(
@@ -28,8 +29,12 @@ import {submitFlip} from '../api/dna'
 //   }
 // }
 
-const {getDrafts: getDraftsFromStore, getDraft: getDraftFromStore, saveDrafts} =
-  global.flipStore || {}
+const {
+  getDrafts: getDraftsFromStore,
+  getDraft: getDraftFromStore,
+  saveDrafts,
+  deleteDraft: deleteFromStore,
+} = global.flipStore || {}
 
 function shuffle(order) {
   const initialOrder = order.map((_, i) => i)
@@ -43,12 +48,6 @@ function toHex(pics, order) {
   const hexBuffs = encode([buffs.map(ab => new Uint8Array(ab)), shuffle(order)])
 
   return `0x${hexBuffs.toString('hex')}`
-}
-
-const initialTypes = {
-  published: 'published',
-  drafts: 'drafts',
-  archived: 'archived',
 }
 
 function useFlips() {
@@ -67,7 +66,7 @@ function useFlips() {
   }, [flips])
 
   const getDrafts = useCallback(
-    () => flips.filter(f => f.type === initialTypes.drafts),
+    () => flips.filter(f => f.type === FlipType.Draft),
     [flips]
   )
 
@@ -77,20 +76,17 @@ function useFlips() {
   )
 
   const saveDraft = useCallback(draft => {
-    const nextDraft = {...draft, type: initialTypes.drafts}
+    const nextDraft = {...draft, type: FlipType.Draft}
     setFlips(prevFlips => {
       const draftIdx = prevFlips.findIndex(f => f.id === draft.id)
-      let nextFlips = []
       if (draftIdx > -1) {
-        nextFlips = [
+        return [
           ...prevFlips.slice(0, draftIdx),
           {...nextDraft, modifiedAt: Date.now()},
           ...prevFlips.slice(draftIdx + 1),
         ]
-      } else {
-        nextFlips = prevFlips.concat({...nextDraft, createdAt: Date.now()})
       }
-      return nextFlips
+      return prevFlips.concat({...nextDraft, createdAt: Date.now()})
     })
   }, [])
 
@@ -103,7 +99,7 @@ function useFlips() {
         ...prevFlips.slice(0, flipIdx),
         {
           ...prevFlips[flipIdx],
-          type: initialTypes.published,
+          type: FlipType.Published,
           modifiedAt: Date.now(),
         },
         ...prevFlips.slice(flipIdx + 1),
@@ -112,13 +108,19 @@ function useFlips() {
     return resp
   }, [])
 
+  const deleteFlip = useCallback(({id}) => {
+    deleteFromStore(id)
+    setFlips(prevFlips => prevFlips.filter(f => f.id !== id))
+  }, [])
+
   return {
     flips,
-    types: initialTypes,
+    types: FlipType,
     getDrafts,
     getDraft,
     saveDraft,
     publish,
+    deleteFlip,
   }
 }
 

@@ -12,18 +12,22 @@ import useFlips from '../../shared/utils/useFlips'
 import useValidation from '../../shared/utils/useValidation'
 import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
+import FlipCover from '../../screens/flips/shared/components/flip-cover'
+import FlipType from '../../screens/flips/shared/types/flip-type'
 
 function Flips() {
-  const {flips, types} = useFlips()
-  const [filter, setFilter] = useLocalStorage('flips/filter', types.published)
   const {running: validationRunning} = useValidation()
-  const [filteredFlips, setFilteredFlips] = useState()
+
+  const [flipType, setFlipType] = useLocalStorage(
+    'flips/filter',
+    FlipType.Published
+  )
+  const {flips, deleteFlip} = useFlips()
+  const [filteredFlips, setFilteredFlips] = useState([])
 
   useEffect(() => {
-    setFilteredFlips(flips.filter(flip => flip.type === filter))
-  }, [filter, flips])
-
-  const flipTypes = Object.keys(types)
+    setFilteredFlips(flips.filter(flip => flip.type === flipType))
+  }, [flipType, flips, setFilteredFlips])
 
   return (
     <Layout>
@@ -31,13 +35,13 @@ function Flips() {
         <Heading>My Flips</Heading>
         <FlipToolbar>
           <Flex>
-            {flipTypes.map(type => (
+            {Object.values(FlipType).map(type => (
               <FlipToolbarItem
                 key={type}
                 onClick={() => {
-                  setFilter(type)
+                  setFlipType(type)
                 }}
-                isCurrent={filter === type}
+                isCurrent={flipType === type}
               >
                 {type}
               </FlipToolbarItem>
@@ -53,7 +57,17 @@ function Flips() {
         </FlipToolbar>
       </Box>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
-        <FlipList flips={filteredFlips} onUpdateFlips={setFilteredFlips} />
+        <FlipList>
+          {filteredFlips.map(flip => (
+            <FlipCover
+              key={flip.id}
+              {...flip}
+              onDelete={() => {
+                deleteFlip(flip)
+              }}
+            />
+          ))}
+        </FlipList>
       </Box>
     </Layout>
   )
