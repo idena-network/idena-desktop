@@ -53,6 +53,4 @@ export const Input = React.forwardRef(({type = 'text', ...otherProps}, ref) => (
 
 Input.propTypes = {
   type: PropTypes.string,
-  // eslint-disable-next-line react/forbid-prop-types
-  ref: PropTypes.object,
 }

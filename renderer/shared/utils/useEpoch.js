@@ -1,20 +1,30 @@
 import {useState} from 'react'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {fetchEpoch} from '../api/dna'
+import {shallowCompare} from './obj'
 
-const shallowCompare = (obj1, obj2) =>
-  Object.keys(obj1).length === Object.keys(obj2).length &&
-  Object.keys(obj1).every(key => obj1[key] === obj2[key])
+export const EpochPeriod = {
+  FlipLottery: 'FlipLottery',
+  ShortSession: 'ShortSession',
+  LongSession: 'LongSession',
+  AfterLongSession: 'AfterLongSession',
+  None: 'None',
+}
+
+const initialEpoch = {
+  epoch: null,
+  nextValidation: null,
+  currentPeriod: null,
+}
 
 function useEpoch() {
-  const [epoch, setEpoch] = useState({})
+  const [epoch, setEpoch] = useState(initialEpoch)
 
   useInterval(() => {
     let ignore = false
 
     async function fetchData() {
       const nextEpoch = await fetchEpoch()
-
       if (!ignore && !shallowCompare(nextEpoch, epoch)) {
         setEpoch(nextEpoch)
       }
@@ -27,9 +37,7 @@ function useEpoch() {
     }
   }, 10000)
 
-  return {
-    epoch,
-  }
+  return epoch
 }
 
 export default useEpoch

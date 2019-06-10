@@ -13,6 +13,8 @@ import userScheme from '../shared/types/user'
 import theme from '../shared/theme'
 import Loading from '../shared/components/loading'
 import useValidation from '../shared/utils/useValidation'
+import useIdentity from '../shared/utils/useIdentity'
+import useEpoch from '../shared/utils/useEpoch'
 
 const NavItem = withRouter(({href, router, icon, children}) => {
   const active = router.pathname.startsWith(href)
@@ -46,7 +48,7 @@ const NavItem = withRouter(({href, router, icon, children}) => {
 })
 
 // eslint-disable-next-line react/prop-types
-const Block = ({title, value}) => (
+const Block = ({title, value, fallback = <Loading />}) => (
   <Box
     bg=""
     p={theme.spacings.normal}
@@ -66,18 +68,15 @@ const Block = ({title, value}) => (
         display: 'block',
       }}
     >
-      {value}
+      {value || fallback}
     </Text>
   </Box>
 )
 
-function Nav({user}) {
-  const {nextValidation, requiredFlips, madeFlips} = {
-    nextValidation: new Date(),
-    requiredFlips: 3,
-    madeFlips: 0,
-  } // useContext(NetContext)
-  const {running: validationRunning, currentStage} = useValidation()
+function Nav() {
+  const {nickname, requiredFlips, flips} = useIdentity()
+  const {currentPeriod, nextValidation} = useEpoch()
+  const {running: validationRunning} = useValidation()
 
   return (
     <nav>
@@ -86,7 +85,7 @@ function Nav({user}) {
       </Box>
       <List>
         <NavItem href="/dashboard" active icon={<FiUserCheck />}>
-          {'My Idena' || user.name}
+          {'My Idena' || nickname}
         </NavItem>
         <NavItem href="/flips" icon={<FiInstagram />}>
           Flips
@@ -105,28 +104,23 @@ function Nav({user}) {
           m={`${theme.spacings.xlarge} 0`}
           css={{borderRadius: '10px'}}
         >
-          <Block
-            title="Current period"
-            value={currentStage.type || <Loading />}
-          />
-          {validationRunning && (
+          <Block title="Current period" value={currentPeriod} />
+          {!validationRunning && (
             <Block
               title="My current task"
               value={
                 Number.isFinite(requiredFlips) &&
-                `Create ${requiredFlips - madeFlips} flips`
+                `Create ${requiredFlips - (flips || []).length} flips`
               }
             />
           )}
-          {validationRunning && (
+          {!validationRunning && (
             <Block
               title="Next validation"
               value={
-                nextValidation ? (
-                  new Date(nextValidation).toLocaleString()
-                ) : (
-                  <Loading />
-                )
+                nextValidation
+                  ? new Date(nextValidation).toLocaleString()
+                  : nextValidation
               }
             />
           )}
@@ -148,10 +142,6 @@ function Nav({user}) {
       `}</style>
     </nav>
   )
-}
-
-Nav.propTypes = {
-  user: userScheme,
 }
 
 export default React.memo(Nav)
