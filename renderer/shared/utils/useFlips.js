@@ -3,36 +3,10 @@ import {encode} from 'rlp'
 import {submitFlip} from '../api/dna'
 import FlipType from '../../screens/flips/shared/types/flip-type'
 
-// async function fetchData() {
-//   const responses = await Promise.all(
-//     getPublishedFlips().map(flip =>
-//       fetchFlip(flip.hash).then(data => ({
-//         ...flip,
-//         data,
-//       }))
-//     )
-//   )
-
-//   const fetchedFlips = responses.map(({data: {result}, ...rest}) => ({
-//     ...rest,
-//     pics: result ? decode(fromHexString(result.hex.substr(2)))[0] : [],
-//   }))
-
-//   if (!ignore) {
-//     setFlips({
-//       ...flips,
-//       flips: [
-//         ...fetchedFlips,
-//         ...new Array(requiredFlips).fill(null),
-//       ].slice(requiredFlips),
-//     })
-//   }
-// }
-
 const {
-  getDrafts: getDraftsFromStore,
-  getDraft: getDraftFromStore,
-  saveDrafts,
+  getFlips: getFlipsFromStore,
+  getFlip: getFlipFromStore,
+  saveFlips,
   deleteDraft: deleteFromStore,
 } = global.flipStore || {}
 
@@ -55,13 +29,13 @@ function useFlips() {
 
   useEffect(() => {
     // eslint-disable-next-line no-shadow
-    const flips = getDraftsFromStore()
+    const flips = getFlipsFromStore()
     setFlips(flips)
   }, [])
 
   useEffect(() => {
     if (flips.length > 0) {
-      saveDrafts(flips)
+      saveFlips(flips)
     }
   }, [flips])
 
@@ -71,7 +45,7 @@ function useFlips() {
   )
 
   const getDraft = useCallback(
-    id => flips.find(f => f.id === id) || getDraftFromStore(id),
+    id => flips.find(f => f.id === id) || getFlipFromStore(id),
     [flips]
   )
 

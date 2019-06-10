@@ -4,25 +4,27 @@ const store = new Store({
   name: 'flips',
 })
 
-function getDrafts() {
-  return store.get('drafts', [])
+const keyName = 'flips'
+
+function getFlips() {
+  return store.get(keyName, [])
 }
 
-function getDraft(id) {
-  return store.get('drafts', []).find(draft => draft.id === id)
+function getFlip(id) {
+  return store.get(keyName, []).find(draft => draft.id === id)
 }
 
-function saveDrafts(drafts) {
-  store.set('drafts', drafts)
+function saveFlips(drafts) {
+  store.set(keyName, drafts)
 }
 
 function addDraft(draft) {
-  const drafts = store.get('drafts', [])
-  store.set('drafts', drafts.concat(draft))
+  const drafts = store.get(keyName, [])
+  store.set(keyName, drafts.concat(draft))
 }
 
 function updateDraft(draft) {
-  const drafts = store.get('drafts', [])
+  const drafts = store.get(keyName, [])
   const draftIdx = drafts.findIndex(({id}) => id === draft.id)
   if (draftIdx > -1) {
     const nextDrafts = [
@@ -30,43 +32,31 @@ function updateDraft(draft) {
       {...drafts[draftIdx], ...draft},
       ...drafts.slice(draftIdx + 1),
     ]
-    store.set('drafts', nextDrafts)
+    store.set(keyName, nextDrafts)
     return nextDrafts
   }
   return drafts
 }
 
 function deleteDraft(id) {
-  const drafts = store.get('drafts', [])
+  const drafts = store.get(keyName, [])
   const deletingIdx = store
-    .get('drafts', [])
+    .get(keyName, [])
     .findIndex(({id: currId}) => currId === id)
+
   if (deletingIdx > -1) {
     const nextDrafts = [
       ...drafts.slice(0, deletingIdx),
       ...drafts.slice(deletingIdx + 1),
     ]
-    store.set('drafts', nextDrafts)
+    store.set(keyName, nextDrafts)
     return nextDrafts
   }
   return drafts
 }
 
 function clearDrafts() {
-  store.set('drafts', [])
-}
-
-function publishFlip(flip) {
-  const flips = store.get('published', [])
-  store.set('published', flips.concat(flip))
-}
-
-function getPublishedFlips() {
-  return store.get('published', [])
-}
-
-function clearPublished() {
-  store.set('published', [])
+  store.set(keyName, [])
 }
 
 function clear() {
@@ -75,15 +65,12 @@ function clear() {
 
 module.exports = {
   store,
-  getDrafts,
-  getDraft,
-  saveDrafts,
+  getFlips,
+  getFlip,
+  saveFlips,
   addDraft,
   updateDraft,
   deleteDraft,
   clearDrafts,
-  publishFlip,
-  getPublishedFlips,
-  clearPublished,
   clear,
 }

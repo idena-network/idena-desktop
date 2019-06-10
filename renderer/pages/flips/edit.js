@@ -10,12 +10,10 @@ import {NotificationContext} from '../../shared/providers/notification-provider'
 const defaultRouter = {query: {id: ''}}
 
 function EditFlip({router: {query: {id}} = defaultRouter}) {
-  const {getDraft} = global.flipStore || {
-    getDraft: () => {},
-  }
+  const {getFlip} = global.flipStore || {}
 
   const {onAddNotification} = useContext(NotificationContext)
-  const draft = getDraft(id)
+  const draft = getFlip(id)
 
   return id ? (
     <Layout>
