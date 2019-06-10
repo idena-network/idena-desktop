@@ -4,7 +4,7 @@ import {
   FiInstagram,
   FiUsers,
   FiSettings,
-  FiMessageCircle,
+  FiMessageSquare,
   FiUserCheck,
 } from 'react-icons/fi'
 import {Box, List, Link, Text} from '../shared/components'
@@ -94,7 +94,7 @@ function Nav({user}) {
         <NavItem href="/contacts" icon={<FiUsers />}>
           Contacts
         </NavItem>
-        <NavItem href="/chats" icon={<FiMessageCircle />}>
+        <NavItem href="/chats" icon={<FiMessageSquare />}>
           Chats
         </NavItem>
         <NavItem href="/settings" icon={<FiSettings />}>

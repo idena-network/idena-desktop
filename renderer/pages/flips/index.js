@@ -49,7 +49,7 @@ function Flips() {
           </Flex>
           <Flex>
             {!validationRunning && (
-              <IconLink href="/flips/new" icon={<FiPlusSquare />} first>
+              <IconLink href="/flips/new" icon={<FiPlusSquare />}>
                 Add flip
               </IconLink>
             )}

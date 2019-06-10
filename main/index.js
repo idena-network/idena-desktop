@@ -1,4 +1,5 @@
 const {join, resolve} = require('path')
+// eslint-disable-next-line import/no-extraneous-dependencies
 const {BrowserWindow, app, ipcMain, Tray, Menu} = require('electron')
 const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
@@ -19,8 +20,8 @@ const isWin = process.platform === 'win32'
 const createMainWindow = () => {
   mainWindow = new BrowserWindow({
     title: app.getName(),
-    width: 1200,
-    height: 800,
+    width: 1080,
+    height: 700,
     webPreferences: {
       nodeIntegration: false,
       preload: join(__dirname, 'preload.js'),

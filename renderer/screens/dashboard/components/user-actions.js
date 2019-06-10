@@ -4,16 +4,17 @@ import {FiShare, FiUserPlus, FiCamera} from 'react-icons/fi'
 import {Link} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import IconLink from '../../../shared/components/icon-link'
+import Divider from '../../../shared/components/divider'
 
 export function UserActions({onToggleSendInvite}) {
   return (
     <Flex>
-      <IconLink icon={<FiShare />} first>
-        Share
-      </IconLink>
+      <IconLink icon={<FiShare />}>Share</IconLink>
+      <Divider vertical />
       <IconLink icon={<FiUserPlus />} onClick={onToggleSendInvite}>
         Invite
       </IconLink>
+      <Divider vertical />
       <Link href="/flips/new">
         <IconLink icon={<FiCamera />}>Submit flip</IconLink>
       </Link>

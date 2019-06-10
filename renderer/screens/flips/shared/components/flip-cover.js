@@ -10,6 +10,7 @@ import {composeHint} from '../utils/flip'
 import FlipType from '../types/flip-type'
 import Flex from '../../../../shared/components/flex'
 import {FlatButton} from '../../../../shared/components/button'
+import Divider from '../../../../shared/components/divider'
 
 const FlipMenu = forwardRef((props, ref) => (
   <Box
@@ -44,10 +45,6 @@ function FlipMenuItem({href, onClick, icon, ...props}) {
   )
 }
 
-function FlipMenuSeparator() {
-  return <Box bg={theme.colors.gray2} w="100%" css={{height: '1px'}} />
-}
-
 FlipMenuItem.propTypes = {
   href: PropTypes.string,
   onClick: PropTypes.func,
@@ -79,26 +76,22 @@ function FlipCover({id, hint, pics, type, createdAt, onDelete, width}) {
               style={{cursor: 'pointer'}}
               fontSize={theme.fontSizes.large}
             />
-            {isMenuOpen && (
+            {isDraft && isMenuOpen && (
               <Absolute top="2em" right={0}>
                 <FlipMenu ref={menuRef}>
-                  {isDraft && (
-                    <FlipMenuItem
-                      href={`/flips/edit?id=${id}`}
-                      icon={<FiEdit2 color={theme.colors.primary} />}
-                    >
-                      Edit flip
-                    </FlipMenuItem>
-                  )}
-                  <FlipMenuSeparator />
-                  {isDraft && (
-                    <FlipMenuItem
-                      onClick={onDelete}
-                      icon={<FiXCircle color={theme.colors.danger} />}
-                    >
-                      Delete flip
-                    </FlipMenuItem>
-                  )}
+                  <FlipMenuItem
+                    href={`/flips/edit?id=${id}`}
+                    icon={<FiEdit2 color={theme.colors.primary} />}
+                  >
+                    Edit flip
+                  </FlipMenuItem>
+                  <Divider />
+                  <FlipMenuItem
+                    onClick={onDelete}
+                    icon={<FiXCircle color={theme.colors.danger} />}
+                  >
+                    Delete flip
+                  </FlipMenuItem>
                 </FlipMenu>
               </Absolute>
             )}

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import PropTypes from 'prop-types'
 import theme from '../theme'
 
-function IconButton({icon, children, first, ...props}) {
+function IconButton({icon, children, ...props}) {
   return (
     <button type="button" {...props}>
       {icon}
@@ -18,19 +18,9 @@ function IconButton({icon, children, first, ...props}) {
           display: flex;
           align-items: center;
           padding: 0 1em;
-          ${first && `padding-left: 0`};
           text-decoration: none;
           vertical-align: middle;
           position: relative;
-        }
-        button::after {
-          ${!first && `content: ''`};
-          background: ${theme.colors.gray2};
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: 0;
-          width: 1px;
         }
         span {
           display: inline-block;
@@ -43,24 +33,17 @@ function IconButton({icon, children, first, ...props}) {
 
 IconButton.propTypes = {
   icon: PropTypes.node,
-  first: PropTypes.bool,
   children: PropTypes.node,
 }
 
-function IconLink({href, ...props}) {
-  return href ? (
-    <Link href={href}>
-      <IconButton {...props} />
-    </Link>
-  ) : (
-    <IconButton {...props} />
-  )
+function IconLink({href, icon, ...props}) {
+  const iconButton = <IconButton icon={icon} {...props} />
+  return href ? <Link href={href}>{iconButton}</Link> : iconButton
 }
 
 IconLink.propTypes = {
   href: PropTypes.string,
   icon: PropTypes.node,
-  first: PropTypes.bool,
 }
 
 export default IconLink
