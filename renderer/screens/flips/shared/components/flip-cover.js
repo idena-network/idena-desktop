@@ -1,7 +1,8 @@
-import React, {useState} from 'react'
+import React, {useState, useRef, forwardRef} from 'react'
 import PropTypes from 'prop-types'
 import {FiMoreVertical, FiEdit2, FiXCircle} from 'react-icons/fi'
 import {position, borderRadius} from 'polished'
+import useClickAway from 'react-use/lib/useClickAway'
 import theme from '../../../../shared/theme'
 import FlipImage from './flip-image'
 import {Box, Text, Link, Absolute} from '../../../../shared/components'
@@ -10,22 +11,21 @@ import FlipType from '../types/flip-type'
 import Flex from '../../../../shared/components/flex'
 import {FlatButton} from '../../../../shared/components/button'
 
-function FlipMenu(props) {
-  return (
-    <Box
-      bg={theme.colors.white}
-      py={theme.spacings.small}
-      css={{
-        ...borderRadius('top', '10px'),
-        ...borderRadius('bottom', '10px'),
-        boxShadow:
-          '0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)',
-      }}
-      w="145px"
-      {...props}
-    />
-  )
-}
+const FlipMenu = forwardRef((props, ref) => (
+  <Box
+    bg={theme.colors.white}
+    py={theme.spacings.small}
+    css={{
+      ...borderRadius('top', '10px'),
+      ...borderRadius('bottom', '10px'),
+      boxShadow:
+        '0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)',
+    }}
+    w="145px"
+    ref={ref}
+    {...props}
+  />
+))
 
 function FlipMenuItem({href, onClick, icon, ...props}) {
   return (
@@ -57,6 +57,12 @@ FlipMenuItem.propTypes = {
 function FlipCover({id, hint, pics, type, createdAt, onDelete, width}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
+  const menuRef = useRef()
+
+  useClickAway(menuRef, () => {
+    setIsMenuOpen(false)
+  })
+
   const isDraft = type === FlipType.Draft
   return (
     <Box w={width}>
@@ -75,7 +81,7 @@ function FlipCover({id, hint, pics, type, createdAt, onDelete, width}) {
             />
             {isMenuOpen && (
               <Absolute top="2em" right={0}>
-                <FlipMenu>
+                <FlipMenu ref={menuRef}>
                   {isDraft && (
                     <FlipMenuItem
                       href={`/flips/edit?id=${id}`}

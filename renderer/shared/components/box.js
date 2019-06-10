@@ -1,28 +1,18 @@
-import React from 'react'
+import React, {forwardRef} from 'react'
 import PropTypes from 'prop-types'
 import theme from '../theme'
 
 export const Dim = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 
-function Box({
-  bg,
-  m,
-  margin,
-  mx,
-  my,
-  p,
-  padding,
-  px,
-  py,
-  w,
-  css: style,
-  ...props
-}) {
+function Box(
+  {bg, m, margin, mx, my, p, padding, px, py, w, css: style, ...props},
+  ref
+) {
   const marginProp = m || margin
   const paddingProp = p || padding
   return (
     <>
-      <div style={style} {...props} />
+      <div style={style} ref={ref} {...props} />
       <style jsx>{`
         div {
           display: block;
@@ -59,4 +49,4 @@ Box.propTypes = {
   css: PropTypes.object,
 }
 
-export default Box
+export default forwardRef(Box)
