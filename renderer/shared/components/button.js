@@ -34,4 +34,30 @@ Button.propTypes = {
   css: PropTypes.object,
 }
 
+export function FlatButton({size = 1, disabled, css, ...props}) {
+  return (
+    <>
+      <button type="button" disabled={disabled} style={css} {...props} />
+      <style jsx>{`
+        button {
+          border: none;
+          border-radius: 6px;
+          color: ${theme.colors.text};
+          cursor: pointer;
+          font-size: ${`${size}em`};
+          padding: 0;
+          outline: none;
+          ${disabled && `opacity: 0.5`};
+        }
+        button:hover {
+          opacity: 0.9;
+          ${disabled && `opacity: 0.5`};
+        }
+      `}</style>
+    </>
+  )
+}
+
+FlatButton.propTypes = Button.propTypes
+
 export default Button

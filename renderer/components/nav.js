@@ -1,13 +1,9 @@
-import React, {useContext} from 'react'
+import React from 'react'
 import {withRouter} from 'next/router'
 import {Box, List, Link, Text} from '../shared/components'
 import userScheme from '../shared/types/user'
 import theme from '../shared/theme'
-import NetContext from '../shared/providers/net-provider'
 import Loading from '../shared/components/loading'
-import {If} from '../shared/components/utils'
-import {ValidationContext} from '../shared/providers/validation-provider'
-import {isValidationRunning} from '../shared/utils/validation'
 import useValidation from '../shared/utils/useValidation'
 
 const NavItem = withRouter(({href, router, children}) => {
@@ -17,6 +13,8 @@ const NavItem = withRouter(({href, router, children}) => {
       <Link
         href={href}
         color={active ? theme.colors.white : theme.colors.white05}
+        width="100%"
+        height="100%"
       >
         {children}
       </Link>

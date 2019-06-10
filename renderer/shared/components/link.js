@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import NextLink from 'next/link'
 import theme from '../theme'
 
-function Link({href, color, fontSize, children}) {
+function Link({href, color, fontSize, children, width, height}) {
   return (
     <NextLink href={href}>
       <a>
@@ -18,8 +18,8 @@ function Link({href, color, fontSize, children}) {
             font-size: ${fontSize};
             text-decoration: none;
             display: inline-block;
-            width: 100%;
-            height: 100%;
+            width: ${width};
+            height: ${height};
           }
         `}</style>
       </a>
@@ -35,6 +35,8 @@ Link.propTypes = {
   href: PropTypes.string.isRequired,
   color: PropTypes.string,
   fontSize: PropTypes.string,
+  width: PropTypes.string,
+  height: PropTypes.string,
   children: PropTypes.node,
 }
 

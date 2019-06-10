@@ -1,9 +1,11 @@
+import {capitalize} from '../../../../shared/utils/string'
+
 /**
  * Composes hint for the flip
  * @param {string[]} words List of two words
  */
 export function composeHint(words) {
-  return words.join('/')
+  return words.map(capitalize).join(' / ')
 }
 
 /**

@@ -56,7 +56,7 @@ function Flips() {
           </Flex>
         </FlipToolbar>
       </Box>
-      <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
+      <Box px={theme.spacings.xxxlarge}>
         <FlipList>
           {filteredFlips.map(flip => (
             <FlipCover
@@ -65,6 +65,7 @@ function Flips() {
               onDelete={() => {
                 deleteFlip(flip)
               }}
+              width="25%"
             />
           ))}
         </FlipList>

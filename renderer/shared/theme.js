@@ -20,7 +20,7 @@ const fontSizes = {
   subHeading: '1.4em',
   normal: '1rem',
   small: '0.72rem',
-  large: 24,
+  large: '1.4em',
 }
 
 const fontWeights = {
