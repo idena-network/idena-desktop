@@ -1,22 +1,30 @@
 import React from 'react'
 import {withRouter} from 'next/router'
+import {
+  FiInstagram,
+  FiUsers,
+  FiSettings,
+  FiMessageCircle,
+  FiUserCheck,
+} from 'react-icons/fi'
 import {Box, List, Link, Text} from '../shared/components'
+import Flex from '../shared/components/flex'
 import userScheme from '../shared/types/user'
 import theme from '../shared/theme'
 import Loading from '../shared/components/loading'
 import useValidation from '../shared/utils/useValidation'
 
-const NavItem = withRouter(({href, router, children}) => {
+const NavItem = withRouter(({href, router, icon, children}) => {
   const active = router.pathname.startsWith(href)
+  const color = active ? theme.colors.white : theme.colors.white05
   return (
     <li>
-      <Link
-        href={href}
-        color={active ? theme.colors.white : theme.colors.white05}
-        width="100%"
-        height="100%"
-      >
-        {children}
+      <Link href={href} color={color} width="100%" height="100%">
+        <Flex align="center">
+          {React.cloneElement(icon, {color, fontSize: theme.fontSizes.normal})}
+          <Box w="8px" />
+          {children}
+        </Flex>
       </Link>
       <style jsx>{`
         li {
@@ -77,12 +85,21 @@ function Nav({user}) {
         <img src="../static/logo.svg" alt="idena logo" />
       </Box>
       <List>
-        <NavItem href="/dashboard" active>
+        <NavItem href="/dashboard" active icon={<FiUserCheck />}>
           {'My Idena' || user.name}
         </NavItem>
-        <NavItem href="/flips">Flips</NavItem>
-        <NavItem href="/contacts">Contacts</NavItem>
-        <NavItem href="/settings">Settings</NavItem>
+        <NavItem href="/flips" icon={<FiInstagram />}>
+          Flips
+        </NavItem>
+        <NavItem href="/contacts" icon={<FiUsers />}>
+          Contacts
+        </NavItem>
+        <NavItem href="/chats" icon={<FiMessageCircle />}>
+          Chats
+        </NavItem>
+        <NavItem href="/settings" icon={<FiSettings />}>
+          Settings
+        </NavItem>
         <Box
           bg={theme.colors.white01}
           m={`${theme.spacings.xlarge} 0`}
