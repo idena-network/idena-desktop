@@ -20,22 +20,26 @@ const initialEpoch = {
 function useEpoch() {
   const [epoch, setEpoch] = useState(initialEpoch)
 
-  useInterval(() => {
-    let ignore = false
+  useInterval(
+    () => {
+      let ignore = false
 
-    async function fetchData() {
-      const nextEpoch = await fetchEpoch()
-      if (!ignore && !shallowCompare(nextEpoch, epoch)) {
-        setEpoch(nextEpoch)
+      async function fetchData() {
+        const nextEpoch = await fetchEpoch()
+        if (!ignore && !shallowCompare(nextEpoch, epoch)) {
+          setEpoch(nextEpoch)
+        }
       }
-    }
 
-    fetchData()
+      fetchData()
 
-    return () => {
-      ignore = true
-    }
-  }, 10000)
+      return () => {
+        ignore = true
+      }
+    },
+    10000,
+    true
+  )
 
   return epoch
 }

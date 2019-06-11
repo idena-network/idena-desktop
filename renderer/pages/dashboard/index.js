@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import {rem} from 'polished'
 import Layout from '../../components/layout'
 import {Heading, Drawer, Box} from '../../shared/components'
 import {
@@ -25,7 +26,7 @@ export default () => {
 
   return (
     <Layout>
-      <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
+      <Box px={theme.spacings.xxxlarge} py={theme.spacings.large} w="480px">
         <Heading>Profile</Heading>
         <UserActions
           onToggleSendInvite={() => toggleSendInvite(true)}

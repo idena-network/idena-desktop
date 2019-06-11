@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
 import {
   FiInstagram,
@@ -9,7 +10,6 @@ import {
 } from 'react-icons/fi'
 import {Box, List, Link, Text} from '../shared/components'
 import Flex from '../shared/components/flex'
-import userScheme from '../shared/types/user'
 import theme from '../shared/theme'
 import Loading from '../shared/components/loading'
 import useValidation from '../shared/utils/useValidation'
@@ -47,31 +47,38 @@ const NavItem = withRouter(({href, router, icon, children}) => {
   )
 })
 
-// eslint-disable-next-line react/prop-types
-const Block = ({title, value, fallback = <Loading />}) => (
-  <Box
-    bg=""
-    p={theme.spacings.normal}
-    css={{
-      borderBottom: `solid 1px ${theme.colors.gray3}`,
-    }}
-  >
-    <Text
-      color={theme.colors.muted}
-      css={{display: 'block', marginBottom: theme.spacings.small}}
-    >
-      {title}
-    </Text>
-    <Text
-      color={theme.colors.white}
+function Block({title, value, fallback = <Loading />}) {
+  return (
+    <Box
+      bg="none"
+      p={theme.spacings.normal}
       css={{
-        display: 'block',
+        borderBottom: `solid 1px ${theme.colors.gray3}`,
       }}
     >
-      {value || fallback}
-    </Text>
-  </Box>
-)
+      <Text
+        color={theme.colors.muted}
+        css={{display: 'block', marginBottom: theme.spacings.small}}
+      >
+        {title}
+      </Text>
+      <Text
+        color={theme.colors.white}
+        css={{
+          display: 'block',
+        }}
+      >
+        {value || fallback}
+      </Text>
+    </Box>
+  )
+}
+
+Block.propTypes = {
+  title: PropTypes.string,
+  value: PropTypes.string,
+  fallback: PropTypes.node,
+}
 
 function Nav() {
   const {nickname, requiredFlips, flips} = useIdentity()
@@ -129,7 +136,7 @@ function Nav() {
       <style jsx>{`
         nav {
           background: ${theme.colors.primary2};
-          color: white;
+          color: ${theme.colors.white};
           padding: 2em;
           width: 250px;
           text-align: center;
@@ -144,4 +151,4 @@ function Nav() {
   )
 }
 
-export default React.memo(Nav)
+export default Nav

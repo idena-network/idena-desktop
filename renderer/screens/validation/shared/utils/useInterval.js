@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import {useEffect, useRef} from 'react'
 
-export function useInterval(callback, delay) {
+export function useInterval(callback, delay, useImmediately = false) {
   const savedCallback = useRef()
 
   useEffect(() => {
@@ -18,4 +18,13 @@ export function useInterval(callback, delay) {
       return () => clearInterval(id)
     }
   }, [delay])
+
+  useEffect(() => {
+    function tick() {
+      savedCallback.current()
+    }
+    if (useImmediately) {
+      tick()
+    }
+  }, [useImmediately])
 }

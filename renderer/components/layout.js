@@ -1,19 +1,17 @@
 import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
-import {withRouter} from 'next/router'
-import SidebarNav from './nav'
+import Nav from './nav'
 import {NotificationContext} from '../shared/providers/notification-provider'
 import Notifications from './notifications'
 import ValidationBanner from '../screens/validation/shared/components/banner'
 
-function Layout({NavMenu = SidebarNav, children}) {
+function Layout({Sidebar = Nav, children}) {
   const {notifications, alerts} = useContext(NotificationContext)
-
   return (
     <>
       <main>
-        <NavMenu />
-        <div>{children}</div>
+        <Sidebar />
+        <section>{children}</section>
       </main>
       <ValidationBanner />
       <Notifications notifications={notifications} alerts={alerts} />
@@ -24,7 +22,7 @@ function Layout({NavMenu = SidebarNav, children}) {
           padding: 0;
           margin: 0;
         }
-        div {
+        section {
           width: 100%;
         }
       `}</style>
@@ -33,9 +31,8 @@ function Layout({NavMenu = SidebarNav, children}) {
 }
 
 Layout.propTypes = {
-  NavMenu: PropTypes.node,
+  Sidebar: PropTypes.node,
   children: PropTypes.node,
-  router: PropTypes.shape({pathname: PropTypes.string}),
 }
 
-export default withRouter(Layout)
+export default Layout
