@@ -1,22 +1,12 @@
-/* eslint-disable import/prefer-default-export */
-import React from 'react'
+import React, {forwardRef} from 'react'
 import PropTypes from 'prop-types'
 import {Box} from '.'
 import {Dim} from './box'
 
-export function Absolute({
-  bg,
-  top,
-  left,
-  bottom,
-  right,
-  zIndex,
-  children,
-  ...boxProps
-}) {
-  return (
-    <div>
-      <Box {...boxProps}>{children}</Box>
+export const Absolute = forwardRef(
+  ({bg, top, left, bottom, right, zIndex, width, ...props}, ref) => (
+    <div ref={ref}>
+      <Box {...props} />
       <style jsx>{`
         div {
           background: ${bg};
@@ -26,12 +16,12 @@ export function Absolute({
           top: ${top};
           bottom: ${bottom};
           z-index: ${zIndex};
-          width: ${boxProps.w};
+          width: ${width};
         }
       `}</style>
     </div>
   )
-}
+)
 
 Absolute.propTypes = {
   bg: PropTypes.string,
@@ -39,6 +29,7 @@ Absolute.propTypes = {
   left: Dim,
   bottom: Dim,
   right: Dim,
+  width: Dim,
   zIndex: PropTypes.number,
   children: PropTypes.node,
 }

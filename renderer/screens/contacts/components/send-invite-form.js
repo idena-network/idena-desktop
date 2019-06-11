@@ -37,7 +37,6 @@ export function SendInviteForm({addr, amount, available, onSend}) {
       >
         Send invite
       </Button>
-      )}
     </Box>
   )
 }

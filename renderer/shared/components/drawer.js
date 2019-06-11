@@ -1,9 +1,17 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
+import {FiX} from 'react-icons/fi'
+import useClickAway from 'react-use/lib/useClickAway'
 import theme from '../theme'
-import {Fill, Absolute, Text} from '.'
+import {Fill, Absolute} from '.'
 
-export function Drawer({show, onHide, ...props}) {
+function Drawer({show, onHide, ...props}) {
+  const ref = useRef()
+
+  useClickAway(ref, () => {
+    onHide()
+  })
+
   return show ? (
     <Fill bg={theme.colors.gray3} zIndex={1}>
       <Absolute
@@ -12,18 +20,17 @@ export function Drawer({show, onHide, ...props}) {
         top={0}
         bottom={0}
         right={0}
-        w="350px"
+        width="350px"
+        ref={ref}
         {...props}
       />
       <Absolute top="1em" right="1em" zIndex={2}>
-        <Text
+        <FiX
           color={theme.colors.muted}
-          size="1.6em"
-          css={{cursor: 'pointer'}}
+          fontSize={theme.fontSizes.large}
           onClick={onHide}
-        >
-          &times;
-        </Text>
+          cursor="pointer"
+        />
       </Absolute>
     </Fill>
   ) : null
