@@ -112,7 +112,7 @@ FlipCover.propTypes = {
   id: PropTypes.string.isRequired,
   hint: PropTypes.arrayOf(PropTypes.string).isRequired,
   pics: PropTypes.arrayOf(PropTypes.string).isRequired,
-  type: PropTypes.shape(FlipType),
+  type: PropTypes.oneOf(Object.values(FlipType)),
   createdAt: PropTypes.number.isRequired,
   onDelete: PropTypes.func,
   width: PropTypes.string,

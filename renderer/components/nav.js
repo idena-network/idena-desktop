@@ -15,6 +15,7 @@ import Loading from '../shared/components/loading'
 import useValidation from '../shared/utils/useValidation'
 import useIdentity from '../shared/utils/useIdentity'
 import useEpoch from '../shared/utils/useEpoch'
+import useCoinbaseAddress from '../shared/utils/useCoinbaseAddress'
 
 const NavItem = withRouter(({href, router, icon, children}) => {
   const active = router.pathname.startsWith(href)
@@ -81,7 +82,8 @@ Block.propTypes = {
 }
 
 function Nav() {
-  const {nickname, requiredFlips, flips} = useIdentity()
+  const address = useCoinbaseAddress()
+  const {nickname, requiredFlips, flips} = useIdentity(address)
   const {currentPeriod, nextValidation} = useEpoch()
   const {running: validationRunning} = useValidation()
 

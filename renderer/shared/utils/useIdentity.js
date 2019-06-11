@@ -1,5 +1,25 @@
-import {useEffect, useState, useRef} from 'react'
-import {fetchIdentity, fetchCoinbaseAddress} from '../api'
+import {useEffect, useState} from 'react'
+import {fetchIdentity} from '../api'
+
+export const IdentityStatus = {
+  Undefined: 'Undefined',
+  Invite: 'Invite',
+  Newbie: 'Newbie',
+  Candidate: 'Candidate',
+  Verified: 'Verified',
+  Suspend: 'Suspend',
+  Zombie: 'Zombie',
+  Killed: 'Killed',
+}
+
+const mapToFriendlyStatus = status => {
+  switch (status) {
+    case IdentityStatus.Undefined:
+      return 'Not validated'
+    default:
+      return status
+  }
+}
 
 const initialIdentity = {
   address: '',
@@ -19,35 +39,33 @@ const initialIdentity = {
 
 function useIdentity(address) {
   const [identity, setIdentity] = useState(initialIdentity)
-  const addressRef = useRef(address)
-
-  const friendlyStatus =
-    identity.state === 'Undefined' ? 'Not validated' : identity.state
-  const validated = friendlyStatus === 'Validated'
 
   useEffect(() => {
     let ignore = false
 
     async function fetchData() {
-      if (!address) {
-        addressRef.current = await fetchCoinbaseAddress()
-      }
-
       // eslint-disable-next-line no-shadow
-      const identity = await fetchIdentity(addressRef.current)
+      const identity = await fetchIdentity(address)
       if (!ignore) {
-        setIdentity(identity)
+        const {state: status} = identity
+        setIdentity({
+          ...identity,
+          friendlyStatus: mapToFriendlyStatus(status),
+          validated: status === IdentityStatus.Verified,
+        })
       }
     }
 
-    fetchData()
+    if (address) {
+      fetchData()
+    }
 
     return () => {
       ignore = true
     }
-  }, [address, friendlyStatus])
+  }, [address])
 
-  return {...identity, friendlyStatus, validated}
+  return identity
 }
 
 export default useIdentity

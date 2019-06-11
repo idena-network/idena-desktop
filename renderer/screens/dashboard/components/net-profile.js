@@ -26,4 +26,4 @@ NetProfile.propTypes = {
   stake: PropTypes.string.isRequired,
 }
 
-export default React.memo(NetProfile)
+export default NetProfile

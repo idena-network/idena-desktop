@@ -15,9 +15,11 @@ import {NotificationContext} from '../../../../../shared/providers/notification-
 import {hasDataUrl, composeHint} from '../../../shared/utils/flip'
 import useFlips from '../../../../../shared/utils/useFlips'
 import useIdentity from '../../../../../shared/utils/useIdentity'
+import useCoinbaseAddress from '../../../../../shared/utils/useCoinbaseAddress'
 
 function FlipMaster({id}) {
-  const {validated, requiredFlips} = useIdentity()
+  const address = useCoinbaseAddress()
+  const {validated, requiredFlips} = useIdentity(address)
 
   const {getDraft, saveDraft, publish} = useFlips()
 

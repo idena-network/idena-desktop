@@ -9,15 +9,12 @@ import FlipToolbar, {
 } from '../../screens/flips/shared/components/toolbar'
 import FlipList from '../../screens/flips/shared/components/flip-list'
 import useFlips from '../../shared/utils/useFlips'
-import useValidation from '../../shared/utils/useValidation'
 import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
 import FlipCover from '../../screens/flips/shared/components/flip-cover'
 import FlipType from '../../screens/flips/shared/types/flip-type'
 
 function Flips() {
-  const {running: validationRunning} = useValidation()
-
   const [flipType, setFlipType] = useLocalStorage(
     'flips/filter',
     FlipType.Published
@@ -48,11 +45,9 @@ function Flips() {
             ))}
           </Flex>
           <Flex>
-            {!validationRunning && (
-              <IconLink href="/flips/new" icon={<FiPlusSquare />}>
-                Add flip
-              </IconLink>
-            )}
+            <IconLink href="/flips/new" icon={<FiPlusSquare />}>
+              Add flip
+            </IconLink>
           </Flex>
         </FlipToolbar>
       </Box>

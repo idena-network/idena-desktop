@@ -109,4 +109,4 @@ FlipPics.propTypes = {
   onUpdateFlip: PropTypes.func.isRequired,
 }
 
-export default React.memo(FlipPics)
+export default FlipPics
