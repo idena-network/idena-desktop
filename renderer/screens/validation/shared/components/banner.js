@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react'
 import {withRouter} from 'next/router'
 import PropTypes from 'prop-types'
+import useSessionStorage from 'react-use/lib/useSessionStorage'
 import {Absolute, Box, Text, Fill, Link} from '../../../../shared/components'
 import useTiming from '../../../../shared/utils/useTiming'
 import useEpoch, {EpochPeriod} from '../../../../shared/utils/useEpoch'
@@ -9,73 +10,73 @@ import theme from '../../../../shared/theme'
 import useTimer from '../utils/useTimer'
 import Flex from '../../../../shared/components/flex'
 
-function ValidationBanner({shouldCallToValidate, seconds, onTick, children}) {
-  const {secondsLeft} = useTimer({seconds})
+function ValidationBanner({time, shouldCallToValidate, children}) {
+  const [timer, setTimer] = useSessionStorage('idena/timer', time)
+  const {seconds} = useTimer({seconds: timer || time})
 
   useEffect(() => {
-    if (onTick) {
-      onTick(secondsLeft)
-    }
-  }, [onTick, secondsLeft])
+    setTimer(seconds)
+  }, [seconds, setTimer])
 
   return (
     <Box bg={theme.colors.primary} css={{color: theme.colors.white}}>
       <Flex justify="space-between" align="center">
         <Flex>
           <Box p={theme.spacings.normal} css={{position: 'relative'}}>
-            {secondsLeft} seconds left
+            {seconds} seconds left
             <Fill bg="rgba(0,0,0,0.1)" css={{display: 'none'}}>
               &nbsp;
             </Fill>
           </Box>
           <Box p={theme.spacings.normal}>{children}</Box>
         </Flex>
-        <Box p={theme.spacings.normal}>
-          {shouldCallToValidate && (
+        {shouldCallToValidate && (
+          <Box p={theme.spacings.normal}>
             <Link href="/validation/short" color={theme.colors.white}>
               Validate
             </Link>
-          )}
-        </Box>
+          </Box>
+        )}
       </Flex>
     </Box>
   )
 }
 
 ValidationBanner.propTypes = {
+  time: PropTypes.number.isRequired,
   shouldCallToValidate: PropTypes.bool.isRequired,
-  seconds: PropTypes.number.isRequired,
-  onTick: PropTypes.func,
+  children: PropTypes.node,
 }
 
 function Banner({router}) {
-  const timing = useTiming()
+  const {flipLottery, shortSession, longSession} = useTiming()
   const {currentPeriod} = useEpoch()
   const {shortAnswers, longAnswers} = useValidation()
 
-  const matchValidationRoute = router.pathname.startsWith('/validation')
+  const matchValidation = router.pathname.startsWith('/validation')
+
   const isCeremonyRunning =
     currentPeriod === EpochPeriod.ShortSession ||
     currentPeriod === EpochPeriod.LongSession
-  const noAnswers =
-    isCeremonyRunning && (shortAnswers.length === 0 || longAnswers.length === 0)
+  const noAnswers = shortAnswers.length === 0 || longAnswers.length === 0
 
-  return matchValidationRoute ? (
+  return !matchValidation ? (
     <Absolute bottom={0} left={0} right={0}>
       {currentPeriod === EpochPeriod.FlipLottery && (
         <Box bg={theme.colors.danger} p={theme.spacings.normal}>
           <Text color={theme.colors.white}>
-            {`Validation starts in ${timing.flipLottery} sec`}
+            {`Validation starts in ${flipLottery} sec`}
           </Text>
         </Box>
       )}
       {isCeremonyRunning && (
         <ValidationBanner
-          seconds={timing.shortSession}
-          onTick={sec => {
-            console.log(sec)
-          }}
-          shouldCallToValidate={noAnswers}
+          time={
+            currentPeriod === EpochPeriod.ShortSession
+              ? shortSession
+              : longSession
+          }
+          shouldCallToValidate={isCeremonyRunning && noAnswers}
         >
           {noAnswers
             ? `${currentPeriod} running`

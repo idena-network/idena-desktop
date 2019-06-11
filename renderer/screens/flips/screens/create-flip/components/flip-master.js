@@ -19,7 +19,7 @@ import useCoinbaseAddress from '../../../../../shared/utils/useCoinbaseAddress'
 
 function FlipMaster({id}) {
   const address = useCoinbaseAddress()
-  const {validated, requiredFlips} = useIdentity(address)
+  const {canSubmitFlip} = useIdentity(address)
 
   const {getDraft, saveDraft, publish} = useFlips()
 
@@ -46,8 +46,7 @@ function FlipMaster({id}) {
   }, [id])
 
   const shouldSaveDraft = flip.pics.some(hasDataUrl)
-  const shouldPublish =
-    flip.pics.every(hasDataUrl) && validated && requiredFlips > 0
+  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip
 
   useEffect(() => {
     if (shouldSaveDraft) {
@@ -169,7 +168,7 @@ function FlipMaster({id}) {
             onClose={handleClose}
             onSubmit={handleSubmitFlip}
             last={step === steps.length - 1}
-            allowSubmit={shouldPublish}
+            allowSubmit={canPublish}
           >
             {children}
           </CreateFlipStep>

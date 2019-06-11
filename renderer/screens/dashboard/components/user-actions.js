@@ -6,12 +6,12 @@ import Flex from '../../../shared/components/flex'
 import IconLink from '../../../shared/components/icon-link'
 import Divider from '../../../shared/components/divider'
 
-export function UserActions({onToggleSendInvite}) {
+export function UserActions({onSendInvite}) {
   return (
     <Flex>
       <IconLink icon={<FiShare />}>Share</IconLink>
       <Divider vertical />
-      <IconLink icon={<FiUserPlus />} onClick={onToggleSendInvite}>
+      <IconLink icon={<FiUserPlus />} onClick={onSendInvite}>
         Invite
       </IconLink>
       <Divider vertical />
@@ -23,7 +23,7 @@ export function UserActions({onToggleSendInvite}) {
 }
 
 UserActions.propTypes = {
-  onToggleSendInvite: PropTypes.func,
+  onSendInvite: PropTypes.func,
 }
 
 export default UserActions

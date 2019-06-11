@@ -1,53 +1,38 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
-import {
-  Box,
-  SubHeading,
-  FormGroup,
-  Label,
-  Input,
-  Button,
-} from '../../../shared/components'
+import {margin, rem} from 'polished'
+import {Box, FormGroup, Label, Input, Button} from '../../../shared/components'
 import theme from '../../../shared/theme'
+import Flex from '../../../shared/components/flex'
 
-export function ActivateInviteForm({to, activateResult, onActivateInviteSend}) {
-  const keyInputRef = useRef(null)
+export function ActivateInviteForm({onActivate}) {
+  const keyInputRef = useRef()
+
   return (
-    <Box p="2em">
-      <Box m="0 0 2em">
-        <SubHeading>Activate invite</SubHeading>
-      </Box>
+    <Box my={theme.spacings.normal} py={theme.spacings.normal}>
       <FormGroup>
-        <Label htmlFor="activateInviteKey">Key</Label>
-        <Input ref={keyInputRef} id="activateInviteKey" />
+        <Label htmlFor="activateInviteKey">Invitation code</Label>
+        <Flex align="center">
+          <Input
+            ref={keyInputRef}
+            id="activateInviteKey"
+            style={{...margin(0, theme.spacings.normal, 0, 0), width: rem(400)}}
+          />
+          <Button
+            onClick={() => {
+              onActivate(keyInputRef.current.value)
+            }}
+          >
+            Activate invite
+          </Button>
+        </Flex>
       </FormGroup>
-      <Button
-        onClick={() => {
-          onActivateInviteSend(to, keyInputRef.current.value)
-        }}
-      >
-        Activate invite
-      </Button>
-      {activateResult && (
-        <Box bg={theme.colors.gray} p="1em" m="1em 0" w={100}>
-          <pre>{JSON.stringify(activateResult)}</pre>
-          <style jsx>{`
-            pre {
-              white-space: pre-wrap;
-              word-break: break-word;
-            }
-          `}</style>
-        </Box>
-      )}
     </Box>
   )
 }
 
 ActivateInviteForm.propTypes = {
-  to: PropTypes.string,
-  // eslint-disable-next-line react/forbid-prop-types
-  activateResult: PropTypes.object,
-  onActivateInviteSend: PropTypes.func,
+  onActivate: PropTypes.func,
 }
 
 export default ActivateInviteForm

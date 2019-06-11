@@ -1,6 +1,5 @@
 import {useState, useEffect} from 'react'
 import useEpoch, {EpochPeriod} from './useEpoch'
-import useTiming from './useTiming'
 
 const store = {
   getValidation() {
@@ -22,87 +21,51 @@ const initialValidation = {
   running: false,
   shortAnswers: [],
   longAnswers: [],
-  finishedAt: null,
 }
 
 function useValidation() {
-  const {epoch, currentPeriod, nextValidation} = useEpoch()
-  const {
-    flipLottery: flipLotteryDuration,
-    shortSession: shortSessionDuration,
-    longSession: longSessionDuration,
-    fullValidationSession: fullValidationSessionDuration,
-  } = useTiming()
+  const {epoch, currentPeriod} = useEpoch()
 
   const [validation, setValidation] = useState(initialValidation)
 
-  const {getValidation, saveValidation} = store
-
   useEffect(() => {
-    const savedValidation = getValidation()
-    const {startedAt, finishedAt} = savedValidation
-
-    const now = Date.now()
-    const secondsPassed = Math.floor((now - startedAt) / 1000)
-
-    const running = currentPeriod !== EpochPeriod.None
-    const isValid = startedAt > now && now < finishedAt
-    let secondsLeft
-
-    if (running) {
-      if (isValid) {
-        const shortSessionOffset = flipLotteryDuration + shortSessionDuration
-        const longSessionOffset = shortSessionOffset + longSessionDuration
-
-        // 5 < 10
-        if (currentPeriod === EpochPeriod.FlipLottery) {
-          secondsLeft = flipLotteryDuration - secondsPassed
-        }
-        // 11 < 10 + 30
-        else if (secondsPassed <= shortSessionOffset) {
-          secondsLeft = shortSessionOffset - secondsPassed
-        }
-        // 41 < 10 + 30 + 60
-        else if (secondsPassed <= longSessionOffset) {
-          secondsLeft = longSessionOffset - secondsPassed
-        }
-        setValidation({...savedValidation, running, secondsLeft})
-      } else {
-        // the flow was broken
-        setValidation({
-          running,
-          // nextValidation points to prev one when period is None
-          startedAt: nextValidation,
-          shortAnswers: [],
-          longAnswers: [],
-        })
-      }
+    if (epoch) {
+      // clearFlips()
+      // resetKeywords
+      setValidation(initialValidation)
     }
-  }, [
-    currentPeriod,
-    flipLotteryDuration,
-    getValidation,
-    longSessionDuration,
-    nextValidation,
-    shortSessionDuration,
-  ])
+  }, [epoch])
 
   useEffect(() => {
-    setValidation({
-      running: false,
-      startedAt:
-        (Math.floor(Date.now() / 1000) - fullValidationSessionDuration) * 1000,
-      shortAnswers: [],
-      longAnswers: [],
-      finishedAt: Date.now(),
-    })
-  }, [epoch, fullValidationSessionDuration])
+    if (currentPeriod) {
+      setValidation(prevValidation => ({
+        ...prevValidation,
+        startedAt:
+          currentPeriod === EpochPeriod.FlipLottery ? Date.now() : null,
+        running: currentPeriod !== EpochPeriod.None,
+      }))
+    }
+  }, [currentPeriod])
+
+  const submitShortAnswers = answers => {
+    setValidation(prevValidation => ({
+      ...prevValidation,
+      shortAnswers: answers,
+    }))
+  }
+
+  const submitLongAnswers = answers => {
+    setValidation(prevValidation => ({
+      ...prevValidation,
+      longAnswers: answers,
+    }))
+  }
 
   useEffect(() => {
-    saveValidation(validation)
-  }, [saveValidation, validation])
+    // saveValidation(validation)
+  }, [validation])
 
-  return validation
+  return {...validation, submitShortAnswers, submitLongAnswers}
 }
 
 export default useValidation

@@ -14,27 +14,32 @@ function useTiming() {
   useEffect(() => {
     let ignore = false
 
-    const {
-      ValidationInterval: none,
-      FlipLotteryDuration: flipLottery,
-      ShortSessionDuration: shortSession,
-      LongSessionDuration: longSession,
-      AfterLongSessionDuration: afterLongSession,
-    } = fetchCeremonyIntervals()
+    async function fetchData() {
+      const intervals = await fetchCeremonyIntervals()
+      const {
+        ValidationInterval: none,
+        FlipLotteryDuration: flipLottery,
+        ShortSessionDuration: shortSession,
+        LongSessionDuration: longSession,
+        AfterLongSessionDuration: afterLongSession,
+      } = intervals
 
-    const fullValidationSession =
-      flipLottery + shortSession + longSession + afterLongSession
+      const fullValidationSession =
+        flipLottery + shortSession + longSession + afterLongSession
 
-    if (!ignore) {
-      setTiming({
-        none,
-        flipLottery,
-        shortSession,
-        longSession,
-        afterLongSession,
-        fullValidationSession,
-      })
+      if (!ignore) {
+        setTiming({
+          none,
+          flipLottery,
+          shortSession,
+          longSession,
+          afterLongSession,
+          fullValidationSession,
+        })
+      }
     }
+
+    fetchData()
 
     return () => {
       ignore = true

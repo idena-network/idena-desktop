@@ -12,13 +12,7 @@ import Avatar from './contact-avatar'
 import theme from '../../../shared/theme'
 import {Figure} from '../../../shared/components/utils'
 
-export function SendInviteForm({
-  addr,
-  amount,
-  available,
-  inviteResult,
-  onInviteSend,
-}) {
+export function SendInviteForm({addr, amount, available, onSend}) {
   const addrInputRef = useRef(null)
   const amountInputRef = useRef(null)
   return (
@@ -38,21 +32,11 @@ export function SendInviteForm({
       <Figure label="Available" value={available} />
       <Button
         onClick={() => {
-          onInviteSend(addrInputRef.current.value, amountInputRef.current.value)
+          onSend(addrInputRef.current.value, amountInputRef.current.value)
         }}
       >
         Send invite
       </Button>
-      {inviteResult && (
-        <Box bg={theme.colors.gray} p="1em" m="1em 0" w={100}>
-          <pre>{JSON.stringify(inviteResult)}</pre>
-          <style jsx>{`
-            pre {
-              white-space: pre-wrap;
-              word-break: break-word;
-            }
-          `}</style>
-        </Box>
       )}
     </Box>
   )
@@ -62,9 +46,7 @@ SendInviteForm.propTypes = {
   addr: PropTypes.string,
   amount: PropTypes.number,
   available: PropTypes.number,
-  // eslint-disable-next-line react/forbid-prop-types
-  inviteResult: PropTypes.object,
-  onInviteSend: PropTypes.func.isRequired,
+  onSend: PropTypes.func.isRequired,
 }
 
 export default SendInviteForm

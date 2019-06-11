@@ -4,8 +4,8 @@ import {fetchIdentity} from '../api'
 export const IdentityStatus = {
   Undefined: 'Undefined',
   Invite: 'Invite',
-  Newbie: 'Newbie',
   Candidate: 'Candidate',
+  Newbie: 'Newbie',
   Verified: 'Verified',
   Suspend: 'Suspend',
   Zombie: 'Zombie',
@@ -35,6 +35,7 @@ const initialIdentity = {
   totalShortFlipPoints: 0,
   flips: null,
   online: false,
+  canSubmitFlip: false,
 }
 
 function useIdentity(address) {
@@ -47,11 +48,22 @@ function useIdentity(address) {
       // eslint-disable-next-line no-shadow
       const identity = await fetchIdentity(address)
       if (!ignore) {
-        const {state: status} = identity
+        const {state: status, requiredFlips} = identity
         setIdentity({
           ...identity,
           friendlyStatus: mapToFriendlyStatus(status),
           validated: status === IdentityStatus.Verified,
+          canSubmitFlip:
+            [
+              IdentityStatus.Candidate,
+              IdentityStatus.Newbie,
+              IdentityStatus.Verified,
+            ].includes(status) &&
+            (true || requiredFlips > 0),
+          canActivateInvite: [
+            IdentityStatus.Undefined,
+            IdentityStatus.Zombie,
+          ].includes(status),
         })
       }
     }

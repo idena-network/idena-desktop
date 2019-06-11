@@ -1,22 +1,22 @@
 import {useState, useEffect} from 'react'
 import {useInterval} from './useInterval'
 
-function useTimer({seconds}) {
-  const [secondsLeft, setSecondsLeft] = useState(seconds)
+function useTimer({seconds: initialSeconds}) {
+  const [seconds, setSeconds] = useState(initialSeconds)
 
-  const shouldRun = secondsLeft > 0
+  const shouldRun = seconds > 0
 
   useInterval(
-    () => setSecondsLeft(secondsLeft - 1),
+    () => setSeconds(prevSeconds => prevSeconds - 1),
     shouldRun ? 1 * 1000 : null
   )
 
   useEffect(() => {
-    setSecondsLeft(0)
-    setSecondsLeft(seconds)
-  }, [seconds])
+    setSeconds(0)
+    setSeconds(initialSeconds)
+  }, [initialSeconds])
 
-  return {secondsLeft}
+  return {seconds}
 }
 
 export default useTimer
