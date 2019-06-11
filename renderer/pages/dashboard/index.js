@@ -11,23 +11,26 @@ import {activateInvite, sendInvite} from '../../shared/api'
 import {SendInviteForm} from '../../screens/contacts/components'
 import theme from '../../shared/theme'
 import useCoinbaseAddress from '../../shared/utils/useCoinbaseAddress'
-import useIdentity, {IdentityStatus} from '../../shared/utils/useIdentity'
-import {NotificationContext} from '../../shared/providers/notification-provider'
+import useIdentity from '../../shared/utils/useIdentity'
+import {
+  NotificationContext,
+  NotificationType,
+} from '../../shared/providers/notification-provider'
 
 export default () => {
   const address = useCoinbaseAddress()
   const identity = useIdentity(address)
 
-  const {onAddNotification} = useContext(NotificationContext)
+  const {addNotification} = useContext(NotificationContext)
 
-  const [showSendInvite, toggleSendInvite] = useState(false)
+  const [isSendInviteOpen, setIsSendInviteOpen] = useState(false)
 
   return (
     <Layout>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large} w="600px">
         <Heading>Profile</Heading>
         <UserActions
-          onSendInvite={() => toggleSendInvite(true)}
+          onSendInvite={() => setIsSendInviteOpen(true)}
           canActivateInvite
         />
         <UserInfo {...identity} />
@@ -36,21 +39,36 @@ export default () => {
           <ActivateInviteForm
             onActivate={async key => {
               const result = await activateInvite(address, key)
-              onAddNotification({result})
+              addNotification({
+                title: `Activation ${result ? 'succeeded' : 'failed'}`,
+                body: JSON.stringify(result),
+              })
             }}
           />
         )}
       </Box>
       <Drawer
-        show={showSendInvite}
+        show={isSendInviteOpen}
         onHide={() => {
-          toggleSendInvite(false)
+          setIsSendInviteOpen(false)
         }}
       >
         <SendInviteForm
           onSend={async (to, key) => {
-            const result = await sendInvite(to, key)
-            onAddNotification({result})
+            const {result, error} = await sendInvite(to, key)
+            setIsSendInviteOpen(false)
+            if (result) {
+              addNotification({
+                title: 'Invite sent',
+                body: JSON.stringify(result),
+              })
+            } else {
+              addNotification({
+                title: 'Ooops! Error sending invite',
+                body: error.message,
+                type: NotificationType.Error,
+              })
+            }
           }}
         />
       </Drawer>

@@ -9,7 +9,6 @@ import {
   Input,
 } from '../../../shared/components'
 import Avatar from './contact-avatar'
-import theme from '../../../shared/theme'
 import {Figure} from '../../../shared/components/utils'
 
 export function SendInviteForm({addr, amount, available, onSend}) {

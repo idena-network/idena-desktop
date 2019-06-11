@@ -1,11 +1,14 @@
 import React, {createContext, useState, useEffect} from 'react'
 
+export const NotificationType = {
+  Info: 'info',
+  Error: 'error',
+}
+
 const initialState = {
   notifications: [],
   onAddNotification: null,
-  alerts: [],
-  setAlert: null,
-  clearAlert: null,
+  addNotification: null,
 }
 
 export const NotificationContext = createContext(initialState)
@@ -13,7 +16,6 @@ export const NotificationContext = createContext(initialState)
 // eslint-disable-next-line react/prop-types
 function NotificationProvider({children}) {
   const [notifications, setNotifications] = useState(initialState.notifications)
-  const [alerts, setAlerts] = useState(initialState.alerts)
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -21,32 +23,25 @@ function NotificationProvider({children}) {
         const [, ...last] = notifications
         setNotifications(last)
       }
-    }, 2000)
+    }, 5000)
     return () => {
       clearTimeout(timeoutId)
     }
   }, [notifications])
 
-  const onAddNotification = ({title, body}) => {
-    setNotifications([...notifications, {title, body, timestamp: Date.now()}])
-  }
-
-  const setAlert = ({title, body}) => {
-    setAlerts([{title, body}])
-  }
-
-  const clearAlert = () => {
-    setAlerts([])
+  const onAddNotification = ({title, body, type = NotificationType.Info}) => {
+    setNotifications([
+      ...notifications,
+      {title, body, type, timestamp: Date.now()},
+    ])
   }
 
   return (
     <NotificationContext.Provider
       value={{
         notifications,
-        alerts,
         onAddNotification,
-        setAlert,
-        clearAlert,
+        addNotification: onAddNotification,
       }}
     >
       {children}

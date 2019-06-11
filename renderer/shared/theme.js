@@ -46,7 +46,7 @@ export default {
   fontWeights,
   Box: {
     w: '',
-    bg: 'inherit',
+    bg: '',
   },
   Flex: {
     direction: 'initial',

@@ -8,8 +8,7 @@ export async function sendInvite(addr, amount) {
     params: [strip({to: addr, amount})],
     id: 1,
   })
-  const {result} = data
-  return result
+  return data
 }
 
 export async function activateInvite(to, key) {

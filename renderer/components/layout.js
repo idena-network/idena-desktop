@@ -6,7 +6,7 @@ import Notifications from './notifications'
 import ValidationBanner from '../screens/validation/shared/components/banner'
 
 function Layout({Sidebar = Nav, children}) {
-  const {notifications, alerts} = useContext(NotificationContext)
+  const {notifications} = useContext(NotificationContext)
   return (
     <>
       <main>
@@ -14,7 +14,7 @@ function Layout({Sidebar = Nav, children}) {
         <section>{children}</section>
       </main>
       <ValidationBanner />
-      <Notifications notifications={notifications} alerts={alerts} />
+      <Notifications notifications={notifications} />
       <style jsx>{`
         main {
           display: flex;
