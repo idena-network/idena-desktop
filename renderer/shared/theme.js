@@ -76,4 +76,8 @@ export default {
     fontWeight: fontWeights.normal,
     textDecoration: 'none',
   },
+  Button: {
+    color: colors.text,
+    size: 1,
+  },
 }

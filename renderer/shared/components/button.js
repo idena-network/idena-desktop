@@ -27,6 +27,10 @@ function Button({size = 1, disabled, css, ...props}) {
   )
 }
 
+Button.defaultProps = {
+  ...theme.Button,
+}
+
 Button.propTypes = {
   size: PropTypes.number,
   disabled: PropTypes.bool,
@@ -34,7 +38,7 @@ Button.propTypes = {
   css: PropTypes.object,
 }
 
-export function FlatButton({size = 1, disabled, css, ...props}) {
+export function FlatButton({size = 1, color, disabled, css, ...props}) {
   return (
     <>
       <button type="button" disabled={disabled} style={css} {...props} />
@@ -43,7 +47,7 @@ export function FlatButton({size = 1, disabled, css, ...props}) {
           background: none;
           border: none;
           border-radius: 6px;
-          color: ${theme.colors.text};
+          color: ${color};
           cursor: ${disabled ? 'not-allowed' : 'pointer'};
           font-size: ${`${size}em`};
           padding: 0;
@@ -57,6 +61,10 @@ export function FlatButton({size = 1, disabled, css, ...props}) {
       `}</style>
     </>
   )
+}
+
+FlatButton.defaultProps = {
+  ...theme.Button,
 }
 
 FlatButton.propTypes = Button.propTypes

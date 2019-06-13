@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 
+import {margin} from 'polished'
 import Layout from '../../components/layout'
 import {
   Box,
@@ -8,21 +9,30 @@ import {
   Input,
   Label,
   Button,
-  Text,
 } from '../../shared/components'
 import theme from '../../shared/theme'
 import nodeSettings from '../../screens/settings/shared/utils/node'
+import {FlatButton} from '../../shared/components/button'
+import Divider from '../../shared/components/divider'
+import Flex from '../../shared/components/flex'
+import {NotificationContext} from '../../shared/providers/notification-provider'
+
+const DEFAULT_NODE_URL = 'http://localhost:9009'
 
 export default function Settings() {
+  const {addNotification} = React.useContext(NotificationContext)
+
   const addrRef = React.createRef()
 
   const [addr, setAddr] = useState()
-  const [saved, setSaved] = useState()
 
   const handleSaveNodeAddr = () => {
     const nextAddr = addrRef.current.value
     setAddr(nextAddr)
-    setSaved(true)
+    addNotification({
+      title: 'Settings saved!',
+      body: `Now running at ${nextAddr}`,
+    })
   }
 
   useEffect(() => {
@@ -38,16 +48,29 @@ export default function Settings() {
         <Box>
           <SubHeading>Node settings</SubHeading>
           <Label htmlFor="url">Address</Label>
-          <Input
-            defaultValue={nodeSettings.url}
-            ref={addrRef}
-            id="url"
-            name="url"
-          />
-          <Button onClick={handleSaveNodeAddr}>Save</Button>
-          {saved && (
-            <Text color={theme.colors.success}>Now running against {addr}</Text>
-          )}
+          <Flex align="center">
+            <Input
+              defaultValue={nodeSettings.url}
+              ref={addrRef}
+              id="url"
+              name="url"
+              style={margin(0, theme.spacings.normal, 0, 0)}
+            />
+            <Button onClick={handleSaveNodeAddr}>Save</Button>
+            <Divider vertical m={theme.spacings.small} />
+            <FlatButton
+              color={theme.colors.primary}
+              onClick={() => {
+                setAddr(DEFAULT_NODE_URL)
+                addNotification({
+                  title: 'Settings saved!',
+                  body: `Now running at ${DEFAULT_NODE_URL}`,
+                })
+              }}
+            >
+              Use default
+            </FlatButton>
+          </Flex>
         </Box>
       </Box>
     </Layout>
