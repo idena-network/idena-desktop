@@ -18,7 +18,7 @@ function Notifications({notifications}) {
 
 Notifications.propTypes = {
   // eslint-disable-next-line no-use-before-define
-  notifications: PropTypes.arrayOf(Notification.propTypes),
+  notifications: PropTypes.arrayOf(PropTypes.shape(Notification.propTypes)),
 }
 
 const pickBgColor = (colors, type) => {

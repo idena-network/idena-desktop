@@ -51,6 +51,7 @@ export default function Settings() {
           <Flex align="center">
             <Input
               defaultValue={nodeSettings.url}
+              value={addr}
               ref={addrRef}
               id="url"
               name="url"
