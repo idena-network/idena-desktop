@@ -5,31 +5,21 @@ const store = new Store({
 })
 
 /**
- * Sets the flag indicating validation has started
- * @param {number} durationInSec Validation duration, in sec
+ * Get the current validation ceremony
  */
-function markValidationStarted(durationInSec) {
-  store.set('validation.running', true)
-  store.set('validation.startedAt', Date.now())
-  store.set('validation.ttl', Date.now() + durationInSec * 1000)
-}
-
-/**
- * Sets the flag indicating validation has ended
- */
-function markValidationFinished() {
-  store.set('validation.running', true)
-}
-
-/**
- * Gets the current validation ceremony
- */
-function getCurrentValidation() {
+function getValidation() {
   return store.get('validation')
 }
 
 /**
- * Saves answers for a short session flips
+ * Save validation object
+ */
+function saveValidation(validation) {
+  return store.set('validation', validation)
+}
+
+/**
+ * Save answers for a short session flips
  * @param {object[]} answers Answers given by candidate for a short session
  */
 function saveShortAnswers(answers) {
@@ -37,7 +27,7 @@ function saveShortAnswers(answers) {
 }
 
 /**
- * Saves answers for a long session flips
+ * Save answers for a long session flips
  * @param {object[]} answers Answers given by candidate for a long session
  */
 function saveLongAnswers(answers) {
@@ -49,9 +39,8 @@ function deleteValidation() {
 }
 
 module.exports = {
-  getCurrentValidation,
-  markValidationStarted,
-  markValidationFinished,
+  getValidation,
+  saveValidation,
   saveShortAnswers,
   saveLongAnswers,
   deleteValidation,

@@ -19,7 +19,7 @@ function Flips() {
     'flips/filter',
     FlipType.Published
   )
-  const {flips, deleteFlip} = useFlips()
+  const {flips, deleteFlip, publish} = useFlips()
   const [filteredFlips, setFilteredFlips] = useState([])
 
   useEffect(() => {
@@ -59,6 +59,9 @@ function Flips() {
               {...flip}
               onDelete={() => {
                 deleteFlip(flip)
+              }}
+              onPublish={() => {
+                publish(flip)
               }}
               width="25%"
             />

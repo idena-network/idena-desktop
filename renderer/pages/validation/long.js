@@ -1,30 +1,25 @@
-import React, {useEffect, useState, useContext} from 'react'
+import React, {useEffect, useState} from 'react'
 import Router from 'next/router'
 import {decode} from 'rlp'
 import Layout from '../../screens/validation/shared/components/validation-layout'
 import ValidationHeader from '../../screens/validation/shared/components/validation-header'
-import Timer from '../../screens/validation/screens/short/components/timer'
+// import Timer from '../../screens/validation/screens/short/components/timer'
 import ValidationScene from '../../screens/validation/shared/components/validation-scene'
 import ValidationActions from '../../screens/validation/shared/components/validation-actions'
 import FlipThumbnails from '../../screens/validation/shared/components/flip-thumbnails'
 import {fetchFlip} from '../../shared/services/api'
 import {fromHexString} from '../../shared/utils/string'
 import Flex from '../../shared/components/flex'
-import {
-  fetchFlipHashes,
-  submitLongAnswers,
-} from '../../screens/validation/shared/api/validation-api'
+import {fetchFlipHashes} from '../../screens/validation/shared/api/validation-api'
 import {
   answered,
   types as answerTypes,
 } from '../../screens/validation/shared/utils/answers'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
-import {ValidationContext} from '../../shared/providers/validation-provider'
+import useValidation from '../../shared/utils/useValidation'
 
 export default function() {
-  const {setLongAnswers, validationTimer, setValidationTimer} = useContext(
-    ValidationContext
-  )
+  const {submitLongAnswers} = useValidation()
 
   const [flips, setFlips] = useState([])
   const [flipHashes, setFlipHashes] = useState([])
@@ -71,8 +66,7 @@ export default function() {
       easy: false,
       answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
     }))
-    await submitLongAnswers(answersPayload, 0, 0)
-    setLongAnswers(answersPayload)
+    submitLongAnswers(answersPayload)
     Router.replace('/dashboard')
   }
 
@@ -161,7 +155,7 @@ export default function() {
           currentIndex={flips.length > 0 ? currentFlipIdx + 1 : 0}
           total={flips.length}
         >
-          <Timer time={validationTimer} onTick={setValidationTimer} />
+          {/* <Timer time={validationTimer} onTick={setValidationTimer} /> */}
         </ValidationHeader>
         <Flex direction="column" flex="1">
           <ValidationScene

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext} from 'react'
+import React, {useEffect, useState} from 'react'
 import {decode} from 'rlp'
 import Layout from '../../screens/validation/shared/components/validation-layout'
 import ValidationHeader from '../../screens/validation/shared/components/validation-header'
@@ -9,18 +9,15 @@ import FlipThumbnails from '../../screens/validation/shared/components/flip-thum
 import {fetchFlip} from '../../shared/services/api'
 import {fromHexString} from '../../shared/utils/string'
 import Flex from '../../shared/components/flex'
-import {
-  fetchFlipHashes,
-  submitShortAnswers,
-} from '../../screens/validation/shared/api/validation-api'
+import {fetchFlipHashes} from '../../screens/validation/shared/api/validation-api'
 import {
   answered,
   types as answerTypes,
 } from '../../screens/validation/shared/utils/answers'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import theme from '../../shared/theme'
-import {ValidationContext} from '../../shared/providers/validation-provider'
 import {goToLongSession} from '../../screens/validation/shared/utils/router'
+import useValidation from '../../shared/utils/useValidation'
 
 export default function() {
   const [flips, setFlips] = useState([])
@@ -31,9 +28,7 @@ export default function() {
   const [answers, setAnswers] = useState([])
   const [flipsLoaded, setFlipsLoaded] = useState(false)
 
-  const {setShortAnswers, validationTimer, setValidationTimer} = useContext(
-    ValidationContext
-  )
+  const {submitShortAnswers} = useValidation()
 
   const handlePrev = () => {
     const prevFlipIdx = Math.max(0, currentFlipIdx - 1)
@@ -74,8 +69,7 @@ export default function() {
       easy: false,
       answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
     }))
-    await submitShortAnswers(answersPayload, 0, 0)
-    setShortAnswers(answersPayload)
+    submitShortAnswers(answersPayload)
     goToLongSession()
   }
 
@@ -167,7 +161,7 @@ export default function() {
           currentIndex={flips.length > 0 ? currentFlipIdx + 1 : 0}
           total={flips.length}
         >
-          <Timer time={validationTimer} onTick={setValidationTimer} />
+          {/* <Timer time={validationTimer} onTick={setValidationTimer} /> */}
         </ValidationHeader>
         <Flex direction="column" flex="1">
           <ValidationScene

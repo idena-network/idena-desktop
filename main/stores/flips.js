@@ -14,8 +14,8 @@ function getFlip(id) {
   return store.get(keyName, []).find(draft => draft.id === id)
 }
 
-function saveFlips(drafts) {
-  store.set(keyName, drafts)
+function saveFlips(flips) {
+  store.set(keyName, flips)
 }
 
 function addDraft(draft) {
@@ -55,10 +55,6 @@ function deleteDraft(id) {
   return drafts
 }
 
-function clearDrafts() {
-  store.set(keyName, [])
-}
-
 function clear() {
   store.clear()
 }
@@ -71,6 +67,5 @@ module.exports = {
   addDraft,
   updateDraft,
   deleteDraft,
-  clearDrafts,
   clear,
 }

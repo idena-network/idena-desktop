@@ -23,7 +23,7 @@ function NotificationProvider({children}) {
         const [, ...last] = notifications
         setNotifications(last)
       }
-    }, 3000)
+    }, 2000)
     return () => {
       clearTimeout(timeoutId)
     }

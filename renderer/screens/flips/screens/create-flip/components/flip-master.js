@@ -23,6 +23,8 @@ function FlipMaster({id}) {
 
   const {getDraft, saveDraft, publish} = useFlips()
 
+  const {addNotification} = useContext(NotificationContext)
+
   const [flip, setFlip] = useState({
     pics: [
       `https://placehold.it/480?text=1`,
@@ -46,7 +48,7 @@ function FlipMaster({id}) {
   }, [id])
 
   const shouldSaveDraft = flip.pics.some(hasDataUrl)
-  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip
+  const canPublish = flip.pics.every(hasDataUrl) // && canSubmitFlip
 
   useEffect(() => {
     if (shouldSaveDraft) {
@@ -54,13 +56,16 @@ function FlipMaster({id}) {
     }
   }, [id, flip, shouldSaveDraft, saveDraft])
 
-  const {onAddNotification} = useContext(NotificationContext)
-
   const handleSubmitFlip = async () => {
     try {
       // eslint-disable-next-line no-shadow
       const {result, error} = await publish(flip)
       setResult(error ? error.message : result.hash)
+      addNotification({
+        title: error ? 'Error while uploading flip' : 'Flip saved!',
+        body: error ? error.message : `Hash ${result.hash}`,
+      })
+      Router.push('/flips')
     } catch (error) {
       setResult(
         error.response.status === 413
@@ -71,7 +76,7 @@ function FlipMaster({id}) {
   }
 
   const handleClose = () => {
-    onAddNotification({
+    addNotification({
       title: 'Flip has been saved to drafts',
     })
     Router.push('/flips')

@@ -1,20 +1,10 @@
 import {useState, useEffect} from 'react'
 import useEpoch, {EpochPeriod} from './useEpoch'
+import FlipType from '../../screens/flips/shared/types/flip-type'
+import * as api from '../../screens/validation/shared/api/validation-api'
 
-const store = {
-  getValidation() {
-    return {
-      startedAt: Date.now(),
-      running: true,
-      shortAnswers: [],
-      longAnswers: [],
-      finishedAt: null,
-    }
-  },
-  saveValidation(nextState) {
-    return nextState
-  },
-}
+const {getValidation, saveValidation} = global.validationStore || {}
+const {getFlips, saveFlips} = global.flipStore || {}
 
 const initialValidation = {
   startedAt: null,
@@ -24,30 +14,35 @@ const initialValidation = {
 }
 
 function useValidation() {
-  const {epoch, currentPeriod} = useEpoch()
+  const {currentPeriod} = useEpoch()
 
   const [validation, setValidation] = useState(initialValidation)
 
   useEffect(() => {
-    if (epoch) {
-      // clearFlips()
-      // resetKeywords
-      setValidation(initialValidation)
-    }
-  }, [epoch])
+    const currentValidation = getValidation()
+    setValidation(currentValidation)
+  }, [])
 
   useEffect(() => {
     if (currentPeriod) {
-      setValidation(prevValidation => ({
-        ...prevValidation,
-        startedAt:
-          currentPeriod === EpochPeriod.FlipLottery ? Date.now() : null,
-        running: currentPeriod !== EpochPeriod.None,
-      }))
+      if (currentPeriod === EpochPeriod.None) {
+        // eslint-disable-next-line no-use-before-define
+        resetEpoch()
+        setValidation(initialValidation)
+      } else {
+        setValidation(prevValidation => ({
+          ...prevValidation,
+          startedAt:
+            currentPeriod === EpochPeriod.FlipLottery ? Date.now() : null,
+          running: currentPeriod !== EpochPeriod.None,
+        }))
+      }
     }
   }, [currentPeriod])
 
   const submitShortAnswers = answers => {
+    api.submitShortAnswers(answers, 0, 0)
+    console.log('submitShortAnswers', answers)
     setValidation(prevValidation => ({
       ...prevValidation,
       shortAnswers: answers,
@@ -55,14 +50,31 @@ function useValidation() {
   }
 
   const submitLongAnswers = answers => {
+    api.submitLongAnswers(answers, 0, 0)
+    console.log('submitLongAnswers', answers)
     setValidation(prevValidation => ({
       ...prevValidation,
       longAnswers: answers,
     }))
   }
 
+  const resetEpoch = () => {
+    const flipsToArchive = getFlips()
+      .filter(f => f.type !== FlipType.Archived)
+      .map(flip => ({
+        ...flip,
+        type: FlipType.Archived,
+      }))
+    // console.log(flipsToArchive)
+    // saveFlips(flipsToArchive)
+    // resetKeywords()
+  }
+
   useEffect(() => {
-    // saveValidation(validation)
+    console.log('saveValidation', validation)
+    if (validation.shortAnswers.length || validation.longAnswers.length) {
+      saveValidation(validation)
+    }
   }, [validation])
 
   return {...validation, submitShortAnswers, submitLongAnswers}

@@ -14,7 +14,7 @@ import useCoinbaseAddress from '../../shared/utils/useCoinbaseAddress'
 import useIdentity from '../../shared/utils/useIdentity'
 import {
   NotificationContext,
-  NotificationType,
+  // NotificationType,
 } from '../../shared/providers/notification-provider'
 
 export default () => {
@@ -24,6 +24,7 @@ export default () => {
   const {addNotification} = useContext(NotificationContext)
 
   const [isSendInviteOpen, setIsSendInviteOpen] = useState(false)
+  const [inviteResult, setInviteResult] = useState()
 
   return (
     <Layout>
@@ -41,7 +42,9 @@ export default () => {
               const result = await activateInvite(address, key)
               addNotification({
                 title: `Activation ${result ? 'succeeded' : 'failed'}`,
-                body: JSON.stringify(result),
+                body: result
+                  ? `tx ${result}`
+                  : 'Inivite tx is not approved yet',
               })
             }}
           />
@@ -56,20 +59,13 @@ export default () => {
         <SendInviteForm
           onSend={async (to, key) => {
             const {result, error} = await sendInvite(to, key)
-            setIsSendInviteOpen(false)
             if (result) {
-              addNotification({
-                title: 'Invite sent',
-                body: JSON.stringify(result),
-              })
+              setInviteResult(result)
             } else {
-              addNotification({
-                title: 'Ooops! Error sending invite',
-                body: error.message,
-                type: NotificationType.Error,
-              })
+              setInviteResult(error.message)
             }
           }}
+          result={inviteResult}
         />
       </Drawer>
     </Layout>

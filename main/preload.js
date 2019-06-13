@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 const {ipcRenderer} = require('electron')
 const isDev = require('electron-is-dev')
 

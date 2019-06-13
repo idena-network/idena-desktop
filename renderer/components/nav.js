@@ -118,8 +118,13 @@ function Nav() {
             <Block
               title="My current task"
               value={
-                Number.isFinite(requiredFlips) &&
-                `Create ${requiredFlips - (flips || []).length} flips`
+                Number.isFinite(requiredFlips) && requiredFlips ? (
+                  `Create ${requiredFlips - (flips || []).length} flips`
+                ) : (
+                  <Link href="/dashboard" color={theme.colors.white}>
+                    Activate invite
+                  </Link>
+                )
               }
             />
           )}

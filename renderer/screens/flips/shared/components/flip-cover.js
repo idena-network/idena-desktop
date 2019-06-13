@@ -12,7 +12,6 @@ import FlipType from '../types/flip-type'
 import Flex from '../../../../shared/components/flex'
 import {FlatButton} from '../../../../shared/components/button'
 import Divider from '../../../../shared/components/divider'
-import useFlips from '../../../../shared/utils/useFlips'
 import useCoinbaseAddress from '../../../../shared/utils/useCoinbaseAddress'
 import useIdentity from '../../../../shared/utils/useIdentity'
 
@@ -70,10 +69,18 @@ FlipMenuItem.propTypes = {
   disabled: PropTypes.bool,
 }
 
-function FlipCover({id, hint, pics, order, type, createdAt, onDelete, width}) {
+function FlipCover({
+  id,
+  hint,
+  pics,
+  type,
+  createdAt,
+  onDelete,
+  onPublish,
+  width,
+}) {
   const address = useCoinbaseAddress()
   const {canSubmitFlip} = useIdentity(address)
-  const {publish} = useFlips()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -84,7 +91,7 @@ function FlipCover({id, hint, pics, order, type, createdAt, onDelete, width}) {
   })
 
   const isDraft = type === FlipType.Draft
-  const canSubmit = canSubmitFlip && pics.every(hasDataUrl)
+  const canSubmit = true || (canSubmitFlip && pics.every(hasDataUrl))
   return (
     <Box w={width}>
       <Box my={theme.spacings.small}>
@@ -110,9 +117,7 @@ function FlipCover({id, hint, pics, order, type, createdAt, onDelete, width}) {
                     Edit flip
                   </FlipMenuItem>
                   <FlipMenuItem
-                    onClick={
-                      canSubmit ? () => publish({id, hint, pics, order}) : null
-                    }
+                    onClick={canSubmit ? onPublish() : null}
                     disabled={!canSubmit}
                     icon={<FiUploadCloud color={theme.colors.primary} />}
                   >
@@ -145,10 +150,10 @@ FlipCover.propTypes = {
   id: PropTypes.string.isRequired,
   hint: PropTypes.arrayOf(PropTypes.string).isRequired,
   pics: PropTypes.arrayOf(PropTypes.string).isRequired,
-  order: PropTypes.arrayOf(PropTypes.number).isRequired,
   type: PropTypes.oneOf(Object.values(FlipType)),
   createdAt: PropTypes.number.isRequired,
   onDelete: PropTypes.func,
+  onPublish: PropTypes.func,
   width: PropTypes.string,
 }
 
