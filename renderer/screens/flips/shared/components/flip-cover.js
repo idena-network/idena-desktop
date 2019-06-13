@@ -1,16 +1,20 @@
 import React, {useState, useRef, forwardRef} from 'react'
 import PropTypes from 'prop-types'
-import {FiMoreVertical, FiEdit2, FiXCircle} from 'react-icons/fi'
+import {FiMoreVertical, FiEdit2, FiXCircle, FiUploadCloud} from 'react-icons/fi'
 import {position, borderRadius} from 'polished'
 import useClickAway from 'react-use/lib/useClickAway'
+import useHover from 'react-use/lib/useHover'
 import theme from '../../../../shared/theme'
 import FlipImage from './flip-image'
 import {Box, Text, Link, Absolute} from '../../../../shared/components'
-import {composeHint} from '../utils/flip'
+import {composeHint, hasDataUrl} from '../utils/flip'
 import FlipType from '../types/flip-type'
 import Flex from '../../../../shared/components/flex'
 import {FlatButton} from '../../../../shared/components/button'
 import Divider from '../../../../shared/components/divider'
+import useFlips from '../../../../shared/utils/useFlips'
+import useCoinbaseAddress from '../../../../shared/utils/useCoinbaseAddress'
+import useIdentity from '../../../../shared/utils/useIdentity'
 
 const FlipMenu = forwardRef((props, ref) => (
   <Box
@@ -28,9 +32,13 @@ const FlipMenu = forwardRef((props, ref) => (
   />
 ))
 
-function FlipMenuItem({href, onClick, icon, ...props}) {
-  return (
-    <Box p={theme.spacings.normal}>
+function FlipMenuItem({href, onClick, icon, disabled, ...props}) {
+  const item = hovered => (
+    <Box
+      px={theme.spacings.normal}
+      py={theme.spacings.small}
+      bg={hovered ? theme.colors.gray : ''}
+    >
       <Flex align="center">
         {React.cloneElement(icon, {
           style: {marginRight: theme.spacings.normal},
@@ -38,20 +46,35 @@ function FlipMenuItem({href, onClick, icon, ...props}) {
         {href ? (
           <Link href={href} {...props} />
         ) : (
-          <FlatButton onClick={onClick} {...props} />
+          <FlatButton
+            bg={hovered ? theme.colors.gray : ''}
+            disabled={disabled}
+            onClick={onClick}
+            {...props}
+          />
         )}
       </Flex>
     </Box>
   )
+  // eslint-disable-next-line no-unused-vars
+  const [hoveredItem, hovered] = useHover(item)
+
+  return hoveredItem
 }
 
 FlipMenuItem.propTypes = {
   href: PropTypes.string,
   onClick: PropTypes.func,
   icon: PropTypes.node,
+  hovered: PropTypes.bool,
+  disabled: PropTypes.bool,
 }
 
-function FlipCover({id, hint, pics, type, createdAt, onDelete, width}) {
+function FlipCover({id, hint, pics, order, type, createdAt, onDelete, width}) {
+  const address = useCoinbaseAddress()
+  const {canSubmitFlip} = useIdentity(address)
+  const {publish} = useFlips()
+
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const menuRef = useRef()
@@ -61,6 +84,7 @@ function FlipCover({id, hint, pics, type, createdAt, onDelete, width}) {
   })
 
   const isDraft = type === FlipType.Draft
+  const canSubmit = canSubmitFlip && pics.every(hasDataUrl)
   return (
     <Box w={width}>
       <Box my={theme.spacings.small}>
@@ -85,7 +109,16 @@ function FlipCover({id, hint, pics, type, createdAt, onDelete, width}) {
                   >
                     Edit flip
                   </FlipMenuItem>
-                  <Divider />
+                  <FlipMenuItem
+                    onClick={
+                      canSubmit ? () => publish({id, hint, pics, order}) : null
+                    }
+                    disabled={!canSubmit}
+                    icon={<FiUploadCloud color={theme.colors.primary} />}
+                  >
+                    Submit flip
+                  </FlipMenuItem>
+                  <Divider m={theme.spacings.small} />
                   <FlipMenuItem
                     onClick={onDelete}
                     icon={<FiXCircle color={theme.colors.danger} />}
@@ -112,6 +145,7 @@ FlipCover.propTypes = {
   id: PropTypes.string.isRequired,
   hint: PropTypes.arrayOf(PropTypes.string).isRequired,
   pics: PropTypes.arrayOf(PropTypes.string).isRequired,
+  order: PropTypes.arrayOf(PropTypes.array).isRequired,
   type: PropTypes.oneOf(Object.values(FlipType)),
   createdAt: PropTypes.number.isRequired,
   onDelete: PropTypes.func,

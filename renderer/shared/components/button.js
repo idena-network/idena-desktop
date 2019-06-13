@@ -12,7 +12,7 @@ function Button({size = 1, disabled, css, ...props}) {
           border: none;
           border-radius: 6px;
           color: ${theme.colors.white};
-          cursor: pointer;
+          cursor: ${disabled ? 'not-allowed' : 'pointer'};
           font-size: ${`${size}em`};
           padding: ${`${0.5 * size}em ${size}em`};
           outline: none;
@@ -40,10 +40,11 @@ export function FlatButton({size = 1, disabled, css, ...props}) {
       <button type="button" disabled={disabled} style={css} {...props} />
       <style jsx>{`
         button {
+          background: none;
           border: none;
           border-radius: 6px;
           color: ${theme.colors.text};
-          cursor: pointer;
+          cursor: ${disabled ? 'not-allowed' : 'pointer'};
           font-size: ${`${size}em`};
           padding: 0;
           outline: none;
