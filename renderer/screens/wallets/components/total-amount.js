@@ -11,7 +11,7 @@ function TotalAmount({amount}) {
         <Text color={theme.colors.muted}>Total amount</Text>
       </Box>
       <Box>
-        <Text fontSize={rem(theme.fontSizes.large)}>{amount} DNA</Text>
+        <Text fontSize={rem(24)}>{amount} DNA</Text>
       </Box>
     </Box>
   )

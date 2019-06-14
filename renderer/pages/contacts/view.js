@@ -10,7 +10,10 @@ import {ContactDetails} from '../../screens/contacts/components'
 
 function ContactView({router: {query}}) {
   const {addr} = query
-  const {identities} = useContext(NetContext)
+  const {identities} = useContext(NetContext) || {
+    invites: [],
+    identities: [],
+  }
   const contacts = useContext(ContactContext)
 
   const [contact, setContact] = useState(null)

@@ -8,7 +8,7 @@ import theme from '../../../shared/theme'
 const WhiteText = ({css, ...props}) => (
   <Text
     color={theme.colors.white}
-    css={{display: 'block', ...wordWrap(), ...css}}
+    css={{display: 'block', ...wordWrap('break-word'), ...css}}
     {...props}
   />
 )

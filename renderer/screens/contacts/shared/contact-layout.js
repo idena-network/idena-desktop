@@ -16,7 +16,10 @@ import ContactContext from '../providers/contact-provider'
 
 function ContactLayout({children}) {
   const savedContacts = useContext(ContactContext)
-  const {invites: remainingInvites, identities} = useContext(NetContext)
+  const {invites: remainingInvites, identities} = useContext(NetContext) || {
+    invites: [],
+    identities: [],
+  }
   const [showSendInviteForm, setSendInviteFormVisibility] = useState(false)
   const [inviteResult, setInviteResult] = useState()
   const [sentInvites, setSentInvites] = useState([])
