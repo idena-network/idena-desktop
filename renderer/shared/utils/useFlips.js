@@ -43,38 +43,32 @@ function useFlips() {
   )
 
   const saveDraft = useCallback(draft => {
-    const nextDraft = {...draft, type: FlipType.Draft}
-
     setFlips(prevFlips => {
       const draftIdx = prevFlips.findIndex(
         f => f.id === draft.id && f.type === FlipType.Draft
       )
-      if (draftIdx > -1) {
-        return [
-          ...prevFlips.slice(0, draftIdx),
-          {...nextDraft, modifiedAt: Date.now()},
-          ...prevFlips.slice(draftIdx + 1),
-        ]
-      }
-
-      return prevFlips.concat({...nextDraft, createdAt: Date.now()})
+      const nextDraft = {...draft, type: FlipType.Draft}
+      return draftIdx > -1
+        ? [
+            ...prevFlips.slice(0, draftIdx),
+            {...prevFlips[draftIdx], ...nextDraft, modifiedAt: Date.now()},
+            ...prevFlips.slice(draftIdx + 1),
+          ]
+        : prevFlips.concat({...nextDraft, createdAt: Date.now()})
     })
   }, [])
 
-  const submitFlip = useCallback(async ({id, pics, order, hint}) => {
+  const submitFlip = useCallback(async flip => {
+    const {pics, order} = flip
     const resp = await api.submitFlip(toHex(pics, order))
     const {result} = resp
-
     if (result) {
       setFlips(prevFlips => {
-        const flipIdx = prevFlips.findIndex(f => f.id === id)
+        const flipIdx = prevFlips.findIndex(f => f.id === flip.id)
         return [
           ...prevFlips.slice(0, flipIdx),
           {
-            id,
-            pics,
-            order,
-            hint,
+            ...flip,
             type: FlipType.Published,
             modifiedAt: Date.now(),
           },
@@ -82,7 +76,6 @@ function useFlips() {
         ]
       })
     }
-
     return resp
   }, [])
 

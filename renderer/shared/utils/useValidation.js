@@ -42,7 +42,6 @@ function useValidation() {
 
   const submitShortAnswers = answers => {
     api.submitShortAnswers(answers, 0, 0)
-    console.log('submitShortAnswers', answers)
     setValidation(prevValidation => ({
       ...prevValidation,
       shortAnswers: answers,
@@ -51,7 +50,6 @@ function useValidation() {
 
   const submitLongAnswers = answers => {
     api.submitLongAnswers(answers, 0, 0)
-    console.log('submitLongAnswers', answers)
     setValidation(prevValidation => ({
       ...prevValidation,
       longAnswers: answers,
@@ -71,7 +69,6 @@ function useValidation() {
   }
 
   useEffect(() => {
-    console.log('saveValidation', validation)
     if (validation.shortAnswers.length || validation.longAnswers.length) {
       saveValidation(validation)
     }
