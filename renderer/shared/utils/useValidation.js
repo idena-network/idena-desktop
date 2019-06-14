@@ -20,7 +20,7 @@ function useValidation() {
 
   useEffect(() => {
     const currentValidation = getValidation()
-    setValidation(currentValidation)
+    setValidation(currentValidation || initialValidation)
   }, [])
 
   useEffect(() => {
