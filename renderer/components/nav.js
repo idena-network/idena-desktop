@@ -99,12 +99,12 @@ function Nav() {
         <NavItem href="/flips" icon={<FiInstagram />}>
           Flips
         </NavItem>
-        <NavItem href="/contacts" icon={<FiUsers />}>
+        {/* <NavItem href="/contacts" icon={<FiUsers />}>
           Contacts
-        </NavItem>
+        </NavItem> 
         <NavItem href="/chats" icon={<FiMessageSquare />}>
           Chats
-        </NavItem>
+        </NavItem> */}
         <NavItem href="/settings" icon={<FiSettings />}>
           Settings
         </NavItem>
