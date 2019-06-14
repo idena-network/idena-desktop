@@ -9,10 +9,9 @@ import {
   Input,
 } from '../../../shared/components'
 import Avatar from './contact-avatar'
-import {Figure} from '../../../shared/components/utils'
 import Pre from '../../../shared/components/pre'
 
-export function SendInviteForm({addr, amount, available, onSend, result}) {
+export function SendInviteForm({addr, amount, onSend, result}) {
   const addrInputRef = useRef(null)
   const amountInputRef = useRef(null)
   return (
@@ -29,7 +28,6 @@ export function SendInviteForm({addr, amount, available, onSend, result}) {
         <Label htmlFor="amount">Amount</Label>
         <Input defaultValue={amount} ref={amountInputRef} id="amount" />
       </FormGroup>
-      <Figure label="Available" value={available} />
       <Button
         onClick={() => {
           onSend(addrInputRef.current.value, amountInputRef.current.value)
@@ -45,7 +43,6 @@ export function SendInviteForm({addr, amount, available, onSend, result}) {
 SendInviteForm.propTypes = {
   addr: PropTypes.string,
   amount: PropTypes.number,
-  available: PropTypes.number,
   onSend: PropTypes.func.isRequired,
   result: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 }

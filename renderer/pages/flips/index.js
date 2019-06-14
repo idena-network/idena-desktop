@@ -13,18 +13,24 @@ import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
 import FlipCover from '../../screens/flips/shared/components/flip-cover'
 import FlipType from '../../screens/flips/shared/types/flip-type'
+import {
+  NotificationContext,
+  NotificationType,
+} from '../../shared/providers/notification-provider'
 
 function Flips() {
   const [flipType, setFlipType] = useLocalStorage(
     'flips/filter',
     FlipType.Published
   )
-  const {flips, deleteFlip, publish} = useFlips()
+  const {flips, deleteFlip, submitFlip} = useFlips()
   const [filteredFlips, setFilteredFlips] = useState([])
 
   useEffect(() => {
     setFilteredFlips(flips.filter(flip => flip.type === flipType))
   }, [flipType, flips, setFilteredFlips])
+
+  const {addNotification} = React.useContext(NotificationContext)
 
   return (
     <Layout>
@@ -60,8 +66,26 @@ function Flips() {
               onDelete={() => {
                 deleteFlip(flip)
               }}
-              onPublish={() => {
-                publish(flip)
+              onPublish={async () => {
+                try {
+                  const {result, error} = await submitFlip(flip)
+                  addNotification({
+                    title: error ? 'Error while uploading flip' : 'Flip saved!',
+                    body: error ? error.message : `Hash ${result.hash}`,
+                    type: error
+                      ? NotificationType.Error
+                      : NotificationType.Info,
+                  })
+                } catch ({response: {status}}) {
+                  addNotification({
+                    title: 'Error while uploading flip',
+                    body:
+                      status === 413
+                        ? 'Maximum image size exceeded'
+                        : 'Unexpected error occurred',
+                    type: NotificationType.Error,
+                  })
+                }
               }}
               width="25%"
             />

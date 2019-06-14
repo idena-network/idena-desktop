@@ -101,12 +101,14 @@ function FlipCover({
         <Flex justify="space-between" align="center">
           <Text>{composeHint(hint)}</Text>
           <Box css={position('relative')}>
-            <FiMoreVertical
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              color={theme.colors.primary}
-              style={{cursor: 'pointer'}}
-              fontSize={theme.fontSizes.large}
-            />
+            {isDraft && (
+              <FiMoreVertical
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                color={theme.colors.primary}
+                style={{cursor: 'pointer'}}
+                fontSize={theme.fontSizes.large}
+              />
+            )}
             {isDraft && isMenuOpen && (
               <Absolute top="2em" right={0}>
                 <FlipMenu ref={menuRef}>
@@ -117,7 +119,7 @@ function FlipCover({
                     Edit flip
                   </FlipMenuItem>
                   <FlipMenuItem
-                    onClick={canSubmit ? onPublish() : null}
+                    onClick={canSubmit ? () => onPublish() : null}
                     disabled={!canSubmit}
                     icon={<FiUploadCloud color={theme.colors.primary} />}
                   >

@@ -1,6 +1,6 @@
 import {useState, useEffect, useCallback} from 'react'
 import {encode} from 'rlp'
-import {submitFlip} from '../api/dna'
+import * as api from '../api/dna'
 import FlipType from '../../screens/flips/shared/types/flip-type'
 
 const {
@@ -20,7 +20,6 @@ function toHex(pics, order) {
     Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
   )
   const hexBuffs = encode([buffs.map(ab => new Uint8Array(ab)), shuffle(order)])
-
   return `0x${hexBuffs.toString('hex')}`
 }
 
@@ -28,9 +27,8 @@ function useFlips() {
   const [flips, setFlips] = useState([])
 
   useEffect(() => {
-    // eslint-disable-next-line no-shadow
-    const flips = getFlipsFromStore()
-    setFlips(flips)
+    const savedFlips = getFlipsFromStore()
+    setFlips(savedFlips)
   }, [])
 
   useEffect(() => {
@@ -39,11 +37,6 @@ function useFlips() {
     }
   }, [flips])
 
-  const getDrafts = useCallback(
-    () => flips.filter(f => f.type === FlipType.Draft),
-    [flips]
-  )
-
   const getDraft = useCallback(
     id => flips.find(f => f.id === id) || getFlipFromStore(id),
     [flips]
@@ -51,6 +44,7 @@ function useFlips() {
 
   const saveDraft = useCallback(draft => {
     const nextDraft = {...draft, type: FlipType.Draft}
+
     setFlips(prevFlips => {
       const draftIdx = prevFlips.findIndex(
         f => f.id === draft.id && f.type === FlipType.Draft
@@ -62,19 +56,18 @@ function useFlips() {
           ...prevFlips.slice(draftIdx + 1),
         ]
       }
+
       return prevFlips.concat({...nextDraft, createdAt: Date.now()})
     })
   }, [])
 
-  const publish = useCallback(async ({id, pics, order, hint}) => {
-    const encodedFlip = toHex(pics, order)
-    const resp = await submitFlip(encodedFlip)
+  const submitFlip = useCallback(async ({id, pics, order, hint}) => {
+    const resp = await api.submitFlip(toHex(pics, order))
     const {result} = resp
+
     if (result) {
-      await setFlips(prevFlips => {
-        const flipIdx = prevFlips.findIndex(
-          f => f.id === id && f.type === FlipType.Draft
-        )
+      setFlips(prevFlips => {
+        const flipIdx = prevFlips.findIndex(f => f.id === id)
         return [
           ...prevFlips.slice(0, flipIdx),
           {
@@ -89,6 +82,7 @@ function useFlips() {
         ]
       })
     }
+
     return resp
   }, [])
 
@@ -99,11 +93,9 @@ function useFlips() {
 
   return {
     flips,
-    types: FlipType,
-    getDrafts,
     getDraft,
     saveDraft,
-    publish,
+    submitFlip,
     deleteFlip,
   }
 }

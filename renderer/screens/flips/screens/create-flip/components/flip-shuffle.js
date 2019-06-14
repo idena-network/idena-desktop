@@ -11,7 +11,7 @@ function FlipShuffle({pics, order, onShuffleFlip}) {
         <Flex direction="column" justify="center" align="center">
           {pics.map((src, idx) => (
             <Box key={idx}>
-              <img alt={`flip-${idx}`} width={150} src={src} />
+              <img alt={`flip-${idx}`} width={100} src={src} />
             </Box>
           ))}
         </Flex>
@@ -19,7 +19,7 @@ function FlipShuffle({pics, order, onShuffleFlip}) {
         <Flex direction="column" justify="center" align="center">
           {order.map(idx => (
             <Box key={idx}>
-              <img alt={`flip-${idx}`} width={150} src={pics[idx]} />
+              <img alt={`flip-${idx}`} width={100} src={pics[idx]} />
             </Box>
           ))}
         </Flex>

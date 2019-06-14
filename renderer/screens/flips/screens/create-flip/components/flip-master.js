@@ -11,7 +11,10 @@ import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import {getRandomHint} from '../utils/hints'
 import SubmitFlip from './submit-flip'
-import {NotificationContext} from '../../../../../shared/providers/notification-provider'
+import {
+  NotificationContext,
+  NotificationType,
+} from '../../../../../shared/providers/notification-provider'
 import {hasDataUrl, composeHint} from '../../../shared/utils/flip'
 import useFlips from '../../../../../shared/utils/useFlips'
 import useIdentity from '../../../../../shared/utils/useIdentity'
@@ -20,8 +23,7 @@ import useCoinbaseAddress from '../../../../../shared/utils/useCoinbaseAddress'
 function FlipMaster({id}) {
   const address = useCoinbaseAddress()
   const {canSubmitFlip} = useIdentity(address)
-
-  const {getDraft, saveDraft, publish} = useFlips()
+  const {getDraft, saveDraft, submitFlip} = useFlips()
 
   const {addNotification} = useContext(NotificationContext)
 
@@ -37,7 +39,7 @@ function FlipMaster({id}) {
   })
 
   const [step, setStep] = useState(0)
-  const [result, setResult] = useState()
+  const [submitResult, setSubmitResult] = useState()
 
   useEffect(() => {
     const draft = getDraft(id)
@@ -47,28 +49,24 @@ function FlipMaster({id}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
-  const shouldSaveDraft = flip.pics.some(hasDataUrl)
-  const canPublish = flip.pics.every(hasDataUrl) // && canSubmitFlip
-
   useEffect(() => {
-    if (shouldSaveDraft) {
+    if (flip.pics.some(hasDataUrl)) {
       saveDraft({id, ...flip})
     }
-  }, [id, flip, shouldSaveDraft, saveDraft])
+  }, [id, flip, saveDraft])
 
   const handleSubmitFlip = async () => {
     try {
-      // eslint-disable-next-line no-shadow
-      const {result, error} = await publish(flip)
-      setResult(error ? error.message : result.hash)
+      const {result, error} = await submitFlip(flip)
       addNotification({
         title: error ? 'Error while uploading flip' : 'Flip saved!',
         body: error ? error.message : `Hash ${result.hash}`,
+        type: error ? NotificationType.Error : NotificationType.Info,
       })
       Router.push('/flips')
-    } catch (error) {
-      setResult(
-        error.response.status === 413
+    } catch ({response: {status}}) {
+      setSubmitResult(
+        status === 413
           ? 'Maximum image size exceeded'
           : 'Unexpected error occurred'
       )
@@ -81,6 +79,8 @@ function FlipMaster({id}) {
     })
     Router.push('/flips')
   }
+
+  const canPublish = true || (flip.pics.every(hasDataUrl) && canSubmitFlip)
 
   const steps = [
     {
@@ -122,7 +122,7 @@ function FlipMaster({id}) {
     },
     {
       title: 'Submit story',
-      children: <SubmitFlip {...flip} submitFlipResult={result} />,
+      children: <SubmitFlip {...flip} submitFlipResult={submitResult} />,
     },
   ]
 
