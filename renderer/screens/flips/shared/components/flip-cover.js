@@ -75,6 +75,7 @@ function FlipCover({
   pics,
   type,
   createdAt,
+  modifiedAt,
   onDelete,
   onPublish,
   width,
@@ -143,7 +144,11 @@ function FlipCover({
           {new Date(createdAt).toLocaleString()}
         </Text>
       </Box>
-      <Box />
+      <Box my={theme.spacings.small}>
+        <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
+          Modified: {new Date(createdAt || modifiedAt).toLocaleString()}
+        </Text>
+      </Box>
     </Box>
   )
 }
@@ -154,6 +159,7 @@ FlipCover.propTypes = {
   pics: PropTypes.arrayOf(PropTypes.string).isRequired,
   type: PropTypes.oneOf(Object.values(FlipType)),
   createdAt: PropTypes.number.isRequired,
+  modifiedAt: PropTypes.number.isRequired,
   onDelete: PropTypes.func,
   onPublish: PropTypes.func,
   width: PropTypes.string,

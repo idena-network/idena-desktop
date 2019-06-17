@@ -1,11 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Box, Button, SubHeading} from '../../../../../shared/components'
+import {rem} from 'polished'
+import {Box, Button, SubHeading, Text} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import theme from '../../../../../shared/theme'
 
-function CreateFlipStep({
+function FlipStep({
   children,
+  title,
   desc,
   onPrev,
   onNext,
@@ -19,8 +21,11 @@ function CreateFlipStep({
   const shouldNext = !last
   return (
     <Box>
-      <Box p={theme.spacings.large}>
-        <SubHeading>{desc}</SubHeading>
+      <Box>
+        <Box my={rem(theme.spacings.medium24)}>
+          <SubHeading>{title}</SubHeading>
+          {desc && <Text color={theme.colors.muted}>{desc}</Text>}
+        </Box>
         {children}
       </Box>
       <Flex justify="flex-end">
@@ -37,7 +42,8 @@ function CreateFlipStep({
   )
 }
 
-CreateFlipStep.propTypes = {
+FlipStep.propTypes = {
+  title: PropTypes.string.isRequired,
   desc: PropTypes.string,
   onPrev: PropTypes.func.isRequired,
   onNext: PropTypes.func.isRequired,
@@ -48,4 +54,4 @@ CreateFlipStep.propTypes = {
   allowSubmit: PropTypes.bool.isRequired,
 }
 
-export default CreateFlipStep
+export default FlipStep

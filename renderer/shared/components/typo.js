@@ -13,7 +13,7 @@ export function Heading({color, fontSize, fontWeight, margin, children}) {
           color: ${color};
           font-size: ${fontSize};
           font-weight: ${fontWeight};
-          ${margin};
+          margin: ${margin};
         }
       `}</style>
     </h1>

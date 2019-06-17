@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import useLocalStorage from 'react-use/lib/useLocalStorage'
 import {FiPlusSquare} from 'react-icons/fi'
+import {rem} from 'polished'
 import Layout from '../../components/layout'
 import {Heading, Box} from '../../shared/components'
 import theme from '../../shared/theme'
@@ -57,7 +58,7 @@ function Flips() {
           </Flex>
         </FlipToolbar>
       </Box>
-      <Box px={theme.spacings.xxxlarge}>
+      <Box my={rem(theme.spacings.medium32)} px={theme.spacings.xxxlarge}>
         <FlipList>
           {filteredFlips.map(flip => (
             <FlipCover

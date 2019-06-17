@@ -1,9 +1,10 @@
 import React, {useState, useEffect, useContext} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
-import {FiX} from 'react-icons/fi'
-import CreateFlipStep from './flip-step'
-import {Box, SubHeading, Text, Absolute} from '../../../../../shared/components'
+import {FiX, FiCheckCircle, FiCircle} from 'react-icons/fi'
+import {rem, margin} from 'polished'
+import FlipStep from './flip-step'
+import {Box, Text, Absolute} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import theme from '../../../../../shared/theme'
 import FlipPics from './flip-pics'
@@ -73,19 +74,14 @@ function FlipMaster({id}) {
     }
   }
 
-  const handleClose = () => {
-    addNotification({
-      title: 'Flip has been saved to drafts',
-    })
-    Router.push('/flips')
-  }
-
   const canPublish = true || (flip.pics.every(hasDataUrl) && canSubmitFlip)
 
   const steps = [
     {
-      title: 'Choose the hint',
-      desc: 'Choose key words',
+      caption: 'Think up a story',
+      title: 'Think up a story',
+      desc:
+        'Think up a short story about someone/something related to the two key words below according to the template',
       children: (
         <FlipHint
           {...flip}
@@ -94,11 +90,12 @@ function FlipMaster({id}) {
       ),
     },
     {
-      title: 'Create a story',
+      caption: 'Select images',
+      title: 'Select 4 images to tell your story',
       desc: flip
-        ? `Select ${
-            flip.pics.length
-          } images to create a story with words: ${composeHint(flip.hint)}`
+        ? `Use key words for the story “${composeHint(
+            flip.hint
+          )}” and template TBD`
         : '',
       children: (
         <FlipPics
@@ -110,7 +107,9 @@ function FlipMaster({id}) {
       ),
     },
     {
+      caption: 'Shuffle images',
       title: 'Shuffle images',
+      desc: 'Shuffle images in a way to make a nonsense sequence of images',
       children: (
         <FlipShuffle
           {...flip}
@@ -121,68 +120,67 @@ function FlipMaster({id}) {
       ),
     },
     {
-      title: 'Submit story',
+      caption: 'Submit flip',
+      title: 'Submit flip',
       children: <SubmitFlip {...flip} submitFlipResult={submitResult} />,
     },
   ]
 
   return (
-    <Box>
-      <Flex>
-        {steps.map(({title}, idx) => (
-          <Flex
-            key={title}
-            align="center"
-            css={{
-              borderBottom: `solid 2px ${
-                idx <= step ? theme.colors.primary : theme.colors.gray3
-              }`,
-              padding: theme.spacings.normal,
-              paddingLeft: idx === 0 ? 0 : '',
-            }}
-            onClick={() => setStep(idx)}
-          >
-            <Text
-              color={theme.colors.white}
-              fontWeight={600}
+    <>
+      <Box bg={theme.colors.gray} py={rem(14)} mx={rem(-80)} my={rem(24)}>
+        <Flex css={margin(0, 0, 0, rem(80))}>
+          {steps.map(({caption}, idx) => (
+            <Flex
+              key={caption}
+              align="center"
+              onClick={() => setStep(idx)}
               css={{
-                background: theme.colors.primary,
-                borderRadius: '50%',
-                width: '24px',
-                height: '24px',
-                textAlign: 'center',
-                verticalAlign: 'middle',
-                marginRight: theme.spacings.small,
+                ...margin(0, theme.spacings.xlarge, 0, 0),
+                cursor: 'pointer',
               }}
             >
-              {idx + 1}
-            </Text>
-            <SubHeading>{title}</SubHeading>
-          </Flex>
-        ))}
-      </Flex>
+              {idx <= step ? (
+                <FiCheckCircle
+                  fontSize={theme.fontSizes.large}
+                  color={theme.colors.primary}
+                />
+              ) : (
+                <FiCircle
+                  fontSize={theme.fontSizes.large}
+                  color={theme.colors.muted}
+                />
+              )}
+              <Text
+                color={idx <= step ? theme.colors.text : theme.colors.muted}
+                fontWeight={theme.fontWeights.semi}
+                css={{...margin(0, 0, 0, theme.spacings.small), lineHeight: 1}}
+              >
+                {caption}
+              </Text>
+            </Flex>
+          ))}
+        </Flex>
+      </Box>
       {
         steps.map(({title, desc, children}) => (
-          <CreateFlipStep
+          <FlipStep
             key={title}
+            title={title}
             desc={desc}
             onPrev={() => setStep(step - 1)}
             onNext={() => {
               setStep(step + 1)
             }}
-            onClose={handleClose}
             onSubmit={handleSubmitFlip}
             last={step === steps.length - 1}
             allowSubmit={canPublish}
           >
             {children}
-          </CreateFlipStep>
+          </FlipStep>
         ))[step]
       }
-      <Absolute top="1em" right="2em">
-        <FiX onClick={handleClose} />
-      </Absolute>
-    </Box>
+    </>
   )
 }
 

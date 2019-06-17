@@ -8,6 +8,7 @@ import {
   FiMessageSquare,
   FiUserCheck,
 } from 'react-icons/fi'
+import {margin, rem} from 'polished'
 import {Box, List, Link, Text} from '../shared/components'
 import Flex from '../shared/components/flex'
 import theme from '../shared/theme'
@@ -89,7 +90,7 @@ function Nav() {
 
   return (
     <nav>
-      <Box m="2em 0">
+      <Box css={margin(rem(32), 0, rem(40), 0)}>
         <img src="../static/logo.svg" alt="idena logo" />
       </Box>
       <List>
@@ -144,13 +145,15 @@ function Nav() {
         nav {
           background: ${theme.colors.primary2};
           color: ${theme.colors.white};
-          padding: 2em;
-          width: 250px;
           text-align: center;
           min-height: 100vh;
         }
+        nav :global(ul) {
+          padding: 0 ${rem(16)};
+          width: 200px;
+        }
         img {
-          width: 96px;
+          width: 80px;
           filter: invert(1);
         }
       `}</style>

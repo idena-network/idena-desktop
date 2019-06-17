@@ -7,9 +7,8 @@ import Flex from '../../../shared/components/flex'
 
 export function ActivateInviteForm({onActivate}) {
   const keyInputRef = useRef()
-
   return (
-    <Box my={theme.spacings.normal} py={theme.spacings.normal}>
+    <Box py={theme.spacings.normal}>
       <FormGroup>
         <Label htmlFor="activateInviteKey">Invitation code</Label>
         <Flex align="center">

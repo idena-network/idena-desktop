@@ -33,7 +33,9 @@ const spacings = {
   xxsmall: '0.1em',
   small: '0.5em',
   normal: '1em',
-  large: '1.5em',
+  medium24: 24, // TODO: rename it more meaningful from design system perspective
+  medium32: 32,
+  large: 80,
   xlarge: '2em',
   xxlarge: '3em',
   xxxlarge: '4em',

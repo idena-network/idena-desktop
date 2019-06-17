@@ -1,30 +1,48 @@
 import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
+import {FiX} from 'react-icons/fi'
+import {rem, margin} from 'polished'
 import {Heading, Box} from '../../shared/components'
 import FlipMaster from '../../screens/flips/screens/create-flip/components/flip-master'
 import Layout from '../../components/layout'
 import theme from '../../shared/theme'
 import {NotificationContext} from '../../shared/providers/notification-provider'
+import Flex from '../../shared/components/flex'
 
-const defaultRouter = {query: {id: ''}}
-
-function EditFlip({router: {query: {id}} = defaultRouter}) {
+function EditFlip({router}) {
   const {getFlip} = global.flipStore || {getFlip: null}
 
-  const {onAddNotification} = useContext(NotificationContext)
+  const {addNotification} = useContext(NotificationContext)
 
   if (!getFlip) {
     return null
   }
 
-  const draft = getFlip(id)
+  const draft = getFlip(router.query.id)
 
-  return id ? (
+  return draft ? (
     <Layout>
-      <Box p={theme.spacings.large}>
-        <Heading>Edit flip</Heading>
-        <FlipMaster id={id} {...draft} onAddNotification={onAddNotification} />
+      <Box px={rem(80)} py={rem(24)}>
+        <Flex align="center" justify="space-between">
+          <Heading margin={0}>Edit flip</Heading>
+          <FiX
+            color={theme.colors.muted}
+            fontSize={theme.fontSizes.large}
+            cursor="pointer"
+            onClick={() => {
+              addNotification({
+                title: 'Flip has been saved to drafts',
+              })
+              router.push('/flips')
+            }}
+          />
+        </Flex>
+        <FlipMaster
+          id={draft.id}
+          {...draft}
+          onAddNotification={addNotification}
+        />
       </Box>
     </Layout>
   ) : null
