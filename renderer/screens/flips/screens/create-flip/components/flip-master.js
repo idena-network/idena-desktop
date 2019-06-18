@@ -58,7 +58,7 @@ function FlipMaster({id}) {
 
   const handleSubmitFlip = async () => {
     try {
-      const {result, error} = await submitFlip(flip)
+      const {result, error} = await submitFlip({id, ...flip})
       addNotification({
         title: error ? 'Error while uploading flip' : 'Flip saved!',
         body: error ? error.message : `Hash ${result.hash}`,

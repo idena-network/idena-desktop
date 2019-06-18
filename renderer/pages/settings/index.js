@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 
-import {margin} from 'polished'
+import {margin, rem} from 'polished'
 import Layout from '../../components/layout'
 import {
   Box,
@@ -18,6 +18,8 @@ import Flex from '../../shared/components/flex'
 import {NotificationContext} from '../../shared/providers/notification-provider'
 
 const DEFAULT_NODE_URL = 'http://localhost:9009'
+
+const {clear: clearFlips} = global.flipStore || {}
 
 export default function Settings() {
   const {addNotification} = React.useContext(NotificationContext)
@@ -72,6 +74,19 @@ export default function Settings() {
               Use default
             </FlatButton>
           </Flex>
+        </Box>
+        <Box my={rem(theme.spacings.medium32)}>
+          <SubHeading>Flips</SubHeading>
+          <Box>
+            <Button
+              onClick={() => {
+                clearFlips()
+                addNotification({title: 'Flips cleared'})
+              }}
+            >
+              Clear flips
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Layout>

@@ -78,7 +78,7 @@ function Block({title, value, fallback = <Loading />}) {
 
 Block.propTypes = {
   title: PropTypes.string,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   fallback: PropTypes.node,
 }
 
@@ -135,7 +135,7 @@ function Nav() {
               value={
                 nextValidation
                   ? new Date(nextValidation).toLocaleString()
-                  : nextValidation
+                  : null
               }
             />
           )}
