@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
+import {FiX} from 'react-icons/fi'
 import theme from '../theme'
 
 export function AddIcon({width = '32px', ...props}) {
@@ -35,4 +36,15 @@ export function AddIcon({width = '32px', ...props}) {
 
 AddIcon.propTypes = {
   width: PropTypes.string,
+}
+
+export function IconClose(props) {
+  return (
+    <FiX
+      color={theme.colors.muted}
+      fontSize={theme.fontSizes.large}
+      cursor="pointer"
+      {...props}
+    />
+  )
 }
