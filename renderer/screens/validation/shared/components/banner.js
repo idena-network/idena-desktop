@@ -76,7 +76,7 @@ function Banner({router}) {
               ? shortSession
               : longSession
           }
-          shouldCallToValidate={isCeremonyRunning && noAnswers}
+          shouldCallToValidate={isCeremonyRunning}
         >
           {noAnswers
             ? `${currentPeriod} running`

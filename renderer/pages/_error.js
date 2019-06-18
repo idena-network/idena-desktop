@@ -1,21 +1,23 @@
 import React from 'react'
+import Layout from '../components/layout'
 
 class Error extends React.Component {
   static getInitialProps({res, err}) {
     // eslint-disable-next-line no-nested-ternary
     const statusCode = res ? res.statusCode : err ? err.statusCode : null
-    return {statusCode}
+    return {statusCode, err}
   }
 
   render() {
     // eslint-disable-next-line react/prop-types
-    const {statusCode} = this.props
+    const {statusCode, err} = this.props
     return (
-      <p>
+      <Layout>
         {statusCode
           ? `An error ${statusCode} occurred on server`
           : 'An error occurred on client'}
-      </p>
+        {err ? JSON.stringify(err) : 'Weird, no error caught'}
+      </Layout>
     )
   }
 }
