@@ -14,7 +14,7 @@ import useCoinbaseAddress from '../../shared/utils/useCoinbaseAddress'
 import useIdentity from '../../shared/utils/useIdentity'
 import {
   NotificationContext,
-  // NotificationType,
+  NotificationType,
 } from '../../shared/providers/notification-provider'
 
 export default () => {
@@ -42,9 +42,8 @@ export default () => {
               const result = await activateInvite(address, key)
               addNotification({
                 title: `Activation ${result ? 'succeeded' : 'failed'}`,
-                body: result
-                  ? `tx ${result}`
-                  : 'Inivite tx is not approved yet',
+                body: result || 'Inivite tx is not approved yet',
+                type: result ? NotificationType.Info : NotificationType.Error,
               })
             }}
           />
