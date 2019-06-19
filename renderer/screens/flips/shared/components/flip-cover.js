@@ -182,7 +182,7 @@ FlipCover.propTypes = {
   type: PropTypes.oneOf(Object.values(FlipType)),
   mined: PropTypes.bool,
   createdAt: PropTypes.number.isRequired,
-  modifiedAt: PropTypes.number.isRequired,
+  modifiedAt: PropTypes.number,
   onDelete: PropTypes.func,
   onPublish: PropTypes.func,
   width: PropTypes.string,

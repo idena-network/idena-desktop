@@ -1,12 +1,12 @@
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useCallback} from 'react'
 import useEpoch, {EpochPeriod} from './useEpoch'
-import FlipType from '../../screens/flips/shared/types/flip-type'
 import * as api from '../../screens/validation/shared/api/validation-api'
+import useFlips from './useFlips'
 
 const {getValidation, saveValidation} = global.validationStore || {}
-const {getFlips, saveFlips} = global.flipStore || {}
 
 const initialValidation = {
+  epoch: null,
   startedAt: null,
   running: false,
   shortAnswers: [],
@@ -14,65 +14,68 @@ const initialValidation = {
 }
 
 function useValidation() {
-  const {currentPeriod} = useEpoch()
+  const {epoch, currentPeriod} = useEpoch()
+  const {archiveFlips} = useFlips()
 
   const [validation, setValidation] = useState(initialValidation)
 
   useEffect(() => {
     const currentValidation = getValidation()
-    setValidation(currentValidation || initialValidation)
+    if (currentValidation) {
+      setValidation(currentValidation)
+    }
   }, [])
 
   useEffect(() => {
+    if (epoch && epoch !== validation.epoch) {
+      console.info('=====================')
+      console.info('YAY!!! STARTING NEW EPOCH!!!', epoch)
+      console.info('=====================')
+
+      setValidation(initialValidation)
+      // resetKeywords()
+      archiveFlips()
+
+      saveValidation({...initialValidation, epoch})
+    }
+  }, [archiveFlips, epoch, validation.epoch])
+
+  useEffect(() => {
     if (currentPeriod) {
-      if (currentPeriod === EpochPeriod.None) {
-        // eslint-disable-next-line no-use-before-define
-        resetEpoch()
-        setValidation(initialValidation)
-      } else {
-        setValidation(prevValidation => ({
-          ...prevValidation,
-          startedAt:
-            currentPeriod === EpochPeriod.FlipLottery ? Date.now() : null,
-          running: currentPeriod !== EpochPeriod.None,
-        }))
-      }
+      setValidation(prevValidation => ({
+        ...prevValidation,
+        startedAt:
+          currentPeriod === EpochPeriod.FlipLottery ? Date.now() : null,
+        running: currentPeriod !== EpochPeriod.None,
+      }))
     }
   }, [currentPeriod])
 
-  const submitShortAnswers = answers => {
+  useEffect(() => {
+    if (
+      validation &&
+      validation.shortAnswers.length &&
+      validation.longAnswers.length
+    ) {
+      saveValidation(validation)
+    }
+  }, [validation])
+
+  const submitShortAnswers = useCallback(answers => {
     api.submitShortAnswers(answers, 0, 0)
     setValidation(prevValidation => ({
       ...prevValidation,
       shortAnswers: answers,
     }))
-  }
+  }, [])
 
-  const submitLongAnswers = answers => {
+  const submitLongAnswers = useCallback(answers => {
     api.submitLongAnswers(answers, 0, 0)
     setValidation(prevValidation => ({
       ...prevValidation,
       longAnswers: answers,
     }))
-  }
-
-  const resetEpoch = () => {
-    const flipsToArchive = getFlips()
-      .filter(f => f.type !== FlipType.Archived)
-      .map(flip => ({
-        ...flip,
-        type: FlipType.Archived,
-      }))
-    // console.log(flipsToArchive)
-    // saveFlips(flipsToArchive)
-    // resetKeywords()
-  }
-
-  useEffect(() => {
-    if (validation.shortAnswers.length || validation.longAnswers.length) {
-      saveValidation(validation)
-    }
-  }, [validation])
+  }, [])
 
   return {...validation, submitShortAnswers, submitLongAnswers}
 }

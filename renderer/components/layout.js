@@ -1,19 +1,23 @@
 import React, {useContext} from 'react'
+import {withRouter} from 'next/router'
 import PropTypes from 'prop-types'
 import Nav from './nav'
 import {NotificationContext} from '../shared/providers/notification-provider'
 import Notifications from './notifications'
 import ValidationBanner from '../screens/validation/shared/components/banner'
 
-function Layout({Sidebar = Nav, children}) {
+function Layout({Sidebar = Nav, router, children}) {
   const {notifications} = useContext(NotificationContext)
+
+  const matchValidation = router.pathname.startsWith('/validation')
+
   return (
     <>
       <main>
         <Sidebar />
         <section>{children}</section>
       </main>
-      <ValidationBanner />
+      {!matchValidation && <ValidationBanner />}
       <Notifications notifications={notifications} />
       <style jsx>{`
         main {
@@ -32,7 +36,9 @@ function Layout({Sidebar = Nav, children}) {
 
 Layout.propTypes = {
   Sidebar: PropTypes.node,
+  // eslint-disable-next-line react/forbid-prop-types
+  router: PropTypes.object,
   children: PropTypes.node,
 }
 
-export default Layout
+export default withRouter(Layout)

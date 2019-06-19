@@ -109,12 +109,22 @@ function useFlips() {
     setFlips(prevFlips => prevFlips.filter(f => f.id !== id))
   }, [])
 
+  const archiveFlips = useCallback(() => {
+    saveFlips(
+      flips.map(f => ({
+        ...f,
+        type: FlipType.Archived,
+      }))
+    )
+  }, [flips])
+
   return {
     flips,
     getDraft,
     saveDraft,
     submitFlip,
     deleteFlip,
+    archiveFlips,
   }
 }
 
