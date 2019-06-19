@@ -16,10 +16,11 @@ import {FlatButton} from '../../shared/components/button'
 import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
 import {NotificationContext} from '../../shared/providers/notification-provider'
+import FlipType from '../../screens/flips/shared/types/flip-type'
 
 const DEFAULT_NODE_URL = 'http://localhost:9009'
 
-const {clear: clearFlips} = global.flipStore || {}
+const {clear: clearFlips, getFlips, saveFlips} = global.flipStore || {}
 
 export default function Settings() {
   const {addNotification} = React.useContext(NotificationContext)
@@ -76,15 +77,31 @@ export default function Settings() {
           </Flex>
         </Box>
         <Box my={rem(theme.spacings.medium32)}>
-          <SubHeading>Flips</SubHeading>
+          <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
+            Flips
+          </SubHeading>
           <Box>
             <Button
               onClick={() => {
                 clearFlips()
-                addNotification({title: 'Flips cleared'})
+                addNotification({title: 'Flips deleted'})
               }}
             >
               Clear flips
+            </Button>
+          </Box>
+          <Box my={theme.spacings.small}>
+            <Button
+              onClick={() => {
+                const toBeArchived = getFlips().map(f => ({
+                  ...f,
+                  type: FlipType.Archived,
+                }))
+                saveFlips(toBeArchived)
+                addNotification({title: 'Flips archived'})
+              }}
+            >
+              Archive flips
             </Button>
           </Box>
         </Box>
