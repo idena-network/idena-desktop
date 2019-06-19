@@ -20,25 +20,21 @@ function EditFlip({router}) {
 
   const draft = getFlip(router.query.id)
 
+  const handleClose = () => {
+    addNotification({
+      title: 'Flip has been saved to drafts',
+    })
+    router.push('/flips')
+  }
+
   return draft ? (
     <Layout>
       <Box px={rem(theme.spacings.large)} py={rem(theme.spacings.medium24)}>
         <Flex align="center" justify="space-between">
           <Heading margin={0}>Edit flip</Heading>
-          <IconClose
-            onClick={() => {
-              addNotification({
-                title: 'Flip has been saved to drafts',
-              })
-              router.push('/flips')
-            }}
-          />
+          <IconClose onClick={handleClose} />
         </Flex>
-        <FlipMaster
-          id={draft.id}
-          {...draft}
-          onAddNotification={addNotification}
-        />
+        <FlipMaster id={draft.id} {...draft} onClose={handleClose} />
       </Box>
     </Layout>
   ) : null

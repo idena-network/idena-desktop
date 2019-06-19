@@ -15,21 +15,21 @@ function NewFlip({router}) {
 
   const [id] = useState(nanoid())
 
+  const handleClose = () => {
+    addNotification({
+      title: 'Flip has been saved to drafts',
+    })
+    router.push('/flips')
+  }
+
   return (
     <Layout>
       <Box px={rem(theme.spacings.large)} py={rem(theme.spacings.medium24)}>
         <Flex align="center" justify="space-between">
           <Heading margin={0}>New flip</Heading>
-          <IconClose
-            onClick={() => {
-              addNotification({
-                title: 'Flip has been saved to drafts',
-              })
-              router.push('/flips')
-            }}
-          />
+          <IconClose onClick={handleClose} />
         </Flex>
-        <FlipMaster id={id} />
+        <FlipMaster id={id} onClose={handleClose} />
       </Box>
     </Layout>
   )

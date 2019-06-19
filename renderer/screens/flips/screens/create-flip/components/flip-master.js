@@ -1,10 +1,10 @@
 import React, {useState, useEffect, useContext} from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
-import {FiX, FiCheckCircle, FiCircle} from 'react-icons/fi'
+import {FiCheckCircle, FiCircle} from 'react-icons/fi'
 import {rem, margin} from 'polished'
 import FlipStep from './flip-step'
-import {Box, Text, Absolute} from '../../../../../shared/components'
+import {Box, Text} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 import theme from '../../../../../shared/theme'
 import FlipPics from './flip-pics'
@@ -21,7 +21,7 @@ import useFlips from '../../../../../shared/utils/useFlips'
 import useIdentity from '../../../../../shared/utils/useIdentity'
 import useCoinbaseAddress from '../../../../../shared/utils/useCoinbaseAddress'
 
-function FlipMaster({id}) {
+function FlipMaster({id, onClose}) {
   const address = useCoinbaseAddress()
   const {canSubmitFlip} = useIdentity(address)
   const {getDraft, saveDraft, submitFlip} = useFlips()
@@ -74,7 +74,7 @@ function FlipMaster({id}) {
     }
   }
 
-  const canPublish = true || (flip.pics.every(hasDataUrl) && canSubmitFlip)
+  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip
 
   const steps = [
     {
@@ -172,6 +172,7 @@ function FlipMaster({id}) {
             onNext={() => {
               setStep(step + 1)
             }}
+            onClose={onClose}
             onSubmit={handleSubmitFlip}
             last={step === steps.length - 1}
             allowSubmit={canPublish}
@@ -186,6 +187,7 @@ function FlipMaster({id}) {
 
 FlipMaster.propTypes = {
   id: PropTypes.string,
+  onClose: PropTypes.func,
 }
 
 export default FlipMaster

@@ -2,6 +2,8 @@ import {useState, useEffect, useCallback} from 'react'
 import {encode} from 'rlp'
 import * as api from '../api/dna'
 import FlipType from '../../screens/flips/shared/types/flip-type'
+import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+import {fetchTx} from '../api'
 
 const {
   getFlips: getFlipsFromStore,
@@ -37,6 +39,27 @@ function useFlips() {
     }
   }, [flips])
 
+  useInterval(
+    () => {
+      const txPromises = flips
+        .filter(f => f.type === FlipType.Published)
+        .map(f => f.txHash)
+        .map(fetchTx)
+      Promise.all(txPromises).then(txs => {
+        setFlips(
+          flips.map(flip => ({
+            ...flip,
+            mined: txs.find(tx => tx.hash === flip.txHash) !== null,
+          }))
+        )
+      })
+    },
+    flips.filter(({type, mined}) => type === FlipType.Published && !mined)
+      .length
+      ? 1000
+      : null
+  )
+
   const getDraft = useCallback(
     id => flips.find(f => f.id === id) || getFlipFromStore(id),
     [flips]
@@ -68,7 +91,9 @@ function useFlips() {
         return [
           ...prevFlips.slice(0, flipIdx),
           {
+            ...prevFlips[flipIdx],
             ...flip,
+            ...result,
             type: FlipType.Published,
             modifiedAt: Date.now(),
           },

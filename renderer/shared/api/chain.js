@@ -8,5 +8,5 @@ export async function fetchTx(hash) {
     id: 1,
   })
   const {result} = data
-  return {hash, tx: result}
+  return {hash, result}
 }

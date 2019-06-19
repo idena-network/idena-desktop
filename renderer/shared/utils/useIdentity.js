@@ -48,7 +48,7 @@ function useIdentity(address) {
       // eslint-disable-next-line no-shadow
       const identity = await fetchIdentity(address)
       if (!ignore) {
-        const {state: status, requiredFlips} = identity
+        const {state: status, requiredFlips, flips} = identity
         setIdentity({
           ...identity,
           friendlyStatus: mapToFriendlyStatus(status),
@@ -59,7 +59,8 @@ function useIdentity(address) {
               IdentityStatus.Newbie,
               IdentityStatus.Verified,
             ].includes(status) &&
-            (true || requiredFlips > 0),
+            requiredFlips > 0 &&
+            (flips || []).length < requiredFlips,
           canActivateInvite: [
             IdentityStatus.Undefined,
             IdentityStatus.Zombie,

@@ -1,7 +1,13 @@
 import React, {useState, useRef, forwardRef} from 'react'
 import PropTypes from 'prop-types'
-import {FiMoreVertical, FiEdit2, FiXCircle, FiUploadCloud} from 'react-icons/fi'
-import {position, borderRadius} from 'polished'
+import {
+  FiMoreVertical,
+  FiEdit2,
+  FiXCircle,
+  FiUploadCloud,
+  FiClock,
+} from 'react-icons/fi'
+import {position, borderRadius, backgrounds, padding, rem} from 'polished'
 import useClickAway from 'react-use/lib/useClickAway'
 import useHover from 'react-use/lib/useHover'
 import theme from '../../../../shared/theme'
@@ -74,6 +80,7 @@ function FlipCover({
   hint,
   pics,
   type,
+  mined,
   createdAt,
   modifiedAt,
   onDelete,
@@ -95,8 +102,23 @@ function FlipCover({
   const canSubmit = true || (canSubmitFlip && pics.every(hasDataUrl))
   return (
     <Box w={width}>
-      <Box my={theme.spacings.small}>
+      <Box my={theme.spacings.small} css={position('relative')}>
         <FlipImage src={pics[0]} />
+        {type === FlipType.Published && !mined && (
+          <Absolute
+            bottom="0"
+            left="135px"
+            css={{
+              ...backgrounds(theme.colors.white),
+              ...borderRadius('top', '50%'),
+              ...borderRadius('bottom', '50%'),
+              lineHeight: 1,
+              ...padding(0),
+            }}
+          >
+            <FiClock color={theme.colors.danger} fontSize={rem(24)} />
+          </Absolute>
+        )}
       </Box>
       <Box my={theme.spacings.normal} css={{marginBottom: 0}} w="150px">
         <Flex justify="space-between" align="center">
@@ -158,6 +180,7 @@ FlipCover.propTypes = {
   hint: PropTypes.arrayOf(PropTypes.string).isRequired,
   pics: PropTypes.arrayOf(PropTypes.string).isRequired,
   type: PropTypes.oneOf(Object.values(FlipType)),
+  mined: PropTypes.bool,
   createdAt: PropTypes.number.isRequired,
   modifiedAt: PropTypes.number.isRequired,
   onDelete: PropTypes.func,
