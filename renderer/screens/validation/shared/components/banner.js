@@ -10,7 +10,7 @@ import {useInterval} from '../utils/useInterval'
 import {useValidationState} from '../../../../shared/providers/validation-context'
 
 function Banner() {
-  const {flipLottery, shortSession, longSession} = useTiming()
+  const {shortSession, longSession} = useTiming()
   const {currentPeriod, nextValidation} = useEpoch()
   const {shortAnswers, longAnswers} = useValidationState()
 
@@ -23,7 +23,7 @@ function Banner() {
       <Absolute bottom={0} left={0} right={0}>
         <Box bg={theme.colors.danger} p={theme.spacings.normal}>
           <Text color={theme.colors.white}>
-            {`Validation starts in ${flipLottery} sec`}
+            {`Validation starts in a few seconds`}
           </Text>
         </Box>
       </Absolute>
@@ -31,7 +31,11 @@ function Banner() {
   }
 
   if (
-    [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(currentPeriod)
+    [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+      currentPeriod
+    ) &&
+    shortSession &&
+    longSession
   ) {
     const hasAnswers = shortAnswers.length === 0 || longAnswers.length === 0
 
