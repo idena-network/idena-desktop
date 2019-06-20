@@ -17,8 +17,7 @@ export async function activateInvite(to, key) {
     params: [strip({to, key})],
     id: 1,
   })
-  const {result} = data
-  return result
+  return data
 }
 
 export async function fetchIdentities() {

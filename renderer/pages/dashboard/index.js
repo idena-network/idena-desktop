@@ -39,10 +39,10 @@ export default () => {
         {identity.canActivateInvite && (
           <ActivateInviteForm
             onActivate={async key => {
-              const result = await activateInvite(address, key)
+              const {result, error} = await activateInvite(address, key)
               addNotification({
                 title: `Activation ${result ? 'succeeded' : 'failed'}`,
-                body: result || 'Inivite tx is not approved yet',
+                body: result || error.message,
                 type: result ? NotificationType.Info : NotificationType.Error,
               })
             }}
