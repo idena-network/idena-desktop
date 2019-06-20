@@ -16,12 +16,15 @@ import {FlatButton} from '../../shared/components/button'
 import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
 import {NotificationContext} from '../../shared/providers/notification-provider'
+import useFlips from '../../shared/utils/useFlips'
 
 const DEFAULT_NODE_URL = 'http://localhost:9009'
 
-const {clear: clearFlips, archiveFlips} = global.flipStore || {}
+const {clear: clearFlips} = global.flipStore || {}
 
 export default function Settings() {
+  const {archiveFlips} = useFlips()
+
   const {addNotification} = React.useContext(NotificationContext)
 
   const addrRef = React.createRef()

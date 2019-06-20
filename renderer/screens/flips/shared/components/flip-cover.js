@@ -116,7 +116,11 @@ function FlipCover({
               ...padding(0),
             }}
           >
-            <FiClock color={theme.colors.danger} fontSize={rem(24)} />
+            <FiClock
+              color={theme.colors.danger}
+              fontSize={rem(24)}
+              title="Mining..."
+            />
           </Absolute>
         )}
       </Box>

@@ -31,7 +31,6 @@ function Banner() {
   }
 
   if (
-    true ||
     [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(currentPeriod)
   ) {
     const hasAnswers = shortAnswers.length === 0 || longAnswers.length === 0

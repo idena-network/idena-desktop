@@ -5,7 +5,7 @@ export default () => (
     html {
       box-sizing: border-box;
       font-size: 14px;
-      height: 100%;
+      min-height: 100%;
     }
     body {
       box-sizing: border-box;
@@ -15,7 +15,7 @@ export default () => (
       font-size: 1rem;
       margin: 0;
       padding: 0;
-      min-height: 100vh;
+      min-height: 100%;
     }
     *,
     *::before,
@@ -24,7 +24,7 @@ export default () => (
     }
     body > div,
     main {
-      min-height: 100vh;
+      min-height: 100%;
     }
   `}</style>
 )
