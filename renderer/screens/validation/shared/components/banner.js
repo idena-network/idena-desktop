@@ -48,6 +48,7 @@ function Banner() {
           key={currentPeriod}
           seconds={finish.diff(dayjs(), 's')}
           willValidate={hasAnswers}
+          period={currentPeriod}
         >
           {hasAnswers
             ? `${currentPeriod} running`
@@ -60,7 +61,7 @@ function Banner() {
   return null
 }
 
-function Countdown({seconds: initalSeconds, willValidate, children}) {
+function Countdown({seconds: initalSeconds, willValidate, period, children}) {
   const [seconds, setSeconds] = React.useState(initalSeconds)
 
   useInterval(
@@ -69,6 +70,9 @@ function Countdown({seconds: initalSeconds, willValidate, children}) {
     },
     seconds > 0 ? 1000 : null
   )
+
+  const isShortSession = period === EpochPeriod.ShortSession
+  const href = `/validation/${isShortSession ? 'short' : 'long'}`
 
   return (
     <Box bg={theme.colors.primary} css={{color: theme.colors.white}}>
@@ -84,7 +88,7 @@ function Countdown({seconds: initalSeconds, willValidate, children}) {
         </Flex>
         {willValidate && (
           <Box p={theme.spacings.normal}>
-            <Link href="/validation/short" color={theme.colors.white}>
+            <Link href={href} color={theme.colors.white}>
               Validate
             </Link>
           </Box>
@@ -97,6 +101,7 @@ function Countdown({seconds: initalSeconds, willValidate, children}) {
 Countdown.propTypes = {
   seconds: PropTypes.number.isRequired,
   willValidate: PropTypes.bool.isRequired,
+  period: PropTypes.string,
   children: PropTypes.node,
 }
 
