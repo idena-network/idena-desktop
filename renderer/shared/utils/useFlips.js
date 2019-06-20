@@ -5,6 +5,7 @@ import FlipType from '../../screens/flips/shared/types/flip-type'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {fetchTx} from '../api'
 import {HASH_IN_MEMPOOL} from './tx'
+import {areSame} from './arr'
 
 const {
   getFlips: getFlipsFromStore,
@@ -85,28 +86,42 @@ function useFlips() {
     })
   }, [])
 
-  const submitFlip = useCallback(async flip => {
-    const {pics, order} = flip
-    const resp = await api.submitFlip(toHex(pics, order))
-    const {result} = resp
-    if (result) {
-      setFlips(prevFlips => {
-        const flipIdx = prevFlips.findIndex(f => f.id === flip.id)
-        return [
-          ...prevFlips.slice(0, flipIdx),
-          {
-            ...prevFlips[flipIdx],
-            ...flip,
-            ...result,
-            type: FlipType.Published,
-            modifiedAt: Date.now(),
-          },
-          ...prevFlips.slice(flipIdx + 1),
-        ]
-      })
-    }
-    return resp
-  }, [])
+  const submitFlip = useCallback(
+    async flip => {
+      const {pics, order} = flip
+
+      if (
+        flips.filter(
+          f => f.type === FlipType.Published && areSame(f.pics, pics)
+        ).length > 0
+      ) {
+        return {
+          error: {message: 'You already submitted this flip'},
+        }
+      }
+
+      const resp = await api.submitFlip(toHex(pics, order))
+      const {result} = resp
+      if (result) {
+        setFlips(prevFlips => {
+          const flipIdx = prevFlips.findIndex(f => f.id === flip.id)
+          return [
+            ...prevFlips.slice(0, flipIdx),
+            {
+              ...prevFlips[flipIdx],
+              ...flip,
+              ...result,
+              type: FlipType.Published,
+              modifiedAt: Date.now(),
+            },
+            ...prevFlips.slice(flipIdx + 1),
+          ]
+        })
+      }
+      return resp
+    },
+    [flips]
+  )
 
   const deleteFlip = useCallback(({id}) => {
     deleteFromStore(id)

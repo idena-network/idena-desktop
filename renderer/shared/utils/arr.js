@@ -41,3 +41,8 @@ export const reorderList = (list, nextOrder) => {
   })
   return nextList
 }
+
+export function areSame(arr1, arr2) {
+  const b = new Set(arr2)
+  return arr1.every(x => b.has(x)) && arr1.length === arr2.length
+}
