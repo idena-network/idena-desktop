@@ -15,7 +15,7 @@ import theme from '../shared/theme'
 import Loading from '../shared/components/loading'
 import useValidation from '../shared/utils/useValidation'
 import useIdentity from '../shared/utils/useIdentity'
-import useEpoch from '../shared/utils/useEpoch'
+import useEpoch, {EpochPeriod} from '../shared/utils/useEpoch'
 import useCoinbaseAddress from '../shared/utils/useCoinbaseAddress'
 
 const NavItem = withRouter(({href, router, icon, children}) => {
@@ -86,7 +86,6 @@ function Nav() {
   const address = useCoinbaseAddress()
   const {nickname, requiredFlips, flips} = useIdentity(address)
   const {currentPeriod, nextValidation} = useEpoch()
-  const {running: validationRunning} = useValidation()
 
   return (
     <nav>
@@ -115,7 +114,7 @@ function Nav() {
           css={{borderRadius: '10px'}}
         >
           <Block title="Current period" value={currentPeriod} />
-          {!validationRunning && (
+          {currentPeriod === EpochPeriod.None && (
             <Block
               title="My current task"
               value={
@@ -129,7 +128,7 @@ function Nav() {
               }
             />
           )}
-          {!validationRunning && (
+          {currentPeriod === EpochPeriod.None && (
             <Block
               title="Next validation"
               value={

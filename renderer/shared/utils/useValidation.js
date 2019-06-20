@@ -1,83 +1,85 @@
-import {useState, useEffect, useCallback} from 'react'
+import {useState, useEffect, useCallback, useRef} from 'react'
 import useEpoch, {EpochPeriod} from './useEpoch'
 import * as api from '../../screens/validation/shared/api/validation-api'
 import useFlips from './useFlips'
 
 const {getValidation, saveValidation} = global.validationStore || {}
 
-const initialValidation = {
-  epoch: null,
-  startedAt: null,
-  running: false,
-  shortAnswers: [],
-  longAnswers: [],
-}
-
 function useValidation() {
   const {epoch, currentPeriod} = useEpoch()
   const {archiveFlips} = useFlips()
 
-  const [validation, setValidation] = useState(initialValidation)
+  const [shortAnswers, setShortAnswers] = useState([])
+  const [longAnswers, setLongAnswers] = useState([])
+  const [running, setRunning] = useState(false)
+
+  const savedEpoch = useRef()
 
   useEffect(() => {
-    const currentValidation = getValidation()
-    if (currentValidation) {
-      setValidation(currentValidation)
-    }
+    // eslint-disable-next-line no-shadow
+    const {shortAnswers, longAnswers, epoch} = getValidation()
+    setShortAnswers(shortAnswers)
+    setLongAnswers(longAnswers)
+    savedEpoch.current = epoch
   }, [])
 
   useEffect(() => {
-    if (epoch && epoch !== validation.epoch) {
-      console.info('=====================')
-      console.info('YAY!!! STARTING NEW EPOCH!!!', epoch)
-      console.info('=====================')
-
-      setValidation(initialValidation)
-      // resetKeywords()
-      archiveFlips()
-
-      saveValidation({...initialValidation, epoch})
+    function resetValidation() {
+      setShortAnswers([])
+      setLongAnswers([])
+      setRunning(false)
     }
-  }, [archiveFlips, epoch, validation.epoch])
+
+    function resetKeywords() {
+      // TODO: implement reset keywords
+    }
+
+    console.info(epoch, savedEpoch.current)
+    if (epoch && epoch !== savedEpoch.current) {
+      console.info('Starting new epoch', epoch)
+      savedEpoch.current = epoch
+      resetValidation()
+      archiveFlips()
+      // resetKeywords()
+    }
+  }, [archiveFlips, epoch])
 
   useEffect(() => {
-    if (currentPeriod) {
-      setValidation(prevValidation => ({
-        ...prevValidation,
-        startedAt:
-          currentPeriod === EpochPeriod.FlipLottery ? Date.now() : null,
-        running: currentPeriod !== EpochPeriod.None,
-      }))
-    }
+    setRunning(
+      [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+        currentPeriod
+      )
+    )
   }, [currentPeriod])
 
   useEffect(() => {
-    if (
-      validation &&
-      validation.shortAnswers.length &&
-      validation.longAnswers.length
-    ) {
-      saveValidation(validation)
+    if (epoch) {
+      saveValidation({
+        shortAnswers,
+        longAnswers,
+        running,
+        epoch: savedEpoch.current,
+      })
     }
-  }, [validation])
+  }, [epoch, longAnswers, running, shortAnswers])
 
   const submitShortAnswers = useCallback(answers => {
     api.submitShortAnswers(answers, 0, 0)
-    setValidation(prevValidation => ({
-      ...prevValidation,
-      shortAnswers: answers,
-    }))
+    setShortAnswers(answers)
   }, [])
 
   const submitLongAnswers = useCallback(answers => {
     api.submitLongAnswers(answers, 0, 0)
-    setValidation(prevValidation => ({
-      ...prevValidation,
-      longAnswers: answers,
-    }))
+    setLongAnswers(answers)
   }, [])
 
-  return {...validation, submitShortAnswers, submitLongAnswers}
+  return {
+    shortAnswers,
+    longAnswers,
+    running,
+    submitShortAnswers,
+    submitLongAnswers,
+  }
 }
 
 export default useValidation

@@ -51,7 +51,7 @@ function useEpoch() {
         ignore = true
       }
     },
-    10000,
+    1000,
     true
   )
 

@@ -5,6 +5,7 @@ import Nav from './nav'
 import {NotificationContext} from '../shared/providers/notification-provider'
 import Notifications from './notifications'
 import ValidationBanner from '../screens/validation/shared/components/banner'
+import {ValidationProvider} from '../shared/providers/validation-context'
 
 function Layout({Sidebar = Nav, router, children}) {
   const {notifications} = useContext(NotificationContext)
@@ -17,7 +18,11 @@ function Layout({Sidebar = Nav, router, children}) {
         <Sidebar />
         <section>{children}</section>
       </main>
-      {!matchValidation && <ValidationBanner />}
+      {!matchValidation && (
+        <ValidationProvider>
+          <ValidationBanner />
+        </ValidationProvider>
+      )}
       <Notifications notifications={notifications} />
       <style jsx>{`
         main {
