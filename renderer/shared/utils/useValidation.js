@@ -16,11 +16,14 @@ function useValidation() {
   const savedEpoch = useRef()
 
   useEffect(() => {
-    // eslint-disable-next-line no-shadow
-    const {shortAnswers, longAnswers, epoch} = getValidation()
-    setShortAnswers(shortAnswers)
-    setLongAnswers(longAnswers)
-    savedEpoch.current = epoch
+    const validation = getValidation()
+    if (validation) {
+      // eslint-disable-next-line no-shadow
+      const {shortAnswers, longAnswers, epoch} = validation
+      setShortAnswers(shortAnswers)
+      setLongAnswers(longAnswers)
+      savedEpoch.current = epoch
+    }
   }, [])
 
   useEffect(() => {
