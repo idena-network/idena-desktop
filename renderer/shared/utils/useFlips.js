@@ -4,6 +4,7 @@ import * as api from '../api/dna'
 import FlipType from '../../screens/flips/shared/types/flip-type'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {fetchTx} from '../api'
+import {HASH_IN_MEMPOOL} from './tx'
 
 const {
   getFlips: getFlipsFromStore,
@@ -47,10 +48,13 @@ function useFlips() {
         .map(fetchTx)
       Promise.all(txPromises).then(txs => {
         setFlips(
-          flips.map(flip => ({
-            ...flip,
-            mined: txs.find(tx => tx.hash === flip.txHash) !== null,
-          }))
+          flips.map(flip => {
+            const tx = txs.find(({hash}) => hash === flip.txHash)
+            return {
+              ...flip,
+              mined: tx && tx.result && tx.result.blockHash !== HASH_IN_MEMPOOL,
+            }
+          })
         )
       })
     },
