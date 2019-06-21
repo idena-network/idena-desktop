@@ -163,11 +163,13 @@ function CurrentTask({period, identity}) {
     if (period === EpochPeriod.None) {
       const numOfFlipsToSubmit = requiredFlips - (flips || []).length
       const shouldSendFlips = numOfFlipsToSubmit > 0
-      return shouldSendFlips
-        ? `Create ${numOfFlipsToSubmit} flip${
-            numOfFlipsToSubmit > 1 ? 's' : ''
-          }`
-        : 'Wait for validation'
+      return shouldSendFlips ? (
+        <Link href="/flips" color={theme.colors.white}>
+          Create {numOfFlipsToSubmit} flip{numOfFlipsToSubmit > 1 ? 's' : ''}
+        </Link>
+      ) : (
+        'Wait for validation'
+      )
     }
     if (validationRunning) {
       if (shortAnswers.length && longAnswers.length) {
