@@ -211,6 +211,14 @@ function CurrentTask({period, identity}) {
     }
   }
 
+  if (period === EpochPeriod.FlipLottery) {
+    return 'Flips lottery'
+  }
+
+  if (period === EpochPeriod.AfterLongSession) {
+    return 'Wait for validation end'
+  }
+
   return '...'
 }
 
