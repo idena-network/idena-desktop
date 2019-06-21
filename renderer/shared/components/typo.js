@@ -99,3 +99,8 @@ Text.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,
 }
+
+// eslint-disable-next-line react/prop-types
+export function BlockText({css, ...props}) {
+  return <Text {...props} css={{...css, display: 'block'}} />
+}

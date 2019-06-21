@@ -2,10 +2,13 @@ import {capitalize} from '../../../../shared/utils/string'
 
 /**
  * Composes hint for the flip
- * @param {string[]} words List of two words
+ * @param {object[]} words List of two words
  */
 export function composeHint(words) {
-  return words.map(capitalize).join(' / ')
+  return words
+    .map(w => (typeof w === 'string' ? w : w.name))
+    .map(capitalize)
+    .join(' / ')
 }
 
 /**

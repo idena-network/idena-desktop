@@ -1,29 +1,36 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {rem, padding, margin} from 'polished'
 import theme from '../../../../../shared/theme'
-import {Box, Button} from '../../../../../shared/components'
+import {Box, Button, BlockText} from '../../../../../shared/components'
 import Flex from '../../../../../shared/components/flex'
 
 function FlipHint({hint, onChange}) {
   return (
-    <Flex direction="column" align="center">
-      {hint.map((word, idx) => (
-        <Box
-          key={word}
-          p={theme.spacings.xlarge}
-          m={theme.spacings.normal}
-          w="300px"
-          css={{
-            border: `solid 1px ${theme.colors.gray3}`,
-            borderRadius: '10px',
-            marginTop: idx === 0 ? theme.spacings.normal : 0,
-          }}
-        >
-          {word}
-        </Box>
-      ))}
-      <Button onClick={onChange}>Change my words</Button>
-    </Flex>
+    <Box>
+      <Flex align="center" justify="center">
+        {hint.map(({name, desc}) => (
+          <Box
+            key={name}
+            p={theme.spacings.xlarge}
+            m={theme.spacings.normal}
+            w={rem(268)}
+            css={{
+              border: `solid 1px ${theme.colors.gray2}`,
+              borderRadius: '10px',
+              minHeight: rem(120),
+              ...padding(rem(12), rem(20)),
+            }}
+          >
+            <BlockText>{name}</BlockText>
+            <BlockText color={theme.colors.muted}>{desc}</BlockText>
+          </Box>
+        ))}
+      </Flex>
+      <Box css={margin(rem(theme.spacings.medium24), 0, 0)}>
+        <Button onClick={onChange}>Change my words</Button>
+      </Box>
+    </Box>
   )
 }
 

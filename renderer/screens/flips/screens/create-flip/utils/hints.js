@@ -13,5 +13,8 @@ export function getRandomHint() {
   //   secondWord = words[randomIndex(nextIndex)]
   // }
 
-  return [firstWord, secondWord]
+  return [firstWord, secondWord].map(({name, desc}) => ({
+    name,
+    desc: desc || name,
+  }))
 }
