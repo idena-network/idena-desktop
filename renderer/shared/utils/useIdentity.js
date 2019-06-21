@@ -28,6 +28,7 @@ const initialIdentity = {
   invites: 0,
   age: 0,
   state: '',
+  friendlyStatus: '',
   pubkey: '',
   requiredFlips: 0,
   madeFlips: 0,
@@ -36,6 +37,7 @@ const initialIdentity = {
   flips: null,
   online: false,
   canSubmitFlip: false,
+  canActivateInvite: false,
 }
 
 function useIdentity(address) {
@@ -63,6 +65,7 @@ function useIdentity(address) {
             (flips || []).length < requiredFlips,
           canActivateInvite: [
             IdentityStatus.Undefined,
+            IdentityStatus.Killed,
             IdentityStatus.Invite,
           ].includes(status),
         })

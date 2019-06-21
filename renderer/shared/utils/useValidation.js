@@ -37,7 +37,6 @@ function useValidation() {
       // TODO: implement reset keywords
     }
 
-    console.info(epoch, savedEpoch.current)
     if (epoch && epoch !== savedEpoch.current) {
       console.info('Starting new epoch', epoch)
       savedEpoch.current = epoch
