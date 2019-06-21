@@ -63,7 +63,7 @@ function useIdentity(address) {
             (flips || []).length < requiredFlips,
           canActivateInvite: [
             IdentityStatus.Undefined,
-            IdentityStatus.Zombie,
+            IdentityStatus.Invite,
           ].includes(status),
         })
       }
