@@ -61,7 +61,7 @@ function useFlips() {
     },
     flips.filter(({type, mined}) => type === FlipType.Published && !mined)
       .length
-      ? 1000
+      ? 10000
       : null
   )
 
@@ -120,7 +120,8 @@ function useFlips() {
       }
       return resp
     },
-    [flips]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   )
 
   const deleteFlip = useCallback(({id}) => {
