@@ -146,7 +146,12 @@ function FlipCover({
                     Edit flip
                   </FlipMenuItem>
                   <FlipMenuItem
-                    onClick={canSubmit ? () => onPublish() : null}
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      if (canSubmit) {
+                        onPublish()
+                      }
+                    }}
                     disabled={!canSubmit}
                     icon={<FiUploadCloud color={theme.colors.primary} />}
                   >
@@ -154,7 +159,12 @@ function FlipCover({
                   </FlipMenuItem>
                   <Divider m={theme.spacings.small} />
                   <FlipMenuItem
-                    onClick={onDelete}
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      if (canSubmit) {
+                        onDelete()
+                      }
+                    }}
                     icon={<FiXCircle color={theme.colors.danger} />}
                   >
                     Delete flip
