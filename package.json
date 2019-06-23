@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "build": "next build renderer && next export renderer",
-    "dist": "npm run build && build",
+    "dist": "npm run build && build --dir",
     "clean": "rm -rf renderer/out dist",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
