@@ -120,8 +120,7 @@ function useFlips() {
       }
       return resp
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [flips]
   )
 
   const deleteFlip = useCallback(({id}) => {
