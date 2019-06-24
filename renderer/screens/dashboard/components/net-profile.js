@@ -5,6 +5,7 @@ import theme from '../../../shared/theme'
 import {Box} from '../../../shared/components'
 import {Figure} from '../../../shared/components/utils'
 import {useIdentityState} from '../../../shared/providers/identity-context'
+import {mapToFriendlyStatus} from '../../../shared/utils/useIdentity'
 
 export function NetProfile({stake, age}) {
   const {address, status} = useIdentityState()
@@ -18,7 +19,7 @@ export function NetProfile({stake, age}) {
       }}
     >
       <Figure label="Address" value={address} />
-      <Figure label="Status" value={status} />
+      <Figure label="Status" value={mapToFriendlyStatus(status)} />
       <Figure label="Stake" value={stake} postfix="DNA" />
       <Figure label="Age" value={age} postfix="epochs" />
     </Box>

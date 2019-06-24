@@ -11,7 +11,7 @@ import {useValidationState} from '../../../../shared/providers/validation-contex
 
 function Banner() {
   const {shortSession, longSession} = useTiming()
-  const {currentPeriod, nextValidation} = useEpoch()
+  const {currentPeriod, currentValidationStart} = useEpoch()
   const {shortAnswers, longAnswers} = useValidationState()
 
   if (!currentPeriod) {
@@ -44,7 +44,7 @@ function Banner() {
         ? shortSession
         : shortSession + longSession
 
-    const finish = dayjs(nextValidation).add(duration, 's')
+    const finish = dayjs(currentValidationStart).add(duration, 's')
 
     return (
       <Absolute bottom={0} left={0} right={0}>
