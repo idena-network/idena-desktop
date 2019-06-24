@@ -35,7 +35,7 @@ function FlipHint({hint, onChange}) {
 }
 
 FlipHint.propTypes = {
-  hint: PropTypes.arrayOf(PropTypes.string),
+  hint: PropTypes.arrayOf(PropTypes.object),
   onChange: PropTypes.func,
 }
 

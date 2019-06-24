@@ -26,11 +26,9 @@ function Button({size = 1, disabled, css, ...props}) {
     </>
   )
 }
-
 Button.defaultProps = {
   ...theme.Button,
 }
-
 Button.propTypes = {
   size: PropTypes.number,
   disabled: PropTypes.bool,
@@ -38,7 +36,7 @@ Button.propTypes = {
   css: PropTypes.object,
 }
 
-export function FlatButton({size = 1, color, disabled, css, ...props}) {
+function FlatButton({size = 1, color, disabled, css, ...props}) {
   return (
     <>
       <button type="button" disabled={disabled} style={css} {...props} />
@@ -62,11 +60,42 @@ export function FlatButton({size = 1, color, disabled, css, ...props}) {
     </>
   )
 }
-
 FlatButton.defaultProps = {
   ...theme.Button,
 }
-
 FlatButton.propTypes = Button.propTypes
 
+function IconButton({icon, children, ...props}) {
+  return (
+    <button type="button" {...props}>
+      {icon}
+      <span>{children}</span>
+      <style jsx>{`
+        button {
+          background: none;
+          border: none;
+          color: ${theme.colors.primary};
+          cursor: pointer;
+          font-size: 1em;
+          display: flex;
+          align-items: center;
+          padding: 0 1em;
+          text-decoration: none;
+          vertical-align: middle;
+          position: relative;
+        }
+        span {
+          display: inline-block;
+          margin-left: ${theme.spacings.small};
+        }
+      `}</style>
+    </button>
+  )
+}
+IconButton.propTypes = {
+  icon: PropTypes.node,
+  children: PropTypes.node,
+}
+
+export {FlatButton, IconButton}
 export default Button

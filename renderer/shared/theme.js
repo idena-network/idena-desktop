@@ -32,7 +32,9 @@ const fontWeights = {
 const spacings = {
   xxsmall: '0.1em',
   small: '0.5em',
+  small8: 8,
   normal: '1em',
+  medium16: 16,
   medium24: 24, // TODO: rename it more meaningful from design system perspective
   medium32: 32,
   large: 80,
