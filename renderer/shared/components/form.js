@@ -33,24 +33,32 @@ Label.propTypes = {
   htmlFor: PropTypes.string.isRequired,
 }
 
-export const Input = React.forwardRef(({type = 'text', ...otherProps}, ref) => (
-  <>
-    <input type={type} ref={ref} {...otherProps} />
-    <style jsx>{`
-      input {
-        background: none;
-        border: solid 1px ${theme.colors.gray2};
-        box-shadow: none;
-        border-radius: 8px;
-        color: ${theme.colors.input};
-        font-size: 1em;
-        outline: none;
-        padding: 0.5em 1em;
-      }
-    `}</style>
-  </>
-))
+export const Input = React.forwardRef(
+  ({type = 'text', disabled, ...otherProps}, ref) => (
+    <>
+      <input type={type} ref={ref} {...otherProps} />
+      <style jsx>{`
+        input {
+          background: none;
+          box-shadow: none;
+          border-radius: 8px;
+          font-size: 1em;
+          outline: none;
+          padding: 0.5em 1em;
+        }
+      `}</style>
+      <style jsx>{`
+        input {
+          border: solid 1px ${theme.colors.gray2};
+          color: ${theme.colors.input};
+          ${disabled && 'cursor: not-allowed; opacity: 0.5'};
+        }
+      `}</style>
+    </>
+  )
+)
 
 Input.propTypes = {
   type: PropTypes.string,
+  disabled: PropTypes.bool,
 }

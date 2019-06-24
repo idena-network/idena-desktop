@@ -4,8 +4,10 @@ import {margin, rem} from 'polished'
 import theme from '../../../shared/theme'
 import {Box} from '../../../shared/components'
 import {Figure} from '../../../shared/components/utils'
+import {useIdentityState} from '../../../shared/providers/identity-context'
 
-export function NetProfile({address, friendlyStatus, stake, age}) {
+export function NetProfile({stake, age}) {
+  const {address, status} = useIdentityState()
   return (
     <Box
       bg={theme.colors.gray}
@@ -16,7 +18,7 @@ export function NetProfile({address, friendlyStatus, stake, age}) {
       }}
     >
       <Figure label="Address" value={address} />
-      <Figure label="Status" value={friendlyStatus} />
+      <Figure label="Status" value={status} />
       <Figure label="Stake" value={stake} postfix="DNA" />
       <Figure label="Age" value={age} postfix="epochs" />
     </Box>
@@ -24,10 +26,8 @@ export function NetProfile({address, friendlyStatus, stake, age}) {
 }
 
 NetProfile.propTypes = {
-  address: PropTypes.string.isRequired,
   age: PropTypes.number,
-  friendlyStatus: PropTypes.string,
-  stake: PropTypes.string.isRequired,
+  stake: PropTypes.string,
 }
 
 export default NetProfile

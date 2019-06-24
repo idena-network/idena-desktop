@@ -10,10 +10,16 @@ import {
 } from '../../../shared/components'
 import Avatar from './contact-avatar'
 import Pre from '../../../shared/components/pre'
+import {useInviteDispatch} from '../../../shared/providers/invite-context'
 
-export function SendInviteForm({addr, amount, onSend, result}) {
-  const addrInputRef = useRef(null)
-  const amountInputRef = useRef(null)
+export function SendInviteForm({addr, amount, onFail}) {
+  const addRef = useRef(null)
+  const amountRef = useRef(null)
+
+  const [result, setResult] = React.useState()
+
+  const {addInvite, getLastInvite} = useInviteDispatch()
+
   return (
     <Box p="2em">
       <Avatar name="optimusway" size={4} />
@@ -22,15 +28,22 @@ export function SendInviteForm({addr, amount, onSend, result}) {
       </Box>
       <FormGroup>
         <Label htmlFor="addr">Address</Label>
-        <Input defaultValue={addr} ref={addrInputRef} id="addr" />
+        <Input defaultValue={addr} ref={addRef} id="addr" />
       </FormGroup>
       <FormGroup>
         <Label htmlFor="amount">Amount</Label>
-        <Input defaultValue={amount} ref={amountInputRef} id="amount" />
+        <Input defaultValue={amount} ref={amountRef} id="amount" />
       </FormGroup>
       <Button
-        onClick={() => {
-          onSend(addrInputRef.current.value, amountInputRef.current.value)
+        onClick={async () => {
+          try {
+            await addInvite(addRef.current.value, addRef.current.value)
+            setResult(JSON.stringify(getLastInvite()))
+          } catch (error) {
+            if (onFail) {
+              onFail(error)
+            }
+          }
         }}
       >
         Send invite
@@ -43,8 +56,7 @@ export function SendInviteForm({addr, amount, onSend, result}) {
 SendInviteForm.propTypes = {
   addr: PropTypes.string,
   amount: PropTypes.number,
-  onSend: PropTypes.func.isRequired,
-  result: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  onFail: PropTypes.func,
 }
 
 export default SendInviteForm

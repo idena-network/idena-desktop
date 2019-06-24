@@ -4,25 +4,49 @@ import {margin, rem} from 'polished'
 import {Box, FormGroup, Label, Input, Button} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
+import {
+  useInviteState,
+  useInviteDispatch,
+} from '../../../shared/providers/invite-context'
+import {useIdentityState} from '../../../shared/providers/identity-context'
 
-export function ActivateInviteForm({onActivate}) {
-  const keyInputRef = useRef()
+export function ActivateInviteForm({onFail}) {
+  const keyRef = useRef()
+
+  const {activationCode, activationTx} = useInviteState()
+  const {activateInvite} = useInviteDispatch()
+
+  const {canActivateInvite} = useIdentityState()
+
+  if (!canActivateInvite) {
+    return null
+  }
+
   return (
     <Box py={theme.spacings.normal}>
       <FormGroup>
         <Label htmlFor="activateInviteKey">Invitation code</Label>
         <Flex align="center">
           <Input
-            ref={keyInputRef}
+            ref={keyRef}
             id="activateInviteKey"
+            defaultValue={activationCode}
+            disabled={!!activationCode || !!activationTx}
             style={{...margin(0, theme.spacings.normal, 0, 0), width: rem(400)}}
           />
           <Button
-            onClick={() => {
-              onActivate(keyInputRef.current.value)
+            disabled={!!activationCode || !!activationTx}
+            onClick={async () => {
+              try {
+                await activateInvite(keyRef.current.value)
+              } catch (error) {
+                if (onFail) {
+                  onFail(error)
+                }
+              }
             }}
           >
-            Activate invite
+            {activationCode ? 'Mining...' : 'Activate invite'}
           </Button>
         </Flex>
       </FormGroup>
@@ -31,7 +55,7 @@ export function ActivateInviteForm({onActivate}) {
 }
 
 ActivateInviteForm.propTypes = {
-  onActivate: PropTypes.func,
+  onFail: PropTypes.func,
 }
 
 export default ActivateInviteForm

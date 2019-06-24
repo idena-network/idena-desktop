@@ -12,7 +12,7 @@ export const IdentityStatus = {
   Killed: 'Killed',
 }
 
-const mapToFriendlyStatus = status => {
+export const mapToFriendlyStatus = status => {
   switch (status) {
     case IdentityStatus.Undefined:
       return 'Not validated'

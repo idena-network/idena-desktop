@@ -14,17 +14,11 @@ export function useInterval(callback, delay, useImmediately = false) {
       savedCallback.current()
     }
     if (delay !== null) {
+      if (useImmediately) {
+        tick()
+      }
       const id = setInterval(tick, delay)
       return () => clearInterval(id)
     }
-  }, [delay])
-
-  useEffect(() => {
-    function tick() {
-      savedCallback.current()
-    }
-    if (useImmediately) {
-      tick()
-    }
-  }, [useImmediately])
+  }, [delay, useImmediately])
 }

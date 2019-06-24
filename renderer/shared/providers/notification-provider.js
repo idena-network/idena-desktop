@@ -7,7 +7,6 @@ export const NotificationType = {
 
 const initialState = {
   notifications: [],
-  onAddNotification: null,
   addNotification: null,
 }
 
@@ -28,7 +27,7 @@ function NotificationProvider({children}) {
     }
   }, [notifications])
 
-  const onAddNotification = ({title, body, type = NotificationType.Info}) => {
+  const addNotification = ({title, body, type = NotificationType.Info}) => {
     setNotifications([
       ...notifications,
       {title, body, type, timestamp: Date.now()},
@@ -39,8 +38,7 @@ function NotificationProvider({children}) {
     <NotificationContext.Provider
       value={{
         notifications,
-        onAddNotification,
-        addNotification: onAddNotification,
+        addNotification,
       }}
     >
       {children}

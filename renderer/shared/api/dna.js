@@ -2,10 +2,10 @@
 import api from './api-client'
 import {strip} from '../utils/obj'
 
-export async function sendInvite(addr, amount) {
+export async function sendInvite({to, amount}) {
   const {data} = await api().post('/', {
     method: 'dna_sendInvite',
-    params: [strip({to: addr, amount})],
+    params: [strip({to, amount})],
     id: 1,
   })
   return data

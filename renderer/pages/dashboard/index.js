@@ -7,7 +7,6 @@ import {
   NetProfile,
   ActivateInviteForm,
 } from '../../screens/dashboard/components'
-import {activateInvite, sendInvite} from '../../shared/api'
 import {SendInviteForm} from '../../screens/contacts/components'
 import theme from '../../shared/theme'
 import useCoinbaseAddress from '../../shared/utils/useCoinbaseAddress'
@@ -16,15 +15,19 @@ import {
   NotificationContext,
   NotificationType,
 } from '../../shared/providers/notification-provider'
+import {InviteProvider} from '../../shared/providers/invite-context'
+import {IdentityProvider} from '../../shared/providers/identity-context'
 
 export default () => {
   const address = useCoinbaseAddress()
   const identity = useIdentity(address)
 
   const {addNotification} = useContext(NotificationContext)
-
   const [isSendInviteOpen, setIsSendInviteOpen] = useState(false)
-  const [inviteResult, setInviteResult] = useState()
+
+  if (!address) {
+    return null
+  }
 
   return (
     <Layout>
@@ -35,19 +38,24 @@ export default () => {
           canActivateInvite
         />
         <UserInfo {...identity} />
-        <NetProfile {...identity} />
-        {identity.canActivateInvite && (
-          <ActivateInviteForm
-            onActivate={async key => {
-              const {result, error} = await activateInvite(address, key)
-              addNotification({
-                title: `Activation ${result ? 'succeeded' : 'failed'}`,
-                body: result || error.message,
-                type: result ? NotificationType.Info : NotificationType.Error,
-              })
-            }}
-          />
-        )}
+        <InviteProvider>
+          <IdentityProvider address={address}>
+            <NetProfile {...identity} />
+          </IdentityProvider>
+        </InviteProvider>
+
+        <InviteProvider>
+          <IdentityProvider address={address}>
+            <ActivateInviteForm
+              onFail={({message}) =>
+                addNotification({
+                  title: message,
+                  type: NotificationType.Error,
+                })
+              }
+            />
+          </IdentityProvider>
+        </InviteProvider>
       </Box>
       <Drawer
         show={isSendInviteOpen}
@@ -55,17 +63,13 @@ export default () => {
           setIsSendInviteOpen(false)
         }}
       >
-        <SendInviteForm
-          onSend={async (to, key) => {
-            const {result, error} = await sendInvite(to, key)
-            if (result) {
-              setInviteResult(result)
-            } else {
-              setInviteResult(error.message)
+        <InviteProvider>
+          <SendInviteForm
+            onFail={({message}) =>
+              addNotification({title: message, type: NotificationType.Error})
             }
-          }}
-          result={inviteResult}
-        />
+          />
+        </InviteProvider>
       </Drawer>
     </Layout>
   )

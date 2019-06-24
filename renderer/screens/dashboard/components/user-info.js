@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, margin, borderRadius, backgrounds} from 'polished'
+import {rem, margin} from 'polished'
 import {SubHeading, Text, Box} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
