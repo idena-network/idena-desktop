@@ -3,13 +3,9 @@ import App, {Container} from 'next/app'
 import Router from 'next/router'
 import NProgress from 'nprogress'
 
-import {NetProvider} from '../shared/providers/net-provider'
 import GlobalStyle from '../components/global-style'
 import NProgressStyle from '../components/nprogress-style'
 import NotificationProvider from '../shared/providers/notification-provider'
-import ValidationProvider from '../shared/providers/validation-provider'
-
-let idx = 0
 
 Router.events.on('routeChangeStart', () => {
   NProgress.start()
@@ -17,7 +13,6 @@ Router.events.on('routeChangeStart', () => {
 
 Router.events.on('routeChangeComplete', () => {
   NProgress.done()
-  idx += 1
 })
 
 Router.events.on('routeChangeError', () => {
@@ -32,11 +27,7 @@ class MyApp extends App {
         <GlobalStyle />
         <NProgressStyle />
         <NotificationProvider>
-          {/* <NetProvider key={`net-provider-${idx}`}> */}
-          {/* <ValidationProvider> */}
           <Component {...pageProps} />
-          {/* </ValidationProvider> */}
-          {/* </NetProvider> */}
         </NotificationProvider>
       </Container>
     )

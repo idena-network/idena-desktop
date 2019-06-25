@@ -6,12 +6,13 @@ import {NotificationContext} from '../shared/providers/notification-provider'
 import Notifications from './notifications'
 import ValidationBanner from '../screens/validation/shared/components/banner'
 import {ValidationProvider} from '../shared/providers/validation-context'
+import {ChainProvider} from '../shared/providers/chain-context'
+import SyncStatus from './sync-status'
 
 function Layout({Sidebar = Nav, router, children}) {
   const {notifications} = useContext(NotificationContext)
 
   const matchValidation = router.pathname.startsWith('/validation')
-
   return (
     <>
       <main>
@@ -24,6 +25,9 @@ function Layout({Sidebar = Nav, router, children}) {
         </ValidationProvider>
       )}
       <Notifications notifications={notifications} />
+      <ChainProvider>
+        <SyncStatus />
+      </ChainProvider>
       <style jsx>{`
         main {
           display: flex;

@@ -10,3 +10,26 @@ export async function fetchTx(hash) {
   const {result} = data
   return {hash, result}
 }
+
+/**
+ * Sync status
+ * @typedef {Object} SyncStatus
+ * @property {boolean} syncing
+ * @property {number} currentBlock
+ * @property {number} highestBlock
+ */
+
+/**
+ * Retrieve node sync status
+ *
+ * @returns {SyncStatus} Sync status
+ */
+export async function fetchSync() {
+  const {data} = await api().post('/', {
+    method: 'bcn_syncing',
+    params: [],
+    id: 1,
+  })
+  const {result} = data
+  return result
+}
