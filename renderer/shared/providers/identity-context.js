@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
-import {fetchIdentity} from '../api'
+import {fetchIdentity, killIdentity} from '../api'
 import {useInviteDispatch} from './invite-context'
 import {IdentityStatus} from '../utils/useIdentity'
 
@@ -52,6 +52,15 @@ function IdentityProvider({address, children}) {
     IdentityStatus.Invite,
   ].includes(status)
 
+  const killMe = () => {
+    const {result, error} = killIdentity(address)
+    if (result) {
+      setStatus(IdentityStatus.Killed)
+    } else {
+      throw new Error(error.message)
+    }
+  }
+
   return (
     <IdentityStateContext.Provider
       value={{
@@ -60,7 +69,7 @@ function IdentityProvider({address, children}) {
         canActivateInvite,
       }}
     >
-      <IdentityDispatchContext.Provider value={null}>
+      <IdentityDispatchContext.Provider value={killMe}>
         {children}
       </IdentityDispatchContext.Provider>
     </IdentityStateContext.Provider>

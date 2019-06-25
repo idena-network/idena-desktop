@@ -17,6 +17,9 @@ import {
 } from '../../shared/providers/notification-provider'
 import {InviteProvider} from '../../shared/providers/invite-context'
 import {IdentityProvider} from '../../shared/providers/identity-context'
+import KillMe from '../../screens/dashboard/components/kill-me'
+
+const WANNA_KILL_MYSELF = false
 
 export default () => {
   const address = useCoinbaseAddress()
@@ -41,6 +44,7 @@ export default () => {
         <InviteProvider>
           <IdentityProvider address={address}>
             <NetProfile {...identity} />
+            {WANNA_KILL_MYSELF && <KillMe />}
           </IdentityProvider>
         </InviteProvider>
 
