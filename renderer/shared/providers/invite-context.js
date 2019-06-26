@@ -13,33 +13,28 @@ const InviteDispatchContext = React.createContext()
 // eslint-disable-next-line react/prop-types
 function InviteProvider({children}) {
   const [invites, setInvites] = React.useState([])
-  const [activationCode, setActivationCode] = React.useState()
   const [activationTx, setActivationTx] = React.useState()
 
   React.useEffect(() => {
     const savedInvites = db.getInvites()
     setInvites(savedInvites)
-
-    const code = db.getActivationCode()
-    if (code) {
-      setActivationCode(code)
-    }
   }, [])
 
   const address = useCoinbaseAddress()
 
   useInterval(
     async () => {
-      const {result} = await api.activateInvite(address, activationCode)
+      const {result} = api.fetchTx(activationTx)
       if (result) {
-        const {hash: activateHash} = result
-        setActivationTx(activateHash)
-        db.setActivationTx(activateHash)
+        const {hash} = result
+        if (hash && hash !== HASH_IN_MEMPOOL) {
+          resetActivation()
+        }
       } else {
         resetActivation()
       }
     },
-    activationCode && !activationTx ? 3000 : null
+    activationTx ? 3000 : null
   )
 
   const addInvite = async (to, amount) => {
@@ -55,23 +50,25 @@ function InviteProvider({children}) {
   }
 
   const activateInvite = async code => {
-    setActivationCode(code)
-    db.setActivationCode(code)
+    const result = await api.activateInvite(address, code)
+    const {error} = result
+    if (error) {
+      throw new Error(error.message)
+    } else {
+      setActivationTx(result)
+      db.setActivationTx(result)
+    }
   }
 
   const getLastInvite = () => invites[invites.length - 1]
 
   const resetActivation = () => {
-    setActivationCode('')
-    db.clearActivationCode()
     setActivationTx('')
     db.clearActivationTx()
   }
 
   return (
-    <InviteStateContext.Provider
-      value={{invites, activationCode, activationTx}}
-    >
+    <InviteStateContext.Provider value={{invites, activationTx}}>
       <InviteDispatchContext.Provider
         value={{addInvite, activateInvite, resetActivation, getLastInvite}}
       >

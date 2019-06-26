@@ -13,7 +13,7 @@ import {useIdentityState} from '../../../shared/providers/identity-context'
 export function ActivateInviteForm({onFail}) {
   const keyRef = useRef()
 
-  const {activationCode, activationTx} = useInviteState()
+  const {activationTx} = useInviteState()
   const {activateInvite} = useInviteDispatch()
 
   const {canActivateInvite} = useIdentityState()
@@ -21,6 +21,8 @@ export function ActivateInviteForm({onFail}) {
   if (!canActivateInvite) {
     return null
   }
+
+  const mining = !!activationTx
 
   return (
     <Box py={theme.spacings.normal}>
@@ -30,12 +32,11 @@ export function ActivateInviteForm({onFail}) {
           <Input
             ref={keyRef}
             id="activateInviteKey"
-            defaultValue={activationCode}
-            disabled={!!activationCode || !!activationTx}
+            disabled={mining}
             style={{...margin(0, theme.spacings.normal, 0, 0), width: rem(400)}}
           />
           <Button
-            disabled={!!activationCode || !!activationTx}
+            disabled={mining}
             onClick={async () => {
               try {
                 await activateInvite(keyRef.current.value)
@@ -46,7 +47,7 @@ export function ActivateInviteForm({onFail}) {
               }
             }}
           >
-            {activationCode ? 'Mining...' : 'Activate invite'}
+            {mining ? 'Mining...' : 'Activate invite'}
           </Button>
         </Flex>
       </FormGroup>
