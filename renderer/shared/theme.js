@@ -13,6 +13,7 @@ const colors = {
   white01: 'rgba(255, 255, 255, 0.1)',
   danger: 'rgba(255, 102, 102, 0.8)',
   success: '#00b894',
+  success012: 'rgba(39, 217, 128, 0.12)',
 }
 
 const fontSizes = {
@@ -38,6 +39,7 @@ const spacings = {
   medium24: 24, // TODO: rename it more meaningful from design system perspective
   medium32: 32,
   large: 80,
+  large48: 48,
   xlarge: '2em',
   xxlarge: '3em',
   xxxlarge: '4em',

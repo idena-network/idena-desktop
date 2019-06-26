@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, padding, border, margin} from 'polished'
+import {rem, padding, border, margin, ellipsis} from 'polished'
 import {Box, Group, Text} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
@@ -44,7 +44,7 @@ Sidebar.propTypes = {
 
 // eslint-disable-next-line react/prop-types
 function InviteSection({children}) {
-  const remainingInvites = [1]
+  const remainingInvites = [{}]
   return (
     <Group title={`Invites (${remainingInvites.length} left)`}>
       {children}
@@ -56,7 +56,9 @@ function InviteList({onSelectInvite}) {
   const {invites} = useInviteState()
 
   if (invites.length === 0) {
-    return <Text>No invites yet...</Text>
+    return (
+      <Text css={padding(rem(theme.spacings.medium16))}>No invites yet...</Text>
+    )
   }
 
   return (
@@ -80,22 +82,24 @@ InviteList.propTypes = {
   onSelectInvite: PropTypes.func,
 }
 
-function InviteCard({receiver, status, ...props}) {
+function InviteCard({receiver, mined, ...props}) {
   const fullName = useFullName(props)
   return (
     <Flex
       align="center"
-      style={{cursor: 'pointer', ...margin(0, 0, rem(theme.spacings.medium16))}}
+      css={{cursor: 'pointer', ...margin(0, 0, rem(theme.spacings.medium16))}}
       {...props}
     >
       <Avatar username={receiver} size={32} />
       <Box>
         <Box>
-          <Text css={{wordBreak: 'break-all'}}>{fullName || receiver}</Text>
+          <Text css={{...ellipsis(rem(140))}} title={fullName || receiver}>
+            {fullName || receiver}
+          </Text>
         </Box>
         <Box>
           <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
-            {status}
+            {mined ? 'Mined' : 'Mining...'}
           </Text>
         </Box>
       </Box>
@@ -107,7 +111,7 @@ InviteCard.propTypes = {
   firstName: PropTypes.string,
   lastName: PropTypes.string,
   receiver: PropTypes.string,
-  status: PropTypes.string.isRequired,
+  mined: PropTypes.bool,
 }
 
 // eslint-disable-next-line react/prop-types

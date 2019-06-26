@@ -2,6 +2,7 @@ import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
 import {FiX} from 'react-icons/fi'
 import useClickAway from 'react-use/lib/useClickAway'
+import {rem} from 'polished'
 import theme from '../theme'
 import {Fill, Absolute} from '.'
 
@@ -20,7 +21,7 @@ function Drawer({show, onHide, ...props}) {
         top={0}
         bottom={0}
         right={0}
-        width="350px"
+        width={rem(360)}
         ref={ref}
         {...props}
       />

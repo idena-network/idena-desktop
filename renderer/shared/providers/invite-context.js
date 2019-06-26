@@ -19,8 +19,31 @@ function InviteProvider({children}) {
   const {addNotification} = React.useContext(NotificationContext)
 
   React.useEffect(() => {
+    let ignore = false
+
+    async function fetchData() {
+      const txs = await Promise.all(
+        savedInvites.map(({hash}) => hash).map(api.fetchTx)
+      )
+      // eslint-disable-next-line no-shadow
+      const invites = savedInvites.map(invite => {
+        const tx = txs.find(({hash}) => hash === invite.hash)
+        return {
+          ...invite,
+          mined: tx && tx.result && tx.result.blockHash !== HASH_IN_MEMPOOL,
+        }
+      })
+      if (!ignore) {
+        setInvites(invites)
+      }
+    }
+
     const savedInvites = db.getInvites()
-    setInvites(savedInvites)
+    fetchData()
+
+    return () => {
+      ignore = true
+    }
   }, [])
 
   const address = useCoinbaseAddress()

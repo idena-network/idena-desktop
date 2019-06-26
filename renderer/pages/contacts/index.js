@@ -37,7 +37,10 @@ export default function() {
           setShowInvite(false)
         }}
       >
-        <DisplayInvite {...selectedInvite} />
+        <DisplayInvite
+          {...selectedInvite}
+          code={selectedInvite && selectedInvite.key}
+        />
       </Drawer>
     </Layout>
   )

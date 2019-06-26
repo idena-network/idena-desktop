@@ -4,7 +4,7 @@ export default () => (
   <style jsx global>{`
     html {
       box-sizing: border-box;
-      font-size: 14px;
+      font-size: 13px;
       min-height: 100%;
     }
     body {

@@ -3,6 +3,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
+import {ellipsis} from 'polished'
 import theme from '../theme'
 import {Box} from '.'
 
@@ -20,7 +21,7 @@ export function Label({htmlFor, ...otherProps}) {
       <label htmlFor={htmlFor} {...otherProps} />
       <style jsx>{`
         label {
-          color: ${theme.colors.muted};
+          color: ${theme.colors.text};
           display: block;
           margin-bottom: ${theme.spacings.normal};
         }
@@ -51,7 +52,8 @@ export const Input = React.forwardRef(
         input {
           border: solid 1px ${theme.colors.gray2};
           color: ${theme.colors.input};
-          ${disabled && 'cursor: not-allowed; opacity: 0.5'};
+          ${disabled && 'cursor: not-allowed'};
+          ${disabled && 'opacity: 0.5'};
         }
       `}</style>
     </>
