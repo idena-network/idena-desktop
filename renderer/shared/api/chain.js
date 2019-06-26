@@ -7,8 +7,7 @@ export async function fetchTx(hash) {
     params: [hash],
     id: 1,
   })
-  const {result} = data
-  return {hash, result}
+  return {hash, ...data}
 }
 
 /**

@@ -36,7 +36,9 @@ function InviteProvider({children}) {
       } else {
         resetActivation()
         addNotification({
-          title: error.message,
+          title: error
+            ? error.message
+            : 'Activation failed. Tx no longer exists',
           type: NotificationType.Error,
         })
       }
@@ -57,13 +59,12 @@ function InviteProvider({children}) {
   }
 
   const activateInvite = async code => {
-    const result = await api.activateInvite(address, code)
-    const {error} = result
-    if (error) {
-      throw new Error(error.message)
-    } else {
+    const {result, error} = await api.activateInvite(address, code)
+    if (result) {
       setActivationTx(result)
       db.setActivationTx(result)
+    } else {
+      throw new Error(error.message)
     }
   }
 

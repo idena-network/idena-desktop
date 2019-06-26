@@ -22,7 +22,7 @@ export function SendInviteForm({addr, amount, onFail}) {
 
   return (
     <Box p="2em">
-      <Avatar username={addr} size={24} />
+      <Avatar username={addr} />
       <Box m="0 0 2em">
         <SubHeading>Invite Unknown person</SubHeading>
       </Box>
