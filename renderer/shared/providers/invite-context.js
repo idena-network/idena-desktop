@@ -30,25 +30,14 @@ function InviteProvider({children}) {
 
   useInterval(
     async () => {
-      // const {hash: inviteHash} = getLastInvite()
-      // const {result: inviteResult} = await api.fetchTx(inviteHash)
-      // if (inviteResult) {
-      //   if (inviteResult.blockHash !== HASH_IN_MEMPOOL) {
-      const {result: activateResult} = await api.activateInvite(
-        address,
-        activationCode
-      )
-      if (activateResult) {
-        const {hash: activateHash} = activateResult
+      const {result} = await api.activateInvite(address, activationCode)
+      if (result) {
+        const {hash: activateHash} = result
         setActivationTx(activateHash)
         db.setActivationTx(activateHash)
       } else {
         resetActivation()
       }
-      //   }
-      // } else {
-      //   resetActivation()
-      // }
     },
     activationCode && !activationTx ? 3000 : null
   )
