@@ -1,13 +1,7 @@
 import React, {useContext, useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import Layout from '../../../components/layout'
-import {
-  ContactNav,
-  ContactList,
-  Actions,
-  ContactSearch,
-  SendInviteForm,
-} from '../components'
+import {ContactNav, Actions, ContactSearch, SendInviteForm} from '../components'
 import {sendInvite, fetchTx} from '../../../shared/api'
 import {Row, Col, Drawer} from '../../../shared/components'
 import DisplayInvite from '../components/display-invite'
@@ -86,7 +80,7 @@ function ContactLayout({children}) {
                   setSendInviteFormVisibility(true)
                 }}
               />
-              <ContactList
+              {/* <ContactList
                 remainingInvites={remainingInvites}
                 sentInvites={sentInvites}
                 contacts={contacts}
@@ -100,7 +94,7 @@ function ContactLayout({children}) {
                     contacts.find(contact => contact.addr === id)
                   )
                 }}
-              />
+              /> */}
             </ContactNav>
           </Col>
           <Col w={8} p="1em">
