@@ -5,9 +5,13 @@ import {SubHeading, Text, Box} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import Avatar from '../../flips/shared/components/avatar'
+import useUsername from '../../../shared/utils/use-username'
+import useFullName from '../../contacts/shared/useFullName'
 
-function UserInfo({nickname, address}) {
-  const username = nickname || address
+function UserInfo(props) {
+  const {address} = props
+  const fullName = useFullName(props)
+  const username = useUsername(props)
   return (
     <Flex
       align="center"
@@ -17,7 +21,7 @@ function UserInfo({nickname, address}) {
     >
       <Avatar username={username} />
       <Box my={rem(theme.spacings.medium24)}>
-        <SubHeading>{username}</SubHeading>
+        <SubHeading>{fullName || username}</SubHeading>
         <Box>
           <Text color={theme.colors.muted} css={{wordBreak: 'break-all'}}>
             {address}
@@ -29,7 +33,6 @@ function UserInfo({nickname, address}) {
 }
 
 UserInfo.propTypes = {
-  nickname: PropTypes.string.isRequired,
   address: PropTypes.string.isRequired,
 }
 

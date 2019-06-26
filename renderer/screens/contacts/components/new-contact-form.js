@@ -8,7 +8,7 @@ import {
   Label,
   Input,
 } from '../../../shared/components'
-import Avatar from './contact-avatar'
+import Avatar from '../../flips/shared/components/avatar'
 
 export function NewContactForm({name, lastName, addr, username, onSave}) {
   const nameRef = useRef(null)
@@ -17,7 +17,7 @@ export function NewContactForm({name, lastName, addr, username, onSave}) {
   const usernameRef = useRef(null)
   return (
     <Box p="2em">
-      <Avatar name="optimusway" size={4} />
+      <Avatar username={name} size={24} />
       <SubHeading>Personal data</SubHeading>
       <FormGroup>
         <Label htmlFor="name">Name</Label>

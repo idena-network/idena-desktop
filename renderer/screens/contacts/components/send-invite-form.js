@@ -8,9 +8,9 @@ import {
   Label,
   Input,
 } from '../../../shared/components'
-import Avatar from './contact-avatar'
 import Pre from '../../../shared/components/pre'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
+import Avatar from '../../flips/shared/components/avatar'
 
 export function SendInviteForm({addr, amount, onFail}) {
   const addRef = useRef(null)
@@ -22,7 +22,7 @@ export function SendInviteForm({addr, amount, onFail}) {
 
   return (
     <Box p="2em">
-      <Avatar name="optimusway" size={4} />
+      <Avatar username={addr} size={24} />
       <Box m="0 0 2em">
         <SubHeading>Invite Unknown person</SubHeading>
       </Box>

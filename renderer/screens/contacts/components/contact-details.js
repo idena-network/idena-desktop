@@ -1,37 +1,26 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-// eslint-disable-next-line import/no-named-as-default
 import UserInfo from '../../dashboard/components/user-info'
 import ContactToolbar from './contact-toolbar'
 import theme from '../../../shared/theme'
-import {Box, Link} from '../../../shared/components'
+import {Box} from '../../../shared/components'
 import {Figure} from '../../../shared/components/utils'
 
-function ContactDetails({
-  name,
-  lastName,
-  fullName = `${name} ${lastName}`,
-  addr,
-  status = 'Undefined',
-  age = 0,
-}) {
+function ContactDetails(props) {
+  const {address, status, age} = props
   return (
     <div>
       <section>
-        <UserInfo fullName={fullName} address={addr} />
+        <UserInfo {...props} />
         <ContactToolbar />
         <div>
           <Figure label="Status" value={status} />
           <Figure label="Age" value={age} postfix="epochs" />
-          <Figure label="Address" value={addr} />
+          <Figure label="Address" value={address} />
         </div>
       </section>
       <section>
-        <Box>
-          <Link href={`/contacts/screens/contacts/edit?addr=${addr}`}>
-            Edit
-          </Link>
-        </Box>
+        <Box>Edit</Box>
       </section>
       <style jsx>{`
         div {
@@ -56,10 +45,9 @@ function ContactDetails({
 }
 
 ContactDetails.propTypes = {
-  name: PropTypes.string,
+  firstName: PropTypes.string,
   lastName: PropTypes.string,
-  fullName: PropTypes.string,
-  addr: PropTypes.string.isRequired,
+  address: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
   age: PropTypes.number.isRequired,
 }

@@ -1,14 +1,44 @@
 import React from 'react'
-import Layout from '../../screens/contacts/shared/contact-layout'
-import {SubHeading} from '../../shared/components'
-import {ContactProvider} from '../../screens/contacts/providers/contact-provider'
+import {Box, Drawer} from '../../shared/components'
+import Layout from '../../components/layout'
+import Flex from '../../shared/components/flex'
+import {ContactDetails} from '../../screens/contacts/components'
+import {ContactProvider} from '../../shared/providers/contact-context'
+import Sidebar from '../../screens/contacts/components/sidebar'
+import DisplayInvite from '../../screens/contacts/components/display-invite'
+import {InviteProvider} from '../../shared/providers/invite-context'
 
 export default function() {
+  const [selectedContact, setSelectedContact] = React.useState(null)
+  const [selectedInvite, setSelectedInvite] = React.useState(null)
+  const [showInvite, setShowInvite] = React.useState(false)
+
   return (
-    <ContactProvider>
-      <Layout>
-        <SubHeading>Select contact to the left</SubHeading>
-      </Layout>
-    </ContactProvider>
+    <Layout>
+      <Flex>
+        <InviteProvider>
+          <ContactProvider>
+            <Sidebar
+              onSelectContact={setSelectedContact}
+              onSelectInvite={invite => {
+                setShowInvite(true)
+                setSelectedInvite(invite)
+              }}
+            />
+          </ContactProvider>
+        </InviteProvider>
+        <Box>
+          <ContactDetails {...selectedContact} />
+        </Box>
+      </Flex>
+      <Drawer
+        show={showInvite}
+        onHide={() => {
+          setShowInvite(false)
+        }}
+      >
+        <DisplayInvite {...selectedInvite} />
+      </Drawer>
+    </Layout>
   )
 }

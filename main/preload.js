@@ -4,13 +4,15 @@ const isDev = require('electron-is-dev')
 
 const flips = require('./stores/flips')
 const validation = require('./stores/validation')
-const invite = require('./stores/invite')
+const invites = require('./stores/invites')
+const contacts = require('./stores/contacts')
 
 process.once('loaded', () => {
   global.ipcRenderer = ipcRenderer
   global.flipStore = flips
   global.validationStore = validation
-  global.inviteDb = invite
+  global.invitesDb = invites
+  global.contactsDb = contacts
 
   if (isDev) {
     global.require = require

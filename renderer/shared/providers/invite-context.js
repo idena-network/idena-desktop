@@ -5,7 +5,7 @@ import useCoinbaseAddress from '../utils/useCoinbaseAddress'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {HASH_IN_MEMPOOL} from '../utils/tx'
 
-const db = global.inviteDb || {}
+const db = global.invitesDb || {}
 
 const InviteStateContext = React.createContext()
 const InviteDispatchContext = React.createContext()

@@ -1,7 +1,7 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
 import {Box, Button, FormGroup, Label, Input} from '../../../shared/components'
-import Avatar from './contact-avatar'
+import Avatar from '../../flips/shared/components/avatar'
 
 export function EditContactForm({name, lastName, addr, onSave}) {
   const nameRef = useRef(null)
@@ -9,7 +9,7 @@ export function EditContactForm({name, lastName, addr, onSave}) {
   const addrRef = useRef(null)
   return (
     <Box p="2em">
-      <Avatar name="optimusway" size={4} />
+      <Avatar username={name} size={24} />
       <FormGroup>
         <Label htmlFor="name">Name</Label>
         <Input defaultValue={name} ref={nameRef} id="name" />

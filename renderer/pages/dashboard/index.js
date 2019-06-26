@@ -47,7 +47,6 @@ export default () => {
             {WANNA_KILL_MYSELF && <KillMe />}
           </IdentityProvider>
         </InviteProvider>
-
         <InviteProvider>
           <IdentityProvider address={address}>
             <ActivateInviteForm

@@ -3,12 +3,12 @@ import PropTypes from 'prop-types'
 import {margin, rem, backgrounds, borderRadius} from 'polished'
 import theme from '../../../../shared/theme'
 
-function Avatar({username}) {
+function Avatar({username, size = 80}) {
   return (
     <img
       src={`https://robohash.org/${username}`}
       alt={username}
-      width={80}
+      width={size}
       style={{
         ...margin(0, rem(theme.spacings.medium24), 0, 0),
         ...backgrounds(theme.colors.gray),
@@ -21,6 +21,7 @@ function Avatar({username}) {
 
 Avatar.propTypes = {
   username: PropTypes.string,
+  size: PropTypes.number,
 }
 
 export default Avatar

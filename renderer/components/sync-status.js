@@ -7,7 +7,7 @@ import theme from '../shared/theme'
 function SyncStatus() {
   const {syncing, progress} = useChainState()
 
-  if (!syncing || !progress) {
+  if (!syncing || !Number.isFinite(progress)) {
     return null
   }
 

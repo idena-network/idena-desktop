@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
-import {FiInstagram, FiSettings, FiUserCheck} from 'react-icons/fi'
+import {FiInstagram, FiSettings, FiUserCheck, FiUsers} from 'react-icons/fi'
 import {margin, rem} from 'polished'
 import {Box, List, Link, Text} from '../shared/components'
 import Flex from '../shared/components/flex'
@@ -29,10 +29,10 @@ function Nav() {
         <NavItem href="/flips" icon={<FiInstagram />}>
           Flips
         </NavItem>
-        {/* <NavItem href="/contacts" icon={<FiUsers />}>
+        <NavItem href="/contacts" icon={<FiUsers />}>
           Contacts
-        </NavItem> 
-        <NavItem href="/chats" icon={<FiMessageSquare />}>
+        </NavItem>
+        {/* <NavItem href="/chats" icon={<FiMessageSquare />}>
           Chats
         </NavItem> */}
         <NavItem href="/settings" icon={<FiSettings />}>
