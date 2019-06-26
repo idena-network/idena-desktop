@@ -4,6 +4,7 @@ import * as api from '../api'
 import useCoinbaseAddress from '../utils/useCoinbaseAddress'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {HASH_IN_MEMPOOL} from '../utils/tx'
+import {NotificationContext, NotificationType} from './notification-provider'
 
 const db = global.invitesDb || {}
 
@@ -15,6 +16,8 @@ function InviteProvider({children}) {
   const [invites, setInvites] = React.useState([])
   const [activationTx, setActivationTx] = React.useState()
 
+  const {addNotification} = React.useContext(NotificationContext)
+
   React.useEffect(() => {
     const savedInvites = db.getInvites()
     setInvites(savedInvites)
@@ -24,7 +27,7 @@ function InviteProvider({children}) {
 
   useInterval(
     async () => {
-      const {result} = api.fetchTx(activationTx)
+      const {result, error} = await api.fetchTx(activationTx)
       if (result) {
         const {hash} = result
         if (hash && hash !== HASH_IN_MEMPOOL) {
@@ -32,6 +35,10 @@ function InviteProvider({children}) {
         }
       } else {
         resetActivation()
+        addNotification({
+          title: error.message,
+          type: NotificationType.Error,
+        })
       }
     },
     activationTx ? 3000 : null
