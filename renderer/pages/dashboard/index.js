@@ -33,21 +33,19 @@ export default () => {
   }
 
   return (
-    <Layout>
-      <Box px={theme.spacings.xxxlarge} py={theme.spacings.large} w="600px">
-        <Heading>Profile</Heading>
-        <UserActions
-          onSendInvite={() => setIsSendInviteOpen(true)}
-          canActivateInvite
-        />
-        <UserInfo {...identity} />
-        <InviteProvider>
+    <InviteProvider>
+      <Layout>
+        <Box px={theme.spacings.xxxlarge} py={theme.spacings.large} w="600px">
+          <Heading>Profile</Heading>
+          <UserActions
+            onSendInvite={() => setIsSendInviteOpen(true)}
+            canActivateInvite
+          />
+          <UserInfo {...identity} />
           <IdentityProvider address={address}>
             <NetProfile {...identity} />
             {WANNA_KILL_MYSELF && <KillMe />}
           </IdentityProvider>
-        </InviteProvider>
-        <InviteProvider>
           <IdentityProvider address={address}>
             <ActivateInviteForm
               onFail={({message}) =>
@@ -58,22 +56,30 @@ export default () => {
               }
             />
           </IdentityProvider>
-        </InviteProvider>
-      </Box>
-      <Drawer
-        show={isSendInviteOpen}
-        onHide={() => {
-          setIsSendInviteOpen(false)
-        }}
-      >
-        <InviteProvider>
+        </Box>
+        <Drawer
+          show={isSendInviteOpen}
+          onHide={() => {
+            setIsSendInviteOpen(false)
+          }}
+        >
           <SendInviteForm
-            onFail={({message}) =>
-              addNotification({title: message, type: NotificationType.Error})
-            }
+            onSuccess={() => {
+              setIsSendInviteOpen(false)
+              addNotification({
+                title: 'Invite sent. Check Contacts',
+              })
+            }}
+            onFail={error => {
+              setIsSendInviteOpen(false)
+              addNotification({
+                title: error.message,
+                type: NotificationType.Error,
+              })
+            }}
           />
-        </InviteProvider>
-      </Drawer>
-    </Layout>
+        </Drawer>
+      </Layout>
+    </InviteProvider>
   )
 }

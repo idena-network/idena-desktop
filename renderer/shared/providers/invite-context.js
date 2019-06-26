@@ -69,11 +69,10 @@ function InviteProvider({children}) {
     activationTx ? 3000 : null
   )
 
-  const addInvite = async (to, amount) => {
-    let invite = {to, amount}
-    const {result, error} = await api.sendInvite(invite)
+  const addInvite = async (to, amount, firstName = '', lastName = '') => {
+    const {result, error} = await api.sendInvite({to, amount})
     if (result) {
-      invite = {...invite, ...result}
+      const invite = {amount, firstName, lastName, ...result}
       setInvites([...invites, invite])
       db.addInvite(invite)
     } else {
@@ -91,8 +90,6 @@ function InviteProvider({children}) {
     }
   }
 
-  const getLastInvite = () => invites[invites.length - 1]
-
   const resetActivation = () => {
     setActivationTx('')
     db.clearActivationTx()
@@ -101,7 +98,7 @@ function InviteProvider({children}) {
   return (
     <InviteStateContext.Provider value={{invites, activationTx}}>
       <InviteDispatchContext.Provider
-        value={{addInvite, activateInvite, resetActivation, getLastInvite}}
+        value={{addInvite, activateInvite, resetActivation}}
       >
         {children}
       </InviteDispatchContext.Provider>

@@ -1,21 +1,23 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/label-has-for */
+/* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {ellipsis} from 'polished'
+import {margin, rem} from 'polished'
 import theme from '../theme'
 import {Box} from '.'
+import Flex from './flex'
+import {Text} from './typo'
 
-export function FormGroup(props) {
-  return <Box m="0 0 1em" {...props} />
+function FormGroup(props) {
+  return <Box m={margin(0, 0, rem(theme.spacings.medium16))} {...props} />
 }
 
 FormGroup.propTypes = {
   children: PropTypes.node,
 }
 
-export function Label({htmlFor, ...otherProps}) {
+function Label({htmlFor, ...otherProps}) {
   return (
     <>
       <label htmlFor={htmlFor} {...otherProps} />
@@ -34,7 +36,7 @@ Label.propTypes = {
   htmlFor: PropTypes.string.isRequired,
 }
 
-export const Input = React.forwardRef(
+const Input = React.forwardRef(
   ({type = 'text', disabled, ...otherProps}, ref) => (
     <>
       <input type={type} ref={ref} {...otherProps} />
@@ -64,3 +66,38 @@ Input.propTypes = {
   type: PropTypes.string,
   disabled: PropTypes.bool,
 }
+
+function Field({label, children, ...props}) {
+  return (
+    <FormGroup>
+      <Label style={margin(rem(theme.spacings.small8), 0)}>{label}</Label>
+      <Input {...props} />
+      {children}
+    </FormGroup>
+  )
+}
+
+Field.propTypes = {
+  label: PropTypes.string.isRequired,
+  children: PropTypes.node,
+}
+
+function Hint({label, value}) {
+  return (
+    <Flex
+      justify="space-between"
+      align="center"
+      css={margin(rem(theme.spacings.small8), 0)}
+    >
+      <Text color={theme.colors.muted}>{label}</Text>
+      <Text>{value}</Text>
+    </Flex>
+  )
+}
+
+Hint.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string,
+}
+
+export {FormGroup, Label, Input, Field, Hint}

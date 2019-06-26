@@ -8,14 +8,7 @@ import {
   borderRadius,
   backgrounds,
 } from 'polished'
-import {
-  Box,
-  SubHeading,
-  Input,
-  Label,
-  FormGroup,
-  Text,
-} from '../../../shared/components'
+import {Box, SubHeading, Text, Field, Hint} from '../../../shared/components'
 import Avatar from '../../flips/shared/components/avatar'
 import useFullName from '../shared/useFullName'
 import theme from '../../../shared/theme'
@@ -48,27 +41,21 @@ function DisplayInvite({
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          {fullName || receiver}
+          Invite for {fullName || receiver}
         </SubHeading>
         <Status mined={mined}>{mined ? 'Mined.' : 'Mining...'}</Status>
       </Box>
       <Flex justify="space-between">
-        <FormGroup>
-          <Label>First name</Label>
-          <Input style={{width: rem(140)}} />
-        </FormGroup>
-        <FormGroup>
-          <Label>Last name</Label>
-          <Input style={{width: rem(140)}} />
-        </FormGroup>
+        <NameField label="First name" value={firstName} />
+        <NameField label="Last name" value={lastName} />
       </Flex>
-      <Field label="Amount" value={amount} readonly={readonly}>
+      <WideField label="Amount" value={amount} disabled={readonly}>
         <Hint label="Fee" value="0.999 DNA" />
         <Hint label="Total amount" value="1000.999 DNA" />
-      </Field>
-      <Field label="Invitation code" value={code} readonly={readonly} />
-      <Field label="Transaction ID" value={hash} readonly={readonly} />
-      <Field label="Receiver" value={receiver} readonly={readonly} />
+      </WideField>
+      <WideField label="Invitation code" value={code} disabled={readonly} />
+      <WideField label="Transaction ID" value={hash} disabled={readonly} />
+      <WideField label="Receiver" value={receiver} disabled={readonly} />
     </Box>
   )
 }
@@ -81,31 +68,6 @@ DisplayInvite.propTypes = {
   lastName: PropTypes.string,
   mined: PropTypes.bool,
   code: PropTypes.string,
-}
-
-// eslint-disable-next-line react/prop-types
-function Field({label, value, readonly = false, children}) {
-  return (
-    <FormGroup>
-      <Label style={margin(rem(theme.spacings.small8), 0)}>{label}</Label>
-      <Input disabled={readonly} style={{width: rem(296)}} value={value} />
-      {children}
-    </FormGroup>
-  )
-}
-
-// eslint-disable-next-line react/prop-types
-function Hint({label, value}) {
-  return (
-    <Flex
-      justify="space-between"
-      align="center"
-      css={margin(rem(theme.spacings.small8), 0)}
-    >
-      <Text color={theme.colors.muted}>{label}</Text>
-      <Text>{value}</Text>
-    </Flex>
-  )
 }
 
 // eslint-disable-next-line react/prop-types
@@ -125,5 +87,8 @@ function Status({mined, ...props}) {
     />
   )
 }
+
+const NameField = props => <Field {...props} style={{width: rem(140)}} />
+const WideField = props => <Field {...props} style={{width: rem(296)}} />
 
 export default DisplayInvite
