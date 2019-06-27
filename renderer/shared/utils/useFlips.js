@@ -14,6 +14,8 @@ const {
   deleteDraft: deleteFromStore,
 } = global.flipStore || {}
 
+const DEFAULT_ORDER = [0, 1, 2, 3]
+
 function shuffle(order) {
   const initialOrder = order.map((_, i) => i)
   return Math.random() < 0.5 ? [initialOrder, order] : [order, initialOrder]
@@ -97,6 +99,12 @@ function useFlips() {
       ) {
         return {
           error: {message: 'You already submitted this flip'},
+        }
+      }
+
+      if (areSame(order, DEFAULT_ORDER)) {
+        return {
+          error: {message: 'You must shuffle flip before submit'},
         }
       }
 
