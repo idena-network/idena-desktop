@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, padding, border, margin, ellipsis, backgrounds} from 'polished'
-import {Box, Group, Text} from '../../../shared/components'
+import {Box, Group, Text, Input} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
 import useFullName from '../shared/useFullName'
@@ -13,6 +13,8 @@ import {mapToFriendlyStatus} from '../../../shared/utils/useIdentity'
 
 function Sidebar({onSelectContact, onSelectInvite}) {
   const {contacts} = useContactState()
+
+  const [term, setTerm] = React.useState()
 
   React.useEffect(() => {
     if (contacts.length) {
@@ -28,11 +30,12 @@ function Sidebar({onSelectContact, onSelectInvite}) {
         minHeight: '100vh',
       }}
     >
+      <Search onInput={e => setTerm(e.target.value)} />
       <InviteSection>
         <InviteList onSelectInvite={onSelectInvite} />
       </InviteSection>
       <ContactSection>
-        <ContactList onSelectContact={onSelectContact} />
+        <ContactList filter={term} onSelectContact={onSelectContact} />
       </ContactSection>
     </Box>
   )
@@ -129,11 +132,27 @@ function ContactSection({children}) {
   )
 }
 
-function ContactList({onSelectContact}) {
+function ContactList({filter, onSelectContact}) {
   const {contacts} = useContactState()
-  const [currentIdx, setCurrentIdx] = React.useState(0)
 
-  if (contacts.length === 0) {
+  const [currentIdx, setCurrentIdx] = React.useState(0)
+  const [filteredContacts, setFilteredContacts] = React.useState([])
+
+  React.useEffect(() => {
+    if (filter && filter.length > 2) {
+      // eslint-disable-next-line no-shadow
+      const nextContacts = contacts.filter(({firstName, lastName, address}) =>
+        [firstName, lastName, address].some(x =>
+          x.toLowerCase().includes(filter.toLowerCase())
+        )
+      )
+      setFilteredContacts(nextContacts)
+    } else {
+      setFilteredContacts(contacts)
+    }
+  }, [contacts, filter])
+
+  if (filteredContacts.length === 0) {
     return (
       <Text css={padding(rem(theme.spacings.medium16))}>
         No contacts yet...
@@ -143,7 +162,7 @@ function ContactList({onSelectContact}) {
 
   return (
     <Box css={{...margin(0, 0, rem(theme.spacings.medium24), 0)}}>
-      {contacts.map((contact, idx) => (
+      {filteredContacts.map((contact, idx) => (
         <ContactCard
           key={contact.id}
           {...contact}
@@ -161,6 +180,7 @@ function ContactList({onSelectContact}) {
 }
 
 ContactList.propTypes = {
+  filter: PropTypes.string,
   onSelectContact: PropTypes.func,
 }
 
@@ -206,6 +226,19 @@ ContactCard.propTypes = {
   lastName: PropTypes.string,
   state: PropTypes.string.isRequired,
   isCurrent: PropTypes.bool,
+}
+
+function Search(props) {
+  return (
+    <Box p={rem(theme.spacings.medium16)}>
+      <Input
+        type="search"
+        placeholder="Search"
+        style={{...backgrounds(theme.colors.gray), border: 'none'}}
+        {...props}
+      />
+    </Box>
+  )
 }
 
 export default Sidebar
