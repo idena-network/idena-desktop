@@ -4,9 +4,12 @@ import {margin, rem, backgrounds, borderRadius} from 'polished'
 import theme from '../../../../shared/theme'
 
 function Avatar({username, size = 80}) {
+  const src = username
+    ? `https://robohash.org/${username}`
+    : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
   return (
     <img
-      src={`https://robohash.org/${username}`}
+      src={src}
       alt={username}
       width={size}
       style={{
