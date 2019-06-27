@@ -128,7 +128,12 @@ function FlipMaster({id, onClose}) {
 
   return (
     <>
-      <Box bg={theme.colors.gray} py={rem(14)} mx={rem(-80)} my={rem(24)}>
+      <Box
+        bg={theme.colors.gray}
+        py={rem(14)}
+        mx={rem(-80)}
+        my={rem(theme.spacings.medium24)}
+      >
         <Flex css={margin(0, 0, 0, rem(80))}>
           {steps.map(({caption}, idx) => (
             <Flex

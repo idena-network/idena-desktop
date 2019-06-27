@@ -5,7 +5,7 @@ import FlipType from '../../screens/flips/shared/types/flip-type'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {fetchTx} from '../api'
 import {HASH_IN_MEMPOOL} from './tx'
-import {areSame} from './arr'
+import {areSame, areEual} from './arr'
 
 const {
   getFlips: getFlipsFromStore,
@@ -102,7 +102,7 @@ function useFlips() {
         }
       }
 
-      if (areSame(order, DEFAULT_ORDER)) {
+      if (areEual(order, DEFAULT_ORDER)) {
         return {
           error: {message: 'You must shuffle flip before submit'},
         }

@@ -1,28 +1,25 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {rem} from 'polished'
 
-function FlipImage({src, size = 150, css}) {
+function FlipImage({src, size = 150, ...props}) {
   return (
-    <>
-      <img src={src} alt="flip" style={css} />
+    <div {...props}>
       <style jsx>{`
-        img {
-          background-size: cover;
-          background-position: center center;
-          border-radius: 8px;
-          width: ${`${size}px`};
-          height: ${`${size}px`};
+        div {
+          background: url(${src}) no-repeat;
+          background-size: contain;
+          width: ${rem(size)};
+          height: ${rem(size)};
         }
       `}</style>
-    </>
+    </div>
   )
 }
 
 FlipImage.propTypes = {
   src: PropTypes.string.isRequired,
   size: PropTypes.number,
-  // eslint-disable-next-line react/forbid-prop-types
-  css: PropTypes.object,
 }
 
 export default FlipImage

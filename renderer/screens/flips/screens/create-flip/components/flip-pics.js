@@ -1,6 +1,9 @@
 import React, {useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
-import {Box, Button} from '../../../../../shared/components'
+import {rem, borderRadius, margin} from 'polished'
+import {FiSearch} from 'react-icons/fi'
+import {Box, Input} from '../../../../../shared/components'
+import Divider from '../../../../../shared/components/divider'
 import Flex from '../../../../../shared/components/flex'
 import ImageEditor from './image-editor'
 import theme from '../../../../../shared/theme'
@@ -9,10 +12,8 @@ import {
   IMAGE_SEARCH_PICK,
   IMAGE_SEARCH_TOGGLE,
 } from '../../../../../../main/channels'
-
-const activeStyle = {
-  border: `solid 2px ${theme.colors.primary}`,
-}
+import FlipImage from '../../../shared/components/flip-image'
+import {IconButton} from '../../../../../shared/components/button'
 
 function FlipPics({pics, onUpdateFlip}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -69,36 +70,62 @@ function FlipPics({pics, onUpdateFlip}) {
 
   return (
     <Flex>
-      <Box p={theme.spacings.normal}>
-        {pics.map((src, idx) => (
-          <Box
-            key={idx}
-            onClick={() => {
-              setSelectedIndex(idx)
-            }}
-            css={idx === selectedIndex ? activeStyle : {}}
-          >
-            <img src={src} alt={`flip-${idx}`} width={100} />
-          </Box>
-        ))}
-      </Box>
-      <Box p={theme.spacings.normal}>
-        <ImageEditor src={pics[selectedIndex]} />
-        <Flex justify="space-around">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleUpload}
-            disabled={false}
-          />
+      <Box css={margin(0, rem(40), 0)}>
+        {pics.map((src, idx) => {
+          const isCurrent = idx === selectedIndex
 
-          <Button
+          let style = {}
+          if (idx === 0) {
+            style = {...style, ...borderRadius('top', rem(8))}
+          }
+          if (idx === pics.length - 1) {
+            style = {...style, ...borderRadius('bottom', rem(8))}
+          }
+          if (isCurrent) {
+            style = {
+              ...style,
+              border: `solid 2px ${theme.colors.primary}`,
+              boxShadow: '0 0 4px 4px rgba(87, 143, 255, 0.25)',
+            }
+          }
+
+          return (
+            <FlipImage
+              // eslint-disable-next-line react/no-array-index-key
+              key={idx}
+              src={src}
+              isCurrent={isCurrent}
+              size={120}
+              style={style}
+              onClick={() => {
+                setSelectedIndex(idx)
+              }}
+            />
+          )
+        })}
+      </Box>
+      <Box>
+        <ImageEditor src={pics[selectedIndex]} />
+        <Flex
+          justify="space-between"
+          align="center"
+          css={margin(rem(theme.spacings.medium16), 0, 0)}
+        >
+          <IconButton
+            icon={<FiSearch />}
             onClick={() => {
               global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, 1)
             }}
           >
             Search on Google
-          </Button>
+          </IconButton>
+          <Divider vertical />
+          <Input
+            type="file"
+            accept="image/*"
+            style={{border: 'none'}}
+            onChange={handleUpload}
+          />
         </Flex>
       </Box>
     </Flex>
