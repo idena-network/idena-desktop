@@ -69,6 +69,30 @@ function InviteProvider({children}) {
     activationTx ? 3000 : null
   )
 
+  useInterval(
+    async () => {
+      const txs = await Promise.all(
+        invites
+          .filter(({mined}) => !mined)
+          .map(({hash}) => hash)
+          .map(api.fetchTx)
+      )
+      setInvites(
+        invites.map(invite => {
+          const tx = txs.find(({hash}) => hash === invite.hash)
+          if (tx) {
+            return {
+              ...invite,
+              mined: tx && tx.result && tx.result.blockHash !== HASH_IN_MEMPOOL,
+            }
+          }
+          return invite
+        })
+      )
+    },
+    invites.filter(({mined}) => !mined).length ? 5000 : null
+  )
+
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
     const {result, error} = await api.sendInvite({to, amount})
     if (result) {

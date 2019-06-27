@@ -34,7 +34,7 @@ function DisplayInvite({
       </Box>
       <Box
         css={{
-          ...margin(theme.spacings.medium16, 0, theme.spacings.medium32),
+          ...margin(theme.spacings.medium16, 0, theme.spacings.small8),
           textAlign: 'center',
         }}
       >

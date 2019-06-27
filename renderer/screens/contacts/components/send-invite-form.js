@@ -47,24 +47,24 @@ export function SendInviteForm({onSuccess, onFail}) {
         <NameField
           label="First name"
           value={firstName}
-          onInput={e => setFirstName(e.target.value)}
+          onChange={e => setFirstName(e.target.value)}
         />
         <NameField
           label="Last name"
           value={lastName}
-          onInput={e => setLastName(e.target.value)}
+          onChange={e => setLastName(e.target.value)}
         />
       </Flex>
       <WideField
         label="Address"
         value={address}
-        onInput={e => setAddress(e.target.value)}
+        onChange={e => setAddress(e.target.value)}
       />
       <WideField
         label="Amount"
         type="number"
         value={amount}
-        onInput={e => setAmount(e.target.value)}
+        onChange={e => setAmount(e.target.value)}
       >
         <Hint label="Fee" value="0.999 DNA" />
         <Hint label="Total amount" value="1000.999 DNA" />
@@ -76,15 +76,15 @@ export function SendInviteForm({onSuccess, onFail}) {
             try {
               setSubmitting(true)
               await addInvite(address, amount, firstName, lastName)
+              setSubmitting(false)
               if (onSuccess) {
                 onSuccess()
               }
             } catch (error) {
+              setSubmitting(false)
               if (onFail) {
                 onFail(error)
               }
-            } finally {
-              setSubmitting(false)
             }
           }}
         >

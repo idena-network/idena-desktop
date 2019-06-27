@@ -30,7 +30,7 @@ function Sidebar({onSelectContact, onSelectInvite}) {
         minHeight: '100vh',
       }}
     >
-      <Search onInput={e => setTerm(e.target.value)} />
+      <Search onChange={e => setTerm(e.target.value)} />
       <InviteSection>
         <InviteList onSelectInvite={onSelectInvite} />
       </InviteSection>
@@ -224,7 +224,7 @@ ContactCard.propTypes = {
   address: PropTypes.string.isRequired,
   firstName: PropTypes.string,
   lastName: PropTypes.string,
-  state: PropTypes.string.isRequired,
+  state: PropTypes.string,
   isCurrent: PropTypes.bool,
 }
 

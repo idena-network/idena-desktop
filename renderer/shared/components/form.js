@@ -3,7 +3,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {margin, rem, border} from 'polished'
+import {margin, rem} from 'polished'
 import theme from '../theme'
 import {Box} from '.'
 import Flex from './flex'
@@ -53,8 +53,8 @@ const Input = React.forwardRef(
         input {
           border: solid 1px ${theme.colors.gray2};
           color: ${theme.colors.input};
+          ${disabled && `background: ${theme.colors.gray2}`};
           ${disabled && 'cursor: not-allowed'};
-          ${disabled && 'opacity: 0.5'};
         }
         input:focus {
           outline: solid 2px ${theme.colors.primary};
@@ -69,11 +69,16 @@ Input.propTypes = {
   disabled: PropTypes.bool,
 }
 
-function Field({label, children, ...props}) {
+let idx = 0
+function Field({label, id, children, ...props}) {
+  // eslint-disable-next-line no-plusplus
+  const uniqId = id || `input${++idx}`
   return (
-    <FormGroup>
-      <Label style={margin(rem(theme.spacings.small8), 0)}>{label}</Label>
-      <Input {...props} />
+    <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}>
+      <Label htmlFor={uniqId} style={margin(0, 0, rem(theme.spacings.small8))}>
+        {label}
+      </Label>
+      <Input id={uniqId} {...props} />
       {children}
     </FormGroup>
   )
@@ -81,6 +86,7 @@ function Field({label, children, ...props}) {
 
 Field.propTypes = {
   label: PropTypes.string.isRequired,
+  id: PropTypes.string,
   children: PropTypes.node,
 }
 
