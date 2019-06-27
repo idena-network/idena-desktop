@@ -14,10 +14,10 @@ export default function() {
   const [showInvite, setShowInvite] = React.useState(false)
 
   return (
-    <Layout>
-      <Flex>
-        <InviteProvider>
-          <ContactProvider>
+    <InviteProvider>
+      <ContactProvider>
+        <Layout>
+          <Flex>
             <Sidebar
               onSelectContact={setSelectedContact}
               onSelectInvite={invite => {
@@ -25,23 +25,23 @@ export default function() {
                 setSelectedInvite(invite)
               }}
             />
-          </ContactProvider>
-        </InviteProvider>
-        <Box>
-          <ContactDetails {...selectedContact} />
-        </Box>
-      </Flex>
-      <Drawer
-        show={showInvite}
-        onHide={() => {
-          setShowInvite(false)
-        }}
-      >
-        <DisplayInvite
-          {...selectedInvite}
-          code={selectedInvite && selectedInvite.key}
-        />
-      </Drawer>
-    </Layout>
+            <Box>
+              <ContactDetails {...selectedContact} />
+            </Box>
+          </Flex>
+          <Drawer
+            show={showInvite}
+            onHide={() => {
+              setShowInvite(false)
+            }}
+          >
+            <DisplayInvite
+              {...selectedInvite}
+              code={selectedInvite && selectedInvite.key}
+            />
+          </Drawer>
+        </Layout>
+      </ContactProvider>
+    </InviteProvider>
   )
 }

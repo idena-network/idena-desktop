@@ -34,19 +34,17 @@ export default () => {
 
   return (
     <InviteProvider>
-      <Layout>
-        <Box px={theme.spacings.xxxlarge} py={theme.spacings.large} w="600px">
-          <Heading>Profile</Heading>
-          <UserActions
-            onSendInvite={() => setIsSendInviteOpen(true)}
-            canActivateInvite
-          />
-          <UserInfo {...identity} />
-          <IdentityProvider address={address}>
+      <IdentityProvider address={address}>
+        <Layout>
+          <Box px={theme.spacings.xxxlarge} py={theme.spacings.large} w="600px">
+            <Heading>Profile</Heading>
+            <UserActions
+              onSendInvite={() => setIsSendInviteOpen(true)}
+              canActivateInvite
+            />
+            <UserInfo {...identity} />
             <NetProfile {...identity} />
             {WANNA_KILL_MYSELF && <KillMe />}
-          </IdentityProvider>
-          <IdentityProvider address={address}>
             <ActivateInviteForm
               onFail={({message}) =>
                 addNotification({
@@ -55,31 +53,31 @@ export default () => {
                 })
               }
             />
-          </IdentityProvider>
-        </Box>
-        <Drawer
-          show={isSendInviteOpen}
-          onHide={() => {
-            setIsSendInviteOpen(false)
-          }}
-        >
-          <SendInviteForm
-            onSuccess={() => {
+          </Box>
+          <Drawer
+            show={isSendInviteOpen}
+            onHide={() => {
               setIsSendInviteOpen(false)
-              addNotification({
-                title: 'Invite sent. Check Contacts',
-              })
             }}
-            onFail={error => {
-              setIsSendInviteOpen(false)
-              addNotification({
-                title: error.message,
-                type: NotificationType.Error,
-              })
-            }}
-          />
-        </Drawer>
-      </Layout>
+          >
+            <SendInviteForm
+              onSuccess={() => {
+                setIsSendInviteOpen(false)
+                addNotification({
+                  title: 'Invite sent. Check Contacts',
+                })
+              }}
+              onFail={error => {
+                setIsSendInviteOpen(false)
+                addNotification({
+                  title: error.message,
+                  type: NotificationType.Error,
+                })
+              }}
+            />
+          </Drawer>
+        </Layout>
+      </IdentityProvider>
     </InviteProvider>
   )
 }

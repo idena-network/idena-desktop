@@ -3,7 +3,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {margin, rem} from 'polished'
+import {margin, rem, border} from 'polished'
 import theme from '../theme'
 import {Box} from '.'
 import Flex from './flex'
@@ -46,7 +46,6 @@ const Input = React.forwardRef(
           box-shadow: none;
           border-radius: 8px;
           font-size: 1em;
-          outline: none;
           padding: 0.5em 1em;
         }
       `}</style>
@@ -56,6 +55,9 @@ const Input = React.forwardRef(
           color: ${theme.colors.input};
           ${disabled && 'cursor: not-allowed'};
           ${disabled && 'opacity: 0.5'};
+        }
+        input:focus {
+          outline: solid 2px ${theme.colors.primary};
         }
       `}</style>
     </>

@@ -3,24 +3,25 @@ import PropTypes from 'prop-types'
 import UserInfo from '../../dashboard/components/user-info'
 import ContactToolbar from './contact-toolbar'
 import theme from '../../../shared/theme'
-import {Box} from '../../../shared/components'
 import {Figure} from '../../../shared/components/utils'
+import {mapToFriendlyStatus} from '../../../shared/utils/useIdentity'
 
 function ContactDetails(props) {
-  const {address, status, age} = props
+  const {address, state, age} = props
   return (
     <div>
       <section>
         <UserInfo {...props} />
         <ContactToolbar />
         <div>
-          <Figure label="Status" value={status} />
-          <Figure label="Age" value={age} postfix="epochs" />
+          {state && (
+            <Figure label="Status" value={mapToFriendlyStatus(state)} />
+          )}
+          {Number.isFinite(age) && (
+            <Figure label="Age" value={age} postfix="epochs" />
+          )}
           <Figure label="Address" value={address} />
         </div>
-      </section>
-      <section>
-        <Box>Edit</Box>
       </section>
       <style jsx>{`
         div {
@@ -48,7 +49,7 @@ ContactDetails.propTypes = {
   firstName: PropTypes.string,
   lastName: PropTypes.string,
   address: PropTypes.string.isRequired,
-  status: PropTypes.string.isRequired,
+  state: PropTypes.string.isRequired,
   age: PropTypes.number.isRequired,
 }
 

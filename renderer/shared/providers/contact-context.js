@@ -11,9 +11,29 @@ function ContactProvider({children}) {
   const [contacts, setContacts] = React.useState([])
 
   React.useEffect(() => {
-    // eslint-disable-next-line no-shadow
-    const contacts = db.getContacts()
-    setContacts(contacts)
+    let ignore = false
+
+    async function fetchData() {
+      const identities = await api.fetchIdentities()
+      // eslint-disable-next-line no-use-before-define
+      const enrichedContacts = savedContacts.map(contact => {
+        const identity = identities.find(
+          ({address}) => address === contact.address
+        )
+        return {...contact, ...identity}
+      })
+
+      if (!ignore) {
+        setContacts(enrichedContacts)
+      }
+    }
+
+    const savedContacts = db.getContacts()
+    fetchData()
+
+    return () => {
+      ignore = true
+    }
   }, [])
 
   const addContact = contact => {

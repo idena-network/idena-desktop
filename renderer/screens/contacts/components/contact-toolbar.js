@@ -1,30 +1,28 @@
 import React from 'react'
+import {rem, padding, margin} from 'polished'
+import {FiSend, FiDollarSign, FiSlash} from 'react-icons/fi'
 import theme from '../../../shared/theme'
+import {IconButton} from '../../../shared/components/button'
+import Divider from '../../../shared/components/divider'
+import Flex from '../../../shared/components/flex'
 
 export default () => (
-  <div>
-    <a href="/">Send message</a>
-    <a href="/">Send coins</a>
-    <a href="/">Block user</a>
-    <style jsx>{`
-      div {
-        padding: 2em 1em;
-      }
-      a {
-        color: ${theme.colors.primary};
-        margin: 1em 2em 1em 0;
-        text-decoration: none;
-        position: relative;
-      }
-      a:not(:last-child)::after {
-        content: '';
-        background: rgb(232, 234, 237);
-        width: 1px;
-        position: absolute;
-        top: -3px;
-        right: -1em;
-        bottom: -3px;
-      }
-    `}</style>
-  </div>
+  <Flex
+    css={{
+      ...padding(rem(theme.spacings.small8), 0),
+      ...margin(rem(theme.spacings.medium16), 0),
+    }}
+  >
+    <IconButton icon={<FiSend />} color={theme.colors.primary}>
+      Send message
+    </IconButton>
+    <Divider vertical />
+    <IconButton icon={<FiDollarSign />} color={theme.colors.primary}>
+      Send coins
+    </IconButton>
+    <Divider vertical />
+    <IconButton icon={<FiSlash />} color={theme.colors.primary}>
+      Block user
+    </IconButton>
+  </Flex>
 )

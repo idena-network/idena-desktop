@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, padding, border, margin, ellipsis} from 'polished'
+import {rem, padding, border, margin, ellipsis, backgrounds} from 'polished'
 import {Box, Group, Text} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
@@ -9,6 +9,7 @@ import Flex from '../../../shared/components/flex'
 import Avatar from '../../flips/shared/components/avatar'
 import {useInviteState} from '../../../shared/providers/invite-context'
 import useUsername from '../../../shared/utils/use-username'
+import {mapToFriendlyStatus} from '../../../shared/utils/useIdentity'
 
 function Sidebar({onSelectContact, onSelectInvite}) {
   const {contacts} = useContactState()
@@ -23,8 +24,8 @@ function Sidebar({onSelectContact, onSelectInvite}) {
     <Box
       style={{
         ...border('right', '1px', 'solid', theme.colors.gray2),
-        ...padding(rem(theme.spacings.medium16)),
         width: rem(240),
+        minHeight: '100vh',
       }}
     >
       <InviteSection>
@@ -44,9 +45,11 @@ Sidebar.propTypes = {
 
 // eslint-disable-next-line react/prop-types
 function InviteSection({children}) {
-  const remainingInvites = [{}]
   return (
-    <Group title={`Invites (${remainingInvites.length} left)`}>
+    <Group
+      title="Invites"
+      css={{...margin(rem(theme.spacings.medium16)), marginBottom: 0}}
+    >
       {children}
     </Group>
   )
@@ -62,7 +65,7 @@ function InviteList({onSelectInvite}) {
   }
 
   return (
-    <Box my={rem(theme.spacings.medium32)}>
+    <Box css={{...margin(0, 0, rem(theme.spacings.medium24), 0)}}>
       {invites.map(({id, ...invite}) => (
         <InviteCard
           key={id}
@@ -87,7 +90,7 @@ function InviteCard({receiver, mined, ...props}) {
   return (
     <Flex
       align="center"
-      css={{cursor: 'pointer', ...margin(0, 0, rem(theme.spacings.medium16))}}
+      css={{cursor: 'pointer', ...padding(rem(theme.spacings.medium16))}}
       {...props}
     >
       <Avatar username={receiver} size={32} />
@@ -117,21 +120,36 @@ InviteCard.propTypes = {
 // eslint-disable-next-line react/prop-types
 function ContactSection({children}) {
   return (
-    <Group title="Contacts">
-      <Box m="1em 0">{children}</Box>
+    <Group
+      title="Contacts"
+      css={{...margin(rem(theme.spacings.medium16)), marginTop: 0}}
+    >
+      {children}
     </Group>
   )
 }
 
 function ContactList({onSelectContact}) {
   const {contacts} = useContactState()
+  const [currentIdx, setCurrentIdx] = React.useState(0)
+
+  if (contacts.length === 0) {
+    return (
+      <Text css={padding(rem(theme.spacings.medium16))}>
+        No contacts yet...
+      </Text>
+    )
+  }
+
   return (
-    <Box my={rem(theme.spacings.medium24)}>
-      {contacts.map(contact => (
+    <Box css={{...margin(0, 0, rem(theme.spacings.medium24), 0)}}>
+      {contacts.map((contact, idx) => (
         <ContactCard
           key={contact.id}
           {...contact}
+          isCurrent={idx === currentIdx}
           onClick={() => {
+            setCurrentIdx(idx)
             if (onSelectContact) {
               onSelectContact(contact)
             }
@@ -150,7 +168,8 @@ function ContactCard({
   address,
   firstName,
   lastName,
-  status = 'Status...',
+  state,
+  isCurrent,
   ...props
 }) {
   const fullName = useFullName({firstName, lastName})
@@ -158,7 +177,11 @@ function ContactCard({
   return (
     <Flex
       align="center"
-      css={{cursor: 'pointer', ...margin(0, 0, rem(theme.spacings.medium16))}}
+      css={{
+        ...backgrounds(isCurrent ? theme.colors.gray2 : ''),
+        cursor: 'pointer',
+        ...padding(rem(theme.spacings.medium16)),
+      }}
       {...props}
     >
       <Avatar username={username} size={32} />
@@ -168,7 +191,7 @@ function ContactCard({
         </Box>
         <Box>
           <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
-            {status}
+            {mapToFriendlyStatus(state)}
           </Text>
         </Box>
       </Box>
@@ -181,7 +204,8 @@ ContactCard.propTypes = {
   address: PropTypes.string.isRequired,
   firstName: PropTypes.string,
   lastName: PropTypes.string,
-  status: PropTypes.string.isRequired,
+  state: PropTypes.string.isRequired,
+  isCurrent: PropTypes.bool,
 }
 
 export default Sidebar

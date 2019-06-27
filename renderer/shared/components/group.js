@@ -3,10 +3,12 @@ import PropTypes from 'prop-types'
 import {Box, Text} from '.'
 import theme from '../theme'
 
-function Group({title, children}) {
+function Group({title, children, ...props}) {
   return (
     <Box>
-      <Text color={theme.colors.muted}>{title}</Text>
+      <Text color={theme.colors.muted} {...props}>
+        {title}
+      </Text>
       <Box>{children}</Box>
     </Box>
   )
