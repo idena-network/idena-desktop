@@ -45,6 +45,74 @@ const showMainWindow = () => {
   mainWindow.focus()
 }
 
+const createMenu = () => {
+  const application = {
+    label: 'Idena',
+    submenu: [
+      {
+        label: 'About Idena',
+        role: 'about',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Quit',
+        accelerator: 'Command+Q',
+        selector: 'terminate:',
+        click: () => {
+          if (isWin) {
+            app.quit()
+          }
+        },
+      },
+    ],
+  }
+
+  const edit = {
+    label: 'Edit',
+    submenu: [
+      {
+        label: 'Undo',
+        accelerator: 'CmdOrCtrl+Z',
+        role: 'undo',
+      },
+      {
+        label: 'Redo',
+        accelerator: 'Shift+CmdOrCtrl+Z',
+        role: 'redo',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Cut',
+        accelerator: 'CmdOrCtrl+X',
+        role: 'cut',
+      },
+      {
+        label: 'Copy',
+        accelerator: 'CmdOrCtrl+C',
+        role: 'copy',
+      },
+      {
+        label: 'Paste',
+        accelerator: 'CmdOrCtrl+V',
+        role: 'paste',
+      },
+      {
+        label: 'Select All',
+        accelerator: 'CmdOrCtrl+A',
+        role: 'selectAll',
+      },
+    ],
+  }
+
+  const template = [application, edit]
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+}
+
 const createTray = () => {
   tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-dark-2.png'))
 
@@ -79,6 +147,9 @@ app.on('ready', async () => {
   await prepareNext('./renderer')
 
   createMainWindow()
+  if (!isDev) {
+    createMenu()
+  }
   createTray()
 })
 
