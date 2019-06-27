@@ -53,9 +53,24 @@ function DisplayInvite({
         <Hint label="Fee" value="0.999 DNA" />
         <Hint label="Total amount" value="1000.999 DNA" />
       </WideField>
-      <WideField label="Invitation code" value={code} disabled={readonly} />
-      <WideField label="Transaction ID" value={hash} disabled={readonly} />
-      <WideField label="Receiver" value={receiver} disabled={readonly} />
+      <WideField
+        label="Invitation code"
+        value={code}
+        disabled={readonly}
+        allowCopy
+      />
+      <WideField
+        label="Transaction ID"
+        value={hash}
+        disabled={readonly}
+        allowCopy
+      />
+      <WideField
+        label="Receiver"
+        value={receiver}
+        disabled={readonly}
+        allowCopy
+      />
     </Box>
   )
 }

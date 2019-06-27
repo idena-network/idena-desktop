@@ -8,6 +8,8 @@ import theme from '../theme'
 import {Box} from '.'
 import Flex from './flex'
 import {Text} from './typo'
+import {FlatButton} from './button'
+import useClipboard from '../utils/use-clipboard'
 
 function FormGroup(props) {
   return <Box m={margin(0, 0, rem(theme.spacings.medium16))} {...props} />
@@ -70,15 +72,41 @@ Input.propTypes = {
 }
 
 let idx = 0
-function Field({label, id, children, ...props}) {
+function Field({label, id, allowCopy, onCopied, children, ...props}) {
+  const [{value: copiedText}, copyToClipboard] = useClipboard()
+  const inputRef = React.useRef()
+
   // eslint-disable-next-line no-plusplus
   const uniqId = id || `input${++idx}`
   return (
     <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}>
-      <Label htmlFor={uniqId} style={margin(0, 0, rem(theme.spacings.small8))}>
-        {label}
-      </Label>
-      <Input id={uniqId} {...props} />
+      <Flex justify="space-between" align="center">
+        <Label
+          htmlFor={uniqId}
+          style={margin(0, 0, rem(theme.spacings.small8))}
+        >
+          {label}
+        </Label>
+        {allowCopy && (
+          <Flex align="center">
+            <Text
+              color={theme.colors.success}
+              fontSize={theme.fontSizes.small}
+              css={margin(0, rem(theme.spacings.small8), 0)}
+            >
+              {copiedText && 'Copied'}
+            </Text>
+            <FlatButton
+              color={theme.colors.primary}
+              css={{lineHeight: 1}}
+              onClick={() => copyToClipboard(inputRef.current.value)}
+            >
+              Copy
+            </FlatButton>
+          </Flex>
+        )}
+      </Flex>
+      <Input id={uniqId} {...props} ref={inputRef} />
       {children}
     </FormGroup>
   )
@@ -87,6 +115,8 @@ function Field({label, id, children, ...props}) {
 Field.propTypes = {
   label: PropTypes.string.isRequired,
   id: PropTypes.string,
+  allowCopy: PropTypes.bool,
+  onCopied: PropTypes.func,
   children: PropTypes.node,
 }
 
