@@ -61,10 +61,11 @@ function FlipPics({pics, onUpdateFlip}) {
           base64Url,
           ...pics.slice(selectedIndex + 1),
         ])
+        setPickedUrl(null)
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pickedUrl])
+  }, [pickedUrl, selectedIndex])
 
   return (
     <Flex>
