@@ -12,7 +12,7 @@ import {FlatButton} from './button'
 import useClipboard from '../utils/use-clipboard'
 
 function FormGroup(props) {
-  return <Box m={margin(0, 0, rem(theme.spacings.medium16))} {...props} />
+  return <Box {...props} />
 }
 
 FormGroup.propTypes = {
