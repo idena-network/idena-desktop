@@ -2,11 +2,11 @@ import React from 'react'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {fetchSync} from '../api'
 
-const ChainStateContext = React.createContext()
-const ChainDispatchContext = React.createContext()
+const SyncStateContext = React.createContext()
+const SyncDispatchContext = React.createContext()
 
 // eslint-disable-next-line react/prop-types
-function ChainProvider({children}) {
+function SyncProvider({children}) {
   const [syncing, setSyncing] = React.useState(true)
   const [progress, setProgress] = React.useState(null)
 
@@ -26,28 +26,28 @@ function ChainProvider({children}) {
   )
 
   return (
-    <ChainStateContext.Provider value={{syncing, progress}}>
-      <ChainDispatchContext.Provider value={null}>
+    <SyncStateContext.Provider value={{syncing, progress}}>
+      <SyncDispatchContext.Provider value={null}>
         {children}
-      </ChainDispatchContext.Provider>
-    </ChainStateContext.Provider>
+      </SyncDispatchContext.Provider>
+    </SyncStateContext.Provider>
   )
 }
 
-function useChainState() {
-  const context = React.useContext(ChainStateContext)
+function useSyncState() {
+  const context = React.useContext(SyncStateContext)
   if (context === undefined) {
-    throw new Error('useChainState must be used within a ChainProvider')
+    throw new Error('useChainState must be used within a SyncProvider')
   }
   return context
 }
 
-function useChainDispatch() {
-  const context = React.useContext(ChainDispatchContext)
+function useSyncDispatch() {
+  const context = React.useContext(SyncDispatchContext)
   if (context === undefined) {
-    throw new Error('useChainDispatch must be used within a ChainProvider')
+    throw new Error('useChainDispatch must be used within a SyncProvider')
   }
   return context
 }
 
-export {ChainProvider, useChainState, useChainDispatch}
+export {SyncProvider, useSyncState, useSyncDispatch}

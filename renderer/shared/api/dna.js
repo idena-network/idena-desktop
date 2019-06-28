@@ -59,22 +59,17 @@ export async function fetchIdentity(address) {
 
 /**
  * Epoch
- * @typedef {Object}
+ * @typedef {Object} Epoch
  * @property {String} epoch Current epoch
  * @property {String} nextValidation Next validation timestamp
  * @property {String} currentPeriod Current period
+ * @property {String} currentValidationStart Actual validation start time
  */
 
 /**
- * Fetches current epoch, next validation time and current period
+ * Fetch current epoch information
  *
  * @returns {Epoch} Epoch details
- * @example
- * {
- *   "epoch": 184,
- *   "nextValidation": "2019-05-08T19:40:00+02:00",
- *   "currentPeriod": "None"
- * }
  */
 export async function fetchEpoch() {
   const {data} = await api().post('/', {
@@ -87,7 +82,7 @@ export async function fetchEpoch() {
 }
 
 /**
- * Fetches timings specific to validation ceremony
+ * Fetch timings specific to validation ceremony
  * 
  * @returns {object}
  * @example {

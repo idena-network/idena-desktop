@@ -1,11 +1,11 @@
 import React from 'react'
 import {rem} from 'polished'
 import {Absolute, Box} from '../shared/components'
-import {useChainState} from '../shared/providers/chain-context'
+import {useSyncState} from '../shared/providers/sync-context'
 import theme from '../shared/theme'
 
 function SyncStatus() {
-  const {syncing, progress} = useChainState()
+  const {syncing, progress} = useSyncState()
 
   if (!syncing || !Number.isFinite(progress)) {
     return null

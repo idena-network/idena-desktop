@@ -24,7 +24,7 @@ function Button({size = 1, disabled, variant = 'primary', css, ...props}) {
           padding: ${`${0.5 * size}em ${size}em`};
           outline: none;
           ${disabled && `opacity: 0.5`};
-          transition: all 0.3s ease;
+          transition: background 0.3s ease, color 0.3s ease;
         }
         button:hover {
           background: ${darken(0.1, bg)};

@@ -1,40 +1,40 @@
-import {useState, useEffect} from 'react'
+import React from 'react'
 import {fetchCeremonyIntervals} from '../api'
 
-function useTiming() {
-  const [timing, setTiming] = useState({
-    none: null,
-    flipLottery: null,
-    shortSession: null,
-    longSession: null,
-    afterLongSession: null,
-    fullValidationSession: null,
-  })
+const initialTiming = {
+  validation: null,
+  flipLottery: null,
+  shortSession: null,
+  longSession: null,
+  afterLongSession: null,
+  none: null,
+}
 
-  useEffect(() => {
+function useTiming() {
+  const [timing, setTiming] = React.useState(initialTiming)
+
+  React.useEffect(() => {
     let ignore = false
 
     async function fetchData() {
-      const intervals = await fetchCeremonyIntervals()
       const {
-        ValidationInterval: none,
+        ValidationInterval: validation,
         FlipLotteryDuration: flipLottery,
         ShortSessionDuration: shortSession,
         LongSessionDuration: longSession,
         AfterLongSessionDuration: afterLongSession,
-      } = intervals
-
-      const fullValidationSession =
-        flipLottery + shortSession + longSession + afterLongSession
+      } = await fetchCeremonyIntervals()
 
       if (!ignore) {
         setTiming({
-          none,
+          validation,
           flipLottery,
           shortSession,
           longSession,
           afterLongSession,
-          fullValidationSession,
+          none:
+            validation -
+            (flipLottery + shortSession + longSession + afterLongSession),
         })
       }
     }

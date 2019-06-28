@@ -33,16 +33,10 @@ function useValidation() {
       setRunning(false)
     }
 
-    function resetKeywords() {
-      // TODO: implement reset keywords
-    }
-
     if (epoch && epoch !== savedEpoch.current) {
-      console.info('Starting new epoch', epoch)
       savedEpoch.current = epoch
       resetValidation()
       archiveFlips()
-      // resetKeywords()
     }
   }, [archiveFlips, epoch])
 
@@ -59,11 +53,10 @@ function useValidation() {
       saveValidation({
         shortAnswers,
         longAnswers,
-        running,
         epoch: savedEpoch.current,
       })
     }
-  }, [epoch, longAnswers, running, shortAnswers])
+  }, [epoch, longAnswers, shortAnswers])
 
   const submitShortAnswers = useCallback(answers => {
     api.submitShortAnswers(answers, 0, 0)
