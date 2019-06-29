@@ -18,13 +18,19 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module',
   },
-  plugins: [
-    "react-hooks"
-  ],
+  plugins: ['react-hooks'],
   rules: {
     'react/jsx-filename-extension': [1, {extensions: ['.js', '.jsx']}],
-    "react/require-default-props": [0],
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    'react/require-default-props': [0],
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: true,
+        optionalDependencies: false,
+        peerDependencies: false,
+      },
+    ],
   },
 }

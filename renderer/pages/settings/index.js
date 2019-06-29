@@ -9,6 +9,7 @@ import {
   Label,
   Button,
 } from '../../shared/components'
+import Link from '../../shared/components/link'
 import theme from '../../shared/theme'
 import nodeSettings from '../../screens/settings/shared/utils/node'
 import {FlatButton} from '../../shared/components/button'
@@ -116,6 +117,17 @@ function Settings() {
             >
               Clear invites
             </Button>
+          </Box>
+        </Box>
+        <Box my={rem(theme.spacings.medium32)}>
+          <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
+            Validation
+          </SubHeading>
+          <Box my={theme.spacings.small}>
+            <Link href="/validation/short">Short</Link>
+          </Box>
+          <Box my={theme.spacings.small}>
+            <Link href="/validation/long">Long</Link>
           </Box>
         </Box>
         <EpochDisplay />

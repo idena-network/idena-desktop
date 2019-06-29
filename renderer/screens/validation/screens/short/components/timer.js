@@ -1,31 +1,44 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Box} from '../../../../../shared/components'
+import {FiClock} from 'react-icons/fi'
+import {rem} from 'polished'
 import {useInterval} from '../../../shared/utils/useInterval'
+import Flex from '../../../../../shared/components/flex'
+import {Text} from '../../../../../shared/components'
+import theme from '../../../../../shared/theme'
 
-function Timer({time, onTick}) {
+function convertSeconds(seconds) {
+  const min = Math.floor(seconds / 60)
+  const sec = seconds % 60
+  return {
+    min,
+    sec,
+  }
+}
+
+function Timer({seconds: initialSeconds}) {
+  const [seconds, setSeconds] = React.useState(initialSeconds)
   useInterval(
     () => {
-      if (time > 0) {
-        onTick(time - 1)
-      }
+      setSeconds(seconds - 1)
     },
-    time > 0 ? 1000 : null
+    seconds > 0 ? 1000 : null
   )
-
-  const mins = Math.floor(time / 60)
-  const secs = time - mins * 60
-
+  let {min, sec} = convertSeconds(seconds)
+  min = min.toString().padStart(2, 0)
+  sec = sec.toString().padStart(2, 0)
   return (
-    <Box>{`${mins}:${secs.toLocaleString(undefined, {
-      minimumIntegerDigits: 2,
-    })} left`}</Box>
+    <Flex align="center">
+      <FiClock color={theme.colors.danger} style={{marginRight: rem(4)}} />
+      <Text color={theme.colors.danger} fontWeight={600}>
+        {`${min}:${sec}`}
+      </Text>
+    </Flex>
   )
 }
 
 Timer.propTypes = {
-  time: PropTypes.number.isRequired,
-  onTick: PropTypes.func.isRequired,
+  seconds: PropTypes.number.isRequired,
 }
 
 export default Timer

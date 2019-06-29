@@ -4,7 +4,8 @@ import theme from '../../../../shared/theme'
 
 const borderRadius = dir => {
   const side = dir === 'prev' ? 'right' : 'left'
-  return `border-top-${side}-radius: 100%; border-bottom-${side}-radius: 100%`
+  // return `border-top-${side}-radius: 400px; border-bottom-${side}-radius: 400px`
+  return `;`
 }
 
 function Arrow({dir}) {
@@ -18,13 +19,20 @@ function Arrow({dir}) {
           align-items: center;
           ${prev && `justify-content: flex-start`};
           ${!prev && `justify-content: flex-end`};
-          height: 100%;
-          width: 100%;
+          width: 560px;
+
+          position: fixed;
+          top: 50px;
+          bottom: 50px;
+          left: 0;
+
+          border-radius: 40%;
+          transition: all 0.5s ease;
+          transform: translateX(${dir === 'prev' ? '-280px' : '280px'});
         }
         div:hover {
-          background: ${theme.colors.gray2};
-          ${borderRadius(dir)};
-          transition: all cubic-bezier(0.075, 0.82, 0.165, 1);
+          background: ${theme.colors.white01};
+          border-radius: 50%;
         }
       `}</style>
     </div>

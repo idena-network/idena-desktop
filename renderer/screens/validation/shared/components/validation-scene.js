@@ -1,14 +1,17 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react'
 import PropTypes from 'prop-types'
+import {rem} from 'polished'
 import {Col, Box, Fill} from '../../../../shared/components'
 import Flex from '../../../../shared/components/flex'
 import Arrow from './arrow'
 import {reorderList} from '../../../../shared/utils/arr'
+import Spinner from './spinner'
 import theme from '../../../../shared/theme'
 
 const selectedStyle = {
-  border: 'solid 2px red',
+  border: `solid 2px ${theme.colors.primary}`,
+  boxShadow: '0 0 4px 4px rgba(87, 143, 255, 0.25)',
 }
 
 function ValidationScene({
@@ -21,6 +24,7 @@ function ValidationScene({
   loaded,
   last,
 }) {
+  const style = {borderRadius: rem(8), position: 'relative', height: '100%'}
   return (
     <Flex justify="space-between" flex="1">
       <Col onClick={onPrev} w={4}>
@@ -31,11 +35,7 @@ function ValidationScene({
           direction="column"
           justify="center"
           align="center"
-          css={
-            selectedOption === 0
-              ? {...selectedStyle, position: 'relative', height: '100%'}
-              : {position: 'relative', height: '100%'}
-          }
+          css={selectedOption === 0 ? {...selectedStyle, ...style} : style}
           width="100%"
           onClick={() => onAnswer(0)}
         >
@@ -45,7 +45,7 @@ function ValidationScene({
                 <img
                   // eslint-disable-next-line react/no-array-index-key
                   alt="currentFlip"
-                  width={100}
+                  width={140}
                   src={URL.createObjectURL(
                     new Blob([src], {type: 'image/jpeg'})
                   )}
@@ -53,7 +53,9 @@ function ValidationScene({
               </Box>
             ))
           ) : (
-            <Fill bg={theme.colors.gray2}>Loading...</Fill>
+            <Fill>
+              <Spinner />
+            </Fill>
           )}
         </Flex>
         <Box w="2em">&nbsp;</Box>
@@ -61,11 +63,7 @@ function ValidationScene({
           direction="column"
           justify="center"
           align="center"
-          css={
-            selectedOption === 1
-              ? {...selectedStyle, position: 'relative', height: '100%'}
-              : {position: 'relative', height: '100%'}
-          }
+          css={selectedOption === 1 ? {...selectedStyle, ...style} : style}
           width="100%"
           onClick={() => onAnswer(1)}
         >
@@ -75,7 +73,7 @@ function ValidationScene({
                 <img
                   // eslint-disable-next-line react/no-array-index-key
                   alt="currentFlip"
-                  width={100}
+                  width={140}
                   src={URL.createObjectURL(
                     new Blob([src], {type: 'image/jpeg'})
                   )}
@@ -83,7 +81,9 @@ function ValidationScene({
               </Box>
             ))
           ) : (
-            <Fill bg={theme.colors.gray2}>Loading...</Fill>
+            <Fill>
+              <Spinner />
+            </Fill>
           )}
         </Flex>
       </Flex>
