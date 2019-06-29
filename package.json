@@ -21,11 +21,13 @@
       "renderer/out"
     ],
     "win": {
+      "publish": null,
       "target": [
         "zip"
       ]
     },
     "mac": {
+      "publish": null,
       "icon": "main/static/icons/mac.icns",
       "target": [
         "zip"
