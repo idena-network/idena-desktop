@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react'
 import Router from 'next/router'
 import {decode} from 'rlp'
+import dayjs from 'dayjs'
+import {backgrounds, rem, padding} from 'polished'
 import Layout from '../../screens/validation/shared/components/validation-layout'
 import ValidationHeader from '../../screens/validation/shared/components/validation-header'
-// import Timer from '../../screens/validation/screens/short/components/timer'
 import ValidationScene from '../../screens/validation/shared/components/validation-scene'
 import ValidationActions from '../../screens/validation/shared/components/validation-actions'
 import FlipThumbnails from '../../screens/validation/shared/components/flip-thumbnails'
@@ -17,6 +18,11 @@ import {
 } from '../../screens/validation/shared/utils/answers'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import useValidation from '../../shared/utils/useValidation'
+import {Link, IconClose} from '../../shared/components'
+import Timer from '../../screens/validation/screens/short/components/timer'
+import useTiming from '../../shared/utils/use-timing'
+import {useEpochState} from '../../shared/providers/epoch-context'
+import theme from '../../shared/theme'
 
 export default function() {
   const {submitLongAnswers} = useValidation()
@@ -29,46 +35,8 @@ export default function() {
   const [flipsLoaded, setFlipsLoaded] = useState(false)
   const [loadedStates, setLoadedStates] = useState([])
 
-  const handlePrev = () => {
-    const prevFlipIdx = Math.max(0, currentFlipIdx - 1)
-    setCurrentFlipIdx(prevFlipIdx)
-  }
-
-  const handleNext = () => {
-    const nextFlipIdx = Math.min(currentFlipIdx + 1, flips.length - 1)
-    setCurrentFlipIdx(nextFlipIdx)
-  }
-
-  const handlePick = idx => setCurrentFlipIdx(idx)
-
-  const handleAnswer = option => {
-    const nextAnswers = [
-      ...answers.slice(0, currentFlipIdx),
-      option,
-      ...answers.slice(currentFlipIdx + 1),
-    ]
-    setAnswers(nextAnswers)
-  }
-
-  const handleReportAbuse = () => {
-    const nextAnswers = [
-      ...answers.slice(0, currentFlipIdx),
-      answerTypes.inappropriate,
-      ...answers.slice(currentFlipIdx + 1),
-    ]
-    setAnswers(nextAnswers)
-    setCurrentFlipIdx(Math.min(currentFlipIdx + 1, flips.length - 1))
-  }
-
-  const handleSubmitAnswers = async () => {
-    const answersPayload = flipHashes.map((hash, idx) => ({
-      hash,
-      easy: false,
-      answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
-    }))
-    submitLongAnswers(answersPayload)
-    Router.replace('/dashboard')
-  }
+  const {shortSession} = useTiming()
+  const epoch = useEpochState()
 
   useEffect(() => {
     let ignore = false
@@ -147,15 +115,73 @@ export default function() {
     flipsLoaded ? null : 1000
   )
 
+  if (epoch === null || shortSession === null) {
+    return null
+  }
+
+  const handlePrev = () => {
+    const prevFlipIdx = Math.max(0, currentFlipIdx - 1)
+    setCurrentFlipIdx(prevFlipIdx)
+  }
+
+  const handleNext = () => {
+    const nextFlipIdx = Math.min(currentFlipIdx + 1, flips.length - 1)
+    setCurrentFlipIdx(nextFlipIdx)
+  }
+
+  const handlePick = idx => setCurrentFlipIdx(idx)
+
+  const handleAnswer = option => {
+    const nextAnswers = [
+      ...answers.slice(0, currentFlipIdx),
+      option,
+      ...answers.slice(currentFlipIdx + 1),
+    ]
+    setAnswers(nextAnswers)
+  }
+
+  const handleReportAbuse = () => {
+    const nextAnswers = [
+      ...answers.slice(0, currentFlipIdx),
+      answerTypes.inappropriate,
+      ...answers.slice(currentFlipIdx + 1),
+    ]
+    setAnswers(nextAnswers)
+    setCurrentFlipIdx(Math.min(currentFlipIdx + 1, flips.length - 1))
+  }
+
+  const handleSubmitAnswers = async () => {
+    const answersPayload = flipHashes.map((hash, idx) => ({
+      hash,
+      easy: false,
+      answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
+    }))
+    submitLongAnswers(answersPayload)
+    Router.replace('/dashboard')
+  }
+
+  const finish = dayjs(
+    epoch.currentValidationStart || epoch.nextValidation
+  ).add(shortSession, 's')
+
   return (
     <Layout>
-      <Flex direction="column" css={{minHeight: '100vh'}}>
+      <Flex
+        direction="column"
+        css={{
+          ...backgrounds(theme.colors.white),
+          minHeight: '100vh',
+          ...padding(rem(theme.spacings.medium24), rem(theme.spacings.large)),
+        }}
+      >
         <ValidationHeader
           type="Long"
           currentIndex={flips.length > 0 ? currentFlipIdx + 1 : 0}
           total={flips.length}
         >
-          {/* <Timer time={validationTimer} onTick={setValidationTimer} /> */}
+          <Link href="/dashboard">
+            <IconClose />
+          </Link>
         </ValidationHeader>
         <Flex direction="column" flex="1">
           <ValidationScene
@@ -172,6 +198,7 @@ export default function() {
             onReportAbuse={handleReportAbuse}
             canSubmit={answers.length > 0 && answers.every(answered)}
             onSubmitAnswers={handleSubmitAnswers}
+            countdown={<Timer seconds={finish.diff(dayjs(), 's')} />}
           />
         </Flex>
         <FlipThumbnails

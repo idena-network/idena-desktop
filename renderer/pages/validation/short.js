@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {decode} from 'rlp'
 import dayjs from 'dayjs'
-import {backgrounds, padding, margin, rem} from 'polished'
-import Layout from '../../screens/validation/shared/components/validation-layout'
+import {backgrounds, padding, rem} from 'polished'
 import ValidationHeader from '../../screens/validation/shared/components/validation-header'
 import Timer from '../../screens/validation/screens/short/components/timer'
 import ValidationScene from '../../screens/validation/shared/components/validation-scene'
@@ -20,8 +19,9 @@ import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import theme from '../../shared/theme'
 import {goToLongSession} from '../../screens/validation/shared/utils/router'
 import useValidation from '../../shared/utils/useValidation'
-import {EpochPeriod, useEpochState} from '../../shared/providers/epoch-context'
+import {useEpochState} from '../../shared/providers/epoch-context'
 import useTiming from '../../shared/utils/use-timing'
+import {IconClose, Link} from '../../shared/components'
 
 function ShortSession() {
   const [flips, setFlips] = useState([])
@@ -177,7 +177,11 @@ function ShortSession() {
         type="short"
         currentIndex={flips.length > 0 ? currentFlipIdx + 1 : 0}
         total={flips.length}
-      />
+      >
+        <Link href="/dashboard">
+          <IconClose />
+        </Link>
+      </ValidationHeader>
       <Flex direction="column" flex="1">
         <ValidationScene
           flip={flips[currentFlipIdx]}
