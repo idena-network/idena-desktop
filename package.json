@@ -13,20 +13,10 @@
   },
   "build": {
     "appId": "io.idena",
-    "asar": true,
     "files": [
       "**/*",
       "!renderer",
       "renderer/out"
-    ],
-    "extraResources": [
-      {
-        "from": "renderer/out",
-        "to": "app/renderer"
-      }
-    ],
-    "asarUnpack": [
-      "app/renderer"
     ],
     "mac": {
       "icon": "main/static/icons/mac.icns"
