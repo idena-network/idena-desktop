@@ -57,15 +57,15 @@ function useFlips() {
         .map(f => f.txHash)
         .map(fetchTx)
       Promise.all(txPromises).then(txs => {
-        setFlips(
-          flips.map(flip => {
-            const tx = txs.find(({hash}) => hash === flip.txHash)
-            return {
-              ...flip,
-              mined: tx && tx.result && tx.result.blockHash !== HASH_IN_MEMPOOL,
-            }
-          })
-        )
+        const nextFlips = flips.map(flip => {
+          const tx = txs.find(({hash}) => hash === flip.txHash)
+          return {
+            ...flip,
+            mined: tx && tx.result && tx.result.blockHash !== HASH_IN_MEMPOOL,
+          }
+        })
+        setFlips(nextFlips)
+        saveFlips(nextFlips)
       })
     },
     flips.filter(({type, mined}) => type === FlipType.Published && !mined)
@@ -153,12 +153,12 @@ function useFlips() {
   }, [])
 
   const archiveFlips = useCallback(() => {
-    saveFlips(
-      flips.map(f => ({
-        ...f,
-        type: FlipType.Archived,
-      }))
-    )
+    const nextFlips = flips.map(f => ({
+      ...f,
+      type: FlipType.Archived,
+    }))
+    setFlips(nextFlips)
+    saveFlips(nextFlips)
   }, [flips])
 
   return {

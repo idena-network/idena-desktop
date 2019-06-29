@@ -61,9 +61,9 @@ const createMenu = () => {
         accelerator: 'Command+Q',
         selector: 'terminate:',
         click: () => {
-          if (isWin) {
-            app.quit()
-          }
+          // if (isWin) {
+          app.quit()
+          // }
         },
       },
     ],
@@ -133,9 +133,9 @@ const createTray = () => {
       accelerator: 'Command+Q',
       selector: 'terminate:',
       click: () => {
-        if (isWin) {
-          app.quit()
-        }
+        // if (isWin) {
+        app.quit()
+        // }
       },
     },
   ])
@@ -147,9 +147,9 @@ app.on('ready', async () => {
   await prepareNext('./renderer')
 
   createMainWindow()
-  if (!isDev) {
-    createMenu()
-  }
+  // if (!isDev) {
+  createMenu()
+  // }
   createTray()
 })
 
