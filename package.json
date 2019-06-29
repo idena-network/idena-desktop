@@ -6,20 +6,30 @@
   "scripts": {
     "start": "run-electron .",
     "build": "next build renderer && next export renderer",
-    "dist": "npm run build && build --dir",
+    "dist": "npm run build && build",
+    "pack": "npm run build && build --dir",
     "clean": "rm -rf renderer/out dist",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
   "build": {
     "appId": "io.idena",
+    "artifactName": "${os}.${ext}",
     "files": [
       "**/*",
       "!renderer",
       "renderer/out"
     ],
+    "win": {
+      "target": [
+        "zip"
+      ]
+    },
     "mac": {
-      "icon": "main/static/icons/mac.icns"
+      "icon": "main/static/icons/mac.icns",
+      "target": [
+        "zip"
+      ]
     }
   },
   "devDependencies": {
@@ -44,7 +54,7 @@
   },
   "dependencies": {
     "ansi-to-html": "^0.6.10",
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "dayjs": "^1.8.14",
     "dequal": "^1.0.0",
     "electron-is-dev": "^1.0.1",
