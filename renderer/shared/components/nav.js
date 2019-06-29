@@ -61,6 +61,16 @@ function Nav() {
             </Block>
           )}
         </Box>
+        <Box
+          bg={theme.colors.white01}
+          my={theme.spacings.xxlarge}
+          css={{
+            ...borderRadius('top', rem(10)),
+            ...borderRadius('bottom', rem(10)),
+          }}
+        >
+          <Block title="Version">{global.appVersion}</Block>
+        </Box>
       </List>
       <style jsx>{`
         nav {

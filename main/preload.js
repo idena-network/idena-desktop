@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-const {ipcRenderer} = require('electron')
+const electron = require('electron')
 const isDev = require('electron-is-dev')
 
 const flips = require('./stores/flips')
@@ -8,11 +8,17 @@ const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
 
 process.once('loaded', () => {
-  global.ipcRenderer = ipcRenderer
+  global.ipcRenderer = electron.ipcRenderer
   global.flipStore = flips
   global.validationStore = validation
   global.invitesDb = invites
   global.contactsDb = contacts
+
+  try {
+    global.appVersion = electron.remote.app.getVersion()
+  } catch (error) {
+    console.error(error)
+  }
 
   if (isDev) {
     global.require = require
