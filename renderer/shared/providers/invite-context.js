@@ -1,10 +1,10 @@
 /* eslint-disable no-use-before-define */
 import React from 'react'
 import * as api from '../api'
-import useCoinbaseAddress from '../utils/useCoinbaseAddress'
-import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+import useAddress from '../hooks/use-address'
+import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL} from '../utils/tx'
-import {NotificationContext, NotificationType} from './notification-provider'
+import {useNotificationDispatch, NotificationType} from './notification-context'
 
 const db = global.invitesDb || {}
 
@@ -16,7 +16,7 @@ function InviteProvider({children}) {
   const [invites, setInvites] = React.useState([])
   const [activationTx, setActivationTx] = React.useState()
 
-  const {addNotification} = React.useContext(NotificationContext)
+  const {addNotification} = useNotificationDispatch()
 
   React.useEffect(() => {
     let ignore = false
@@ -46,7 +46,7 @@ function InviteProvider({children}) {
     }
   }, [])
 
-  const address = useCoinbaseAddress()
+  const address = useAddress()
 
   useInterval(
     async () => {

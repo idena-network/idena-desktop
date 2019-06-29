@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import {margin, rem} from 'polished'
-import Layout from '../../components/layout'
+import Layout from '../../shared/components/layout'
 import {
   Box,
   Heading,
@@ -11,7 +11,6 @@ import {
 } from '../../shared/components'
 import Link from '../../shared/components/link'
 import theme from '../../shared/theme'
-import nodeSettings from '../../screens/settings/shared/utils/node'
 import {FlatButton} from '../../shared/components/button'
 import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
@@ -19,6 +18,7 @@ import Pre from '../../shared/components/pre'
 import useFlips from '../../shared/utils/useFlips'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
+import {nodeSettings} from '../../shared/api/api-client'
 
 const DEFAULT_NODE_URL = 'http://localhost:9009'
 

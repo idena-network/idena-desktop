@@ -1,10 +1,10 @@
 import axios from 'axios'
-import getConfig from 'next/config'
-import nodeSettings from '../../screens/settings/shared/utils/node'
 
-const {publicRuntimeConfig} = getConfig()
+export const nodeSettings = {
+  url: 'http://localhost:9009',
+}
 
-export const baseUrl = nodeSettings.url || publicRuntimeConfig.baseUrl
+export const baseUrl = nodeSettings.url
 
 export const {MOCK = true} = process.env
 

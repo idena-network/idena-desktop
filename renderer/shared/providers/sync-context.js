@@ -1,5 +1,5 @@
 import React from 'react'
-import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+import {useInterval} from '../hooks/use-interval'
 import {fetchSync} from '../api'
 
 const SyncStateContext = React.createContext()

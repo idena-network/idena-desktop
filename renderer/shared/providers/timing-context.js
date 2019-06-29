@@ -1,6 +1,6 @@
 /* eslint-disable no-shadow */
 import React from 'react'
-import useTiming from '../utils/use-timing'
+import useTiming from '../hooks/use-timing'
 
 const TimingStateContext = React.createContext()
 

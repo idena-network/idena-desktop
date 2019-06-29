@@ -16,7 +16,7 @@ import Flex from '../../../shared/components/flex'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 
-export function SendInviteForm({onSuccess, onFail}) {
+function SendInviteForm({onSuccess, onFail}) {
   const [firstName, setFirstName] = React.useState()
   const [lastName, setLastName] = React.useState()
   const [address, setAddress] = React.useState()

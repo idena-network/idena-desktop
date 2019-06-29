@@ -1,19 +1,17 @@
 import React from 'react'
 import {FiPlusSquare} from 'react-icons/fi'
-import {rem} from 'polished'
+import {rem, margin} from 'polished'
 import useLocalStorage from '../../shared/hooks/use-local-storage'
-import Layout from '../../components/layout'
+import Layout from '../../shared/components/layout'
 import {Heading, Box} from '../../shared/components'
 import theme from '../../shared/theme'
 import FlipToolbar, {
   FlipToolbarItem,
-} from '../../screens/flips/shared/components/toolbar'
-import FlipList from '../../screens/flips/shared/components/flip-list'
-import useFlips from '../../shared/utils/useFlips'
+} from '../../screens/flips/components/toolbar'
+import useFlips, {FlipType} from '../../shared/utils/useFlips'
 import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
-import FlipCover from '../../screens/flips/shared/components/flip-cover'
-import FlipType from '../../screens/flips/shared/types/flip-type'
+import FlipCover from '../../screens/flips/components/flip-cover'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 
 function Flips() {
@@ -91,6 +89,15 @@ function Flips() {
         </FlipList>
       </Box>
     </Layout>
+  )
+}
+
+function FlipList(props) {
+  return (
+    <Flex
+      css={{flexWrap: 'wrap', ...margin(`${theme.spacings.normal} 0`)}}
+      {...props}
+    />
   )
 }
 

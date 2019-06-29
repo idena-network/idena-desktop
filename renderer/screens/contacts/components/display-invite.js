@@ -10,9 +10,9 @@ import {
 } from 'polished'
 import {Box, SubHeading, Text, Field, Hint} from '../../../shared/components'
 import Avatar from '../../../shared/components/avatar'
-import useFullName from '../shared/useFullName'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
+import useFullName from '../../../shared/hooks/use-full-name'
 
 function DisplayInvite({
   hash,
@@ -34,7 +34,7 @@ function DisplayInvite({
       </Box>
       <Box
         css={{
-          ...margin(theme.spacings.medium16, 0, theme.spacings.small8),
+          ...margin(theme.spacings.medium16, 0, 0),
           textAlign: 'center',
         }}
       >

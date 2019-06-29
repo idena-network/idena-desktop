@@ -1,5 +1,5 @@
 import React from 'react'
-import Layout from '../components/layout'
+import Layout from '../shared/components/layout'
 
 class Error extends React.Component {
   static getInitialProps({res, err}) {

@@ -1,11 +1,12 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import {margin, rem} from 'polished'
 import theme from '../../../shared/theme'
 import {Box} from '../../../shared/components'
 import {Figure} from '../../../shared/components/utils'
-import {useIdentityState} from '../../../shared/providers/identity-context'
-import {mapToFriendlyStatus} from '../../../shared/utils/useIdentity'
+import {
+  useIdentityState,
+  mapToFriendlyStatus,
+} from '../../../shared/providers/identity-context'
 
 function NetProfile() {
   const {address, state, stake, age} = useIdentityState()

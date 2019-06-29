@@ -1,7 +1,0 @@
-export {default as ContactNav} from './contact-nav'
-export {default as Actions} from './actions'
-export {default as ContactSearch} from './contact-search'
-export {default as ContactDetails} from './contact-details'
-export * from './send-invite-form'
-export {default as NewContactForm} from './new-contact-form'
-export {default as EditContactForm} from './edit-contact-form'

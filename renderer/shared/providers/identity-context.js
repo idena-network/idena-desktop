@@ -1,8 +1,27 @@
 import React from 'react'
 import deepEqual from 'dequal'
-import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+import {useInterval} from '../hooks/use-interval'
 import {fetchIdentity, killIdentity} from '../api'
-import {IdentityStatus} from '../utils/useIdentity'
+
+export const IdentityStatus = {
+  Undefined: 'Undefined',
+  Invite: 'Invite',
+  Candidate: 'Candidate',
+  Newbie: 'Newbie',
+  Verified: 'Verified',
+  Suspend: 'Suspend',
+  Zombie: 'Zombie',
+  Killed: 'Killed',
+}
+
+export function mapToFriendlyStatus(status) {
+  switch (status) {
+    case IdentityStatus.Undefined:
+      return 'Not validated'
+    default:
+      return status
+  }
+}
 
 const IdentityStateContext = React.createContext()
 const IdentityDispatchContext = React.createContext()
@@ -36,13 +55,22 @@ function IdentityProvider({children}) {
     }
 
     fetchData()
-  }, 5000)
+  }, 3000)
 
   const canActivateInvite = [
     IdentityStatus.Undefined,
     IdentityStatus.Killed,
     IdentityStatus.Invite,
   ].includes(identity && identity.state)
+
+  const canSubmitFlip =
+    [
+      IdentityStatus.Candidate,
+      IdentityStatus.Newbie,
+      IdentityStatus.Verified,
+    ].includes(identity && identity.state) &&
+    identity.requiredFlips > 0 &&
+    (identity.flips || []).length < identity.requiredFlips
 
   const killMe = () => {
     const {result, error} = killIdentity(identity.address)
@@ -58,6 +86,7 @@ function IdentityProvider({children}) {
       value={{
         ...identity,
         canActivateInvite,
+        canSubmitFlip,
       }}
     >
       <IdentityDispatchContext.Provider value={{killMe}}>

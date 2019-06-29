@@ -9,7 +9,7 @@ import {Box} from '.'
 import Flex from './flex'
 import {Text} from './typo'
 import {FlatButton} from './button'
-import useClipboard from '../utils/use-clipboard'
+import useClipboard from '../hooks/use-clipboard'
 
 function FormGroup(props) {
   return <Box {...props} />

@@ -1,12 +1,11 @@
 import React, {useState, useEffect} from 'react'
-import Layout from '../../components/layout'
+import Layout from '../../shared/components/layout'
 import {Box, Heading} from '../../shared/components'
 import theme from '../../shared/theme'
 import TotalAmount from '../../screens/wallets/components/total-amount'
-import {fetchAccountList} from '../../screens/wallets/shared/api/wallet-api'
-import {fetchBalance} from '../../shared/services/api'
 import WalletList from '../../screens/wallets/components/wallet-list'
 import Loading from '../../shared/components/loading'
+import {fetchAccountList, fetchBalance} from '../../shared/api/wallet'
 
 export default function() {
   const [wallets, setWallets] = useState()

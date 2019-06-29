@@ -1,13 +1,14 @@
 import React, {useState, useEffect} from 'react'
-import Layout from '../../components/layout'
 import {Row, Col} from '../../shared/components'
-import {
-  ChatNav,
-  ChatSearch,
-  ChatList,
-  Room,
-} from '../../screens/chats/components'
-import {fetchChatList} from '../../shared/services/api'
+import Layout from '../../shared/components/layout'
+import Nav from '../../screens/chats/components/chat-nav'
+import Search from '../../screens/chats/components/chat-search'
+import ChatList from '../../screens/chats/components/chat-list'
+import Room from '../../screens/chats/components/room'
+
+function fetchChatList() {
+  return []
+}
 
 export default () => {
   const [chats, setChats] = useState([])
@@ -33,10 +34,10 @@ export default () => {
     <Layout>
       <Row>
         <Col w={4}>
-          <ChatNav>
-            <ChatSearch />
+          <Nav>
+            <Search />
             <ChatList chats={chats} />
-          </ChatNav>
+          </Nav>
         </Col>
         <Col w={8}>{chats.length && <Room {...chats[0]} />}</Col>
       </Row>

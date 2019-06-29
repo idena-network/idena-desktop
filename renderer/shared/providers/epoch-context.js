@@ -1,9 +1,9 @@
 import React from 'react'
 import dayjs from 'dayjs'
 import deepEqual from 'dequal'
-import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+import {useInterval} from '../hooks/use-interval'
 import {fetchEpoch} from '../api'
-import useTiming from '../utils/use-timing'
+import useTiming from '../hooks/use-timing'
 
 const hasValues = obj => Object.values(obj).every(x => x)
 const GAP = 30

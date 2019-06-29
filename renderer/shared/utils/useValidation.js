@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback, useRef} from 'react'
-import * as api from '../../screens/validation/shared/api/validation-api'
+import * as api from '../api/validation'
 import useFlips from './useFlips'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 

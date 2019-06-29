@@ -1,8 +1,7 @@
 import {useState, useEffect, useCallback} from 'react'
 import {encode} from 'rlp'
 import * as api from '../api/dna'
-import FlipType from '../../screens/flips/shared/types/flip-type'
-import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+import {useInterval} from '../hooks/use-interval'
 import {fetchTx} from '../api'
 import {HASH_IN_MEMPOOL} from './tx'
 import {areSame, areEual} from './arr'
@@ -13,6 +12,12 @@ const {
   saveFlips,
   deleteDraft: deleteFromStore,
 } = global.flipStore || {}
+
+export const FlipType = {
+  Published: 'published',
+  Draft: 'draft',
+  Archived: 'archived',
+}
 
 const DEFAULT_ORDER = [0, 1, 2, 3]
 

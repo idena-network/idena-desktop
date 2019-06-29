@@ -4,14 +4,18 @@ import UserInfo from '../../dashboard/components/user-info'
 import ContactToolbar from './contact-toolbar'
 import theme from '../../../shared/theme'
 import {Figure} from '../../../shared/components/utils'
-import {mapToFriendlyStatus} from '../../../shared/utils/useIdentity'
+import {
+  mapToFriendlyStatus,
+  useIdentityState,
+} from '../../../shared/providers/identity-context'
 
 function ContactDetails(props) {
-  const {address, state, age} = props
+  const identity = useIdentityState
+  const {address, state, age} = identity
   return (
     <div>
       <section>
-        <UserInfo {...props} />
+        <UserInfo {...identity} {...props} />
         <ContactToolbar />
         <div>
           {state && (
@@ -48,9 +52,6 @@ function ContactDetails(props) {
 ContactDetails.propTypes = {
   firstName: PropTypes.string,
   lastName: PropTypes.string,
-  address: PropTypes.string,
-  state: PropTypes.string,
-  age: PropTypes.number,
 }
 
 export default ContactDetails

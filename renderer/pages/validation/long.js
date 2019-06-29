@@ -2,27 +2,27 @@ import React, {useEffect, useState} from 'react'
 import Router from 'next/router'
 import {decode} from 'rlp'
 import dayjs from 'dayjs'
-import {backgrounds, rem, padding} from 'polished'
-import Layout from '../../screens/validation/shared/components/validation-layout'
-import ValidationHeader from '../../screens/validation/shared/components/validation-header'
-import ValidationScene from '../../screens/validation/shared/components/validation-scene'
-import ValidationActions from '../../screens/validation/shared/components/validation-actions'
-import FlipThumbnails from '../../screens/validation/shared/components/flip-thumbnails'
-import {fetchFlip} from '../../shared/services/api'
+import {backgrounds, rem, padding, position} from 'polished'
+import ValidationHeader from '../../screens/validation/components/validation-header'
+import ValidationScene from '../../screens/validation/components/validation-scene'
+import ValidationActions from '../../screens/validation/components/validation-actions'
+import FlipThumbnails from '../../screens/validation/components/flip-thumbnails'
 import {fromHexString} from '../../shared/utils/string'
 import Flex from '../../shared/components/flex'
-import {fetchFlipHashes} from '../../screens/validation/shared/api/validation-api'
+import {fetchFlipHashes} from '../../shared/api/validation'
 import {
   answered,
   types as answerTypes,
-} from '../../screens/validation/shared/utils/answers'
-import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+} from '../../screens/validation/utils/answers'
+import {useInterval} from '../../shared/hooks/use-interval'
 import useValidation from '../../shared/utils/useValidation'
 import {Link, IconClose} from '../../shared/components'
-import Timer from '../../screens/validation/screens/short/components/timer'
-import useTiming from '../../shared/utils/use-timing'
+import Timer from '../../screens/validation/components/timer'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import theme from '../../shared/theme'
+import Layout from '../../shared/components/layout'
+import {useTimingState} from '../../shared/providers/timing-context'
+import {fetchFlip} from '../../shared/api'
 
 export default function() {
   const {submitLongAnswers} = useValidation()
@@ -35,7 +35,7 @@ export default function() {
   const [flipsLoaded, setFlipsLoaded] = useState(false)
   const [loadedStates, setLoadedStates] = useState([])
 
-  const {shortSession} = useTiming()
+  const {longSession} = useTimingState()
   const epoch = useEpochState()
 
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function() {
     flipsLoaded ? null : 1000
   )
 
-  if (epoch === null || shortSession === null) {
+  if (epoch === null || longSession === null) {
     return null
   }
 
@@ -162,7 +162,7 @@ export default function() {
 
   const finish = dayjs(
     epoch.currentValidationStart || epoch.nextValidation
-  ).add(shortSession, 's')
+  ).add(longSession, 's')
 
   return (
     <Layout>
@@ -172,10 +172,11 @@ export default function() {
           ...backgrounds(theme.colors.white),
           minHeight: '100vh',
           ...padding(rem(theme.spacings.medium24), rem(theme.spacings.large)),
+          ...position('relative'),
         }}
       >
         <ValidationHeader
-          type="Long"
+          type="long"
           currentIndex={flips.length > 0 ? currentFlipIdx + 1 : 0}
           total={flips.length}
         >
@@ -193,6 +194,7 @@ export default function() {
             selectedOption={answers[currentFlipIdx]}
             loaded={loadedStates[currentFlipIdx]}
             last={currentFlipIdx > flips.length - 1}
+            type="long"
           />
           <ValidationActions
             onReportAbuse={handleReportAbuse}

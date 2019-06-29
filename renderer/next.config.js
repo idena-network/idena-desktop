@@ -1,11 +1,4 @@
 const config = {
-  publicRuntimeConfig: {
-    baseUrl: process.env.BASE_URL,
-  },
-  env: {
-    cseCx: process.env.CSE_CX,
-    cseKey: process.env.CSE_KEY,
-  },
   exportPathMap() {
     // Let Next.js know where to find the entry page
     // when it's exporting the static bundle for the use
@@ -13,15 +6,11 @@ const config = {
     return {
       '/dashboard': {page: '/dashboard'},
       '/contacts': {page: '/contacts'},
-      '/contacts/new': {page: '/contacts/new'},
-      '/contacts/edit': {page: '/contacts/edit'},
-      '/contacts/view': {page: '/contacts/view'},
       '/chats': {page: '/chats'},
       '/wallets': {page: '/wallets'},
       '/flips': {page: '/flips'},
       '/flips/new': {page: '/flips/new'},
       '/flips/edit': {page: '/flips/edit'},
-      '/validation': {page: '/validation'},
       '/validation/short': {page: '/validation/short'},
       '/validation/long': {page: '/validation/long'},
     }

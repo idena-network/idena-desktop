@@ -1,10 +1,12 @@
 import React from 'react'
-import {LastMessage} from '.'
+import LastMessage from './last-message'
 
-export default ({chats}) => (
-  <div>
-    {chats.map(chat => (
-      <LastMessage chat={chat} />
-    ))}
-  </div>
-)
+export default function ChatList({chats}) {
+  return (
+    <div>
+      {chats.map(chat => (
+        <LastMessage chat={chat} />
+      ))}
+    </div>
+  )
+}

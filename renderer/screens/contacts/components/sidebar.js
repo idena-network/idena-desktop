@@ -4,12 +4,12 @@ import {rem, padding, border, margin, ellipsis, backgrounds} from 'polished'
 import {Box, Group, Text, Input} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
-import useFullName from '../shared/useFullName'
 import Flex from '../../../shared/components/flex'
 import Avatar from '../../../shared/components/avatar'
 import {useInviteState} from '../../../shared/providers/invite-context'
-import useUsername from '../../../shared/utils/use-username'
-import {mapToFriendlyStatus} from '../../../shared/utils/useIdentity'
+import useUsername from '../../../shared/hooks/use-username'
+import useFullName from '../../../shared/hooks/use-full-name'
+import {mapToFriendlyStatus} from '../../../shared/providers/identity-context'
 
 function Sidebar({onSelectContact, onSelectInvite}) {
   const {contacts} = useContactState()

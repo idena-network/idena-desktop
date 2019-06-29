@@ -7,7 +7,7 @@ const fromMe = sender => sender === 'QQ'
 
 const bg = sender => (fromMe(sender) ? theme.colors.primary : theme.colors.gray)
 
-export default ({text, sender, timestamp}) => {
+export default function Message({text, sender, timestamp}) {
   const own = fromMe(sender)
   return (
     <li>

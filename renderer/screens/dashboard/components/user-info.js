@@ -4,9 +4,9 @@ import {SubHeading, Text, Box} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import Avatar from '../../../shared/components/avatar'
-import useUsername from '../../../shared/utils/use-username'
-import useFullName from '../../contacts/shared/useFullName'
+import useUsername from '../../../shared/hooks/use-username'
 import {useIdentityState} from '../../../shared/providers/identity-context'
+import useFullName from '../../../shared/hooks/use-full-name'
 
 // TODO: THIS IS SHARED COMPONENT!!1 Please move under /shared dir
 function UserInfo() {

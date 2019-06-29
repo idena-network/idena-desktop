@@ -1,29 +1,30 @@
 import React, {useEffect, useState} from 'react'
+import {withRouter} from 'next/router'
 import {decode} from 'rlp'
 import dayjs from 'dayjs'
 import {backgrounds, padding, rem} from 'polished'
-import ValidationHeader from '../../screens/validation/shared/components/validation-header'
-import Timer from '../../screens/validation/screens/short/components/timer'
-import ValidationScene from '../../screens/validation/shared/components/validation-scene'
-import ValidationActions from '../../screens/validation/shared/components/validation-actions'
-import FlipThumbnails from '../../screens/validation/shared/components/flip-thumbnails'
-import {fetchFlip} from '../../shared/services/api'
+import ValidationHeader from '../../screens/validation/components/validation-header'
+import Timer from '../../screens/validation/components/timer'
+import ValidationScene from '../../screens/validation/components/validation-scene'
+import ValidationActions from '../../screens/validation/components/validation-actions'
+import FlipThumbnails from '../../screens/validation/components/flip-thumbnails'
 import {fromHexString} from '../../shared/utils/string'
 import Flex from '../../shared/components/flex'
-import {fetchFlipHashes} from '../../screens/validation/shared/api/validation-api'
+import {fetchFlipHashes} from '../../shared/api/validation'
 import {
   answered,
   types as answerTypes,
-} from '../../screens/validation/shared/utils/answers'
-import {useInterval} from '../../screens/validation/shared/utils/useInterval'
+} from '../../screens/validation/utils/answers'
+import {useInterval} from '../../shared/hooks/use-interval'
 import theme from '../../shared/theme'
-import {goToLongSession} from '../../screens/validation/shared/utils/router'
 import useValidation from '../../shared/utils/useValidation'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import useTiming from '../../shared/utils/use-timing'
 import {IconClose, Link} from '../../shared/components'
+import {useTimingState} from '../../shared/providers/timing-context'
+import {fetchFlip} from '../../shared/api'
 
-function ShortSession() {
+// eslint-disable-next-line react/prop-types
+function ShortSession({router}) {
   const [flips, setFlips] = useState([])
   const [flipHashes, setFlipHashes] = useState([])
   const [orders, setOrders] = useState([])
@@ -32,7 +33,7 @@ function ShortSession() {
   const [answers, setAnswers] = useState([])
   const [flipsLoaded, setFlipsLoaded] = useState(false)
 
-  const {shortSession} = useTiming()
+  const {shortSession} = useTimingState()
   const epoch = useEpochState()
   const {submitShortAnswers} = useValidation()
 
@@ -157,7 +158,7 @@ function ShortSession() {
       answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
     }))
     submitShortAnswers(answersPayload)
-    goToLongSession()
+    router.push('/validation/long')
   }
 
   const finish = dayjs(
@@ -192,6 +193,7 @@ function ShortSession() {
           selectedOption={answers[currentFlipIdx]}
           loaded={loadedStates[currentFlipIdx]}
           last={currentFlipIdx > flips.length - 1}
+          type="short"
         />
         <ValidationActions
           onReportAbuse={handleReportAbuse}
@@ -210,4 +212,4 @@ function ShortSession() {
   )
 }
 
-export default ShortSession
+export default withRouter(ShortSession)

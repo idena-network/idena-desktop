@@ -2,11 +2,12 @@ import React from 'react'
 import App, {Container} from 'next/app'
 import Router from 'next/router'
 import NProgress from 'nprogress'
-import GlobalStyle from '../components/global-style'
-import NProgressStyle from '../components/nprogress-style'
+import GlobalStyle from '../shared/components/global-style'
+import NProgressStyle from '../shared/components/nprogress-style'
 import {EpochProvider} from '../shared/providers/epoch-context'
 import {IdentityProvider} from '../shared/providers/identity-context'
 import {NotificationProvider} from '../shared/providers/notification-context'
+import {TimingProvider} from '../shared/providers/timing-context'
 
 Router.events.on('routeChangeStart', () => {
   NProgress.start()
@@ -27,13 +28,15 @@ class MyApp extends App {
       <Container>
         <GlobalStyle />
         <NProgressStyle />
-        <EpochProvider>
-          <IdentityProvider>
-            <NotificationProvider>
-              <Component {...pageProps} />
-            </NotificationProvider>
-          </IdentityProvider>
-        </EpochProvider>
+        <TimingProvider>
+          <EpochProvider>
+            <IdentityProvider>
+              <NotificationProvider>
+                <Component {...pageProps} />
+              </NotificationProvider>
+            </IdentityProvider>
+          </EpochProvider>
+        </TimingProvider>
       </Container>
     )
   }
