@@ -125,7 +125,7 @@ function ContactSection({children}) {
   return (
     <Group
       title="Contacts"
-      css={{...margin(rem(theme.spacings.medium16)), marginTop: 0}}
+      css={{...margin(rem(theme.spacings.medium16)), marginBottom: 0}}
     >
       {children}
     </Group>

@@ -28,7 +28,6 @@ function Button({size = 1, disabled, variant = 'primary', css, ...props}) {
         button:hover {
           background: ${darken(0.1, bg)};
           color: ${darken(0.05, color)};
-          ${disabled && `opacity: 0.5`};
         }
         button:disabled {
           cursor: not-allowed;

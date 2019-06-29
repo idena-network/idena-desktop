@@ -22,6 +22,7 @@ import {useNotificationDispatch} from '../../shared/providers/notification-conte
 const DEFAULT_NODE_URL = 'http://localhost:9009'
 
 const {clear: clearFlips} = global.flipStore || {}
+const inviteDb = global.invitesDb || {}
 
 function Settings() {
   const {archiveFlips} = useFlips()
@@ -99,6 +100,21 @@ function Settings() {
               }}
             >
               Archive flips
+            </Button>
+          </Box>
+        </Box>
+        <Box my={rem(theme.spacings.medium32)}>
+          <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
+            Invites
+          </SubHeading>
+          <Box my={theme.spacings.small}>
+            <Button
+              onClick={() => {
+                inviteDb.clearInvites()
+                addNotification({title: 'Invites removed'})
+              }}
+            >
+              Clear invites
             </Button>
           </Box>
         </Box>

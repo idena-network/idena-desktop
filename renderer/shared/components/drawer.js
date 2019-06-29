@@ -1,15 +1,15 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
 import {FiX} from 'react-icons/fi'
-import useClickAway from 'react-use/lib/useClickAway'
 import {rem} from 'polished'
 import theme from '../theme'
 import {Fill, Absolute} from '.'
+import useClickOutside from '../hooks/use-click-outside'
 
 function Drawer({show, onHide, ...props}) {
   const ref = useRef()
 
-  useClickAway(ref, () => {
+  useClickOutside(ref, () => {
     onHide()
   })
 

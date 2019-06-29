@@ -48,7 +48,7 @@ function ContactDetails(props) {
 ContactDetails.propTypes = {
   firstName: PropTypes.string,
   lastName: PropTypes.string,
-  address: PropTypes.string.isRequired,
+  address: PropTypes.string,
   state: PropTypes.string,
   age: PropTypes.number,
 }

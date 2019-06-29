@@ -25,13 +25,16 @@ module.exports = {
   addInvite(invite) {
     return getInvites()
       .push({id: nanoid(), ...invite})
-      .update('sentInvites', n => n + 1)
       .write()
   },
   removeInvite({id}) {
     return getInvites()
       .remove({id})
-      .update('sentInvites', n => n - 1)
+      .write()
+  },
+  clearInvites() {
+    return getInvites()
+      .remove()
       .write()
   },
   getActivationTx() {

@@ -49,25 +49,25 @@ function DisplayInvite({
         <NameField label="First name" defaultValue={firstName} />
         <NameField label="Last name" defaultValue={lastName} />
       </Flex>
-      <WideField label="Amount" value={amount} disabled={readonly}>
+      <WideField label="Amount" defaultValue={amount} disabled={readonly}>
         <Hint label="Fee" value="0.999 DNA" />
         <Hint label="Total amount" value="1000.999 DNA" />
       </WideField>
       <WideField
         label="Invitation code"
-        value={code}
+        defaultValue={code}
         disabled={readonly}
         allowCopy
       />
       <WideField
         label="Transaction ID"
-        value={hash}
+        defaultValue={hash}
         disabled={readonly}
         allowCopy
       />
       <WideField
         label="Receiver"
-        value={receiver}
+        defaultValue={receiver}
         disabled={readonly}
         allowCopy
       />

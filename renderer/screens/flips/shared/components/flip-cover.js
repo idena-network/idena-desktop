@@ -8,8 +8,6 @@ import {
   FiClock,
 } from 'react-icons/fi'
 import {position, borderRadius, backgrounds, padding, rem} from 'polished'
-import useClickAway from 'react-use/lib/useClickAway'
-import useHover from 'react-use/lib/useHover'
 import theme from '../../../../shared/theme'
 import FlipImage from './flip-image'
 import {Box, Text, Link, Absolute} from '../../../../shared/components'
@@ -21,6 +19,8 @@ import Divider from '../../../../shared/components/divider'
 import {useIdentityState} from '../../../../shared/providers/identity-context'
 import useFlips from '../../../../shared/utils/useFlips'
 import {useNotificationDispatch} from '../../../../shared/providers/notification-context'
+import useClickOutside from '../../../../shared/hooks/use-click-outside'
+import useHover from '../../../../shared/hooks/use-hover'
 
 const FlipMenu = forwardRef((props, ref) => (
   <Box
@@ -39,11 +39,13 @@ const FlipMenu = forwardRef((props, ref) => (
 ))
 
 function FlipMenuItem({href, onClick, icon, disabled, ...props}) {
-  const item = hovered => (
+  const [hoverRef, isHovered] = useHover()
+  return (
     <Box
+      ref={hoverRef}
       px={theme.spacings.normal}
       py={theme.spacings.small}
-      bg={hovered ? theme.colors.gray : ''}
+      bg={isHovered ? theme.colors.gray : ''}
     >
       <Flex align="center">
         {React.cloneElement(icon, {
@@ -53,7 +55,7 @@ function FlipMenuItem({href, onClick, icon, disabled, ...props}) {
           <Link href={href} {...props} />
         ) : (
           <FlatButton
-            bg={hovered ? theme.colors.gray : ''}
+            bg={isHovered ? theme.colors.gray : ''}
             disabled={disabled}
             onClick={onClick}
             {...props}
@@ -62,10 +64,6 @@ function FlipMenuItem({href, onClick, icon, disabled, ...props}) {
       </Flex>
     </Box>
   )
-  // eslint-disable-next-line no-unused-vars
-  const [hoveredItem, hovered] = useHover(item)
-
-  return hoveredItem
 }
 
 FlipMenuItem.propTypes = {
@@ -80,22 +78,21 @@ function FlipCover({
   id,
   hint,
   pics,
-  order,
   type,
   mined,
   createdAt,
   modifiedAt,
   width,
+  onSubmit,
+  onDelete,
 }) {
   const {canSubmitFlip} = useIdentityState()
-  const {submitFlip, deleteFlip} = useFlips()
-  const {addNotification, addError} = useNotificationDispatch()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const menuRef = useRef()
 
-  useClickAway(menuRef, () => {
+  useClickOutside(menuRef, () => {
     setIsMenuOpen(false)
   })
 
@@ -149,34 +146,7 @@ function FlipCover({
                   <FlipMenuItem
                     onClick={async () => {
                       setIsMenuOpen(false)
-                      if (canSubmit) {
-                        try {
-                          const {result, error} = await submitFlip({
-                            id,
-                            pics,
-                            order,
-                          })
-                          if (error) {
-                            addError({
-                              title: 'Error while uploading flip',
-                              body: error.message,
-                            })
-                          } else {
-                            addNotification({
-                              title: 'Flip saved',
-                              body: result.hash,
-                            })
-                          }
-                        } catch (error) {
-                          let message = 'Something went wrong'
-                          if (error.response && error.response.status === 413) {
-                            message = 'Maximum image size exceeded'
-                          }
-                          addError({
-                            title: message,
-                          })
-                        }
-                      }
+                      onSubmit()
                     }}
                     disabled={!canSubmit}
                     icon={<FiUploadCloud color={theme.colors.primary} />}
@@ -187,9 +157,7 @@ function FlipCover({
                   <FlipMenuItem
                     onClick={() => {
                       setIsMenuOpen(false)
-                      if (canSubmit) {
-                        deleteFlip({id})
-                      }
+                      onDelete()
                     }}
                     icon={<FiXCircle color={theme.colors.danger} />}
                   >
@@ -219,12 +187,13 @@ FlipCover.propTypes = {
   id: PropTypes.string.isRequired,
   hint: PropTypes.arrayOf(PropTypes.object).isRequired,
   pics: PropTypes.arrayOf(PropTypes.string).isRequired,
-  order: PropTypes.arrayOf(PropTypes.number),
   type: PropTypes.oneOf(Object.values(FlipType)),
   mined: PropTypes.bool,
   createdAt: PropTypes.number.isRequired,
   modifiedAt: PropTypes.number,
   width: PropTypes.string,
+  onSubmit: PropTypes.func,
+  onDelete: PropTypes.func,
 }
 
 export default FlipCover

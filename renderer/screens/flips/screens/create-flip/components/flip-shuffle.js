@@ -68,7 +68,7 @@ function FlipShuffle({pics, order, onShuffleFlip}) {
             {provided => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
                 {order.map((idx, k) => (
-                  <Draggable draggableId={`pic${idx}`} index={k}>
+                  <Draggable key={idx} draggableId={`pic${idx}`} index={k}>
                     {/* eslint-disable-next-line no-shadow */}
                     {provided => (
                       <div
