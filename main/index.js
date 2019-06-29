@@ -61,9 +61,7 @@ const createMenu = () => {
         accelerator: 'Command+Q',
         selector: 'terminate:',
         click: () => {
-          // if (isWin) {
           app.quit()
-          // }
         },
       },
     ],
@@ -133,9 +131,7 @@ const createTray = () => {
       accelerator: 'Command+Q',
       selector: 'terminate:',
       click: () => {
-        // if (isWin) {
         app.quit()
-        // }
       },
     },
   ])
@@ -147,9 +143,9 @@ app.on('ready', async () => {
   await prepareNext('./renderer')
 
   createMainWindow()
-  // if (!isDev) {
-  createMenu()
-  // }
+  if (!isDev) {
+    createMenu()
+  }
   createTray()
 })
 
@@ -176,7 +172,7 @@ ipcMain.on('node-log', ({sender}, message) => {
 })
 
 function checkPort(port) {
-  console.log('checking', port)
+  console.log('Looking for open port...', port)
   return new Promise((res, rej) => {
     const tempServer = net.createServer()
 
@@ -208,7 +204,7 @@ function runExpress(port) {
 function choosePort() {
   return checkPort(expressPort)
     .then(() => {
-      console.log(`Found free port ${expressPort}`)
+      console.log(`Found open port: ${expressPort}`)
       runExpress(expressPort)
       return Promise.resolve()
     })
