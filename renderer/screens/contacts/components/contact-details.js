@@ -49,8 +49,8 @@ ContactDetails.propTypes = {
   firstName: PropTypes.string,
   lastName: PropTypes.string,
   address: PropTypes.string.isRequired,
-  state: PropTypes.string.isRequired,
-  age: PropTypes.number.isRequired,
+  state: PropTypes.string,
+  age: PropTypes.number,
 }
 
 export default ContactDetails

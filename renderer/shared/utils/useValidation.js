@@ -1,12 +1,12 @@
 import {useState, useEffect, useCallback, useRef} from 'react'
-import useEpoch, {EpochPeriod} from './useEpoch'
 import * as api from '../../screens/validation/shared/api/validation-api'
 import useFlips from './useFlips'
+import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 
 const {getValidation, saveValidation} = global.validationStore || {}
 
 function useValidation() {
-  const {epoch, currentPeriod} = useEpoch()
+  const epoch = useEpochState()
   const {archiveFlips} = useFlips()
 
   const [shortAnswers, setShortAnswers] = useState([])
@@ -16,13 +16,13 @@ function useValidation() {
   const savedEpoch = useRef()
 
   useEffect(() => {
-    const validation = getValidation()
-    if (validation) {
+    const savedValidation = getValidation()
+    if (savedValidation) {
       // eslint-disable-next-line no-shadow
-      const {shortAnswers, longAnswers, epoch} = validation
+      const {shortAnswers, longAnswers, epoch} = savedValidation
       setShortAnswers(shortAnswers)
       setLongAnswers(longAnswers)
-      savedEpoch.current = epoch
+      savedEpoch.current = epoch.epoch
     }
   }, [])
 
@@ -33,8 +33,8 @@ function useValidation() {
       setRunning(false)
     }
 
-    if (epoch && epoch !== savedEpoch.current) {
-      savedEpoch.current = epoch
+    if (epoch && epoch.epoch !== savedEpoch.current) {
+      savedEpoch.current = epoch.epoch
       resetValidation()
       archiveFlips()
     }
@@ -42,11 +42,12 @@ function useValidation() {
 
   useEffect(() => {
     setRunning(
-      [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
-        currentPeriod
-      )
+      epoch &&
+        [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+          epoch.currentPeriod
+        )
     )
-  }, [currentPeriod])
+  }, [epoch])
 
   useEffect(() => {
     if (epoch) {

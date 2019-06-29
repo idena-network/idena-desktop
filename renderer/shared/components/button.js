@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, transparentize, transitions, darken, lighten} from 'polished'
+import {rem, transparentize, darken} from 'polished'
 import theme from '../theme'
 
 function Button({size = 1, disabled, variant = 'primary', css, ...props}) {
@@ -19,17 +19,20 @@ function Button({size = 1, disabled, variant = 'primary', css, ...props}) {
           border: none;
           border-radius: 6px;
           color: ${color};
-          cursor: ${disabled ? 'not-allowed' : 'pointer'};
+          cursor: pointer;
           font-size: ${`${size}em`};
           padding: ${`${0.5 * size}em ${size}em`};
           outline: none;
-          ${disabled && `opacity: 0.5`};
           transition: background 0.3s ease, color 0.3s ease;
         }
         button:hover {
           background: ${darken(0.1, bg)};
           color: ${darken(0.05, color)};
           ${disabled && `opacity: 0.5`};
+        }
+        button:disabled {
+          cursor: not-allowed;
+          opacity: 0.5;
         }
       `}</style>
     </>
@@ -61,8 +64,10 @@ function FlatButton({size = 1, color, disabled, css, ...props}) {
           padding: 0;
           outline: none;
           ${disabled && `opacity: 0.5`};
+          transition: background 0.3s ease, color 0.3s ease;
         }
         button:hover {
+          color: ${darken(0.05, color)};
           opacity: 0.9;
           ${disabled && `opacity: 0.5`};
         }
@@ -84,19 +89,28 @@ function IconButton({icon, children, ...props}) {
         button {
           background: none;
           border: none;
-          color: ${theme.colors.primary};
           cursor: pointer;
           font-size: 1em;
           display: flex;
           align-items: center;
-          padding: ${rem(theme.spacings.small8)};
           text-decoration: none;
           vertical-align: middle;
           position: relative;
-          transition: all 0.5s ease-out;
+          transition: color 0.5s ease;
         }
         span {
           display: inline-block;
+        }
+      `}</style>
+      <style jsx>{`
+        button {
+          color: ${theme.colors.primary};
+          padding: ${rem(theme.spacings.small8)};
+        }
+        button:hover {
+          color: ${darken(0.1, theme.colors.primary)};
+        }
+        span {
           margin-left: ${theme.spacings.small};
         }
       `}</style>

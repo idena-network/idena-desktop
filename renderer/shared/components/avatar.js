@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {margin, rem, backgrounds, borderRadius} from 'polished'
-import theme from '../../../../shared/theme'
+import theme from '../theme'
 
 function Avatar({username, size = 80}) {
   const src = username

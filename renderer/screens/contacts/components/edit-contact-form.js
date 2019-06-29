@@ -1,7 +1,7 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
 import {Box, Button, FormGroup, Label, Input} from '../../../shared/components'
-import Avatar from '../../flips/shared/components/avatar'
+import Avatar from '../../../shared/components/avatar'
 
 export function EditContactForm({name, lastName, addr, onSave}) {
   const nameRef = useRef(null)

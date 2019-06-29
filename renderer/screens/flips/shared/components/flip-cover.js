@@ -18,8 +18,9 @@ import FlipType from '../types/flip-type'
 import Flex from '../../../../shared/components/flex'
 import {FlatButton} from '../../../../shared/components/button'
 import Divider from '../../../../shared/components/divider'
-import useCoinbaseAddress from '../../../../shared/utils/useCoinbaseAddress'
-import useIdentity from '../../../../shared/utils/useIdentity'
+import {useIdentityState} from '../../../../shared/providers/identity-context'
+import useFlips from '../../../../shared/utils/useFlips'
+import {useNotificationDispatch} from '../../../../shared/providers/notification-context'
 
 const FlipMenu = forwardRef((props, ref) => (
   <Box
@@ -79,16 +80,16 @@ function FlipCover({
   id,
   hint,
   pics,
+  order,
   type,
   mined,
   createdAt,
   modifiedAt,
-  onDelete,
-  onPublish,
   width,
 }) {
-  const address = useCoinbaseAddress()
-  const {canSubmitFlip} = useIdentity(address)
+  const {canSubmitFlip} = useIdentityState()
+  const {submitFlip, deleteFlip} = useFlips()
+  const {addNotification, addError} = useNotificationDispatch()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -146,10 +147,35 @@ function FlipCover({
                     Edit flip
                   </FlipMenuItem>
                   <FlipMenuItem
-                    onClick={() => {
+                    onClick={async () => {
                       setIsMenuOpen(false)
                       if (canSubmit) {
-                        onPublish()
+                        try {
+                          const {result, error} = await submitFlip({
+                            id,
+                            pics,
+                            order,
+                          })
+                          if (error) {
+                            addError({
+                              title: 'Error while uploading flip',
+                              body: error.message,
+                            })
+                          } else {
+                            addNotification({
+                              title: 'Flip saved',
+                              body: result.hash,
+                            })
+                          }
+                        } catch (error) {
+                          let message = 'Something went wrong'
+                          if (error.response && error.response.status === 413) {
+                            message = 'Maximum image size exceeded'
+                          }
+                          addError({
+                            title: message,
+                          })
+                        }
                       }
                     }}
                     disabled={!canSubmit}
@@ -162,7 +188,7 @@ function FlipCover({
                     onClick={() => {
                       setIsMenuOpen(false)
                       if (canSubmit) {
-                        onDelete()
+                        deleteFlip({id})
                       }
                     }}
                     icon={<FiXCircle color={theme.colors.danger} />}
@@ -191,14 +217,13 @@ function FlipCover({
 
 FlipCover.propTypes = {
   id: PropTypes.string.isRequired,
-  hint: PropTypes.arrayOf(PropTypes.string).isRequired,
+  hint: PropTypes.arrayOf(PropTypes.object).isRequired,
   pics: PropTypes.arrayOf(PropTypes.string).isRequired,
+  order: PropTypes.arrayOf(PropTypes.number),
   type: PropTypes.oneOf(Object.values(FlipType)),
   mined: PropTypes.bool,
   createdAt: PropTypes.number.isRequired,
   modifiedAt: PropTypes.number,
-  onDelete: PropTypes.func,
-  onPublish: PropTypes.func,
   width: PropTypes.string,
 }
 

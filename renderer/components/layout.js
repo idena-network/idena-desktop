@@ -1,6 +1,5 @@
 import React, {useContext} from 'react'
 import {withRouter} from 'next/router'
-import PropTypes from 'prop-types'
 import Nav from './nav'
 import {NotificationContext} from '../shared/providers/notification-provider'
 import Notifications from './notifications'
@@ -9,21 +8,17 @@ import {ValidationProvider} from '../shared/providers/validation-context'
 import {SyncProvider} from '../shared/providers/sync-context'
 import SyncStatus from './sync-status'
 
-function Layout({Sidebar = Nav, router, children}) {
+// eslint-disable-next-line react/prop-types
+function Layout({children}) {
   const {notifications} = useContext(NotificationContext)
 
-  const matchValidation = router.pathname.startsWith('/validation')
   return (
-    <>
-      <main>
-        <Sidebar />
-        <section>{children}</section>
-      </main>
-      {!matchValidation && (
-        <ValidationProvider>
-          <ValidationBanner />
-        </ValidationProvider>
-      )}
+    <main>
+      <Nav />
+      <section>{children}</section>
+      <ValidationProvider>
+        <ValidationBanner />
+      </ValidationProvider>
       <Notifications notifications={notifications} />
       <SyncProvider>
         <SyncStatus />
@@ -39,15 +34,8 @@ function Layout({Sidebar = Nav, router, children}) {
           width: 100%;
         }
       `}</style>
-    </>
+    </main>
   )
 }
 
-Layout.propTypes = {
-  Sidebar: PropTypes.node,
-  // eslint-disable-next-line react/forbid-prop-types
-  router: PropTypes.object,
-  children: PropTypes.node,
-}
-
-export default withRouter(Layout)
+export default Layout

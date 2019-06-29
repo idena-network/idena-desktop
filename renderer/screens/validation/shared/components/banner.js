@@ -1,22 +1,30 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {withRouter} from 'next/router'
 import dayjs from 'dayjs'
 import {Absolute, Box, Text, Fill, Link} from '../../../../shared/components'
 import useTiming from '../../../../shared/utils/use-timing'
-import useEpoch, {EpochPeriod} from '../../../../shared/utils/useEpoch'
 import theme from '../../../../shared/theme'
 import Flex from '../../../../shared/components/flex'
 import {useInterval} from '../utils/useInterval'
 import {useValidationState} from '../../../../shared/providers/validation-context'
+import {
+  useEpochState,
+  EpochPeriod,
+} from '../../../../shared/providers/epoch-context'
 
-function Banner() {
+// eslint-disable-next-line react/prop-types
+function Banner({router}) {
   const {shortSession, longSession} = useTiming()
-  const {currentPeriod, currentValidationStart} = useEpoch()
+  const epoch = useEpochState()
   const {shortAnswers, longAnswers} = useValidationState()
 
-  if (!currentPeriod) {
+  const matchValidation = router.pathname.startsWith('/validation')
+  if (epoch === null || matchValidation) {
     return null
   }
+
+  const {currentPeriod, currentValidationStart} = epoch
 
   if (currentPeriod === EpochPeriod.FlipLottery) {
     return (
@@ -109,4 +117,4 @@ Countdown.propTypes = {
   children: PropTypes.node,
 }
 
-export default Banner
+export default withRouter(Banner)

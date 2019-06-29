@@ -1,18 +1,18 @@
-import React, {useContext} from 'react'
-import PropTypes from 'prop-types'
+import React from 'react'
 import {withRouter} from 'next/router'
 import {rem} from 'polished'
 import {Heading, Box, IconClose} from '../../shared/components'
 import FlipMaster from '../../screens/flips/screens/create-flip/components/flip-master'
 import Layout from '../../components/layout'
 import theme from '../../shared/theme'
-import {NotificationContext} from '../../shared/providers/notification-provider'
 import Flex from '../../shared/components/flex'
+import {useNotificationDispatch} from '../../shared/providers/notification-context'
 
+// eslint-disable-next-line react/prop-types
 function EditFlip({router}) {
   const {getFlip} = global.flipStore || {getFlip: null}
 
-  const {addNotification} = useContext(NotificationContext)
+  const {addNotification} = useNotificationDispatch()
 
   if (!getFlip) {
     return null
@@ -38,11 +38,6 @@ function EditFlip({router}) {
       </Box>
     </Layout>
   ) : null
-}
-
-EditFlip.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  router: PropTypes.object.isRequired,
 }
 
 export default withRouter(EditFlip)

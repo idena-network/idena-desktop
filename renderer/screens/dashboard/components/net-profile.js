@@ -7,28 +7,23 @@ import {Figure} from '../../../shared/components/utils'
 import {useIdentityState} from '../../../shared/providers/identity-context'
 import {mapToFriendlyStatus} from '../../../shared/utils/useIdentity'
 
-export function NetProfile({stake, age}) {
-  const {address, status} = useIdentityState()
+function NetProfile() {
+  const {address, state, stake, age} = useIdentityState()
   return (
     <Box
       bg={theme.colors.gray}
       p={theme.spacings.xlarge}
       css={{
-        borderRadius: '10px',
+        borderRadius: rem(10),
         ...margin(0, 0, rem(theme.spacings.medium24), 0),
       }}
     >
       <Figure label="Address" value={address} />
-      <Figure label="Status" value={mapToFriendlyStatus(status)} />
+      <Figure label="Status" value={mapToFriendlyStatus(state)} />
       <Figure label="Stake" value={stake} postfix="DNA" />
       <Figure label="Age" value={age} postfix="epochs" />
     </Box>
   )
-}
-
-NetProfile.propTypes = {
-  age: PropTypes.number,
-  stake: PropTypes.string,
 }
 
 export default NetProfile

@@ -31,26 +31,30 @@ export async function fetchIdentities() {
 }
 
 /**
+ * Identity
+ * @typedef {Object} Identity
+ * @property {string} address
+ * @property {string} nickname
+ * @property {string} stake
+ * @property {number} invites Invites available
+ * @property {number} age
+ * @property {string} state Identity state
+ * @property {string} pubkey
+ * @property {number} requiredFlips
+ * @property {number} madeFlips
+ * @property {string[]} flips
+ */
+
+/**
  * Fetch identity info for the address
  *
  * @param {string} address Address
- * @returns {object} Identity details
- * @example {
-    "address": "0x994cf4cccf6463a903f339ea87288fe253e23b98",
-    "nickname": "",
-    "stake": "1998",
-    "invites": 0,
-    "age": 0,
-    "state": "Undefined",
-    "pubkey": "",
-    "requiredFlips": 0,
-    "madeFlips": 0
-  }
+ * @returns {Identity} Identity details
  */
 export async function fetchIdentity(address) {
   const {data} = await api().post('/', {
     method: 'dna_identity',
-    params: [address],
+    params: address ? [address] : [],
     id: 1,
   })
   const {result} = data

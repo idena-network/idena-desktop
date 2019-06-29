@@ -1,17 +1,21 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import {rem, margin} from 'polished'
 import {SubHeading, Text, Box} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
-import Avatar from '../../flips/shared/components/avatar'
+import Avatar from '../../../shared/components/avatar'
 import useUsername from '../../../shared/utils/use-username'
 import useFullName from '../../contacts/shared/useFullName'
+import {useIdentityState} from '../../../shared/providers/identity-context'
 
-function UserInfo(props) {
-  const {address} = props
-  const fullName = useFullName(props)
-  const username = useUsername(props)
+// TODO: THIS IS SHARED COMPONENT!!1 Please move under /shared dir
+function UserInfo() {
+  const identity = useIdentityState()
+  const {address} = identity
+
+  const fullName = useFullName(identity)
+  const username = useUsername(identity)
+
   return (
     <Flex
       align="center"
@@ -30,10 +34,6 @@ function UserInfo(props) {
       </Box>
     </Flex>
   )
-}
-
-UserInfo.propTypes = {
-  address: PropTypes.string.isRequired,
 }
 
 export default UserInfo

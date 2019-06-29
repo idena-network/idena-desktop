@@ -8,9 +8,15 @@ import {
 import {Box, Button, Input, Absolute} from '../../../shared/components'
 import theme from '../../../shared/theme'
 
+const WANNA_KILL_MYSELF = false
+
 function KillMe() {
   const [showConfirm, setShowConfirm] = React.useState(false)
   const {killMe} = useIdentityDispatch()
+
+  if (!WANNA_KILL_MYSELF) {
+    return null
+  }
 
   return (
     <Box>

@@ -8,7 +8,7 @@ import {
   Label,
   Input,
 } from '../../../shared/components'
-import Avatar from '../../flips/shared/components/avatar'
+import Avatar from '../../../shared/components/avatar'
 
 export function NewContactForm({name, lastName, addr, username, onSave}) {
   const nameRef = useRef(null)

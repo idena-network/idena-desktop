@@ -10,10 +10,11 @@ import {
   Hint,
   Button,
 } from '../../../shared/components'
-import Avatar from '../../flips/shared/components/avatar'
+import Avatar from '../../../shared/components/avatar'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
+import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 
 export function SendInviteForm({onSuccess, onFail}) {
   const [firstName, setFirstName] = React.useState()
@@ -23,6 +24,7 @@ export function SendInviteForm({onSuccess, onFail}) {
   const [submitting, setSubmitting] = React.useState(false)
 
   const {addInvite} = useInviteDispatch()
+  const {addNotification, addError} = useNotificationDispatch()
 
   return (
     <Box
@@ -78,11 +80,17 @@ export function SendInviteForm({onSuccess, onFail}) {
               await addInvite(address, amount, firstName, lastName)
               setSubmitting(false)
               if (onSuccess) {
+                addNotification({
+                  title: 'Invite sent',
+                })
                 onSuccess()
               }
             } catch (error) {
               setSubmitting(false)
               if (onFail) {
+                addError({
+                  title: error.message,
+                })
                 onFail(error)
               }
             }

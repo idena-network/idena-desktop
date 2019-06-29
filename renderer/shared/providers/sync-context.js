@@ -21,7 +21,7 @@ function SyncProvider({children}) {
         throw new Error(error.message)
       }
     },
-    syncing ? 1000 : null,
+    syncing ? 10000 : null,
     true
   )
 

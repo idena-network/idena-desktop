@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "main": "main/index.js",
   "scripts": {
-    "start": "electron .",
+    "start": "run-electron .",
     "build": "next build renderer && next export renderer",
     "dist": "npm run build && build --dir",
     "clean": "rm -rf renderer/out dist",
@@ -42,7 +42,8 @@
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
     "eslint-plugin-react-hooks": "^1.6.0",
-    "prettier": "^1.16.4"
+    "prettier": "^1.16.4",
+    "run-electron": "^1.0.0"
   },
   "dependencies": {
     "ansi-to-html": "^0.6.10",

@@ -1,83 +1,56 @@
-import React, {useState, useContext} from 'react'
+import React from 'react'
+import {rem} from 'polished'
+import {FiShare, FiUserPlus, FiCamera} from 'react-icons/fi'
 import Layout from '../../components/layout'
 import {Heading, Drawer, Box} from '../../shared/components'
-import {
-  UserActions,
-  UserInfo,
-  NetProfile,
-  ActivateInviteForm,
-} from '../../screens/dashboard/components'
 import {SendInviteForm} from '../../screens/contacts/components'
 import theme from '../../shared/theme'
-import useCoinbaseAddress from '../../shared/utils/useCoinbaseAddress'
-import useIdentity from '../../shared/utils/useIdentity'
-import {
-  NotificationContext,
-  NotificationType,
-} from '../../shared/providers/notification-provider'
 import {InviteProvider} from '../../shared/providers/invite-context'
-import {IdentityProvider} from '../../shared/providers/identity-context'
 import KillMe from '../../screens/dashboard/components/kill-me'
-
-const WANNA_KILL_MYSELF = false
+import Actions from '../../screens/dashboard/components/actions'
+import IconLink from '../../shared/components/icon-link'
+import ActivateInviteForm from '../../screens/dashboard/components/activate-invite-form'
+import UserInfo from '../../screens/dashboard/components/user-info'
+import NetProfile from '../../screens/dashboard/components/net-profile'
 
 export default () => {
-  const address = useCoinbaseAddress()
-  const identity = useIdentity(address)
+  const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(false)
 
-  const {addNotification} = useContext(NotificationContext)
-  const [isSendInviteOpen, setIsSendInviteOpen] = useState(false)
-
-  if (!address) {
-    return null
-  }
+  const handleCloseSendInvite = () => setIsSendInviteOpen(false)
 
   return (
     <InviteProvider>
-      <IdentityProvider address={address}>
-        <Layout>
-          <Box px={theme.spacings.xxxlarge} py={theme.spacings.large} w="600px">
-            <Heading>Profile</Heading>
-            <UserActions
-              onSendInvite={() => setIsSendInviteOpen(true)}
-              canActivateInvite
-            />
-            <UserInfo {...identity} />
-            <NetProfile {...identity} />
-            {WANNA_KILL_MYSELF && <KillMe />}
-            <ActivateInviteForm
-              onFail={({message}) =>
-                addNotification({
-                  title: message,
-                  type: NotificationType.Error,
-                })
-              }
-            />
-          </Box>
-          <Drawer
-            show={isSendInviteOpen}
-            onHide={() => {
-              setIsSendInviteOpen(false)
-            }}
-          >
-            <SendInviteForm
-              onSuccess={() => {
-                setIsSendInviteOpen(false)
-                addNotification({
-                  title: 'Invite sent. Check Contacts',
-                })
-              }}
-              onFail={error => {
-                setIsSendInviteOpen(false)
-                addNotification({
-                  title: error.message,
-                  type: NotificationType.Error,
-                })
-              }}
-            />
-          </Drawer>
-        </Layout>
-      </IdentityProvider>
+      <Layout>
+        <Box
+          px={theme.spacings.xxxlarge}
+          py={theme.spacings.large}
+          w={rem(700)}
+        >
+          <Heading>Profile</Heading>
+          <Actions>
+            <IconLink icon={<FiShare />}>Share</IconLink>
+            <IconLink
+              icon={<FiUserPlus />}
+              onClick={() => setIsSendInviteOpen(true)}
+            >
+              Invite
+            </IconLink>
+            <IconLink href="/flips/new" icon={<FiCamera />}>
+              Submit flip
+            </IconLink>
+          </Actions>
+          <UserInfo />
+          <NetProfile />
+          <ActivateInviteForm />
+          <KillMe />
+        </Box>
+        <Drawer show={isSendInviteOpen} onHide={handleCloseSendInvite}>
+          <SendInviteForm
+            onSuccess={handleCloseSendInvite}
+            onFail={handleCloseSendInvite}
+          />
+        </Drawer>
+      </Layout>
     </InviteProvider>
   )
 }

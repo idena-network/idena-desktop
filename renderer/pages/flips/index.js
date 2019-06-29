@@ -14,24 +14,16 @@ import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
 import FlipCover from '../../screens/flips/shared/components/flip-cover'
 import FlipType from '../../screens/flips/shared/types/flip-type'
-import {
-  NotificationContext,
-  NotificationType,
-} from '../../shared/providers/notification-provider'
 
 function Flips() {
-  const [flipType, setFlipType] = useLocalStorage(
-    'flips/filter',
-    FlipType.Published
-  )
-  const {flips, deleteFlip, submitFlip} = useFlips()
-  const [filteredFlips, setFilteredFlips] = useState([])
+  const {flips} = useFlips()
+
+  const [filter, setFilter] = React.useState(FlipType.Published)
+  const [filteredFlips, setFilteredFlips] = React.useState([])
 
   useEffect(() => {
-    setFilteredFlips(flips.filter(flip => flip.type === flipType))
-  }, [flipType, flips, setFilteredFlips])
-
-  const {addNotification} = React.useContext(NotificationContext)
+    setFilteredFlips(flips.filter(({type}) => type === filter))
+  }, [filter, flips])
 
   return (
     <Layout>
@@ -43,9 +35,9 @@ function Flips() {
               <FlipToolbarItem
                 key={type}
                 onClick={() => {
-                  setFlipType(type)
+                  setFilter(type)
                 }}
-                isCurrent={flipType === type}
+                isCurrent={filter === type}
               >
                 {type}
               </FlipToolbarItem>
@@ -61,35 +53,7 @@ function Flips() {
       <Box my={rem(theme.spacings.medium32)} px={theme.spacings.xxxlarge}>
         <FlipList>
           {filteredFlips.map(flip => (
-            <FlipCover
-              key={flip.id}
-              {...flip}
-              onDelete={() => {
-                deleteFlip(flip)
-              }}
-              onPublish={async () => {
-                try {
-                  const {result, error} = await submitFlip(flip)
-                  addNotification({
-                    title: error ? 'Error while uploading flip' : 'Flip saved!',
-                    body: error ? error.message : `Hash ${result.hash}`,
-                    type: error
-                      ? NotificationType.Error
-                      : NotificationType.Info,
-                  })
-                } catch ({response: {status}}) {
-                  addNotification({
-                    title: 'Error while uploading flip',
-                    body:
-                      status === 413
-                        ? 'Maximum image size exceeded'
-                        : 'Unexpected error occurred',
-                    type: NotificationType.Error,
-                  })
-                }
-              }}
-              width="25%"
-            />
+            <FlipCover key={flip.id} {...flip} width="25%" />
           ))}
         </FlipList>
       </Box>

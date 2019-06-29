@@ -1,61 +1,53 @@
 import React from 'react'
-import PropTypes from 'prop-types'
+import deepEqual from 'dequal'
 import {useInterval} from '../../screens/validation/shared/utils/useInterval'
 import {fetchIdentity, killIdentity} from '../api'
-import {useInviteDispatch} from './invite-context'
 import {IdentityStatus} from '../utils/useIdentity'
 
 const IdentityStateContext = React.createContext()
 const IdentityDispatchContext = React.createContext()
 
-function IdentityProvider({address, children}) {
-  const {resetActivation} = useInviteDispatch()
-
-  const [status, setStatus] = React.useState()
+// eslint-disable-next-line react/prop-types
+function IdentityProvider({children}) {
+  const [identity, setIdentity] = React.useState(null)
 
   React.useEffect(() => {
     let ignore = false
 
-    if (address) {
-      fetchIdentity(address).then(({state}) => {
-        if (!ignore) {
-          setStatus(state)
-        }
-      })
+    async function fetchData() {
+      if (!ignore) {
+        setIdentity(await fetchIdentity())
+      }
     }
+
+    fetchData()
 
     return () => {
       ignore = true
     }
-  }, [address, status])
+  }, [])
 
-  useInterval(
-    async () => {
-      // eslint-disable-next-line no-shadow
-      const identity = await fetchIdentity(address)
-      const {state} = identity
-      setStatus(state)
-    },
-    address ? 3000 : null,
-    true
-  )
-
-  React.useEffect(() => {
-    if (status && status === IdentityStatus.Candidate) {
-      resetActivation()
+  useInterval(async () => {
+    async function fetchData() {
+      const nextIdentity = await fetchIdentity()
+      if (!deepEqual(identity, nextIdentity)) {
+        setIdentity(nextIdentity)
+      }
     }
-  }, [resetActivation, status])
+
+    fetchData()
+  }, 5000)
 
   const canActivateInvite = [
     IdentityStatus.Undefined,
     IdentityStatus.Killed,
     IdentityStatus.Invite,
-  ].includes(status)
+  ].includes(identity && identity.state)
 
   const killMe = () => {
-    const {result, error} = killIdentity(address)
+    const {result, error} = killIdentity(identity.address)
     if (result) {
-      setStatus(IdentityStatus.Killed)
+      setIdentity({...identity, state: IdentityStatus.Killed})
     } else {
       throw new Error(error.message)
     }
@@ -64,21 +56,15 @@ function IdentityProvider({address, children}) {
   return (
     <IdentityStateContext.Provider
       value={{
-        address,
-        status,
+        ...identity,
         canActivateInvite,
       }}
     >
-      <IdentityDispatchContext.Provider value={killMe}>
+      <IdentityDispatchContext.Provider value={{killMe}}>
         {children}
       </IdentityDispatchContext.Provider>
     </IdentityStateContext.Provider>
   )
-}
-
-IdentityProvider.propTypes = {
-  address: PropTypes.string.isRequired,
-  children: PropTypes.node,
 }
 
 function useIdentityState() {

@@ -9,7 +9,7 @@ import {
   backgrounds,
 } from 'polished'
 import {Box, SubHeading, Text, Field, Hint} from '../../../shared/components'
-import Avatar from '../../flips/shared/components/avatar'
+import Avatar from '../../../shared/components/avatar'
 import useFullName from '../shared/useFullName'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
@@ -46,8 +46,8 @@ function DisplayInvite({
         <Status mined={mined}>{mined ? 'Mined.' : 'Mining...'}</Status>
       </Box>
       <Flex justify="space-between">
-        <NameField label="First name" value={firstName} />
-        <NameField label="Last name" value={lastName} />
+        <NameField label="First name" defaultValue={firstName} />
+        <NameField label="Last name" defaultValue={lastName} />
       </Flex>
       <WideField label="Amount" value={amount} disabled={readonly}>
         <Hint label="Fee" value="0.999 DNA" />

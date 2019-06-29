@@ -7,11 +7,11 @@ import FlipMaster from '../../screens/flips/screens/create-flip/components/flip-
 import Layout from '../../components/layout'
 import theme from '../../shared/theme'
 import Flex from '../../shared/components/flex'
-import {NotificationContext} from '../../shared/providers/notification-provider'
+import {useNotificationDispatch} from '../../shared/providers/notification-context'
 
 // eslint-disable-next-line react/prop-types
 function NewFlip({router}) {
-  const {addNotification} = React.useContext(NotificationContext)
+  const {addNotification} = useNotificationDispatch()
 
   const [id] = useState(nanoid())
 

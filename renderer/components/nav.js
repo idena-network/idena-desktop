@@ -2,29 +2,35 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
 import {FiInstagram, FiSettings, FiUserCheck, FiUsers} from 'react-icons/fi'
-import {margin, rem} from 'polished'
+import {margin, rem, borderRadius} from 'polished'
 import {Box, List, Link, Text} from '../shared/components'
 import Flex from '../shared/components/flex'
 import theme from '../shared/theme'
 import Loading from '../shared/components/loading'
 import useValidation from '../shared/utils/useValidation'
-import useIdentity, {IdentityStatus} from '../shared/utils/useIdentity'
-import useEpoch, {EpochPeriod} from '../shared/utils/useEpoch'
-import useCoinbaseAddress from '../shared/utils/useCoinbaseAddress'
+import {IdentityStatus} from '../shared/utils/useIdentity'
+import {useIdentityState} from '../shared/providers/identity-context'
+import {useEpochState, EpochPeriod} from '../shared/providers/epoch-context'
 
 function Nav() {
-  const address = useCoinbaseAddress()
-  const identity = useIdentity(address)
-  const {currentPeriod, nextValidation} = useEpoch()
+  const identity = useIdentityState()
+  const {nickname} = identity
 
+  const epoch = useEpochState()
+
+  if (!epoch) {
+    return null
+  }
+
+  const {currentPeriod, nextValidation} = epoch
   return (
     <nav>
-      <Box css={margin(rem(32), 0, rem(40), 0)}>
+      <Box css={margin(rem(theme.spacings.medium32), 0, rem(40), 0)}>
         <img src="../static/logo.svg" alt="idena logo" />
       </Box>
       <List>
         <NavItem href="/dashboard" active icon={<FiUserCheck />}>
-          {'My Idena' || identity.nickname}
+          {'My Idena' || nickname}
         </NavItem>
         <NavItem href="/flips" icon={<FiInstagram />}>
           Flips
@@ -40,8 +46,11 @@ function Nav() {
         </NavItem>
         <Box
           bg={theme.colors.white01}
-          m={`${theme.spacings.xlarge} 0`}
-          css={{borderRadius: '10px'}}
+          my={theme.spacings.xlarge}
+          css={{
+            ...borderRadius('top', rem(10)),
+            ...borderRadius('bottom', rem(10)),
+          }}
         >
           <Block title="Current period">{currentPeriod}</Block>
           <Block title="My current task">
@@ -49,7 +58,7 @@ function Nav() {
           </Block>
           {currentPeriod === EpochPeriod.None && (
             <Block title="Next validation">
-              {nextValidation && new Date(nextValidation).toLocaleString()}
+              {new Date(nextValidation).toLocaleString()}
             </Block>
           )}
         </Box>
@@ -95,6 +104,7 @@ const NavItem = withRouter(({href, router, icon, children}) => {
           padding: 0 1em;
           line-height: 2.2em;
           margin: 0 0 0.5em;
+          transition: background 0.3s ease;
         }
         li:hover {
           border-radius: 4px;

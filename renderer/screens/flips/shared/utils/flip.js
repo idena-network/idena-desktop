@@ -5,6 +5,9 @@ import {capitalize} from '../../../../shared/utils/string'
  * @param {object[]} words List of two words
  */
 export function composeHint(words) {
+  if (!words) {
+    return ''
+  }
   return words
     .map(w => (typeof w === 'string' ? w : w.name))
     .map(capitalize)

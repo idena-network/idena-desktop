@@ -18,13 +18,17 @@ const Box = forwardRef(
           div {
             display: block;
             background: ${bg};
-            ${marginProp && `margin: ${marginProp}`};
-            ${mx && `margin-left: ${mx}; margin-right: ${mx}`};
-            ${my && `margin-top: ${my}; margin-bottom: ${my}`};
-            ${paddingProp && `padding: ${paddingProp}`};
-            ${px && `padding-left: ${px}; padding-right: ${px}`};
-            ${py && `padding-top: ${py}; padding-bottom: ${py}`};
-            ${w && `width: ${w}`};
+            margin: ${marginProp};
+            margin-left: ${mx};
+            margin-right: ${mx};
+            margin-top: ${my};
+            margin-bottom: ${my};
+            padding: ${paddingProp};
+            padding-left: ${px};
+            padding-right: ${px};
+            padding-top: ${py};
+            padding-bottom: ${py};
+            width: ${w};
           }
         `}</style>
       </>

@@ -34,12 +34,14 @@ function useFlips() {
 
   useEffect(() => {
     const savedFlips = getFlipsFromStore()
-    setFlips(savedFlips)
+    if (savedFlips.length) {
+      setFlips(savedFlips)
+    }
   }, [])
 
   useEffect(() => {
     if (flips.length > 0) {
-      saveFlips(flips)
+      // saveFlips(flips)
     }
   }, [flips])
 
@@ -78,20 +80,23 @@ function useFlips() {
         f => f.id === draft.id && f.type === FlipType.Draft
       )
       const nextDraft = {...draft, type: FlipType.Draft}
-      return draftIdx > -1
-        ? [
-            ...prevFlips.slice(0, draftIdx),
-            {...prevFlips[draftIdx], ...nextDraft, modifiedAt: Date.now()},
-            ...prevFlips.slice(draftIdx + 1),
-          ]
-        : prevFlips.concat({...nextDraft, createdAt: Date.now()})
+      const nextFlips =
+        draftIdx > -1
+          ? [
+              ...prevFlips.slice(0, draftIdx),
+              {...prevFlips[draftIdx], ...nextDraft, modifiedAt: Date.now()},
+              ...prevFlips.slice(draftIdx + 1),
+            ]
+          : prevFlips.concat({...nextDraft, createdAt: Date.now()})
+
+      saveFlips(nextFlips)
+
+      return nextFlips
     })
   }, [])
 
   const submitFlip = useCallback(
-    async flip => {
-      const {pics, order} = flip
-
+    async ({id, pics, order}) => {
       if (
         flips.filter(
           f => f.type === FlipType.Published && areSame(f.pics, pics)
@@ -112,18 +117,24 @@ function useFlips() {
       const {result} = resp
       if (result) {
         setFlips(prevFlips => {
-          const flipIdx = prevFlips.findIndex(f => f.id === flip.id)
-          return [
+          const flipIdx = prevFlips.findIndex(f => f.id === id)
+          const nextFlips = [
             ...prevFlips.slice(0, flipIdx),
             {
               ...prevFlips[flipIdx],
-              ...flip,
+              id,
+              pics,
+              order,
               ...result,
               type: FlipType.Published,
               modifiedAt: Date.now(),
             },
             ...prevFlips.slice(flipIdx + 1),
           ]
+
+          saveFlips(nextFlips)
+
+          return nextFlips
         })
       }
       return resp

@@ -6,8 +6,15 @@ import {fetchEpoch} from '../api'
 import useTiming from '../utils/use-timing'
 
 const hasValues = obj => Object.values(obj).every(x => x)
-
 const GAP = 30
+
+export const EpochPeriod = {
+  FlipLottery: 'FlipLottery',
+  ShortSession: 'ShortSession',
+  LongSession: 'LongSession',
+  AfterLongSession: 'AfterLongSession',
+  None: 'None',
+}
 
 const EpochStateContext = React.createContext()
 const EpochDispatchContext = React.createContext()
@@ -67,9 +74,7 @@ function EpochProvider({children}) {
 
   useInterval(async () => {
     const nextEpoch = await fetchEpoch()
-    if (!deepEqual(epoch, nextEpoch)) {
-      setEpoch(nextEpoch)
-    }
+    setEpoch(nextEpoch)
   }, interval)
 
   return (

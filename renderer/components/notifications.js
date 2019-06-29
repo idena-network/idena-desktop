@@ -1,35 +1,22 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {wordWrap, rem, opacify} from 'polished'
+import {wordWrap, rem} from 'polished'
 import {FiFile} from 'react-icons/fi'
 import {Absolute, Box} from '../shared/components'
 import Flex from '../shared/components/flex'
 import theme from '../shared/theme'
 import {NotificationType} from '../shared/providers/notification-provider'
+import {useNotificationState} from '../shared/providers/notification-context'
 
-function Notifications({notifications}) {
+function Notifications() {
+  const {notifications} = useNotificationState()
   return (
     <Absolute bottom={theme.spacings.normal} left="0" right="0">
       {notifications.map(notification => (
-        <Notification key={notification.timestamp} {...notification} />
+        <Notification key={notification.title + Date.now()} {...notification} />
       ))}
     </Absolute>
   )
-}
-
-Notifications.propTypes = {
-  // eslint-disable-next-line no-use-before-define
-  notifications: PropTypes.arrayOf(PropTypes.shape(Notification.propTypes)),
-}
-
-const pickColor = (colors, type) => {
-  switch (type) {
-    default:
-    case NotificationType.Info:
-      return colors.text
-    case NotificationType.Error:
-      return colors.danger
-  }
 }
 
 function Notification({title, body, type = NotificationType.Info}) {
@@ -43,7 +30,10 @@ function Notification({title, body, type = NotificationType.Info}) {
           css={{
             borderRadius: rem(8),
             boxShadow: `0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)`,
-            color: pickColor(theme.colors, type),
+            color:
+              type === NotificationType.Error
+                ? theme.colors.danger
+                : theme.colors.text,
             zIndex: 9,
           }}
           w="260px"

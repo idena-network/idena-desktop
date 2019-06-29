@@ -94,7 +94,6 @@ function FlipPics({pics, onUpdateFlip}) {
               // eslint-disable-next-line react/no-array-index-key
               key={idx}
               src={src}
-              isCurrent={isCurrent}
               size={120}
               style={style}
               onClick={() => {

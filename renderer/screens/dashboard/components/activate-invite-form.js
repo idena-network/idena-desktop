@@ -1,5 +1,4 @@
 import React, {useRef} from 'react'
-import PropTypes from 'prop-types'
 import {margin, rem} from 'polished'
 import {Box, FormGroup, Label, Input, Button} from '../../../shared/components'
 import theme from '../../../shared/theme'
@@ -9,9 +8,12 @@ import {
   useInviteDispatch,
 } from '../../../shared/providers/invite-context'
 import {useIdentityState} from '../../../shared/providers/identity-context'
+import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 
-export function ActivateInviteForm({onFail}) {
+function ActivateInviteForm() {
   const keyRef = useRef()
+
+  const {addError} = useNotificationDispatch()
 
   const {activationTx} = useInviteState()
   const {activateInvite} = useInviteDispatch()
@@ -40,10 +42,10 @@ export function ActivateInviteForm({onFail}) {
             onClick={async () => {
               try {
                 await activateInvite(keyRef.current.value)
-              } catch (error) {
-                if (onFail) {
-                  onFail(error)
-                }
+              } catch ({message}) {
+                addError({
+                  title: message,
+                })
               }
             }}
           >
@@ -53,10 +55,6 @@ export function ActivateInviteForm({onFail}) {
       </FormGroup>
     </Box>
   )
-}
-
-ActivateInviteForm.propTypes = {
-  onFail: PropTypes.func,
 }
 
 export default ActivateInviteForm
