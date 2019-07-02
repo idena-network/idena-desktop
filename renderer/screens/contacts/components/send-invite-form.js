@@ -57,11 +57,11 @@ function SendInviteForm({onSuccess, onFail}) {
           onChange={e => setLastName(e.target.value)}
         />
       </Flex>
-      <WideField
+      {/* <WideField
         label="Address"
         value={address}
         onChange={e => setAddress(e.target.value)}
-      />
+      /> */}
       <WideField
         label="Amount"
         type="number"
@@ -96,7 +96,7 @@ function SendInviteForm({onSuccess, onFail}) {
             }
           }}
         >
-          {submitting ? <FiLoader /> : 'Send invite'}
+          {submitting ? <FiLoader /> : 'Create invite'}
         </Button>
       </FormGroup>
     </Box>

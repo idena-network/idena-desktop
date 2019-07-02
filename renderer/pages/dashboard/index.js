@@ -1,4 +1,5 @@
 import React from 'react'
+import {withRouter} from 'next/router'
 import {rem} from 'polished'
 import {FiShare, FiUserPlus, FiCamera} from 'react-icons/fi'
 import Layout from '../../shared/components/layout'
@@ -13,7 +14,8 @@ import ActivateInviteForm from '../../screens/dashboard/components/activate-invi
 import UserInfo from '../../screens/dashboard/components/user-info'
 import NetProfile from '../../screens/dashboard/components/net-profile'
 
-export default () => {
+// eslint-disable-next-line react/prop-types
+function Dashboard({router}) {
   const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(false)
 
   const handleCloseSendInvite = () => setIsSendInviteOpen(false)
@@ -46,7 +48,10 @@ export default () => {
         </Box>
         <Drawer show={isSendInviteOpen} onHide={handleCloseSendInvite}>
           <SendInviteForm
-            onSuccess={handleCloseSendInvite}
+            onSuccess={() => {
+              handleCloseSendInvite()
+              router.push('/contacts')
+            }}
             onFail={handleCloseSendInvite}
           />
         </Drawer>
@@ -54,3 +59,5 @@ export default () => {
     </InviteProvider>
   )
 }
+
+export default withRouter(Dashboard)
