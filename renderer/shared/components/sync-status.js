@@ -1,13 +1,23 @@
 import React from 'react'
 import {rem} from 'polished'
 import {Absolute, Box} from '.'
-import {useSyncState} from '../providers/sync-context'
+import {useChainState} from '../providers/chain-context'
 import theme from '../theme'
+import {useNotificationDispatch} from '../providers/notification-context'
 
 function SyncStatus() {
-  const {syncing, progress} = useSyncState()
+  const {progress, alive} = useChainState()
+  const {addError} = useNotificationDispatch()
 
-  if (!syncing || !Number.isFinite(progress)) {
+  React.useEffect(() => {
+    if (alive !== null && !alive) {
+      addError({
+        title: `Unable to connect to node`,
+      })
+    }
+  }, [addError, alive, progress])
+
+  if (progress === null || progress !== 1) {
     return null
   }
 

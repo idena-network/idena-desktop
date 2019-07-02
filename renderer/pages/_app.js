@@ -3,11 +3,11 @@ import App, {Container} from 'next/app'
 import Router from 'next/router'
 import NProgress from 'nprogress'
 import GlobalStyle from '../shared/components/global-style'
-import NProgressStyle from '../shared/components/nprogress-style'
 import {EpochProvider} from '../shared/providers/epoch-context'
 import {IdentityProvider} from '../shared/providers/identity-context'
 import {NotificationProvider} from '../shared/providers/notification-context'
 import {TimingProvider} from '../shared/providers/timing-context'
+import {ChainProvider} from '../shared/providers/chain-context'
 
 Router.events.on('routeChangeStart', () => {
   NProgress.start()
@@ -27,19 +27,27 @@ class MyApp extends App {
     return (
       <Container>
         <GlobalStyle />
-        <NProgressStyle />
-        <TimingProvider>
-          <EpochProvider>
-            <IdentityProvider>
-              <NotificationProvider>
-                <Component {...pageProps} />
-              </NotificationProvider>
-            </IdentityProvider>
-          </EpochProvider>
-        </TimingProvider>
+        <AppProvider>
+          <Component {...pageProps} />
+        </AppProvider>
       </Container>
     )
   }
+}
+
+// eslint-disable-next-line react/prop-types
+function AppProvider({children}) {
+  return (
+    <ChainProvider>
+      <TimingProvider>
+        <NotificationProvider>
+          <EpochProvider>
+            <IdentityProvider>{children}</IdentityProvider>
+          </EpochProvider>
+        </NotificationProvider>
+      </TimingProvider>
+    </ChainProvider>
+  )
 }
 
 export default MyApp

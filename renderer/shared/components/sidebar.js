@@ -10,23 +10,59 @@ import Loading from './loading'
 import useValidation from '../utils/useValidation'
 import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
+import {useChainState} from '../providers/chain-context'
+
+function Sidebar() {
+  const {alive} = useChainState()
+  return (
+    <section>
+      <div>
+        <Avatar />
+        <Nav />
+      </div>
+      <div>
+        {alive && <InfoPanel />}
+        <Version />
+      </div>
+      <style jsx>{`
+        section {
+          background: ${theme.colors.primary2};
+          color: ${theme.colors.white};
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 0 ${rem(16)};
+          width: ${rem(250)};
+          z-index: 2;
+        }
+      `}</style>
+    </section>
+  )
+}
+
+function Avatar() {
+  return (
+    <Box
+      css={{
+        ...margin(rem(theme.spacings.medium32), 0, rem(40), 0),
+        textAlign: 'center',
+      }}
+    >
+      <img src="../static/logo.svg" alt="idena logo" />
+      <style jsx>{`
+        img {
+          width: 80px;
+          filter: invert(1);
+        }
+      `}</style>
+    </Box>
+  )
+}
 
 function Nav() {
-  const identity = useIdentityState()
-  const {nickname} = identity
-
-  const epoch = useEpochState()
-
-  if (!epoch) {
-    return null
-  }
-
-  const {currentPeriod, nextValidation} = epoch
+  const {nickname} = useIdentityState()
   return (
     <nav>
-      <Box css={margin(rem(theme.spacings.medium32), 0, rem(40), 0)}>
-        <img src="../static/logo.svg" alt="idena logo" />
-      </Box>
       <List>
         <NavItem href="/dashboard" active icon={<FiUserCheck />}>
           {'My Idena' || nickname}
@@ -43,52 +79,7 @@ function Nav() {
         <NavItem href="/settings" icon={<FiSettings />}>
           Settings
         </NavItem>
-        <Box
-          bg={theme.colors.white01}
-          my={theme.spacings.xlarge}
-          css={{
-            ...borderRadius('top', rem(10)),
-            ...borderRadius('bottom', rem(10)),
-          }}
-        >
-          <Block title="Current period">{currentPeriod}</Block>
-          <Block title="My current task">
-            <CurrentTask period={currentPeriod} identity={identity} />
-          </Block>
-          {currentPeriod === EpochPeriod.None && (
-            <Block title="Next validation">
-              {new Date(nextValidation).toLocaleString()}
-            </Block>
-          )}
-        </Box>
-        <Box
-          bg={theme.colors.white01}
-          my={theme.spacings.xxlarge}
-          css={{
-            ...borderRadius('top', rem(10)),
-            ...borderRadius('bottom', rem(10)),
-          }}
-        >
-          <Block title="Version">{global.appVersion}</Block>
-        </Box>
       </List>
-      <style jsx>{`
-        nav {
-          background: ${theme.colors.primary2};
-          color: ${theme.colors.white};
-          text-align: center;
-          min-height: 100vh;
-          z-index: 2;
-        }
-        nav :global(ul) {
-          padding: 0 ${rem(16)};
-          width: 200px;
-        }
-        img {
-          width: 80px;
-          filter: invert(1);
-        }
-      `}</style>
     </nav>
   )
 }
@@ -124,6 +115,36 @@ const NavItem = withRouter(({href, router, icon, children}) => {
     </li>
   )
 })
+
+function InfoPanel() {
+  const identity = useIdentityState()
+  const epoch = useEpochState()
+
+  if (!epoch) {
+    return null
+  }
+
+  const {currentPeriod, nextValidation} = epoch
+  return (
+    <Box
+      bg={theme.colors.white01}
+      css={{
+        ...borderRadius('top', rem(10)),
+        ...borderRadius('bottom', rem(10)),
+      }}
+    >
+      <Block title="Current period">{currentPeriod}</Block>
+      <Block title="My current task">
+        <CurrentTask period={currentPeriod} identity={identity} />
+      </Block>
+      {currentPeriod === EpochPeriod.None && (
+        <Block title="Next validation">
+          {new Date(nextValidation).toLocaleString()}
+        </Block>
+      )}
+    </Box>
+  )
+}
 
 function Block({title, children, fallback = <Loading />}) {
   return (
@@ -252,4 +273,18 @@ CurrentTask.propTypes = {
   }).isRequired,
 }
 
-export default Nav
+function Version() {
+  return (
+    <Box
+      css={{
+        ...borderRadius('top', rem(10)),
+        ...borderRadius('bottom', rem(10)),
+        ...margin(rem(theme.spacings.medium16), 0, rem(theme.spacings.small8)),
+      }}
+    >
+      <Block title="Version">{global.appVersion}</Block>
+    </Box>
+  )
+}
+
+export default Sidebar

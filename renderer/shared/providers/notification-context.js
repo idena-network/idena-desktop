@@ -24,20 +24,20 @@ function NotificationProvider({children}) {
     }
   }, [notifications])
 
-  const addNotification = ({title, body, type = NotificationType.Info}) => {
-    setNotifications([...notifications, {title, body, type}])
-  }
+  const addNotification = React.useCallback(
+    ({title, body, type = NotificationType.Info}) => {
+      setNotifications(n => [...n, {title, body, type}])
+    },
+    []
+  )
 
-  const addError = ({title, body}) => {
-    setNotifications([
-      ...notifications,
-      {title, body, type: NotificationType.Error},
-    ])
-  }
+  const addError = React.useCallback(({title, body}) => {
+    setNotifications(n => [...n, {title, body, type: NotificationType.Error}])
+  }, [])
 
-  const addAlert = ({title, body}) => {
-    setAlerts([...alerts, {title, body, type: NotificationType.Error}])
-  }
+  const addAlert = React.useCallback(({title, body}) => {
+    setAlerts(a => [...a, {title, body, type: NotificationType.Error}])
+  }, [])
 
   return (
     <NotificationStateContext.Provider value={{notifications, alerts}}>
