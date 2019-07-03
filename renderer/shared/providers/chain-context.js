@@ -2,29 +2,36 @@ import React from 'react'
 import {useInterval} from '../hooks/use-interval'
 import {fetchSync} from '../api'
 
-const SYNC_SUCCEEDED = 'SYNC_STATE_FETCHED'
-const SYNC_FAILED = 'SYNC_FAILED'
+const FETCH_SYNC_SUCCEEDED = 'FETCH_SYNC_SUCCEEDED'
+const FETCH_SYNC_FAILED = 'FETCH_SYNC_FAILED'
 
 const initialState = {
-  alive: null,
+  unreachable: null,
   syncing: null,
+  currentBlock: null,
+  highestBlock: null,
   progress: null,
 }
 
 function chainReducer(state, action) {
-  const {syncing, currentBlock, highestBlock, alive} = action.payload
   switch (action.type) {
-    case SYNC_SUCCEEDED:
+    case FETCH_SYNC_SUCCEEDED: {
+      const {syncing, currentBlock, highestBlock} = action.payload
       return {
         ...state,
-        syncing,
-        progress: currentBlock / highestBlock,
-        alive: true,
+        currentBlock,
+        highestBlock,
+        syncing: Number.isFinite(currentBlock / highestBlock)
+          ? syncing && currentBlock !== highestBlock
+          : null,
+        unreachable: false,
       }
-    case SYNC_FAILED:
+    }
+    case FETCH_SYNC_FAILED:
       return {
         ...state,
-        alive,
+        syncing: null,
+        unreachable: true,
       }
     default:
       throw new Error(`Unknown action ${action.type}`)
@@ -41,12 +48,14 @@ function ChainProvider({children}) {
     async () => {
       try {
         const syncState = await fetchSync()
-        dispatch({type: SYNC_SUCCEEDED, payload: syncState})
+        dispatch({type: FETCH_SYNC_SUCCEEDED, payload: syncState})
       } catch (error) {
-        dispatch({type: SYNC_FAILED, payload: {alive: false}})
+        dispatch({type: FETCH_SYNC_FAILED})
       }
     },
-    state.progress === 1 ? 30000 : 1000,
+    (state.syncing !== null && state.syncing) || state.unreachable
+      ? 1000
+      : 10000,
     true
   )
 

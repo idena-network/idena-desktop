@@ -3,7 +3,6 @@ import Sidebar from './sidebar'
 import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
 import {ValidationProvider} from '../providers/validation-context'
-import SyncStatus from './sync-status'
 
 // eslint-disable-next-line react/prop-types
 function Layout({children}) {
@@ -15,7 +14,6 @@ function Layout({children}) {
         <ValidationBanner />
       </ValidationProvider>
       <Notifications />
-      <SyncStatus />
       <style jsx>{`
         main {
           display: flex;

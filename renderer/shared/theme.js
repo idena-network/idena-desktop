@@ -11,9 +11,12 @@ const colors = {
   white: 'rgb(255, 255, 255)',
   white05: 'rgba(255, 255, 255, 0.5)',
   white01: 'rgba(255, 255, 255, 0.1)',
-  danger: 'rgba(255, 102, 102, 0.8)',
-  success: '#00b894',
-  success012: 'rgba(39, 217, 128, 0.12)',
+  danger: 'rgb(255, 102, 102)',
+  danger02: 'rgba(255, 102, 102, 0.2)',
+  warning: 'rgb(255, 163, 102)',
+  warning02: 'rgba(255, 163, 102, 0.2)',
+  success: 'rgb(39, 217, 128)',
+  success02: 'rgba(39, 217, 128, 0.2)',
 }
 
 const fontSizes = {

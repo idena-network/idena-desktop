@@ -13,15 +13,15 @@ import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
 
 function Sidebar() {
-  const {alive} = useChainState()
   return (
     <section>
-      <div>
+      <Flex direction="column" align="flex-start">
+        <NodeStatus />
         <Avatar />
         <Nav />
-      </div>
+      </Flex>
       <div>
-        {alive && <InfoPanel />}
+        <InfoPanel />
         <Version />
       </div>
       <style jsx>{`
@@ -33,6 +33,7 @@ function Sidebar() {
           justify-content: space-between;
           padding: 0 ${rem(16)};
           width: ${rem(250)};
+          position: relative;
           z-index: 2;
         }
       `}</style>
@@ -40,18 +41,67 @@ function Sidebar() {
   )
 }
 
+function NodeStatus() {
+  const {syncing, unreachable, currentBlock, highestBlock} = useChainState()
+
+  let bg = theme.colors.white01
+  let color = theme.colors.muted
+  let text = 'Getting node status...'
+
+  if (unreachable) {
+    bg = theme.colors.danger02
+    color = theme.colors.danger
+    text = 'Offline'
+  } else if (syncing !== null) {
+    bg = syncing ? theme.colors.warning02 : theme.colors.success02
+    color = syncing ? theme.colors.warning : theme.colors.success
+    text = syncing ? 'Synchronizing' : 'Synchronized'
+  }
+
+  return (
+    <Box
+      bg={bg}
+      px={rem(theme.spacings.small12)}
+      py={rem(4)}
+      css={{
+        borderRadius: rem(12),
+        color: theme.colors.white,
+        ...margin(
+          rem(theme.spacings.small8),
+          rem(0),
+          rem(theme.spacings.medium24)
+        ),
+      }}
+      title={
+        syncing
+          ? `Synchronizing blocks: ${currentBlock} out of ${highestBlock}`
+          : ''
+      }
+    >
+      <Text
+        color={color}
+        css={{
+          lineHeight: rem(18),
+        }}
+      >
+        {text}
+      </Text>
+    </Box>
+  )
+}
+
 function Avatar() {
   return (
     <Box
       css={{
-        ...margin(rem(theme.spacings.medium32), 0, rem(40), 0),
-        textAlign: 'center',
+        alignSelf: 'center',
+        ...margin(0, 0, rem(40), 0),
       }}
     >
       <img src="../static/logo.svg" alt="idena logo" />
       <style jsx>{`
         img {
-          width: 80px;
+          width: ${rem(80)};
           filter: invert(1);
         }
       `}</style>
@@ -80,6 +130,11 @@ function Nav() {
           Settings
         </NavItem>
       </List>
+      <style jsx>{`
+        nav {
+          align-self: stretch;
+        }
+      `}</style>
     </nav>
   )
 }
@@ -117,10 +172,11 @@ const NavItem = withRouter(({href, router, icon, children}) => {
 })
 
 function InfoPanel() {
+  const {disconnected} = useChainState()
   const identity = useIdentityState()
   const epoch = useEpochState()
 
-  if (!epoch) {
+  if (disconnected || !epoch) {
     return null
   }
 

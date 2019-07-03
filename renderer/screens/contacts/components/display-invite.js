@@ -91,7 +91,7 @@ function Status({mined, ...props}) {
     <Text
       css={{
         ...backgrounds(
-          mined ? theme.colors.success012 : 'rgba(255, 163, 102, 0.12)'
+          mined ? theme.colors.success02 : 'rgba(255, 163, 102, 0.12)'
         ),
         ...borderRadius('top', rem(12)),
         ...borderRadius('bottom', rem(12)),
