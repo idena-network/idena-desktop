@@ -41,7 +41,7 @@ Label.propTypes = {
 const Input = React.forwardRef(
   ({type = 'text', disabled, ...otherProps}, ref) => (
     <>
-      <input type={type} ref={ref} {...otherProps} />
+      <input type={type} disabled={disabled} ref={ref} {...otherProps} />
       <style jsx>{`
         input {
           background: none;

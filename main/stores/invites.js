@@ -23,22 +23,22 @@ module.exports = {
       .read()
   },
   addInvite(invite) {
-    return getInvites()
+    getInvites()
       .push({id: nanoid(), ...invite})
       .write()
   },
   removeInvite({id}) {
-    return getInvites()
+    getInvites()
       .remove({id})
       .write()
   },
   clearInvites() {
-    return getInvites()
+    getInvites()
       .remove()
       .write()
   },
   getActivationTx() {
-    db.get('activationTx').value()
+    return db.get('activationTx').value()
   },
   setActivationTx(hash) {
     db.set('activationTx', hash).write()

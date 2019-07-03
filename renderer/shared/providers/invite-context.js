@@ -1,10 +1,10 @@
 /* eslint-disable no-use-before-define */
 import React from 'react'
 import * as api from '../api'
-import useAddress from '../hooks/use-address'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL} from '../utils/tx'
 import {useNotificationDispatch, NotificationType} from './notification-context'
+import {useIdentityState} from './identity-context'
 
 const db = global.invitesDb || {}
 
@@ -16,6 +16,7 @@ function InviteProvider({children}) {
   const [invites, setInvites] = React.useState([])
   const [activationTx, setActivationTx] = React.useState()
 
+  const {address} = useIdentityState()
   const {addNotification} = useNotificationDispatch()
 
   React.useEffect(() => {
@@ -41,19 +42,20 @@ function InviteProvider({children}) {
     const savedInvites = db.getInvites()
     fetchData()
 
+    const savedActivationTx = db.getActivationTx()
+    setActivationTx(savedActivationTx)
+
     return () => {
       ignore = true
     }
   }, [])
 
-  const address = useAddress()
-
   useInterval(
     async () => {
       const {result, error} = await api.fetchTx(activationTx)
       if (result) {
-        const {hash} = result
-        if (hash && hash !== HASH_IN_MEMPOOL) {
+        const {blockHash} = result
+        if (blockHash && blockHash !== HASH_IN_MEMPOOL) {
           resetActivation()
         }
       } else {

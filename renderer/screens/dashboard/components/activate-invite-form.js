@@ -7,7 +7,10 @@ import {
   useInviteState,
   useInviteDispatch,
 } from '../../../shared/providers/invite-context'
-import {useIdentityState} from '../../../shared/providers/identity-context'
+import {
+  useIdentityState,
+  IdentityStatus,
+} from '../../../shared/providers/identity-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 
 function ActivateInviteForm() {
@@ -18,7 +21,7 @@ function ActivateInviteForm() {
   const {activationTx} = useInviteState()
   const {activateInvite} = useInviteDispatch()
 
-  const {canActivateInvite} = useIdentityState()
+  const {canActivateInvite, state: status} = useIdentityState()
 
   if (!canActivateInvite) {
     return null
@@ -34,8 +37,11 @@ function ActivateInviteForm() {
           <Input
             ref={keyRef}
             id="activateInviteKey"
-            disabled={mining}
-            style={{...margin(0, theme.spacings.normal, 0, 0), width: rem(400)}}
+            disabled={mining || status === IdentityStatus.Invite}
+            style={{
+              ...margin(0, theme.spacings.normal, 0, 0),
+              width: rem(400),
+            }}
           />
           <Button
             disabled={mining}
