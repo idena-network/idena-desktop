@@ -31,6 +31,7 @@ function Sidebar() {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
+          height: 100vh;
           padding: 0 ${rem(16)};
           width: ${rem(250)};
           position: relative;
@@ -309,7 +310,7 @@ function CurrentTask({period, identity}) {
   }
 
   if (period === EpochPeriod.FlipLottery) {
-    return 'Flips lottery'
+    return 'Flip lottery'
   }
 
   if (period === EpochPeriod.AfterLongSession) {

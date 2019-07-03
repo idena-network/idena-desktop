@@ -7,7 +7,7 @@ const adapter = new FileSync(dbPath('invites.json'))
 const db = low(adapter)
 
 // Set some defaults (required if your JSON file is empty)
-db.defaults({invites: [], activationTx: ''}).write()
+db.defaults({invites: [], activationTx: '', activationCode: ''}).write()
 
 function getInvites() {
   return db.get('invites')
@@ -45,5 +45,14 @@ module.exports = {
   },
   clearActivationTx() {
     db.set('activationTx', '').write()
+  },
+  getActivationCode() {
+    return db.get('activationCode').value()
+  },
+  setActivationCode(code) {
+    db.set('activationCode', code).write()
+  },
+  clearActivationCode() {
+    db.set('activationCode', '').write()
   },
 }

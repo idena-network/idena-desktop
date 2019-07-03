@@ -29,6 +29,7 @@ function Notification({title, body, type = NotificationType.Info}) {
           bg={theme.colors.white}
           px={rem(16)}
           py={rem(12)}
+          my={rem(theme.spacings.small8)}
           css={{
             borderRadius: rem(8),
             boxShadow: `0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)`,

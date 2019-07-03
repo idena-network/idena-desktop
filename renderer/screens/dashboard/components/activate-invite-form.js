@@ -18,7 +18,7 @@ function ActivateInviteForm() {
 
   const {addError} = useNotificationDispatch()
 
-  const {activationTx} = useInviteState()
+  const {activationTx, activationCode} = useInviteState()
   const {activateInvite} = useInviteDispatch()
 
   const {canActivateInvite, state: status} = useIdentityState()
@@ -42,6 +42,7 @@ function ActivateInviteForm() {
               ...margin(0, theme.spacings.normal, 0, 0),
               width: rem(400),
             }}
+            defaultValue={activationCode}
           />
           <Button
             disabled={mining}

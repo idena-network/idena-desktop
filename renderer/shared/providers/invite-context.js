@@ -15,6 +15,7 @@ const InviteDispatchContext = React.createContext()
 function InviteProvider({children}) {
   const [invites, setInvites] = React.useState([])
   const [activationTx, setActivationTx] = React.useState()
+  const [activationCode, setActivationCode] = React.useState()
 
   const {address} = useIdentityState()
   const {addNotification} = useNotificationDispatch()
@@ -42,8 +43,8 @@ function InviteProvider({children}) {
     const savedInvites = db.getInvites()
     fetchData()
 
-    const savedActivationTx = db.getActivationTx()
-    setActivationTx(savedActivationTx)
+    setActivationTx(db.getActivationTx())
+    setActivationCode(db.getActivationCode())
 
     return () => {
       ignore = true
@@ -111,6 +112,10 @@ function InviteProvider({children}) {
     if (result) {
       setActivationTx(result)
       db.setActivationTx(result)
+      if (code) {
+        setActivationCode(code)
+        db.setActivationCode(code)
+      }
     } else {
       throw new Error(error.message)
     }
@@ -119,10 +124,14 @@ function InviteProvider({children}) {
   const resetActivation = () => {
     setActivationTx('')
     db.clearActivationTx()
+    setActivationCode('')
+    db.clearActivationCode()
   }
 
   return (
-    <InviteStateContext.Provider value={{invites, activationTx}}>
+    <InviteStateContext.Provider
+      value={{invites, activationTx, activationCode}}
+    >
       <InviteDispatchContext.Provider
         value={{addInvite, activateInvite, resetActivation}}
       >

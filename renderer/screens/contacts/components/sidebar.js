@@ -27,7 +27,8 @@ function Sidebar({onSelectContact, onSelectInvite}) {
       style={{
         ...border('right', '1px', 'solid', theme.colors.gray2),
         width: rem(240),
-        minHeight: '100vh',
+        height: '100vh',
+        overflowY: 'auto',
       }}
     >
       <Search onChange={e => setTerm(e.target.value)} />
