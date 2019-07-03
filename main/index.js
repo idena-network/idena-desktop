@@ -1,13 +1,25 @@
 const {join, resolve} = require('path')
-// eslint-disable-next-line import/no-extraneous-dependencies
 const {BrowserWindow, app, ipcMain, Tray, Menu} = require('electron')
+const {autoUpdater} = require('electron-updater')
 const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
 const express = require('express')
 const net = require('net')
+const log = require('electron-log')
 const loadRoute = require('./utils/routes')
 
-const {IMAGE_SEARCH_TOGGLE, IMAGE_SEARCH_PICK} = require('./channels')
+log.info('idena started')
+
+autoUpdater.logger = log
+autoUpdater.logger.transports.file.level = 'info'
+
+const {
+  IMAGE_SEARCH_TOGGLE,
+  IMAGE_SEARCH_PICK,
+  UPDATE_LOADING,
+  UPDATE_DOWNLOADED,
+  UPDATE_APPLY,
+} = require('./channels')
 const {startNode} = require('./idenaNode')
 
 let mainWindow
@@ -16,6 +28,21 @@ let expressPort = 3051
 
 // Possible values are: 'darwin', 'freebsd', 'linux', 'sunos' or 'win32'
 const isWin = process.platform === 'win32'
+
+app.on('second-instance', () => {
+  // Someone tried to run a second instance, we should focus our window.
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.focus()
+  }
+})
+
+const isFirstInstance = app.requestSingleInstanceLock()
+
+if (!isFirstInstance) {
+  app.quit()
+  return
+}
 
 const createMainWindow = () => {
   mainWindow = new BrowserWindow({
@@ -138,6 +165,26 @@ const createTray = () => {
   tray.setContextMenu(contextMenu)
 }
 
+autoUpdater.on('download-progress', info => {
+  mainWindow.webContents.send(UPDATE_LOADING, info)
+})
+
+autoUpdater.on('update-downloaded', info => {
+  mainWindow.webContents.send(UPDATE_DOWNLOADED, info)
+})
+
+function checkForUpdates() {
+  if (isDev) {
+    return
+  }
+
+  setInterval(() => {
+    autoUpdater.checkForUpdates()
+  }, 60 * 60 * 1000)
+
+  autoUpdater.checkForUpdates()
+}
+
 // Prepare the renderer once the app is ready
 app.on('ready', async () => {
   await prepareNext('./renderer')
@@ -147,6 +194,10 @@ app.on('ready', async () => {
     createMenu()
   }
   createTray()
+
+  if (isWin) {
+    checkForUpdates()
+  }
 })
 
 app.on('before-quit', () => {
@@ -217,7 +268,7 @@ function choosePort() {
 choosePort()
 
 let searchWindow
-ipcMain.on(IMAGE_SEARCH_TOGGLE, (event, message) => {
+ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, message) => {
   if (message) {
     searchWindow = new BrowserWindow({
       width: 800,
@@ -230,20 +281,19 @@ ipcMain.on(IMAGE_SEARCH_TOGGLE, (event, message) => {
       parent: mainWindow,
     })
     searchWindow.loadURL(`http://localhost:${expressPort}/`)
-    if (isDev && false) {
-      searchWindow.webContents.openDevTools({
-        mode: 'detach',
-      })
-    }
   }
 })
 
-ipcMain.on(IMAGE_SEARCH_TOGGLE, (event, message) => {
+ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, message) => {
   if (!message) {
     searchWindow.close()
   }
 })
 
-ipcMain.on(IMAGE_SEARCH_PICK, (event, message) => {
+ipcMain.on(IMAGE_SEARCH_PICK, (_event, message) => {
   mainWindow.webContents.send(IMAGE_SEARCH_PICK, message)
+})
+
+ipcMain.on(UPDATE_APPLY, () => {
+  autoUpdater.quitAndInstall()
 })
