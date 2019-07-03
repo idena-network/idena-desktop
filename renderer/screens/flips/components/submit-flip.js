@@ -12,7 +12,7 @@ function SubmitFlip({pics, order, submitFlipResult}) {
             {pics.map((src, idx) => (
               // eslint-disable-next-line react/no-array-index-key
               <Box key={idx}>
-                <img alt={`flip-${idx}`} width={90} src={src} />
+                <img alt={`flip-${idx}`} width={120} src={src} />
               </Box>
             ))}
           </Flex>
@@ -20,7 +20,7 @@ function SubmitFlip({pics, order, submitFlipResult}) {
           <Flex direction="column" justify="center" align="center">
             {order.map(idx => (
               <Box key={idx}>
-                <img alt={`flip-${idx}`} width={90} src={pics[idx]} />
+                <img alt={`flip-${idx}`} width={120} src={pics[idx]} />
               </Box>
             ))}
           </Flex>

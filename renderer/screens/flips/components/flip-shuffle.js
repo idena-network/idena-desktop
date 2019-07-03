@@ -106,7 +106,7 @@ FlipShuffle.propTypes = {
 function Image({src, style, children}) {
   return (
     <Box style={style}>
-      <img alt="flip" width={90} src={src} />
+      <img alt="flip" width={120} src={src} />
       {children}
     </Box>
   )
