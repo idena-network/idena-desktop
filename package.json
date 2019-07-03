@@ -14,7 +14,7 @@
   },
   "build": {
     "appId": "io.idena",
-    "artifactName": "${os}.${ext}",
+    "artifactName": "idena-client-${os}-${version}.${ext}",
     "files": [
       "**/*",
       "!renderer",
