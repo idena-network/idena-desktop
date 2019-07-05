@@ -9,7 +9,7 @@ import {
 } from '../../../shared/providers/identity-context'
 
 function NetProfile() {
-  const {address, state, stake, age} = useIdentityState()
+  const {address, state, stake, age, totalQualifiedFlips, totalShortFlipPoints} = useIdentityState()
   return (
     <Box
       bg={theme.colors.gray}
@@ -21,10 +21,25 @@ function NetProfile() {
     >
       <Figure label="Address" value={address} />
       <Figure label="Status" value={mapToFriendlyStatus(state)} />
-      <Figure label="Stake" value={stake} postfix="DNA" />
+
+      { stake>0 && (
+        <>
+          <Figure label="Stake" value={stake} postfix="DNA" />
+        </>
+      )}
+
       <Figure label="Age" value={age} postfix="epochs" />
+
+      { totalQualifiedFlips>0 && ( 
+        <>
+          <Figure label="Total flips score" value={totalShortFlipPoints+' out of '+totalQualifiedFlips +' ('+ Math.round( totalShortFlipPoints/totalQualifiedFlips * 10000 )/100 +'%) ' } postfix="" />
+        </>  
+      )}
+
     </Box>
   )
 }
+
+
 
 export default NetProfile

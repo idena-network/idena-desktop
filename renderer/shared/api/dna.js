@@ -43,6 +43,8 @@ export async function fetchIdentities() {
  * @property {number} requiredFlips
  * @property {number} madeFlips
  * @property {string[]} flips
+ * @property {number} totalQualifiedFlips
+ * @property {number} totalShortFlipPoints
  */
 
 /**
