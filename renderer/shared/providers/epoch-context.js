@@ -6,7 +6,7 @@ import {fetchEpoch} from '../api'
 import useTiming from '../hooks/use-timing'
 
 const hasValues = obj => Object.values(obj).every(x => x)
-const GAP = 30
+const GAP = 60
 
 export const EpochPeriod = {
   FlipLottery: 'FlipLottery',
