@@ -78,7 +78,7 @@ function FlipMaster({id, onClose}) {
       caption: 'Think up a story',
       title: 'Think up a story',
       desc:
-        'Think up a short story about someone/something related to the two key words below according to the template',
+        'Think up a short story about someone/something related to the two key words below according to the template: "Before - Something happens - After"',
       children: (
         <FlipHint
           {...flip}
@@ -92,7 +92,7 @@ function FlipMaster({id, onClose}) {
       desc: flip
         ? `Use key words for the story “${composeHint(
             flip.hint
-          )}” and template TBD`
+          )}” and template "Before - Something happens - After"`
         : '',
       children: (
         <FlipPics

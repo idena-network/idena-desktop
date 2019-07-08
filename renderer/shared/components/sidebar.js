@@ -190,7 +190,9 @@ function InfoPanel() {
         ...borderRadius('bottom', rem(10)),
       }}
     >
+      {currentPeriod !== EpochPeriod.None && (
       <Block title="Current period">{currentPeriod}</Block>
+      )}
       <Block title="My current task">
         <CurrentTask period={currentPeriod} identity={identity} />
       </Block>
