@@ -10,7 +10,8 @@ const contacts = require('./stores/contacts')
 process.once('loaded', () => {
   global.ipcRenderer = electron.ipcRenderer
   global.flipStore = flips
-  global.validationStore = validation
+  // global.validationStore = validation
+  global.validationDb = validation
   global.invitesDb = invites
   global.contactsDb = contacts
 

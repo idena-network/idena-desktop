@@ -1,47 +1,35 @@
-const Store = require('electron-store')
+const low = require('lowdb')
+const FileSync = require('lowdb/adapters/FileSync')
+const {dbPath} = require('./setup')
 
-const store = new Store({
-  name: 'validation',
-})
+const adapter = new FileSync(dbPath('validation.json'))
+const db = low(adapter)
 
-/**
- * Get the current validation ceremony
- */
-function getValidation() {
-  return store.get('validation')
-}
-
-/**
- * Save validation object
- */
-function saveValidation(validation) {
-  return store.set('validation', validation)
-}
-
-/**
- * Save answers for a short session flips
- * @param {object[]} answers Answers given by candidate for a short session
- */
-function saveShortAnswers(answers) {
-  store.set('validation.shortAnswers', answers)
-}
-
-/**
- * Save answers for a long session flips
- * @param {object[]} answers Answers given by candidate for a long session
- */
-function saveLongAnswers(answers) {
-  store.set('validation.longAnswers', answers)
-}
-
-function deleteValidation() {
-  store.delete('validation')
-}
+const initialState = {shortAnswers: [], longAnswers: [], epoch: null}
+db.defaults(initialState).write()
 
 module.exports = {
-  getValidation,
-  saveValidation,
-  saveShortAnswers,
-  saveLongAnswers,
-  deleteValidation,
+  getValidation() {
+    return db.getState()
+  },
+  getShortAnswers() {
+    return db.get('shortAnswers').read()
+  },
+  getLongAnswers() {
+    return db.get('longAnswers').read()
+  },
+  setShortAnswers(answers, epoch) {
+    db.set('shortAnswers', answers)
+      .set('epoch', epoch)
+      .write()
+  },
+  setLongAnswers(answers, epoch) {
+    return db
+      .set('longAnswers', answers)
+      .set('epoch', epoch)
+      .write()
+  },
+  resetValidation() {
+    db.setState(initialState).write()
+  },
 }

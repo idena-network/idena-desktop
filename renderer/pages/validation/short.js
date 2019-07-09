@@ -1,72 +1,65 @@
-import React, {useEffect, useState} from 'react'
-import {withRouter} from 'next/router'
-import {decode} from 'rlp'
-import dayjs from 'dayjs'
-import {backgrounds, padding, rem} from 'polished'
+import React from 'react'
+import Router from 'next/router'
+import {backgrounds, padding, rem, position} from 'polished'
 import ValidationHeader from '../../screens/validation/components/validation-header'
 import Timer from '../../screens/validation/components/timer'
 import ValidationScene from '../../screens/validation/components/validation-scene'
 import ValidationActions from '../../screens/validation/components/validation-actions'
 import FlipThumbnails from '../../screens/validation/components/flip-thumbnails'
-import {fromHexString} from '../../shared/utils/string'
 import Flex from '../../shared/components/flex'
 import {fetchFlipHashes} from '../../shared/api/validation'
-import {
-  answered,
-  types as answerTypes,
-} from '../../screens/validation/utils/answers'
 import {useInterval} from '../../shared/hooks/use-interval'
 import theme from '../../shared/theme'
-import useValidation from '../../shared/utils/useValidation'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {IconClose, Link} from '../../shared/components'
-import {useTimingState} from '../../shared/providers/timing-context'
 import {fetchFlip} from '../../shared/api'
+import {
+  submitShortAnswers,
+  useValidationDispatch,
+} from '../../shared/providers/validation-context'
+import Spinner from '../../screens/validation/components/spinner'
+import {
+  sessionReducer,
+  initialState,
+  START_FETCH,
+  FETCH_SUCCEEDED,
+  FETCH_FAILED,
+  FETCH_MISSING_SUCCEEDED,
+  PREV,
+  NEXT,
+  ANSWER,
+  REPORT_ABUSE,
+  PICK,
+} from '../../screens/validation/utils/reducer'
 
-// eslint-disable-next-line react/prop-types
-function ShortSession({router}) {
-  const [flips, setFlips] = useState([])
-  const [flipHashes, setFlipHashes] = useState([])
-  const [orders, setOrders] = useState([])
-  const [loadedStates, setLoadedStates] = useState([])
-  const [currentFlipIdx, setCurrentFlipIdx] = useState(0)
-  const [answers, setAnswers] = useState([])
-  const [flipsLoaded, setFlipsLoaded] = useState(false)
-
-  const {shortSession} = useTimingState()
+function ShortSession() {
+  const [state, dispatch] = React.useReducer(sessionReducer, initialState)
+  const validationDispatch = useValidationDispatch()
   const epoch = useEpochState()
-  const {submitShortAnswers} = useValidation()
 
-  useEffect(() => {
+  React.useEffect(() => {
     let ignore = false
 
+    if (!ignore) {
+      dispatch({type: START_FETCH})
+    }
+
     async function fetchData() {
-      const flipHashesResult = await fetchFlipHashes('short')
-      if (!flipHashesResult || !flipHashesResult.length) {
-        return
-      }
-
-      const mappedFlipHashes = flipHashesResult.map(({hash}) => hash)
-
-      const flipsResult = await Promise.all(mappedFlipHashes.map(fetchFlip))
-      const flipHexes = flipsResult
-        .filter(({result}) => result && result.hex)
-        .map(({result}) => result.hex.substr(2))
-
-      const decodedFlipHexes = flipHexes.map(hex => decode(fromHexString(hex)))
-      const decodedFlips = decodedFlipHexes.map(f => f[0])
-      const decodedOrders = decodedFlipHexes.map(f =>
-        f[1].map(x => x.map(xx => xx[0] || 0))
-      )
-
-      const nextLoadedState = flipHashesResult.map(({ready}) => ready)
-
-      if (!ignore) {
-        setFlips(decodedFlips)
-        setFlipHashes(mappedFlipHashes)
-        setOrders(decodedOrders)
-        setAnswers(decodedFlips.map(() => null))
-        setLoadedStates(nextLoadedState)
+      try {
+        const hashes = await fetchFlipHashes('short')
+        const hexes = await Promise.all(
+          hashes
+            .filter(x => x.ready)
+            .map(x => x.hash)
+            .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
+        )
+        if (!ignore) {
+          dispatch({type: FETCH_SUCCEEDED, hashes, hexes})
+        }
+      } catch (error) {
+        if (!ignore) {
+          dispatch({type: FETCH_FAILED, error})
+        }
       }
     }
 
@@ -78,138 +71,79 @@ function ShortSession({router}) {
   }, [])
 
   useInterval(
-    () => {
-      async function fetchData() {
-        const flipHashesResult = await fetchFlipHashes('short')
-        if (!flipHashesResult || !flipHashesResult.length) {
-          return
-        }
-
-        const mappedFlipHashes = flipHashesResult.map(({hash}) => hash)
-
-        const flipsResult = await Promise.all(mappedFlipHashes.map(fetchFlip))
-        const flipHexes = flipsResult
-          .filter(({result}) => result && result.hex)
-          .map(({result}) => result.hex.substr(2))
-
-        const decodedFlipHexes = flipHexes.map(hex =>
-          decode(fromHexString(hex))
+    async () => {
+      try {
+        const hexes = await Promise.all(
+          state.hashes
+            .filter(x => !x.ready)
+            .map(x => x.hash)
+            .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
         )
-        const decodedFlips = decodedFlipHexes.map(f => f[0])
-        const decodedOrders = decodedFlipHexes.map(f =>
-          f[1].map(x => x.map(xx => xx[0] || 0))
-        )
-
-        setFlips(decodedFlips)
-        setFlipHashes(mappedFlipHashes)
-        setOrders(decodedOrders)
-
-        const nextLoadedState = flipHashesResult.map(({ready}) => ready)
-        setFlipsLoaded(nextLoadedState.every(x => x))
-        setLoadedStates(nextLoadedState)
+        dispatch({type: FETCH_MISSING_SUCCEEDED, hexes})
+      } catch (error) {
+        dispatch({type: FETCH_FAILED, error})
       }
-
-      fetchData()
     },
-    flipsLoaded ? null : 1000
+    state.hashes.filter(x => !x.ready).length > 0 ? 1000 : null
   )
-
-  if (epoch === null || shortSession === null) {
-    return null
-  }
-
-  const handlePrev = () => {
-    const prevFlipIdx = Math.max(0, currentFlipIdx - 1)
-    setCurrentFlipIdx(prevFlipIdx)
-  }
-
-  const handleNext = () => {
-    const nextFlipIdx = Math.min(currentFlipIdx + 1, flips.length - 1)
-    setCurrentFlipIdx(nextFlipIdx)
-  }
-
-  const handlePick = idx => {
-    setCurrentFlipIdx(idx)
-  }
-
-  const handleAnswer = option => {
-    const nextAnswers = [
-      ...answers.slice(0, currentFlipIdx),
-      option,
-      ...answers.slice(currentFlipIdx + 1),
-    ]
-    setAnswers(nextAnswers)
-  }
-
-  const handleReportAbuse = () => {
-    const nextAnswers = [
-      ...answers.slice(0, currentFlipIdx),
-      answerTypes.inappropriate,
-      ...answers.slice(currentFlipIdx + 1),
-    ]
-    setAnswers(nextAnswers)
-    setCurrentFlipIdx(Math.min(currentFlipIdx + 1, flips.length - 1))
-  }
-
-  const handleSubmitAnswers = async () => {
-    const answersPayload = flipHashes.map((hash, idx) => ({
-      hash,
-      easy: false,
-      answer: answered(answers[idx]) ? answers[idx] + 1 : answerTypes.none,
-    }))
-    submitShortAnswers(answersPayload)
-    router.push('/validation/long')
-  }
-
-  const finish = dayjs(
-    epoch.currentValidationStart || epoch.nextValidation
-  ).add(shortSession, 's')
 
   return (
     <Flex
       direction="column"
       css={{
         ...backgrounds('rgba(0,0,0,1)'),
-        minHeight: '100vh',
-        ...padding(rem(theme.spacings.medium24), rem(theme.spacings.large)),
+        height: '100vh',
+        ...padding(
+          rem(theme.spacings.medium24),
+          rem(theme.spacings.large),
+          rem(theme.spacings.medium16)
+        ),
       }}
     >
       <ValidationHeader
         type="short"
-        currentIndex={flips.length > 0 ? currentFlipIdx + 1 : 0}
-        total={flips.length}
+        currentIndex={state.currentIndex}
+        total={state.flips.length}
       >
         <Link href="/dashboard">
           <IconClose />
         </Link>
       </ValidationHeader>
-      <Flex direction="column" flex="1">
-        <ValidationScene
-          flip={flips[currentFlipIdx]}
-          orders={orders[currentFlipIdx]}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onAnswer={handleAnswer}
-          selectedOption={answers[currentFlipIdx]}
-          loaded={loadedStates[currentFlipIdx]}
-          last={currentFlipIdx > flips.length - 1}
-          type="short"
-        />
-        <ValidationActions
-          onReportAbuse={handleReportAbuse}
-          canSubmit={answers.length > 0 && answers.every(answered)}
-          onSubmitAnswers={handleSubmitAnswers}
-          countdown={<Timer seconds={finish.diff(dayjs(), 's')} />}
-        />
+      <Flex
+        direction="column"
+        align="center"
+        flex={1}
+        css={position('relative')}
+      >
+        {state.loading && <Spinner />}
+        {state.flips[state.currentIndex] && (
+          <ValidationScene
+            flip={state.flips[state.currentIndex]}
+            onPrev={() => dispatch({type: PREV})}
+            onNext={() => dispatch({type: NEXT})}
+            onAnswer={option => dispatch({type: ANSWER, option})}
+            isFirst={state.currentIndex === 0}
+            isLast={state.currentIndex >= state.flips.length - 1}
+            type="short"
+          />
+        )}
       </Flex>
+      <ValidationActions
+        onReportAbuse={hash => dispatch({type: REPORT_ABUSE, hash})}
+        canSubmit={state.canSubmit}
+        onSubmitAnswers={async () => {
+          submitShortAnswers(validationDispatch, state.flips, epoch.epoch)
+          Router.push('/validation/long')
+        }}
+        countdown={<Timer />}
+      />
       <FlipThumbnails
-        currentIndex={currentFlipIdx}
-        flips={flips}
-        answers={answers}
-        onPick={handlePick}
+        currentIndex={state.currentIndex}
+        flips={state.flips}
+        onPick={index => dispatch({type: PICK, index})}
       />
     </Flex>
   )
 }
 
-export default withRouter(ShortSession)
+export default ShortSession

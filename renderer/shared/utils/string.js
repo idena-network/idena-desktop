@@ -28,20 +28,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 export function base64ArrayBuffer(arrayBuffer) {
-  var base64 = ''
-  var encodings =
+  let base64 = ''
+  const encodings =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
-  var bytes = new Uint8Array(arrayBuffer)
-  var byteLength = bytes.byteLength
-  var byteRemainder = byteLength % 3
-  var mainLength = byteLength - byteRemainder
+  const bytes = new Uint8Array(arrayBuffer)
+  const {byteLength} = bytes
+  const byteRemainder = byteLength % 3
+  const mainLength = byteLength - byteRemainder
 
-  var a, b, c, d
-  var chunk
+  let a
+  let b
+  let c
+  let d
+  let chunk
 
   // Main loop deals with bytes in chunks of 3
-  for (var i = 0; i < mainLength; i = i + 3) {
+  for (let i = 0; i < mainLength; i += 3) {
     // Combine the three bytes into a single integer
     chunk = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
 
@@ -64,7 +67,7 @@ export function base64ArrayBuffer(arrayBuffer) {
     // Set the 4 least significant bits to zero
     b = (chunk & 3) << 4 // 3   = 2^2 - 1
 
-    base64 += encodings[a] + encodings[b] + '=='
+    base64 += `${encodings[a] + encodings[b]}==`
   } else if (byteRemainder == 2) {
     chunk = (bytes[mainLength] << 8) | bytes[mainLength + 1]
 
@@ -74,14 +77,8 @@ export function base64ArrayBuffer(arrayBuffer) {
     // Set the 2 least significant bits to zero
     c = (chunk & 15) << 2 // 15    = 2^4 - 1
 
-    base64 += encodings[a] + encodings[b] + encodings[c] + '='
+    base64 += `${encodings[a] + encodings[b] + encodings[c]}=`
   }
 
   return base64
 }
-
-export const fromHexString = hexString =>
-  new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)))
-
-export const toHexString = bytes =>
-  bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '')

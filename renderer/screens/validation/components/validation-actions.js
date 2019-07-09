@@ -15,7 +15,7 @@ function ValidationActions({
     <Flex
       justify="space-between"
       css={{
-        ...margin(rem(theme.spacings.medium32), 0),
+        ...margin(rem(29), 0, theme.spacings.medium16),
       }}
     >
       <Flex justify="flex-start" css={{flex: 1}}>

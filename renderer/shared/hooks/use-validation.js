@@ -1,6 +1,6 @@
 import {useState, useEffect, useCallback, useRef} from 'react'
 import * as api from '../api/validation'
-import useFlips from './useFlips'
+import useFlips from '../utils/useFlips'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 
 const {getValidation, saveValidation} = global.validationStore || {}

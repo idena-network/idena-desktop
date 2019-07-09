@@ -1,13 +1,20 @@
-/* eslint-disable react/no-array-index-key */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem} from 'polished'
+import {rem, margin} from 'polished'
 import {Col, Box, Fill} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import Arrow from './arrow'
 import {reorderList} from '../../../shared/utils/arr'
 import Spinner from './spinner'
 import theme from '../../../shared/theme'
+import {AnswerType} from '../../../shared/providers/validation-context'
+
+const style = {
+  borderRadius: rem(8),
+  ...margin(0, rem(theme.spacings.medium24), 0),
+  position: 'relative',
+  height: '100%',
+}
 
 const selectedStyle = {
   border: `solid 2px ${theme.colors.primary}`,
@@ -15,37 +22,48 @@ const selectedStyle = {
 }
 
 function ValidationScene({
-  flip = [],
-  orders = [[], []],
+  flip,
   onPrev,
   onNext,
   onAnswer,
-  selectedOption,
-  loaded,
-  last,
+  isFirst,
+  isLast,
   type,
 }) {
-  const style = {borderRadius: rem(8), position: 'relative', height: '100%'}
+  const {pics, answer, ready, orders} = flip
   return (
-    <Flex justify="space-between" flex="1">
-      <Col onClick={onPrev} w={4}>
-        <Arrow dir="prev" type={type} />
-      </Col>
-      <Flex align="center" width="33%">
+    <Flex
+      justify="space-between"
+      flex={1}
+      css={margin(0, rem(theme.spacings.medium24), 0)}
+    >
+      {!isFirst && (
+        <Col onClick={onPrev} w={4}>
+          <Arrow dir="prev" type={type} />
+        </Col>
+      )}
+      <Flex>
         <Flex
           direction="column"
-          justify="center"
           align="center"
-          css={selectedOption === 0 ? {...selectedStyle, ...style} : style}
+          css={answer === 1 ? {...selectedStyle, ...style} : style}
           width="100%"
-          onClick={() => onAnswer(0)}
         >
-          {loaded ? (
-            reorderList(flip, orders[0]).map((src, idx) => (
-              <Box key={orders[0][idx]}>
+          {ready ? (
+            reorderList(pics, orders[0]).map((src, idx) => (
+              <Box
+                key={orders[0][idx]}
+                onClick={() => onAnswer(AnswerType.Left)}
+              >
                 <img
                   alt="currentFlip"
-                  width={120}
+                  height={110}
+                  width={147}
+                  style={{
+                    background: theme.colors.white,
+                    objectFit: 'contain',
+                    objectPosition: 'center',
+                  }}
                   src={URL.createObjectURL(
                     new Blob([src], {type: 'image/jpeg'})
                   )}
@@ -58,21 +76,28 @@ function ValidationScene({
             </Fill>
           )}
         </Flex>
-        <Box w="2em">&nbsp;</Box>
         <Flex
           direction="column"
           justify="center"
           align="center"
-          css={selectedOption === 1 ? {...selectedStyle, ...style} : style}
+          css={answer === 2 ? {...selectedStyle, ...style} : style}
           width="100%"
-          onClick={() => onAnswer(1)}
         >
-          {loaded ? (
-            reorderList(flip, orders[1]).map((src, idx) => (
-              <Box key={orders[1][idx]}>
+          {ready ? (
+            reorderList(pics, orders[1]).map((src, idx) => (
+              <Box
+                key={orders[1][idx]}
+                onClick={() => onAnswer(AnswerType.Right)}
+              >
                 <img
                   alt="currentFlip"
-                  width={120}
+                  height={110}
+                  width={147}
+                  style={{
+                    background: theme.colors.white,
+                    objectFit: 'contain',
+                    objectPosition: 'center',
+                  }}
                   src={URL.createObjectURL(
                     new Blob([src], {type: 'image/jpeg'})
                   )}
@@ -86,23 +111,27 @@ function ValidationScene({
           )}
         </Flex>
       </Flex>
-      <Col onClick={last ? null : onNext} w={4}>
-        <Arrow dir="next" type={type} />
-        {!last && <Arrow dir="next" type={type} />}
-      </Col>
+      {!isLast && (
+        <Col onClick={onNext} w={4}>
+          <Arrow dir="next" type={type} />
+        </Col>
+      )}
     </Flex>
   )
 }
 
 ValidationScene.propTypes = {
-  flip: PropTypes.arrayOf(PropTypes.object),
-  orders: PropTypes.arrayOf(PropTypes.array),
+  flip: PropTypes.shape({
+    pics: PropTypes.arrayOf(PropTypes.string).isRequired,
+    ready: PropTypes.bool.isRequired,
+    orders: PropTypes.arrayOf(PropTypes.array).isRequired,
+    answer: PropTypes.number,
+  }),
   onPrev: PropTypes.func,
   onNext: PropTypes.func,
   onAnswer: PropTypes.func,
-  selectedOption: PropTypes.number,
-  loaded: PropTypes.bool,
-  last: PropTypes.bool,
+  isFirst: PropTypes.bool,
+  isLast: PropTypes.bool,
   type: PropTypes.string.isRequired,
 }
 

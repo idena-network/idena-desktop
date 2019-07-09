@@ -20,7 +20,7 @@ module.exports = {
   getInvite(id) {
     return getInvites()
       .find({id})
-      .read()
+      .value()
   },
   addInvite(invite) {
     getInvites()

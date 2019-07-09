@@ -7,10 +7,10 @@ import {Box, List, Link, Text} from '.'
 import Flex from './flex'
 import theme from '../theme'
 import Loading from './loading'
-import useValidation from '../utils/useValidation'
 import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
+import {useValidationState} from '../providers/validation-context'
 
 function Sidebar() {
   return (
@@ -240,10 +240,10 @@ Block.propTypes = {
 
 function CurrentTask({period, identity}) {
   const {
-    running: validationRunning,
+    running: validationRunning = false,
     shortAnswers,
     longAnswers,
-  } = useValidation()
+  } = useValidationState()
 
   if (!period || !identity || !identity.state) {
     return null

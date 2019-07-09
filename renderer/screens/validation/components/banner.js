@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
 import dayjs from 'dayjs'
 import {Absolute, Box, Text, Fill, Link} from '../../../shared/components'
-import useTiming from '../../../shared/hooks/use-timing'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {useInterval} from '../../../shared/hooks/use-interval'
@@ -12,15 +11,17 @@ import {
   useEpochState,
   EpochPeriod,
 } from '../../../shared/providers/epoch-context'
+import {useTimingState} from '../../../shared/providers/timing-context'
+
+const matchValidation = path => path.startsWith('/validation')
 
 // eslint-disable-next-line react/prop-types
 function Banner({router}) {
-  const {shortSession, longSession} = useTiming()
+  const {shortSession, longSession} = useTimingState()
   const epoch = useEpochState()
   const {shortAnswers, longAnswers} = useValidationState()
 
-  const matchValidation = router.pathname.startsWith('/validation')
-  if (epoch === null || matchValidation) {
+  if (epoch === null || matchValidation(router.pathname)) {
     return null
   }
 

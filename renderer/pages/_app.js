@@ -8,6 +8,7 @@ import {IdentityProvider} from '../shared/providers/identity-context'
 import {NotificationProvider} from '../shared/providers/notification-context'
 import {TimingProvider} from '../shared/providers/timing-context'
 import {ChainProvider} from '../shared/providers/chain-context'
+import {ValidationProvider} from '../shared/providers/validation-context'
 
 Router.events.on('routeChangeStart', () => {
   NProgress.start()
@@ -42,7 +43,9 @@ function AppProvider({children}) {
       <TimingProvider>
         <NotificationProvider>
           <EpochProvider>
-            <IdentityProvider>{children}</IdentityProvider>
+            <IdentityProvider>
+              <ValidationProvider>{children}</ValidationProvider>
+            </IdentityProvider>
           </EpochProvider>
         </NotificationProvider>
       </TimingProvider>

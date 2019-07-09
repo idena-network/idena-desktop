@@ -1,13 +1,15 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import {FiClock} from 'react-icons/fi'
 import {rem} from 'polished'
+import dayjs from 'dayjs'
 import {useInterval} from '../../../shared/hooks/use-interval'
 import Flex from '../../../shared/components/flex'
 import {Text} from '../../../shared/components'
 import theme from '../../../shared/theme'
+import {useTimingState} from '../../../shared/providers/timing-context'
+import {useEpochState} from '../../../shared/providers/epoch-context'
 
-function convertSeconds(seconds) {
+function convertToMinSec(seconds) {
   const min = Math.floor(seconds / 60)
   const sec = seconds % 60
   return {
@@ -16,29 +18,35 @@ function convertSeconds(seconds) {
   }
 }
 
-function Timer({seconds: initialSeconds}) {
-  const [seconds, setSeconds] = React.useState(initialSeconds)
-  useInterval(
-    () => {
-      setSeconds(seconds - 1)
-    },
-    seconds > 0 ? 1000 : null
-  )
-  let {min, sec} = convertSeconds(seconds)
-  min = min.toString().padStart(2, 0)
-  sec = sec.toString().padStart(2, 0)
+const Oed = t => t.toString().padStart(2, 0)
+
+function Timer() {
+  const [seconds, setSeconds] = React.useState(null)
+
+  const {shortSession} = useTimingState()
+  const epoch = useEpochState()
+
+  React.useEffect(() => {
+    if (epoch && shortSession) {
+      const finish = dayjs(
+        epoch.currentValidationStart || epoch.nextValidation
+      ).add(shortSession, 's')
+      setSeconds(finish.diff(dayjs(), 's'))
+    }
+  }, [epoch, shortSession])
+
+  useInterval(() => setSeconds(seconds - 1), seconds > 0 ? 1000 : null)
+
+  const {min, sec} = convertToMinSec(seconds)
+
   return (
     <Flex align="center">
       <FiClock color={theme.colors.danger} style={{marginRight: rem(4)}} />
       <Text color={theme.colors.danger} fontWeight={600}>
-        {`${min}:${sec}`}
+        {`${Oed(min)}:${Oed(sec)}`}
       </Text>
     </Flex>
   )
-}
-
-Timer.propTypes = {
-  seconds: PropTypes.number.isRequired,
 }
 
 export default Timer

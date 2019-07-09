@@ -4,8 +4,9 @@ import {rem, backgrounds} from 'polished'
 import Flex from '../../../shared/components/flex'
 import {Box, Fill} from '../../../shared/components'
 import theme from '../../../shared/theme'
-import {inappropriate, appropriate} from '../utils/answers'
 import FlipImage from '../../flips/components/flip-image'
+import {hasAnswer} from '../utils/reducer'
+import {AnswerType} from '../../../shared/providers/validation-context'
 
 const activeStyle = {
   border: `solid 2px ${theme.colors.primary}`,
@@ -21,21 +22,27 @@ const style = {
   width: rem(40),
 }
 
-function FlipThumbnails({currentIndex, flips, answers, onPick}) {
+function FlipThumbnails({flips, currentIndex, onPick}) {
   return (
-    <Flex justify="center" align="center">
-      {flips.map((flip, idx) => (
+    <Flex justify="center" align="center" css={{minHeight: rem(48)}}>
+      {flips.map(({hash, pics, answer}, idx) => (
         <Box
-          // eslint-disable-next-line react/no-array-index-key
-          key={idx}
+          key={hash}
           css={currentIndex === idx ? {...style, ...activeStyle} : style}
           onClick={() => onPick(idx)}
         >
-          {appropriate(answers[idx]) && <Fill bg={theme.colors.white05} />}
-          {inappropriate(answers[idx]) && <Fill bg={theme.colors.danger} />}
+          {hasAnswer(answer) && (
+            <Fill
+              bg={
+                answer === AnswerType.Inappropriate
+                  ? theme.colors.danger
+                  : theme.colors.white05
+              }
+            />
+          )}
           <FlipImage
             size={32}
-            src={URL.createObjectURL(new Blob([flip[0]], {type: 'image/jpeg'}))}
+            src={URL.createObjectURL(new Blob([pics[0]], {type: 'image/jpeg'}))}
             style={{borderRadius: rem(8)}}
           />
         </Box>
@@ -47,7 +54,6 @@ function FlipThumbnails({currentIndex, flips, answers, onPick}) {
 FlipThumbnails.propTypes = {
   currentIndex: PropTypes.number.isRequired,
   flips: PropTypes.arrayOf(PropTypes.array).isRequired,
-  answers: PropTypes.arrayOf(PropTypes.number).isRequired,
   onPick: PropTypes.func,
 }
 
