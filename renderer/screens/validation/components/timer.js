@@ -18,32 +18,32 @@ function convertToMinSec(seconds) {
   }
 }
 
-const Oed = t => t.toString().padStart(2, 0)
+const padded = t => t.toString().padStart(2, 0)
 
-function Timer() {
+// eslint-disable-next-line react/prop-types
+function Timer({type = 'short'}) {
   const [seconds, setSeconds] = React.useState(null)
 
-  const {shortSession} = useTimingState()
+  const {shortSession, longSession} = useTimingState()
   const epoch = useEpochState()
 
   React.useEffect(() => {
-    if (epoch && shortSession) {
+    if (epoch && shortSession && longSession) {
       const finish = dayjs(
         epoch.currentValidationStart || epoch.nextValidation
-      ).add(shortSession, 's')
+      ).add(type === 'long' ? longSession : shortSession, 's')
       setSeconds(finish.diff(dayjs(), 's'))
     }
-  }, [epoch, shortSession])
+  }, [epoch, shortSession, longSession, type])
 
   useInterval(() => setSeconds(seconds - 1), seconds > 0 ? 1000 : null)
 
   const {min, sec} = convertToMinSec(seconds)
-
   return (
     <Flex align="center">
       <FiClock color={theme.colors.danger} style={{marginRight: rem(4)}} />
       <Text color={theme.colors.danger} fontWeight={600}>
-        {`${Oed(min)}:${Oed(sec)}`}
+        {`${padded(min)}:${padded(sec)}`}
       </Text>
     </Flex>
   )

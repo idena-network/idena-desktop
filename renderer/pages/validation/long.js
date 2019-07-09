@@ -142,7 +142,7 @@ export default function() {
             )
             Router.push('/dashboard')
           }}
-          countdown={<Timer />}
+          countdown={<Timer type="long" />}
         />
         <FlipThumbnails
           currentIndex={state.currentIndex}
