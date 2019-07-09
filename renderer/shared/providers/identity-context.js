@@ -55,7 +55,7 @@ function IdentityProvider({children}) {
     }
 
     fetchData()
-  }, 3000 * 1000)
+  }, 5000)
 
   const canActivateInvite = [
     IdentityStatus.Undefined,

@@ -71,7 +71,7 @@ function EpochProvider({children}) {
 
       setInterval(
         isValidationSoon || isValidationRunning
-          ? 1000 * 1000
+          ? 1000
           : validationStart.subtract(GAP, 's').diff(dayjs(), 'ms')
       )
     }
