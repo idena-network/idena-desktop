@@ -7,6 +7,7 @@ import theme from '../../../shared/theme'
 import FlipImage from '../../flips/components/flip-image'
 import {hasAnswer} from '../utils/reducer'
 import {AnswerType} from '../../../shared/providers/validation-context'
+import Spinner from './spinner'
 
 const activeStyle = {
   border: `solid 2px ${theme.colors.primary}`,
@@ -25,7 +26,7 @@ const style = {
 function FlipThumbnails({flips, currentIndex, onPick}) {
   return (
     <Flex justify="center" align="center" css={{minHeight: rem(48)}}>
-      {flips.map(({hash, pics, answer}, idx) => (
+      {flips.map(({hash, pics, answer, ready}, idx) => (
         <Box
           key={hash}
           css={currentIndex === idx ? {...style, ...activeStyle} : style}
@@ -40,11 +41,19 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
               }
             />
           )}
-          <FlipImage
-            size={32}
-            src={URL.createObjectURL(new Blob([pics[0]], {type: 'image/jpeg'}))}
-            style={{borderRadius: rem(8)}}
-          />
+          {ready ? (
+            <FlipImage
+              size={32}
+              src={URL.createObjectURL(
+                new Blob([pics[0]], {type: 'image/jpeg'})
+              )}
+              style={{borderRadius: rem(8)}}
+            />
+          ) : (
+            <Fill>
+              <Spinner />
+            </Fill>
+          )}
         </Box>
       ))}
     </Flex>

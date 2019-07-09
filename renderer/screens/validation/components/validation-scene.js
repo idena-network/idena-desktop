@@ -45,6 +45,7 @@ function ValidationScene({
       <Flex>
         <Flex
           direction="column"
+          justify="center"
           align="center"
           css={answer === 1 ? {...selectedStyle, ...style} : style}
           width="100%"
