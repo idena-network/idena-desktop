@@ -7,7 +7,6 @@ import ValidationActions from '../../screens/validation/components/validation-ac
 import FlipThumbnails from '../../screens/validation/components/flip-thumbnails'
 import Flex from '../../shared/components/flex'
 import {fetchFlipHashes} from '../../shared/api/validation'
-import {answered} from '../../screens/validation/utils/answers'
 import {useInterval} from '../../shared/hooks/use-interval'
 import {Link, IconClose} from '../../shared/components'
 import Timer from '../../screens/validation/components/timer'
@@ -48,7 +47,7 @@ export default function() {
 
     async function fetchData() {
       try {
-        const hashes = await fetchFlipHashes('short')
+        const hashes = await fetchFlipHashes('long')
         const hexes = await Promise.all(
           hashes
             .filter(x => x.ready)
