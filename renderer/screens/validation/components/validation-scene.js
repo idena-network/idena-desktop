@@ -123,7 +123,7 @@ function ValidationScene({
 
 ValidationScene.propTypes = {
   flip: PropTypes.shape({
-    pics: PropTypes.arrayOf(PropTypes.string).isRequired,
+    pics: PropTypes.arrayOf(PropTypes.object).isRequired,
     ready: PropTypes.bool.isRequired,
     orders: PropTypes.arrayOf(PropTypes.array).isRequired,
     answer: PropTypes.number,

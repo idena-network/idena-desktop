@@ -62,7 +62,7 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
 
 FlipThumbnails.propTypes = {
   currentIndex: PropTypes.number.isRequired,
-  flips: PropTypes.arrayOf(PropTypes.array).isRequired,
+  flips: PropTypes.arrayOf(PropTypes.object).isRequired,
   onPick: PropTypes.func,
 }
 
