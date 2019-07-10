@@ -7,10 +7,7 @@ import Flex from '../../../shared/components/flex'
 import {Text} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import {useTimingState} from '../../../shared/providers/timing-context'
-import {
-  useEpochState,
-  EpochPeriod,
-} from '../../../shared/providers/epoch-context'
+import {useEpochState} from '../../../shared/providers/epoch-context'
 
 function convertToMinSec(seconds) {
   const min = Math.floor(seconds / 60)
@@ -32,15 +29,15 @@ function Timer({type}) {
 
   React.useEffect(() => {
     if (epoch) {
-      const {currentValidationStart, nextValidation, currentPeriod} = epoch
+      const {currentValidationStart, nextValidation} = epoch
       const validationStart = dayjs(currentValidationStart || nextValidation)
 
-      if (currentPeriod === EpochPeriod.ShortSession) {
+      if (type === 'short') {
         const finish = validationStart.add(shortSession, 's')
         setSeconds(finish.diff(dayjs(), 's'))
       }
-      if (type === 'long' || currentPeriod === EpochPeriod.LongSession) {
-        const finish = validationStart.add(longSession, 's')
+      if (type === 'long') {
+        const finish = validationStart.add(shortSession + longSession, 's')
         setSeconds(finish.diff(dayjs(), 's'))
       }
     }

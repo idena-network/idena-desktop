@@ -135,7 +135,7 @@ function ShortSession() {
           submitShortAnswers(validationDispatch, state.flips, epoch.epoch)
           Router.push('/validation/long')
         }}
-        countdown={<Timer />}
+        countdown={<Timer type="short" />}
       />
       <FlipThumbnails
         currentIndex={state.currentIndex}

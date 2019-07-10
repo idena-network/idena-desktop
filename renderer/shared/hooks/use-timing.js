@@ -38,19 +38,19 @@ function useTiming() {
     let ignore = false
 
     async function fetchData() {
-      // eslint-disable-next-line no-shadow
-      const timing = await fetchTiming()
-      if (!ignore) {
-        setTiming(timing)
+      try {
+        // eslint-disable-next-line no-shadow
+        const timing = await fetchTiming()
+        if (!ignore) {
+          setTiming(timing)
+        }
+      } catch (error) {
+        logConnectivityIssue('timing (initial)', error)
+        setInterval(5000)
       }
     }
 
-    try {
-      fetchData()
-    } catch (error) {
-      logConnectivityIssue('timing (initial)', error)
-      setInterval(5000)
-    }
+    fetchData()
 
     return () => {
       ignore = true
