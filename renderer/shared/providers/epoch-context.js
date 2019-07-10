@@ -3,7 +3,8 @@ import dayjs from 'dayjs'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
 import {fetchEpoch} from '../api'
-import useTiming from '../hooks/use-timing'
+import {useTimingState} from './timing-context'
+import {logConnectivityIssue} from '../utils/log'
 
 const hasValues = obj => Object.values(obj).every(x => x)
 const GAP = 60
@@ -24,17 +25,21 @@ function EpochProvider({children}) {
   const [epoch, setEpoch] = React.useState(null)
   const [interval, setInterval] = React.useState(null)
 
-  const timing = useTiming()
+  const timing = useTimingState()
 
   React.useEffect(() => {
     let ignore = false
 
     async function fetchData() {
-      const nextEpoch = await fetchEpoch()
-      if (!deepEqual(epoch, nextEpoch)) {
+      try {
+        // eslint-disable-next-line no-shadow
+        const epoch = await fetchEpoch()
         if (!ignore) {
-          setEpoch(nextEpoch)
+          setEpoch(epoch)
         }
+      } catch (error) {
+        logConnectivityIssue('epoch (initial)', error)
+        setInterval(5000)
       }
     }
 
@@ -43,7 +48,7 @@ function EpochProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [epoch])
+  }, [])
 
   React.useEffect(() => {
     if (epoch && hasValues(timing)) {
@@ -73,8 +78,14 @@ function EpochProvider({children}) {
   }, [epoch, timing])
 
   useInterval(async () => {
-    const nextEpoch = await fetchEpoch()
-    setEpoch(nextEpoch)
+    try {
+      const nextEpoch = await fetchEpoch()
+      if (!deepEqual(epoch, nextEpoch)) {
+        setEpoch(nextEpoch)
+      }
+    } catch (error) {
+      logConnectivityIssue('epoch (poll)', error)
+    }
   }, interval)
 
   return (

@@ -7,6 +7,7 @@ const TimingStateContext = React.createContext()
 // eslint-disable-next-line react/prop-types
 function TimingProvider({children}) {
   const timing = useTiming()
+
   return (
     <TimingStateContext.Provider value={timing}>
       {children}
