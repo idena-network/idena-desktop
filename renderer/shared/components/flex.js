@@ -39,7 +39,7 @@ Flex.propTypes = {
   direction: PropTypes.string,
   justify: PropTypes.string,
   align: PropTypes.string,
-  flex: PropTypes.string,
+  flex: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   width: PropTypes.string,
   onClick: PropTypes.func,
   // eslint-disable-next-line react/forbid-prop-types

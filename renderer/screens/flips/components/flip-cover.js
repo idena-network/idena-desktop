@@ -133,7 +133,7 @@ function FlipCover({
               />
             )}
             {isDraft && isMenuOpen && (
-              <Absolute top="2em" right={0}>
+              <Absolute top="2em" right={0} zIndex={2}>
                 <FlipMenu ref={menuRef}>
                   <FlipMenuItem
                     href={`/flips/edit?id=${id}`}

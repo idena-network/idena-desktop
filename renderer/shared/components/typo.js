@@ -8,11 +8,11 @@ export function Heading({
   fontSize,
   fontWeight,
   margin,
+  style,
   children,
-  ...props
 }) {
   return (
-    <h1 {...props}>
+    <h1 style={style}>
       {children}
       <style jsx>{`
         h1 {
@@ -36,6 +36,8 @@ Heading.propTypes = {
   fontSize: PropTypes.string,
   fontWeight: PropTypes.number,
   margin: Dim,
+  // eslint-disable-next-line react/forbid-prop-types
+  style: PropTypes.object,
   children: PropTypes.node,
 }
 

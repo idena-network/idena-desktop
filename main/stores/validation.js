@@ -24,12 +24,14 @@ module.exports = {
       .write()
   },
   setLongAnswers(answers, epoch) {
-    return db
-      .set('longAnswers', answers)
+    db.set('longAnswers', answers)
       .set('epoch', epoch)
       .write()
   },
-  resetValidation() {
-    db.setState(initialState).write()
+  resetValidation(epoch) {
+    db.set('shortAnswers', [])
+      .set('longAnswers', [])
+      .set('epoch', epoch)
+      .write()
   },
 }

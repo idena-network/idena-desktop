@@ -7,7 +7,10 @@ import Flex from '../../../shared/components/flex'
 import {Text} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import {useTimingState} from '../../../shared/providers/timing-context'
-import {useEpochState} from '../../../shared/providers/epoch-context'
+import {
+  useEpochState,
+  EpochPeriod,
+} from '../../../shared/providers/epoch-context'
 
 function convertToMinSec(seconds) {
   const min = Math.floor(seconds / 60)
@@ -21,18 +24,25 @@ function convertToMinSec(seconds) {
 const padded = t => t.toString().padStart(2, 0)
 
 // eslint-disable-next-line react/prop-types
-function Timer({type = 'short'}) {
+function Timer({type}) {
   const [seconds, setSeconds] = React.useState(null)
 
   const {shortSession, longSession} = useTimingState()
   const epoch = useEpochState()
 
   React.useEffect(() => {
-    if (epoch && shortSession && longSession) {
-      const finish = dayjs(
-        epoch.currentValidationStart || epoch.nextValidation
-      ).add(type === 'long' ? longSession : shortSession, 's')
-      setSeconds(finish.diff(dayjs(), 's'))
+    if (epoch) {
+      const {currentValidationStart, nextValidation, currentPeriod} = epoch
+      const validationStart = dayjs(currentValidationStart || nextValidation)
+
+      if (currentPeriod === EpochPeriod.ShortSession) {
+        const finish = validationStart.add(shortSession, 's')
+        setSeconds(finish.diff(dayjs(), 's'))
+      }
+      if (type === 'long' || currentPeriod === EpochPeriod.LongSession) {
+        const finish = validationStart.add(longSession, 's')
+        setSeconds(finish.diff(dayjs(), 's'))
+      }
     }
   }, [epoch, shortSession, longSession, type])
 

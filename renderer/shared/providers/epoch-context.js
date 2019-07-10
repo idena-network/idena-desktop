@@ -56,7 +56,10 @@ function EpochProvider({children}) {
       const validationStart = dayjs(currentValidationStart || nextValidation)
 
       const secondsBeforeValidation = dayjs(validationStart).diff(dayjs(), 's')
-      const secondsAfterValidation = dayjs().diff(dayjs(validationStart), 's')
+      const secondsAfterValidationStart = dayjs().diff(
+        dayjs(validationStart),
+        's'
+      )
 
       const {flipLottery, shortSession, longSession, afterLongSession} = timing
 
@@ -65,8 +68,8 @@ function EpochProvider({children}) {
         secondsBeforeValidation < flipLottery + GAP
 
       const isValidationRunning =
-        secondsAfterValidation >= 0 &&
-        secondsAfterValidation <
+        secondsAfterValidationStart >= 0 &&
+        secondsAfterValidationStart <
           shortSession + longSession + afterLongSession + GAP
 
       setInterval(

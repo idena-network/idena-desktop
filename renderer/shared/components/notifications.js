@@ -9,13 +9,16 @@ import {
   useNotificationState,
   NotificationType,
 } from '../providers/notification-context'
+import useId from '../hooks/use-id'
 
 function Notifications() {
   const {notifications} = useNotificationState()
+  const id = useId()
   return (
     <Absolute bottom={theme.spacings.normal} left="0" right="0">
-      {notifications.map(notification => (
-        <Notification key={notification.title + Date.now()} {...notification} />
+      {notifications.map((notification, idx) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <Notification key={`notification-${id}-${idx}`} {...notification} />
       ))}
     </Absolute>
   )

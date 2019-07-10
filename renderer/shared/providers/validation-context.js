@@ -12,21 +12,27 @@ const AnswerType = {
 const LOAD_VALIDATION = 'LOAD_VALIDATION'
 const SUBMIT_SHORT_ANSWERS = 'SUBMIT_SHORT_ANSWERS'
 const SUBMIT_LONG_ANSWERS = 'SUBMIT_LONG_ANSWERS'
+const SET_EPOCH = 'SET_EPOCH'
 
 const initialState = {
   shortAnswers: [],
   longAnswers: [],
+  epoch: null,
 }
 
 function validationReducer(state, action) {
   switch (action.type) {
-    case LOAD_VALIDATION:
+    case LOAD_VALIDATION: {
       return {...state, ...action.validation}
+    }
     case SUBMIT_SHORT_ANSWERS: {
-      return {...state, shortAnswers: action.answers}
+      return {...state, shortAnswers: action.answers, epoch: action.epoch}
     }
     case SUBMIT_LONG_ANSWERS: {
-      return {...state, longAnswers: action.answers}
+      return {...state, longAnswers: action.answers, epoch: action.epoch}
+    }
+    case SET_EPOCH: {
+      return {...state, epoch: action.epoch}
     }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`)
@@ -51,12 +57,14 @@ function ValidationProvider({children}) {
   const epoch = useEpochState()
 
   React.useEffect(() => {
-    if (epoch) {
-      if (epoch.epoch !== state.epoch) {
-        db.resetValidation()
+    if (epoch !== null) {
+      const {epoch: savedEpoch} = db.getValidation()
+      if (epoch.epoch !== savedEpoch) {
+        db.resetValidation(epoch.epoch)
+        dispatch({type: SET_EPOCH, epoch: epoch.epoch})
       }
     }
-  }, [epoch, state.epoch])
+  }, [epoch])
 
   return (
     <ValidationStateContext.Provider value={state}>
@@ -101,7 +109,7 @@ async function submitShortAnswers(dispatch, flips, epoch) {
   await api.submitShortAnswers(payload, 0, 0)
   db.setShortAnswers(payload, epoch)
 
-  dispatch({type: SUBMIT_SHORT_ANSWERS, payload})
+  dispatch({type: SUBMIT_SHORT_ANSWERS, answers: payload, epoch})
 }
 
 async function submitLongAnswers(dispatch, flips, epoch) {
@@ -110,7 +118,7 @@ async function submitLongAnswers(dispatch, flips, epoch) {
   await api.submitLongAnswers(payload, 0, 0)
   db.setLongAnswers(payload, epoch)
 
-  dispatch({type: SUBMIT_LONG_ANSWERS, payload})
+  dispatch({type: SUBMIT_LONG_ANSWERS, answers: payload, epoch})
 }
 
 export {

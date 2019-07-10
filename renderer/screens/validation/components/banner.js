@@ -46,7 +46,9 @@ function Banner({router}) {
     shortSession &&
     longSession
   ) {
-    const hasAnswers = shortAnswers.length === 0 || longAnswers.length === 0
+    const hasAnswers =
+      (currentPeriod === EpochPeriod.ShortSession && shortAnswers.length > 0) ||
+      (currentPeriod === EpochPeriod.LongSession && longAnswers.length > 0)
 
     const duration =
       currentPeriod === EpochPeriod.ShortSession
@@ -60,12 +62,12 @@ function Banner({router}) {
         <Countdown
           key={currentPeriod}
           seconds={finish.diff(dayjs(), 's')}
-          willValidate={hasAnswers}
+          willValidate={!hasAnswers}
           period={currentPeriod}
         >
           {hasAnswers
-            ? `${currentPeriod} running`
-            : `Waiting for the end of ${currentPeriod}`}
+            ? `Waiting for the end of ${currentPeriod}`
+            : `${currentPeriod} running`}
         </Countdown>
       </Absolute>
     )

@@ -99,7 +99,7 @@ function Avatar() {
         ...margin(0, 0, rem(40), 0),
       }}
     >
-      <img src="../static/logo.svg" alt="idena logo" />
+      <img src="/static/logo.svg" alt="idena logo" />
       <style jsx>{`
         img {
           width: ${rem(80)};
@@ -272,8 +272,11 @@ function CurrentTask({period, identity}) {
       )
     }
     if (validationRunning) {
-      if (shortAnswers.length && longAnswers.length) {
-        return 'Wait for validation end'
+      if (
+        (period === EpochPeriod.ShortSession && shortAnswers.length) ||
+        (period === EpochPeriod.LongSession && longAnswers.length)
+      ) {
+        return `Wait for ${period} end`
       }
       const href = `/validation/${
         period === EpochPeriod.ShortSession ? 'short' : 'long'

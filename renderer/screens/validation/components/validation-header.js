@@ -14,7 +14,7 @@ function ValidationHeader({type, currentIndex, total, children}) {
           color={isShort ? theme.colors.white : theme.colors.text}
           style={{...margin(0), ...padding(rem(9), 0, rem(7))}}
         >
-          Select meaningful story: left or right ({currentIndex} of {total})
+          Select meaningful story: left or right ({currentIndex + 1} of {total})
         </Heading>
       </Box>
       <Box>{children}</Box>
