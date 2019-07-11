@@ -36,6 +36,7 @@ function EpochProvider({children}) {
         const epoch = await fetchEpoch()
         if (!ignore) {
           setEpoch(epoch)
+          setInterval(100)
         }
       } catch (error) {
         logConnectivityIssue('epoch (initial)', error)
@@ -50,39 +51,41 @@ function EpochProvider({children}) {
     }
   }, [])
 
-  React.useEffect(() => {
-    if (epoch && hasValues(timing)) {
-      const {currentValidationStart, nextValidation} = epoch
-      const validationStart = dayjs(currentValidationStart || nextValidation)
-
-      const secondsBeforeValidation = dayjs(validationStart).diff(dayjs(), 's')
-      const secondsAfterValidationStart = dayjs().diff(
-        dayjs(validationStart),
-        's'
-      )
-
-      const {flipLottery, shortSession, longSession, afterLongSession} = timing
-
-      const isValidationSoon =
-        secondsBeforeValidation > 0 &&
-        secondsBeforeValidation < flipLottery + GAP
-
-      const isValidationRunning =
-        secondsAfterValidationStart >= 0 &&
-        secondsAfterValidationStart <
-          shortSession + longSession + afterLongSession + GAP
-
-      setInterval(
-        isValidationSoon || isValidationRunning
-          ? 1000
-          : validationStart.subtract(GAP, 's').diff(dayjs(), 'ms')
-      )
-    }
-  }, [epoch, timing])
-
   useInterval(async () => {
     try {
       const nextEpoch = await fetchEpoch()
+      if (hasValues(timing)) {
+        const {currentValidationStart, nextValidation} = nextEpoch
+        const {
+          flipLottery,
+          shortSession,
+          longSession,
+          afterLongSession,
+        } = timing
+
+        const validationStart = dayjs(currentValidationStart || nextValidation)
+
+        const secondsBeforeValidation = validationStart.diff(dayjs(), 's')
+        const secondsAfterValidationStart = dayjs().diff(validationStart, 's')
+
+        const isValidationSoon =
+          secondsBeforeValidation > 0 &&
+          secondsBeforeValidation < flipLottery + GAP
+
+        const isValidationRunning =
+          secondsAfterValidationStart >= 0 &&
+          secondsAfterValidationStart <
+            shortSession + longSession + afterLongSession + GAP
+
+        // eslint-disable-next-line no-shadow
+        const interval =
+          isValidationSoon || isValidationRunning
+            ? 1000
+            : validationStart.subtract(GAP, 's').diff(dayjs(), 'ms')
+
+        setInterval(interval)
+      }
+
       if (!deepEqual(epoch, nextEpoch)) {
         setEpoch(nextEpoch)
       }
