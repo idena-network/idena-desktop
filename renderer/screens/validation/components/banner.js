@@ -47,8 +47,9 @@ function Banner({router}) {
     longSession
   ) {
     const hasAnswers =
-      (currentPeriod === EpochPeriod.ShortSession && shortAnswers.length > 0) ||
-      (currentPeriod === EpochPeriod.LongSession && longAnswers.length > 0)
+      currentPeriod === EpochPeriod.ShortSession
+        ? shortAnswers.length
+        : longAnswers.length
 
     const duration =
       currentPeriod === EpochPeriod.ShortSession

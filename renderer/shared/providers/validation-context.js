@@ -13,7 +13,7 @@ const AnswerType = {
 const LOAD_VALIDATION = 'LOAD_VALIDATION'
 const SUBMIT_SHORT_ANSWERS = 'SUBMIT_SHORT_ANSWERS'
 const SUBMIT_LONG_ANSWERS = 'SUBMIT_LONG_ANSWERS'
-const SET_EPOCH = 'SET_EPOCH'
+const RESET_EPOCH = 'RESET_EPOCH'
 
 const initialState = {
   shortAnswers: [],
@@ -32,8 +32,8 @@ function validationReducer(state, action) {
     case SUBMIT_LONG_ANSWERS: {
       return {...state, longAnswers: action.answers, epoch: action.epoch}
     }
-    case SET_EPOCH: {
-      return {...state, epoch: action.epoch}
+    case RESET_EPOCH: {
+      return {...state, shortAnswers: [], longAnswers: [], epoch: action.epoch}
     }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`)
@@ -63,7 +63,7 @@ function ValidationProvider({children}) {
       const {epoch: savedEpoch} = db.getValidation()
       if (epoch.epoch !== savedEpoch) {
         db.resetValidation(epoch.epoch)
-        dispatch({type: SET_EPOCH, epoch: epoch.epoch})
+        dispatch({type: RESET_EPOCH, epoch: epoch.epoch})
         archiveFlips()
       }
     }
