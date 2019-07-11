@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, margin} from 'polished'
+import {rem, margin, padding, borderRadius} from 'polished'
 import {Col, Box, Fill} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import Arrow from './arrow'
@@ -9,17 +9,33 @@ import Spinner from './spinner'
 import theme from '../../../shared/theme'
 import {AnswerType} from '../../../shared/providers/validation-context'
 
-const style = {
+const defaultStyle = {
   borderRadius: rem(8),
   ...margin(0, rem(theme.spacings.medium24), 0),
   position: 'relative',
+  ...padding(rem(4)),
   height: '100%',
   minWidth: rem(147),
+  opacity: 1,
 }
 
-const selectedStyle = {
+const answeredStyle = {
+  ...defaultStyle,
   border: `solid 2px ${theme.colors.primary}`,
-  boxShadow: '0 0 4px 4px rgba(87, 143, 255, 0.25)',
+  boxShadow: '0 0 4px 6px rgba(87, 143, 255, 0.25)',
+  opacity: 1,
+}
+
+const oppositeAnsweredStyle = {
+  ...defaultStyle,
+  opacity: 0.3,
+}
+
+function style(answer, target) {
+  if (!answer || answer === AnswerType.None) {
+    return defaultStyle
+  }
+  return answer === target ? answeredStyle : oppositeAnsweredStyle
 }
 
 function ValidationScene({
@@ -48,7 +64,7 @@ function ValidationScene({
           direction="column"
           justify="center"
           align="center"
-          css={answer === 1 ? {...selectedStyle, ...style} : style}
+          css={style(answer, AnswerType.Left)}
           width="100%"
         >
           {ready ? (
@@ -63,6 +79,11 @@ function ValidationScene({
                   width={147}
                   style={{
                     background: theme.colors.white,
+                    ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
+                    ...borderRadius(
+                      'bottom',
+                      idx === pics.length - 1 ? rem(8) : 'none'
+                    ),
                     objectFit: 'contain',
                     objectPosition: 'center',
                   }}
@@ -82,7 +103,7 @@ function ValidationScene({
           direction="column"
           justify="center"
           align="center"
-          css={answer === 2 ? {...selectedStyle, ...style} : style}
+          css={style(answer, AnswerType.Right)}
           width="100%"
         >
           {ready ? (
@@ -97,6 +118,11 @@ function ValidationScene({
                   width={147}
                   style={{
                     background: theme.colors.white,
+                    ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
+                    ...borderRadius(
+                      'bottom',
+                      idx === pics.length - 1 ? rem(8) : 'none'
+                    ),
                     objectFit: 'contain',
                     objectPosition: 'center',
                   }}

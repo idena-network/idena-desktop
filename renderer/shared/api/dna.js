@@ -126,8 +126,16 @@ export async function fetchCoinbaseAddress() {
 }
 
 /**
+ * Flip object
+ * @typedef {Object} Flip
+ * @property {string} hex Binary encoded flip data, in hex format
+ * @property {number} epoch Origin epoch when a flip was created
+ */
+
+/**
  * Fetches hex representation of the FLIP published in the network
  * @param {string} hash Flip hash
+ * @returns {Flip} Encoded flip
  */
 export async function fetchFlip(hash) {
   const {data} = await api().post('/', {

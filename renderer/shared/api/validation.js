@@ -28,13 +28,6 @@ export async function fetchFlipHashes(type) {
 }
 
 /**
- * Flip object
- * @typedef {Object} Flip
- * @property {string} hex Binary encoded flip data, in hex format
- * @property {number} epoch Origin epoch when a flip was created
- */
-
-/**
  * Format used for submitting validation session answers
  * @typedef {Object} ValidationAnswer
  * @property {string} hash Flip hash
