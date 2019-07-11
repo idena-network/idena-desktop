@@ -14,6 +14,7 @@ const style = {
   ...margin(0, rem(theme.spacings.medium24), 0),
   position: 'relative',
   height: '100%',
+  minWidth: rem(147),
 }
 
 const selectedStyle = {

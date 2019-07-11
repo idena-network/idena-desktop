@@ -50,9 +50,7 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
               style={{borderRadius: rem(8)}}
             />
           ) : (
-            <Fill>
-              <Spinner />
-            </Fill>
+            <Spinner size={24} />
           )}
         </Box>
       ))}
