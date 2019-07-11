@@ -1,6 +1,7 @@
 import React from 'react'
 import * as api from '../api/validation'
 import {useEpochState} from './epoch-context'
+import useFlips from '../utils/useFlips'
 
 const AnswerType = {
   None: 0,
@@ -55,6 +56,7 @@ function ValidationProvider({children}) {
   }, [])
 
   const epoch = useEpochState()
+  const {archiveFlips} = useFlips()
 
   React.useEffect(() => {
     if (epoch !== null) {
@@ -62,9 +64,10 @@ function ValidationProvider({children}) {
       if (epoch.epoch !== savedEpoch) {
         db.resetValidation(epoch.epoch)
         dispatch({type: SET_EPOCH, epoch: epoch.epoch})
+        archiveFlips()
       }
     }
-  }, [epoch])
+  }, [archiveFlips, epoch])
 
   return (
     <ValidationStateContext.Provider value={state}>
