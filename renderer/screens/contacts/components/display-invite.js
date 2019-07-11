@@ -27,7 +27,7 @@ function DisplayInvite({
   const readonly = mined
   return (
     <Box
-      css={padding(rem(theme.spacings.large48), rem(theme.spacings.medium32))}
+      css={padding(rem(theme.spacings.medium32), rem(theme.spacings.medium32))}
     >
       <Box css={{textAlign: 'center'}}>
         <Avatar username={receiver} size={80} />
