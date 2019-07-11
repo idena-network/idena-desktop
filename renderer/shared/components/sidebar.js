@@ -43,13 +43,13 @@ function Sidebar() {
 }
 
 function NodeStatus() {
-  const {syncing, unreachable, currentBlock, highestBlock} = useChainState()
+  const {syncing, offline, currentBlock, highestBlock} = useChainState()
 
   let bg = theme.colors.white01
   let color = theme.colors.muted
   let text = 'Getting node status...'
 
-  if (unreachable) {
+  if (offline) {
     bg = theme.colors.danger02
     color = theme.colors.danger
     text = 'Offline'
@@ -191,7 +191,7 @@ function InfoPanel() {
       }}
     >
       {currentPeriod !== EpochPeriod.None && (
-      <Block title="Current period">{currentPeriod}</Block>
+        <Block title="Current period">{currentPeriod}</Block>
       )}
       <Block title="My current task">
         <CurrentTask period={currentPeriod} identity={identity} />

@@ -6,7 +6,7 @@ const FETCH_SYNC_SUCCEEDED = 'FETCH_SYNC_SUCCEEDED'
 const FETCH_SYNC_FAILED = 'FETCH_SYNC_FAILED'
 
 const initialState = {
-  unreachable: null,
+  offline: null,
   syncing: null,
   currentBlock: null,
   highestBlock: null,
@@ -21,17 +21,14 @@ function chainReducer(state, action) {
         ...state,
         currentBlock,
         highestBlock,
-        syncing: Number.isFinite(currentBlock / highestBlock)
-          ? syncing && currentBlock !== highestBlock
-          : null,
-        unreachable: false,
+        syncing,
+        offline: false,
       }
     }
     case FETCH_SYNC_FAILED:
       return {
         ...state,
-        syncing: null,
-        unreachable: true,
+        offline: true,
       }
     default:
       throw new Error(`Unknown action ${action.type}`)
