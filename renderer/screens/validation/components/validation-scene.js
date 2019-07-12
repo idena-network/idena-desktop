@@ -8,6 +8,7 @@ import {reorderList} from '../../../shared/utils/arr'
 import Spinner from './spinner'
 import theme from '../../../shared/theme'
 import {AnswerType} from '../../../shared/providers/validation-context'
+import {hasAnswer} from '../utils/reducer'
 
 const defaultStyle = {
   borderRadius: rem(8),
@@ -139,7 +140,7 @@ function ValidationScene({
           )}
         </Flex>
       </Flex>
-      {!isLast && (
+      {!isLast && hasAnswer(answer) && (
         <Col onClick={onNext} w={4}>
           <Arrow dir="next" type={type} />
         </Col>
