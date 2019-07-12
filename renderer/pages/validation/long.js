@@ -88,6 +88,12 @@ export default function() {
     state.hashes.filter(x => !x.ready).length > 0 ? 1000 : null
   )
 
+  const handleSubmitAnswers = async () => {
+    console.info('auto-sending answers (long)', state.flips)
+    await submitLongAnswers(validationDispatch, state.flips, epoch.epoch)
+    Router.push('/dashboard')
+  }
+
   return (
     <Layout>
       <Flex
@@ -134,15 +140,8 @@ export default function() {
         <ValidationActions
           onReportAbuse={hash => dispatch({type: REPORT_ABUSE, hash})}
           canSubmit={state.canSubmit}
-          onSubmitAnswers={async () => {
-            await submitLongAnswers(
-              validationDispatch,
-              state.flips,
-              epoch.epoch
-            )
-            Router.push('/dashboard')
-          }}
-          countdown={<Timer type="long" />}
+          onSubmitAnswers={handleSubmitAnswers}
+          countdown={<Timer type="long" onExpired={handleSubmitAnswers} />}
         />
         <FlipThumbnails
           currentIndex={state.currentIndex}

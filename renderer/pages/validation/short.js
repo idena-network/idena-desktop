@@ -87,6 +87,12 @@ function ShortSession() {
     state.hashes.filter(x => !x.ready).length > 0 ? 1000 : null
   )
 
+  const handleSubmitAnswers = async () => {
+    console.info('auto-sending answers (short)', state.flips)
+    submitShortAnswers(validationDispatch, state.flips, epoch.epoch)
+    Router.push('/validation/long')
+  }
+
   return (
     <Flex
       direction="column"
@@ -131,11 +137,8 @@ function ShortSession() {
       <ValidationActions
         onReportAbuse={hash => dispatch({type: REPORT_ABUSE, hash})}
         canSubmit={state.canSubmit}
-        onSubmitAnswers={async () => {
-          submitShortAnswers(validationDispatch, state.flips, epoch.epoch)
-          Router.push('/validation/long')
-        }}
-        countdown={<Timer type="short" />}
+        onSubmitAnswers={handleSubmitAnswers}
+        countdown={<Timer type="short" onExpired={handleSubmitAnswers} />}
       />
       <FlipThumbnails
         currentIndex={state.currentIndex}

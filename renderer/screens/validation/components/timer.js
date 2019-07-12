@@ -20,8 +20,10 @@ function convertToMinSec(seconds) {
 
 const padded = t => t.toString().padStart(2, 0)
 
+const GAP = 10
+
 // eslint-disable-next-line react/prop-types
-function Timer({type}) {
+function Timer({type, onExpired}) {
   const [seconds, setSeconds] = React.useState(null)
 
   const {shortSession, longSession} = useTimingState()
@@ -33,17 +35,26 @@ function Timer({type}) {
       const validationStart = dayjs(currentValidationStart || nextValidation)
 
       if (type === 'short') {
-        const finish = validationStart.add(shortSession, 's')
+        const finish = validationStart.add(shortSession - GAP, 's')
         setSeconds(finish.diff(dayjs(), 's'))
       }
       if (type === 'long') {
-        const finish = validationStart.add(shortSession + longSession, 's')
+        const finish = validationStart.add(
+          shortSession + longSession - GAP,
+          's'
+        )
         setSeconds(finish.diff(dayjs(), 's'))
       }
     }
   }, [epoch, shortSession, longSession, type])
 
   useInterval(() => setSeconds(seconds - 1), seconds > 0 ? 1000 : null)
+
+  React.useEffect(() => {
+    if (onExpired && Number.isFinite(seconds) && seconds === 1) {
+      onExpired()
+    }
+  }, [onExpired, seconds])
 
   const {min, sec} = convertToMinSec(seconds)
   return (
