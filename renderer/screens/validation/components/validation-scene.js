@@ -7,8 +7,10 @@ import Arrow from './arrow'
 import {reorderList} from '../../../shared/utils/arr'
 import Spinner from './spinner'
 import theme from '../../../shared/theme'
-import {AnswerType} from '../../../shared/providers/validation-context'
-import {hasAnswer} from '../utils/reducer'
+import {
+  AnswerType,
+  hasAnswer,
+} from '../../../shared/providers/validation-context'
 
 const defaultStyle = {
   borderRadius: rem(8),

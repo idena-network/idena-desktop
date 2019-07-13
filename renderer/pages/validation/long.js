@@ -17,49 +17,55 @@ import {fetchFlip} from '../../shared/api'
 import {
   useValidationDispatch,
   submitLongAnswers,
-} from '../../shared/providers/validation-context'
-import {
-  sessionReducer,
-  initialState,
-  START_FETCH,
-  FETCH_SUCCEEDED,
-  FETCH_FAILED,
-  FETCH_MISSING_SUCCEEDED,
+  START_FETCH_FLIPS,
+  FETCH_FLIPS_SUCCEEDED,
+  FETCH_FLIPS_FAILED,
+  FETCH_MISSING_FLIPS_SUCCEEDED,
   PREV,
   NEXT,
   ANSWER,
   REPORT_ABUSE,
   PICK,
-} from '../../screens/validation/utils/reducer'
+  useValidationState,
+} from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
 
 export default function() {
-  const [state, dispatch] = React.useReducer(sessionReducer, initialState)
-  const validationDispatch = useValidationDispatch()
+  const state = useValidationState()
+  const dispatch = useValidationDispatch()
   const epoch = useEpochState()
 
   React.useEffect(() => {
     let ignore = false
 
     if (!ignore) {
-      dispatch({type: START_FETCH})
+      dispatch({type: START_FETCH_FLIPS})
     }
 
     async function fetchData() {
       try {
         const hashes = await fetchFlipHashes('long')
-        const hexes = await Promise.all(
-          hashes
-            .filter(x => x.ready)
-            .map(x => x.hash)
-            .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
-        )
-        if (!ignore) {
-          dispatch({type: FETCH_SUCCEEDED, hashes, hexes})
+        if (hashes) {
+          const hexes = await Promise.all(
+            hashes
+              .filter(x => x.ready)
+              .map(x => x.hash)
+              .map(hash =>
+                fetchFlip(hash).then(resp => ({hash, ...resp.result}))
+              )
+          )
+          if (!ignore) {
+            dispatch({type: FETCH_FLIPS_SUCCEEDED, hashes, hexes})
+          }
+        } else {
+          dispatch({
+            type: FETCH_FLIPS_FAILED,
+            error: Error(`Cannot fetch flips`),
+          })
         }
       } catch (error) {
         if (!ignore) {
-          dispatch({type: FETCH_FAILED, error})
+          dispatch({type: FETCH_FLIPS_FAILED, error})
         }
       }
     }
@@ -69,7 +75,7 @@ export default function() {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [dispatch])
 
   useInterval(
     async () => {
@@ -80,17 +86,16 @@ export default function() {
             .map(x => x.hash)
             .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
         )
-        dispatch({type: FETCH_MISSING_SUCCEEDED, hexes})
+        dispatch({type: FETCH_MISSING_FLIPS_SUCCEEDED, hexes})
       } catch (error) {
-        dispatch({type: FETCH_FAILED, error})
+        dispatch({type: FETCH_FLIPS_FAILED, error})
       }
     },
     state.hashes.filter(x => !x.ready).length > 0 ? 1000 : null
   )
 
   const handleSubmitAnswers = async () => {
-    console.info('auto-sending answers (long)', state.flips)
-    await submitLongAnswers(validationDispatch, state.flips, epoch.epoch)
+    await submitLongAnswers(dispatch, state.flips, epoch.epoch)
     Router.push('/dashboard')
   }
 
@@ -141,7 +146,7 @@ export default function() {
           onReportAbuse={hash => dispatch({type: REPORT_ABUSE, hash})}
           canSubmit={state.canSubmit}
           onSubmitAnswers={handleSubmitAnswers}
-          countdown={<Timer type="long" onExpired={handleSubmitAnswers} />}
+          countdown={<Timer />}
         />
         <FlipThumbnails
           currentIndex={state.currentIndex}

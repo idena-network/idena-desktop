@@ -1,7 +1,10 @@
 import {useState, useEffect, useCallback, useRef} from 'react'
+import dayjs from 'dayjs'
 import * as api from '../api/validation'
 import useFlips from '../utils/useFlips'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
+import {useTimingState} from '../providers/timing-context'
+import {useInterval} from './use-interval'
 
 const {getValidation, saveValidation} = global.validationStore || {}
 
@@ -76,6 +79,34 @@ function useValidation() {
     submitShortAnswers,
     submitLongAnswers,
   }
+}
+
+const GAP = 9
+
+export function useValidationTimer() {
+  const [seconds, setSeconds] = useState()
+
+  const {shortSession, longSession} = useTimingState()
+  const epoch = useEpochState()
+
+  useEffect(() => {
+    if (epoch && shortSession && longSession) {
+      const {currentPeriod, currentValidationStart, nextValidation} = epoch
+      const finish = dayjs(currentValidationStart || nextValidation)
+        .add(
+          currentPeriod === EpochPeriod.ShortSession
+            ? shortSession
+            : shortSession + longSession,
+          's'
+        )
+        .subtract(GAP, 's')
+      setSeconds(finish.isAfter(dayjs()) ? finish.diff(dayjs(), 's') : 0)
+    }
+  }, [epoch, shortSession, longSession])
+
+  useInterval(() => setSeconds(seconds - 1), seconds > 0 ? 1000 : null)
+
+  return seconds
 }
 
 export default useValidation

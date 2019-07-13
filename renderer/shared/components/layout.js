@@ -2,7 +2,6 @@ import React from 'react'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
-import {ValidationProvider} from '../providers/validation-context'
 
 // eslint-disable-next-line react/prop-types
 function Layout({children}) {
@@ -10,9 +9,7 @@ function Layout({children}) {
     <main>
       <Sidebar />
       <section>{children}</section>
-      <ValidationProvider>
-        <ValidationBanner />
-      </ValidationProvider>
+      <ValidationBanner />
       <Notifications />
       <style jsx>{`
         main {
