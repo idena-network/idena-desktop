@@ -140,11 +140,12 @@ function ValidationScene({
           )}
         </Flex>
       </Flex>
-      {!isLast && hasAnswer(answer) && (
-        <Col onClick={onNext} w={4}>
-          <Arrow dir="next" type={type} />
-        </Col>
-      )}
+      {!ready ||
+        (!isLast && hasAnswer(answer) && (
+          <Col onClick={onNext} w={4}>
+            <Arrow dir="next" type={type} />
+          </Col>
+        ))}
     </Flex>
   )
 }
