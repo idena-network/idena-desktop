@@ -8,7 +8,7 @@ import {useValidationTimer} from '../../../shared/hooks/use-validation'
 
 const padded = t => t.toString().padStart(2, 0)
 
-function maptoMinSec(seconds) {
+function mapToMinSec(seconds) {
   return [Math.floor(seconds / 60), seconds % 60]
 }
 
@@ -18,7 +18,7 @@ function Timer() {
     <Flex align="center">
       <FiClock color={theme.colors.danger} style={{marginRight: rem(4)}} />
       <Text color={theme.colors.danger} fontWeight={600}>
-        {maptoMinSec(seconds)
+        {mapToMinSec(seconds)
           .map(padded)
           .join(':')}
       </Text>

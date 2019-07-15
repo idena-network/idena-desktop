@@ -217,23 +217,26 @@ function ValidationProvider({children}) {
   }, [archiveFlips, epoch])
 
   useEffect(() => {
-    if (Number.isFinite(seconds) && seconds === 1) {
-      if (epoch.currentPeriod === EpochPeriod.ShortSession) {
-        console.info('Auto-sending short answers', {
-          answers: state.shortAnswers,
-          epoch: epoch.epoch,
-        })
-        // eslint-disable-next-line no-use-before-define
-        submitShortAnswers(dispatch, state.shortAnswers, epoch.epoch)
-      } else if (epoch.currentPeriod === EpochPeriod.ShortSession) {
-        console.info('Auto-sending long answers', {
-          answers: state.longAnswers,
-          epoch: epoch.epoch,
-        })
-        // eslint-disable-next-line no-use-before-define
-        submitLongAnswers(dispatch, state.longAnswers, epoch.epoch)
+    async function sendAnswers() {
+      if (Number.isFinite(seconds) && seconds === 1) {
+        if (epoch.currentPeriod === EpochPeriod.ShortSession) {
+          console.info('Auto-sending short answers', {
+            answers: state.shortAnswers,
+            epoch: epoch.epoch,
+          })
+          // eslint-disable-next-line no-use-before-define
+          await submitShortAnswers(dispatch, state.shortAnswers, epoch.epoch)
+        } else if (epoch.currentPeriod === EpochPeriod.LongSession) {
+          console.info('Auto-sending long answers', {
+            answers: state.longAnswers,
+            epoch: epoch.epoch,
+          })
+          // eslint-disable-next-line no-use-before-define
+          await submitLongAnswers(dispatch, state.longAnswers, epoch.epoch)
+        }
       }
     }
+    sendAnswers()
   }, [epoch, seconds, state])
 
   return (
