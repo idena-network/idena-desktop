@@ -1,9 +1,9 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
 import {FiInstagram, FiSettings, FiUserCheck, FiUsers} from 'react-icons/fi'
 import {margin, rem, borderRadius} from 'polished'
-import {Box, List, Link, Text} from '.'
+import {Box, List, Link, Text, Button} from '.'
 import Flex from './flex'
 import theme from '../theme'
 import Loading from './loading'
@@ -11,8 +11,38 @@ import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
 import {useValidationState} from '../providers/validation-context'
+import {
+  UPDATE_DOWNLOADED,
+  UPDATE_APPLY,
+  UPDATE_LOADING,
+} from '../../../main/channels'
 
 function Sidebar() {
+  const [updateDownloded, setUpdateDownloded] = useState(false)
+  const [updatePercent, setUpdatePercent] = useState(0)
+
+  const updateAvailable = () => {
+    setUpdateDownloded(true)
+  }
+
+  const updateLoading = (_, info) => {
+    setUpdatePercent(info.percent)
+  }
+
+  useEffect(() => {
+    global.ipcRenderer.on(UPDATE_DOWNLOADED, updateAvailable)
+    return () => {
+      global.ipcRenderer.removeListener(UPDATE_DOWNLOADED, updateAvailable)
+    }
+  }, [])
+
+  useEffect(() => {
+    global.ipcRenderer.on(UPDATE_LOADING, updateLoading)
+    return () => {
+      global.ipcRenderer.removeListener(UPDATE_LOADING, updateLoading)
+    }
+  }, [])
+
   return (
     <section>
       <Flex direction="column" align="flex-start">
@@ -22,7 +52,10 @@ function Sidebar() {
       </Flex>
       <div>
         <InfoPanel />
-        <Version />
+        <Version
+          updateReady={updateDownloded}
+          updateLoadingPercent={updatePercent}
+        />
       </div>
       <style jsx>{`
         section {
@@ -147,7 +180,10 @@ const NavItem = withRouter(({href, router, icon, children}) => {
     <li>
       <Link href={href} color={color} width="100%" height="100%">
         <Flex align="center">
-          {React.cloneElement(icon, {color, fontSize: theme.fontSizes.normal})}
+          {React.cloneElement(icon, {
+            color,
+            fontSize: theme.fontSizes.normal,
+          })}
           <Box w="8px" />
           {children}
         </Flex>
@@ -335,7 +371,7 @@ CurrentTask.propTypes = {
   }).isRequired,
 }
 
-function Version() {
+function Version({updateReady, updateLoadingPercent}) {
   return (
     <Box
       css={{
@@ -344,9 +380,35 @@ function Version() {
         ...margin(rem(theme.spacings.medium16), 0, rem(theme.spacings.small8)),
       }}
     >
-      <Block title="Version">{global.appVersion}</Block>
+      <Block title="Version">
+        {global.appVersion}
+        {updateReady ? (
+          <Button
+            css={margin(0, 0, 0, rem(theme.spacings.medium16))}
+            onClick={() => {
+              global.ipcRenderer.send(UPDATE_APPLY)
+            }}
+          >
+            Update
+          </Button>
+        ) : null}
+        {updateLoadingPercent > 0 && !updateReady ? (
+          <span style={{marginLeft: rem(theme.spacings.medium16)}}>
+            Loading:{' '}
+            {Number(updateLoadingPercent).toLocaleString(undefined, {
+              maximumFractionDigits: 2,
+            })}
+            %
+          </span>
+        ) : null}
+      </Block>
     </Box>
   )
+}
+
+Version.propTypes = {
+  updateReady: PropTypes.bool,
+  updateLoadingPercent: PropTypes.number,
 }
 
 export default Sidebar

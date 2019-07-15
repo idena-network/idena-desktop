@@ -3,10 +3,13 @@
   "productName": "Idena",
   "version": "0.0.1",
   "main": "main/index.js",
+  "repository": "idena-network/idena-desktop",
   "scripts": {
     "start": "run-electron .",
     "build": "next build renderer && next export renderer",
     "dist": "npm run build && build",
+    "dist:win": "npm run build && build --win",
+    "dist:mac": "npm run build && build --mac",
     "pack": "npm run build && build --dir",
     "clean": "rm -rf renderer/out dist",
     "lint": "eslint .",
@@ -21,17 +24,15 @@
       "renderer/out"
     ],
     "win": {
-      "publish": null,
-      "target": [
-        "zip"
+      "publish": [
+        "github"
       ]
     },
     "mac": {
-      "publish": null,
-      "icon": "main/static/icons/mac.icns",
-      "target": [
-        "zip"
-      ]
+      "publish": [
+        "github"
+      ],
+      "icon": "main/static/icons/mac.icns"
     }
   },
   "devDependencies": {
@@ -60,8 +61,10 @@
     "dayjs": "^1.8.14",
     "dequal": "^1.0.0",
     "electron-is-dev": "^1.0.1",
+    "electron-log": "^3.0.6",
     "electron-next": "^3.1.5",
     "electron-store": "^3.2.0",
+    "electron-updater": "^4.0.14",
     "express": "^4.17.0",
     "lowdb": "^1.0.0",
     "nanoid": "^2.0.1",
