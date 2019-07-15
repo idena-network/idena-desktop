@@ -25,8 +25,8 @@ install:
   - npm i
 
 script:
-  - echo "Deploy windows version to GitHub"
-  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then npm run dist:win; fi
+  - echo "Build win"
+  - npm run dist:win
 
-  - echo "Deploy mac version to GitHub"
-  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then npm run dist:mac; fi
+  - echo "Build mac"
+  - npm run dist:mac
