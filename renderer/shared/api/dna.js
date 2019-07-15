@@ -45,6 +45,7 @@ export async function fetchIdentities() {
  * @property {string[]} flips
  * @property {number} totalQualifiedFlips
  * @property {number} totalShortFlipPoints
+ * @property {boolean} online
  */
 
 /**
@@ -164,6 +165,24 @@ export async function killIdentity(from) {
         from,
       },
     ],
+    id: 1,
+  })
+  return data
+}
+
+export async function becomeOnline() {
+  const {data} = await api().post('/', {
+    method: 'dna_becomeOnline',
+    params: [],
+    id: 1,
+  })
+  return data
+}
+
+export async function becomeOffline() {
+  const {data} = await api().post('/', {
+    method: 'dna_becomeOffline',
+    params: [],
     id: 1,
   })
   return data

@@ -19,6 +19,8 @@ import useFlips from '../../shared/utils/useFlips'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {nodeSettings} from '../../shared/api/api-client'
+import {becomeOnline, becomeOffline} from '../../shared/api'
+import {useIdentityState} from '../../shared/providers/identity-context'
 
 const DEFAULT_NODE_URL = 'http://localhost:9009'
 
@@ -27,7 +29,8 @@ const inviteDb = global.invitesDb || {}
 
 function Settings() {
   const {archiveFlips} = useFlips()
-  const {addNotification} = useNotificationDispatch()
+  const {addNotification, addError} = useNotificationDispatch()
+  const {online} = useIdentityState()
 
   const addrRef = React.createRef()
   const [addr, setAddr] = useState()
@@ -130,15 +133,46 @@ function Settings() {
             <Link href="/validation/long">Long</Link>
           </Box>
         </Box>
-        <EpochDisplay />
+        <Box my={rem(theme.spacings.medium32)}>
+          <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
+            Now: {online ? 'online 🔵' : 'offline 🔴'}
+          </SubHeading>
+          <Box my={theme.spacings.small}>
+            <Button
+              disabled={online}
+              onClick={async () => {
+                try {
+                  await becomeOnline()
+                } catch (error) {
+                  addError({
+                    title: error.message,
+                  })
+                }
+              }}
+            >
+              Become online
+            </Button>
+          </Box>
+          <Box my={theme.spacings.small}>
+            <Button
+              disabled={!online}
+              onClick={async () => {
+                try {
+                  await becomeOffline()
+                } catch (error) {
+                  addError({
+                    title: error.message,
+                  })
+                }
+              }}
+            >
+              Become offline
+            </Button>
+          </Box>
+        </Box>
       </Box>
     </Layout>
   )
-}
-
-function EpochDisplay() {
-  const epoch = useEpochState()
-  return <Pre>{JSON.stringify(epoch)}</Pre>
 }
 
 export default Settings
