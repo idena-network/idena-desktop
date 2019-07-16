@@ -81,7 +81,10 @@ function EpochProvider({children}) {
         const interval =
           isValidationSoon || isValidationRunning
             ? 1000
-            : validationStart.subtract(GAP, 's').diff(dayjs(), 'ms')
+            : Math.max(
+                validationStart.subtract(GAP, 's').diff(dayjs(), 'ms'),
+                1000
+              )
 
         setInterval(interval)
       }
