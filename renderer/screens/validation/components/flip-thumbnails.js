@@ -5,8 +5,10 @@ import Flex from '../../../shared/components/flex'
 import {Box, Fill} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import FlipImage from '../../flips/components/flip-image'
-import {hasAnswer} from '../utils/reducer'
-import {AnswerType} from '../../../shared/providers/validation-context'
+import {
+  AnswerType,
+  hasAnswer,
+} from '../../../shared/providers/validation-context'
 import Spinner from './spinner'
 
 const activeStyle = {

@@ -81,7 +81,7 @@ function useValidation() {
   }
 }
 
-const GAP = 9
+const GAP = 10
 
 export function useValidationTimer() {
   const [seconds, setSeconds] = useState()
@@ -92,14 +92,14 @@ export function useValidationTimer() {
   useEffect(() => {
     if (epoch && shortSession && longSession) {
       const {currentPeriod, currentValidationStart, nextValidation} = epoch
-      const finish = dayjs(currentValidationStart || nextValidation)
-        .add(
-          currentPeriod === EpochPeriod.ShortSession
-            ? shortSession
-            : shortSession + longSession,
-          's'
-        )
-        .subtract(GAP, 's')
+
+      const start = dayjs(currentValidationStart || nextValidation)
+      const duration =
+        currentPeriod === EpochPeriod.ShortSession
+          ? shortSession
+          : shortSession + longSession
+      const finish = start.add(duration, 's').subtract(GAP, 's')
+
       setSeconds(finish.isAfter(dayjs()) ? finish.diff(dayjs(), 's') : 0)
     }
   }, [epoch, shortSession, longSession])

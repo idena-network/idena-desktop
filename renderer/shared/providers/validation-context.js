@@ -4,12 +4,18 @@ import * as api from '../api/validation'
 import {useEpochState, EpochPeriod} from './epoch-context'
 import useFlips from '../utils/useFlips'
 import {useValidationTimer} from '../hooks/use-validation'
+import useLogger from '../hooks/use-logger'
 
-const AnswerType = {
+export const AnswerType = {
   None: 0,
   Left: 1,
   Right: 2,
   Inappropriate: 3,
+}
+
+export const SessionType = {
+  Short: 'short',
+  Long: 'long',
 }
 
 function fromHexString(hexString) {
@@ -59,7 +65,6 @@ export const NEXT = 'NEXT'
 export const PREV = 'PREV'
 export const PICK = 'PICK'
 export const REPORT_ABUSE = 'REPORT_ABUSE'
-export const RESET_CEREMONY = 'RESET_CEREMONY'
 
 const initialCeremonyState = {
   hashes: [],
@@ -73,6 +78,8 @@ const initialState = {
   shortAnswers: [],
   longAnswers: [],
   epoch: null,
+  shortAnswersSubmitted: false,
+  longAnswersSubmitted: false,
   ...initialCeremonyState,
 }
 
@@ -86,6 +93,7 @@ function validationReducer(state, action) {
         ...state,
         shortAnswers: action.answers,
         epoch: action.epoch,
+        shortAnswersSubmitted: true,
         ...initialCeremonyState,
       }
     }
@@ -94,6 +102,7 @@ function validationReducer(state, action) {
         ...state,
         longAnswers: action.answers,
         epoch: action.epoch,
+        longAnswersSubmitted: true,
         ...initialCeremonyState,
       }
     }
@@ -103,6 +112,8 @@ function validationReducer(state, action) {
         shortAnswers: [],
         longAnswers: [],
         epoch: action.epoch,
+        shortAnswersSubmitted: false,
+        longAnswersSubmitted: false,
         ...initialCeremonyState,
       }
     }
@@ -193,14 +204,16 @@ const ValidationDispatchContext = createContext()
 const db = global.validationDb
 
 // eslint-disable-next-line react/prop-types
-function ValidationProvider({children}) {
-  const [state, dispatch] = useReducer(validationReducer, initialState)
+export function ValidationProvider({children}) {
+  const [state, dispatch] = useLogger(
+    useReducer(validationReducer, initialState)
+  )
   const seconds = useValidationTimer()
 
   useEffect(() => {
     const validation = db.getValidation()
     dispatch({type: LOAD_VALIDATION, validation})
-  }, [])
+  }, [dispatch])
 
   const epoch = useEpochState()
   const {archiveFlips} = useFlips()
@@ -214,30 +227,45 @@ function ValidationProvider({children}) {
         archiveFlips()
       }
     }
-  }, [archiveFlips, epoch])
+  }, [archiveFlips, dispatch, epoch])
 
   useEffect(() => {
-    async function sendAnswers() {
-      if (Number.isFinite(seconds) && seconds === 1) {
-        if (epoch.currentPeriod === EpochPeriod.ShortSession) {
-          console.info('Auto-sending short answers', {
-            answers: state.shortAnswers,
-            epoch: epoch.epoch,
-          })
-          // eslint-disable-next-line no-use-before-define
-          await submitShortAnswers(dispatch, state.shortAnswers, epoch.epoch)
-        } else if (epoch.currentPeriod === EpochPeriod.LongSession) {
-          console.info('Auto-sending long answers', {
-            answers: state.longAnswers,
-            epoch: epoch.epoch,
-          })
-          // eslint-disable-next-line no-use-before-define
-          await submitLongAnswers(dispatch, state.longAnswers, epoch.epoch)
-        }
+    async function sendAnswers(type) {
+      if (type === SessionType.Short) {
+        // eslint-disable-next-line no-use-before-define
+        await submitShortAnswers(dispatch, state.shortAnswers, epoch.epoch)
+      }
+      if (type === SessionType.Long) {
+        // eslint-disable-next-line no-use-before-define
+        await submitLongAnswers(dispatch, state.longAnswers, epoch.epoch)
       }
     }
-    sendAnswers()
-  }, [epoch, seconds, state])
+
+    // prevent mess with epoch and seconds switching simultaneously
+    if (seconds === 1) {
+      if (
+        epoch.currentPeriod === EpochPeriod.ShortSession &&
+        !state.shortAnswersSubmitted &&
+        state.shortAnswers.length
+      ) {
+        sendAnswers(SessionType.Short)
+      } else if (
+        epoch.currentPeriod === EpochPeriod.LongSession &&
+        !state.longAnswersSubmitted &&
+        state.longAnswers.length
+      ) {
+        sendAnswers(SessionType.Long)
+      }
+    }
+  }, [
+    dispatch,
+    epoch,
+    seconds,
+    state.longAnswers,
+    state.longAnswersSubmitted,
+    state.shortAnswers,
+    state.shortAnswersSubmitted,
+  ])
 
   return (
     <ValidationStateContext.Provider value={state}>
@@ -248,7 +276,7 @@ function ValidationProvider({children}) {
   )
 }
 
-function useValidationState() {
+export function useValidationState() {
   const context = useContext(ValidationStateContext)
   if (context === undefined) {
     throw new Error(
@@ -258,7 +286,7 @@ function useValidationState() {
   return context
 }
 
-function useValidationDispatch() {
+export function useValidationDispatch() {
   const context = useContext(ValidationDispatchContext)
   if (context === undefined) {
     throw new Error(
@@ -270,13 +298,12 @@ function useValidationDispatch() {
 
 function prepareAnswers(flips) {
   return flips.map(flip => ({
-    hash: flip.hash,
+    answer: hasAnswer(flip.answer) ? flip.answer : 0,
     easy: false,
-    answer: Number.isFinite(flip.answer) ? flip.answer : 0,
   }))
 }
 
-async function submitShortAnswers(dispatch, flips, epoch) {
+export async function submitShortAnswers(dispatch, flips, epoch) {
   const payload = prepareAnswers(flips)
 
   await api.submitShortAnswers(payload, 0, 0)
@@ -285,20 +312,11 @@ async function submitShortAnswers(dispatch, flips, epoch) {
   dispatch({type: SUBMIT_SHORT_ANSWERS, answers: payload, epoch})
 }
 
-async function submitLongAnswers(dispatch, flips, epoch) {
+export async function submitLongAnswers(dispatch, flips, epoch) {
   const payload = prepareAnswers(flips)
 
   await api.submitLongAnswers(payload, 0, 0)
   db.setLongAnswers(payload, epoch)
 
   dispatch({type: SUBMIT_LONG_ANSWERS, answers: payload, epoch})
-}
-
-export {
-  ValidationProvider,
-  useValidationState,
-  useValidationDispatch,
-  submitShortAnswers,
-  submitLongAnswers,
-  AnswerType,
 }

@@ -29,10 +29,9 @@ export async function fetchFlipHashes(type) {
 
 /**
  * Format used for submitting validation session answers
- * @typedef {Object} ValidationAnswer
- * @property {string} hash Flip hash
+ * @typedef {Object} Answer
+ * @property {import('../providers/validation-context').AnswerType} answer Answer type enumeration: 0 - none, 1 - left, 2 - right, 3 - inappropriate
  * @property {boolean} easy Treat as not enough complex for validation or not
- * @property {number} answer Answer type enumeration: 0 - none, 1 - left, 2 - right, 3 - inappropriate
  *
  * @example {hash: "0x123", easy: false, answer: 1}
  */
@@ -40,13 +39,13 @@ export async function fetchFlipHashes(type) {
 /**
  * Submit answers for short session
  *
- * @property {ValidationAnswer[]} answers List of answers
+ * @property {Answer[]} answers List of answers
  * @property {number} nonce Nonce
  * @property {number} epoch Epoch
  *
  * @returns {string} Tx hash
  * @example
- *  ({answers: [{hash: "0x123", easy: false, answer: 1}], nonce: 0, epoch: 0}) => '0xfe516a684f99c8f6ef7674a08a81eb6b856efd76141cf97eb83ee323897af7e8'
+ *  submitShortAnswers({answers: [{answer: 1, easy: false}, {answer: 2, easy: false}], nonce: 0, epoch: 0})
  */
 export async function submitShortAnswers(answers, nonce, epoch) {
   const {data} = await api().post('/', {
@@ -61,10 +60,13 @@ export async function submitShortAnswers(answers, nonce, epoch) {
 /**
  * Submit answers for long session
  *
- * @param {SubmitAnswersInput} input
+ * @property {Answer[]} answers List of answers
+ * @property {number} nonce Nonce
+ * @property {number} epoch Epoch
  *
  * @returns {string} Tx hash
- * @example 0xfe516a684f99c8f6ef7674a08a81eb6b856efd76141cf97eb83ee323897af7e8
+ * @example
+ *  submitLongAnswers({answers: [{answer: 1, easy: false}, {answer: 2, easy: false}], nonce: 0, epoch: 0})
  */
 export async function submitLongAnswers(answers, nonce, epoch) {
   const {data} = await api().post('/', {
