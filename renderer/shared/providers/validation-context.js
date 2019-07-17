@@ -4,7 +4,6 @@ import * as api from '../api/validation'
 import {useEpochState, EpochPeriod} from './epoch-context'
 import useFlips from '../utils/useFlips'
 import {useValidationTimer} from '../hooks/use-validation'
-import useLogger from '../hooks/use-logger'
 
 export const AnswerType = {
   None: 0,
@@ -120,7 +119,6 @@ function validationReducer(state, action) {
     case START_FETCH_FLIPS: {
       return {
         ...state,
-        ...initialCeremonyState,
         loading: true,
       }
     }
@@ -205,9 +203,7 @@ const db = global.validationDb
 
 // eslint-disable-next-line react/prop-types
 export function ValidationProvider({children}) {
-  const [state, dispatch] = useLogger(
-    useReducer(validationReducer, initialState)
-  )
+  const [state, dispatch] = useReducer(validationReducer, initialState)
   const seconds = useValidationTimer()
 
   useEffect(() => {
@@ -243,29 +239,23 @@ export function ValidationProvider({children}) {
 
     // prevent mess with epoch and seconds switching simultaneously
     if (seconds === 1) {
+      const {shortAnswersSubmitted, longAnswersSubmitted, flips} = state
+      const hasSomeAnswer = flips.map(x => x.answer).some(hasAnswer)
       if (
         epoch.currentPeriod === EpochPeriod.ShortSession &&
-        !state.shortAnswersSubmitted &&
-        state.shortAnswers.length
+        shortAnswersSubmitted &&
+        hasSomeAnswer
       ) {
         sendAnswers(SessionType.Short)
       } else if (
         epoch.currentPeriod === EpochPeriod.LongSession &&
-        !state.longAnswersSubmitted &&
-        state.longAnswers.length
+        longAnswersSubmitted &&
+        hasSomeAnswer
       ) {
         sendAnswers(SessionType.Long)
       }
     }
-  }, [
-    dispatch,
-    epoch,
-    seconds,
-    state.longAnswers,
-    state.longAnswersSubmitted,
-    state.shortAnswers,
-    state.shortAnswersSubmitted,
-  ])
+  }, [epoch, seconds, state])
 
   return (
     <ValidationStateContext.Provider value={state}>
