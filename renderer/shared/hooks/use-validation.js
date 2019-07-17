@@ -5,6 +5,7 @@ import useFlips from '../utils/useFlips'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useTimingState} from '../providers/timing-context'
 import {useInterval} from './use-interval'
+import {SessionType} from '../providers/validation-context'
 
 const {getValidation, saveValidation} = global.validationStore || {}
 
@@ -83,7 +84,7 @@ function useValidation() {
 
 const GAP = 10
 
-export function useValidationTimer() {
+export function useValidationTimer(type) {
   const [seconds, setSeconds] = useState()
 
   const {shortSession, longSession} = useTimingState()
@@ -91,18 +92,16 @@ export function useValidationTimer() {
 
   useEffect(() => {
     if (epoch && shortSession && longSession) {
-      const {currentPeriod, currentValidationStart, nextValidation} = epoch
+      const {currentValidationStart, nextValidation} = epoch
 
       const start = dayjs(currentValidationStart || nextValidation)
       const duration =
-        currentPeriod === EpochPeriod.ShortSession
-          ? shortSession
-          : shortSession + longSession
+        type === SessionType.Short ? shortSession : shortSession + longSession
       const finish = start.add(duration, 's').subtract(GAP, 's')
 
       setSeconds(finish.isAfter(dayjs()) ? finish.diff(dayjs(), 's') : 0)
     }
-  }, [epoch, shortSession, longSession])
+  }, [epoch, shortSession, longSession, type])
 
   useInterval(() => setSeconds(seconds - 1), seconds > 0 ? 1000 : null)
 

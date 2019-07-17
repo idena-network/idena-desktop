@@ -23,7 +23,7 @@ function Flex({
           justify-content: ${justify};
           align-items: ${align};
           ${flex && `flex: ${flex}`};
-          ${width && `flex: ${width}`};
+          ${width && `width: ${width}`};
         }
       `}</style>
     </div>

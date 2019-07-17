@@ -4,6 +4,8 @@ import * as api from '../api/validation'
 import {useEpochState, EpochPeriod} from './epoch-context'
 import useFlips from '../utils/useFlips'
 import {useValidationTimer} from '../hooks/use-validation'
+import useLogger from '../hooks/use-logger'
+import {fetchFlip} from '../api'
 
 export const AnswerType = {
   None: 0,
@@ -56,9 +58,8 @@ const SUBMIT_SHORT_ANSWERS = 'SUBMIT_SHORT_ANSWERS'
 const SUBMIT_LONG_ANSWERS = 'SUBMIT_LONG_ANSWERS'
 const RESET_EPOCH = 'RESET_EPOCH'
 export const START_FETCH_FLIPS = 'START_FETCH_FLIPS'
-export const FETCH_FLIPS_SUCCEEDED = 'FETCH_FLIPS_SUCCEEDED'
-export const FETCH_FLIPS_FAILED = 'FETCH_FLIPS_FAILED'
-export const FETCH_MISSING_FLIPS_SUCCEEDED = 'FETCH_MISSING_FLIPS_SUCCEEDED'
+const FETCH_FLIPS_SUCCEEDED = 'FETCH_FLIPS_SUCCEEDED'
+const FETCH_FLIPS_FAILED = 'FETCH_FLIPS_FAILED'
 export const ANSWER = 'ANSWER'
 export const NEXT = 'NEXT'
 export const PREV = 'PREV'
@@ -71,6 +72,7 @@ const initialCeremonyState = {
   loading: true,
   currentIndex: 0,
   canSubmit: false,
+  ready: false,
 }
 
 const initialState = {
@@ -127,17 +129,10 @@ function validationReducer(state, action) {
       const flips = decodeFlips(hashes, hexes)
       return {
         ...state,
+        hashes,
         flips,
         loading: false,
-      }
-    }
-    case FETCH_MISSING_FLIPS_SUCCEEDED: {
-      const {hexes} = action
-      const flips = decodeFlips(state.hashes, hexes)
-      return {
-        ...state,
-        flips,
-        loading: false,
+        ready: hashes.every(x => x.ready),
       }
     }
     case FETCH_FLIPS_FAILED: {
@@ -145,6 +140,7 @@ function validationReducer(state, action) {
         ...state,
         loading: true,
         error: action.error,
+        ready: state.hashes.length === 0,
       }
     }
     case PREV: {
@@ -203,7 +199,9 @@ const db = global.validationDb
 
 // eslint-disable-next-line react/prop-types
 export function ValidationProvider({children}) {
-  const [state, dispatch] = useReducer(validationReducer, initialState)
+  const [state, dispatch] = useLogger(
+    useReducer(validationReducer, initialState)
+  )
   const seconds = useValidationTimer()
 
   useEffect(() => {
@@ -255,7 +253,7 @@ export function ValidationProvider({children}) {
         sendAnswers(SessionType.Long)
       }
     }
-  }, [epoch, seconds, state])
+  }, [dispatch, epoch, seconds, state])
 
   return (
     <ValidationStateContext.Provider value={state}>
@@ -284,6 +282,28 @@ export function useValidationDispatch() {
     )
   }
   return context
+}
+
+export async function fetchFlips(dispatch, type) {
+  try {
+    const hashes = await api.fetchFlipHashes(type)
+    if (hashes) {
+      const hexes = await Promise.all(
+        hashes
+          .filter(x => x.ready)
+          .map(x => x.hash)
+          .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
+      )
+      dispatch({type: FETCH_FLIPS_SUCCEEDED, hashes, hexes})
+    } else {
+      dispatch({
+        type: FETCH_FLIPS_FAILED,
+        error: new Error(`Cannot fetch flips`),
+      })
+    }
+  } catch (error) {
+    dispatch({type: FETCH_FLIPS_FAILED, error})
+  }
 }
 
 function prepareAnswers(flips) {

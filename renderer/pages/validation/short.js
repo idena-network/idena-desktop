@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import Router from 'next/router'
 import {backgrounds, padding, rem, position} from 'polished'
 import ValidationHeader from '../../screens/validation/components/validation-header'
@@ -7,25 +7,22 @@ import ValidationScene from '../../screens/validation/components/validation-scen
 import ValidationActions from '../../screens/validation/components/validation-actions'
 import FlipThumbnails from '../../screens/validation/components/flip-thumbnails'
 import Flex from '../../shared/components/flex'
-import {fetchFlipHashes} from '../../shared/api/validation'
 import {useInterval} from '../../shared/hooks/use-interval'
 import theme from '../../shared/theme'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {IconClose, Link} from '../../shared/components'
-import {fetchFlip} from '../../shared/api'
 import {
   submitShortAnswers,
   useValidationDispatch,
   useValidationState,
   START_FETCH_FLIPS,
-  FETCH_FLIPS_SUCCEEDED,
-  FETCH_FLIPS_FAILED,
-  FETCH_MISSING_FLIPS_SUCCEEDED,
   PREV,
   NEXT,
   ANSWER,
   REPORT_ABUSE,
   PICK,
+  SessionType,
+  fetchFlips,
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
 
@@ -34,63 +31,24 @@ function ShortSession() {
   const dispatch = useValidationDispatch()
   const epoch = useEpochState()
 
-  React.useEffect(() => {
+  useEffect(() => {
     let ignore = false
 
-    if (!ignore) {
+    if (!state.ready && !ignore) {
       dispatch({type: START_FETCH_FLIPS})
     }
-
-    async function fetchData() {
-      try {
-        const hashes = await fetchFlipHashes('short')
-        if (hashes) {
-          const hexes = await Promise.all(
-            hashes
-              .filter(x => x.ready)
-              .map(x => x.hash)
-              .map(hash =>
-                fetchFlip(hash).then(resp => ({hash, ...resp.result}))
-              )
-          )
-          if (!ignore) {
-            dispatch({type: FETCH_FLIPS_SUCCEEDED, hashes, hexes})
-          }
-        } else {
-          dispatch({
-            type: FETCH_FLIPS_FAILED,
-            error: Error(`Cannot fetch flips`),
-          })
-        }
-      } catch (error) {
-        if (!ignore) {
-          dispatch({type: FETCH_FLIPS_FAILED, error})
-        }
-      }
-    }
-
-    fetchData()
 
     return () => {
       ignore = true
     }
-  }, [dispatch])
+  }, [dispatch, state.ready])
 
   useInterval(
     async () => {
-      try {
-        const hexes = await Promise.all(
-          state.hashes
-            .filter(x => !x.ready)
-            .map(x => x.hash)
-            .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
-        )
-        dispatch({type: FETCH_MISSING_FLIPS_SUCCEEDED, hexes})
-      } catch (error) {
-        dispatch({type: FETCH_FLIPS_FAILED, error})
-      }
+      await fetchFlips(dispatch, SessionType.Short)
     },
-    state.hashes.filter(x => !x.ready).length > 0 ? 1000 : null
+    state.ready ? null : 1000,
+    true
   )
 
   const handleSubmitAnswers = async () => {
@@ -112,7 +70,7 @@ function ShortSession() {
       }}
     >
       <ValidationHeader
-        type="short"
+        type={SessionType.Short}
         currentIndex={state.currentIndex}
         total={state.flips.length}
       >
@@ -135,7 +93,7 @@ function ShortSession() {
             onAnswer={option => dispatch({type: ANSWER, option})}
             isFirst={state.currentIndex === 0}
             isLast={state.currentIndex >= state.flips.length - 1}
-            type="short"
+            type={SessionType.Short}
           />
         )}
       </Flex>
@@ -143,7 +101,7 @@ function ShortSession() {
         onReportAbuse={hash => dispatch({type: REPORT_ABUSE, hash})}
         canSubmit={state.canSubmit}
         onSubmitAnswers={handleSubmitAnswers}
-        countdown={<Timer />}
+        countdown={<Timer type={SessionType.Short} />}
       />
       <FlipThumbnails
         currentIndex={state.currentIndex}
