@@ -5,7 +5,10 @@ import {Absolute, Box, Text, Fill, Link} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import Divider from '../../../shared/components/divider'
-import {useValidationState} from '../../../shared/providers/validation-context'
+import {
+  useValidationState,
+  SessionType,
+} from '../../../shared/providers/validation-context'
 import {
   useEpochState,
   EpochPeriod,
@@ -44,13 +47,14 @@ function ValidationSoon() {
 }
 
 function ValidationRunning() {
-  const seconds = useValidationTimer()
-
   const {currentPeriod} = useEpochState()
   const {shortAnswers, longAnswers} = useValidationState()
 
   const isShortSession = currentPeriod === EpochPeriod.ShortSession
+  const sessionType = isShortSession ? SessionType.Short : SessionType.Long
   const hasAnswers = isShortSession ? shortAnswers.length : longAnswers.length
+
+  const seconds = useValidationTimer()
 
   return (
     <Flex
@@ -69,9 +73,14 @@ function ValidationRunning() {
           css={{
             ...padding(rem(theme.spacings.medium16)),
             position: 'relative',
+            minHeight: rem(56),
           }}
         >
-          <Timer color={theme.colors.white} useIcon={false} />
+          <Timer
+            type={sessionType}
+            color={theme.colors.white}
+            useIcon={false}
+          />
           <Fill bg="rgba(0,0,0,0.1)" />
         </Flex>
         {hasAnswers ? (

@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import React, {useReducer, useEffect, createContext, useContext} from 'react'
 import {decode} from 'rlp'
 import * as api from '../api/validation'
@@ -225,32 +226,39 @@ export function ValidationProvider({children}) {
 
   useEffect(() => {
     async function sendAnswers(type) {
-      if (type === SessionType.Short) {
-        // eslint-disable-next-line no-use-before-define
-        await submitShortAnswers(dispatch, state.shortAnswers, epoch.epoch)
-      }
-      if (type === SessionType.Long) {
-        // eslint-disable-next-line no-use-before-define
-        await submitLongAnswers(dispatch, state.longAnswers, epoch.epoch)
+      switch (type) {
+        case SessionType.Short: {
+          await submitShortAnswers(dispatch, state.flips, epoch.epoch)
+          break
+        }
+        case EpochPeriod.LongSession: {
+          await submitLongAnswers(dispatch, state.flips, epoch.epoch)
+          break
+        }
+        default:
+          break
       }
     }
 
     // prevent mess with epoch and seconds switching simultaneously
     if (seconds === 1) {
       const {shortAnswersSubmitted, longAnswersSubmitted, flips} = state
+      const {currentPeriod} = epoch
       const hasSomeAnswer = flips.map(x => x.answer).some(hasAnswer)
-      if (
-        epoch.currentPeriod === EpochPeriod.ShortSession &&
-        shortAnswersSubmitted &&
-        hasSomeAnswer
-      ) {
-        sendAnswers(SessionType.Short)
-      } else if (
-        epoch.currentPeriod === EpochPeriod.LongSession &&
-        longAnswersSubmitted &&
-        hasSomeAnswer
-      ) {
-        sendAnswers(SessionType.Long)
+
+      if (hasSomeAnswer) {
+        if (
+          currentPeriod === EpochPeriod.ShortSession &&
+          !shortAnswersSubmitted
+        ) {
+          sendAnswers(SessionType.Short)
+        }
+        if (
+          currentPeriod === EpochPeriod.LongSession &&
+          !longAnswersSubmitted
+        ) {
+          sendAnswers(SessionType.Long)
+        }
       }
     }
   }, [dispatch, epoch, seconds, state])

@@ -33,16 +33,10 @@ export default function() {
   const epoch = useEpochState()
 
   useEffect(() => {
-    let ignore = false
-
-    if (!state.ready && !ignore) {
+    if (!state.ready && !state.longAnswersSubmitted) {
       dispatch({type: START_FETCH_FLIPS})
     }
-
-    return () => {
-      ignore = true
-    }
-  }, [dispatch, state.ready])
+  }, [dispatch, state.longAnswersSubmitted, state.ready])
 
   useInterval(
     async () => {

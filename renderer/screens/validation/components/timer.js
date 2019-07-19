@@ -7,6 +7,11 @@ import {Text} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import {useValidationTimer} from '../../../shared/hooks/use-validation'
 import {SessionType} from '../../../shared/providers/validation-context'
+import {
+  useEpochState,
+  EpochPeriod,
+} from '../../../shared/providers/epoch-context'
+import {useTimingState} from '../../../shared/providers/timing-context'
 
 const padded = t => t.toString().padStart(2, 0)
 
@@ -15,12 +20,19 @@ function formatSeconds(seconds) {
 }
 
 function Timer({type, color = theme.colors.danger, useIcon = true}) {
-  const seconds = useValidationTimer(type)
+  let seconds = useValidationTimer()
+  const {currentPeriod} = useEpochState()
+  const {longSession} = useTimingState()
+
+  if (type === SessionType.Long && currentPeriod === EpochPeriod.ShortSession) {
+    seconds += longSession
+  }
+
   return (
     <Flex align="center">
       {useIcon && <FiClock color={color} style={{marginRight: rem(4)}} />}
       <Text color={color} fontWeight={600}>
-        {formatSeconds(seconds)}
+        {Number.isFinite(seconds) && formatSeconds(seconds)}
       </Text>
     </Flex>
   )

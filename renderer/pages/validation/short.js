@@ -32,16 +32,10 @@ function ShortSession() {
   const epoch = useEpochState()
 
   useEffect(() => {
-    let ignore = false
-
-    if (!state.ready && !ignore) {
+    if (!state.ready && !state.shortAnswersSubmitted) {
       dispatch({type: START_FETCH_FLIPS})
     }
-
-    return () => {
-      ignore = true
-    }
-  }, [dispatch, state.ready])
+  }, [dispatch, state.ready, state.shortAnswersSubmitted])
 
   useInterval(
     async () => {
