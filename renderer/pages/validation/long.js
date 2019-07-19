@@ -33,6 +33,12 @@ export default function() {
   const epoch = useEpochState()
 
   useEffect(() => {
+    if (state.longAnswersSubmitted) {
+      Router.push('/dashboard')
+    }
+  }, [state.longAnswersSubmitted])
+
+  useEffect(() => {
     if (!state.ready && !state.longAnswersSubmitted) {
       dispatch({type: START_FETCH_FLIPS})
     }
@@ -48,7 +54,6 @@ export default function() {
 
   const handleSubmitAnswers = async () => {
     await submitLongAnswers(dispatch, state.flips, epoch.epoch)
-    Router.push('/dashboard')
   }
 
   return (
@@ -64,6 +69,7 @@ export default function() {
             rem(theme.spacings.medium16)
           ),
           ...position('relative'),
+          overflow: 'hidden',
         }}
       >
         <ValidationHeader
@@ -81,8 +87,8 @@ export default function() {
           flex={1}
           css={position('relative')}
         >
-          {state.loading && <Spinner />}
-          {state.flips[state.currentIndex] && (
+          {(state.longAnswersSubmitted || state.loading) && <Spinner />}
+          {!state.longAnswersSubmitted && state.flips[state.currentIndex] && (
             <ValidationScene
               flip={state.flips[state.currentIndex]}
               onPrev={() => dispatch({type: PREV})}

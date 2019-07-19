@@ -21,10 +21,17 @@ function formatSeconds(seconds) {
 
 function Timer({type, color = theme.colors.danger, useIcon = true}) {
   let seconds = useValidationTimer()
-  const {currentPeriod} = useEpochState()
+  const epoch = useEpochState()
   const {longSession} = useTimingState()
 
-  if (type === SessionType.Long && currentPeriod === EpochPeriod.ShortSession) {
+  if (!epoch) {
+    return null
+  }
+
+  if (
+    type === SessionType.Long &&
+    epoch.currentPeriod === EpochPeriod.ShortSession
+  ) {
     seconds += longSession
   }
 

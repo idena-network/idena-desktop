@@ -22,17 +22,17 @@ function Arrow({dir, type}) {
         div {
           display: flex;
           align-items: center;
-          justify-content: prevcenter;
-          width: ${rem(500)};
-          height: ${rem(500)};
+          justify-content: center;
+          width: ${rem(600)};
+          height: ${rem(600)};
 
           position: absolute;
           top: 50%;
           ${prev ? 'left: 0' : 'right: 0'};
 
-          border-radius: 40%;
+          border-radius: 50%;
           transition: all 0.5s ease;
-          transform: ${`translate(${prev ? '-50%' : '50%'}, -50%);`};
+          transform: ${`translate(${prev ? '-320px' : '320px'}, -50%);`};
         }
         div:hover {
           background: ${bg};

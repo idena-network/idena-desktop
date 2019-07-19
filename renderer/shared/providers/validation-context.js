@@ -30,14 +30,24 @@ function decodeFlips(hashes, hexes) {
   return hashes.map(({hash, ready}) => {
     const hex = hexes.find(x => x.hash === hash)
     if (hex) {
-      const decodedFlip = decode(fromHexString(hex.hex.substring(2)))
-      const orders = decodedFlip[1].map(order => order.map(x => x[0] || 0))
-      return {
-        hash,
-        ready,
-        pics: decodedFlip[0],
-        orders,
-        answer: null,
+      try {
+        const decodedFlip = decode(fromHexString(hex.hex.substring(2)))
+        const orders = decodedFlip[1].map(order => order.map(x => x[0] || 0))
+        return {
+          hash,
+          ready,
+          pics: decodedFlip[0],
+          orders,
+          answer: null,
+        }
+      } catch {
+        return {
+          hash,
+          ready: false,
+          pics: null,
+          orders: null,
+          answer: null,
+        }
       }
     }
     return {
@@ -217,9 +227,9 @@ export function ValidationProvider({children}) {
     if (epoch !== null) {
       const {epoch: savedEpoch} = db.getValidation()
       if (epoch.epoch !== savedEpoch) {
+        archiveFlips()
         db.resetValidation(epoch.epoch)
         dispatch({type: RESET_EPOCH, epoch: epoch.epoch})
-        archiveFlips()
       }
     }
   }, [archiveFlips, dispatch, epoch])

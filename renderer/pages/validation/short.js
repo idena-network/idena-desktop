@@ -32,6 +32,12 @@ function ShortSession() {
   const epoch = useEpochState()
 
   useEffect(() => {
+    if (state.shortAnswersSubmitted) {
+      Router.push('/validation/long')
+    }
+  }, [state.shortAnswersSubmitted])
+
+  useEffect(() => {
     if (!state.ready && !state.shortAnswersSubmitted) {
       dispatch({type: START_FETCH_FLIPS})
     }
@@ -47,7 +53,6 @@ function ShortSession() {
 
   const handleSubmitAnswers = async () => {
     await submitShortAnswers(dispatch, state.flips, epoch.epoch)
-    Router.push('/validation/long')
   }
 
   return (
@@ -61,6 +66,7 @@ function ShortSession() {
           rem(theme.spacings.large),
           rem(theme.spacings.medium16)
         ),
+        overflow: 'hidden',
       }}
     >
       <ValidationHeader
@@ -78,8 +84,8 @@ function ShortSession() {
         flex={1}
         css={position('relative')}
       >
-        {state.loading && <Spinner />}
-        {state.flips[state.currentIndex] && (
+        {(state.loading || state.shortAnswersSubmitted) && <Spinner />}
+        {!state.shortAnswersSubmitted && state.flips[state.currentIndex] && (
           <ValidationScene
             flip={state.flips[state.currentIndex]}
             onPrev={() => dispatch({type: PREV})}
