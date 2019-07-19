@@ -241,7 +241,7 @@ export function ValidationProvider({children}) {
           await submitShortAnswers(dispatch, state.flips, epoch.epoch)
           break
         }
-        case EpochPeriod.LongSession: {
+        case SessionType.Long: {
           await submitLongAnswers(dispatch, state.flips, epoch.epoch)
           break
         }
