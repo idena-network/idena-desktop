@@ -37,7 +37,13 @@ function Timer({type, color = theme.colors.danger, useIcon = true}) {
 
   return (
     <Flex align="center">
-      {useIcon && <FiClock color={color} style={{marginRight: rem(4)}} />}
+      {useIcon && (
+        <FiClock
+          size={rem(20)}
+          color={color}
+          style={{marginRight: rem(theme.spacings.small8)}}
+        />
+      )}
       <Text color={color} fontWeight={600}>
         {Number.isFinite(seconds) && formatSeconds(seconds)}
       </Text>
