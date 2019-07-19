@@ -4,22 +4,22 @@ import {Box} from '.'
 import {Dim} from './box'
 
 export const Absolute = forwardRef(
-  ({bg, top, left, bottom, right, zIndex, width, ...props}, ref) => (
-    <div ref={ref}>
-      <Box {...props} />
-      <style jsx>{`
-        div {
-          background: ${bg};
-          position: absolute;
-          left: ${left};
-          right: ${right};
-          top: ${top};
-          bottom: ${bottom};
-          z-index: ${zIndex};
-          width: ${width};
-        }
-      `}</style>
-    </div>
+  ({bg, top, left, bottom, right, zIndex, width, css, ...props}, ref) => (
+    <Box
+      css={{
+        ...css,
+        background: bg,
+        position: 'absolute',
+        left,
+        right,
+        top,
+        bottom,
+        zIndex,
+        width,
+      }}
+      ref={ref}
+      {...props}
+    />
   )
 )
 
@@ -32,6 +32,8 @@ Absolute.propTypes = {
   width: Dim,
   zIndex: PropTypes.number,
   children: PropTypes.node,
+  // eslint-disable-next-line react/forbid-prop-types
+  css: PropTypes.object,
 }
 
 export function Fill(props) {

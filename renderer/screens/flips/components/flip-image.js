@@ -7,8 +7,8 @@ function FlipImage({src, size = 150, ...props}) {
     <div {...props}>
       <style jsx>{`
         div {
-          background: url(${src}) no-repeat;
-          background-size: contain;
+          background: url(${src}) center center no-repeat;
+          background-size: cover;
           width: ${rem(size)};
           height: ${rem(size)};
         }

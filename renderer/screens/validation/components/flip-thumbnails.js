@@ -1,8 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, backgrounds} from 'polished'
+import {rem, position, rgba} from 'polished'
+import {FiCheck, FiZap} from 'react-icons/fi'
 import Flex from '../../../shared/components/flex'
-import {Box, Fill} from '../../../shared/components'
+import {Fill} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import FlipImage from '../../flips/components/flip-image'
 import {
@@ -13,14 +14,13 @@ import Spinner from './spinner'
 
 const activeStyle = {
   border: `solid 2px ${theme.colors.primary}`,
-  boxShadow: '0 0 4px 4px rgba(87, 143, 255, 0.25)',
 }
 
 const style = {
+  border: `solid 2px transparent`,
   borderRadius: rem(12),
-  ...backgrounds(theme.colors.white),
-  padding: theme.spacings.xxsmall,
-  position: 'relative',
+  padding: rem(4),
+  ...position('relative'),
   height: rem(40),
   width: rem(40),
 }
@@ -29,19 +29,29 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
   return (
     <Flex justify="center" align="center" css={{minHeight: rem(48)}}>
       {flips.map(({hash, pics, answer, ready}, idx) => (
-        <Box
+        <Flex
           key={hash}
+          justify="center"
+          align="center"
           css={currentIndex === idx ? {...style, ...activeStyle} : style}
           onClick={() => onPick(idx)}
         >
           {hasAnswer(answer) && (
             <Fill
-              bg={
-                answer === AnswerType.Inappropriate
-                  ? theme.colors.danger
-                  : theme.colors.white05
-              }
-            />
+              bg={rgba(89, 89, 89, 0.95)}
+              css={{
+                borderRadius: rem(12),
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              {answer === AnswerType.Inappropriate ? (
+                <FiZap size={rem(20)} color={theme.colors.white} />
+              ) : (
+                <FiCheck size={rem(20)} color={theme.colors.white} />
+              )}
+            </Fill>
           )}
           {ready ? (
             <FlipImage
@@ -49,12 +59,14 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
               src={URL.createObjectURL(
                 new Blob([pics[0]], {type: 'image/jpeg'})
               )}
-              style={{borderRadius: rem(8)}}
+              style={{
+                borderRadius: rem(12),
+              }}
             />
           ) : (
             <Spinner size={24} />
           )}
-        </Box>
+        </Flex>
       ))}
     </Flex>
   )
