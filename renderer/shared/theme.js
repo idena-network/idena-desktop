@@ -22,6 +22,7 @@ const colors = {
 const fontSizes = {
   heading: '2rem',
   subHeading: '1.4em',
+  blockHeading: '1rem',
   normal: '1rem',
   small: '0.72rem',
   large: '1.4em',
@@ -30,6 +31,7 @@ const fontSizes = {
 const fontWeights = {
   normal: 400,
   semi: 600,
+  medium: 500,
   bold: 700,
 }
 
@@ -73,6 +75,12 @@ export default {
     color: colors.text,
     fontSize: fontSizes.subHeading,
     fontWeight: fontWeights.semi,
+    ...margin(0),
+  },
+  BlockHeading: {
+    color: colors.text,
+    fontSize: fontSizes.blockHeading,
+    fontWeight: fontWeights.medium,
     ...margin(0),
   },
   Text: {

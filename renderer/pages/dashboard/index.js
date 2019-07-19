@@ -9,6 +9,7 @@ import theme from '../../shared/theme'
 import {InviteProvider} from '../../shared/providers/invite-context'
 import KillMe from '../../screens/dashboard/components/kill-me'
 import Actions from '../../screens/dashboard/components/actions'
+import MinerStatusSwitcher from '../../screens/dashboard/components/miner-status-switcher'
 import IconLink from '../../shared/components/icon-link'
 import ActivateInviteForm from '../../screens/dashboard/components/activate-invite-form'
 import UserInfo from '../../screens/dashboard/components/user-info'
@@ -42,6 +43,7 @@ function Dashboard({router}) {
             </IconLink>
           </Actions>
           <UserInfo />
+          <MinerStatusSwitcher />
           <NetProfile />
           <ActivateInviteForm />
           <KillMe />

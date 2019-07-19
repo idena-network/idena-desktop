@@ -46,7 +46,7 @@ const Input = React.forwardRef(
         input {
           background: none;
           box-shadow: none;
-          border-radius: 8px;
+          border-radius: 6px;
           font-size: 1em;
           padding: 0.5em 1em;
         }
@@ -138,4 +138,87 @@ Hint.propTypes = {
   value: PropTypes.string,
 }
 
-export {FormGroup, Label, Input, Field, Hint}
+function Switcher({checked, withStatusHint}) {
+  return (
+    <>
+      <label className="switcher">
+        <input type="checkbox" checked={checked} />
+        <div className="pin" />
+        {withStatusHint && <span>{checked ? 'On' : 'Off'}</span>}
+      </label>
+
+      <style jsx>{`
+        .switcher {
+          position: relative;
+          display: inline-block;
+          vertical-align: middle;
+          width: 32px;
+          height: 16px;
+          cursor: pointer;
+          z-index: 10;
+          user-select: none;
+        }
+        span {
+          font-size: 1rem;
+          line-height: 16px;
+          font-weight: 500;
+          color: ${theme.colors.gray3};
+          display: inline-block;
+          vertical-align: middle;
+          margin: 0 8px;
+          position: absolute;
+          right: 100%;
+          top: 0;
+          transition: color 0.3s ease;
+        }
+        .pin {
+          background-color: ${theme.colors.gray3};
+          box-shadow: none;
+          border-radius: 100px;
+          font-size: 1em;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          transition: background 0.3s ease;
+        }
+        .pin:before {
+          content: '';
+          position: absolute;
+          left: 3px;
+          top: 3px;
+          width: 10px;
+          height: 10px;
+          border-radius: 100px;
+          background-color: ${theme.colors.white};
+          transition: left 0.3s ease;
+        }
+        input {
+          cursor: pointer;
+          position: absolute;
+          left: -100%;
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        input:checked ~ span {
+          color: ${theme.colors.primary};
+        }
+        input:checked ~ .pin {
+          background-color: ${theme.colors.primary};
+        }
+        input:checked ~ .pin:before {
+          left: 18px;
+        }
+      `}</style>
+    </>
+  )
+}
+
+Switcher.propTypes = {
+  checked: PropTypes.bool,
+  withStatusHint: PropTypes.bool,
+}
+
+export {FormGroup, Label, Input, Field, Hint, Switcher}
