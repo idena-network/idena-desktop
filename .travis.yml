@@ -5,10 +5,7 @@ node_js: '10'
 
 os:
   - osx
-
-branches:
-  only:
-    - master
+  - windows
 
 env:
   global:
@@ -26,7 +23,7 @@ install:
 
 script:
   - echo "Build win"
-  - npm run dist:win
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then npm run dist:win; fi
 
   - echo "Build mac"
-  - npm run dist:mac
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then npm run dist:mac; fi
