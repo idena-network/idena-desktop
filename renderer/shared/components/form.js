@@ -27,7 +27,8 @@ function Label({htmlFor, ...otherProps}) {
         label {
           color: ${theme.colors.text};
           display: block;
-          margin-bottom: ${theme.spacings.normal};
+          font-weight: 500;
+          margin-bottom: ${rem(10)};
         }
       `}</style>
     </>
@@ -49,13 +50,14 @@ const Input = React.forwardRef(
           border-radius: 6px;
           font-size: 1em;
           padding: 0.5em 1em;
+          width: 100%;
         }
       `}</style>
       <style jsx>{`
         input {
           border: solid 1px ${theme.colors.gray2};
           color: ${theme.colors.input};
-          ${disabled && `background: ${theme.colors.gray2}`};
+          ${disabled && `background: ${theme.colors.gray}`};
           ${disabled && 'cursor: not-allowed'};
         }
         input:focus {
@@ -138,13 +140,13 @@ Hint.propTypes = {
   value: PropTypes.string,
 }
 
-function Switcher({checked, withStatusHint}) {
+function Switcher({isChecked, withStatusHint}) {
   return (
     <>
       <label className="switcher">
-        <input type="checkbox" checked={checked} />
+        <input type="checkbox" checked={isChecked} value={isChecked} />
         <div className="pin" />
-        {withStatusHint && <span>{checked ? 'On' : 'Off'}</span>}
+        {withStatusHint && <span>{isChecked ? 'On' : 'Off'}</span>}
       </label>
 
       <style jsx>{`
@@ -155,14 +157,14 @@ function Switcher({checked, withStatusHint}) {
           width: 32px;
           height: 16px;
           cursor: pointer;
-          z-index: 10;
+          z-index: 1;
           user-select: none;
         }
         span {
           font-size: 1rem;
           line-height: 16px;
           font-weight: 500;
-          color: ${theme.colors.gray3};
+          color: ${theme.colors.danger};
           display: inline-block;
           vertical-align: middle;
           margin: 0 8px;
@@ -172,7 +174,7 @@ function Switcher({checked, withStatusHint}) {
           transition: color 0.3s ease;
         }
         .pin {
-          background-color: ${theme.colors.gray3};
+          background-color: ${theme.colors.danger};
           box-shadow: none;
           border-radius: 100px;
           font-size: 1em;
@@ -217,7 +219,7 @@ function Switcher({checked, withStatusHint}) {
 }
 
 Switcher.propTypes = {
-  checked: PropTypes.bool,
+  isChecked: PropTypes.bool,
   withStatusHint: PropTypes.bool,
 }
 
