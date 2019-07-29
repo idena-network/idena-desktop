@@ -82,7 +82,7 @@ function EpochProvider({children}) {
           isValidationSoon || isValidationRunning
             ? 1000
             : Math.max(
-                validationStart.subtract(GAP, 's').diff(dayjs(), 'ms'),
+                validationStart.subtract(flipLottery, 's').diff(dayjs(), 'ms'),
                 1000
               )
 
