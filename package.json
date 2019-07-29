@@ -1,7 +1,7 @@
 {
   "name": "idena-desktop",
   "productName": "Idena",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "main": "main/index.js",
   "repository": "idena-network/idena-desktop",
   "scripts": {
