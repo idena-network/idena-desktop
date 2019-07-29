@@ -22,3 +22,15 @@ export function useInterval(callback, delay, useImmediately = false) {
     }
   }, [delay, useImmediately])
 }
+
+export function usePoll([state, fetch], delay) {
+  const fetchRef = useRef(fetch)
+
+  useEffect(() => {
+    fetchRef.current = fetch
+  }, [fetch])
+
+  useInterval(fetchRef.current, delay)
+
+  return [state, fetchRef.current]
+}

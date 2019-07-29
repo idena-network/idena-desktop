@@ -72,7 +72,8 @@
     "polished": "^3.3.0",
     "react-beautiful-dnd": "^10.0.4",
     "react-icons": "^3.7.0",
-    "rlp": "^2.2.2"
+    "rlp": "^2.2.2",
+    "use-deep-compare-effect": "^1.2.0"
   },
   "prettier": {
     "trailingComma": "es5",
