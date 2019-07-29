@@ -3,6 +3,8 @@ osx_image: xcode10.2
 language: node_js
 node_js: '10'
 
+if: tag IS present
+
 os:
   - osx
   - windows
@@ -19,7 +21,7 @@ cache:
     - $HOME/.npm/_prebuilds
 
 install:
-  - npm i
+  - npm ci
 
 script:
   - echo "Build win"
