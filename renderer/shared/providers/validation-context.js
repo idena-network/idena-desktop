@@ -64,6 +64,10 @@ export function hasAnswer(answer) {
   return Number.isFinite(answer)
 }
 
+function canSubmit(flips, idx) {
+  return flips.map(x => x.answer).every(hasAnswer) || idx === flips.length - 1
+}
+
 const LOAD_VALIDATION = 'LOAD_VALIDATION'
 const SUBMIT_SHORT_ANSWERS = 'SUBMIT_SHORT_ANSWERS'
 const SUBMIT_LONG_ANSWERS = 'SUBMIT_LONG_ANSWERS'
@@ -155,9 +159,11 @@ function validationReducer(state, action) {
       }
     }
     case PREV: {
+      const idx = Math.max(state.currentIndex - 1, 0)
       return {
         ...state,
-        currentIndex: Math.max(state.currentIndex - 1, 0),
+        currentIndex: idx,
+        canSubmit: canSubmit(state.flips, idx),
       }
     }
     case NEXT: {
@@ -165,14 +171,14 @@ function validationReducer(state, action) {
       return {
         ...state,
         currentIndex: idx,
-        canSubmit: idx === state.flips.length - 1,
+        canSubmit: canSubmit(state.flips, idx),
       }
     }
     case PICK: {
       return {
         ...state,
         currentIndex: action.index,
-        canSubmit: action.index === state.flips.length - 1,
+        canSubmit: canSubmit(state.flips, action.index),
       }
     }
     case ANSWER: {
@@ -184,6 +190,7 @@ function validationReducer(state, action) {
       return {
         ...state,
         flips,
+        canSubmit: canSubmit(flips, state.currentIndex),
       }
     }
     case REPORT_ABUSE: {
@@ -192,10 +199,12 @@ function validationReducer(state, action) {
         {...state.flips[state.currentIndex], answer: AnswerType.Inappropriate},
         ...state.flips.slice(state.currentIndex + 1),
       ]
+      const idx = Math.min(state.currentIndex + 1, state.flips.length - 1)
       return {
         ...state,
         flips,
-        currentIndex: Math.min(state.currentIndex + 1, state.flips.length - 1),
+        currentIndex: idx,
+        canSubmit: canSubmit(flips, idx),
       }
     }
     default: {
