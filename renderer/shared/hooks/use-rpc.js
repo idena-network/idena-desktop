@@ -78,7 +78,7 @@ export default function useRpc(initialMethod, ...initialParams) {
     }
 
     if (rpcBody.method) {
-      fetchData(ignore)
+      fetchData()
     }
 
     return () => {
