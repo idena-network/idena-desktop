@@ -24,8 +24,8 @@ install:
   - npm ci
 
 before_script:
-  - sed -i "s/\(\"version\":\s\"\).*\(\".*\)/\10.0.50\2/" package.json
-  - cat package.json
+  - sed -i "s/\(\"version\":\s\"\).*\(\".*\)/\10.0.50\2/" ./package.json
+  - cat ./package.json
 
 script:
   - echo "Build win"
