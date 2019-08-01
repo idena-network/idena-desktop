@@ -87,8 +87,7 @@ export default function useRpc(initialMethod, ...initialParams) {
   }, [rpcBody])
 
   return [
-    dataState,
-    rpcBody,
+    {...dataState, ...rpcBody},
     (method, ...params) => dispatchRpc([method, ...params]),
   ]
 }

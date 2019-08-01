@@ -22,7 +22,7 @@ export function useInterval(callback, delay, useImmediately = false) {
   }, [delay, useImmediately])
 }
 
-export function usePoll([state, rpcBody, callRpc], delay) {
-  useInterval(() => callRpc(rpcBody.method, ...rpcBody.params), delay)
-  return [state, rpcBody, callRpc]
+export function usePoll([{method, params, ...rest}, callRpc], delay) {
+  useInterval(() => callRpc(method, ...params), delay)
+  return [{method, params, ...rest}, callRpc]
 }
