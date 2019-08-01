@@ -16,7 +16,6 @@ import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
 import Pre from '../../shared/components/pre'
 import useFlips from '../../shared/utils/useFlips'
-import {useEpochState} from '../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {nodeSettings} from '../../shared/api/api-client'
 import useRpc from '../../shared/hooks/use-rpc'
@@ -141,15 +140,14 @@ function Settings() {
 }
 
 function EpochDisplay() {
-  // const epoch = useEpochState()
-  const [{result}] = usePoll(useRpc('dna_epoch'), 1000 * 60)
+  const [{result}] = usePoll(useRpc('dna_epoch'), 3000)
   return <Pre>{JSON.stringify(result)}</Pre>
 }
 
 function SyncDisplay() {
-  const hash =
+  const tx = useTx(
     '0x8115b61793a45b5a37fd9c94ed3f1b78fcea4af9c7b5371069883a5ea51cab9a'
-  const tx = useTx(hash || null)
+  )
   return <Pre>{tx ? JSON.stringify(tx) : 'fetching...'}</Pre>
 }
 

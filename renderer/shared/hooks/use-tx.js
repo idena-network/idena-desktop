@@ -68,10 +68,7 @@ export default function useTx(hash) {
     }
   )
 
-  const [{result, error, isReady}, fetchTx] = useRpc(
-    hash && 'bcn_transaction',
-    hash
-  )
+  const [{result, error, isReady}, fetchTx] = useRpc('bcn_transaction', hash)
 
   useInterval(
     () => {
@@ -86,7 +83,7 @@ export default function useTx(hash) {
             type: 'mempool',
             result,
           })
-          fetchTx()
+          fetchTx('bcn_transaction', hash)
         } else {
           dispatch({
             type: 'mined',

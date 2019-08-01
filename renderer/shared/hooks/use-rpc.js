@@ -1,8 +1,24 @@
-import {useReducer, useCallback, useRef} from 'react'
+import {useReducer} from 'react'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 
-export default function useRpc(method, ...params) {
-  const [state, dispatch] = useReducer(
+export default function useRpc(initialMethod, ...initialParams) {
+  const [rpcBody, dispatchRpc] = useReducer(
+    (state, [method, ...params]) => {
+      return {
+        ...state,
+        method,
+        params,
+        id: state.id + 1,
+      }
+    },
+    {
+      method: initialMethod,
+      params: initialParams,
+      id: 0,
+    }
+  )
+
+  const [dataState, dataDispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
         case 'start':
@@ -15,7 +31,7 @@ export default function useRpc(method, ...params) {
           return {
             ...state,
             isLoading: false,
-            ...action,
+            result: action.result,
             isReady: true,
           }
         case 'fail':
@@ -37,47 +53,42 @@ export default function useRpc(method, ...params) {
     }
   )
 
-  const ignore = useRef()
-
-  const fetchData = useCallback(async () => {
-    try {
-      const resp = await fetch('http://localhost:9009', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          method,
-          params,
-          id: 1,
-        }),
-      })
-      const json = await resp.json()
-      if (!ignore.current) {
-        dispatch({type: 'done', ...json})
-      }
-    } catch (error) {
-      if (!ignore.current) {
-        dispatch({type: 'error', error})
-      }
-    }
-  }, [method, params])
-
   useDeepCompareEffect(() => {
-    if (!method) {
-      return null
+    let ignore = false
+
+    async function fetchData() {
+      try {
+        const resp = await fetch('http://localhost:9009', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(rpcBody),
+        })
+        const json = await resp.json()
+        if (!ignore) {
+          dataDispatch({type: 'done', ...json})
+        }
+      } catch (error) {
+        if (!ignore) {
+          dataDispatch({type: 'error', error})
+        }
+      }
     }
 
-    ignore.current = false
-
-    dispatch({type: 'start'})
-    fetchData(ignore)
+    if (rpcBody.method) {
+      fetchData(ignore)
+    }
 
     return () => {
-      ignore.current = true
+      ignore = true
     }
-  }, [dispatch, method, params])
+  }, [rpcBody])
 
-  return [state, fetchData]
+  return [
+    dataState,
+    rpcBody,
+    (method, ...params) => dispatchRpc([method, ...params]),
+  ]
 }

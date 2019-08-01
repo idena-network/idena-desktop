@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import {useEffect, useRef} from 'react'
 
 export function useInterval(callback, delay, useImmediately = false) {
@@ -23,14 +22,7 @@ export function useInterval(callback, delay, useImmediately = false) {
   }, [delay, useImmediately])
 }
 
-export function usePoll([state, fetch], delay) {
-  const fetchRef = useRef(fetch)
-
-  useEffect(() => {
-    fetchRef.current = fetch
-  }, [fetch])
-
-  useInterval(fetchRef.current, delay)
-
-  return [state, fetchRef.current]
+export function usePoll([state, rpcBody, callRpc], delay) {
+  useInterval(() => callRpc(rpcBody.method, ...rpcBody.params), delay)
+  return [state, rpcBody, callRpc]
 }
