@@ -7,7 +7,7 @@ node_js: '10'
 
 os:
   - osx
-  # - windows
+  - windows
 
 env:
   global:
@@ -24,7 +24,8 @@ install:
   - npm ci
 
 before_script:
-  - sed -i '' "s/\(\"version\":\s\"\).*\(\".*\)/\10.0.50\2/" package.json
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then sed -i "s/\(\"version\":\s\"\).*\(\".*\)/\10.0.50\2/" package.json; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sed -i '' "s/\(\"version\":\s\"\).*\(\".*\)/\10.0.50\2/" package.json; fi
   - cat package.json
 
 script:
