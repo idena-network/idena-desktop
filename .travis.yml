@@ -3,11 +3,11 @@ osx_image: xcode10.2
 language: node_js
 node_js: '10'
 
-if: tag IS present
+#if: tag IS present
 
 os:
   - osx
-  - windows
+  # - windows
 
 env:
   global:
@@ -22,6 +22,10 @@ cache:
 
 install:
   - npm ci
+
+before_script:
+  - sed -i "s/\(\"version\":\s\"\).*\(\".*\)/\1${0.0.50}\2/" package.json
+  - cat package.json
 
 script:
   - echo "Build win"
