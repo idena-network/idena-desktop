@@ -21,7 +21,7 @@ export const FlipType = {
 
 const DEFAULT_ORDER = [0, 1, 2, 3]
 
-function permuataion(maxValue) {
+function perm(maxValue) {
   const permArray = new Array(maxValue)
   for (let i = 0; i < maxValue; i += 1) {
     permArray[i] = i
@@ -58,7 +58,7 @@ function shufflePics(pics, shuffledOrder, seed) {
 }
 
 function toHex(pics, order) {
-  const seed = permuataion(4)
+  const seed = perm(4)
   const shuffled = shufflePics(pics, order, seed)
 
   const rlp = encode([
