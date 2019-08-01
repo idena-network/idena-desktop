@@ -62,7 +62,7 @@ function useTiming() {
       // eslint-disable-next-line no-shadow
       const timing = await fetchTiming()
       setTiming(timing)
-      setInterval(1000 * 60 * 5)
+      setInterval(1000 * 60 * 1)
     } catch (error) {
       logConnectivityIssue('timing (poll)', error)
     }
