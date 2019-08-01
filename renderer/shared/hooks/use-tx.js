@@ -68,11 +68,7 @@ export default function useTx(hash) {
     }
   )
 
-  const {
-    0: {result, error, isReady},
-    length: l,
-    [l - 1]: fetchTx,
-  } = useRpc('bcn_transaction', hash)
+  const [{result, error, isReady}, fetchTx] = useRpc('bcn_transaction', hash)
 
   useInterval(
     () => {
