@@ -20,12 +20,14 @@ cache:
     - $HOME/.cache/electron-builder
     - $HOME/.npm/_prebuilds
 
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then powershell -command 'Set-MpPreference -DisableRealtimeMonitoring $true'; fi
+
 install:
   - npm ci
 
 before_script:
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then sed -i "s/\(\"version\":\s\"\).*\(\".*\)/\1${TRAVIS_TAG:1}\2/" package.json; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sed -i '' "s/\(\"version\":\s\"\).*\(\".*\)/\1${TRAVIS_TAG:1}\2/" package.json; fi
+  - npm --no-git-tag-version version ${TRAVIS_TAG:1}
 
 script:
   - echo "Build win"
