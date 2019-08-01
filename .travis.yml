@@ -20,16 +20,11 @@ cache:
     - $HOME/.cache/electron-builder
     - $HOME/.npm/_prebuilds
 
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gnu-sed; fi
-  - export PATH=/usr/local/bin:$PATH
-
 install:
   - npm ci
 
 before_script:
-  - sed -i "s/\(\"version\":\s\"\).*\(\".*\)/\1${TRAVIS_TAG:1}\2/" package.json
-  - cat package.json
+  - npm --no-git-tag-version version ${TRAVIS_TAG:1}
 
 script:
   - echo "Build win"
