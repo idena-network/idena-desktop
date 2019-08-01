@@ -161,15 +161,18 @@ function validationReducer(state, action) {
       }
     }
     case NEXT: {
+      const idx = Math.min(state.currentIndex + 1, state.flips.length - 1)
       return {
         ...state,
-        currentIndex: Math.min(state.currentIndex + 1, state.flips.length - 1),
+        currentIndex: idx,
+        canSubmit: idx === state.flips.length - 1,
       }
     }
     case PICK: {
       return {
         ...state,
         currentIndex: action.index,
+        canSubmit: action.index === state.flips.length - 1,
       }
     }
     case ANSWER: {
@@ -181,7 +184,6 @@ function validationReducer(state, action) {
       return {
         ...state,
         flips,
-        canSubmit: flips.map(x => x.answer).every(hasAnswer),
       }
     }
     case REPORT_ABUSE: {
@@ -194,7 +196,6 @@ function validationReducer(state, action) {
         ...state,
         flips,
         currentIndex: Math.min(state.currentIndex + 1, state.flips.length - 1),
-        canSubmit: flips.map(x => x.answer).every(hasAnswer),
       }
     }
     default: {
