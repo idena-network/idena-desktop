@@ -3,7 +3,7 @@ osx_image: xcode10.2
 language: node_js
 node_js: '10'
 
-#if: tag IS present
+if: tag IS present
 
 os:
   - osx
@@ -24,9 +24,8 @@ install:
   - npm ci
 
 before_script:
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then sed -i "s/\(\"version\":\s\"\).*\(\".*\)/\10.0.50\2/" package.json; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sed -i '' "s/\(\"version\":\s\"\).*\(\".*\)/\10.0.50\2/" package.json; fi
-  - cat package.json
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then sed -i "s/\(\"version\":\s\"\).*\(\".*\)/\1${TRAVIS_TAG:1}\2/" package.json; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sed -i '' "s/\(\"version\":\s\"\).*\(\".*\)/\1${TRAVIS_TAG:1}\2/" package.json; fi
 
 script:
   - echo "Build win"
