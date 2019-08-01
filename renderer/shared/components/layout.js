@@ -9,8 +9,10 @@ function Layout({router, children}) {
   return (
     <main>
       <Sidebar />
-      <section>{children}</section>
-      {!router.pathname.startsWith('/validation') && <ValidationBanner />}
+      <section>
+        {!router.pathname.startsWith('/validation') && <ValidationBanner />}
+        {children}
+      </section>
       <Notifications />
       <style jsx>{`
         main {

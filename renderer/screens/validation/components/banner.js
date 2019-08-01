@@ -1,7 +1,6 @@
 import React from 'react'
-import {withRouter} from 'next/router'
 import {padding, rem, backgrounds} from 'polished'
-import {Absolute, Box, Text, Fill, Link} from '../../../shared/components'
+import {Box, Text, Fill, Link} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import Divider from '../../../shared/components/divider'
@@ -21,13 +20,16 @@ function Banner() {
 
   if (epoch) {
     const {currentPeriod} = epoch
+    const isLottery = currentPeriod === EpochPeriod.FlipLottery
+    const isValidation = [
+      EpochPeriod.ShortSession,
+      EpochPeriod.LongSession,
+    ].includes(currentPeriod)
     return (
-      <Absolute top={0} left={0} right={0} zIndex={3}>
-        {currentPeriod === EpochPeriod.FlipLottery && <ValidationSoon />}
-        {[EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
-          currentPeriod
-        ) && <ValidationRunning />}
-      </Absolute>
+      <Box>
+        {isLottery && <ValidationSoon />}
+        {isValidation && <ValidationRunning />}
+      </Box>
     )
   }
 
@@ -112,4 +114,4 @@ function ValidationRunning() {
   )
 }
 
-export default withRouter(Banner)
+export default Banner
