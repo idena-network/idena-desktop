@@ -21,7 +21,8 @@ cache:
     - $HOME/.npm/_prebuilds
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gnu-sed && alias sed=gsed; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gnu-sed; fi
+  - export PATH=/usr/local/bin:$PATH
 
 install:
   - npm ci
