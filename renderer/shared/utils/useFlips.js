@@ -21,17 +21,53 @@ export const FlipType = {
 
 const DEFAULT_ORDER = [0, 1, 2, 3]
 
-function shuffle(order) {
-  const initialOrder = order.map((_, i) => i)
-  return Math.random() < 0.5 ? [initialOrder, order] : [order, initialOrder]
+function permuataion(maxValue) {
+  const permArray = new Array(maxValue)
+  for (let i = 0; i < maxValue; i += 1) {
+    permArray[i] = i
+  }
+  for (let i = maxValue - 1; i >= 0; i -= 1) {
+    const randPos = Math.floor(i * Math.random())
+    const tmpStore = permArray[i]
+    permArray[i] = permArray[randPos]
+    permArray[randPos] = tmpStore
+  }
+  return permArray
+}
+
+function shufflePics(pics, shuffledOrder, seed) {
+  const newPics = []
+  const cache = {}
+  const firstOrder = new Array(4)
+
+  seed.forEach((value, idx) => {
+    newPics.push(pics[value])
+    firstOrder[value] = idx
+    cache[value] = newPics.length - 1
+  })
+
+  const secondOrder = shuffledOrder.map(value => cache[value])
+
+  return {
+    pics: newPics,
+    orders:
+      Math.random() < 0.5
+        ? [firstOrder, secondOrder]
+        : [secondOrder, firstOrder],
+  }
 }
 
 function toHex(pics, order) {
-  const buffs = pics.map(src =>
-    Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
-  )
-  const hexBuffs = encode([buffs.map(ab => new Uint8Array(ab)), shuffle(order)])
-  return `0x${hexBuffs.toString('hex')}`
+  const seed = permuataion(4)
+  const shuffled = shufflePics(pics, order, seed)
+
+  const rlp = encode([
+    shuffled.pics.map(src =>
+      Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
+    ),
+    shuffled.orders,
+  ])
+  return `0x${rlp.toString('hex')}`
 }
 
 function useFlips() {
@@ -43,12 +79,6 @@ function useFlips() {
       setFlips(savedFlips)
     }
   }, [])
-
-  useEffect(() => {
-    if (flips.length > 0) {
-      // saveFlips(flips)
-    }
-  }, [flips])
 
   useInterval(
     () => {
