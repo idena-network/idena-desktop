@@ -146,7 +146,7 @@ function EpochDisplay() {
 
 function SyncDisplay() {
   const tx = useTx(
-    '0x8115b61793a45b5a37fd9c94ed3f1b78fcea4af9c7b5371069883a5ea51cab9a'
+    '0x7ebfe8ba67ae1961002791ad9c387bc2101e134f4279e79b8443083e10d8f219'
   )
   return <Pre>{tx ? JSON.stringify(tx) : 'fetching...'}</Pre>
 }
