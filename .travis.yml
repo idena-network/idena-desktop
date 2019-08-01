@@ -6,7 +6,7 @@ node_js: '10'
 if: tag IS present
 
 os:
-  - osx
+  # - osx
   - windows
 
 env:
@@ -19,6 +19,9 @@ cache:
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
     - $HOME/.npm/_prebuilds
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then powershell -command 'Set-MpPreference -DisableRealtimeMonitoring $true'; fi
 
 install:
   - npm ci
