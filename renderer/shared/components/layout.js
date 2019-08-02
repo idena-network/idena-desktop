@@ -19,9 +19,12 @@ function Layout({router, children}) {
           display: flex;
           padding: 0;
           margin: 0;
+          max-height: 100vh;
+          overflow: hidden;
         }
         section {
           flex: 1;
+          overflow-y: auto;
         }
       `}</style>
     </main>
