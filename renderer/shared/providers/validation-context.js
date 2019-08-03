@@ -26,19 +26,21 @@ function fromHexString(hexString) {
   )
 }
 
-function decodeFlips(hashes, hexes) {
+function decodeFlips(hashes, hexes, prevFlips) {
   return hashes.map(({hash, ready}) => {
     const hex = hexes.find(x => x.hash === hash)
     if (hex) {
       try {
         const decodedFlip = decode(fromHexString(hex.hex.substring(2)))
+        const pics = decodedFlip[0]
         const orders = decodedFlip[1].map(order => order.map(x => x[0] || 0))
+        const prevFlip = prevFlips.find(x => x.hash === hash)
         return {
+          ...prevFlip,
           hash,
           ready,
-          pics: decodedFlip[0],
+          pics,
           orders,
-          answer: null,
         }
       } catch {
         return {
@@ -141,7 +143,7 @@ function validationReducer(state, action) {
     }
     case FETCH_FLIPS_SUCCEEDED: {
       const {hashes, hexes} = action
-      const flips = decodeFlips(hashes, hexes)
+      const flips = decodeFlips(hashes, hexes, state.flips)
       return {
         ...state,
         hashes,
@@ -155,7 +157,6 @@ function validationReducer(state, action) {
         ...state,
         loading: true,
         error: action.error,
-        ready: state.hashes.length === 0,
       }
     }
     case PREV: {
@@ -319,8 +320,11 @@ export async function fetchFlips(dispatch, type) {
       const hexes = await Promise.all(
         hashes
           .filter(x => x.ready)
+          .filter(x => !x.loaded)
           .map(x => x.hash)
-          .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
+          .map(hash =>
+            fetchFlip(hash).then(resp => ({hash, loaded: true, ...resp.result}))
+          )
       )
       dispatch({type: FETCH_FLIPS_SUCCEEDED, hashes, hexes})
     } else {

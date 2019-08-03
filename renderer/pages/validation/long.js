@@ -6,7 +6,6 @@ import ValidationScene from '../../screens/validation/components/validation-scen
 import ValidationActions from '../../screens/validation/components/validation-actions'
 import FlipThumbnails from '../../screens/validation/components/flip-thumbnails'
 import Flex from '../../shared/components/flex'
-import {useInterval} from '../../shared/hooks/use-interval'
 import {Link, IconClose} from '../../shared/components'
 import Timer from '../../screens/validation/components/timer'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -33,6 +32,13 @@ export default function() {
   const epoch = useEpochState()
 
   useEffect(() => {
+    async function fetchData() {
+      await fetchFlips(dispatch, SessionType.Long)
+    }
+    fetchData()
+  }, [dispatch])
+
+  useEffect(() => {
     if (state.longAnswersSubmitted) {
       Router.push('/dashboard')
     }
@@ -43,14 +49,6 @@ export default function() {
       dispatch({type: START_FETCH_FLIPS})
     }
   }, [dispatch, state.longAnswersSubmitted, state.ready])
-
-  useInterval(
-    async () => {
-      await fetchFlips(dispatch, SessionType.Long)
-    },
-    state.ready ? null : 1000,
-    true
-  )
 
   const handleSubmitAnswers = async () => {
     await submitLongAnswers(dispatch, state.flips, epoch.epoch)
