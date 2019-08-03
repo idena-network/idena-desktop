@@ -28,10 +28,10 @@ function fromHexString(hexString) {
 
 function decodeFlips(hashes, hexes, prevFlips) {
   return hashes.map(({hash, ready}) => {
-    const hex = hexes.find(x => x.hash === hash)
-    if (hex) {
+    const hexObject = hexes.find(x => x.hash === hash)
+    if (hexObject) {
       try {
-        const decodedFlip = decode(fromHexString(hex.hex.substring(2)))
+        const decodedFlip = decode(fromHexString(hexObject.hex.substring(2)))
         const pics = decodedFlip[0]
         const urls = pics.map(pic =>
           URL.createObjectURL(new Blob([pic], {type: 'image/jpeg'}))
@@ -45,6 +45,7 @@ function decodeFlips(hashes, hexes, prevFlips) {
           pics,
           urls,
           orders,
+          loaded: hexObject.loaded,
         }
       } catch {
         return {
