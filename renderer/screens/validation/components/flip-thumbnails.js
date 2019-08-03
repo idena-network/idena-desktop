@@ -24,7 +24,7 @@ const style = {
 function FlipThumbnails({flips, currentIndex, onPick}) {
   return (
     <Flex justify="center" align="center" css={{minHeight: rem(48)}}>
-      {flips.map(({hash, pics, answer, ready}, idx) => (
+      {flips.map(({hash, urls, answer, ready}, idx) => (
         <Flex
           key={hash}
           justify="center"
@@ -60,9 +60,7 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
             {ready ? (
               <FlipImage
                 size={32}
-                src={URL.createObjectURL(
-                  new Blob([pics[0]], {type: 'image/jpeg'})
-                )}
+                src={urls[0]}
                 style={{
                   borderRadius: rem(12),
                 }}

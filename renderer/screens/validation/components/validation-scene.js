@@ -50,7 +50,7 @@ function ValidationScene({
   isLast,
   type,
 }) {
-  const {pics, answer, ready, orders} = flip
+  const {urls, answer, ready, orders} = flip
   return (
     <Flex
       justify="space-between"
@@ -71,7 +71,7 @@ function ValidationScene({
           width="100%"
         >
           {ready ? (
-            reorderList(pics, orders[0]).map((src, idx) => (
+            reorderList(urls, orders[0]).map((src, idx) => (
               <Box
                 key={orders[0][idx]}
                 onClick={() => onAnswer(AnswerType.Left)}
@@ -85,14 +85,12 @@ function ValidationScene({
                     ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
                     ...borderRadius(
                       'bottom',
-                      idx === pics.length - 1 ? rem(8) : 'none'
+                      idx === urls.length - 1 ? rem(8) : 'none'
                     ),
                     objectFit: 'contain',
                     objectPosition: 'center',
                   }}
-                  src={URL.createObjectURL(
-                    new Blob([src], {type: 'image/jpeg'})
-                  )}
+                  src={src}
                 />
               </Box>
             ))
@@ -110,7 +108,7 @@ function ValidationScene({
           width="100%"
         >
           {ready ? (
-            reorderList(pics, orders[1]).map((src, idx) => (
+            reorderList(urls, orders[1]).map((src, idx) => (
               <Box
                 key={orders[1][idx]}
                 onClick={() => onAnswer(AnswerType.Right)}
@@ -124,14 +122,12 @@ function ValidationScene({
                     ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
                     ...borderRadius(
                       'bottom',
-                      idx === pics.length - 1 ? rem(8) : 'none'
+                      idx === urls.length - 1 ? rem(8) : 'none'
                     ),
                     objectFit: 'contain',
                     objectPosition: 'center',
                   }}
-                  src={URL.createObjectURL(
-                    new Blob([src], {type: 'image/jpeg'})
-                  )}
+                  src={src}
                 />
               </Box>
             ))
