@@ -33,10 +33,10 @@ export default function() {
 
   useEffect(() => {
     async function fetchData() {
-      await fetchFlips(dispatch, SessionType.Long)
+      await fetchFlips(dispatch, SessionType.Long, state.flips)
     }
     fetchData()
-  }, [dispatch])
+  }, [dispatch, state.flips])
 
   useEffect(() => {
     if (state.longAnswersSubmitted) {

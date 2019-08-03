@@ -45,7 +45,7 @@ function decodeFlips(hashes, hexes, prevFlips) {
           pics,
           urls,
           orders,
-          loaded: hexObject.loaded,
+          loaded: true,
         }
       } catch {
         return {
@@ -55,6 +55,7 @@ function decodeFlips(hashes, hexes, prevFlips) {
           urls: null,
           orders: null,
           answer: null,
+          loaded: false,
         }
       }
     }
@@ -65,6 +66,7 @@ function decodeFlips(hashes, hexes, prevFlips) {
       urls: null,
       orders: null,
       answer: null,
+      loaded: false,
     }
   })
 }
@@ -150,11 +152,12 @@ function validationReducer(state, action) {
     }
     case FETCH_FLIPS_SUCCEEDED: {
       const {hashes, hexes} = action
-      const flips = decodeFlips(hashes, hexes, state.flips)
       return {
         ...state,
         hashes,
-        flips,
+        flips: hexes.length
+          ? decodeFlips(hashes, hexes, state.flips)
+          : state.flips,
         loading: false,
         ready: hashes.every(x => x.ready),
       }
@@ -320,18 +323,21 @@ export function useValidationDispatch() {
   return context
 }
 
-export async function fetchFlips(dispatch, type) {
+export async function fetchFlips(dispatch, type, flips) {
   try {
     const hashes = await api.fetchFlipHashes(type)
     if (hashes) {
       const hexes = await Promise.all(
         hashes
-          .filter(x => x.ready)
-          .filter(x => !x.loaded)
+          .filter(x => {
+            const prevFlip = flips.find(f => f.hash === x.hash)
+            if (prevFlip) {
+              return x.ready && !prevFlip.loaded
+            }
+            return x.ready
+          })
           .map(x => x.hash)
-          .map(hash =>
-            fetchFlip(hash).then(resp => ({hash, loaded: true, ...resp.result}))
-          )
+          .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
       )
       dispatch({type: FETCH_FLIPS_SUCCEEDED, hashes, hexes})
     } else {

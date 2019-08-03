@@ -45,9 +45,9 @@ function ShortSession() {
 
   useInterval(
     async () => {
-      await fetchFlips(dispatch, SessionType.Short)
+      await fetchFlips(dispatch, SessionType.Short, state.flips)
     },
-    state.ready ? null : 1000,
+    state.ready ? null : 1000 * 1,
     true
   )
 
