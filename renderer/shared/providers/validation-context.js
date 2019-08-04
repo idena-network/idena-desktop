@@ -29,6 +29,7 @@ function fromHexString(hexString) {
 function decodeFlips(hashes, hexes, prevFlips) {
   return hashes.map(({hash, ready}) => {
     const hexObject = hexes.find(x => x.hash === hash)
+    const prevFlip = prevFlips.find(x => x.hash === hash)
     if (hexObject) {
       try {
         const decodedFlip = decode(fromHexString(hexObject.hex.substring(2)))
@@ -37,7 +38,6 @@ function decodeFlips(hashes, hexes, prevFlips) {
           URL.createObjectURL(new Blob([pic], {type: 'image/jpeg'}))
         )
         const orders = decodedFlip[1].map(order => order.map(x => x[0] || 0))
-        const prevFlip = prevFlips.find(x => x.hash === hash)
         return {
           ...prevFlip,
           hash,
@@ -59,15 +59,17 @@ function decodeFlips(hashes, hexes, prevFlips) {
         }
       }
     }
-    return {
-      hash,
-      ready,
-      pics: null,
-      urls: null,
-      orders: null,
-      answer: null,
-      loaded: false,
-    }
+    return (
+      prevFlip || {
+        hash,
+        ready,
+        pics: null,
+        urls: null,
+        orders: null,
+        answer: null,
+        loaded: false,
+      }
+    )
   })
 }
 
