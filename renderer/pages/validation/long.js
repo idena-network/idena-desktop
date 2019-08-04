@@ -33,10 +33,10 @@ export default function() {
 
   useEffect(() => {
     async function fetchData() {
-      await fetchFlips(dispatch, SessionType.Long, state.flips)
+      await fetchFlips(dispatch, SessionType.Long)
     }
     fetchData()
-  }, [dispatch, state.flips])
+  }, [dispatch])
 
   useEffect(() => {
     if (state.longAnswersSubmitted) {
@@ -99,7 +99,7 @@ export default function() {
           )}
         </Flex>
         <ValidationActions
-          onReportAbuse={hash => dispatch({type: REPORT_ABUSE, hash})}
+          onReportAbuse={() => dispatch({type: REPORT_ABUSE})}
           canSubmit={state.canSubmit}
           onSubmitAnswers={handleSubmitAnswers}
           countdown={<Timer type={SessionType.Long} />}

@@ -157,9 +157,7 @@ function validationReducer(state, action) {
       return {
         ...state,
         hashes,
-        flips: hexes.length
-          ? decodeFlips(hashes, hexes, state.flips)
-          : state.flips,
+        flips: decodeFlips(hashes, hexes, state.flips),
         loading: false,
         ready: hashes.every(x => x.ready),
       }
@@ -325,7 +323,7 @@ export function useValidationDispatch() {
   return context
 }
 
-export async function fetchFlips(dispatch, type, flips) {
+export async function fetchFlips(dispatch, type, flips = []) {
   try {
     const hashes = await api.fetchFlipHashes(type)
     if (hashes) {

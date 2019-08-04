@@ -47,7 +47,7 @@ function ShortSession() {
     async () => {
       await fetchFlips(dispatch, SessionType.Short, state.flips)
     },
-    state.ready ? null : 1000 * 1,
+    state.ready || state.shortAnswersSubmitted ? null : 1000 * 1,
     true
   )
 
@@ -98,7 +98,7 @@ function ShortSession() {
         )}
       </Flex>
       <ValidationActions
-        onReportAbuse={hash => dispatch({type: REPORT_ABUSE, hash})}
+        onReportAbuse={() => dispatch({type: REPORT_ABUSE})}
         canSubmit={state.canSubmit}
         onSubmitAnswers={handleSubmitAnswers}
         countdown={<Timer type={SessionType.Short} />}
