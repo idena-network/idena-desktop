@@ -72,7 +72,7 @@ export default function useRpc(initialMethod, ...initialParams) {
         }
       } catch (error) {
         if (!ignore) {
-          dataDispatch({type: 'error', error})
+          dataDispatch({type: 'fail', error})
         }
       }
     }
