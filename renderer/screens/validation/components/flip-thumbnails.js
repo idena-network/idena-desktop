@@ -25,8 +25,8 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
   return (
     <Flex justify="center" align="center" css={{minHeight: rem(48)}}>
       {flips.map(
-        ({hash, urls, answer, ready, failed, extra}, idx) =>
-          !extra && (
+        ({hash, urls, answer, ready, failed, hidden}, idx) =>
+          !hidden && (
             <Flex
               key={hash}
               justify="center"

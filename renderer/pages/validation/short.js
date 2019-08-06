@@ -65,7 +65,7 @@ function ShortSession() {
     await submitShortAnswers(dispatch, state.flips, epoch.epoch)
   }
 
-  const availableFlipsLength = state.flips.filter(x => !x.extra).length
+  const availableFlipsLength = state.flips.filter(x => !x.hidden).length
 
   return (
     <Flex
