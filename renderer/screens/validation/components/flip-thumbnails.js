@@ -59,7 +59,7 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
                     )}
                   </Fill>
                 )}
-                {failed && (
+                {failed && !hasAnswer(answer) && (
                   <Fill
                     bg={rgba(89, 89, 89, 0.95)}
                     css={{
