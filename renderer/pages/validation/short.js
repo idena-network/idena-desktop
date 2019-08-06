@@ -23,8 +23,12 @@ import {
   PICK,
   SessionType,
   fetchFlips,
+  SHOW_EXTRA_FLIPS,
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
+import {useTimeout} from '../../shared/hooks/use-timeout'
+
+const EXTRA_FLIPS_DELAY = 30 * 1000 // 30 sec
 
 function ShortSession() {
   const state = useValidationState()
@@ -51,9 +55,17 @@ function ShortSession() {
     true
   )
 
+  useTimeout(() => {
+    if (!state.ready && !state.shortAnswersSubmitted) {
+      dispatch({type: SHOW_EXTRA_FLIPS})
+    }
+  }, EXTRA_FLIPS_DELAY)
+
   const handleSubmitAnswers = async () => {
     await submitShortAnswers(dispatch, state.flips, epoch.epoch)
   }
+
+  const availableFlipsLength = state.flips.filter(x => !x.extra).length
 
   return (
     <Flex
@@ -72,7 +84,7 @@ function ShortSession() {
       <ValidationHeader
         type={SessionType.Short}
         currentIndex={state.currentIndex}
-        total={state.flips.length}
+        total={availableFlipsLength}
       >
         <Link href="/dashboard">
           <IconClose />
@@ -92,7 +104,7 @@ function ShortSession() {
             onNext={() => dispatch({type: NEXT})}
             onAnswer={option => dispatch({type: ANSWER, option})}
             isFirst={state.currentIndex === 0}
-            isLast={state.currentIndex >= state.flips.length - 1}
+            isLast={state.currentIndex >= availableFlipsLength - 1}
             type={SessionType.Short}
           />
         )}

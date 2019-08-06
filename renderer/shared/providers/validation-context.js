@@ -27,7 +27,7 @@ function fromHexString(hexString) {
 }
 
 function decodeFlips(hashes, hexes, prevFlips) {
-  return hashes.map(({hash, ready}) => {
+  return hashes.map(({hash, ready, extra}) => {
     const hexObject = hexes.find(x => x.hash === hash)
     const prevFlip = prevFlips.find(x => x.hash === hash)
     if (hexObject) {
@@ -46,10 +46,12 @@ function decodeFlips(hashes, hexes, prevFlips) {
           urls,
           orders,
           loaded: true,
+          extra: prevFlip ? prevFlip.extra : extra,
         }
       } catch {
         return {
           hash,
+          extra,
           ready: false,
           pics: null,
           urls: null,
@@ -63,6 +65,7 @@ function decodeFlips(hashes, hexes, prevFlips) {
       prevFlip || {
         hash,
         ready,
+        extra,
         pics: null,
         urls: null,
         orders: null,
@@ -78,7 +81,11 @@ export function hasAnswer(answer) {
 }
 
 function canSubmit(flips, idx) {
-  return flips.map(x => x.answer).every(hasAnswer) || idx === flips.length - 1
+  const availableFlips = flips.filter(x => !x.extra)
+  return (
+    flips.map(x => x.answer).every(hasAnswer) ||
+    idx === availableFlips.length - 1
+  )
 }
 
 const LOAD_VALIDATION = 'LOAD_VALIDATION'
@@ -93,6 +100,7 @@ export const NEXT = 'NEXT'
 export const PREV = 'PREV'
 export const PICK = 'PICK'
 export const REPORT_ABUSE = 'REPORT_ABUSE'
+export const SHOW_EXTRA_FLIPS = 'SHOW_EXTRA_FLIPS'
 
 const initialCeremonyState = {
   hashes: [],
@@ -154,12 +162,13 @@ function validationReducer(state, action) {
     }
     case FETCH_FLIPS_SUCCEEDED: {
       const {hashes, hexes} = action
+      const flips = decodeFlips(hashes, hexes, state.flips)
       return {
         ...state,
         hashes,
         flips: decodeFlips(hashes, hexes, state.flips),
         loading: false,
-        ready: hashes.every(x => x.ready),
+        ready: flips.every(x => x.ready || x.failed),
       }
     }
     case FETCH_FLIPS_FAILED: {
@@ -216,6 +225,33 @@ function validationReducer(state, action) {
         flips,
         currentIndex: idx,
         canSubmit: canSubmit(flips, idx),
+      }
+    }
+    case SHOW_EXTRA_FLIPS: {
+      const flips = state.flips.map(flip => {
+        return {
+          ...flip,
+          failed: !flip.ready,
+        }
+      })
+      let availableExtraFlips = flips.filter(x => x.failed).length
+      const resultedFlips = flips.map(flip => {
+        if (!flip.extra) {
+          return flip
+        }
+        const shouldBecomeAvailable =
+          flip.ready && flip.loaded && availableExtraFlips > 0
+        availableExtraFlips -= 1
+        return {
+          ...flip,
+          extra: !shouldBecomeAvailable,
+        }
+      })
+      return {
+        ...state,
+        canSubmit: canSubmit(resultedFlips, state.currentIndex),
+        flips: resultedFlips,
+        ready: flips.every(x => x.ready || x.failed),
       }
     }
     default: {
