@@ -54,17 +54,17 @@ export default function() {
     await submitLongAnswers(dispatch, state.flips, epoch.epoch)
   }
 
-  let isFirst = true
-  let isLast = true
+  let isFirstVisibleFlip = true
+  let isLastVisibleFlip = true
   for (let i = 0; i < state.currentIndex; i += 1) {
     if (!state.flips[i].hidden) {
-      isFirst = false
+      isFirstVisibleFlip = false
       break
     }
   }
   for (let i = state.currentIndex + 1; i < state.flips.length; i += 1) {
     if (!state.flips[i].hidden) {
-      isLast = false
+      isLastVisibleFlip = false
       break
     }
   }
@@ -107,8 +107,8 @@ export default function() {
               onPrev={() => dispatch({type: PREV})}
               onNext={() => dispatch({type: NEXT})}
               onAnswer={option => dispatch({type: ANSWER, option})}
-              isFirst={isFirst}
-              isLast={isLast}
+              isFirst={isFirstVisibleFlip}
+              isLast={isLastVisibleFlip}
               type={SessionType.Long}
             />
           )}

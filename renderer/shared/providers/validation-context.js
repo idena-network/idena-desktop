@@ -51,6 +51,7 @@ function decodeFlips(hashes, hexes, prevFlips) {
       } catch {
         return {
           hash,
+          failed: true,
           hidden,
           ready: false,
           pics: null,
