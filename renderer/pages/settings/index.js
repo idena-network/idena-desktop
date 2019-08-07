@@ -149,9 +149,13 @@ function EpochDisplay() {
 }
 
 function SyncDisplay() {
-  const tx = useTx(
-    '0x91861aa89a08613875f0a019b413c4ad686d3548918230983821a79dca720f6b'
-  )
+  const [tx, setHash] = useTx()
+  useEffect(() => {
+    setHash(
+      '0x91861aa89a08613875f0a019b413c4ad686d3548918230983821a79dca720f6b'
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return <Pre>{tx ? JSON.stringify(tx) : 'fetching...'}</Pre>
 }
 

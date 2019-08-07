@@ -1,6 +1,24 @@
-import {useReducer} from 'react'
+import {useReducer, useCallback} from 'react'
 import useDeepCompareEffect from 'use-deep-compare-effect'
+import axios from 'axios'
 
+/**
+ * @typedef UseRpcResult
+ * @param {string} method Method name
+ * @param {string} params: Params
+ * @param {string} id: Id
+ * @param {string} result: Result
+ * @param {string} error: Error, if thrown
+ * @param {string} isLoading: Loading state
+ * @param {string} isReady: Ready state
+ */
+
+/**
+ * Call RPC with args
+ * @param {string} initialMethod Method name
+ * @param  {...any} initialParams Params passed as args
+ * @returns {[UseRpcResult, *]} Result
+ */
 export default function useRpc(initialMethod, ...initialParams) {
   const [rpcBody, dispatchRpc] = useReducer(
     (state, [method, ...params]) => {
@@ -58,17 +76,9 @@ export default function useRpc(initialMethod, ...initialParams) {
 
     async function fetchData() {
       try {
-        const resp = await fetch('http://localhost:9009', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(rpcBody),
-        })
-        const json = await resp.json()
+        const {data} = await axios.post('http://localhost:5555', rpcBody)
         if (!ignore) {
-          dataDispatch({type: 'done', ...json})
+          dataDispatch({type: 'done', ...data})
         }
       } catch (error) {
         if (!ignore) {
@@ -88,6 +98,6 @@ export default function useRpc(initialMethod, ...initialParams) {
 
   return [
     {...dataState, ...rpcBody},
-    (method, ...params) => dispatchRpc([method, ...params]),
+    useCallback((method, ...params) => dispatchRpc([method, ...params]), []),
   ]
 }

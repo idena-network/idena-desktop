@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {
   Box,
   BlockHeading,
@@ -13,11 +13,27 @@ import {
 } from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import theme from '../../../shared/theme'
+import useTx from '../../../shared/hooks/use-tx'
+import useRpc from '../../../shared/hooks/use-rpc'
 
 // eslint-disable-next-line react/prop-types
 function MinerStatusSwitcher() {
-  const [switcherActive, setSwitcherState] = useState(true)
-  const [showModal, setShowModal] = React.useState(false)
+  const [mining, setMining] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+
+  const [{result: hash}, callRpc] = useRpc()
+  const [{mined}, setHash] = useTx()
+
+  useEffect(() => {
+    setHash(hash)
+  }, [hash, setHash])
+
+  useEffect(() => {
+    if (mined) {
+      setMining(x => !x)
+      setShowModal(false)
+    }
+  }, [mined])
 
   return (
     <Box m="0 0 24px 0">
@@ -29,7 +45,7 @@ function MinerStatusSwitcher() {
               Miner
             </Label>
             <Box style={{pointerEvents: 'none'}}>
-              <Switcher withStatusHint isChecked={switcherActive} />
+              <Switcher withStatusHint isChecked={mining} />
             </Box>
           </Flex>
         </div>
@@ -53,10 +69,10 @@ function MinerStatusSwitcher() {
       >
         <Box m="0 0 18px">
           <SubHeading>
-            &apos;Miner&apos; mode {!switcherActive ? 'on' : 'off'}
+            &apos;Miner&apos; mode {!mining ? 'on' : 'off'}
           </SubHeading>
           <Text>
-            {!switcherActive ? (
+            {!mining ? (
               <span>Switch the node to the &apos;Miner&apos; mode.</span>
             ) : (
               <span>Switch off the &apos;Miner&apos; mode.</span>
@@ -78,8 +94,7 @@ function MinerStatusSwitcher() {
           <Box px="4px">
             <Button
               onClick={() => {
-                setSwitcherState(!switcherActive)
-                setShowModal(false)
+                callRpc(mining ? 'dna_becomeOffline' : 'dna_becomeOnline')
               }}
             >
               Submit

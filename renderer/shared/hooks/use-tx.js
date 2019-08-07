@@ -1,4 +1,4 @@
-import {useReducer} from 'react'
+import {useState, useReducer, useEffect} from 'react'
 import useRpc from './use-rpc'
 import {HASH_IN_MEMPOOL} from '../utils/tx'
 import {useInterval} from './use-interval'
@@ -23,13 +23,20 @@ import {useInterval} from './use-interval'
 
 /**
  * useTx
- * @param {string} hash
- * @returns {Tx & TxStatus} tx
+ * @param {string} initialHash
+ * @returns {[Tx & TxStatus, *]} tx
  */
-export default function useTx(hash) {
+export default function useTx(initialHash) {
+  const [hash, setHash] = useState(initialHash)
   const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
+        case 'reset':
+          return {
+            ...state,
+            mining: true,
+            mined: false,
+          }
         case 'mempool':
           return {
             ...state,
@@ -68,15 +75,22 @@ export default function useTx(hash) {
     }
   )
 
-  const [{result, error, isReady}, fetchTx] = useRpc('bcn_transaction', hash)
+  const [{result, error}, fetchTx] = useRpc('bcn_transaction', initialHash)
+
+  useEffect(() => {
+    dispatch({type: 'reset'})
+    fetchTx('bcn_transaction', hash)
+  }, [fetchTx, hash])
 
   useInterval(
     () => {
       if (error) {
         dispatch({type: 'fail', error})
-      } else if (isReady && result === null) {
+      }
+      if (result === null) {
         dispatch({type: 'missing'})
-      } else {
+      }
+      if (result !== null) {
         const {blockHash} = result
         if (blockHash === HASH_IN_MEMPOOL) {
           dispatch({
@@ -95,5 +109,5 @@ export default function useTx(hash) {
     hash && !state.mined ? 1000 : null
   )
 
-  return state
+  return [state, setHash]
 }
