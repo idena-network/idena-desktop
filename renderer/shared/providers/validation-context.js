@@ -133,7 +133,6 @@ const initialCeremonyState = {
   currentIndex: 0,
   canSubmit: false,
   ready: false,
-  virtualIndex: 0,
 }
 
 const initialState = {
@@ -189,35 +188,17 @@ function validationReducer(state, action) {
       const {data, sessionType} = action
       let flips = decodeFlips(data, state.flips)
       let {currentIndex} = state
-      let virtualIndex = 0
-      if (sessionType === SessionType.Short) {
-        flips = reorderFlips(flips)
-      }
       if (sessionType === SessionType.Long) {
         flips = flips.map(flip => ({
           ...flip,
           hidden: !flip.ready,
         }))
-        if (!currentIndex) {
-          for (let i = 0; i < flips.length; i += 1) {
-            if (!flips[i].hidden) {
-              currentIndex = i
-              break
-            }
-          }
-        } else {
-          for (let i = 0; i < currentIndex; i += 1) {
-            if (!state.flips[i].hidden) {
-              virtualIndex += 1
-            }
-          }
-        }
       }
+      flips = reorderFlips(flips)
       return {
         ...state,
         flips,
         currentIndex,
-        virtualIndex,
         loading: false,
         ready: flips.every(x => x.ready || x.failed),
       }
@@ -230,53 +211,25 @@ function validationReducer(state, action) {
       }
     }
     case PREV: {
-      let step = 1
-      while (
-        state.currentIndex - step >= 0 &&
-        state.flips[state.currentIndex - step].hidden
-      ) {
-        step += 1
-      }
-      const idx = Math.max(state.currentIndex - step, 0)
-      const virtualIndex = Math.max(state.virtualIndex - 1, 0)
+      const idx = Math.max(state.currentIndex - 1, 0)
       return {
         ...state,
         currentIndex: idx,
-        virtualIndex,
         canSubmit: canSubmit(state.flips, idx),
       }
     }
     case NEXT: {
-      let step = 1
-      while (
-        state.currentIndex + step < state.flips.length &&
-        state.flips[state.currentIndex + step].hidden
-      ) {
-        step += 1
-      }
-      const idx = Math.min(state.currentIndex + step, state.flips.length - 1)
-      const virtualIndex = Math.min(
-        state.virtualIndex + 1,
-        state.flips.length - 1
-      )
+      const idx = Math.min(state.currentIndex + 1, state.flips.length - 1)
       return {
         ...state,
         currentIndex: idx,
-        virtualIndex,
         canSubmit: canSubmit(state.flips, idx),
       }
     }
     case PICK: {
-      let virtualIndex = 0
-      for (let i = 0; i < action.index; i += 1) {
-        if (!state.flips[i].hidden) {
-          virtualIndex += 1
-        }
-      }
       return {
         ...state,
         currentIndex: action.index,
-        virtualIndex,
         canSubmit: canSubmit(state.flips, action.index),
       }
     }
@@ -298,24 +251,13 @@ function validationReducer(state, action) {
         {...state.flips[state.currentIndex], answer: AnswerType.Inappropriate},
         ...state.flips.slice(state.currentIndex + 1),
       ]
-      let step = 1
-      while (
-        state.currentIndex + step < state.flips.length &&
-        state.flips[state.currentIndex + step].hidden
-      ) {
-        step += 1
-      }
-      const idx = Math.min(state.currentIndex + step, state.flips.length - 1)
-      let {virtualIndex, currentIndex} = state
-      if (!state.flips[idx].hidden) {
-        currentIndex = idx
-        virtualIndex = Math.min(state.virtualIndex + 1, state.flips.length - 1)
-      }
+
+      const availableFlipsLength = flips.filter(x => !x.hidden).length
+      const idx = Math.min(state.currentIndex + 1, availableFlipsLength - 1)
       return {
         ...state,
         flips,
-        currentIndex,
-        virtualIndex,
+        currentIndex: idx,
         canSubmit: canSubmit(flips, idx),
       }
     }
