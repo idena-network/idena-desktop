@@ -26,27 +26,57 @@ function fromHexString(hexString) {
   )
 }
 
-function decodeFlips(hashes, hexes, prevFlips) {
-  return hashes.map(({hash, ready, extra: hidden}) => {
-    const hexObject = hexes.find(x => x.hash === hash)
-    const prevFlip = prevFlips.find(x => x.hash === hash)
-    if (hexObject) {
+function reorderFlips(flips) {
+  const ready = []
+  const loading = []
+  const failed = []
+  const hidden = []
+  for (let i = 0; i < flips.length; i++) {
+    if (flips[i].hidden) {
+      hidden.push(flips[i])
+    } else if (flips[i].ready && flips[i].loaded) {
+      ready.push(flips[i])
+    } else if (flips[i].failed) {
+      failed.push(flips[i])
+    } else {
+      loading.push(flips[i])
+    }
+  }
+  return [...ready, ...loading, ...failed, ...hidden]
+}
+
+function decodeFlips(data, currentFlips) {
+  const flips = currentFlips.length
+    ? currentFlips
+    : data.map(item => ({
+        ...item,
+        pics: null,
+        urls: null,
+        orders: null,
+        answer: null,
+        loaded: false,
+      }))
+  return flips.map(flip => {
+    if ((flip.ready && flip.loaded) || flip.failed) {
+      return flip
+    }
+    const item = data.find(x => x.hash === flip.hash)
+    if (item.ready && item.hex) {
       try {
-        const decodedFlip = decode(fromHexString(hexObject.hex.substring(2)))
+        const decodedFlip = decode(fromHexString(item.hex.substring(2)))
         const pics = decodedFlip[0]
         const urls = pics.map(pic =>
           URL.createObjectURL(new Blob([pic], {type: 'image/jpeg'}))
         )
         const orders = decodedFlip[1].map(order => order.map(x => x[0] || 0))
         return {
-          ...prevFlip,
-          hash,
-          ready,
+          ...flip,
+          ready: true,
           pics,
           urls,
           orders,
           loaded: true,
-          hidden: prevFlip ? prevFlip.hidden : hidden,
+          hidden: flip.hidden || item.hidden,
         }
       } catch {
         return {
@@ -61,19 +91,13 @@ function decodeFlips(hashes, hexes, prevFlips) {
           loaded: false,
         }
       }
-    }
-    return (
-      prevFlip || {
-        hash,
-        ready,
-        hidden,
-        pics: null,
-        urls: null,
-        orders: null,
-        answer: null,
-        loaded: false,
+    } else {
+      return {
+        hash: item.hash,
+        hidden: item.hidden,
+        ready: item.ready,
       }
-    )
+    }
   })
 }
 
@@ -104,7 +128,6 @@ export const REPORT_ABUSE = 'REPORT_ABUSE'
 export const SHOW_EXTRA_FLIPS = 'SHOW_EXTRA_FLIPS'
 
 const initialCeremonyState = {
-  hashes: [],
   flips: [],
   loading: true,
   currentIndex: 0,
@@ -163,10 +186,13 @@ function validationReducer(state, action) {
       }
     }
     case FETCH_FLIPS_SUCCEEDED: {
-      const {hashes, hexes, sessionType} = action
-      let flips = decodeFlips(hashes, hexes, state.flips)
+      const {data, sessionType} = action
+      let flips = decodeFlips(data, state.flips)
       let {currentIndex} = state
       let virtualIndex = 0
+      if (sessionType === SessionType.Short) {
+        flips = reorderFlips(flips)
+      }
       if (sessionType === SessionType.Long) {
         flips = flips.map(flip => ({
           ...flip,
@@ -187,10 +213,8 @@ function validationReducer(state, action) {
           }
         }
       }
-
       return {
         ...state,
-        hashes,
         flips,
         currentIndex,
         virtualIndex,
@@ -296,29 +320,39 @@ function validationReducer(state, action) {
       }
     }
     case SHOW_EXTRA_FLIPS: {
-      const flips = state.flips.map(flip => {
+      let flips = state.flips.map(flip => {
         return {
           ...flip,
           failed: !flip.ready,
         }
       })
       let availableExtraFlips = flips.filter(x => x.failed).length
-      const resultedFlips = flips.map(flip => {
+      let openedFlipsCount = 0
+      flips = flips.map(flip => {
         if (!flip.hidden) {
           return flip
         }
         const shouldBecomeAvailable =
           flip.ready && flip.loaded && availableExtraFlips > 0
         availableExtraFlips -= 1
+        openedFlipsCount += 1
         return {
           ...flip,
           hidden: !shouldBecomeAvailable,
         }
       })
+
+      for (let i = flips.length - 1; i >= 0; i -= 1) {
+        if (openedFlipsCount > 0 && flips[i].failed) {
+          openedFlipsCount -= 1
+          flips[i].hidden = true
+        }
+      }
+
       return {
         ...state,
-        canSubmit: canSubmit(resultedFlips, state.currentIndex),
-        flips: resultedFlips,
+        canSubmit: canSubmit(flips, state.currentIndex),
+        flips: reorderFlips(flips),
         ready: true,
       }
     }
@@ -431,19 +465,32 @@ export async function fetchFlips(dispatch, type, flips = []) {
   try {
     const hashes = await api.fetchFlipHashes(type)
     if (hashes) {
-      const hexes = await Promise.all(
-        hashes
-          .filter(x => {
-            const prevFlip = flips.find(f => f.hash === x.hash)
-            if (prevFlip) {
-              return x.ready && !prevFlip.loaded
+      const data = await Promise.all(
+        hashes.map(({hash, extra: hidden, ready}) => {
+          const existingFlip = flips.find(f => f.hash === hash)
+          if (existingFlip) {
+            if (
+              (existingFlip.ready && existingFlip.loaded) ||
+              existingFlip.failed
+            ) {
+              return Promise.resolve({
+                hash: existingFlip.hash,
+                hidden: existingFlip.hidden,
+                ready: existingFlip.ready,
+              })
             }
-            return x.ready
-          })
-          .map(x => x.hash)
-          .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
+          } else if (!ready) {
+            return Promise.resolve({hash, hidden, ready})
+          }
+          return fetchFlip(hash).then(resp => ({
+            hash,
+            hidden,
+            ready,
+            ...resp.result,
+          }))
+        })
       )
-      dispatch({type: FETCH_FLIPS_SUCCEEDED, hashes, hexes, sessionType: type})
+      dispatch({type: FETCH_FLIPS_SUCCEEDED, data, sessionType: type})
     } else {
       dispatch({
         type: FETCH_FLIPS_FAILED,
