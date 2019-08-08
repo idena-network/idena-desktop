@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, margin, padding, borderRadius} from 'polished'
@@ -50,7 +51,7 @@ function ValidationScene({
   isLast,
   type,
 }) {
-  const {urls, answer, ready, orders} = flip
+  const {urls, answer, ready, orders, failed} = flip
   return (
     <Flex
       justify="space-between"
@@ -70,7 +71,8 @@ function ValidationScene({
           css={style(answer, AnswerType.Left)}
           width="100%"
         >
-          {ready ? (
+          {ready &&
+            !failed &&
             reorderList(urls, orders[0]).map((src, idx) => (
               <Box
                 key={orders[0][idx]}
@@ -93,12 +95,28 @@ function ValidationScene({
                   src={src}
                 />
               </Box>
-            ))
-          ) : (
+            ))}
+          {!ready && !failed && (
             <Fill>
               <Spinner />
             </Fill>
           )}
+          {failed &&
+            [1, 2, 3, 4].map((_, idx) => (
+              <Box key={`left-${idx}`}>
+                <img
+                  alt="noImage"
+                  height={110}
+                  width={147}
+                  style={{
+                    background: theme.colors.white,
+                    objectFit: 'contain',
+                    objectPosition: 'center',
+                  }}
+                  src="https://placehold.it/147x110?text=No+data"
+                />
+              </Box>
+            ))}
         </Flex>
         <Flex
           direction="column"
@@ -107,7 +125,8 @@ function ValidationScene({
           css={style(answer, AnswerType.Right)}
           width="100%"
         >
-          {ready ? (
+          {ready &&
+            !failed &&
             reorderList(urls, orders[1]).map((src, idx) => (
               <Box
                 key={orders[1][idx]}
@@ -130,15 +149,31 @@ function ValidationScene({
                   src={src}
                 />
               </Box>
-            ))
-          ) : (
+            ))}
+          {!ready && !failed && (
             <Fill>
               <Spinner />
             </Fill>
           )}
+          {failed &&
+            [1, 2, 3, 4].map((_, idx) => (
+              <Box key={`right-${idx}`}>
+                <img
+                  alt="noImage"
+                  height={110}
+                  width={147}
+                  style={{
+                    background: theme.colors.white,
+                    objectFit: 'contain',
+                    objectPosition: 'center',
+                  }}
+                  src="https://placehold.it/147x110?text=No+data"
+                />
+              </Box>
+            ))}
         </Flex>
       </Flex>
-      {(!ready || (!isLast && hasAnswer(answer))) && (
+      {!isLast && (!ready || hasAnswer(answer)) && (
         <Col onClick={onNext} w={4}>
           <Arrow dir="next" type={type} />
         </Col>

@@ -27,7 +27,7 @@ function fromHexString(hexString) {
 }
 
 function decodeFlips(hashes, hexes, prevFlips) {
-  return hashes.map(({hash, ready}) => {
+  return hashes.map(({hash, ready, extra: hidden}) => {
     const hexObject = hexes.find(x => x.hash === hash)
     const prevFlip = prevFlips.find(x => x.hash === hash)
     if (hexObject) {
@@ -46,10 +46,13 @@ function decodeFlips(hashes, hexes, prevFlips) {
           urls,
           orders,
           loaded: true,
+          hidden: prevFlip ? prevFlip.hidden : hidden,
         }
       } catch {
         return {
           hash,
+          failed: true,
+          hidden,
           ready: false,
           pics: null,
           urls: null,
@@ -63,6 +66,7 @@ function decodeFlips(hashes, hexes, prevFlips) {
       prevFlip || {
         hash,
         ready,
+        hidden,
         pics: null,
         urls: null,
         orders: null,
@@ -78,7 +82,11 @@ export function hasAnswer(answer) {
 }
 
 function canSubmit(flips, idx) {
-  return flips.map(x => x.answer).every(hasAnswer) || idx === flips.length - 1
+  const availableFlips = flips.filter(x => !x.hidden && !x.failed)
+  return (
+    availableFlips.map(x => x.answer).every(hasAnswer) ||
+    idx >= availableFlips.length - 1
+  )
 }
 
 const LOAD_VALIDATION = 'LOAD_VALIDATION'
@@ -93,6 +101,7 @@ export const NEXT = 'NEXT'
 export const PREV = 'PREV'
 export const PICK = 'PICK'
 export const REPORT_ABUSE = 'REPORT_ABUSE'
+export const SHOW_EXTRA_FLIPS = 'SHOW_EXTRA_FLIPS'
 
 const initialCeremonyState = {
   hashes: [],
@@ -101,6 +110,7 @@ const initialCeremonyState = {
   currentIndex: 0,
   canSubmit: false,
   ready: false,
+  virtualIndex: 0,
 }
 
 const initialState = {
@@ -153,13 +163,39 @@ function validationReducer(state, action) {
       }
     }
     case FETCH_FLIPS_SUCCEEDED: {
-      const {hashes, hexes} = action
+      const {hashes, hexes, sessionType} = action
+      let flips = decodeFlips(hashes, hexes, state.flips)
+      let {currentIndex} = state
+      let virtualIndex = 0
+      if (sessionType === SessionType.Long) {
+        flips = flips.map(flip => ({
+          ...flip,
+          hidden: !flip.ready,
+        }))
+        if (!currentIndex) {
+          for (let i = 0; i < flips.length; i += 1) {
+            if (!flips[i].hidden) {
+              currentIndex = i
+              break
+            }
+          }
+        } else {
+          for (let i = 0; i < currentIndex; i += 1) {
+            if (!state.flips[i].hidden) {
+              virtualIndex += 1
+            }
+          }
+        }
+      }
+
       return {
         ...state,
         hashes,
-        flips: decodeFlips(hashes, hexes, state.flips),
+        flips,
+        currentIndex,
+        virtualIndex,
         loading: false,
-        ready: hashes.every(x => x.ready),
+        ready: flips.every(x => x.ready || x.failed),
       }
     }
     case FETCH_FLIPS_FAILED: {
@@ -170,25 +206,53 @@ function validationReducer(state, action) {
       }
     }
     case PREV: {
-      const idx = Math.max(state.currentIndex - 1, 0)
+      let step = 1
+      while (
+        state.currentIndex - step >= 0 &&
+        state.flips[state.currentIndex - step].hidden
+      ) {
+        step += 1
+      }
+      const idx = Math.max(state.currentIndex - step, 0)
+      const virtualIndex = Math.max(state.virtualIndex - 1, 0)
       return {
         ...state,
         currentIndex: idx,
+        virtualIndex,
         canSubmit: canSubmit(state.flips, idx),
       }
     }
     case NEXT: {
-      const idx = Math.min(state.currentIndex + 1, state.flips.length - 1)
+      let step = 1
+      while (
+        state.currentIndex + step < state.flips.length &&
+        state.flips[state.currentIndex + step].hidden
+      ) {
+        step += 1
+      }
+      const idx = Math.min(state.currentIndex + step, state.flips.length - 1)
+      const virtualIndex = Math.min(
+        state.virtualIndex + 1,
+        state.flips.length - 1
+      )
       return {
         ...state,
         currentIndex: idx,
+        virtualIndex,
         canSubmit: canSubmit(state.flips, idx),
       }
     }
     case PICK: {
+      let virtualIndex = 0
+      for (let i = 0; i < action.index; i += 1) {
+        if (!state.flips[i].hidden) {
+          virtualIndex += 1
+        }
+      }
       return {
         ...state,
         currentIndex: action.index,
+        virtualIndex,
         canSubmit: canSubmit(state.flips, action.index),
       }
     }
@@ -210,12 +274,52 @@ function validationReducer(state, action) {
         {...state.flips[state.currentIndex], answer: AnswerType.Inappropriate},
         ...state.flips.slice(state.currentIndex + 1),
       ]
-      const idx = Math.min(state.currentIndex + 1, state.flips.length - 1)
+      let step = 1
+      while (
+        state.currentIndex + step < state.flips.length &&
+        state.flips[state.currentIndex + step].hidden
+      ) {
+        step += 1
+      }
+      const idx = Math.min(state.currentIndex + step, state.flips.length - 1)
+      let {virtualIndex, currentIndex} = state
+      if (!state.flips[idx].hidden) {
+        currentIndex = idx
+        virtualIndex = Math.min(state.virtualIndex + 1, state.flips.length - 1)
+      }
       return {
         ...state,
         flips,
-        currentIndex: idx,
+        currentIndex,
+        virtualIndex,
         canSubmit: canSubmit(flips, idx),
+      }
+    }
+    case SHOW_EXTRA_FLIPS: {
+      const flips = state.flips.map(flip => {
+        return {
+          ...flip,
+          failed: !flip.ready,
+        }
+      })
+      let availableExtraFlips = flips.filter(x => x.failed).length
+      const resultedFlips = flips.map(flip => {
+        if (!flip.hidden) {
+          return flip
+        }
+        const shouldBecomeAvailable =
+          flip.ready && flip.loaded && availableExtraFlips > 0
+        availableExtraFlips -= 1
+        return {
+          ...flip,
+          hidden: !shouldBecomeAvailable,
+        }
+      })
+      return {
+        ...state,
+        canSubmit: canSubmit(resultedFlips, state.currentIndex),
+        flips: resultedFlips,
+        ready: true,
       }
     }
     default: {
@@ -339,7 +443,7 @@ export async function fetchFlips(dispatch, type, flips = []) {
           .map(x => x.hash)
           .map(hash => fetchFlip(hash).then(resp => ({hash, ...resp.result})))
       )
-      dispatch({type: FETCH_FLIPS_SUCCEEDED, hashes, hexes})
+      dispatch({type: FETCH_FLIPS_SUCCEEDED, hashes, hexes, sessionType: type})
     } else {
       dispatch({
         type: FETCH_FLIPS_FAILED,
