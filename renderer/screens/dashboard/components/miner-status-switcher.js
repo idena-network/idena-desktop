@@ -15,10 +15,14 @@ import Flex from '../../../shared/components/flex'
 import theme from '../../../shared/theme'
 import useTx from '../../../shared/hooks/use-tx'
 import useRpc from '../../../shared/hooks/use-rpc'
+import {useIdentityState} from '../../../shared/providers/identity-context'
 
 // eslint-disable-next-line react/prop-types
 function MinerStatusSwitcher() {
-  const [mining, setMining] = useState(true)
+  const identity = useIdentityState()
+  const {online} = identity
+
+  const [mining, setMining] = useState(online)
   const [showModal, setShowModal] = useState(false)
 
   const [{result: hash}, callRpc] = useRpc()
@@ -34,6 +38,10 @@ function MinerStatusSwitcher() {
       setShowModal(false)
     }
   }, [mined])
+
+  if (identity === null) {
+    return null
+  }
 
   return (
     <Box m="0 0 24px 0">
