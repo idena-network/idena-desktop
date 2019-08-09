@@ -28,7 +28,7 @@ import {
 import Spinner from '../../screens/validation/components/spinner'
 import {useTimeout} from '../../shared/hooks/use-timeout'
 
-const EXTRA_FLIPS_DELAY = 10 * 1000 // 30 sec
+const EXTRA_FLIPS_DELAY = 30 * 1000 // 30 sec
 
 function ShortSession() {
   const state = useValidationState()
