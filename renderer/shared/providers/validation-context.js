@@ -459,6 +459,7 @@ function prepareAnswers(flips) {
   return flips.map(flip => ({
     answer: hasAnswer(flip.answer) ? flip.answer : 0,
     easy: false,
+    hash: flip.hash,
   }))
 }
 
