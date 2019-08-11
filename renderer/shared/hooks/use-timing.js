@@ -14,7 +14,7 @@ const initialTiming = {
 
 function useTiming() {
   const [timing, setTiming] = React.useState(initialTiming)
-  const [interval, setInterval] = React.useState(null)
+  const [interval, setInterval] = React.useState(1000 * 1)
 
   useInterval(
     async () => {
@@ -36,6 +36,7 @@ function useTiming() {
         })
         setInterval(1000 * 60 * 1)
       } catch (error) {
+        setInterval(1000 * 5 * 1)
         logConnectivityIssue('timing', error)
       }
     },
