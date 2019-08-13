@@ -107,9 +107,10 @@ export function hasAnswer(answer) {
 
 function canSubmit(flips, idx) {
   const availableFlips = flips.filter(x => !x.hidden && !x.failed)
+  const visibleFlips = flips.filter(x => !x.hidden)
   return (
     availableFlips.map(x => x.answer).every(hasAnswer) ||
-    idx >= availableFlips.length - 1
+    idx >= visibleFlips.length - 1
   )
 }
 
