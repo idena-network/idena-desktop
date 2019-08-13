@@ -80,9 +80,9 @@ function decodeFlips(data, currentFlips) {
         }
       } catch {
         return {
-          hash,
+          hash: flip.hash,
           failed: true,
-          hidden,
+          hidden: flip.hidden || item.hidden,
           ready: false,
           pics: null,
           urls: null,
