@@ -54,20 +54,7 @@ export default function() {
     await submitLongAnswers(dispatch, state.flips, epoch.epoch)
   }
 
-  let isFirstVisibleFlip = true
-  let isLastVisibleFlip = true
-  for (let i = 0; i < state.currentIndex; i += 1) {
-    if (!state.flips[i].hidden) {
-      isFirstVisibleFlip = false
-      break
-    }
-  }
-  for (let i = state.currentIndex + 1; i < state.flips.length; i += 1) {
-    if (!state.flips[i].hidden) {
-      isLastVisibleFlip = false
-      break
-    }
-  }
+  const availableFlipsLength = state.flips.filter(x => !x.hidden).length
 
   return (
     <Layout>
@@ -87,8 +74,8 @@ export default function() {
       >
         <ValidationHeader
           type={SessionType.Long}
-          currentIndex={state.virtualIndex}
-          total={state.flips.filter(x => !x.hidden).length}
+          currentIndex={state.currentIndex}
+          total={availableFlipsLength}
         >
           <Link href="/dashboard">
             <IconClose />
@@ -107,8 +94,8 @@ export default function() {
               onPrev={() => dispatch({type: PREV})}
               onNext={() => dispatch({type: NEXT})}
               onAnswer={option => dispatch({type: ANSWER, option})}
-              isFirst={isFirstVisibleFlip}
-              isLast={isLastVisibleFlip}
+              isFirst={state.currentIndex === 0}
+              isLast={state.currentIndex >= availableFlipsLength - 1}
               type={SessionType.Long}
             />
           )}

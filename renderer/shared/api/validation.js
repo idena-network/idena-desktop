@@ -6,6 +6,7 @@ import api from './api-client'
  * @typedef {Object} FlipHash
  * @property {string} hash Flip hash, repesenting it's address in the network
  * @property {boolean} ready Whether flip is ready to be showned or not
+ * @property {boolean} extra Whether flip is extra or not
  */
 
 /**
@@ -15,7 +16,7 @@ import api from './api-client'
  *
  * @returns {FlipHash[]} List of flip hashes
  *
- * @example [{hash: "0x123", ready: true}, {hash: "0x99999", ready: false}]
+ * @example [{hash: "0x123", ready: true, extra: false}, {hash: "0x99999", ready: false, extra: true}]
  */
 export async function fetchFlipHashes(type) {
   const {data} = await api().post('/', {
