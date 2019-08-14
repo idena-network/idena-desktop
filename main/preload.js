@@ -15,6 +15,8 @@ process.once('loaded', () => {
   global.invitesDb = invites
   global.contactsDb = contacts
 
+  global.isDev = isDev
+
   try {
     global.appVersion = electron.remote.app.getVersion()
   } catch (error) {
