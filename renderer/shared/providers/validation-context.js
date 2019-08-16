@@ -61,7 +61,7 @@ function decodeFlips(data, currentFlips) {
       return flip
     }
     const item = data.find(x => x.hash === flip.hash)
-    if (item.ready && item.hex) {
+    if (item.ready) {
       try {
         const decodedFlip = decode(fromHexString(item.hex.substring(2)))
         const pics = decodedFlip[0]
@@ -188,7 +188,7 @@ function validationReducer(state, action) {
     case FETCH_FLIPS_SUCCEEDED: {
       const {data, sessionType} = action
       let flips = decodeFlips(data, state.flips)
-      let {currentIndex} = state
+      const {currentIndex} = state
       if (sessionType === SessionType.Long) {
         flips = flips.map(flip => ({
           ...flip,
