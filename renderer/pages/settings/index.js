@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import {margin, rem} from 'polished'
+
 import Layout from '../../shared/components/layout'
 import {
   Box,
@@ -79,58 +80,62 @@ function Settings() {
             </FlatButton>
           </Flex>
         </Box>
-        <Box my={rem(theme.spacings.medium32)}>
-          <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
-            Flips
-          </SubHeading>
-          <Box>
-            <Button
-              onClick={() => {
-                clearFlips()
-                addNotification({title: 'Flips deleted'})
-              }}
-            >
-              Clear flips
-            </Button>
-          </Box>
-          <Box my={theme.spacings.small}>
-            <Button
-              onClick={() => {
-                archiveFlips()
-                addNotification({title: 'Flips archived'})
-              }}
-            >
-              Archive flips
-            </Button>
-          </Box>
-        </Box>
-        <Box my={rem(theme.spacings.medium32)}>
-          <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
-            Invites
-          </SubHeading>
-          <Box my={theme.spacings.small}>
-            <Button
-              onClick={() => {
-                inviteDb.clearInvites()
-                addNotification({title: 'Invites removed'})
-              }}
-            >
-              Clear invites
-            </Button>
-          </Box>
-        </Box>
-        <Box my={rem(theme.spacings.medium32)}>
-          <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
-            Validation
-          </SubHeading>
-          <Box my={theme.spacings.small}>
-            <Link href="/validation/short">Short</Link>
-          </Box>
-          <Box my={theme.spacings.small}>
-            <Link href="/validation/long">Long</Link>
-          </Box>
-        </Box>
-        <EpochDisplay />
+        {global.isDev && (
+          <>
+            <Box my={rem(theme.spacings.medium32)}>
+              <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
+                Flips
+              </SubHeading>
+              <Box>
+                <Button
+                  onClick={() => {
+                    clearFlips()
+                    addNotification({title: 'Flips deleted'})
+                  }}
+                >
+                  Clear flips
+                </Button>
+              </Box>
+              <Box my={theme.spacings.small}>
+                <Button
+                  onClick={() => {
+                    archiveFlips()
+                    addNotification({title: 'Flips archived'})
+                  }}
+                >
+                  Archive flips
+                </Button>
+              </Box>
+            </Box>
+            <Box my={rem(theme.spacings.medium32)}>
+              <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
+                Invites
+              </SubHeading>
+              <Box my={theme.spacings.small}>
+                <Button
+                  onClick={() => {
+                    inviteDb.clearInvites()
+                    addNotification({title: 'Invites removed'})
+                  }}
+                >
+                  Clear invites
+                </Button>
+              </Box>
+            </Box>
+            <Box my={rem(theme.spacings.medium32)}>
+              <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
+                Validation
+              </SubHeading>
+              <Box my={theme.spacings.small}>
+                <Link href="/validation/short">Short</Link>
+              </Box>
+              <Box my={theme.spacings.small}>
+                <Link href="/validation/long">Long</Link>
+              </Box>
+            </Box>
+            <EpochDisplay />
+          </>
+        )}
       </Box>
     </Layout>
   )
