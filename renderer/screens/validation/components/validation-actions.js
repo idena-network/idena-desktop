@@ -25,7 +25,11 @@ function ValidationActions({
         {countdown}
       </Flex>
       <Flex justify="flex-end" css={{flex: 1}}>
-        {canSubmit && <Button onClick={onSubmitAnswers}>Submit answers</Button>}
+        {
+          <Button onClick={onSubmitAnswers} disabled={!canSubmit}>
+            Submit answers
+          </Button>
+        }
       </Flex>
     </Flex>
   )

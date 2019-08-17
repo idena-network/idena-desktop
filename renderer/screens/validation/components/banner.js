@@ -1,5 +1,7 @@
 import React from 'react'
+import Router from 'next/router'
 import {padding, rem, backgrounds} from 'polished'
+
 import {Box, Text, Fill, Link} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
@@ -50,13 +52,23 @@ function ValidationSoon() {
 
 function ValidationRunning() {
   const {currentPeriod} = useEpochState()
-  const {shortAnswers, longAnswers} = useValidationState()
+  const {
+    shortAnswers,
+    longAnswers,
+    shortAnswersSubmitted,
+  } = useValidationState()
 
   const isShortSession = currentPeriod === EpochPeriod.ShortSession
   const sessionType = isShortSession ? SessionType.Short : SessionType.Long
   const hasAnswers = isShortSession ? shortAnswers.length : longAnswers.length
 
   const seconds = useValidationTimer()
+
+  React.useEffect(() => {
+    if (isShortSession && !shortAnswersSubmitted) {
+      Router.push('/validation/short')
+    }
+  }, [isShortSession, shortAnswersSubmitted])
 
   return (
     <Flex
