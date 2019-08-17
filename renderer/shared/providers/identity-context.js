@@ -72,6 +72,16 @@ function IdentityProvider({children}) {
     identity.requiredFlips > 0 &&
     (identity.flips || []).length < identity.requiredFlips
 
+  const canValidate =
+    identity &&
+    [
+      IdentityStatus.Candidate,
+      IdentityStatus.Newbie,
+      IdentityStatus.Verified,
+      IdentityStatus.Suspend,
+      IdentityStatus.Zombie,
+    ].includes(identity.state)
+
   const killMe = () => {
     const {result, error} = killIdentity(identity.address)
     if (result) {
@@ -87,6 +97,7 @@ function IdentityProvider({children}) {
         ...identity,
         canActivateInvite,
         canSubmitFlip,
+        canValidate,
       }}
     >
       <IdentityDispatchContext.Provider value={{killMe}}>
