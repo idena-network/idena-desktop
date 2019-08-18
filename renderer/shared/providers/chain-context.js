@@ -28,6 +28,7 @@ function chainReducer(state, action) {
     case FETCH_SYNC_FAILED:
       return {
         ...state,
+        syncing: false,
         offline: true,
       }
     default:
@@ -44,15 +45,13 @@ function ChainProvider({children}) {
   useInterval(
     async () => {
       try {
-        const syncState = await fetchSync()
-        dispatch({type: FETCH_SYNC_SUCCEEDED, payload: syncState})
+        const sync = await fetchSync()
+        dispatch({type: FETCH_SYNC_SUCCEEDED, payload: sync})
       } catch (error) {
         dispatch({type: FETCH_SYNC_FAILED})
       }
     },
-    (state.syncing !== null && state.syncing) || state.unreachable
-      ? 1000
-      : 10000,
+    !state.offline && state.syncing ? 1000 * 1 : 5000 * 1,
     true
   )
 
