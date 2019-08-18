@@ -16,6 +16,11 @@ export default function useLogger([state, dispatch]) {
       console.log('Action:', action)
       console.log('State:', state)
       console.groupEnd()
+
+      global.ipcRenderer.send('log', 'Dispatch')
+      global.ipcRenderer.send('log', 'Action', action)
+      global.ipcRenderer.send('log', 'State', state)
+      global.ipcRenderer.send('log', '----')
     }
   }, [state])
 
