@@ -92,3 +92,5 @@ typings/
 datadir
 **/invites.json
 **/contacts.json
+
+.idea

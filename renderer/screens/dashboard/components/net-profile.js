@@ -24,7 +24,7 @@ function NetProfile() {
 
       { stake>0 && (
         <>
-          <Figure label="Stake" value={stake} postfix="DNA" />
+          <Figure label="Stake" value={stake} postfix="DNA" tooltip="Frozen coins"/>
         </>
       )}
 

@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 export {default as Box} from './box'
 export * from './typo'
+export * from './tooltip'
 export {default as Group} from './group'
 export {default as Button} from './button'
 export {default as Drawer} from './drawer'

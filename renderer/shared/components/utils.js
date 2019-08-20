@@ -1,12 +1,20 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
+import {FiInfo} from 'react-icons/fi'
 import theme from '../theme'
-import {Box, Text} from '.'
+import {Box, Text, Tooltip, TooltipIcon} from '.'
 
-export const Figure = ({label, value, postfix}) => (
+export const Figure = ({label, value, postfix, tooltip}) => (
   <Box m="0 0 1em">
-    <span>{label}</span>
+    <div>
+      {label}
+      {tooltip && (
+        <Tooltip content={tooltip}>
+          <TooltipIcon icon={<FiInfo />} />
+        </Tooltip>
+      )}
+    </div>
     <Text css={{wordBreak: 'break-all'}}>{value}</Text>
     {postfix && (
       <>
@@ -15,10 +23,14 @@ export const Figure = ({label, value, postfix}) => (
       </>
     )}
     <style jsx>{`
-      span {
+      div {
         color: ${theme.colors.muted};
         display: block;
         margin-bottom: ${theme.spacings.small};
+      }
+      span {
+        position: relative;
+        display: inline-block;
       }
     `}</style>
   </Box>
@@ -26,6 +38,7 @@ export const Figure = ({label, value, postfix}) => (
 
 Figure.propTypes = {
   label: PropTypes.string,
+  tooltip: PropTypes.string,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   postfix: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 }
