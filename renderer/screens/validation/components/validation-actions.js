@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {margin, rem} from 'polished'
-import {Button} from '../../../shared/components'
+import {Button, Tooltip} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import theme from '../../../shared/theme'
 
@@ -19,7 +19,9 @@ function ValidationActions({
       }}
     >
       <Flex justify="flex-start" css={{flex: 1}}>
-        <Button onClick={onReportAbuse}>Report abuse</Button>
+        <Tooltip content="Please wait the flip is loading" placement="top-left">
+          <Button onClick={onReportAbuse}>Report abuse</Button>
+        </Tooltip>
       </Flex>
       <Flex justify="center" css={{width: '33%'}}>
         {countdown}

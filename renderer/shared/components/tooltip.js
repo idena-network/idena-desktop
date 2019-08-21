@@ -22,7 +22,7 @@ export function Tooltip({children, content, placement, ...props}) {
         .tooltip {
           position: absolute;
           padding: ${rem(6)} ${rem(14)};
-          margin: ${rem(5)} 0;
+          margin: ${rem(10)} 0;
           left: 50%;
           bottom: 100%;
           background-color: ${theme.colors.text};
@@ -64,6 +64,24 @@ export function Tooltip({children, content, placement, ...props}) {
           border-width: 5px;
           margin-left: -5px;
         }
+        .tooltip-top-left,
+        .tooltip-top-right {
+          transform: translate(0, 0);
+        }
+        .tooltip-top-left {
+          left: 0;
+        }
+        .tooltip-top-left:after {
+          left: 10%;
+        }
+        .tooltip-top-right {
+          right: 0;
+          left: auto;
+        }
+        .tooltip-top-right:after {
+          left: auto;
+          right: 10%;
+        }
       `}</style>
     </Box>
   )
@@ -72,6 +90,7 @@ export function Tooltip({children, content, placement, ...props}) {
 Tooltip.propTypes = {
   content: PropTypes.node,
   children: PropTypes.node,
+  large: PropTypes.bool,
   placement: PropTypes.string,
 }
 
