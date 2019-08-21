@@ -7,31 +7,28 @@ import {useInterval} from './use-interval'
 const GAP = 10
 
 export function useValidationTimer() {
-  const [seconds, setSeconds] = useState()
-
   const {shortSession, longSession} = useTimingState()
   const epoch = useEpochState()
+
+  const [seconds, setSeconds] = useState()
 
   useEffect(() => {
     if (epoch && shortSession && longSession) {
       const {currentPeriod, currentValidationStart, nextValidation} = epoch
 
       const start = dayjs(currentValidationStart || nextValidation)
-
       const duration =
-        currentPeriod === EpochPeriod.ShortSession
-          ? shortSession
-          : shortSession + longSession
+        shortSession +
+        (currentPeriod === EpochPeriod.ShortSession ? 0 : longSession) -
+        GAP
+      const finish = start.add(duration, 's')
+      const diff = Math.max(Math.min(finish.diff(dayjs(), 's'), duration), 0)
 
-      const finish = start.add(duration, 's').subtract(GAP, 's')
-
-      const diff = Math.min(finish.diff(dayjs(), 's'), duration)
-
-      setSeconds(Math.max(diff, 0))
+      setSeconds(diff)
     }
-  }, [epoch, shortSession, longSession, seconds])
+  }, [epoch, longSession, shortSession])
 
-  useInterval(() => setSeconds(seconds - 1), seconds > 0 ? 1000 : null)
+  useInterval(() => setSeconds(seconds - 1), seconds ? 1000 : null)
 
   return seconds
 }
