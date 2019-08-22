@@ -120,3 +120,22 @@ export function TooltipIcon({icon}) {
 TooltipIcon.propTypes = {
   icon: PropTypes.node,
 }
+
+export function TooltipControl({children}) {
+  return (
+    <span>
+      {children}
+      <style jsx>{`
+        span {
+          display: inline-block;
+          vertical-align: middle;
+          border-bottom: 1px dotted #96999e;
+        }
+      `}</style>
+    </span>
+  )
+}
+
+TooltipControl.propTypes = {
+  children: PropTypes.node,
+}
