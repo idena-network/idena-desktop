@@ -24,7 +24,7 @@ function ValidationActions({
           content={
             canAbuse
               ? 'Mark flip as inappropriate'
-              : `Please wait while the flip is loading...`
+              : `Please wait while the flip is loading`
           }
           placement="top-left"
           pinned={!canAbuse}
