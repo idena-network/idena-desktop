@@ -62,7 +62,7 @@ function SendInviteForm({onSuccess, onFail}) {
         value={address}
         onChange={e => setAddress(e.target.value)}
       /> */}
-      <WideField
+      {/* <WideField
         label="Amount"
         type="number"
         value={amount}
@@ -70,7 +70,7 @@ function SendInviteForm({onSuccess, onFail}) {
       >
         <Hint label="Fee" value="0.999 DNA" />
         <Hint label="Total amount" value="1000.999 DNA" />
-      </WideField>
+      </WideField> */}
       <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}>
         <Button
           disabled={submitting}
