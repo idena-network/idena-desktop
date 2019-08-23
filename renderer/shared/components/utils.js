@@ -1,18 +1,18 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {FiInfo} from 'react-icons/fi'
 import theme from '../theme'
-import {Box, Text, Tooltip, TooltipIcon} from '.'
+import {Box, Text, Tooltip, TooltipControl} from '.'
 
 export const Figure = ({label, value, postfix, tooltip}) => (
   <Box m="0 0 1em">
     <div>
-      {label}
-      {tooltip && (
+      {tooltip ? (
         <Tooltip content={tooltip}>
-          <TooltipIcon icon={<FiInfo />} />
+          <TooltipControl>{label}</TooltipControl>
         </Tooltip>
+      ) : (
+        <span>{label}</span>
       )}
     </div>
     <Text css={{wordBreak: 'break-all'}}>{value}</Text>

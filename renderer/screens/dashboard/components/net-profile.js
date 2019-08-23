@@ -20,7 +20,20 @@ function NetProfile() {
       }}
     >
       <Figure label="Address" value={address} />
-      <Figure label="Status" value={mapToFriendlyStatus(state)} />
+
+
+      { state=="Newbie" && (
+        <>
+          <Figure label="Status" value={mapToFriendlyStatus(state)} tooltip="Solve more than 10 flips&#10;to become Verified" />
+        </>
+      )}
+      { state!="Newbie" && (
+        <>
+          <Figure label="Status" value={mapToFriendlyStatus(state)} />
+        </>
+      )}
+
+
 
       { stake>0 && (
         <>
@@ -32,7 +45,8 @@ function NetProfile() {
 
       { totalQualifiedFlips>0 && ( 
         <>
-          <Figure label="Total flips score" value={totalShortFlipPoints+' out of '+totalQualifiedFlips +' ('+ Math.round( totalShortFlipPoints/totalQualifiedFlips * 10000 )/100 +'%) ' } postfix="" />
+          <Figure label="Total score" value={totalShortFlipPoints+' out of '+totalQualifiedFlips +' ('+ Math.round( totalShortFlipPoints/totalQualifiedFlips * 10000 )/100 +'%) ' } 
+           postfix="" tooltip="Total score for&#10;all validations" />
         </>  
       )}
 

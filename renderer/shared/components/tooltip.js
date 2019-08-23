@@ -34,7 +34,7 @@ export function Tooltip({children, content, placement, pinned, ...props}) {
           border-radius: ${rem(6)};
           font-size: ${rem(13)};
           line-height: ${rem(20)};
-          white-space: nowrap;
+          white-space: pre;
           opacity: 0;
           visibility: hidden;
           transform: translate(-50%, 0);
@@ -119,4 +119,23 @@ export function TooltipIcon({icon}) {
 
 TooltipIcon.propTypes = {
   icon: PropTypes.node,
+}
+
+export function TooltipControl({children}) {
+  return (
+    <span>
+      {children}
+      <style jsx>{`
+        span {
+          display: inline-block;
+          vertical-align: middle;
+          border-bottom: 1px dotted #96999e;
+        }
+      `}</style>
+    </span>
+  )
+}
+
+TooltipControl.propTypes = {
+  children: PropTypes.node,
 }
