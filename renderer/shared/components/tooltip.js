@@ -34,7 +34,7 @@ export function Tooltip({children, content, placement, pinned, ...props}) {
           border-radius: ${rem(6)};
           font-size: ${rem(13)};
           line-height: ${rem(20)};
-          white-space: nowrap;
+          white-space: pre;
           opacity: 0;
           visibility: hidden;
           transform: translate(-50%, 0);
