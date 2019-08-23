@@ -4,18 +4,22 @@ import {rem} from 'polished'
 import {Box} from '.'
 import theme from '../theme'
 
-export function Tooltip({children, content, placement, ...props}) {
+export function Tooltip({children, content, placement, pinned, ...props}) {
   return (
     <Box {...props} style={{position: 'relative', display: 'inline-block'}}>
       <div className="tooltip-action">{children}</div>
-      <div className={placement ? `tooltip tooltip-${placement}` : `tooltip`}>
+      <div
+        className={`tooltip ${pinned ? 'tooltip--pinned' : ''}
+          ${placement ? `tooltip-${placement}` : ''}`}
+      >
         {content}
       </div>
       <style jsx>{`
         .tooltip-action {
           cursor: pointer;
         }
-        .tooltip-action:hover + .tooltip {
+        .tooltip-action:hover + .tooltip,
+        .tooltip.tooltip--pinned {
           opacity: 1;
           visibility: visible;
         }
@@ -92,6 +96,7 @@ Tooltip.propTypes = {
   children: PropTypes.node,
   large: PropTypes.bool,
   placement: PropTypes.string,
+  pinned: PropTypes.bool,
 }
 
 export function TooltipIcon({icon}) {

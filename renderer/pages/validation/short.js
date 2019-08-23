@@ -113,6 +113,11 @@ function ShortSession() {
         onReportAbuse={() => dispatch({type: REPORT_ABUSE})}
         canSubmit={state.canSubmit}
         onSubmitAnswers={handleSubmitAnswers}
+        canAbuse={
+          state.flips[state.currentIndex] &&
+          (state.flips[state.currentIndex].ready ||
+            state.flips[state.currentIndex].failed)
+        }
         countdown={<Timer type={SessionType.Short} />}
       />
       <FlipThumbnails

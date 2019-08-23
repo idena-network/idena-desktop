@@ -9,6 +9,7 @@ function ValidationActions({
   onReportAbuse,
   onSubmitAnswers,
   canSubmit,
+  canAbuse,
   countdown,
 }) {
   return (
@@ -19,8 +20,18 @@ function ValidationActions({
       }}
     >
       <Flex justify="flex-start" css={{flex: 1}}>
-        <Tooltip content="Please wait the flip is loading" placement="top-left">
-          <Button onClick={onReportAbuse}>Report abuse</Button>
+        <Tooltip
+          content={
+            canAbuse
+              ? 'Mark flip as inappropriate'
+              : `Please wait while the flip is loading...`
+          }
+          placement="top-left"
+          pinned={!canAbuse}
+        >
+          <Button onClick={onReportAbuse} disabled={!canAbuse}>
+            Report abuse
+          </Button>
         </Tooltip>
       </Flex>
       <Flex justify="center" css={{width: '33%'}}>
@@ -41,6 +52,7 @@ ValidationActions.propTypes = {
   onReportAbuse: PropTypes.func,
   onSubmitAnswers: PropTypes.func,
   canSubmit: PropTypes.bool,
+  canAbuse: PropTypes.bool,
   countdown: PropTypes.node,
 }
 
