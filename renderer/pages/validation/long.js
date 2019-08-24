@@ -104,6 +104,7 @@ export default function() {
           onReportAbuse={() => dispatch({type: REPORT_ABUSE})}
           canSubmit={state.canSubmit}
           onSubmitAnswers={handleSubmitAnswers}
+          canAbuse
           countdown={<Timer type={SessionType.Long} />}
         />
         <FlipThumbnails
