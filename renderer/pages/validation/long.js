@@ -8,7 +8,7 @@ import FlipThumbnails from '../../screens/validation/components/flip-thumbnails'
 import Flex from '../../shared/components/flex'
 import {Link, IconClose} from '../../shared/components'
 import Timer from '../../screens/validation/components/timer'
-import {useEpochState} from '../../shared/providers/epoch-context'
+import {useEpochState, EpochPeriod} from '../../shared/providers/epoch-context'
 import theme from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {
@@ -31,6 +31,16 @@ export default function() {
   const state = useValidationState()
   const dispatch = useValidationDispatch()
   const epoch = useEpochState()
+
+  useEffect(() => {
+    if (
+      ![EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+        epoch.currentPeriod
+      )
+    ) {
+      Router.push('/dashboard')
+    }
+  }, [epoch.currentPeriod])
 
   useEffect(() => {
     async function fetchData() {
