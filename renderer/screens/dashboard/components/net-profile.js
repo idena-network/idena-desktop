@@ -41,7 +41,9 @@ function NetProfile() {
         </>
       )}
 
-      <Figure label="Age" value={age} postfix="epochs" />
+{
+//      <Figure label="Age" value={age} postfix="epochs" /> 
+}
 
       { totalQualifiedFlips>0 && ( 
         <>
