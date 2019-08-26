@@ -85,7 +85,7 @@ function MinerStatusSwitcher() {
     }
   }, [identity, mined])
 
-  if (!identity || !identity.canMine || state.miner === null) {
+  if (identity === null || !identity.canMine) {
     return null
   }
 
@@ -99,7 +99,9 @@ function MinerStatusSwitcher() {
               Miner
             </Label>
             <Box style={{pointerEvents: 'none'}}>
-              <Switcher withStatusHint isChecked={state.miner} />
+              {state.miner !== null && (
+                <Switcher withStatusHint isChecked={state.miner} />
+              )}
             </Box>
           </Flex>
         </div>
