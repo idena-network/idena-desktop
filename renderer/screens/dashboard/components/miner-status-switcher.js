@@ -128,12 +128,12 @@ function MinerStatusSwitcher() {
             )}
           </Text>
         </Box>
-        <form>
+        {/* <form>
           <FormGroup m="0 0 24px">
             <Label htmlFor="fee">Fee, DNA</Label>
             <Input name="fee" value="123" disabled />
           </FormGroup>
-        </form>
+        </form> */}
         <Flex align="center" justify="flex-end">
           <Box px="4px">
             <Button variant="secondary" onClick={() => dispatch(['close'])}>
