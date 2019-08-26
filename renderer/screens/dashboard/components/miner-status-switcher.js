@@ -15,15 +15,12 @@ import Flex from '../../../shared/components/flex'
 import theme from '../../../shared/theme'
 import useTx from '../../../shared/hooks/use-tx'
 import useRpc from '../../../shared/hooks/use-rpc'
-import {
-  useIdentityState,
-  IdentityStatus,
-} from '../../../shared/providers/identity-context'
+import {useIdentityState} from '../../../shared/providers/identity-context'
 
 // eslint-disable-next-line react/prop-types
 function MinerStatusSwitcher() {
   const identity = useIdentityState()
-  const {online, state} = identity
+  const {online, canMine} = identity
 
   const [mining, setMining] = useState(online)
   const [showModal, setShowModal] = useState(false)
@@ -42,7 +39,7 @@ function MinerStatusSwitcher() {
     }
   }, [mined])
 
-  if (!identity || state !== IdentityStatus.Verified) {
+  if (!identity || !canMine) {
     return null
   }
 
