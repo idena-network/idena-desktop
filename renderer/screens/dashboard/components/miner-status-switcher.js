@@ -20,13 +20,18 @@ import {useIdentityState} from '../../../shared/providers/identity-context'
 // eslint-disable-next-line react/prop-types
 function MinerStatusSwitcher() {
   const identity = useIdentityState()
-  const {online, canMine} = identity
 
-  const [mining, setMining] = useState(online)
+  const [mining, setMining] = useState()
   const [showModal, setShowModal] = useState(false)
 
   const [{result: hash}, callRpc] = useRpc()
   const [{mined}, setHash] = useTx()
+
+  useEffect(() => {
+    if (identity) {
+      setMining(identity.online)
+    }
+  }, [identity])
 
   useEffect(() => {
     setHash(hash)
@@ -39,7 +44,7 @@ function MinerStatusSwitcher() {
     }
   }, [mined])
 
-  if (!identity || !canMine) {
+  if (!identity || !identity.canMine) {
     return null
   }
 
