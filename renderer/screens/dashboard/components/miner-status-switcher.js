@@ -42,7 +42,7 @@ function MinerStatusSwitcher() {
     }
   }, [mined])
 
-  if (state !== IdentityStatus.Verified) {
+  if (!identity || state !== IdentityStatus.Verified) {
     return null
   }
 
