@@ -21,15 +21,57 @@ import {useIdentityState} from '../../../shared/providers/identity-context'
 function MinerStatusSwitcher() {
   const identity = useIdentityState()
 
-  const [mining, setMining] = useState()
-  const [showModal, setShowModal] = useState(false)
-
   const [{result: hash}, callRpc] = useRpc()
   const [{mined}, setHash] = useTx()
 
+  const [state, dispatch] = React.useReducer(
+    (state, [action, identity]) => {
+      switch (action) {
+        case 'init': {
+          return {
+            ...state,
+            miner: identity.online,
+          }
+        }
+        case 'open': {
+          return {
+            ...state,
+            showModal: true,
+          }
+        }
+        case 'close': {
+          return {
+            ...state,
+            showModal: false,
+          }
+        }
+        case 'toggle':
+          return {
+            ...state,
+            mining: true,
+          }
+        case 'mined': {
+          return {
+            ...state,
+            mining: false,
+            showModal: false,
+            miner: identity.online,
+          }
+        }
+        default:
+          return state
+      }
+    },
+    {
+      miner: null,
+      showModal: false,
+      mining: false,
+    }
+  )
+
   useEffect(() => {
     if (identity) {
-      setMining(identity.online)
+      dispatch(['init', identity])
     }
   }, [identity])
 
@@ -39,18 +81,17 @@ function MinerStatusSwitcher() {
 
   useEffect(() => {
     if (mined) {
-      setMining(x => !x)
-      setShowModal(false)
+      dispatch(['mined', identity])
     }
-  }, [mined])
+  }, [identity, mined])
 
-  if (!identity || !identity.canMine) {
+  if (!identity || !identity.canMine || state.miner === null) {
     return null
   }
 
   return (
     <Box m="0 0 24px 0">
-      <FormGroup onClick={() => setShowModal(!showModal)}>
+      <FormGroup onClick={() => dispatch(['open'])}>
         <BlockHeading>Status</BlockHeading>
         <div className="form-control">
           <Flex align="center" justify="space-between">
@@ -58,7 +99,7 @@ function MinerStatusSwitcher() {
               Miner
             </Label>
             <Box style={{pointerEvents: 'none'}}>
-              <Switcher withStatusHint isChecked={mining} />
+              <Switcher withStatusHint isChecked={state.miner} />
             </Box>
           </Flex>
         </div>
@@ -74,21 +115,16 @@ function MinerStatusSwitcher() {
           }
         `}</style>
       </FormGroup>
-      <Modal
-        show={showModal}
-        onHide={() => {
-          setShowModal(false)
-        }}
-      >
+      <Modal show={state.showModal} onHide={() => dispatch(['close'])}>
         <Box m="0 0 18px">
           <SubHeading>
-            &apos;Miner&apos; mode {!mining ? 'on' : 'off'}
+            &quot;Miner&quot; mode {!state.miner ? 'on' : 'off'}
           </SubHeading>
           <Text>
-            {!mining ? (
-              <span>Switch the node to the &apos;Miner&apos; mode.</span>
+            {!state.miner ? (
+              <span>Switch the node to the &quot;Miner&quot; mode.</span>
             ) : (
-              <span>Switch off the &apos;Miner&apos; mode.</span>
+              <span>Switch off the &quot;Miner&quot; mode.</span>
             )}
           </Text>
         </Box>
@@ -100,17 +136,22 @@ function MinerStatusSwitcher() {
         </form>
         <Flex align="center" justify="flex-end">
           <Box px="4px">
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
+            <Button variant="secondary" onClick={() => dispatch(['close'])}>
               Cancel
             </Button>
           </Box>
           <Box px="4px">
             <Button
               onClick={() => {
-                callRpc(mining ? 'dna_becomeOffline' : 'dna_becomeOnline')
+                dispatch(['toggle'])
+                callRpc(
+                  state.miner ? 'dna_becomeOffline' : 'dna_becomeOnline',
+                  {}
+                )
               }}
+              disabled={state.mining}
             >
-              Submit
+              {state.mining ? 'Mining...' : 'Submit'}
             </Button>
           </Box>
         </Flex>
