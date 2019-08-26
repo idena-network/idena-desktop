@@ -36,10 +36,10 @@ function ShortSession() {
   const epoch = useEpochState()
 
   useEffect(() => {
-    if (epoch.currentPeriod !== EpochPeriod.ShortSession) {
+    if (epoch && epoch.currentPeriod !== EpochPeriod.ShortSession) {
       Router.push('/dashboard')
     }
-  }, [epoch.currentPeriod])
+  }, [epoch])
 
   useEffect(() => {
     if (state.shortAnswersSubmitted) {
