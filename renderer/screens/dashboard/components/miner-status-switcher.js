@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {
   Box,
   BlockHeading,
@@ -6,7 +6,6 @@ import {
   Label,
   Switcher,
   Modal,
-  Input,
   Button,
   SubHeading,
   Text,
@@ -100,7 +99,11 @@ function MinerStatusSwitcher() {
             </Label>
             <Box style={{pointerEvents: 'none'}}>
               {state.miner !== null && (
-                <Switcher withStatusHint isChecked={state.miner} isInProgress={false}/>
+                <Switcher
+                  withStatusHint
+                  isChecked={state.miner}
+                  isInProgress={state.mining}
+                />
               )}
             </Box>
           </Flex>
