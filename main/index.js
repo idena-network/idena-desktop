@@ -9,7 +9,7 @@ const log = require('electron-log')
 const loadRoute = require('./utils/routes')
 
 log.transports.file.fileName = 'idena.log'
-log.transports.file.maxSize = 0 // 100 * 1024 * 1024
+log.transports.file.maxSize = 100 * 1024 * 1024
 log.transports.console.level = false
 
 log.info('idena started')
