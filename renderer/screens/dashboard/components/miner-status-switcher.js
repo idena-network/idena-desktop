@@ -100,7 +100,7 @@ function MinerStatusSwitcher() {
             </Label>
             <Box style={{pointerEvents: 'none'}}>
               {state.miner !== null && (
-                <Switcher withStatusHint isChecked={state.miner} />
+                <Switcher withStatusHint isChecked={state.miner} isInProgress={false}/>
               )}
             </Box>
           </Flex>

@@ -140,13 +140,15 @@ Hint.propTypes = {
   value: PropTypes.string,
 }
 
-function Switcher({isChecked, withStatusHint}) {
+function Switcher({isChecked, withStatusHint, isInProgress}) {
   return (
     <>
       <label className="switcher">
-        <input type="checkbox" checked={isChecked} value={isChecked} />
+        <input type="checkbox" checked={isChecked} className={isInProgress && 'in-progress'} value={isChecked}/>
         <div className="pin" />
-        {withStatusHint && <span>{isChecked ? 'On' : 'Off'}</span>}
+        {withStatusHint && (
+          <span>{isInProgress ? 'Mining...' : (isChecked ? 'On' : 'Off')}</span>
+        )}
       </label>
 
       <style jsx>{`
@@ -213,6 +215,15 @@ function Switcher({isChecked, withStatusHint}) {
         input:checked ~ .pin:before {
           left: 18px;
         }
+        input.in-progress ~ span {
+          color: ${theme.colors.warning};
+        }
+        input.in-progress ~ .pin {
+          background-color: ${theme.colors.warning};
+        }
+        input.in-progress ~ .pin:before {
+          left: 11px;
+        }
       `}</style>
     </>
   )
@@ -220,6 +231,7 @@ function Switcher({isChecked, withStatusHint}) {
 
 Switcher.propTypes = {
   isChecked: PropTypes.bool,
+  isInProgress: PropTypes.bool,
   withStatusHint: PropTypes.bool,
 }
 
