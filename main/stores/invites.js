@@ -27,6 +27,16 @@ module.exports = {
       .push({id: nanoid(), ...invite})
       .write()
   },
+
+  updateInvite(id, invite) {
+    const key=id
+
+    getInvites()
+      .find( {id: key} )
+      .assign( {id: key, ...invite} )
+      .write()
+  },
+
   removeInvite({id}) {
     getInvites()
       .remove({id})

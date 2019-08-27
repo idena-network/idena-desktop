@@ -42,7 +42,7 @@ function SendInviteForm({onSuccess, onFail}) {
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          Invite for Unknown person
+          Invite new person
         </SubHeading>
       </Box>
       <Flex justify="space-between">

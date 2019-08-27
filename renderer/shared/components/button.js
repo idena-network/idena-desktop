@@ -79,9 +79,9 @@ FlatButton.defaultProps = {
 }
 FlatButton.propTypes = Button.propTypes
 
-function IconButton({icon, children, ...props}) {
+function IconButton({icon, children, disabled, ...props}) {
   return (
-    <button type="button" {...props}>
+    <button type="button" disabled={disabled} {...props}>
       {icon}
       <span>{children}</span>
       <style jsx>{`
@@ -96,6 +96,7 @@ function IconButton({icon, children, ...props}) {
           vertical-align: middle;
           position: relative;
           transition: color 0.5s ease;
+          ${disabled && `opacity: 0.5`};
         }
         span {
           display: inline-block;

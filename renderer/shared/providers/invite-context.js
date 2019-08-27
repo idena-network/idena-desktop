@@ -17,7 +17,7 @@ function InviteProvider({children}) {
   const [activationTx, setActivationTx] = React.useState()
   const [activationCode, setActivationCode] = React.useState()
 
-  const {address} = useIdentityState()
+  const {address, invitees} = useIdentityState()
   const {addNotification} = useNotificationDispatch()
 
   React.useEffect(() => {
@@ -27,16 +27,45 @@ function InviteProvider({children}) {
       const txs = await Promise.all(
         savedInvites.map(({hash}) => hash).map(api.fetchTx)
       )
-      // eslint-disable-next-line no-shadow
-      const invites = savedInvites.map(invite => {
+
+      const invites = savedInvites
+/*
+      .filter( ({hash}) => { //non activated invites only
+        const invitee = invitees && invitees.find(({TxHash}) => TxHash === hash)
+        return invitee==null
+      })
+*/
+      .map(invite => { //find out mining invite status
         const tx = txs.find(({hash}) => hash === invite.hash)
+        const invitee = invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
         return {
           ...invite,
-          mined: tx && tx.result && tx.result.blockHash !== HASH_IN_MEMPOOL,
-        }
+          dbkey: invite.id,
+          activated: invitee!=null,
+          receiver:  invitee!=null ? invitee.Address : invite.receiver,
+          mining: (tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL),
+        } 
       })
+
+/*
+      const allInvites = invitees==null ? invites : 
+        invites.concat( invitees //add invites from idena node
+          .map( invitee => {
+            return {  
+              firstName: '',
+              lastName: '',
+              activated: true,
+              mining: false,
+              hash: invitee.TxHash,
+              receiver: invitee.Address,
+              key: ''
+            } 
+          })
+        )
+*/
+      const allInvites = invites
       if (!ignore) {
-        setInvites(invites)
+        setInvites(allInvites)
       }
     }
 
@@ -76,7 +105,7 @@ function InviteProvider({children}) {
     async () => {
       const txs = await Promise.all(
         invites
-          .filter(({mined}) => !mined)
+          .filter(({mining}) => mining)
           .map(({hash}) => hash)
           .map(api.fetchTx)
       )
@@ -86,14 +115,14 @@ function InviteProvider({children}) {
           if (tx) {
             return {
               ...invite,
-              mined: tx && tx.result && tx.result.blockHash !== HASH_IN_MEMPOOL,
+              mining: tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
             }
           }
           return invite
         })
       )
     },
-    invites.filter(({mined}) => !mined).length ? 5000 : null
+    invites.filter(({mining}) => mining).length ? 5000 : null
   )
 
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
@@ -105,6 +134,31 @@ function InviteProvider({children}) {
     } else {
       throw new Error(error.message)
     }
+  }
+
+
+  const updateInvite = async (id, firstName, lastName) => {
+
+      const key=id
+      const newFirstName = firstName || ''
+      const newLastName = lastName || ''
+      
+      setInvites(
+        invites.map(invite => {
+          if (invite.id==id) {
+            return {
+              ...invite,
+              firstName: newFirstName,
+              lastName: newLastName,
+            }
+          }
+          return invite
+        })
+      )
+
+      const invite = {id:key, firstName: newFirstName, lastName: newLastName}
+      db.updateInvite(id, invite)
+
   }
 
   const activateInvite = async code => {
@@ -133,7 +187,7 @@ function InviteProvider({children}) {
       value={{invites, activationTx, activationCode}}
     >
       <InviteDispatchContext.Provider
-        value={{addInvite, activateInvite, resetActivation}}
+        value={{addInvite, updateInvite, activateInvite, resetActivation}}
       >
         {children}
       </InviteDispatchContext.Provider>

@@ -1,0 +1,86 @@
+import React, {useRef}  from 'react'
+import PropTypes from 'prop-types'
+import {
+  wordWrap,
+  margin,
+  rem,
+  padding,
+  borderRadius,
+  backgrounds,
+} from 'polished'
+import {Box, Button, Label, Input, FormGroup, SubHeading, Text, Field, Hint} from '../../../shared/components'
+import Avatar from '../../../shared/components/avatar'
+import theme from '../../../shared/theme'
+import Flex from '../../../shared/components/flex'
+import useFullName from '../../../shared/hooks/use-full-name'
+
+import useUsername from '../../../shared/hooks/use-username'
+
+
+function RenameInvite({
+  receiver,
+  firstName,
+  lastName,
+  onSave,
+}) {
+  const fullName = useFullName({firstName, lastName})
+
+  const address = receiver
+  const username = useUsername({address})
+
+  const [newFirstName, setNewFirstName] = React.useState(firstName)
+  const [newLastName, setNewLastName] = React.useState(lastName)
+
+
+  return (
+    <Box
+      css={padding(rem(theme.spacings.medium32), rem(theme.spacings.medium32))}
+    >
+      <Box css={{textAlign: 'center'}}>
+        <Avatar username={username} size={80} />
+      </Box>
+
+
+      <Box css={{ ...margin(theme.spacings.medium16, 0, 0), textAlign: 'center', }}>
+
+        <SubHeading css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}} >
+          {fullName || receiver}
+        </SubHeading>
+
+      </Box>
+
+      <Flex justify="space-between">
+        <NameField label="First name" id="firstNameEidt" defaultValue={firstName} 
+          onChange={e => setNewFirstName(e.target.value)}
+        />
+        <NameField label="Last name" id="lastNameEdit" defaultValue={lastName} 
+          onChange={e => setNewLastName(e.target.value)}
+        />
+      </Flex>
+
+      <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}>
+        <Button
+          onClick={() => { onSave( newFirstName, newLastName) }}
+        >
+          Done
+        </Button>
+      </FormGroup>
+
+    </Box>
+
+
+  )
+}
+
+RenameInvite.propTypes = {
+  receiver: PropTypes.string,
+  firstName: PropTypes.string,
+  lastName: PropTypes.string,
+  onSave: PropTypes.func,
+}
+
+
+const NameField = props => <Field {...props} style={{width: rem(140)}} />
+const WideField = props => <Field {...props} style={{width: rem(296)}} />
+
+export default RenameInvite

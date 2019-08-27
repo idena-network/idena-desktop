@@ -5,13 +5,17 @@ import Flex from '../../shared/components/flex'
 import ContactDetails from '../../screens/contacts/components/contact-details'
 import {ContactProvider} from '../../shared/providers/contact-context'
 import Sidebar from '../../screens/contacts/components/sidebar'
-import DisplayInvite from '../../screens/contacts/components/display-invite'
+//import DisplayInvite from '../../screens/contacts/components/display-invite'
 import {InviteProvider} from '../../shared/providers/invite-context'
+import InviteDetails from '../../screens/contacts/components/invite-details'
+
 
 export default function() {
   const [selectedContact, setSelectedContact] = React.useState(null)
   const [selectedInvite, setSelectedInvite] = React.useState(null)
   const [showInvite, setShowInvite] = React.useState(false)
+  const [showContact, setShowContact] = React.useState(false)
+
 
   return (
     <InviteProvider>
@@ -21,25 +25,28 @@ export default function() {
             <Sidebar
               onSelectContact={setSelectedContact}
               onSelectInvite={invite => {
-                setShowInvite(true)
                 setSelectedInvite(invite)
+                setShowInvite(true)
               }}
             />
+
             <Box>
-              <ContactDetails {...selectedContact} />
+
+              {showInvite && ( 
+                <InviteDetails 
+                  {...selectedInvite}
+                  code={selectedInvite && selectedInvite.key}
+                />
+              )}
+
+              {showContact && ( 
+                <ContactDetails 
+                  {...selectedContact} 
+                />
+              )}
+
             </Box>
           </Flex>
-          <Drawer
-            show={showInvite}
-            onHide={() => {
-              setShowInvite(false)
-            }}
-          >
-            <DisplayInvite
-              {...selectedInvite}
-              code={selectedInvite && selectedInvite.key}
-            />
-          </Drawer>
         </Layout>
       </ContactProvider>
     </InviteProvider>

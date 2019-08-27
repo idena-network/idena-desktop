@@ -31,13 +31,18 @@ function Sidebar({onSelectContact, onSelectInvite}) {
         overflowY: 'auto',
       }}
     >
+
+{/*
       <Search onChange={e => setTerm(e.target.value)} />
+*/}
       <InviteSection>
         <InviteList onSelectInvite={onSelectInvite} />
       </InviteSection>
+{/*
       <ContactSection>
         <ContactList filter={term} onSelectContact={onSelectContact} />
       </ContactSection>
+*/}
     </Box>
   )
 }
@@ -72,7 +77,7 @@ function InviteList({onSelectInvite}) {
     <Box css={{...margin(0, 0, rem(theme.spacings.medium24), 0)}}>
       {invites.map(({id, ...invite}) => (
         <InviteCard
-          key={id}
+          id={invite.dbkey}
           {...invite}
           onClick={() => {
             if (onSelectInvite) {
@@ -89,7 +94,7 @@ InviteList.propTypes = {
   onSelectInvite: PropTypes.func,
 }
 
-function InviteCard({receiver, mined, ...props}) {
+function InviteCard({id, receiver, mined, mining, activated, ...props}) {
   const fullName = useFullName(props)
   return (
     <Flex
@@ -106,7 +111,11 @@ function InviteCard({receiver, mined, ...props}) {
         </Box>
         <Box>
           <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
-            {mined ? 'Mined' : 'Mining...'}
+            {activated ? 'Activated' : 
+              (mining ? 'Mining...' : 
+                'Mined'
+              )
+            }
           </Text>
         </Box>
       </Box>
@@ -115,6 +124,7 @@ function InviteCard({receiver, mined, ...props}) {
 }
 
 InviteCard.propTypes = {
+  id: PropTypes.string,
   firstName: PropTypes.string,
   lastName: PropTypes.string,
   receiver: PropTypes.string,
