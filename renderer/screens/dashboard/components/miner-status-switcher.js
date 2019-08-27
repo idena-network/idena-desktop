@@ -91,7 +91,6 @@ function MinerStatusSwitcher() {
   return (
     <Box m="0 0 24px 0">
       <FormGroup onClick={() => dispatch(['open'])}>
-        <BlockHeading></BlockHeading>
         <div className="form-control">
           <Flex align="center" justify="space-between">
             <Label htmlFor="switcher" style={{margin: 0, cursor: 'pointer'}}>

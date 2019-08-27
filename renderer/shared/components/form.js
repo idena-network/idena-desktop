@@ -27,7 +27,6 @@ function Label({htmlFor, ...otherProps}) {
         label {
           color: ${theme.colors.text};
           display: block;
-          font-weight: 000;
           margin-bottom: ${rem(10)};
         }
       `}</style>
