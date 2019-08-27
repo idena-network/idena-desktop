@@ -354,7 +354,7 @@ export function ValidationProvider({children}) {
 
     // prevent mess with epoch and seconds switching simultaneously
     if (seconds === 1) {
-      const {shortAnswersSubmitted, longAnswersSubmitted, flips} = state
+      const {shortAnswersSubmitted, flips} = state
       const {currentPeriod} = epoch
       const hasSomeAnswer = flips.map(x => x.answer).some(hasAnswer)
 
@@ -365,12 +365,12 @@ export function ValidationProvider({children}) {
         ) {
           sendAnswers(SessionType.Short)
         }
-        if (
-          currentPeriod === EpochPeriod.LongSession &&
-          !longAnswersSubmitted
-        ) {
-          sendAnswers(SessionType.Long)
-        }
+        // if (
+        //   currentPeriod === EpochPeriod.LongSession &&
+        //   !longAnswersSubmitted
+        // ) {
+        //   sendAnswers(SessionType.Long)
+        // }
       }
     }
   }, [dispatch, epoch, seconds, state])
