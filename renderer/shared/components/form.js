@@ -27,7 +27,7 @@ function Label({htmlFor, ...otherProps}) {
         label {
           color: ${theme.colors.text};
           display: block;
-          font-weight: 500;
+          font-weight: 000;
           margin-bottom: ${rem(10)};
         }
       `}</style>
@@ -147,7 +147,7 @@ function Switcher({isChecked, withStatusHint, isInProgress}) {
         <input type="checkbox" checked={isChecked} className={isInProgress && 'in-progress'} value={isChecked}/>
         <div className="pin" />
         {withStatusHint && (
-          <span>{isInProgress ? 'Mining...' : (isChecked ? 'On' : 'Off')}</span>
+          <span>{isInProgress ? 'Waiting...' : (isChecked ? 'On' : 'Off')}</span>
         )}
       </label>
 

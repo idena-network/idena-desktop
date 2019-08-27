@@ -91,11 +91,11 @@ function MinerStatusSwitcher() {
   return (
     <Box m="0 0 24px 0">
       <FormGroup onClick={() => dispatch(['open'])}>
-        <BlockHeading>Status</BlockHeading>
+        <BlockHeading></BlockHeading>
         <div className="form-control">
           <Flex align="center" justify="space-between">
             <Label htmlFor="switcher" style={{margin: 0, cursor: 'pointer'}}>
-              Miner
+              Online mining status
             </Label>
             <Box style={{pointerEvents: 'none'}}>
               {state.miner !== null && (
@@ -123,13 +123,21 @@ function MinerStatusSwitcher() {
       <Modal show={state.showModal} onHide={() => dispatch(['close'])}>
         <Box m="0 0 18px">
           <SubHeading>
-            &quot;Miner&quot; mode {!state.miner ? 'on' : 'off'}
+            {!state.miner ? 'Activate mining status' : 'Deactivate mining status'}
           </SubHeading>
           <Text>
             {!state.miner ? (
-              <span>Switch the node to the &quot;Miner&quot; mode.</span>
+              <span>Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour. 
+                    <br/>
+                    <br/>
+                    You can deactivate your online status at any time. 
+              </span>
             ) : (
-              <span>Switch off the &quot;Miner&quot; mode.</span>
+              <span>Submit the form to deactivate your mining status.
+                    <br/>
+                    <br/>
+                    You can activate it again afterwards. 
+              </span>
             )}
           </Text>
         </Box>
@@ -156,7 +164,7 @@ function MinerStatusSwitcher() {
               }}
               disabled={state.mining}
             >
-              {state.mining ? 'Mining...' : 'Submit'}
+              {state.mining ? 'Waiting...' : 'Submit'}
             </Button>
           </Box>
         </Flex>
