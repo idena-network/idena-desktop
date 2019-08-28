@@ -32,12 +32,19 @@ function Dashboard({router}) {
           <Heading>Profile</Heading>
           <Actions>
             <IconLink icon={<FiShare />}>Share</IconLink>
+
+{/*
             <IconLink
               icon={<FiUserPlus />}
               onClick={() => setIsSendInviteOpen(true)}
             >
               Invite
             </IconLink>
+*/}
+            <IconLink href="/contacts/invite" icon={<FiUserPlus />}>
+              Invite
+            </IconLink>
+
             <IconLink href="/flips/new" icon={<FiCamera />}>
               Submit flip
             </IconLink>
