@@ -94,7 +94,7 @@ InviteList.propTypes = {
   onSelectInvite: PropTypes.func,
 }
 
-function InviteCard({id, receiver, mined, mining, activated, ...props}) {
+function InviteCard({id, receiver, mined, mining, activated, canKill, ...props}) {
   const fullName = useFullName(props)
   return (
     <Flex
@@ -111,9 +111,9 @@ function InviteCard({id, receiver, mined, mining, activated, ...props}) {
         </Box>
         <Box>
           <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
-            {activated ? 'Activated' : 
+            { activated && canKill ? 'Accepted' : 
               (mining ? 'Mining...' : 
-                'Mined'
+                ''
               )
             }
           </Text>

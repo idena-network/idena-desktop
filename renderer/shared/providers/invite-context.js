@@ -38,13 +38,42 @@ function InviteProvider({children}) {
       .map(invite => { //find out mining invite status
         const tx = txs.find(({hash}) => hash === invite.hash)
         const invitee = invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
+        const isMining = (tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL)
+
+
+        const nextInvite =
+          (!invite.activated)&&(invitee!=null) ? //newly activated invite
+            { ...invite,
+              activated: true,
+              canKill: true,
+              receiver: invitee.Address,
+            }: 
+              (invite.activated)&&(invitee==null) ? //activated invite becomes verified or killed
+              { ...invite,
+                canKill: false,
+              } : 
+                (invitee==null)&&(!isMining) ? //not activated
+                { ...invite,
+                  activated: false,
+                  canKill: true,
+                } : {...invite}
+          
+
+          if (invitee!=null) { //save changes if invitee is found
+            db.updateInvite(invite.id, nextInvite)
+          }
+
+
+        //if (invite.hash == '0xfcd4dd213f779671f703a47147559186da1f7fe9a354f5c7c843e24183dc5d77'){
+        //  alert( invitee&&invitee.Address + ' l='+ invitees.length  + ' kill='+nextInvite.canKill)
+        //}
+
         return {
-          ...invite,
+          ...nextInvite,
           dbkey: invite.id,
-          activated: invitee!=null,
-          receiver:  invitee!=null ? invitee.Address : invite.receiver,
-          mining: (tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL),
-        } 
+          mining: isMining,
+        }
+
       })
 
 /*

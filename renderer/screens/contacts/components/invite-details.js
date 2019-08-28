@@ -31,6 +31,7 @@ function InviteDetails({
   amount,
   mining,
   activated,
+  canKill,
   firstName,
   lastName,
   code,
@@ -57,14 +58,12 @@ function InviteDetails({
   }, [])
                   
 
-
   const address = receiver
   const invite = {address, receiver, firstName: newFirstName, lastName: newLastName, mining, activated}
-  const inviteIsExpired = identity && (identity.state=='Undefined') && (!mining);
-  const inviteIsSpent = !invite.activated && identity && identity.state!='Invite';
+  const inviteIsExpired = identity && (identity.state=='Undefined') && (!mining) && (!activated);
 
   const state = (inviteIsExpired ? 'Expired invitation' :
-                   (identity&&identity.state=='Invite'? 'Invitation is not activated yet' : 
+                   (identity&&identity.state=='Invite'? 'Invitation' : 
                     identity&&identity.state 
                    ) 
                 )
@@ -74,9 +73,12 @@ function InviteDetails({
 
       <section>
 
-        <ContactInfo {...invite} showMining={ !inviteIsExpired && !activated}  />
+        <ContactInfo {...invite} showMining={ mining }  />
 
-        <ContactToolbar onRename={() => {setShowRenameForm(true)} }/>
+        <ContactToolbar 
+          onRename={() => {setShowRenameForm(true)}} 
+          onKill={ canKill?()=>{ /*TODO*/  }:null }
+        />
 
         <div>
           <Figure label="Status" value={state} />
@@ -84,12 +86,14 @@ function InviteDetails({
             <Figure label="Address" value={receiver} />
           )} 
 
+          { canKill && (  
           <WideField
             label="Invitation code"
             defaultValue={code}
             disabled={true}
-            allowCopy={!inviteIsSpent}
+            allowCopy={!activated && !inviteIsExpired}
           />
+          )}  
 
         </div>
       </section>
