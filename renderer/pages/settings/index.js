@@ -31,22 +31,15 @@ function Settings() {
   const {addNotification} = useNotificationDispatch()
 
   const addrRef = React.createRef()
-  const [addr, setAddr] = useState()
 
   const handleSaveNodeAddr = () => {
     const nextAddr = addrRef.current.value
-    setAddr(nextAddr)
+    nodeSettings.url = nextAddr
     addNotification({
       title: 'Settings saved!',
       body: `Now running at ${nextAddr}`,
     })
   }
-
-  useEffect(() => {
-    if (addr) {
-      nodeSettings.url = addr
-    }
-  }, [addr])
 
   return (
     <Layout>
@@ -58,10 +51,8 @@ function Settings() {
           <Flex align="center">
             <Input
               defaultValue={nodeSettings.url}
-              value={addr}
               ref={addrRef}
               id="url"
-              name="url"
               style={margin(0, theme.spacings.normal, 0, 0)}
             />
             <Button onClick={handleSaveNodeAddr}>Save</Button>
