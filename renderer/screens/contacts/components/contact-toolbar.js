@@ -12,8 +12,8 @@ import Actions from '../../../shared/components/actions'
 import IconLink from '../../../shared/components/icon-link'
 
 
-function ContactToolbar({onRename, onRevokeInvitation, onSendCoins}) {
-
+function ContactToolbar({onRename, onKill, onSendCoins}) {
+                                         
 /*
     <Flex
       css={{
@@ -40,14 +40,15 @@ function ContactToolbar({onRename, onRevokeInvitation, onSendCoins}) {
       <Actions>
         <IconLink disabled={true} icon={<FiSend />}>Send message</IconLink>
         <IconLink disabled={true} icon={<FiDollarSign />}>Send coins</IconLink>
-        <IconLink disabled={true} icon={<FiSlash />}>Kill invitation</IconLink>
-        <IconLink
-          onClick={() => {
-            onRename && onRename()
-          }} 
-        >
+
+        <IconLink disabled={onKill==null} icon={<FiSlash />} onClick={()=>{onKill()}} >
+          Kill
+        </IconLink>
+
+        <IconLink disabled={onRename==null} onClick={()=>{onRename()}} >
           Rename
         </IconLink>
+
       </Actions>
 
     </Box>
