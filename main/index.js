@@ -5,17 +5,14 @@ const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
 const express = require('express')
 const net = require('net')
-const log = require('electron-log')
 const loadRoute = require('./utils/routes')
+const logger = require('./logger')
+const loggerShutdown = require('./logger').shutdown
 
-log.transports.file.fileName = 'idena.log'
-log.transports.file.maxSize = 100 * 1024 * 1024
-log.transports.console.level = false
+logger.info('idena started')
 
-log.info('idena started')
-
-autoUpdater.logger = log
-autoUpdater.logger.transports.file.level = 'info'
+// autoUpdater.logger = logger
+// autoUpdater.logger.transports.file.level = 'info'
 
 const {
   IMAGE_SEARCH_TOGGLE,
@@ -206,6 +203,7 @@ app.on('ready', async () => {
 
 app.on('before-quit', () => {
   mainWindow.forceClose = true
+  loggerShutdown(() => {})
 })
 
 app.on('activate', showMainWindow)
@@ -300,8 +298,4 @@ ipcMain.on(IMAGE_SEARCH_PICK, (_event, message) => {
 
 ipcMain.on(UPDATE_APPLY, () => {
   autoUpdater.quitAndInstall()
-})
-
-ipcMain.on('log', (_, ...args) => {
-  log.log(...args)
 })

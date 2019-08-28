@@ -1,4 +1,5 @@
 import React from 'react'
+import {removeKeys} from '../utils/obj'
 
 export default function useLogger([state, dispatch]) {
   const actionRef = React.useRef()
@@ -17,10 +18,10 @@ export default function useLogger([state, dispatch]) {
       console.log('State:', state)
       console.groupEnd()
 
-      global.ipcRenderer.send('log', 'Dispatch')
-      global.ipcRenderer.send('log', 'Action', action)
-      global.ipcRenderer.send('log', 'State', state)
-      global.ipcRenderer.send('log', '----')
+      global.logger.debug('--- START DISPATCH ---')
+      global.logger.debug('Action', action)
+      global.logger.debug('State', removeKeys(state, 'hex'))
+      global.logger.debug('--- END DISPATCH ---')
     }
   }, [state])
 

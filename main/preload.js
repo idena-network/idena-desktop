@@ -6,6 +6,7 @@ const flips = require('./stores/flips')
 const validation = require('./stores/validation')
 const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
+const logger = require('./logger')
 
 process.once('loaded', () => {
   global.ipcRenderer = electron.ipcRenderer
@@ -14,6 +15,8 @@ process.once('loaded', () => {
   global.validationDb = validation
   global.invitesDb = invites
   global.contactsDb = contacts
+
+  global.logger = logger
 
   global.isDev = isDev
 
