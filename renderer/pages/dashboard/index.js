@@ -8,7 +8,7 @@ import SendInviteForm from '../../screens/contacts/components/send-invite-form'
 import theme from '../../shared/theme'
 import {InviteProvider} from '../../shared/providers/invite-context'
 import KillMe from '../../screens/dashboard/components/kill-me'
-import Actions from '../../screens/dashboard/components/actions'
+import Actions from '../../shared/components/actions'
 import IconLink from '../../shared/components/icon-link'
 import ActivateInviteForm from '../../screens/dashboard/components/activate-invite-form'
 import UserInfo from '../../screens/dashboard/components/user-info'
@@ -31,19 +31,9 @@ function Dashboard({router}) {
           <Heading>Profile</Heading>
           <Actions>
             <IconLink icon={<FiShare />}>Share</IconLink>
-
-{/*
-            <IconLink
-              icon={<FiUserPlus />}
-              onClick={() => setIsSendInviteOpen(true)}
-            >
-              Invite
-            </IconLink>
-*/}
             <IconLink href="/contacts/invite" icon={<FiUserPlus />}>
               Invite
             </IconLink>
-
             <IconLink href="/flips/new" icon={<FiCamera />}>
               Submit flip
             </IconLink>

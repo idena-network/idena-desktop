@@ -3,13 +3,18 @@ import PropTypes from 'prop-types'
 import {rem, padding, margin} from 'polished'
 import {FiSend, FiDollarSign, FiSlash} from 'react-icons/fi'
 import theme from '../../../shared/theme'
+import {Box} from '../../../shared/components'
 import {IconButton} from '../../../shared/components/button'
 import Divider from '../../../shared/components/divider'
 import Flex from '../../../shared/components/flex'
 
+import Actions from '../../../shared/components/actions'
+import IconLink from '../../../shared/components/icon-link'
+
+
 function ContactToolbar({onRename, onRevokeInvitation, onSendCoins}) {
 
-  return(
+/*
     <Flex
       css={{
         ...padding(rem(theme.spacings.small8), 0),
@@ -17,43 +22,35 @@ function ContactToolbar({onRename, onRevokeInvitation, onSendCoins}) {
       }}
     >
 
-
-      <IconButton disabled={true} icon={<FiSend />} color={theme.colors.primary}>
-        Send message
-      </IconButton>
-      <Divider vertical />
-
-        <IconButton disabled={true} icon={<FiDollarSign />} color={theme.colors.primary}
-          onClick={() => {
-            onSendCoins && onSendCoins()
-          }}
-        >
-          Send coins
-        </IconButton>
-        <Divider vertical/>
-
-  
-        <Divider vertical/>
-        <IconButton disabled={true} icon={<FiSlash />} color={theme.colors.primary}
-          onClick={() => {
-            onRevokeInvitation && onRevokeInvitation()
-          }}
-        >
-          Revoke invitation
-        </IconButton>
-        <Divider vertical/>
+*/
 
 
-        <IconButton color={theme.colors.primary}
+  return(
+
+    <Box
+      py={theme.spacings.large}
+      w={rem(700)}
+      css={{
+        ...padding(rem(theme.spacings.small8), 0),
+        ...margin(rem(theme.spacings.medium16), 0),
+      }}
+    >
+
+                                                   
+      <Actions>
+        <IconLink disabled={true} icon={<FiSend />}>Send message</IconLink>
+        <IconLink disabled={true} icon={<FiDollarSign />}>Send coins</IconLink>
+        <IconLink disabled={true} icon={<FiSlash />}>Kill invitation</IconLink>
+        <IconLink
           onClick={() => {
             onRename && onRename()
           }} 
         >
           Rename
-        </IconButton> 
+        </IconLink>
+      </Actions>
 
-
-    </Flex>
+    </Box>
   )
 }
 
