@@ -96,7 +96,7 @@ function SendInviteForm({onSuccess, onFail}) {
             }
           }}
         >
-          {submitting ? <FiLoader /> : 'Create invite'}
+          {submitting ? <FiLoader /> : 'Create invite code'}
         </Button>
       </FormGroup>
     </Box>

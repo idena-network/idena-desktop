@@ -6,6 +6,7 @@ const config = {
     return {
       '/dashboard': {page: '/dashboard'},
       '/contacts': {page: '/contacts'},
+      '/contacts/invite': {page: '/contacts/new-invite'},
       '/chats': {page: '/chats'},
       '/wallets': {page: '/wallets'},
       '/flips': {page: '/flips'},
