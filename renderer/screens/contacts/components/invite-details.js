@@ -24,30 +24,22 @@ import {useInviteDispatch} from '../../../shared/providers/invite-context'
 
 
 
-function InviteDetails({
-  dbkey, 
-  hash,
-  receiver,
-  amount,
-  mining,
-  activated,
-  canKill,
-  firstName,
-  lastName,
-  code,
-}) {
+function InviteDetails({ dbkey }) {
   const [identity, setIdentity] = useState(null) 
   const [showRenameForm, setShowRenameForm] = useState(false) 
   const {updateInvite} = useInviteDispatch()
 
+
   const [newFirstName, setNewFirstName] = React.useState(firstName)
   const [newLastName, setNewLastName] = React.useState(lastName)
 
-  const isMining = mining
-  const isActivated = activated
+  const {invites} = useInviteState()
+  const invite = invites && invites.find(({id}) => id === dbkey)
 
+  const {key, receiver, canKill, firstName, lastName, mining, activated} = invite
+  const inviteIsExpired = identity && (identity.state=='Undefined') && (!canKill) && (!mining) && (!activated);
 
-
+  //TODO move to invite context:
   React.useEffect(() => {
     let ignore = false
     async function fetchData() {
@@ -62,12 +54,6 @@ function InviteDetails({
   }, [])
 
                 
-  const address = receiver
-  const invite = {address, receiver, firstName: newFirstName, lastName: newLastName, mining:isMining, activated:isActivated}
-  const inviteIsExpired = identity && (identity.state=='Undefined') && (!canKill) && (!isMining) && (!isActivated);
-
-  //if (inviteIsExpired)
-  //  alert('isMining='+isMining + ' inviteIsExpired='+inviteIsExpired + ' isActivated='+isActivated + ' identity.state='+ (identity && identity.state) + ' canKill='+canKill) 
 
 
   const state = (inviteIsExpired ? 'Expired invitation' :
@@ -81,7 +67,7 @@ function InviteDetails({
 
       <section>
 
-        <ContactInfo {...invite} showMining={isMining}  />
+        <ContactInfo {...invite} address={receiver} showMining={mining}  />
 
         <ContactToolbar 
           onRename={() => {setShowRenameForm(true)}} 
@@ -97,9 +83,9 @@ function InviteDetails({
           { !inviteIsExpired && (  
             <WideField
               label="Invitation code"
-              defaultValue={code}
+              defaultValue={key}
               disabled={true}
-              allowCopy={!isActivated}
+              allowCopy={!activated}
             />
           )}  
 
@@ -195,9 +181,7 @@ function InviteDetails({
       />
     </Box>
   )
-*/
 
-}
 
 InviteDetails.propTypes = {
   dbkey: PropTypes.string,
@@ -209,6 +193,14 @@ InviteDetails.propTypes = {
   mining: PropTypes.bool,
   activated: PropTypes.bool,
   code: PropTypes.string,
+}
+
+*/
+
+}
+
+InviteDetails.propTypes = {
+  hash: PropTypes.string,
 }
 
 

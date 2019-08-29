@@ -73,6 +73,8 @@ function InviteList({onSelectInvite}) {
     )
   }
 
+
+
   return (
     <Box css={{...margin(0, 0, rem(theme.spacings.medium24), 0)}}>
       {invites.map(({id, ...invite}) => (

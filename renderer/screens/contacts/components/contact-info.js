@@ -28,10 +28,13 @@ function ContactInfo(
 
 }
 ) {
+
+
   
   const fullName = useFullName( {firstName, lastName} )
   const username = useUsername( {address} )
     
+
   return (
     <Flex
       align="center"
