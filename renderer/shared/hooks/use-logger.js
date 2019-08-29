@@ -1,5 +1,6 @@
 import React from 'react'
-import {removeKeys} from '../utils/obj'
+
+const {logger} = global
 
 export default function useLogger([state, dispatch]) {
   const actionRef = React.useRef()
@@ -13,15 +14,15 @@ export default function useLogger([state, dispatch]) {
     const action = actionRef.current
 
     if (action) {
-      console.group('Dispatch')
+      console.group('DISPATCH')
       console.log('Action:', action)
       console.log('State:', state)
       console.groupEnd()
 
-      global.logger.debug('--- START DISPATCH ---')
-      global.logger.debug('Action', action)
-      global.logger.debug('State', removeKeys(state, 'hex'))
-      global.logger.debug('--- END DISPATCH ---')
+      logger.debug('--- START DISPATCH ---')
+      logger.debug('Action', action)
+      logger.debug('State', state)
+      logger.debug('--- END DISPATCH ---')
     }
   }, [state])
 
