@@ -11,22 +11,8 @@ import Flex from '../../../shared/components/flex'
 import Actions from '../../../shared/components/actions'
 import IconLink from '../../../shared/components/icon-link'
 
-
 function ContactToolbar({onRename, onKill, onSendCoins}) {
-                                         
-/*
-    <Flex
-      css={{
-        ...padding(rem(theme.spacings.small8), 0),
-        ...margin(rem(theme.spacings.medium16), 0),
-      }}
-    >
-
-*/
-
-
-  return(
-
+  return (
     <Box
       py={theme.spacings.large}
       w={rem(700)}
@@ -35,22 +21,33 @@ function ContactToolbar({onRename, onKill, onSendCoins}) {
         ...margin(rem(theme.spacings.medium16), 0),
       }}
     >
-
-                                                   
       <Actions>
-        <IconLink disabled={true} icon={<FiSend />}>Send message</IconLink>
-        <IconLink disabled={true} icon={<FiDollarSign />}>Send coins</IconLink>
+        <IconLink disabled icon={<FiSend />}>
+          Send message
+        </IconLink>
+        <IconLink disabled icon={<FiDollarSign />}>
+          Send coins
+        </IconLink>
 
-        <IconLink disabled={onKill==null} icon={<FiSlash />} onClick={()=>{onKill()}} >
+        <IconLink
+          disabled={onKill == null}
+          icon={<FiSlash />}
+          onClick={() => {
+            onKill()
+          }}
+        >
           Kill
         </IconLink>
 
-        <IconLink disabled={onRename==null} onClick={()=>{onRename()}} >
+        <IconLink
+          disabled={onRename == null}
+          onClick={() => {
+            onRename()
+          }}
+        >
           Rename
         </IconLink>
-
       </Actions>
-
     </Box>
   )
 }
@@ -60,6 +57,5 @@ ContactToolbar.propTypes = {
   onRevokeInvitation: PropTypes.func,
   onSendCoins: PropTypes.func,
 }
-
 
 export default ContactToolbar

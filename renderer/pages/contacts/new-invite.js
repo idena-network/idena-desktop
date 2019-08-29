@@ -12,53 +12,12 @@ import ContactsPage from '../../screens/contacts/components/contacts-page'
 import {InviteProvider} from '../../shared/providers/invite-context'
 
 // eslint-disable-next-line react/prop-types
-function NewInvite({router}) {
-
-
-  const handleClose = () => {
-    addNotification({
-      title: 'Flip has been saved to drafts',
-    })
-  }
-
+function NewInvite() {
   return (
     <InviteProvider>
-        <ContactsPage showNewInviteForm={true}/>
+      <ContactsPage showNewInviteForm />
     </InviteProvider>
   )
-
-
-
-//router.push('/contacts')
-
-/*
-
-  const {addNotification} = useNotificationDispatch()
-
-  const [id] = useState(nanoid())
-
-  const handleClose = () => {
-    addNotification({
-      title: 'Flip has been saved to drafts',
-    })
-    router.push('/contacts')
-  }
-
-  return (
-    <Layout>
-      <Box px={rem(theme.spacings.large)} py={rem(theme.spacings.medium24)}>
-        <Flex align="center" justify="space-between">
-          <Heading margin={0}>New flip</Heading>
-          <IconClose onClick={handleClose} />
-        </Flex>
-        <FlipMaster id={id} onClose={handleClose} />
-      </Box>
-    </Layout>
-  )
-
-*/
-
-
 }
 
 export default withRouter(NewInvite)
