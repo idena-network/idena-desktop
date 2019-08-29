@@ -18,7 +18,9 @@ export default function() {
 
   return (
 
+    <InviteProvider>
         <ContactsPage />
+    </InviteProvider>
   )
 }
 

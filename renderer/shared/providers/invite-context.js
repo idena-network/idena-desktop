@@ -28,17 +28,20 @@ function InviteProvider({children}) {
         savedInvites.map(({hash}) => hash).map(api.fetchTx)
       )
 
-      const invites = savedInvites
 /*
+      const invites = savedInvites
       .filter( ({hash}) => { //non activated invites only
         const invitee = invitees && invitees.find(({TxHash}) => TxHash === hash)
         return invitee==null
       })
 */
+
+      const invites = savedInvites
       .map(invite => { //find out mining invite status
         const tx = txs.find(({hash}) => hash === invite.hash)
         const invitee = invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
         const isMining = (tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL)
+
 
 
         const nextInvite =
@@ -52,21 +55,21 @@ function InviteProvider({children}) {
               { ...invite,
                 canKill: false,
               } : 
-                (invitee==null)&&(!isMining) ? //not activated
+                (invite.activated)&&(invitee==null) ? //expired
                 { ...invite,
-                  activated: false,
-                  canKill: true,
-                } : {...invite}
-          
+                  canKill: false,
+                } : 
+                    {...invite}
+                   
 
-          if (invitee!=null) { //save changes if invitee is found
+
+          if ((invitee!=null) || //save changes if invitee is found
+             (invite.activated)&&(invitee==null)) { //save changes is becomes verified or killed
             db.updateInvite(invite.id, nextInvite)
           }
 
 
-        //if (invite.hash == '0xfcd4dd213f779671f703a47147559186da1f7fe9a354f5c7c843e24183dc5d77'){
-        //  alert( invitee&&invitee.Address + ' l='+ invitees.length  + ' kill='+nextInvite.canKill)
-        //}
+
 
         return {
           ...nextInvite,
@@ -142,8 +145,10 @@ function InviteProvider({children}) {
         invites.map(invite => {
           const tx = txs.find(({hash}) => hash === invite.hash)
           if (tx) {
+
+
             return {
-              ...invite,
+              ...invite, 
               mining: tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
             }
           }
@@ -157,9 +162,13 @@ function InviteProvider({children}) {
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
     const {result, error} = await api.sendInvite({to, amount})
     if (result) {
-      const invite = {amount, firstName, lastName, ...result}
+      const saveInvite = {amount, firstName, lastName,  ...result, activated:false, canKill:true}
+
+      const invite = {...saveInvite, mining:true}
       setInvites([...invites, invite])
-      db.addInvite(invite)
+
+      db.addInvite(saveInvite)
+      return invite
     } else {
       throw new Error(error.message)
     }

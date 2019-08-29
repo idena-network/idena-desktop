@@ -13,7 +13,7 @@ import Avatar from '../../../shared/components/avatar'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import useFullName from '../../../shared/hooks/use-full-name'
-
+import {useInviteState} from '../../../shared/providers/invite-context'
 import ContactInfo from '../../contacts/components/contact-info'
 import ContactToolbar from './contact-toolbar'
 import {Figure} from '../../../shared/components/utils'
@@ -43,6 +43,10 @@ function InviteDetails({
   const [newFirstName, setNewFirstName] = React.useState(firstName)
   const [newLastName, setNewLastName] = React.useState(lastName)
 
+  const isMining = mining
+  const isActivated = activated
+
+
 
   React.useEffect(() => {
     let ignore = false
@@ -56,15 +60,19 @@ function InviteDetails({
       ignore = true
     }
   }, [])
-                  
 
+                
   const address = receiver
-  const invite = {address, receiver, firstName: newFirstName, lastName: newLastName, mining, activated}
-  const inviteIsExpired = identity && (identity.state=='Undefined') && (!mining) && (!activated);
+  const invite = {address, receiver, firstName: newFirstName, lastName: newLastName, mining:isMining, activated:isActivated}
+  const inviteIsExpired = identity && (identity.state=='Undefined') && (!canKill) && (!isMining) && (!isActivated);
+
+  //if (inviteIsExpired)
+  //  alert('isMining='+isMining + ' inviteIsExpired='+inviteIsExpired + ' isActivated='+isActivated + ' identity.state='+ (identity && identity.state) + ' canKill='+canKill) 
+
 
   const state = (inviteIsExpired ? 'Expired invitation' :
                    (identity&&identity.state=='Invite'? 'Invitation' : 
-                    identity&&identity.state 
+                    mining?'Mining...':identity&&identity.state 
                    ) 
                 )
 
@@ -73,7 +81,7 @@ function InviteDetails({
 
       <section>
 
-        <ContactInfo {...invite} showMining={ mining }  />
+        <ContactInfo {...invite} showMining={isMining}  />
 
         <ContactToolbar 
           onRename={() => {setShowRenameForm(true)}} 
@@ -82,17 +90,17 @@ function InviteDetails({
 
         <div>
           <Figure label="Status" value={state} />
-          { identity && (identity.state!='Invite') && !inviteIsExpired && (
+          { identity && (identity.state!='Invite') && !inviteIsExpired && !mining && (
             <Figure label="Address" value={receiver} />
           )} 
 
-          { canKill && (  
-          <WideField
-            label="Invitation code"
-            defaultValue={code}
-            disabled={true}
-            allowCopy={!activated && !inviteIsExpired}
-          />
+          { !inviteIsExpired && (  
+            <WideField
+              label="Invitation code"
+              defaultValue={code}
+              disabled={true}
+              allowCopy={!isActivated}
+            />
           )}  
 
         </div>

@@ -9,6 +9,7 @@ import theme from '../../shared/theme'
 import Flex from '../../shared/components/flex'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import ContactsPage from '../../screens/contacts/components/contacts-page'
+import {InviteProvider} from '../../shared/providers/invite-context'
 
 // eslint-disable-next-line react/prop-types
 function NewInvite({router}) {
@@ -21,7 +22,9 @@ function NewInvite({router}) {
   }
 
   return (
-        <ContactsPage showNewInvite={true}/>
+    <InviteProvider>
+        <ContactsPage showNewInviteForm={true}/>
+    </InviteProvider>
   )
 
 
