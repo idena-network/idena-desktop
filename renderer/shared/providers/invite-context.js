@@ -44,6 +44,7 @@ function InviteProvider({children}) {
 
 
 
+        //TODO: remove dependency on saved state
         const nextInvite =
           (!invite.activated)&&(invitee!=null) ? //newly activated invite
             { ...invite,
@@ -55,7 +56,7 @@ function InviteProvider({children}) {
               { ...invite,
                 canKill: false,
               } : 
-                (invite.activated)&&(invitee==null) ? //expired
+                (invite.activated)&&(invitee==null) ? //expired 
                 { ...invite,
                   canKill: false,
                 } : 
@@ -63,11 +64,9 @@ function InviteProvider({children}) {
                    
 
 
-          if ((invitee!=null) || //save changes if invitee is found
-             (invite.activated)&&(invitee==null)) { //save changes is becomes verified or killed
+          if (invitee!=null){  //save changes if invitee is found
             db.updateInvite(invite.id, nextInvite)
           }
-
 
 
 
