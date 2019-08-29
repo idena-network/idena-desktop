@@ -1,20 +1,15 @@
 const {app, remote} = require('electron')
 const path = require('path')
-const fs = require('fs')
 const pino = require('pino')
 
 function logPath(fileName) {
-  const whichApp = app || remote.app
-  const dir = path.join(whichApp.getPath('userData'), 'logs')
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir)
-  }
-  return path.join(dir, fileName)
+  return path.join((app || remote.app).getPath('logs'), fileName)
 }
 
 const logger = pino(
   {
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL || 'debug',
+    base: {pid: process.pid},
     redact: [
       'hex',
       'data[*].hex',
