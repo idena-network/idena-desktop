@@ -28,7 +28,7 @@ function InviteProvider({children}) {
         savedInvites.map(({hash}) => hash).map(api.fetchTx)
       )
 
-/*
+      /*
       const invites = savedInvites
       .filter( ({hash}) => { //non activated invites only
         const invitee = invitees && invitees.find(({TxHash}) => TxHash === hash)
@@ -36,49 +36,40 @@ function InviteProvider({children}) {
       })
 */
 
-      const invites = savedInvites
-      .map(invite => { //find out mining invite status
+      const invites = savedInvites.map(invite => {
+        // find out mining invite status
         const tx = txs.find(({hash}) => hash === invite.hash)
-        const invitee = invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
-        const isMining = (tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL)
+        const invitee =
+          invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
+        const isMining =
+          tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL
 
-
-
-        //TODO: remove dependency on saved state
+        // TODO: remove dependency on saved state
         const nextInvite =
-          (!invite.activated)&&(invitee!=null) ? //newly activated invite
-            { ...invite,
-              activated: true,
-              canKill: true,
-              receiver: invitee.Address,
-            }: 
-              (invite.activated)&&(invitee==null) ? //activated invite becomes verified or killed
-              { ...invite,
-                canKill: false,
-              } : 
-                (invite.activated)&&(invitee==null) ? //expired 
-                { ...invite,
-                  canKill: false,
-                } : 
-                    {...invite}
-                   
+          !invite.activated && invitee != null // newly activated invite
+            ? {
+                ...invite,
+                activated: true,
+                canKill: true,
+                receiver: invitee.Address,
+              }
+            : invite.activated && invitee == null // activated invite becomes verified or killed or exired
+            ? {...invite, canKill: false}
+            : {...invite}
 
-
-          if (invitee!=null){  //save changes if invitee is found
-            db.updateInvite(invite.id, nextInvite)
-          }
-
-
+        if (invitee != null) {
+          // save changes if invitee is found
+          db.updateInvite(invite.id, nextInvite)
+        }
 
         return {
           ...nextInvite,
           dbkey: invite.id,
           mining: isMining,
         }
-
       })
 
-/*
+      /*
       const allInvites = invitees==null ? invites : 
         invites.concat( invitees //add invites from idena node
           .map( invitee => {
@@ -109,7 +100,7 @@ function InviteProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [invitees])
 
   useInterval(
     async () => {
@@ -144,11 +135,10 @@ function InviteProvider({children}) {
         invites.map(invite => {
           const tx = txs.find(({hash}) => hash === invite.hash)
           if (tx) {
-
-
             return {
-              ...invite, 
-              mining: tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
+              ...invite,
+              mining:
+                tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
             }
           }
           return invite
@@ -161,41 +151,44 @@ function InviteProvider({children}) {
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
     const {result, error} = await api.sendInvite({to, amount})
     if (result) {
-      const saveInvite = {amount, firstName, lastName,  ...result, activated:false, canKill:true}
-
-      const invite = {...saveInvite, mining:true}
-      setInvites([...invites, invite])
+      const saveInvite = {
+        amount,
+        firstName,
+        lastName,
+        ...result,
+        activated: false,
+        canKill: true,
+      }
 
       db.addInvite(saveInvite)
+      const invite = {...saveInvite, mining: true}
+      setInvites([...invites, invite])
+
       return invite
-    } else {
-      throw new Error(error.message)
     }
+    throw new Error(error.message)
   }
 
-
   const updateInvite = async (id, firstName, lastName) => {
+    const key = id
+    const newFirstName = firstName || ''
+    const newLastName = lastName || ''
 
-      const key=id
-      const newFirstName = firstName || ''
-      const newLastName = lastName || ''
-      
-      setInvites(
-        invites.map(invite => {
-          if (invite.id==id) {
-            return {
-              ...invite,
-              firstName: newFirstName,
-              lastName: newLastName,
-            }
+    setInvites(
+      invites.map(invite => {
+        if (invite.id == id) {
+          return {
+            ...invite,
+            firstName: newFirstName,
+            lastName: newLastName,
           }
-          return invite
-        })
-      )
+        }
+        return invite
+      })
+    )
 
-      const invite = {id:key, firstName: newFirstName, lastName: newLastName}
-      db.updateInvite(id, invite)
-
+    const invite = {id: key, firstName: newFirstName, lastName: newLastName}
+    db.updateInvite(id, invite)
   }
 
   const activateInvite = async code => {
