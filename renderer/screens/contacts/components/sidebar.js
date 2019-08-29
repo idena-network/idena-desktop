@@ -26,8 +26,8 @@ function Sidebar({onSelectContact, onSelectInvite}) {
     <Box
       style={{
         ...border('right', '1px', 'solid', theme.colors.gray2),
-        width: rem(240),
-        height: '100vh',
+        width: rem(270),
+        height: '91vh',
         overflowY: 'auto',
       }}
     >

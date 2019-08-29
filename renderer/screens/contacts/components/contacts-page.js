@@ -1,4 +1,6 @@
 import React from 'react'
+import {rem, padding, margin} from 'polished'
+import theme from '../../../shared/theme'
 import PropTypes from 'prop-types'
 import {Box, Drawer} from '../../../shared/components'
 import Layout from '../../../shared/components/layout'
@@ -12,27 +14,45 @@ import InviteDetails from './invite-details'
 import Actions from '../../../shared/components/actions'
 import {FiShare, FiUserPlus} from 'react-icons/fi'
 import IconLink from '../../../shared/components/icon-link'
+import {useInviteState} from '../../../shared/providers/invite-context'
 
 
 
-function ContactsPage( {showNewInvite=false}, ...props) {
+function ContactsPage( {showNewInviteForm=false}, ...props) {
 
   const [selectedContact, setSelectedContact] = React.useState(null)
   const [selectedInvite, setSelectedInvite] = React.useState(null)
   const [showInvite, setShowInvite] = React.useState(false)
   const [showContact, setShowContact] = React.useState(false)
 
-  const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(showNewInvite)
-  const handleCloseSendInvite = () => setIsSendInviteOpen(false)
+  const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(showNewInviteForm)
+  const handleCloseSendInvite = (invite) => {
+    setIsSendInviteOpen(false)
+  }
+
+  const {invites} = useInviteState()
+
+  React.useEffect(() => {
+    if ((selectedInvite==null) && invites.length) {
+      setSelectedInvite(invites[0])
+      setShowInvite(true)
+    }
+  }, [invites, setSelectedInvite])
 
 
   return (
-    <InviteProvider>
       <ContactProvider>
 
         <Layout>
 
-          <Actions>
+        <Box
+          css={{
+          ...margin(theme.spacings.medium16, theme.spacings.medium16, 0),
+          }}
+        >
+
+          <Actions
+          >
             <IconLink
               icon={<FiUserPlus />}
               onClick={() => setIsSendInviteOpen(true)}
@@ -40,6 +60,10 @@ function ContactsPage( {showNewInvite=false}, ...props) {
               Invite
             </IconLink>
           </Actions>
+
+
+        </Box>
+
 
           <Flex>
             <Sidebar
@@ -54,7 +78,7 @@ function ContactsPage( {showNewInvite=false}, ...props) {
 
               {showInvite && ( 
                 <InviteDetails 
-                  {...selectedInvite}
+                  {...selectedInvite} 
                   code={selectedInvite && selectedInvite.key}
                 />
               )}
@@ -70,9 +94,9 @@ function ContactsPage( {showNewInvite=false}, ...props) {
 
             <Drawer show={isSendInviteOpen} onHide={handleCloseSendInvite}>
               <SendInviteForm
-                onSuccess={() => {
+                onSuccess={(invite) => {
                   handleCloseSendInvite()
-                  router.push('/contacts')
+                  setSelectedInvite(invite)
                 }}
                 onFail={handleCloseSendInvite}
               />
@@ -81,7 +105,6 @@ function ContactsPage( {showNewInvite=false}, ...props) {
           </Flex>
         </Layout>
       </ContactProvider>
-    </InviteProvider>
 
   )
 
@@ -89,7 +112,7 @@ function ContactsPage( {showNewInvite=false}, ...props) {
 
 
 ContactsPage.propTypes = {
-  showNewInvite: PropTypes.bool,
+  showNewInviteForm: PropTypes.bool,
 }
 
 
