@@ -1,5 +1,7 @@
 import React from 'react'
 
+const {logger} = global
+
 export default function useLogger([state, dispatch]) {
   const actionRef = React.useRef()
 
@@ -12,15 +14,15 @@ export default function useLogger([state, dispatch]) {
     const action = actionRef.current
 
     if (action) {
-      console.group('Dispatch')
+      console.group('DISPATCH')
       console.log('Action:', action)
       console.log('State:', state)
       console.groupEnd()
 
-      global.ipcRenderer.send('log', 'Dispatch')
-      global.ipcRenderer.send('log', 'Action', action)
-      global.ipcRenderer.send('log', 'State', state)
-      global.ipcRenderer.send('log', '----')
+      logger.debug('--- START DISPATCH ---')
+      logger.debug('Action', action)
+      logger.debug('State', state)
+      logger.debug('--- END DISPATCH ---')
     }
   }, [state])
 

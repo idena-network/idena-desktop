@@ -5,17 +5,13 @@ const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
 const express = require('express')
 const net = require('net')
-const log = require('electron-log')
 const loadRoute = require('./utils/routes')
+const logger = require('./logger')
 
-log.transports.file.fileName = 'idena.log'
-log.transports.file.maxSize = 100 * 1024 * 1024
-log.transports.console.level = false
+logger.info('idena started')
 
-log.info('idena started')
-
-autoUpdater.logger = log
-autoUpdater.logger.transports.file.level = 'info'
+// autoUpdater.logger = logger
+// autoUpdater.logger.transports.file.level = 'info'
 
 const {
   IMAGE_SEARCH_TOGGLE,
@@ -211,7 +207,6 @@ app.on('before-quit', () => {
 
 app.on('activate', showMainWindow)
 
-// Quit the app once all windows are closed
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -228,7 +223,7 @@ ipcMain.on('node-log', ({sender}, message) => {
 })
 
 function checkPort(port) {
-  console.log('Looking for open port...', port)
+  logger.debug('Looking for open port...', port)
   return new Promise((res, rej) => {
     const tempServer = net.createServer()
 
@@ -252,15 +247,14 @@ function runExpress(port) {
   })
 
   server.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Running on localhost:${port}`)
+    logger.debug(`Running on localhost:${port}`)
   })
 }
 
 function choosePort() {
   return checkPort(expressPort)
     .then(() => {
-      console.log(`Found open port: ${expressPort}`)
+      logger.debug(`Found open port: ${expressPort}`)
       runExpress(expressPort)
       return Promise.resolve()
     })
@@ -301,8 +295,4 @@ ipcMain.on(IMAGE_SEARCH_PICK, (_event, message) => {
 
 ipcMain.on(UPDATE_APPLY, () => {
   autoUpdater.quitAndInstall()
-})
-
-ipcMain.on('log', (_, ...args) => {
-  log.log(...args)
 })
