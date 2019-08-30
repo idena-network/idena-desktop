@@ -5,7 +5,7 @@
   "main": "main/index.js",
   "repository": "idena-network/idena-desktop",
   "scripts": {
-    "start": "LOG_LEVEL=debug run-electron .",
+    "start": "run-electron .",
     "build": "next build renderer && next export renderer",
     "dist": "npm run build && build",
     "dist:win": "npm run build && build --win --publish onTag",
