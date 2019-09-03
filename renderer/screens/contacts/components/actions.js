@@ -1,10 +1,9 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import {rem, rgba} from 'polished'
-import theme from '../../../shared/theme'
 import {FiShare} from 'react-icons/fi'
+import theme from '../../../shared/theme'
 
-export const Actions = ({onInvite}) => (
+export const Actions = () => (
   <div
     style={{
       paddingLeft: rem(theme.spacings.medium16),
@@ -67,8 +66,6 @@ export const Actions = ({onInvite}) => (
   </div>
 )
 
-Actions.propTypes = {
-  onInvite: PropTypes.func,
-}
+Actions.propTypes = {}
 
 export default Actions

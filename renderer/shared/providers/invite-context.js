@@ -28,37 +28,46 @@ function InviteProvider({children}) {
         savedInvites.map(({hash}) => hash).map(api.fetchTx)
       )
 
-      /*
-      const invites = savedInvites
-      .filter( ({hash}) => { //non activated invites only
-        const invitee = invitees && invitees.find(({TxHash}) => TxHash === hash)
-        return invitee==null
-      })
-*/
+      const invitedIdentities = await Promise.all(
+        savedInvites.map(({receiver}) => receiver).map(api.fetchIdentity)
+      )
 
-      const invites = savedInvites.map(invite => {
+      const nextInvites = savedInvites.map(invite => {
         // find out mining invite status
         const tx = txs.find(({hash}) => hash === invite.hash)
+
+        // find all identities/invites
+        const invitedIdentity = invitedIdentities.find(
+          ({address}) => address === invite.receiver
+        )
+
+        // find invitee to kill
         const invitee =
           invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
+
+        // becomes activated once invitee is found
+        const isNewInviteActivated = !invite.activated && invitee != null
+
+        const canKill =
+          invitee != null &&
+          invitedIdentity &&
+          (invitedIdentity.state === 'Invite' ||
+            invitedIdentity.state === 'Candidate' ||
+            invitedIdentity.state === 'Newbie')
+
         const isMining =
           tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL
 
-        // TODO: remove dependency on saved state
-        const nextInvite =
-          !invite.activated && invitee != null // newly activated invite
-            ? {
-                ...invite,
-                activated: true,
-                canKill: true,
-                receiver: invitee.Address,
-              }
-            : invite.activated && invitee == null // activated invite becomes verified or killed or exired
-            ? {...invite, canKill: false}
-            : {...invite}
+        const nextInvite = {
+          ...invite,
+          activated: invite.activated || isNewInviteActivated,
+          canKill,
+          receiver:
+            (invitedIdentity && invitedIdentity.address) || invite.receiver,
+        }
 
-        if (invitee != null) {
-          // save changes if invitee is found
+        if (isNewInviteActivated) {
+          // save changes once invitee is found
           db.updateInvite(invite.id, nextInvite)
         }
 
@@ -66,26 +75,11 @@ function InviteProvider({children}) {
           ...nextInvite,
           dbkey: invite.id,
           mining: isMining,
+          identity: invitedIdentity,
         }
       })
 
-      /*
-      const allInvites = invitees==null ? invites : 
-        invites.concat( invitees //add invites from idena node
-          .map( invitee => {
-            return {  
-              firstName: '',
-              lastName: '',
-              activated: true,
-              mining: false,
-              hash: invitee.TxHash,
-              receiver: invitee.Address,
-              key: ''
-            } 
-          })
-        )
-*/
-      const allInvites = invites
+      const allInvites = nextInvites
       if (!ignore) {
         setInvites(allInvites)
       }
@@ -100,7 +94,7 @@ function InviteProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [invitees])
+  }, [address, invitees])
 
   useInterval(
     async () => {
@@ -176,7 +170,7 @@ function InviteProvider({children}) {
 
     setInvites(
       invites.map(invite => {
-        if (invite.id == id) {
+        if (invite.id === id) {
           return {
             ...invite,
             firstName: newFirstName,

@@ -10,26 +10,27 @@ import SendInviteForm from './send-invite-form'
 import InviteDetails from './invite-details'
 import {useInviteState} from '../../../shared/providers/invite-context'
 
-function ContactsPage( {showNewInviteForm=false}, ...props) {
+function ContactsPage({showNewInviteForm = false}, ...props) {
   const [selectedContact, setSelectedContact] = React.useState(null)
   const [selectedInvite, setSelectedInvite] = React.useState(null)
   const [showInvite, setShowInvite] = React.useState(false)
   const [showContact, setShowContact] = React.useState(false)
 
-  const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(showNewInviteForm)
-  const handleCloseSendInvite = (invite) => {
+  const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(
+    showNewInviteForm
+  )
+  const handleCloseSendInvite = invite => {
     setIsSendInviteOpen(false)
   }
 
   const {invites} = useInviteState()
 
   React.useEffect(() => {
-    if ((selectedInvite==null) && invites.length) {
+    if (selectedInvite == null && invites.length) {
       setSelectedInvite(invites[0])
       setShowInvite(true)
     }
-  }, [invites, setSelectedInvite])
-
+  }, [invites, selectedInvite, setSelectedInvite])
 
   return (
     <ContactProvider>
@@ -41,8 +42,10 @@ function ContactsPage( {showNewInviteForm=false}, ...props) {
               setSelectedInvite(invite)
               setShowInvite(true)
             }}
+            onNewInvite={() => {
+              setIsSendInviteOpen(true)
+            }}
           />
-
           <Box>
             {showInvite && (
               <InviteDetails
@@ -51,16 +54,12 @@ function ContactsPage( {showNewInviteForm=false}, ...props) {
               />
             )}
 
-            {showContact && (
-              <ContactDetails
-                {...selectedContact}
-              />
-            )}
+            {showContact && <ContactDetails {...selectedContact} />}
           </Box>
 
           <Drawer show={isSendInviteOpen} onHide={handleCloseSendInvite}>
             <SendInviteForm
-              onSuccess={(invite) => {
+              onSuccess={invite => {
                 handleCloseSendInvite()
                 setSelectedInvite(invite)
               }}

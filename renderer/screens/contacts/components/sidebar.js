@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, padding, border, margin, ellipsis, backgrounds} from 'polished'
@@ -6,13 +7,16 @@ import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import Avatar from '../../../shared/components/avatar'
-import {Actions} from './actions'
+// import {Actions} from './actions'
 import {useInviteState} from '../../../shared/providers/invite-context'
 import useUsername from '../../../shared/hooks/use-username'
 import useFullName from '../../../shared/hooks/use-full-name'
-import {mapToFriendlyStatus} from '../../../shared/providers/identity-context'
+import {
+  mapToFriendlyStatus,
+  useIdentityState,
+} from '../../../shared/providers/identity-context'
 
-function Sidebar({onSelectContact, onSelectInvite}) {
+function Sidebar({onSelectContact, onSelectInvite, onNewInvite}) {
   const {contacts} = useContactState()
 
   const [term, setTerm] = React.useState()
@@ -33,13 +37,19 @@ function Sidebar({onSelectContact, onSelectInvite}) {
       }}
     >
       <Search onChange={e => setTerm(e.target.value)} />
+      <InviteSection onNewInvite={onNewInvite}>
+        <InviteList filter={term} onSelectInvite={onSelectInvite} />
+      </InviteSection>
+
+      {/*
       <Actions />
-      <InviteSection>
+      <InviteSection  filter={term} onNewInvite={onNewInvite}>
         <InviteList onSelectInvite={onSelectInvite} />
       </InviteSection>
       <ContactSection>
         <ContactList filter={term} onSelectContact={onSelectContact} />
       </ContactSection>
+      */}
     </Box>
   )
 }
@@ -47,28 +57,57 @@ function Sidebar({onSelectContact, onSelectInvite}) {
 Sidebar.propTypes = {
   onSelectContact: PropTypes.func,
   onSelectInvite: PropTypes.func,
+  onNewInvite: PropTypes.func,
 }
 
 // eslint-disable-next-line react/prop-types
-function InviteSection({children}) {
-  return <SidebarHeading title="Invites">{children}</SidebarHeading>
+function InviteSection({onNewInvite, children}) {
+  const {invites} = useIdentityState()
+
+  return (
+    <SidebarHeading
+      onNewInvite={onNewInvite}
+      title={`Invites (${invites} left)`}
+    >
+      {children}
+    </SidebarHeading>
+  )
 }
 
-function InviteList({onSelectInvite}) {
+function InviteList({filter, onSelectInvite}) {
   const {invites} = useInviteState()
 
-  if (invites.length === 0) {
+  const [filteredInvites, setFilteredInvites] = React.useState([])
+
+  React.useEffect(() => {
+    if (filter && filter.length > 0) {
+      // eslint-disable-next-line no-shadow
+      const nextInvite = invites.filter(({firstName, lastName, receiver}) =>
+        [firstName, lastName, receiver].some(x =>
+          x.toLowerCase().includes(filter.toLowerCase())
+        )
+      )
+      setFilteredInvites(nextInvite)
+    } else {
+      setFilteredInvites(invites)
+    }
+  }, [invites, filter])
+
+  if (filter && filteredInvites.length === 0) {
     return (
-      <Text css={padding(rem(theme.spacings.medium16))}>No invites yet...</Text>
+      <Text css={padding(rem(theme.spacings.medium16))}>
+        No invites found...
+      </Text>
     )
   }
 
   return (
     <Box css={{...margin(0, 0, rem(theme.spacings.medium24), 0)}}>
-      {invites.map(({id, ...invite}) => (
+      {filteredInvites.map(({id, ...invite}) => (
         <InviteCard
           id={invite.dbkey}
           {...invite}
+          state={invite.identity && invite.identity.state}
           onClick={() => {
             if (onSelectInvite) {
               onSelectInvite(invite)
@@ -81,11 +120,28 @@ function InviteList({onSelectInvite}) {
 }
 
 InviteList.propTypes = {
+  filter: PropTypes.string,
   onSelectInvite: PropTypes.func,
 }
 
-function InviteCard({id, receiver, mined, mining, activated, canKill, ...props}) {
+function InviteCard({
+  id,
+  receiver,
+  mined,
+  mining,
+  activated,
+  canKill,
+  state,
+  ...props
+}) {
   const fullName = useFullName(props)
+
+  const hint = mining
+    ? 'Mining...'
+    : activated
+    ? mapToFriendlyStatus(state)
+    : ''
+
   return (
     <div className="card">
       <Flex align="center" {...props}>
@@ -101,13 +157,7 @@ function InviteCard({id, receiver, mined, mining, activated, canKill, ...props})
             </div>
           </Box>
           <Box>
-            <div className="card__hint">
-              {(activated && canKill) ? 'Accepted' :
-                (mining ? 'Mining...' :
-                    ''
-                )
-              }
-            </div>
+            <div className="card__hint">{hint}</div>
           </Box>
         </Box>
       </Flex>
@@ -143,6 +193,7 @@ InviteCard.propTypes = {
   mining: PropTypes.bool,
   activated: PropTypes.bool,
   canKill: PropTypes.bool,
+  state: PropTypes.string,
 }
 
 // eslint-disable-next-line react/prop-types
@@ -173,7 +224,7 @@ function ContactList({filter, onSelectContact}) {
   if (filteredContacts.length === 0) {
     return (
       <Text css={padding(rem(theme.spacings.medium16))}>
-        No contacts yet...
+        No contacts found...
       </Text>
     )
   }
@@ -287,12 +338,13 @@ function Search(props) {
   )
 }
 
-function SidebarHeading({children, title}) {
+function SidebarHeading({children, title, onNewInvite}) {
   return (
     <Group
       title={title}
       addon={
         <Button
+          onClick={onNewInvite}
           type="button"
           style={{
             borderRadius: '3px',
@@ -300,7 +352,7 @@ function SidebarHeading({children, title}) {
             height: rem(20),
             fontSize: rem(21),
             lineHeight: rem(5),
-            padding: '0 2px 2px',
+            padding: '0 0px 0px',
             fontWeight: 'bold',
             display: 'block',
             top: '50%',
@@ -329,6 +381,7 @@ function SidebarHeading({children, title}) {
 SidebarHeading.propTypes = {
   children: PropTypes.node.isRequired,
   title: PropTypes.string.isRequired,
+  onNewInvite: PropTypes.func,
 }
 
 export default Sidebar
