@@ -112,12 +112,8 @@ function FlipMaster({id, onClose}) {
     },
     {
       caption: 'Select images',
-      title: 'Select 4 images to tell your story',
-      desc: flip
-        ? `Use key words for the story “${composeHint(
-            flip.hint
-          )}” and template "Before - Something happens - After"`
-        : '',
+      title: `Select 4 images to tell your story (${composeHint(flip.hint)})`,
+      desc: flip ? `Please no text on images to explain your story` : '',
       children: (
         <FlipPics
           {...flip}
@@ -142,7 +138,8 @@ function FlipMaster({id, onClose}) {
     },
     {
       caption: 'Submit flip',
-      title: 'Submit flip',
+      title: `Submit flip (${composeHint(flip.hint)})`,
+      desc: `Are you sure there is no way to read the shuffled images as a meaningful story?`,
       children: <SubmitFlip {...flip} submitFlipResult={submitResult} />,
     },
   ]
