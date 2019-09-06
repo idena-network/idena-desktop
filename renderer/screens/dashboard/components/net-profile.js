@@ -9,7 +9,14 @@ import {
 } from '../../../shared/providers/identity-context'
 
 function NetProfile() {
-  const {address, state, stake, age, totalQualifiedFlips, totalShortFlipPoints} = useIdentityState()
+  const {
+    address,
+    state,
+    stake,
+    age,
+    totalQualifiedFlips,
+    totalShortFlipPoints,
+  } = useIdentityState()
   return (
     <Box
       bg={theme.colors.gray}
@@ -21,23 +28,29 @@ function NetProfile() {
     >
       <Figure label="Address" value={address} />
 
-
-      { state=="Newbie" && (
+      {state == 'Newbie' && (
         <>
-          <Figure label="Status" value={mapToFriendlyStatus(state)} tooltip="Solve more than 10 flips&#10;to become Verified" />
+          <Figure
+            label="Status"
+            value={mapToFriendlyStatus(state)}
+            tooltip="Solve more than 10 flips&#10;to become Verified"
+          />
         </>
       )}
-      { state!="Newbie" && (
+      {state != 'Newbie' && (
         <>
           <Figure label="Status" value={mapToFriendlyStatus(state)} />
         </>
       )}
 
-
-
-      { stake>0 && (
+      {stake > 0 && (
         <>
-          <Figure label="Stake" value={stake} postfix="DNA" tooltip="Frozen coins"/>
+          <Figure
+            label="Stake"
+            value={stake}
+            postfix="DNA"
+            tooltip="Frozen coins"
+          />
         </>
       )}
 
@@ -45,17 +58,26 @@ function NetProfile() {
 //      <Figure label="Age" value={age} postfix="epochs" /> 
 }
 
-      { totalQualifiedFlips>0 && ( 
+      {totalQualifiedFlips > 0 && (
         <>
-          <Figure label="Total score" value={totalShortFlipPoints+' out of '+totalQualifiedFlips +' ('+ Math.round( totalShortFlipPoints/totalQualifiedFlips * 10000 )/100 +'%) ' } 
-           postfix="" tooltip="Total score for&#10;all validations" />
-        </>  
+          <Figure
+            label="Total score"
+            value={
+              `${totalShortFlipPoints 
+              } out of ${ 
+              totalQualifiedFlips 
+              } (${ 
+              Math.round((totalShortFlipPoints / totalQualifiedFlips) * 10000) /
+                100 
+              }%) `
+            }
+            postfix=""
+            tooltip="Total score for&#10;all validations"
+          />
+        </>
       )}
-
     </Box>
   )
 }
-
-
 
 export default NetProfile

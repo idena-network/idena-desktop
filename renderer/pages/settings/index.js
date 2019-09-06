@@ -17,9 +17,10 @@ import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
 import Pre from '../../shared/components/pre'
 import useFlips from '../../shared/utils/useFlips'
-import {useEpochState} from '../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {nodeSettings} from '../../shared/api/api-client'
+import useRpc from '../../shared/hooks/use-rpc'
+import {usePoll} from '../../shared/hooks/use-interval'
 
 const DEFAULT_NODE_URL = 'http://localhost:9009'
 
@@ -133,8 +134,8 @@ function Settings() {
 }
 
 function EpochDisplay() {
-  const epoch = useEpochState()
-  return <Pre>{JSON.stringify(epoch)}</Pre>
+  const [{result}] = usePoll(useRpc('dna_epoch'), 3000)
+  return <Pre>{JSON.stringify(result)}</Pre>
 }
 
 export default Settings

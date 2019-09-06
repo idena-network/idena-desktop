@@ -55,7 +55,7 @@ function IdentityProvider({children}) {
     }
 
     fetchData()
-  }, 5000)
+  }, 1000 * 1)
 
   const canActivateInvite = [
     IdentityStatus.Undefined,
@@ -82,6 +82,10 @@ function IdentityProvider({children}) {
       IdentityStatus.Zombie,
     ].includes(identity.state)
 
+  const canMine =
+    identity &&
+    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(identity.state)
+
   const killMe = () => {
     const {result, error} = killIdentity(identity.address)
     if (result) {
@@ -98,6 +102,7 @@ function IdentityProvider({children}) {
         canActivateInvite,
         canSubmitFlip,
         canValidate,
+        canMine,
       }}
     >
       <IdentityDispatchContext.Provider value={{killMe}}>
