@@ -46,6 +46,7 @@ export async function fetchIdentities() {
  * @property {number} totalQualifiedFlips
  * @property {number} totalShortFlipPoints
  * @property {boolean} online
+ * @property {string} penalty
  */
 
 /**

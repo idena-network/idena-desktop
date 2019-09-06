@@ -13,7 +13,7 @@ function NetProfile() {
     address,
     state,
     stake,
-    age,
+    penalty,
     totalQualifiedFlips,
     totalShortFlipPoints,
   } = useIdentityState()
@@ -28,7 +28,7 @@ function NetProfile() {
     >
       <Figure label="Address" value={address} />
 
-      {state == 'Newbie' && (
+      {state === 'Newbie' && (
         <>
           <Figure
             label="Status"
@@ -37,7 +37,7 @@ function NetProfile() {
           />
         </>
       )}
-      {state != 'Newbie' && (
+      {state !== 'Newbie' && (
         <>
           <Figure label="Status" value={mapToFriendlyStatus(state)} />
         </>
@@ -54,23 +54,26 @@ function NetProfile() {
         </>
       )}
 
-{
-//      <Figure label="Age" value={age} postfix="epochs" /> 
-}
+      {penalty > 0 && (
+        <Figure
+          label="Penalty"
+          value={penalty}
+          postfix="DNA"
+          tooltip="Offline penalty"
+        />
+      )}
+
+      {
+        //      <Figure label="Age" value={age} postfix="epochs" />
+      }
 
       {totalQualifiedFlips > 0 && (
         <>
           <Figure
             label="Total score"
-            value={
-              `${totalShortFlipPoints 
-              } out of ${ 
-              totalQualifiedFlips 
-              } (${ 
-              Math.round((totalShortFlipPoints / totalQualifiedFlips) * 10000) /
-                100 
-              }%) `
-            }
+            value={`${totalShortFlipPoints} out of ${totalQualifiedFlips} (${Math.round(
+              (totalShortFlipPoints / totalQualifiedFlips) * 10000
+            ) / 100}%) `}
             postfix=""
             tooltip="Total score for&#10;all validations"
           />
