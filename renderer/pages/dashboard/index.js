@@ -9,9 +9,8 @@ import theme from '../../shared/theme'
 import {InviteProvider} from '../../shared/providers/invite-context'
 import KillMe from '../../screens/dashboard/components/kill-me'
 
-import Actions from '../../screens/dashboard/components/actions'
+import Actions from '../../shared/components/actions'
 import MinerStatusSwitcher from '../../screens/dashboard/components/miner-status-switcher'
-// import Actions from '../../shared/components/actions'
 
 import IconLink from '../../shared/components/icon-link'
 import ActivateInviteForm from '../../screens/dashboard/components/activate-invite-form'
