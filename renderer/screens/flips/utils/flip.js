@@ -1,7 +1,5 @@
-import {alert} from 'react'
 import dict from './words'
 import {capitalize} from '../../../shared/utils/string'
-import {useIdentityState} from '../../../shared/providers/identity-context'
 
 /**
  * Composes hint for the flip
@@ -45,14 +43,32 @@ export function getRandomHint() {
   return {idx: -1, words: wordsPair, id: -1}
 }
 
-export function getNextKeyWordsHint(flipKeyWordPairs, idx, i = 50) {
+export function getNextKeyWordsHint(
+  flipKeyWordPairs,
+  publishedFlips,
+  idx = -1,
+  i = 50
+) {
   if (flipKeyWordPairs) {
     const isLastId = idx + 1 > flipKeyWordPairs.length - 1
     const nextIdx = isLastId ? 0 : idx + 1
 
-    if (flipKeyWordPairs[nextIdx] && flipKeyWordPairs[nextIdx].used) {
+    const isUsed =
+      (flipKeyWordPairs[nextIdx] && flipKeyWordPairs[nextIdx].used) ||
+      (flipKeyWordPairs[nextIdx] &&
+        publishedFlips.find(
+          ({hint}) => hint.id === flipKeyWordPairs[nextIdx].id
+        ))
+
+    if (isUsed) {
       if (i < 0) return getRandomHint()
-      return getNextKeyWordsHint(flipKeyWordPairs, nextIdx, i - 1)
+
+      return getNextKeyWordsHint(
+        flipKeyWordPairs,
+        publishedFlips,
+        nextIdx,
+        i - 1
+      )
     }
 
     if (flipKeyWordPairs[nextIdx]) {

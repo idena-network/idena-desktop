@@ -11,11 +11,13 @@ import FlipPics from './flip-pics'
 import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import SubmitFlip from './submit-flip'
-import useFlips from '../../../shared/utils/useFlips'
+
+import useFlips, {FlipType} from '../../../shared/utils/useFlips'
 import {
   useIdentityState,
   IdentityStatus,
 } from '../../../shared/providers/identity-context'
+
 import {
   NotificationType,
   useNotificationDispatch,
@@ -37,9 +39,9 @@ function FlipMaster({id, onClose}) {
   const epoch = useEpochState()
   const {syncing} = useChainState()
 
-  const {getDraft, saveDraft, submitFlip} = useFlips()
+  const {flips, getDraft, saveDraft, submitFlip} = useFlips()
 
-  const {addNotification} = useNotificationDispatch()
+  const publishedFlips = flips.filter(({type}) => type === FlipType.Published)
 
   const [flip, setFlip] = useState({
     pics: [
@@ -49,11 +51,23 @@ function FlipMaster({id, onClose}) {
       `https://placehold.it/480?text=4`,
     ],
     order: Array.from({length: 4}, (_, i) => i),
-    hint: getNextKeyWordsHint(flipKeyWordPairs, -1),
+    hint: getNextKeyWordsHint(flipKeyWordPairs, publishedFlips),
   })
 
+  const {addNotification} = useNotificationDispatch()
   const [step, setStep] = useState(0)
   const [submitResult, setSubmitResult] = useState()
+
+  useEffect(() => {
+    // init hint on the first page when flips updated
+    if (step === 0)
+      setFlip({
+        ...flip,
+        hint: getNextKeyWordsHint(flipKeyWordPairs, publishedFlips),
+      })
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flips])
 
   useEffect(() => {
     const draft = getDraft(id)
@@ -128,7 +142,11 @@ function FlipMaster({id, onClose}) {
           onChange={() => {
             setFlip({
               ...flip,
-              hint: getNextKeyWordsHint(flipKeyWordPairs, flip.hint.idx),
+              hint: getNextKeyWordsHint(
+                flipKeyWordPairs,
+                publishedFlips,
+                flip.hint.idx
+              ),
             })
           }}
         />
