@@ -20,7 +20,8 @@ import {
   NotificationType,
   useNotificationDispatch,
 } from '../../../shared/providers/notification-context'
-import {composeHint, hasDataUrl, getRandomHint} from '../utils/flip'
+
+import {composeHint, hasDataUrl, getNextKeyWordsHint} from '../utils/flip'
 import {
   useEpochState,
   EpochPeriod,
@@ -28,7 +29,11 @@ import {
 import {useChainState} from '../../../shared/providers/chain-context'
 
 function FlipMaster({id, onClose}) {
-  const {canSubmitFlip, state: identityState} = useIdentityState()
+  const {
+    canSubmitFlip,
+    flipKeyWordPairs,
+    state: identityState,
+  } = useIdentityState()
   const epoch = useEpochState()
   const {syncing} = useChainState()
 
@@ -44,7 +49,7 @@ function FlipMaster({id, onClose}) {
       `https://placehold.it/480?text=4`,
     ],
     order: Array.from({length: 4}, (_, i) => i),
-    hint: getRandomHint(),
+    hint: getNextKeyWordsHint(flipKeyWordPairs, -1),
   })
 
   const [step, setStep] = useState(0)
@@ -66,7 +71,8 @@ function FlipMaster({id, onClose}) {
 
   const handleSubmitFlip = async () => {
     try {
-      const {result, error} = await submitFlip({id, ...flip})
+      const hintId = flip.hint.id
+      const {result, error} = await submitFlip({id, ...flip, hintId})
 
       let message = ''
       if (error) {
@@ -119,7 +125,12 @@ function FlipMaster({id, onClose}) {
       children: (
         <FlipHint
           {...flip}
-          onChange={() => setFlip({...flip, hint: getRandomHint()})}
+          onChange={() => {
+            setFlip({
+              ...flip,
+              hint: getNextKeyWordsHint(flipKeyWordPairs, flip.hint.idx),
+            })
+          }}
         />
       ),
     },

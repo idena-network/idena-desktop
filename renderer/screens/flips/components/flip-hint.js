@@ -6,10 +6,11 @@ import {Box, Button, BlockText} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 
 function FlipHint({hint, onChange}) {
+  const bntLabel = hint && hint.idx < 0 ? '' : `(#${hint.idx + 1})`
   return (
     <Box>
       <Flex align="center" justify="center">
-        {hint.map(({name, desc}) => (
+        {hint.words.map(({name, desc}) => (
           <Box
             key={name}
             p={theme.spacings.xlarge}
@@ -28,14 +29,14 @@ function FlipHint({hint, onChange}) {
         ))}
       </Flex>
       <Box css={margin(rem(theme.spacings.medium24), 0, 0)}>
-        <Button onClick={onChange}>Change my words</Button>
+        <Button onClick={onChange}>Change words {bntLabel}</Button>
       </Box>
     </Box>
   )
 }
 
 FlipHint.propTypes = {
-  hint: PropTypes.arrayOf(PropTypes.object),
+  hint: PropTypes.object,
   onChange: PropTypes.func,
 }
 
