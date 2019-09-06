@@ -20,7 +20,6 @@ import useFlips from '../../shared/utils/useFlips'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {nodeSettings} from '../../shared/api/api-client'
 import useRpc from '../../shared/hooks/use-rpc'
-import useTx from '../../shared/hooks/use-tx'
 import {usePoll} from '../../shared/hooks/use-interval'
 
 const DEFAULT_NODE_URL = 'http://localhost:9009'
@@ -146,17 +145,6 @@ function Settings() {
 function EpochDisplay() {
   const [{result}] = usePoll(useRpc('dna_epoch'), 3000)
   return <Pre>{JSON.stringify(result)}</Pre>
-}
-
-function SyncDisplay() {
-  const [tx, setHash] = useTx()
-  useEffect(() => {
-    setHash(
-      '0x91861aa89a08613875f0a019b413c4ad686d3548918230983821a79dca720f6b'
-    )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-  return <Pre>{tx ? JSON.stringify(tx) : 'fetching...'}</Pre>
 }
 
 export default Settings
