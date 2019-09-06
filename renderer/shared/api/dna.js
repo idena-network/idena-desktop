@@ -148,10 +148,10 @@ export async function fetchFlip(hash) {
   return data
 }
 
-export async function submitFlip(hex) {
+export async function submitFlip(hex, hintId) {
   const {data} = await api().post('/', {
     method: 'flip_submit',
-    params: [{hex}],
+    params: [{hex, id: hintId}],
     id: 1,
   })
   return data
