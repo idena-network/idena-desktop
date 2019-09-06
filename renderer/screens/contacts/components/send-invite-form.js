@@ -77,13 +77,13 @@ function SendInviteForm({onSuccess, onFail}) {
           onClick={async () => {
             try {
               setSubmitting(true)
-              await addInvite(address, amount, firstName, lastName)
+              const invite = await addInvite(address, amount, firstName, lastName)
               setSubmitting(false)
               if (onSuccess) {
                 addNotification({
-                  title: 'Invite sent',
+                  title: 'Invitation code created',
                 })
-                onSuccess()
+                onSuccess(invite)
               }
             } catch (error) {
               setSubmitting(false)
@@ -96,7 +96,7 @@ function SendInviteForm({onSuccess, onFail}) {
             }
           }}
         >
-          {submitting ? <FiLoader /> : 'Create invite'}
+          {submitting ? <FiLoader /> : 'Create invitation'}
         </Button>
       </FormGroup>
     </Box>

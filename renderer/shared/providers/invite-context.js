@@ -28,42 +28,58 @@ function InviteProvider({children}) {
         savedInvites.map(({hash}) => hash).map(api.fetchTx)
       )
 
-      const invites = savedInvites
-/*
-      .filter( ({hash}) => { //non activated invites only
-        const invitee = invitees && invitees.find(({TxHash}) => TxHash === hash)
-        return invitee==null
-      })
-*/
-      .map(invite => { //find out mining invite status
+      const invitedIdentities = await Promise.all(
+        savedInvites.map(({receiver}) => receiver).map(api.fetchIdentity)
+      )
+
+      const nextInvites = savedInvites.map(invite => {
+        // find out mining invite status
         const tx = txs.find(({hash}) => hash === invite.hash)
-        const invitee = invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
-        return {
+
+        // find all identities/invites
+        const invitedIdentity = invitedIdentities.find(
+          ({address}) => address === invite.receiver
+        )
+
+        // find invitee to kill
+        const invitee =
+          invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
+
+        // becomes activated once invitee is found
+        const isNewInviteActivated = !invite.activated && invitee != null
+
+        const canKill =
+          invitee != null &&
+          invitedIdentity &&
+          (invitedIdentity.state === 'Invite' ||
+            invitedIdentity.state === 'Candidate' ||
+            invitedIdentity.state === 'Newbie')
+
+        const isMining =
+          tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL
+
+        const nextInvite = {
           ...invite,
+          activated: invite.activated || isNewInviteActivated,
+          canKill,
+          receiver:
+            (invitedIdentity && invitedIdentity.address) || invite.receiver,
+        }
+
+        if (isNewInviteActivated) {
+          // save changes once invitee is found
+          db.updateInvite(invite.id, nextInvite)
+        }
+
+        return {
+          ...nextInvite,
           dbkey: invite.id,
-          activated: invitee!=null,
-          receiver:  invitee!=null ? invitee.Address : invite.receiver,
-          mining: (tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL),
-        } 
+          mining: isMining,
+          identity: invitedIdentity,
+        }
       })
 
-/*
-      const allInvites = invitees==null ? invites : 
-        invites.concat( invitees //add invites from idena node
-          .map( invitee => {
-            return {  
-              firstName: '',
-              lastName: '',
-              activated: true,
-              mining: false,
-              hash: invitee.TxHash,
-              receiver: invitee.Address,
-              key: ''
-            } 
-          })
-        )
-*/
-      const allInvites = invites
+      const allInvites = nextInvites
       if (!ignore) {
         setInvites(allInvites)
       }
@@ -78,7 +94,7 @@ function InviteProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [address, invitees])
 
   useInterval(
     async () => {
@@ -115,7 +131,8 @@ function InviteProvider({children}) {
           if (tx) {
             return {
               ...invite,
-              mining: tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
+              mining:
+                tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
             }
           }
           return invite
@@ -128,37 +145,44 @@ function InviteProvider({children}) {
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
     const {result, error} = await api.sendInvite({to, amount})
     if (result) {
-      const invite = {amount, firstName, lastName, ...result}
+      const saveInvite = {
+        amount,
+        firstName,
+        lastName,
+        ...result,
+        activated: false,
+        canKill: true,
+      }
+
+      db.addInvite(saveInvite)
+      const invite = {...saveInvite, mining: true}
       setInvites([...invites, invite])
-      db.addInvite(invite)
-    } else {
-      throw new Error(error.message)
+
+      return invite
     }
+    throw new Error(error.message)
   }
 
-
   const updateInvite = async (id, firstName, lastName) => {
+    const key = id
+    const newFirstName = firstName || ''
+    const newLastName = lastName || ''
 
-      const key=id
-      const newFirstName = firstName || ''
-      const newLastName = lastName || ''
-      
-      setInvites(
-        invites.map(invite => {
-          if (invite.id==id) {
-            return {
-              ...invite,
-              firstName: newFirstName,
-              lastName: newLastName,
-            }
+    setInvites(
+      invites.map(invite => {
+        if (invite.id === id) {
+          return {
+            ...invite,
+            firstName: newFirstName,
+            lastName: newLastName,
           }
-          return invite
-        })
-      )
+        }
+        return invite
+      })
+    )
 
-      const invite = {id:key, firstName: newFirstName, lastName: newLastName}
-      db.updateInvite(id, invite)
-
+    const invite = {id: key, firstName: newFirstName, lastName: newLastName}
+    db.updateInvite(id, invite)
   }
 
   const activateInvite = async code => {

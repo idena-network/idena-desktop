@@ -1,17 +1,22 @@
+/* eslint-disable no-nested-ternary */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, padding, border, margin, ellipsis, backgrounds} from 'polished'
-import {Box, Group, Text, Input} from '../../../shared/components'
+import {Box, Group, Text, Input, Button} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import Avatar from '../../../shared/components/avatar'
+// import {Actions} from './actions'
 import {useInviteState} from '../../../shared/providers/invite-context'
 import useUsername from '../../../shared/hooks/use-username'
 import useFullName from '../../../shared/hooks/use-full-name'
-import {mapToFriendlyStatus} from '../../../shared/providers/identity-context'
+import {
+  mapToFriendlyStatus,
+  useIdentityState,
+} from '../../../shared/providers/identity-context'
 
-function Sidebar({onSelectContact, onSelectInvite}) {
+function Sidebar({onSelectContact, onSelectInvite, onNewInvite}) {
   const {contacts} = useContactState()
 
   const [term, setTerm] = React.useState()
@@ -26,23 +31,25 @@ function Sidebar({onSelectContact, onSelectInvite}) {
     <Box
       style={{
         ...border('right', '1px', 'solid', theme.colors.gray2),
-        width: rem(240),
-        height: '100vh',
+        width: rem(270),
+        height: '91vh',
         overflowY: 'auto',
       }}
     >
-
-{/*
       <Search onChange={e => setTerm(e.target.value)} />
-*/}
-      <InviteSection>
+      <InviteSection onNewInvite={onNewInvite}>
+        <InviteList filter={term} onSelectInvite={onSelectInvite} />
+      </InviteSection>
+
+      {/*
+      <Actions />
+      <InviteSection  filter={term} onNewInvite={onNewInvite}>
         <InviteList onSelectInvite={onSelectInvite} />
       </InviteSection>
-{/*
       <ContactSection>
         <ContactList filter={term} onSelectContact={onSelectContact} />
       </ContactSection>
-*/}
+      */}
     </Box>
   )
 }
@@ -50,35 +57,57 @@ function Sidebar({onSelectContact, onSelectInvite}) {
 Sidebar.propTypes = {
   onSelectContact: PropTypes.func,
   onSelectInvite: PropTypes.func,
+  onNewInvite: PropTypes.func,
 }
 
 // eslint-disable-next-line react/prop-types
-function InviteSection({children}) {
+function InviteSection({onNewInvite, children}) {
+  const {invites} = useIdentityState()
+
   return (
-    <Group
-      title="Invites"
-      css={{...margin(rem(theme.spacings.medium16)), marginBottom: 0}}
+    <SidebarHeading
+      onNewInvite={onNewInvite}
+      title={`Invites (${invites} left)`}
     >
       {children}
-    </Group>
+    </SidebarHeading>
   )
 }
 
-function InviteList({onSelectInvite}) {
+function InviteList({filter, onSelectInvite}) {
   const {invites} = useInviteState()
 
-  if (invites.length === 0) {
+  const [filteredInvites, setFilteredInvites] = React.useState([])
+
+  React.useEffect(() => {
+    if (filter && filter.length > 0) {
+      // eslint-disable-next-line no-shadow
+      const nextInvite = invites.filter(({firstName, lastName, receiver}) =>
+        [firstName, lastName, receiver].some(x =>
+          x.toLowerCase().includes(filter.toLowerCase())
+        )
+      )
+      setFilteredInvites(nextInvite)
+    } else {
+      setFilteredInvites(invites)
+    }
+  }, [invites, filter])
+
+  if (filter && filteredInvites.length === 0) {
     return (
-      <Text css={padding(rem(theme.spacings.medium16))}>No invites yet...</Text>
+      <Text css={padding(rem(theme.spacings.medium16))}>
+        No invites found...
+      </Text>
     )
   }
 
   return (
     <Box css={{...margin(0, 0, rem(theme.spacings.medium24), 0)}}>
-      {invites.map(({id, ...invite}) => (
+      {filteredInvites.map(({id, ...invite}) => (
         <InviteCard
           id={invite.dbkey}
           {...invite}
+          state={invite.identity && invite.identity.state}
           onClick={() => {
             if (onSelectInvite) {
               onSelectInvite(invite)
@@ -91,35 +120,67 @@ function InviteList({onSelectInvite}) {
 }
 
 InviteList.propTypes = {
+  filter: PropTypes.string,
   onSelectInvite: PropTypes.func,
 }
 
-function InviteCard({id, receiver, mined, mining, activated, ...props}) {
+function InviteCard({
+  id,
+  receiver,
+  mined,
+  mining,
+  activated,
+  canKill,
+  state,
+  ...props
+}) {
   const fullName = useFullName(props)
+
+  const hint = mining
+    ? 'Mining...'
+    : activated
+    ? mapToFriendlyStatus(state)
+    : ''
+
   return (
-    <Flex
-      align="center"
-      css={{cursor: 'pointer', ...padding(rem(theme.spacings.medium16))}}
-      {...props}
-    >
-      <Avatar username={receiver} size={32} />
-      <Box>
+    <div className="card">
+      <Flex align="center" {...props}>
+        <Avatar username={receiver} size={32} />
         <Box>
-          <Text css={{...ellipsis(rem(140))}} title={fullName || receiver}>
-            {fullName || receiver}
-          </Text>
+          <Box>
+            <div
+              className="card__title"
+              style={{...ellipsis(rem(140))}}
+              title={fullName || receiver}
+            >
+              {fullName || receiver}
+            </div>
+          </Box>
+          <Box>
+            <div className="card__hint">{hint}</div>
+          </Box>
         </Box>
-        <Box>
-          <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
-            {activated ? 'Activated' : 
-              (mining ? 'Mining...' : 
-                'Mined'
-              )
-            }
-          </Text>
-        </Box>
-      </Box>
-    </Flex>
+      </Flex>
+      <style jsx>{`
+        .card {
+          cursor: pointer;
+          padding: ${rem(6)} ${rem(theme.spacings.medium16)};
+        }
+        .card__title {
+          color: ${theme.colors.text};
+          font-size: ${rem(15)};
+          line-height: ${rem(15)};
+          font-weight: ${theme.fontWeights.medium};
+          display: block;
+        }
+        .card__hint {
+          color: ${theme.colors.muted};
+          font-size: ${rem(13)};
+          line-height: ${rem(10)};
+          font-weight: ${theme.fontWeights.medium};
+        }
+      `}</style>
+    </div>
   )
 }
 
@@ -129,18 +190,15 @@ InviteCard.propTypes = {
   lastName: PropTypes.string,
   receiver: PropTypes.string,
   mined: PropTypes.bool,
+  mining: PropTypes.bool,
+  activated: PropTypes.bool,
+  canKill: PropTypes.bool,
+  state: PropTypes.string,
 }
 
 // eslint-disable-next-line react/prop-types
 function ContactSection({children}) {
-  return (
-    <Group
-      title="Contacts"
-      css={{...margin(rem(theme.spacings.medium16)), marginBottom: 0}}
-    >
-      {children}
-    </Group>
-  )
+  return <SidebarHeading title="Contacts">{children}</SidebarHeading>
 }
 
 function ContactList({filter, onSelectContact}) {
@@ -166,7 +224,7 @@ function ContactList({filter, onSelectContact}) {
   if (filteredContacts.length === 0) {
     return (
       <Text css={padding(rem(theme.spacings.medium16))}>
-        No contacts yet...
+        No contacts found...
       </Text>
     )
   }
@@ -206,27 +264,49 @@ function ContactCard({
   const fullName = useFullName({firstName, lastName})
   const username = useUsername({address, fullName})
   return (
-    <Flex
-      align="center"
-      css={{
-        ...backgrounds(isCurrent ? theme.colors.gray2 : ''),
-        cursor: 'pointer',
-        ...padding(rem(theme.spacings.medium16)),
+    <div
+      className="card"
+      style={{
+        ...backgrounds(isCurrent ? theme.colors.gray : ''),
       }}
-      {...props}
     >
-      <Avatar username={username} size={32} />
-      <Box>
+      <Flex align="center" {...props}>
+        <Avatar username={username} size={32} />
         <Box>
-          <Text css={{wordBreak: 'break-all'}}>{fullName || address}</Text>
+          <Box>
+            <div
+              className="card__title"
+              style={{...ellipsis(rem(140))}}
+              title={fullName || address}
+            >
+              {fullName || address}
+            </div>
+          </Box>
+          <Box>
+            <div className="card__hint">{mapToFriendlyStatus(state)}</div>
+          </Box>
         </Box>
-        <Box>
-          <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
-            {mapToFriendlyStatus(state)}
-          </Text>
-        </Box>
-      </Box>
-    </Flex>
+      </Flex>
+      <style jsx>{`
+        .card {
+          cursor: pointer;
+          padding: ${rem(6)} ${rem(theme.spacings.medium16)};
+        }
+        .card__title {
+          color: ${theme.colors.text};
+          font-size: ${rem(15)};
+          line-height: ${rem(15)};
+          font-weight: ${theme.fontWeights.medium};
+          display: block;
+        }
+        .card__hint {
+          color: ${theme.colors.primary};
+          font-size: ${rem(13)};
+          line-height: ${rem(10)};
+          font-weight: ${theme.fontWeights.medium};
+        }
+      `}</style>
+    </div>
   )
 }
 
@@ -245,11 +325,63 @@ function Search(props) {
       <Input
         type="search"
         placeholder="Search"
-        style={{...backgrounds(theme.colors.gray), border: 'none'}}
+        style={{
+          ...backgrounds(theme.colors.gray),
+          border: 'none',
+          textAlign: 'center',
+          width: '100%',
+          outline: 'none',
+        }}
         {...props}
       />
     </Box>
   )
+}
+
+function SidebarHeading({children, title, onNewInvite}) {
+  return (
+    <Group
+      title={title}
+      addon={
+        <Button
+          onClick={onNewInvite}
+          type="button"
+          style={{
+            borderRadius: '3px',
+            width: rem(20),
+            height: rem(20),
+            fontSize: rem(21),
+            lineHeight: rem(5),
+            padding: '0 0px 0px',
+            fontWeight: 'bold',
+            display: 'block',
+            top: '50%',
+            position: 'absolute',
+            right: rem(18),
+            transform: 'translate(0, -50%)',
+          }}
+        >
+          +
+        </Button>
+      }
+      css={{
+        position: 'relative',
+        paddingTop: rem(7),
+        paddingLeft: rem(theme.spacings.medium16),
+        paddingBottom: rem(7),
+        paddingRight: rem(28),
+        width: '100%',
+      }}
+    >
+      {children}
+    </Group>
+  )
+}
+
+SidebarHeading.propTypes = {
+  children: PropTypes.node.isRequired,
+  title: PropTypes.string.isRequired,
+  onNewInvite: PropTypes.func,
 }
 
 export default Sidebar

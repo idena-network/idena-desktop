@@ -3,57 +3,49 @@ import PropTypes from 'prop-types'
 import {rem, padding, margin} from 'polished'
 import {FiSend, FiDollarSign, FiSlash} from 'react-icons/fi'
 import theme from '../../../shared/theme'
-import {IconButton} from '../../../shared/components/button'
-import Divider from '../../../shared/components/divider'
-import Flex from '../../../shared/components/flex'
+import {Box} from '../../../shared/components'
 
-function ContactToolbar({onRename, onRevokeInvitation, onSendCoins}) {
+import Actions from '../../../shared/components/actions'
+import IconLink from '../../../shared/components/icon-link'
 
-  return(
-    <Flex
+function ContactToolbar({onRename, onKill, onSendCoins}) {
+  return (
+    <Box
+      py={theme.spacings.large}
+      w={rem(700)}
       css={{
         ...padding(rem(theme.spacings.small8), 0),
         ...margin(rem(theme.spacings.medium16), 0),
       }}
     >
-
-
-      <IconButton disabled={true} icon={<FiSend />} color={theme.colors.primary}>
-        Send message
-      </IconButton>
-      <Divider vertical />
-
-        <IconButton disabled={true} icon={<FiDollarSign />} color={theme.colors.primary}
-          onClick={() => {
-            onSendCoins && onSendCoins()
-          }}
-        >
+      <Actions>
+        <IconLink disabled icon={<FiSend />}>
+          Send message
+        </IconLink>
+        <IconLink disabled icon={<FiDollarSign />}>
           Send coins
-        </IconButton>
-        <Divider vertical/>
+        </IconLink>
 
-  
-        <Divider vertical/>
-        <IconButton disabled={true} icon={<FiSlash />} color={theme.colors.primary}
+        <IconLink
+          disabled={onKill == null}
+          icon={<FiSlash />}
           onClick={() => {
-            onRevokeInvitation && onRevokeInvitation()
+            onKill()
           }}
         >
-          Revoke invitation
-        </IconButton>
-        <Divider vertical/>
+          Kill
+        </IconLink>
 
-
-        <IconButton color={theme.colors.primary}
+        <IconLink
+          disabled={onRename == null}
           onClick={() => {
-            onRename && onRename()
-          }} 
+            onRename()
+          }}
         >
           Rename
-        </IconButton> 
-
-
-    </Flex>
+        </IconLink>
+      </Actions>
+    </Box>
   )
 }
 
@@ -62,6 +54,5 @@ ContactToolbar.propTypes = {
   onRevokeInvitation: PropTypes.func,
   onSendCoins: PropTypes.func,
 }
-
 
 export default ContactToolbar

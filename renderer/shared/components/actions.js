@@ -1,8 +1,8 @@
 import React from 'react'
 import {rem} from 'polished'
-import Flex from '../../../shared/components/flex'
-import Divider from '../../../shared/components/divider'
-import theme from '../../../shared/theme'
+import Flex from './flex'
+import Divider from './divider'
+import theme from '../theme'
 
 // eslint-disable-next-line react/prop-types
 function Actions({children}) {

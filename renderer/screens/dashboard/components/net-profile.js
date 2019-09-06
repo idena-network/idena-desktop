@@ -14,6 +14,7 @@ function NetProfile() {
     state,
     stake,
     penalty,
+    age,
     totalQualifiedFlips,
     totalShortFlipPoints,
   } = useIdentityState()
@@ -62,6 +63,7 @@ function NetProfile() {
           tooltip="Your node was offline more that 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins."
         />
       )}
+      {age > 0 && <Figure label="Age" value={age} postfix="epochs" />}
 
       {totalQualifiedFlips > 0 && (
         <>
