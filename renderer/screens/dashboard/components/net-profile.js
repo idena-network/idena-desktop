@@ -56,16 +56,12 @@ function NetProfile() {
 
       {penalty > 0 && (
         <Figure
-          label="Penalty"
+          label="Mining penalty"
           value={penalty}
           postfix="DNA"
-          tooltip="Offline penalty"
+          tooltip="Your node was offline more that 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins."
         />
       )}
-
-      {
-        //      <Figure label="Age" value={age} postfix="epochs" />
-      }
 
       {totalQualifiedFlips > 0 && (
         <>
