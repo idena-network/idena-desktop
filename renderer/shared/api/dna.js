@@ -188,3 +188,12 @@ export async function becomeOffline() {
   })
   return data
 }
+
+export async function exportPK(password) {
+  const {data} = await api().post('/', {
+    method: 'dna_exportKey',
+    params: [password],
+    id: 1,
+  })
+  return data
+}

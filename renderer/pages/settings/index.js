@@ -1,5 +1,6 @@
 import React from 'react'
 import {margin, rem} from 'polished'
+import QRCode from 'qrcode.react'
 
 import Layout from '../../shared/components/layout'
 import {
@@ -10,7 +11,6 @@ import {
   Label,
   Button,
 } from '../../shared/components'
-import Link from '../../shared/components/link'
 import theme from '../../shared/theme'
 import {FlatButton} from '../../shared/components/button'
 import Divider from '../../shared/components/divider'
@@ -20,6 +20,7 @@ import {useNotificationDispatch} from '../../shared/providers/notification-conte
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 import {BASE_API_URL} from '../../shared/api/api-client'
 import {loadState} from '../../shared/utils/persist'
+import {exportPK} from '../../shared/api'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -90,10 +91,7 @@ function Settings() {
         </Box>
         {global.isDev && (
           <>
-            <Box my={rem(theme.spacings.medium32)}>
-              <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
-                Flips
-              </SubHeading>
+            <Section title="Flips">
               <Box>
                 <Button
                   onClick={() => {
@@ -114,11 +112,8 @@ function Settings() {
                   Archive flips
                 </Button>
               </Box>
-            </Box>
-            <Box my={rem(theme.spacings.medium32)}>
-              <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
-                Invites
-              </SubHeading>
+            </Section>
+            <Section title="Invites">
               <Box my={theme.spacings.small}>
                 <Button
                   onClick={() => {
@@ -129,22 +124,35 @@ function Settings() {
                   Clear invites
                 </Button>
               </Box>
-            </Box>
-            <Box my={rem(theme.spacings.medium32)}>
-              <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
-                Validation
-              </SubHeading>
-              <Box my={theme.spacings.small}>
-                <Link href="/validation/short">Short</Link>
-              </Box>
-              <Box my={theme.spacings.small}>
-                <Link href="/validation/long">Long</Link>
-              </Box>
-            </Box>
+            </Section>
+            <ExportPK />
           </>
         )}
       </Box>
     </Layout>
+  )
+}
+
+function Section({title, children}) {
+  return (
+    <Box my={rem(theme.spacings.medium32)}>
+      <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
+        {title}
+      </SubHeading>
+      <Box my={rem(theme.spacings.small8)}>{children}</Box>
+    </Box>
+  )
+}
+
+function ExportPK() {
+  const [pk, setPk] = React.useState()
+  return (
+    <Section title="Export PK">
+      <Button onClick={async () => setPk(await exportPK('pass123'))}>
+        Export PK
+      </Button>
+      <Box my={rem(theme.spacings.small8)}>{pk && <QRCode value={pk} />}</Box>
+    </Section>
   )
 }
 
