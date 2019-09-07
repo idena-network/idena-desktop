@@ -18,7 +18,12 @@ import {
   NotificationType,
   useNotificationDispatch,
 } from '../../../shared/providers/notification-context'
-import {composeHint, hasDataUrl, getNextKeyWordsHint} from '../utils/flip'
+import {
+  composeHint,
+  hasDataUrl,
+  getNextKeyWordsHint,
+  getKeyWordsHint,
+} from '../utils/flip'
 
 function FlipMaster({id, onClose}) {
   const {canSubmitFlip, flipKeyWordPairs} = useIdentityState()
@@ -42,13 +47,16 @@ function FlipMaster({id, onClose}) {
   const [step, setStep] = useState(0)
   const [submitResult, setSubmitResult] = useState()
 
+  const [isFlipsLoaded, setIsFlipsLoaded] = useState(false)
+
   useEffect(() => {
-    // init hint on the first page when flips updated
-    if (step === 0)
+    // init hint on the first page when [flips] updated
+    if (step === 0 && !isFlipsLoaded) {
       setFlip({
         ...flip,
         hint: getNextKeyWordsHint(flipKeyWordPairs, publishedFlips),
       })
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flips])
@@ -56,7 +64,11 @@ function FlipMaster({id, onClose}) {
   useEffect(() => {
     const draft = getDraft(id)
     if (draft) {
-      setFlip(draft)
+      setIsFlipsLoaded(true)
+      setFlip({
+        ...draft,
+        hint: getKeyWordsHint(flipKeyWordPairs, draft.hint.id),
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
@@ -69,8 +81,8 @@ function FlipMaster({id, onClose}) {
 
   const handleSubmitFlip = async () => {
     try {
-      const hintId = flip.hint.id
-      const {result, error} = await submitFlip({id, ...flip, hintId})
+      const pairId = flip.hint.id
+      const {result, error} = await submitFlip({id, ...flip, pairId})
       addNotification({
         title: error ? 'Error while uploading flip' : 'Flip saved!',
         body: error ? error.message : `Hash ${result.hash}`,
@@ -98,12 +110,13 @@ function FlipMaster({id, onClose}) {
         <FlipHint
           {...flip}
           onChange={() => {
+            setIsFlipsLoaded(true)
             setFlip({
               ...flip,
               hint: getNextKeyWordsHint(
                 flipKeyWordPairs,
                 publishedFlips,
-                flip.hint.idx
+                flip.hint.id
               ),
             })
           }}
@@ -139,7 +152,7 @@ function FlipMaster({id, onClose}) {
     {
       caption: 'Submit flip',
       title: `Submit flip (${composeHint(flip.hint)})`,
-      desc: `Are you sure there is no way to read the shuffled images as a meaningful story?`,
+      desc: `Are you sure it is not possible to read the shuffled images as a meaningful story?`,
       children: <SubmitFlip {...flip} submitFlipResult={submitResult} />,
     },
   ]

@@ -59,8 +59,8 @@ function Flips() {
               width="25%"
               onSubmit={async () => {
                 try {
-                  const hintId = flip.hint.id
-                  const {result, error} = await submitFlip(flip, hintId)
+                  const pairId = flip.hint.id
+                  const {result, error} = await submitFlip(flip, pairId)
                   if (error) {
                     addError({
                       title: 'Error while uploading flip',

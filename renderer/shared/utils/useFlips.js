@@ -131,7 +131,7 @@ function useFlips() {
   }, [])
 
   const submitFlip = useCallback(
-    async ({id, pics, order, hintId}) => {
+    async ({id, pics, order, pairId}) => {
       if (
         flips.filter(
           f => f.type === FlipType.Published && areSame(f.pics, pics)
@@ -148,7 +148,7 @@ function useFlips() {
         }
       }
 
-      const resp = await api.submitFlip(toHex(pics, order), hintId)
+      const resp = await api.submitFlip(toHex(pics, order), pairId)
       const {result} = resp
       if (result) {
         setFlips(prevFlips => {
