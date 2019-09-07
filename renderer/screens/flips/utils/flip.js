@@ -40,51 +40,65 @@ export function getRandomHint() {
     desc: desc || name,
   }))
 
-  return {idx: -1, words: wordsPair, id: -1}
+  return {id: -1, words: wordsPair}
+}
+
+export function getKeyWordsHint(flipKeyWordPairs, id) {
+  if (!flipKeyWordPairs || !flipKeyWordPairs.length) return getRandomHint()
+
+  const pairId = id && id >= 0 && id < flipKeyWordPairs.length ? id : 0
+
+  const hint = flipKeyWordPairs[pairId]
+
+  const nextIndex1 = hint.words[0]
+  const nextIndex2 = hint.words[1]
+  const firstWord = dict[nextIndex1] || {name: 'Error', descr: 'No word found'}
+  const secondWord = dict[nextIndex2] || {name: 'Error', descr: 'No word found'}
+
+  const wordsPair = [firstWord, secondWord].map(({name, desc}) => ({
+    name,
+    desc: desc || name,
+  }))
+
+  return {id, words: wordsPair}
 }
 
 export function getNextKeyWordsHint(
   flipKeyWordPairs,
   publishedFlips,
-  idx = -1,
+  currId = -1,
   i = 50
 ) {
-  if (flipKeyWordPairs) {
-    const isLastId = idx + 1 > flipKeyWordPairs.length - 1
-    const nextIdx = isLastId ? 0 : idx + 1
+  if (!flipKeyWordPairs || !flipKeyWordPairs.length) return getRandomHint()
 
-    const isUsed =
-      (flipKeyWordPairs[nextIdx] && flipKeyWordPairs[nextIdx].used) ||
-      (flipKeyWordPairs[nextIdx] &&
-        publishedFlips.find(
-          ({hint}) => hint.id === flipKeyWordPairs[nextIdx].id
-        ))
+  const nexIdx =
+    currId < 0
+      ? 0
+      : flipKeyWordPairs.indexOf(
+          flipKeyWordPairs.find(({id}) => id === currId)
+        ) + 1
 
-    if (isUsed) {
-      if (i < 0) return getRandomHint()
+  const nextKeyWordPair =
+    nexIdx >= flipKeyWordPairs.length
+      ? flipKeyWordPairs[0]
+      : flipKeyWordPairs[nexIdx]
 
-      return getNextKeyWordsHint(
-        flipKeyWordPairs,
-        publishedFlips,
-        nextIdx,
-        i - 1
-      )
-    }
+  const isUsed =
+    (nextKeyWordPair && nextKeyWordPair.used) ||
+    (nextKeyWordPair &&
+      publishedFlips.find(({hint}) => hint.id === nextKeyWordPair.id))
 
-    if (flipKeyWordPairs[nextIdx]) {
-      const nextIndex1 = flipKeyWordPairs[nextIdx].words[0]
-      const nextIndex2 = flipKeyWordPairs[nextIdx].words[1]
-      const firstWord = dict[nextIndex1]
-      const secondWord = dict[nextIndex2]
+  if (isUsed) {
+    // get next free pair
 
-      const wordsPair = [firstWord, secondWord].map(({name, desc}) => ({
-        name,
-        desc: desc || name,
-      }))
+    if (i < 0) return getRandomHint() // no more free words
 
-      return {idx: nextIdx, words: wordsPair, id: flipKeyWordPairs[nextIdx].id}
-    }
-    return getRandomHint()
+    return getNextKeyWordsHint(
+      flipKeyWordPairs,
+      publishedFlips,
+      nextKeyWordPair.id,
+      i - 1
+    )
   }
-  return getRandomHint()
+  return getKeyWordsHint(flipKeyWordPairs, nextKeyWordPair.id)
 }
