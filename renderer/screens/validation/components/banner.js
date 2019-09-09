@@ -112,7 +112,7 @@ function ValidationRunning() {
           </Box>
         )}
       </Flex>
-      {!hasAnswers && !!seconds && (
+      {!hasAnswers && !!seconds && canValidate && (
         <Flex css={padding(theme.spacings.normal)}>
           <Divider vertical m={rem(theme.spacings.medium16)} />
           <Link href={`/validation/${isShortSession ? 'short' : 'long'}`}>
