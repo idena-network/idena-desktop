@@ -22,8 +22,8 @@ function setPersistedValue(name, key, value) {
 
 export default function usePersistentState(dbName, key, initialValue) {
   const [value, setValue] = useState(() => {
-    const presistedState = getPersistedValue(dbName) || initialValue
-    return presistedState[key]
+    const presistedState = getPersistedValue(dbName)
+    return (presistedState && presistedState[key]) || initialValue
   })
 
   useEffect(() => {
