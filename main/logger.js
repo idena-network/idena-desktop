@@ -14,12 +14,14 @@ function logPath(fileName) {
     case 'win32':
       return path.join(whichApp.getPath('logs'), fileName)
     default:
-      // return path.join(whichApp.getPath('userData'), fileName)
-      return prepareDir(whichApp.getPath('userData'), fileName)
-        .or(process.env.XDG_CONFIG_HOME, fileName)
-        .or(homeDir, '.config', fileName)
-        .or(process.env.XDG_DATA_HOME, fileName)
-        .or(homeDir, '.local', 'share', fileName).result
+      return path.join(
+        prepareDir(whichApp.getPath('userData'))
+          .or(process.env.XDG_CONFIG_HOME)
+          .or(homeDir, '.config')
+          .or(process.env.XDG_DATA_HOME)
+          .or(homeDir, '.local', 'share').result,
+        fileName
+      )
   }
 }
 
