@@ -4,7 +4,6 @@ const fs = require('fs')
 const os = require('os')
 const pino = require('pino')
 
-const appName = 'Idena'
 const homeDir = os.homedir ? os.homedir() : process.env.HOME
 
 function logPath(fileName) {
@@ -16,11 +15,11 @@ function logPath(fileName) {
       return path.join(whichApp.getPath('logs'), fileName)
     default:
       // return path.join(whichApp.getPath('userData'), fileName)
-      return prepareDir(whichApp.getPath('userData'))
-        .or(process.env.XDG_CONFIG_HOME, appName)
-        .or(homeDir, '.config', appName)
-        .or(process.env.XDG_DATA_HOME, appName)
-        .or(homeDir, '.local', 'share', appName).result
+      return prepareDir(whichApp.getPath('userData'), fileName)
+        .or(process.env.XDG_CONFIG_HOME, fileName)
+        .or(homeDir, '.config', fileName)
+        .or(process.env.XDG_DATA_HOME, fileName)
+        .or(homeDir, '.local', 'share', fileName).result
   }
 }
 
