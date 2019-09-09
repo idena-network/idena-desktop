@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 import {margin, rem} from 'polished'
 
 import Layout from '../../shared/components/layout'
@@ -20,7 +20,7 @@ import {useNotificationDispatch} from '../../shared/providers/notification-conte
 import {nodeSettings} from '../../shared/api/api-client'
 import usePersistentState from '../../shared/hooks/use-persistent-state'
 
-const DEFAULT_NODE_URL = 'http://localhost:90091'
+const DEFAULT_NODE_URL = 'http://localhost:9009'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
