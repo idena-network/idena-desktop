@@ -3,7 +3,15 @@ const path = require('path')
 const pino = require('pino')
 
 function logPath(fileName) {
-  return path.join((app || remote.app).getPath('logs'), fileName)
+  const whichApp = app || remote.app
+
+  switch (process.platform) {
+    case 'darwin':
+    case 'win32':
+      return path.join(whichApp.getPath('logs'), fileName)
+    default:
+      return path.join(whichApp.getPath('userData'), fileName)
+  }
 }
 
 const logger = pino(
