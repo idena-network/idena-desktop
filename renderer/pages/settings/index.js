@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {margin, rem} from 'polished'
 
 import Layout from '../../shared/components/layout'
@@ -15,14 +15,12 @@ import theme from '../../shared/theme'
 import {FlatButton} from '../../shared/components/button'
 import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
-import Pre from '../../shared/components/pre'
 import useFlips from '../../shared/utils/useFlips'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {nodeSettings} from '../../shared/api/api-client'
-import useRpc from '../../shared/hooks/use-rpc'
-import {usePoll} from '../../shared/hooks/use-interval'
+import usePersistentState from '../../shared/hooks/use-persistent-state'
 
-const DEFAULT_NODE_URL = 'http://localhost:9009'
+const DEFAULT_NODE_URL = 'http://localhost:90091'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -32,6 +30,11 @@ function Settings() {
   const {addNotification} = useNotificationDispatch()
 
   const addrRef = React.createRef()
+  const [addr, setAddr] = usePersistentState(
+    'settings',
+    'url',
+    DEFAULT_NODE_URL
+  )
 
   const handleSaveNodeAddr = () => {
     const nextAddr = addrRef.current.value
@@ -51,7 +54,7 @@ function Settings() {
           <Label htmlFor="url">Address</Label>
           <Flex align="center">
             <Input
-              defaultValue={nodeSettings.url}
+              defaultValue={addr}
               ref={addrRef}
               id="url"
               style={margin(0, theme.spacings.normal, 0, 0)}
@@ -125,17 +128,11 @@ function Settings() {
                 <Link href="/validation/long">Long</Link>
               </Box>
             </Box>
-            <EpochDisplay />
           </>
         )}
       </Box>
     </Layout>
   )
-}
-
-function EpochDisplay() {
-  const [{result}] = usePoll(useRpc('dna_epoch'), 3000)
-  return <Pre>{JSON.stringify(result)}</Pre>
 }
 
 export default Settings
