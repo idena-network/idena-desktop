@@ -34,7 +34,7 @@ function Dashboard({router}) {
           <Heading>Profile</Heading>
           <Actions>
             <IconLink icon={<FiShare />}>Share</IconLink>
-            <IconLink href="/contacts/invite" icon={<FiUserPlus />}>
+            <IconLink href="/contacts/new-invite" icon={<FiUserPlus />}>
               Invite
             </IconLink>
             <IconLink href="/flips/new" icon={<FiCamera />}>
