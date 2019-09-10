@@ -36,21 +36,21 @@ function InviteProvider({children}) {
         // find out mining invite status
         const tx = txs.find(({hash}) => hash === invite.hash)
 
+        // find invitee to kill
+        const invitee =
+          invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
+
         // find all identities/invites
         const invitedIdentity = invitedIdentities.find(
           ({address}) => address === invite.receiver
         )
 
-        // find invitee to kill
-        const invitee =
-          invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
-
         // becomes activated once invitee is found
-        const isNewInviteActivated = !invite.activated && invitee != null
+        const isNewInviteActivated = !!invitee
 
         const canKill =
-          invitee != null &&
-          invitedIdentity &&
+          !!invitee &&
+          !!invitedIdentity &&
           (invitedIdentity.state === 'Invite' ||
             invitedIdentity.state === 'Candidate' ||
             invitedIdentity.state === 'Newbie')
@@ -62,8 +62,7 @@ function InviteProvider({children}) {
           ...invite,
           activated: invite.activated || isNewInviteActivated,
           canKill,
-          receiver:
-            (invitedIdentity && invitedIdentity.address) || invite.receiver,
+          receiver: isNewInviteActivated ? invitee.Address : invite.receiver,
         }
 
         if (isNewInviteActivated) {
