@@ -64,11 +64,12 @@ function IdentityProvider({children}) {
   ].includes(identity && identity.state)
 
   const canSubmitFlip =
+    identity &&
     [
       IdentityStatus.Candidate,
       IdentityStatus.Newbie,
       IdentityStatus.Verified,
-    ].includes(identity && identity.state) &&
+    ].includes(identity.state) &&
     identity.requiredFlips > 0 &&
     (identity.flips || []).length < identity.requiredFlips
 

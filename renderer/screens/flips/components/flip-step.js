@@ -16,6 +16,7 @@ function FlipStep({
   last,
   allowSubmit,
 }) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
   const shouldClose = last && !allowSubmit
   const shouldSubmit = last && allowSubmit
   const shouldNext = !last
@@ -45,7 +46,18 @@ function FlipStep({
         </Button>
         {shouldNext && <Button onClick={onNext}>Next step</Button>}
         {shouldClose && <Button onClick={onClose}>Close</Button>}
-        {shouldSubmit && <Button onClick={onSubmit}>Submit</Button>}
+        {shouldSubmit && (
+          <Button
+            disabled={isSubmitting}
+            onClick={async () => {
+              setIsSubmitting(true)
+              await onSubmit()
+              setIsSubmitting(false)
+            }}
+          >
+            Submit
+          </Button>
+        )}
       </Flex>
     </Box>
   )
