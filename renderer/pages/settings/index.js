@@ -17,8 +17,8 @@ import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
 import useFlips from '../../shared/utils/useFlips'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
-import {nodeSettings} from '../../shared/api/api-client'
 import usePersistentState from '../../shared/hooks/use-persistent-state'
+import {nodeSettings} from '../../shared/api/api-client'
 
 const DEFAULT_NODE_URL = 'http://localhost:9009'
 
@@ -29,21 +29,26 @@ function Settings() {
   const {archiveFlips} = useFlips()
   const {addNotification} = useNotificationDispatch()
 
-  const addrRef = React.createRef()
-  const [addr, setAddr] = usePersistentState(
+  const [persistedUrl, setPersistedUrl] = usePersistentState(
     'settings',
     'url',
     DEFAULT_NODE_URL
   )
 
-  const handleSaveNodeAddr = () => {
-    const nextAddr = addrRef.current.value
-    nodeSettings.url = nextAddr
-    addNotification({
-      title: 'Settings saved!',
-      body: `Now running at ${nextAddr}`,
-    })
-  }
+  const [url, setUrl] = React.useState(persistedUrl)
+  const [modified, setModified] = React.useState()
+
+  React.useEffect(() => {
+    if (modified) {
+      setPersistedUrl(url)
+      nodeSettings.url = url
+      addNotification({
+        title: 'Settings saved!',
+        body: `Now running at ${url}`,
+      })
+    }
+    setModified(false)
+  }, [addNotification, modified, setPersistedUrl, url])
 
   return (
     <Layout>
@@ -54,21 +59,17 @@ function Settings() {
           <Label htmlFor="url">Address</Label>
           <Flex align="center">
             <Input
-              defaultValue={addr}
-              ref={addrRef}
-              id="url"
+              value={url}
+              onChange={e => setUrl(e.target.value)}
               style={margin(0, theme.spacings.normal, 0, 0)}
             />
-            <Button onClick={handleSaveNodeAddr}>Save</Button>
+            <Button onClick={() => setModified(Date.now())}>Save</Button>
             <Divider vertical m={theme.spacings.small} />
             <FlatButton
               color={theme.colors.primary}
               onClick={() => {
-                // setAddr(DEFAULT_NODE_URL)
-                addNotification({
-                  title: 'Settings saved!',
-                  body: `Now running at ${DEFAULT_NODE_URL}`,
-                })
+                setUrl(DEFAULT_NODE_URL)
+                setModified(Date.now())
               }}
             >
               Use default
