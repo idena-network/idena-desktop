@@ -23,6 +23,8 @@ function InviteDetails({dbkey}) {
   const invite = invites && invites.find(({id}) => id === dbkey)
   const identity = invite && invite.identity
 
+  if (!invite) return null
+
   const {key, receiver, canKill, mining, activated} = invite
   const inviteIsExpired =
     identity &&
