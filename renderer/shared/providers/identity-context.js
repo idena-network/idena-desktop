@@ -9,7 +9,7 @@ export const IdentityStatus = {
   Candidate: 'Candidate',
   Newbie: 'Newbie',
   Verified: 'Verified',
-  Suspend: 'Suspend',
+  Suspended: 'Suspended',
   Zombie: 'Zombie',
   Killed: 'Killed',
 }
@@ -79,7 +79,7 @@ function IdentityProvider({children}) {
       IdentityStatus.Candidate,
       IdentityStatus.Newbie,
       IdentityStatus.Verified,
-      IdentityStatus.Suspend,
+      IdentityStatus.Suspended,
       IdentityStatus.Zombie,
     ].includes(identity.state)
 
