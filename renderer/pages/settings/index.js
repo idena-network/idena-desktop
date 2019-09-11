@@ -17,10 +17,8 @@ import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
 import useFlips from '../../shared/utils/useFlips'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
-import usePersistentState from '../../shared/hooks/use-persistent-state'
-import {nodeSettings} from '../../shared/api/api-client'
-
-const DEFAULT_NODE_URL = 'http://localhost:9009'
+import {usePersistence} from '../../shared/hooks/use-persistent-state'
+import {BASE_API_URL} from '../../shared/api/api-client'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -29,26 +27,41 @@ function Settings() {
   const {archiveFlips} = useFlips()
   const {addNotification} = useNotificationDispatch()
 
-  const [persistedUrl, setPersistedUrl] = usePersistentState(
-    'settings',
-    'url',
-    DEFAULT_NODE_URL
+  const urlRef = React.useRef()
+
+  const [state, dispatch] = usePersistence(
+    React.useReducer(
+      (state, [type]) => {
+        switch (type) {
+          case 'url/reset':
+            return {...state, isSaved: false}
+          case 'url/save':
+            return {...state, url: urlRef.current.value, isSaved: true}
+          case 'url/default': {
+            urlRef.current.value = BASE_API_URL
+            return {...state, url: BASE_API_URL, isSaved: true}
+          }
+          default:
+            return state
+        }
+      },
+      {
+        url: BASE_API_URL,
+        isSaved: false,
+      }
+    ),
+    'settings'
   )
 
-  const [url, setUrl] = React.useState(persistedUrl)
-  const [modified, setModified] = React.useState()
-
   React.useEffect(() => {
-    if (modified) {
-      setPersistedUrl(url)
-      nodeSettings.url = url
+    if (state.isSaved) {
       addNotification({
-        title: 'Settings saved!',
-        body: `Now running at ${url}`,
+        title: 'Settings updated',
+        body: `Connected to ${state.url}`,
       })
+      dispatch(['url/reset'])
     }
-    setModified(false)
-  }, [addNotification, modified, setPersistedUrl, url])
+  }, [addNotification, dispatch, state.isSaved, state.url])
 
   return (
     <Layout>
@@ -59,18 +72,15 @@ function Settings() {
           <Label htmlFor="url">Address</Label>
           <Flex align="center">
             <Input
-              value={url}
-              onChange={e => setUrl(e.target.value)}
+              defaultValue={state.url}
+              ref={urlRef}
               style={margin(0, theme.spacings.normal, 0, 0)}
             />
-            <Button onClick={() => setModified(Date.now())}>Save</Button>
+            <Button onClick={() => dispatch(['url/save'])}>Save</Button>
             <Divider vertical m={theme.spacings.small} />
             <FlatButton
               color={theme.colors.primary}
-              onClick={() => {
-                setUrl(DEFAULT_NODE_URL)
-                setModified(Date.now())
-              }}
+              onClick={() => dispatch(['url/default'])}
             >
               Use default
             </FlatButton>

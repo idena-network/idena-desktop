@@ -1,14 +1,9 @@
 import axios from 'axios'
+import {loadItem} from '../utils/persist'
 
-export const nodeSettings = {
-  url: 'http://localhost:9009',
-}
-
-export const baseUrl = nodeSettings.url
-
-export const {MOCK = true} = process.env
+export const BASE_API_URL = 'http://localhost:9009'
 
 export default () =>
   axios.create({
-    baseURL: nodeSettings.url,
+    baseURL: loadItem('settings', 'url') || BASE_API_URL,
   })
