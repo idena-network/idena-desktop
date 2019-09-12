@@ -36,7 +36,12 @@ function ShortSession() {
   const epoch = useEpochState()
 
   useEffect(() => {
-    if (epoch && epoch.currentPeriod !== EpochPeriod.ShortSession) {
+    if (
+      epoch &&
+      ![EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+        epoch.currentPeriod
+      )
+    ) {
       Router.push('/dashboard')
     }
   }, [epoch])

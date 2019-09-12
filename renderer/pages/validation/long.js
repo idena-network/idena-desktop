@@ -42,13 +42,14 @@ export default function() {
 
   useEffect(() => {
     if (
+      epoch &&
       ![EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
         epoch.currentPeriod
       )
     ) {
       Router.push('/dashboard')
     }
-  }, [epoch.currentPeriod])
+  }, [epoch])
 
   const [showModal, setShowModal] = React.useState()
 
