@@ -29,6 +29,7 @@ function Settings() {
 
   const [state, dispatch] = usePersistence(
     React.useReducer(
+      // eslint-disable-next-line no-shadow
       (state, [type, url]) => {
         switch (type) {
           case 'url/reset':
