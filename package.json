@@ -27,13 +27,14 @@
     "win": {
       "publish": [
         "github"
-      ]
+      ],
+      "icon": "main/static/icons/icon_512_2x.ico"
     },
     "mac": {
       "publish": [
         "github"
       ],
-      "icon": "main/static/icons/mac.icns"
+      "icon": "main/static/icons/icon-512@2x.icns"
     }
   },
   "devDependencies": {
