@@ -51,7 +51,6 @@ function reducer(state, [action, {online} = defaultState]) {
         ...state,
         isMining: false,
         showModal: false,
-        online,
       }
     case 'error':
       return {
@@ -74,10 +73,10 @@ function MinerStatusSwitcher() {
   const [state, dispatch] = useReducer(reducer, defaultState)
 
   useEffect(() => {
-    if (identity && !state.showModal) {
+    if (!state.showModal) {
       dispatch(['init', identity])
     }
-  }, [dispatch, identity, state.showModal])
+  }, [identity, state.showModal])
 
   useEffect(() => setHash(hash), [hash, setHash])
 
@@ -86,13 +85,13 @@ function MinerStatusSwitcher() {
       dispatch(['error'])
       addError({title: error.message})
     }
-  }, [addError, dispatch, error])
+  }, [addError, error])
 
   useEffect(() => {
     if (mined) {
       dispatch(['mined'])
     }
-  }, [dispatch, mined])
+  }, [mined])
 
   if (!identity.canMine) {
     return null
@@ -107,7 +106,7 @@ function MinerStatusSwitcher() {
               Online mining status
             </Label>
             <Box style={{pointerEvents: 'none'}}>
-              {state.online !== null && (
+              {state.online !== null && state.online !== undefined && (
                 <Switcher
                   withStatusHint
                   isChecked={state.online}
