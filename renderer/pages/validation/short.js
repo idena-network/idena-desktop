@@ -9,7 +9,7 @@ import FlipThumbnails from '../../screens/validation/components/flip-thumbnails'
 import Flex from '../../shared/components/flex'
 import {useInterval} from '../../shared/hooks/use-interval'
 import theme from '../../shared/theme'
-import {useEpochState} from '../../shared/providers/epoch-context'
+import {useEpochState, EpochPeriod} from '../../shared/providers/epoch-context'
 import {IconClose, Link} from '../../shared/components'
 import {
   submitShortAnswers,
@@ -34,6 +34,17 @@ function ShortSession() {
   const state = useValidationState()
   const dispatch = useValidationDispatch()
   const epoch = useEpochState()
+
+  useEffect(() => {
+    if (
+      epoch &&
+      ![EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+        epoch.currentPeriod
+      )
+    ) {
+      Router.push('/dashboard')
+    }
+  }, [epoch])
 
   useEffect(() => {
     if (state.shortAnswersSubmitted) {

@@ -6,9 +6,16 @@ import ValidationScene from '../../screens/validation/components/validation-scen
 import ValidationActions from '../../screens/validation/components/validation-actions'
 import FlipThumbnails from '../../screens/validation/components/flip-thumbnails'
 import Flex from '../../shared/components/flex'
-import {Link, IconClose} from '../../shared/components'
+import {
+  Link,
+  IconClose,
+  Box,
+  SubHeading,
+  Text,
+  Button,
+} from '../../shared/components'
 import Timer from '../../screens/validation/components/timer'
-import {useEpochState} from '../../shared/providers/epoch-context'
+import {useEpochState, EpochPeriod} from '../../shared/providers/epoch-context'
 import theme from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {
@@ -25,12 +32,33 @@ import {
   fetchFlips,
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
+import Modal from '../../shared/components/modal'
 
 // eslint-disable-next-line react/display-name
 export default function() {
   const state = useValidationState()
   const dispatch = useValidationDispatch()
   const epoch = useEpochState()
+
+  useEffect(() => {
+    if (
+      epoch &&
+      ![EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+        epoch.currentPeriod
+      )
+    ) {
+      Router.push('/dashboard')
+    }
+  }, [epoch])
+
+  const [showModal, setShowModal] = React.useState()
+
+  useEffect(() => {
+    if (!state.shortAnswersSubmitted) {
+      setShowModal(true)
+      setTimeout(() => Router.push('/dashboard'), 3000)
+    }
+  }, [state.shortAnswersSubmitted])
 
   useEffect(() => {
     async function fetchData() {
@@ -114,6 +142,29 @@ export default function() {
           onPick={index => dispatch({type: PICK, index})}
         />
       </Flex>
+
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false)
+        }}
+      >
+        <Box m="0 0 18px">
+          <SubHeading>Short answers are missing</SubHeading>
+          <Text>You will be redirected back to the dashboard.</Text>
+        </Box>
+        <Flex align="center" justify="flex-end">
+          <Box px="4px">
+            <Button
+              onClick={() => {
+                Router.push('/dashboard')
+              }}
+            >
+              Go to dashboard
+            </Button>
+          </Box>
+        </Flex>
+      </Modal>
     </Layout>
   )
 }
