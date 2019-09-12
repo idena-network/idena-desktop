@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {padding, rem, margin, wordWrap} from 'polished'
@@ -7,7 +8,6 @@ import {
   SubHeading,
   FormGroup,
   Field,
-  Hint,
   Button,
 } from '../../../shared/components'
 import Avatar from '../../../shared/components/avatar'
@@ -19,8 +19,8 @@ import {useNotificationDispatch} from '../../../shared/providers/notification-co
 function SendInviteForm({onSuccess, onFail}) {
   const [firstName, setFirstName] = React.useState()
   const [lastName, setLastName] = React.useState()
-  const [address, setAddress] = React.useState()
-  const [amount, setAmount] = React.useState()
+  const [address] = React.useState()
+  const [amount] = React.useState()
   const [submitting, setSubmitting] = React.useState(false)
 
   const {addInvite} = useInviteDispatch()
@@ -77,7 +77,12 @@ function SendInviteForm({onSuccess, onFail}) {
           onClick={async () => {
             try {
               setSubmitting(true)
-              const invite = await addInvite(address, amount, firstName, lastName)
+              const invite = await addInvite(
+                address,
+                amount,
+                firstName,
+                lastName
+              )
               setSubmitting(false)
               if (onSuccess) {
                 addNotification({

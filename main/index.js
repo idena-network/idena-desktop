@@ -1,4 +1,5 @@
 const {join, resolve} = require('path')
+// eslint-disable-next-line import/no-extraneous-dependencies
 const {BrowserWindow, app, ipcMain, Tray, Menu} = require('electron')
 const {autoUpdater} = require('electron-updater')
 const isDev = require('electron-is-dev')

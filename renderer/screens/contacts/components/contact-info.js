@@ -1,39 +1,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {margin, rem, padding, borderRadius, backgrounds} from 'polished'
 import {SubHeading, FormGroup, Text, Box} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import Avatar from '../../../shared/components/avatar'
 import useUsername from '../../../shared/hooks/use-username'
-import {
-  wordWrap,
-  margin,
-  rem,
-  padding,
-  borderRadius,
-  backgrounds,
-} from 'polished'
-
 
 import useFullName from '../../../shared/hooks/use-full-name'
 
-function ContactInfo(
-{
-  address,
-  firstName,
-  lastName,
-  mining,
-  showMining, 
-  activated,
-
-}
-) {
-
-
-  
-  const fullName = useFullName( {firstName, lastName} )
-  const username = useUsername( {address} )
-    
+function ContactInfo({address, firstName, lastName, mining, showMining}) {
+  const fullName = useFullName({firstName, lastName})
+  const username = useUsername({address})
 
   return (
     <Flex
@@ -44,26 +22,27 @@ function ContactInfo(
     >
       <Avatar username={username} />
       <Box my={rem(theme.spacings.medium24)}>
-        <SubHeading>{ fullName || username }</SubHeading>
+        <SubHeading>{fullName || username}</SubHeading>
         <Box>
           <Text color={theme.colors.muted} css={{wordBreak: 'break-all'}}>
             {address}
           </Text>
 
-          { showMining && (
-          <>
-            <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}> 
-              <Status mined={!mining}> {!mining ? 'Mined' : 'Mining...'} </Status>
-            </FormGroup>
-          </> 
-          )} 
-
+          {showMining && (
+            <>
+              <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}>
+                <Status mined={!mining}>
+                  {' '}
+                  {!mining ? 'Mined' : 'Mining...'}{' '}
+                </Status>
+              </FormGroup>
+            </>
+          )}
         </Box>
       </Box>
     </Flex>
   )
 }
-
 
 ContactInfo.propTypes = {
   address: PropTypes.string,
@@ -71,10 +50,9 @@ ContactInfo.propTypes = {
   lastName: PropTypes.string,
   mining: PropTypes.bool,
   showMining: PropTypes.bool,
-
-  activated: PropTypes.bool,
 }
 
+// eslint-disable-next-line react/prop-types
 function Status({mined, ...props}) {
   return (
     <Text
@@ -91,6 +69,5 @@ function Status({mined, ...props}) {
     />
   )
 }
-
 
 export default ContactInfo

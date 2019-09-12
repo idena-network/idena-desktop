@@ -29,38 +29,38 @@ import {useInterval} from './use-interval'
 export default function useTx(initialHash) {
   const [hash, setHash] = useState(initialHash)
   const [state, dispatch] = useReducer(
-    (state, action) => {
+    (prevState, action) => {
       switch (action.type) {
         case 'reset':
           return {
-            ...state,
+            ...prevState,
             mining: true,
             mined: false,
           }
         case 'mempool':
           return {
-            ...state,
+            ...prevState,
             mining: true,
             mined: false,
             ...action.result,
           }
         case 'mined':
           return {
-            ...state,
+            ...prevState,
             mining: false,
             mined: true,
             ...action.result,
           }
         case 'fail':
           return {
-            ...state,
+            ...prevState,
             mining: false,
             mined: true,
             error: action.error.message,
           }
         case 'missing':
           return {
-            ...state,
+            ...prevState,
             mining: false,
             mined: true,
             error: 'tx is missing /shrug',

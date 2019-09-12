@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React from 'react'
 import {margin, rem} from 'polished'
 
 import Layout from '../../shared/components/layout'
@@ -61,7 +61,7 @@ function Settings() {
             <FlatButton
               color={theme.colors.primary}
               onClick={() => {
-                setAddr(DEFAULT_NODE_URL)
+                // setAddr(DEFAULT_NODE_URL)
                 addNotification({
                   title: 'Settings saved!',
                   body: `Now running at ${DEFAULT_NODE_URL}`,

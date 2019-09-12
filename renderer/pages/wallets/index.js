@@ -7,7 +7,7 @@ import WalletList from '../../screens/wallets/components/wallet-list'
 import Loading from '../../shared/components/loading'
 import {fetchAccountList, fetchBalance} from '../../shared/api/wallet'
 
-export default function() {
+export default function Index() {
   const [wallets, setWallets] = useState()
   const [totalAmount, setTotalAmount] = useState()
 

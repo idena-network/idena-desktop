@@ -1,12 +1,13 @@
 import React from 'react'
 import theme from '../../../shared/theme'
 
-const toEmoji = sender => '🤖'
+const toEmoji = () => '🤖'
 
 const fromMe = sender => sender === 'QQ'
 
 const bg = sender => (fromMe(sender) ? theme.colors.primary : theme.colors.gray)
 
+// eslint-disable-next-line react/prop-types
 export default function Message({text, sender, timestamp}) {
   const own = fromMe(sender)
   return (

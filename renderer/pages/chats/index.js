@@ -10,7 +10,7 @@ function fetchChatList() {
   return []
 }
 
-export default () => {
+export default function Index() {
   const [chats, setChats] = useState([])
 
   useEffect(() => {

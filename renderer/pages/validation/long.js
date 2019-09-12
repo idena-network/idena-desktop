@@ -26,6 +26,7 @@ import {
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
 
+// eslint-disable-next-line react/display-name
 export default function() {
   const state = useValidationState()
   const dispatch = useValidationDispatch()
