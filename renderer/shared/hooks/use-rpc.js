@@ -1,7 +1,8 @@
 import {useReducer, useCallback} from 'react'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import axios from 'axios'
-import {nodeSettings} from '../api/api-client'
+import {loadItem} from '../utils/persist'
+import {BASE_API_URL} from '../api/api-client'
 
 /**
  * @typedef UseRpcResult
@@ -75,7 +76,10 @@ export default function useRpc(initialMethod, ...initialParams) {
 
     async function fetchData() {
       try {
-        const {data} = await axios.post(nodeSettings.url, rpcBody)
+        const {data} = await axios.post(
+          loadItem('settings', 'url') || BASE_API_URL,
+          rpcBody
+        )
         if (!ignore) {
           dataDispatch({type: 'done', ...data})
         }
