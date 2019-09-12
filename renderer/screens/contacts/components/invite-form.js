@@ -80,8 +80,6 @@ RenameInvite.propTypes = {
   onSave: PropTypes.func,
 }
 
-
 const NameField = props => <Field {...props} style={{width: rem(140)}} />
-const WideField = props => <Field {...props} style={{width: rem(296)}} />
 
 export default RenameInvite

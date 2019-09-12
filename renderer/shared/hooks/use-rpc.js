@@ -22,14 +22,12 @@ import {nodeSettings} from '../api/api-client'
  */
 export default function useRpc(initialMethod, ...initialParams) {
   const [rpcBody, dispatchRpc] = useReducer(
-    (state, [method, ...params]) => {
-      return {
-        ...state,
-        method,
-        params,
-        id: state.id + 1,
-      }
-    },
+    (state, [method, ...params]) => ({
+      ...state,
+      method,
+      params,
+      id: state.id + 1,
+    }),
     {
       method: initialMethod,
       params: initialParams,

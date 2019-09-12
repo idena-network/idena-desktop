@@ -2,6 +2,7 @@ import React from 'react'
 import {rem} from 'polished'
 import theme from '../theme'
 
+// eslint-disable-next-line react/display-name
 export default () => (
   <style jsx global>{`
     html {

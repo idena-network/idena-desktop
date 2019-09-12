@@ -8,7 +8,7 @@ import {Box} from '../../../shared/components'
 import Actions from '../../../shared/components/actions'
 import IconLink from '../../../shared/components/icon-link'
 
-function ContactToolbar({onRename, onKill, onSendCoins}) {
+function ContactToolbar({onRename, onKill}) {
   return (
     <Box
       py={theme.spacings.large}
@@ -51,8 +51,7 @@ function ContactToolbar({onRename, onKill, onSendCoins}) {
 
 ContactToolbar.propTypes = {
   onRename: PropTypes.func,
-  onRevokeInvitation: PropTypes.func,
-  onSendCoins: PropTypes.func,
+  onKill: PropTypes.func,
 }
 
 export default ContactToolbar

@@ -42,7 +42,7 @@ function InviteProvider({children}) {
 
         // find all identities/invites
         const invitedIdentity = invitedIdentities.find(
-          ({address}) => address === invite.receiver
+          ({addr}) => addr === invite.receiver
         )
 
         // becomes activated once invitee is found
@@ -168,15 +168,15 @@ function InviteProvider({children}) {
     const newLastName = lastName || ''
 
     setInvites(
-      invites.map(invite => {
-        if (invite.id === id) {
+      invites.map(inv => {
+        if (inv.id === id) {
           return {
-            ...invite,
+            ...inv,
             firstName: newFirstName,
             lastName: newLastName,
           }
         }
-        return invite
+        return inv
       })
     )
 

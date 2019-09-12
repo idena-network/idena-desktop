@@ -7,7 +7,6 @@ import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import Avatar from '../../../shared/components/avatar'
-// import {Actions} from './actions'
 import {useInviteState} from '../../../shared/providers/invite-context'
 import useUsername from '../../../shared/hooks/use-username'
 import useFullName from '../../../shared/hooks/use-full-name'
@@ -103,7 +102,7 @@ function InviteList({filter, onSelectInvite}) {
 
   return (
     <Box css={{...margin(0, 0, rem(theme.spacings.medium24), 0)}}>
-      {filteredInvites.map(({id, ...invite}) => (
+      {filteredInvites.map(invite => (
         <InviteCard
           id={invite.dbkey}
           {...invite}
@@ -124,16 +123,7 @@ InviteList.propTypes = {
   onSelectInvite: PropTypes.func,
 }
 
-function InviteCard({
-  id,
-  receiver,
-  mined,
-  mining,
-  activated,
-  canKill,
-  state,
-  ...props
-}) {
+function InviteCard({receiver, mining, activated, state, ...props}) {
   const fullName = useFullName(props)
 
   const hint = mining
@@ -194,11 +184,6 @@ InviteCard.propTypes = {
   activated: PropTypes.bool,
   canKill: PropTypes.bool,
   state: PropTypes.string,
-}
-
-// eslint-disable-next-line react/prop-types
-function ContactSection({children}) {
-  return <SidebarHeading title="Contacts">{children}</SidebarHeading>
 }
 
 function ContactList({filter, onSelectContact}) {

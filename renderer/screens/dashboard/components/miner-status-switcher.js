@@ -1,7 +1,6 @@
 import React, {useEffect} from 'react'
 import {
   Box,
-  BlockHeading,
   FormGroup,
   Label,
   Switcher,
@@ -24,41 +23,41 @@ function MinerStatusSwitcher() {
   const [{mined}, setHash] = useTx()
 
   const [state, dispatch] = React.useReducer(
-    (state, [action, identity]) => {
+    (prevState, [action, identityObject]) => {
       switch (action) {
         case 'init': {
           return {
-            ...state,
-            miner: identity.online,
+            ...prevState,
+            miner: identityObject.online,
           }
         }
         case 'open': {
           return {
-            ...state,
+            ...prevState,
             showModal: true,
           }
         }
         case 'close': {
           return {
-            ...state,
+            ...prevState,
             showModal: false,
           }
         }
         case 'toggle':
           return {
-            ...state,
+            ...prevState,
             mining: true,
           }
         case 'mined': {
           return {
-            ...state,
+            ...prevState,
             mining: false,
             showModal: false,
-            miner: identity.online,
+            miner: identityObject.online,
           }
         }
         default:
-          return state
+          return prevState
       }
     },
     {
@@ -122,20 +121,26 @@ function MinerStatusSwitcher() {
       <Modal show={state.showModal} onHide={() => dispatch(['close'])}>
         <Box m="0 0 18px">
           <SubHeading>
-            {!state.miner ? 'Activate mining status' : 'Deactivate mining status'}
+            {!state.miner
+              ? 'Activate mining status'
+              : 'Deactivate mining status'}
           </SubHeading>
           <Text>
             {!state.miner ? (
-              <span>Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour. 
-                    <br/>
-                    <br/>
-                    You can deactivate your online status at any time. 
+              <span>
+                Submit the form to start mining. Your node has to be online
+                unless you deactivate your status. Otherwise penalties might be
+                charged after being offline more than 1 hour.
+                <br />
+                <br />
+                You can deactivate your online status at any time.
               </span>
             ) : (
-              <span>Submit the form to deactivate your mining status.
-                    <br/>
-                    <br/>
-                    You can activate it again afterwards. 
+              <span>
+                Submit the form to deactivate your mining status.
+                <br />
+                <br />
+                You can activate it again afterwards.
               </span>
             )}
           </Text>

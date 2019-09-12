@@ -107,8 +107,6 @@ BlockHeading.propTypes = {
   color: PropTypes.string,
   fontSize: PropTypes.string,
   fontWeight: PropTypes.number,
-  margin: Dim,
-  // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,
   children: PropTypes.node,
 }

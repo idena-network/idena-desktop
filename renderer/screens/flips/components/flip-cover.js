@@ -20,6 +20,7 @@ import useClickOutside from '../../../shared/hooks/use-click-outside'
 import useHover from '../../../shared/hooks/use-hover'
 import {FlipType} from '../../../shared/utils/useFlips'
 
+// eslint-disable-next-line react/display-name
 const FlipMenu = forwardRef((props, ref) => (
   <Box
     bg={theme.colors.white}
