@@ -3,8 +3,6 @@ osx_image: xcode10.2
 language: node_js
 node_js: '10'
 
-if: tag IS present
-
 os:
   - osx
   - windows
@@ -20,18 +18,17 @@ cache:
     - $HOME/.cache/electron-builder
     - $HOME/.npm/_prebuilds
 
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then powershell -command 'Set-MpPreference -DisableRealtimeMonitoring $true'; fi
-
 install:
   - npm ci
 
 before_script:
-  - npm --no-git-tag-version version ${TRAVIS_TAG:1}
+  - if [[ "$TRAVIS_TAG" != "" ]]; then npm --no-git-tag-version version ${TRAVIS_TAG:1}; fi
 
 script:
+  - npm run eslint
+
   - echo "Build win"
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then npm run dist:win; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ] && [ "$TRAVIS_TAG" != "" ]]; then npm run dist:win; fi
 
   - echo "Build mac"
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then npm run dist:mac; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TRAVIS_TAG" != "" ]]; then npm run dist:mac; fi
