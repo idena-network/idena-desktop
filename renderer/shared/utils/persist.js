@@ -30,3 +30,18 @@ export function persistState(name, state) {
     .setState(state)
     .write()
 }
+
+/**
+ * Checks if action or action list has the name passed
+ * @param {(string|string[])} actionList
+ * @param {string} action
+ */
+export function shouldPersist(actionList, action) {
+  if (!actionList || actionList.length === 0) {
+    return true
+  }
+  const actionName = Array.isArray(action) ? action[0] : action.type
+  return Array.isArray(actionList)
+    ? actionList.includes(actionName)
+    : actionList === actionName
+}

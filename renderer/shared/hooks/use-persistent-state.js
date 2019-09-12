@@ -1,6 +1,12 @@
 import {useState, useEffect, useRef} from 'react'
 import dequal from 'dequal'
-import {loadItem, persistItem, loadState, persistState} from '../utils/persist'
+import {
+  loadItem,
+  persistItem,
+  loadState,
+  persistState,
+  shouldPersist,
+} from '../utils/persist'
 
 export function usePersistentState(dbName, key, initialValue) {
   const [value, setValue] = useState(
@@ -51,19 +57,4 @@ export function usePersistence([state, dispatch], name, on) {
     actionRef.current ? state : loadState(name) || state,
     newDispatchRef.current,
   ]
-}
-
-/**
- * Checks if action or action list has the name passed
- * @param {(string|string[])} actionList
- * @param {string} action
- */
-function shouldPersist(actionList, action) {
-  if (!actionList || actionList.length === 0) {
-    return true
-  }
-  const actionName = Array.isArray(action) ? action[0] : action.type
-  return Array.isArray(actionList)
-    ? actionList.includes(actionName)
-    : actionList === actionName
 }
