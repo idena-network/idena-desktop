@@ -27,20 +27,16 @@ function Settings() {
   const {archiveFlips} = useFlips()
   const {addNotification} = useNotificationDispatch()
 
-  const urlRef = React.useRef()
-
   const [state, dispatch] = usePersistence(
     React.useReducer(
-      (state, [type]) => {
+      (state, [type, url]) => {
         switch (type) {
           case 'url/reset':
             return {...state, isSaved: false}
+          case 'url/change':
+            return {...state, url, isSaved: false}
           case 'url/save':
-            return {...state, url: urlRef.current.value, isSaved: true}
-          case 'url/default': {
-            urlRef.current.value = BASE_API_URL
-            return {...state, url: BASE_API_URL, isSaved: true}
-          }
+            return {...state, isSaved: true}
           default:
             return state
         }
@@ -50,7 +46,8 @@ function Settings() {
         isSaved: false,
       }
     ),
-    'settings'
+    'settings',
+    ['url/save', 'url/reset']
   )
 
   React.useEffect(() => {
@@ -72,15 +69,15 @@ function Settings() {
           <Label htmlFor="url">Address</Label>
           <Flex align="center">
             <Input
-              defaultValue={state.url}
-              ref={urlRef}
+              value={state.url}
+              onChange={e => dispatch(['url/change', e.target.value])}
               style={margin(0, theme.spacings.normal, 0, 0)}
             />
             <Button onClick={() => dispatch(['url/save'])}>Save</Button>
             <Divider vertical m={theme.spacings.small} />
             <FlatButton
               color={theme.colors.primary}
-              onClick={() => dispatch(['url/default'])}
+              onClick={() => dispatch(['url/change', BASE_API_URL])}
             >
               Use default
             </FlatButton>
