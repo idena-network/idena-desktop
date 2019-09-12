@@ -7,6 +7,7 @@ const validation = require('./stores/validation')
 const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
 const logger = require('./logger')
+const {prepareDb} = require('./stores/setup')
 
 process.once('loaded', () => {
   global.ipcRenderer = electron.ipcRenderer
@@ -19,6 +20,7 @@ process.once('loaded', () => {
   global.logger = logger
 
   global.isDev = isDev
+  global.prepareDb = prepareDb
 
   try {
     global.appVersion = electron.remote.app.getVersion()
