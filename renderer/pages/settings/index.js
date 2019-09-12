@@ -71,7 +71,10 @@ function Settings() {
             <Input
               value={state.url}
               onChange={e => dispatch(['url/change', e.target.value])}
-              style={margin(0, theme.spacings.normal, 0, 0)}
+              style={{
+                ...margin(0, theme.spacings.normal, 0, 0),
+                width: rem(300),
+              }}
             />
             <Button onClick={() => dispatch(['url/save'])}>Save</Button>
             <Divider vertical m={theme.spacings.small} />
