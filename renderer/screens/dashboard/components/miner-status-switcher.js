@@ -1,4 +1,5 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useReducer} from 'react'
+
 import {
   Box,
   FormGroup,
@@ -14,76 +15,86 @@ import theme from '../../../shared/theme'
 import useTx from '../../../shared/hooks/use-tx'
 import useRpc from '../../../shared/hooks/use-rpc'
 import {useIdentityState} from '../../../shared/providers/identity-context'
+import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 
-// eslint-disable-next-line react/prop-types
+const defaultState = {
+  online: null,
+  showModal: false,
+  isMining: false,
+}
+
+function reducer(state, [action, {online} = defaultState]) {
+  switch (action) {
+    case 'init':
+      return {
+        ...state,
+        online,
+      }
+    case 'open':
+      return {
+        ...state,
+        showModal: true,
+      }
+    case 'close':
+      return {
+        ...state,
+        showModal: false,
+      }
+
+    case 'toggle':
+      return {
+        ...state,
+        isMining: true,
+      }
+    case 'mined':
+      return {
+        ...state,
+        isMining: false,
+        showModal: false,
+        online,
+      }
+    case 'error':
+      return {
+        ...state,
+        showModal: false,
+        isMining: false,
+      }
+    default:
+      return state
+  }
+}
+
 function MinerStatusSwitcher() {
   const identity = useIdentityState()
+  const {addError} = useNotificationDispatch()
 
-  const [{result: hash}, callRpc] = useRpc()
+  const [{result: hash, error}, callRpc] = useRpc()
   const [{mined}, setHash] = useTx()
 
-  const [state, dispatch] = React.useReducer(
-    (prevState, [action, identityObject]) => {
-      switch (action) {
-        case 'init': {
-          return {
-            ...prevState,
-            miner: identityObject.online,
-          }
-        }
-        case 'open': {
-          return {
-            ...prevState,
-            showModal: true,
-          }
-        }
-        case 'close': {
-          return {
-            ...prevState,
-            showModal: false,
-          }
-        }
-        case 'toggle':
-          return {
-            ...prevState,
-            mining: true,
-          }
-        case 'mined': {
-          return {
-            ...prevState,
-            mining: false,
-            showModal: false,
-            miner: identityObject.online,
-          }
-        }
-        default:
-          return prevState
-      }
-    },
-    {
-      miner: null,
-      showModal: false,
-      mining: false,
-    }
-  )
+  const [state, dispatch] = useReducer(reducer, defaultState)
 
   useEffect(() => {
-    if (identity) {
+    if (identity && !state.showModal) {
       dispatch(['init', identity])
     }
-  }, [identity])
+  }, [dispatch, identity, state.showModal])
+
+  useEffect(() => setHash(hash), [hash, setHash])
 
   useEffect(() => {
-    setHash(hash)
-  }, [hash, setHash])
+    if (error) {
+      dispatch(['error'])
+      addError({title: error.message})
+    }
+  }, [addError, dispatch, error])
 
   useEffect(() => {
     if (mined) {
-      dispatch(['mined', identity])
+      dispatch(['mined'])
     }
-  }, [identity, mined])
+  }, [dispatch, mined])
 
-  if (identity === null || !identity.canMine) {
+  if (!identity.canMine) {
     return null
   }
 
@@ -96,11 +107,11 @@ function MinerStatusSwitcher() {
               Online mining status
             </Label>
             <Box style={{pointerEvents: 'none'}}>
-              {state.miner !== null && (
+              {state.online !== null && (
                 <Switcher
                   withStatusHint
-                  isChecked={state.miner}
-                  isInProgress={state.mining}
+                  isChecked={state.online}
+                  isInProgress={state.isMining}
                 />
               )}
             </Box>
@@ -121,12 +132,12 @@ function MinerStatusSwitcher() {
       <Modal show={state.showModal} onHide={() => dispatch(['close'])}>
         <Box m="0 0 18px">
           <SubHeading>
-            {!state.miner
+            {!state.online
               ? 'Activate mining status'
               : 'Deactivate mining status'}
           </SubHeading>
           <Text>
-            {!state.miner ? (
+            {!state.online ? (
               <span>
                 Submit the form to start mining. Your node has to be online
                 unless you deactivate your status. Otherwise penalties might be
@@ -145,12 +156,6 @@ function MinerStatusSwitcher() {
             )}
           </Text>
         </Box>
-        {/* <form>
-          <FormGroup m="0 0 24px">
-            <Label htmlFor="fee">Fee, DNA</Label>
-            <Input name="fee" value="123" disabled />
-          </FormGroup>
-        </form> */}
         <Flex align="center" justify="flex-end">
           <Box px="4px">
             <Button variant="secondary" onClick={() => dispatch(['close'])}>
@@ -162,13 +167,13 @@ function MinerStatusSwitcher() {
               onClick={() => {
                 dispatch(['toggle'])
                 callRpc(
-                  state.miner ? 'dna_becomeOffline' : 'dna_becomeOnline',
+                  state.online ? 'dna_becomeOffline' : 'dna_becomeOnline',
                   {}
                 )
               }}
-              disabled={state.mining}
+              disabled={state.isMining}
             >
-              {state.mining ? 'Waiting...' : 'Submit'}
+              {state.isMining ? 'Waiting...' : 'Submit'}
             </Button>
           </Box>
         </Flex>

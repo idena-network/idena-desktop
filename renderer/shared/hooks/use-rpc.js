@@ -50,13 +50,14 @@ export default function useRpc(initialMethod, ...initialParams) {
             ...state,
             isLoading: false,
             result: action.result,
+            error: action.error,
             isReady: true,
           }
         case 'fail':
           return {
             ...state,
             isLoading: false,
-            error: action.error.message,
+            error: action.error,
             isReady: true,
           }
         default:

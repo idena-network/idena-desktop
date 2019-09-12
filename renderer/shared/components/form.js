@@ -142,96 +142,100 @@ Hint.propTypes = {
 
 function Switcher({isChecked, withStatusHint, isInProgress}) {
   return (
-    <>
-      <label className="switcher">
-        <input
-          type="checkbox"
-          checked={isChecked}
-          className={isInProgress && 'in-progress'}
-          value={isChecked}
-        />
-        <div className="pin" />
-        {withStatusHint && (
-          // eslint-disable-next-line no-nested-ternary
-          <span>{isInProgress ? 'Waiting...' : isChecked ? 'On' : 'Off'}</span>
-        )}
-      </label>
+    isChecked !== undefined && (
+      <>
+        <label className="switcher">
+          <input
+            type="checkbox"
+            defaultChecked={isChecked}
+            className={isInProgress && 'in-progress'}
+            value={isChecked}
+          />
+          <div className="pin" />
+          {withStatusHint && (
+            <span>
+              {/* eslint-disable-next-line no-nested-ternary */}
+              {isInProgress ? 'Waiting...' : isChecked ? 'On' : 'Off'}
+            </span>
+          )}
+        </label>
 
-      <style jsx>{`
-        .switcher {
-          position: relative;
-          display: inline-block;
-          vertical-align: middle;
-          width: 32px;
-          height: 16px;
-          cursor: pointer;
-          z-index: 1;
-          user-select: none;
-        }
-        span {
-          font-size: 1rem;
-          line-height: 16px;
-          font-weight: 500;
-          color: ${theme.colors.danger};
-          display: inline-block;
-          vertical-align: middle;
-          margin: 0 8px;
-          position: absolute;
-          right: 100%;
-          top: 0;
-          transition: color 0.3s ease;
-        }
-        .pin {
-          background-color: ${theme.colors.danger};
-          box-shadow: none;
-          border-radius: 100px;
-          font-size: 1em;
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          transition: background 0.3s ease;
-        }
-        .pin:before {
-          content: '';
-          position: absolute;
-          left: 3px;
-          top: 3px;
-          width: 10px;
-          height: 10px;
-          border-radius: 100px;
-          background-color: ${theme.colors.white};
-          transition: left 0.3s ease;
-        }
-        input {
-          cursor: pointer;
-          position: absolute;
-          left: -100%;
-          opacity: 0;
-          width: 0;
-          height: 0;
-        }
-        input:checked ~ span {
-          color: ${theme.colors.primary};
-        }
-        input:checked ~ .pin {
-          background-color: ${theme.colors.primary};
-        }
-        input:checked ~ .pin:before {
-          left: 18px;
-        }
-        input.in-progress ~ span {
-          color: ${theme.colors.warning};
-        }
-        input.in-progress ~ .pin {
-          background-color: ${theme.colors.warning};
-        }
-        input.in-progress ~ .pin:before {
-          left: 11px;
-        }
-      `}</style>
-    </>
+        <style jsx>{`
+          .switcher {
+            position: relative;
+            display: inline-block;
+            vertical-align: middle;
+            width: 32px;
+            height: 16px;
+            cursor: pointer;
+            z-index: 1;
+            user-select: none;
+          }
+          span {
+            font-size: 1rem;
+            line-height: 16px;
+            font-weight: 500;
+            color: ${theme.colors.danger};
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 8px;
+            position: absolute;
+            right: 100%;
+            top: 0;
+            transition: color 0.3s ease;
+          }
+          .pin {
+            background-color: ${theme.colors.danger};
+            box-shadow: none;
+            border-radius: 100px;
+            font-size: 1em;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: background 0.3s ease;
+          }
+          .pin:before {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 10px;
+            height: 10px;
+            border-radius: 100px;
+            background-color: ${theme.colors.white};
+            transition: left 0.3s ease;
+          }
+          input {
+            cursor: pointer;
+            position: absolute;
+            left: -100%;
+            opacity: 0;
+            width: 0;
+            height: 0;
+          }
+          input:checked ~ span {
+            color: ${theme.colors.primary};
+          }
+          input:checked ~ .pin {
+            background-color: ${theme.colors.primary};
+          }
+          input:checked ~ .pin:before {
+            left: 18px;
+          }
+          input.in-progress ~ span {
+            color: ${theme.colors.warning};
+          }
+          input.in-progress ~ .pin {
+            background-color: ${theme.colors.warning};
+          }
+          input.in-progress ~ .pin:before {
+            left: 11px;
+          }
+        `}</style>
+      </>
+    )
   )
 }
 
