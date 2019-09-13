@@ -149,11 +149,14 @@ function Switcher({isChecked, withStatusHint, isInProgress}) {
           checked={isChecked}
           className={isInProgress && 'in-progress'}
           value={isChecked}
+          readOnly
         />
         <div className="pin" />
         {withStatusHint && (
-          // eslint-disable-next-line no-nested-ternary
-          <span>{isInProgress ? 'Waiting...' : isChecked ? 'On' : 'Off'}</span>
+          <span>
+            {/* eslint-disable-next-line no-nested-ternary */}
+            {isInProgress ? 'Waiting...' : isChecked ? 'On' : 'Off'}
+          </span>
         )}
       </label>
 
