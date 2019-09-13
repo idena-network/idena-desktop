@@ -30,12 +30,14 @@ const IdentityDispatchContext = React.createContext()
 // eslint-disable-next-line react/prop-types
 function IdentityProvider({children}) {
   const [identity, setIdentity] = React.useState(null)
+  const [{result: balanceResult}, callRpc] = useRpc()
 
   React.useEffect(() => {
     let ignore = false
 
     async function fetchData() {
       const fetchedIdentity = await fetchIdentity()
+      callRpc('dna_getBalance', fetchedIdentity.address)
       if (!ignore) {
         setIdentity(fetchedIdentity)
       }
@@ -46,7 +48,7 @@ function IdentityProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [callRpc])
 
   useInterval(async () => {
     async function fetchData() {
@@ -59,13 +61,10 @@ function IdentityProvider({children}) {
     fetchData()
   }, 1000 * 1)
 
-  const [{result: balanceResult}, callRpc] = useRpc()
-
-  React.useEffect(() => {
-    if (identity) {
-      callRpc('dna_getBalance', identity.address)
-    }
-  }, [callRpc, identity])
+  useInterval(
+    () => callRpc('dna_getBalance', identity.address),
+    identity ? 1000 : null
+  )
 
   const canActivateInvite = [
     IdentityStatus.Undefined,
