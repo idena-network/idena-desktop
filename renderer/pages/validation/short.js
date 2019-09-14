@@ -146,7 +146,7 @@ function ShortSession() {
         flips={state.flips}
         onPick={index => dispatch({type: PICK, index})}
       />
-      <FlipQualificationModal
+      <InviteQualificationModal
         show={showModal}
         onHide={() => setShowModal(false)}
         onSubmit={() => Router.push('/validation/long')}
@@ -156,7 +156,7 @@ function ShortSession() {
 }
 
 // eslint-disable-next-line react/prop-types
-function FlipQualificationModal({show, onSubmit}) {
+function InviteQualificationModal({show, onSubmit}) {
   return (
     <Modal show={show}>
       <Box m="0 0 18px">
