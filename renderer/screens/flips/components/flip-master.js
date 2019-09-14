@@ -12,15 +12,24 @@ import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import SubmitFlip from './submit-flip'
 import useFlips from '../../../shared/utils/useFlips'
-import {useIdentityState} from '../../../shared/providers/identity-context'
+import {
+  useIdentityState,
+  mapToFriendlyStatus,
+} from '../../../shared/providers/identity-context'
 import {
   NotificationType,
   useNotificationDispatch,
 } from '../../../shared/providers/notification-context'
 import {composeHint, hasDataUrl, getRandomHint} from '../utils/flip'
+import {
+  useEpochState,
+  EpochPeriod,
+} from '../../../shared/providers/epoch-context'
 
 function FlipMaster({id, onClose}) {
-  const {canSubmitFlip} = useIdentityState()
+  const {canSubmitFlip, state} = useIdentityState()
+  const {currentPeriod} = useEpochState()
+
   const {getDraft, saveDraft, submitFlip} = useFlips()
 
   const {addNotification} = useNotificationDispatch()
@@ -56,9 +65,26 @@ function FlipMaster({id, onClose}) {
   const handleSubmitFlip = async () => {
     try {
       const {result, error} = await submitFlip({id, ...flip})
+
+      let message = ''
+      if (error) {
+        if (currentPeriod !== EpochPeriod.None) {
+          message = `Can not submit flip during the validation session`
+        } else if (!canSubmitFlip) {
+          message = `You can not submit flips having ${mapToFriendlyStatus(
+            state
+          )} status`
+        } else if (canSubmitFlip) {
+          message = 'You cannot submit more flips until the next validation'
+        } else {
+          // eslint-disable-next-line prefer-destructuring
+          message = error.message
+        }
+      }
+
       addNotification({
         title: error ? 'Error while uploading flip' : 'Flip saved!',
-        body: error ? error.message : `Hash ${result.hash}`,
+        body: error ? message : `Hash ${result.hash}`,
         type: error ? NotificationType.Error : NotificationType.Info,
       })
       Router.push('/flips')
