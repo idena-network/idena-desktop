@@ -1,7 +1,8 @@
 import React from 'react'
 import deepEqual from 'dequal'
-import {useInterval} from '../hooks/use-interval'
+import {useInterval, usePoll} from '../hooks/use-interval'
 import {fetchIdentity, killIdentity} from '../api'
+import useRpc from '../hooks/use-rpc'
 
 export const IdentityStatus = {
   Undefined: 'Undefined',
@@ -29,13 +30,19 @@ const IdentityDispatchContext = React.createContext()
 // eslint-disable-next-line react/prop-types
 function IdentityProvider({children}) {
   const [identity, setIdentity] = React.useState(null)
+  const [{result: balanceResult}, callRpc] = usePoll(
+    useRpc('dna_getBalance', identity && identity.address),
+    identity ? 1000 : null
+  )
 
   React.useEffect(() => {
     let ignore = false
 
     async function fetchData() {
+      const fetchedIdentity = await fetchIdentity()
+      callRpc('dna_getBalance', fetchedIdentity.address)
       if (!ignore) {
-        setIdentity(await fetchIdentity())
+        setIdentity(fetchedIdentity)
       }
     }
 
@@ -44,7 +51,7 @@ function IdentityProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [callRpc])
 
   useInterval(async () => {
     async function fetchData() {
@@ -100,6 +107,7 @@ function IdentityProvider({children}) {
     <IdentityStateContext.Provider
       value={{
         ...identity,
+        balance: balanceResult && balanceResult.balance,
         canActivateInvite,
         canSubmitFlip,
         canValidate,
