@@ -1,6 +1,6 @@
 import React from 'react'
 import deepEqual from 'dequal'
-import {useInterval} from '../hooks/use-interval'
+import {useInterval, usePoll} from '../hooks/use-interval'
 import {fetchIdentity, killIdentity} from '../api'
 import useRpc from '../hooks/use-rpc'
 
@@ -30,7 +30,10 @@ const IdentityDispatchContext = React.createContext()
 // eslint-disable-next-line react/prop-types
 function IdentityProvider({children}) {
   const [identity, setIdentity] = React.useState(null)
-  const [{result: balanceResult}, callRpc] = useRpc()
+  const [{result: balanceResult}, callRpc] = usePoll(
+    useRpc('dna_getBalance', identity && identity.address),
+    identity ? 1000 : null
+  )
 
   React.useEffect(() => {
     let ignore = false
@@ -60,11 +63,6 @@ function IdentityProvider({children}) {
 
     fetchData()
   }, 1000 * 1)
-
-  useInterval(
-    () => callRpc('dna_getBalance', identity.address),
-    identity ? 1000 : null
-  )
 
   const canActivateInvite = [
     IdentityStatus.Undefined,
