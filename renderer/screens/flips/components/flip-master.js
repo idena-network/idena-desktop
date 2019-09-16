@@ -12,15 +12,26 @@ import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import SubmitFlip from './submit-flip'
 import useFlips from '../../../shared/utils/useFlips'
-import {useIdentityState} from '../../../shared/providers/identity-context'
+import {
+  useIdentityState,
+  IdentityStatus,
+} from '../../../shared/providers/identity-context'
 import {
   NotificationType,
   useNotificationDispatch,
 } from '../../../shared/providers/notification-context'
 import {composeHint, hasDataUrl, getRandomHint} from '../utils/flip'
+import {
+  useEpochState,
+  EpochPeriod,
+} from '../../../shared/providers/epoch-context'
+import {useChainState} from '../../../shared/providers/chain-context'
 
 function FlipMaster({id, onClose}) {
-  const {canSubmitFlip} = useIdentityState()
+  const {canSubmitFlip, state: identityState} = useIdentityState()
+  const {currentPeriod} = useEpochState()
+  const {syncing} = useChainState()
+
   const {getDraft, saveDraft, submitFlip} = useFlips()
 
   const {addNotification} = useNotificationDispatch()
@@ -56,9 +67,35 @@ function FlipMaster({id, onClose}) {
   const handleSubmitFlip = async () => {
     try {
       const {result, error} = await submitFlip({id, ...flip})
+
+      let message = ''
+      if (error) {
+        if (
+          [
+            IdentityStatus.None,
+            IdentityStatus.Candidate,
+            IdentityStatus.Suspended,
+            IdentityStatus.Zombie,
+          ].includes(identityState)
+        ) {
+          message = `You can not submit flips having 'Candidate' status`
+        } else if (
+          [IdentityStatus.Newbie, IdentityStatus.Verified].includes(
+            identityState
+          )
+        ) {
+          message = 'You cannot submit more flips until the next validation'
+        } else if (currentPeriod !== EpochPeriod.None) {
+          message = `Can not submit flip during the validation session`
+        } else {
+          // eslint-disable-next-line prefer-destructuring
+          message = error.message
+        }
+      }
+
       addNotification({
         title: error ? 'Error while uploading flip' : 'Flip saved!',
-        body: error ? error.message : `Hash ${result.hash}`,
+        body: error ? message : `Hash ${result.hash}`,
         type: error ? NotificationType.Error : NotificationType.Info,
       })
       Router.push('/flips')
@@ -71,7 +108,7 @@ function FlipMaster({id, onClose}) {
     }
   }
 
-  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip
+  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip && !syncing
 
   const steps = [
     {
