@@ -14,7 +14,6 @@ import SubmitFlip from './submit-flip'
 import useFlips from '../../../shared/utils/useFlips'
 import {
   useIdentityState,
-  mapToFriendlyStatus,
   IdentityStatus,
 } from '../../../shared/providers/identity-context'
 import {
@@ -26,10 +25,12 @@ import {
   useEpochState,
   EpochPeriod,
 } from '../../../shared/providers/epoch-context'
+import {useChainState} from '../../../shared/providers/chain-context'
 
 function FlipMaster({id, onClose}) {
   const {canSubmitFlip, state: identityState} = useIdentityState()
   const {currentPeriod} = useEpochState()
+  const {syncing} = useChainState()
 
   const {getDraft, saveDraft, submitFlip} = useFlips()
 
@@ -107,7 +108,7 @@ function FlipMaster({id, onClose}) {
     }
   }
 
-  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip
+  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip && !syncing
 
   const steps = [
     {
