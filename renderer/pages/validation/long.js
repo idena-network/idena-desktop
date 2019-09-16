@@ -150,8 +150,11 @@ export default function() {
         }}
       >
         <Box m="0 0 18px">
-          <SubHeading>Short answers are missing</SubHeading>
-          <Text>You will be redirected back to the dashboard.</Text>
+          <SubHeading>Short session is over</SubHeading>
+          <Text>
+            Unfortunately, you are late: the short validation session is already
+            over. You will be redirected to My Idena page.
+          </Text>
         </Box>
         <Flex align="center" justify="flex-end">
           <Box px="4px">

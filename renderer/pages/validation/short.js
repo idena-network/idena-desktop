@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import Router from 'next/router'
 import {backgrounds, padding, rem, position} from 'polished'
 import ValidationHeader from '../../screens/validation/components/validation-header'
@@ -10,7 +10,15 @@ import Flex from '../../shared/components/flex'
 import {useInterval} from '../../shared/hooks/use-interval'
 import theme from '../../shared/theme'
 import {useEpochState, EpochPeriod} from '../../shared/providers/epoch-context'
-import {IconClose, Link} from '../../shared/components'
+import {
+  IconClose,
+  Link,
+  Modal,
+  Box,
+  SubHeading,
+  Text,
+  Button,
+} from '../../shared/components'
 import {
   submitShortAnswers,
   useValidationDispatch,
@@ -46,11 +54,13 @@ function ShortSession() {
     }
   }, [epoch])
 
+  const [showModal, setShowModal] = useState(false)
+
   useEffect(() => {
     if (state.shortAnswersSubmitted) {
-      Router.push('/validation/long')
+      setShowModal(true)
     }
-  }, [state.shortAnswersSubmitted])
+  }, [showModal, state.shortAnswersSubmitted])
 
   useEffect(() => {
     if (!state.ready && !state.shortAnswersSubmitted) {
@@ -136,7 +146,35 @@ function ShortSession() {
         flips={state.flips}
         onPick={index => dispatch({type: PICK, index})}
       />
+      <InviteQualificationModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        onSubmit={() => Router.push('/validation/long')}
+      />
     </Flex>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+function InviteQualificationModal({show, onSubmit}) {
+  return (
+    <Modal show={show}>
+      <Box m="0 0 18px">
+        <SubHeading>Flips qualification session</SubHeading>
+        <Text>
+          Your answers for the validation session have been submitted
+          successfully!
+        </Text>
+        <Text>
+          Please solve the series of 30 flips to check the flips quality. The
+          flip is quialified if the majority gives the same answer (more than
+          66% of participants).
+        </Text>
+      </Box>
+      <Flex align="center" justify="flex-end">
+        <Button onClick={onSubmit}>Okay, let’s start</Button>
+      </Flex>
+    </Modal>
   )
 }
 

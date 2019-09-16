@@ -10,7 +10,9 @@ function Modal({show, onHide, ...props}) {
   const ref = useRef()
 
   useClickOutside(ref, () => {
-    onHide()
+    if (onHide) {
+      onHide()
+    }
   })
 
   return show ? (
