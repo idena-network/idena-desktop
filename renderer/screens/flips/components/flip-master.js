@@ -15,6 +15,7 @@ import useFlips from '../../../shared/utils/useFlips'
 import {
   useIdentityState,
   mapToFriendlyStatus,
+  IdentityStatus,
 } from '../../../shared/providers/identity-context'
 import {
   NotificationType,
@@ -27,7 +28,7 @@ import {
 } from '../../../shared/providers/epoch-context'
 
 function FlipMaster({id, onClose}) {
-  const {canSubmitFlip, state} = useIdentityState()
+  const {canSubmitFlip, state: identityState} = useIdentityState()
   const {currentPeriod} = useEpochState()
 
   const {getDraft, saveDraft, submitFlip} = useFlips()
@@ -68,14 +69,23 @@ function FlipMaster({id, onClose}) {
 
       let message = ''
       if (error) {
-        if (currentPeriod !== EpochPeriod.None) {
-          message = `Can not submit flip during the validation session`
-        } else if (!canSubmitFlip) {
-          message = `You can not submit flips having ${mapToFriendlyStatus(
-            state
-          )} status`
-        } else if (canSubmitFlip) {
+        if (
+          [
+            IdentityStatus.None,
+            IdentityStatus.Candidate,
+            IdentityStatus.Suspended,
+            IdentityStatus.Zombie,
+          ].includes(identityState)
+        ) {
+          message = `You can not submit flips having 'Candidate' status`
+        } else if (
+          [IdentityStatus.Newbie, IdentityStatus.Verified].includes(
+            identityState
+          )
+        ) {
           message = 'You cannot submit more flips until the next validation'
+        } else if (currentPeriod !== EpochPeriod.None) {
+          message = `Can not submit flip during the validation session`
         } else {
           // eslint-disable-next-line prefer-destructuring
           message = error.message
