@@ -96,7 +96,7 @@ function FlipCover({
   })
 
   const isDraft = type === FlipType.Draft
-  const canSubmit = (true || canSubmitFlip) && pics.every(hasDataUrl)
+  const canSubmit = canSubmitFlip && pics.every(hasDataUrl)
   return (
     <Box w={width}>
       <Box my={theme.spacings.small} css={position('relative')}>
