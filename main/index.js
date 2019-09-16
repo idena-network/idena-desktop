@@ -141,7 +141,7 @@ const createMenu = () => {
 }
 
 const createTray = () => {
-  tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-16@2x.png'))
+  tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-16-white@2x.png'))
 
   if (isWin) {
     tray.on('click', showMainWindow)
