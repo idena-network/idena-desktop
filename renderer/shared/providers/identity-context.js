@@ -31,7 +31,7 @@ const IdentityDispatchContext = React.createContext()
 function IdentityProvider({children}) {
   const [identity, setIdentity] = React.useState(null)
   const [{result: balanceResult}, callRpc] = usePoll(
-    useRpc('dna_getBalance', identity && identity.address),
+    useRpc(identity ? 'dna_getBalance' : null, identity && identity.address),
     identity ? 1000 : null
   )
 

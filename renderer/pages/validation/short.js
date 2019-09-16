@@ -60,7 +60,7 @@ function ShortSession() {
     if (state.shortAnswersSubmitted) {
       setShowModal(true)
     }
-  }, [showModal, state.shortAnswersSubmitted])
+  }, [state.shortAnswersSubmitted])
 
   useEffect(() => {
     if (!state.ready && !state.shortAnswersSubmitted) {
