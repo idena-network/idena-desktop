@@ -55,7 +55,7 @@ const createMainWindow = () => {
       nodeIntegration: false,
       preload: join(__dirname, 'preload.js'),
     },
-    icon: resolve(__dirname, 'static', '64x64.png'),
+    icon: resolve(__dirname, 'static', 'icon-128@2x.png'),
   })
 
   loadRoute(mainWindow, 'dashboard')
@@ -141,7 +141,7 @@ const createMenu = () => {
 }
 
 const createTray = () => {
-  tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-dark-2.png'))
+  tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-16-white@2x.png'))
 
   if (isWin) {
     tray.on('click', showMainWindow)
