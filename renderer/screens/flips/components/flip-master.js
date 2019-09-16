@@ -29,7 +29,7 @@ import {useChainState} from '../../../shared/providers/chain-context'
 
 function FlipMaster({id, onClose}) {
   const {canSubmitFlip, state: identityState} = useIdentityState()
-  const {currentPeriod} = useEpochState()
+  const epoch = useEpochState()
   const {syncing} = useChainState()
 
   const {getDraft, saveDraft, submitFlip} = useFlips()
@@ -85,7 +85,7 @@ function FlipMaster({id, onClose}) {
           )
         ) {
           message = 'You cannot submit more flips until the next validation'
-        } else if (currentPeriod !== EpochPeriod.None) {
+        } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
           message = `Can not submit flip during the validation session`
         } else {
           // eslint-disable-next-line prefer-destructuring
