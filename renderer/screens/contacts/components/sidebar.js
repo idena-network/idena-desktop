@@ -2,6 +2,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, padding, border, margin, ellipsis, backgrounds} from 'polished'
+import {FiPlus} from 'react-icons/fi'
 import {Box, Group, Text, Input, Button} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
@@ -31,7 +32,7 @@ function Sidebar({onSelectContact, onSelectInvite, onNewInvite}) {
       style={{
         ...border('right', '1px', 'solid', theme.colors.gray2),
         width: rem(270),
-        height: '91vh',
+        height: '100vh',
         overflowY: 'auto',
       }}
     >
@@ -335,10 +336,9 @@ function SidebarHeading({children, title, onNewInvite}) {
             borderRadius: '3px',
             width: rem(20),
             height: rem(20),
-            fontSize: rem(21),
+            fontSize: rem(18),
             lineHeight: rem(5),
-            padding: '0 0px 0px',
-            fontWeight: 'bold',
+            padding: '1px',
             display: 'block',
             top: '50%',
             position: 'absolute',
@@ -346,7 +346,7 @@ function SidebarHeading({children, title, onNewInvite}) {
             transform: 'translate(0, -50%)',
           }}
         >
-          +
+          <FiPlus />
         </Button>
       }
       css={{

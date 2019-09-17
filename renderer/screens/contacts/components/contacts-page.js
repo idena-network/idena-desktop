@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Box, Drawer} from '../../../shared/components'
+import {FiUsers} from 'react-icons/fi'
+import {Box, Drawer, Placeholder} from '../../../shared/components'
 import Layout from '../../../shared/components/layout'
 import Flex from '../../../shared/components/flex'
 import ContactDetails from './contact-details'
@@ -46,7 +47,13 @@ function ContactsPage({showNewInviteForm = false}) {
               setIsSendInviteOpen(true)
             }}
           />
-          <Box>
+          <Box
+            css={{
+              flexBasis: 0,
+              flexGrow: 1,
+              maxWidth: '100%',
+            }}
+          >
             {showInvite && (
               <InviteDetails
                 {...selectedInvite}
@@ -55,6 +62,18 @@ function ContactsPage({showNewInviteForm = false}) {
             )}
 
             {showContact && <ContactDetails {...selectedContact} />}
+
+            {!showContact && !showInvite && (
+              <Placeholder
+                icon={<FiUsers />}
+                text={
+                  <>
+                    You haven’t contacts yet. <br />
+                    Share Idena and invite people
+                  </>
+                }
+              />
+            )}
           </Box>
 
           <Drawer show={isSendInviteOpen} onHide={handleCloseSendInvite}>
