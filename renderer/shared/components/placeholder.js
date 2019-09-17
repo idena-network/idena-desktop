@@ -35,8 +35,8 @@ export function Placeholder({children, icon, text, ...props}) {
         }
         .text {
           color: ${theme.colors.muted};
-          font-size: ${rem(13)};
-          line-height: ${rem(18)};
+          font-size: ${rem(16)};
+          line-height: ${rem(22)};
         }
       `}</style>
     </Box>
