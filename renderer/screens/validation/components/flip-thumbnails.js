@@ -37,7 +37,7 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
     >
       {flips.map(
         (flip, idx) =>
-          !flips.hidden && (
+          !flip.hidden && (
             <Thumb
               {...flip}
               isCurrent={currentIndex === idx}
