@@ -1,9 +1,7 @@
 import {useState, useEffect, useRef} from 'react'
-import dequal from 'dequal'
 import {
   loadItem,
   persistItem,
-  loadState,
   persistState,
   shouldPersist,
 } from '../utils/persist'
@@ -26,13 +24,11 @@ export function usePersistentState(dbName, key, initialValue) {
 /**
  * Middleware-style hook persisting reducer state
  *
- * It also supports initial state 👏
  * @param {*} useReducer Original useReducer
  * @param {string} name Name of the file to be persisted in
  * @param {(string|string[])} [on] If passed whitelists actions triggering persistence
  */
 export function usePersistence([state, dispatch], name, on) {
-  const lastStateRef = useRef()
   const actionRef = useRef()
 
   const newDispatchRef = useRef(action => {
@@ -43,18 +39,10 @@ export function usePersistence([state, dispatch], name, on) {
   useEffect(() => {
     const action = actionRef.current
     if (action && shouldPersist(on, action)) {
-      if (!dequal(lastStateRef.current, state)) {
-        persistState(name, state)
-      }
-      lastStateRef.current = state
-    } else if (!loadState(name)) {
       persistState(name, state)
     }
-    // TODO: Do we have something to do with the cleanup? 🤔 Weird case when actions come concurrently
+    // TODO: Do we have something to do with the cleanup? 🤔
   }, [name, on, state])
 
-  return [
-    actionRef.current ? state : loadState(name) || state,
-    newDispatchRef.current,
-  ]
+  return [state, newDispatchRef.current]
 }
