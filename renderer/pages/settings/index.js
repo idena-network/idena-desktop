@@ -37,7 +37,7 @@ function Settings() {
           case 'url/change':
             return {...state, url, isSaved: false}
           case 'url/save':
-            return {...state, isSaved: true}
+            return {...state, url, isSaved: true}
           default:
             return state
         }
@@ -77,7 +77,9 @@ function Settings() {
                 width: rem(300),
               }}
             />
-            <Button onClick={() => dispatch(['url/save'])}>Save</Button>
+            <Button onClick={() => dispatch(['url/save', state.url])}>
+              Save
+            </Button>
             <Divider vertical m={theme.spacings.small} />
             <FlatButton
               color={theme.colors.primary}
