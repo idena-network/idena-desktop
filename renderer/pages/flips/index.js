@@ -45,7 +45,7 @@ function Flips() {
           </Flex>
           <Flex>
             <IconLink href="/flips/new" icon={<FiPlusSquare />}>
-              Add flip
+              New flip
             </IconLink>
           </Flex>
         </FlipToolbar>
