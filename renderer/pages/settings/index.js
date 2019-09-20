@@ -19,6 +19,7 @@ import useFlips from '../../shared/utils/useFlips'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 import {BASE_API_URL} from '../../shared/api/api-client'
+import {loadState} from '../../shared/utils/persist'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -42,7 +43,7 @@ function Settings() {
             return state
         }
       },
-      {
+      loadState('settings') || {
         url: BASE_API_URL,
         isSaved: false,
       }
