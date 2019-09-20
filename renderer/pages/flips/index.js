@@ -59,8 +59,16 @@ function Flips() {
               width="25%"
               onSubmit={async () => {
                 try {
-                  const pairId = flip.hint.id
-                  const {result, error} = await submitFlip(flip, pairId)
+                  if (!flip.hint) {
+                    addError({
+                      title: 'Can not submit flip',
+                      body: 'Keywords are not specified',
+                    })
+                  }
+                  const {result, error} =
+                    flip.hint &&
+                    (await submitFlip(flip, {pairId: flip.hint.id}))
+
                   if (error) {
                     addError({
                       title: 'Error while uploading flip',
