@@ -3,7 +3,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {margin, rem} from 'polished'
+import {margin, rem, transparentize} from 'polished'
 import theme from '../theme'
 import {Box} from '.'
 import Flex from './flex'
@@ -140,7 +140,15 @@ Hint.propTypes = {
   value: PropTypes.string,
 }
 
-function Switcher({isChecked, withStatusHint, isInProgress}) {
+function Switcher({
+  isChecked,
+  withStatusHint,
+  isInProgress,
+  bgOn = theme.colors.primary,
+  bgOff = theme.colors.gray4,
+  ...props
+}) {
+  const {disabled} = props
   return (
     <>
       <label className="switcher">
@@ -149,7 +157,8 @@ function Switcher({isChecked, withStatusHint, isInProgress}) {
           checked={isChecked}
           className={isInProgress && 'in-progress'}
           value={isChecked}
-          readOnly
+          disabled={disabled}
+          {...props}
         />
         <div className="pin" />
         {withStatusHint && (
@@ -167,7 +176,7 @@ function Switcher({isChecked, withStatusHint, isInProgress}) {
           vertical-align: middle;
           width: 32px;
           height: 16px;
-          cursor: pointer;
+          cursor: ${disabled ? 'not-allowed' : 'pointer'};
           z-index: 1;
           user-select: none;
         }
@@ -175,7 +184,7 @@ function Switcher({isChecked, withStatusHint, isInProgress}) {
           font-size: 1rem;
           line-height: 16px;
           font-weight: 500;
-          color: ${theme.colors.danger};
+          color: ${bgOff};
           display: inline-block;
           vertical-align: middle;
           margin: 0 8px;
@@ -185,7 +194,7 @@ function Switcher({isChecked, withStatusHint, isInProgress}) {
           transition: color 0.3s ease;
         }
         .pin {
-          background-color: ${theme.colors.danger};
+          background-color: ${bgOff};
           box-shadow: none;
           border-radius: 100px;
           font-size: 1em;
@@ -216,10 +225,16 @@ function Switcher({isChecked, withStatusHint, isInProgress}) {
           height: 0;
         }
         input:checked ~ span {
-          color: ${theme.colors.primary};
+          color: ${bgOn};
         }
         input:checked ~ .pin {
-          background-color: ${theme.colors.primary};
+          background-color: ${bgOn};
+        }
+        input:disabled ~ span {
+          color: ${transparentize(0.4, isChecked ? bgOn : bgOff)};
+        }
+        input:disabled ~ .pin {
+          background-color: ${transparentize(0.4, isChecked ? bgOn : bgOff)};
         }
         input:checked ~ .pin:before {
           left: 18px;
@@ -242,6 +257,9 @@ Switcher.propTypes = {
   isChecked: PropTypes.bool,
   isInProgress: PropTypes.bool,
   withStatusHint: PropTypes.bool,
+  disabled: PropTypes.bool,
+  bgOn: PropTypes.string,
+  bgOff: PropTypes.string,
 }
 
 export {FormGroup, Label, Input, Field, Hint, Switcher}

@@ -297,6 +297,18 @@ function validationReducer(state, action) {
         ready: true,
       }
     }
+    case 'IRRELEVANT_WORDS_TOGGLED': {
+      const {irrelevantWords, ...currentFlip} = state.flips[state.currentIndex]
+      const flips = [
+        ...state.flips.slice(0, state.currentIndex),
+        {...currentFlip, irrelevantWords: !irrelevantWords},
+        ...state.flips.slice(state.currentIndex + 1),
+      ]
+      return {
+        ...state,
+        flips,
+      }
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`)
     }
@@ -446,7 +458,7 @@ export async function fetchFlips(dispatch, type, flips = []) {
 function prepareAnswers(flips) {
   return flips.map(flip => ({
     answer: hasAnswer(flip.answer) ? flip.answer : 0,
-    easy: false,
+    wrongWords: flip.irrelevantWords,
     hash: flip.hash,
   }))
 }

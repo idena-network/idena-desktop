@@ -111,6 +111,8 @@ function MinerStatusSwitcher() {
                   withStatusHint
                   isChecked={state.online}
                   isInProgress={state.isMining}
+                  bgOff={theme.colors.danger}
+                  bgOn={theme.colors.primary}
                 />
               )}
             </Box>
