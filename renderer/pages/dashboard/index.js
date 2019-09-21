@@ -38,7 +38,7 @@ function Dashboard({router}) {
               Invite
             </IconLink>
             <IconLink href="/flips/new" icon={<FiCamera />}>
-              Submit flip
+              New flip
             </IconLink>
           </Actions>
           <UserInfo />
