@@ -11,19 +11,43 @@ import FlipPics from './flip-pics'
 import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import SubmitFlip from './submit-flip'
-import useFlips from '../../../shared/utils/useFlips'
-import {useIdentityState} from '../../../shared/providers/identity-context'
+
+import useFlips, {FlipType} from '../../../shared/utils/useFlips'
+import {
+  useIdentityState,
+  IdentityStatus,
+} from '../../../shared/providers/identity-context'
+
 import {
   NotificationType,
   useNotificationDispatch,
 } from '../../../shared/providers/notification-context'
-import {composeHint, hasDataUrl, getRandomHint} from '../utils/flip'
+
+import {
+  composeHint,
+  hasDataUrl,
+  getNextKeyWordsHint,
+  getKeyWordsHint,
+} from '../utils/flip'
+
+import {
+  useEpochState,
+  EpochPeriod,
+} from '../../../shared/providers/epoch-context'
+import {useChainState} from '../../../shared/providers/chain-context'
 
 function FlipMaster({id, onClose}) {
-  const {canSubmitFlip} = useIdentityState()
-  const {getDraft, saveDraft, submitFlip} = useFlips()
+  const {
+    canSubmitFlip,
+    flipKeyWordPairs,
+    state: identityState,
+  } = useIdentityState()
+  const epoch = useEpochState()
+  const {syncing} = useChainState()
 
-  const {addNotification} = useNotificationDispatch()
+  const {flips, getDraft, saveDraft, submitFlip} = useFlips()
+
+  const publishedFlips = flips.filter(({type}) => type === FlipType.Published)
 
   const [flip, setFlip] = useState({
     pics: [
@@ -33,16 +57,34 @@ function FlipMaster({id, onClose}) {
       `https://placehold.it/480?text=4`,
     ],
     order: Array.from({length: 4}, (_, i) => i),
-    hint: getRandomHint(),
+    hint: getNextKeyWordsHint(flipKeyWordPairs, publishedFlips),
   })
 
+  const {addNotification} = useNotificationDispatch()
   const [step, setStep] = useState(0)
   const [submitResult, setSubmitResult] = useState()
+
+  const [isFlipsLoaded, setIsFlipsLoaded] = useState(false)
+
+  useEffect(() => {
+    // init hint on the first page when [flips] updated
+    if (step === 0 && !isFlipsLoaded) {
+      setFlip({
+        ...flip,
+        hint: getNextKeyWordsHint(flipKeyWordPairs, publishedFlips),
+      })
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flips])
 
   useEffect(() => {
     const draft = getDraft(id)
     if (draft) {
-      setFlip(draft)
+      setIsFlipsLoaded(true)
+      setFlip({
+        ...draft,
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
@@ -55,10 +97,37 @@ function FlipMaster({id, onClose}) {
 
   const handleSubmitFlip = async () => {
     try {
-      const {result, error} = await submitFlip({id, ...flip})
+      const pairId = flip.hint.id
+      const {result, error} = await submitFlip({id, ...flip, pairId})
+
+      let message = ''
+      if (error) {
+        if (
+          [
+            IdentityStatus.None,
+            IdentityStatus.Candidate,
+            IdentityStatus.Suspended,
+            IdentityStatus.Zombie,
+          ].includes(identityState)
+        ) {
+          message = `You can not submit flips having 'Candidate' status`
+        } else if (
+          [IdentityStatus.Newbie, IdentityStatus.Verified].includes(
+            identityState
+          )
+        ) {
+          message = 'You cannot submit more flips until the next validation'
+        } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
+          message = `Can not submit flip during the validation session`
+        } else {
+          // eslint-disable-next-line prefer-destructuring
+          message = error.message
+        }
+      }
+
       addNotification({
         title: error ? 'Error while uploading flip' : 'Flip saved!',
-        body: error ? error.message : `Hash ${result.hash}`,
+        body: error ? message : `Hash ${result.hash}`,
         type: error ? NotificationType.Error : NotificationType.Info,
       })
       Router.push('/flips')
@@ -71,7 +140,7 @@ function FlipMaster({id, onClose}) {
     }
   }
 
-  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip
+  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip && !syncing
 
   const steps = [
     {
@@ -82,18 +151,24 @@ function FlipMaster({id, onClose}) {
       children: (
         <FlipHint
           {...flip}
-          onChange={() => setFlip({...flip, hint: getRandomHint()})}
+          onChange={() => {
+            setIsFlipsLoaded(true)
+            setFlip({
+              ...flip,
+              hint: getNextKeyWordsHint(
+                flipKeyWordPairs,
+                publishedFlips,
+                flip.hint.id
+              ),
+            })
+          }}
         />
       ),
     },
     {
       caption: 'Select images',
-      title: 'Select 4 images to tell your story',
-      desc: flip
-        ? `Use key words for the story “${composeHint(
-            flip.hint
-          )}” and template "Before - Something happens - After"`
-        : '',
+      title: `Select 4 images to tell your story (${composeHint(flip.hint)})`,
+      desc: flip ? `Please no text on images to explain your story` : '',
       children: (
         <FlipPics
           {...flip}
@@ -118,7 +193,8 @@ function FlipMaster({id, onClose}) {
     },
     {
       caption: 'Submit flip',
-      title: 'Submit flip',
+      title: `Submit flip (${composeHint(flip.hint)})`,
+      desc: `Are you sure it is not possible to read the shuffled images as a meaningful story?`,
       children: <SubmitFlip {...flip} submitFlipResult={submitResult} />,
     },
   ]

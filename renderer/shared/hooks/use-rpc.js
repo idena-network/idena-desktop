@@ -1,7 +1,8 @@
 import {useReducer, useCallback} from 'react'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import axios from 'axios'
-import {nodeSettings} from '../api/api-client'
+import {loadItem} from '../utils/persist'
+import {BASE_API_URL} from '../api/api-client'
 
 /**
  * @typedef UseRpcResult
@@ -22,14 +23,12 @@ import {nodeSettings} from '../api/api-client'
  */
 export default function useRpc(initialMethod, ...initialParams) {
   const [rpcBody, dispatchRpc] = useReducer(
-    (state, [method, ...params]) => {
-      return {
-        ...state,
-        method,
-        params,
-        id: state.id + 1,
-      }
-    },
+    (state, [method, ...params]) => ({
+      ...state,
+      method,
+      params,
+      id: state.id + 1,
+    }),
     {
       method: initialMethod,
       params: initialParams,
@@ -51,13 +50,14 @@ export default function useRpc(initialMethod, ...initialParams) {
             ...state,
             isLoading: false,
             result: action.result,
+            error: action.error,
             isReady: true,
           }
         case 'fail':
           return {
             ...state,
             isLoading: false,
-            error: action.error.message,
+            error: action.error,
             isReady: true,
           }
         default:
@@ -77,7 +77,10 @@ export default function useRpc(initialMethod, ...initialParams) {
 
     async function fetchData() {
       try {
-        const {data} = await axios.post(nodeSettings.url, rpcBody)
+        const {data} = await axios.post(
+          loadItem('settings', 'url') || BASE_API_URL,
+          rpcBody
+        )
         if (!ignore) {
           dataDispatch({type: 'done', ...data})
         }

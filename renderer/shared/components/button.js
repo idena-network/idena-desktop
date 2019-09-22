@@ -120,6 +120,7 @@ function IconButton({icon, children, disabled, ...props}) {
 IconButton.propTypes = {
   icon: PropTypes.node,
   children: PropTypes.node,
+  disabled: PropTypes.bool,
 }
 
 export {FlatButton, IconButton}

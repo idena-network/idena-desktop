@@ -1,7 +1,10 @@
-import React, {useState, useEffect} from 'react'
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+import React, {useRef, useState, useEffect} from 'react'
+
 import PropTypes from 'prop-types'
 import {rem, position, borderRadius, margin} from 'polished'
-import {FiSearch} from 'react-icons/fi'
+import {FiSearch, FiUpload} from 'react-icons/fi'
 import {Draggable, DragDropContext, Droppable} from 'react-beautiful-dnd'
 import {Box, Input} from '../../../shared/components'
 import Divider from '../../../shared/components/divider'
@@ -92,6 +95,8 @@ function FlipPics({pics, onUpdateFlip}) {
     onUpdateFlip(nextOrder)
   }
 
+  const uploaderRef = useRef()
+
   return (
     <Flex>
       <Box css={margin(0, rem(40), 0)}>
@@ -159,14 +164,31 @@ function FlipPics({pics, onUpdateFlip}) {
             Search on Google
           </IconButton>
           <Divider vertical />
+
+          <IconButton
+            tooltip="Total score for&#10;all validations"
+            icon={<FiUpload />}
+            onClick={() => {
+              uploaderRef.current.click()
+            }}
+          >
+            Select file
+            <small> (150kb) </small>
+          </IconButton>
+
           <Box>
             <Input
+              ref={uploaderRef}
               type="file"
               accept="image/*"
-              style={{border: 'none', paddingRight: 0, width: rem(230)}}
+              style={{
+                display: 'none',
+                border: 'none',
+                paddingRight: 0,
+                width: rem(230),
+              }}
               onChange={handleUpload}
             />
-            <small>(Max 150kb)</small>
           </Box>
         </Flex>
       </Box>

@@ -38,6 +38,7 @@ Label.propTypes = {
   htmlFor: PropTypes.string.isRequired,
 }
 
+// eslint-disable-next-line react/display-name
 const Input = React.forwardRef(
   ({type = 'text', disabled, ...otherProps}, ref) => (
     <>
@@ -73,7 +74,7 @@ Input.propTypes = {
 }
 
 let idx = 0
-function Field({label, id, allowCopy, onCopied, children, ...props}) {
+function Field({label, id, allowCopy, children, ...props}) {
   const [{value: copiedText}, copyToClipboard] = useClipboard()
   const inputRef = React.useRef()
 
@@ -143,10 +144,19 @@ function Switcher({isChecked, withStatusHint, isInProgress}) {
   return (
     <>
       <label className="switcher">
-        <input type="checkbox" checked={isChecked} className={isInProgress && 'in-progress'} value={isChecked}/>
+        <input
+          type="checkbox"
+          checked={isChecked}
+          className={isInProgress && 'in-progress'}
+          value={isChecked}
+          readOnly
+        />
         <div className="pin" />
         {withStatusHint && (
-          <span>{isInProgress ? 'Waiting...' : (isChecked ? 'On' : 'Off')}</span>
+          <span>
+            {/* eslint-disable-next-line no-nested-ternary */}
+            {isInProgress ? 'Waiting...' : isChecked ? 'On' : 'Off'}
+          </span>
         )}
       </label>
 

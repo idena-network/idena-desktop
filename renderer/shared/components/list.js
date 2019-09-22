@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 
-export default function({m, children}) {
+export default function List({m, children}) {
   return (
     <ul>
       {children}

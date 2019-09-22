@@ -31,7 +31,7 @@ function reorderFlips(flips) {
   const loading = []
   const failed = []
   const hidden = []
-  for (let i = 0; i < flips.length; i++) {
+  for (let i = 0; i < flips.length; i += 1) {
     if (flips[i].hidden) {
       hidden.push(flips[i])
     } else if (flips[i].ready && flips[i].loaded) {
@@ -263,12 +263,10 @@ function validationReducer(state, action) {
       }
     }
     case SHOW_EXTRA_FLIPS: {
-      let flips = state.flips.map(flip => {
-        return {
-          ...flip,
-          failed: !flip.ready,
-        }
-      })
+      let flips = state.flips.map(flip => ({
+        ...flip,
+        failed: !flip.ready,
+      }))
       let availableExtraFlips = flips.filter(x => x.failed).length
       let openedFlipsCount = 0
       flips = flips.map(flip => {

@@ -2,6 +2,7 @@ import React from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
 import {fetchIdentity, killIdentity} from '../api'
+import useRpc from '../hooks/use-rpc'
 
 export const IdentityStatus = {
   Undefined: 'Undefined',
@@ -9,7 +10,7 @@ export const IdentityStatus = {
   Candidate: 'Candidate',
   Newbie: 'Newbie',
   Verified: 'Verified',
-  Suspend: 'Suspend',
+  Suspended: 'Suspended',
   Zombie: 'Zombie',
   Killed: 'Killed',
 }
@@ -29,13 +30,16 @@ const IdentityDispatchContext = React.createContext()
 // eslint-disable-next-line react/prop-types
 function IdentityProvider({children}) {
   const [identity, setIdentity] = React.useState(null)
+  const [{result: balanceResult}, callRpc] = useRpc()
 
   React.useEffect(() => {
     let ignore = false
 
     async function fetchData() {
+      const fetchedIdentity = await fetchIdentity()
+      callRpc('dna_getBalance', fetchedIdentity.address)
       if (!ignore) {
-        setIdentity(await fetchIdentity())
+        setIdentity(fetchedIdentity)
       }
     }
 
@@ -44,7 +48,7 @@ function IdentityProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [callRpc])
 
   useInterval(async () => {
     async function fetchData() {
@@ -57,6 +61,11 @@ function IdentityProvider({children}) {
     fetchData()
   }, 1000 * 1)
 
+  useInterval(
+    () => callRpc('dna_getBalance', identity.address),
+    identity && identity.address ? 1000 : null
+  )
+
   const canActivateInvite = [
     IdentityStatus.Undefined,
     IdentityStatus.Killed,
@@ -64,11 +73,12 @@ function IdentityProvider({children}) {
   ].includes(identity && identity.state)
 
   const canSubmitFlip =
+    identity &&
     [
       IdentityStatus.Candidate,
       IdentityStatus.Newbie,
       IdentityStatus.Verified,
-    ].includes(identity && identity.state) &&
+    ].includes(identity.state) &&
     identity.requiredFlips > 0 &&
     (identity.flips || []).length < identity.requiredFlips
 
@@ -78,7 +88,7 @@ function IdentityProvider({children}) {
       IdentityStatus.Candidate,
       IdentityStatus.Newbie,
       IdentityStatus.Verified,
-      IdentityStatus.Suspend,
+      IdentityStatus.Suspended,
       IdentityStatus.Zombie,
     ].includes(identity.state)
 
@@ -99,6 +109,7 @@ function IdentityProvider({children}) {
     <IdentityStateContext.Provider
       value={{
         ...identity,
+        balance: balanceResult && balanceResult.balance,
         canActivateInvite,
         canSubmitFlip,
         canValidate,

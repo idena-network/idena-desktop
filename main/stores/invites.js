@@ -29,11 +29,11 @@ module.exports = {
   },
 
   updateInvite(id, invite) {
-    const key=id
+    const key = id
 
     getInvites()
-      .find( {id: key} )
-      .assign( {id: key, ...invite} )
+      .find({id: key})
+      .assign({id: key, ...invite})
       .write()
   },
 

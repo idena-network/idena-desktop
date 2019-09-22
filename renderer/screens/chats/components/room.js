@@ -3,6 +3,7 @@ import RoomHeader from './room-header'
 import MessageList from './message-list'
 import MessageForm from './message-form'
 
+// eslint-disable-next-line react/prop-types
 export default function Room({messages}) {
   return (
     <div>

@@ -20,6 +20,7 @@ import useClickOutside from '../../../shared/hooks/use-click-outside'
 import useHover from '../../../shared/hooks/use-hover'
 import {FlipType} from '../../../shared/utils/useFlips'
 
+// eslint-disable-next-line react/display-name
 const FlipMenu = forwardRef((props, ref) => (
   <Box
     bg={theme.colors.white}
@@ -95,7 +96,7 @@ function FlipCover({
   })
 
   const isDraft = type === FlipType.Draft
-  const canSubmit = (true || canSubmitFlip) && pics.every(hasDataUrl)
+  const canSubmit = canSubmitFlip && pics.every(hasDataUrl)
   return (
     <Box w={width}>
       <Box my={theme.spacings.small} css={position('relative')}>

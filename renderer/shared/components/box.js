@@ -4,6 +4,7 @@ import theme from '../theme'
 
 export const Dim = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 
+// eslint-disable-next-line react/display-name
 const Box = forwardRef(
   (
     {bg, m, margin, mx, my, p, padding, px, py, w, css: style, ...props},

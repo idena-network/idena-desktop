@@ -21,22 +21,22 @@ import Timer from './timer'
 function Banner() {
   const epoch = useEpochState()
 
-  if (epoch) {
-    const {currentPeriod} = epoch
-    const isLottery = currentPeriod === EpochPeriod.FlipLottery
-    const isValidation = [
-      EpochPeriod.ShortSession,
-      EpochPeriod.LongSession,
-    ].includes(currentPeriod)
-    return (
-      <Box>
-        {isLottery && <ValidationSoon />}
-        {isValidation && <ValidationRunning />}
-      </Box>
-    )
+  if (!epoch) {
+    return null
   }
 
-  return null
+  const {currentPeriod} = epoch
+  const isValidation = [
+    EpochPeriod.ShortSession,
+    EpochPeriod.LongSession,
+  ].includes(currentPeriod)
+  return (
+    <Box>
+      {currentPeriod === EpochPeriod.FlipLottery && <ValidationSoon />}
+      {isValidation && <ValidationRunning />}
+      {currentPeriod === EpochPeriod.AfterLongSession && <AfterLongSession />}
+    </Box>
+  )
 }
 
 function ValidationSoon() {
@@ -112,7 +112,7 @@ function ValidationRunning() {
           </Box>
         )}
       </Flex>
-      {!hasAnswers && !!seconds && (
+      {!hasAnswers && !!seconds && canValidate && (
         <Flex css={padding(theme.spacings.normal)}>
           <Divider vertical m={rem(theme.spacings.medium16)} />
           <Link href={`/validation/${isShortSession ? 'short' : 'long'}`}>
@@ -126,6 +126,21 @@ function ValidationRunning() {
         </Flex>
       )}
     </Flex>
+  )
+}
+
+function AfterLongSession() {
+  return (
+    <Box
+      bg={theme.colors.success}
+      p={rem(theme.spacings.medium16)}
+      css={{minHeight: rem(56)}}
+    >
+      <Text color={theme.colors.white}>
+        Please wait. The network is reaching consensus about validated
+        identities
+      </Text>
+    </Box>
   )
 }
 

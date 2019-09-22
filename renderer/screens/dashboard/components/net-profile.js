@@ -13,6 +13,7 @@ function NetProfile() {
     address,
     state,
     stake,
+    balance,
     penalty,
     age,
     totalQualifiedFlips,
@@ -41,6 +42,17 @@ function NetProfile() {
       {state !== 'Newbie' && (
         <>
           <Figure label="Status" value={mapToFriendlyStatus(state)} />
+        </>
+      )}
+
+      {balance > 0 && (
+        <>
+          <Figure
+            label="Balance"
+            value={balance}
+            postfix="DNA"
+            tooltip="Current balance"
+          />
         </>
       )}
 

@@ -33,6 +33,7 @@ const fontWeights = {
   medium: 500,
   semi: 600,
   medium: 500,
+  semi: 600,
   bold: 700,
 }
 

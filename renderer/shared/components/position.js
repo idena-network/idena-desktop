@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {Box} from '.'
 import {Dim} from './box'
 
+// eslint-disable-next-line react/display-name
 export const Absolute = forwardRef(
   ({bg, top, left, bottom, right, zIndex, width, css, ...props}, ref) => (
     <Box
@@ -32,7 +33,6 @@ Absolute.propTypes = {
   width: Dim,
   zIndex: PropTypes.number,
   children: PropTypes.node,
-  // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,
 }
 

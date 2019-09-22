@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React from 'react'
 import {margin, rem} from 'polished'
 
 import Layout from '../../shared/components/layout'
@@ -15,14 +15,11 @@ import theme from '../../shared/theme'
 import {FlatButton} from '../../shared/components/button'
 import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
-import Pre from '../../shared/components/pre'
 import useFlips from '../../shared/utils/useFlips'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
-import {nodeSettings} from '../../shared/api/api-client'
-import useRpc from '../../shared/hooks/use-rpc'
-import {usePoll} from '../../shared/hooks/use-interval'
-
-const DEFAULT_NODE_URL = 'http://localhost:9009'
+import {usePersistence} from '../../shared/hooks/use-persistent-state'
+import {BASE_API_URL} from '../../shared/api/api-client'
+import {loadState} from '../../shared/utils/persist'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -31,16 +28,39 @@ function Settings() {
   const {archiveFlips} = useFlips()
   const {addNotification} = useNotificationDispatch()
 
-  const addrRef = React.createRef()
+  const [state, dispatch] = usePersistence(
+    React.useReducer(
+      // eslint-disable-next-line no-shadow
+      (state, [type, url]) => {
+        switch (type) {
+          case 'url/reset':
+            return {...state, isSaved: false}
+          case 'url/change':
+            return {...state, url, isSaved: false}
+          case 'url/save':
+            return {...state, isSaved: true}
+          default:
+            return state
+        }
+      },
+      loadState('settings') || {
+        url: BASE_API_URL,
+        isSaved: false,
+      }
+    ),
+    'settings',
+    ['url/save', 'url/reset']
+  )
 
-  const handleSaveNodeAddr = () => {
-    const nextAddr = addrRef.current.value
-    nodeSettings.url = nextAddr
-    addNotification({
-      title: 'Settings saved!',
-      body: `Now running at ${nextAddr}`,
-    })
-  }
+  React.useEffect(() => {
+    if (state.isSaved) {
+      addNotification({
+        title: 'Settings updated',
+        body: `Connected to ${state.url}`,
+      })
+      dispatch(['url/reset'])
+    }
+  }, [addNotification, dispatch, state.isSaved, state.url])
 
   return (
     <Layout>
@@ -51,22 +71,18 @@ function Settings() {
           <Label htmlFor="url">Address</Label>
           <Flex align="center">
             <Input
-              defaultValue={nodeSettings.url}
-              ref={addrRef}
-              id="url"
-              style={margin(0, theme.spacings.normal, 0, 0)}
+              value={state.url}
+              onChange={e => dispatch(['url/change', e.target.value])}
+              style={{
+                ...margin(0, theme.spacings.normal, 0, 0),
+                width: rem(300),
+              }}
             />
-            <Button onClick={handleSaveNodeAddr}>Save</Button>
+            <Button onClick={() => dispatch(['url/save'])}>Save</Button>
             <Divider vertical m={theme.spacings.small} />
             <FlatButton
               color={theme.colors.primary}
-              onClick={() => {
-                setAddr(DEFAULT_NODE_URL)
-                addNotification({
-                  title: 'Settings saved!',
-                  body: `Now running at ${DEFAULT_NODE_URL}`,
-                })
-              }}
+              onClick={() => dispatch(['url/change', BASE_API_URL])}
             >
               Use default
             </FlatButton>
@@ -125,17 +141,11 @@ function Settings() {
                 <Link href="/validation/long">Long</Link>
               </Box>
             </Box>
-            <EpochDisplay />
           </>
         )}
       </Box>
     </Layout>
   )
-}
-
-function EpochDisplay() {
-  const [{result}] = usePoll(useRpc('dna_epoch'), 3000)
-  return <Pre>{JSON.stringify(result)}</Pre>
 }
 
 export default Settings

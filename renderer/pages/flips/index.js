@@ -45,7 +45,7 @@ function Flips() {
           </Flex>
           <Flex>
             <IconLink href="/flips/new" icon={<FiPlusSquare />}>
-              Add flip
+              New flip
             </IconLink>
           </Flex>
         </FlipToolbar>
@@ -59,7 +59,16 @@ function Flips() {
               width="25%"
               onSubmit={async () => {
                 try {
-                  const {result, error} = await submitFlip(flip)
+                  if (!flip.hint) {
+                    addError({
+                      title: 'Can not submit flip',
+                      body: 'Keywords are not specified',
+                    })
+                  }
+                  const {result, error} =
+                    flip.hint &&
+                    (await submitFlip(flip, {pairId: flip.hint.id}))
+
                   if (error) {
                     addError({
                       title: 'Error while uploading flip',

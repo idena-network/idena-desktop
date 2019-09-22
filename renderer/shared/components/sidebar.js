@@ -328,7 +328,7 @@ function CurrentTask({period, identity}) {
   if (
     [
       IdentityStatus.Candidate,
-      IdentityStatus.Suspend,
+      IdentityStatus.Suspended,
       IdentityStatus.Zombie,
     ].includes(state)
   ) {
