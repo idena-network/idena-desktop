@@ -32,8 +32,6 @@ function InviteProvider({children}) {
         savedInvites.map(({receiver}) => receiver).map(api.fetchIdentity)
       )
 
-      // alert(invitedIdentities[0].address)
-
       const nextInvites = savedInvites.map(invite => {
         // find out mining invite status
         const tx = txs.find(({hash}) => hash === invite.hash)
