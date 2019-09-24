@@ -7,7 +7,7 @@ export const Dim = PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 // eslint-disable-next-line react/display-name
 const Box = forwardRef(
   (
-    {bg, m, margin, mx, my, p, padding, px, py, w, css: style, ...props},
+    {bg, color, m, margin, mx, my, p, padding, px, py, w, css: style, ...props},
     ref
   ) => {
     const marginProp = m || margin
@@ -19,6 +19,7 @@ const Box = forwardRef(
           div {
             display: block;
             background: ${bg};
+            color: ${color};
             margin: ${marginProp};
             margin-left: ${mx};
             margin-right: ${mx};
@@ -43,6 +44,7 @@ Box.defaultProps = {
 
 Box.propTypes = {
   bg: PropTypes.string,
+  color: PropTypes.string,
   m: Dim,
   p: Dim,
   margin: Dim,

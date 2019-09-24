@@ -105,6 +105,7 @@ function IconButton({icon, children, disabled, ...props}) {
       <style jsx>{`
         button {
           color: ${theme.colors.primary};
+          font-weight: 500;
           padding: ${rem(theme.spacings.small8)};
         }
         button:hover {

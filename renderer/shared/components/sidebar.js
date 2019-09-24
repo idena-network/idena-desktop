@@ -1,7 +1,13 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
-import {FiInstagram, FiSettings, FiUserCheck, FiUsers} from 'react-icons/fi'
+import {
+  FiInstagram,
+  FiSettings,
+  FiUserCheck,
+  FiUsers,
+  FiCreditCard
+} from 'react-icons/fi'
 import {margin, rem, borderRadius} from 'polished'
 import {Box, List, Link, Text, Button} from '.'
 import Flex from './flex'
@@ -150,6 +156,9 @@ function Nav() {
       <List>
         <NavItem href="/dashboard" active icon={<FiUserCheck />}>
           {'My Idena' || nickname}
+        </NavItem>
+        <NavItem href="/wallets" icon={<FiCreditCard />}>
+          Wallets
         </NavItem>
         <NavItem href="/flips" icon={<FiInstagram />}>
           Flips
