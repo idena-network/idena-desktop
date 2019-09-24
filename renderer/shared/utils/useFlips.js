@@ -147,7 +147,11 @@ function useFlips() {
           error: {message: 'You must shuffle flip before submit'},
         }
       }
-
+      if (!pairId) {
+        return {
+          error: {message: 'Keywords for flip are not specified'},
+        }
+      }
       const resp = await api.submitFlip(toHex(pics, order), pairId)
       const {result} = resp
       if (result) {
