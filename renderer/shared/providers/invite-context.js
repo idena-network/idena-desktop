@@ -42,7 +42,7 @@ function InviteProvider({children}) {
 
         // find all identities/invites
         const invitedIdentity = invitedIdentities.find(
-          ({address}) => address === invite.receiver
+          ({address: addr}) => addr === invite.receiver
         )
 
         // becomes activated once invitee is found
