@@ -97,8 +97,7 @@ function FlipMaster({id, onClose}) {
 
   const handleSubmitFlip = async () => {
     try {
-      const pairId = flip.hint.id
-      const {result, error} = await submitFlip({id, ...flip, pairId})
+      const {result, error} = await submitFlip({id, ...flip})
 
       let message = ''
       if (error) {

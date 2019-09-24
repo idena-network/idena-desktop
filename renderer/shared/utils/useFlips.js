@@ -131,7 +131,7 @@ function useFlips() {
   }, [])
 
   const submitFlip = useCallback(
-    async ({id, pics, order, pairId}) => {
+    async ({id, pics, order, hint}) => {
       if (
         flips.filter(
           f => f.type === FlipType.Published && areSame(f.pics, pics)
@@ -141,12 +141,12 @@ function useFlips() {
           error: {message: 'You already submitted this flip'},
         }
       }
-
       if (areEual(order, DEFAULT_ORDER)) {
         return {
           error: {message: 'You must shuffle flip before submit'},
         }
       }
+      const pairId = hint && hint.id
       if (!pairId) {
         return {
           error: {message: 'Keywords for flip are not specified'},

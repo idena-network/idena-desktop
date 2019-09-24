@@ -65,9 +65,7 @@ function Flips() {
                       body: 'Keywords are not specified',
                     })
                   }
-                  const {result, error} =
-                    flip.hint &&
-                    (await submitFlip(flip, {pairId: flip.hint.id}))
+                  const {result, error} = await submitFlip(flip)
 
                   if (error) {
                     addError({
