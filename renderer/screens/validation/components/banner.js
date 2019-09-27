@@ -15,7 +15,10 @@ import {
   EpochPeriod,
 } from '../../../shared/providers/epoch-context'
 import {useValidationTimer} from '../../../shared/hooks/use-validation'
-import {useIdentityState} from '../../../shared/providers/identity-context'
+import {
+  useIdentityState,
+  canValidate,
+} from '../../../shared/providers/identity-context'
 import Timer from './timer'
 
 function Banner() {
@@ -65,13 +68,13 @@ function ValidationRunning() {
 
   const seconds = useValidationTimer()
 
-  const {canValidate} = useIdentityState()
+  const identity = useIdentityState()
 
   React.useEffect(() => {
-    if (isShortSession && !shortAnswersSubmitted && canValidate) {
+    if (isShortSession && !shortAnswersSubmitted && canValidate(identity)) {
       Router.push('/validation/short')
     }
-  }, [canValidate, isShortSession, shortAnswersSubmitted])
+  }, [identity, isShortSession, shortAnswersSubmitted])
 
   return (
     <Flex
