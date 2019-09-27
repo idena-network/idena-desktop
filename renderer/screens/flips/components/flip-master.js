@@ -241,9 +241,7 @@ function FlipMaster({id, onClose}) {
             title={title}
             desc={desc}
             onPrev={() => setStep(step - 1)}
-            onNext={() => {
-              setStep(step + 1)
-            }}
+            onNext={() => setStep(step + 1)}
             onClose={onClose}
             onSubmit={handleSubmitFlip}
             isFirst={step === 0}
