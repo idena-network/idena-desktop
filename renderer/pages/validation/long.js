@@ -25,7 +25,6 @@ import {
   PREV,
   NEXT,
   ANSWER,
-  REPORT_ABUSE,
   PICK,
   useValidationState,
   SessionType,
@@ -130,10 +129,8 @@ export default function() {
           )}
         </Flex>
         <ValidationActions
-          onReportAbuse={() => dispatch({type: REPORT_ABUSE})}
           canSubmit={state.canSubmit}
           onSubmitAnswers={handleSubmitAnswers}
-          canAbuse
           countdown={<Timer type={SessionType.Long} />}
         />
         <FlipThumbnails
