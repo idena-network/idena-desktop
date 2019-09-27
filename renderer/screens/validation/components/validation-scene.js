@@ -2,7 +2,7 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, margin, padding, borderRadius} from 'polished'
+import {rem, margin, padding, borderRadius, cover} from 'polished'
 import {Col, Box, Fill, Switcher, Label} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import Arrow from './arrow'
@@ -21,7 +21,7 @@ import {
 } from '../../../shared/providers/validation-context'
 import vocabulary from '../../flips/utils/words'
 import useRpc from '../../../shared/hooks/use-rpc'
-import {usePoll} from '../../../shared/hooks/use-interval'
+import {useInterval} from '../../../shared/hooks/use-interval'
 
 export default function ValidationScene({
   flip: {urls, answer, ready, orders, failed, hash},
@@ -53,23 +53,44 @@ export default function ValidationScene({
             reorderList(urls, orders[0]).map((src, idx) => (
               <Box
                 key={orders[0][idx]}
+                css={{
+                  height: rem(110, theme.fontSizes.base),
+                  width: rem(147, theme.fontSizes.base),
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
                 onClick={() =>
                   dispatch({type: ANSWER, option: AnswerType.Left})
                 }
               >
+                <div
+                  style={{
+                    background: `center center / cover no-repeat url(${src})`,
+                    filter: 'blur(3px)',
+                    ...cover(),
+                    zIndex: 1,
+                  }}
+                />
                 <img
                   alt="currentFlip"
                   height={110}
                   width={147}
                   style={{
-                    background: theme.colors.white,
                     ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
                     ...borderRadius(
                       'bottom',
                       idx === urls.length - 1 ? rem(8) : 'none'
                     ),
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 2,
+                    textAlign: 'center',
                     objectFit: 'contain',
                     objectPosition: 'center',
+                    height: rem(110, theme.fontSizes.base),
+                    width: rem(147, theme.fontSizes.base),
                   }}
                   src={src}
                 />
@@ -108,23 +129,42 @@ export default function ValidationScene({
             reorderList(urls, orders[1]).map((src, idx) => (
               <Box
                 key={orders[1][idx]}
+                css={{
+                  height: rem(110, theme.fontSizes.base),
+                  width: rem(147, theme.fontSizes.base),
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
                 onClick={() =>
                   dispatch({type: ANSWER, option: AnswerType.Right})
                 }
               >
+                <div
+                  style={{
+                    background: `center center / cover no-repeat url(${src})`,
+                    filter: 'blur(3px)',
+                    ...cover(),
+                    zIndex: 1,
+                  }}
+                />
                 <img
                   alt="currentFlip"
-                  height={110}
-                  width={147}
                   style={{
-                    background: theme.colors.white,
                     ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
                     ...borderRadius(
                       'bottom',
                       idx === urls.length - 1 ? rem(8) : 'none'
                     ),
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 2,
+                    textAlign: 'center',
                     objectFit: 'contain',
                     objectPosition: 'center',
+                    height: rem(110, theme.fontSizes.base),
+                    width: rem(147, theme.fontSizes.base),
                   }}
                   src={src}
                 />
@@ -152,7 +192,9 @@ export default function ValidationScene({
               </Box>
             ))}
         </Flex>
-        {type === SessionType.Long && <Words hash={hash} />}
+        {type === SessionType.Long && ready && !failed && (
+          <Words key={hash} hash={hash} />
+        )}
       </Flex>
       {!isLast && (!ready || hasAnswer(answer)) && (
         <Col onClick={() => dispatch({type: NEXT})} w={4}>
@@ -269,24 +311,25 @@ function Words({hash}) {
 }
 
 function useWords(hash) {
-  const [{result, error}] = usePoll(useRpc('flip_words', hash), 1000)
+  const [{result, error}, fetchWords] = useRpc()
+
+  useInterval(() => fetchWords('flip_words', hash), hash ? 1000 : null)
 
   if (error || !result) {
     return null
   }
 
-  const {words} = result
-  return words.map(i => vocabulary[i])
+  return result.words.map(i => vocabulary[i])
 }
 
 const defaultStyle = {
-  borderRadius: rem(8),
+  borderRadius: rem(8, theme.fontSizes.base),
   boxShadow: `0 0 1px 0 ${theme.colors.primary2}`,
-  ...margin(0, rem(theme.spacings.medium24), 0),
+  ...margin(0, rem(theme.spacings.medium24, theme.fontSizes.base), 0),
   position: 'relative',
-  ...padding(rem(4)),
+  ...padding(rem(4, theme.fontSizes.base)),
   height: '100%',
-  minWidth: rem(147),
+  // minWidth: rem(147, theme.fontSizes.base),
   opacity: 1,
 }
 
