@@ -13,13 +13,14 @@ function FlipStep({
   onNext,
   onClose,
   onSubmit,
-  last,
+  isFirst,
+  isLast,
   allowSubmit,
 }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const shouldClose = last && !allowSubmit
-  const shouldSubmit = last && allowSubmit
-  const shouldNext = !last
+  const shouldClose = isLast && !allowSubmit
+  const shouldSubmit = isLast && allowSubmit
+  const shouldNext = !isLast
   return (
     <Box>
       <Box>
@@ -39,8 +40,9 @@ function FlipStep({
       >
         <Button
           variant="secondary"
-          onClick={onPrev}
+          disabled={isFirst}
           css={margin(0, rem(theme.spacings.small8), 0)}
+          onClick={onPrev}
         >
           Previous step
         </Button>
@@ -70,7 +72,8 @@ FlipStep.propTypes = {
   onNext: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  last: PropTypes.bool,
+  isFirst: PropTypes.bool,
+  isLast: PropTypes.bool,
   children: PropTypes.node,
   allowSubmit: PropTypes.bool.isRequired,
 }
