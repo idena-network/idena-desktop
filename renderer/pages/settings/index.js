@@ -152,6 +152,7 @@ function ExportPK() {
   const [{result: pk}, callRpc] = useRpc()
   const [password, setPassword] = React.useState()
   const [showDialog, setShowDialog] = React.useState()
+  React.useEffect(() => setShowDialog(!!pk), [pk])
   return (
     <Section title="Export PK">
       <Label htmlFor="url">Password</Label>
@@ -166,10 +167,7 @@ function ExportPK() {
           onChange={e => setPassword(e.target.value)}
         />
         <Button
-          onClick={async () => {
-            callRpc('dna_exportKey', password)
-            setShowDialog(true)
-          }}
+          onClick={async () => callRpc('dna_exportKey', password)}
           disabled={!password}
         >
           Export PK
@@ -182,7 +180,7 @@ function ExportPK() {
             textAlign: 'center',
           }}
         >
-          {pk && <QRCode value={pk} />}
+          <QRCode value={pk} />
         </Box>
         <Box>
           <Field
