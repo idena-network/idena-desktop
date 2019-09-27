@@ -155,24 +155,29 @@ function ExportPK() {
   React.useEffect(() => setShowDialog(!!pk), [pk])
   return (
     <Section title="Export PK">
-      <Label htmlFor="url">Password</Label>
-      <Flex align="center">
-        <Input
-          value={password}
-          type="password"
-          style={{
-            ...margin(0, theme.spacings.normal, 0, 0),
-            width: rem(300),
-          }}
-          onChange={e => setPassword(e.target.value)}
-        />
-        <Button
-          onClick={async () => callRpc('dna_exportKey', password)}
-          disabled={!password}
-        >
-          Export PK
-        </Button>
-      </Flex>
+      <form
+        onSubmit={e => {
+          e.preventDefault()
+          callRpc('dna_exportKey', password)
+        }}
+      >
+        <Label htmlFor="url">Password</Label>
+        <Flex align="center">
+          <Input
+            value={password}
+            type="password"
+            style={{
+              ...margin(0, theme.spacings.normal, 0, 0),
+              width: rem(300),
+            }}
+            disabled={showDialog}
+            onChange={e => setPassword(e.target.value)}
+          />
+          <Button type="submit" disabled={!password}>
+            Export PK
+          </Button>
+        </Flex>
+      </form>
       <PkDialog show={showDialog} onHide={() => setShowDialog(false)}>
         <Box
           css={{
