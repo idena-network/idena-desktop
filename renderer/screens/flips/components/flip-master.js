@@ -23,12 +23,7 @@ import {
   useNotificationDispatch,
 } from '../../../shared/providers/notification-context'
 
-import {
-  composeHint,
-  hasDataUrl,
-  getNextKeyWordsHint,
-  getKeyWordsHint,
-} from '../utils/flip'
+import {composeHint, hasDataUrl, getNextKeyWordsHint} from '../utils/flip'
 
 import {
   useEpochState,

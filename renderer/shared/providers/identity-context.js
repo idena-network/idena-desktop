@@ -82,6 +82,7 @@ function IdentityProvider({children}) {
     identity.requiredFlips > 0 &&
     (identity.flips || []).length < identity.requiredFlips
 
+  // eslint-disable-next-line no-shadow
   const canValidate =
     identity &&
     [
