@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-curly-brace-presence */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem} from 'polished'
@@ -7,7 +8,10 @@ export function Table({children, ...props}) {
   return (
     <table {...props}>
       {children}
-      <style jsx>`width: 100%; border-collapse: collapse;`</style>
+      <style jsx>{`
+        width: 100%;
+        border-collapse: collapse;
+      `}</style>
     </table>
   )
 }
@@ -20,7 +24,9 @@ export function TableRow({children, ...props}) {
   return (
     <tr {...props}>
       {children}
-      <style jsx>`width: 100%;`</style>
+      <style jsx>{`
+        width: 100%;
+      `}</style>
     </tr>
   )
 }
