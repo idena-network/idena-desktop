@@ -4,18 +4,14 @@ import {rem} from 'polished'
 import theme from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {Box, Heading} from '../../shared/components'
-import {
-  Table,
-  TableCol,
-  TableRow,
-  TableHeaderCol,
-  RowStatus,
-} from '../../shared/components/table'
+
 import Flex from '../../shared/components/flex'
 import Actions from '../../shared/components/actions'
 import IconLink from '../../shared/components/icon-link'
 import TotalAmount from '../../screens/wallets/components/total-amount'
 import WalletList from '../../screens/wallets/components/wallet-list'
+import WalletTransfer from '../../screens/wallets/components/wallet-transfer'
+import WalletActions from '../../screens/wallets/components/wallet-actions'
 import Loading from '../../shared/components/loading'
 import {fetchAccountList, fetchBalance} from '../../shared/api/wallet'
 
@@ -77,6 +73,9 @@ export default function Index() {
               <div>
                 <WalletList wallets={wallets} />
               </div>
+              <div style={{marginBottom: 24}}>
+                <WalletTransfer />
+              </div>
 
               <h3
                 style={{
@@ -91,26 +90,7 @@ export default function Index() {
                 Recent transactions
               </h3>
 
-              <Table>
-                <thead>
-                  <TableRow>
-                    <TableHeaderCol>Transaction</TableHeaderCol>
-                    <TableHeaderCol>Date</TableHeaderCol>
-                    <TableHeaderCol>USD value</TableHeaderCol>
-                    <TableHeaderCol>DNA value</TableHeaderCol>
-                  </TableRow>
-                </thead>
-                <tbody>
-                  <TableRow>
-                    <TableCol>
-                      <RowStatus up walletName="Main" />
-                    </TableCol>
-                    <TableCol>24.03.2019, 16:42</TableCol>
-                    <TableCol>2,9914 USD</TableCol>
-                    <TableCol color={theme.colors.danger}>-200 DNA</TableCol>
-                  </TableRow>
-                </tbody>
-              </Table>
+              <WalletActions />
             </>
           )}
         </Box>

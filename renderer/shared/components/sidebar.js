@@ -5,9 +5,9 @@ import {
   FiInstagram,
   FiSettings,
   FiUserCheck,
-  FiUsers,
-  FiCreditCard
+  FiUsers
 } from 'react-icons/fi'
+import {FaWallet} from 'react-icons/fa'
 import {margin, rem, borderRadius} from 'polished'
 import {Box, List, Link, Text, Button} from '.'
 import Flex from './flex'
@@ -157,7 +157,7 @@ function Nav() {
         <NavItem href="/dashboard" active icon={<FiUserCheck />}>
           {'My Idena' || nickname}
         </NavItem>
-        <NavItem href="/wallets" icon={<FiCreditCard />}>
+        <NavItem href="/wallets" icon={<FaWallet />}>
           Wallets
         </NavItem>
         <NavItem href="/flips" icon={<FiInstagram />}>

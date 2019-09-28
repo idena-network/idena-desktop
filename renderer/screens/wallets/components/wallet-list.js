@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {rem} from 'polished'
 import WalletCard from './wallet-card'
 import Flex from '../../../shared/components/flex'
-import {rem} from 'polished'
 
 function WalletList({wallets = []}) {
   return (
@@ -22,11 +22,13 @@ function WalletList({wallets = []}) {
         .scroll {
           overflow: hidden;
           width: 100%;
-          height: ${rem(180)};
+          height: 94px;
+          margin-bottom: ${rem(30)};
         }
 
         .scroll-inner {
-          overflow: auto;
+          overflow: hidden;
+          overflow-x: auto;
           padding-bottom: 15px;
           height: calc(100% + 15px);
         }

@@ -39,8 +39,9 @@ export function TableCol({children, color, ...props}) {
     <td {...props}>
       {children}
       <style jsx>{`
-        padding: ${rem(7)} ${rem(12)};
+        padding: ${rem(8)} ${rem(12)};
         color: ${color || 'inherit'};
+        border-bottom: 1px solid ${theme.colors.gray2};
       `}</style>
     </td>
   )
@@ -76,26 +77,4 @@ export function TableHeaderCol({children, ...props}) {
 
 TableHeaderCol.propTypes = {
   children: PropTypes.node,
-}
-
-export function RowStatus({up, walletName, ...props}) {
-  return (
-    <div {...props} className="status">
-      <div className="icon">
-
-      </div>
-      <div className="content">
-        <div className="">Received</div>
-        <div className="">Main</div>
-      </div>
-      <style jsx>{`
-
-      `}</style>
-    </div>
-  )
-}
-
-RowStatus.propTypes = {
-  up: PropTypes.bool,
-  walletName: PropTypes.string,
 }
