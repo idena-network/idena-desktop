@@ -64,7 +64,6 @@ RowStatus.propTypes = {
   walletName: PropTypes.string,
 }
 
-
 function WalletTransfer() {
   return (
     <Table>

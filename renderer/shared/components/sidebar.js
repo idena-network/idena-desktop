@@ -1,12 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
-import {
-  FiInstagram,
-  FiSettings,
-  FiUserCheck,
-  FiUsers
-} from 'react-icons/fi'
+import {FiInstagram, FiSettings, FiUserCheck, FiUsers} from 'react-icons/fi'
 import {FaWallet} from 'react-icons/fa'
 import {margin, rem, borderRadius} from 'polished'
 import {Box, List, Link, Text, Button} from '.'
