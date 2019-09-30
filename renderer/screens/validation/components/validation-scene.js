@@ -63,14 +63,7 @@ export default function ValidationScene({
                   dispatch({type: ANSWER, option: AnswerType.Left})
                 }
               >
-                <div
-                  style={{
-                    background: `center center / cover no-repeat url(${src})`,
-                    filter: 'blur(3px)',
-                    ...cover(),
-                    zIndex: 1,
-                  }}
-                />
+                <div style={blurStyle(src)} />
                 <img
                   alt="currentFlip"
                   height={110}
@@ -139,14 +132,7 @@ export default function ValidationScene({
                   dispatch({type: ANSWER, option: AnswerType.Right})
                 }
               >
-                <div
-                  style={{
-                    background: `center center / cover no-repeat url(${src})`,
-                    filter: 'blur(3px)',
-                    ...cover(),
-                    zIndex: 1,
-                  }}
-                />
+                <div style={blurStyle(src)} />
                 <img
                   alt="currentFlip"
                   style={{
@@ -344,6 +330,13 @@ const oppositeAnsweredStyle = {
   ...defaultStyle,
   opacity: 0.3,
 }
+
+const blurStyle = src => ({
+  background: `center center / cover no-repeat url(${src})`,
+  filter: 'blur(6px)',
+  ...cover(),
+  zIndex: 1,
+})
 
 function style(answer, target) {
   if (!answer || answer === AnswerType.None) {
