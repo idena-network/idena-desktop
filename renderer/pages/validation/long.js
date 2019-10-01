@@ -226,7 +226,7 @@ export function useWords() {
       takes.current = 0
       lastUsedFlipIdx.current = 0
     }
-  }, [error, result, unfetchedWords.length])
+  }, [error, result])
 
   return words
 }
