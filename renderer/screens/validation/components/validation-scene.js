@@ -61,6 +61,7 @@ export default function ValidationScene({
                   dispatch({type: ANSWER, option: AnswerType.Left})
                 }
               >
+                {/* eslint-disable-next-line no-use-before-define */}
                 <div style={blurStyle(src)} />
                 <img
                   alt="currentFlip"
@@ -130,6 +131,7 @@ export default function ValidationScene({
                   dispatch({type: ANSWER, option: AnswerType.Right})
                 }
               >
+                {/* eslint-disable-next-line no-use-before-define */}
                 <div style={blurStyle(src)} />
                 <img
                   alt="currentFlip"
