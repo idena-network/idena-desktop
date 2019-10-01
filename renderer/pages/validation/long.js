@@ -30,9 +30,13 @@ import {
   useValidationState,
   SessionType,
   fetchFlips,
+  WORDS_FETCHED,
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
 import Modal from '../../shared/components/modal'
+import useRpc from '../../shared/hooks/use-rpc'
+import {useInterval} from '../../shared/hooks/use-interval'
+import vocabulary from '../../screens/flips/utils/words'
 
 // eslint-disable-next-line react/display-name
 export default function() {
@@ -78,6 +82,16 @@ export default function() {
       dispatch({type: START_FETCH_FLIPS})
     }
   }, [dispatch, state.longAnswersSubmitted, state.ready])
+
+  const words = useWords()
+  useEffect(() => {
+    if (words) {
+      dispatch({
+        type: WORDS_FETCHED,
+        words,
+      })
+    }
+  }, [dispatch, words])
 
   const handleSubmitAnswers = async () => {
     await submitLongAnswers(dispatch, state.flips, epoch.epoch)
@@ -170,4 +184,38 @@ export default function() {
       </Modal>
     </Layout>
   )
+}
+
+export function useWords() {
+  const {flips} = useValidationState()
+
+  const [{result, error}, fetchWords] = useRpc()
+
+  const unfetchedWords = flips
+    .filter(x => !x.hidden)
+    // eslint-disable-next-line no-shadow
+    .filter(({words}) => !words)
+
+  const lastUsedFlip = React.useRef()
+
+  useInterval(
+    () => {
+      fetchWords('flip_words', unfetchedWords[0].hash)
+      ;[lastUsedFlip.current] = unfetchedWords
+    },
+    unfetchedWords.length ? 1000 : null
+  )
+
+  const [words, setWords] = React.useState()
+
+  useEffect(() => {
+    if (result && !error) {
+      setWords([
+        lastUsedFlip.current.hash,
+        result.words.map(i => vocabulary[i]),
+      ])
+    }
+  }, [error, result])
+
+  return words
 }

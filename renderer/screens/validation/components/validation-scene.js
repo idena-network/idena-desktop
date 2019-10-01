@@ -16,13 +16,11 @@ import {
   NEXT,
   ANSWER,
   useValidationState,
+  IRRELEVANT_WORDS_TOGGLED,
 } from '../../../shared/providers/validation-context'
-import vocabulary from '../../flips/utils/words'
-import useRpc from '../../../shared/hooks/use-rpc'
-import {useInterval} from '../../../shared/hooks/use-interval'
 
 export default function ValidationScene({
-  flip: {urls, answer, ready, orders, failed, hash},
+  flip: {urls, answer, ready, orders, failed, hash, words},
   isFirst,
   isLast,
   type,
@@ -179,7 +177,7 @@ export default function ValidationScene({
             ))}
         </Flex>
         {type === SessionType.Long && ready && !failed && (
-          <Words key={hash} hash={hash} />
+          <Words key={hash} words={words} />
         )}
       </Flex>
       {!isLast && (!ready || hasAnswer(answer)) && (
@@ -204,23 +202,11 @@ ValidationScene.propTypes = {
 }
 
 // eslint-disable-next-line react/prop-types
-function Words({hash}) {
+function Words({words}) {
   const {flips, currentIndex} = useValidationState()
   const dispatch = useValidationDispatch()
 
-  let words = useWords(hash)
-
   const haveWords = words && words.length
-  words = haveWords
-    ? words
-    : [
-        {
-          name: `👀👻➡️`,
-          desc:
-            'Trying to get flip words for you to moderate the story... Free to skip if no luck.',
-        },
-      ]
-
   const {irrelevantWords} = flips[currentIndex]
 
   return (
@@ -237,39 +223,72 @@ function Words({hash}) {
             ...margin(0, 0, rem(29, theme.fontSizes.base)),
           }}
         >
-          {words.map(({name, desc}, idx) => (
-            <React.Fragment key={`name-${idx}`}>
+          {haveWords ? (
+            words.map(({name, desc}, idx) => (
+              <React.Fragment key={`name-${idx}`}>
+                <Box
+                  style={{
+                    color: theme.colors.primary2,
+                    fontWeight: 500,
+                    lineHeight: rem(20, theme.fontSizes.base),
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {name}
+                </Box>
+                <Box
+                  style={{
+                    color: theme.colors.muted,
+                    lineHeight: rem(20),
+                    ...margin(
+                      0,
+                      0,
+                      rem(theme.spacings.medium24, theme.fontSizes.base)
+                    ),
+                  }}
+                >
+                  {desc}
+                </Box>
+              </React.Fragment>
+            ))
+          ) : (
+            <>
               <Box
                 style={{
                   color: theme.colors.primary2,
                   fontWeight: 500,
                   lineHeight: rem(20, theme.fontSizes.base),
-                  textTransform: 'capitalize',
                 }}
               >
-                {name}
+                Getting keywords...
               </Box>
-              <Box
-                style={{
-                  color: theme.colors.muted,
-                  lineHeight: rem(20),
-                  ...margin(
-                    0,
-                    0,
-                    rem(theme.spacings.medium24, theme.fontSizes.base)
-                  ),
-                }}
-              >
-                {desc}
-              </Box>
-            </React.Fragment>
-          ))}
+              {[
+                'Loading keywords to moderate the story 📬🏗🔤',
+                'Feel free to skip this step.',
+              ].map((w, idx) => (
+                <Box
+                  key={`desc-${idx}`}
+                  style={{
+                    color: theme.colors.muted,
+                    lineHeight: rem(20),
+                    ...margin(
+                      rem(theme.spacings.small8, theme.fontSizes.base),
+                      0,
+                      0
+                    ),
+                  }}
+                >
+                  {w}
+                </Box>
+              ))}
+            </>
+          )}
         </Box>
         <Flex align="center">
           <Box>
             <Switcher
               isChecked={irrelevantWords}
-              onChange={() => dispatch({type: 'IRRELEVANT_WORDS_TOGGLED'})}
+              onChange={() => dispatch({type: IRRELEVANT_WORDS_TOGGLED})}
               disabled={!haveWords}
               bgOn={theme.colors.danger}
             />
@@ -286,7 +305,7 @@ function Words({hash}) {
                 rem(theme.spacings.small12, theme.fontSizes.base)
               ),
             }}
-            onClick={() => dispatch({type: 'IRRELEVANT_WORDS_TOGGLED'})}
+            onClick={() => dispatch({type: IRRELEVANT_WORDS_TOGGLED})}
           >
             Report irrelevant words
           </Label>
@@ -296,22 +315,11 @@ function Words({hash}) {
   )
 }
 
-function useWords(hash) {
-  const [{result, error}, fetchWords] = useRpc()
-
-  useInterval(() => fetchWords('flip_words', hash), hash ? 1000 : null)
-
-  if (error || !result) {
-    return null
-  }
-
-  return result.words.map(i => vocabulary[i])
-}
-
 const defaultStyle = {
   borderRadius: rem(8, theme.fontSizes.base),
   boxShadow: `0 0 1px 0 ${theme.colors.primary2}`,
   ...margin(0, rem(theme.spacings.medium24, theme.fontSizes.base), 0),
+  minWidth: rem(147, theme.fontSizes.base),
   position: 'relative',
   ...padding(rem(4, theme.fontSizes.base)),
   height: '100%',

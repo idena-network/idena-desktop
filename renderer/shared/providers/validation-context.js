@@ -127,6 +127,8 @@ export const PREV = 'PREV'
 export const PICK = 'PICK'
 export const REPORT_ABUSE = 'REPORT_ABUSE'
 export const SHOW_EXTRA_FLIPS = 'SHOW_EXTRA_FLIPS'
+export const WORDS_FETCHED = 'WORDS_FETCHED'
+export const IRRELEVANT_WORDS_TOGGLED = 'IRRELEVANT_WORDS_TOGGLED'
 
 const initialCeremonyState = {
   flips: [],
@@ -297,7 +299,7 @@ function validationReducer(state, action) {
         ready: true,
       }
     }
-    case 'IRRELEVANT_WORDS_TOGGLED': {
+    case IRRELEVANT_WORDS_TOGGLED: {
       const {irrelevantWords, ...currentFlip} = state.flips[state.currentIndex]
       const flips = [
         ...state.flips.slice(0, state.currentIndex),
@@ -307,6 +309,20 @@ function validationReducer(state, action) {
       return {
         ...state,
         flips,
+      }
+    }
+    case WORDS_FETCHED: {
+      const {
+        words: [hash, fetchedWords],
+      } = action
+      const flip = state.flips.find(f => f.hash === hash)
+      return {
+        ...state,
+        flips: [
+          ...state.flips.slice(0, state.flips.indexOf(flip)),
+          {...flip, words: flip.words || fetchedWords},
+          ...state.flips.slice(state.flips.indexOf(flip) + 1),
+        ],
       }
     }
     default: {
