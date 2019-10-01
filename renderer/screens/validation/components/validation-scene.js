@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable react/no-array-index-key */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, margin, padding, borderRadius, cover} from 'polished'
@@ -315,7 +313,6 @@ const defaultStyle = {
   position: 'relative',
   ...padding(rem(4, theme.fontSizes.base)),
   height: '100%',
-  // minWidth: rem(147, theme.fontSizes.base),
   opacity: 1,
 }
 
