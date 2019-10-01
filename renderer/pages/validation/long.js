@@ -197,11 +197,20 @@ export function useWords() {
     .filter(({words}) => !words)
 
   const lastUsedFlip = React.useRef()
+  const lastUsedFlipIdx = React.useRef(0)
+  const takes = React.useRef(0)
 
   useInterval(
     () => {
-      fetchWords('flip_words', unfetchedWords[0].hash)
-      ;[lastUsedFlip.current] = unfetchedWords
+      if (takes.current < 3) {
+        fetchWords('flip_words', unfetchedWords[lastUsedFlipIdx.current].hash)
+        lastUsedFlip.current = unfetchedWords[lastUsedFlipIdx.current]
+        takes.current += 1
+      } else {
+        takes.current = 0
+        lastUsedFlipIdx.current =
+          (lastUsedFlipIdx.current + 1) % unfetchedWords.length
+      }
     },
     unfetchedWords.length ? 1000 : null
   )
@@ -214,8 +223,10 @@ export function useWords() {
         lastUsedFlip.current.hash,
         result.words.map(i => vocabulary[i]),
       ])
+      takes.current = 0
+      lastUsedFlipIdx.current = 0
     }
-  }, [error, result])
+  }, [error, result, unfetchedWords.length])
 
   return words
 }
