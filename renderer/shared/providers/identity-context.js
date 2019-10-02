@@ -82,6 +82,7 @@ function IdentityProvider({children}) {
     identity.requiredFlips > 0 &&
     (identity.flips || []).length < identity.requiredFlips
 
+  // eslint-disable-next-line no-shadow
   const canValidate =
     identity &&
     [
@@ -139,6 +140,27 @@ function useIdentityDispatch() {
     )
   }
   return context
+}
+
+export function canValidate(identity) {
+  if (!identity) {
+    return false
+  }
+
+  const {requiredFlips, flips, state} = identity
+
+  const numOfFlipsToSubmit = requiredFlips - (flips || []).length
+  const shouldSendFlips = numOfFlipsToSubmit > 0
+
+  return (
+    ([IdentityStatus.Verified, IdentityStatus.Newbie].includes(state) &&
+      !shouldSendFlips) ||
+    [
+      IdentityStatus.Candidate,
+      IdentityStatus.Suspended,
+      IdentityStatus.Zombie,
+    ].includes(state)
+  )
 }
 
 export {IdentityProvider, useIdentityState, useIdentityDispatch}
