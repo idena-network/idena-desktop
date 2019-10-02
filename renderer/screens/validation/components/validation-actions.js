@@ -1,17 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {margin, rem} from 'polished'
-import {Button, Tooltip} from '../../../shared/components'
+import {Button} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import theme from '../../../shared/theme'
 
-function ValidationActions({
-  onReportAbuse,
-  onSubmitAnswers,
-  canSubmit,
-  canAbuse,
-  countdown,
-}) {
+function ValidationActions({onSubmitAnswers, canSubmit, countdown}) {
   return (
     <Flex
       justify="space-between"
@@ -20,19 +14,7 @@ function ValidationActions({
       }}
     >
       <Flex justify="flex-start" css={{flex: 1}}>
-        <Tooltip
-          content={
-            canAbuse
-              ? 'Mark flip as inappropriate'
-              : `Please wait while the flip is loading`
-          }
-          placement="top-left"
-          pinned={!canAbuse}
-        >
-          <Button onClick={onReportAbuse} disabled={!canAbuse}>
-            Report abuse
-          </Button>
-        </Tooltip>
+        &nbsp;
       </Flex>
       <Flex justify="center" css={{width: '33%'}}>
         {countdown}
@@ -49,10 +31,8 @@ function ValidationActions({
 }
 
 ValidationActions.propTypes = {
-  onReportAbuse: PropTypes.func,
   onSubmitAnswers: PropTypes.func,
   canSubmit: PropTypes.bool,
-  canAbuse: PropTypes.bool,
   countdown: PropTypes.node,
 }
 

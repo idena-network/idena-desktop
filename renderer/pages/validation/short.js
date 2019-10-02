@@ -27,7 +27,6 @@ import {
   PREV,
   NEXT,
   ANSWER,
-  REPORT_ABUSE,
   PICK,
   SessionType,
   fetchFlips,
@@ -36,7 +35,7 @@ import {
 import Spinner from '../../screens/validation/components/spinner'
 import {useTimeout} from '../../shared/hooks/use-timeout'
 
-const EXTRA_FLIPS_DELAY = 30 * 1000 // 30 sec
+const EXTRA_FLIPS_DELAY = 30 * 1000
 
 function ShortSession() {
   const state = useValidationState()
@@ -131,14 +130,8 @@ function ShortSession() {
         )}
       </Flex>
       <ValidationActions
-        onReportAbuse={() => dispatch({type: REPORT_ABUSE})}
         canSubmit={state.canSubmit}
         onSubmitAnswers={handleSubmitAnswers}
-        canAbuse={
-          state.flips[state.currentIndex] &&
-          (state.flips[state.currentIndex].ready ||
-            state.flips[state.currentIndex].failed)
-        }
         countdown={<Timer type={SessionType.Short} />}
       />
       <FlipThumbnails
