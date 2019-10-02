@@ -23,12 +23,7 @@ import {
   useNotificationDispatch,
 } from '../../../shared/providers/notification-context'
 
-import {
-  composeHint,
-  hasDataUrl,
-  getNextKeyWordsHint,
-  getKeyWordsHint,
-} from '../utils/flip'
+import {composeHint, hasDataUrl, getNextKeyWordsHint} from '../utils/flip'
 
 import {
   useEpochState,
@@ -246,12 +241,11 @@ function FlipMaster({id, onClose}) {
             title={title}
             desc={desc}
             onPrev={() => setStep(step - 1)}
-            onNext={() => {
-              setStep(step + 1)
-            }}
+            onNext={() => setStep(step + 1)}
             onClose={onClose}
             onSubmit={handleSubmitFlip}
-            last={step === steps.length - 1}
+            isFirst={step === 0}
+            isLast={step === steps.length - 1}
             allowSubmit={canPublish}
           >
             {children}
