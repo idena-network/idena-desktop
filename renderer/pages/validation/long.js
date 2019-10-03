@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react'
 import Router from 'next/router'
 import {backgrounds, rem, padding, position} from 'polished'
+
 import ValidationHeader from '../../screens/validation/components/validation-header'
 import ValidationScene from '../../screens/validation/components/validation-scene'
 import ValidationActions from '../../screens/validation/components/validation-actions'
@@ -33,8 +34,7 @@ import {
 import Spinner from '../../screens/validation/components/spinner'
 import Modal from '../../shared/components/modal'
 
-// eslint-disable-next-line react/display-name
-export default function() {
+export default function LongValidation() {
   const state = useValidationState()
   const dispatch = useValidationDispatch()
   const epoch = useEpochState()
@@ -50,14 +50,14 @@ export default function() {
     }
   }, [epoch])
 
-  const [showModal, setShowModal] = React.useState()
+  const [showModal, setShowModal] = React.useState(false)
 
   useEffect(() => {
-    if (!state.shortAnswersSubmitted) {
+    if (!state.shortAnswers.length) {
       setShowModal(true)
       setTimeout(() => Router.push('/dashboard'), 3000)
     }
-  }, [state.shortAnswersSubmitted])
+  }, [state.shortAnswers.length])
 
   useEffect(() => {
     async function fetchData() {
