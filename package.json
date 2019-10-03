@@ -78,6 +78,7 @@
     "polished": "^3.3.0",
     "prop-types": "^15.6.2",
     "react": "^16.8.4",
+    "qrcode.react": "^0.9.3",
     "react-beautiful-dnd": "^10.0.4",
     "react-icons": "^3.7.0",
     "rlp": "^2.2.2",
