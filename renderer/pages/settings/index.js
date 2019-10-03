@@ -128,9 +128,9 @@ function Settings() {
                 </Button>
               </Box>
             </Section>
-            <ExportPK />
           </>
         )}
+        <ExportPK />
       </Box>
     </Layout>
   )
@@ -154,7 +154,7 @@ function ExportPK() {
   const [showDialog, setShowDialog] = React.useState()
   React.useEffect(() => setShowDialog(!!pk), [pk])
   return (
-    <Section title="Export PK">
+    <Section title="Export private key">
       <form
         onSubmit={e => {
           e.preventDefault()
