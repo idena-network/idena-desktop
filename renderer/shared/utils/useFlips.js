@@ -152,7 +152,7 @@ function useFlips() {
         }
       }
       const pairId = hint.id
-      const resp = await api.submitFlip(toHex(pics, order), pairId)
+      const resp = await api.submitFlip(toHex(pics, order), Math.max(0, pairId))
       const {result} = resp
       if (result) {
         setFlips(prevFlips => {
