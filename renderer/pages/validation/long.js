@@ -30,9 +30,13 @@ import {
   useValidationState,
   SessionType,
   fetchFlips,
+  WORDS_FETCHED,
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
 import Modal from '../../shared/components/modal'
+import useRpc from '../../shared/hooks/use-rpc'
+import {useInterval} from '../../shared/hooks/use-interval'
+import vocabulary from '../../screens/flips/utils/words'
 
 export default function LongValidation() {
   const state = useValidationState()
@@ -77,6 +81,16 @@ export default function LongValidation() {
       dispatch({type: START_FETCH_FLIPS})
     }
   }, [dispatch, state.longAnswersSubmitted, state.ready])
+
+  const words = useWords()
+  useEffect(() => {
+    if (words) {
+      dispatch({
+        type: WORDS_FETCHED,
+        words,
+      })
+    }
+  }, [dispatch, words])
 
   const handleSubmitAnswers = async () => {
     await submitLongAnswers(dispatch, state.flips, epoch.epoch)
@@ -167,4 +181,49 @@ export default function LongValidation() {
       </Modal>
     </Layout>
   )
+}
+
+export function useWords() {
+  const {flips} = useValidationState()
+
+  const [{result, error}, fetchWords] = useRpc()
+
+  const unfetchedWords = flips
+    .filter(x => !x.hidden)
+    // eslint-disable-next-line no-shadow
+    .filter(({words}) => !words)
+
+  const lastUsedFlip = React.useRef()
+  const lastUsedFlipIdx = React.useRef(0)
+  const takes = React.useRef(0)
+
+  useInterval(
+    () => {
+      if (takes.current < 3) {
+        fetchWords('flip_words', unfetchedWords[lastUsedFlipIdx.current].hash)
+        lastUsedFlip.current = unfetchedWords[lastUsedFlipIdx.current]
+        takes.current += 1
+      } else {
+        takes.current = 0
+        lastUsedFlipIdx.current =
+          (lastUsedFlipIdx.current + 1) % unfetchedWords.length
+      }
+    },
+    unfetchedWords.length ? 1000 : null
+  )
+
+  const [words, setWords] = React.useState()
+
+  useEffect(() => {
+    if (result && !error) {
+      setWords([
+        lastUsedFlip.current.hash,
+        result.words.map(i => vocabulary[i]),
+      ])
+      takes.current = 0
+      lastUsedFlipIdx.current = 0
+    }
+  }, [error, result])
+
+  return words
 }

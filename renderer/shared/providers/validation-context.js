@@ -127,6 +127,8 @@ export const PREV = 'PREV'
 export const PICK = 'PICK'
 export const REPORT_ABUSE = 'REPORT_ABUSE'
 export const SHOW_EXTRA_FLIPS = 'SHOW_EXTRA_FLIPS'
+export const WORDS_FETCHED = 'WORDS_FETCHED'
+export const IRRELEVANT_WORDS_TOGGLED = 'IRRELEVANT_WORDS_TOGGLED'
 
 const initialCeremonyState = {
   flips: [],
@@ -297,6 +299,32 @@ function validationReducer(state, action) {
         ready: true,
       }
     }
+    case IRRELEVANT_WORDS_TOGGLED: {
+      const {irrelevantWords, ...currentFlip} = state.flips[state.currentIndex]
+      const flips = [
+        ...state.flips.slice(0, state.currentIndex),
+        {...currentFlip, irrelevantWords: !irrelevantWords},
+        ...state.flips.slice(state.currentIndex + 1),
+      ]
+      return {
+        ...state,
+        flips,
+      }
+    }
+    case WORDS_FETCHED: {
+      const {
+        words: [hash, fetchedWords],
+      } = action
+      const flip = state.flips.find(f => f.hash === hash)
+      return {
+        ...state,
+        flips: [
+          ...state.flips.slice(0, state.flips.indexOf(flip)),
+          {...flip, words: flip.words || fetchedWords},
+          ...state.flips.slice(state.flips.indexOf(flip) + 1),
+        ],
+      }
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`)
     }
@@ -446,7 +474,7 @@ export async function fetchFlips(dispatch, type, flips = []) {
 function prepareAnswers(flips) {
   return flips.map(flip => ({
     answer: hasAnswer(flip.answer) ? flip.answer : 0,
-    easy: false,
+    wrongWords: flip.irrelevantWords,
     hash: flip.hash,
   }))
 }

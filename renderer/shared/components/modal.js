@@ -30,6 +30,7 @@ function Modal({show, onHide, ...props}) {
           border-radius: 6px;
           background-color: ${theme.colors.white};
           transform: translate(-50%, -50%);
+          z-index: 9;
         }
       `}</style>
       <Absolute top="1em" right="1em" zIndex={2}>
