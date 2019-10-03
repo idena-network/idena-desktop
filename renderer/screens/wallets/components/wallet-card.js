@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {margin, rem} from 'polished'
-import {FiCreditCard, FiLock} from 'react-icons/fi'
 import {MdMoreVert} from 'react-icons/md'
 import {Box} from '../../../shared/components'
 import theme from '../../../shared/theme'
@@ -21,7 +20,13 @@ function WalletCard({address, balance, main, lock}) {
       w={rem(195)}
     >
       <div className="title">
-        <div className="icon">{lock ? <FiLock /> : <FiCreditCard />}</div>
+        <div className="icn">
+          {lock ? (
+            <i className="icon icon--small_lock" />
+          ) : (
+            <i className="icon icon--small_balance" />
+          )}
+        </div>
         {address}
       </div>
       <div className="action">
@@ -39,10 +44,10 @@ function WalletCard({address, balance, main, lock}) {
           margin-bottom: ${rem(17)};
           font-weight: 500;
         }
-        .icon {
+        .icn {
           display: inline-block;
           vertical-align: middle;
-          margin: ${rem(1)} ${rem(10)} 0 0;
+          margin: 0 ${rem(10)} 0 0;
         }
         .value {
           word-wrap: break-word;

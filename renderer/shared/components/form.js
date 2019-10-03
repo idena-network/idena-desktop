@@ -39,7 +39,7 @@ Label.propTypes = {
   htmlFor: PropTypes.string.isRequired,
 }
 
-function Select({options, disabled, border, ...otherProps}) {
+function Select({options, disabled, ...otherProps}) {
   return (
     <>
       <div>
@@ -81,7 +81,7 @@ function Select({options, disabled, border, ...otherProps}) {
           background: none;
           background: none;
           box-shadow: none;
-          border-radius: ${border || '6px'};
+          border-radius: 6px;
           font-size: 1em;
           width: 100%;
           cursor: pointer;
@@ -100,7 +100,6 @@ Select.propTypes = {
   name: PropTypes.string,
   id: PropTypes.string,
   options: PropTypes.array,
-  border: PropTypes.string,
   disabled: PropTypes.bool,
 }
 
@@ -141,8 +140,44 @@ Input.propTypes = {
   disabled: PropTypes.bool,
 }
 
+// eslint-disable-next-line react/display-name
+function Textarea({disabled, ...otherProps}) {
+  return (
+    <>
+      <textarea disabled={disabled} {...otherProps} />
+      <style jsx>{`
+        textarea {
+          position: relative;
+          background: none;
+          box-shadow: none;
+          border-radius: 6px;
+          border: 0;
+          font-size: 1em;
+          padding: ${rem(theme.spacings.medium16)};
+          width: 100%;
+          box-shadow: inset 0 0 0 1px ${theme.colors.gray2};
+          color: ${theme.colors.text};
+          ${disabled && `background: ${theme.colors.gray}`};
+          ${disabled && 'cursor: not-allowed'};
+          resize: none;
+        }
+        textarea:focus {
+          outline: none;
+          z-index: 2;
+          border-color: ${theme.colors.primary};
+          box-shadow: inset 0 0 0 2px ${theme.colors.primary};
+        }
+      `}</style>
+    </>
+  )
+}
+
+Textarea.propTypes = {
+  disabled: PropTypes.bool,
+}
+
 let idx = 0
-function Field({label, id, allowCopy, children, ...props}) {
+function Field({label, id, allowCopy, children, textarea, select, ...props}) {
   const [{value: copiedText}, copyToClipboard] = useClipboard()
   const inputRef = React.useRef()
 
@@ -176,7 +211,8 @@ function Field({label, id, allowCopy, children, ...props}) {
           </Flex>
         )}
       </Flex>
-      <Input id={uniqId} {...props} ref={inputRef} />
+      {!select && !textarea && <Input id={uniqId} {...props} ref={inputRef} />}
+      {textarea && <Textarea id={uniqId} {...props} ref={inputRef} />}
       {children}
     </FormGroup>
   )
@@ -186,6 +222,8 @@ Field.propTypes = {
   label: PropTypes.string.isRequired,
   id: PropTypes.string,
   allowCopy: PropTypes.bool,
+  select: PropTypes.bool,
+  textarea: PropTypes.bool,
   onCopied: PropTypes.func,
   children: PropTypes.node,
 }

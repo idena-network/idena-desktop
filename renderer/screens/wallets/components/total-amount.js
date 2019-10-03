@@ -18,21 +18,18 @@ function TotalAmount({amount, percentChanges, amountChanges}) {
           </div>
           <style jsx>{`
             .value {
-              display: inline-block;
               font-weight: 500;
               line-height: 1.4;
             }
             .changes {
-              display: inline-block;
+              font-weight: 500;
               font-size: ${rem(18)};
-              color: ${percentChanges < 0
-                ? theme.colors.danger
-                : theme.colors.success};
-              margin-left: ${rem(8)};
+              color: ${percentChanges < 0 ? theme.colors.danger : 'inherit'};
             }
             .changes span {
               color: ${theme.colors.muted};
               margin-left: ${rem(6)};
+              font-weight: normal;
             }
           `}</style>
         </Text>

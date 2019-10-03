@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rgba, rem} from 'polished'
-import {FaLongArrowAltDown, FaLongArrowAltUp} from 'react-icons/fa'
 import theme from '../../../shared/theme'
 
 import {
@@ -9,13 +8,18 @@ import {
   TableCol,
   TableRow,
   TableHeaderCol,
+  TableHint,
 } from '../../../shared/components/table'
 
 function RowStatus({type, walletName, ...props}) {
   return (
     <div {...props} className="status">
-      <div className="icon">
-        {type === 'Sent' ? <FaLongArrowAltUp /> : <FaLongArrowAltDown />}
+      <div className="icn">
+        {type === 'Sent' ? (
+          <i className="icon icon--up_arrow" />
+        ) : (
+          <i className="icon icon--down_arrow" />
+        )}
       </div>
       <div className="content">
         <div className="type">{type}</div>
@@ -30,11 +34,10 @@ function RowStatus({type, walletName, ...props}) {
         </div>
       </div>
       <style jsx>{`
-        .icon {
+        .icn {
           width: 32px;
           height: 32px;
           border-radius: 8px;
-          font-size: ${rem(22)};
           padding: ${rem(8)};
           text-align: center;
           float: left;
@@ -52,7 +55,7 @@ function RowStatus({type, walletName, ...props}) {
         }
         .name {
           font-size: ${rem(13)};
-          font-weight: 600;
+          font-weight: 500;
         }
       `}</style>
     </div>
@@ -70,9 +73,10 @@ function WalletTransfer() {
       <thead>
         <TableRow>
           <TableHeaderCol>Transaction</TableHeaderCol>
-          <TableHeaderCol>Date</TableHeaderCol>
-          <TableHeaderCol>USD value</TableHeaderCol>
-          <TableHeaderCol>DNA value</TableHeaderCol>
+          <TableHeaderCol>Address</TableHeaderCol>
+          <TableHeaderCol>Comment</TableHeaderCol>
+          <TableHeaderCol>Date and time</TableHeaderCol>
+          <TableHeaderCol className="text-right">DNA value</TableHeaderCol>
         </TableRow>
       </thead>
       <tbody>
@@ -80,17 +84,31 @@ function WalletTransfer() {
           <TableCol>
             <RowStatus type="Sent" walletName="Main" />
           </TableCol>
+          <TableCol>
+            <div>To contact</div>
+            <TableHint>Oxe67DE87789987998878888</TableHint>
+          </TableCol>
+          <TableCol>—</TableCol>
           <TableCol>24.03.2019, 16:42</TableCol>
-          <TableCol>2,9914 USD</TableCol>
-          <TableCol color={theme.colors.danger}>-200 DNA</TableCol>
+          <TableCol className="text-right">
+            <div style={{color: theme.colors.danger}}>-200 DNA</div>
+            <TableHint>2,9914 USD</TableHint>
+          </TableCol>
         </TableRow>
         <TableRow>
           <TableCol>
             <RowStatus type="Received" walletName="Second" />
           </TableCol>
+          <TableCol>
+            <div>To Friedhelm Hagen</div>
+            <TableHint>0x5A3abB61A9c5475B8243</TableHint>
+          </TableCol>
+          <TableCol>New tires</TableCol>
           <TableCol>24.03.2019, 16:42</TableCol>
-          <TableCol>2,9914 USD</TableCol>
-          <TableCol>+200 DNA</TableCol>
+          <TableCol className="text-right">
+            <div>+200 DNA</div>
+            <TableHint>2,9914 USD</TableHint>
+          </TableCol>
         </TableRow>
       </tbody>
     </Table>

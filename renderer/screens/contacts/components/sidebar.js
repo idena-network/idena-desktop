@@ -332,13 +332,13 @@ function SidebarHeading({children, title, onNewInvite}) {
           onClick={onNewInvite}
           type="button"
           style={{
-            borderRadius: '3px',
-            width: rem(20),
-            height: rem(20),
-            fontSize: rem(21),
+            width: rem(24),
+            height: rem(24),
+            fontSize: rem(18),
             lineHeight: rem(5),
-            padding: '0 0px 0px',
-            fontWeight: 'bold',
+            padding: '0',
+            color: theme.colors.primary,
+            background: 'transparent',
             display: 'block',
             top: '50%',
             position: 'absolute',
@@ -346,7 +346,7 @@ function SidebarHeading({children, title, onNewInvite}) {
             transform: 'translate(0, -50%)',
           }}
         >
-          +
+          <i className="icon icon--add_btn" />
         </Button>
       }
       css={{

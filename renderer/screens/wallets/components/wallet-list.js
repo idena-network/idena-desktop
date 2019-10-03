@@ -22,7 +22,7 @@ function WalletList({wallets = []}) {
         .scroll {
           overflow: hidden;
           width: 100%;
-          height: 94px;
+          height: 98px;
           margin-bottom: ${rem(30)};
         }
 

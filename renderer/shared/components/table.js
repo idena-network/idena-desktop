@@ -40,9 +40,15 @@ export function TableCol({children, color, ...props}) {
     <td {...props}>
       {children}
       <style jsx>{`
-        padding: ${rem(8)} ${rem(12)};
-        color: ${color || 'inherit'};
-        border-bottom: 1px solid ${theme.colors.gray2};
+        td {
+          padding: ${rem(8)} ${rem(12)};
+          color: ${color || 'inherit'};
+          border-bottom: 1px solid ${theme.colors.gray2};
+        }
+
+        td.text-right {
+          text-align: right;
+        }
       `}</style>
     </td>
   )
@@ -71,11 +77,33 @@ export function TableHeaderCol({children, ...props}) {
         th:last-child {
           border-radius: 0 ${rem(6)} ${rem(6)} 0;
         }
+        th.text-right {
+          text-align: right;
+        }
       `}</style>
     </th>
   )
 }
 
 TableHeaderCol.propTypes = {
+  children: PropTypes.node,
+}
+
+export function TableHint({children, ...props}) {
+  return (
+    <div {...props}>
+      {children}
+      <style jsx>{`
+        div {
+          color: ${theme.colors.muted};
+          font-size: ${rem(13)};
+          font-weight: 500;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+TableHint.propTypes = {
   children: PropTypes.node,
 }

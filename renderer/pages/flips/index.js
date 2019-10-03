@@ -1,5 +1,4 @@
 import React from 'react'
-import {FiPlusSquare} from 'react-icons/fi'
 import {rem, margin} from 'polished'
 import useLocalStorage from '../../shared/hooks/use-local-storage'
 import Layout from '../../shared/components/layout'
@@ -44,7 +43,10 @@ function Flips() {
             ))}
           </Flex>
           <Flex>
-            <IconLink href="/flips/new" icon={<FiPlusSquare />}>
+            <IconLink
+              href="/flips/new"
+              icon={<i className="icon icon--add_btn" />}
+            >
               New flip
             </IconLink>
           </Flex>
