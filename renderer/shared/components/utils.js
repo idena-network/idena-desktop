@@ -15,7 +15,7 @@ export const Figure = ({label, value, postfix, tooltip}) => (
         <span>{label}</span>
       )}
     </div>
-    {value && <Text css={{wordBreak: 'break-all'}}>{value}</Text>}
+    <Text css={{wordBreak: 'break-all'}}>{value}</Text>
     {postfix && (
       <>
         {' '}
