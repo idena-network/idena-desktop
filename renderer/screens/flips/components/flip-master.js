@@ -1,10 +1,10 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import Router from 'next/router'
-import {FiCheckCircle, FiCircle} from 'react-icons/fi'
-import {rem, margin} from 'polished'
+import { FiCheckCircle, FiCircle } from 'react-icons/fi'
+import { rem, margin } from 'polished'
 import FlipStep from './flip-step'
-import {Box, Text} from '../../../shared/components'
+import { Box, Text } from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import theme from '../../../shared/theme'
 import FlipPics from './flip-pics'
@@ -12,7 +12,7 @@ import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import SubmitFlip from './submit-flip'
 
-import useFlips, {FlipType} from '../../../shared/utils/useFlips'
+import useFlips, { FlipType } from '../../../shared/utils/useFlips'
 import {
   useIdentityState,
   IdentityStatus,
@@ -23,26 +23,27 @@ import {
   useNotificationDispatch,
 } from '../../../shared/providers/notification-context'
 
-import {composeHint, hasDataUrl, getNextKeyWordsHint} from '../utils/flip'
+import { composeHint, hasDataUrl, getNextKeyWordsHint } from '../utils/flip'
 
 import {
   useEpochState,
   EpochPeriod,
 } from '../../../shared/providers/epoch-context'
-import {useChainState} from '../../../shared/providers/chain-context'
+import { useChainState } from '../../../shared/providers/chain-context'
 
-function FlipMaster({id, onClose}) {
+function FlipMaster({ id, onClose }) {
   const {
     canSubmitFlip,
     flipKeyWordPairs,
     state: identityState,
   } = useIdentityState()
   const epoch = useEpochState()
-  const {syncing} = useChainState()
+  const { syncing } = useChainState()
 
-  const {flips, getDraft, saveDraft, submitFlip} = useFlips()
+  const { flips, getDraft, saveDraft, submitFlip } = useFlips()
 
-  const publishedFlips = flips.filter(({type}) => type === FlipType.Published)
+  const publishedFlips = flips.filter(({ type }) => type === FlipType.Published)
+
 
   const [flip, setFlip] = useState({
     pics: [
@@ -51,11 +52,13 @@ function FlipMaster({id, onClose}) {
       `https://placehold.it/480?text=3`,
       `https://placehold.it/480?text=4`,
     ],
-    order: Array.from({length: 4}, (_, i) => i),
+    nonSensePic: `https://placehold.it/480?text=5`,
+    nonSenseOrder: -1,
+    order: Array.from({ length: 4 }, (_, i) => i),
     hint: getNextKeyWordsHint(flipKeyWordPairs, publishedFlips),
   })
 
-  const {addNotification} = useNotificationDispatch()
+  const { addNotification } = useNotificationDispatch()
   const [step, setStep] = useState(0)
   const [submitResult, setSubmitResult] = useState()
 
@@ -86,13 +89,13 @@ function FlipMaster({id, onClose}) {
 
   useEffect(() => {
     if (flip.pics.some(hasDataUrl)) {
-      saveDraft({id, ...flip})
+      saveDraft({ id, ...flip })
     }
   }, [id, flip, saveDraft])
 
   const handleSubmitFlip = async () => {
     try {
-      const {result, error} = await submitFlip({id, ...flip})
+      const { result, error } = await submitFlip({ id, ...flip })
 
       let message = ''
       if (error) {
@@ -125,7 +128,7 @@ function FlipMaster({id, onClose}) {
         type: error ? NotificationType.Error : NotificationType.Info,
       })
       Router.push('/flips')
-    } catch ({response: {status}}) {
+    } catch ({ response: { status } }) {
       setSubmitResult(
         status === 413
           ? 'Maximum image size exceeded'
@@ -167,7 +170,7 @@ function FlipMaster({id, onClose}) {
         <FlipPics
           {...flip}
           onUpdateFlip={nextPics => {
-            setFlip({...flip, pics: nextPics})
+            setFlip({ ...flip, pics: nextPics })
           }}
         />
       ),
@@ -180,7 +183,13 @@ function FlipMaster({id, onClose}) {
         <FlipShuffle
           {...flip}
           onShuffleFlip={order => {
-            setFlip({...flip, order})
+            setFlip({ ...flip, order })
+          }}
+          onUpdateNonSensePic={(nonSensePic) => {
+            setFlip({ ...flip, nonSensePic })
+          }}
+          onUpdateNonSenseOrder={(nonSenseOrder) => {
+            setFlip({ ...flip, nonSenseOrder })
           }}
         />
       ),
@@ -202,7 +211,7 @@ function FlipMaster({id, onClose}) {
         my={rem(theme.spacings.medium24)}
       >
         <Flex css={margin(0, 0, 0, rem(80))}>
-          {steps.map(({caption}, idx) => (
+          {steps.map(({ caption }, idx) => (
             <Flex
               key={caption}
               align="center"
@@ -218,15 +227,15 @@ function FlipMaster({id, onClose}) {
                   color={theme.colors.primary}
                 />
               ) : (
-                <FiCircle
-                  fontSize={theme.fontSizes.large}
-                  color={theme.colors.muted}
-                />
-              )}
+                  <FiCircle
+                    fontSize={theme.fontSizes.large}
+                    color={theme.colors.muted}
+                  />
+                )}
               <Text
                 color={idx <= step ? theme.colors.text : theme.colors.muted}
                 fontWeight={theme.fontWeights.semi}
-                css={{...margin(0, 0, 0, theme.spacings.small), lineHeight: 1}}
+                css={{ ...margin(0, 0, 0, theme.spacings.small), lineHeight: 1 }}
               >
                 {caption}
               </Text>
@@ -235,7 +244,7 @@ function FlipMaster({id, onClose}) {
         </Flex>
       </Box>
       {
-        steps.map(({title, desc, children}) => (
+        steps.map(({ title, desc, children }) => (
           <FlipStep
             key={title}
             title={title}
