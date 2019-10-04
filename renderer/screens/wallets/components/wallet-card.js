@@ -1,39 +1,76 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {margin, rem, wordWrap} from 'polished'
-import {Box, Text} from '../../../shared/components'
+import {margin, rem} from 'polished'
+import {MdMoreVert} from 'react-icons/md'
+import {Box} from '../../../shared/components'
 import theme from '../../../shared/theme'
 
-// eslint-disable-next-line react/prop-types
-const WhiteText = ({css, ...props}) => (
-  <Text
-    color={theme.colors.white}
-    css={{display: 'block', ...wordWrap('break-word'), ...css}}
-    {...props}
-  />
-)
-
-function WalletCard({address, balance}) {
+function WalletCard({address, balance, main, lock}) {
   return (
     <Box
-      bg={theme.colors.primary}
-      padding={theme.spacings.large}
-      css={{
-        borderRadius: rem(10),
-        ...margin(theme.spacings.normal, 0),
-        maxWidth: '25%',
+      bg={main ? theme.colors.primary : theme.colors.gray}
+      color={main ? theme.colors.white : theme.colors.primary2}
+      padding={rem(theme.spacings.medium16)}
+      style={{
+        borderRadius: rem(8),
+        minWidth: rem(195),
+        position: 'relative',
+        ...margin(0, theme.spacings.medium24, 0, 0),
       }}
+      w={rem(195)}
     >
-      <WhiteText css={{...margin(0, 0, theme.spacings.normal)}}>
+      <div className="title">
+        <div className="icn">
+          {lock ? (
+            <i className="icon icon--small_lock" />
+          ) : (
+            <i className="icon icon--small_balance" />
+          )}
+        </div>
         {address}
-      </WhiteText>
-      <WhiteText>Balance</WhiteText>
-      <WhiteText>{balance} DNA</WhiteText>
+      </div>
+      <div className="action">
+        <MdMoreVert />
+      </div>
+      <div
+        className="balance"
+        style={{color: main ? theme.colors.white : theme.colors.muted}}
+      >
+        Balance
+      </div>
+      <div className="value">{balance} DNA</div>
+      <style jsx>{`
+        .title {
+          margin-bottom: ${rem(17)};
+          font-weight: 500;
+        }
+        .icn {
+          display: inline-block;
+          vertical-align: middle;
+          margin: 0 ${rem(10)} 0 0;
+        }
+        .value {
+          word-wrap: break-word;
+          font-size: ${rem(17)};
+          line-height: ${rem(24)};
+          font-weight: 500;
+        }
+        .action {
+          padding: ${rem(5)};
+          font-size: ${rem(20)};
+          position: absolute;
+          top: ${rem(10)};
+          right: ${rem(8)};
+          cursor: pointer;
+        }
+      `}</style>
     </Box>
   )
 }
 
 WalletCard.propTypes = {
+  main: PropTypes.bool,
+  lock: PropTypes.bool,
   address: PropTypes.string.isRequired,
   balance: PropTypes.number.isRequired,
 }

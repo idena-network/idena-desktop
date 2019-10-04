@@ -1,7 +1,6 @@
 import React from 'react'
 import {withRouter} from 'next/router'
 import {rem} from 'polished'
-import {FiShare, FiUserPlus, FiCamera} from 'react-icons/fi'
 import Layout from '../../shared/components/layout'
 import {Heading, Drawer, Box} from '../../shared/components'
 import SendInviteForm from '../../screens/contacts/components/send-invite-form'
@@ -33,11 +32,17 @@ function Dashboard({router}) {
         >
           <Heading>Profile</Heading>
           <Actions>
-            <IconLink icon={<FiShare />}>Share</IconLink>
-            <IconLink href="/contacts/new-invite" icon={<FiUserPlus />}>
+            <IconLink icon={<i className="icon icon--share" />}>Share</IconLink>
+            <IconLink
+              href="/contacts/new-invite"
+              icon={<i className="icon icon--add_contact" />}
+            >
               Invite
             </IconLink>
-            <IconLink href="/flips/new" icon={<FiCamera />}>
+            <IconLink
+              href="/flips/new"
+              icon={<i className="icon icon--photo" />}
+            >
               New flip
             </IconLink>
           </Actions>

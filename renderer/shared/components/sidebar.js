@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
-import {FiInstagram, FiSettings, FiUserCheck, FiUsers} from 'react-icons/fi'
+import {FiUserCheck} from 'react-icons/fi'
 import {margin, rem, borderRadius} from 'polished'
 import {Box, List, Link, Text, Button} from '.'
 import Flex from './flex'
@@ -151,22 +151,38 @@ function Nav() {
         <NavItem href="/dashboard" active icon={<FiUserCheck />}>
           {'My Idena' || nickname}
         </NavItem>
-        <NavItem href="/flips" icon={<FiInstagram />}>
+        {/* <NavItem
+          href="/wallets"
+          icon={<i className="icon icon--menu_wallets" />}
+        >
+          Wallets
+        </NavItem> */}
+        <NavItem href="/flips" icon={<i className="icon icon--menu_gallery" />}>
           Flips
         </NavItem>
-        <NavItem href="/contacts" icon={<FiUsers />}>
+        <NavItem
+          href="/contacts"
+          icon={<i className="icon icon--menu_contacts" />}
+        >
           Contacts
         </NavItem>
         {/* <NavItem href="/chats" icon={<FiMessageSquare />}>
           Chats
         </NavItem> */}
-        <NavItem href="/settings" icon={<FiSettings />}>
+        <NavItem href="/settings" icon={<i className="icon icon--settings" />}>
           Settings
         </NavItem>
       </List>
       <style jsx>{`
         nav {
           align-self: stretch;
+        }
+        .icon {
+          margin-left: -4px;
+          margin-top: -4px;
+          margin-bottom: -3px;
+          position: relative;
+          top: 1px;
         }
       `}</style>
     </nav>
