@@ -6,7 +6,7 @@ import {
   FiUpload,
   FiRefreshCw,
   FiImage,
-  FiMinusCircle,
+  FiXCircle,
   FiChevronLeft,
   FiMove,
 } from 'react-icons/fi'
@@ -216,7 +216,7 @@ function AddImageButton(props) {
 
 function DeleteImageButton(props) {
   return (
-    <IconButton style={{color: 'red'}} icon={<FiMinusCircle />} {...props}>
+    <IconButton style={{color: 'red'}} icon={<FiXCircle />} {...props}>
       Remove nonsense image
     </IconButton>
   )
