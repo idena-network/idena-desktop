@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {rem, position, borderRadius} from 'polished'
 import {Box} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
-import {rem, position, borderRadius} from 'polished'
 
 function SubmitFlip({
   pics,

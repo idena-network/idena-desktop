@@ -42,7 +42,7 @@ function shufflePics(pics, shuffledOrder, seed) {
 
   seed.forEach((value, idx) => {
     newPics.push(pics[value])
-    firstOrder[value] = idx
+    if (value < 4) firstOrder[value] = idx
     cache[value] = newPics.length - 1
   })
 
@@ -57,9 +57,16 @@ function shufflePics(pics, shuffledOrder, seed) {
   }
 }
 
-function toHex(pics, order) {
-  const seed = perm(4)
-  const shuffled = shufflePics(pics, order, seed)
+function toHex(pics, order, nonSensePic, nonSenseOrder) {
+  const seed = nonSenseOrder >= 0 ? perm(5) : perm(4)
+
+  const k = order.findIndex(idx => idx === nonSenseOrder)
+
+  const nextPics = k >= 0 ? [...pics, nonSensePic] : pics
+  const nextOrder =
+    k >= 0 ? [...order.slice(0, k), 4, ...order.slice(k + 1)] : order
+
+  const shuffled = shufflePics(nextPics, nextOrder, seed)
 
   const rlp = encode([
     shuffled.pics.map(src =>
@@ -131,7 +138,7 @@ function useFlips() {
   }, [])
 
   const submitFlip = useCallback(
-    async ({id, pics, order, hint}) => {
+    async ({id, pics, order, nonSensePic, nonSenseOrder, hint}) => {
       if (
         flips.filter(
           f => f.type === FlipType.Published && areSame(f.pics, pics)
@@ -141,7 +148,7 @@ function useFlips() {
           error: {message: 'You already submitted this flip'},
         }
       }
-      if (areEual(order, DEFAULT_ORDER)) {
+      if (areEual(order, DEFAULT_ORDER) && nonSenseOrder < 0) {
         return {
           error: {message: 'You must shuffle flip before submit'},
         }
@@ -152,7 +159,10 @@ function useFlips() {
         }
       }
       const pairId = hint.id
-      const resp = await api.submitFlip(toHex(pics, order), Math.max(0, pairId))
+      const resp = await api.submitFlip(
+        toHex(pics, order, nonSensePic, nonSenseOrder),
+        Math.max(0, pairId)
+      )
       const {result} = resp
       if (result) {
         setFlips(prevFlips => {

@@ -19,6 +19,7 @@ import {useIdentityState} from '../../../shared/providers/identity-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import useHover from '../../../shared/hooks/use-hover'
 import {FlipType} from '../../../shared/utils/useFlips'
+import {useChainState} from '../../../shared/providers/chain-context'
 
 // eslint-disable-next-line react/display-name
 const FlipMenu = forwardRef((props, ref) => (
@@ -77,6 +78,8 @@ function FlipCover({
   id,
   hint,
   pics,
+  nonSensePic,
+  nonSenseOrder,
   type,
   mined,
   createdAt,
@@ -86,6 +89,7 @@ function FlipCover({
   onDelete,
 }) {
   const {canSubmitFlip} = useIdentityState()
+  const {syncing} = useChainState()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -96,7 +100,13 @@ function FlipCover({
   })
 
   const isDraft = type === FlipType.Draft
-  const canSubmit = global.isDev || (canSubmitFlip && pics.every(hasDataUrl))
+  const canSubmit =
+    global.isDev ||
+    (!syncing &&
+      canSubmitFlip &&
+      pics.every(hasDataUrl) &&
+      (nonSenseOrder < 0 || (nonSenseOrder >= 0 && hasDataUrl(nonSensePic))))
+
   return (
     <Box w={width}>
       <Box my={theme.spacings.small} css={position('relative')}>
@@ -147,7 +157,7 @@ function FlipCover({
                       setIsMenuOpen(false)
                       onSubmit()
                     }}
-                    disabled={!canSubmit}
+                    disabled={!!canSubmit}
                     icon={<FiUploadCloud color={theme.colors.primary} />}
                   >
                     Submit flip
@@ -186,6 +196,8 @@ FlipCover.propTypes = {
   id: PropTypes.string.isRequired,
   hint: PropTypes.arrayOf(PropTypes.object).isRequired,
   pics: PropTypes.arrayOf(PropTypes.string).isRequired,
+  nonSensePic: PropTypes.string.isRequired,
+  nonSenseOrder: PropTypes.number.isRequired,
   type: PropTypes.oneOf(Object.values(FlipType)),
   mined: PropTypes.bool,
   createdAt: PropTypes.number.isRequired,
