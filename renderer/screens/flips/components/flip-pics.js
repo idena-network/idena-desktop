@@ -1,19 +1,19 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useRef, useState, useEffect } from 'react'
+import React, {useRef, useState, useEffect} from 'react'
 
 import PropTypes from 'prop-types'
-import { rem, position, borderRadius, margin } from 'polished'
-import { FiSearch, FiUpload } from 'react-icons/fi'
-import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd'
-import { Box, Input } from '../../../shared/components'
+import {rem, position, borderRadius, margin} from 'polished'
+import {FiSearch, FiUpload} from 'react-icons/fi'
+import {Draggable, DragDropContext, Droppable} from 'react-beautiful-dnd'
+import {Box, Input} from '../../../shared/components'
 import Divider from '../../../shared/components/divider'
 import Flex from '../../../shared/components/flex'
 import ImageEditor from './image-editor'
 import theme from '../../../shared/theme'
-import { convertToBase64Url } from '../utils/use-data-url'
-import { IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE } from '../../../../main/channels'
-import { IconButton } from '../../../shared/components/button'
+import {convertToBase64Url} from '../utils/use-data-url'
+import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
+import {IconButton} from '../../../shared/components/button'
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
@@ -22,12 +22,12 @@ const reorder = (list, startIndex, endIndex) => {
   return result
 }
 
-function FlipPics({ pics, onUpdateFlip }) {
+function FlipPics({pics, onUpdateFlip}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [pickedUrl, setPickedUrl] = useState('')
 
   const handleImageSearchPick = (_, data) => {
-    const [{ url }] = data.docs[0].thumbnails
+    const [{url}] = data.docs[0].thumbnails
     setPickedUrl(url)
   }
 
@@ -97,8 +97,6 @@ function FlipPics({ pics, onUpdateFlip }) {
 
   const uploaderRef = useRef()
 
-
-
   return (
     <Flex>
       <Box css={margin(0, rem(40), 0)}>
@@ -112,10 +110,10 @@ function FlipPics({ pics, onUpdateFlip }) {
                   let style = position('relative')
 
                   if (idx === 0) {
-                    style = { ...style, ...borderRadius('top', rem(8)) }
+                    style = {...style, ...borderRadius('top', rem(8))}
                   }
                   if (idx === pics.length - 1) {
-                    style = { ...style, ...borderRadius('bottom', rem(8)) }
+                    style = {...style, ...borderRadius('bottom', rem(8))}
                   }
 
                   if (isCurrent) {
@@ -204,7 +202,7 @@ FlipPics.propTypes = {
 }
 
 // eslint-disable-next-line react/prop-types
-function Image({ src, style, children }) {
+function Image({src, style, children}) {
   return (
     <Box>
       <img alt="flip" width={120} src={src} style={style} />

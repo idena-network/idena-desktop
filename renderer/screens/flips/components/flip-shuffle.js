@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, {useRef, useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {Draggable, DragDropContext, Droppable} from 'react-beautiful-dnd'
