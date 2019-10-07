@@ -1,16 +1,17 @@
 import React from 'react'
-import {withRouter} from 'next/router'
+import {useRouter} from 'next/router'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
 
 // eslint-disable-next-line react/prop-types
-function Layout({router, children}) {
+export default function Layout({children}) {
+  const {pathname} = useRouter()
   return (
     <main>
       <Sidebar />
       <section>
-        {!router.pathname.startsWith('/validation') && <ValidationBanner />}
+        {!pathname.startsWith('/validation') && <ValidationBanner />}
         {children}
       </section>
       <Notifications />
@@ -30,5 +31,3 @@ function Layout({router, children}) {
     </main>
   )
 }
-
-export default withRouter(Layout)

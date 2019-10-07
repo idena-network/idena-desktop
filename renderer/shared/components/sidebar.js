@@ -47,7 +47,7 @@ function Sidebar() {
     <section>
       <Flex direction="column" align="flex-start">
         <NodeStatus />
-        <Avatar />
+        <Logo />
         <Nav />
       </Flex>
       <div>
@@ -124,7 +124,7 @@ function NodeStatus() {
   )
 }
 
-function Avatar() {
+export function Logo() {
   return (
     <Box
       css={{
@@ -189,7 +189,7 @@ function Nav() {
   )
 }
 
-const NavItem = withRouter(({href, router, icon, children}) => {
+export const NavItem = withRouter(({href, router, icon, children}) => {
   const active = router.pathname.startsWith(href)
   const color = active ? theme.colors.white : theme.colors.white05
   return (
@@ -387,7 +387,7 @@ CurrentTask.propTypes = {
   }).isRequired,
 }
 
-function Version({updateReady, updateLoadingPercent}) {
+export function Version({updateReady, updateLoadingPercent}) {
   return (
     <Box
       css={{
