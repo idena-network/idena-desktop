@@ -157,7 +157,7 @@ function FlipCover({
                       setIsMenuOpen(false)
                       onSubmit()
                     }}
-                    disabled={!!canSubmit}
+                    disabled={!canSubmit}
                     icon={<FiUploadCloud color={theme.colors.primary} />}
                   >
                     Submit flip

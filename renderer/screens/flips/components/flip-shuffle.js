@@ -45,7 +45,7 @@ function FlipShuffle({
   onShuffleFlip,
   onUpdateNonSensePic,
 }) {
-  const [showAddNonsesneImage, setShowAddNonsesneImage] = React.useState(false)
+  const [showAddNonsesneImage, setShowAddNonsenseImage] = React.useState(false)
 
   function onDragEnd(result) {
     if (!result.destination) {
@@ -74,10 +74,10 @@ function FlipShuffle({
           nonSensePic,
           nonSenseOrder,
           onUpdateNonSensePic,
-          setShowAddNonsesneImage,
+          setShowAddNonsenseImage,
         }}
         onClose={() => {
-          setShowAddNonsesneImage(false)
+          setShowAddNonsenseImage(false)
         }}
       />
     )
@@ -160,7 +160,7 @@ function FlipShuffle({
             <AddImageButton
               css={{margin: 0}}
               onClick={() => {
-                setShowAddNonsesneImage(true)
+                setShowAddNonsenseImage(true)
               }}
             />
           )}
@@ -247,7 +247,7 @@ function NonsenseImageEditor({
   nonSensePic,
   nonSenseOrder,
   onUpdateNonSensePic,
-  setShowAddNonsesneImage,
+  setShowAddNonsenseImage,
 }) {
   const [selectedIndex, setSelectedIndex] = useState(
     nonSenseOrder < 0 ? order[0] : nonSenseOrder
@@ -308,7 +308,7 @@ function NonsenseImageEditor({
           tooltip=""
           icon={<FiChevronLeft fontSize={rem(25)} color={theme.colors.muted} />}
           onClick={() => {
-            setShowAddNonsesneImage(false)
+            setShowAddNonsenseImage(false)
           }}
         />
       </div>
@@ -349,7 +349,6 @@ function NonsenseImageEditor({
               }
 
               if (isCurrent) {
-                // alert(nonSensePic)
                 style = {
                   ...style,
                   border: `solid 2px ${theme.colors.primary}`,
@@ -435,7 +434,7 @@ NonsenseImageEditor.propTypes = {
   nonSensePic: PropTypes.string,
   nonSenseOrder: PropTypes.number,
   onUpdateNonSensePic: PropTypes.func.isRequired,
-  setShowAddNonsesneImage: PropTypes.func.isRequired,
+  setShowAddNonsenseImage: PropTypes.func.isRequired,
 }
 
 export default FlipShuffle

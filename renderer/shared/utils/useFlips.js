@@ -21,6 +21,8 @@ export const FlipType = {
 
 const DEFAULT_ORDER = [0, 1, 2, 3]
 
+const FLIP_LENGTH = DEFAULT_ORDER.length
+
 function perm(maxValue) {
   const permArray = new Array(maxValue)
   for (let i = 0; i < maxValue; i += 1) {
@@ -38,11 +40,11 @@ function perm(maxValue) {
 function shufflePics(pics, shuffledOrder, seed) {
   const newPics = []
   const cache = {}
-  const firstOrder = new Array(4)
+  const firstOrder = new Array(FLIP_LENGTH)
 
   seed.forEach((value, idx) => {
     newPics.push(pics[value])
-    if (value < 4) firstOrder[value] = idx
+    if (value < FLIP_LENGTH) firstOrder[value] = idx
     cache[value] = newPics.length - 1
   })
 
@@ -58,13 +60,12 @@ function shufflePics(pics, shuffledOrder, seed) {
 }
 
 function toHex(pics, order, nonSensePic, nonSenseOrder) {
-  const seed = nonSenseOrder >= 0 ? perm(5) : perm(4)
+  const seed = nonSenseOrder >= 0 ? perm(FLIP_LENGTH + 1) : perm(FLIP_LENGTH)
 
   const k = order.findIndex(idx => idx === nonSenseOrder)
-
   const nextPics = k >= 0 ? [...pics, nonSensePic] : pics
   const nextOrder =
-    k >= 0 ? [...order.slice(0, k), 4, ...order.slice(k + 1)] : order
+    k >= 0 ? [...order.slice(0, k), FLIP_LENGTH, ...order.slice(k + 1)] : order
 
   const shuffled = shufflePics(nextPics, nextOrder, seed)
 
