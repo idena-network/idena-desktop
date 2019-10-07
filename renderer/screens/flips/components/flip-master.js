@@ -183,7 +183,7 @@ function FlipMaster({id, onClose}) {
       caption: 'Shuffle images',
       title: 'Shuffle images',
       desc:
-        'Shuffle images or add another image in order to make a nonsense sequence of images',
+        'Shuffle images or add alternative image in order to make a nonsense sequence of images',
       children: (
         <FlipShuffle
           {...flip}

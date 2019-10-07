@@ -211,7 +211,7 @@ function ShuffleButton(props) {
 function AddImageButton(props) {
   return (
     <IconButton icon={<FiImage />} {...props}>
-      Add nonsense image
+      Add alternative image
     </IconButton>
   )
 }
@@ -219,7 +219,7 @@ function AddImageButton(props) {
 function DeleteImageButton(props) {
   return (
     <IconButton style={{color: 'red'}} icon={<FiXCircle />} {...props}>
-      Remove nonsense image
+      Remove alternative image
     </IconButton>
   )
 }
