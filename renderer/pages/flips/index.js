@@ -1,5 +1,6 @@
 import React from 'react'
 import {rem, margin} from 'polished'
+
 import useLocalStorage from '../../shared/hooks/use-local-storage'
 import Layout from '../../shared/components/layout'
 import {Heading, Box} from '../../shared/components'
@@ -12,10 +13,12 @@ import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
 import FlipCover from '../../screens/flips/components/flip-cover'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
+import {useChainState} from '../../shared/providers/chain-context'
 
 function Flips() {
   const {flips, submitFlip, deleteFlip} = useFlips()
   const {addNotification, addError} = useNotificationDispatch()
+  const {syncing} = useChainState()
 
   const [filter, setFilter] = useLocalStorage(
     'flips/filter',
@@ -25,7 +28,7 @@ function Flips() {
   const filteredFlips = flips.filter(({type}) => type === filter)
 
   return (
-    <Layout>
+    <Layout syncing={syncing}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Heading>My Flips</Heading>
         <FlipToolbar>

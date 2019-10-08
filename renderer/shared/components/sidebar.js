@@ -42,7 +42,6 @@ function Sidebar() {
       global.ipcRenderer.removeListener(UPDATE_LOADING, updateLoading)
     }
   }, [])
-
   return (
     <section>
       <Flex direction="column" align="flex-start">
@@ -51,7 +50,7 @@ function Sidebar() {
         <Nav />
       </Flex>
       <div>
-        <InfoPanel />
+        <ActionPanel />
         <Version
           updateReady={updateDownloded}
           updateLoadingPercent={updatePercent}
@@ -224,12 +223,12 @@ export const NavItem = withRouter(({href, router, icon, children}) => {
   )
 })
 
-function InfoPanel() {
-  const {disconnected} = useChainState()
+function ActionPanel() {
+  const {syncing} = useChainState()
   const identity = useIdentityState()
   const epoch = useEpochState()
 
-  if (disconnected || !epoch) {
+  if (syncing || !epoch) {
     return null
   }
 

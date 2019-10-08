@@ -1,20 +1,16 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
+import SyncingApp from './syncing-app'
 
-// eslint-disable-next-line react/prop-types
-export default function Layout({children}) {
-  const {pathname} = useRouter()
+export default function Layout({syncing, ...props}) {
   return (
     <main>
       <Sidebar />
-      <section>
-        {!pathname.startsWith('/validation') && <ValidationBanner />}
-        {children}
-      </section>
-      <Notifications />
+      {syncing ? <SyncingApp /> : <NormalApp {...props} />}
       <style jsx>{`
         main {
           display: flex;
@@ -29,5 +25,27 @@ export default function Layout({children}) {
         }
       `}</style>
     </main>
+  )
+}
+
+Layout.propTypes = {
+  syncing: PropTypes.bool,
+  children: PropTypes.node,
+}
+
+function NormalApp(props) {
+  const {pathname} = useRouter()
+  return (
+    <section>
+      {!pathname.startsWith('/validation') && <ValidationBanner />}
+      <div {...props} />
+      <Notifications />
+      <style jsx>{`
+        section {
+          flex: 1;
+          overflow-y: auto;
+        }
+      `}</style>
+    </section>
   )
 }
