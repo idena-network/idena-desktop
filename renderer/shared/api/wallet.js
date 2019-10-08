@@ -6,7 +6,9 @@ import api from './api-client'
  *
  * @returns {string[]} Accounts
  */
-export async function fetchAccountList() {
+export async function fetchAccountList(address) {
+  return [{address}, {address, isStake: true}]
+  /*
   const {data} = await api().post('/', {
     method: `account_list`,
     params: [],
@@ -14,19 +16,24 @@ export async function fetchAccountList() {
   })
   const {result} = data
   return result
+  */
 }
 
 /**
  * Fetch balance for an address
  *
- * @returns {string} Address
+ * @returns {number} Balance
  */
-export async function fetchBalance(address) {
+export async function fetchBalance(address, isStake) {
+  const b = 123
+  return {b}
   const {data} = await api().post('/', {
     method: `dna_getBalance`,
     params: [address],
     id: 1,
   })
-  const {result} = data
+  const balance = data.result ? data.result.balance : 0
+  const stake = data.result ? data.result.stake : 0
+  const result = isStake ? stake : balance
   return result
 }

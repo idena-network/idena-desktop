@@ -13,9 +13,11 @@ function TotalAmount({amount, percentChanges, amountChanges}) {
       <Box>
         <Text fontSize={rem(24)}>
           <div className="value">{amount} DNA</div>
-          <div className="changes">
-            {percentChanges}% <span>({amountChanges} USD)</span>
-          </div>
+          {/*
+            <div className="changes">
+              {percentChanges}% <span>({amountChanges} USD)</span>
+            </div>
+          */}
           <style jsx>{`
             .value {
               font-weight: 500;

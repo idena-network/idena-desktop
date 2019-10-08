@@ -13,6 +13,7 @@ import WalletActions from '../../screens/wallets/components/wallet-actions'
 import TransferForm from '../../screens/wallets/components/transfer-form'
 import Loading from '../../shared/components/loading'
 import {fetchAccountList, fetchBalance} from '../../shared/api/wallet'
+import {useIdentityState} from '../../shared/providers/identity-context'
 
 export default function Index() {
   const [wallets, setWallets] = useState()
@@ -21,17 +22,21 @@ export default function Index() {
   const [fetching, setFetching] = useState(false)
   const [isTransferFormOpen, setIsTransferFormOpen] = React.useState(false)
   const handleCloseTransferForm = () => setIsTransferFormOpen(false)
+  const {address} = useIdentityState()
 
   useEffect(() => {
     let ignore = false
 
     async function fetchData() {
-      const accounts = await fetchAccountList()
+      const accounts = await fetchAccountList(address)
 
-      const balancePromises = accounts.map(account =>
-        fetchBalance.then(resp => ({account, ...resp}))
-      )
+      const balancePromises = accounts.map(account => {
+        const {b} = fetchBalance(account.address, account.isStake)
+        return {...account, balance: b}
+      })
+
       const nextWallets = await Promise.all(balancePromises)
+      alert(JSON.stringify(nextWallets[1]))
       setWallets(nextWallets)
       setTotalAmount(nextWallets.map(b => b.balance).reduce((a, b) => a + b, 0))
     }
@@ -45,7 +50,7 @@ export default function Index() {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [address])
 
   return (
     <Layout>
@@ -68,16 +73,21 @@ export default function Index() {
                   <Actions>
                     <IconLink
                       icon={<i className="icon icon--withdraw" />}
-                      onClick={() => setIsTransferFormOpen(!isTransferFormOpen)}
+                      onClick={() => {
+                        // alert(JSON.stringify(wallets))
+                        setIsTransferFormOpen(!isTransferFormOpen)
+                      }}
                     >
                       Transfer
                     </IconLink>
                     <IconLink icon={<i className="icon icon--deposit" />}>
                       Receive
                     </IconLink>
-                    <IconLink icon={<i className="icon icon--add_btn" />}>
-                      New wallet
-                    </IconLink>
+                    {/*
+                      <IconLink icon={<i className="icon icon--add_btn" />}>
+                          New wallet
+                      </IconLink>
+                    */}
                   </Actions>
                 </div>
               </Flex>

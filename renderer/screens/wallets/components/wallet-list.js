@@ -3,18 +3,21 @@ import PropTypes from 'prop-types'
 import {rem} from 'polished'
 import WalletCard from './wallet-card'
 import Flex from '../../../shared/components/flex'
+import {useIdentityState} from '../../../shared/providers/identity-context'
 
 function WalletList({wallets = []}) {
   return (
     <div className="scroll">
       <div className="scroll-inner">
         <Flex>
-          <WalletCard address="ffff" balance="dddd" main />
-          <WalletCard address="ffff" balance="dddd" lock />
-          <WalletCard address="ffff" balance="dddd" />
-
-          {wallets.map(({address, balance}) => (
-            <WalletCard key={address} address={address} balance={balance} />
+          {wallets.map(({address, balance, isStake}) => (
+            <WalletCard
+              key={address}
+              address={address}
+              balance={balance}
+              lock={isStake}
+              main={!isStake}
+            />
           ))}
         </Flex>
       </div>

@@ -17,7 +17,7 @@ function WalletCard({address, balance, main, lock}) {
         position: 'relative',
         ...margin(0, theme.spacings.medium24, 0, 0),
       }}
-      w={rem(195)}
+      w={rem(295)}
     >
       <div className="title">
         <div className="icn">
@@ -27,7 +27,7 @@ function WalletCard({address, balance, main, lock}) {
             <i className="icon icon--small_balance" />
           )}
         </div>
-        {address}
+        {`${address && address.substr(0, 20)}...`}
       </div>
       <div className="action">
         <MdMoreVert />
