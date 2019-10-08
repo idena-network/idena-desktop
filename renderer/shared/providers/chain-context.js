@@ -16,12 +16,9 @@ const initialState = {
 function chainReducer(state, action) {
   switch (action.type) {
     case FETCH_SYNC_SUCCEEDED: {
-      const {syncing, currentBlock, highestBlock} = action.payload
       return {
         ...state,
-        currentBlock,
-        highestBlock,
-        syncing,
+        ...action.payload,
         offline: false,
       }
     }

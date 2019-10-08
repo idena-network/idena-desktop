@@ -56,7 +56,7 @@ export default function SyncingApp() {
 }
 
 function SyncingIdentity() {
-  const {currentBlock, highestBlock} = useChainState()
+  const {currentBlock, highestBlock, wrongTime} = useChainState()
   const {address} = useIdentityState()
   const [{result: peers}] = usePoll(useRpc('net_peers'), 1000)
   return (
@@ -84,10 +84,12 @@ function SyncingIdentity() {
         </div>
         <progress value={currentBlock} max={highestBlock} />
       </section>
-      <section>
-        Can not connet to Idena Node. Please make sure the node is running or
-        check connection settings.
-      </section>
+      {wrongTime && (
+        <section>
+          Please check you local clock. The time must be synchronized with
+          internet time in order to have connections with other peers.
+        </section>
+      )}
       <style jsx>{`
         section > section {
           margin-bottom: ${rem(40, theme.fontSizes.base)};
