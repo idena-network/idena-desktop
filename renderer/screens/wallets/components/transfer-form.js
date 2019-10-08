@@ -1,5 +1,6 @@
 import React from 'react'
 import {rem, margin, padding, wordWrap} from 'polished'
+import PropTypes from 'prop-types'
 import theme from '../../../shared/theme'
 import {
   Box,
@@ -10,7 +11,7 @@ import {
   Select,
 } from '../../../shared/components'
 
-function TransferForm() {
+function TransferForm({wallets}) {
   return (
     <Box
       css={padding(rem(theme.spacings.large48), rem(theme.spacings.medium32))}
@@ -27,24 +28,22 @@ function TransferForm() {
         </SubHeading>
 
         <FormGroup>
-          <Field label="Transfer from" select>
+          <Field label="From" select>
             <Select
               name="select"
               id="select"
-              options={['Main', 'Second']}
+              options={
+                wallets &&
+                wallets
+                  .filter(wallet => !wallet.isStake)
+                  .map(wallet => wallet.address)
+              }
               border="0"
             />
           </Field>
         </FormGroup>
         <FormGroup>
-          <Field label="To" select>
-            <Select
-              name="select"
-              id="select"
-              options={['Main', 'Second']}
-              border="0"
-            />
-          </Field>
+          <Field label="To" value="" />
         </FormGroup>
         <FormGroup>
           <Field label="Amount, DNA" value="" />
@@ -61,6 +60,10 @@ function TransferForm() {
       </Box>
     </Box>
   )
+}
+
+TransferForm.propTypes = {
+  wallets: PropTypes.arrayOf(PropTypes.object).isRequired,
 }
 
 export default TransferForm

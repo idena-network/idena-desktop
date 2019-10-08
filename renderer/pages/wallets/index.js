@@ -29,16 +29,54 @@ export default function Index() {
 
     async function fetchData() {
       const accounts = await fetchAccountList(address)
+      /*
+      const nextWallets = await Promise.all(
+        accounts
+          .map(account => ({
+            address: account.address,
+            isStake: account.isStake,
+          }))
+          .map(fetchBalance)
+      )
 
-      const balancePromises = accounts.map(account => {
-        const {b} = fetchBalance(account.address, account.isStake)
-        return {...account, balance: b}
+        const balancePromises = accounts.map(account => {
+        const {result} = fetchBalance(account.address, account.isStake)
+        alert(JSON.stringify({result}))
+        return {...account, balance: result}
       })
+      const nextWallets = await Promise.all(balancePromises)
+
+  */
+      /*
+      const nextWallets = await Promise.all(
+        accounts.map(account => {
+          const result = fetchBalance(account.address, account.isStake)
+          alert(JSON.stringify(result))
+          return { ...account, balance: 12 }
+        })
+      )
+
+      
+      const balancePromises = accounts.map(account =>
+        fetchBalance.then(resp => ({account, ...resp}))
+      )
+  */
+
+      const balancePromises = accounts.map(account =>
+        fetchBalance(account.address).then(resp => {
+          const balance =
+            resp && account && (account.isStake ? resp.stake : resp.balance)
+          return {...account, balance}
+        })
+      )
 
       const nextWallets = await Promise.all(balancePromises)
-      alert(JSON.stringify(nextWallets[1]))
+
+      // console.log(JSON.stringify(nextWallets))
       setWallets(nextWallets)
-      setTotalAmount(nextWallets.map(b => b.balance).reduce((a, b) => a + b, 0))
+      setTotalAmount(
+        nextWallets.map(b => b.balance).reduce((a, b) => a * 1 + b * 1, 0)
+      )
     }
 
     if (!ignore) {
@@ -74,7 +112,6 @@ export default function Index() {
                     <IconLink
                       icon={<i className="icon icon--withdraw" />}
                       onClick={() => {
-                        // alert(JSON.stringify(wallets))
                         setIsTransferFormOpen(!isTransferFormOpen)
                       }}
                     >
@@ -112,7 +149,7 @@ export default function Index() {
           )}
         </Box>
         <Drawer show={isTransferFormOpen} onHide={handleCloseTransferForm}>
-          <TransferForm />
+          <TransferForm wallets={wallets} />
         </Drawer>
       </Box>
     </Layout>
