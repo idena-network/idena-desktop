@@ -25,6 +25,7 @@ export default function SyncingApp() {
           display: flex;
           flex-direction: column;
           flex: 1;
+          height: 100vh;
         }
 
         section > div:first-child {
