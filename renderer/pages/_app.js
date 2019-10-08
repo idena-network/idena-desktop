@@ -17,7 +17,8 @@ import {List} from '../shared/components'
 import {Version, NavItem, Logo} from '../shared/components/sidebar'
 import theme from '../shared/theme'
 import Avatar from '../shared/components/avatar'
-// import Spinner from '../screens/validation/components/spinner'
+import useRpc from '../shared/hooks/use-rpc'
+import {usePoll} from '../shared/hooks/use-interval'
 
 Router.events.on('routeChangeStart', () => {
   NProgress.start()
@@ -86,8 +87,10 @@ function SyncingApp() {
         </nav>
         <section>
           <div>
-            <Spinner size={24} />
-            <span>Synchronizing...</span>
+            <div>
+              <Spinner size={24} />
+            </div>
+            <div>Synchronizing...</div>
           </div>
           <div>
             <SyncingIdentity />
@@ -142,8 +145,12 @@ function SyncingApp() {
             position: relative;
             text-align: center;
           }
-          section > div:first-child > span {
-            margin-left: ${rem(8, 13)};
+          section > div:first-child > div:first-child {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: ${rem(18, 13)};
+            transform: scale(0.35);
           }
           section > div:nth-child(2) {
             display: flex;
@@ -160,6 +167,7 @@ function SyncingApp() {
 function SyncingIdentity() {
   const {currentBlock, highestBlock} = useChainState()
   const {address} = useIdentityState()
+  const [{result: peers}] = usePoll(useRpc('net_peers'), 1000)
   return (
     <section>
       <section>
@@ -180,7 +188,7 @@ function SyncingIdentity() {
             {currentBlock} out of {highestBlock}
           </h3>
           <div>
-            <span>Peers connected:</span> 4
+            <span>Peers connected:</span> {(peers || []).length}
           </div>
         </div>
         <progress value={currentBlock} max={highestBlock} />
@@ -265,167 +273,97 @@ function SyncedApp(props) {
 
 function Spinner() {
   return (
-    <div className="sk-fading-circle">
-      <div className="sk-circle1 sk-circle" />
-      <div className="sk-circle2 sk-circle" />
-      <div className="sk-circle3 sk-circle" />
-      <div className="sk-circle4 sk-circle" />
-      <div className="sk-circle5 sk-circle" />
-      <div className="sk-circle6 sk-circle" />
-      <div className="sk-circle7 sk-circle" />
-      <div className="sk-circle8 sk-circle" />
-      <div className="sk-circle9 sk-circle" />
-      <div className="sk-circle10 sk-circle" />
-      <div className="sk-circle11 sk-circle" />
-      <div className="sk-circle12 sk-circle" />
+    <>
+      <div className="loader-inner line-spin-fade-loader">
+        <div />
+        <div />
+        <div />
+        <div />
+        <div />
+        <div />
+        <div />
+        <div />
+      </div>
       <style jsx>{`
-        .sk-fading-circle {
-          width: 20px;
-          height: 20px;
+        @keyframes line-spin-fade-loader {
+          50% {
+            opacity: 0.3;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+
+        .line-spin-fade-loader {
           position: relative;
+          top: -10px;
+          left: -4px;
         }
-
-        .sk-fading-circle .sk-circle {
-          width: 100%;
-          height: 100%;
-          position: absolute;
+        .line-spin-fade-loader > div:nth-child(1) {
+          top: 20px;
           left: 0;
+          animation: line-spin-fade-loader 1.2s -0.84s infinite ease-in-out;
+        }
+        .line-spin-fade-loader > div:nth-child(2) {
+          top: 13.63636px;
+          left: 13.63636px;
+          -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+          animation: line-spin-fade-loader 1.2s -0.72s infinite ease-in-out;
+        }
+        .line-spin-fade-loader > div:nth-child(3) {
           top: 0;
-        }
-
-        .sk-fading-circle .sk-circle:before {
-          content: '';
-          display: block;
-          margin: 0 auto;
-          width: 15%;
-          height: 15%;
-          background-color: #fff;
-          border-radius: 100%;
-          -webkit-animation: sk-circleFadeDelay 1.2s infinite ease-in-out both;
-          animation: sk-circleFadeDelay 1.2s infinite ease-in-out both;
-        }
-        .sk-fading-circle .sk-circle2 {
-          -webkit-transform: rotate(30deg);
-          -ms-transform: rotate(30deg);
-          transform: rotate(30deg);
-        }
-        .sk-fading-circle .sk-circle3 {
-          -webkit-transform: rotate(60deg);
-          -ms-transform: rotate(60deg);
-          transform: rotate(60deg);
-        }
-        .sk-fading-circle .sk-circle4 {
+          left: 20px;
           -webkit-transform: rotate(90deg);
-          -ms-transform: rotate(90deg);
           transform: rotate(90deg);
+          animation: line-spin-fade-loader 1.2s -0.6s infinite ease-in-out;
         }
-        .sk-fading-circle .sk-circle5 {
-          -webkit-transform: rotate(120deg);
-          -ms-transform: rotate(120deg);
-          transform: rotate(120deg);
+        .line-spin-fade-loader > div:nth-child(4) {
+          top: -13.63636px;
+          left: 13.63636px;
+          -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+          animation: line-spin-fade-loader 1.2s -0.48s infinite ease-in-out;
         }
-        .sk-fading-circle .sk-circle6 {
-          -webkit-transform: rotate(150deg);
-          -ms-transform: rotate(150deg);
-          transform: rotate(150deg);
+        .line-spin-fade-loader > div:nth-child(5) {
+          top: -20px;
+          left: 0;
+          animation: line-spin-fade-loader 1.2s -0.36s infinite ease-in-out;
         }
-        .sk-fading-circle .sk-circle7 {
-          -webkit-transform: rotate(180deg);
-          -ms-transform: rotate(180deg);
-          transform: rotate(180deg);
+        .line-spin-fade-loader > div:nth-child(6) {
+          top: -13.63636px;
+          left: -13.63636px;
+          -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+          animation: line-spin-fade-loader 1.2s -0.24s infinite ease-in-out;
         }
-        .sk-fading-circle .sk-circle8 {
-          -webkit-transform: rotate(210deg);
-          -ms-transform: rotate(210deg);
-          transform: rotate(210deg);
+        .line-spin-fade-loader > div:nth-child(7) {
+          top: 0;
+          left: -20px;
+          -webkit-transform: rotate(90deg);
+          transform: rotate(90deg);
+          animation: line-spin-fade-loader 1.2s -0.12s infinite ease-in-out;
         }
-        .sk-fading-circle .sk-circle9 {
-          -webkit-transform: rotate(240deg);
-          -ms-transform: rotate(240deg);
-          transform: rotate(240deg);
+        .line-spin-fade-loader > div:nth-child(8) {
+          top: 13.63636px;
+          left: -13.63636px;
+          -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+          animation: line-spin-fade-loader 1.2s 0s infinite ease-in-out;
         }
-        .sk-fading-circle .sk-circle10 {
-          -webkit-transform: rotate(270deg);
-          -ms-transform: rotate(270deg);
-          transform: rotate(270deg);
-        }
-        .sk-fading-circle .sk-circle11 {
-          -webkit-transform: rotate(300deg);
-          -ms-transform: rotate(300deg);
-          transform: rotate(300deg);
-        }
-        .sk-fading-circle .sk-circle12 {
-          -webkit-transform: rotate(330deg);
-          -ms-transform: rotate(330deg);
-          transform: rotate(330deg);
-        }
-        .sk-fading-circle .sk-circle2:before {
-          -webkit-animation-delay: -1.1s;
-          animation-delay: -1.1s;
-        }
-        .sk-fading-circle .sk-circle3:before {
-          -webkit-animation-delay: -1s;
-          animation-delay: -1s;
-        }
-        .sk-fading-circle .sk-circle4:before {
-          -webkit-animation-delay: -0.9s;
-          animation-delay: -0.9s;
-        }
-        .sk-fading-circle .sk-circle5:before {
-          -webkit-animation-delay: -0.8s;
-          animation-delay: -0.8s;
-        }
-        .sk-fading-circle .sk-circle6:before {
-          -webkit-animation-delay: -0.7s;
-          animation-delay: -0.7s;
-        }
-        .sk-fading-circle .sk-circle7:before {
-          -webkit-animation-delay: -0.6s;
-          animation-delay: -0.6s;
-        }
-        .sk-fading-circle .sk-circle8:before {
-          -webkit-animation-delay: -0.5s;
-          animation-delay: -0.5s;
-        }
-        .sk-fading-circle .sk-circle9:before {
-          -webkit-animation-delay: -0.4s;
-          animation-delay: -0.4s;
-        }
-        .sk-fading-circle .sk-circle10:before {
-          -webkit-animation-delay: -0.3s;
-          animation-delay: -0.3s;
-        }
-        .sk-fading-circle .sk-circle11:before {
-          -webkit-animation-delay: -0.2s;
-          animation-delay: -0.2s;
-        }
-        .sk-fading-circle .sk-circle12:before {
-          -webkit-animation-delay: -0.1s;
-          animation-delay: -0.1s;
-        }
-
-        @-webkit-keyframes sk-circleFadeDelay {
-          0%,
-          39%,
-          100% {
-            opacity: 0;
-          }
-          40% {
-            opacity: 1;
-          }
-        }
-
-        @keyframes sk-circleFadeDelay {
-          0%,
-          39%,
-          100% {
-            opacity: 0;
-          }
-          40% {
-            opacity: 1;
-          }
+        .line-spin-fade-loader > div {
+          background-color: #fff;
+          width: 4px;
+          height: 35px;
+          border-radius: 2px;
+          margin: 2px;
+          -webkit-animation-fill-mode: both;
+          animation-fill-mode: both;
+          position: absolute;
+          width: 5px;
+          height: 15px;
         }
       `}</style>
-    </div>
+    </>
   )
 }
