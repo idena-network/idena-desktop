@@ -116,12 +116,10 @@ export default () => (
 
     @font-face {
       font-family: 'icons';
-      src: url('/static/fonts/icons.eot?ey6yd3');
-      src: url('/static/fonts/icons.eot?ey6yd3#iefix')
-          format('embedded-opentype'),
-        url('/static/fonts/icons.ttf?ey6yd3') format('truetype'),
-        url('/static/fonts/icons.woff?ey6yd3') format('woff'),
-        url('/static/fonts/icons.svg?ey6yd3#icons') format('svg');
+      src: url('/static/fonts/icons.eot');
+      src: url('/static/fonts/icons.ttf') format('truetype'),
+        url('/static/fonts/icons.woff') format('woff'),
+        url('/static/fonts/icons.svg#icons') format('svg');
       font-weight: normal;
       font-style: normal;
       font-display: block;
