@@ -48,7 +48,7 @@ function ChainProvider({children}) {
         dispatch({type: FETCH_SYNC_FAILED})
       }
     },
-    !state.offline && state.syncing ? 1000 * 1 : 5000 * 1,
+    !state.offline && state.syncing ? 1000 * 1 : 1000 * 5,
     true
   )
 
