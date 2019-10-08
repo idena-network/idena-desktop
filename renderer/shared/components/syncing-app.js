@@ -242,3 +242,31 @@ function Spinner() {
     </>
   )
 }
+
+export function OfflineApp() {
+  return (
+    <section>
+      <div>Offline</div>
+      <style jsx>{`
+        section {
+          background: #333;
+          color: white;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        section > div:first-child {
+          background: rgb(255, 102, 102);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          line-height: ${rem(20, 13)};
+          padding: ${rem(12, 13)};
+          position: relative;
+          text-align: center;
+        }
+      `}</style>
+    </section>
+  )
+}

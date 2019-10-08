@@ -18,14 +18,14 @@ import {useChainState} from '../../shared/providers/chain-context'
 
 function Dashboard() {
   const router = useRouter()
-  const {syncing} = useChainState()
+  const {syncing, offline} = useChainState()
 
   const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(false)
   const handleCloseSendInvite = () => setIsSendInviteOpen(false)
 
   return (
     <InviteProvider>
-      <Layout syncing={syncing}>
+      <Layout syncing={syncing} offline={offline}>
         <Box
           px={theme.spacings.xxxlarge}
           py={theme.spacings.large}
