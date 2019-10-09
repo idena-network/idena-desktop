@@ -2,7 +2,6 @@ import React from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
 import {fetchEpoch} from '../api'
-import {logConnectivityIssue} from '../utils/log'
 
 export const EpochPeriod = {
   FlipLottery: 'FlipLottery',
@@ -25,16 +24,18 @@ function EpochProvider({children}) {
 
     async function fetchData() {
       try {
-        // eslint-disable-next-line no-shadow
         const nextEpoch = await fetchEpoch()
         if (!ignore) {
           setEpoch(nextEpoch)
         }
       } catch (error) {
-        logConnectivityIssue('epoch (initial)', error)
         if (!ignore) {
-          setInterval(5000)
+          setInterval(1000 * 5)
         }
+        global.logger.error(
+          'An error occured while fetching epoch',
+          error.message
+        )
       }
     }
 
@@ -45,16 +46,22 @@ function EpochProvider({children}) {
     }
   }, [])
 
-  useInterval(async () => {
-    try {
-      const nextEpoch = await fetchEpoch()
-      if (!deepEqual(epoch, nextEpoch)) {
-        setEpoch(nextEpoch)
+  useInterval(
+    async () => {
+      try {
+        const nextEpoch = await fetchEpoch()
+        if (!deepEqual(epoch, nextEpoch)) {
+          setEpoch(nextEpoch)
+        }
+      } catch (error) {
+        global.logger.error(
+          'An error occured while fetching epoch',
+          error.message
+        )
       }
-    } catch (error) {
-      logConnectivityIssue('epoch (poll)', error)
-    }
-  }, interval)
+    },
+    epoch ? interval : null
+  )
 
   return (
     <EpochStateContext.Provider value={epoch}>
