@@ -9,6 +9,7 @@ import {NotificationProvider} from '../shared/providers/notification-context'
 import {TimingProvider} from '../shared/providers/timing-context'
 import {ChainProvider} from '../shared/providers/chain-context'
 import {ValidationProvider} from '../shared/providers/validation-context'
+import Error from './_error'
 
 Router.events.on('routeChangeStart', () => {
   NProgress.start()
@@ -22,14 +23,60 @@ Router.events.on('routeChangeError', () => {
   NProgress.done()
 })
 
-export default class MyApp extends NextApp {
+class MyApp extends App {
+  constructor(props) {
+    super(props)
+    this.state = {
+      hasError: false,
+      error: undefined,
+    }
+  }
+
+  static async getInitialProps({Component, ctx}) {
+    try {
+      let pageProps = {}
+
+      if (Component.getInitialProps) {
+        pageProps = await Component.getInitialProps(ctx)
+      }
+
+      return {pageProps}
+    } catch (error) {
+      global.logger.error(error, ctx)
+      return {
+        hasError: true,
+        error,
+      }
+    }
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    return {
+      hasError: props.hasError || state.hasError || false,
+      error: props.error || state.error || undefined,
+    }
+  }
+
+  static getDerivedStateFromError() {
+    return {hasError: true}
+  }
+
+  componentDidCatch(error) {
+    this.setState({error})
+  }
+
   render() {
     const {Component, pageProps} = this.props
+    const {hasError, error} = this.state
     return (
       <Container>
         <GlobalStyle />
         <AppProviders>
-          <Component {...pageProps} />
+          {hasError ? (
+            <Error err={error && error.props} />
+          ) : (
+            <Component {...pageProps} />
+          )}
         </AppProviders>
       </Container>
     )
@@ -40,13 +87,13 @@ function AppProviders(props) {
   return (
     <ChainProvider>
       <TimingProvider>
-        <NotificationProvider>
-          <EpochProvider>
-            <IdentityProvider>
-              <ValidationProvider {...props} />
-            </IdentityProvider>
-          </EpochProvider>
-        </NotificationProvider>
+        <EpochProvider>
+          <IdentityProvider>
+            <ValidationProvider>
+              <NotificationProvider {...props} />
+            </ValidationProvider>
+          </IdentityProvider>
+        </EpochProvider>
       </TimingProvider>
     </ChainProvider>
   )
