@@ -24,19 +24,11 @@ export async function fetchAccountList(address) {
  *
  * @returns {number} Balance
  */
-export async function fetchBalance(address, isStake) {
+export async function fetchBalance(address) {
   const {data} = await api().post('/', {
     method: `dna_getBalance`,
     params: [address],
     id: 1,
   })
-  // alert(JSON.stringify(data.result))
   return data.result
-
-  alert(JSON.stringify(data))
-
-  const b = data.result ? data.result.balance : 11
-  const s = data.result ? data.result.stake : 234
-  const balance = isStake ? s : b
-  return balance
 }

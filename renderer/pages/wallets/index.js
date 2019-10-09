@@ -11,84 +11,19 @@ import TotalAmount from '../../screens/wallets/components/total-amount'
 import WalletList from '../../screens/wallets/components/wallet-list'
 import WalletActions from '../../screens/wallets/components/wallet-actions'
 import TransferForm from '../../screens/wallets/components/transfer-form'
+import ReceiveForm from '../../screens/wallets/components/receive-form'
+
 import Loading from '../../shared/components/loading'
-import {fetchAccountList, fetchBalance} from '../../shared/api/wallet'
-import {useIdentityState} from '../../shared/providers/identity-context'
+import useWallets from '../../shared/utils/useWallets'
 
 export default function Index() {
-  const [wallets, setWallets] = useState()
-  const [totalAmount, setTotalAmount] = useState()
+  const {wallets, totalAmount, fetching} = useWallets()
 
-  const [fetching, setFetching] = useState(false)
   const [isTransferFormOpen, setIsTransferFormOpen] = React.useState(false)
   const handleCloseTransferForm = () => setIsTransferFormOpen(false)
-  const {address} = useIdentityState()
 
-  useEffect(() => {
-    let ignore = false
-
-    async function fetchData() {
-      const accounts = await fetchAccountList(address)
-      /*
-      const nextWallets = await Promise.all(
-        accounts
-          .map(account => ({
-            address: account.address,
-            isStake: account.isStake,
-          }))
-          .map(fetchBalance)
-      )
-
-        const balancePromises = accounts.map(account => {
-        const {result} = fetchBalance(account.address, account.isStake)
-        alert(JSON.stringify({result}))
-        return {...account, balance: result}
-      })
-      const nextWallets = await Promise.all(balancePromises)
-
-  */
-      /*
-      const nextWallets = await Promise.all(
-        accounts.map(account => {
-          const result = fetchBalance(account.address, account.isStake)
-          alert(JSON.stringify(result))
-          return { ...account, balance: 12 }
-        })
-      )
-
-      
-      const balancePromises = accounts.map(account =>
-        fetchBalance.then(resp => ({account, ...resp}))
-      )
-  */
-
-      const balancePromises = accounts.map(account =>
-        fetchBalance(account.address).then(resp => {
-          const balance =
-            resp && account && (account.isStake ? resp.stake : resp.balance)
-          return {...account, balance}
-        })
-      )
-
-      const nextWallets = await Promise.all(balancePromises)
-
-      // console.log(JSON.stringify(nextWallets))
-      setWallets(nextWallets)
-      setTotalAmount(
-        nextWallets.map(b => b.balance).reduce((a, b) => a * 1 + b * 1, 0)
-      )
-    }
-
-    if (!ignore) {
-      setFetching(true)
-      fetchData()
-      setFetching(false)
-    }
-
-    return () => {
-      ignore = true
-    }
-  }, [address])
+  const [isReceiveFormOpen, setIsReceiveFormOpen] = React.useState(false)
+  const handleCloseReceiveForm = () => setIsReceiveFormOpen(false)
 
   return (
     <Layout>
@@ -117,7 +52,12 @@ export default function Index() {
                     >
                       Transfer
                     </IconLink>
-                    <IconLink icon={<i className="icon icon--deposit" />}>
+                    <IconLink
+                      icon={<i className="icon icon--deposit" />}
+                      onClick={() => {
+                        setIsReceiveFormOpen(!isReceiveFormOpen)
+                      }}
+                    >
                       Receive
                     </IconLink>
                     {/*
@@ -149,7 +89,16 @@ export default function Index() {
           )}
         </Box>
         <Drawer show={isTransferFormOpen} onHide={handleCloseTransferForm}>
-          <TransferForm wallets={wallets} />
+          <TransferForm
+            onSuccess={handleCloseTransferForm}
+            onFail={handleCloseTransferForm}
+          />
+        </Drawer>
+
+        <Drawer show={isReceiveFormOpen} onHide={handleCloseReceiveForm}>
+          <ReceiveForm
+            address={wallets.length > 0 && wallets[0] && wallets[0].address}
+          />
         </Drawer>
       </Box>
     </Layout>
