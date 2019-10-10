@@ -11,6 +11,8 @@ const {prepareDb} = require('./stores/setup')
 
 process.once('loaded', () => {
   global.ipcRenderer = electron.ipcRenderer
+  global.openExternal = electron.shell.openExternal
+
   global.flipStore = flips
   // global.validationStore = validation
   global.validationDb = validation
