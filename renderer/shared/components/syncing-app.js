@@ -5,6 +5,9 @@ import {useIdentityState} from '../providers/identity-context'
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import Avatar from './avatar'
+import Link from './link'
+import {FlatButton} from './button'
+import List from './list'
 
 export default function SyncingApp() {
   return (
@@ -240,5 +243,83 @@ function Spinner() {
         }
       `}</style>
     </>
+  )
+}
+
+export function OfflineApp() {
+  return (
+    <section>
+      <div>Offline</div>
+      <div>
+        <div>
+          <h2>How to get started</h2>
+          <List>
+            <li>
+              Download the latest version of{' '}
+              <FlatButton
+                color={theme.colors.primary}
+                onClick={() =>
+                  global.openExternal('https://idena.io/?view=download')
+                }
+              >
+                Idena node
+              </FlatButton>
+            </li>
+            <li>
+              Follow the{' '}
+              <FlatButton
+                color={theme.colors.primary}
+                onClick={() =>
+                  global.openExternal('https://idena.io/?view=guide')
+                }
+              >
+                guide
+              </FlatButton>{' '}
+              to install and run Idena node
+            </li>
+            <li>
+              Check your connection{' '}
+              <Link color={theme.colors.primary} href="/settings">
+                settings
+              </Link>
+            </li>
+          </List>
+        </div>
+      </div>
+      <style jsx>{`
+        section {
+          background: #333;
+          color: white;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+        section > div:first-child {
+          background: rgb(255, 102, 102);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          line-height: ${rem(20, 13)};
+          padding: ${rem(12, 13)};
+          position: relative;
+          text-align: center;
+        }
+        section > div:nth-child(2) {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 1;
+        }
+        h2 {
+          font-size: ${rem(18, theme.fontSizes.base)};
+          font-weight: 500;
+          margin: 0;
+          word-break: break-all;
+        }
+        li {
+          margin-bottom: ${rem(theme.spacings.small8, theme.fontSizes.base)};
+        }
+      `}</style>
+    </section>
   )
 }

@@ -4,13 +4,15 @@ import {useRouter} from 'next/router'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
-import SyncingApp from './syncing-app'
+import SyncingApp, {OfflineApp} from './syncing-app'
 
-export default function Layout({syncing, ...props}) {
+export default function Layout({syncing, offline, ...props}) {
   return (
     <main>
       <Sidebar />
-      {syncing ? <SyncingApp /> : <NormalApp {...props} />}
+      {syncing && !offline && <SyncingApp />}
+      {offline && !syncing && <OfflineApp />}
+      {!offline && !syncing && <NormalApp {...props} />}
       <style jsx>{`
         main {
           display: flex;
@@ -30,6 +32,7 @@ export default function Layout({syncing, ...props}) {
 
 Layout.propTypes = {
   syncing: PropTypes.bool,
+  offline: PropTypes.bool,
   children: PropTypes.node,
 }
 
