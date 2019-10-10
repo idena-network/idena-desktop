@@ -24,8 +24,8 @@ function Dashboard() {
   const handleCloseSendInvite = () => setIsSendInviteOpen(false)
 
   return (
-    <InviteProvider>
-      <Layout syncing={syncing} offline={offline}>
+    <Layout syncing={syncing} offline={offline}>
+      <InviteProvider>
         <Box
           px={theme.spacings.xxxlarge}
           py={theme.spacings.large}
@@ -62,8 +62,8 @@ function Dashboard() {
             onFail={handleCloseSendInvite}
           />
         </Drawer>
-      </Layout>
-    </InviteProvider>
+      </InviteProvider>
+    </Layout>
   )
 }
 
