@@ -155,14 +155,9 @@ function Spinner() {
   return (
     <>
       <div className="loader-inner line-spin-fade-loader">
-        <div />
-        <div />
-        <div />
-        <div />
-        <div />
-        <div />
-        <div />
-        <div />
+        {Array.from({length: 8}, (_, i) => i).map(() => (
+          <div />
+        ))}
       </div>
       <style jsx>{`
         @keyframes line-spin-fade-loader {
