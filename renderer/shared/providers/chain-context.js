@@ -7,7 +7,7 @@ const FETCH_SYNC_FAILED = 'FETCH_SYNC_FAILED'
 
 const initialState = {
   offline: null,
-  syncing: null,
+  syncing: true,
   currentBlock: null,
   highestBlock: null,
   progress: null,
