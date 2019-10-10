@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import api from './api-client'
+import {strip} from '../utils/obj'
 
 /**
  * Fetch account list for a given node
@@ -31,4 +32,32 @@ export async function fetchBalance(address) {
     id: 1,
   })
   return data.result
+}
+
+export async function fetchTransactions(address, count) {
+  const {data} = await api().post('/', {
+    method: 'bcn_transactions',
+    params: [
+      strip({
+        address,
+        count,
+      }),
+    ],
+    id: 1,
+  })
+  return data
+}
+
+export async function fetchPendingTransactions(address, count) {
+  const {data} = await api().post('/', {
+    method: 'bcn_pendingTransactions',
+    params: [
+      strip({
+        address,
+        count,
+      }),
+    ],
+    id: 1,
+  })
+  return data
 }

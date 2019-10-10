@@ -16,8 +16,8 @@ function Avatar({username, size = 80}) {
       style={{
         ...margin(0, rem(theme.spacings.medium24), 0, 0),
         ...backgrounds(theme.colors.gray),
-        ...borderRadius('top', 20),
-        ...borderRadius('bottom', 20),
+        ...borderRadius('top', 10),
+        ...borderRadius('bottom', 10),
       }}
     />
   )

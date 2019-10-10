@@ -15,30 +15,18 @@ import {
 
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useWallets from '../../../shared/utils/useWallets'
+import {useIdentityState} from '../providers/identity-context'
 
-function TransferForm({onSuccess, onFail}) {
+function KillForm({wallet, onSuccess, onFail}) {
+  const {address} = useIdentityState()
+
   const {wallets, sendTransaction} = useWallets()
 
-  const selectWallets =
-    wallets &&
-    wallets.filter(wallet => !wallet.isStake).map(wallet => wallet.address)
-
-  const [from, setFrom] = React.useState(
-    selectWallets.length > 0 ? selectWallets[0] : null
-  )
-
-  useEffect(() => {
-    if (!from) {
-      setFrom(selectWallets.length > 0 ? selectWallets[0] : null)
-    }
-  }, [from, selectWallets])
-
-  const [to, setTo] = React.useState()
-  const [amount, setAmount] = React.useState()
+  const [to, setTo] = React.useState(address)
+  const [amount, setAmount] = React.useState(wallet && wallet.amount)
 
   const [submitting, setSubmitting] = React.useState(false)
 
-  // const {sendTransaction} = useWalletDispatch()
   const {addNotification, addError} = useNotificationDispatch()
 
   return (
@@ -62,7 +50,7 @@ function TransferForm({onSuccess, onFail}) {
               name="select"
               id=""
               options={selectWallets}
-              value={selectWallets[0]}
+              value={from}
               onChange={e => setFrom(e.target.value)}
               border="0"
             />
@@ -133,9 +121,9 @@ function TransferForm({onSuccess, onFail}) {
   )
 }
 
-TransferForm.propTypes = {
+KillForm.propTypes = {
   onSuccess: PropTypes.func,
   onFail: PropTypes.func,
 }
 
-export default TransferForm
+export default KillForm

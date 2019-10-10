@@ -1,7 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rgba, rem} from 'polished'
+import {ellipsis, rgba, rem} from 'polished'
 import theme from '../../../shared/theme'
+import useWallets from '../../../shared/utils/useWallets'
+import Avatar from '../../../shared/components/avatar'
+import Flex from '../../../shared/components/flex'
 
 import {
   Table,
@@ -11,7 +14,11 @@ import {
   TableHint,
 } from '../../../shared/components/table'
 
-function RowStatus({type, walletName, ...props}) {
+function RowStatus({type, isMining, walletName, ...props}) {
+  const txColor = type === 'Sent' ? theme.colors.danger : theme.colors.primary
+
+  const iconColor = isMining ? theme.colors.muted : txColor
+
   return (
     <div {...props} className="status">
       <div className="icn">
@@ -27,7 +34,9 @@ function RowStatus({type, walletName, ...props}) {
           className="name"
           style={{
             color:
-              walletName === 'Main' ? theme.colors.primary : theme.colors.muted,
+              walletName === 'Main123'
+                ? theme.colors.primary
+                : theme.colors.muted,
           }}
         >
           {walletName}
@@ -42,12 +51,8 @@ function RowStatus({type, walletName, ...props}) {
           text-align: center;
           float: left;
           margin-right: ${rem(12)};
-          background-color: ${type === 'Sent'
-            ? rgba(theme.colors.danger, 0.12)
-            : rgba(theme.colors.primary, 0.12)};
-          color: ${type === 'Sent'
-            ? theme.colors.danger
-            : theme.colors.primary};
+          background-color: ${rgba(iconColor, 0.12)};
+          color: ${iconColor};
         }
         .content {
           overflow: hidden;
@@ -64,52 +69,83 @@ function RowStatus({type, walletName, ...props}) {
 
 RowStatus.propTypes = {
   type: PropTypes.oneOf(['Sent', 'Received']),
+  isMining: PropTypes.bool,
   walletName: PropTypes.string,
 }
 
 function WalletTransfer() {
+  const {transactions} = useWallets()
+
   return (
     <Table>
       <thead>
         <TableRow>
           <TableHeaderCol>Transaction</TableHeaderCol>
           <TableHeaderCol>Address</TableHeaderCol>
-          <TableHeaderCol>Comment</TableHeaderCol>
-          <TableHeaderCol>Date and time</TableHeaderCol>
-          <TableHeaderCol className="text-right">DNA value</TableHeaderCol>
+          <TableHeaderCol className="text-right">Amount, DNA</TableHeaderCol>
+          <TableHeaderCol className="text-right">Fee, DNA</TableHeaderCol>
+          <TableHeaderCol>Date</TableHeaderCol>
+          <TableHeaderCol>Blockchain transaction ID</TableHeaderCol>
         </TableRow>
       </thead>
       <tbody>
-        <TableRow>
-          <TableCol>
-            <RowStatus type="Sent" walletName="Main" />
-          </TableCol>
-          <TableCol>
-            <div>To contact</div>
-            <TableHint>Oxe67DE87789987998878888</TableHint>
-          </TableCol>
-          <TableCol>—</TableCol>
-          <TableCol>24.03.2019, 16:42</TableCol>
-          <TableCol className="text-right">
-            <div style={{color: theme.colors.danger}}>-200 DNA</div>
-            <TableHint>2,9914 USD</TableHint>
-          </TableCol>
-        </TableRow>
-        <TableRow>
-          <TableCol>
-            <RowStatus type="Received" walletName="Second" />
-          </TableCol>
-          <TableCol>
-            <div>To Friedhelm Hagen</div>
-            <TableHint>0x5A3abB61A9c5475B8243</TableHint>
-          </TableCol>
-          <TableCol>New tires</TableCol>
-          <TableCol>24.03.2019, 16:42</TableCol>
-          <TableCol className="text-right">
-            <div>+200 DNA</div>
-            <TableHint>2,9914 USD</TableHint>
-          </TableCol>
-        </TableRow>
+        {transactions &&
+          transactions
+            .filter(tx => tx.type === 'send')
+            .map(tx => (
+              <TableRow>
+                <TableCol>
+                  <RowStatus
+                    isMining={tx.isMining}
+                    type={tx.direction}
+                    walletName={tx.wallet && tx.wallet.name}
+                  />
+                </TableCol>
+
+                <TableCol>
+                  <Flex align="center">
+                    <Avatar username={tx.counterParty} size={32} />
+                    <div>
+                      <div>
+                        {` ${tx.direction === 'Sent' ? 'To ' : 'From '}
+                        ${
+                          tx.counterPartyWallet
+                            ? `wallet ${tx.counterPartyWallet.name}`
+                            : 'address'
+                        } 
+                         `}
+                      </div>
+                      <TableHint>{tx.counterParty}</TableHint>
+                    </div>
+                  </Flex>
+                </TableCol>
+
+                <TableCol className="text-right">
+                  <div
+                    style={{
+                      color:
+                        tx.signAmount < 0
+                          ? theme.colors.danger
+                          : theme.colors.text,
+                    }}
+                  >
+                    {tx.signAmount}
+                  </div>
+                </TableCol>
+
+                <TableCol className="text-right">{tx.fee}</TableCol>
+                <TableCol>
+                  {tx.timeStamp && new Date(tx.timeStamp).toLocaleString()}
+                </TableCol>
+
+                <TableCol>
+                  <div> {tx.isMining ? 'Mining...' : 'Confirmed'}</div>
+                  <TableHint style={{...ellipsis(rem(190))}}>
+                    {tx.isMining ? '' : tx.blockHash}
+                  </TableHint>
+                </TableCol>
+              </TableRow>
+            ))}
       </tbody>
     </Table>
   )
