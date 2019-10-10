@@ -61,8 +61,9 @@ class MyApp extends App {
     return {hasError: true}
   }
 
-  componentDidCatch(error) {
+  componentDidCatch(error, errorInfo) {
     this.setState({error})
+    global.logger.error(error, errorInfo)
   }
 
   render() {
