@@ -14,15 +14,16 @@ import {
   TableHint,
 } from '../../../shared/components/table'
 
-function RowStatus({type, isMining, walletName, ...props}) {
-  const txColor = type === 'Sent' ? theme.colors.danger : theme.colors.primary
+function RowStatus({direction, type, isMining, walletName, ...props}) {
+  const txColor =
+    direction === 'Sent' ? theme.colors.danger : theme.colors.primary
 
   const iconColor = isMining ? theme.colors.muted : txColor
 
   return (
     <div {...props} className="status">
       <div className="icn">
-        {type === 'Sent' ? (
+        {direction === 'Sent' ? (
           <i className="icon icon--up_arrow" />
         ) : (
           <i className="icon icon--down_arrow" />
@@ -68,7 +69,8 @@ function RowStatus({type, isMining, walletName, ...props}) {
 }
 
 RowStatus.propTypes = {
-  type: PropTypes.oneOf(['Sent', 'Received']),
+  direction: PropTypes.oneOf(['Sent', 'Received']),
+  type: PropTypes.string,
   isMining: PropTypes.bool,
   walletName: PropTypes.string,
 }
@@ -91,13 +93,14 @@ function WalletTransfer() {
       <tbody>
         {transactions &&
           transactions
-            .filter(tx => tx.type === 'send')
+            // .filter(tx => tx.type === 'send')
             .map(tx => (
               <TableRow>
                 <TableCol>
                   <RowStatus
                     isMining={tx.isMining}
-                    type={tx.direction}
+                    direction={tx.direction}
+                    type={tx.typeName}
                     walletName={tx.wallet && tx.wallet.name}
                   />
                 </TableCol>
@@ -129,7 +132,7 @@ function WalletTransfer() {
                           : theme.colors.text,
                     }}
                   >
-                    {tx.signAmount}
+                    {tx.amount === '0' ? '\u2013' : tx.signAmount}
                   </div>
                 </TableCol>
 

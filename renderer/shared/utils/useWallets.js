@@ -18,6 +18,16 @@ function isAddress(address) {
   return address.length === 42 && address.substr(0, 2) === '0x'
 }
 
+function getTransactionTypeName(type) {
+  if (type === 'send') return 'Transfer'
+  if (type === 'activation') return 'Activate invitation'
+  if (type === 'invite') return 'Issue invitation'
+  if (type === 'kill') return 'Withdraw stake'
+  if (type === 'killInvitee') return 'Revoke invitation'
+  if (type === 'submitFlip') return 'Submit flip'
+  if (type === 'online') return 'Change online status'
+}
+
 function useWallets() {
   const [wallets, setWallets] = useState([])
   const [totalAmount, setTotalAmount] = useState()
@@ -76,10 +86,17 @@ function useWallets() {
       // alert(txs.length)
       // if (txsPending && txsPending.length > 0) alert(txsPending.length)
 
+      const hiddenTypes = [
+        'evidence',
+        'submitShortAnswers',
+        'submitLongAnswers',
+        'submitAnswersHash',
+      ]
+
       const nextTransactions =
         joinedTxs &&
         joinedTxs
-          .filter(tx => tx)
+          .filter(tx => tx && !hiddenTypes.find(type => tx.type === type))
           .map(tx => {
             const fromWallet = wallets.find(
               wallet => wallet.address === tx.from
@@ -87,14 +104,17 @@ function useWallets() {
             const toWallet = wallets.find(wallet => wallet.address === tx.to)
 
             const direction = fromWallet ? 'Sent' : 'Received'
+            const typeName =
+              tx.type === 'send' ? direction : getTransactionTypeName(tx.type)
             const sourceWallet = fromWallet || toWallet
-            const signAmount = fromWallet ? -tx.amount : tx.amount
+            const signAmount = fromWallet ? -tx.amount : `+${tx.amount}`
             const counterParty = fromWallet ? tx.to : tx.from
             const counterPartyWallet = fromWallet ? toWallet : fromWallet
             const isMining = tx.blockHash === HASH_IN_MEMPOOL
 
             const nextTx = {
               ...tx,
+              typeName,
               wallet: sourceWallet,
               direction,
               signAmount,
@@ -117,7 +137,7 @@ function useWallets() {
     return () => {
       ignore = true
     }
-  }, [address, wallets])
+  }, 2000)
 
   const sendTransaction = useCallback(async ({from, to, amount}) => {
     if (!isAddress(from)) {
