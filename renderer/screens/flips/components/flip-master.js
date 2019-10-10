@@ -51,6 +51,8 @@ function FlipMaster({id, onClose}) {
       `https://placehold.it/480?text=3`,
       `https://placehold.it/480?text=4`,
     ],
+    nonSensePic: `https://placehold.it/480?text=5`,
+    nonSenseOrder: -1,
     order: Array.from({length: 4}, (_, i) => i),
     hint: getNextKeyWordsHint(flipKeyWordPairs, publishedFlips),
   })
@@ -134,7 +136,12 @@ function FlipMaster({id, onClose}) {
     }
   }
 
-  const canPublish = flip.pics.every(hasDataUrl) && canSubmitFlip && !syncing
+  const canPublish =
+    flip.pics.every(hasDataUrl) &&
+    canSubmitFlip &&
+    !syncing &&
+    (flip.nonSenseOrder < 0 ||
+      (flip.nonSenseOrder >= 0 && hasDataUrl(flip.nonSensePic)))
 
   const steps = [
     {
@@ -175,12 +182,16 @@ function FlipMaster({id, onClose}) {
     {
       caption: 'Shuffle images',
       title: 'Shuffle images',
-      desc: 'Shuffle images in a way to make a nonsense sequence of images',
+      desc:
+        'Shuffle images or add alternative image in order to make a nonsense sequence of images',
       children: (
         <FlipShuffle
           {...flip}
           onShuffleFlip={order => {
             setFlip({...flip, order})
+          }}
+          onUpdateNonSensePic={(nonSensePic, nonSenseOrder) => {
+            setFlip({...flip, nonSensePic, nonSenseOrder})
           }}
         />
       ),

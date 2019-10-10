@@ -166,7 +166,7 @@ function FlipPics({pics, onUpdateFlip}) {
           <Divider vertical />
 
           <IconButton
-            tooltip="Total score for&#10;all validations"
+            tooltip=""
             icon={<FiUpload />}
             onClick={() => {
               uploaderRef.current.click()
