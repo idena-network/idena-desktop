@@ -1,16 +1,20 @@
 import React, {useState} from 'react'
 import nanoid from 'nanoid'
 import {rem} from 'polished'
-import {withRouter} from 'next/router'
+import {useRouter} from 'next/router'
+
 import {Heading, Box, IconClose} from '../../shared/components'
 import FlipMaster from '../../screens/flips/components/flip-master'
 import Layout from '../../shared/components/layout'
 import theme from '../../shared/theme'
 import Flex from '../../shared/components/flex'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
+import {useChainState} from '../../shared/providers/chain-context'
 
-// eslint-disable-next-line react/prop-types
-function NewFlip({router}) {
+function NewFlip() {
+  const {syncing} = useChainState()
+
+  const router = useRouter()
   const {addNotification} = useNotificationDispatch()
 
   const [id] = useState(nanoid())
@@ -23,7 +27,7 @@ function NewFlip({router}) {
   }
 
   return (
-    <Layout>
+    <Layout syncing={syncing}>
       <Box px={rem(theme.spacings.large)} py={rem(theme.spacings.medium24)}>
         <Flex align="center" justify="space-between">
           <Heading margin={0}>New flip</Heading>
@@ -35,4 +39,4 @@ function NewFlip({router}) {
   )
 }
 
-export default withRouter(NewFlip)
+export default NewFlip

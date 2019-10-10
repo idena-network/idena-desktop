@@ -42,16 +42,15 @@ function Sidebar() {
       global.ipcRenderer.removeListener(UPDATE_LOADING, updateLoading)
     }
   }, [])
-
   return (
     <section>
       <Flex direction="column" align="flex-start">
         <NodeStatus />
-        <Avatar />
+        <Logo />
         <Nav />
       </Flex>
       <div>
-        <InfoPanel />
+        <ActionPanel />
         <Version
           updateReady={updateDownloded}
           updateLoadingPercent={updatePercent}
@@ -124,7 +123,7 @@ function NodeStatus() {
   )
 }
 
-function Avatar() {
+export function Logo() {
   return (
     <Box
       css={{
@@ -189,7 +188,7 @@ function Nav() {
   )
 }
 
-const NavItem = withRouter(({href, router, icon, children}) => {
+export const NavItem = withRouter(({href, router, icon, children}) => {
   const active = router.pathname.startsWith(href)
   const color = active ? theme.colors.white : theme.colors.white05
   return (
@@ -224,12 +223,12 @@ const NavItem = withRouter(({href, router, icon, children}) => {
   )
 })
 
-function InfoPanel() {
-  const {disconnected} = useChainState()
+function ActionPanel() {
+  const {syncing} = useChainState()
   const identity = useIdentityState()
   const epoch = useEpochState()
 
-  if (disconnected || !epoch) {
+  if (syncing || !epoch) {
     return null
   }
 
@@ -387,7 +386,7 @@ CurrentTask.propTypes = {
   }).isRequired,
 }
 
-function Version({updateReady, updateLoadingPercent}) {
+export function Version({updateReady, updateLoadingPercent}) {
   return (
     <Box
       css={{

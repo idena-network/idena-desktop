@@ -1,34 +1,35 @@
 import React from 'react'
-import {withRouter} from 'next/router'
+import {useRouter} from 'next/router'
 import {rem} from 'polished'
+
 import Layout from '../../shared/components/layout'
 import {Heading, Drawer, Box} from '../../shared/components'
 import SendInviteForm from '../../screens/contacts/components/send-invite-form'
 import theme from '../../shared/theme'
 import {InviteProvider} from '../../shared/providers/invite-context'
 import KillMe from '../../screens/dashboard/components/kill-me'
-
 import Actions from '../../shared/components/actions'
 import MinerStatusSwitcher from '../../screens/dashboard/components/miner-status-switcher'
-
 import IconLink from '../../shared/components/icon-link'
 import ActivateInviteForm from '../../screens/dashboard/components/activate-invite-form'
 import UserInfo from '../../screens/dashboard/components/user-info'
 import NetProfile from '../../screens/dashboard/components/net-profile'
+import {useChainState} from '../../shared/providers/chain-context'
 
-// eslint-disable-next-line react/prop-types
-function Dashboard({router}) {
+function Dashboard() {
+  const router = useRouter()
+  const {syncing} = useChainState()
+
   const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(false)
-
   const handleCloseSendInvite = () => setIsSendInviteOpen(false)
 
   return (
     <InviteProvider>
-      <Layout>
+      <Layout syncing={syncing}>
         <Box
           px={theme.spacings.xxxlarge}
           py={theme.spacings.large}
-          w={rem(700)}
+          w={rem(700, theme.fontSizes.base)}
         >
           <Heading>Profile</Heading>
           <Actions>
@@ -66,4 +67,4 @@ function Dashboard({router}) {
   )
 }
 
-export default withRouter(Dashboard)
+export default Dashboard

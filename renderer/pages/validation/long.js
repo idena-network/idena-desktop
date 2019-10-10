@@ -37,11 +37,13 @@ import Modal from '../../shared/components/modal'
 import useRpc from '../../shared/hooks/use-rpc'
 import {useInterval} from '../../shared/hooks/use-interval'
 import vocabulary from '../../screens/flips/utils/words'
+import {useChainState} from '../../shared/providers/chain-context'
 
 export default function LongValidation() {
   const state = useValidationState()
   const dispatch = useValidationDispatch()
   const epoch = useEpochState()
+  const {syncing} = useChainState()
 
   useEffect(() => {
     if (
@@ -99,7 +101,7 @@ export default function LongValidation() {
   const availableFlipsLength = state.flips.filter(x => !x.hidden).length
 
   return (
-    <Layout>
+    <Layout syncing={syncing}>
       <Flex
         direction="column"
         css={{

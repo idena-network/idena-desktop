@@ -12,6 +12,7 @@ function Avatar({username, size = 80}) {
       src={src}
       alt={username}
       width={size}
+      height={size}
       style={{
         ...margin(0, rem(theme.spacings.medium24), 0, 0),
         ...backgrounds(theme.colors.gray),

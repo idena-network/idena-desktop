@@ -7,7 +7,7 @@ const FETCH_SYNC_FAILED = 'FETCH_SYNC_FAILED'
 
 const initialState = {
   offline: null,
-  syncing: null,
+  syncing: true,
   currentBlock: null,
   highestBlock: null,
   progress: null,
@@ -16,12 +16,9 @@ const initialState = {
 function chainReducer(state, action) {
   switch (action.type) {
     case FETCH_SYNC_SUCCEEDED: {
-      const {syncing, currentBlock, highestBlock} = action.payload
       return {
         ...state,
-        currentBlock,
-        highestBlock,
-        syncing,
+        ...action.payload,
         offline: false,
       }
     }
@@ -51,7 +48,7 @@ function ChainProvider({children}) {
         dispatch({type: FETCH_SYNC_FAILED})
       }
     },
-    !state.offline && state.syncing ? 1000 * 1 : 5000 * 1,
+    !state.offline && state.syncing ? 1000 * 1 : 1000 * 5,
     true
   )
 

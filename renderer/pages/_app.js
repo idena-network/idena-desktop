@@ -1,5 +1,5 @@
 import React from 'react'
-import App, {Container} from 'next/app'
+import NextApp, {Container} from 'next/app'
 import Router from 'next/router'
 import NProgress from 'nprogress'
 import GlobalStyle from '../shared/components/global-style'
@@ -22,29 +22,28 @@ Router.events.on('routeChangeError', () => {
   NProgress.done()
 })
 
-class MyApp extends App {
+export default class MyApp extends NextApp {
   render() {
     const {Component, pageProps} = this.props
     return (
       <Container>
         <GlobalStyle />
-        <AppProvider>
+        <AppProviders>
           <Component {...pageProps} />
-        </AppProvider>
+        </AppProviders>
       </Container>
     )
   }
 }
 
-// eslint-disable-next-line react/prop-types
-function AppProvider({children}) {
+function AppProviders(props) {
   return (
     <ChainProvider>
       <TimingProvider>
         <NotificationProvider>
           <EpochProvider>
             <IdentityProvider>
-              <ValidationProvider>{children}</ValidationProvider>
+              <ValidationProvider {...props} />
             </IdentityProvider>
           </EpochProvider>
         </NotificationProvider>
@@ -52,5 +51,3 @@ function AppProvider({children}) {
     </ChainProvider>
   )
 }
-
-export default MyApp
