@@ -53,7 +53,7 @@ function TransferForm({onSuccess, onFail}) {
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          Transfer DNA’s
+          Send DNA’s
         </SubHeading>
 
         <FormGroup>

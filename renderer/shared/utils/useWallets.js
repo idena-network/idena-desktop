@@ -28,7 +28,7 @@ function useWallets() {
         fetchBalance(account.address).then(resp => {
           const balance =
             resp && account && (account.isStake ? resp.stake : resp.balance)
-          return {...account, balance}
+          return {...account, balance, name: account.isStake ? 'Stake' : 'Main'}
         })
       )
 

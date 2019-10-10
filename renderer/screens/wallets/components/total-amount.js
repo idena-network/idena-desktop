@@ -41,7 +41,7 @@ function TotalAmount({amount, percentChanges, amountChanges}) {
 }
 
 TotalAmount.propTypes = {
-  amount: PropTypes.number.isRequired,
+  amount: PropTypes.number,
   percentChanges: PropTypes.number,
   amountChanges: PropTypes.number,
 }
