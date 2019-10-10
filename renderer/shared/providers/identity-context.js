@@ -36,10 +36,16 @@ function IdentityProvider({children}) {
     let ignore = false
 
     async function fetchData() {
-      const fetchedIdentity = await fetchIdentity()
-      callRpc('dna_getBalance', fetchedIdentity.address)
-      if (!ignore) {
-        setIdentity(fetchedIdentity)
+      try {
+        const fetchedIdentity = await fetchIdentity()
+        if (!ignore) {
+          setIdentity(fetchedIdentity)
+        }
+      } catch (error) {
+        global.logger.error(
+          'An error occured while fetching identity',
+          error.message
+        )
       }
     }
 
@@ -50,20 +56,31 @@ function IdentityProvider({children}) {
     }
   }, [callRpc])
 
-  useInterval(async () => {
-    async function fetchData() {
-      const nextIdentity = await fetchIdentity()
-      if (!deepEqual(identity, nextIdentity)) {
-        setIdentity(nextIdentity)
+  useInterval(
+    () => {
+      async function fetchData() {
+        try {
+          const nextIdentity = await fetchIdentity()
+          if (!deepEqual(identity, nextIdentity)) {
+            setIdentity(nextIdentity)
+          }
+        } catch (error) {
+          global.logger.error(
+            'An error occured while fetching identity',
+            error.message
+          )
+        }
       }
-    }
 
-    fetchData()
-  }, 1000 * 1)
+      fetchData()
+    },
+    identity ? 1000 * 1 : 1000 * 5
+  )
 
   useInterval(
     () => callRpc('dna_getBalance', identity.address),
-    identity && identity.address ? 1000 : null
+    identity && identity.address ? 1000 * 1 : null,
+    true
   )
 
   const canActivateInvite = [

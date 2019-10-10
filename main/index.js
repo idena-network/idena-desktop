@@ -297,3 +297,7 @@ ipcMain.on(IMAGE_SEARCH_PICK, (_event, message) => {
 ipcMain.on(UPDATE_APPLY, () => {
   autoUpdater.quitAndInstall()
 })
+
+ipcMain.on('reload', () => {
+  loadRoute(mainWindow, 'dashboard')
+})

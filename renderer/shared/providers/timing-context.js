@@ -1,26 +1,17 @@
-/* eslint-disable no-shadow */
 import React from 'react'
 import useTiming from '../hooks/use-timing'
 
 const TimingStateContext = React.createContext()
 
-// eslint-disable-next-line react/prop-types
-function TimingProvider({children}) {
+export function TimingProvider(props) {
   const timing = useTiming()
-
-  return (
-    <TimingStateContext.Provider value={timing}>
-      {children}
-    </TimingStateContext.Provider>
-  )
+  return <TimingStateContext.Provider value={timing} {...props} />
 }
 
-function useTimingState() {
+export function useTimingState() {
   const context = React.useContext(TimingStateContext)
   if (context === undefined) {
     throw new Error('useTimingState must be used within a TimingProvider')
   }
   return context
 }
-
-export {TimingProvider, useTimingState}

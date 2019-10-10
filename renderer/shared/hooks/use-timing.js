@@ -1,7 +1,6 @@
 import React from 'react'
 import {fetchCeremonyIntervals} from '../api'
 import {useInterval} from './use-interval'
-import {logConnectivityIssue} from '../utils/log'
 
 const initialTiming = {
   validation: null,
@@ -37,7 +36,10 @@ function useTiming() {
         setInterval(1000 * 60 * 1)
       } catch (error) {
         setInterval(1000 * 5 * 1)
-        logConnectivityIssue('timing', error)
+        global.logger.error(
+          'An error occured while fetching ceremony intervals',
+          error.message
+        )
       }
     },
     interval,
