@@ -1,6 +1,9 @@
 import React from 'react'
+
+import {rem} from 'polished'
 import Layout from '../shared/components/layout'
-import {Box} from '../shared/components'
+import {Box, Button} from '../shared/components'
+import theme from '../shared/theme'
 
 class Error extends React.Component {
   static getInitialProps({res, err}) {
@@ -14,10 +17,17 @@ class Error extends React.Component {
     const {statusCode, err} = this.props
     return (
       <Layout>
-        {statusCode
-          ? `An error ${statusCode} occurred on server`
-          : 'An error occurred on client'}
-        <Box>{err ? JSON.stringify(err) : 'Weird, no error caught'}</Box>
+        <Box p={rem(theme.spacings.medium16)}>
+          {statusCode
+            ? `An error ${statusCode} occurred on server`
+            : 'An error occurred on client'}
+          <Box>
+            <pre>{err ? JSON.stringify(err) : 'Something went wrong'}</pre>
+            <Button onClick={() => global.ipcRenderer.send('reload')}>
+              Go to My Idena
+            </Button>
+          </Box>
+        </Box>
       </Layout>
     )
   }
