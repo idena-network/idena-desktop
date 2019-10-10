@@ -57,7 +57,7 @@ function IdentityProvider({children}) {
   }, [callRpc])
 
   useInterval(
-    async () => {
+    () => {
       async function fetchData() {
         try {
           const nextIdentity = await fetchIdentity()
@@ -74,12 +74,12 @@ function IdentityProvider({children}) {
 
       fetchData()
     },
-    identity ? 1000 * 1 : null
+    identity ? 1000 * 1 : 1000 * 5
   )
 
   useInterval(
     () => callRpc('dna_getBalance', identity.address),
-    identity && identity.address ? 1000 : null,
+    identity && identity.address ? 1000 * 1 : null,
     true
   )
 
