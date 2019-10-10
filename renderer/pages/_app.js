@@ -23,7 +23,7 @@ Router.events.on('routeChangeError', () => {
   NProgress.done()
 })
 
-class MyApp extends App {
+export default class MyApp extends NextApp {
   constructor(props) {
     super(props)
     this.state = {
