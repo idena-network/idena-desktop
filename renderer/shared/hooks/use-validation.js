@@ -35,12 +35,7 @@ export function useValidationTimer() {
     }
   }, [epoch, longSession, shortSession])
 
-  useInterval(
-    () => {
-      updateSeconds()
-    },
-    seconds ? 1000 : null
-  )
+  useInterval(updateSeconds, seconds ? 1000 : null)
 
   return seconds
 }
