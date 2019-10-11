@@ -29,9 +29,7 @@ function EpochProvider({children}) {
           setEpoch(nextEpoch)
         }
       } catch (error) {
-        if (!ignore) {
-          setInterval(1000 * 5)
-        }
+        setInterval(1000 * 5)
         global.logger.error(
           'An error occured while fetching epoch',
           error.message
@@ -46,22 +44,16 @@ function EpochProvider({children}) {
     }
   }, [])
 
-  useInterval(
-    async () => {
-      try {
-        const nextEpoch = await fetchEpoch()
-        if (!deepEqual(epoch, nextEpoch)) {
-          setEpoch(nextEpoch)
-        }
-      } catch (error) {
-        global.logger.error(
-          'An error occured while fetching epoch',
-          error.message
-        )
+  useInterval(async () => {
+    try {
+      const nextEpoch = await fetchEpoch()
+      if (!deepEqual(epoch, nextEpoch)) {
+        setEpoch(nextEpoch)
       }
-    },
-    epoch ? interval : null
-  )
+    } catch (error) {
+      global.logger.error('An error occuredwhile fetching epoch', error.message)
+    }
+  }, interval)
 
   return (
     <EpochStateContext.Provider value={epoch}>
