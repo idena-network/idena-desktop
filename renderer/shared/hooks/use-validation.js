@@ -1,34 +1,41 @@
-import {useState, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import dayjs from 'dayjs'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useTimingState} from '../providers/timing-context'
 import {useInterval} from './use-interval'
 
-const GAP = 10
+const GAP = 9
 
 export function useValidationTimer() {
   const {shortSession, longSession} = useTimingState()
   const epoch = useEpochState()
 
   const [seconds, setSeconds] = useState()
+  const finish = React.useRef()
+  const duration = React.useRef()
+
+  function updateSeconds() {
+    const secondsLeft = finish.current.diff(dayjs(), 's')
+    setSeconds(
+      secondsLeft < 0
+        ? null
+        : Math.max(Math.min(secondsLeft, duration.current), 0)
+    )
+  }
 
   useEffect(() => {
     if (epoch && shortSession && longSession) {
-      const {currentPeriod, currentValidationStart, nextValidation} = epoch
-
-      const start = dayjs(currentValidationStart || nextValidation)
-      const duration =
+      const {currentPeriod, nextValidation} = epoch
+      duration.current =
         shortSession +
         (currentPeriod === EpochPeriod.ShortSession ? 0 : longSession) -
         GAP
-      const finish = start.add(duration, 's')
-      const diff = Math.max(Math.min(finish.diff(dayjs(), 's'), duration), 0)
-
-      setSeconds(diff)
+      finish.current = dayjs(nextValidation).add(duration.current, 's')
+      updateSeconds()
     }
   }, [epoch, longSession, shortSession])
 
-  useInterval(() => setSeconds(seconds - 1), seconds ? 1000 : null)
+  useInterval(updateSeconds, seconds ? 1000 : null)
 
   return seconds
 }
