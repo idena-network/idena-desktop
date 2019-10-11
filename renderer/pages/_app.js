@@ -9,7 +9,6 @@ import {NotificationProvider} from '../shared/providers/notification-context'
 import {TimingProvider} from '../shared/providers/timing-context'
 import {ChainProvider} from '../shared/providers/chain-context'
 import {ValidationProvider} from '../shared/providers/validation-context'
-import Error from './_error'
 
 Router.events.on('routeChangeStart', () => {
   NProgress.start()
@@ -24,37 +23,9 @@ Router.events.on('routeChangeError', () => {
 })
 
 export default class MyApp extends NextApp {
-  constructor(props) {
-    super(props)
-    this.state = {
-      hasError: false,
-      error: undefined,
-    }
-  }
-
-  static async getInitialProps({Component, ctx}) {
-    try {
-      let pageProps = {}
-
-      if (Component.getInitialProps) {
-        pageProps = await Component.getInitialProps(ctx)
-      }
-
-      return {pageProps}
-    } catch (error) {
-      global.logger.error(error, ctx)
-      return {
-        hasError: true,
-        error,
-      }
-    }
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    return {
-      hasError: props.hasError || state.hasError || false,
-      error: props.error || state.error || undefined,
-    }
+  state = {
+    hasError: false,
+    error: undefined,
   }
 
   static getDerivedStateFromError() {
@@ -68,16 +39,11 @@ export default class MyApp extends NextApp {
 
   render() {
     const {Component, pageProps} = this.props
-    const {hasError, error} = this.state
     return (
       <Container>
         <GlobalStyle />
         <AppProviders>
-          {hasError ? (
-            <Error err={error && error.props} />
-          ) : (
-            <Component {...pageProps} />
-          )}
+          <Component {...pageProps} />
         </AppProviders>
       </Container>
     )

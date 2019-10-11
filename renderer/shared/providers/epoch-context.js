@@ -51,7 +51,10 @@ function EpochProvider({children}) {
         setEpoch(nextEpoch)
       }
     } catch (error) {
-      global.logger.error('An error occuredwhile fetching epoch', error.message)
+      global.logger.error(
+        'An error occured while fetching epoch',
+        error.message
+      )
     }
   }, interval)
 
