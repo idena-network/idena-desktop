@@ -1,5 +1,5 @@
 import React from 'react'
-import NextApp, {Container} from 'next/app'
+import App, {Container} from 'next/app'
 import Router from 'next/router'
 import NProgress from 'nprogress'
 import GlobalStyle from '../shared/components/global-style'
@@ -10,40 +10,19 @@ import {TimingProvider} from '../shared/providers/timing-context'
 import {ChainProvider} from '../shared/providers/chain-context'
 import {ValidationProvider} from '../shared/providers/validation-context'
 
-Router.events.on('routeChangeStart', () => {
-  NProgress.start()
-})
-
-Router.events.on('routeChangeComplete', () => {
-  NProgress.done()
-})
-
-Router.events.on('routeChangeError', () => {
-  NProgress.done()
-})
-
-export default class MyApp extends NextApp {
-  state = {
-    hasError: false,
-    error: undefined,
-  }
-
-  static getDerivedStateFromError() {
-    return {hasError: true}
-  }
-
-  componentDidCatch(error, errorInfo) {
-    this.setState({error})
-    global.logger.error(error, errorInfo)
-  }
-
+export default class MyApp extends App {
   render() {
     const {Component, pageProps} = this.props
+
+    // Workaround for https://github.com/zeit/next.js/issues/8592
+    const {err} = this.props
+    const modifiedPageProps = {...pageProps, err}
+
     return (
       <Container>
         <GlobalStyle />
         <AppProviders>
-          <Component {...pageProps} />
+          <Component {...modifiedPageProps} />
         </AppProviders>
       </Container>
     )
@@ -65,3 +44,15 @@ function AppProviders(props) {
     </ChainProvider>
   )
 }
+
+Router.events.on('routeChangeStart', () => {
+  NProgress.start()
+})
+
+Router.events.on('routeChangeComplete', () => {
+  NProgress.done()
+})
+
+Router.events.on('routeChangeError', () => {
+  NProgress.done()
+})

@@ -288,7 +288,7 @@ export function OfflineApp() {
       </div>
       <style jsx>{`
         section {
-          background: #333;
+          background: rgb(69, 72, 77);
           color: white;
           display: flex;
           flex-direction: column;
