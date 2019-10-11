@@ -158,8 +158,8 @@ function Spinner() {
   return (
     <>
       <div className="loader-inner line-spin-fade-loader">
-        {Array.from({length: 8}, (_, i) => i).map(() => (
-          <div />
+        {Array.from({length: 8}, (_, i) => i).map(x => (
+          <div key={`spinner-item-${x}`} />
         ))}
       </div>
       <style jsx>{`
