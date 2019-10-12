@@ -34,8 +34,6 @@ import {
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
 import {useTimeout} from '../../shared/hooks/use-timeout'
-import {useChainState} from '../../shared/providers/chain-context'
-import SyncingApp from '../../shared/components/syncing-app'
 
 const EXTRA_FLIPS_DELAY = 35 * 1000
 
@@ -43,7 +41,6 @@ function ShortSession() {
   const state = useValidationState()
   const dispatch = useValidationDispatch()
   const epoch = useEpochState()
-  const {syncing} = useChainState()
 
   useEffect(() => {
     if (
@@ -89,10 +86,6 @@ function ShortSession() {
   }
 
   const availableFlipsLength = state.flips.filter(x => !x.hidden).length
-
-  if (syncing) {
-    return <SyncingApp />
-  }
 
   return (
     <Flex
