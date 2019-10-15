@@ -1,6 +1,7 @@
 import {useEffect, useRef} from 'react'
 
-export function useInterval2(callback, delay, useImmediately = false) {
+// TODO: just to make it clear that this useInterval uses interval. Yep!
+export function useIntervalInterval(callback, delay, useImmediately = false) {
   const savedCallback = useRef()
 
   useEffect(() => {
