@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {rem} from 'polished'
 import theme from '../../shared/theme'
 import Layout from '../../shared/components/layout'
@@ -7,48 +7,42 @@ import {Box, Drawer, Heading} from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import Actions from '../../shared/components/actions'
 import IconLink from '../../shared/components/icon-link'
+
 import TotalAmount from '../../screens/wallets/components/total-amount'
 import WalletList from '../../screens/wallets/components/wallet-list'
 import WalletActions from '../../screens/wallets/components/wallet-actions'
 import TransferForm from '../../screens/wallets/components/transfer-form'
+import ReceiveForm from '../../screens/wallets/components/receive-form'
+
 import Loading from '../../shared/components/loading'
-import {fetchAccountList, fetchBalance} from '../../shared/api/wallet'
+import useWallets from '../../shared/utils/useWallets'
+import {useChainState} from '../../shared/providers/chain-context'
 
 export default function Index() {
-  const [wallets, setWallets] = useState()
-  const [totalAmount, setTotalAmount] = useState()
+  const {wallets, totalAmount, fetching} = useWallets()
 
-  const [fetching, setFetching] = useState(false)
   const [isTransferFormOpen, setIsTransferFormOpen] = React.useState(false)
+  const [
+    isRWithdrawStakeFormOpen,
+    setIsRWithdrawStakeFormOpen,
+  ] = React.useState(false)
+
   const handleCloseTransferForm = () => setIsTransferFormOpen(false)
 
+  const [isReceiveFormOpen, setIsReceiveFormOpen] = React.useState(false)
+  const handleCloseReceiveForm = () => setIsReceiveFormOpen(false)
+
+  const [activeWallet, setActiveWallet] = React.useState()
+  const {syncing, offline} = useChainState()
+
   useEffect(() => {
-    let ignore = false
-
-    async function fetchData() {
-      const accounts = await fetchAccountList()
-
-      const balancePromises = accounts.map(account =>
-        fetchBalance.then(resp => ({account, ...resp}))
-      )
-      const nextWallets = await Promise.all(balancePromises)
-      setWallets(nextWallets)
-      setTotalAmount(nextWallets.map(b => b.balance).reduce((a, b) => a + b, 0))
+    if (!activeWallet && wallets.length > 0) {
+      setActiveWallet(wallets[0])
     }
-
-    if (!ignore) {
-      setFetching(true)
-      fetchData()
-      setFetching(false)
-    }
-
-    return () => {
-      ignore = true
-    }
-  }, [])
+  }, [activeWallet, wallets])
 
   return (
-    <Layout>
+    <Layout syncing={syncing} offline={offline}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Heading>Wallets</Heading>
         <Box>
@@ -60,29 +54,47 @@ export default function Index() {
                 <div>
                   <TotalAmount
                     amount={totalAmount}
-                    percentChanges={-0.48}
-                    amountChanges={-122}
+                    percentChanges={0}
+                    amountChanges={0}
                   />
                 </div>
                 <div>
                   <Actions>
                     <IconLink
+                      disabled={activeWallet && activeWallet.isStake}
                       icon={<i className="icon icon--withdraw" />}
-                      onClick={() => setIsTransferFormOpen(!isTransferFormOpen)}
+                      onClick={() => {
+                        setIsTransferFormOpen(!isTransferFormOpen)
+                      }}
                     >
-                      Transfer
+                      Send
                     </IconLink>
-                    <IconLink icon={<i className="icon icon--deposit" />}>
+                    <IconLink
+                      disabled={activeWallet && activeWallet.isStake}
+                      icon={<i className="icon icon--deposit" />}
+                      onClick={() => {
+                        setIsReceiveFormOpen(!isReceiveFormOpen)
+                      }}
+                    >
                       Receive
                     </IconLink>
-                    <IconLink icon={<i className="icon icon--add_btn" />}>
-                      New wallet
-                    </IconLink>
+                    {/*
+                      <IconLink icon={<i className="icon icon--add_btn" />}>
+                          New wallet
+                      </IconLink>
+                    */}
                   </Actions>
                 </div>
               </Flex>
               <div>
-                <WalletList wallets={wallets} />
+                <WalletList
+                  wallets={wallets}
+                  activeWallet={activeWallet}
+                  onChangeActiveWallet={wallet => setActiveWallet(wallet)}
+                  onSend={() => setIsTransferFormOpen(true)}
+                  onReceive={() => setIsReceiveFormOpen(true)}
+                  onWithdrawStake={() => setIsRWithdrawStakeFormOpen(true)}
+                />
               </div>
               <h3
                 style={{
@@ -102,8 +114,16 @@ export default function Index() {
           )}
         </Box>
         <Drawer show={isTransferFormOpen} onHide={handleCloseTransferForm}>
-          <TransferForm />
+          <TransferForm
+            onSuccess={handleCloseTransferForm}
+            onFail={handleCloseTransferForm}
+          />
         </Drawer>
+
+        <Drawer show={isReceiveFormOpen} onHide={handleCloseReceiveForm}>
+          <ReceiveForm address={wallets[0] && wallets[0].address} />
+        </Drawer>
+        <Drawer show={isRWithdrawStakeFormOpen} />
       </Box>
     </Layout>
   )

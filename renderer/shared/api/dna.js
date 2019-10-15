@@ -188,3 +188,18 @@ export async function becomeOffline() {
   })
   return data
 }
+
+export async function sendTransaction(from, to, amount) {
+  const {data} = await api().post('/', {
+    method: 'dna_sendTransaction',
+    params: [
+      strip({
+        from,
+        to,
+        amount,
+      }),
+    ],
+    id: 1,
+  })
+  return data
+}

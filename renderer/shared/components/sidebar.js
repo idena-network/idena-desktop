@@ -150,12 +150,14 @@ function Nav() {
         <NavItem href="/dashboard" active icon={<FiUserCheck />}>
           {'My Idena' || nickname}
         </NavItem>
-        {/* <NavItem
-          href="/wallets"
-          icon={<i className="icon icon--menu_wallets" />}
-        >
-          Wallets
-        </NavItem> */}
+        {
+          <NavItem
+            href="/wallets"
+            icon={<i className="icon icon--menu_wallets" />}
+          >
+            Wallets
+          </NavItem>
+        }
         <NavItem href="/flips" icon={<i className="icon icon--menu_gallery" />}>
           Flips
         </NavItem>

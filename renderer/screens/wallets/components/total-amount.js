@@ -13,9 +13,11 @@ function TotalAmount({amount, percentChanges, amountChanges}) {
       <Box>
         <Text fontSize={rem(24)}>
           <div className="value">{amount} DNA</div>
-          <div className="changes">
-            {percentChanges}% <span>({amountChanges} USD)</span>
-          </div>
+          {false && ( // TODO: show wallet changes
+            <div className="changes">
+              {percentChanges}% <span>({amountChanges} USD)</span>
+            </div>
+          )}
           <style jsx>{`
             .value {
               font-weight: 500;
@@ -39,7 +41,7 @@ function TotalAmount({amount, percentChanges, amountChanges}) {
 }
 
 TotalAmount.propTypes = {
-  amount: PropTypes.number.isRequired,
+  amount: PropTypes.number,
   percentChanges: PropTypes.number,
   amountChanges: PropTypes.number,
 }
