@@ -35,7 +35,7 @@ function RowStatus({direction, type, isMining, walletName, ...props}) {
           className="name"
           style={{
             color:
-              walletName === 'Main123'
+              walletName === 'Main123' // TODO multiple wallets support
                 ? theme.colors.primary
                 : theme.colors.muted,
           }}
@@ -79,23 +79,23 @@ function WalletTransfer() {
   const {transactions} = useWallets()
 
   return (
-    <Table>
-      <thead>
-        <TableRow>
-          <TableHeaderCol>Transaction</TableHeaderCol>
-          <TableHeaderCol>Address</TableHeaderCol>
-          <TableHeaderCol className="text-right">Amount, DNA</TableHeaderCol>
-          <TableHeaderCol className="text-right">Fee, DNA</TableHeaderCol>
-          <TableHeaderCol>Date</TableHeaderCol>
-          <TableHeaderCol>Blockchain transaction ID</TableHeaderCol>
-        </TableRow>
-      </thead>
-      <tbody>
-        {transactions &&
-          transactions
-            // .filter(tx => tx.type === 'send')
-            .map(tx => (
-              <TableRow>
+    <div>
+      <Table>
+        <thead>
+          <TableRow>
+            <TableHeaderCol>Transaction</TableHeaderCol>
+            <TableHeaderCol>Address</TableHeaderCol>
+            <TableHeaderCol className="text-right">Amount, DNA</TableHeaderCol>
+            <TableHeaderCol className="text-right">Fee, DNA</TableHeaderCol>
+            <TableHeaderCol>Date</TableHeaderCol>
+            <TableHeaderCol>Blockchain transaction ID</TableHeaderCol>
+          </TableRow>
+        </thead>
+        <tbody>
+          {transactions &&
+            transactions.length > 0 &&
+            transactions.map((tx, k) => (
+              <TableRow key={k}>
                 <TableCol>
                   <RowStatus
                     isMining={tx.isMining}
@@ -106,21 +106,25 @@ function WalletTransfer() {
                 </TableCol>
 
                 <TableCol>
-                  <Flex align="center">
-                    <Avatar username={tx.counterParty} size={32} />
-                    <div>
+                  {(!tx.to && '\u2013') || (
+                    <Flex align="center">
+                      <Avatar username={tx.counterParty} size={32} />
                       <div>
-                        {` ${tx.direction === 'Sent' ? 'To ' : 'From '}
+                        <div>
+                          {` ${tx.direction === 'Sent' ? 'To ' : 'From '}
                         ${
                           tx.counterPartyWallet
                             ? `wallet ${tx.counterPartyWallet.name}`
                             : 'address'
                         } 
                          `}
+                        </div>
+                        <TableHint style={{...ellipsis(rem(190))}}>
+                          {tx.counterParty}
+                        </TableHint>
                       </div>
-                      <TableHint>{tx.counterParty}</TableHint>
-                    </div>
-                  </Flex>
+                    </Flex>
+                  )}
                 </TableCol>
 
                 <TableCol className="text-right">
@@ -136,21 +140,49 @@ function WalletTransfer() {
                   </div>
                 </TableCol>
 
-                <TableCol className="text-right">{tx.fee}</TableCol>
+                <TableCol className="text-right">
+                  {((!tx.isMining || tx.maxFee === '0') &&
+                    (tx.usedFee === '0' ? '\u2013' : tx.usedFee)) || (
+                    <div>
+                      <div> {tx.maxFee} </div>
+                      <TableHint>Fee limit</TableHint>
+                    </div>
+                  )}
+
+                  {}
+                </TableCol>
                 <TableCol>
-                  {tx.timeStamp && new Date(tx.timeStamp).toLocaleString()}
+                  {!tx.timestamp
+                    ? '\u2013'
+                    : new Date(tx.timestamp * 1000).toLocaleString()}
                 </TableCol>
 
                 <TableCol>
-                  <div> {tx.isMining ? 'Mining...' : 'Confirmed'}</div>
-                  <TableHint style={{...ellipsis(rem(190))}}>
-                    {tx.isMining ? '' : tx.blockHash}
-                  </TableHint>
+                  {(tx.isMining && 'Mining...') || (
+                    <div>
+                      <div> Confirmed</div>
+                      <TableHint style={{...ellipsis(rem(190))}}>
+                        {tx.isMining ? '' : tx.blockHash}
+                      </TableHint>
+                    </div>
+                  )}
                 </TableCol>
               </TableRow>
             ))}
-      </tbody>
-    </Table>
+        </tbody>
+      </Table>
+      {transactions && transactions.length === 0 && (
+        <div
+          style={{
+            color: theme.colors.muted,
+            textAlign: 'center',
+            lineHeight: '40vh',
+          }}
+        >
+          You have no any transactions yet
+        </div>
+      )}
+    </div>
   )
 }
 

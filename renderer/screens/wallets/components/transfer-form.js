@@ -69,12 +69,11 @@ function TransferForm({onSuccess, onFail}) {
           </Field>
         </FormGroup>
         <FormGroup>
-          <Field label="To" value={to} onChange={e => setTo(e.target.value)} />
+          <Field label="To" onChange={e => setTo(e.target.value)} />
         </FormGroup>
         <FormGroup>
           <Field
             label="Amount, DNA"
-            value={amount}
             type="number"
             onChange={e => setAmount(e.target.value)}
           />

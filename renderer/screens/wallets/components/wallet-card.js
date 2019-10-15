@@ -133,7 +133,6 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                   >
                     Send
                   </WalletMenuItem>
-
                   <WalletMenuItem
                     onClick={async () => {
                       setIsMenuOpen(false)
@@ -144,9 +143,11 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                   >
                     Receive
                   </WalletMenuItem>
+                  {// TODO kill identity action
+                  false && isStake && <Divider m={theme.spacings.small} />}
 
-                  {isStake && <Divider m={theme.spacings.small} />}
-                  {isStake && (
+                  {// TODO kill identity action
+                  false && isStake && (
                     <WalletMenuItem
                       onClick={async () => {
                         setIsMenuOpen(false)

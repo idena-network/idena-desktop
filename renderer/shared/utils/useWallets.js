@@ -18,14 +18,18 @@ function isAddress(address) {
   return address.length === 42 && address.substr(0, 2) === '0x'
 }
 
-function getTransactionTypeName(type) {
+function getTransactionTypeName(tx) {
+  const {type} = tx
+  const {payload} = tx
   if (type === 'send') return 'Transfer'
-  if (type === 'activation') return 'Activate invitation'
-  if (type === 'invite') return 'Issue invitation'
-  if (type === 'kill') return 'Withdraw stake'
-  if (type === 'killInvitee') return 'Revoke invitation'
-  if (type === 'submitFlip') return 'Submit flip'
-  if (type === 'online') return 'Change online status'
+  if (type === 'activation') return 'Invitation activated'
+  if (type === 'invite') return 'Invitation issued'
+  if (type === 'killInvitee') return 'Invitation terminated'
+  if (type === 'kill') return 'Stake terminated'
+  if (type === 'submitFlip') return 'Flip submtted'
+  if (type === 'online')
+    return `Mining status ${payload === '0xc101' ? 'On' : 'Off'}`
+  return ''
 }
 
 function useWallets() {
@@ -44,18 +48,27 @@ function useWallets() {
       const accounts = await fetchAccountList(address)
       const balancePromises = accounts.map(account =>
         fetchBalance(account.address).then(resp => {
-          const balance =
+          const walletBalance =
             resp && account && (account.isStake ? resp.stake : resp.balance)
-          return {...account, balance, name: account.isStake ? 'Stake' : 'Main'}
+
+          return {
+            ...account,
+            balance: walletBalance,
+            name: account.isStake ? 'Stake' : 'Main',
+          }
         })
       )
 
       const nextWallets = await Promise.all(balancePromises)
 
+      const nextTotalAmount =
+        nextWallets.length &&
+        nextWallets
+          .map(b => b.balance)
+          .reduce((a, b) => parseFloat(a) + parseFloat(b) || 0)
+
       setWallets(nextWallets)
-      setTotalAmount(
-        nextWallets.map(b => b.balance).reduce((a, b) => a * 1 + b * 1 || 0)
-      )
+      setTotalAmount(nextTotalAmount)
     }
 
     if (!ignore) {
@@ -73,6 +86,42 @@ function useWallets() {
     let ignore = false
 
     async function fetchData() {
+      const balancePromises = wallets.map(wallet =>
+        fetchBalance(wallet.address).then(resp => {
+          const walletBalance =
+            resp && wallet && (wallet.isStake ? resp.stake : resp.balance)
+
+          return {
+            ...wallet,
+            balance: walletBalance,
+          }
+        })
+      )
+
+      const nextWallets = await Promise.all(balancePromises)
+      const nextTotalAmount =
+        nextWallets.length &&
+        nextWallets
+          .map(b => b.balance)
+          .reduce((a, b) => parseFloat(a) + parseFloat(b) || 0)
+
+      setWallets(nextWallets)
+      setTotalAmount(nextTotalAmount)
+    }
+
+    if (!ignore) {
+      fetchData()
+    }
+
+    return () => {
+      ignore = true
+    }
+  }, 2000)
+
+  useInterval(() => {
+    let ignore = false
+
+    async function fetchData() {
       const txResp = await fetchTransactions(address, 50)
       const txPendingResp = await fetchPendingTransactions(address, 50)
 
@@ -83,8 +132,6 @@ function useWallets() {
         txPendingResp.result.transactions
 
       const joinedTxs = [].concat(txsPending).concat(txs)
-      // alert(txs.length)
-      // if (txsPending && txsPending.length > 0) alert(txsPending.length)
 
       const hiddenTypes = [
         'evidence',
@@ -104,8 +151,10 @@ function useWallets() {
             const toWallet = wallets.find(wallet => wallet.address === tx.to)
 
             const direction = fromWallet ? 'Sent' : 'Received'
+
             const typeName =
-              tx.type === 'send' ? direction : getTransactionTypeName(tx.type)
+              tx.type === 'send' ? direction : getTransactionTypeName(tx)
+
             const sourceWallet = fromWallet || toWallet
             const signAmount = fromWallet ? -tx.amount : `+${tx.amount}`
             const counterParty = fromWallet ? tx.to : tx.from

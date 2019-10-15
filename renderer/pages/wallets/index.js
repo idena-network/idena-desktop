@@ -34,8 +34,8 @@ export default function Index() {
   const [activeWallet, setActiveWallet] = React.useState()
 
   useEffect(() => {
-    if (!activeWallet) {
-      setActiveWallet(wallets.length > 0 ? wallets[0] : null)
+    if (!activeWallet && wallets.length > 0) {
+      setActiveWallet(wallets[0])
     }
   }, [activeWallet, wallets])
 
@@ -52,8 +52,8 @@ export default function Index() {
                 <div>
                   <TotalAmount
                     amount={totalAmount}
-                    percentChanges={-0.48}
-                    amountChanges={-122}
+                    percentChanges={0}
+                    amountChanges={0}
                   />
                 </div>
                 <div>

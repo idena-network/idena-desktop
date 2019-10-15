@@ -29,7 +29,12 @@ function WalletList({
               >
                 <WalletCard
                   wallet={wallet}
-                  main={wallet === activeWallet}
+                  main={
+                    wallet &&
+                    activeWallet &&
+                    wallet.address === activeWallet.address &&
+                    wallet.isStake === activeWallet.isStake
+                  }
                   onSend={onSend}
                   onReceive={onReceive}
                   onWithdrawStake={onWithdrawStake}

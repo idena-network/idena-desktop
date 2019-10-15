@@ -15,15 +15,16 @@ import {
 
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useWallets from '../../../shared/utils/useWallets'
-import {useIdentityState} from '../providers/identity-context'
+import {
+  useIdentityState,
+  useIdentityDispatch,
+} from '../../../shared/providers/identity-context'
 
-function KillForm({wallet, onSuccess, onFail}) {
-  const {address} = useIdentityState()
-
-  const {wallets, sendTransaction} = useWallets()
+function KillForm({onSuccess, onFail}) {
+  const {address, stake} = useIdentityState()
+  const {killMe} = useIdentityDispatch()
 
   const [to, setTo] = React.useState(address)
-  const [amount, setAmount] = React.useState(wallet && wallet.amount)
 
   const [submitting, setSubmitting] = React.useState(false)
 
@@ -41,30 +42,18 @@ function KillForm({wallet, onSuccess, onFail}) {
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          Send DNA’s
+          Terminate identity
         </SubHeading>
 
-        <FormGroup>
-          <Field label="From" select>
-            <Select
-              name="select"
-              id=""
-              options={selectWallets}
-              value={from}
-              onChange={e => setFrom(e.target.value)}
-              border="0"
-            />
-          </Field>
-        </FormGroup>
         <FormGroup>
           <Field label="To" value={to} onChange={e => setTo(e.target.value)} />
         </FormGroup>
         <FormGroup>
           <Field
-            label="Amount, DNA"
-            value={amount}
+            disabled
+            label="Withraw stake, DNA"
+            value={stake}
             type="number"
-            onChange={e => setAmount(e.target.value)}
           />
         </FormGroup>
         {/*
@@ -77,10 +66,11 @@ function KillForm({wallet, onSuccess, onFail}) {
           className="text-right"
         >
           <Button
-            disabled={submitting || !to || !from || !amount}
+            disabled={submitting || !to}
             onClick={async () => {
               try {
                 setSubmitting(true)
+                killMe(address)
 
                 const {result, error} = await sendTransaction({
                   from,
