@@ -112,7 +112,7 @@ function useWallets() {
     if (!ignore) {
       setTxFetching(true)
       fetchData()
-      setTxFetching(true)
+      setTxFetching(false)
     }
 
     return () => {
