@@ -1,11 +1,7 @@
 import {useState, useEffect, useCallback} from 'react'
-import {encode} from 'rlp'
 import * as api from '../api/dna'
 import {useInterval} from '../hooks/use-interval'
-import {fetchTx} from '../api'
 import {HASH_IN_MEMPOOL} from './tx'
-import {areSame, areEual} from './arr'
-
 import {useIdentityState} from '../providers/identity-context'
 import {
   fetchAccountList,

@@ -1,5 +1,4 @@
 import React from 'react'
-import {useEffect} from 'react'
 import {rem, margin, padding, wordWrap} from 'polished'
 import PropTypes from 'prop-types'
 import {FiLoader} from 'react-icons/fi'
@@ -72,11 +71,7 @@ function KillForm({onSuccess, onFail}) {
                 setSubmitting(true)
                 killMe(address)
 
-                const {result, error} = await sendTransaction({
-                  from,
-                  to,
-                  amount,
-                })
+                const {result, error} = await killMe()
                 setSubmitting(false)
 
                 if (error) {

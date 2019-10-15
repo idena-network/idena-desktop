@@ -2,14 +2,7 @@ import React, {forwardRef, useState, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {MdMoreVert} from 'react-icons/md'
 
-import {
-  margin,
-  position,
-  borderRadius,
-  backgrounds,
-  padding,
-  rem,
-} from 'polished'
+import {margin, position, borderRadius, rem} from 'polished'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Box, Link, Absolute} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'

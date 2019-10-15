@@ -123,6 +123,7 @@ export default function Index() {
         <Drawer show={isReceiveFormOpen} onHide={handleCloseReceiveForm}>
           <ReceiveForm address={wallets[0] && wallets[0].address} />
         </Drawer>
+        <Drawer show={isRWithdrawStakeFormOpen} />
       </Box>
     </Layout>
   )

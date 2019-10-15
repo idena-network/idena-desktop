@@ -1,5 +1,4 @@
-import React from 'react'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {rem, margin, padding, wordWrap} from 'polished'
 import PropTypes from 'prop-types'
 import {FiLoader} from 'react-icons/fi'
@@ -38,7 +37,6 @@ function TransferForm({onSuccess, onFail}) {
 
   const [submitting, setSubmitting] = React.useState(false)
 
-  // const {sendTransaction} = useWalletDispatch()
   const {addNotification, addError} = useNotificationDispatch()
 
   return (
