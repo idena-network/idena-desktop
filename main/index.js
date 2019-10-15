@@ -1,6 +1,13 @@
 const {join, resolve} = require('path')
-// eslint-disable-next-line import/no-extraneous-dependencies
-const {BrowserWindow, app, ipcMain, Tray, Menu} = require('electron')
+const {
+  BrowserWindow,
+  app,
+  ipcMain,
+  Tray,
+  Menu,
+  systemPreferences,
+  // eslint-disable-next-line import/no-extraneous-dependencies
+} = require('electron')
 const {autoUpdater} = require('electron-updater')
 const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
@@ -29,6 +36,7 @@ let expressPort = 3051
 
 // Possible values are: 'darwin', 'freebsd', 'linux', 'sunos' or 'win32'
 const isWin = process.platform === 'win32'
+const isMac = process.platform === 'darwin'
 
 app.on('second-instance', () => {
   // Someone tried to run a second instance, we should focus our window.
@@ -140,8 +148,12 @@ const createMenu = () => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
+let trayIcon = 'icon-16-white@2x.png'
+if (isMac && !systemPreferences.isDarkMode()) {
+  trayIcon = 'icon-16@2x.png'
+}
 const createTray = () => {
-  tray = new Tray(resolve(__dirname, 'static', 'tray', 'icon-16-white@2x.png'))
+  tray = new Tray(resolve(__dirname, 'static', 'tray', trayIcon))
 
   if (isWin) {
     tray.on('click', showMainWindow)
