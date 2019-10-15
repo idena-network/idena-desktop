@@ -43,18 +43,24 @@ function ShortSession() {
   const epoch = useEpochState()
 
   useEffect(() => {
-    if (
-      epoch &&
-      ![EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
-        epoch.currentPeriod
-      )
-    ) {
-      Router.push('/dashboard')
+    if (epoch) {
+      const {currentPeriod} = epoch
+
+      const isValidation = [
+        EpochPeriod.ShortSession,
+        EpochPeriod.LongSession,
+      ].includes(currentPeriod)
+
+      const missedShortAnswers =
+        currentPeriod === EpochPeriod.LongSession && !state.shortAnswers.length
+
+      if (!isValidation || missedShortAnswers) {
+        Router.push('/dashboard')
+      }
     }
-  }, [epoch])
+  }, [epoch, state.shortAnswers.length])
 
   const [showModal, setShowModal] = useState(false)
-
   useEffect(() => {
     if (state.shortAnswersSubmitted) {
       setShowModal(true)
