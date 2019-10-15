@@ -16,7 +16,7 @@ const net = require('net')
 const loadRoute = require('./utils/routes')
 const logger = require('./logger')
 
-logger.info('idena started')
+logger.info('idena started', global.appVersion || app.getVersion())
 
 // autoUpdater.logger = logger
 // autoUpdater.logger.transports.file.level = 'info'
