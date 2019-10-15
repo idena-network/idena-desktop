@@ -10,15 +10,7 @@ import Flex from '../../shared/components/flex'
 import {useInterval} from '../../shared/hooks/use-interval'
 import theme from '../../shared/theme'
 import {useEpochState, EpochPeriod} from '../../shared/providers/epoch-context'
-import {
-  IconClose,
-  Link,
-  Modal,
-  Box,
-  SubHeading,
-  Text,
-  Button,
-} from '../../shared/components'
+import {Modal, Box, SubHeading, Text, Button} from '../../shared/components'
 import {
   submitShortAnswers,
   useValidationDispatch,
@@ -43,18 +35,24 @@ function ShortSession() {
   const epoch = useEpochState()
 
   useEffect(() => {
-    if (
-      epoch &&
-      ![EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
-        epoch.currentPeriod
-      )
-    ) {
-      Router.push('/dashboard')
+    if (epoch) {
+      const {currentPeriod} = epoch
+
+      const isValidation = [
+        EpochPeriod.ShortSession,
+        EpochPeriod.LongSession,
+      ].includes(currentPeriod)
+
+      const missedShortAnswers =
+        currentPeriod === EpochPeriod.LongSession && !state.shortAnswers.length
+
+      if (!isValidation || missedShortAnswers) {
+        Router.push('/dashboard')
+      }
     }
-  }, [epoch])
+  }, [epoch, state.shortAnswers.length])
 
   const [showModal, setShowModal] = useState(false)
-
   useEffect(() => {
     if (state.shortAnswersSubmitted) {
       setShowModal(true)
@@ -105,11 +103,7 @@ function ShortSession() {
         type={SessionType.Short}
         currentIndex={state.currentIndex}
         total={availableFlipsLength}
-      >
-        <Link href="/dashboard">
-          <IconClose />
-        </Link>
-      </ValidationHeader>
+      />
       <Flex
         direction="column"
         align="center"
@@ -151,7 +145,7 @@ function ShortSession() {
 // eslint-disable-next-line react/prop-types
 function InviteQualificationModal({show, onSubmit}) {
   return (
-    <Modal show={show}>
+    <Modal show={show} showCloseIcon={false}>
       <Box m="0 0 18px">
         <SubHeading>Flips qualification session</SubHeading>
         <Text>
