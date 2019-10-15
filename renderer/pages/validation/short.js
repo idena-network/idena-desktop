@@ -111,11 +111,7 @@ function ShortSession() {
         type={SessionType.Short}
         currentIndex={state.currentIndex}
         total={availableFlipsLength}
-      >
-        <Link href="/dashboard">
-          <IconClose />
-        </Link>
-      </ValidationHeader>
+      />
       <Flex
         direction="column"
         align="center"
@@ -157,7 +153,7 @@ function ShortSession() {
 // eslint-disable-next-line react/prop-types
 function InviteQualificationModal({show, onSubmit}) {
   return (
-    <Modal show={show}>
+    <Modal show={show} showCloseIcon={false}>
       <Box m="0 0 18px">
         <SubHeading>Flips qualification session</SubHeading>
         <Text>

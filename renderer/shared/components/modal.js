@@ -6,7 +6,7 @@ import theme from '../theme'
 import {Box, Fill, Absolute} from '.'
 import useClickOutside from '../hooks/use-click-outside'
 
-function Modal({show, onHide, ...props}) {
+function Modal({show, showCloseIcon = true, onHide, ...props}) {
   const ref = useRef()
 
   useClickOutside(ref, () => {
@@ -33,14 +33,16 @@ function Modal({show, onHide, ...props}) {
           z-index: 9;
         }
       `}</style>
-      <Absolute top="1em" right="1em" zIndex={2}>
-        <FiX
-          color={theme.colors.muted}
-          fontSize={theme.fontSizes.large}
-          onClick={onHide}
-          cursor="pointer"
-        />
-      </Absolute>
+      {showCloseIcon && (
+        <Absolute top="1em" right="1em" zIndex={2}>
+          <FiX
+            color={theme.colors.muted}
+            fontSize={theme.fontSizes.large}
+            onClick={onHide}
+            cursor="pointer"
+          />
+        </Absolute>
+      )}
     </Fill>
   ) : null
 }
@@ -48,6 +50,7 @@ function Modal({show, onHide, ...props}) {
 Modal.propTypes = {
   show: PropTypes.bool,
   onHide: PropTypes.func,
+  showCloseIcon: PropTypes.bool,
 }
 
 export default Modal
