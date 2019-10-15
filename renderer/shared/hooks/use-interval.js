@@ -29,8 +29,11 @@ export function useInterval(callback, delay, useImmediately = false) {
   }, [callback])
 
   useEffect(() => {
+    let timeoutId
+
     function tick() {
-      return setTimeout(() => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
         savedCallback.current()
         tick()
       }, delay)
@@ -40,7 +43,7 @@ export function useInterval(callback, delay, useImmediately = false) {
       if (useImmediately) {
         savedCallback.current()
       }
-      const timeoutId = tick()
+      tick()
       return () => clearTimeout(timeoutId)
     }
   }, [delay, useImmediately])
