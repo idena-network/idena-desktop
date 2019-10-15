@@ -10,15 +10,7 @@ import Flex from '../../shared/components/flex'
 import {useInterval} from '../../shared/hooks/use-interval'
 import theme from '../../shared/theme'
 import {useEpochState, EpochPeriod} from '../../shared/providers/epoch-context'
-import {
-  IconClose,
-  Link,
-  Modal,
-  Box,
-  SubHeading,
-  Text,
-  Button,
-} from '../../shared/components'
+import {Modal, Box, SubHeading, Text, Button} from '../../shared/components'
 import {
   submitShortAnswers,
   useValidationDispatch,
