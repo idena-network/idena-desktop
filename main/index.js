@@ -148,12 +148,24 @@ const createMenu = () => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
-let trayIcon = 'icon-16-white@2x.png'
-if (isMac && !systemPreferences.isDarkMode()) {
-  trayIcon = 'icon-16@2x.png'
+function trayIcon() {
+  const icon = 'icon-16-white@2x.png'
+  return isMac
+    ? `icon-16${systemPreferences.isDarkMode() ? '-white' : ''}@2x.png`
+    : icon
 }
+
+if (isMac) {
+  systemPreferences.subscribeNotification(
+    'AppleInterfaceThemeChangedNotification',
+    () => {
+      tray.setImage(resolve(__dirname, 'static', 'tray', trayIcon()))
+    }
+  )
+}
+
 const createTray = () => {
-  tray = new Tray(resolve(__dirname, 'static', 'tray', trayIcon))
+  tray = new Tray(resolve(__dirname, 'static', 'tray', trayIcon()))
 
   if (isWin) {
     tray.on('click', showMainWindow)
