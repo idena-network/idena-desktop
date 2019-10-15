@@ -39,7 +39,7 @@ function useWallets() {
   const [fetching, setFetching] = useState(false)
 
   const [transactions, setTransactions] = useState([])
-  const [txFetching, setTxFetching] = useState(false)
+  const [txFetching, setTxFetching] = useState(true)
 
   useEffect(() => {
     let ignore = false
@@ -110,7 +110,9 @@ function useWallets() {
     }
 
     if (!ignore) {
+      setTxFetching(true)
       fetchData()
+      setTxFetching(true)
     }
 
     return () => {
@@ -221,6 +223,7 @@ function useWallets() {
     fetching,
     sendTransaction,
     transactions,
+    txFetching,
   }
 }
 

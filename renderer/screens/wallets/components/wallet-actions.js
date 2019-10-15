@@ -76,7 +76,7 @@ RowStatus.propTypes = {
 }
 
 function WalletTransfer() {
-  const {transactions} = useWallets()
+  const {transactions, txFetching} = useWallets()
 
   return (
     <div>
@@ -179,7 +179,7 @@ function WalletTransfer() {
             lineHeight: '40vh',
           }}
         >
-          You have no any transactions yet
+          {txFetching ? '' : 'You have no any transactions yet'}
         </div>
       )}
     </div>
