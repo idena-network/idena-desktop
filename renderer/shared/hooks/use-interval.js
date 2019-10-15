@@ -1,13 +1,13 @@
 import {useEffect, useRef} from 'react'
 
-export function useInterval(callback, delay, useImmediately = false) {
+// TODO: just to make it clear that this useInterval uses interval. Yep!
+export function useIntervalInterval(callback, delay, useImmediately = false) {
   const savedCallback = useRef()
 
   useEffect(() => {
     savedCallback.current = callback
   }, [callback])
 
-  // eslint-disable-next-line consistent-return
   useEffect(() => {
     function tick() {
       savedCallback.current()
@@ -16,8 +16,36 @@ export function useInterval(callback, delay, useImmediately = false) {
       if (useImmediately) {
         tick()
       }
-      const id = setInterval(tick, delay)
-      return () => clearInterval(id)
+      const id = setTimeout(tick, delay)
+      return () => clearTimeout(id)
+    }
+  }, [delay, useImmediately])
+}
+
+// TODO: move to usePoll later, yay
+export function useInterval(callback, delay, useImmediately = false) {
+  const savedCallback = useRef()
+  useEffect(() => {
+    savedCallback.current = callback
+  }, [callback])
+
+  useEffect(() => {
+    let timeoutId
+
+    function tick() {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        savedCallback.current()
+        tick()
+      }, delay)
+    }
+
+    if (delay !== null) {
+      if (useImmediately) {
+        savedCallback.current()
+      }
+      tick()
+      return () => clearTimeout(timeoutId)
     }
   }, [delay, useImmediately])
 }
