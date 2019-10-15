@@ -16,6 +16,7 @@ import ReceiveForm from '../../screens/wallets/components/receive-form'
 
 import Loading from '../../shared/components/loading'
 import useWallets from '../../shared/utils/useWallets'
+import {useChainState} from '../../shared/providers/chain-context'
 
 export default function Index() {
   const {wallets, totalAmount, fetching} = useWallets()
@@ -32,6 +33,7 @@ export default function Index() {
   const handleCloseReceiveForm = () => setIsReceiveFormOpen(false)
 
   const [activeWallet, setActiveWallet] = React.useState()
+  const {syncing, offline} = useChainState()
 
   useEffect(() => {
     if (!activeWallet && wallets.length > 0) {
@@ -40,7 +42,7 @@ export default function Index() {
   }, [activeWallet, wallets])
 
   return (
-    <Layout>
+    <Layout syncing={syncing} offline={offline}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Heading>Wallets</Heading>
         <Box>
