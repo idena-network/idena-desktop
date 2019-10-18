@@ -1,43 +1,76 @@
-import React, {useState, useEffect} from 'react'
+import React, {useEffect} from 'react'
 import dayjs from 'dayjs'
-import {useEpochState, EpochPeriod} from '../providers/epoch-context'
+import {useEpochState} from '../providers/epoch-context'
 import {useTimingState} from '../providers/timing-context'
 import {useInterval} from './use-interval'
 
-const GAP = 9
-
 export function useValidationTimer() {
-  const {shortSession, longSession} = useTimingState()
+  const timing = useTimingState()
   const epoch = useEpochState()
 
-  const [seconds, setSeconds] = useState()
-  const finish = React.useRef()
-  const duration = React.useRef()
-
-  function updateSeconds() {
-    const secondsLeft = finish.current.diff(dayjs(), 's')
-    setSeconds(
-      secondsLeft < 0
-        ? null
-        : Math.max(Math.min(secondsLeft, duration.current), 0)
-    )
-  }
+  const [state, dispatch] = React.useReducer(
+    (prevState, name) => {
+      switch (name) {
+        default:
+        case 'start': {
+          const {nextValidation} = epoch
+          const {shortSession, longSession} = timing
+          const shortSessionEnd = dayjs(nextValidation).add(shortSession, 's')
+          const longSessionEnd = dayjs(nextValidation).add(
+            shortSession + longSession,
+            's'
+          )
+          return {
+            ...prevState,
+            shortSessionEnd,
+            longSessionEnd,
+            secondsLeftForShortSession: Math.max(
+              shortSessionEnd.diff(dayjs(), 's'),
+              0
+            ),
+            secondsLeftForLongSession: Math.max(
+              longSessionEnd.diff(dayjs(), 's'),
+              0
+            ),
+          }
+        }
+        case 'tick': {
+          return {
+            ...prevState,
+            secondsLeftForShortSession: Math.max(
+              prevState.shortSessionEnd.diff(dayjs(), 's'),
+              0
+            ),
+            secondsLeftForLongSession: Math.max(
+              prevState.longSessionEnd.diff(dayjs(), 's'),
+              0
+            ),
+          }
+        }
+      }
+    },
+    {
+      shortSessionEnd: null,
+      longSessionEnd: null,
+      secondsLeftForShortSession: null,
+      secondsLeftForLongSession: null,
+    }
+  )
 
   useEffect(() => {
-    if (epoch && shortSession && longSession) {
-      const {currentPeriod, nextValidation} = epoch
-      duration.current =
-        shortSession +
-        (currentPeriod === EpochPeriod.ShortSession ? 0 : longSession) -
-        GAP
-      finish.current = dayjs(nextValidation).add(duration.current, 's')
-      updateSeconds()
+    if (epoch && Object.keys(timing).length) {
+      dispatch('start')
     }
-  }, [epoch, longSession, shortSession])
+  }, [epoch, timing])
 
-  useInterval(updateSeconds, seconds ? 1000 : null)
+  useInterval(
+    () => dispatch('tick'),
+    state.secondsLeftForShortSession + state.secondsLeftForLongSession > 0
+      ? 1000
+      : null
+  )
 
-  return seconds
+  return state
 }
 
 export default useValidationTimer

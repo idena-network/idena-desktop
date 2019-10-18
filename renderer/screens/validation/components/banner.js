@@ -9,6 +9,7 @@ import Divider from '../../../shared/components/divider'
 import {
   useValidationState,
   SessionType,
+  GAP,
 } from '../../../shared/providers/validation-context'
 import {
   useEpochState,
@@ -66,7 +67,10 @@ function ValidationRunning() {
   const sessionType = isShortSession ? SessionType.Short : SessionType.Long
   const hasAnswers = isShortSession ? shortAnswers.length : longAnswers.length
 
-  const seconds = useValidationTimer()
+  const {
+    secondsLeftForShortSession,
+    secondsLeftForLongSession,
+  } = useValidationTimer()
 
   const identity = useIdentityState()
 
@@ -75,6 +79,10 @@ function ValidationRunning() {
       Router.push('/validation/short')
     }
   }, [identity, isShortSession, shortAnswersSubmitted])
+
+  const seconds = isShortSession
+    ? secondsLeftForShortSession
+    : secondsLeftForLongSession
 
   return (
     <Flex
@@ -109,7 +117,7 @@ function ValidationRunning() {
           </Box>
         ) : (
           <Box p={theme.spacings.normal}>
-            {seconds > 0
+            {!isShortSession || seconds > GAP
               ? `Idena ${currentPeriod} has started`
               : `Submitting answers for ${currentPeriod}`}
           </Box>

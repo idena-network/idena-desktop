@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {FiClock} from 'react-icons/fi'
 import {rem} from 'polished'
@@ -20,19 +20,15 @@ function formatSeconds(seconds) {
 }
 
 function Timer({type, color = theme.colors.danger, useIcon = true}) {
-  let seconds = useValidationTimer()
   const epoch = useEpochState()
-  const {longSession} = useTimingState()
+  // const {longSession} = useTimingState()
+  const {
+    secondsLeftForShortSession: shortSeconds,
+    secondsLeftForLongSession: longSeconds,
+  } = useValidationTimer()
 
   if (!epoch) {
     return null
-  }
-
-  if (
-    type === SessionType.Long &&
-    epoch.currentPeriod === EpochPeriod.ShortSession
-  ) {
-    seconds += longSession
   }
 
   return (
@@ -45,7 +41,12 @@ function Timer({type, color = theme.colors.danger, useIcon = true}) {
         />
       )}
       <Text color={color} fontWeight={600}>
-        {Number.isFinite(seconds) && formatSeconds(seconds)}
+        {type === SessionType.Short &&
+          Number.isFinite(shortSeconds) &&
+          formatSeconds(shortSeconds)}
+        {type === SessionType.Long &&
+          Number.isFinite(longSeconds) &&
+          formatSeconds(longSeconds)}
       </Text>
     </Flex>
   )
