@@ -4,11 +4,9 @@ import {decode} from 'rlp'
 import * as api from '../api/validation'
 import {useEpochState} from './epoch-context'
 import useFlips from '../utils/useFlips'
-import {useValidationTimer} from '../hooks/use-validation'
+import {useValidationTimer} from '../hooks/use-validation-timer'
 import useLogger from '../hooks/use-logger'
 import {fetchFlip} from '../api'
-
-export const GAP = 10
 
 export const AnswerType = {
   None: 0,
@@ -369,7 +367,7 @@ export function ValidationProvider({children}) {
       await submitShortAnswers(dispatch, state.flips, epoch.epoch)
     }
 
-    if (secondsLeftForShortSession === GAP) {
+    if (secondsLeftForShortSession === 0) {
       const {shortAnswersSubmitted, flips} = state
       const hasSomeAnswer = flips.map(x => x.answer).some(hasAnswer)
       if (hasSomeAnswer && !shortAnswersSubmitted) {

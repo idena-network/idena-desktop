@@ -4,6 +4,8 @@ import {useEpochState} from '../providers/epoch-context'
 import {useTimingState} from '../providers/timing-context'
 import {useInterval} from './use-interval'
 
+const GAP = 10
+
 export function useValidationTimer() {
   const timing = useTimingState()
   const epoch = useEpochState()
@@ -15,22 +17,21 @@ export function useValidationTimer() {
         case 'start': {
           const {nextValidation} = epoch
           const {shortSession, longSession} = timing
-          const shortSessionEnd = dayjs(nextValidation).add(shortSession, 's')
-          const longSessionEnd = dayjs(nextValidation).add(
-            shortSession + longSession,
-            's'
-          )
+          const shortSessionEnd = dayjs(nextValidation)
+            .add(shortSession, 's')
+            .subtract(GAP, 's')
+          const longSessionEnd = shortSessionEnd.add(longSession, 's')
           return {
             ...prevState,
             shortSessionEnd,
             longSessionEnd,
             secondsLeftForShortSession: Math.max(
-              shortSessionEnd.diff(dayjs(), 's'),
-              0
+              0,
+              shortSessionEnd.diff(dayjs(), 's')
             ),
             secondsLeftForLongSession: Math.max(
-              longSessionEnd.diff(dayjs(), 's'),
-              0
+              0,
+              longSessionEnd.diff(dayjs(), 's')
             ),
           }
         }
@@ -38,12 +39,12 @@ export function useValidationTimer() {
           return {
             ...prevState,
             secondsLeftForShortSession: Math.max(
-              prevState.shortSessionEnd.diff(dayjs(), 's'),
-              0
+              0,
+              prevState.shortSessionEnd.diff(dayjs(), 's')
             ),
             secondsLeftForLongSession: Math.max(
-              prevState.longSessionEnd.diff(dayjs(), 's'),
-              0
+              0,
+              prevState.longSessionEnd.diff(dayjs(), 's')
             ),
           }
         }

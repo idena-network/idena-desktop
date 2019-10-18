@@ -9,13 +9,12 @@ import Divider from '../../../shared/components/divider'
 import {
   useValidationState,
   SessionType,
-  GAP,
 } from '../../../shared/providers/validation-context'
 import {
   useEpochState,
   EpochPeriod,
 } from '../../../shared/providers/epoch-context'
-import {useValidationTimer} from '../../../shared/hooks/use-validation'
+import {useValidationTimer} from '../../../shared/hooks/use-validation-timer'
 import {
   useIdentityState,
   canValidate,
@@ -117,7 +116,7 @@ function ValidationRunning() {
           </Box>
         ) : (
           <Box p={theme.spacings.normal}>
-            {!isShortSession || seconds > GAP
+            {!isShortSession || seconds > 0
               ? `Idena ${currentPeriod} has started`
               : `Submitting answers for ${currentPeriod}`}
           </Box>
