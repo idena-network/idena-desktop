@@ -90,7 +90,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
         position: 'relative',
         ...margin(0, theme.spacings.medium24, 0, 0),
       }}
-      w={rem(295)}
+      w={rem(315)}
     >
       <div className="title">
         <div className="icn">
