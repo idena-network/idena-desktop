@@ -3,11 +3,18 @@ import PropTypes from 'prop-types'
 import {rem, transparentize, darken} from 'polished'
 import theme from '../theme'
 
-function Button({size = 1, disabled, variant = 'primary', css, ...props}) {
+function Button({
+  size = 1,
+  disabled,
+  danger,
+  variant = 'primary',
+  css,
+  ...props
+}) {
   const isPrimary = variant === 'primary'
-  const bg = isPrimary
-    ? theme.colors.primary
-    : transparentize(0.88, theme.colors.primary)
+  const bcolor = danger ? theme.colors.danger : theme.colors.primary
+
+  const bg = isPrimary ? bcolor : transparentize(0.88, bcolor)
   const color = isPrimary ? theme.colors.white : theme.colors.primary
 
   return (
@@ -43,6 +50,7 @@ Button.defaultProps = {
 Button.propTypes = {
   size: PropTypes.number,
   disabled: PropTypes.bool,
+  danger: PropTypes.bool,
   variant: PropTypes.oneOf(['primary', 'secondary']),
   // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,
@@ -79,7 +87,8 @@ FlatButton.defaultProps = {
 }
 FlatButton.propTypes = Button.propTypes
 
-function IconButton({icon, children, disabled, ...props}) {
+function IconButton({icon, children, disabled, danger, ...props}) {
+  const color = danger ? theme.colors.danger : theme.colors.primary
   return (
     <button type="button" disabled={disabled} {...props}>
       {icon}
@@ -104,12 +113,12 @@ function IconButton({icon, children, disabled, ...props}) {
       `}</style>
       <style jsx>{`
         button {
-          color: ${theme.colors.primary};
+          color: ${color};
           font-weight: 500;
           padding: ${rem(theme.spacings.small8)};
         }
         button:hover {
-          color: ${darken(0.1, theme.colors.primary)};
+          color: ${darken(0.1, color)};
         }
         span {
           margin-left: ${theme.spacings.small};
@@ -122,6 +131,7 @@ IconButton.propTypes = {
   icon: PropTypes.node,
   children: PropTypes.node,
   disabled: PropTypes.bool,
+  danger: PropTypes.bool,
 }
 
 export {FlatButton, IconButton}

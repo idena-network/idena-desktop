@@ -5,15 +5,15 @@ import {FiLoader} from 'react-icons/fi'
 import theme from '../../../shared/theme'
 import {
   Box,
+  Text,
   SubHeading,
   FormGroup,
   Field,
   Button,
-  Select,
 } from '../../../shared/components'
 
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
-import useWallets from '../../../shared/utils/useWallets'
+import Avatar from '../../../shared/components/avatar'
 import {
   useIdentityState,
   useIdentityDispatch,
@@ -23,7 +23,7 @@ function KillForm({onSuccess, onFail}) {
   const {address, stake} = useIdentityState()
   const {killMe} = useIdentityDispatch()
 
-  const [to, setTo] = React.useState(address)
+  const [to, setTo] = React.useState()
 
   const [submitting, setSubmitting] = React.useState(false)
 
@@ -38,15 +38,24 @@ function KillForm({onSuccess, onFail}) {
           ...margin(theme.spacings.medium16, 0, theme.spacings.medium32),
         }}
       >
-        <SubHeading
-          css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
+        <Box css={{textAlign: 'center'}}>
+          <Avatar username={address} size={80} />
+        </Box>
+        <Box
+          css={{
+            ...margin(theme.spacings.medium16, 0, theme.spacings.medium32),
+            textAlign: 'center',
+          }}
         >
-          Terminate identity
-        </SubHeading>
+          <SubHeading css={{...margin(0, 0, theme.spacings.small8)}}>
+            Terminate identity
+          </SubHeading>
+          <Text>
+            Terminate your identity and withdraw the stake. Your identity status
+            will be reset to 'Not validated'.
+          </Text>
+        </Box>
 
-        <FormGroup>
-          <Field label="To" value={to} onChange={e => setTo(e.target.value)} />
-        </FormGroup>
         <FormGroup>
           <Field
             disabled
@@ -55,6 +64,15 @@ function KillForm({onSuccess, onFail}) {
             type="number"
           />
         </FormGroup>
+
+        <FormGroup>
+          <Field
+            label="To address"
+            value={to}
+            onChange={e => setTo(e.target.value)}
+          />
+        </FormGroup>
+
         {/*
         <FormGroup>
           <Field label="Comment" value="" textarea />
@@ -66,12 +84,12 @@ function KillForm({onSuccess, onFail}) {
         >
           <Button
             disabled={submitting || !to}
+            danger
             onClick={async () => {
               try {
                 setSubmitting(true)
-                killMe(address)
 
-                const {result, error} = await killMe()
+                const {result, error} = await killMe({to})
                 setSubmitting(false)
 
                 if (error) {
@@ -98,7 +116,7 @@ function KillForm({onSuccess, onFail}) {
               }
             }}
           >
-            {submitting ? <FiLoader /> : 'Transfer'}
+            {submitting ? <FiLoader /> : 'Terminate'}
           </Button>
         </FormGroup>
       </Box>
