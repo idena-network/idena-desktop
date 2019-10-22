@@ -2,9 +2,9 @@
 import React, {useReducer, useEffect, createContext, useContext} from 'react'
 import {decode} from 'rlp'
 import * as api from '../api/validation'
-import {useEpochState, EpochPeriod} from './epoch-context'
+import {useEpochState} from './epoch-context'
 import useFlips from '../utils/useFlips'
-import {useValidationTimer} from '../hooks/use-validation'
+import {useValidationTimer} from '../hooks/use-validation-timer'
 import useLogger from '../hooks/use-logger'
 import {fetchFlip} from '../api'
 
@@ -341,7 +341,7 @@ export function ValidationProvider({children}) {
   const [state, dispatch] = useLogger(
     useReducer(validationReducer, initialState)
   )
-  const seconds = useValidationTimer()
+  const {secondsLeftForShortSession} = useValidationTimer()
 
   useEffect(() => {
     const validation = db.getValidation()
@@ -363,43 +363,18 @@ export function ValidationProvider({children}) {
   }, [archiveFlips, dispatch, epoch])
 
   useEffect(() => {
-    async function sendAnswers(type) {
-      switch (type) {
-        case SessionType.Short: {
-          await submitShortAnswers(dispatch, state.flips, epoch.epoch)
-          break
-        }
-        case SessionType.Long: {
-          await submitLongAnswers(dispatch, state.flips, epoch.epoch)
-          break
-        }
-        default:
-          break
-      }
+    async function sendAnswers() {
+      await submitShortAnswers(dispatch, state.flips, epoch.epoch)
     }
 
-    // prevent mess with epoch and seconds switching simultaneously
-    if (seconds === 1) {
+    if (secondsLeftForShortSession === 0) {
       const {shortAnswersSubmitted, flips} = state
-      const {currentPeriod} = epoch
       const hasSomeAnswer = flips.map(x => x.answer).some(hasAnswer)
-
-      if (hasSomeAnswer) {
-        if (
-          currentPeriod === EpochPeriod.ShortSession &&
-          !shortAnswersSubmitted
-        ) {
-          sendAnswers(SessionType.Short)
-        }
-        // if (
-        //   currentPeriod === EpochPeriod.LongSession &&
-        //   !longAnswersSubmitted
-        // ) {
-        //   sendAnswers(SessionType.Long)
-        // }
+      if (hasSomeAnswer && !shortAnswersSubmitted) {
+        sendAnswers()
       }
     }
-  }, [dispatch, epoch, seconds, state])
+  }, [dispatch, epoch, secondsLeftForShortSession, state])
 
   return (
     <ValidationStateContext.Provider value={state}>
