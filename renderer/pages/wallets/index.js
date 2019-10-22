@@ -1,9 +1,10 @@
 import React, {useEffect} from 'react'
 import {rem} from 'polished'
+import {FiChevronRight} from 'react-icons/fi'
+
 import theme from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {Box, Drawer, Heading} from '../../shared/components'
-
 import Flex from '../../shared/components/flex'
 import Actions from '../../shared/components/actions'
 import IconLink from '../../shared/components/icon-link'
@@ -17,6 +18,7 @@ import ReceiveForm from '../../screens/wallets/components/receive-form'
 import Loading from '../../shared/components/loading'
 import useWallets from '../../shared/utils/useWallets'
 import {useChainState} from '../../shared/providers/chain-context'
+import {FlatButton} from '../../shared/components/button'
 
 export default function Index() {
   const {wallets, totalAmount, fetching} = useWallets()
@@ -101,13 +103,37 @@ export default function Index() {
                   fontWeight: 500,
                   fontSize: rem(24),
                   letterSpacing: 0,
-                  marginBottom: rem(19),
+                  marginBottom: 0,
                   marginTop: 0,
                   color: theme.colors.primary2,
                 }}
               >
                 Recent transactions
               </h3>
+
+              <FlatButton
+                color={theme.colors.primary}
+                onClick={() =>
+                  global.openExternal(
+                    `https://scan.idena.io/address?address=${
+                      activeWallet.address
+                    }#rewards`
+                  )
+                }
+                style={{
+                  marginBottom: rem(19),
+                }}
+              >
+                <span>See Explorer for rewards and penalties </span>
+
+                <FiChevronRight
+                  style={{
+                    position: 'relative',
+                    top: '3px',
+                  }}
+                  fontSize={rem(19)}
+                />
+              </FlatButton>
 
               <WalletActions />
             </>
