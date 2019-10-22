@@ -17,11 +17,12 @@ function WalletList({
   return (
     <div className="scroll">
       <div className="scroll-inner">
-        <Flex>
+        <Flex css={{height: '100%'}}>
           {wallets
             .filter(wallet => wallet.address)
             .map((wallet, idx) => (
               <div
+                style={{height: '100%'}}
                 key={idx}
                 onClick={() => {
                   onChangeActiveWallet(wallet)
@@ -47,7 +48,7 @@ function WalletList({
         .scroll {
           overflow: hidden;
           width: 100%;
-          height: 98px;
+          height: 100px;
           margin-bottom: ${rem(30)};
         }
 

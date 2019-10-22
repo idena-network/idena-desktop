@@ -16,10 +16,10 @@ import useHover from '../../../shared/hooks/use-hover'
 const WalletMenu = forwardRef((props, ref) => (
   <Box
     bg={theme.colors.white}
-    py={theme.spacings.small}
+    py={rem(theme.spacings.small8)}
     css={{
-      ...borderRadius('top', '10px'),
-      ...borderRadius('bottom', '10px'),
+      ...borderRadius('top', '8px'),
+      ...borderRadius('bottom', '8px'),
       boxShadow:
         '0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)',
     }}
@@ -32,26 +32,35 @@ const WalletMenu = forwardRef((props, ref) => (
 function WalletMenuItem({href, onClick, icon, danger, disabled, ...props}) {
   const [hoverRef, isHovered] = useHover()
   return (
-    <Box
-      ref={hoverRef}
-      px={theme.spacings.normal}
-      py={theme.spacings.small}
-      bg={isHovered ? theme.colors.gray : ''}
-    >
+    <Box ref={hoverRef}>
       <Flex align="center" onClick={disabled ? null : onClick}>
-        {React.cloneElement(icon, {
-          style: {
-            marginRight: theme.spacings.normal,
-            color: danger ? theme.colors.danger : theme.colors.primary,
-            opacity: disabled ? 0.5 : 1,
-          },
-        })}
         {href ? (
-          <Link href={href} {...props} />
+          <>
+            {React.cloneElement(icon, {
+              style: {
+                marginRight: theme.spacings.normal,
+                color: danger ? theme.colors.danger : theme.colors.primary,
+                opacity: disabled ? 0.5 : 1,
+              },
+            })}
+            <Link href={href} {...props} />
+          </>
         ) : (
           <FlatButton
-            bg={isHovered ? theme.colors.gray : ''}
             disabled={disabled}
+            icon={icon}
+            style={{
+              fontWeight: 500,
+              borderRadius: 0,
+              display: 'block',
+              width: '100%',
+              textAlign: 'left',
+              paddingTop: theme.spacings.small8,
+              paddingBottom: theme.spacings.small8,
+              paddingLeft: theme.spacings.normal,
+              paddingRight: theme.spacings.normal,
+              backgroundColor: isHovered ? theme.colors.gray : '',
+            }}
             {...props}
           />
         )}
@@ -86,8 +95,11 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
       padding={rem(theme.spacings.medium16)}
       style={{
         borderRadius: rem(8),
-        minWidth: rem(195),
+        width: rem(232),
+        minWidth: rem(232),
+        height: '100%',
         position: 'relative',
+        zIndex: main ? 1 : 0,
         ...margin(0, theme.spacings.medium24, 0, 0),
       }}
       w={rem(295)}
@@ -104,17 +116,21 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
       </div>
 
       <div className="action">
-        <MdMoreVert
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          style={{cursor: 'pointer'}}
-        />
-      </div>
-
-      <Box my={theme.spacings.normal} css={{marginBottom: 0}} w="150px">
+        <span className="action-icon">
+          <MdMoreVert
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            style={{cursor: 'pointer'}}
+          />
+        </span>
         <Flex justify="space-between" align="center">
           <Box css={position('fixed')}>
             {isMenuOpen && (
-              <Absolute top="-1.5em" right="-16em" zIndex={2}>
+              <Absolute
+                top="100%"
+                right="-17px"
+                zIndex={2}
+                css={{marginTop: '5px'}}
+              >
                 <WalletMenu ref={menuRef}>
                   <WalletMenuItem
                     onClick={async () => {
@@ -122,7 +138,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                       onSend(wallet)
                     }}
                     disabled={isStake}
-                    icon={<i className="icon icon--withdraw" />}
+                    icon="withdraw"
                   >
                     Send
                   </WalletMenuItem>
@@ -132,7 +148,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                       onReceive(wallet)
                     }}
                     disabled={isStake}
-                    icon={<i className="icon icon--deposit" />}
+                    icon="deposit"
                   >
                     Receive
                   </WalletMenuItem>
@@ -148,7 +164,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                       }}
                       disabled={!isStake}
                       danger
-                      icon={<i className="icon icon--delete" />}
+                      icon="delete"
                     >
                       Withdraw
                     </WalletMenuItem>
@@ -158,7 +174,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
             )}
           </Box>
         </Flex>
-      </Box>
+      </div>
 
       <div
         className="balance"
@@ -166,10 +182,13 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
       >
         Balance
       </div>
-      <div className="value">{balance} DNA</div>
+      <div className="value">
+        <span>{balance}</span>
+        DNA
+      </div>
       <style jsx>{`
         .title {
-          margin-bottom: ${rem(17)};
+          margin-bottom: ${rem(25)};
           font-weight: 500;
         }
         .icn {
@@ -183,13 +202,24 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
           line-height: ${rem(24)};
           font-weight: 500;
         }
+        .value span {
+          max-width: calc(100% - 40px);
+          overflow: hidden;
+          display: inline-block;
+          vertical-align: bottom;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          margin-right: 3px;
+         }
         .action {
           padding: ${rem(5)};
-          font-size: ${rem(20)};
           position: absolute;
           top: ${rem(10)};
           right: ${rem(8)};
           cursor: pointer;
+        }
+        .action-icon {
+          font-size: ${rem(20)};
         }
       `}</style>
     </Box>

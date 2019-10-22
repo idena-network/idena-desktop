@@ -46,12 +46,17 @@ Button.propTypes = {
   variant: PropTypes.oneOf(['primary', 'secondary']),
   // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,
+  icon: PropTypes.node,
+  children: PropTypes.any,
 }
 
-function FlatButton({size = 1, color, disabled, css, ...props}) {
+function FlatButton({size = 1, icon, color, disabled, children, css, ...props}) {
   return (
     <>
-      <button type="button" disabled={disabled} style={css} {...props} />
+      <button type="button" disabled={disabled} style={css} {...props}>
+        {icon && <i className={`icon icon--${icon}`} />}
+        {children}
+      </button>
       <style jsx>{`
         button {
           background: none;
@@ -69,6 +74,15 @@ function FlatButton({size = 1, color, disabled, css, ...props}) {
           color: ${darken(0.05, color)};
           opacity: 0.9;
           ${disabled && `opacity: 0.5`};
+        }
+        .icon {
+          display: inline-block;
+          vertical-align: middle;
+          line-height: 21px;
+          position: relative;
+          top: -1px;
+          margin: -4px 10px -4px 0;
+          color: ${theme.colors.primary};
         }
       `}</style>
     </>
