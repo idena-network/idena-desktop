@@ -15,6 +15,8 @@ import WalletActions from '../../screens/wallets/components/wallet-actions'
 import TransferForm from '../../screens/wallets/components/transfer-form'
 import ReceiveForm from '../../screens/wallets/components/receive-form'
 
+import KillForm from '../../screens/wallets/components/kill-form'
+
 import Loading from '../../shared/components/loading'
 import useWallets from '../../shared/utils/useWallets'
 import {useChainState} from '../../shared/providers/chain-context'
@@ -23,22 +25,20 @@ import {FlatButton} from '../../shared/components/button'
 export default function Index() {
   const {wallets, totalAmount, fetching} = useWallets()
 
-  const [isTransferFormOpen, setIsTransferFormOpen] = React.useState(false)
-  const [
-    isRWithdrawStakeFormOpen,
-    setIsRWithdrawStakeFormOpen,
-  ] = React.useState(false)
-
-  const handleCloseTransferForm = () => setIsTransferFormOpen(false)
-
   const [isReceiveFormOpen, setIsReceiveFormOpen] = React.useState(false)
+  const [isTransferFormOpen, setIsTransferFormOpen] = React.useState(false)
+  const [isWithdrawStakeFormOpen, setIsWithdrawStakeFormOpen] = React.useState(
+    false
+  )
+  const handleCloseWithdrawStakeForm = () => setIsWithdrawStakeFormOpen(false)
+  const handleCloseTransferForm = () => setIsTransferFormOpen(false)
   const handleCloseReceiveForm = () => setIsReceiveFormOpen(false)
 
   const [activeWallet, setActiveWallet] = React.useState()
   const {syncing, offline} = useChainState()
 
   useEffect(() => {
-    if (!activeWallet && wallets.length > 0) {
+    if (!activeWallet && wallets && wallets.length > 0) {
       setActiveWallet(wallets[0])
     }
   }, [activeWallet, wallets])
@@ -80,6 +80,19 @@ export default function Index() {
                     >
                       Receive
                     </IconLink>
+                    {/*  
+                    <IconLink
+                      disabled={activeWallet && !activeWallet.isStake}
+                      icon={<i className="icon icon--delete" />}
+                      danger
+                      onClick={() => {
+                        setIsWithdrawStakeFormOpen(!isWithdrawStakeFormOpen)
+                      }}
+                    >
+                      Terminate
+                    </IconLink>
+                    */}
+
                     {/*
                       <IconLink icon={<i className="icon icon--add_btn" />}>
                           New wallet
@@ -95,7 +108,7 @@ export default function Index() {
                   onChangeActiveWallet={wallet => setActiveWallet(wallet)}
                   onSend={() => setIsTransferFormOpen(true)}
                   onReceive={() => setIsReceiveFormOpen(true)}
-                  onWithdrawStake={() => setIsRWithdrawStakeFormOpen(true)}
+                  onWithdrawStake={() => setIsWithdrawStakeFormOpen(true)}
                 />
               </div>
               <h3
@@ -149,7 +162,16 @@ export default function Index() {
         <Drawer show={isReceiveFormOpen} onHide={handleCloseReceiveForm}>
           <ReceiveForm address={wallets[0] && wallets[0].address} />
         </Drawer>
-        <Drawer show={isRWithdrawStakeFormOpen} />
+
+        <Drawer
+          show={isWithdrawStakeFormOpen}
+          onHide={handleCloseWithdrawStakeForm}
+        >
+          <KillForm
+            onSuccess={handleCloseWithdrawStakeForm}
+            onFail={handleCloseWithdrawStakeForm}
+          />
+        </Drawer>
       </Box>
     </Layout>
   )

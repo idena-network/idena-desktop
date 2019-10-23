@@ -15,6 +15,8 @@ import ActivateInviteForm from '../../screens/dashboard/components/activate-invi
 import UserInfo from '../../screens/dashboard/components/user-info'
 import NetProfile from '../../screens/dashboard/components/net-profile'
 import {useChainState} from '../../shared/providers/chain-context'
+import KillForm from '../../screens/wallets/components/kill-form'
+import {useIdentityState} from '../../shared/providers/identity-context'
 
 function Dashboard() {
   const router = useRouter()
@@ -22,6 +24,13 @@ function Dashboard() {
 
   const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(false)
   const handleCloseSendInvite = () => setIsSendInviteOpen(false)
+
+  const [isWithdrawStakeFormOpen, setIsWithdrawStakeFormOpen] = React.useState(
+    false
+  )
+  const handleCloseWithdrawStakeForm = () => setIsWithdrawStakeFormOpen(false)
+
+  const {canTerminate} = useIdentityState()
 
   return (
     <InviteProvider>
@@ -33,7 +42,9 @@ function Dashboard() {
         >
           <Heading>Profile</Heading>
           <Actions>
+            {/*
             <IconLink icon={<i className="icon icon--share" />}>Share</IconLink>
+            */}
             <IconLink
               href="/contacts/new-invite"
               icon={<i className="icon icon--add_contact" />}
@@ -45,6 +56,16 @@ function Dashboard() {
               icon={<i className="icon icon--photo" />}
             >
               New flip
+            </IconLink>
+            <IconLink
+              icon={<i className="icon icon--delete" />}
+              danger
+              disabled={!canTerminate}
+              onClick={() => {
+                setIsWithdrawStakeFormOpen(!isWithdrawStakeFormOpen)
+              }}
+            >
+              Terminate
             </IconLink>
           </Actions>
           <UserInfo />
@@ -60,6 +81,16 @@ function Dashboard() {
               router.push('/contacts')
             }}
             onFail={handleCloseSendInvite}
+          />
+        </Drawer>
+
+        <Drawer
+          show={isWithdrawStakeFormOpen}
+          onHide={handleCloseWithdrawStakeForm}
+        >
+          <KillForm
+            onSuccess={handleCloseWithdrawStakeForm}
+            onFail={handleCloseWithdrawStakeForm}
           />
         </Drawer>
       </Layout>

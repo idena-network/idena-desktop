@@ -157,13 +157,14 @@ export async function submitFlip(hex, pairId) {
   return data
 }
 
-export async function killIdentity(from) {
+export async function killIdentity(from, to) {
   const {data} = await api().post('/', {
     method: 'dna_sendTransaction',
     params: [
       {
         type: 3,
         from,
+        to,
       },
     ],
     id: 1,

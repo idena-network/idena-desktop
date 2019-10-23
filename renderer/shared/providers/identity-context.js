@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useCallback} from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
 import {fetchIdentity, killIdentity} from '../api'
@@ -13,6 +13,7 @@ export const IdentityStatus = {
   Suspended: 'Suspended',
   Zombie: 'Zombie',
   Killed: 'Killed',
+  Terminating: 'Terminating',
 }
 
 export function mapToFriendlyStatus(status) {
@@ -62,7 +63,12 @@ function IdentityProvider({children}) {
         try {
           const nextIdentity = await fetchIdentity()
           if (!deepEqual(identity, nextIdentity)) {
-            setIdentity(nextIdentity)
+            const state =
+              identity.state === IdentityStatus.Terminating &&
+              nextIdentity.state !== IdentityStatus.Undefined
+                ? identity.state
+                : nextIdentity.state
+            setIdentity({...nextIdentity, state})
           }
         } catch (error) {
           global.logger.error(
@@ -91,11 +97,7 @@ function IdentityProvider({children}) {
 
   const canSubmitFlip =
     identity &&
-    [
-      IdentityStatus.Candidate,
-      IdentityStatus.Newbie,
-      IdentityStatus.Verified,
-    ].includes(identity.state) &&
+    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(identity.state) &&
     identity.requiredFlips > 0 &&
     (identity.flips || []).length < identity.requiredFlips
 
@@ -110,18 +112,33 @@ function IdentityProvider({children}) {
       IdentityStatus.Zombie,
     ].includes(identity.state)
 
+  const canTerminate =
+    identity &&
+    [
+      IdentityStatus.Candidate,
+      IdentityStatus.Newbie,
+      IdentityStatus.Verified,
+      IdentityStatus.Suspended,
+      IdentityStatus.Zombie,
+    ].includes(identity.state)
+
   const canMine =
     identity &&
     [IdentityStatus.Newbie, IdentityStatus.Verified].includes(identity.state)
 
-  const killMe = () => {
-    const {result, error} = killIdentity(identity.address)
-    if (result) {
-      setIdentity({...identity, state: IdentityStatus.Killed})
-    } else {
-      throw new Error(error.message)
-    }
-  }
+  const killMe = useCallback(
+    async ({to}) => {
+      const resp = await killIdentity(identity.address, to)
+      const {result} = resp
+
+      if (result) {
+        setIdentity({...identity, state: IdentityStatus.Terminating})
+        return result
+      }
+      return resp
+    },
+    [identity]
+  )
 
   return (
     <IdentityStateContext.Provider
@@ -132,6 +149,7 @@ function IdentityProvider({children}) {
         canSubmitFlip,
         canValidate,
         canMine,
+        canTerminate,
       }}
     >
       <IdentityDispatchContext.Provider value={{killMe}}>

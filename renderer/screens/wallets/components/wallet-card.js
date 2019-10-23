@@ -136,11 +136,9 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                   >
                     Receive
                   </WalletMenuItem>
-                  {// TODO kill identity action
-                  false && isStake && <Divider m={theme.spacings.small} />}
+                  {isStake && <Divider m={theme.spacings.small} />}
 
-                  {// TODO kill identity action
-                  false && isStake && (
+                  {isStake && (
                     <WalletMenuItem
                       onClick={async () => {
                         setIsMenuOpen(false)
@@ -150,7 +148,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                       danger
                       icon={<i className="icon icon--delete" />}
                     >
-                      Withdraw
+                      Terminate
                     </WalletMenuItem>
                   )}
                 </WalletMenu>
