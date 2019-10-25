@@ -51,7 +51,7 @@ function NetProfile() {
             label="Balance"
             value={balance}
             postfix="DNA"
-            tooltip="Current balance"
+            tooltip="Main wallet balance"
           />
         </>
       )}
@@ -62,7 +62,7 @@ function NetProfile() {
             label="Stake"
             value={stake}
             postfix="DNA"
-            tooltip="Frozen coins"
+            tooltip="In order to withdraw the&#10;stake you have to&#10;terminate your identity"
           />
         </>
       )}
