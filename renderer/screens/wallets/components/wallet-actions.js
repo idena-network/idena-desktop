@@ -119,7 +119,7 @@ function WalletTransfer() {
                         } 
                          `}
                         </div>
-                        <TableHint style={{...ellipsis(rem(190))}}>
+                        <TableHint style={{...ellipsis(rem(130))}}>
                           {tx.counterParty}
                         </TableHint>
                       </div>

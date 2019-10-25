@@ -59,7 +59,6 @@ function Dashboard() {
             </IconLink>
             <IconLink
               icon={<i className="icon icon--delete" />}
-              danger
               disabled={!canTerminate}
               onClick={() => {
                 setIsWithdrawStakeFormOpen(!isWithdrawStakeFormOpen)
