@@ -64,8 +64,10 @@ function IdentityProvider({children}) {
           const nextIdentity = await fetchIdentity()
           if (!deepEqual(identity, nextIdentity)) {
             const state =
+              identity &&
               identity.state === IdentityStatus.Terminating &&
-              nextIdentity.state !== IdentityStatus.Undefined
+              nextIdentity &&
+              nextIdentity.state !== IdentityStatus.Undefined // still mining
                 ? identity.state
                 : nextIdentity.state
             setIdentity({...nextIdentity, state})
