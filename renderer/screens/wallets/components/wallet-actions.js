@@ -163,7 +163,7 @@ function WalletTransfer() {
                     <div>
                       <div> Confirmed</div>
                       <TableHint style={{...ellipsis(rem(130))}}>
-                        {tx.isMining ? '' : tx.blockHash}
+                        {tx.isMining ? '' : tx.hash}
                       </TableHint>
                     </div>
                   )}
