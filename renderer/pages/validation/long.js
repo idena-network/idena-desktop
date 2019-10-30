@@ -59,7 +59,7 @@ export default function LongValidation() {
   useEffect(() => {
     if (!state.shortAnswers.length) {
       setShowModal(true)
-      setTimeout(() => Router.push('/dashboard'), 3000)
+      setTimeout(() => Router.push('/dashboard'), 5000)
     }
   }, [state.shortAnswers.length])
 
