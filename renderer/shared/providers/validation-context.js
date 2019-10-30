@@ -269,7 +269,9 @@ function validationReducer(state, action) {
         ...flip,
         failed: !flip.ready,
       }))
-      let availableExtraFlips = flips.filter(x => x.failed).length
+      let availableExtraFlips = flips.filter(
+        flip => flip.failed && !flip.hidden
+      ).length
       let openedFlipsCount = 0
       flips = flips.map(flip => {
         if (!flip.hidden) {
