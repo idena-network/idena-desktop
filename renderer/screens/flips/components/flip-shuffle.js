@@ -33,6 +33,8 @@ import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
 import {convertToBase64Url} from '../utils/use-data-url'
 import {hasDataUrl} from '../utils/flip'
 
+const mousetrap = require('mousetrap')
+
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
   const [removed] = result.splice(startIndex, 1)
@@ -262,7 +264,7 @@ function NonsenseImageEditor({
 
   const [imageClipboard, setImageClipboard] = useState(null)
 
-  const mousetrap = require('mousetrap')
+  
   const isMac = process.platform === 'darwin'
 
   mousetrap.bind(['command+v', 'ctrl+v'], function() {
