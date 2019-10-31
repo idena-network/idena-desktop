@@ -1,5 +1,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const electron = require('electron')
+// eslint-disable-next-line import/no-extraneous-dependencies
+const {clipboard} = require('electron')
+
 const isDev = require('electron-is-dev')
 
 const flips = require('./stores/flips')
@@ -23,6 +26,8 @@ process.once('loaded', () => {
 
   global.isDev = isDev
   global.prepareDb = prepareDb
+
+  global.clipboard = clipboard
 
   try {
     global.appVersion = electron.remote.app.getVersion()
