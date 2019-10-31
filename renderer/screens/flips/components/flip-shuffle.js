@@ -264,7 +264,6 @@ function NonsenseImageEditor({
 
   const [imageClipboard, setImageClipboard] = useState(null)
 
-  
   const isMac = process.platform === 'darwin'
 
   mousetrap.bind(['command+v', 'ctrl+v'], function() {
