@@ -32,6 +32,7 @@ import Divider from '../../../shared/components/divider'
 import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
 import {convertToBase64Url} from '../utils/use-data-url'
 import {hasDataUrl} from '../utils/flip'
+import {getImageURLFromClipboard} from '../../../shared/utils/clipboard'
 
 const mousetrap = require('mousetrap')
 
@@ -272,24 +273,7 @@ function NonsenseImageEditor({
   })
 
   function pasteImageFromClipboard() {
-    const img = global.clipboard.readImage()
-    if (!img || img.isEmpty()) return
-
-    const {width, height} = img.getSize()
-    const maxWidth = 147 * 2
-    const maxHeight = 110 * 2
-
-    const ratio = img.getAspectRatio() || 1
-
-    const newWidth = width > height ? maxWidth : maxHeight * ratio
-    const newHeight = width < height ? maxHeight : maxWidth / ratio
-
-    const nextImage =
-      width > maxWidth || height > maxHeight
-        ? img.resize({width: newWidth, height: newHeight})
-        : img
-
-    const url = nextImage.toDataURL()
+    const url = getImageURLFromClipboard()
     if (url) setImageClipboard(url)
   }
 
