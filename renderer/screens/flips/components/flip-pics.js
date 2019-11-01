@@ -208,7 +208,7 @@ function FlipPics({pics, onUpdateFlip}) {
           <IconButton
             tooltip=""
             icon={<FiCopy />}
-            onClick={pasteImageFromClipboard()}
+            onClick={() => pasteImageFromClipboard()}
           >
             Paste image ({global.isMac ? 'Cmd' : 'Ctrl'}+V)
           </IconButton>
