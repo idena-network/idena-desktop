@@ -22,6 +22,7 @@ import {
   borderRadius,
 } from 'polished'
 
+import mousetrap from 'mousetrap'
 import Flex from '../../../shared/components/flex'
 import {Box, Absolute, Input} from '../../../shared/components'
 import {shuffle} from '../../../shared/utils/arr'
@@ -33,8 +34,6 @@ import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
 import {convertToBase64Url} from '../utils/use-data-url'
 import {hasDataUrl} from '../utils/flip'
 import {getImageURLFromClipboard} from '../../../shared/utils/clipboard'
-
-const mousetrap = require('mousetrap')
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
@@ -265,8 +264,6 @@ function NonsenseImageEditor({
 
   const [imageClipboard, setImageClipboard] = useState(null)
 
-  const isMac = process.platform === 'darwin'
-
   mousetrap.bind(['command+v', 'ctrl+v'], function() {
     pasteImageFromClipboard()
     return false
@@ -274,7 +271,9 @@ function NonsenseImageEditor({
 
   function pasteImageFromClipboard() {
     const url = getImageURLFromClipboard()
-    if (url) setImageClipboard(url)
+    if (url) {
+      setImageClipboard(url)
+    }
   }
 
   const handleImageSearchPick = (_, data) => {
@@ -439,11 +438,9 @@ function NonsenseImageEditor({
           <IconButton
             tooltip=""
             icon={<FiCopy />}
-            onClick={() => {
-              pasteImageFromClipboard()
-            }}
+            onClick={pasteImageFromClipboard()}
           >
-            Paste image ({isMac ? 'Cmd' : 'Ctrl'}+V)
+            Paste image ({global.isMac ? 'Cmd' : 'Ctrl'}+V)
           </IconButton>
 
           <Box>

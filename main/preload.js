@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const electron = require('electron')
-// eslint-disable-next-line import/no-extraneous-dependencies
-const {clipboard} = require('electron')
+
+const {clipboard} = electron
 
 const isDev = require('electron-is-dev')
 
@@ -26,6 +26,7 @@ process.once('loaded', () => {
 
   global.isDev = isDev
   global.prepareDb = prepareDb
+  global.isMac = process.platform === 'darwin'
 
   global.clipboard = clipboard
 
