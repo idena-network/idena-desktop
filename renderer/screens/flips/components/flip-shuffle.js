@@ -11,6 +11,7 @@ import {
   FiXCircle,
   FiChevronLeft,
   FiMove,
+  FiCopy,
 } from 'react-icons/fi'
 import {
   rem,
@@ -21,6 +22,7 @@ import {
   borderRadius,
 } from 'polished'
 
+import mousetrap from 'mousetrap'
 import Flex from '../../../shared/components/flex'
 import {Box, Absolute, Input} from '../../../shared/components'
 import {shuffle} from '../../../shared/utils/arr'
@@ -31,6 +33,7 @@ import Divider from '../../../shared/components/divider'
 import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
 import {convertToBase64Url} from '../utils/use-data-url'
 import {hasDataUrl} from '../utils/flip'
+import {getImageURLFromClipboard} from '../../../shared/utils/clipboard'
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
@@ -252,17 +255,39 @@ function NonsenseImageEditor({
   setShowAddNonsenseImage,
 }) {
   const [selectedIndex, setSelectedIndex] = useState(
-    nonSenseOrder < 0 ? order[0] : nonSenseOrder
+    nonSenseOrder < 0 ? order[3] : nonSenseOrder
   )
 
   const nonsenseImageUploaderRef = useRef()
 
   const [pickedUrl, setPickedUrl] = useState('')
 
+  const [imageClipboard, setImageClipboard] = useState(null)
+
+  mousetrap.bind(['command+v', 'ctrl+v'], function() {
+    pasteImageFromClipboard()
+    return false
+  })
+
+  function pasteImageFromClipboard() {
+    const url = getImageURLFromClipboard()
+    if (url) {
+      setImageClipboard(url)
+    }
+  }
+
   const handleImageSearchPick = (_, data) => {
     const [{url}] = data.docs[0].thumbnails
     setPickedUrl(url)
   }
+
+  useEffect(() => {
+    if (imageClipboard) {
+      onUpdateNonSensePic(imageClipboard, selectedIndex)
+      setImageClipboard(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageClipboard, selectedIndex])
 
   useEffect(() => {
     global.ipcRenderer.on(IMAGE_SEARCH_PICK, handleImageSearchPick)
@@ -408,6 +433,14 @@ function NonsenseImageEditor({
           >
             Select file
             <small> (150kb) </small>
+          </IconButton>
+
+          <IconButton
+            tooltip=""
+            icon={<FiCopy />}
+            onClick={() => pasteImageFromClipboard()}
+          >
+            Paste image ({global.isMac ? 'Cmd' : 'Ctrl'}+V)
           </IconButton>
 
           <Box>

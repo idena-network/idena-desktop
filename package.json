@@ -71,6 +71,7 @@
     "electron-updater": "^4.0.14",
     "express": "^4.17.0",
     "lowdb": "^1.0.0",
+    "mousetrap": "^1.6.3",
     "nanoid": "^2.0.1",
     "next": "^8.1.0",
     "nprogress": "^0.2.0",

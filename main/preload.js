@@ -1,5 +1,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const electron = require('electron')
+
+const {clipboard} = electron
+
 const isDev = require('electron-is-dev')
 
 const flips = require('./stores/flips')
@@ -23,6 +26,9 @@ process.once('loaded', () => {
 
   global.isDev = isDev
   global.prepareDb = prepareDb
+  global.isMac = process.platform === 'darwin'
+
+  global.clipboard = clipboard
 
   try {
     global.appVersion = electron.remote.app.getVersion()

@@ -1,5 +1,5 @@
 import React from 'react'
-import {rem, margin, padding, wordWrap} from 'polished'
+import {rem, margin, padding} from 'polished'
 import PropTypes from 'prop-types'
 import {FiLoader} from 'react-icons/fi'
 import theme from '../../../shared/theme'

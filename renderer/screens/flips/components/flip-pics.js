@@ -4,8 +4,9 @@ import React, {useRef, useState, useEffect} from 'react'
 
 import PropTypes from 'prop-types'
 import {rem, position, borderRadius, margin} from 'polished'
-import {FiSearch, FiUpload} from 'react-icons/fi'
+import {FiSearch, FiUpload, FiCopy} from 'react-icons/fi'
 import {Draggable, DragDropContext, Droppable} from 'react-beautiful-dnd'
+import mousetrap from 'mousetrap'
 import {Box, Input} from '../../../shared/components'
 import Divider from '../../../shared/components/divider'
 import Flex from '../../../shared/components/flex'
@@ -14,6 +15,7 @@ import theme from '../../../shared/theme'
 import {convertToBase64Url} from '../utils/use-data-url'
 import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
 import {IconButton} from '../../../shared/components/button'
+import {getImageURLFromClipboard} from '../../../shared/utils/clipboard'
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
@@ -25,6 +27,7 @@ const reorder = (list, startIndex, endIndex) => {
 function FlipPics({pics, onUpdateFlip}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [pickedUrl, setPickedUrl] = useState('')
+  const [imageClipboard, setImageClipboard] = useState(null)
 
   const handleImageSearchPick = (_, data) => {
     const [{url}] = data.docs[0].thumbnails
@@ -74,6 +77,30 @@ function FlipPics({pics, onUpdateFlip}) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pickedUrl, selectedIndex])
+
+  useEffect(() => {
+    if (imageClipboard) {
+      onUpdateFlip([
+        ...pics.slice(0, selectedIndex),
+        imageClipboard,
+        ...pics.slice(selectedIndex + 1),
+      ])
+      setImageClipboard(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageClipboard, selectedIndex])
+
+  mousetrap.bind(['command+v', 'ctrl+v'], function() {
+    pasteImageFromClipboard()
+    return false
+  })
+
+  function pasteImageFromClipboard() {
+    const url = getImageURLFromClipboard()
+    if (url) {
+      setImageClipboard(url)
+    }
+  }
 
   function onDragEnd(result) {
     if (!result.destination) {
@@ -174,6 +201,16 @@ function FlipPics({pics, onUpdateFlip}) {
           >
             Select file
             <small> (150kb) </small>
+          </IconButton>
+
+          <Divider vertical />
+
+          <IconButton
+            tooltip=""
+            icon={<FiCopy />}
+            onClick={() => pasteImageFromClipboard()}
+          >
+            Paste image ({global.isMac ? 'Cmd' : 'Ctrl'}+V)
           </IconButton>
 
           <Box>
