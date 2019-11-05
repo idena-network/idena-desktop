@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
 import {FiUserCheck} from 'react-icons/fi'
@@ -11,37 +11,12 @@ import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
 import {useValidationState} from '../providers/validation-context'
-import {
-  UPDATE_DOWNLOADED,
-  UPDATE_APPLY,
-  UPDATE_LOADING,
-} from '../../../main/channels'
+import {UI_UPDATE_COMMAND} from '../../../main/channels'
+import {useNodeState} from '../providers/node-context'
+import {useSettingsState} from '../providers/settings-context'
+// import {useNodeState} from '../providers/node-context'
 
 function Sidebar() {
-  const [updateDownloded, setUpdateDownloded] = useState(false)
-  const [updatePercent, setUpdatePercent] = useState(0)
-
-  const updateAvailable = () => {
-    setUpdateDownloded(true)
-  }
-
-  const updateLoading = (_, info) => {
-    setUpdatePercent(info.percent)
-  }
-
-  useEffect(() => {
-    global.ipcRenderer.on(UPDATE_DOWNLOADED, updateAvailable)
-    return () => {
-      global.ipcRenderer.removeListener(UPDATE_DOWNLOADED, updateAvailable)
-    }
-  }, [])
-
-  useEffect(() => {
-    global.ipcRenderer.on(UPDATE_LOADING, updateLoading)
-    return () => {
-      global.ipcRenderer.removeListener(UPDATE_LOADING, updateLoading)
-    }
-  }, [])
   return (
     <section>
       <Flex direction="column" align="flex-start">
@@ -51,10 +26,7 @@ function Sidebar() {
       </Flex>
       <div>
         <ActionPanel />
-        <Version
-          updateReady={updateDownloded}
-          updateLoadingPercent={updatePercent}
-        />
+        <Version />
       </div>
       <style jsx>{`
         section {
@@ -388,7 +360,9 @@ CurrentTask.propTypes = {
   }).isRequired,
 }
 
-export function Version({updateReady, updateLoadingPercent}) {
+export function Version() {
+  const node = useNodeState()
+  const settings = useSettingsState()
   return (
     <Box
       css={{
@@ -397,35 +371,20 @@ export function Version({updateReady, updateLoadingPercent}) {
         ...margin(rem(theme.spacings.medium16), 0, rem(theme.spacings.small8)),
       }}
     >
-      <Block title="Version">
-        {global.appVersion}
-        {updateReady ? (
-          <Button
-            css={margin(0, 0, 0, rem(theme.spacings.medium16))}
-            onClick={() => {
-              global.ipcRenderer.send(UPDATE_APPLY)
-            }}
-          >
-            Update
-          </Button>
-        ) : null}
-        {updateLoadingPercent > 0 && !updateReady ? (
-          <span style={{marginLeft: rem(theme.spacings.medium16)}}>
-            Loading:{' '}
-            {Number(updateLoadingPercent).toLocaleString(undefined, {
-              maximumFractionDigits: 2,
-            })}
-            %
-          </span>
-        ) : null}
-      </Block>
+      <div>Client version: {global.appVersion}</div>
+      <div>Node version: {node.currentVersion}</div>
+      {settings.uiUpdateReady ? (
+        <Button
+          css={margin(0, 0, 0, rem(theme.spacings.medium16))}
+          onClick={() => {
+            global.ipcRenderer.send(UI_UPDATE_COMMAND, 'update-ui')
+          }}
+        >
+          Update
+        </Button>
+      ) : null}
     </Box>
   )
-}
-
-Version.propTypes = {
-  updateReady: PropTypes.bool,
-  updateLoadingPercent: PropTypes.number,
 }
 
 export default Sidebar

@@ -9,6 +9,8 @@ import {NotificationProvider} from '../shared/providers/notification-context'
 import {TimingProvider} from '../shared/providers/timing-context'
 import {ChainProvider} from '../shared/providers/chain-context'
 import {ValidationProvider} from '../shared/providers/validation-context'
+import {NodeProvider} from '../shared/providers/node-context'
+import {SettingsProvider} from '../shared/providers/settings-context'
 
 export default class MyApp extends App {
   render() {
@@ -31,17 +33,21 @@ export default class MyApp extends App {
 
 function AppProviders(props) {
   return (
-    <ChainProvider>
-      <TimingProvider>
-        <EpochProvider>
-          <IdentityProvider>
-            <ValidationProvider>
-              <NotificationProvider {...props} />
-            </ValidationProvider>
-          </IdentityProvider>
-        </EpochProvider>
-      </TimingProvider>
-    </ChainProvider>
+    <SettingsProvider>
+      <NodeProvider>
+        <ChainProvider>
+          <TimingProvider>
+            <EpochProvider>
+              <IdentityProvider>
+                <ValidationProvider>
+                  <NotificationProvider {...props} />
+                </ValidationProvider>
+              </IdentityProvider>
+            </EpochProvider>
+          </TimingProvider>
+        </ChainProvider>
+      </NodeProvider>
+    </SettingsProvider>
   )
 }
 

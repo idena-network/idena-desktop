@@ -24,13 +24,22 @@ logger.info('idena started', global.appVersion || app.getVersion())
 const {
   IMAGE_SEARCH_TOGGLE,
   IMAGE_SEARCH_PICK,
-  UPDATE_LOADING,
-  UPDATE_DOWNLOADED,
-  UPDATE_APPLY,
+  UI_UPDATE_EVENT,
+  UI_UPDATE_COMMAND,
+  NODE_COMMAND,
+  NODE_EVENT,
 } = require('./channels')
-const {startNode} = require('./idenaNode')
+const {
+  startNode,
+  stopNode,
+  downloadNode,
+  updateNode,
+  getCurrentVersion,
+  getRemoteVersion,
+} = require('./idenaNode')
 
 let mainWindow
+let node
 let tray
 let expressPort = 3051
 
@@ -192,11 +201,11 @@ const createTray = () => {
 }
 
 autoUpdater.on('download-progress', info => {
-  mainWindow.webContents.send(UPDATE_LOADING, info)
+  mainWindow.webContents.send(UI_UPDATE_EVENT, 'download-progress', info)
 })
 
 autoUpdater.on('update-downloaded', info => {
-  mainWindow.webContents.send(UPDATE_DOWNLOADED, info)
+  mainWindow.webContents.send(UI_UPDATE_EVENT, 'update-ready', info)
 })
 
 function checkForUpdates() {
@@ -224,6 +233,7 @@ app.on('ready', async () => {
   if (isWin) {
     checkForUpdates()
   }
+  setTimeout(pollRemoteVersion, 10000)
 })
 
 app.on('before-quit', () => {
@@ -238,8 +248,109 @@ app.on('window-all-closed', () => {
   }
 })
 
-ipcMain.on('node-start', ({sender}) => {
-  startNode(sender, false)
+ipcMain.on(NODE_COMMAND, async (event, command, data) => {
+  console.log('new command', command)
+
+  switch (command) {
+    case 'init-local-node': {
+      getCurrentVersion()
+        .then(version => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-ready', version)
+        })
+        .catch(async e => {
+          logger.error('error while getting node version', e.toString())
+          const remoteVersion = await getRemoteVersion()
+          mainWindow.webContents.send(
+            NODE_EVENT,
+            'download-started',
+            remoteVersion
+          )
+          downloadNode(progress => {
+            mainWindow.webContents.send(
+              NODE_EVENT,
+              'download-progress',
+              progress
+            )
+          })
+            .then(async version => {
+              mainWindow.webContents.send(
+                NODE_EVENT,
+                'download-finished',
+                version
+              )
+              try {
+                await updateNode()
+                mainWindow.webContents.send(NODE_EVENT, 'node-ready', version)
+              } catch (err) {
+                mainWindow.webContents.send(NODE_EVENT, 'init-failed')
+                logger.error('error while updating node', err.toString())
+              }
+            })
+            .catch(err => {
+              mainWindow.webContents.send(NODE_EVENT, 'init-failed')
+              logger.error('error while downlading node', err.toString())
+            })
+        })
+      break
+    }
+    case 'start-local-node': {
+      startNode(data.rpcPort, false, log => {
+        mainWindow.webContents.send(NODE_EVENT, 'node-log', log)
+      })
+        .then(n => {
+          node = n
+          mainWindow.webContents.send(NODE_EVENT, 'node-start')
+        })
+        .catch(e => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-start-fail')
+          logger.error('error while starting node', e.toString())
+        })
+      break
+    }
+    case 'stop-local-node': {
+      stopNode(node)
+        .then(() => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-stop')
+        })
+        .catch(e => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-stop-fail')
+          logger.error('error while stopping node', e.toString())
+        })
+      break
+    }
+    case 'update-local-node': {
+      stopNode(node)
+        .then(async () => {
+          try {
+            mainWindow.webContents.send(NODE_EVENT, 'node-stop')
+            await updateNode()
+            const version = await getCurrentVersion(false)
+            mainWindow.webContents.send(NODE_EVENT, 'node-ready', version)
+          } catch (e) {
+            mainWindow.webContents.send(NODE_EVENT, 'init-failed')
+          }
+        })
+        .catch(e => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-stop-fail')
+          logger.error('error while stopping node', e.toString())
+        })
+      break
+    }
+    case 'download-update': {
+      downloadNode(progress => {
+        mainWindow.webContents.send(NODE_EVENT, 'download-progress', progress)
+      })
+        .then(version => {
+          mainWindow.webContents.send(NODE_EVENT, 'download-finished', version)
+        })
+        .catch(e => {
+          mainWindow.webContents.send(NODE_EVENT, 'download-failed')
+          logger.error('error while downlading node', e.toString())
+        })
+      break
+    }
+    default:
+  }
 })
 
 // listen specific `node` messages
@@ -318,10 +429,23 @@ ipcMain.on(IMAGE_SEARCH_PICK, (_event, message) => {
   mainWindow.webContents.send(IMAGE_SEARCH_PICK, message)
 })
 
-ipcMain.on(UPDATE_APPLY, () => {
-  autoUpdater.quitAndInstall()
+ipcMain.on(UI_UPDATE_COMMAND, async (event, command) => {
+  if (command === 'update-ui') {
+    autoUpdater.quitAndInstall()
+  }
 })
 
 ipcMain.on('reload', () => {
   loadRoute(mainWindow, 'dashboard')
 })
+
+async function pollRemoteVersion() {
+  try {
+    const remoteVersion = await getRemoteVersion()
+    mainWindow.webContents.send(NODE_EVENT, 'remote-version', remoteVersion)
+  } catch (e) {
+    logger.error('error while checking remote node version', e.toString())
+  }
+
+  setTimeout(pollRemoteVersion, 60 * 1000)
+}

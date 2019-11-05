@@ -6,8 +6,10 @@ import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import Avatar from './avatar'
 import Link from './link'
-import {FlatButton} from './button'
+import Button, {FlatButton} from './button'
 import List from './list'
+import {NODE_COMMAND} from '../../../main/channels'
+import {useNodeState} from '../providers/node-context'
 
 export default function SyncingApp() {
   return (
@@ -247,13 +249,30 @@ function Spinner() {
 }
 
 export function OfflineApp() {
+  const {
+    nodeReady,
+    failed,
+    downloading,
+    progress,
+    remoteVersion,
+  } = useNodeState()
   return (
     <section>
       <div>Offline</div>
       <div>
         <div>
-          <h2>How to get started</h2>
-          <List>
+          {!nodeReady && downloading && progress ? (
+            <>
+              <h2>Downloding Idena Node...</h2>
+              <div>
+                <h3>Version {remoteVersion}</h3>
+                <progress value={progress.percentage} max={100} />
+              </div>
+            </>
+          ) : null}
+          {nodeReady && <h3>Idena Node Starting...</h3>}
+          {failed && <h3>Failed. Try to restart the app.</h3>}
+          {/* <List>
             <li>
               Download the latest version of{' '}
               <FlatButton
@@ -283,7 +302,7 @@ export function OfflineApp() {
                 settings
               </Link>
             </li>
-          </List>
+          </List> */}
         </div>
       </div>
       <style jsx>{`

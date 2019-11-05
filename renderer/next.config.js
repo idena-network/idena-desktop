@@ -14,6 +14,8 @@ const config = {
       '/flips/edit': {page: '/flips/edit'},
       '/validation/short': {page: '/validation/short'},
       '/validation/long': {page: '/validation/long'},
+      '/settings': {page: '/settings'},
+      '/settings/node': {page: '/settings/node'},
     }
   },
   onDemandEntries: {

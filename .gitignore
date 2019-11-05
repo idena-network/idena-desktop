@@ -94,3 +94,5 @@ datadir
 **/contacts.json
 
 .idea
+
+main/node/**
