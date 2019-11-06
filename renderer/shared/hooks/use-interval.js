@@ -32,19 +32,21 @@ export function useInterval(callback, delay, useImmediately = false) {
   useEffect(() => {
     let timeoutId
 
-    function tick() {
+    async function tick() {
+      await savedCallback.current()
+    }
+
+    async function pollTick() {
       clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        savedCallback.current()
-        tick()
-      }, delay)
+      await tick()
+      timeoutId = setTimeout(pollTick, delay)
     }
 
     if (delay !== null) {
       if (useImmediately) {
-        savedCallback.current()
+        tick()
       }
-      tick()
+      pollTick()
       return () => clearTimeout(timeoutId)
     }
   }, [delay, useImmediately])

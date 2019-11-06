@@ -6,6 +6,13 @@ import Layout from '../shared/components/layout'
 import {Button} from '../shared/components'
 import theme from '../shared/theme'
 
+// for dev purposes, in case when `global` is not yet ready
+global.logger = global.logger || {
+  error(...args) {
+    console.error(...args)
+  },
+}
+
 // eslint-disable-next-line react/prop-types
 function MyError({statusCode, hasGetInitialPropsRun, err}) {
   if (!hasGetInitialPropsRun && err) {
