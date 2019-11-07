@@ -55,7 +55,6 @@ app.on('second-instance', () => {
     mainWindow.focus()
   }
 })
-
 const isFirstInstance = app.requestSingleInstanceLock()
 
 if (!isFirstInstance) {
@@ -101,6 +100,13 @@ const createMenu = () => {
       },
       {
         type: 'separator',
+      },
+      {
+        label: 'Dev tools',
+        accelerator:
+          process.platform === 'darwin' ? 'Cmd+Shift+I' : 'Ctrl+Shift+I',
+        role: 'toggleDevTools',
+        visible: false,
       },
       {
         label: 'Quit',

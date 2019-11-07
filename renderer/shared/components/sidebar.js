@@ -380,7 +380,7 @@ export function Version() {
             global.ipcRenderer.send(UI_UPDATE_COMMAND, 'update-ui')
           }}
         >
-          Update
+          Update UI to {settings.uiRemoteVersion}
         </Button>
       ) : null}
     </Box>

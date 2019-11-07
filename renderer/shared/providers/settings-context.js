@@ -26,18 +26,19 @@ function settingsReducer(state, action) {
       return {
         ...state,
         initialized: true,
-        version: global.appVersion,
+        uiVersion: global.appVersion,
         useInternalNode: action.data.useInternalNode,
       }
     case 'UI_UPDATE_READY':
       return {
         ...state,
         uiUpdateReady: true,
+        uiRemoteVersion: action.data.version,
       }
     case 'UI_UPDATED':
       return {
         ...state,
-        version: action.data,
+        uiVersion: action.data,
         uiUpdateReady: false,
       }
     default:
@@ -64,7 +65,7 @@ function SettingsProvider({children}) {
         case 'download-progress':
           break
         case 'update-ready':
-          dispatch({type: UI_UPDATE_READY})
+          dispatch({type: UI_UPDATE_READY, data})
           break
         default:
       }
@@ -87,7 +88,7 @@ function SettingsProvider({children}) {
   }, [dispatch, firstRun, state.initialized])
 
   useEffect(() => {
-    if (semver.lt(global.appVersion, state.version)) {
+    if (semver.lt(state.uiVersion, global.appVersion)) {
       dispatch({type: UI_UPDATED, data: global.appVersion})
     }
   })
