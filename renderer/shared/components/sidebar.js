@@ -11,9 +11,10 @@ import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
 import {useValidationState} from '../providers/validation-context'
-import {UI_UPDATE_COMMAND} from '../../../main/channels'
-import {useNodeState} from '../providers/node-context'
-import {useSettingsState} from '../providers/settings-context'
+import {
+  useAutoUpdateState,
+  useAutoUpdateDispatch,
+} from '../providers/update-context'
 // import {useNodeState} from '../providers/node-context'
 
 function Sidebar() {
@@ -361,8 +362,9 @@ CurrentTask.propTypes = {
 }
 
 export function Version() {
-  const node = useNodeState()
-  const settings = useSettingsState()
+  const autoUpdate = useAutoUpdateState()
+  const {uiUpdate, nodeUpdate} = useAutoUpdateDispatch()
+
   return (
     <Box
       css={{
@@ -372,17 +374,28 @@ export function Version() {
       }}
     >
       <div>Client version: {global.appVersion}</div>
-      <div>Node version: {node.currentVersion}</div>
-      {settings.uiUpdateReady ? (
+      <div>Node version: {autoUpdate.nodeCurrentVersion}</div>
+      {autoUpdate.uiCanUpdate ? (
         <Button
           css={margin(0, 0, 0, rem(theme.spacings.medium16))}
           onClick={() => {
-            global.ipcRenderer.send(UI_UPDATE_COMMAND, 'update-ui')
+            uiUpdate()
           }}
         >
-          Update UI to {settings.uiRemoteVersion}
+          Update Client to {autoUpdate.uiRemoteVersion}
         </Button>
       ) : null}
+      {!autoUpdate.uiCanUpdate && autoUpdate.nodeCanUpdate ? (
+        <Button
+          css={margin(0, 0, 0, rem(theme.spacings.medium16))}
+          onClick={() => {
+            nodeUpdate()
+          }}
+        >
+          Update Node to {autoUpdate.nodeRemoteVersion}
+        </Button>
+      ) : null}
+      {autoUpdate.nodeUpdating && <Text>Updating...</Text>}
     </Box>
   )
 }

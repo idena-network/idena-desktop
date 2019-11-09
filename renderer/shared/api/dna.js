@@ -214,3 +214,12 @@ export async function fetchNodeVersion() {
   const {result} = data
   return result
 }
+
+export async function importKey(key, password) {
+  const {data} = await api().post('/', {
+    method: 'dna_importKey',
+    params: [{key, password}],
+    id: 1,
+  })
+  return data
+}

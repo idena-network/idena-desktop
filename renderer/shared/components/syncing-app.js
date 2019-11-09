@@ -5,11 +5,11 @@ import {useIdentityState} from '../providers/identity-context'
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import Avatar from './avatar'
-import Link from './link'
-import Button, {FlatButton} from './button'
-import List from './list'
-import {NODE_COMMAND} from '../../../main/channels'
 import {useNodeState} from '../providers/node-context'
+import {useAutoUpdateState} from '../providers/update-context'
+import {Logo} from './sidebar'
+import Flex from './flex'
+import Box from './box'
 
 export default function SyncingApp() {
   return (
@@ -249,29 +249,62 @@ function Spinner() {
 }
 
 export function OfflineApp() {
-  const {
-    nodeReady,
-    failed,
-    downloading,
-    progress,
-    remoteVersion,
-  } = useNodeState()
+  const {nodeReady, nodeFailed} = useNodeState()
+  const {nodeProgress} = useAutoUpdateState()
   return (
     <section>
-      <div>Offline</div>
       <div>
+        {!nodeReady && (
+          <div className="loading-wrapper">
+            <Flex>
+              <img src="/static/idena_white.svg" alt="logo" />
+              {/* icon here */}
+              <Flex direction="column" justify="space-between" flex="1">
+                <h2>Downloding Idena Node...</h2>
+
+                <Flex justify="space-between">
+                  <div className="gray">
+                    Version {nodeProgress ? nodeProgress.version : ''}
+                  </div>
+                  <div>
+                    {(
+                      (nodeProgress ? nodeProgress.transferred : 0) /
+                      (1024 * 1024)
+                    ).toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    MB <span className="gray">of</span>{' '}
+                    {(
+                      (nodeProgress ? nodeProgress.length : 0) /
+                      (1024 * 1024)
+                    ).toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    MB
+                  </div>
+                </Flex>
+              </Flex>
+            </Flex>
+            <Box>
+              <progress
+                value={nodeProgress ? nodeProgress.percentage : 0}
+                max={100}
+              />
+            </Box>
+          </div>
+        )}
         <div>
-          {!nodeReady && downloading && progress ? (
+          {/* {!nodeReady && nodeProgress ? (
             <>
               <h2>Downloding Idena Node...</h2>
               <div>
-                <h3>Version {remoteVersion}</h3>
-                <progress value={progress.percentage} max={100} />
+                <h3>Version {nodeProgress.version}</h3>
+                <progress value={nodeProgress.percentage} max={100} />
               </div>
             </>
-          ) : null}
+          ) : null} */}
           {nodeReady && <h3>Idena Node Starting...</h3>}
-          {failed && <h3>Failed. Try to restart the app.</h3>}
+          {nodeFailed && <h3>Failed. Try to restart the app.</h3>}
           {/* <List>
             <li>
               Download the latest version of{' '}
@@ -313,27 +346,46 @@ export function OfflineApp() {
           flex-direction: column;
           flex: 1;
         }
-        section > div:first-child {
-          background: rgb(255, 102, 102);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          line-height: ${rem(20, 13)};
-          padding: ${rem(12, 13)};
-          position: relative;
-          text-align: center;
-        }
-        section > div:nth-child(2) {
+        section > div {
           display: flex;
           align-items: center;
           justify-content: center;
           flex: 1;
+        }
+        section > div > div.loading-wrapper {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          width: 50%;
+        }
+        img {
+          width: ${rem(60)};
+          height: ${rem(60)};
+          margin-right: ${rem(10)};
+        }
+        section > div > div.loading-wrapper .gray {
+          opacity: 0.5;
+        }
+        progress {
+          width: 100%;
+          height: ${rem(4, theme.fontSizes.base)};
+          background-color: rgba(0, 0, 0, 0.16);
+        }
+        progress::-webkit-progress-bar {
+          background-color: rgba(0, 0, 0, 0.16);
+        }
+        progress::-webkit-progress-value {
+          background-color: ${theme.colors.primary};
         }
         h2 {
           font-size: ${rem(18, theme.fontSizes.base)};
           font-weight: 500;
           margin: 0;
           word-break: break-all;
+        }
+        span {
+          font-size: ${rem(14, theme.fontSizes.base)};
+          line-height: ${rem(20, theme.fontSizes.base)};
         }
         li {
           margin-bottom: ${rem(theme.spacings.small8, theme.fontSizes.base)};

@@ -5,6 +5,7 @@ import Sidebar from './sidebar'
 import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
 import SyncingApp, {OfflineApp} from './syncing-app'
+import {GlobalModals} from './modal'
 
 export default function Layout({syncing, offline, ...props}) {
   return (
@@ -38,11 +39,13 @@ Layout.propTypes = {
 
 function NormalApp(props) {
   const {pathname} = useRouter()
+
   return (
     <section>
       {!pathname.startsWith('/validation') && <ValidationBanner />}
       <div {...props} />
       <Notifications />
+      <GlobalModals />
       <style jsx>{`
         section {
           flex: 1;

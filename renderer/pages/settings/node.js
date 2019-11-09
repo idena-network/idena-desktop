@@ -3,7 +3,14 @@
 import React, {useState} from 'react'
 import {margin, rem} from 'polished'
 
-import {Box, Input, Label, Button, Switcher} from '../../shared/components'
+import {
+  Box,
+  Input,
+  Label,
+  Button,
+  Switcher,
+  Text,
+} from '../../shared/components'
 import theme from '../../shared/theme'
 import {FlatButton} from '../../shared/components/button'
 import Divider from '../../shared/components/divider'
@@ -14,14 +21,18 @@ import SettingsLayout from './layout'
 import {
   useSettingsState,
   useSettingsDispatch,
-  TOGGLE_NODE_SWITCHER,
-  SAVE_EXTERNAL_URL,
 } from '../../shared/providers/settings-context'
+import {
+  useNodeState,
+  useNodeDispatch,
+} from '../../shared/providers/node-context'
 
 function NodeSettings() {
   const {addNotification} = useNotificationDispatch()
   const settings = useSettingsState()
-  const settingsDispatch = useSettingsDispatch()
+  const {saveExternalUrl, toggleNodeSwitcher} = useSettingsDispatch()
+  const {nodeFailed} = useNodeState()
+  const {tryRestartNode} = useNodeDispatch()
 
   const [url, setUrl] = useState(settings.url)
 
@@ -38,7 +49,7 @@ function NodeSettings() {
           <Box>
             <Switcher
               isChecked={settings.useInternalNode}
-              onChange={() => settingsDispatch({type: TOGGLE_NODE_SWITCHER})}
+              onChange={() => toggleNodeSwitcher()}
               bgOn={theme.colors.primary}
             />
           </Box>
@@ -51,11 +62,34 @@ function NodeSettings() {
                 rem(theme.spacings.small12, theme.fontSizes.base)
               ),
             }}
-            onClick={() => settingsDispatch({type: TOGGLE_NODE_SWITCHER})}
+            onClick={() => toggleNodeSwitcher()}
           >
             <strong>Run built-in node</strong>
             <div>Use built-in node to have automatic updates</div>
           </div>
+          {nodeFailed && (
+            <div
+              style={{
+                ...margin(
+                  0,
+                  0,
+                  0,
+                  rem(theme.spacings.small12, theme.fontSizes.base)
+                ),
+              }}
+            >
+              <Text css={{color: theme.colors.warning}}>
+                Node failed to start
+              </Text>
+              <Button
+                variant="default"
+                css={{marginLeft: 10}}
+                onClick={() => tryRestartNode()}
+              >
+                Try restart
+              </Button>
+            </div>
+          )}
         </Flex>
       </Box>
       <Box py={theme.spacings.large}>
@@ -63,7 +97,7 @@ function NodeSettings() {
           <Box>
             <Switcher
               isChecked={!settings.useInternalNode}
-              onChange={() => settingsDispatch({type: TOGGLE_NODE_SWITCHER})}
+              onChange={() => toggleNodeSwitcher()}
               bgOn={theme.colors.primary}
             />
           </Box>
@@ -76,7 +110,7 @@ function NodeSettings() {
                 rem(theme.spacings.small12, theme.fontSizes.base)
               ),
             }}
-            onClick={() => settingsDispatch({type: TOGGLE_NODE_SWITCHER})}
+            onClick={() => toggleNodeSwitcher()}
           >
             <strong>Connect to remote node</strong>
             <div>
@@ -102,7 +136,7 @@ function NodeSettings() {
           />
           <Button
             onClick={() => {
-              settingsDispatch({type: SAVE_EXTERNAL_URL, data: url})
+              saveExternalUrl(url)
               notify()
             }}
           >
@@ -113,7 +147,7 @@ function NodeSettings() {
             color={theme.colors.primary}
             onClick={() => {
               setUrl(BASE_API_URL)
-              settingsDispatch({type: SAVE_EXTERNAL_URL, data: url})
+              saveExternalUrl(BASE_API_URL)
               notify()
             }}
           >

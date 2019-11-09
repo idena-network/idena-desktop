@@ -18,6 +18,9 @@ import useFlips from '../../shared/utils/useFlips'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import useRpc from '../../shared/hooks/use-rpc'
 import SettingsLayout from './layout'
+import {importKey} from '../../shared/api'
+import {useNodeDispatch} from '../../shared/providers/node-context'
+import {useSettingsState} from '../../shared/providers/settings-context'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -25,7 +28,7 @@ const inviteDb = global.invitesDb || {}
 function Settings() {
   const {archiveFlips} = useFlips()
   const {addNotification} = useNotificationDispatch()
-
+  const {useInternalNode} = useSettingsState()
   return (
     <SettingsLayout>
       {global.isDev && (
@@ -67,6 +70,7 @@ function Settings() {
         </>
       )}
       <ExportPK />
+      {useInternalNode && <ImportPK />}
     </SettingsLayout>
   )
 }
@@ -133,6 +137,63 @@ function ExportPK() {
           />
         </Box>
       </PkDialog>
+    </Section>
+  )
+}
+
+function ImportPK() {
+  const [password, setPassword] = React.useState()
+  const [key, setKey] = React.useState()
+  const {addError, addNotification} = useNotificationDispatch()
+  const {importNodeKey} = useNodeDispatch()
+
+  const submit = async () => {
+    const {error} = await importKey(key, password)
+    if (error) {
+      addError({title: 'Error while importing key', body: error.message})
+    } else {
+      importNodeKey()
+      addNotification({
+        title: 'Success',
+        body: 'Key was imported. Please, wait, while node is restarting.',
+      })
+      setKey('')
+      setPassword('')
+    }
+  }
+
+  return (
+    <Section title="Import private key">
+      <form
+        onSubmit={async e => {
+          e.preventDefault()
+          await submit()
+        }}
+      >
+        <Label htmlFor="key">Key</Label>
+        <Input
+          value={key}
+          type="text"
+          style={{
+            ...margin(0, theme.spacings.normal, 0, 0),
+            width: rem(300),
+          }}
+          onChange={e => setKey(e.target.value)}
+        />
+        <Label htmlFor="password">Password</Label>
+        <Input
+          value={password}
+          type="password"
+          style={{
+            ...margin(0, theme.spacings.normal, 0, 0),
+            width: rem(300),
+          }}
+          onChange={e => setPassword(e.target.value)}
+        />
+        <Button type="submit" disabled={!password || !key}>
+          Import PK
+        </Button>
+      </form>
     </Section>
   )
 }

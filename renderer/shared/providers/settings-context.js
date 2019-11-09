@@ -3,44 +3,39 @@ import semver from 'semver'
 import {usePersistence} from '../hooks/use-persistent-state'
 import {loadState} from '../utils/persist'
 import {BASE_API_URL, BASE_INTERNAL_API_PORT} from '../api/api-client'
-import {UI_UPDATE_EVENT} from '../../../main/channels'
 
 const SETTINGS_INITIALIZE = 'SETTINGS_INITIALIZE'
-const UI_UPDATED = 'UI_UPDATED'
-export const TOGGLE_NODE_SWITCHER = 'TOGGLE_NODE_SWITCHER'
-export const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
-export const UI_UPDATE_READY = 'UI_UPDATE_READY'
+const TOGGLE_NODE_SWITCHER = 'TOGGLE_NODE_SWITCHER'
+const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
+const UPDATE_UI_VERSION = 'UPDATE_UI_VERSION'
 
 const initialState = {
   url: BASE_API_URL,
   internalPort: BASE_INTERNAL_API_PORT,
+  tcpPort: 50505,
+  ipfsPort: 50506,
+  uiVersion: global.appVersion,
+  useInternalNode: false,
 }
 
 function settingsReducer(state, action) {
   switch (action.type) {
-    case 'TOGGLE_NODE_SWITCHER':
+    case TOGGLE_NODE_SWITCHER:
       return {...state, useInternalNode: !state.useInternalNode}
-    case 'SAVE_EXTERNAL_URL':
+    case SAVE_EXTERNAL_URL:
       return {...state, url: action.data}
-    case 'SETTINGS_INITIALIZE':
+    case SETTINGS_INITIALIZE:
       return {
+        ...initialState,
         ...state,
         initialized: true,
-        uiVersion: global.appVersion,
-        useInternalNode: action.data.useInternalNode,
       }
-    case 'UI_UPDATE_READY':
-      return {
-        ...state,
-        uiUpdateReady: true,
-        uiRemoteVersion: action.data.version,
-      }
-    case 'UI_UPDATED':
+    case UPDATE_UI_VERSION: {
       return {
         ...state,
         uiVersion: action.data,
-        uiUpdateReady: false,
       }
+    }
     default:
       return state
   }
@@ -59,26 +54,6 @@ function SettingsProvider({children}) {
   )
 
   useEffect(() => {
-    const onEvent = (_sender, event, data) => {
-      console.log(event, data)
-      switch (event) {
-        case 'download-progress':
-          break
-        case 'update-ready':
-          dispatch({type: UI_UPDATE_READY, data})
-          break
-        default:
-      }
-    }
-
-    global.ipcRenderer.on(UI_UPDATE_EVENT, onEvent)
-
-    return () => {
-      global.ipcRenderer.removeListener(UI_UPDATE_EVENT, onEvent)
-    }
-  })
-
-  useEffect(() => {
     if (!state.initialized) {
       dispatch({
         type: SETTINGS_INITIALIZE,
@@ -89,13 +64,23 @@ function SettingsProvider({children}) {
 
   useEffect(() => {
     if (semver.lt(state.uiVersion, global.appVersion)) {
-      dispatch({type: UI_UPDATED, data: global.appVersion})
+      dispatch({type: UPDATE_UI_VERSION, data: global.appVersion})
     }
   })
 
+  const saveExternalUrl = url => {
+    dispatch({type: SAVE_EXTERNAL_URL, data: url})
+  }
+
+  const toggleNodeSwitcher = () => {
+    dispatch({type: TOGGLE_NODE_SWITCHER})
+  }
+
   return (
     <SettingsStateContext.Provider value={state}>
-      <SettingsDispatchContext.Provider value={dispatch}>
+      <SettingsDispatchContext.Provider
+        value={{saveExternalUrl, toggleNodeSwitcher}}
+      >
         {children}
       </SettingsDispatchContext.Provider>
     </SettingsStateContext.Provider>

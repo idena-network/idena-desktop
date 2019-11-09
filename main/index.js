@@ -24,8 +24,8 @@ logger.info('idena started', global.appVersion || app.getVersion())
 const {
   IMAGE_SEARCH_TOGGLE,
   IMAGE_SEARCH_PICK,
-  UI_UPDATE_EVENT,
-  UI_UPDATE_COMMAND,
+  AUTO_UPDATE_EVENT,
+  AUTO_UPDATE_COMMAND,
   NODE_COMMAND,
   NODE_EVENT,
 } = require('./channels')
@@ -35,13 +35,17 @@ const {
   downloadNode,
   updateNode,
   getCurrentVersion,
-  getRemoteVersion,
-} = require('./idenaNode')
+  cleanNodeState,
+} = require('./idena-node')
+
+const NodeUpdater = require('./node-updater')
 
 let mainWindow
 let node
 let tray
 let expressPort = 3051
+
+const nodeUpdater = new NodeUpdater(logger)
 
 // Possible values are: 'darwin', 'freebsd', 'linux', 'sunos' or 'win32'
 const isWin = process.platform === 'win32'
@@ -206,12 +210,58 @@ const createTray = () => {
   tray.setContextMenu(contextMenu)
 }
 
+nodeUpdater.on('update-available', info => {
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-available', info)
+})
+
+nodeUpdater.on('download-progress', info => {
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-download-progress', info)
+})
+
+nodeUpdater.on('update-downloaded', info => {
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-ready', info)
+})
+
 autoUpdater.on('download-progress', info => {
-  mainWindow.webContents.send(UI_UPDATE_EVENT, 'download-progress', info)
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'ui-download-progress', info)
 })
 
 autoUpdater.on('update-downloaded', info => {
-  mainWindow.webContents.send(UI_UPDATE_EVENT, 'update-ready', info)
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'ui-update-ready', info)
+})
+
+ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
+  console.log(`new ${AUTO_UPDATE_COMMAND}`, command)
+  switch (command) {
+    case 'start-checking': {
+      nodeUpdater.checkForUpdates(data.nodeCurrentVersion, data.isInternalNode)
+      break
+    }
+    case 'update-ui': {
+      autoUpdater.quitAndInstall()
+      break
+    }
+    case 'update-node': {
+      stopNode(node)
+        .then(async () => {
+          try {
+            mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+            await updateNode()
+            mainWindow.webContents.send(NODE_EVENT, 'node-ready')
+            mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-updated')
+          } catch (e) {
+            mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+            throw e
+          }
+        })
+        .catch(e => {
+          mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-failed')
+          logger.error('error while updating node', e.toString())
+        })
+      break
+    }
+    default:
+  }
 })
 
 function checkForUpdates() {
@@ -239,7 +289,6 @@ app.on('ready', async () => {
   if (isWin) {
     checkForUpdates()
   }
-  setTimeout(pollRemoteVersion, 10000)
 })
 
 app.on('before-quit', () => {
@@ -255,7 +304,7 @@ app.on('window-all-closed', () => {
 })
 
 ipcMain.on(NODE_COMMAND, async (event, command, data) => {
-  console.log('new command', command)
+  console.log(`new ${NODE_COMMAND}`, command)
 
   switch (command) {
     case 'init-local-node': {
@@ -263,52 +312,36 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
         .then(version => {
           mainWindow.webContents.send(NODE_EVENT, 'node-ready', version)
         })
-        .catch(async e => {
-          logger.error('error while getting node version', e.toString())
-          const remoteVersion = await getRemoteVersion()
-          mainWindow.webContents.send(
-            NODE_EVENT,
-            'download-started',
-            remoteVersion
-          )
-          downloadNode(progress => {
+        .catch(() => {
+          downloadNode(info => {
             mainWindow.webContents.send(
-              NODE_EVENT,
-              'download-progress',
-              progress
+              AUTO_UPDATE_EVENT,
+              'node-download-progress',
+              info
             )
           })
-            .then(async version => {
-              mainWindow.webContents.send(
-                NODE_EVENT,
-                'download-finished',
-                version
-              )
-              try {
+            .then(() => {
+              stopNode(node).then(async () => {
+                mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
                 await updateNode()
-                mainWindow.webContents.send(NODE_EVENT, 'node-ready', version)
-              } catch (err) {
-                mainWindow.webContents.send(NODE_EVENT, 'init-failed')
-                logger.error('error while updating node', err.toString())
-              }
+                mainWindow.webContents.send(NODE_EVENT, 'node-ready')
+              })
             })
             .catch(err => {
-              mainWindow.webContents.send(NODE_EVENT, 'init-failed')
+              mainWindow.webContents.send(NODE_EVENT, 'node-failed')
               logger.error('error while downlading node', err.toString())
             })
         })
       break
     }
     case 'start-local-node': {
-      startNode(data.rpcPort, false, log => {
-        mainWindow.webContents.send(NODE_EVENT, 'node-log', log)
-      })
+      startNode(data.rpcPort, data.tcpPort, data.ipfsPort, true)
         .then(n => {
           node = n
-          mainWindow.webContents.send(NODE_EVENT, 'node-start')
+          mainWindow.webContents.send(NODE_EVENT, 'node-started')
         })
         .catch(e => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-start-fail')
+          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
           logger.error('error while starting node', e.toString())
         })
       break
@@ -316,42 +349,23 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
     case 'stop-local-node': {
       stopNode(node)
         .then(() => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-stop')
+          mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
         })
         .catch(e => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-stop-fail')
+          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
           logger.error('error while stopping node', e.toString())
         })
       break
     }
-    case 'update-local-node': {
+    case 'clean-state': {
       stopNode(node)
         .then(async () => {
-          try {
-            mainWindow.webContents.send(NODE_EVENT, 'node-stop')
-            await updateNode()
-            const version = await getCurrentVersion(false)
-            mainWindow.webContents.send(NODE_EVENT, 'node-ready', version)
-          } catch (e) {
-            mainWindow.webContents.send(NODE_EVENT, 'init-failed')
-          }
+          cleanNodeState()
+          mainWindow.webContents.send(NODE_EVENT, 'state-cleaned')
         })
         .catch(e => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-stop-fail')
+          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
           logger.error('error while stopping node', e.toString())
-        })
-      break
-    }
-    case 'download-update': {
-      downloadNode(progress => {
-        mainWindow.webContents.send(NODE_EVENT, 'download-progress', progress)
-      })
-        .then(version => {
-          mainWindow.webContents.send(NODE_EVENT, 'download-finished', version)
-        })
-        .catch(e => {
-          mainWindow.webContents.send(NODE_EVENT, 'download-failed')
-          logger.error('error while downlading node', e.toString())
         })
       break
     }
@@ -435,23 +449,6 @@ ipcMain.on(IMAGE_SEARCH_PICK, (_event, message) => {
   mainWindow.webContents.send(IMAGE_SEARCH_PICK, message)
 })
 
-ipcMain.on(UI_UPDATE_COMMAND, async (event, command) => {
-  if (command === 'update-ui') {
-    autoUpdater.quitAndInstall()
-  }
-})
-
 ipcMain.on('reload', () => {
   loadRoute(mainWindow, 'dashboard')
 })
-
-async function pollRemoteVersion() {
-  try {
-    const remoteVersion = await getRemoteVersion()
-    mainWindow.webContents.send(NODE_EVENT, 'remote-version', remoteVersion)
-  } catch (e) {
-    logger.error('error while checking remote node version', e.toString())
-  }
-
-  setTimeout(pollRemoteVersion, 60 * 1000)
-}

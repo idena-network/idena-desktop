@@ -1,29 +1,36 @@
 /* eslint-disable no-console */
 const path = require('path')
-const fs = require('fs')
+const fs = require('fs-extra')
 const {spawn, exec} = require('child_process')
 const axios = require('axios')
 const progress = require('progress-stream')
 const semver = require('semver')
+// eslint-disable-next-line import/no-extraneous-dependencies
+const appDataPath = require('./app-data-path')
 
+const config = 'config.json'
 const idenaBin = 'idena-go'
 const idenaNodeReleasesUrl =
   'https://api.github.com/repos/idena-network/idena-go/releases/latest'
+const idenaChainDbFolder = 'idenachain.db'
 
 const nodeVersionRegex = /\d+.\d+.\d+/
 
 const getBinarySuffix = () => (process.platform === 'win32' ? '.exe' : '')
 
-const getNodeDir = () => path.join(__dirname, 'node')
+const getNodeDir = () => path.join(appDataPath('userData'), 'node')
+
+const getNodeDataDir = () => path.join(getNodeDir(), 'datadir')
 
 const getNodeFile = () => path.join(getNodeDir(), idenaBin + getBinarySuffix())
+
+const getNodeConfigFile = () => path.join(getNodeDir(), config)
 
 const getTempNodeFile = () =>
   path.join(getNodeDir(), `new-${idenaBin}${getBinarySuffix()}`)
 
-const isBundled = () => fs.existsSync(getNodeFile())
-
-const getBinary = async () => (isBundled() ? getNodeFile() : idenaBin)
+const getNodeChainDbFolder = () =>
+  path.join(getNodeDataDir(), idenaChainDbFolder)
 
 const getReleaseUrl = async () => {
   const {data} = await axios.get(idenaNodeReleasesUrl)
@@ -80,7 +87,7 @@ async function downloadNode(onProgress) {
       })
 
       str.on('progress', function(p) {
-        onProgress(p)
+        onProgress({...p, version})
       })
 
       response.data.pipe(str).pipe(writer)
@@ -90,8 +97,22 @@ async function downloadNode(onProgress) {
   })
 }
 
-async function startNode(port, useLogging = true, onLog) {
-  const idenaNode = spawn(await getBinary(), ['--rpcport', port])
+async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
+  const paramters = [
+    '--datadir',
+    getNodeDataDir(),
+    '--rpcport',
+    port,
+    '--port',
+    tcpPort,
+    '--ipfsport',
+    ipfsPort,
+  ]
+  if (fs.existsSync(getNodeConfigFile())) {
+    paramters.push('--config')
+    paramters.push(config)
+  }
+  const idenaNode = spawn(getNodeFile(), paramters)
 
   idenaNode.stdout.on('data', data => {
     const str = data.toString()
@@ -120,6 +141,7 @@ async function startNode(port, useLogging = true, onLog) {
 
 async function stopNode(node) {
   return new Promise(async resolve => {
+    if (!node) resolve()
     node.on('close', resolve)
     node.kill()
   })
@@ -161,6 +183,17 @@ function updateNode() {
   })
 }
 
+function nodeExists() {
+  return fs.existsSync(getNodeFile())
+}
+
+function cleanNodeState() {
+  const chainDbDirectory = getNodeChainDbFolder()
+  if (fs.existsSync(chainDbDirectory)) {
+    fs.removeSync(chainDbDirectory)
+  }
+}
+
 module.exports = {
   downloadNode,
   getCurrentVersion,
@@ -168,4 +201,6 @@ module.exports = {
   startNode,
   stopNode,
   updateNode,
+  nodeExists,
+  cleanNodeState,
 }
