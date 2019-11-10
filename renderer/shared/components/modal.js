@@ -100,7 +100,7 @@ export function GlobalModals() {
           </Box>
           <Box px="4px">
             <Button
-              variant="default"
+              variant="secondary"
               onClick={() => {
                 enableInternalNode(true)
                 hideTransferModal()

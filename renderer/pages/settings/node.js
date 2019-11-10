@@ -91,7 +91,7 @@ function NodeSettings() {
                 Node failed to start
               </Text>
               <Button
-                variant="default"
+                variant="secondary"
                 css={{marginLeft: 10}}
                 onClick={() => tryRestartNode()}
               >
