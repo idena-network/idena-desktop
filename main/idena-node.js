@@ -141,16 +141,19 @@ async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
 
 async function stopNode(node) {
   return new Promise(async resolve => {
-    if (!node) resolve()
-    node.on('close', resolve)
-    node.kill()
+    if (!node) {
+      resolve()
+    } else {
+      node.on('close', resolve)
+      node.kill()
+    }
   })
 }
 
 function getCurrentVersion(tempNode) {
   return new Promise((resolve, reject) => {
     const node = tempNode ? getTempNodeFile() : getNodeFile()
-    exec(`${node} --version`, (err, stdout, stderr) => {
+    exec(`"${node}" --version`, (err, stdout, stderr) => {
       if (err) {
         reject(new Error(stderr))
       }
