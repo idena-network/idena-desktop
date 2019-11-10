@@ -1,11 +1,11 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import semver from 'semver'
 import {usePersistence} from '../hooks/use-persistent-state'
 import {loadState} from '../utils/persist'
 import {BASE_API_URL, BASE_INTERNAL_API_PORT} from '../api/api-client'
 
 const SETTINGS_INITIALIZE = 'SETTINGS_INITIALIZE'
-const TOGGLE_NODE_SWITCHER = 'TOGGLE_NODE_SWITCHER'
+const ENABLE_INTERNAL_NODE = 'ENABLE_INTERNAL_NODE'
 const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
 const UPDATE_UI_VERSION = 'UPDATE_UI_VERSION'
 
@@ -20,8 +20,8 @@ const initialState = {
 
 function settingsReducer(state, action) {
   switch (action.type) {
-    case TOGGLE_NODE_SWITCHER:
-      return {...state, useInternalNode: !state.useInternalNode}
+    case ENABLE_INTERNAL_NODE:
+      return {...state, useInternalNode: action.data}
     case SAVE_EXTERNAL_URL:
       return {...state, url: action.data}
     case SETTINGS_INITIALIZE:
@@ -29,6 +29,8 @@ function settingsReducer(state, action) {
         ...initialState,
         ...state,
         initialized: true,
+        useInternalNode: action.data.useInternalNode,
+        userBeforeInternalNode: !action.data.useInternalNode,
       }
     case UPDATE_UI_VERSION: {
       return {
@@ -53,6 +55,10 @@ function SettingsProvider({children}) {
     'settings'
   )
 
+  const [transferModal, toggleTransferModal] = useState(
+    !state.initialized && !firstRun
+  )
+
   useEffect(() => {
     if (!state.initialized) {
       dispatch({
@@ -63,7 +69,7 @@ function SettingsProvider({children}) {
   }, [dispatch, firstRun, state.initialized])
 
   useEffect(() => {
-    if (semver.lt(state.uiVersion, global.appVersion)) {
+    if (state.uiVersion && semver.lt(state.uiVersion, global.appVersion)) {
       dispatch({type: UPDATE_UI_VERSION, data: global.appVersion})
     }
   })
@@ -72,14 +78,27 @@ function SettingsProvider({children}) {
     dispatch({type: SAVE_EXTERNAL_URL, data: url})
   }
 
-  const toggleNodeSwitcher = () => {
-    dispatch({type: TOGGLE_NODE_SWITCHER})
+  const enableInternalNode = enable => {
+    dispatch({type: ENABLE_INTERNAL_NODE, data: enable})
+  }
+
+  const showTransferModal = () => {
+    toggleTransferModal(true)
+  }
+
+  const hideTransferModal = () => {
+    toggleTransferModal(false)
   }
 
   return (
-    <SettingsStateContext.Provider value={state}>
+    <SettingsStateContext.Provider value={{...state, transferModal}}>
       <SettingsDispatchContext.Provider
-        value={{saveExternalUrl, toggleNodeSwitcher}}
+        value={{
+          saveExternalUrl,
+          enableInternalNode,
+          showTransferModal,
+          hideTransferModal,
+        }}
       >
         {children}
       </SettingsDispatchContext.Provider>

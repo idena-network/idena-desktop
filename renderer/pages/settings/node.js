@@ -30,7 +30,11 @@ import {
 function NodeSettings() {
   const {addNotification} = useNotificationDispatch()
   const settings = useSettingsState()
-  const {saveExternalUrl, toggleNodeSwitcher} = useSettingsDispatch()
+  const {
+    saveExternalUrl,
+    enableInternalNode,
+    showTransferModal,
+  } = useSettingsDispatch()
   const {nodeFailed} = useNodeState()
   const {tryRestartNode} = useNodeDispatch()
 
@@ -49,7 +53,13 @@ function NodeSettings() {
           <Box>
             <Switcher
               isChecked={settings.useInternalNode}
-              onChange={() => toggleNodeSwitcher()}
+              onChange={() => {
+                if (settings.userBeforeInternalNode) {
+                  showTransferModal()
+                } else {
+                  enableInternalNode(true)
+                }
+              }}
               bgOn={theme.colors.primary}
             />
           </Box>
@@ -62,7 +72,6 @@ function NodeSettings() {
                 rem(theme.spacings.small12, theme.fontSizes.base)
               ),
             }}
-            onClick={() => toggleNodeSwitcher()}
           >
             <strong>Run built-in node</strong>
             <div>Use built-in node to have automatic updates</div>
@@ -97,7 +106,7 @@ function NodeSettings() {
           <Box>
             <Switcher
               isChecked={!settings.useInternalNode}
-              onChange={() => toggleNodeSwitcher()}
+              onChange={() => enableInternalNode(false)}
               bgOn={theme.colors.primary}
             />
           </Box>
@@ -110,7 +119,6 @@ function NodeSettings() {
                 rem(theme.spacings.small12, theme.fontSizes.base)
               ),
             }}
-            onClick={() => toggleNodeSwitcher()}
           >
             <strong>Connect to remote node</strong>
             <div>
