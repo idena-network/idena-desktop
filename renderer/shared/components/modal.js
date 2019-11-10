@@ -102,7 +102,8 @@ export function GlobalModals() {
             <Button
               variant="default"
               onClick={() => {
-                enableInternalNode()
+                enableInternalNode(true)
+                hideTransferModal()
               }}
             >
               Run with a new address
