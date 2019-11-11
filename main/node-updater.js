@@ -16,7 +16,6 @@ class NodeUpdater extends events.EventEmitter {
   }
 
   async checkForUpdates(currentVersion, isInternalNode) {
-    console.log(currentVersion, isInternalNode)
     this.currentVersion = currentVersion
     this.isInternalNode = isInternalNode
 
@@ -30,7 +29,9 @@ class NodeUpdater extends events.EventEmitter {
   async doUpdateCheck() {
     try {
       const remoteVersion = await getRemoteVersion()
-      if (this.isInternalNode && !nodeExists()) return
+      if (this.isInternalNode && !nodeExists()) {
+        return false
+      }
       if (semver.lt(this.currentVersion, remoteVersion)) {
         this.emit('update-available', {version: remoteVersion})
 
@@ -52,10 +53,9 @@ class NodeUpdater extends events.EventEmitter {
       }
     } catch (e) {
       this.logger.error('error while checking update', e.toString())
-      this.emit('update-available', {version: '0.10.1'})
+    } finally {
+      this.timeout = setTimeout(() => this.doUpdateCheck(), 60 * 60 * 1000)
     }
-
-    this.timeout = setTimeout(() => this.doUpdateCheck(), 60 * 60 * 1000)
 
     return false
   }

@@ -92,7 +92,7 @@ async function downloadNode(onProgress) {
 
       response.data.pipe(str).pipe(writer)
     } catch (error) {
-      reject(error)
+      return reject(error)
     }
   })
 }
@@ -142,11 +142,11 @@ async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
 async function stopNode(node) {
   return new Promise(async resolve => {
     if (!node) {
-      resolve()
-    } else {
-      node.on('close', resolve)
-      node.kill()
+      console.log('node process is not found')
+      return resolve()
     }
+    node.on('close', resolve)
+    node.kill('SIGINT')
   })
 }
 
@@ -155,15 +155,15 @@ function getCurrentVersion(tempNode) {
     const node = tempNode ? getTempNodeFile() : getNodeFile()
     exec(`"${node}" --version`, (err, stdout, stderr) => {
       if (err) {
-        reject(new Error(stderr))
+        return reject(new Error(stderr))
       }
 
       const m = stdout.match(nodeVersionRegex)
       if (m && m.length && semver.valid(m[0])) {
-        resolve(semver.clean(m[0]))
+        return resolve(semver.clean(m[0]))
       }
 
-      reject(new Error('cannot resolve node version'))
+      return reject(new Error('cannot resolve node version'))
     })
   })
 }
@@ -179,9 +179,12 @@ function updateNode() {
       }
 
       fs.renameSync(tempNode, currentNode)
-      resolve()
+      if (process.platform !== 'win32') {
+        fs.chmodSync(currentNode, '755')
+      }
+      return resolve()
     } catch (e) {
-      reject(e)
+      return reject(e)
     }
   })
 }

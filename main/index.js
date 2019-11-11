@@ -313,7 +313,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
           mainWindow.webContents.send(NODE_EVENT, 'node-ready', version)
         })
         .catch(e => {
-          console.log(e, toString())
+          logger.error('error while getting current node version', e.toString())
           downloadNode(info => {
             mainWindow.webContents.send(
               AUTO_UPDATE_EVENT,
