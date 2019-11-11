@@ -161,7 +161,7 @@ function FlipShuffle({
               onShuffleFlip(nextOrder)
             }}
           />
-          {nonSenseOrder < 0 && (
+          {false && nonSenseOrder < 0 && (
             <AddImageButton
               css={{margin: 0}}
               onClick={() => {
@@ -170,7 +170,7 @@ function FlipShuffle({
             />
           )}
 
-          {nonSenseOrder >= 0 && (
+          {false && nonSenseOrder >= 0 && (
             <DeleteImageButton
               css={{margin: 0}}
               onClick={() => {
