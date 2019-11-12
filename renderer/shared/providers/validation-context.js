@@ -139,12 +139,14 @@ const initialCeremonyState = {
 }
 
 const initialState = {
+  ...initialCeremonyState,
   shortAnswers: [],
   longAnswers: [],
   epoch: null,
   shortAnswersSubmitted: false,
   longAnswersSubmitted: false,
-  ...initialCeremonyState,
+  allFlipsQualified: false,
+  stage: 'short',
 }
 
 function validationReducer(state, action) {
@@ -158,6 +160,7 @@ function validationReducer(state, action) {
         shortAnswers: action.answers,
         epoch: action.epoch,
         shortAnswersSubmitted: true,
+        stage: 'long',
         ...initialCeremonyState,
       }
     }
@@ -311,6 +314,11 @@ function validationReducer(state, action) {
       return {
         ...state,
         flips,
+        allFlipsQualified: state.flips.every(
+          // eslint-disable-next-line no-shadow
+          ({irrelevantWords}) =>
+            irrelevantWords !== undefined && irrelevantWords !== null
+        ),
       }
     }
     case WORDS_FETCHED: {
@@ -325,6 +333,16 @@ function validationReducer(state, action) {
           {...flip, words: flip.words || fetchedWords},
           ...state.flips.slice(state.flips.indexOf(flip) + 1),
         ],
+      }
+    }
+    case 'QUALIFICATION_REQUESTED': {
+      return {
+        ...state,
+        stage: 'qualification',
+        currentIndex: state.flips.findIndex(
+          ({irrelevantWords}) =>
+            irrelevantWords === undefined || irrelevantWords === null
+        ),
       }
     }
     default: {

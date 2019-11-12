@@ -25,6 +25,7 @@ export default function ValidationScene({
   isLast,
   type,
 }) {
+  const {stage} = useValidationState()
   const dispatch = useValidationDispatch()
   return (
     <Flex
@@ -176,9 +177,10 @@ export default function ValidationScene({
               </Box>
             ))}
         </Flex>
-        {type === SessionType.Long && ready && !failed && (
-          <Words key={hash} words={words} />
-        )}
+        {type === SessionType.Long &&
+          stage === 'qualification' &&
+          ready &&
+          !failed && <Words key={hash} words={words} />}
       </Flex>
       {!isLast && (!ready || hasAnswer(answer)) && (
         <Col onClick={() => dispatch({type: NEXT})} w={4}>

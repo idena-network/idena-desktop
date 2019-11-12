@@ -92,10 +92,6 @@ export default function LongValidation() {
     }
   }, [dispatch, words])
 
-  const handleSubmitAnswers = async () => {
-    await submitLongAnswers(dispatch, state.flips, epoch.epoch)
-  }
-
   const availableFlipsLength = state.flips.filter(x => !x.hidden).length
 
   return (
@@ -144,7 +140,9 @@ export default function LongValidation() {
         </Flex>
         <ValidationActions
           canSubmit={state.canSubmit}
-          onSubmitAnswers={handleSubmitAnswers}
+          onSubmitAnswers={async () => {
+            await submitLongAnswers(dispatch, state.flips, epoch.epoch)
+          }}
           countdown={<Timer type={SessionType.Long} />}
         />
         <FlipThumbnails
@@ -154,12 +152,7 @@ export default function LongValidation() {
         />
       </Flex>
 
-      <Modal
-        show={showModal}
-        onHide={() => {
-          setShowModal(false)
-        }}
-      >
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Box m="0 0 18px">
           <SubHeading>Short session is over</SubHeading>
           <Text>

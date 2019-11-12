@@ -4,8 +4,14 @@ import {margin, rem} from 'polished'
 import {Button} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import theme from '../../../shared/theme'
+import {
+  useValidationState,
+  useValidationDispatch,
+} from '../../../shared/providers/validation-context'
 
-function ValidationActions({onSubmitAnswers, canSubmit, countdown}) {
+function ValidationActions({onSubmitAnswers, countdown}) {
+  const {canSubmit, stage} = useValidationState()
+  const dispatch = useValidationDispatch()
   return (
     <Flex
       justify="space-between"
@@ -20,11 +26,16 @@ function ValidationActions({onSubmitAnswers, canSubmit, countdown}) {
         {countdown}
       </Flex>
       <Flex justify="flex-end" css={{flex: 1}}>
-        {
-          <Button onClick={onSubmitAnswers} disabled={!canSubmit}>
-            Submit answers
-          </Button>
-        }
+        <Button
+          onClick={() =>
+            stage === 'long'
+              ? dispatch({type: 'QUALIFICATION_REQUESTED'})
+              : onSubmitAnswers()
+          }
+          disabled={!canSubmit}
+        >
+          {stage === 'long' ? 'Next' : 'Submit answers'}
+        </Button>
       </Flex>
     </Flex>
   )
