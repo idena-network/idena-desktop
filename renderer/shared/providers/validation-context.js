@@ -343,16 +343,19 @@ function validationReducer(state, action) {
         ...state,
         qualificationRequested: true,
       }
-    case QUALIFICATION_STARTED:
+    case QUALIFICATION_STARTED: {
+      const firstUnqualifiedIdx = state.flips.findIndex(
+        ({irrelevantWords}) =>
+          irrelevantWords === undefined || irrelevantWords === null
+      )
       return {
         ...state,
-        currentIndex: state.flips.findIndex(
-          ({irrelevantWords}) =>
-            irrelevantWords === undefined || irrelevantWords === null
-        ),
+        currentIndex: firstUnqualifiedIdx,
         qualificationRequested: false,
         stage: SessionType.Qualification,
+        canSubmit: false,
       }
+    }
 
     default: {
       throw new Error(`Unhandled action type: ${action.type}`)
