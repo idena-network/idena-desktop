@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react'
 import Router from 'next/router'
-import {backgrounds, rem, padding, position} from 'polished'
+import {backgrounds, rem, padding, position, margin} from 'polished'
 
 import ValidationHeader from '../../screens/validation/components/validation-header'
 import ValidationScene from '../../screens/validation/components/validation-scene'
@@ -31,6 +31,7 @@ import {
   SessionType,
   fetchFlips,
   WORDS_FETCHED,
+  QUALIFICATION_STARTED,
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
 import Modal from '../../shared/components/modal'
@@ -92,6 +93,11 @@ export default function LongValidation() {
     }
   }, [dispatch, words])
 
+  const [showQualificationDialog, setShowQualificationDialog] = React.useState()
+  useEffect(() => setShowQualificationDialog(state.qualificationRequested), [
+    state.qualificationRequested,
+  ])
+
   const availableFlipsLength = state.flips.filter(x => !x.hidden).length
 
   return (
@@ -151,7 +157,6 @@ export default function LongValidation() {
           onPick={index => dispatch({type: PICK, index})}
         />
       </Flex>
-
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Box m="0 0 18px">
           <SubHeading>Short session is over</SubHeading>
@@ -168,6 +173,33 @@ export default function LongValidation() {
               }}
             >
               Go to dashboard
+            </Button>
+          </Box>
+        </Flex>
+      </Modal>
+      <Modal
+        show={showQualificationDialog}
+        onHide={() => setShowQualificationDialog(false)}
+      >
+        <Box m="0 0 18px">
+          <SubHeading css={margin(0, 0, rem(10))}>
+            Your answers are not yet submitted
+          </SubHeading>
+          <Text css={margin(0, 0, rem(16))}>
+            Please qualify the keywords relevance and submit the answers.
+          </Text>
+          <Text>The flips with irrelevant keywords will be penalized.</Text>
+        </Box>
+        <Flex align="center" justify="flex-end">
+          <Box px="4px">
+            <Button
+              onClick={() =>
+                dispatch({
+                  type: QUALIFICATION_STARTED,
+                })
+              }
+            >
+              Ok, I understand
             </Button>
           </Box>
         </Flex>

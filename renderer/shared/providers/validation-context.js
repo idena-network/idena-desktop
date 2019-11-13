@@ -135,6 +135,7 @@ export const SHOW_EXTRA_FLIPS = 'SHOW_EXTRA_FLIPS'
 export const WORDS_FETCHED = 'WORDS_FETCHED'
 export const IRRELEVANT_WORDS_TOGGLED = 'IRRELEVANT_WORDS_TOGGLED'
 export const QUALIFICATION_REQUESTED = 'QUALIFICATION_REQUESTED'
+export const QUALIFICATION_STARTED = 'QUALIFICATION_STARTED'
 
 const initialCeremonyState = {
   flips: [],
@@ -152,6 +153,7 @@ const initialState = {
   shortAnswersSubmitted: false,
   longAnswersSubmitted: false,
   stage: 'short',
+  qualificationRequested: false,
 }
 
 function validationReducer(state, action) {
@@ -175,6 +177,7 @@ function validationReducer(state, action) {
         longAnswers: action.answers,
         epoch: action.epoch,
         longAnswersSubmitted: true,
+        qualificationRequested: false,
         ...initialCeremonyState,
       }
     }
@@ -335,16 +338,22 @@ function validationReducer(state, action) {
         ],
       }
     }
-    case QUALIFICATION_REQUESTED: {
+    case QUALIFICATION_REQUESTED:
       return {
         ...state,
-        stage: SessionType.Qualification,
+        qualificationRequested: true,
+      }
+    case QUALIFICATION_STARTED:
+      return {
+        ...state,
         currentIndex: state.flips.findIndex(
           ({irrelevantWords}) =>
             irrelevantWords === undefined || irrelevantWords === null
         ),
+        qualificationRequested: false,
+        stage: SessionType.Qualification,
       }
-    }
+
     default: {
       throw new Error(`Unhandled action type: ${action.type}`)
     }
