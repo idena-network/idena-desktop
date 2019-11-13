@@ -18,6 +18,7 @@ export const AnswerType = {
 export const SessionType = {
   Short: 'short',
   Long: 'long',
+  Qualification: 'qualification',
 }
 
 function fromHexString(hexString) {
@@ -105,9 +106,13 @@ export function hasAnswer(answer) {
   return Number.isFinite(answer)
 }
 
-function canSubmit(flips, idx) {
+function canSubmit(state, idx) {
+  const {flips, stage} = state
   const availableFlips = flips.filter(x => !x.hidden && !x.failed)
   const visibleFlips = flips.filter(x => !x.hidden)
+  if (stage === 'qualification') {
+    return idx >= visibleFlips.length - 1
+  }
   return (
     availableFlips.map(x => x.answer).every(hasAnswer) ||
     idx >= visibleFlips.length - 1
@@ -221,7 +226,7 @@ function validationReducer(state, action) {
       return {
         ...state,
         currentIndex: idx,
-        canSubmit: canSubmit(state.flips, idx),
+        canSubmit: canSubmit(state, idx),
       }
     }
     case NEXT: {
@@ -229,14 +234,14 @@ function validationReducer(state, action) {
       return {
         ...state,
         currentIndex: idx,
-        canSubmit: canSubmit(state.flips, idx),
+        canSubmit: canSubmit(state, idx),
       }
     }
     case PICK: {
       return {
         ...state,
         currentIndex: action.index,
-        canSubmit: canSubmit(state.flips, action.index),
+        canSubmit: canSubmit(state, action.index),
       }
     }
     case ANSWER: {
@@ -248,7 +253,7 @@ function validationReducer(state, action) {
       return {
         ...state,
         flips,
-        canSubmit: canSubmit(flips, state.currentIndex),
+        canSubmit: canSubmit(state, state.currentIndex),
       }
     }
     case REPORT_ABUSE: {
@@ -264,7 +269,7 @@ function validationReducer(state, action) {
         ...state,
         flips,
         currentIndex: idx,
-        canSubmit: canSubmit(flips, idx),
+        canSubmit: canSubmit(state, state.currentIndex),
       }
     }
     case SHOW_EXTRA_FLIPS: {
@@ -299,7 +304,7 @@ function validationReducer(state, action) {
 
       return {
         ...state,
-        canSubmit: canSubmit(flips, state.currentIndex),
+        canSubmit: canSubmit(state, state.currentIndex),
         flips: reorderFlips(flips),
         ready: true,
       }

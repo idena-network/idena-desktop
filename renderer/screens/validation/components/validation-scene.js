@@ -20,7 +20,7 @@ import {
 } from '../../../shared/providers/validation-context'
 
 export default function ValidationScene({
-  flip: {urls, answer, ready, orders, failed, hash, words},
+  flip: {urls, answer, ready, orders, failed, hash, words, irrelevantWords},
   isFirst,
   isLast,
   type,
@@ -182,7 +182,7 @@ export default function ValidationScene({
           ready &&
           !failed && <Words key={hash} words={words} />}
       </Flex>
-      {!isLast && (!ready || hasAnswer(answer)) && (
+      {shouldAllowNext(isLast, ready, stage, answer, irrelevantWords) && (
         <Col onClick={() => dispatch({type: NEXT})} w={4}>
           <Arrow dir="next" type={type} />
         </Col>
@@ -315,6 +315,22 @@ function Words({words}) {
       </Box>
     </Flex>
   )
+}
+
+function shouldAllowNext(isLast, ready, stage, answer, irrelevantWords) {
+  if (isLast) {
+    return false
+  }
+
+  if (!ready) {
+    return true
+  }
+
+  if (stage === SessionType.Qualification) {
+    return irrelevantWords !== null && irrelevantWords !== undefined
+  }
+
+  return hasAnswer(answer)
 }
 
 const defaultStyle = {
