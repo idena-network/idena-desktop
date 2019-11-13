@@ -110,7 +110,7 @@ function canSubmit(state, idx) {
   const {flips, stage} = state
   const availableFlips = flips.filter(x => !x.hidden && !x.failed)
   const visibleFlips = flips.filter(x => !x.hidden)
-  if (stage === 'qualification') {
+  if (stage === SessionType.Qualification) {
     return idx >= visibleFlips.length - 1
   }
   return (
@@ -134,6 +134,7 @@ export const REPORT_ABUSE = 'REPORT_ABUSE'
 export const SHOW_EXTRA_FLIPS = 'SHOW_EXTRA_FLIPS'
 export const WORDS_FETCHED = 'WORDS_FETCHED'
 export const IRRELEVANT_WORDS_TOGGLED = 'IRRELEVANT_WORDS_TOGGLED'
+export const QUALIFICATION_REQUESTED = 'QUALIFICATION_REQUESTED'
 
 const initialCeremonyState = {
   flips: [],
@@ -150,7 +151,6 @@ const initialState = {
   epoch: null,
   shortAnswersSubmitted: false,
   longAnswersSubmitted: false,
-  allFlipsQualified: false,
   stage: 'short',
 }
 
@@ -310,20 +310,15 @@ function validationReducer(state, action) {
       }
     }
     case IRRELEVANT_WORDS_TOGGLED: {
-      const {irrelevantWords, ...currentFlip} = state.flips[state.currentIndex]
+      const currentFlip = state.flips[state.currentIndex]
       const flips = [
         ...state.flips.slice(0, state.currentIndex),
-        {...currentFlip, irrelevantWords: !irrelevantWords},
+        {...currentFlip, irrelevantWords: action.irrelevant},
         ...state.flips.slice(state.currentIndex + 1),
       ]
       return {
         ...state,
         flips,
-        allFlipsQualified: state.flips.every(
-          // eslint-disable-next-line no-shadow
-          ({irrelevantWords}) =>
-            irrelevantWords !== undefined && irrelevantWords !== null
-        ),
       }
     }
     case WORDS_FETCHED: {
@@ -340,10 +335,10 @@ function validationReducer(state, action) {
         ],
       }
     }
-    case 'QUALIFICATION_REQUESTED': {
+    case QUALIFICATION_REQUESTED: {
       return {
         ...state,
-        stage: 'qualification',
+        stage: SessionType.Qualification,
         currentIndex: state.flips.findIndex(
           ({irrelevantWords}) =>
             irrelevantWords === undefined || irrelevantWords === null

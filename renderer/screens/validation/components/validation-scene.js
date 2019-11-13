@@ -1,7 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, margin, padding, borderRadius, cover} from 'polished'
-import {Col, Box, Fill, Switcher, Label} from '../../../shared/components'
+import {FiCheck} from 'react-icons/fi'
+import {
+  Col,
+  Box,
+  Fill,
+  Switcher,
+  Label,
+  Button,
+  Heading,
+} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import Arrow from './arrow'
 import {reorderList} from '../../../shared/utils/arr'
@@ -18,6 +27,7 @@ import {
   useValidationState,
   IRRELEVANT_WORDS_TOGGLED,
 } from '../../../shared/providers/validation-context'
+import {IconButton} from '../../../shared/components/button'
 
 export default function ValidationScene({
   flip: {urls, answer, ready, orders, failed, hash, words, irrelevantWords},
@@ -38,7 +48,7 @@ export default function ValidationScene({
           <Arrow dir="prev" type={type} />
         </Box>
       )}
-      <Flex>
+      <Flex align="center">
         <Flex
           direction="column"
           justify="center"
@@ -178,7 +188,7 @@ export default function ValidationScene({
             ))}
         </Flex>
         {type === SessionType.Long &&
-          stage === 'qualification' &&
+          stage === SessionType.Qualification &&
           ready &&
           !failed && <Words key={hash} words={words} />}
       </Flex>
@@ -210,19 +220,29 @@ function Words({words}) {
 
   const haveWords = words && words.length
   const {irrelevantWords} = flips[currentIndex]
+  const hasQualified = irrelevantWords !== null && irrelevantWords !== undefined
 
   return (
-    <Flex
-      align="center"
+    <Box
       css={{
-        ...margin(0, 0, 0, rem(theme.spacings.medium24, theme.fontSizes.base)),
-        width: '200px',
+        ...margin(0, 0, 0, rem(36, theme.fontSizes.base)),
+        width: rem(280),
       }}
     >
+      <Heading fontSize={rem(20)} fontWeight={500}>
+        Are both keywords relevant to the flip?
+      </Heading>
       <Box>
         <Box
           style={{
-            ...margin(0, 0, rem(29, theme.fontSizes.base)),
+            background: theme.colors.gray,
+            borderRadius: rem(8),
+            ...margin(rem(32, theme.fontSizes.base), 0),
+            ...padding(
+              rem(33, theme.fontSizes.base),
+              rem(40, theme.fontSizes.base),
+              rem(39, theme.fontSizes.base)
+            ),
           }}
         >
           {haveWords ? (
@@ -286,34 +306,46 @@ function Words({words}) {
             </>
           )}
         </Box>
-        <Flex align="center">
-          <Box>
-            <Switcher
-              isChecked={irrelevantWords}
-              onChange={() => dispatch({type: IRRELEVANT_WORDS_TOGGLED})}
-              disabled={!haveWords}
-              bgOn={theme.colors.danger}
-            />
-          </Box>
-          <Label
-            htmlFor="switcher"
-            style={{
-              color: haveWords ? theme.colors.text : theme.colors.muted,
-              cursor: haveWords ? 'pointer' : 'not-allowed',
-              ...margin(
-                0,
-                0,
-                0,
-                rem(theme.spacings.small12, theme.fontSizes.base)
-              ),
-            }}
-            onClick={() => dispatch({type: IRRELEVANT_WORDS_TOGGLED})}
+        <Flex align="center" justify="space-between">
+          <Button
+            variant={hasQualified && !irrelevantWords ? 'primary' : 'secondary'}
+            onClick={() =>
+              dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: false})
+            }
           >
-            Report irrelevant words
-          </Label>
+            <Flex align="center">
+              <Box style={padding(0, rem(4))}>
+                {hasQualified && !irrelevantWords ? <FiCheck /> : null}
+              </Box>
+              <Box style={{whiteSpace: 'nowrap'}}>Both relevant</Box>
+            </Flex>
+          </Button>
+          <Button
+            style={
+              hasQualified && irrelevantWords
+                ? {
+                    backgroundColor: theme.colors.danger,
+                    color: theme.colors.white,
+                  }
+                : {
+                    backgroundColor: theme.colors.danger02,
+                    color: theme.colors.danger,
+                  }
+            }
+            onClick={() =>
+              dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: true})
+            }
+          >
+            <Flex align="center">
+              <Box style={padding(0, rem(4))}>
+                {hasQualified && irrelevantWords ? <FiCheck /> : null}
+              </Box>
+              <Box>Irrelevant</Box>
+            </Flex>
+          </Button>
         </Flex>
       </Box>
-    </Flex>
+    </Box>
   )
 }
 

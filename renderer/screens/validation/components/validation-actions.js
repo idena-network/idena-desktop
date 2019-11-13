@@ -7,6 +7,7 @@ import theme from '../../../shared/theme'
 import {
   useValidationState,
   useValidationDispatch,
+  QUALIFICATION_REQUESTED,
 } from '../../../shared/providers/validation-context'
 
 function ValidationActions({onSubmitAnswers, countdown}) {
@@ -29,7 +30,7 @@ function ValidationActions({onSubmitAnswers, countdown}) {
         <Button
           onClick={() =>
             stage === 'long'
-              ? dispatch({type: 'QUALIFICATION_REQUESTED'})
+              ? dispatch({type: QUALIFICATION_REQUESTED})
               : onSubmitAnswers()
           }
           disabled={!canSubmit}

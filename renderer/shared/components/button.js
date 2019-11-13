@@ -12,9 +12,9 @@ function Button({
   ...props
 }) {
   const isPrimary = variant === 'primary'
-  const bcolor = danger ? theme.colors.danger : theme.colors.primary
+  const bgColor = danger ? theme.colors.danger : theme.colors.primary
 
-  const bg = isPrimary ? bcolor : transparentize(0.88, bcolor)
+  const bg = isPrimary ? bgColor : transparentize(0.88, bgColor)
   const color = isPrimary ? theme.colors.white : theme.colors.primary
 
   return (
