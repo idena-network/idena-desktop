@@ -113,8 +113,11 @@ function canSubmit(state, idx) {
   if (stage === SessionType.Qualification) {
     return (
       availableFlips.every(
-        ({irrelevantWords}) =>
-          irrelevantWords !== null && irrelevantWords !== undefined
+        ({words, irrelevantWords}) =>
+          words &&
+          words.length &&
+          irrelevantWords !== null &&
+          irrelevantWords !== undefined
       ) || idx >= visibleFlips.length - 1
     )
   }

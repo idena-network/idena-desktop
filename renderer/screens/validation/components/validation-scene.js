@@ -32,7 +32,7 @@ export default function ValidationScene({
     <Flex
       justify="space-between"
       flex={1}
-      css={margin(0, rem(theme.spacings.medium24), 0)}
+      css={margin(0, rem(theme.spacings.medium24, theme.fontSizes.base), 0)}
     >
       {!isFirst && (
         <Box onClick={() => dispatch({type: PREV})}>
@@ -68,10 +68,15 @@ export default function ValidationScene({
                   height={110}
                   width={147}
                   style={{
-                    ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
+                    ...borderRadius(
+                      'top',
+                      idx === 0 ? rem(8, theme.fontSizes.base) : 'none'
+                    ),
                     ...borderRadius(
                       'bottom',
-                      idx === urls.length - 1 ? rem(8) : 'none'
+                      idx === urls.length - 1
+                        ? rem(8, theme.fontSizes.base)
+                        : 'none'
                     ),
                     position: 'absolute',
                     top: '50%',
@@ -136,10 +141,15 @@ export default function ValidationScene({
                 <img
                   alt="currentFlip"
                   style={{
-                    ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
+                    ...borderRadius(
+                      'top',
+                      idx === 0 ? rem(8, theme.fontSizes.base) : 'none'
+                    ),
                     ...borderRadius(
                       'bottom',
-                      idx === urls.length - 1 ? rem(8) : 'none'
+                      idx === urls.length - 1
+                        ? rem(8, theme.fontSizes.base)
+                        : 'none'
                     ),
                     position: 'absolute',
                     top: '50%',
@@ -183,7 +193,14 @@ export default function ValidationScene({
           ready &&
           !failed && <Words key={hash} words={words} />}
       </Flex>
-      {shouldAllowNext(isLast, ready, stage, answer, irrelevantWords) && (
+      {shouldAllowNext(
+        isLast,
+        ready,
+        stage,
+        answer,
+        irrelevantWords,
+        words
+      ) && (
         <Col onClick={() => dispatch({type: NEXT})} w={4}>
           <Arrow dir="next" type={type} />
         </Col>
@@ -217,17 +234,17 @@ function Words({words}) {
     <Box
       css={{
         ...margin(0, 0, 0, rem(36, theme.fontSizes.base)),
-        width: rem(280),
+        width: rem(280, theme.fontSizes.base),
       }}
     >
-      <Heading fontSize={rem(20)} fontWeight={500}>
+      <Heading fontSize={rem(18, theme.fontSizes.base)} fontWeight={500}>
         Are both keywords relevant to the flip?
       </Heading>
       <Box>
         <Box
           style={{
             background: theme.colors.gray,
-            borderRadius: rem(8),
+            borderRadius: rem(8, theme.fontSizes.base),
             ...margin(rem(32, theme.fontSizes.base), 0),
             ...padding(
               rem(33, theme.fontSizes.base),
@@ -252,7 +269,7 @@ function Words({words}) {
                 <Box
                   style={{
                     color: theme.colors.muted,
-                    lineHeight: rem(20),
+                    lineHeight: rem(20, theme.fontSizes.base),
                     ...margin(
                       0,
                       0,
@@ -273,17 +290,16 @@ function Words({words}) {
                   lineHeight: rem(20, theme.fontSizes.base),
                 }}
               >
-                Getting keywords...
+                Getting flip keywords...
               </Box>
               {[
-                'Loading keywords to moderate the story 📬🏗🔤',
-                'Feel free to skip this step.',
+                'Can not load the flip keywords to moderate the story. Please wait or skip this flip.',
               ].map((w, idx) => (
                 <Box
                   key={`desc-${idx}`}
                   style={{
                     color: theme.colors.muted,
-                    lineHeight: rem(20),
+                    lineHeight: rem(20, theme.fontSizes.base),
                     ...margin(
                       rem(theme.spacings.small8, theme.fontSizes.base),
                       0,
@@ -303,12 +319,14 @@ function Words({words}) {
             onClick={() =>
               dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: false})
             }
+            style={{fontWeight: 500, width: rem(136, theme.fontSizes.base)}}
           >
-            <Flex align="center">
+            <Flex align="center" justify="center">
               {hasQualified && !irrelevantWords && (
-                <Box style={padding(0, rem(4))}>
-                  <FiCheck />
-                </Box>
+                <FiCheck
+                  size={16}
+                  style={margin(0, rem(4, theme.fontSizes.base), 0, 0)}
+                />
               )}
               <Box style={{whiteSpace: 'nowrap'}}>Both relevant</Box>
             </Flex>
@@ -319,21 +337,26 @@ function Words({words}) {
                 ? {
                     backgroundColor: theme.colors.danger,
                     color: theme.colors.white,
+                    fontWeight: 500,
+                    width: rem(136, theme.fontSizes.base),
                   }
                 : {
                     backgroundColor: theme.colors.danger02,
                     color: theme.colors.danger,
+                    fontWeight: 500,
+                    width: rem(136, theme.fontSizes.base),
                   }
             }
             onClick={() =>
               dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: true})
             }
           >
-            <Flex align="center">
+            <Flex align="center" justify="center">
               {hasQualified && irrelevantWords && (
-                <Box style={padding(0, rem(4))}>
-                  <FiCheck />
-                </Box>
+                <FiCheck
+                  size={16}
+                  style={margin(0, rem(4, theme.fontSizes.base), 0, 0)}
+                />
               )}
               <Box>Irrelevant</Box>
             </Flex>
@@ -344,7 +367,7 @@ function Words({words}) {
   )
 }
 
-function shouldAllowNext(isLast, ready, stage, answer, irrelevantWords) {
+function shouldAllowNext(isLast, ready, stage, answer, irrelevantWords, words) {
   if (isLast) {
     return false
   }
@@ -354,7 +377,7 @@ function shouldAllowNext(isLast, ready, stage, answer, irrelevantWords) {
   }
 
   if (stage === SessionType.Qualification) {
-    return irrelevantWords !== null && irrelevantWords !== undefined
+    return !words || (irrelevantWords !== null && irrelevantWords !== undefined)
   }
 
   return hasAnswer(answer)
