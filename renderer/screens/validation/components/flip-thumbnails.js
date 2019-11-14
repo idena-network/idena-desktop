@@ -55,7 +55,17 @@ FlipThumbnails.propTypes = {
   onPick: PropTypes.func,
 }
 
-function Thumb({hash, urls, answer, ready, failed, isCurrent, onClick}) {
+function Thumb({
+  hash,
+  urls,
+  answer,
+  ready,
+  failed,
+  isCurrent,
+  onClick,
+  irrelevantWords,
+}) {
+  const hasQualified = irrelevantWords !== null && irrelevantWords !== undefined
   return (
     <Flex
       key={hash}
@@ -72,9 +82,9 @@ function Thumb({hash, urls, answer, ready, failed, isCurrent, onClick}) {
           ...position('relative'),
         }}
       >
-        {hasAnswer(answer) && (
+        {(hasAnswer(answer) || hasQualified) && (
           <Fill
-            bg={rgba(89, 89, 89, 0.95)}
+            bg={hasQualified ? rgba(87, 143, 255, 0.9) : rgba(89, 89, 89, 0.95)}
             css={{
               borderRadius: rem(12),
               display: 'flex',
@@ -126,6 +136,7 @@ Thumb.propTypes = {
   failed: PropTypes.bool,
   isCurrent: PropTypes.bool,
   onClick: PropTypes.func,
+  irrelevantWords: PropTypes.any,
 }
 
 export default FlipThumbnails
