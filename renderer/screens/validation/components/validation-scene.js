@@ -2,15 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, margin, padding, borderRadius, cover} from 'polished'
 import {FiCheck} from 'react-icons/fi'
-import {
-  Col,
-  Box,
-  Fill,
-  Switcher,
-  Label,
-  Button,
-  Heading,
-} from '../../../shared/components'
+import {Col, Box, Fill, Button, Heading} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import Arrow from './arrow'
 import {reorderList} from '../../../shared/utils/arr'
@@ -27,7 +19,6 @@ import {
   useValidationState,
   IRRELEVANT_WORDS_TOGGLED,
 } from '../../../shared/providers/validation-context'
-import {IconButton} from '../../../shared/components/button'
 
 export default function ValidationScene({
   flip: {urls, answer, ready, orders, failed, hash, words, irrelevantWords},

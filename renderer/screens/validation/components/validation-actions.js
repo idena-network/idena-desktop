@@ -44,7 +44,6 @@ function ValidationActions({onSubmitAnswers, countdown}) {
 
 ValidationActions.propTypes = {
   onSubmitAnswers: PropTypes.func,
-  canSubmit: PropTypes.bool,
   countdown: PropTypes.node,
 }
 

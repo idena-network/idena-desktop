@@ -111,7 +111,12 @@ function canSubmit(state, idx) {
   const availableFlips = flips.filter(x => !x.hidden && !x.failed)
   const visibleFlips = flips.filter(x => !x.hidden)
   if (stage === SessionType.Qualification) {
-    return idx >= visibleFlips.length - 1
+    return (
+      availableFlips.every(
+        ({irrelevantWords}) =>
+          irrelevantWords !== null && irrelevantWords !== undefined
+      ) || idx >= visibleFlips.length - 1
+    )
   }
   return (
     availableFlips.map(x => x.answer).every(hasAnswer) ||
@@ -152,7 +157,7 @@ const initialState = {
   epoch: null,
   shortAnswersSubmitted: false,
   longAnswersSubmitted: false,
-  stage: 'short',
+  stage: SessionType.Short,
   qualificationRequested: false,
 }
 
@@ -167,7 +172,7 @@ function validationReducer(state, action) {
         shortAnswers: action.answers,
         epoch: action.epoch,
         shortAnswersSubmitted: true,
-        stage: 'long',
+        stage: SessionType.Long,
         ...initialCeremonyState,
       }
     }
@@ -353,7 +358,7 @@ function validationReducer(state, action) {
         currentIndex: firstUnqualifiedIdx,
         qualificationRequested: false,
         stage: SessionType.Qualification,
-        canSubmit: false,
+        canSubmit: canSubmit(state, firstUnqualifiedIdx),
       }
     }
 
