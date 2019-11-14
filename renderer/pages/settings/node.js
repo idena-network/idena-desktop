@@ -32,8 +32,8 @@ function NodeSettings() {
   const settings = useSettingsState()
   const {
     saveExternalUrl,
-    enableInternalNode,
-    showTransferModal,
+    toggleInternalNode,
+    toggleTransferModal,
   } = useSettingsDispatch()
   const {nodeFailed} = useNodeState()
   const {tryRestartNode} = useNodeDispatch()
@@ -55,9 +55,9 @@ function NodeSettings() {
               isChecked={settings.useInternalNode}
               onChange={() => {
                 if (settings.userBeforeInternalNode) {
-                  showTransferModal()
+                  toggleTransferModal(true)
                 } else {
-                  enableInternalNode(true)
+                  toggleInternalNode(true)
                 }
               }}
               bgOn={theme.colors.primary}
@@ -106,7 +106,7 @@ function NodeSettings() {
           <Box>
             <Switcher
               isChecked={!settings.useInternalNode}
-              onChange={() => enableInternalNode(false)}
+              onChange={() => toggleInternalNode(false)}
               bgOn={theme.colors.primary}
             />
           </Box>

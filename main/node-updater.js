@@ -16,6 +16,9 @@ class NodeUpdater extends events.EventEmitter {
   }
 
   async checkForUpdates(currentVersion, isInternalNode) {
+    this.logger.info(
+      `start checking updates, internal node: ${isInternalNode}, current version: ${currentVersion}`
+    )
     this.currentVersion = currentVersion
     this.isInternalNode = isInternalNode
 

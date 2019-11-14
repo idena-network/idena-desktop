@@ -48,7 +48,6 @@ function nodeReducer(state, action) {
       return {
         ...state,
         nodeReady: false,
-        nodeStarted: false,
         nodeFailed: false,
       }
     }

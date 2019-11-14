@@ -5,6 +5,7 @@ const {spawn, exec} = require('child_process')
 const axios = require('axios')
 const progress = require('progress-stream')
 const semver = require('semver')
+const kill = require('tree-kill')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const appDataPath = require('./app-data-path')
 
@@ -140,13 +141,17 @@ async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
 }
 
 async function stopNode(node) {
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     if (!node) {
       console.log('node process is not found')
       return resolve()
     }
-    node.on('close', resolve)
-    node.kill('SIGINT')
+    kill(node.pid, 'SIGINT', function(err) {
+      if (err) {
+        return reject(err)
+      }
+      return resolve()
+    })
   })
 }
 

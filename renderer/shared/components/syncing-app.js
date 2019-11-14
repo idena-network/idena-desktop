@@ -10,54 +10,66 @@ import {useAutoUpdateState} from '../providers/update-context'
 import {Logo} from './sidebar'
 import Flex from './flex'
 import Box from './box'
+import {GlobalModals} from './modal'
+import {
+  useSettingsState,
+  useSettingsDispatch,
+} from '../providers/settings-context'
+import List from './list'
+import Button, {FlatButton} from './button'
+import Link from './link'
+import {Text, BlockText} from './typo'
 
 export default function SyncingApp() {
   return (
-    <section>
-      <div>
+    <>
+      <GlobalModals />
+      <section>
         <div>
-          <Spinner size={24} />
+          <div>
+            <Spinner size={24} />
+          </div>
+          <div>Synchronizing...</div>
         </div>
-        <div>Synchronizing...</div>
-      </div>
-      <div>
-        <SyncingIdentity />
-      </div>
-      <style jsx>{`
-        section {
-          background: rgb(69, 72, 77);
-          color: white;
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-          height: 100vh;
-        }
+        <div>
+          <SyncingIdentity />
+        </div>
+        <style jsx>{`
+          section {
+            background: rgb(69, 72, 77);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100vh;
+          }
 
-        section > div:first-child {
-          background: rgb(255, 163, 102);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          line-height: ${rem(20, 13)};
-          padding: ${rem(12, 13)};
-          position: relative;
-          text-align: center;
-        }
-        section > div:first-child > div:first-child {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-right: ${rem(18, 13)};
-          transform: scale(0.35);
-        }
-        section > div:nth-child(2) {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: 1;
-        }
-      `}</style>
-    </section>
+          section > div:first-child {
+            background: rgb(255, 163, 102);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: ${rem(20, 13)};
+            padding: ${rem(12, 13)};
+            position: relative;
+            text-align: center;
+          }
+          section > div:first-child > div:first-child {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: ${rem(18, 13)};
+            transform: scale(0.35);
+          }
+          section > div:nth-child(2) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+          }
+        `}</style>
+      </section>
+    </>
   )
 }
 
@@ -250,147 +262,133 @@ function Spinner() {
 
 export function OfflineApp() {
   const {nodeReady, nodeFailed} = useNodeState()
+  const {useInternalNode} = useSettingsState()
   const {nodeProgress} = useAutoUpdateState()
+  const {toggleInternalNode} = useSettingsDispatch()
   return (
-    <section>
-      <div>
-        {!nodeReady && (
-          <div className="loading-wrapper">
-            <Flex>
-              <img src="/static/idena_white.svg" alt="logo" />
-              {/* icon here */}
-              <Flex direction="column" justify="space-between" flex="1">
-                <h2>Downloding Idena Node...</h2>
+    <>
+      <GlobalModals />
+      <section>
+        <div>
+          {!nodeReady && useInternalNode && (
+            <div className="loading-wrapper">
+              <Flex>
+                <img src="/static/idena_white.svg" alt="logo" />
+                {/* icon here */}
+                <Flex direction="column" justify="space-between" flex="1">
+                  <h2>Downloding Idena Node...</h2>
 
-                <Flex justify="space-between">
-                  <div className="gray">
-                    Version {nodeProgress ? nodeProgress.version : ''}
-                  </div>
-                  <div>
-                    {(
-                      (nodeProgress ? nodeProgress.transferred : 0) /
-                      (1024 * 1024)
-                    ).toLocaleString(undefined, {
-                      maximumFractionDigits: 2,
-                    })}{' '}
-                    MB <span className="gray">of</span>{' '}
-                    {(
-                      (nodeProgress ? nodeProgress.length : 0) /
-                      (1024 * 1024)
-                    ).toLocaleString(undefined, {
-                      maximumFractionDigits: 2,
-                    })}{' '}
-                    MB
-                  </div>
+                  <Flex justify="space-between">
+                    <div className="gray">
+                      Version {nodeProgress ? nodeProgress.version : ''}
+                    </div>
+                    <div>
+                      {(
+                        (nodeProgress ? nodeProgress.transferred : 0) /
+                        (1024 * 1024)
+                      ).toLocaleString(undefined, {
+                        maximumFractionDigits: 2,
+                      })}{' '}
+                      MB <span className="gray">of</span>{' '}
+                      {(
+                        (nodeProgress ? nodeProgress.length : 0) /
+                        (1024 * 1024)
+                      ).toLocaleString(undefined, {
+                        maximumFractionDigits: 2,
+                      })}{' '}
+                      MB
+                    </div>
+                  </Flex>
                 </Flex>
               </Flex>
+              <Box>
+                <progress
+                  value={nodeProgress ? nodeProgress.percentage : 0}
+                  max={100}
+                />
+              </Box>
+            </div>
+          )}
+          {!useInternalNode && (
+            <Flex direction="column">
+              <h2>Your external node is offline</h2>
+              <br />
+              <Box>
+                <Button
+                  variant="primary"
+                  onClick={() => toggleInternalNode(true)}
+                >
+                  Run the built-in node
+                </Button>
+              </Box>
+              <br />
+              <BlockText color="white">
+                If you have already node running, please check your connection{' '}
+                <Link color={theme.colors.primary} href="/settings/node">
+                  settings
+                </Link>
+              </BlockText>
             </Flex>
-            <Box>
-              <progress
-                value={nodeProgress ? nodeProgress.percentage : 0}
-                max={100}
-              />
-            </Box>
+          )}
+          <div>
+            {nodeReady && <h3>Idena Node Starting...</h3>}
+            {nodeFailed && <h3>Failed. Try to restart the app.</h3>}
           </div>
-        )}
-        <div>
-          {/* {!nodeReady && nodeProgress ? (
-            <>
-              <h2>Downloding Idena Node...</h2>
-              <div>
-                <h3>Version {nodeProgress.version}</h3>
-                <progress value={nodeProgress.percentage} max={100} />
-              </div>
-            </>
-          ) : null} */}
-          {nodeReady && <h3>Idena Node Starting...</h3>}
-          {nodeFailed && <h3>Failed. Try to restart the app.</h3>}
-          {/* <List>
-            <li>
-              Download the latest version of{' '}
-              <FlatButton
-                color={theme.colors.primary}
-                onClick={() =>
-                  global.openExternal('https://idena.io/?view=download')
-                }
-              >
-                Idena node
-              </FlatButton>
-            </li>
-            <li>
-              Follow the{' '}
-              <FlatButton
-                color={theme.colors.primary}
-                onClick={() =>
-                  global.openExternal('https://idena.io/?view=guide')
-                }
-              >
-                guide
-              </FlatButton>{' '}
-              to install and run Idena node
-            </li>
-            <li>
-              Check your connection{' '}
-              <Link color={theme.colors.primary} href="/settings">
-                settings
-              </Link>
-            </li>
-          </List> */}
         </div>
-      </div>
-      <style jsx>{`
-        section {
-          background: rgb(69, 72, 77);
-          color: white;
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-        }
-        section > div {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: 1;
-        }
-        section > div > div.loading-wrapper {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          width: 50%;
-        }
-        img {
-          width: ${rem(60)};
-          height: ${rem(60)};
-          margin-right: ${rem(10)};
-        }
-        section > div > div.loading-wrapper .gray {
-          opacity: 0.5;
-        }
-        progress {
-          width: 100%;
-          height: ${rem(4, theme.fontSizes.base)};
-          background-color: rgba(0, 0, 0, 0.16);
-        }
-        progress::-webkit-progress-bar {
-          background-color: rgba(0, 0, 0, 0.16);
-        }
-        progress::-webkit-progress-value {
-          background-color: ${theme.colors.primary};
-        }
-        h2 {
-          font-size: ${rem(18, theme.fontSizes.base)};
-          font-weight: 500;
-          margin: 0;
-          word-break: break-all;
-        }
-        span {
-          font-size: ${rem(14, theme.fontSizes.base)};
-          line-height: ${rem(20, theme.fontSizes.base)};
-        }
-        li {
-          margin-bottom: ${rem(theme.spacings.small8, theme.fontSizes.base)};
-        }
-      `}</style>
-    </section>
+        <style jsx>{`
+          section {
+            background: rgb(69, 72, 77);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+          }
+          section > div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+          }
+          section > div > div.loading-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 50%;
+          }
+          img {
+            width: ${rem(60)};
+            height: ${rem(60)};
+            margin-right: ${rem(10)};
+          }
+          section > div > div.loading-wrapper .gray {
+            opacity: 0.5;
+          }
+          progress {
+            width: 100%;
+            height: ${rem(4, theme.fontSizes.base)};
+            background-color: rgba(0, 0, 0, 0.16);
+          }
+          progress::-webkit-progress-bar {
+            background-color: rgba(0, 0, 0, 0.16);
+          }
+          progress::-webkit-progress-value {
+            background-color: ${theme.colors.primary};
+          }
+          h2 {
+            font-size: ${rem(18, theme.fontSizes.base)};
+            font-weight: 500;
+            margin: 0;
+            word-break: break-all;
+          }
+          span {
+            font-size: ${rem(14, theme.fontSizes.base)};
+            line-height: ${rem(20, theme.fontSizes.base)};
+          }
+          li {
+            margin-bottom: ${rem(theme.spacings.small8, theme.fontSizes.base)};
+          }
+        `}</style>
+      </section>
+    </>
   )
 }

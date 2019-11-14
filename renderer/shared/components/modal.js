@@ -20,9 +20,9 @@ import {
 
 export function GlobalModals() {
   const {showExternalUpdateModal} = useAutoUpdateState()
-  const {transferModal} = useSettingsState()
+  const {showTransferModal} = useSettingsState()
   const {hideExternalNodeUpdateModal} = useAutoUpdateDispatch()
-  const {hideTransferModal, enableInternalNode} = useSettingsDispatch()
+  const {toggleTransferModal, toggleInternalNode} = useSettingsDispatch()
 
   return (
     <>
@@ -64,9 +64,9 @@ export function GlobalModals() {
         </Flex>
       </Modal>
       <Modal
-        show={transferModal}
+        show={showTransferModal}
         onHide={() => {
-          hideTransferModal()
+          toggleTransferModal(false)
         }}
         width={500}
       >
@@ -92,7 +92,7 @@ export function GlobalModals() {
           <Box px="4px">
             <Button
               onClick={() => {
-                hideTransferModal()
+                toggleTransferModal(false)
               }}
             >
               Okay, got it
@@ -102,8 +102,8 @@ export function GlobalModals() {
             <Button
               variant="secondary"
               onClick={() => {
-                enableInternalNode(true)
-                hideTransferModal()
+                toggleInternalNode(true)
+                toggleTransferModal(false)
               }}
             >
               Run with a new address

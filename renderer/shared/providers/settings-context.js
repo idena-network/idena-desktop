@@ -5,7 +5,7 @@ import {loadState} from '../utils/persist'
 import {BASE_API_URL, BASE_INTERNAL_API_PORT} from '../api/api-client'
 
 const SETTINGS_INITIALIZE = 'SETTINGS_INITIALIZE'
-const ENABLE_INTERNAL_NODE = 'ENABLE_INTERNAL_NODE'
+const TOGGLE_INTERNL_NODE = 'ENABLE_INTERNAL_NODE'
 const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
 const UPDATE_UI_VERSION = 'UPDATE_UI_VERSION'
 
@@ -20,8 +20,13 @@ const initialState = {
 
 function settingsReducer(state, action) {
   switch (action.type) {
-    case ENABLE_INTERNAL_NODE:
-      return {...state, useInternalNode: action.data}
+    case TOGGLE_INTERNL_NODE: {
+      const newState = {...state, useInternalNode: action.data}
+      if (newState.userBeforeInternalNode && newState.useInternalNode) {
+        delete newState.userBeforeInternalNode
+      }
+      return newState
+    }
     case SAVE_EXTERNAL_URL:
       return {...state, url: action.data}
     case SETTINGS_INITIALIZE:
@@ -55,7 +60,7 @@ function SettingsProvider({children}) {
     'settings'
   )
 
-  const [transferModal, toggleTransferModal] = useState(
+  const [showTransferModal, toggleTransferModal] = useState(
     !state.initialized && !firstRun
   )
 
@@ -78,26 +83,17 @@ function SettingsProvider({children}) {
     dispatch({type: SAVE_EXTERNAL_URL, data: url})
   }
 
-  const enableInternalNode = enable => {
-    dispatch({type: ENABLE_INTERNAL_NODE, data: enable})
-  }
-
-  const showTransferModal = () => {
-    toggleTransferModal(true)
-  }
-
-  const hideTransferModal = () => {
-    toggleTransferModal(false)
+  const toggleInternalNode = enable => {
+    dispatch({type: TOGGLE_INTERNL_NODE, data: enable})
   }
 
   return (
-    <SettingsStateContext.Provider value={{...state, transferModal}}>
+    <SettingsStateContext.Provider value={{...state, showTransferModal}}>
       <SettingsDispatchContext.Provider
         value={{
           saveExternalUrl,
-          enableInternalNode,
-          showTransferModal,
-          hideTransferModal,
+          toggleInternalNode,
+          toggleTransferModal,
         }}
       >
         {children}
