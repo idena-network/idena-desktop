@@ -8,6 +8,7 @@ import {
   useValidationState,
   useValidationDispatch,
   QUALIFICATION_REQUESTED,
+  SessionType,
 } from '../../../shared/providers/validation-context'
 
 function ValidationActions({onSubmitAnswers, countdown}) {
@@ -29,13 +30,13 @@ function ValidationActions({onSubmitAnswers, countdown}) {
       <Flex justify="flex-end" css={{flex: 1}}>
         <Button
           onClick={() =>
-            stage === 'long'
+            stage === SessionType.Long
               ? dispatch({type: QUALIFICATION_REQUESTED})
               : onSubmitAnswers()
           }
           disabled={!canSubmit}
         >
-          {stage === 'long' ? 'Next' : 'Submit answers'}
+          {stage === SessionType.Long ? 'Next' : 'Submit answers'}
         </Button>
       </Flex>
     </Flex>
