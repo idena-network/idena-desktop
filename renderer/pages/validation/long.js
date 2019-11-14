@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react'
 import Router from 'next/router'
-import {backgrounds, rem, padding, position} from 'polished'
+import {backgrounds, rem, padding, position, margin} from 'polished'
 
 import ValidationHeader from '../../screens/validation/components/validation-header'
 import ValidationScene from '../../screens/validation/components/validation-scene'
@@ -18,7 +18,6 @@ import {
 import Timer from '../../screens/validation/components/timer'
 import {useEpochState, EpochPeriod} from '../../shared/providers/epoch-context'
 import theme from '../../shared/theme'
-import Layout from '../../shared/components/layout'
 import {
   useValidationDispatch,
   submitLongAnswers,
@@ -31,6 +30,7 @@ import {
   SessionType,
   fetchFlips,
   WORDS_FETCHED,
+  QUALIFICATION_STARTED,
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
 import Modal from '../../shared/components/modal'
@@ -92,14 +92,15 @@ export default function LongValidation() {
     }
   }, [dispatch, words])
 
-  const handleSubmitAnswers = async () => {
-    await submitLongAnswers(dispatch, state.flips, epoch.epoch)
-  }
+  const [showQualificationDialog, setShowQualificationDialog] = React.useState()
+  useEffect(() => setShowQualificationDialog(state.qualificationRequested), [
+    state.qualificationRequested,
+  ])
 
   const availableFlipsLength = state.flips.filter(x => !x.hidden).length
 
   return (
-    <Layout>
+    <>
       <Flex
         direction="column"
         css={{
@@ -144,7 +145,9 @@ export default function LongValidation() {
         </Flex>
         <ValidationActions
           canSubmit={state.canSubmit}
-          onSubmitAnswers={handleSubmitAnswers}
+          onSubmitAnswers={async () => {
+            await submitLongAnswers(dispatch, state.flips, epoch.epoch)
+          }}
           countdown={<Timer type={SessionType.Long} />}
         />
         <FlipThumbnails
@@ -153,13 +156,7 @@ export default function LongValidation() {
           onPick={index => dispatch({type: PICK, index})}
         />
       </Flex>
-
-      <Modal
-        show={showModal}
-        onHide={() => {
-          setShowModal(false)
-        }}
-      >
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Box m="0 0 18px">
           <SubHeading>Short session is over</SubHeading>
           <Text>
@@ -179,7 +176,34 @@ export default function LongValidation() {
           </Box>
         </Flex>
       </Modal>
-    </Layout>
+      <Modal
+        show={showQualificationDialog}
+        onHide={() => setShowQualificationDialog(false)}
+      >
+        <Box m="0 0 18px">
+          <SubHeading css={margin(0, 0, rem(10))}>
+            Your answers are not yet submitted
+          </SubHeading>
+          <Text css={margin(0, 0, rem(16))}>
+            Please qualify the keywords relevance and submit the answers.
+          </Text>
+          <Text>The flips with irrelevant keywords will be penalized.</Text>
+        </Box>
+        <Flex align="center" justify="flex-end">
+          <Box px="4px">
+            <Button
+              onClick={() =>
+                dispatch({
+                  type: QUALIFICATION_STARTED,
+                })
+              }
+            >
+              Ok, I understand
+            </Button>
+          </Box>
+        </Flex>
+      </Modal>
+    </>
   )
 }
 

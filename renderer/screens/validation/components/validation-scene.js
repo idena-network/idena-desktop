@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, margin, padding, borderRadius, cover} from 'polished'
-import {Col, Box, Fill, Switcher, Label} from '../../../shared/components'
+import {FiCheck} from 'react-icons/fi'
+import {Col, Box, Fill, Button, Heading} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import Arrow from './arrow'
 import {reorderList} from '../../../shared/utils/arr'
@@ -20,24 +21,25 @@ import {
 } from '../../../shared/providers/validation-context'
 
 export default function ValidationScene({
-  flip: {urls, answer, ready, orders, failed, hash, words},
+  flip: {urls, answer, ready, orders, failed, hash, words, irrelevantWords},
   isFirst,
   isLast,
   type,
 }) {
+  const {stage} = useValidationState()
   const dispatch = useValidationDispatch()
   return (
     <Flex
       justify="space-between"
       flex={1}
-      css={margin(0, rem(theme.spacings.medium24), 0)}
+      css={margin(0, rem(theme.spacings.medium24, theme.fontSizes.base), 0)}
     >
       {!isFirst && (
         <Box onClick={() => dispatch({type: PREV})}>
           <Arrow dir="prev" type={type} />
         </Box>
       )}
-      <Flex>
+      <Flex align="center">
         <Flex
           direction="column"
           justify="center"
@@ -66,10 +68,15 @@ export default function ValidationScene({
                   height={110}
                   width={147}
                   style={{
-                    ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
+                    ...borderRadius(
+                      'top',
+                      idx === 0 ? rem(8, theme.fontSizes.base) : 'none'
+                    ),
                     ...borderRadius(
                       'bottom',
-                      idx === urls.length - 1 ? rem(8) : 'none'
+                      idx === urls.length - 1
+                        ? rem(8, theme.fontSizes.base)
+                        : 'none'
                     ),
                     position: 'absolute',
                     top: '50%',
@@ -134,10 +141,15 @@ export default function ValidationScene({
                 <img
                   alt="currentFlip"
                   style={{
-                    ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
+                    ...borderRadius(
+                      'top',
+                      idx === 0 ? rem(8, theme.fontSizes.base) : 'none'
+                    ),
                     ...borderRadius(
                       'bottom',
-                      idx === urls.length - 1 ? rem(8) : 'none'
+                      idx === urls.length - 1
+                        ? rem(8, theme.fontSizes.base)
+                        : 'none'
                     ),
                     position: 'absolute',
                     top: '50%',
@@ -176,11 +188,19 @@ export default function ValidationScene({
               </Box>
             ))}
         </Flex>
-        {type === SessionType.Long && ready && !failed && (
-          <Words key={hash} words={words} />
-        )}
+        {type === SessionType.Long &&
+          stage === SessionType.Qualification &&
+          ready &&
+          !failed && <Words key={hash} words={words} />}
       </Flex>
-      {!isLast && (!ready || hasAnswer(answer)) && (
+      {shouldAllowNext(
+        isLast,
+        ready,
+        stage,
+        answer,
+        irrelevantWords,
+        words
+      ) && (
         <Col onClick={() => dispatch({type: NEXT})} w={4}>
           <Arrow dir="next" type={type} />
         </Col>
@@ -208,19 +228,29 @@ function Words({words}) {
 
   const haveWords = words && words.length
   const {irrelevantWords} = flips[currentIndex]
+  const hasQualified = irrelevantWords !== null && irrelevantWords !== undefined
 
   return (
-    <Flex
-      align="center"
+    <Box
       css={{
-        ...margin(0, 0, 0, rem(theme.spacings.medium24, theme.fontSizes.base)),
-        width: '200px',
+        ...margin(0, 0, 0, rem(36, theme.fontSizes.base)),
+        width: rem(280, theme.fontSizes.base),
       }}
     >
+      <Heading fontSize={rem(18, theme.fontSizes.base)} fontWeight={500}>
+        Are both keywords relevant to the flip?
+      </Heading>
       <Box>
         <Box
           style={{
-            ...margin(0, 0, rem(29, theme.fontSizes.base)),
+            background: theme.colors.gray,
+            borderRadius: rem(8, theme.fontSizes.base),
+            ...margin(rem(32, theme.fontSizes.base), 0),
+            ...padding(
+              rem(33, theme.fontSizes.base),
+              rem(40, theme.fontSizes.base),
+              rem(39, theme.fontSizes.base)
+            ),
           }}
         >
           {haveWords ? (
@@ -239,7 +269,7 @@ function Words({words}) {
                 <Box
                   style={{
                     color: theme.colors.muted,
-                    lineHeight: rem(20),
+                    lineHeight: rem(20, theme.fontSizes.base),
                     ...margin(
                       0,
                       0,
@@ -260,17 +290,16 @@ function Words({words}) {
                   lineHeight: rem(20, theme.fontSizes.base),
                 }}
               >
-                Getting keywords...
+                Getting flip keywords...
               </Box>
               {[
-                'Loading keywords to moderate the story 📬🏗🔤',
-                'Feel free to skip this step.',
+                'Can not load the flip keywords to moderate the story. Please wait or skip this flip.',
               ].map((w, idx) => (
                 <Box
                   key={`desc-${idx}`}
                   style={{
                     color: theme.colors.muted,
-                    lineHeight: rem(20),
+                    lineHeight: rem(20, theme.fontSizes.base),
                     ...margin(
                       rem(theme.spacings.small8, theme.fontSizes.base),
                       0,
@@ -284,35 +313,74 @@ function Words({words}) {
             </>
           )}
         </Box>
-        <Flex align="center">
-          <Box>
-            <Switcher
-              isChecked={irrelevantWords}
-              onChange={() => dispatch({type: IRRELEVANT_WORDS_TOGGLED})}
-              disabled={!haveWords}
-              bgOn={theme.colors.danger}
-            />
-          </Box>
-          <Label
-            htmlFor="switcher"
-            style={{
-              color: haveWords ? theme.colors.text : theme.colors.muted,
-              cursor: haveWords ? 'pointer' : 'not-allowed',
-              ...margin(
-                0,
-                0,
-                0,
-                rem(theme.spacings.small12, theme.fontSizes.base)
-              ),
-            }}
-            onClick={() => dispatch({type: IRRELEVANT_WORDS_TOGGLED})}
+        <Flex align="center" justify="space-between">
+          <Button
+            variant={hasQualified && !irrelevantWords ? 'primary' : 'secondary'}
+            onClick={() =>
+              dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: false})
+            }
+            style={{fontWeight: 500, width: rem(136, theme.fontSizes.base)}}
           >
-            Report irrelevant words
-          </Label>
+            <Flex align="center" justify="center">
+              {hasQualified && !irrelevantWords && (
+                <FiCheck
+                  size={16}
+                  style={margin(0, rem(4, theme.fontSizes.base), 0, 0)}
+                />
+              )}
+              <Box style={{whiteSpace: 'nowrap'}}>Both relevant</Box>
+            </Flex>
+          </Button>
+          <Button
+            style={
+              hasQualified && irrelevantWords
+                ? {
+                    backgroundColor: theme.colors.danger,
+                    color: theme.colors.white,
+                    fontWeight: 500,
+                    width: rem(136, theme.fontSizes.base),
+                  }
+                : {
+                    backgroundColor: theme.colors.danger02,
+                    color: theme.colors.danger,
+                    fontWeight: 500,
+                    width: rem(136, theme.fontSizes.base),
+                  }
+            }
+            onClick={() =>
+              dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: true})
+            }
+          >
+            <Flex align="center" justify="center">
+              {hasQualified && irrelevantWords && (
+                <FiCheck
+                  size={16}
+                  style={margin(0, rem(4, theme.fontSizes.base), 0, 0)}
+                />
+              )}
+              <Box>Irrelevant</Box>
+            </Flex>
+          </Button>
         </Flex>
       </Box>
-    </Flex>
+    </Box>
   )
+}
+
+function shouldAllowNext(isLast, ready, stage, answer, irrelevantWords, words) {
+  if (isLast) {
+    return false
+  }
+
+  if (!ready) {
+    return true
+  }
+
+  if (stage === SessionType.Qualification) {
+    return !words || (irrelevantWords !== null && irrelevantWords !== undefined)
+  }
+
+  return hasAnswer(answer)
 }
 
 const defaultStyle = {

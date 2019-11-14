@@ -18,6 +18,7 @@ export const AnswerType = {
 export const SessionType = {
   Short: 'short',
   Long: 'long',
+  Qualification: 'qualification',
 }
 
 function fromHexString(hexString) {
@@ -105,9 +106,21 @@ export function hasAnswer(answer) {
   return Number.isFinite(answer)
 }
 
-function canSubmit(flips, idx) {
+function canSubmit(state, idx) {
+  const {flips, stage} = state
   const availableFlips = flips.filter(x => !x.hidden && !x.failed)
   const visibleFlips = flips.filter(x => !x.hidden)
+  if (stage === SessionType.Qualification) {
+    return (
+      availableFlips.every(
+        ({words, irrelevantWords}) =>
+          words &&
+          words.length &&
+          irrelevantWords !== null &&
+          irrelevantWords !== undefined
+      ) || idx >= visibleFlips.length - 1
+    )
+  }
   return (
     availableFlips.map(x => x.answer).every(hasAnswer) ||
     idx >= visibleFlips.length - 1
@@ -129,6 +142,8 @@ export const REPORT_ABUSE = 'REPORT_ABUSE'
 export const SHOW_EXTRA_FLIPS = 'SHOW_EXTRA_FLIPS'
 export const WORDS_FETCHED = 'WORDS_FETCHED'
 export const IRRELEVANT_WORDS_TOGGLED = 'IRRELEVANT_WORDS_TOGGLED'
+export const QUALIFICATION_REQUESTED = 'QUALIFICATION_REQUESTED'
+export const QUALIFICATION_STARTED = 'QUALIFICATION_STARTED'
 
 const initialCeremonyState = {
   flips: [],
@@ -139,12 +154,14 @@ const initialCeremonyState = {
 }
 
 const initialState = {
+  ...initialCeremonyState,
   shortAnswers: [],
   longAnswers: [],
   epoch: null,
   shortAnswersSubmitted: false,
   longAnswersSubmitted: false,
-  ...initialCeremonyState,
+  stage: SessionType.Short,
+  qualificationRequested: false,
 }
 
 function validationReducer(state, action) {
@@ -158,6 +175,7 @@ function validationReducer(state, action) {
         shortAnswers: action.answers,
         epoch: action.epoch,
         shortAnswersSubmitted: true,
+        stage: SessionType.Long,
         ...initialCeremonyState,
       }
     }
@@ -167,6 +185,7 @@ function validationReducer(state, action) {
         longAnswers: action.answers,
         epoch: action.epoch,
         longAnswersSubmitted: true,
+        qualificationRequested: false,
         ...initialCeremonyState,
       }
     }
@@ -218,7 +237,7 @@ function validationReducer(state, action) {
       return {
         ...state,
         currentIndex: idx,
-        canSubmit: canSubmit(state.flips, idx),
+        canSubmit: canSubmit(state, idx),
       }
     }
     case NEXT: {
@@ -226,14 +245,14 @@ function validationReducer(state, action) {
       return {
         ...state,
         currentIndex: idx,
-        canSubmit: canSubmit(state.flips, idx),
+        canSubmit: canSubmit(state, idx),
       }
     }
     case PICK: {
       return {
         ...state,
         currentIndex: action.index,
-        canSubmit: canSubmit(state.flips, action.index),
+        canSubmit: canSubmit(state, action.index),
       }
     }
     case ANSWER: {
@@ -245,7 +264,7 @@ function validationReducer(state, action) {
       return {
         ...state,
         flips,
-        canSubmit: canSubmit(flips, state.currentIndex),
+        canSubmit: canSubmit(state, state.currentIndex),
       }
     }
     case REPORT_ABUSE: {
@@ -261,7 +280,7 @@ function validationReducer(state, action) {
         ...state,
         flips,
         currentIndex: idx,
-        canSubmit: canSubmit(flips, idx),
+        canSubmit: canSubmit(state, state.currentIndex),
       }
     }
     case SHOW_EXTRA_FLIPS: {
@@ -296,16 +315,16 @@ function validationReducer(state, action) {
 
       return {
         ...state,
-        canSubmit: canSubmit(flips, state.currentIndex),
+        canSubmit: canSubmit(state, state.currentIndex),
         flips: reorderFlips(flips),
         ready: true,
       }
     }
     case IRRELEVANT_WORDS_TOGGLED: {
-      const {irrelevantWords, ...currentFlip} = state.flips[state.currentIndex]
+      const currentFlip = state.flips[state.currentIndex]
       const flips = [
         ...state.flips.slice(0, state.currentIndex),
-        {...currentFlip, irrelevantWords: !irrelevantWords},
+        {...currentFlip, irrelevantWords: action.irrelevant},
         ...state.flips.slice(state.currentIndex + 1),
       ]
       return {
@@ -327,6 +346,25 @@ function validationReducer(state, action) {
         ],
       }
     }
+    case QUALIFICATION_REQUESTED:
+      return {
+        ...state,
+        qualificationRequested: true,
+      }
+    case QUALIFICATION_STARTED: {
+      const firstUnqualifiedIdx = state.flips.findIndex(
+        ({irrelevantWords}) =>
+          irrelevantWords === undefined || irrelevantWords === null
+      )
+      return {
+        ...state,
+        currentIndex: firstUnqualifiedIdx,
+        qualificationRequested: false,
+        stage: SessionType.Qualification,
+        canSubmit: canSubmit(state, firstUnqualifiedIdx),
+      }
+    }
+
     default: {
       throw new Error(`Unhandled action type: ${action.type}`)
     }

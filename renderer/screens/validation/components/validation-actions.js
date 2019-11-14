@@ -4,8 +4,16 @@ import {margin, rem} from 'polished'
 import {Button} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import theme from '../../../shared/theme'
+import {
+  useValidationState,
+  useValidationDispatch,
+  QUALIFICATION_REQUESTED,
+  SessionType,
+} from '../../../shared/providers/validation-context'
 
-function ValidationActions({onSubmitAnswers, canSubmit, countdown}) {
+function ValidationActions({onSubmitAnswers, countdown}) {
+  const {canSubmit, stage} = useValidationState()
+  const dispatch = useValidationDispatch()
   return (
     <Flex
       justify="space-between"
@@ -20,11 +28,16 @@ function ValidationActions({onSubmitAnswers, canSubmit, countdown}) {
         {countdown}
       </Flex>
       <Flex justify="flex-end" css={{flex: 1}}>
-        {
-          <Button onClick={onSubmitAnswers} disabled={!canSubmit}>
-            Submit answers
-          </Button>
-        }
+        <Button
+          onClick={() =>
+            stage === SessionType.Long
+              ? dispatch({type: QUALIFICATION_REQUESTED})
+              : onSubmitAnswers()
+          }
+          disabled={!canSubmit}
+        >
+          {stage === SessionType.Long ? 'Next' : 'Submit answers'}
+        </Button>
       </Flex>
     </Flex>
   )
@@ -32,7 +45,6 @@ function ValidationActions({onSubmitAnswers, canSubmit, countdown}) {
 
 ValidationActions.propTypes = {
   onSubmitAnswers: PropTypes.func,
-  canSubmit: PropTypes.bool,
   countdown: PropTypes.node,
 }
 
