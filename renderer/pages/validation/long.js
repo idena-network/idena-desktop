@@ -18,7 +18,6 @@ import {
 import Timer from '../../screens/validation/components/timer'
 import {useEpochState, EpochPeriod} from '../../shared/providers/epoch-context'
 import theme from '../../shared/theme'
-import Layout from '../../shared/components/layout'
 import {
   useValidationDispatch,
   submitLongAnswers,
@@ -101,7 +100,7 @@ export default function LongValidation() {
   const availableFlipsLength = state.flips.filter(x => !x.hidden).length
 
   return (
-    <Layout>
+    <>
       <Flex
         direction="column"
         css={{
@@ -204,7 +203,7 @@ export default function LongValidation() {
           </Box>
         </Flex>
       </Modal>
-    </Layout>
+    </>
   )
 }
 

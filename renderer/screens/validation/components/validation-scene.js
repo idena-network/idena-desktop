@@ -314,9 +314,11 @@ function Words({words}) {
             }
           >
             <Flex align="center">
-              <Box style={padding(0, rem(4))}>
-                {hasQualified && !irrelevantWords ? <FiCheck /> : null}
-              </Box>
+              {hasQualified && !irrelevantWords && (
+                <Box style={padding(0, rem(4))}>
+                  <FiCheck />
+                </Box>
+              )}
               <Box style={{whiteSpace: 'nowrap'}}>Both relevant</Box>
             </Flex>
           </Button>
@@ -337,9 +339,11 @@ function Words({words}) {
             }
           >
             <Flex align="center">
-              <Box style={padding(0, rem(4))}>
-                {hasQualified && irrelevantWords ? <FiCheck /> : null}
-              </Box>
+              {hasQualified && irrelevantWords && (
+                <Box style={padding(0, rem(4))}>
+                  <FiCheck />
+                </Box>
+              )}
               <Box>Irrelevant</Box>
             </Flex>
           </Button>
