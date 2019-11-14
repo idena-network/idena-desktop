@@ -95,7 +95,9 @@ function Thumb({
             {answer === AnswerType.Inappropriate ? (
               <FiZap size={rem(20)} color={theme.colors.white} />
             ) : (
-              <FiCheck size={rem(20)} color={theme.colors.white} />
+              hasAnswer(answer) && (
+                <FiCheck size={rem(20)} color={theme.colors.white} />
+              )
             )}
           </Fill>
         )}
