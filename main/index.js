@@ -231,7 +231,7 @@ autoUpdater.on('update-downloaded', info => {
 })
 
 ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
-  console.log(`new ${AUTO_UPDATE_COMMAND}`, command)
+  logger.info(`new autoupdate command`, command, data)
   switch (command) {
     case 'start-checking': {
       nodeUpdater.checkForUpdates(data.nodeCurrentVersion, data.isInternalNode)
@@ -304,7 +304,7 @@ app.on('window-all-closed', () => {
 })
 
 ipcMain.on(NODE_COMMAND, async (event, command, data) => {
-  console.log(`new ${NODE_COMMAND}`, command)
+  logger.info(`new node command`, command, data)
 
   switch (command) {
     case 'init-local-node': {

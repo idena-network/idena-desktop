@@ -7,7 +7,6 @@ import {usePoll} from '../hooks/use-interval'
 import Avatar from './avatar'
 import {useNodeState} from '../providers/node-context'
 import {useAutoUpdateState} from '../providers/update-context'
-import {Logo} from './sidebar'
 import Flex from './flex'
 import Box from './box'
 import {GlobalModals} from './modal'
@@ -15,10 +14,9 @@ import {
   useSettingsState,
   useSettingsDispatch,
 } from '../providers/settings-context'
-import List from './list'
-import Button, {FlatButton} from './button'
+import Button from './button'
 import Link from './link'
-import {Text, BlockText} from './typo'
+import {BlockText} from './typo'
 
 export default function SyncingApp() {
   return (
@@ -262,9 +260,9 @@ function Spinner() {
 
 export function OfflineApp() {
   const {nodeReady, nodeFailed} = useNodeState()
-  const {useInternalNode} = useSettingsState()
+  const {useInternalNode, userBeforeInternalNode} = useSettingsState()
   const {nodeProgress} = useAutoUpdateState()
-  const {toggleInternalNode} = useSettingsDispatch()
+  const {toggleTransferModal, toggleInternalNode} = useSettingsDispatch()
   return (
     <>
       <GlobalModals />
@@ -289,7 +287,7 @@ export function OfflineApp() {
                       ).toLocaleString(undefined, {
                         maximumFractionDigits: 2,
                       })}{' '}
-                      MB <span className="gray">of</span>{' '}
+                      MB <span className="gray">out of</span>{' '}
                       {(
                         (nodeProgress ? nodeProgress.length : 0) /
                         (1024 * 1024)
@@ -316,7 +314,13 @@ export function OfflineApp() {
               <Box>
                 <Button
                   variant="primary"
-                  onClick={() => toggleInternalNode(true)}
+                  onClick={() => {
+                    if (userBeforeInternalNode) {
+                      toggleTransferModal(true)
+                    } else {
+                      toggleInternalNode(true)
+                    }
+                  }}
                 >
                   Run the built-in node
                 </Button>

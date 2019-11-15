@@ -3,6 +3,7 @@ import semver from 'semver'
 import {usePersistence} from '../hooks/use-persistent-state'
 import {loadState} from '../utils/persist'
 import {BASE_API_URL, BASE_INTERNAL_API_PORT} from '../api/api-client'
+import useLogger from '../hooks/use-logger'
 
 const SETTINGS_INITIALIZE = 'SETTINGS_INITIALIZE'
 const TOGGLE_INTERNL_NODE = 'ENABLE_INTERNAL_NODE'
@@ -56,13 +57,13 @@ function SettingsProvider({children}) {
   const firstRun = global.isFirstRun
 
   const [state, dispatch] = usePersistence(
-    React.useReducer(settingsReducer, loadState('settings') || initialState),
+    useLogger(
+      React.useReducer(settingsReducer, loadState('settings') || initialState)
+    ),
     'settings'
   )
 
-  const [showTransferModal, toggleTransferModal] = useState(
-    !state.initialized && !firstRun
-  )
+  const [showTransferModal, toggleTransferModal] = useState(false)
 
   useEffect(() => {
     if (!state.initialized) {

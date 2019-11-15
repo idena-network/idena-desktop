@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react'
 import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
 import {useSettingsState} from './settings-context'
+import useLogger from '../hooks/use-logger'
 
 const NODE_READY = 'NODE_READY'
 const INIT_FAILED = 'INIT_FAILED'
@@ -16,8 +17,6 @@ const initialState = {
 }
 
 function nodeReducer(state, action) {
-  console.log(state, action)
-
   switch (action.type) {
     case INIT_FAILED: {
       return {
@@ -63,7 +62,9 @@ const NodeDispatchContext = React.createContext()
 function NodeProvider({children}) {
   const settings = useSettingsState()
 
-  const [state, dispatch] = React.useReducer(nodeReducer, initialState)
+  const [state, dispatch] = useLogger(
+    React.useReducer(nodeReducer, initialState)
+  )
 
   useEffect(() => {
     const onEvent = (_sender, event, data) => {
@@ -96,7 +97,7 @@ function NodeProvider({children}) {
 
   useEffect(() => {
     dispatch({type: NODE_REINIT})
-  }, [settings.useInternalNode])
+  }, [settings.useInternalNode, dispatch])
 
   useEffect(() => {
     if (
