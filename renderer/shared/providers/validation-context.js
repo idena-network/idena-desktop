@@ -106,8 +106,7 @@ export function hasAnswer(answer) {
   return Number.isFinite(answer)
 }
 
-function canSubmit(state, idx) {
-  const {flips, stage} = state
+function canSubmit(flips, stage, idx) {
   const availableFlips = flips.filter(x => !x.hidden && !x.failed)
   const visibleFlips = flips.filter(x => !x.hidden)
   if (stage === SessionType.Qualification) {
@@ -234,25 +233,28 @@ function validationReducer(state, action) {
     }
     case PREV: {
       const idx = Math.max(state.currentIndex - 1, 0)
+      const {flips, stage} = state
       return {
         ...state,
         currentIndex: idx,
-        canSubmit: canSubmit(state, idx),
+        canSubmit: canSubmit(flips, stage, idx),
       }
     }
     case NEXT: {
       const idx = Math.min(state.currentIndex + 1, state.flips.length - 1)
+      const {flips, stage} = state
       return {
         ...state,
         currentIndex: idx,
-        canSubmit: canSubmit(state, idx),
+        canSubmit: canSubmit(flips, stage, idx),
       }
     }
     case PICK: {
+      const {flips, stage} = state
       return {
         ...state,
         currentIndex: action.index,
-        canSubmit: canSubmit(state, action.index),
+        canSubmit: canSubmit(flips, stage, action.index),
       }
     }
     case ANSWER: {
@@ -264,7 +266,7 @@ function validationReducer(state, action) {
       return {
         ...state,
         flips,
-        canSubmit: canSubmit(state, state.currentIndex),
+        canSubmit: canSubmit(flips, state.stage, state.currentIndex),
       }
     }
     case REPORT_ABUSE: {
@@ -273,14 +275,13 @@ function validationReducer(state, action) {
         {...state.flips[state.currentIndex], answer: AnswerType.Inappropriate},
         ...state.flips.slice(state.currentIndex + 1),
       ]
-
       const availableFlipsLength = flips.filter(x => !x.hidden).length
       const idx = Math.min(state.currentIndex + 1, availableFlipsLength - 1)
       return {
         ...state,
         flips,
         currentIndex: idx,
-        canSubmit: canSubmit(state, state.currentIndex),
+        canSubmit: canSubmit(flips, state.stage, idx),
       }
     }
     case SHOW_EXTRA_FLIPS: {
@@ -313,10 +314,12 @@ function validationReducer(state, action) {
         }
       }
 
+      const reorderedFlips = reorderFlips(flips)
+
       return {
         ...state,
-        canSubmit: canSubmit(state, state.currentIndex),
-        flips: reorderFlips(flips),
+        canSubmit: canSubmit(reorderedFlips, state.stage, state.currentIndex),
+        flips: reorderedFlips,
         ready: true,
       }
     }
@@ -361,7 +364,11 @@ function validationReducer(state, action) {
         currentIndex: firstUnqualifiedIdx,
         qualificationRequested: false,
         stage: SessionType.Qualification,
-        canSubmit: canSubmit(state, firstUnqualifiedIdx),
+        canSubmit: canSubmit(
+          state.flips,
+          SessionType.Qualification,
+          firstUnqualifiedIdx
+        ),
       }
     }
 
