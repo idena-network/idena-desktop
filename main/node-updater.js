@@ -7,6 +7,8 @@ const {
   getCurrentVersion,
 } = require('./idena-node')
 
+const checkingInterval = 10 * 60 * 1000
+
 class NodeUpdater extends events.EventEmitter {
   constructor(logger) {
     super()
@@ -57,7 +59,7 @@ class NodeUpdater extends events.EventEmitter {
     } catch (e) {
       this.logger.error('error while checking update', e.toString())
     } finally {
-      this.timeout = setTimeout(() => this.doUpdateCheck(), 60 * 60 * 1000)
+      this.timeout = setTimeout(() => this.doUpdateCheck(), checkingInterval)
     }
 
     return false

@@ -270,8 +270,12 @@ function checkForUpdates() {
   }
 
   setInterval(() => {
-    autoUpdater.checkForUpdates()
-  }, 60 * 60 * 1000)
+    try {
+      autoUpdater.checkForUpdates()
+    } catch (e) {
+      logger.error('error while checking UI update', e.toString())
+    }
+  }, 10 * 60 * 1000)
 
   autoUpdater.checkForUpdates()
 }
