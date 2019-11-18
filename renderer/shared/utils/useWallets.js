@@ -22,7 +22,7 @@ function getTransactionTypeName(tx) {
   if (type === 'invite') return 'Invitation issued'
   if (type === 'killInvitee') return 'Invitation terminated'
   if (type === 'kill') return 'Identity terminated'
-  if (type === 'submitFlip') return 'Flip submtted'
+  if (type === 'submitFlip') return 'Flip submitted'
   if (type === 'online')
     return `Mining status ${payload === '0xc101' ? 'On' : 'Off'}`
   return ''
