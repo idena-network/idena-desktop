@@ -46,6 +46,15 @@ function NodeSettings() {
       body: `Connected to ${url}`,
     })
 
+  const toggleSwitcher = () => {
+    if (settings.useInternalNode) {
+      toggleInternalNode(false)
+    } else if (settings.userBeforeInternalNode) {
+      toggleTransferModal(true)
+    } else {
+      toggleInternalNode(true)
+    }
+  }
   return (
     <SettingsLayout>
       <Box py={theme.spacings.xlarge}>
@@ -53,13 +62,7 @@ function NodeSettings() {
           <Box>
             <Switcher
               isChecked={settings.useInternalNode}
-              onChange={() => {
-                if (settings.userBeforeInternalNode) {
-                  toggleTransferModal(true)
-                } else {
-                  toggleInternalNode(true)
-                }
-              }}
+              onChange={toggleSwitcher}
               bgOn={theme.colors.primary}
             />
           </Box>
@@ -106,7 +109,7 @@ function NodeSettings() {
           <Box>
             <Switcher
               isChecked={!settings.useInternalNode}
-              onChange={() => toggleInternalNode(false)}
+              onChange={toggleSwitcher}
               bgOn={theme.colors.primary}
             />
           </Box>

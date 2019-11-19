@@ -269,8 +269,8 @@ export function OfflineApp() {
       <section>
         <div>
           {!nodeReady && useInternalNode && (
-            <div className="loading-wrapper">
-              <Flex>
+            <>
+              <Flex width="100%">
                 <img src="/static/idena_white.svg" alt="logo" />
                 {/* icon here */}
                 <Flex direction="column" justify="space-between" flex="1">
@@ -299,16 +299,16 @@ export function OfflineApp() {
                   </Flex>
                 </Flex>
               </Flex>
-              <Box>
+              <Flex width="100%" css={{marginTop: 10}}>
                 <progress
                   value={nodeProgress ? nodeProgress.percentage : 0}
                   max={100}
                 />
-              </Box>
-            </div>
+              </Flex>
+            </>
           )}
           {!useInternalNode && (
-            <Flex direction="column">
+            <>
               <h2>Your external node is offline</h2>
               <br />
               <Box>
@@ -332,12 +332,10 @@ export function OfflineApp() {
                   settings
                 </Link>
               </BlockText>
-            </Flex>
+            </>
           )}
-          <div>
-            {nodeReady && <h3>Idena Node Starting...</h3>}
-            {nodeFailed && <h3>Failed. Try to restart the app.</h3>}
-          </div>
+          {nodeReady && <h3>Idena Node Starting...</h3>}
+          {nodeFailed && <h3>Failed. Try to restart the app.</h3>}
         </div>
         <style jsx>{`
           section {
@@ -345,26 +343,24 @@ export function OfflineApp() {
             color: white;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
             flex: 1;
           }
           section > div {
             display: flex;
             align-items: center;
-            justify-content: center;
-            flex: 1;
-          }
-          section > div > div.loading-wrapper {
-            display: flex;
-            flex-direction: column;
             justify-content: space-between;
+            flex-direction: column;
             width: 50%;
           }
+
           img {
             width: ${rem(60)};
             height: ${rem(60)};
             margin-right: ${rem(10)};
           }
-          section > div > div.loading-wrapper .gray {
+          section .gray {
             opacity: 0.5;
           }
           progress {

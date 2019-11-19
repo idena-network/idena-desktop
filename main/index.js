@@ -42,6 +42,7 @@ const NodeUpdater = require('./node-updater')
 
 let mainWindow
 let node
+let nodeDownloadPromise = null
 let tray
 let expressPort = 3051
 
@@ -318,7 +319,10 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
         })
         .catch(e => {
           logger.error('error while getting current node version', e.toString())
-          downloadNode(info => {
+          if (nodeDownloadPromise) {
+            return
+          }
+          nodeDownloadPromise = downloadNode(info => {
             mainWindow.webContents.send(
               AUTO_UPDATE_EVENT,
               'node-download-progress',
@@ -335,6 +339,9 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
             .catch(err => {
               mainWindow.webContents.send(NODE_EVENT, 'node-failed')
               logger.error('error while downlading node', err.toString())
+            })
+            .finally(() => {
+              nodeDownloadPromise = null
             })
         })
       break
@@ -354,6 +361,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
     case 'stop-local-node': {
       stopNode(node)
         .then(() => {
+          node = null
           mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
         })
         .catch(e => {
@@ -365,6 +373,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
     case 'clean-state': {
       stopNode(node)
         .then(async () => {
+          node = null
           cleanNodeState()
           mainWindow.webContents.send(NODE_EVENT, 'state-cleaned')
         })
