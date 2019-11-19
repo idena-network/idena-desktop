@@ -148,17 +148,24 @@ function ImportPK() {
   const {importNodeKey} = useNodeDispatch()
 
   const submit = async () => {
-    const {error} = await importKey(key, password)
-    if (error) {
-      addError({title: 'Error while importing key', body: error.message})
-    } else {
-      importNodeKey()
-      addNotification({
-        title: 'Success',
-        body: 'Key was imported. Please, wait, while node is restarting.',
+    try {
+      const {error} = await importKey(key, password)
+      if (error) {
+        addError({title: 'Error while importing key', body: error.message})
+      } else {
+        importNodeKey()
+        addNotification({
+          title: 'Success',
+          body: 'Key was imported. Please, wait, while node is restarting.',
+        })
+        setKey('')
+        setPassword('')
+      }
+    } catch (e) {
+      addError({
+        title: 'Error while importing key',
+        body: 'Internal node is not available. Try again in a few seconds.',
       })
-      setKey('')
-      setPassword('')
     }
   }
 
