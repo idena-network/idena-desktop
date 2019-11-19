@@ -340,7 +340,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
       break
     }
     case 'start-local-node': {
-      startNode(data.rpcPort, data.tcpPort, data.ipfsPort, true)
+      startNode(data.rpcPort, data.tcpPort, data.ipfsPort, isDev)
         .then(n => {
           node = n
           mainWindow.webContents.send(NODE_EVENT, 'node-started')
