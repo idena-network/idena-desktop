@@ -141,11 +141,11 @@ function AutoUpdateProvider({children}) {
     if (settings.initialized && state.nodeCurrentVersion !== '0.0.0') {
       global.ipcRenderer.send(AUTO_UPDATE_COMMAND, 'start-checking', {
         nodeCurrentVersion: state.nodeCurrentVersion,
-        isInternalNode: settings.useInternalNode,
+        isInternalNode: !settings.useExternalNode,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.useInternalNode, settings.url, state.nodeCurrentVersion])
+  }, [settings.useExternalNode, settings.url, state.nodeCurrentVersion])
 
   useInterval(
     async () => {
@@ -166,19 +166,19 @@ function AutoUpdateProvider({children}) {
 
   const nodeCanUpdate =
     !state.nodeUpdating &&
-    ((settings.useInternalNode && state.nodeUpdateReady) ||
-      (!settings.useInternalNode && state.nodeUpdateAvailable))
+    ((!settings.useExternalNode && state.nodeUpdateReady) ||
+      (settings.useExternalNode && state.nodeUpdateAvailable))
 
   const uiUpdate = () => {
     global.ipcRenderer.send(AUTO_UPDATE_COMMAND, 'update-ui')
   }
 
   const nodeUpdate = () => {
-    if (settings.useInternalNode) {
+    if (settings.useExternalNode) {
+      dispatch({type: SHOW_EXTERNAL_UPDATE_MODAL})
+    } else {
       global.ipcRenderer.send(AUTO_UPDATE_COMMAND, 'update-node')
       dispatch({type: NODE_UPDATE_START})
-    } else {
-      dispatch({type: SHOW_EXTERNAL_UPDATE_MODAL})
     }
   }
 

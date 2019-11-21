@@ -28,7 +28,7 @@ const inviteDb = global.invitesDb || {}
 function Settings() {
   const {archiveFlips} = useFlips()
   const {addNotification} = useNotificationDispatch()
-  const {runInternalNode, useInternalNode} = useSettingsState()
+  const {runInternalNode, useExternalNode} = useSettingsState()
   return (
     <SettingsLayout>
       {global.isDev && (
@@ -70,7 +70,7 @@ function Settings() {
         </>
       )}
       <ExportPK />
-      {runInternalNode && useInternalNode && <ImportPK />}
+      {runInternalNode && !useExternalNode && <ImportPK />}
     </SettingsLayout>
   )
 }

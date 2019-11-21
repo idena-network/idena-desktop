@@ -32,7 +32,7 @@ function NodeSettings() {
   const settings = useSettingsState()
   const {
     saveExternalUrl,
-    toggleUseInternalNode,
+    toggleUseExternalNode,
     toggleRunInternalNode,
     toggleTransferModal,
   } = useSettingsDispatch()
@@ -108,9 +108,9 @@ function NodeSettings() {
         <Flex align="center">
           <Box>
             <Switcher
-              isChecked={!settings.useInternalNode}
+              isChecked={settings.useExternalNode}
               onChange={() => {
-                toggleUseInternalNode(!settings.useInternalNode)
+                toggleUseExternalNode(!settings.useExternalNode)
               }}
               bgOn={theme.colors.primary}
             />
@@ -134,7 +134,7 @@ function NodeSettings() {
       </Box>
       <Box
         py={theme.spacings.xlarge}
-        style={{display: !settings.useInternalNode ? 'flex' : 'none'}}
+        style={{display: settings.useExternalNode ? 'flex' : 'none'}}
       >
         <Flex align="center">
           <Label htmlFor="url">Node address</Label>
@@ -143,7 +143,7 @@ function NodeSettings() {
             value={url}
             onChange={e => setUrl(e.target.value)}
             style={{
-              ...margin(0, theme.spacings.normal, 0, 0),
+              ...margin(0, theme.spacings.normal, 0, theme.spacings.small),
               width: rem(300),
             }}
           />

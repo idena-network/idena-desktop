@@ -9,7 +9,7 @@ function getUrl() {
   if (!state) {
     return `http://localhost:${BASE_INTERNAL_API_PORT}`
   }
-  if (state.useInternalNode) {
+  if (!state.useExternalNode) {
     return `http://localhost:${state.internalPort}`
   }
   return state.url || BASE_API_URL
