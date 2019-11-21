@@ -44,6 +44,7 @@ const NodeUpdater = require('./node-updater')
 let mainWindow
 let node
 let nodeDownloadPromise = null
+let searchWindow
 let tray
 let expressPort = 3051
 
@@ -92,8 +93,10 @@ const createMainWindow = () => {
 }
 
 const showMainWindow = () => {
-  mainWindow.show()
-  mainWindow.focus()
+  if (mainWindow) {
+    mainWindow.show()
+    mainWindow.focus()
+  }
 }
 
 const createMenu = () => {
@@ -283,6 +286,7 @@ app.on('ready', async () => {
   await prepareNext('./renderer')
 
   createMainWindow()
+
   if (!isDev) {
     createMenu()
   }
@@ -300,6 +304,9 @@ app.on('before-quit', () => {
 app.on('activate', showMainWindow)
 
 app.on('window-all-closed', () => {
+  if (searchWindow) {
+    searchWindow.close()
+  }
   if (process.platform !== 'darwin') {
     app.quit()
   }
@@ -466,26 +473,32 @@ function choosePort() {
 
 choosePort()
 
-let searchWindow
-ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, message) => {
-  if (message) {
-    searchWindow = new BrowserWindow({
-      width: 800,
-      height: 600,
-      frame: false,
-      webPreferences: {
-        nodeIntegration: false,
-        preload: join(__dirname, 'preload.js'),
-      },
-      parent: mainWindow,
-    })
-    searchWindow.loadURL(`http://localhost:${expressPort}/`)
-  }
-})
+function createSearchWindow() {
+  searchWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: false,
+      preload: join(__dirname, 'preload.js'),
+    },
+    parent: mainWindow,
+    show: false,
+  })
+  searchWindow.loadURL(`http://localhost:${expressPort}/`)
+  searchWindow.on('close', e => {
+    e.preventDefault()
+    if (searchWindow) searchWindow.hide()
+  })
+}
 
 ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, message) => {
-  if (!message) {
-    searchWindow.close()
+  if (message) {
+    if (!searchWindow) createSearchWindow()
+    searchWindow.show()
+    searchWindow.focus()
+  } else {
+    searchWindow.hide()
   }
 })
 

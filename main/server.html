@@ -14,9 +14,11 @@
 
       function onPickerApiLoad() {
         pickerApiLoaded = true
+        console.log('api loaded')
         createPicker()
       }
 
+      let picker
       function createPicker() {
         if (pickerApiLoaded) {
           const view = new google.picker.View(google.picker.ViewId.IMAGE_SEARCH)
@@ -27,7 +29,7 @@
           // )
           // view.setSize(google.picker.ImageSearchView.Size.SIZE_VGA)
 
-          const picker = new google.picker.PickerBuilder()
+          picker = new google.picker.PickerBuilder()
             .addView(view)
             // .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
             .enableFeature(google.picker.Feature.NAV_HIDDEN)
@@ -54,6 +56,11 @@
           }
         }
       }
+
+      window.addEventListener('visibilitychange', () => {
+        if (document.hidden || picker.isVisible()) return
+        createPicker()
+      })
     </script>
   </head>
   <body>
