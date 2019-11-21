@@ -298,15 +298,13 @@ app.on('ready', async () => {
 })
 
 app.on('before-quit', () => {
+  if (searchWindow && !searchWindow.isDestroyed()) searchWindow.destroy()
   mainWindow.forceClose = true
 })
 
 app.on('activate', showMainWindow)
 
 app.on('window-all-closed', () => {
-  if (searchWindow) {
-    searchWindow.close()
-  }
   if (process.platform !== 'darwin') {
     app.quit()
   }
