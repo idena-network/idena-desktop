@@ -57,39 +57,39 @@ function IdentityProvider({children}) {
     }
   }, [callRpc])
 
-  useInterval(
-    () => {
-      async function fetchData() {
-        try {
-          const nextIdentity = await fetchIdentity()
-          if (!deepEqual(identity, nextIdentity)) {
-            const state =
-              identity &&
-              identity.state === IdentityStatus.Terminating &&
-              nextIdentity &&
-              nextIdentity.state !== IdentityStatus.Undefined // still mining
-                ? identity.state
-                : nextIdentity.state
-            setIdentity({...nextIdentity, state})
-          }
-        } catch (error) {
-          global.logger.error(
-            'An error occured while fetching identity',
-            error.message
-          )
-        }
-      }
+  // useInterval(
+  //   () => {
+  //     async function fetchData() {
+  //       try {
+  //         const nextIdentity = await fetchIdentity()
+  //         if (!deepEqual(identity, nextIdentity)) {
+  //           const state =
+  //             identity &&
+  //             identity.state === IdentityStatus.Terminating &&
+  //             nextIdentity &&
+  //             nextIdentity.state !== IdentityStatus.Undefined // still mining
+  //               ? identity.state
+  //               : nextIdentity.state
+  //           setIdentity({...nextIdentity, state})
+  //         }
+  //       } catch (error) {
+  //         global.logger.error(
+  //           'An error occured while fetching identity',
+  //           error.message
+  //         )
+  //       }
+  //     }
 
-      fetchData()
-    },
-    identity ? 1000 * 1 : 1000 * 5
-  )
+  //     fetchData()
+  //   },
+  //   identity ? 1000 * 60 * 1 : 1000 * 5
+  // )
 
-  useInterval(
-    () => callRpc('dna_getBalance', identity.address),
-    identity && identity.address ? 1000 * 1 : null,
-    true
-  )
+  // useInterval(
+  //   () => callRpc('dna_getBalance', identity.address),
+  //   identity && identity.address ? 1000 * 1 : null,
+  //   true
+  // )
 
   const canActivateInvite = [
     IdentityStatus.Undefined,

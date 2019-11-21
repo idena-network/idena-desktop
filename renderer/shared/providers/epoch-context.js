@@ -12,12 +12,9 @@ export const EpochPeriod = {
 }
 
 const EpochStateContext = React.createContext()
-const EpochDispatchContext = React.createContext()
 
-// eslint-disable-next-line react/prop-types
-function EpochProvider({children}) {
+export function EpochProvider(props) {
   const [epoch, setEpoch] = React.useState(null)
-  const [interval, setInterval] = React.useState(1000 * 1)
 
   React.useEffect(() => {
     let ignore = false
@@ -29,7 +26,6 @@ function EpochProvider({children}) {
           setEpoch(nextEpoch)
         }
       } catch (error) {
-        setInterval(1000 * 5)
         global.logger.error(
           'An error occured while fetching epoch',
           error.message
@@ -44,43 +40,27 @@ function EpochProvider({children}) {
     }
   }, [])
 
-  useInterval(async () => {
-    try {
-      const nextEpoch = await fetchEpoch()
-      if (!deepEqual(epoch, nextEpoch)) {
-        setEpoch(nextEpoch)
-      }
-    } catch (error) {
-      global.logger.error(
-        'An error occured while fetching epoch',
-        error.message
-      )
-    }
-  }, interval)
+  // useInterval(async () => {
+  //   try {
+  //     const nextEpoch = await fetchEpoch()
+  //     if (!deepEqual(epoch, nextEpoch)) {
+  //       setEpoch(nextEpoch)
+  //     }
+  //   } catch (error) {
+  //     global.logger.error(
+  //       'An error occured while fetching epoch',
+  //       error.message
+  //     )
+  //   }
+  // }, 1000 * 1)
 
-  return (
-    <EpochStateContext.Provider value={epoch}>
-      <EpochDispatchContext.Provider value={null}>
-        {children}
-      </EpochDispatchContext.Provider>
-    </EpochStateContext.Provider>
-  )
+  return <EpochStateContext.Provider value={epoch} {...props} />
 }
 
-function useEpochState() {
+export function useEpochState() {
   const context = React.useContext(EpochStateContext)
   if (context === undefined) {
     throw new Error('EpochState must be used within a EpochProvider')
   }
   return context
 }
-
-function useEpochDispatch() {
-  const context = React.useContext(EpochDispatchContext)
-  if (context === undefined) {
-    throw new Error('EpochDispatch must be used within a EpochProvider')
-  }
-  return context
-}
-
-export {EpochProvider, useEpochState, useEpochDispatch}

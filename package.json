@@ -86,6 +86,7 @@
     "react-beautiful-dnd": "^10.0.4",
     "react-icons": "^3.7.0",
     "reverse-line-reader": "^0.2.6",
+    "react-query": "^0.3.15",
     "rlp": "^2.2.2",
     "semver": "^6.3.0",
     "styled-jsx": "^3.2.2",

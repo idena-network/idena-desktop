@@ -13,38 +13,38 @@ const initialTiming = {
 
 function useTiming() {
   const [timing, setTiming] = React.useState(initialTiming)
-  const [interval, setInterval] = React.useState(1000 * 1)
+  const [interval, setInterval] = React.useState(1000 * 60 * 1)
 
-  useInterval(
-    async () => {
-      try {
-        const {
-          ValidationInterval: validation,
-          FlipLotteryDuration: flipLottery,
-          ShortSessionDuration: shortSession,
-          LongSessionDuration: longSession,
-          AfterLongSessionDuration: afterLongSession,
-        } = await fetchCeremonyIntervals()
+  // useInterval(
+  //   async () => {
+  //     try {
+  //       const {
+  //         ValidationInterval: validation,
+  //         FlipLotteryDuration: flipLottery,
+  //         ShortSessionDuration: shortSession,
+  //         LongSessionDuration: longSession,
+  //         AfterLongSessionDuration: afterLongSession,
+  //       } = await fetchCeremonyIntervals()
 
-        setTiming({
-          validation,
-          flipLottery,
-          shortSession,
-          longSession,
-          afterLongSession,
-        })
-        setInterval(1000 * 60 * 1)
-      } catch (error) {
-        setInterval(1000 * 5 * 1)
-        global.logger.error(
-          'An error occured while fetching ceremony intervals',
-          error.message
-        )
-      }
-    },
-    interval,
-    true
-  )
+  //       setTiming({
+  //         validation,
+  //         flipLottery,
+  //         shortSession,
+  //         longSession,
+  //         afterLongSession,
+  //       })
+  //       setInterval(1000 * 60 * 1)
+  //     } catch (error) {
+  //       setInterval(1000 * 5 * 1)
+  //       global.logger.error(
+  //         'An error occured while fetching ceremony intervals',
+  //         error.message
+  //       )
+  //     }
+  //   },
+  //   interval,
+  //   true
+  // )
 
   return timing
 }

@@ -74,7 +74,7 @@ export default function SyncingApp() {
 function SyncingIdentity() {
   const {currentBlock, highestBlock, wrongTime} = useChainState()
   const {address} = useIdentityState()
-  const [{result: peers}] = usePoll(useRpc('net_peers'), 1000)
+  const [{result: peers}] = useRpc('net_peers')
   return (
     <section>
       <section>

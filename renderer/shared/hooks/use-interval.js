@@ -56,3 +56,20 @@ export function usePoll([{method, params, ...rest}, callRpc], delay) {
   useInterval(() => callRpc(method, ...params), delay)
   return [{method, params, ...rest}, callRpc]
 }
+
+export function usePolling(fetcher, delay) {
+  useEffect(() => {
+    let timeoutId
+
+    async function poll() {
+      await fetcher()
+      timeoutId = setTimeout(poll, delay)
+    }
+
+    poll()
+
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [delay, fetcher])
+}

@@ -32,7 +32,7 @@ function chainReducer(state, action) {
         loading: false,
       }
     }
-    case FETCH_SYNC_FAILED:
+    case RESOLVE: {
       return {
         ...state,
         syncing: false,
@@ -40,11 +40,16 @@ function chainReducer(state, action) {
         loading: false,
       }
     default:
-      throw new Error(`Unknown action ${action.type}`)
+      throw new Error(`Unknown action ${type}`)
   }
 }
 
-const ChainStateContext = React.createContext()
+const initialState = {
+  status: Status.Idle,
+  syncing: true,
+  currentBlock: null,
+  highestBlock: null,
+}
 
 // eslint-disable-next-line react/prop-types
 function ChainProvider({children}) {
@@ -75,7 +80,7 @@ function ChainProvider({children}) {
   )
 }
 
-function useChainState() {
+export function useChainState() {
   const context = React.useContext(ChainStateContext)
   if (context === undefined) {
     throw new Error('useChainState must be used within a ChainProvider')
@@ -83,4 +88,26 @@ function useChainState() {
   return context
 }
 
-export {ChainProvider, useChainState}
+export function useChain() {
+  return [useChainState()]
+}
+
+// eslint-disable-next-line no-shadow
+export async function callRpc(method, ...params) {
+  const {result, error} = await (await fetch('//localhost:5555', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      method,
+      params,
+      id: 1,
+    }),
+  })).json()
+
+  if (error) throw new Error(error.message)
+
+  return result
+}

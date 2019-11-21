@@ -7,7 +7,7 @@ import {EpochProvider} from '../shared/providers/epoch-context'
 import {IdentityProvider} from '../shared/providers/identity-context'
 import {NotificationProvider} from '../shared/providers/notification-context'
 import {TimingProvider} from '../shared/providers/timing-context'
-import {ChainProvider} from '../shared/providers/chain-context'
+import {ChainProvider, ChainSuspense} from '../shared/providers/chain-context'
 import {ValidationProvider} from '../shared/providers/validation-context'
 import {NodeProvider} from '../shared/providers/node-context'
 import {SettingsProvider} from '../shared/providers/settings-context'
@@ -54,14 +54,6 @@ function AppProviders(props) {
   )
 }
 
-Router.events.on('routeChangeStart', () => {
-  NProgress.start()
-})
-
-Router.events.on('routeChangeComplete', () => {
-  NProgress.done()
-})
-
-Router.events.on('routeChangeError', () => {
-  NProgress.done()
-})
+Router.events.on('routeChangeStart', NProgress.start)
+Router.events.on('routeChangeComplete', NProgress.done)
+Router.events.on('routeChangeError', NProgress.done)
