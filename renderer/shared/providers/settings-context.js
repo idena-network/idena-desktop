@@ -6,7 +6,8 @@ import {BASE_API_URL, BASE_INTERNAL_API_PORT} from '../api/api-client'
 import useLogger from '../hooks/use-logger'
 
 const SETTINGS_INITIALIZE = 'SETTINGS_INITIALIZE'
-const TOGGLE_INTERNL_NODE = 'ENABLE_INTERNAL_NODE'
+const TOGGLE_USE_INTERNAL_NODE = 'TOGGLE_USE_INTERNL_NODE'
+const TOGGLE_RUN_INTERNAL_NODE = 'TOGGLE_RUN_INTERNL_NODE'
 const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
 const UPDATE_UI_VERSION = 'UPDATE_UI_VERSION'
 
@@ -17,14 +18,21 @@ const initialState = {
   ipfsPort: 50506,
   uiVersion: global.appVersion,
   useInternalNode: false,
+  runInternalNode: false,
 }
 
 function settingsReducer(state, action) {
   switch (action.type) {
-    case TOGGLE_INTERNL_NODE: {
-      const newState = {...state, useInternalNode: action.data}
-      if (newState.userBeforeInternalNode && newState.useInternalNode) {
+    case TOGGLE_USE_INTERNAL_NODE: {
+      return {...state, useInternalNode: action.data}
+    }
+    case TOGGLE_RUN_INTERNAL_NODE: {
+      const newState = {...state, runInternalNode: action.data}
+      if (newState.userBeforeInternalNode && newState.runInternalNode) {
         delete newState.userBeforeInternalNode
+      }
+      if (newState.runInternalNode) {
+        newState.useInternalNode = true
       }
       return newState
     }
@@ -36,6 +44,7 @@ function settingsReducer(state, action) {
         ...state,
         initialized: true,
         useInternalNode: action.data.useInternalNode,
+        runInternalNode: action.data.useInternalNode,
         userBeforeInternalNode: !action.data.useInternalNode,
       }
     case UPDATE_UI_VERSION: {
@@ -84,8 +93,12 @@ function SettingsProvider({children}) {
     dispatch({type: SAVE_EXTERNAL_URL, data: url})
   }
 
-  const toggleInternalNode = enable => {
-    dispatch({type: TOGGLE_INTERNL_NODE, data: enable})
+  const toggleUseInternalNode = enable => {
+    dispatch({type: TOGGLE_USE_INTERNAL_NODE, data: enable})
+  }
+
+  const toggleRunInternalNode = run => {
+    dispatch({type: TOGGLE_RUN_INTERNAL_NODE, data: run})
   }
 
   return (
@@ -93,7 +106,8 @@ function SettingsProvider({children}) {
       <SettingsDispatchContext.Provider
         value={{
           saveExternalUrl,
-          toggleInternalNode,
+          toggleUseInternalNode,
+          toggleRunInternalNode,
           toggleTransferModal,
         }}
       >

@@ -21,13 +21,13 @@ function SettingsLayout({children}) {
           <FlipToolbar>
             <Flex>
               <FlipToolbarItem
-                key="general"
+                key="privateKey"
                 onClick={() => {
                   router.push('/settings')
                 }}
                 isCurrent={router.pathname === '/settings'}
               >
-                General
+                Private key
               </FlipToolbarItem>
               <FlipToolbarItem
                 key="node"

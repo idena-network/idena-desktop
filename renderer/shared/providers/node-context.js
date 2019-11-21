@@ -97,14 +97,14 @@ function NodeProvider({children}) {
 
   useEffect(() => {
     dispatch({type: NODE_REINIT})
-  }, [settings.useInternalNode, dispatch])
+  }, [settings.runInternalNode, dispatch])
 
   useEffect(() => {
     if (
       state.nodeReady &&
       !state.nodeFailed &&
       !state.nodeStarted &&
-      settings.useInternalNode
+      settings.runInternalNode
     ) {
       global.ipcRenderer.send(NODE_COMMAND, 'start-local-node', {
         rpcPort: settings.internalPort,
@@ -116,7 +116,7 @@ function NodeProvider({children}) {
     settings.internalPort,
     state.nodeReady,
     state.nodeStarted,
-    settings.useInternalNode,
+    settings.runInternalNode,
     settings.tcpPort,
     settings.ipfsPort,
     state.nodeFailed,
@@ -126,7 +126,7 @@ function NodeProvider({children}) {
     if (state.nodeReady || state.nodeFailed) {
       return
     }
-    if (settings.useInternalNode) {
+    if (settings.runInternalNode) {
       if (!state.nodeStarted) {
         global.ipcRenderer.send(NODE_COMMAND, 'init-local-node')
       }
@@ -134,7 +134,7 @@ function NodeProvider({children}) {
       global.ipcRenderer.send(NODE_COMMAND, 'stop-local-node')
     }
   }, [
-    settings.useInternalNode,
+    settings.runInternalNode,
     state.nodeStarted,
     state.nodeReady,
     state.nodeFailed,

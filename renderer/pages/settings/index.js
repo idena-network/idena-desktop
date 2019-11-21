@@ -28,7 +28,7 @@ const inviteDb = global.invitesDb || {}
 function Settings() {
   const {archiveFlips} = useFlips()
   const {addNotification} = useNotificationDispatch()
-  const {useInternalNode} = useSettingsState()
+  const {runInternalNode, useInternalNode} = useSettingsState()
   return (
     <SettingsLayout>
       {global.isDev && (
@@ -70,7 +70,7 @@ function Settings() {
         </>
       )}
       <ExportPK />
-      {useInternalNode && <ImportPK />}
+      {runInternalNode && useInternalNode && <ImportPK />}
     </SettingsLayout>
   )
 }
@@ -94,13 +94,16 @@ function ExportPK() {
   React.useEffect(() => setShowDialog(!!pk), [pk])
   return (
     <Section title="Export private key">
+      <Text css={{marginBottom: 10}}>
+        Create a new password to export your private key
+      </Text>
       <form
         onSubmit={e => {
           e.preventDefault()
           callRpc('dna_exportKey', password)
         }}
       >
-        <Label htmlFor="url">Password</Label>
+        <Label>New password</Label>
         <Flex align="center">
           <Input
             value={password}
@@ -113,7 +116,7 @@ function ExportPK() {
             onChange={e => setPassword(e.target.value)}
           />
           <Button type="submit" disabled={!password}>
-            Export PK
+            Export
           </Button>
         </Flex>
       </form>
@@ -177,12 +180,12 @@ function ImportPK() {
           await submit()
         }}
       >
-        <Label htmlFor="key">Key</Label>
+        <Label htmlFor="key">Encrypted private key</Label>
         <Input
           value={key}
           type="text"
           style={{
-            ...margin(0, theme.spacings.normal, 0, 0),
+            ...margin(0, theme.spacings.normal, theme.spacings.normal, 0),
             width: rem(300),
           }}
           onChange={e => setKey(e.target.value)}
@@ -198,7 +201,7 @@ function ImportPK() {
           onChange={e => setPassword(e.target.value)}
         />
         <Button type="submit" disabled={!password || !key}>
-          Import PK
+          Import
         </Button>
       </form>
     </Section>

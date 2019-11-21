@@ -32,7 +32,8 @@ function NodeSettings() {
   const settings = useSettingsState()
   const {
     saveExternalUrl,
-    toggleInternalNode,
+    toggleUseInternalNode,
+    toggleRunInternalNode,
     toggleTransferModal,
   } = useSettingsDispatch()
   const {nodeFailed} = useNodeState()
@@ -46,23 +47,22 @@ function NodeSettings() {
       body: `Connected to ${url}`,
     })
 
-  const toggleSwitcher = () => {
-    if (settings.useInternalNode) {
-      toggleInternalNode(false)
-    } else if (settings.userBeforeInternalNode) {
-      toggleTransferModal(true)
-    } else {
-      toggleInternalNode(true)
-    }
-  }
   return (
     <SettingsLayout>
       <Box py={theme.spacings.xlarge}>
         <Flex align="center">
           <Box>
             <Switcher
-              isChecked={settings.useInternalNode}
-              onChange={toggleSwitcher}
+              isChecked={settings.runInternalNode}
+              onChange={() => {
+                if (settings.runInternalNode) {
+                  toggleRunInternalNode(false)
+                } else if (settings.userBeforeInternalNode) {
+                  toggleTransferModal(true)
+                } else {
+                  toggleRunInternalNode(true)
+                }
+              }}
               bgOn={theme.colors.primary}
             />
           </Box>
@@ -79,7 +79,7 @@ function NodeSettings() {
             <strong>Run built-in node</strong>
             <div>Use built-in node to have automatic updates</div>
           </div>
-          {nodeFailed && (
+          {settings.runInternalNode && nodeFailed && (
             <div
               style={{
                 ...margin(
@@ -109,7 +109,9 @@ function NodeSettings() {
           <Box>
             <Switcher
               isChecked={!settings.useInternalNode}
-              onChange={toggleSwitcher}
+              onChange={() => {
+                toggleUseInternalNode(!settings.useInternalNode)
+              }}
               bgOn={theme.colors.primary}
             />
           </Box>

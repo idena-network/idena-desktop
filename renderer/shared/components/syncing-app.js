@@ -260,15 +260,19 @@ function Spinner() {
 
 export function OfflineApp() {
   const {nodeReady, nodeFailed} = useNodeState()
-  const {useInternalNode, userBeforeInternalNode} = useSettingsState()
+  const {
+    useInternalNode,
+    runInternalNode,
+    userBeforeInternalNode,
+  } = useSettingsState()
   const {nodeProgress} = useAutoUpdateState()
-  const {toggleTransferModal, toggleInternalNode} = useSettingsDispatch()
+  const {toggleTransferModal, toggleRunInternalNode} = useSettingsDispatch()
   return (
     <>
       <GlobalModals />
       <section>
         <div>
-          {!nodeReady && useInternalNode && (
+          {!nodeReady && useInternalNode && runInternalNode && (
             <>
               <Flex width="100%">
                 <img src="/static/idena_white.svg" alt="logo" />
@@ -307,9 +311,9 @@ export function OfflineApp() {
               </Flex>
             </>
           )}
-          {!useInternalNode && (
+          {(!useInternalNode || !runInternalNode) && (
             <>
-              <h2>Your external node is offline</h2>
+              <h2>Your {useInternalNode ? '' : 'external'} node is offline</h2>
               <br />
               <Box>
                 <Button
@@ -318,7 +322,7 @@ export function OfflineApp() {
                     if (userBeforeInternalNode) {
                       toggleTransferModal(true)
                     } else {
-                      toggleInternalNode(true)
+                      toggleRunInternalNode(true)
                     }
                   }}
                 >
