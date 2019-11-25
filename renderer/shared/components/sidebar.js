@@ -48,20 +48,28 @@ function Sidebar() {
 }
 
 function NodeStatus() {
-  const {syncing, offline, currentBlock, highestBlock} = useChainState()
+  const {
+    loading,
+    syncing,
+    offline,
+    currentBlock,
+    highestBlock,
+  } = useChainState()
 
   let bg = theme.colors.white01
   let color = theme.colors.muted
   let text = 'Getting node status...'
 
-  if (offline) {
-    bg = theme.colors.danger02
-    color = theme.colors.danger
-    text = 'Offline'
-  } else if (syncing !== null) {
-    bg = syncing ? theme.colors.warning02 : theme.colors.success02
-    color = syncing ? theme.colors.warning : theme.colors.success
-    text = syncing ? 'Synchronizing' : 'Synchronized'
+  if (!loading) {
+    if (offline) {
+      bg = theme.colors.danger02
+      color = theme.colors.danger
+      text = 'Offline'
+    } else {
+      bg = syncing ? theme.colors.warning02 : theme.colors.success02
+      color = syncing ? theme.colors.warning : theme.colors.success
+      text = syncing ? 'Synchronizing' : 'Synchronized'
+    }
   }
 
   return (

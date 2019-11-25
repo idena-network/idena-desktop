@@ -4,16 +4,17 @@ import {useRouter} from 'next/router'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
-import SyncingApp, {OfflineApp} from './syncing-app'
+import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {GlobalModals} from './modal'
 
-export default function Layout({syncing, offline, ...props}) {
+export default function Layout({loading, syncing, offline, ...props}) {
   return (
     <main>
       <Sidebar />
-      {syncing && !offline && <SyncingApp />}
-      {offline && !syncing && <OfflineApp />}
-      {!offline && !syncing && <NormalApp {...props} />}
+      {loading && <LoadingApp />}
+      {!loading && syncing && !offline && <SyncingApp />}
+      {!loading && offline && !syncing && <OfflineApp />}
+      {!loading && !offline && !syncing && <NormalApp {...props} />}
       <style jsx>{`
         main {
           display: flex;
@@ -32,6 +33,7 @@ export default function Layout({syncing, offline, ...props}) {
 }
 
 Layout.propTypes = {
+  loading: PropTypes.bool,
   syncing: PropTypes.bool,
   offline: PropTypes.bool,
   children: PropTypes.node,

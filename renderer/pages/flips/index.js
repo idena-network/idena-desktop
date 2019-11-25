@@ -18,7 +18,7 @@ import {useChainState} from '../../shared/providers/chain-context'
 function Flips() {
   const {flips, submitFlip, deleteFlip} = useFlips()
   const {addNotification, addError} = useNotificationDispatch()
-  const {syncing, offline} = useChainState()
+  const {syncing, offline, loading} = useChainState()
 
   const [filter, setFilter] = useLocalStorage(
     'flips/filter',
@@ -28,7 +28,7 @@ function Flips() {
   const filteredFlips = flips.filter(({type}) => type === filter)
 
   return (
-    <Layout syncing={syncing} offline={offline}>
+    <Layout syncing={syncing} offline={offline} loading={loading}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Heading>My Flips</Heading>
         <FlipToolbar>

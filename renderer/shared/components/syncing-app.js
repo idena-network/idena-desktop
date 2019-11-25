@@ -258,6 +258,37 @@ function Spinner() {
   )
 }
 
+export function LoadingApp() {
+  return (
+    <>
+      <GlobalModals />
+      <section>
+        <div>
+          <h3>Please wait...</h3>
+        </div>
+        <style jsx>{`
+          section {
+            background: rgb(69, 72, 77);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+          }
+          section > div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: column;
+            width: 50%;
+          }
+        `}</style>
+      </section>
+    </>
+  )
+}
+
 export function OfflineApp() {
   const {nodeReady, nodeFailed} = useNodeState()
   const {
@@ -266,7 +297,11 @@ export function OfflineApp() {
     userBeforeInternalNode,
   } = useSettingsState()
   const {nodeProgress} = useAutoUpdateState()
-  const {toggleTransferModal, toggleRunInternalNode} = useSettingsDispatch()
+  const {
+    toggleTransferModal,
+    toggleRunInternalNode,
+    toggleUseExternalNode,
+  } = useSettingsDispatch()
   return (
     <>
       <GlobalModals />
@@ -321,8 +356,10 @@ export function OfflineApp() {
                   onClick={() => {
                     if (userBeforeInternalNode) {
                       toggleTransferModal(true)
-                    } else {
+                    } else if (!runInternalNode) {
                       toggleRunInternalNode(true)
+                    } else {
+                      toggleUseExternalNode(false)
                     }
                   }}
                 >
@@ -338,8 +375,10 @@ export function OfflineApp() {
               </BlockText>
             </>
           )}
-          {nodeReady && <h3>Idena Node Starting...</h3>}
-          {nodeFailed && <h3>Failed. Try to restart the app.</h3>}
+          {nodeReady && !useExternalNode && <h3>Idena Node is starting...</h3>}
+          {nodeFailed && !useExternalNode && (
+            <h3>Failed. Try to restart the app.</h3>
+          )}
         </div>
         <style jsx>{`
           section {
