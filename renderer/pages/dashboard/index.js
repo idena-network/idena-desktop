@@ -14,7 +14,6 @@ import IconLink from '../../shared/components/icon-link'
 import ActivateInviteForm from '../../screens/dashboard/components/activate-invite-form'
 import UserInfo from '../../screens/dashboard/components/user-info'
 import NetProfile from '../../screens/dashboard/components/net-profile'
-import {useChainState} from '../../shared/providers/chain-context'
 import KillForm from '../../screens/wallets/components/kill-form'
 import {useIdentityState} from '../../shared/providers/identity-context'
 

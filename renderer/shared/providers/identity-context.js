@@ -1,8 +1,6 @@
 import React, {useCallback} from 'react'
-import deepEqual from 'dequal'
-import {useInterval} from '../hooks/use-interval'
-import {fetchIdentity, killIdentity} from '../api'
-import useRpc from '../hooks/use-rpc'
+import {killIdentity} from '../api'
+import {useRpc} from '../api/api-client'
 
 export const IdentityStatus = {
   Undefined: 'Undefined',
@@ -28,125 +26,58 @@ export function mapToFriendlyStatus(status) {
 const IdentityStateContext = React.createContext()
 const IdentityDispatchContext = React.createContext()
 
-// eslint-disable-next-line react/prop-types
-function IdentityProvider({children}) {
-  const [identity, setIdentity] = React.useState(null)
-  const [{result: balanceResult}, callRpc] = useRpc()
+export function IdentityProvider(props) {
+  const {data: identity, isLoading} = useRpc('dna_identity')
+  const {data: balance} = useRpc(
+    identity && 'dna_getBalance',
+    identity && identity.address
+  )
 
-  React.useEffect(() => {
-    let ignore = false
+  const killMe = useCallback(
+    async ({to}) => killIdentity(identity.address, to),
+    [identity]
+  )
 
-    async function fetchData() {
-      try {
-        const fetchedIdentity = await fetchIdentity()
-        if (!ignore) {
-          setIdentity(fetchedIdentity)
-        }
-      } catch (error) {
-        global.logger.error(
-          'An error occured while fetching identity',
-          error.message
-        )
-      }
-    }
+  if (identity === null || isLoading) return null
 
-    fetchData()
-
-    return () => {
-      ignore = true
-    }
-  }, [callRpc])
-
-  // useInterval(
-  //   () => {
-  //     async function fetchData() {
-  //       try {
-  //         const nextIdentity = await fetchIdentity()
-  //         if (!deepEqual(identity, nextIdentity)) {
-  //           const state =
-  //             identity &&
-  //             identity.state === IdentityStatus.Terminating &&
-  //             nextIdentity &&
-  //             nextIdentity.state !== IdentityStatus.Undefined // still mining
-  //               ? identity.state
-  //               : nextIdentity.state
-  //           setIdentity({...nextIdentity, state})
-  //         }
-  //       } catch (error) {
-  //         global.logger.error(
-  //           'An error occured while fetching identity',
-  //           error.message
-  //         )
-  //       }
-  //     }
-
-  //     fetchData()
-  //   },
-  //   identity ? 1000 * 60 * 1 : 1000 * 5
-  // )
-
-  // useInterval(
-  //   () => callRpc('dna_getBalance', identity.address),
-  //   identity && identity.address ? 1000 * 1 : null,
-  //   true
-  // )
+  const {state, flips, requiredFlips} = identity
 
   const canActivateInvite = [
     IdentityStatus.Undefined,
     IdentityStatus.Killed,
     IdentityStatus.Invite,
-  ].includes(identity && identity.state)
+  ].includes(state)
 
   const canSubmitFlip =
-    identity &&
-    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(identity.state) &&
-    identity.requiredFlips > 0 &&
-    (identity.flips || []).length < identity.requiredFlips
+    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(state) &&
+    requiredFlips > 0 &&
+    (flips || []).length < requiredFlips
 
-  // eslint-disable-next-line no-shadow
-  const canValidate =
-    identity &&
-    [
-      IdentityStatus.Candidate,
-      IdentityStatus.Newbie,
-      IdentityStatus.Verified,
-      IdentityStatus.Suspended,
-      IdentityStatus.Zombie,
-    ].includes(identity.state)
+  const canValidate = [
+    IdentityStatus.Candidate,
+    IdentityStatus.Newbie,
+    IdentityStatus.Verified,
+    IdentityStatus.Suspended,
+    IdentityStatus.Zombie,
+  ].includes(state)
 
-  const canTerminate =
-    identity &&
-    [
-      IdentityStatus.Candidate,
-      IdentityStatus.Newbie,
-      IdentityStatus.Verified,
-      IdentityStatus.Suspended,
-      IdentityStatus.Zombie,
-    ].includes(identity.state)
+  const canTerminate = [
+    IdentityStatus.Candidate,
+    IdentityStatus.Newbie,
+    IdentityStatus.Verified,
+    IdentityStatus.Suspended,
+    IdentityStatus.Zombie,
+  ].includes(state)
 
-  const canMine =
-    identity &&
-    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(identity.state)
-
-  const killMe = useCallback(
-    async ({to}) => {
-      const resp = await killIdentity(identity.address, to)
-      const {result} = resp
-
-      if (result) {
-        setIdentity({...identity, state: IdentityStatus.Terminating})
-        return result
-      }
-      return resp
-    },
-    [identity]
+  const canMine = [IdentityStatus.Newbie, IdentityStatus.Verified].includes(
+    state
   )
 
   return (
     <IdentityStateContext.Provider
       value={{
         ...identity,
-        balance: balanceResult && balanceResult.balance,
+        balance: balance && balance.balance,
         canActivateInvite,
         canSubmitFlip,
         canValidate,
@@ -154,14 +85,12 @@ function IdentityProvider({children}) {
         canTerminate,
       }}
     >
-      <IdentityDispatchContext.Provider value={{killMe}}>
-        {children}
-      </IdentityDispatchContext.Provider>
+      <IdentityDispatchContext.Provider value={{killMe}} {...props} />
     </IdentityStateContext.Provider>
   )
 }
 
-function useIdentityState() {
+export function useIdentityState() {
   const context = React.useContext(IdentityStateContext)
   if (context === undefined) {
     throw new Error('useIdentityState must be used within a IdentityProvider')
@@ -169,7 +98,7 @@ function useIdentityState() {
   return context
 }
 
-function useIdentityDispatch() {
+export function useIdentityDispatch() {
   const context = React.useContext(IdentityDispatchContext)
   if (context === undefined) {
     throw new Error(
@@ -179,7 +108,7 @@ function useIdentityDispatch() {
   return context
 }
 
-export function canValidate(identity) {
+export function shouldValidate(identity) {
   if (!identity) {
     return false
   }
@@ -199,5 +128,3 @@ export function canValidate(identity) {
     ].includes(state)
   )
 }
-
-export {IdentityProvider, useIdentityState, useIdentityDispatch}

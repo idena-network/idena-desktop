@@ -54,7 +54,10 @@ export async function submitShortAnswers(answers, nonce, epoch) {
     params: [{answers, nonce, epoch}],
     id: 1,
   })
-  const {result} = data
+  const {result, error} = data
+
+  if (error) throw new Error(error.message)
+
   return result
 }
 

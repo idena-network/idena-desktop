@@ -1,11 +1,15 @@
 import React from 'react'
-import useTiming from '../hooks/use-timing'
+import {useRpc} from '../api/api-client'
 
 const TimingStateContext = React.createContext()
 
 export function TimingProvider(props) {
-  const timing = useTiming()
-  return <TimingStateContext.Provider value={timing} {...props} />
+  const {data, isLoading} = useRpc('dna_ceremonyIntervals')
+
+  if (data === null || isLoading) return null
+  return (
+    <TimingStateContext.Provider value={mapToFriendlyTiming(data)} {...props} />
+  )
 }
 
 export function useTimingState() {
@@ -14,4 +18,21 @@ export function useTimingState() {
     throw new Error('useTimingState must be used within a TimingProvider')
   }
   return context
+}
+
+function mapToFriendlyTiming(data) {
+  const {
+    ValidationInterval: validation,
+    FlipLotteryDuration: flipLottery,
+    ShortSessionDuration: shortSession,
+    LongSessionDuration: longSession,
+    AfterLongSessionDuration: afterLongSession,
+  } = data
+  return {
+    validation,
+    flipLottery,
+    shortSession,
+    longSession,
+    afterLongSession,
+  }
 }

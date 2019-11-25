@@ -26,6 +26,7 @@ import {
 } from '../../shared/providers/validation-context'
 import Spinner from '../../screens/validation/components/spinner'
 import {useTimeout} from '../../shared/hooks/use-timeout'
+import {useNotificationDispatch} from '../../shared/providers/notification-context'
 
 const EXTRA_FLIPS_DELAY = 35 * 1000
 
@@ -79,8 +80,14 @@ function ShortSession() {
     }
   }, EXTRA_FLIPS_DELAY)
 
+  const {addError} = useNotificationDispatch()
+
   const handleSubmitAnswers = async () => {
-    await submitShortAnswers(dispatch, state.flips, epoch.epoch)
+    try {
+      await submitShortAnswers(dispatch, state.flips, epoch.epoch)
+    } catch ({message}) {
+      addError(message)
+    }
   }
 
   const availableFlipsLength = state.flips.filter(x => !x.hidden).length

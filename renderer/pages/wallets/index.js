@@ -35,7 +35,6 @@ export default function Index() {
   const handleCloseReceiveForm = () => setIsReceiveFormOpen(false)
 
   const [activeWallet, setActiveWallet] = React.useState()
-  const {syncing, offline} = useChainState()
 
   useEffect(() => {
     if (!activeWallet && wallets && wallets.length > 0) {
@@ -44,7 +43,7 @@ export default function Index() {
   }, [activeWallet, wallets])
 
   return (
-    <Layout syncing={syncing} offline={offline}>
+    <Layout>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Heading>Wallets</Heading>
         <Box>

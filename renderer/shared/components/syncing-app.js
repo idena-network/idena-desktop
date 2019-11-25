@@ -1,9 +1,5 @@
 import {rem} from 'polished'
 import theme from '../theme'
-import {useChainState} from '../providers/chain-context'
-import {useIdentityState} from '../providers/identity-context'
-import useRpc from '../hooks/use-rpc'
-import {usePoll} from '../hooks/use-interval'
 import Avatar from './avatar'
 import {useNodeState, useNodeDispatch} from '../providers/node-context'
 import {useAutoUpdateState} from '../providers/update-context'
@@ -17,6 +13,7 @@ import {
 import Button from './button'
 import Link from './link'
 import {BlockText} from './typo'
+import {useRpc} from '../api/api-client'
 
 export default function SyncingApp() {
   return (
@@ -71,10 +68,14 @@ export default function SyncingApp() {
   )
 }
 
-function SyncingIdentity() {
-  const {currentBlock, highestBlock, wrongTime} = useChainState()
-  const {address} = useIdentityState()
-  const [{result: peers}] = useRpc('net_peers')
+// eslint-disable-next-line react/prop-types
+export function SyncInfo({currentBlock, highestBlock, wrongTime}) {
+  const {data: identity} = useRpc('dna_identity')
+
+  if (identity === null) return null
+
+  const {address} = identity
+
   return (
     <section>
       <section>
@@ -94,15 +95,13 @@ function SyncingIdentity() {
           <h3>
             {currentBlock} out of {highestBlock}
           </h3>
-          <div>
-            <span>Peers connected:</span> {(peers || []).length}
-          </div>
+          <Peers />
         </div>
         <progress value={currentBlock} max={highestBlock} />
       </section>
       {wrongTime && (
         <section>
-          Please check you local clock. The time must be synchronized with
+          Please check your local clock. The time must be synchronized with
           internet time in order to have connections with other peers.
         </section>
       )}
@@ -110,11 +109,6 @@ function SyncingIdentity() {
         section > section {
           margin-bottom: ${rem(40, theme.fontSizes.base)};
           max-width: ${rem(480, theme.fontSizes.base)};
-        }
-        section > section:first-child {
-          display: flex;
-          align-items: center;
-          justify-content: center;
         }
         h2 {
           font-size: ${rem(18, theme.fontSizes.base)};
@@ -128,26 +122,21 @@ function SyncingIdentity() {
           font-weight: normal;
           line-height: ${rem(20, theme.fontSizes.base)};
           margin: 0;
-          margin-top: ${rem(9, theme.fontSizes.base)};
         }
-        section:nth-child(2) {
-          display: block;
+        section > section:first-child {
+          display: flex;
+          align-items: center;
         }
-
-        section:nth-child(2) h3 {
-          margin-top: ${rem(5, theme.fontSizes.base)};
+        section > section:first-child h2 {
+          margin-bottom: ${rem(9, theme.fontSizes.base)};
+        }
+        section:nth-child(2) h2 {
+          margin-bottom: ${rem(5, theme.fontSizes.base)};
         }
         section:nth-child(2) > div {
           display: flex;
           align-items: center;
           justify-content: space-between;
-        }
-        section:nth-child(2) > div > div {
-          font-size: ${rem(13, theme.fontSizes.base)};
-          line-height: ${rem(20, theme.fontSizes.base)};
-        }
-        section:nth-child(2) span {
-          color: rgba(255, 255, 255, 0.5);
         }
         progress {
           margin-top: ${rem(11, theme.fontSizes.base)};
@@ -163,6 +152,25 @@ function SyncingIdentity() {
         }
       `}</style>
     </section>
+  )
+}
+
+function Peers() {
+  const {data} = useRpc('net_peers')
+  if (!data) return null
+  return (
+    <div>
+      <span>Peers connected:</span> {data ? data.length : '...'}
+      <style jsx>{`
+        div {
+          font-size: ${rem(13, theme.fontSizes.base)};
+          line-height: ${rem(20, theme.fontSizes.base)};
+        }
+        span {
+          color: rgba(255, 255, 255, 0.5);
+        }
+      `}</style>
+    </div>
   )
 }
 

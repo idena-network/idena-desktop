@@ -9,7 +9,6 @@ import theme, {rem} from '../theme'
 import Loading from './loading'
 import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
-import {useChainState} from '../providers/chain-context'
 import {useValidationState} from '../providers/validation-context'
 import {
   useAutoUpdateState,
@@ -60,9 +59,11 @@ function NodeStatus() {
 
   const [{result: peers}] = usePoll(useRpc('net_peers'), 3000)
 
-  let bg = theme.colors.white01
-  let color = theme.colors.muted
-  let text = 'Getting node status...'
+  if (!data) return null
+
+  let bg = syncing ? theme.colors.warning02 : theme.colors.success02
+  let color = syncing ? theme.colors.warning : theme.colors.success
+  let text = syncing ? 'Synchronizing' : 'Synchronized'
 
   if (!loading) {
     if (offline) {
@@ -230,7 +231,7 @@ function NavItem({href, icon, children}) {
 }
 
 function ActionPanel() {
-  const {syncing} = useChainState()
+  const {syncing} = useRpc('bcn_syncing')
   const identity = useIdentityState()
   const epoch = useEpochState()
 

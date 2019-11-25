@@ -502,19 +502,23 @@ function prepareAnswers(flips) {
 }
 
 export async function submitShortAnswers(dispatch, flips, epoch) {
-  const payload = prepareAnswers(flips)
-
-  await api.submitShortAnswers(payload, 0, 0)
-  db.setShortAnswers(payload, epoch)
-
-  dispatch({type: SUBMIT_SHORT_ANSWERS, answers: payload, epoch})
+  try {
+    const payload = prepareAnswers(flips)
+    await api.submitShortAnswers(payload, 0, 0)
+    db.setShortAnswers(payload, epoch)
+    dispatch({type: SUBMIT_SHORT_ANSWERS, answers: payload, epoch})
+  } catch (error) {
+    throw error
+  }
 }
 
 export async function submitLongAnswers(dispatch, flips, epoch) {
-  const payload = prepareAnswers(flips)
-
-  await api.submitLongAnswers(payload, 0, 0)
-  db.setLongAnswers(payload, epoch)
-
-  dispatch({type: SUBMIT_LONG_ANSWERS, answers: payload, epoch})
+  try {
+    const payload = prepareAnswers(flips)
+    await api.submitLongAnswers(payload, 0, 0)
+    db.setLongAnswers(payload, epoch)
+    dispatch({type: SUBMIT_LONG_ANSWERS, answers: payload, epoch})
+  } catch (error) {
+    throw error
+  }
 }

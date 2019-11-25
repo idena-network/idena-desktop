@@ -17,7 +17,7 @@ import {
 import {useValidationTimer} from '../../../shared/hooks/use-validation-timer'
 import {
   useIdentityState,
-  canValidate,
+  shouldValidate,
 } from '../../../shared/providers/identity-context'
 import Timer from './timer'
 
@@ -74,7 +74,7 @@ function ValidationRunning() {
   const identity = useIdentityState()
 
   React.useEffect(() => {
-    if (isShortSession && !shortAnswersSubmitted && canValidate(identity)) {
+    if (isShortSession && !shortAnswersSubmitted && shouldValidate(identity)) {
       Router.push('/validation/short')
     }
   }, [identity, isShortSession, shortAnswersSubmitted])
@@ -122,7 +122,7 @@ function ValidationRunning() {
           </Box>
         )}
       </Flex>
-      {!hasAnswers && !!seconds && canValidate && (
+      {!hasAnswers && !!seconds && shouldValidate(identity) && (
         <Flex css={padding(theme.spacings.normal)}>
           <Divider vertical m={rem(theme.spacings.medium16)} />
           <Link href={`/validation/${isShortSession ? 'short' : 'long'}`}>
