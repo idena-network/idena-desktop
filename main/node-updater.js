@@ -33,17 +33,33 @@ class NodeUpdater extends events.EventEmitter {
 
   async doUpdateCheck() {
     try {
+      this.logger.info(
+        'do update check',
+        'current',
+        this.currentVersion,
+        'isInternal',
+        this.isInternalNode
+      )
       const remoteVersion = await getRemoteVersion()
       if (this.isInternalNode && !nodeExists()) {
+        this.logger.info('node does not exist, return')
         return false
       }
+
+      this.logger.info('got remote version', remoteVersion)
+
       if (semver.lt(this.currentVersion, remoteVersion)) {
+        this.logger.info('update available')
         this.emit('update-available', {version: remoteVersion})
 
         if (this.isInternalNode) {
+          this.logger.info('got remote version', remoteVersion)
+
           if (!this.downloadPromise) {
+            this.logger.info('getting current temp version')
             getCurrentVersion(true)
               .then(version => {
+                this.logger.info('got local temp version', version)
                 if (semver.lt(version, remoteVersion)) {
                   this.downloadNode(remoteVersion)
                 } else {
@@ -51,6 +67,8 @@ class NodeUpdater extends events.EventEmitter {
                 }
               })
               .catch(() => this.downloadNode(remoteVersion))
+          } else {
+            this.logger.info('download promise is not null, skip downloading')
           }
         }
 
@@ -66,8 +84,15 @@ class NodeUpdater extends events.EventEmitter {
   }
 
   async downloadNode(remoteVersion) {
+    this.logger.info(
+      'start download',
+      remoteVersion,
+      'promise',
+      !!this.downloadPromise
+    )
     if (this.downloadPromise) return
     this.downloadPromise = downloadNode(progress => {
+      this.logger.info('download progress', progress)
       this.emit('download-progress', progress)
     })
       .then(() => {
