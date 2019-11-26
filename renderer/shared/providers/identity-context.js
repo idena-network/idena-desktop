@@ -1,6 +1,7 @@
 import React, {useCallback} from 'react'
 import {killIdentity} from '../api'
 import {useRpc} from '../api/api-client'
+import {OfflineApp} from '../components/syncing-app'
 
 export const IdentityStatus = {
   Undefined: 'Undefined',
@@ -38,7 +39,7 @@ export function IdentityProvider(props) {
     [identity]
   )
 
-  if (identity === null || isLoading) return null
+  if (identity === null || isLoading) return <OfflineApp />
 
   const {state, flips, requiredFlips} = identity
 

@@ -1,5 +1,6 @@
 import React from 'react'
 import {useRpc} from '../api/api-client'
+import {OfflineApp} from '../components/syncing-app'
 
 export const EpochPeriod = {
   FlipLottery: 'FlipLottery',
@@ -14,7 +15,8 @@ const EpochStateContext = React.createContext()
 export function EpochProvider(props) {
   const {data, isLoading} = useRpc('dna_epoch')
 
-  if (data === null || isLoading) return null
+  if (data === null || isLoading) return <OfflineApp />
+
   return <EpochStateContext.Provider value={data} {...props} />
 }
 

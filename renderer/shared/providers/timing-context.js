@@ -1,12 +1,13 @@
 import React from 'react'
 import {useRpc} from '../api/api-client'
+import {OfflineApp} from '../components/syncing-app'
 
 const TimingStateContext = React.createContext()
 
 export function TimingProvider(props) {
   const {data, isLoading} = useRpc('dna_ceremonyIntervals')
 
-  if (data === null || isLoading) return null
+  if (data === null || isLoading) return <OfflineApp />
   return (
     <TimingStateContext.Provider value={mapToFriendlyTiming(data)} {...props} />
   )

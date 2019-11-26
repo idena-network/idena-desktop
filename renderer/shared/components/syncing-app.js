@@ -27,7 +27,7 @@ export default function SyncingApp() {
           <div>Synchronizing...</div>
         </div>
         <div>
-          <SyncingIdentity />
+          <SyncInfo />
         </div>
         <style jsx>{`
           section {
