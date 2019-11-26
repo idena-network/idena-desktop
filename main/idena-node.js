@@ -8,6 +8,7 @@ const semver = require('semver')
 const kill = require('tree-kill')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const appDataPath = require('./app-data-path')
+const {sleep} = require('./utils')
 
 const config = 'config.json'
 const idenaBin = 'idena-go'
@@ -189,10 +190,6 @@ function getCurrentVersion(tempNode) {
       return reject(e)
     }
   })
-}
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 function updateNode() {

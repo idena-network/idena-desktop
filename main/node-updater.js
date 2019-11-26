@@ -6,6 +6,7 @@ const {
   nodeExists,
   getCurrentVersion,
 } = require('./idena-node')
+const {promiseTimeout} = require('./utils')
 
 const checkingInterval = 10 * 60 * 1000
 
@@ -33,13 +34,6 @@ class NodeUpdater extends events.EventEmitter {
 
   async doUpdateCheck() {
     try {
-      this.logger.info(
-        'do update check',
-        'current',
-        this.currentVersion,
-        'isInternal',
-        this.isInternalNode
-      )
       const remoteVersion = await getRemoteVersion()
       if (this.isInternalNode && !nodeExists()) {
         this.logger.info('node does not exist, return')
@@ -53,11 +47,8 @@ class NodeUpdater extends events.EventEmitter {
         this.emit('update-available', {version: remoteVersion})
 
         if (this.isInternalNode) {
-          this.logger.info('got remote version', remoteVersion)
-
           if (!this.downloadPromise) {
-            this.logger.info('getting current temp version')
-            getCurrentVersion(true)
+            promiseTimeout(5000, getCurrentVersion(true))
               .then(version => {
                 this.logger.info('got local temp version', version)
                 if (semver.lt(version, remoteVersion)) {
@@ -92,7 +83,6 @@ class NodeUpdater extends events.EventEmitter {
     )
     if (this.downloadPromise) return
     this.downloadPromise = downloadNode(progress => {
-      this.logger.info('download progress', progress)
       this.emit('download-progress', progress)
     })
       .then(() => {
