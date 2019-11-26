@@ -142,21 +142,25 @@ async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
 
 async function stopNode(node) {
   return new Promise(async (resolve, reject) => {
-    if (!node) {
-      console.log('node process is not found')
-      return resolve()
-    }
-    if (process.platform !== 'win32') {
-      kill(node.pid, 'SIGINT', function(err) {
-        if (err) {
-          return reject(err)
-        }
+    try {
+      if (!node) {
+        console.log('node process is not found')
         return resolve()
-      })
-    } else {
-      node.on('close', resolve)
-      node.on('error', reject)
-      node.kill()
+      }
+      if (process.platform !== 'win32') {
+        kill(node.pid, 'SIGINT', function(err) {
+          if (err) {
+            return reject(err)
+          }
+          return resolve()
+        })
+      } else {
+        node.on('close', resolve)
+        node.on('error', reject)
+        node.kill()
+      }
+    } catch (e) {
+      return reject(e)
     }
   })
 }
@@ -164,18 +168,26 @@ async function stopNode(node) {
 function getCurrentVersion(tempNode) {
   return new Promise((resolve, reject) => {
     const node = tempNode ? getTempNodeFile() : getNodeFile()
-    exec(`"${node}" --version`, {windowsHide: true}, (err, stdout, stderr) => {
-      if (err) {
-        return reject(new Error(stderr))
-      }
+    try {
+      exec(
+        `"${node}" --version`,
+        {windowsHide: true},
+        (err, stdout, stderr) => {
+          if (err) {
+            return reject(new Error(stderr))
+          }
 
-      const m = stdout.match(nodeVersionRegex)
-      if (m && m.length && semver.valid(m[0])) {
-        return resolve(semver.clean(m[0]))
-      }
+          const m = stdout.match(nodeVersionRegex)
+          if (m && m.length && semver.valid(m[0])) {
+            return resolve(semver.clean(m[0]))
+          }
 
-      return reject(new Error('cannot resolve node version'))
-    })
+          return reject(new Error('cannot resolve node version'))
+        }
+      )
+    } catch (e) {
+      return reject(e)
+    }
   })
 }
 
