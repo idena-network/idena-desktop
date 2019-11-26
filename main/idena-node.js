@@ -146,19 +146,25 @@ async function stopNode(node) {
       console.log('node process is not found')
       return resolve()
     }
-    kill(node.pid, 'SIGINT', function(err) {
-      if (err) {
-        return reject(err)
-      }
-      return resolve()
-    })
+    if (process.platform !== 'win32') {
+      kill(node.pid, 'SIGINT', function(err) {
+        if (err) {
+          return reject(err)
+        }
+        return resolve()
+      })
+    } else {
+      node.on('close', resolve)
+      node.on('error', reject)
+      node.kill()
+    }
   })
 }
 
 function getCurrentVersion(tempNode) {
   return new Promise((resolve, reject) => {
     const node = tempNode ? getTempNodeFile() : getNodeFile()
-    exec(`"${node}" --version`, (err, stdout, stderr) => {
+    exec(`"${node}" --version`, {windowsHide: true}, (err, stdout, stderr) => {
       if (err) {
         return reject(new Error(stderr))
       }
@@ -173,14 +179,32 @@ function getCurrentVersion(tempNode) {
   })
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 function updateNode() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const currentNode = getNodeFile()
       const tempNode = getTempNodeFile()
-
-      if (fs.existsSync(currentNode)) {
-        fs.unlinkSync(currentNode)
+      let num = 5
+      let done = false
+      while (num > 0) {
+        try {
+          if (fs.existsSync(currentNode)) {
+            fs.unlinkSync(currentNode)
+          }
+          done = true
+        } catch (e) {
+          console.log(e.toString(), num)
+          await sleep(1000)
+        } finally {
+          num -= 1
+        }
+      }
+      if (!done) {
+        return reject(new Error('cannot remove old idena-go file'))
       }
 
       fs.renameSync(tempNode, currentNode)

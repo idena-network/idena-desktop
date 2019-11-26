@@ -2,8 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
 import {FiUserCheck} from 'react-icons/fi'
-import {margin, rem, borderRadius} from 'polished'
-import {Box, List, Link, Text, Button} from '.'
+import {margin, rem, borderRadius, darken} from 'polished'
+import {Box, List, Link, Text} from '.'
 import Flex from './flex'
 import theme from '../theme'
 import Loading from './loading'
@@ -369,42 +369,100 @@ CurrentTask.propTypes = {
   }).isRequired,
 }
 
+function UpdateButton({text, version, ...props}) {
+  return (
+    <>
+      <button type="button" {...props}>
+        <span>{text}</span>
+        <br />
+        {version}
+      </button>
+      <style jsx>{`
+        button {
+          background: ${theme.colors.white};
+          border: none;
+          border-radius: 6px;
+          color: ${theme.colors.muted};
+          cursor: pointer;
+          padding: ${`0.5em 1em`};
+          outline: none;
+          transition: background 0.3s ease, color 0.3s ease;
+          width: 100%;
+          margin-bottom: ${theme.spacings.medium16};
+        }
+        button span {
+          color: ${theme.colors.text};
+        }
+        button:hover {
+          background: ${darken(0.1, theme.colors.white)};
+        }
+        button:disabled {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+      `}</style>
+    </>
+  )
+}
+
+UpdateButton.propTypes = {
+  text: PropTypes.string,
+  version: PropTypes.string,
+}
+
 export function Version() {
   const autoUpdate = useAutoUpdateState()
   const {uiUpdate, nodeUpdate} = useAutoUpdateDispatch()
 
   return (
-    <Box
-      css={{
-        ...borderRadius('top', rem(10)),
-        ...borderRadius('bottom', rem(10)),
-        ...margin(rem(theme.spacings.medium16), 0, rem(theme.spacings.small8)),
-      }}
-    >
-      <div>Client version: {global.appVersion}</div>
-      <div>Node version: {autoUpdate.nodeCurrentVersion}</div>
-      {autoUpdate.uiCanUpdate ? (
-        <Button
-          css={margin(0, 0, 0, rem(theme.spacings.medium16))}
-          onClick={() => {
-            uiUpdate()
-          }}
-        >
-          Update Client to {autoUpdate.uiRemoteVersion}
-        </Button>
-      ) : null}
-      {!autoUpdate.uiCanUpdate && autoUpdate.nodeCanUpdate ? (
-        <Button
-          css={margin(0, 0, 0, rem(theme.spacings.medium16))}
-          onClick={() => {
-            nodeUpdate()
-          }}
-        >
-          Update Node to {autoUpdate.nodeRemoteVersion}
-        </Button>
-      ) : null}
-      {autoUpdate.nodeUpdating && <Text>Updating...</Text>}
-    </Box>
+    <>
+      <Box
+        css={{
+          ...margin(
+            rem(theme.spacings.medium24),
+            rem(theme.spacings.small8),
+            rem(theme.spacings.medium24)
+          ),
+        }}
+      >
+        <Flex direction="column">
+          <Text color={theme.colors.white05}>
+            Client version: {global.appVersion}
+          </Text>
+          <Text color={theme.colors.white05}>
+            Node version: {autoUpdate.nodeCurrentVersion}
+          </Text>
+        </Flex>
+      </Box>
+      <Box
+        css={{
+          ...margin(0, 0, rem(theme.spacings.small8)),
+        }}
+      >
+        {autoUpdate.nodeUpdating && (
+          <Text
+            color={theme.colors.white05}
+            css={{...margin(0, rem(theme.spacings.small8), 0)}}
+          >
+            Updating Node...
+          </Text>
+        )}
+        {autoUpdate.uiCanUpdate ? (
+          <UpdateButton
+            text="Update Client Version"
+            version={autoUpdate.uiRemoteVersion}
+            onClick={uiUpdate}
+          />
+        ) : null}
+        {!autoUpdate.uiCanUpdate && autoUpdate.nodeCanUpdate ? (
+          <UpdateButton
+            text="Update Node Version"
+            version={autoUpdate.nodeRemoteVersion}
+            onClick={nodeUpdate}
+          />
+        ) : null}
+      </Box>
+    </>
   )
 }
 

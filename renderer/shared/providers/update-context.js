@@ -17,6 +17,7 @@ const NEW_NODE_VERSION = 'NEW_CURRENT_VERSION'
 const NODE_UPDATE_START = 'NODE_UPDATE_START'
 const NODE_UPDATE_SUCCESS = 'NODE_UPDATE_SUCCESS'
 const NODE_DOWNLOAD_PROGRESS = 'NODE_DOWNLOAD_PROGRESS'
+const NODE_UPDATE_FAIL = 'NODE_UPDATE_FAIL'
 
 const initialState = {
   checkStarted: false,
@@ -86,6 +87,12 @@ function settingsReducer(state, action) {
         nodeUpdateAvailable: false,
       }
     }
+    case NODE_UPDATE_FAIL: {
+      return {
+        ...state,
+        nodeUpdating: false,
+      }
+    }
     default:
       return state
   }
@@ -120,6 +127,9 @@ function AutoUpdateProvider({children}) {
           break
         case 'node-updated':
           dispatch({type: NODE_UPDATE_SUCCESS})
+          break
+        case 'node-update-failed':
+          dispatch({type: NODE_UPDATE_FAIL})
           break
         case 'ui-download-progress':
           break

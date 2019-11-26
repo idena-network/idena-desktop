@@ -307,7 +307,7 @@ export function OfflineApp() {
       <GlobalModals />
       <section>
         <div>
-          {!nodeReady && !useExternalNode && runInternalNode && (
+          {!nodeReady && !useExternalNode && runInternalNode && !nodeFailed && (
             <>
               <Flex width="100%">
                 <img src="/static/idena_white.svg" alt="logo" />

@@ -374,6 +374,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
       stopNode(node)
         .then(async () => {
           node = null
+          mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
           cleanNodeState()
           mainWindow.webContents.send(NODE_EVENT, 'state-cleaned')
         })
