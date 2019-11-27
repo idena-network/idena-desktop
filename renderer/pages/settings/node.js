@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, {useState} from 'react'
+import React, {useEffect, useReducer, useRef} from 'react'
 import {margin, rem} from 'polished'
 
 import {
@@ -26,6 +26,7 @@ import {
   useNodeState,
   useNodeDispatch,
 } from '../../shared/providers/node-context'
+import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
 
 function NodeSettings() {
   const {addNotification} = useNotificationDispatch()
@@ -38,13 +39,77 @@ function NodeSettings() {
   } = useSettingsDispatch()
   const {nodeFailed} = useNodeState()
   const {tryRestartNode} = useNodeDispatch()
+  const logsRef = useRef(null)
 
-  const [url, setUrl] = useState(settings.url)
+  const [state, dispatch] = useReducer(
+    (prevState, action) => {
+      switch (action.type) {
+        case 'SET_URL':
+          return {
+            ...prevState,
+            url: action.data,
+          }
+        case 'NEW_LOG': {
+          const prevLogs =
+            prevState.logs.length > 200
+              ? prevState.logs.slice(-100)
+              : prevState.logs
+          return {
+            ...prevState,
+            logs: [...prevLogs, action.data],
+          }
+        }
+        case 'SET_LAST_LOGS': {
+          return {
+            ...prevState,
+            logs: action.data,
+          }
+        }
+        default:
+      }
+    },
+    {
+      logs: [],
+      url: settings.url,
+    }
+  )
+
+  useEffect(() => {
+    const onEvent = (_sender, event, data) => {
+      switch (event) {
+        case 'node-log':
+          if (!settings.useExternalNode) dispatch({type: 'NEW_LOG', data})
+          break
+        case 'last-node-logs':
+          dispatch({type: 'SET_LAST_LOGS', data})
+          break
+        default:
+      }
+    }
+
+    global.ipcRenderer.on(NODE_EVENT, onEvent)
+
+    return () => {
+      global.ipcRenderer.removeListener(NODE_EVENT, onEvent)
+    }
+  })
+
+  useEffect(() => {
+    if (!settings.useExternalNode) {
+      global.ipcRenderer.send(NODE_COMMAND, 'get-last-logs')
+    }
+  }, [settings.useExternalNode])
+
+  useEffect(() => {
+    if (logsRef.current) {
+      logsRef.current.scrollTop = logsRef.current.scrollHeight
+    }
+  }, [state])
 
   const notify = () =>
     addNotification({
       title: 'Settings updated',
-      body: `Connected to ${url}`,
+      body: `Connected to ${state.url}`,
     })
 
   return (
@@ -132,42 +197,59 @@ function NodeSettings() {
           </div>
         </Flex>
       </Box>
-      <Box
-        py={theme.spacings.xlarge}
-        style={{display: settings.useExternalNode ? 'flex' : 'none'}}
-      >
-        <Flex align="center">
-          <Label htmlFor="url">Node address</Label>
-          <Input
-            id="url"
-            value={url}
-            onChange={e => setUrl(e.target.value)}
-            style={{
-              ...margin(0, theme.spacings.normal, 0, theme.spacings.small),
-              width: rem(300),
-            }}
-          />
-          <Button
-            onClick={() => {
-              saveExternalUrl(url)
-              notify()
-            }}
-          >
-            Save
-          </Button>
-          <Divider vertical m={theme.spacings.small} />
-          <FlatButton
-            color={theme.colors.primary}
-            onClick={() => {
-              setUrl(BASE_API_URL)
-              saveExternalUrl(BASE_API_URL)
-              notify()
-            }}
-          >
-            Use default
-          </FlatButton>
-        </Flex>
-      </Box>
+      {settings.useExternalNode && (
+        <Box py={theme.spacings.xlarge}>
+          <Flex align="center">
+            <Label htmlFor="url">Node address</Label>
+            <Input
+              id="url"
+              value={state.url}
+              onChange={e => dispatch({type: 'SET_URL', data: e.target.value})}
+              style={{
+                ...margin(0, theme.spacings.normal, 0, theme.spacings.small),
+                width: rem(300),
+              }}
+            />
+            <Button
+              onClick={() => {
+                saveExternalUrl(state.url)
+                notify()
+              }}
+            >
+              Save
+            </Button>
+            <Divider vertical m={theme.spacings.small} />
+            <FlatButton
+              color={theme.colors.primary}
+              onClick={() => {
+                dispatch({type: 'SET_URL', data: BASE_API_URL})
+                saveExternalUrl(BASE_API_URL)
+                notify()
+              }}
+            >
+              Use default
+            </FlatButton>
+          </Flex>
+        </Box>
+      )}
+      {!settings.useExternalNode && (
+        <div
+          ref={logsRef}
+          direction="column"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 350,
+            overflow: 'auto',
+            wordWrap: 'break-word',
+            ...margin(theme.spacings.medium32, 0),
+          }}
+        >
+          {state.logs.map((log, idx) => (
+            <div key={idx}>{log}</div>
+          ))}
+        </div>
+      )}
     </SettingsLayout>
   )
 }

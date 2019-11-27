@@ -36,6 +36,7 @@ const {
   updateNode,
   getCurrentVersion,
   cleanNodeState,
+  getLastLogs,
 } = require('./idena-node')
 
 const NodeUpdater = require('./node-updater')
@@ -347,7 +348,9 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
       break
     }
     case 'start-local-node': {
-      startNode(data.rpcPort, data.tcpPort, data.ipfsPort, isDev)
+      startNode(data.rpcPort, data.tcpPort, data.ipfsPort, isDev, log => {
+        mainWindow.webContents.send(NODE_EVENT, 'node-log', log)
+      })
         .then(n => {
           node = n
           mainWindow.webContents.send(NODE_EVENT, 'node-started')
@@ -381,6 +384,16 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
         .catch(e => {
           mainWindow.webContents.send(NODE_EVENT, 'node-failed')
           logger.error('error while stopping node', e.toString())
+        })
+      break
+    }
+    case 'get-last-logs': {
+      getLastLogs()
+        .then(logs => {
+          mainWindow.webContents.send(NODE_EVENT, 'last-node-logs', logs)
+        })
+        .catch(e => {
+          logger.error('error while reading logs', e.toString())
         })
       break
     }

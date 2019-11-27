@@ -6,6 +6,7 @@ const axios = require('axios')
 const progress = require('progress-stream')
 const semver = require('semver')
 const kill = require('tree-kill')
+const lineReader = require('reverse-line-reader')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const appDataPath = require('./app-data-path')
 const {sleep} = require('./utils')
@@ -33,6 +34,8 @@ const getTempNodeFile = () =>
 
 const getNodeChainDbFolder = () =>
   path.join(getNodeDataDir(), idenaChainDbFolder)
+
+const getNodeLogsFile = () => path.join(getNodeDataDir(), 'logs', 'output.log')
 
 const getReleaseUrl = async () => {
   const {data} = await axios.get(idenaNodeReleasesUrl)
@@ -206,7 +209,6 @@ function updateNode() {
           }
           done = true
         } catch (e) {
-          console.log(e.toString(), num)
           await sleep(1000)
         } finally {
           num -= 1
@@ -238,6 +240,25 @@ function cleanNodeState() {
   }
 }
 
+function getLastLogs() {
+  const number = 100
+  return new Promise((resolve, reject) => {
+    try {
+      const logs = []
+      lineReader.eachLine(getNodeLogsFile(), function(line, last) {
+        logs.push(line)
+        if (logs.length === number || last) {
+          resolve(logs.reverse())
+          return false
+        }
+        return true
+      })
+    } catch (e) {
+      reject(e)
+    }
+  })
+}
+
 module.exports = {
   downloadNode,
   getCurrentVersion,
@@ -247,4 +268,5 @@ module.exports = {
   updateNode,
   nodeExists,
   cleanNodeState,
+  getLastLogs,
 }

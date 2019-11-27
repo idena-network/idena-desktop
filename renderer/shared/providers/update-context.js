@@ -109,7 +109,6 @@ function AutoUpdateProvider({children}) {
 
   useEffect(() => {
     const onEvent = (_sender, event, data) => {
-      console.log(event, data)
       switch (event) {
         case 'node-update-available':
           if (!state.nodeUpdateAvailable)
@@ -176,7 +175,9 @@ function AutoUpdateProvider({children}) {
 
   const nodeCanUpdate =
     !state.nodeUpdating &&
-    ((!settings.useExternalNode && state.nodeUpdateReady) ||
+    ((!settings.useExternalNode &&
+      state.nodeUpdateReady &&
+      state.nodeRemoteVersion !== state.nodeCurrentVersion) ||
       (settings.useExternalNode && state.nodeUpdateAvailable))
 
   const uiUpdate = () => {
