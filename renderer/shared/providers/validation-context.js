@@ -2,7 +2,7 @@
 import React, {useReducer, useEffect, createContext, useContext} from 'react'
 import {decode} from 'rlp'
 import * as api from '../api/validation'
-import {useEpochState} from './epoch-context'
+import {useEpochState, EpochPeriod} from './epoch-context'
 import useFlips from '../utils/useFlips'
 import {useValidationTimer} from '../hooks/use-validation-timer'
 import useLogger from '../hooks/use-logger'
@@ -414,7 +414,10 @@ export function ValidationProvider({children}) {
       await submitShortAnswers(dispatch, state.flips, epoch.epoch)
     }
 
-    if (secondsLeftForShortSession === 0) {
+    if (
+      secondsLeftForShortSession === 1 &&
+      epoch.currentPeriod === EpochPeriod.ShortSession
+    ) {
       const {shortAnswersSubmitted, flips} = state
       const hasSomeAnswer = flips.map(x => x.answer).some(hasAnswer)
       if (hasSomeAnswer && !shortAnswersSubmitted) {
@@ -521,4 +524,8 @@ export async function submitLongAnswers(dispatch, flips, epoch) {
   } catch (error) {
     throw error
   }
+}
+
+export function useValidation() {
+  return [useValidationState(), useValidationDispatch()]
 }
