@@ -204,3 +204,22 @@ export async function sendTransaction(from, to, amount) {
   })
   return data
 }
+
+export async function fetchNodeVersion() {
+  const {data} = await api().post('/', {
+    method: 'dna_version',
+    params: [],
+    id: 1,
+  })
+  const {result} = data
+  return result
+}
+
+export async function importKey(key, password) {
+  const {data} = await api().post('/', {
+    method: 'dna_importKey',
+    params: [{key, password}],
+    id: 1,
+  })
+  return data
+}

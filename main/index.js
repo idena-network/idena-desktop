@@ -24,15 +24,30 @@ logger.info('idena started', global.appVersion || app.getVersion())
 const {
   IMAGE_SEARCH_TOGGLE,
   IMAGE_SEARCH_PICK,
-  UPDATE_LOADING,
-  UPDATE_DOWNLOADED,
-  UPDATE_APPLY,
+  AUTO_UPDATE_EVENT,
+  AUTO_UPDATE_COMMAND,
+  NODE_COMMAND,
+  NODE_EVENT,
 } = require('./channels')
-const {startNode} = require('./idenaNode')
+const {
+  startNode,
+  stopNode,
+  downloadNode,
+  updateNode,
+  getCurrentVersion,
+  cleanNodeState,
+  getLastLogs,
+} = require('./idena-node')
+
+const NodeUpdater = require('./node-updater')
 
 let mainWindow
+let node
+let nodeDownloadPromise = null
 let tray
 let expressPort = 3051
+
+const nodeUpdater = new NodeUpdater(logger)
 
 // Possible values are: 'darwin', 'freebsd', 'linux', 'sunos' or 'win32'
 const isWin = process.platform === 'win32'
@@ -46,7 +61,6 @@ app.on('second-instance', () => {
     mainWindow.focus()
   }
 })
-
 const isFirstInstance = app.requestSingleInstanceLock()
 
 if (!isFirstInstance) {
@@ -92,6 +106,13 @@ const createMenu = () => {
       },
       {
         type: 'separator',
+      },
+      {
+        label: 'Dev tools',
+        accelerator:
+          process.platform === 'darwin' ? 'Cmd+Shift+I' : 'Ctrl+Shift+I',
+        role: 'toggleDevTools',
+        visible: false,
       },
       {
         label: 'Quit',
@@ -191,12 +212,58 @@ const createTray = () => {
   tray.setContextMenu(contextMenu)
 }
 
+nodeUpdater.on('update-available', info => {
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-available', info)
+})
+
+nodeUpdater.on('download-progress', info => {
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-download-progress', info)
+})
+
+nodeUpdater.on('update-downloaded', info => {
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-ready', info)
+})
+
 autoUpdater.on('download-progress', info => {
-  mainWindow.webContents.send(UPDATE_LOADING, info)
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'ui-download-progress', info)
 })
 
 autoUpdater.on('update-downloaded', info => {
-  mainWindow.webContents.send(UPDATE_DOWNLOADED, info)
+  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'ui-update-ready', info)
+})
+
+ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
+  logger.info(`new autoupdate command`, command, data)
+  switch (command) {
+    case 'start-checking': {
+      nodeUpdater.checkForUpdates(data.nodeCurrentVersion, data.isInternalNode)
+      break
+    }
+    case 'update-ui': {
+      autoUpdater.quitAndInstall()
+      break
+    }
+    case 'update-node': {
+      stopNode(node)
+        .then(async () => {
+          try {
+            mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+            await updateNode()
+            mainWindow.webContents.send(NODE_EVENT, 'node-ready')
+            mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-updated')
+          } catch (e) {
+            mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+            throw e
+          }
+        })
+        .catch(e => {
+          mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-failed')
+          logger.error('error while updating node', e.toString())
+        })
+      break
+    }
+    default:
+  }
 })
 
 function checkForUpdates() {
@@ -205,8 +272,12 @@ function checkForUpdates() {
   }
 
   setInterval(() => {
-    autoUpdater.checkForUpdates()
-  }, 60 * 60 * 1000)
+    try {
+      autoUpdater.checkForUpdates()
+    } catch (e) {
+      logger.error('error while checking UI update', e.toString())
+    }
+  }, 10 * 60 * 1000)
 
   autoUpdater.checkForUpdates()
 }
@@ -238,8 +309,105 @@ app.on('window-all-closed', () => {
   }
 })
 
-ipcMain.on('node-start', ({sender}) => {
-  startNode(sender, false)
+ipcMain.on(NODE_COMMAND, async (event, command, data) => {
+  logger.info(`new node command`, command, data)
+
+  switch (command) {
+    case 'init-local-node': {
+      getCurrentVersion()
+        .then(version => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-ready', version)
+        })
+        .catch(e => {
+          logger.error('error while getting current node version', e.toString())
+          if (nodeDownloadPromise) {
+            return
+          }
+          nodeDownloadPromise = downloadNode(info => {
+            mainWindow.webContents.send(
+              AUTO_UPDATE_EVENT,
+              'node-download-progress',
+              info
+            )
+          })
+            .then(() => {
+              stopNode(node).then(async log => {
+                logger.info(log)
+                node = null
+                mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+                await updateNode()
+                mainWindow.webContents.send(NODE_EVENT, 'node-ready')
+              })
+            })
+            .catch(err => {
+              mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+              logger.error('error while downlading node', err.toString())
+            })
+            .finally(() => {
+              nodeDownloadPromise = null
+            })
+        })
+      break
+    }
+    case 'start-local-node': {
+      startNode(data.rpcPort, data.tcpPort, data.ipfsPort, isDev, log => {
+        mainWindow.webContents.send(NODE_EVENT, 'node-log', log)
+      })
+        .then(n => {
+          logger.info(
+            `node started, PID: ${n.pid}, previous PID: ${
+              node ? node.pid : 'undefined'
+            }`
+          )
+          node = n
+          mainWindow.webContents.send(NODE_EVENT, 'node-started')
+        })
+        .catch(e => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+          logger.error('error while starting node', e.toString())
+        })
+      break
+    }
+    case 'stop-local-node': {
+      stopNode(node)
+        .then(log => {
+          logger.info(log)
+          node = null
+          mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+        })
+        .catch(e => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+          logger.error('error while stopping node', e.toString())
+        })
+      break
+    }
+    case 'clean-state': {
+      stopNode(node)
+        .then(log => {
+          logger.info(log)
+          node = null
+          mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+          cleanNodeState()
+          mainWindow.webContents.send(NODE_EVENT, 'state-cleaned')
+        })
+        .catch(e => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+          logger.error('error while stopping node', e.toString())
+        })
+      break
+    }
+    case 'get-last-logs': {
+      getLastLogs()
+        .then(logs => {
+          mainWindow.webContents.send(NODE_EVENT, 'last-node-logs', logs)
+        })
+        .catch(e => {
+          logger.error('error while reading logs', e.toString())
+        })
+      break
+    }
+    default:
+  }
 })
 
 // listen specific `node` messages
@@ -316,10 +484,6 @@ ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, message) => {
 
 ipcMain.on(IMAGE_SEARCH_PICK, (_event, message) => {
   mainWindow.webContents.send(IMAGE_SEARCH_PICK, message)
-})
-
-ipcMain.on(UPDATE_APPLY, () => {
-  autoUpdater.quitAndInstall()
 })
 
 ipcMain.on('reload', () => {

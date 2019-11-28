@@ -3,6 +3,7 @@ const path = require('path')
 const {app, remote} = require('electron')
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
+const fs = require('fs')
 
 function dbPath(fileDb) {
   const whichApp = app || remote.app
@@ -14,5 +15,8 @@ module.exports = {
   prepareDb(name) {
     const adapter = new FileSync(dbPath(`${name}.json`))
     return low(adapter)
+  },
+  checkDbExists(name) {
+    return fs.existsSync(dbPath(`${name}.json`))
   },
 }

@@ -5,6 +5,7 @@ module.exports = {
 
 module.exports.IMAGE_SEARCH_TOGGLE = 'image-search/toggle'
 module.exports.IMAGE_SEARCH_PICK = 'image-search/pick'
-module.exports.UPDATE_LOADING = 'auto-update/loading'
-module.exports.UPDATE_DOWNLOADED = 'auto-update/downloaded'
-module.exports.UPDATE_APPLY = 'auto-update/update'
+module.exports.AUTO_UPDATE_EVENT = 'auto-update/event'
+module.exports.AUTO_UPDATE_COMMAND = 'auto-update/command'
+module.exports.NODE_EVENT = 'node/event'
+module.exports.NODE_COMMAND = 'node/command'

@@ -1,0 +1,19 @@
+function promiseTimeout(ms, promise) {
+  const timeout = new Promise((resolve, reject) => {
+    const id = setTimeout(() => {
+      clearTimeout(id)
+      return reject(new Error(`Timed out in ${ms}ms.`))
+    }, ms)
+  })
+
+  return Promise.race([promise, timeout])
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+module.exports = {
+  promiseTimeout,
+  sleep,
+}

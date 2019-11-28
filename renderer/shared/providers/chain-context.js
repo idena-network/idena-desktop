@@ -1,13 +1,16 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {useInterval} from '../hooks/use-interval'
 import {fetchSync} from '../api'
+import {useSettingsState} from './settings-context'
 
 const FETCH_SYNC_SUCCEEDED = 'FETCH_SYNC_SUCCEEDED'
 const FETCH_SYNC_FAILED = 'FETCH_SYNC_FAILED'
+const SET_LOADING = 'SET_LOADING'
 
 const initialState = {
-  offline: null,
-  syncing: true,
+  loading: true,
+  offline: true,
+  syncing: false,
   currentBlock: null,
   highestBlock: null,
   progress: null,
@@ -15,11 +18,18 @@ const initialState = {
 
 function chainReducer(state, action) {
   switch (action.type) {
+    case SET_LOADING: {
+      return {
+        ...state,
+        loading: true,
+      }
+    }
     case FETCH_SYNC_SUCCEEDED: {
       return {
         ...state,
         ...action.payload,
         offline: false,
+        loading: false,
       }
     }
     case FETCH_SYNC_FAILED:
@@ -27,6 +37,7 @@ function chainReducer(state, action) {
         ...state,
         syncing: false,
         offline: true,
+        loading: false,
       }
     default:
       throw new Error(`Unknown action ${action.type}`)
@@ -37,7 +48,12 @@ const ChainStateContext = React.createContext()
 
 // eslint-disable-next-line react/prop-types
 function ChainProvider({children}) {
+  const {useExternalNode} = useSettingsState()
   const [state, dispatch] = React.useReducer(chainReducer, initialState)
+
+  useEffect(() => {
+    dispatch({type: SET_LOADING})
+  }, [useExternalNode])
 
   useInterval(
     async () => {

@@ -10,7 +10,9 @@ const validation = require('./stores/validation')
 const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
 const logger = require('./logger')
-const {prepareDb} = require('./stores/setup')
+const {prepareDb, checkDbExists} = require('./stores/setup')
+
+const isFirstRun = !checkDbExists('settings')
 
 process.once('loaded', () => {
   global.ipcRenderer = electron.ipcRenderer
@@ -29,6 +31,7 @@ process.once('loaded', () => {
   global.isMac = process.platform === 'darwin'
 
   global.clipboard = clipboard
+  global.isFirstRun = isFirstRun
 
   try {
     global.appVersion = electron.remote.app.getVersion()

@@ -20,7 +20,7 @@ import {useIdentityState} from '../../shared/providers/identity-context'
 
 function Dashboard() {
   const router = useRouter()
-  const {syncing, offline} = useChainState()
+  const {syncing, offline, loading} = useChainState()
 
   const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(false)
   const handleCloseSendInvite = () => setIsSendInviteOpen(false)
@@ -34,7 +34,7 @@ function Dashboard() {
 
   return (
     <InviteProvider>
-      <Layout syncing={syncing} offline={offline}>
+      <Layout syncing={syncing} offline={offline} loading={loading}>
         <Box
           px={theme.spacings.xxxlarge}
           py={theme.spacings.large}
