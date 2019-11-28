@@ -17,6 +17,7 @@ import {
 } from '../providers/update-context'
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
+import {Tooltip} from './tooltip'
 // import {useNodeState} from '../providers/node-context'
 
 function Sidebar() {
@@ -90,25 +91,35 @@ function NodeStatus() {
           rem(theme.spacings.medium24)
         ),
       }}
-      title={
-        syncing
-          ? `Synchronizing blocks: ${currentBlock} out of ${highestBlock}`
-          : ''
-      }
     >
-      <Flex justify="space-between" align="center">
-        {!offline && (
-          <Bandwidth strength={(peers || []).length} syncing={syncing} />
-        )}
-        <Text
-          color={color}
-          css={{
-            lineHeight: rem(18),
-          }}
-        >
-          {text}
-        </Text>
-      </Flex>
+      <Tooltip
+        content={
+          offline
+            ? null
+            : [
+                syncing
+                  ? `Blocks: ${currentBlock} out of ${highestBlock}`
+                  : `Current block: ${currentBlock}`,
+                !offline ? `Peers: ${(peers || []).length}` : '',
+              ].join('\n')
+        }
+        placement="bottom"
+      >
+        <Flex justify="space-between" align="center">
+          {!offline && (
+            <Bandwidth strength={(peers || []).length} syncing={syncing} />
+          )}
+
+          <Text
+            color={color}
+            css={{
+              lineHeight: rem(18),
+            }}
+          >
+            {text}
+          </Text>
+        </Flex>
+      </Tooltip>
     </Box>
   )
 }
