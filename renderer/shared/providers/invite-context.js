@@ -184,6 +184,25 @@ function InviteProvider({children}) {
     db.updateInvite(id, invite)
   }
 
+  const deleteInvite = async id => {
+    const key = id
+
+    setInvites(
+      invites.map(inv => {
+        if (inv.id === id) {
+          return {
+            ...inv,
+            deletedAt: Date.now(),
+          }
+        }
+        return inv
+      })
+    )
+
+    const invite = {id: key, deletedAt: Date.now()}
+    db.updateInvite(id, invite)
+  }
+
   const activateInvite = async code => {
     const {result, error} = await api.activateInvite(address, code)
     if (result) {
@@ -210,7 +229,13 @@ function InviteProvider({children}) {
       value={{invites, activationTx, activationCode}}
     >
       <InviteDispatchContext.Provider
-        value={{addInvite, updateInvite, activateInvite, resetActivation}}
+        value={{
+          addInvite,
+          updateInvite,
+          deleteInvite,
+          activateInvite,
+          resetActivation,
+        }}
       >
         {children}
       </InviteDispatchContext.Provider>

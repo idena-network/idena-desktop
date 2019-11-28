@@ -51,6 +51,9 @@ function ContactsPage({showNewInviteForm = false}) {
               <InviteDetails
                 {...selectedInvite}
                 code={selectedInvite && selectedInvite.key}
+                onClose={() => {
+                  setShowInvite(false)
+                }}
               />
             )}
 

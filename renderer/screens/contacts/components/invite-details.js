@@ -15,9 +15,9 @@ import ContactToolbar from './contact-toolbar'
 import {Figure} from '../../../shared/components/utils'
 import RenameInvite from './invite-form'
 
-function InviteDetails({dbkey}) {
+function InviteDetails({dbkey, onClose}) {
   const [showRenameForm, setShowRenameForm] = useState(false)
-  const {updateInvite} = useInviteDispatch()
+  const {updateInvite, deleteInvite} = useInviteDispatch()
 
   const {invites} = useInviteState()
   const invite = invites && invites.find(({id}) => id === dbkey)
@@ -50,6 +50,15 @@ function InviteDetails({dbkey}) {
           onRename={() => {
             setShowRenameForm(true)
           }}
+          onDelete={
+            inviteIsExpired
+              ? () => {
+                  const id = dbkey
+                  deleteInvite(id)
+                  onClose()
+                }
+              : null
+          }
           onKill={
             canKill
               ? () => {
@@ -117,6 +126,7 @@ function InviteDetails({dbkey}) {
 
 InviteDetails.propTypes = {
   dbkey: PropTypes.string,
+  onClose: PropTypes.func,
 }
 
 const WideField = props => <Field {...props} style={{width: '100%'}} />

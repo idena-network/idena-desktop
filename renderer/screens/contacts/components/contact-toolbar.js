@@ -1,14 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, padding, margin} from 'polished'
-import {FiSend, FiDollarSign, FiSlash} from 'react-icons/fi'
+import {FiSend, FiXCircle, FiDollarSign, FiSlash} from 'react-icons/fi'
 import theme from '../../../shared/theme'
 import {Box} from '../../../shared/components'
 
 import Actions from '../../../shared/components/actions'
 import IconLink from '../../../shared/components/icon-link'
 
-function ContactToolbar({onRename, onKill}) {
+function ContactToolbar({onRename, onKill, onDelete}) {
   return (
     <Box
       py={theme.spacings.large}
@@ -19,23 +19,23 @@ function ContactToolbar({onRename, onKill}) {
       }}
     >
       <Actions>
+        {/* TODO:
         <IconLink disabled icon={<FiSend />}>
           Send message
         </IconLink>
         <IconLink disabled icon={<FiDollarSign />}>
           Send coins
         </IconLink>
-
-        <IconLink
-          disabled={onKill == null}
-          icon={<FiSlash />}
-          onClick={() => {
-            onKill()
-          }}
-        >
-          Kill
+          <IconLink
+            disabled={onKill == null}
+            icon={<FiSlash />}
+            onClick={() => {
+              onKill()
+            }}
+          >
+            Kill
         </IconLink>
-
+        */}
         <IconLink
           disabled={onRename == null}
           onClick={() => {
@@ -43,6 +43,16 @@ function ContactToolbar({onRename, onKill}) {
           }}
         >
           Rename
+        </IconLink>
+
+        <IconLink
+          disabled={onDelete == null}
+          icon={<FiXCircle />}
+          onClick={() => {
+            onDelete()
+          }}
+        >
+          Delete
         </IconLink>
       </Actions>
     </Box>
@@ -52,6 +62,7 @@ function ContactToolbar({onRename, onKill}) {
 ContactToolbar.propTypes = {
   onRename: PropTypes.func,
   onKill: PropTypes.func,
+  onDelete: PropTypes.func,
 }
 
 export default ContactToolbar
