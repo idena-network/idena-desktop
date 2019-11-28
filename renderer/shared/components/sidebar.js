@@ -97,10 +97,10 @@ function NodeStatus() {
           offline
             ? null
             : [
+                !offline ? `Peers: ${(peers || []).length}` : '',
                 syncing
                   ? `Blocks: ${currentBlock} out of ${highestBlock}`
                   : `Current block: ${currentBlock}`,
-                !offline ? `Peers: ${(peers || []).length}` : '',
               ].join('\n')
         }
         placement="bottom"
