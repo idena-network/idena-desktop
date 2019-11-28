@@ -10,6 +10,7 @@ import {
   Button,
   Switcher,
   Text,
+  SubHeading,
 } from '../../shared/components'
 import theme from '../../shared/theme'
 import {FlatButton} from '../../shared/components/button'
@@ -50,13 +51,14 @@ function NodeSettings() {
             url: action.data,
           }
         case 'NEW_LOG': {
+          console.log(action.data)
           const prevLogs =
             prevState.logs.length > 200
               ? prevState.logs.slice(-100)
               : prevState.logs
           return {
             ...prevState,
-            logs: [...prevLogs, action.data],
+            logs: [...prevLogs, ...action.data],
           }
         }
         case 'SET_LAST_LOGS': {
@@ -233,21 +235,28 @@ function NodeSettings() {
         </Box>
       )}
       {!settings.useExternalNode && (
-        <div
-          ref={logsRef}
-          direction="column"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: 350,
-            overflow: 'auto',
-            wordWrap: 'break-word',
-            ...margin(theme.spacings.medium32, 0),
-          }}
-        >
-          {state.logs.map((log, idx) => (
-            <div key={idx}>{log}</div>
-          ))}
+        <div>
+          <SubHeading
+            css={margin(theme.spacings.medium24, 0, theme.spacings.medium16, 0)}
+          >
+            Built-in node log
+          </SubHeading>
+          <div
+            ref={logsRef}
+            direction="column"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: 300,
+              overflow: 'auto',
+              wordWrap: 'break-word',
+              border: `1px solid ${theme.colors.muted}`,
+            }}
+          >
+            {state.logs.map((log, idx) => (
+              <div key={idx}>{log}</div>
+            ))}
+          </div>
         </div>
       )}
     </SettingsLayout>

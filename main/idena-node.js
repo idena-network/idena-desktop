@@ -121,7 +121,7 @@ async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
 
   idenaNode.stdout.on('data', data => {
     const str = data.toString()
-    if (onLog) onLog(str)
+    if (onLog) onLog(str.split('\n').filter(x => x))
     if (useLogging) {
       console.log(str)
     }
@@ -129,7 +129,7 @@ async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
 
   idenaNode.stderr.on('data', err => {
     const str = err.toString()
-    if (onLog) onLog(str)
+    if (onLog) onLog(str.split('\n').filter(x => x))
     if (useLogging) {
       console.error(str)
     }
@@ -148,18 +148,17 @@ async function stopNode(node) {
   return new Promise(async (resolve, reject) => {
     try {
       if (!node) {
-        console.log('node process is not found')
-        return resolve()
+        return resolve('node process is not found')
       }
       if (process.platform !== 'win32') {
         kill(node.pid, 'SIGINT', function(err) {
           if (err) {
             return reject(err)
           }
-          return resolve()
+          return resolve(`node ${node.pid} stopped successfully`)
         })
       } else {
-        node.on('close', resolve)
+        node.on('exit', () => resolve(`node ${node.pid} stopped successfully`))
         node.on('error', reject)
         node.kill()
       }

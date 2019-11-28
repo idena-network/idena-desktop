@@ -331,7 +331,9 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
             )
           })
             .then(() => {
-              stopNode(node).then(async () => {
+              stopNode(node).then(async log => {
+                logger.info(log)
+                node = null
                 mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
                 await updateNode()
                 mainWindow.webContents.send(NODE_EVENT, 'node-ready')
@@ -352,6 +354,11 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
         mainWindow.webContents.send(NODE_EVENT, 'node-log', log)
       })
         .then(n => {
+          logger.info(
+            `node started, PID: ${n.pid}, previous PID: ${
+              node ? node.pid : 'undefined'
+            }`
+          )
           node = n
           mainWindow.webContents.send(NODE_EVENT, 'node-started')
         })
@@ -363,7 +370,8 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
     }
     case 'stop-local-node': {
       stopNode(node)
-        .then(() => {
+        .then(log => {
+          logger.info(log)
           node = null
           mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
         })
@@ -375,7 +383,8 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
     }
     case 'clean-state': {
       stopNode(node)
-        .then(async () => {
+        .then(log => {
+          logger.info(log)
           node = null
           mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
           cleanNodeState()
