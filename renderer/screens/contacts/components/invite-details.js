@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, {useState} from 'react'
+import React, {useState, useCallback} from 'react'
 import PropTypes from 'prop-types'
 import {rem} from 'polished'
 import {Drawer, Field} from '../../../shared/components'
@@ -15,13 +15,22 @@ import ContactToolbar from './contact-toolbar'
 import {Figure} from '../../../shared/components/utils'
 import RenameInvite from './invite-form'
 
-function InviteDetails({dbkey}) {
+import {useNotificationDispatch} from '../../../shared/providers/notification-context'
+
+function InviteDetails({dbkey, onClose, onSelect}) {
   const [showRenameForm, setShowRenameForm] = useState(false)
-  const {updateInvite} = useInviteDispatch()
+  const {updateInvite, deleteInvite, recoverInvite} = useInviteDispatch()
+  const {addNotificationWithAction} = useNotificationDispatch()
 
   const {invites} = useInviteState()
+
   const invite = invites && invites.find(({id}) => id === dbkey)
   const identity = invite && invite.identity
+
+  const onDeleteUndo = React.useCallback(() => {
+    recoverInvite(dbkey)
+    onSelect(invite)
+  }, [dbkey, invite, onSelect, recoverInvite])
 
   if (!invite) return null
 
@@ -49,6 +58,16 @@ function InviteDetails({dbkey}) {
         <ContactToolbar
           onRename={() => {
             setShowRenameForm(true)
+          }}
+          onDelete={() => {
+            const id = dbkey
+            deleteInvite(id)
+            onClose()
+            addNotificationWithAction({
+              title: `Invitation deleted`,
+              action: onDeleteUndo,
+              actionName: 'Undo',
+            })
           }}
           onKill={
             canKill
@@ -117,6 +136,8 @@ function InviteDetails({dbkey}) {
 
 InviteDetails.propTypes = {
   dbkey: PropTypes.string,
+  onClose: PropTypes.func,
+  onSelect: PropTypes.func,
 }
 
 const WideField = props => <Field {...props} style={{width: '100%'}} />

@@ -61,12 +61,12 @@ Sidebar.propTypes = {
 
 // eslint-disable-next-line react/prop-types
 function InviteSection({onNewInvite, children}) {
-  const {invites} = useIdentityState()
+  const {invites: invitesCount} = useIdentityState()
 
   return (
     <SidebarHeading
-      onNewInvite={onNewInvite}
-      title={`Invites (${invites} left)`}
+      onNewInvite={invitesCount ? onNewInvite : null}
+      title={`Invites (${invitesCount} left)`}
     >
       {children}
     </SidebarHeading>
@@ -102,18 +102,20 @@ function InviteList({filter, onSelectInvite}) {
 
   return (
     <Box css={{...margin(0, 0, rem(theme.spacings.medium24), 0)}}>
-      {filteredInvites.map(invite => (
-        <InviteCard
-          id={invite.dbkey}
-          {...invite}
-          state={invite.identity && invite.identity.state}
-          onClick={() => {
-            if (onSelectInvite) {
-              onSelectInvite(invite)
-            }
-          }}
-        />
-      ))}
+      {filteredInvites
+        .filter(invite => !invite.deletedAt)
+        .map(invite => (
+          <InviteCard
+            id={invite.dbkey}
+            {...invite}
+            state={invite.identity && invite.identity.state}
+            onClick={() => {
+              if (onSelectInvite) {
+                onSelectInvite(invite)
+              }
+            }}
+          />
+        ))}
     </Box>
   )
 }
@@ -329,6 +331,7 @@ function SidebarHeading({children, title, onNewInvite}) {
       title={title}
       addon={
         <Button
+          disabled={onNewInvite === null}
           onClick={onNewInvite}
           type="button"
           style={{
