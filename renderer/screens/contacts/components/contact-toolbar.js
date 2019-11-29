@@ -47,7 +47,7 @@ function ContactToolbar({onRename, onKill, onDelete}) {
 
         <IconLink
           disabled={onDelete == null}
-          icon={<FiXCircle />}
+          icon={<i className="icon icon--small_exit" />}
           onClick={() => {
             onDelete()
           }}
