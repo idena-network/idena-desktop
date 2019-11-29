@@ -1,37 +1,59 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, padding, margin} from 'polished'
-import theme from '../../../shared/theme'
-import {Box, Button, BlockText} from '../../../shared/components'
+import {padding, margin} from 'polished'
+import {FiRotateCcw} from 'react-icons/fi'
+import theme, {rem} from '../../../shared/theme'
+import {Box, BlockText, Text} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
+import {TranslateWords} from '../../../shared/components/translate-button'
+import {FlatButton} from '../../../shared/components/button'
 
 function FlipHint({hint, onChange}) {
   const bntLabel = hint && hint.id >= 0 ? `(#${hint.id + 1})` : '(#1)'
 
   return (
     <Box>
-      <Flex align="center" justify="center">
-        {hint.words &&
-          hint.words.map(({name, desc}) => (
-            <Box
-              key={name}
-              p={theme.spacings.xlarge}
-              m={theme.spacings.normal}
-              w={rem(268)}
-              css={{
-                border: `solid 1px ${theme.colors.gray2}`,
-                borderRadius: '10px',
-                minHeight: rem(120),
-                ...padding(rem(12), rem(20)),
-              }}
+      <Box
+        bg={theme.colors.gray}
+        css={{
+          borderRadius: rem(8),
+          ...padding(rem(32), 0, rem(32), rem(40)),
+          ...margin(0, 'auto'),
+          width: rem(560),
+        }}
+      >
+        <Flex align="center" justify="space-between" css={{minHeight: rem(80)}}>
+          {hint.words &&
+            hint.words.map(({name, desc}) => (
+              <Box key={name} w={rem(220)} css={{...margin(0, rem(40), 0, 0)}}>
+                <BlockText fontWeight={500}>{name}</BlockText>
+                <BlockText color={theme.colors.muted}>{desc}</BlockText>
+              </Box>
+            ))}
+        </Flex>
+        <TranslateWords words={hint.words} />
+      </Box>
+      <Box w={rem(560)} css={margin(rem(theme.spacings.medium16), 'auto', 0)}>
+        <FlatButton
+          color={theme.colors.primary}
+          css={{fontWeight: 500}}
+          variant="secondary"
+          onClick={onChange}
+        >
+          <Flex
+            align="center"
+            css={{lineHeight: rem(18), ...padding(rem(2), 0)}}
+          >
+            <FiRotateCcw height={rem(12)} width={rem(12)} />
+            <Text
+              color={theme.colors.primary}
+              fontWeight={500}
+              css={{lineHeight: 1, ...margin(0, 0, 0, rem(4))}}
             >
-              <BlockText>{name}</BlockText>
-              <BlockText color={theme.colors.muted}>{desc}</BlockText>
-            </Box>
-          ))}
-      </Flex>
-      <Box css={margin(rem(theme.spacings.medium24), 0, 0)}>
-        <Button onClick={onChange}>Change words {bntLabel}</Button>
+              Change words {bntLabel}
+            </Text>
+          </Flex>
+        </FlatButton>
       </Box>
     </Box>
   )
