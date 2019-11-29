@@ -30,7 +30,7 @@ function Dashboard() {
   )
   const handleCloseWithdrawStakeForm = () => setIsWithdrawStakeFormOpen(false)
 
-  const {canTerminate, invites} = useIdentityState()
+  const {canTerminate, invites: invitesCount} = useIdentityState()
 
   return (
     <InviteProvider>
@@ -46,7 +46,7 @@ function Dashboard() {
             <IconLink icon={<i className="icon icon--share" />}>Share</IconLink>
             */}
             <IconLink
-              disabled={invites === 0}
+              disabled={invitesCount === 0}
               href="/contacts/new-invite"
               icon={<i className="icon icon--add_contact" />}
             >

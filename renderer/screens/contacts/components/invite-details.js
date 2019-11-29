@@ -27,7 +27,7 @@ function InviteDetails({dbkey, onClose, onSelect}) {
   const invite = invites && invites.find(({id}) => id === dbkey)
   const identity = invite && invite.identity
 
-  const onDelteUndo = React.useCallback(() => {
+  const onDeleteUndo = React.useCallback(() => {
     recoverInvite(dbkey)
     onSelect(invite)
   }, [dbkey, invite, onSelect, recoverInvite])
@@ -65,7 +65,7 @@ function InviteDetails({dbkey, onClose, onSelect}) {
             onClose()
             addNotificationWithAction({
               title: `Invitation deleted`,
-              action: onDelteUndo,
+              action: onDeleteUndo,
               actionName: 'Undo',
             })
           }}

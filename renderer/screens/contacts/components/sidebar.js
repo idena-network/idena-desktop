@@ -61,12 +61,12 @@ Sidebar.propTypes = {
 
 // eslint-disable-next-line react/prop-types
 function InviteSection({onNewInvite, children}) {
-  const {invites} = useIdentityState()
+  const {invites: invitesCount} = useIdentityState()
 
   return (
     <SidebarHeading
-      onNewInvite={invites ? onNewInvite : null}
-      title={`Invites (${invites} left)`}
+      onNewInvite={invitesCount ? onNewInvite : null}
+      title={`Invites (${invitesCount} left)`}
     >
       {children}
     </SidebarHeading>
