@@ -37,7 +37,7 @@ function Button({
           color: ${darken(0.05, color)};
         }
         button:disabled {
-          cursor: not-allowed;
+          cursor: default;
           opacity: 0.5;
         }
       `}</style>
@@ -97,7 +97,7 @@ function IconButton({icon, children, disabled, danger, ...props}) {
         button {
           background: none;
           border: none;
-          cursor: pointer;
+          cursor: ${disabled ? 'default' : 'pointer'};
           font-size: 1em;
           display: flex;
           align-items: center;

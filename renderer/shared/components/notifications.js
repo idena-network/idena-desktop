@@ -10,6 +10,7 @@ import {
   NotificationType,
 } from '../providers/notification-context'
 import useId from '../hooks/use-id'
+import {IconButton} from './button'
 
 function Notifications() {
   const {notifications} = useNotificationState()
@@ -24,7 +25,13 @@ function Notifications() {
   )
 }
 
-function Notification({title, body, type = NotificationType.Info}) {
+function Notification({
+  title,
+  body,
+  type = NotificationType.Info,
+  action = null,
+  actionName = '',
+}) {
   return (
     <div>
       <Flex width="100%" justify="center">
@@ -51,9 +58,24 @@ function Notification({title, body, type = NotificationType.Info}) {
             <Flex justify="center" align="center">
               <FiFile style={{marginRight: rem(12)}} />
               {title}
+              <Box css={{paddingTop: rem(3), paddingLeft: rem(20)}}>
+                {action && (
+                  <IconButton
+                    onClick={() => {
+                      action()
+                    }}
+                  >
+                    {actionName}
+                  </IconButton>
+                )}
+              </Box>
             </Flex>
           </Box>
-          {body && <Box css={wordWrap('break-word')}>{body}</Box>}
+          {body && (
+            <Flex>
+              <Box css={wordWrap('break-word')}>{body}</Box>
+            </Flex>
+          )}
         </Box>
       </Flex>
     </div>
@@ -64,6 +86,8 @@ Notification.propTypes = {
   title: PropTypes.string.isRequired,
   body: PropTypes.string,
   type: PropTypes.oneOf(Object.values(NotificationType)),
+  action: PropTypes.func,
+  actionName: PropTypes.string,
 }
 
 export default Notifications

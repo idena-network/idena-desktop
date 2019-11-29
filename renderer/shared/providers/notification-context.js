@@ -18,11 +18,18 @@ function NotificationProvider({children}) {
       if (notifications.length) {
         setNotifications(notifications.slice(1))
       }
-    }, 2000)
+    }, 3500)
     return () => {
       clearTimeout(timeoutId)
     }
   }, [notifications])
+
+  const addNotificationWithAction = React.useCallback(
+    ({title, body, type = NotificationType.Info, action, actionName}) => {
+      setNotifications(n => [...n, {title, body, type, action, actionName}])
+    },
+    []
+  )
 
   const addNotification = React.useCallback(
     ({title, body, type = NotificationType.Info}) => {
@@ -42,7 +49,7 @@ function NotificationProvider({children}) {
   return (
     <NotificationStateContext.Provider value={{notifications, alerts}}>
       <NotificationDispatchContext.Provider
-        value={{addNotification, addError, addAlert}}
+        value={{addNotification, addError, addAlert, addNotificationWithAction}}
       >
         {children}
       </NotificationDispatchContext.Provider>

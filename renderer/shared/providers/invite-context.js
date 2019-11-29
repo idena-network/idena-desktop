@@ -186,7 +186,6 @@ function InviteProvider({children}) {
 
   const deleteInvite = async id => {
     const key = id
-
     setInvites(
       invites.map(inv => {
         if (inv.id === id) {
@@ -198,8 +197,25 @@ function InviteProvider({children}) {
         return inv
       })
     )
-
     const invite = {id: key, deletedAt: Date.now()}
+    db.updateInvite(id, invite)
+  }
+
+  const recoverInvite = async id => {
+    const key = id
+
+    setInvites(
+      invites.map(inv => {
+        if (inv.id === id) {
+          return {
+            ...inv,
+            deletedAt: null,
+          }
+        }
+        return inv
+      })
+    )
+    const invite = {id: key, deletedAt: null}
     db.updateInvite(id, invite)
   }
 
@@ -233,6 +249,7 @@ function InviteProvider({children}) {
           addInvite,
           updateInvite,
           deleteInvite,
+          recoverInvite,
           activateInvite,
           resetActivation,
         }}
