@@ -51,7 +51,6 @@ function NodeSettings() {
             url: action.data,
           }
         case 'NEW_LOG': {
-          console.log(action.data)
           const prevLogs =
             prevState.logs.length > 200
               ? prevState.logs.slice(-100)
@@ -104,9 +103,9 @@ function NodeSettings() {
 
   useEffect(() => {
     if (logsRef.current) {
-      logsRef.current.scrollTop = logsRef.current.scrollHeight
+      logsRef.current.scrollTop = 9999
     }
-  }, [state])
+  })
 
   const notify = () =>
     addNotification({
