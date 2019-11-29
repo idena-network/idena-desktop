@@ -246,17 +246,13 @@ ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
     case 'update-node': {
       stopNode(node)
         .then(async () => {
-          try {
-            mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
-            await updateNode()
-            mainWindow.webContents.send(NODE_EVENT, 'node-ready')
-            mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-updated')
-          } catch (e) {
-            mainWindow.webContents.send(NODE_EVENT, 'node-failed')
-            throw e
-          }
+          mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+          await updateNode()
+          mainWindow.webContents.send(NODE_EVENT, 'node-ready')
+          mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-updated')
         })
         .catch(e => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
           mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-failed')
           logger.error('error while updating node', e.toString())
         })
@@ -350,9 +346,20 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
       break
     }
     case 'start-local-node': {
-      startNode(data.rpcPort, data.tcpPort, data.ipfsPort, isDev, log => {
-        mainWindow.webContents.send(NODE_EVENT, 'node-log', log)
-      })
+      startNode(
+        data.rpcPort,
+        data.tcpPort,
+        data.ipfsPort,
+        isDev,
+        log => {
+          mainWindow.webContents.send(NODE_EVENT, 'node-log', log)
+        },
+        msg => {
+          logger.error(msg)
+          node = null
+          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+        }
+      )
         .then(n => {
           logger.info(
             `node started, PID: ${n.pid}, previous PID: ${

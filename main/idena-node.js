@@ -11,7 +11,6 @@ const lineReader = require('reverse-line-reader')
 const appDataPath = require('./app-data-path')
 const {sleep} = require('./utils')
 
-const config = 'config.json'
 const idenaBin = 'idena-go'
 const idenaNodeReleasesUrl =
   'https://api.github.com/repos/idena-network/idena-go/releases/latest'
@@ -27,7 +26,7 @@ const getNodeDataDir = () => path.join(getNodeDir(), 'datadir')
 
 const getNodeFile = () => path.join(getNodeDir(), idenaBin + getBinarySuffix())
 
-const getNodeConfigFile = () => path.join(getNodeDir(), config)
+const getNodeConfigFile = () => path.join(getNodeDir(), 'config.json')
 
 const getTempNodeFile = () =>
   path.join(getNodeDir(), `new-${idenaBin}${getBinarySuffix()}`)
@@ -102,7 +101,14 @@ async function downloadNode(onProgress) {
   })
 }
 
-async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
+async function startNode(
+  port,
+  tcpPort,
+  ipfsPort,
+  useLogging = true,
+  onLog,
+  onExit
+) {
   const paramters = [
     '--datadir',
     getNodeDataDir(),
@@ -113,9 +119,10 @@ async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
     '--ipfsport',
     ipfsPort,
   ]
-  if (fs.existsSync(getNodeConfigFile())) {
+  const configFile = getNodeConfigFile()
+  if (fs.existsSync(configFile)) {
     paramters.push('--config')
-    paramters.push(config)
+    paramters.push(configFile)
   }
   const idenaNode = spawn(getNodeFile(), paramters)
 
@@ -135,9 +142,12 @@ async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
     }
   })
 
-  idenaNode.on('node-close', code => {
+  idenaNode.on('exit', code => {
     if (useLogging) {
       console.info(`child process exited with code ${code}`)
+    }
+    if (onExit) {
+      onExit(`node stopped with code ${code}`)
     }
   })
 
@@ -147,7 +157,7 @@ async function startNode(port, tcpPort, ipfsPort, useLogging = true, onLog) {
 async function stopNode(node) {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!node) {
+      if (!node || node.exitCode !== undefined) {
         return resolve('node process is not found')
       }
       if (process.platform !== 'win32') {
