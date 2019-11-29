@@ -14,7 +14,6 @@
 
       function onPickerApiLoad() {
         pickerApiLoaded = true
-        console.log('api loaded')
         createPicker()
       }
 
@@ -58,8 +57,9 @@
       }
 
       window.addEventListener('visibilitychange', () => {
-        if (document.hidden || picker.isVisible()) return
-        createPicker()
+        if (!picker.isVisible() && !document.hidden) {
+          picker.setVisible(true)
+        }
       })
     </script>
   </head>
