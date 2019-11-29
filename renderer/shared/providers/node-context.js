@@ -4,7 +4,7 @@ import {useSettingsState} from './settings-context'
 import useLogger from '../hooks/use-logger'
 
 const NODE_READY = 'NODE_READY'
-const INIT_FAILED = 'INIT_FAILED'
+const NODE_FAILED = 'NODE_FAILED'
 const NODE_START = 'NODE_START'
 const NODE_STOP = 'NODE_STOP'
 const NODE_REINIT = 'NODE_REINIT'
@@ -18,11 +18,12 @@ const initialState = {
 
 function nodeReducer(state, action) {
   switch (action.type) {
-    case INIT_FAILED: {
+    case NODE_FAILED: {
       return {
         ...state,
         nodeFailed: true,
         nodeReady: false,
+        nodeStarted: false,
       }
     }
     case NODE_READY: {
@@ -70,7 +71,7 @@ function NodeProvider({children}) {
     const onEvent = (_sender, event, data) => {
       switch (event) {
         case 'node-failed':
-          dispatch({type: INIT_FAILED})
+          dispatch({type: NODE_FAILED})
           break
         case 'node-started':
           dispatch({type: NODE_START})

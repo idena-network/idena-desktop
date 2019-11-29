@@ -5,7 +5,7 @@ import {useIdentityState} from '../providers/identity-context'
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import Avatar from './avatar'
-import {useNodeState} from '../providers/node-context'
+import {useNodeState, useNodeDispatch} from '../providers/node-context'
 import {useAutoUpdateState} from '../providers/update-context'
 import Flex from './flex'
 import Box from './box'
@@ -291,6 +291,7 @@ export function LoadingApp() {
 
 export function OfflineApp() {
   const {nodeReady, nodeFailed} = useNodeState()
+  const {tryRestartNode} = useNodeDispatch()
   const {
     useExternalNode,
     runInternalNode,
@@ -307,45 +308,44 @@ export function OfflineApp() {
       <GlobalModals />
       <section>
         <div>
-          {!nodeReady && !useExternalNode && runInternalNode && !nodeFailed && (
-            <>
-              <Flex width="100%">
-                <img src="/static/idena_white.svg" alt="logo" />
-                {/* icon here */}
-                <Flex direction="column" justify="space-between" flex="1">
-                  <h2>Downloding Idena Node...</h2>
+          {!nodeReady &&
+            !useExternalNode &&
+            runInternalNode &&
+            !nodeFailed &&
+            nodeProgress && (
+              <>
+                <Flex width="100%">
+                  <img src="/static/idena_white.svg" alt="logo" />
+                  {/* icon here */}
+                  <Flex direction="column" justify="space-between" flex="1">
+                    <h2>Downloding Idena Node...</h2>
 
-                  <Flex justify="space-between">
-                    <div className="gray">
-                      Version {nodeProgress ? nodeProgress.version : ''}
-                    </div>
-                    <div>
-                      {(
-                        (nodeProgress ? nodeProgress.transferred : 0) /
-                        (1024 * 1024)
-                      ).toLocaleString(undefined, {
-                        maximumFractionDigits: 2,
-                      })}{' '}
-                      MB <span className="gray">out of</span>{' '}
-                      {(
-                        (nodeProgress ? nodeProgress.length : 0) /
-                        (1024 * 1024)
-                      ).toLocaleString(undefined, {
-                        maximumFractionDigits: 2,
-                      })}{' '}
-                      MB
-                    </div>
+                    <Flex justify="space-between">
+                      <div className="gray">Version {nodeProgress.version}</div>
+                      <div>
+                        {(
+                          nodeProgress.transferred /
+                          (1024 * 1024)
+                        ).toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}{' '}
+                        MB <span className="gray">out of</span>{' '}
+                        {(nodeProgress.length / (1024 * 1024)).toLocaleString(
+                          undefined,
+                          {
+                            maximumFractionDigits: 2,
+                          }
+                        )}{' '}
+                        MB
+                      </div>
+                    </Flex>
                   </Flex>
                 </Flex>
-              </Flex>
-              <Flex width="100%" css={{marginTop: 10}}>
-                <progress
-                  value={nodeProgress ? nodeProgress.percentage : 0}
-                  max={100}
-                />
-              </Flex>
-            </>
-          )}
+                <Flex width="100%" css={{marginTop: 10}}>
+                  <progress value={nodeProgress.percentage} max={100} />
+                </Flex>
+              </>
+            )}
           {(useExternalNode || !runInternalNode) && (
             <>
               <h2>Your {useExternalNode ? 'external' : ''} node is offline</h2>
@@ -375,9 +375,29 @@ export function OfflineApp() {
               </BlockText>
             </>
           )}
-          {nodeReady && !useExternalNode && <h3>Idena Node is starting...</h3>}
+          {!useExternalNode &&
+            runInternalNode &&
+            (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress)) && (
+              <h3>Idena Node is starting...</h3>
+            )}
           {nodeFailed && !useExternalNode && (
-            <h3>Failed. Try to restart the app.</h3>
+            <>
+              <h2>Your built-in node is failed</h2>
+              <br />
+              <Box>
+                <Button variant="primary" onClick={tryRestartNode}>
+                  Restart built-in node
+                </Button>
+              </Box>
+              <br />
+              <BlockText color="white">
+                If problem still exists, restart your app or check your
+                connection{' '}
+                <Link color={theme.colors.primary} href="/settings/node">
+                  settings
+                </Link>{' '}
+              </BlockText>
+            </>
           )}
         </div>
         <style jsx>{`
