@@ -1,7 +1,12 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const electron = require('electron')
 
-const {clipboard} = electron
+const {
+  clipboard,
+  ipcRenderer,
+  remote: {app},
+  shell,
+} = electron
 
 const isDev = require('electron-is-dev')
 
@@ -15,11 +20,10 @@ const {prepareDb, checkDbExists} = require('./stores/setup')
 const isFirstRun = !checkDbExists('settings')
 
 process.once('loaded', () => {
-  global.ipcRenderer = electron.ipcRenderer
-  global.openExternal = electron.shell.openExternal
+  global.ipcRenderer = ipcRenderer
+  global.openExternal = shell.openExternal
 
   global.flipStore = flips
-  // global.validationStore = validation
   global.validationDb = validation
   global.invitesDb = invites
   global.contactsDb = contacts
@@ -32,12 +36,9 @@ process.once('loaded', () => {
 
   global.clipboard = clipboard
   global.isFirstRun = isFirstRun
+  ;[global.locale] = app.getLocale().split('-')
 
-  try {
-    global.appVersion = electron.remote.app.getVersion()
-  } catch (error) {
-    console.error(error)
-  }
+  global.appVersion = app.getVersion()
 
   if (isDev) {
     global.require = require

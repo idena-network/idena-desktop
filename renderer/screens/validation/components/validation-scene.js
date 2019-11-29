@@ -19,6 +19,7 @@ import {
   useValidationState,
   IRRELEVANT_WORDS_TOGGLED,
 } from '../../../shared/providers/validation-context'
+import {TranslateWords} from '../../../shared/components/translate-button'
 
 export default function ValidationScene({
   flip: {urls, answer, ready, orders, failed, hash, words, irrelevantWords},
@@ -254,33 +255,36 @@ function Words({words}) {
           }}
         >
           {haveWords ? (
-            words.map(({name, desc}, idx) => (
-              <React.Fragment key={`name-${idx}`}>
-                <Box
-                  style={{
-                    color: theme.colors.primary2,
-                    fontWeight: 500,
-                    lineHeight: rem(20, theme.fontSizes.base),
-                    textTransform: 'capitalize',
-                  }}
-                >
-                  {name}
-                </Box>
-                <Box
-                  style={{
-                    color: theme.colors.muted,
-                    lineHeight: rem(20, theme.fontSizes.base),
-                    ...margin(
-                      0,
-                      0,
-                      rem(theme.spacings.medium24, theme.fontSizes.base)
-                    ),
-                  }}
-                >
-                  {desc}
-                </Box>
-              </React.Fragment>
-            ))
+            <Box>
+              {words.map(({name, desc}, idx) => (
+                <React.Fragment key={`name-${idx}`}>
+                  <Box
+                    style={{
+                      color: theme.colors.primary2,
+                      fontWeight: 500,
+                      lineHeight: rem(20, theme.fontSizes.base),
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {name}
+                  </Box>
+                  <Box
+                    style={{
+                      color: theme.colors.muted,
+                      lineHeight: rem(20, theme.fontSizes.base),
+                      ...margin(
+                        0,
+                        0,
+                        rem(theme.spacings.medium24, theme.fontSizes.base)
+                      ),
+                    }}
+                  >
+                    {desc}
+                  </Box>
+                </React.Fragment>
+              ))}
+              <TranslateWords words={words} />
+            </Box>
           ) : (
             <>
               <Box

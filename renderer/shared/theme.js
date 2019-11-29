@@ -1,3 +1,4 @@
+import {rem as remp} from 'polished'
 import {margin} from './components/system/spacings'
 
 const colors = {
@@ -103,4 +104,8 @@ export default {
     color: colors.text,
     size: 1,
   },
+}
+
+export function rem(value) {
+  return remp(value, fontSizes.base)
 }
