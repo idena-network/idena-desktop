@@ -182,8 +182,7 @@ function FlipMaster({id, onClose}) {
     {
       caption: 'Shuffle images',
       title: 'Shuffle images',
-      desc:
-        'Shuffle images or add alternative image in order to make a nonsense sequence of images',
+      desc: 'Shuffle images in order to make a nonsense sequence of images',
       children: (
         <FlipShuffle
           {...flip}
@@ -199,7 +198,7 @@ function FlipMaster({id, onClose}) {
     {
       caption: 'Submit flip',
       title: `Submit flip (${composeHint(flip.hint)})`,
-      desc: `Are you sure it is not possible to read the shuffled images as a meaningful story?`,
+      desc: `Make sure it is not possible to read the shuffled images as a meaningful story?`,
       children: <SubmitFlip {...flip} submitFlipResult={submitResult} />,
     },
   ]

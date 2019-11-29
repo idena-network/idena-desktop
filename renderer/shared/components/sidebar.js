@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {withRouter} from 'next/router'
-import {FiUserCheck} from 'react-icons/fi'
 import {margin, rem, borderRadius, darken} from 'polished'
 import {Box, List, Link, Text} from '.'
 import Flex from './flex'
@@ -27,9 +26,9 @@ function Sidebar() {
         <NodeStatus />
         <Logo />
         <Nav />
+        <ActionPanel />
       </Flex>
       <div>
-        <ActionPanel />
         <Version />
       </div>
       <style jsx>{`
@@ -129,14 +128,13 @@ export function Logo() {
     <Box
       css={{
         alignSelf: 'center',
-        ...margin(0, 0, rem(40), 0),
+        ...margin(rem(8), 0, rem(10), 0),
       }}
     >
       <img src="/static/logo.svg" alt="idena logo" />
       <style jsx>{`
         img {
           width: ${rem(80)};
-          filter: invert(1);
         }
       `}</style>
     </Box>
@@ -148,7 +146,11 @@ function Nav() {
   return (
     <nav>
       <List>
-        <NavItem href="/dashboard" active icon={<FiUserCheck />}>
+        <NavItem
+          href="/dashboard"
+          active
+          icon={<i className="icon icon--user" />}
+        >
           {'My Idena' || nickname}
         </NavItem>
         {
@@ -240,6 +242,7 @@ function ActionPanel() {
     <Box
       bg={theme.colors.white01}
       css={{
+        minWidth: '100%',
         ...borderRadius('top', rem(10)),
         ...borderRadius('bottom', rem(10)),
       }}
