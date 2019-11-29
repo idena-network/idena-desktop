@@ -5,6 +5,10 @@ import {Box} from '.'
 import theme from '../theme'
 
 export function Tooltip({children, content, placement, pinned, ...props}) {
+  const bg = theme.colors.black
+
+  if (!content) return children
+
   return (
     <Box {...props} style={{position: 'relative', display: 'inline-block'}}>
       <div className="tooltip-action">{children}</div>
@@ -25,20 +29,23 @@ export function Tooltip({children, content, placement, pinned, ...props}) {
         }
         .tooltip {
           position: absolute;
-          padding: ${rem(6)} ${rem(14)};
-          margin: ${rem(10)} 0;
+          padding: ${rem(6, theme.fontSizes.base)}
+            ${rem(14, theme.fontSizes.base)};
+          margin: ${rem(10, theme.fontSizes.base)} 0;
           left: 50%;
           bottom: 100%;
-          background-color: ${theme.colors.text};
+          background-color: ${bg};
           color: ${theme.colors.white};
-          border-radius: ${rem(6)};
-          font-size: ${rem(13)};
-          line-height: ${rem(20)};
+          border-radius: ${rem(6, theme.fontSizes.base)};
+          font-size: ${rem(11, theme.fontSizes.base)};
+          font-weight: 500;
+          line-height: 1.45;
           white-space: pre;
           opacity: 0;
           visibility: hidden;
           transform: translate(-50%, 0);
           transition: all 0.3s ease;
+          z-index: 999;
         }
         .tooltip:after {
           top: 100%;
@@ -50,7 +57,7 @@ export function Tooltip({children, content, placement, pinned, ...props}) {
           position: absolute;
           pointer-events: none;
           border-color: rgba(136, 183, 213, 0);
-          border-top-color: ${theme.colors.text};
+          border-top-color: ${bg};
           border-width: 5px;
           margin-left: -5px;
         }
@@ -64,7 +71,7 @@ export function Tooltip({children, content, placement, pinned, ...props}) {
           border: solid transparent;
           border-color: rgba(136, 183, 213, 0);
           border-top-color: rgba(136, 183, 213, 0);
-          border-bottom-color: ${theme.colors.text};
+          border-bottom-color: ${bg};
           border-width: 5px;
           margin-left: -5px;
         }
@@ -97,6 +104,7 @@ Tooltip.propTypes = {
   large: PropTypes.bool,
   placement: PropTypes.string,
   pinned: PropTypes.bool,
+  bg: PropTypes.string,
 }
 
 export function TooltipIcon({icon}) {
@@ -105,9 +113,9 @@ export function TooltipIcon({icon}) {
       {icon}
       <style jsx>{`
         span {
-          margin: ${rem(-8)} 0;
-          padding: ${rem(6)};
-          font-size: ${rem(20)};
+          margin: ${rem(-8, theme.fontSizes.base)} 0;
+          padding: ${rem(6, theme.fontSizes.base)};
+          font-size: ${rem(20, theme.fontSizes.base)};
           color: ${theme.colors.primary};
           display: inline-block;
           vertical-align: middle;

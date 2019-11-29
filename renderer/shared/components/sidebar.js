@@ -15,6 +15,9 @@ import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
 } from '../providers/update-context'
+import useRpc from '../hooks/use-rpc'
+import {usePoll} from '../hooks/use-interval'
+import {Tooltip} from './tooltip'
 // import {useNodeState} from '../providers/node-context'
 
 function Sidebar() {
@@ -56,6 +59,8 @@ function NodeStatus() {
     highestBlock,
   } = useChainState()
 
+  const [{result: peers}] = usePoll(useRpc('net_peers'), 3000)
+
   let bg = theme.colors.white01
   let color = theme.colors.muted
   let text = 'Getting node status...'
@@ -86,20 +91,35 @@ function NodeStatus() {
           rem(theme.spacings.medium24)
         ),
       }}
-      title={
-        syncing
-          ? `Synchronizing blocks: ${currentBlock} out of ${highestBlock}`
-          : ''
-      }
     >
-      <Text
-        color={color}
-        css={{
-          lineHeight: rem(18),
-        }}
+      <Tooltip
+        content={
+          offline
+            ? null
+            : [
+                !offline ? `Peers: ${(peers || []).length}` : '',
+                syncing
+                  ? `Blocks: ${currentBlock} out of ${highestBlock}`
+                  : `Current block: ${currentBlock}`,
+              ].join('\n')
+        }
+        placement="bottom"
       >
-        {text}
-      </Text>
+        <Flex justify="space-between" align="center">
+          {!offline && (
+            <Bandwidth strength={(peers || []).length} syncing={syncing} />
+          )}
+
+          <Text
+            color={color}
+            css={{
+              lineHeight: rem(18),
+            }}
+          >
+            {text}
+          </Text>
+        </Flex>
+      </Tooltip>
     </Box>
   )
 }
@@ -463,6 +483,53 @@ export function Version() {
         ) : null}
       </Box>
     </>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+function Bandwidth({strength, syncing}) {
+  return (
+    <div>
+      <div>
+        {Array.from({length: 4}).map((_, idx) => (
+          <BandwidthItem
+            active={idx < strength}
+            variant={syncing ? 'warning' : 'success'}
+            height={(idx + 1) * 3}
+          />
+        ))}
+      </div>
+      <style jsx>{`
+        div {
+          display: inline-block;
+          margin-right: ${rem(6, theme.fontSizes.base)};
+          padding: ${rem(2, theme.fontSizes.base)}
+            ${rem(1, theme.fontSizes.base)} ${rem(3, theme.fontSizes.base)};
+          height: ${rem(16, theme.fontSizes.base)};
+          width: ${rem(16, theme.fontSizes.base)};
+        }
+        div > div {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+function BandwidthItem({active, variant, height}) {
+  return (
+    <div>
+      <style jsx>{`
+        background-color: ${theme.colors[`${variant}${active ? '' : '04'}`]};
+        border-radius: ${rem(1, theme.fontSizes.base)};
+        height: ${rem(height, theme.fontSizes.base)};
+        width: ${rem(2, theme.fontSizes.base)};
+        transition: background 0.3s ease;
+      `}</style>
+    </div>
   )
 }
 
