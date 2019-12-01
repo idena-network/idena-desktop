@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, position, rgba} from 'polished'
+import {rem, position, rgba, transparentize} from 'polished'
 import {FiCheck, FiZap, FiXCircle} from 'react-icons/fi'
 import Flex from '../../../shared/components/flex'
 import {Fill, Box} from '../../../shared/components'
@@ -66,6 +66,7 @@ function Thumb({
   irrelevantWords,
 }) {
   const hasQualified = irrelevantWords !== null && irrelevantWords !== undefined
+  const hasIrrelevantWords = hasQualified && irrelevantWords
   return (
     <Flex
       key={hash}
@@ -84,7 +85,14 @@ function Thumb({
       >
         {(hasAnswer(answer) || hasQualified) && (
           <Fill
-            bg={hasQualified ? rgba(87, 143, 255, 0.9) : rgba(89, 89, 89, 0.95)}
+            bg={
+              // eslint-disable-next-line no-nested-ternary
+              hasQualified
+                ? hasIrrelevantWords
+                  ? transparentize(0.1, theme.colors.danger)
+                  : rgba(87, 143, 255, 0.9)
+                : rgba(89, 89, 89, 0.95)
+            }
             css={{
               borderRadius: rem(12),
               display: 'flex',
