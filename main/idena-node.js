@@ -157,8 +157,11 @@ async function startNode(
 async function stopNode(node) {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!node || node.exitCode != null) {
-        return resolve('node process is not found')
+      if (!node) {
+        return resolve('node process not found')
+      }
+      if (node.exitCode != null) {
+        return resolve(`node already exited with code ${node.exitCode}`)
       }
       if (process.platform !== 'win32') {
         kill(node.pid, 'SIGINT', function(err) {
