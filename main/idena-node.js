@@ -157,7 +157,7 @@ async function startNode(
 async function stopNode(node) {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!node || node.exitCode !== undefined) {
+      if (!node || node.exitCode != null) {
         return resolve('node process is not found')
       }
       if (process.platform !== 'win32') {
