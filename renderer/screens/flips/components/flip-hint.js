@@ -22,7 +22,7 @@ function FlipHint({hint, onChange}) {
           width: rem(560),
         }}
       >
-        <Flex align="center" justify="space-between" css={{minHeight: rem(80)}}>
+        <Flex css={{minHeight: rem(40)}}>
           {hint.words &&
             hint.words.map(({name, desc}) => (
               <Box key={name} w={rem(220)} css={{...margin(0, rem(40), 0, 0)}}>
