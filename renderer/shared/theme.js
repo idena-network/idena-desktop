@@ -22,6 +22,7 @@ const colors = {
   success02: 'rgba(39, 217, 128, 0.2)',
   success04: 'rgb(39, 217, 128, 0.4)',
   black: 'rgb(17,17,17)',
+  black0: 'rgb(0,0,0)',
 }
 
 const fontSizes = {

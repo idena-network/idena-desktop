@@ -1,10 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {withRouter} from 'next/router'
-import {margin, rem, borderRadius, darken} from 'polished'
+import {useRouter} from 'next/router'
+import {margin, borderRadius, darken, transparentize, padding} from 'polished'
+
 import {Box, List, Link, Text} from '.'
 import Flex from './flex'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 import Loading from './loading'
 import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
@@ -17,7 +18,6 @@ import {
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
-// import {useNodeState} from '../providers/node-context'
 
 function Sidebar() {
   return (
@@ -39,8 +39,8 @@ function Sidebar() {
           flex-direction: column;
           justify-content: space-between;
           height: 100vh;
-          padding: 0 ${rem(16)};
-          width: ${rem(250)};
+          padding: ${rem(8)} ${rem(16)};
+          width: ${rem(200)};
           position: relative;
           z-index: 2;
         }
@@ -79,17 +79,7 @@ function NodeStatus() {
   return (
     <Box
       bg={bg}
-      px={rem(theme.spacings.small12)}
-      py={rem(4)}
-      css={{
-        borderRadius: rem(12),
-        color: theme.colors.white,
-        ...margin(
-          rem(theme.spacings.small8),
-          rem(0),
-          rem(theme.spacings.medium24)
-        ),
-      }}
+      css={{borderRadius: rem(12), ...padding(rem(4), rem(12), rem(4), rem(8))}}
     >
       <Tooltip
         content={
@@ -106,15 +96,12 @@ function NodeStatus() {
       >
         <Flex justify="space-between" align="center">
           {!offline && (
-            <Bandwidth strength={(peers || []).length} syncing={syncing} />
+            <Box css={margin(0, rem(4), 0, 0)}>
+              <Bandwidth strength={(peers || []).length} syncing={syncing} />
+            </Box>
           )}
 
-          <Text
-            color={color}
-            css={{
-              lineHeight: rem(18),
-            }}
-          >
+          <Text color={color} fontWeight={500} css={{lineHeight: rem(18)}}>
             {text}
           </Text>
         </Flex>
@@ -128,13 +115,13 @@ export function Logo() {
     <Box
       css={{
         alignSelf: 'center',
-        ...margin(rem(8), 0, rem(10), 0),
+        ...margin(rem(32), 0),
       }}
     >
-      <img src="/static/logo.svg" alt="idena logo" />
+      <img src="/static/logo.svg" alt="Idena logo" />
       <style jsx>{`
         img {
-          width: ${rem(80)};
+          width: ${rem(56)};
         }
       `}</style>
     </Box>
@@ -145,7 +132,7 @@ function Nav() {
   const {nickname} = useIdentityState()
   return (
     <nav>
-      <List>
+      <List m={0}>
         <NavItem
           href="/dashboard"
           active
@@ -153,14 +140,12 @@ function Nav() {
         >
           {'My Idena' || nickname}
         </NavItem>
-        {
-          <NavItem
-            href="/wallets"
-            icon={<i className="icon icon--menu_wallets" />}
-          >
-            Wallets
-          </NavItem>
-        }
+        <NavItem
+          href="/wallets"
+          icon={<i className="icon icon--menu_wallets" />}
+        >
+          Wallets
+        </NavItem>
         <NavItem href="/flips" icon={<i className="icon icon--menu_gallery" />}>
           Flips
         </NavItem>
@@ -170,9 +155,6 @@ function Nav() {
         >
           Contacts
         </NavItem>
-        {/* <NavItem href="/chats" icon={<FiMessageSquare />}>
-          Chats
-        </NavItem> */}
         <NavItem href="/settings" icon={<i className="icon icon--settings" />}>
           Settings
         </NavItem>
@@ -193,12 +175,30 @@ function Nav() {
   )
 }
 
-export const NavItem = withRouter(({href, router, icon, children}) => {
+// eslint-disable-next-line react/prop-types
+function NavItem({href, icon, children}) {
+  const router = useRouter()
   const active = router.pathname.startsWith(href)
+  const bg = active ? transparentize(0.84, theme.colors.black0) : ''
+  const bgHover = active
+    ? transparentize(0.84, theme.colors.black0)
+    : transparentize(0.9, theme.colors.white)
   const color = active ? theme.colors.white : theme.colors.white05
   return (
     <li>
-      <Link href={href} color={color} width="100%" height="100%">
+      <Link
+        href={href}
+        color={color}
+        hoverColor={theme.colors.white}
+        fontWeight={500}
+        width="100%"
+        height="100%"
+        style={{
+          fontWeight: 500,
+          lineHeight: rem(20),
+          ...padding(rem(6), rem(8)),
+        }}
+      >
         <Flex align="center">
           {React.cloneElement(icon, {
             color,
@@ -210,23 +210,20 @@ export const NavItem = withRouter(({href, router, icon, children}) => {
       </Link>
       <style jsx>{`
         li {
-          ${active && `background: ${theme.colors.white01}`};
-          border-radius: 4px;
+          background: ${bg};
+          border-radius: ${rem(6)};
           color: ${theme.colors.white05};
           cursor: pointer;
-          padding: 0 1em;
-          line-height: 2.2em;
-          margin: 0 0 0.5em;
           transition: background 0.3s ease;
         }
         li:hover {
           border-radius: 4px;
-          background: ${theme.colors.white01};
+          background: ${bgHover};
         }
       `}</style>
     </li>
   )
-})
+}
 
 function ActionPanel() {
   const {syncing} = useChainState()
@@ -243,8 +240,9 @@ function ActionPanel() {
       bg={theme.colors.white01}
       css={{
         minWidth: '100%',
-        ...borderRadius('top', rem(10)),
-        ...borderRadius('bottom', rem(10)),
+        ...borderRadius('top', rem(6)),
+        ...borderRadius('bottom', rem(6)),
+        ...margin(rem(24), 0, 0),
       }}
     >
       {currentPeriod !== EpochPeriod.None && (
@@ -265,23 +263,23 @@ function ActionPanel() {
 function Block({title, children, fallback = <Loading />}) {
   return (
     <Box
-      bg="none"
-      p={theme.spacings.normal}
       css={{
         borderBottom: `solid 1px ${theme.colors.gray3}`,
+        ...margin(0, 0, rem(1)),
+        ...padding(rem(8), rem(12)),
       }}
     >
       <Text
-        color={theme.colors.muted}
-        css={{display: 'block', marginBottom: theme.spacings.small}}
+        color={theme.colors.white05}
+        fontWeight={500}
+        css={{lineHeight: rem(19)}}
       >
         {title}
       </Text>
       <Text
         color={theme.colors.white}
-        css={{
-          display: 'block',
-        }}
+        fontWeight={500}
+        css={{lineHeight: rem(20)}}
       >
         {children || fallback}
       </Text>
@@ -505,7 +503,6 @@ function Bandwidth({strength, syncing}) {
       <style jsx>{`
         div {
           display: inline-block;
-          margin-right: ${rem(6, theme.fontSizes.base)};
           padding: ${rem(2, theme.fontSizes.base)}
             ${rem(1, theme.fontSizes.base)} ${rem(3, theme.fontSizes.base)};
           height: ${rem(16, theme.fontSizes.base)};

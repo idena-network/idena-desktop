@@ -4,10 +4,19 @@ import PropTypes from 'prop-types'
 import NextLink from 'next/link'
 import theme from '../theme'
 
-function Link({href, color, fontSize, children, width, height}) {
+function Link({
+  href,
+  color,
+  hoverColor = color,
+  fontSize,
+  children,
+  width,
+  height,
+  ...props
+}) {
   return (
     <NextLink href={href}>
-      <a>
+      <a {...props}>
         {children}
         <style jsx>{`
           a,
@@ -20,6 +29,10 @@ function Link({href, color, fontSize, children, width, height}) {
             display: inline-block;
             width: ${width};
             height: ${height};
+          }
+
+          a:hover {
+            color: ${hoverColor};
           }
         `}</style>
       </a>
@@ -34,6 +47,7 @@ Link.defaultProps = {
 Link.propTypes = {
   href: PropTypes.string.isRequired,
   color: PropTypes.string,
+  hoverColor: PropTypes.string,
   fontSize: PropTypes.string,
   width: PropTypes.string,
   height: PropTypes.string,
