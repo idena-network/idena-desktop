@@ -13,11 +13,12 @@ import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
 import FlipCover from '../../screens/flips/components/flip-cover'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
+import {useChain} from '../../shared/providers/chain-context'
 
 function Flips() {
   const {flips, submitFlip, deleteFlip} = useFlips()
   const {addNotification, addError} = useNotificationDispatch()
-  const {syncing, offline, loading} = useChainState()
+  const [{syncing, offline, loading}] = useChain()
 
   const [filter, setFilter] = useLocalStorage(
     'flips/filter',
