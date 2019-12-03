@@ -24,7 +24,7 @@ const reorder = (list, startIndex, endIndex) => {
   return result
 }
 
-function FlipPics({pics, onUpdateFlip}) {
+function FlipPics({id, pics, hint, onUpdateFlip}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [pickedUrl, setPickedUrl] = useState('')
   const [imageClipboard, setImageClipboard] = useState(null)
@@ -184,9 +184,12 @@ function FlipPics({pics, onUpdateFlip}) {
         >
           <IconButton
             icon={<FiSearch />}
-            onClick={() => {
-              global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, 1)
-            }}
+            onClick={() =>
+              global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
+                on: true,
+                id: `${id}-${hint.words.map(({name}) => name).join('-')}`,
+              })
+            }
           >
             Search on Google
           </IconButton>
@@ -234,7 +237,9 @@ function FlipPics({pics, onUpdateFlip}) {
 }
 
 FlipPics.propTypes = {
+  id: PropTypes.string,
   pics: PropTypes.arrayOf(PropTypes.string),
+  hint: PropTypes.any,
   onUpdateFlip: PropTypes.func.isRequired,
 }
 

@@ -298,7 +298,9 @@ app.on('ready', async () => {
 })
 
 app.on('before-quit', () => {
-  if (searchWindow && !searchWindow.isDestroyed()) searchWindow.destroy()
+  if (searchWindow && !searchWindow.isDestroyed()) {
+    searchWindow.destroy()
+  }
   mainWindow.forceClose = true
 })
 
@@ -484,14 +486,18 @@ function createSearchWindow() {
     show: false,
   })
   searchWindow.loadURL(`http://localhost:${expressPort}/`)
-  searchWindow.on('close', e => {
-    e.preventDefault()
-    if (searchWindow) searchWindow.hide()
+  searchWindow.on('closed', () => {
+    searchWindow = null
   })
 }
 
-ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, message) => {
-  if (message) {
+let lastUsedFlipId
+ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, {on, id}) => {
+  if (on) {
+    if (lastUsedFlipId !== id) {
+      createSearchWindow()
+      lastUsedFlipId = id
+    }
     if (!searchWindow) createSearchWindow()
     searchWindow.show()
     searchWindow.focus()
