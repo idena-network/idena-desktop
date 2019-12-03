@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react'
+import React, {useCallback, useState, useEffect} from 'react'
 import {killIdentity} from '../api'
 import {useRpc} from '../api/api-client'
 import {OfflineApp} from '../components/syncing-app'
@@ -34,10 +34,31 @@ export function IdentityProvider(props) {
     identity && identity.address
   )
 
+  const [terminating, setTerminating] = useState(false)
+
   const killMe = useCallback(
-    async ({to}) => killIdentity(identity.address, to),
+    async ({to}) => {
+      try {
+        setTerminating(true)
+        const {error} = await killIdentity(identity.address, to)
+        if (error) throw error
+      } catch (error) {
+        setTerminating(false)
+        throw error
+      }
+    },
     [identity]
   )
+
+  useEffect(() => {
+    if (
+      identity &&
+      identity.state === IdentityStatus.Undefined &&
+      terminating
+    ) {
+      setTerminating(false)
+    }
+  }, [identity, terminating])
 
   if (identity === null || isLoading) return <OfflineApp />
 
@@ -78,6 +99,7 @@ export function IdentityProvider(props) {
     <IdentityStateContext.Provider
       value={{
         ...identity,
+        state: terminating ? IdentityStatus.Terminating : identity.state,
         balance: balance && balance.balance,
         canActivateInvite,
         canSubmitFlip,
