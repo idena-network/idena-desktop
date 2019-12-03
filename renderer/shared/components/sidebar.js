@@ -17,6 +17,7 @@ import {
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
+import {useChain} from '../providers/chain-context'
 
 function Sidebar() {
   return (
@@ -49,17 +50,13 @@ function Sidebar() {
 }
 
 function NodeStatus() {
-  const {
-    loading,
-    syncing,
-    offline,
-    currentBlock,
-    highestBlock,
-  } = useChainState()
+  const [data] = useChain()
 
   const [{result: peers}] = usePoll(useRpc('net_peers'), 3000)
 
   if (!data) return null
+
+  const {loading, syncing, offline, currentBlock, highestBlock} = data
 
   let bg = syncing ? theme.colors.warning02 : theme.colors.success02
   let color = syncing ? theme.colors.warning : theme.colors.success

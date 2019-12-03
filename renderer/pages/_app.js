@@ -11,6 +11,7 @@ import {ValidationProvider} from '../shared/providers/validation-context'
 import {NodeProvider} from '../shared/providers/node-context'
 import {SettingsProvider} from '../shared/providers/settings-context'
 import {AutoUpdateProvider} from '../shared/providers/update-context'
+import {ChainProvider} from '../shared/providers/chain-context'
 
 export default class MyApp extends App {
   render() {

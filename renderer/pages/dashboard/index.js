@@ -16,10 +16,11 @@ import UserInfo from '../../screens/dashboard/components/user-info'
 import NetProfile from '../../screens/dashboard/components/net-profile'
 import KillForm from '../../screens/wallets/components/kill-form'
 import {useIdentityState} from '../../shared/providers/identity-context'
+import {useChain} from '../../shared/providers/chain-context'
 
 function Dashboard() {
   const router = useRouter()
-  const {syncing, offline, loading} = useChainState()
+  const [{syncing, offline, loading}] = useChain()
 
   const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(false)
   const handleCloseSendInvite = () => setIsSendInviteOpen(false)
