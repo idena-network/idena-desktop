@@ -89,6 +89,10 @@ const createMainWindow = () => {
     e.preventDefault()
     mainWindow.hide()
   })
+
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
 }
 
 const showMainWindow = () => {
@@ -213,23 +217,23 @@ const createTray = () => {
 }
 
 nodeUpdater.on('update-available', info => {
-  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-available', info)
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-available', info)
 })
 
 nodeUpdater.on('download-progress', info => {
-  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-download-progress', info)
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-download-progress', info)
 })
 
 nodeUpdater.on('update-downloaded', info => {
-  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-ready', info)
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-ready', info)
 })
 
 autoUpdater.on('download-progress', info => {
-  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'ui-download-progress', info)
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-download-progress', info)
 })
 
 autoUpdater.on('update-downloaded', info => {
-  mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'ui-update-ready', info)
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-update-ready', info)
 })
 
 ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
@@ -246,14 +250,14 @@ ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
     case 'update-node': {
       stopNode(node)
         .then(async () => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+          sendMainWindowMsg(NODE_EVENT, 'node-stopped')
           await updateNode()
-          mainWindow.webContents.send(NODE_EVENT, 'node-ready')
-          mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-updated')
+          sendMainWindowMsg(NODE_EVENT, 'node-ready')
+          sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-updated')
         })
         .catch(e => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
-          mainWindow.webContents.send(AUTO_UPDATE_EVENT, 'node-update-failed')
+          sendMainWindowMsg(NODE_EVENT, 'node-failed')
+          sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-failed')
           logger.error('error while updating node', e.toString())
         })
       break
@@ -312,7 +316,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
     case 'init-local-node': {
       getCurrentVersion()
         .then(version => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-ready', version)
+          sendMainWindowMsg(NODE_EVENT, 'node-ready', version)
         })
         .catch(e => {
           logger.error('error while getting current node version', e.toString())
@@ -320,23 +324,19 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
             return
           }
           nodeDownloadPromise = downloadNode(info => {
-            mainWindow.webContents.send(
-              AUTO_UPDATE_EVENT,
-              'node-download-progress',
-              info
-            )
+            sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-download-progress', info)
           })
             .then(() => {
               stopNode(node).then(async log => {
                 logger.info(log)
                 node = null
-                mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+                sendMainWindowMsg(NODE_EVENT, 'node-stopped')
                 await updateNode()
-                mainWindow.webContents.send(NODE_EVENT, 'node-ready')
+                sendMainWindowMsg(NODE_EVENT, 'node-ready')
               })
             })
             .catch(err => {
-              mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+              sendMainWindowMsg(NODE_EVENT, 'node-failed')
               logger.error('error while downlading node', err.toString())
             })
             .finally(() => {
@@ -352,12 +352,12 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
         data.ipfsPort,
         isDev,
         log => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-log', log)
+          sendMainWindowMsg(NODE_EVENT, 'node-log', log)
         },
         msg => {
           logger.error(msg)
           node = null
-          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+          sendMainWindowMsg(NODE_EVENT, 'node-failed')
         }
       )
         .then(n => {
@@ -367,10 +367,10 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
             }`
           )
           node = n
-          mainWindow.webContents.send(NODE_EVENT, 'node-started')
+          sendMainWindowMsg(NODE_EVENT, 'node-started')
         })
         .catch(e => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+          sendMainWindowMsg(NODE_EVENT, 'node-failed')
           logger.error('error while starting node', e.toString())
         })
       break
@@ -380,10 +380,10 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
         .then(log => {
           logger.info(log)
           node = null
-          mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+          sendMainWindowMsg(NODE_EVENT, 'node-stopped')
         })
         .catch(e => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+          sendMainWindowMsg(NODE_EVENT, 'node-failed')
           logger.error('error while stopping node', e.toString())
         })
       break
@@ -393,12 +393,12 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
         .then(log => {
           logger.info(log)
           node = null
-          mainWindow.webContents.send(NODE_EVENT, 'node-stopped')
+          sendMainWindowMsg(NODE_EVENT, 'node-stopped')
           cleanNodeState()
-          mainWindow.webContents.send(NODE_EVENT, 'state-cleaned')
+          sendMainWindowMsg(NODE_EVENT, 'state-cleaned')
         })
         .catch(e => {
-          mainWindow.webContents.send(NODE_EVENT, 'node-failed')
+          sendMainWindowMsg(NODE_EVENT, 'node-failed')
           logger.error('error while stopping node', e.toString())
         })
       break
@@ -406,7 +406,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
     case 'get-last-logs': {
       getLastLogs()
         .then(logs => {
-          mainWindow.webContents.send(NODE_EVENT, 'last-node-logs', logs)
+          sendMainWindowMsg(NODE_EVENT, 'last-node-logs', logs)
         })
         .catch(e => {
           logger.error('error while reading logs', e.toString())
@@ -490,9 +490,20 @@ ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, message) => {
 })
 
 ipcMain.on(IMAGE_SEARCH_PICK, (_event, message) => {
-  mainWindow.webContents.send(IMAGE_SEARCH_PICK, message)
+  sendMainWindowMsg(IMAGE_SEARCH_PICK, message)
 })
 
 ipcMain.on('reload', () => {
   loadRoute(mainWindow, 'dashboard')
 })
+
+function sendMainWindowMsg(channel, message, data) {
+  if (!mainWindow || !mainWindow.webContents || mainWindow.forceClose) {
+    return
+  }
+  try {
+    mainWindow.webContents.send(channel, message, data)
+  } catch (e) {
+    logger.error('cannot send msg to main window', e.toString())
+  }
+}
