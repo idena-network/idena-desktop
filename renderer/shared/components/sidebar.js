@@ -79,7 +79,11 @@ function NodeStatus() {
   return (
     <Box
       bg={bg}
-      css={{borderRadius: rem(12), ...padding(rem(4), rem(12), rem(4), rem(8))}}
+      css={{
+        borderRadius: rem(12),
+        ...margin(0, 0, 0, rem(-8)),
+        ...padding(rem(2), rem(12), rem(4), rem(8)),
+      }}
     >
       <Tooltip
         content={
@@ -94,9 +98,9 @@ function NodeStatus() {
         }
         placement="bottom"
       >
-        <Flex justify="space-between" align="center">
+        <Flex align="baseline">
           {!offline && (
-            <Box css={margin(0, rem(4), 0, 0)}>
+            <Box css={{...margin(0, rem(4), 0, 0)}}>
               <Bandwidth strength={(peers || []).length} syncing={syncing} />
             </Box>
           )}
@@ -439,18 +443,22 @@ export function Version() {
     <>
       <Box
         css={{
-          ...margin(
-            rem(theme.spacings.medium24),
-            rem(theme.spacings.small8),
-            rem(theme.spacings.medium24)
-          ),
+          ...margin(rem(theme.spacings.small8)),
         }}
       >
         <Flex direction="column">
-          <Text color={theme.colors.white05}>
+          <Text
+            color={theme.colors.white05}
+            fontWeight={500}
+            css={{lineHeight: rem(20)}}
+          >
             Client version: {global.appVersion}
           </Text>
-          <Text color={theme.colors.white05}>
+          <Text
+            color={theme.colors.white05}
+            fontWeight={500}
+            css={{lineHeight: rem(20)}}
+          >
             Node version: {autoUpdate.nodeCurrentVersion}
           </Text>
         </Flex>
