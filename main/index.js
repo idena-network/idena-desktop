@@ -44,6 +44,7 @@ const NodeUpdater = require('./node-updater')
 let mainWindow
 let node
 let nodeDownloadPromise = null
+let searchWindow
 let tray
 let expressPort = 3051
 
@@ -96,8 +97,10 @@ const createMainWindow = () => {
 }
 
 const showMainWindow = () => {
-  mainWindow.show()
-  mainWindow.focus()
+  if (mainWindow) {
+    mainWindow.show()
+    mainWindow.focus()
+  }
 }
 
 const createMenu = () => {
@@ -287,6 +290,7 @@ app.on('ready', async () => {
   await prepareNext('./renderer')
 
   createMainWindow()
+
   if (!isDev) {
     createMenu()
   }
@@ -298,6 +302,9 @@ app.on('ready', async () => {
 })
 
 app.on('before-quit', () => {
+  if (searchWindow && !searchWindow.isDestroyed()) {
+    searchWindow.destroy()
+  }
   mainWindow.forceClose = true
 })
 
@@ -466,26 +473,36 @@ function choosePort() {
 
 choosePort()
 
-let searchWindow
-ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, message) => {
-  if (message) {
-    searchWindow = new BrowserWindow({
-      width: 800,
-      height: 600,
-      frame: false,
-      webPreferences: {
-        nodeIntegration: false,
-        preload: join(__dirname, 'preload.js'),
-      },
-      parent: mainWindow,
-    })
-    searchWindow.loadURL(`http://localhost:${expressPort}/`)
-  }
-})
+function createSearchWindow() {
+  searchWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: false,
+      preload: join(__dirname, 'preload.js'),
+    },
+    parent: mainWindow,
+    show: false,
+  })
+  searchWindow.loadURL(`http://localhost:${expressPort}/`)
+  searchWindow.on('closed', () => {
+    searchWindow = null
+  })
+}
 
-ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, message) => {
-  if (!message) {
-    searchWindow.close()
+let lastUsedFlipId
+ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, {on, id}) => {
+  if (on) {
+    if (lastUsedFlipId !== id) {
+      createSearchWindow()
+      lastUsedFlipId = id
+    }
+    if (!searchWindow) createSearchWindow()
+    searchWindow.show()
+    searchWindow.focus()
+  } else {
+    searchWindow.hide()
   }
 })
 
