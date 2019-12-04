@@ -68,13 +68,14 @@ export default function SyncingApp() {
   )
 }
 
-// eslint-disable-next-line react/prop-types
-export function SyncInfo({currentBlock, highestBlock, wrongTime}) {
+export function SyncInfo() {
   const {data: identity} = useRpc('dna_identity')
+  const {data: sync} = useRpc('bcn_syncing')
 
-  if (identity === null) return null
+  if (identity === null || !sync) return null
 
   const {address} = identity
+  const {currentBlock, highestBlock, wrongTime} = sync
 
   return (
     <section>
