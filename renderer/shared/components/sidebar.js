@@ -72,6 +72,10 @@ function NodeStatus() {
       color = syncing ? theme.colors.warning : theme.colors.success
       text = syncing ? 'Synchronizing' : 'Synchronized'
     }
+  } else {
+    bg = transparentize(0.9, theme.colors.white)
+    color = theme.colors.muted
+    text = 'Getting node status...'
   }
 
   return (
