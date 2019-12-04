@@ -1,13 +1,10 @@
 import React from 'react'
 import {useRpc} from '../api/api-client'
-import {OfflineApp} from '../components/syncing-app'
 
 const TimingStateContext = React.createContext()
 
 export function TimingProvider(props) {
-  const {data, isLoading} = useRpc('dna_ceremonyIntervals')
-
-  if (data === null || isLoading) return <OfflineApp />
+  const {data} = useRpc('dna_ceremonyIntervals')
   return (
     <TimingStateContext.Provider value={mapToFriendlyTiming(data)} {...props} />
   )
@@ -22,18 +19,27 @@ export function useTimingState() {
 }
 
 function mapToFriendlyTiming(data) {
-  const {
-    ValidationInterval: validation,
-    FlipLotteryDuration: flipLottery,
-    ShortSessionDuration: shortSession,
-    LongSessionDuration: longSession,
-    AfterLongSessionDuration: afterLongSession,
-  } = data
+  if (data) {
+    const {
+      ValidationInterval: validation,
+      FlipLotteryDuration: flipLottery,
+      ShortSessionDuration: shortSession,
+      LongSessionDuration: longSession,
+      AfterLongSessionDuration: afterLongSession,
+    } = data
+    return {
+      validation,
+      flipLottery,
+      shortSession,
+      longSession,
+      afterLongSession,
+    }
+  }
   return {
-    validation,
-    flipLottery,
-    shortSession,
-    longSession,
-    afterLongSession,
+    validation: null,
+    flipLottery: null,
+    shortSession: null,
+    longSession: null,
+    afterLongSession: null,
   }
 }

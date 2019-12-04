@@ -1,7 +1,6 @@
 import React, {useCallback, useState, useEffect} from 'react'
 import {killIdentity} from '../api'
 import {useRpc} from '../api/api-client'
-import {OfflineApp} from '../components/syncing-app'
 
 export const IdentityStatus = {
   Undefined: 'Undefined',
@@ -28,7 +27,7 @@ const IdentityStateContext = React.createContext()
 const IdentityDispatchContext = React.createContext()
 
 export function IdentityProvider(props) {
-  const {data: identity, isLoading} = useRpc('dna_identity')
+  const {data: identity} = useRpc('dna_identity')
   const {data: balance} = useRpc(
     identity && 'dna_getBalance',
     identity && identity.address
@@ -60,46 +59,51 @@ export function IdentityProvider(props) {
     }
   }, [identity, terminating])
 
-  if (identity === null || isLoading) return <OfflineApp />
-
-  const {state, flips, requiredFlips} = identity
-
-  const canActivateInvite = [
-    IdentityStatus.Undefined,
-    IdentityStatus.Killed,
-    IdentityStatus.Invite,
-  ].includes(state)
+  const canActivateInvite =
+    identity &&
+    [
+      IdentityStatus.Undefined,
+      IdentityStatus.Killed,
+      IdentityStatus.Invite,
+    ].includes(identity.state)
 
   const canSubmitFlip =
-    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(state) &&
-    requiredFlips > 0 &&
-    (flips || []).length < requiredFlips
+    identity &&
+    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(identity.state) &&
+    identity.requiredFlips > 0 &&
+    (identity.flips || []).length < identity.requiredFlips
 
-  const canValidate = [
-    IdentityStatus.Candidate,
-    IdentityStatus.Newbie,
-    IdentityStatus.Verified,
-    IdentityStatus.Suspended,
-    IdentityStatus.Zombie,
-  ].includes(state)
+  const canValidate =
+    identity &&
+    [
+      IdentityStatus.Candidate,
+      IdentityStatus.Newbie,
+      IdentityStatus.Verified,
+      IdentityStatus.Suspended,
+      IdentityStatus.Zombie,
+    ].includes(identity.state)
 
-  const canTerminate = [
-    IdentityStatus.Candidate,
-    IdentityStatus.Newbie,
-    IdentityStatus.Verified,
-    IdentityStatus.Suspended,
-    IdentityStatus.Zombie,
-  ].includes(state)
+  const canTerminate =
+    identity &&
+    [
+      IdentityStatus.Candidate,
+      IdentityStatus.Newbie,
+      IdentityStatus.Verified,
+      IdentityStatus.Suspended,
+      IdentityStatus.Zombie,
+    ].includes(identity.state)
 
-  const canMine = [IdentityStatus.Newbie, IdentityStatus.Verified].includes(
-    state
-  )
+  const canMine =
+    identity &&
+    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(identity.state)
 
   return (
     <IdentityStateContext.Provider
       value={{
         ...identity,
-        state: terminating ? IdentityStatus.Terminating : identity.state,
+        state: terminating
+          ? IdentityStatus.Terminating
+          : identity && identity.state,
         balance: balance && balance.balance,
         canActivateInvite,
         canSubmitFlip,
