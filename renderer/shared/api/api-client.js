@@ -36,7 +36,7 @@ async function callRpc({method, params}) {
 }
 
 const defaultOptions = {
-  refetchInterval: 3000,
+  refetchInterval: 3 * 1000,
 }
 
 export function useRpc(method, ...params) {

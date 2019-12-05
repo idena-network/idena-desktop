@@ -1,6 +1,9 @@
 import React, {useEffect, useState, useReducer} from 'react'
+import {clearQueryCache} from 'react-query'
+
 import {useRpc} from '../api/api-client'
 import {useSettingsState} from './settings-context'
+import useLogger from '../hooks/use-logger'
 
 const ChainStateContext = React.createContext()
 
@@ -8,59 +11,62 @@ export function ChainProvider(props) {
   const {data, error, isLoading} = useRpc('bcn_syncing')
   const {useExternalNode} = useSettingsState()
 
-  const [state, dispatch] = useReducer(
-    // eslint-disable-next-line no-shadow
-    (state, [type, data]) => {
-      switch (type) {
-        case 'SET_LOADING': {
-          return {
-            ...state,
-            loading: true,
+  const [state, dispatch] = useLogger(
+    useReducer(
+      // eslint-disable-next-line no-shadow
+      (state, [type, data]) => {
+        switch (type) {
+          case 'SET_LOADING': {
+            return {
+              ...state,
+              loading: true,
+            }
           }
+          case 'FETCH_SYNC_SUCCEEDED': {
+            return {
+              ...state,
+              ...data,
+              offline: false,
+              loading: false,
+            }
+          }
+          case 'FETCH_SYNC_FAILED':
+            return {
+              ...state,
+              syncing: false,
+              offline: true,
+              loading: false,
+            }
+          default:
+            throw new Error(`Unknown action ${type}`)
         }
-        case 'FETCH_SYNC_SUCCEEDED': {
-          return {
-            ...state,
-            ...data,
-            offline: false,
-            loading: false,
-          }
-        }
-        case 'FETCH_SYNC_FAILED':
-          return {
-            ...state,
-            syncing: false,
-            offline: true,
-            loading: false,
-          }
-        default:
-          throw new Error(`Unknown action ${type}`)
+      },
+      {
+        loading: true,
+        offline: true,
+        syncing: false,
+        currentBlock: null,
+        highestBlock: null,
       }
-    },
-    {
-      loading: true,
-      offline: true,
-      syncing: false,
-      currentBlock: null,
-      highestBlock: null,
-    }
+    )
   )
 
   useEffect(() => {
     dispatch(['SET_LOADING'])
-  }, [useExternalNode])
+  }, [dispatch, useExternalNode])
 
   useEffect(() => {
     if (!isLoading && !!data) {
       dispatch(['FETCH_SYNC_SUCCEEDED', data])
     }
-  }, [data, isLoading])
+  }, [data, dispatch, isLoading])
 
   useEffect(() => {
     if (!isLoading && !!error) {
+      clearQueryCache()
       dispatch(['FETCH_SYNC_FAILED'])
     }
-  }, [error, isLoading])
+  }, [dispatch, error, isLoading])
 
   return <ChainStateContext.Provider value={state} {...props} />
 }

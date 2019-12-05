@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react'
 import dayjs from 'dayjs'
-import {useEpochState} from '../providers/epoch-context'
+import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useTimingState} from '../providers/timing-context'
 import {useInterval} from './use-interval'
 
@@ -14,6 +14,7 @@ export function useValidationTimer() {
     (prevState, name) => {
       switch (name) {
         default:
+          return state
         case 'start': {
           const {nextValidation} = epoch
           const {shortSession, longSession} = timing
@@ -59,7 +60,13 @@ export function useValidationTimer() {
   )
 
   useEffect(() => {
-    if (epoch && Object.keys(timing).length) {
+    if (
+      epoch &&
+      [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+        epoch.currentPeriod
+      ) &&
+      Object.keys(timing).length
+    ) {
       dispatch('start')
     }
   }, [epoch, timing])

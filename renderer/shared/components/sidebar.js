@@ -101,7 +101,7 @@ function NodeStatus() {
         placement="bottom"
       >
         <Flex align="baseline">
-          {!offline && (
+          {!offline && !loading && (
             <Box css={{...margin(0, rem(4), 0, 0)}}>
               <Bandwidth strength={(peers || []).length} syncing={syncing} />
             </Box>
