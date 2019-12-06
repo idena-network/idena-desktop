@@ -93,9 +93,9 @@ export default function LongValidation() {
   }, [dispatch, words])
 
   const [showQualificationDialog, setShowQualificationDialog] = React.useState()
-  useEffect(() => setShowQualificationDialog(state.qualificationRequested), [
-    state.qualificationRequested,
-  ])
+  useEffect(() => {
+    setShowQualificationDialog(state.qualificationRequested)
+  }, [state.qualificationRequested])
 
   const availableFlipsLength = state.flips.filter(x => !x.hidden).length
 
