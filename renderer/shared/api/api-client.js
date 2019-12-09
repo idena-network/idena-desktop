@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {useQuery} from 'react-query'
+import useSWR from 'swr'
 import {loadState} from '../utils/persist'
 
 export const BASE_INTERNAL_API_PORT = 9119
@@ -16,7 +16,8 @@ function getUrl() {
   return state.url || BASE_API_URL
 }
 
-async function callRpc({method, params}) {
+async function callRpc(method, params) {
+  console.log(method, params)
   const {result, error} = await (await fetch(getUrl(), {
     method: 'POST',
     headers: {
@@ -35,12 +36,11 @@ async function callRpc({method, params}) {
   return result
 }
 
-const defaultOptions = {
-  refetchInterval: 3 * 1000,
-}
-
 export function useRpc(method, ...params) {
-  return useQuery([`rpc/${method}`, {method, params}], callRpc, defaultOptions)
+  console.log(method, params)
+  return useSWR(method, callRpc, {
+    refreshInterval: 3 * 1000,
+  })
 }
 
 export default () =>

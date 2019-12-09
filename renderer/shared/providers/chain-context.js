@@ -63,7 +63,6 @@ export function ChainProvider(props) {
 
   useEffect(() => {
     if (!isLoading && !!error) {
-      clearQueryCache()
       dispatch(['FETCH_SYNC_FAILED'])
     }
   }, [dispatch, error, isLoading])

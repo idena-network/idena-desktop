@@ -13,13 +13,13 @@ const EpochStateContext = React.createContext()
 
 export function EpochProvider(props) {
   const {data} = useRpc('dna_epoch')
-  return <EpochStateContext.Provider value={data} {...props} />
+  return <EpochStateContext.Provider value={data || null} {...props} />
 }
 
 export function useEpochState() {
   const context = React.useContext(EpochStateContext)
   if (context === undefined) {
-    throw new Error('EpochState must be used within a EpochProvider')
+    throw new Error('EpochState must be used within an EpochProvider')
   }
   return context
 }

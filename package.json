@@ -85,11 +85,11 @@
     "react": "^16.8.4",
     "react-beautiful-dnd": "^10.0.4",
     "react-icons": "^3.7.0",
-    "react-query": "^0.3.20",
     "reverse-line-reader": "^0.2.6",
     "rlp": "^2.2.2",
     "semver": "^6.3.0",
     "styled-jsx": "^3.2.2",
+    "swr": "^0.1.13",
     "tree-kill": "^1.2.1",
     "use-deep-compare-effect": "^1.2.0"
   },
