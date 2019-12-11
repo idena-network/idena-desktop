@@ -362,10 +362,12 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
         log => {
           sendMainWindowMsg(NODE_EVENT, 'node-log', log)
         },
-        msg => {
-          logger.error(msg)
-          node = null
-          sendMainWindowMsg(NODE_EVENT, 'node-failed')
+        (msg, code) => {
+          if (code) {
+            logger.error(msg)
+            node = null
+            sendMainWindowMsg(NODE_EVENT, 'node-failed')
+          }
         }
       )
         .then(n => {
