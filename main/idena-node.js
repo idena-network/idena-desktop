@@ -119,9 +119,12 @@ async function startNode(
     tcpPort,
     '--ipfsport',
     ipfsPort,
-    '--apikey',
-    apiKey,
   ]
+  const version = await getCurrentVersion(false)
+  if (version > '0.14.3') {
+    paramters.push('--apikey')
+    paramters.push(apiKey)
+  }
   const configFile = getNodeConfigFile()
   if (fs.existsSync(configFile)) {
     paramters.push('--config')
