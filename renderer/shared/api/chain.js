@@ -29,6 +29,7 @@ export async function fetchSync() {
     params: [],
     id: 1,
   })
-  const {result} = data
+  const {result, error} = data
+  if (error) throw new Error(error.message)
   return result
 }
