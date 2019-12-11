@@ -105,12 +105,14 @@ function NodeProvider({children}) {
       state.nodeReady &&
       !state.nodeFailed &&
       !state.nodeStarted &&
-      settings.runInternalNode
+      settings.runInternalNode &&
+      settings.internalApiKey
     ) {
       global.ipcRenderer.send(NODE_COMMAND, 'start-local-node', {
         rpcPort: settings.internalPort,
         tcpPort: settings.tcpPort,
         ipfsPort: settings.ipfsPort,
+        apiKey: settings.internalApiKey,
       })
     }
   }, [
@@ -121,6 +123,7 @@ function NodeProvider({children}) {
     settings.tcpPort,
     settings.ipfsPort,
     state.nodeFailed,
+    settings.internalApiKey,
   ])
 
   useEffect(() => {

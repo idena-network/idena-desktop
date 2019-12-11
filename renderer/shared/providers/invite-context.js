@@ -23,7 +23,7 @@ function InviteProvider({children}) {
   React.useEffect(() => {
     let ignore = false
 
-    async function fetchData() {
+    async function fetchData(savedInvites) {
       const txs = await Promise.all(
         savedInvites.map(({hash}) => hash).map(api.fetchTx)
       )
@@ -84,8 +84,9 @@ function InviteProvider({children}) {
       }
     }
 
-    const savedInvites = db.getInvites()
-    fetchData()
+    fetchData(db.getInvites()).catch(e => {
+      global.logger.error('An error occured while fetching identity', e.message)
+    })
 
     setActivationTx(db.getActivationTx())
     setActivationCode(db.getActivationCode())

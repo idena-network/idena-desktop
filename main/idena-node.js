@@ -105,6 +105,7 @@ async function startNode(
   port,
   tcpPort,
   ipfsPort,
+  apiKey,
   useLogging = true,
   onLog,
   onExit
@@ -119,6 +120,11 @@ async function startNode(
     '--ipfsport',
     ipfsPort,
   ]
+  const version = await getCurrentVersion(false)
+  if (version > '0.14.3') {
+    paramters.push('--apikey')
+    paramters.push(apiKey)
+  }
   const configFile = getNodeConfigFile()
   if (fs.existsSync(configFile)) {
     paramters.push('--config')

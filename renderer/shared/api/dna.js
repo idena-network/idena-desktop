@@ -61,7 +61,8 @@ export async function fetchIdentity(address) {
     params: address ? [address] : [],
     id: 1,
   })
-  const {result} = data
+  const {result, error} = data
+  if (error) throw new Error(error.message)
   return result
 }
 
@@ -85,7 +86,8 @@ export async function fetchEpoch() {
     params: [],
     id: 1,
   })
-  const {result} = data
+  const {result, error} = data
+  if (error) throw new Error(error.message)
   return result
 }
 
@@ -107,7 +109,8 @@ export async function fetchCeremonyIntervals() {
     params: [],
     id: 1,
   })
-  const {result} = data
+  const {result, error} = data
+  if (error) throw new Error(error.message)
   return result
 }
 
@@ -123,7 +126,8 @@ export async function fetchCoinbaseAddress() {
     params: [],
     id: 1,
   })
-  const {result} = data
+  const {result, error} = data
+  if (error) throw new Error(error.message)
   return result
 }
 
@@ -211,7 +215,8 @@ export async function fetchNodeVersion() {
     params: [],
     id: 1,
   })
-  const {result} = data
+  const {result, error} = data
+  if (error) throw new Error(error.message)
   return result
 }
 

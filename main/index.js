@@ -357,6 +357,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
         data.rpcPort,
         data.tcpPort,
         data.ipfsPort,
+        data.apiKey,
         isDev,
         log => {
           sendMainWindowMsg(NODE_EVENT, 'node-log', log)

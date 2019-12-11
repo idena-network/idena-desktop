@@ -37,6 +37,7 @@ function NodeSettings() {
     toggleUseExternalNode,
     toggleRunInternalNode,
     toggleTransferModal,
+    saveExternalApiKey,
   } = useSettingsDispatch()
   const {nodeFailed} = useNodeState()
   const {tryRestartNode} = useNodeDispatch()
@@ -50,6 +51,12 @@ function NodeSettings() {
             ...prevState,
             url: action.data,
           }
+        case 'SET_API_KEY': {
+          return {
+            ...prevState,
+            apiKey: action.data,
+          }
+        }
         case 'NEW_LOG': {
           const prevLogs =
             prevState.logs.length > 200
@@ -72,6 +79,7 @@ function NodeSettings() {
     {
       logs: [],
       url: settings.url,
+      apiKey: settings.externalApiKey,
     }
   )
 
@@ -201,7 +209,9 @@ function NodeSettings() {
       {settings.useExternalNode && (
         <Box py={theme.spacings.xlarge}>
           <Flex align="center">
-            <Label htmlFor="url">Node address</Label>
+            <Label htmlFor="url" style={{width: 80}}>
+              Node address
+            </Label>
             <Input
               id="url"
               value={state.url}
@@ -230,6 +240,30 @@ function NodeSettings() {
             >
               Use default
             </FlatButton>
+          </Flex>
+          <Flex align="center" css={{marginTop: 10}}>
+            <Label htmlFor="url" style={{width: 80}}>
+              Node api key{' '}
+            </Label>
+            <Input
+              id="key"
+              value={state.apiKey}
+              onChange={e =>
+                dispatch({type: 'SET_API_KEY', data: e.target.value})
+              }
+              style={{
+                ...margin(0, theme.spacings.normal, 0, theme.spacings.small),
+                width: rem(300),
+              }}
+            />
+            <Button
+              onClick={() => {
+                saveExternalApiKey(state.apiKey)
+                notify()
+              }}
+            >
+              Save
+            </Button>
           </Flex>
         </Box>
       )}

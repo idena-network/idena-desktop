@@ -10,6 +10,19 @@ const TOGGLE_USE_EXTERNAL_NODE = 'TOGGLE_USE_EXTERNAL_NODE'
 const TOGGLE_RUN_INTERNAL_NODE = 'TOGGLE_RUN_INTERNL_NODE'
 const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
 const UPDATE_UI_VERSION = 'UPDATE_UI_VERSION'
+const SET_INTERNAL_KEY = 'SET_INTERNAL_KEY'
+const SET_EXTERNAL_KEY = 'SET_EXTERNAL_KEY'
+
+const randomKey = () =>
+  Math.random()
+    .toString(36)
+    .substring(2, 13) +
+  Math.random()
+    .toString(36)
+    .substring(2, 13) +
+  Math.random()
+    .toString(36)
+    .substring(2, 15)
 
 const initialState = {
   url: BASE_API_URL,
@@ -19,6 +32,8 @@ const initialState = {
   uiVersion: global.appVersion,
   useExternalNode: false,
   runInternalNode: false,
+  internalApiKey: randomKey(),
+  externalApiKey: '',
 }
 
 function settingsReducer(state, action) {
@@ -53,6 +68,18 @@ function settingsReducer(state, action) {
         uiVersion: action.data,
       }
     }
+    case SET_INTERNAL_KEY: {
+      return {
+        ...state,
+        internalApiKey: action.data,
+      }
+    }
+    case SET_EXTERNAL_KEY: {
+      return {
+        ...state,
+        externalApiKey: action.data,
+      }
+    }
     default:
       return state
   }
@@ -84,6 +111,12 @@ function SettingsProvider({children}) {
   }, [dispatch, firstRun, state.initialized])
 
   useEffect(() => {
+    if (!state.internalApiKey) {
+      dispatch({type: SET_INTERNAL_KEY, data: randomKey()})
+    }
+  })
+
+  useEffect(() => {
     if (state.uiVersion && semver.lt(state.uiVersion, global.appVersion)) {
       dispatch({type: UPDATE_UI_VERSION, data: global.appVersion})
     }
@@ -101,6 +134,10 @@ function SettingsProvider({children}) {
     dispatch({type: TOGGLE_RUN_INTERNAL_NODE, data: run})
   }
 
+  const saveExternalApiKey = key => {
+    dispatch({type: SET_EXTERNAL_KEY, data: key})
+  }
+
   return (
     <SettingsStateContext.Provider value={{...state, showTransferModal}}>
       <SettingsDispatchContext.Provider
@@ -109,6 +146,7 @@ function SettingsProvider({children}) {
           toggleUseExternalNode,
           toggleRunInternalNode,
           toggleTransferModal,
+          saveExternalApiKey,
         }}
       >
         {children}
