@@ -153,7 +153,7 @@ async function startNode(
       console.info(`child process exited with code ${code}`)
     }
     if (onExit) {
-      onExit(`node stopped with code ${code}`)
+      onExit(`node stopped with code ${code}`, code)
     }
   })
 

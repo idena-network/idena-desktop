@@ -14,14 +14,17 @@ export default function useLogger([state, dispatch]) {
     const action = actionRef.current
 
     if (action) {
+      const plainAction = {...action}
+      const plainState = {...state}
+
       console.group('DISPATCH')
-      console.log('Action:', action)
-      console.log('State:', state)
+      console.log('Action:', plainAction)
+      console.log('State:', plainState)
       console.groupEnd()
 
       logger.debug('--- START DISPATCH ---')
-      logger.debug('Action', action)
-      logger.debug('State', state)
+      logger.debug('Action', plainAction)
+      logger.debug('State', plainState)
       logger.debug('--- END DISPATCH ---')
     }
   }, [state])
