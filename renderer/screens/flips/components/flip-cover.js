@@ -8,6 +8,7 @@ import {
   FiClock,
 } from 'react-icons/fi'
 import {position, borderRadius, backgrounds, padding, rem} from 'polished'
+import {useTranslation} from 'react-i18next'
 import theme from '../../../shared/theme'
 import FlipImage from './flip-image'
 import {Box, Text, Link, Absolute} from '../../../shared/components'
@@ -85,6 +86,8 @@ function FlipCover({
   onSubmit,
   onDelete,
 }) {
+  const {t} = useTranslation()
+
   const {canSubmitFlip} = useIdentityState()
   const {syncing} = useChainState()
 
@@ -119,7 +122,7 @@ function FlipCover({
             <FiClock
               color={theme.colors.danger}
               fontSize={rem(24)}
-              title="Mining..."
+              title={t('Mining...')}
             />
           </Absolute>
         )}
@@ -143,7 +146,7 @@ function FlipCover({
                     href={`/flips/edit?id=${id}`}
                     icon={<FiEdit2 color={theme.colors.primary} />}
                   >
-                    Edit flip
+                    {t('Edit flip')}
                   </FlipMenuItem>
                   <FlipMenuItem
                     onClick={async () => {
@@ -153,7 +156,7 @@ function FlipCover({
                     disabled={!canSubmit}
                     icon={<FiUploadCloud color={theme.colors.primary} />}
                   >
-                    Submit flip
+                    {t('Submit flip')}
                   </FlipMenuItem>
                   <Divider m={theme.spacings.small} />
                   <FlipMenuItem
@@ -163,7 +166,7 @@ function FlipCover({
                     }}
                     icon={<FiXCircle color={theme.colors.danger} />}
                   >
-                    Delete flip
+                    {t('Delete flip')}
                   </FlipMenuItem>
                 </FlipMenu>
               </Absolute>
@@ -178,7 +181,7 @@ function FlipCover({
       </Box>
       <Box my={theme.spacings.small}>
         <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
-          Modified: {new Date(createdAt || modifiedAt).toLocaleString()}
+          {t('Modified')}: {new Date(createdAt || modifiedAt).toLocaleString()}
         </Text>
       </Box>
     </Box>

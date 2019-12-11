@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {MdMoreVert} from 'react-icons/md'
 
 import {margin, position, borderRadius, rem} from 'polished'
+import {useTranslation} from 'react-i18next'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Box, Link, Absolute} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
@@ -79,6 +80,8 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
     setIsMenuOpen(false)
   })
 
+  const {t} = useTranslation()
+
   return (
     <Box
       bg={main ? theme.colors.primary : theme.colors.gray}
@@ -124,7 +127,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                     disabled={isStake}
                     icon={<i className="icon icon--withdraw" />}
                   >
-                    Send
+                    {t('Send')}
                   </WalletMenuItem>
                   <WalletMenuItem
                     onClick={async () => {
@@ -134,7 +137,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                     disabled={isStake}
                     icon={<i className="icon icon--deposit" />}
                   >
-                    Receive
+                    {t('Receive')}
                   </WalletMenuItem>
                   {isStake && <Divider m={theme.spacings.small} />}
 
@@ -148,7 +151,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
                       danger
                       icon={<i className="icon icon--delete" />}
                     >
-                      Terminate
+                      {t('Terminate')}
                     </WalletMenuItem>
                   )}
                 </WalletMenu>
@@ -162,7 +165,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
         className="balance"
         style={{color: main ? theme.colors.white : theme.colors.muted}}
       >
-        Balance
+        {t('Balance')}
       </div>
       <div className="value">{balance} DNA</div>
       <style jsx>{`

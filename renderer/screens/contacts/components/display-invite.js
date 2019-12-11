@@ -8,6 +8,7 @@ import {
   borderRadius,
   backgrounds,
 } from 'polished'
+import {useTranslation} from 'react-i18next'
 import {Box, SubHeading, Text, Field, Hint} from '../../../shared/components'
 import Avatar from '../../../shared/components/avatar'
 import theme from '../../../shared/theme'
@@ -23,6 +24,7 @@ function DisplayInvite({
   lastName,
   code,
 }) {
+  const {t} = useTranslation()
   const fullName = useFullName({firstName, lastName})
   const readonly = mined
   return (
@@ -41,32 +43,32 @@ function DisplayInvite({
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          Invite for {fullName || receiver}
+          {t('Invite for')} {fullName || receiver}
         </SubHeading>
-        <Status mined={mined}>{mined ? 'Mined.' : 'Mining...'}</Status>
+        <Status mined={mined}>{mined ? t('Mined.') : t('Mining...')}</Status>
       </Box>
       <Flex justify="space-between">
-        <NameField label="First name" defaultValue={firstName} />
-        <NameField label="Last name" defaultValue={lastName} />
+        <NameField label={t('First name')} defaultValue={firstName} />
+        <NameField label={t('Last name')} defaultValue={lastName} />
       </Flex>
-      <WideField label="Amount" defaultValue={amount} disabled={readonly}>
-        <Hint label="Fee" value="0.999 DNA" />
-        <Hint label="Total amount" value="1000.999 DNA" />
+      <WideField label={t('Amount')} defaultValue={amount} disabled={readonly}>
+        <Hint label={t('Fee')} value="0.999 DNA" />
+        <Hint label={t('Total amount')} value="1000.999 DNA" />
       </WideField>
       <WideField
-        label="Invitation code"
+        label={t('Invitation code')}
         defaultValue={code}
         disabled={readonly}
         allowCopy
       />
       <WideField
-        label="Transaction ID"
+        label={t('Transaction ID')}
         defaultValue={hash}
         disabled={readonly}
         allowCopy
       />
       <WideField
-        label="Receiver"
+        label={t('Receiver')}
         defaultValue={receiver}
         disabled={readonly}
         allowCopy

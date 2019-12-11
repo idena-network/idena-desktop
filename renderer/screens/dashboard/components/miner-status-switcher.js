@@ -1,4 +1,5 @@
 import React, {useEffect, useReducer} from 'react'
+import {useTranslation} from 'react-i18next'
 
 import {
   Box,
@@ -23,7 +24,7 @@ const defaultState = {
   isMining: false,
 }
 
-function reducer(state, [action, {online} = defaultState]) {
+function miningReducer(state, [action, {online} = defaultState]) {
   switch (action) {
     case 'init':
       return {
@@ -70,7 +71,7 @@ function MinerStatusSwitcher() {
   const [{result: hash, error}, callRpc] = useRpc()
   const [{mined}, setHash] = useTx()
 
-  const [state, dispatch] = useReducer(reducer, defaultState)
+  const [state, dispatch] = useReducer(miningReducer, defaultState)
 
   useEffect(() => {
     if (!state.showModal) {
@@ -93,6 +94,8 @@ function MinerStatusSwitcher() {
     }
   }, [mined])
 
+  const {t} = useTranslation()
+
   if (!identity.canMine) {
     return null
   }
@@ -103,7 +106,7 @@ function MinerStatusSwitcher() {
         <div className="form-control">
           <Flex align="center" justify="space-between">
             <Label htmlFor="switcher" style={{margin: 0, cursor: 'pointer'}}>
-              Online mining status
+              {t('Online mining status')}
             </Label>
             <Box style={{pointerEvents: 'none'}}>
               {state.online !== null && state.online !== undefined && (
@@ -134,25 +137,25 @@ function MinerStatusSwitcher() {
         <Box m="0 0 18px">
           <SubHeading>
             {!state.online
-              ? 'Activate mining status'
-              : 'Deactivate mining status'}
+              ? t('Activate mining status')
+              : t('Deactivate mining status')}
           </SubHeading>
           <Text>
             {!state.online ? (
               <span>
-                Submit the form to start mining. Your node has to be online
+                {t(`Submit the form to start mining. Your node has to be online
                 unless you deactivate your status. Otherwise penalties might be
-                charged after being offline more than 1 hour.
+                charged after being offline more than 1 hour.`)}
                 <br />
                 <br />
-                You can deactivate your online status at any time.
+                {t('You can deactivate your online status at any time.')}
               </span>
             ) : (
               <span>
-                Submit the form to deactivate your mining status.
+                {t('Submit the form to deactivate your mining status.')}
                 <br />
                 <br />
-                You can activate it again afterwards.
+                (t{'You can activate it again afterwards.'})
               </span>
             )}
           </Text>
@@ -160,7 +163,7 @@ function MinerStatusSwitcher() {
         <Flex align="center" justify="flex-end">
           <Box px="4px">
             <Button variant="secondary" onClick={() => dispatch(['close'])}>
-              Cancel
+              {t('Cancel')}
             </Button>
           </Box>
           <Box px="4px">
@@ -174,7 +177,7 @@ function MinerStatusSwitcher() {
               }}
               disabled={state.isMining}
             >
-              {state.isMining ? 'Waiting...' : 'Submit'}
+              {state.isMining ? t('Waiting...') : t('Submit')}
             </Button>
           </Box>
         </Flex>

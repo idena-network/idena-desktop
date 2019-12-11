@@ -1,14 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem} from 'polished'
+import {useTranslation} from 'react-i18next'
 import {Box, Text} from '../../../shared/components'
 import theme from '../../../shared/theme'
 
 function TotalAmount({amount, percentChanges, amountChanges}) {
+  const {t} = useTranslation()
   return (
     <Box>
       <Box>
-        <Text color={theme.colors.muted}>Total amount</Text>
+        <Text color={theme.colors.muted}>{t('Total amount')}</Text>
       </Box>
       <Box>
         <Text fontSize={rem(24)}>

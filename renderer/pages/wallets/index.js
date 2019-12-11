@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react'
 import {rem} from 'polished'
 import {FiChevronRight} from 'react-icons/fi'
+import {useTranslation} from 'react-i18next'
 
 import theme from '../../shared/theme'
 import Layout from '../../shared/components/layout'
@@ -23,6 +24,7 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {FlatButton} from '../../shared/components/button'
 
 export default function Index() {
+  const {t} = useTranslation()
   const {wallets, totalAmount, fetching} = useWallets()
 
   const [isReceiveFormOpen, setIsReceiveFormOpen] = React.useState(false)
@@ -46,7 +48,7 @@ export default function Index() {
   return (
     <Layout syncing={syncing} offline={offline}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
-        <PageTitle>Wallets</PageTitle>
+        <PageTitle>{t('Wallets')}</PageTitle>
         <Box>
           {fetching ? (
             <Loading color={theme.colors.text} />
@@ -69,7 +71,7 @@ export default function Index() {
                         setIsTransferFormOpen(!isTransferFormOpen)
                       }}
                     >
-                      Send
+                      {t('Send')}
                     </IconLink>
                     <IconLink
                       disabled={activeWallet && activeWallet.isStake}
@@ -78,26 +80,8 @@ export default function Index() {
                         setIsReceiveFormOpen(!isReceiveFormOpen)
                       }}
                     >
-                      Receive
+                      {t('Receive')}
                     </IconLink>
-                    {/*  
-                    <IconLink
-                      disabled={activeWallet && !activeWallet.isStake}
-                      icon={<i className="icon icon--delete" />}
-                      danger
-                      onClick={() => {
-                        setIsWithdrawStakeFormOpen(!isWithdrawStakeFormOpen)
-                      }}
-                    >
-                      Terminate
-                    </IconLink>
-                    */}
-
-                    {/*
-                      <IconLink icon={<i className="icon icon--add_btn" />}>
-                          New wallet
-                      </IconLink>
-                    */}
                   </Actions>
                 </div>
               </Flex>
@@ -121,7 +105,7 @@ export default function Index() {
                   color: theme.colors.primary2,
                 }}
               >
-                Recent transactions
+                {t('Recent transactions')}
               </h3>
 
               <FlatButton
@@ -137,7 +121,7 @@ export default function Index() {
                   marginBottom: rem(19),
                 }}
               >
-                <span>See Explorer for rewards and penalties </span>
+                <span>{t('See Explorer for rewards and penalties')} </span>
 
                 <FiChevronRight
                   style={{

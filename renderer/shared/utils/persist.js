@@ -1,20 +1,19 @@
 const loadDb = global.prepareDb || {}
 
-export function loadState(dbName) {
+export function loadPersistentState(dbName) {
   try {
     const value = loadDb(dbName).getState()
-
     return Object.keys(value).length === 0 ? null : value || null
   } catch (error) {
     return null
   }
 }
 
-export function loadItem(dbName, key) {
+export function loadPersistentStateValue(dbName, key) {
   if (!key) {
     throw new Error('loadItem requires key to be passed')
   }
-  const state = loadState(dbName)
+  const state = loadPersistentState(dbName)
   return (state && state[key]) || null
 }
 

@@ -7,6 +7,7 @@ import {rem, position, borderRadius, margin} from 'polished'
 import {FiSearch, FiUpload, FiCopy} from 'react-icons/fi'
 import {Draggable, DragDropContext, Droppable} from 'react-beautiful-dnd'
 import mousetrap from 'mousetrap'
+import {useTranslation} from 'react-i18next'
 import {Box, Input} from '../../../shared/components'
 import Divider from '../../../shared/components/divider'
 import Flex from '../../../shared/components/flex'
@@ -25,6 +26,8 @@ const reorder = (list, startIndex, endIndex) => {
 }
 
 function FlipPics({id, pics, hint, onUpdateFlip}) {
+  const {t} = useTranslation()
+
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [pickedUrl, setPickedUrl] = useState('')
   const [imageClipboard, setImageClipboard] = useState(null)
@@ -159,9 +162,7 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          onClick={() => {
-                            setSelectedIndex(idx)
-                          }}
+                          onClick={() => setSelectedIndex(idx)}
                         >
                           <Image key={idx} src={src} style={style} />
                         </div>
@@ -191,7 +192,7 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
               })
             }
           >
-            Search on Google
+            {t('Search on Google')}
           </IconButton>
           <Divider vertical />
 
@@ -202,7 +203,7 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
               uploaderRef.current.click()
             }}
           >
-            Select file
+            {t('Select file')}
             <small> (150kb) </small>
           </IconButton>
 
@@ -213,7 +214,7 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
             icon={<FiCopy />}
             onClick={() => pasteImageFromClipboard()}
           >
-            Paste image ({global.isMac ? 'Cmd' : 'Ctrl'}+V)
+            {t('Paste image')} ({global.isMac ? 'Cmd' : 'Ctrl'}+V)
           </IconButton>
 
           <Box>

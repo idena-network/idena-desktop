@@ -11,7 +11,7 @@ import {useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/machine'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
-import {loadItem, persistItem} from '../utils/persist'
+import {loadPersistentStateValue, persistItem} from '../utils/persist'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -22,7 +22,7 @@ export default function Layout({loading, syncing, offline, ...props}) {
   const debouncedOffline = useDebounce(offline, AVAILABLE_TIMEOUT)
 
   const [zoomLevel, setZoomLevel] = React.useState(
-    () => loadItem('settings', 'zoomLevel') || 0
+    () => loadPersistentStateValue('settings', 'zoomLevel') || 0
   )
   React.useEffect(() => addWheelHandler(setZoomLevel), [])
   React.useEffect(() => {

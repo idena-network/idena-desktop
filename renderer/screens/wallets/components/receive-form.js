@@ -1,13 +1,13 @@
 import React from 'react'
-
 import {rem, margin, padding, wordWrap} from 'polished'
 import PropTypes from 'prop-types'
 import QRCode from 'qrcode.react'
-
+import {useTranslation} from 'react-i18next'
 import theme from '../../../shared/theme'
 import {Box, SubHeading, FormGroup, Field} from '../../../shared/components'
 
 function ReceiveForm({address}) {
+  const {t} = useTranslation()
   return (
     <Box
       css={padding(rem(theme.spacings.large48), rem(theme.spacings.medium32))}
@@ -20,7 +20,7 @@ function ReceiveForm({address}) {
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          Receive DNA’s
+          {t(`Receive DNA’s`)}
         </SubHeading>
 
         <Box
@@ -34,7 +34,7 @@ function ReceiveForm({address}) {
 
         <FormGroup>
           <WideField
-            label="Address"
+            label={t('Address')}
             defaultValue={address}
             disabled
             allowCopy

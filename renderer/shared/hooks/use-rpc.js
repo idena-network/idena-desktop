@@ -1,7 +1,5 @@
 import {useReducer, useCallback} from 'react'
 import useDeepCompareEffect from 'use-deep-compare-effect'
-import axios from 'axios'
-import {loadItem} from '../utils/persist'
 import api from '../api/api-client'
 
 /**

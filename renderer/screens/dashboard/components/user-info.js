@@ -8,7 +8,7 @@ import useUsername from '../../../shared/hooks/use-username'
 import {useIdentityState} from '../../../shared/providers/identity-context'
 import useFullName from '../../../shared/hooks/use-full-name'
 
-// TODO: THIS IS SHARED COMPONENT!!1 Please move under /shared dir
+// TODO: THIS IS a SHARED COMPONENT!!1 Please move it under /shared
 function UserInfo() {
   const identity = useIdentityState()
   const {address} = identity

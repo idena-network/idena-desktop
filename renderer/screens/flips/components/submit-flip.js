@@ -25,8 +25,6 @@ function SubmitFlip({
               if (idx === pics.length - 1) {
                 style = {...style, ...borderRadius('bottom', rem(8))}
               }
-
-              // eslint-disable-next-line react/no-array-index-key
               return (
                 <Box key={idx}>
                   <img

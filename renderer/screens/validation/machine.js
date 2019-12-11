@@ -10,7 +10,7 @@ import {
 import {SessionType} from '../../shared/providers/validation-context'
 import {fetchFlip} from '../../shared/api'
 import apiClient from '../../shared/api/api-client'
-import {persistState, loadState} from '../../shared/utils/persist'
+import {persistState, loadPersistentState} from '../../shared/utils/persist'
 import {EpochPeriod} from '../../shared/providers/epoch-context'
 import {canValidate} from '../../shared/providers/identity-context'
 import {
@@ -994,7 +994,7 @@ export function persistValidationState(state) {
 }
 
 export function loadValidationState() {
-  return loadState('validation2')
+  return loadPersistentState('validation2')
 }
 
 export function clearValidationState() {

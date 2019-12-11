@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {ellipsis, rgba, rem} from 'polished'
+import {useTranslation} from 'react-i18next'
 import theme from '../../../shared/theme'
 import useWallets from '../../../shared/utils/useWallets'
 import Avatar from '../../../shared/components/avatar'
@@ -77,18 +78,23 @@ RowStatus.propTypes = {
 
 function WalletTransfer() {
   const {transactions, txFetching} = useWallets()
+  const {t} = useTranslation('error')
 
   return (
     <div>
       <Table>
         <thead>
           <TableRow>
-            <TableHeaderCol>Transaction</TableHeaderCol>
-            <TableHeaderCol>Address</TableHeaderCol>
-            <TableHeaderCol className="text-right">Amount, DNA</TableHeaderCol>
-            <TableHeaderCol className="text-right">Fee, DNA</TableHeaderCol>
-            <TableHeaderCol>Date</TableHeaderCol>
-            <TableHeaderCol>Blockchain transaction ID</TableHeaderCol>
+            <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
+            <TableHeaderCol>{t('Address')}</TableHeaderCol>
+            <TableHeaderCol className="text-right">
+              {t('Amount, DNA')}
+            </TableHeaderCol>
+            <TableHeaderCol className="text-right">
+              {t('Fee, DNA')}
+            </TableHeaderCol>
+            <TableHeaderCol>{t('Date')}</TableHeaderCol>
+            <TableHeaderCol>{t('Blockchain transaction ID')}</TableHeaderCol>
           </TableRow>
         </thead>
         <tbody>
@@ -146,7 +152,7 @@ function WalletTransfer() {
                     (tx.usedFee === '0' ? '\u2013' : tx.usedFee)) || (
                     <div>
                       <div> {tx.maxFee} </div>
-                      <TableHint>Fee limit</TableHint>
+                      <TableHint>{t('Fee limit')}</TableHint>
                     </div>
                   )}
 
@@ -161,7 +167,7 @@ function WalletTransfer() {
                 <TableCol>
                   {(tx.isMining && 'Mining...') || (
                     <div>
-                      <div> Confirmed</div>
+                      <div> {t('Confirmed')}</div>
                       <TableHint style={{...ellipsis(rem(130))}}>
                         {tx.isMining ? '' : tx.hash}
                       </TableHint>
@@ -180,13 +186,11 @@ function WalletTransfer() {
             lineHeight: '40vh',
           }}
         >
-          {txFetching ? '' : 'You do not have any transactions yet'}
+          {txFetching ? '' : t(`You don't have any transactions yet`)}
         </div>
       )}
     </div>
   )
 }
-
-WalletTransfer.propTypes = {}
 
 export default WalletTransfer

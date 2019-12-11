@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {padding, margin} from 'polished'
 import {FiRotateCcw} from 'react-icons/fi'
+import {useTranslation} from 'react-i18next'
 import theme, {rem} from '../../../shared/theme'
 import {Box, BlockText, Text} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
@@ -9,8 +10,8 @@ import {TranslateWords} from '../../../shared/components/translate-button'
 import {FlatButton} from '../../../shared/components/button'
 
 function FlipHint({hint, onChange}) {
+  const {t} = useTranslation()
   const bntLabel = hint && hint.id >= 0 ? `(#${hint.id + 1})` : '(#1)'
-
   return (
     <Box>
       <Box
@@ -50,7 +51,7 @@ function FlipHint({hint, onChange}) {
               fontWeight={500}
               css={{lineHeight: 1, ...margin(0, 0, 0, rem(4))}}
             >
-              Change words {bntLabel}
+              {t('Change words')} {bntLabel}
             </Text>
           </Flex>
         </FlatButton>

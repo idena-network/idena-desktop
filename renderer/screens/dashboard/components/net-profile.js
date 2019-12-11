@@ -1,5 +1,7 @@
 import React from 'react'
 import {margin, rem} from 'polished'
+import {useTranslation} from 'react-i18next'
+
 import theme from '../../../shared/theme'
 import {Box} from '../../../shared/components'
 import {Figure} from '../../../shared/components/utils'
@@ -8,7 +10,7 @@ import {
   mapToFriendlyStatus,
 } from '../../../shared/providers/identity-context'
 
-function NetProfile() {
+export function NetProfile() {
   const {
     address,
     state,
@@ -19,6 +21,7 @@ function NetProfile() {
     totalQualifiedFlips,
     totalShortFlipPoints,
   } = useIdentityState()
+  const {t} = useTranslation()
   return (
     <Box
       bg={theme.colors.gray}
@@ -28,30 +31,24 @@ function NetProfile() {
         ...margin(0, 0, rem(theme.spacings.medium24), 0),
       }}
     >
-      <Figure label="Address" value={address} />
-
-      {state === 'Newbie' && (
-        <>
-          <Figure
-            label="Status"
-            value={mapToFriendlyStatus(state)}
-            tooltip="Solve more than 10 flips&#10;to become Verified"
-          />
-        </>
-      )}
-      {state !== 'Newbie' && (
-        <>
-          <Figure label="Status" value={mapToFriendlyStatus(state)} />
-        </>
-      )}
+      <Figure label={t('Address')} value={address} />
+      <Figure
+        label={t('Status')}
+        value={mapToFriendlyStatus(state)}
+        tooltip={
+          state === 'Newbie'
+            ? t('Solve more than 10 flips&#10;to become Verified')
+            : null
+        }
+      />
 
       {balance > 0 && (
         <>
           <Figure
-            label="Balance"
+            label={t('Balance')}
             value={balance}
             postfix="DNA"
-            tooltip="Main wallet balance"
+            tooltip={t('Main wallet balance')}
           />
         </>
       )}
@@ -59,33 +56,36 @@ function NetProfile() {
       {stake > 0 && (
         <>
           <Figure
-            label="Stake"
+            label={t('Stake')}
             value={stake}
             postfix="DNA"
-            tooltip="In order to withdraw the&#10;stake you have to&#10;terminate your identity"
+            tooltip={t(
+              'In order to withdraw the&#10;stake you have to&#10;terminate your identity'
+            )}
           />
         </>
       )}
 
       {penalty > 0 && (
         <Figure
-          label="Mining penalty"
+          label={t('Mining penalty')}
           value={penalty}
           postfix="DNA"
-          tooltip="Your node was offline more that 1 hour.&#10;The penalty will be charged automatically.&#10;Once it's fully paid you'll continue to mine coins."
+          tooltip={t(
+            "Your node was offline more than 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins."
+          )}
         />
       )}
-      {age > 0 && <Figure label="Age" value={age} postfix="epochs" />}
+      {age > 0 && <Figure label="Age" value={age} postfix={t('epochs')} />}
 
       {totalQualifiedFlips > 0 && (
         <>
           <Figure
-            label="Total score"
+            label={t('Total score')}
             value={`${totalShortFlipPoints} out of ${totalQualifiedFlips} (${Math.round(
               (totalShortFlipPoints / totalQualifiedFlips) * 10000
             ) / 100}%) `}
-            postfix=""
-            tooltip="Total score for&#10;all validations"
+            tooltip={t('Total score for&#10;all validations')}
           />
         </>
       )}
