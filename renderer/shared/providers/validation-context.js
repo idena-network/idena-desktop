@@ -416,8 +416,12 @@ export function ValidationProvider({children}) {
 
     if (secondsLeftForShortSession === 0) {
       const {shortAnswersSubmitted, flips} = state
-      const hasSomeAnswer = flips.map(x => x.answer).some(hasAnswer)
-      if (hasSomeAnswer && !shortAnswersSubmitted) {
+      const readyFlips = flips.filter(x => x.ready)
+      const hasEnoughAnswers =
+        readyFlips.length > 0 &&
+        readyFlips.filter(x => hasAnswer(x.answer)).length >=
+          readyFlips.length / 2
+      if (hasEnoughAnswers && !shortAnswersSubmitted) {
         sendAnswers()
       }
     }
