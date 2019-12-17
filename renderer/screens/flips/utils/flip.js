@@ -40,7 +40,7 @@ export function getRandomHint() {
     desc: desc || name,
   }))
 
-  return {id: 0, words: wordsPair}
+  return {id: -1, words: wordsPair}
 }
 
 export function getKeyWordsHint(flipKeyWordPairs, id) {
