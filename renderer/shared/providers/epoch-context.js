@@ -59,7 +59,7 @@ function EpochProvider({children}) {
   }, interval)
 
   return (
-    <EpochStateContext.Provider value={epoch}>
+    <EpochStateContext.Provider value={epoch || null}>
       <EpochDispatchContext.Provider value={null}>
         {children}
       </EpochDispatchContext.Provider>
