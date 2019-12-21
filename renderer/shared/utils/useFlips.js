@@ -159,7 +159,15 @@ function useFlips() {
           error: {message: 'Keywords for flip are not specified'},
         }
       }
+
       const pairId = hint.id
+
+      if (pairId < 0) {
+        return {
+          error: {message: 'Keywords for flip are not allowed'},
+        }
+      }
+
       const resp = await api.submitFlip(
         toHex(pics, order, nonSensePic, nonSenseOrder),
         Math.max(0, pairId)
