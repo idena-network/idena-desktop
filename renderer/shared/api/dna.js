@@ -176,6 +176,21 @@ export async function killIdentity(from, to) {
   return data
 }
 
+export async function killInvitee(from, to) {
+  const {data} = await api().post('/', {
+    method: 'dna_sendTransaction',
+    params: [
+      {
+        type: 10,
+        from,
+        to,
+      },
+    ],
+    id: 1,
+  })
+  return data
+}
+
 export async function becomeOnline() {
   const {data} = await api().post('/', {
     method: 'dna_becomeOnline',

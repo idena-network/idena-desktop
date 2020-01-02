@@ -23,9 +23,11 @@ module.exports = {
       .value()
   },
   addInvite(invite) {
+    const id = nanoid()
     getInvites()
-      .push({id: nanoid(), ...invite})
+      .push({id, ...invite})
       .write()
+    return id
   },
 
   updateInvite(id, invite) {

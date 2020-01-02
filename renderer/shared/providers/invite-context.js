@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import React from 'react'
+import React, {useCallback} from 'react'
 import * as api from '../api'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL} from '../utils/tx'
@@ -127,10 +127,13 @@ function InviteProvider({children}) {
       )
       setInvites(
         invites.map(invite => {
+          const invitedIdentity = api.fetchIdentity(invite.receiver)
+
           const tx = txs.find(({hash}) => hash === invite.hash)
           if (tx) {
             return {
               ...invite,
+              identity: invitedIdentity,
               mining:
                 tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
             }
@@ -154,8 +157,8 @@ function InviteProvider({children}) {
         canKill: true,
       }
 
-      db.addInvite(saveInvite)
-      const invite = {...saveInvite, mining: true}
+      const id = db.addInvite(saveInvite)
+      const invite = {...saveInvite, id, mining: true}
       setInvites([...invites, invite])
 
       return invite
@@ -201,6 +204,34 @@ function InviteProvider({children}) {
     const invite = {id: key, deletedAt: Date.now()}
     db.updateInvite(id, invite)
   }
+
+  const killInvite = useCallback(
+    async ({id, from, to}) => {
+      const resp = await api.killInvitee(from, to)
+      const {result} = resp
+
+      if (result) {
+        const key = id
+        setInvites(
+          invites.map(inv => {
+            if (inv.id === id) {
+              return {
+                ...inv,
+                terminating: true,
+              }
+            }
+            return inv
+          })
+        )
+        const invite = {id: key, terminatedAt: Date.now()}
+        db.updateInvite(id, invite)
+
+        return result
+      }
+      return resp
+    },
+    [invites]
+  )
 
   const recoverInvite = async id => {
     const key = id
@@ -253,6 +284,7 @@ function InviteProvider({children}) {
           recoverInvite,
           activateInvite,
           resetActivation,
+          killInvite,
         }}
       >
         {children}
