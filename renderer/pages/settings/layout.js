@@ -38,6 +38,16 @@ function SettingsLayout({children}) {
               >
                 Node
               </FlipToolbarItem>
+
+              <FlipToolbarItem
+                key="peers"
+                onClick={() => {
+                  router.push('/settings/peers')
+                }}
+                isCurrent={router.pathname === '/settings/peers'}
+              >
+                Peers
+              </FlipToolbarItem>
             </Flex>
           </FlipToolbar>
         </Box>
