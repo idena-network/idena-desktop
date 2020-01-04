@@ -6,15 +6,22 @@ import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {GlobalModals} from './modal'
+import {useDebounce} from '../hooks/use-debounce'
+
+const AVAILABLE_TIMEOUT = 1000 * 5
 
 export default function Layout({loading, syncing, offline, ...props}) {
+  const debouncedSyncing = useDebounce(syncing, AVAILABLE_TIMEOUT)
+  const debouncedOffline = useDebounce(offline, AVAILABLE_TIMEOUT)
   return (
     <main>
       <Sidebar />
       {loading && <LoadingApp />}
-      {!loading && syncing && !offline && <SyncingApp />}
-      {!loading && offline && !syncing && <OfflineApp />}
-      {!loading && !offline && !syncing && <NormalApp {...props} />}
+      {!loading && debouncedSyncing && !debouncedOffline && <SyncingApp />}
+      {!loading && debouncedOffline && !debouncedSyncing && <OfflineApp />}
+      {!loading && !debouncedOffline && !debouncedSyncing && (
+        <NormalApp {...props} />
+      )}
       <style jsx>{`
         main {
           display: flex;
