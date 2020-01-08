@@ -42,7 +42,7 @@ function FlipMaster({id, onClose}) {
 
   const {flips, getDraft, saveDraft, submitFlip} = useFlips()
 
-  const publishedFlips = flips.filter(({type}) => type === FlipType.Published)
+  const publishingFlips = flips.filter(({type}) => type === FlipType.Publishing)
 
   const [flip, setFlip] = useState({
     pics: [
@@ -54,7 +54,7 @@ function FlipMaster({id, onClose}) {
     nonSensePic: `https://placehold.it/480?text=5`,
     nonSenseOrder: -1,
     order: Array.from({length: 4}, (_, i) => i),
-    hint: getNextKeyWordsHint(flipKeyWordPairs, publishedFlips),
+    hint: getNextKeyWordsHint(flipKeyWordPairs, publishingFlips),
   })
 
   const {addNotification} = useNotificationDispatch()
@@ -68,7 +68,7 @@ function FlipMaster({id, onClose}) {
     if (step === 0 && !isFlipsLoaded) {
       setFlip({
         ...flip,
-        hint: getNextKeyWordsHint(flipKeyWordPairs, publishedFlips),
+        hint: getNextKeyWordsHint(flipKeyWordPairs, publishingFlips),
       })
     }
 
@@ -158,7 +158,7 @@ function FlipMaster({id, onClose}) {
               ...flip,
               hint: getNextKeyWordsHint(
                 flipKeyWordPairs,
-                publishedFlips,
+                publishingFlips,
                 flip.hint.id
               ),
             })

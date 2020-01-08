@@ -25,7 +25,11 @@ function Flips() {
     FlipType.Published
   )
 
-  const filteredFlips = flips.filter(({type}) => type === filter)
+  const filteredFlips = flips.filter(({type}) =>
+    filter === FlipType.Published
+      ? [FlipType.Publishing, filter].includes(type)
+      : type === filter
+  )
 
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
@@ -33,17 +37,18 @@ function Flips() {
         <Heading>My Flips</Heading>
         <FlipToolbar>
           <Flex>
-            {Object.values(FlipType).map(type => (
-              <FlipToolbarItem
-                key={type}
-                onClick={() => {
-                  setFilter(type)
-                }}
-                isCurrent={filter === type}
-              >
-                {type}
-              </FlipToolbarItem>
-            ))}
+            {Object.values(FlipType)
+              // alias Publishing to Published in userland
+              .filter(type => type !== FlipType.Publishing)
+              .map(type => (
+                <FlipToolbarItem
+                  key={type}
+                  onClick={() => setFilter(type)}
+                  isCurrent={filter === type}
+                >
+                  {type}
+                </FlipToolbarItem>
+              ))}
           </Flex>
           <Flex>
             <IconLink

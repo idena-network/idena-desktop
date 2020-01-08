@@ -65,7 +65,7 @@ export function getKeyWordsHint(flipKeyWordPairs, id) {
 
 export function getNextKeyWordsHint(
   flipKeyWordPairs,
-  publishedFlips,
+  publishingFlips,
   currId = -1,
   i = 50
 ) {
@@ -86,7 +86,7 @@ export function getNextKeyWordsHint(
   const isUsed =
     (nextKeyWordPair && nextKeyWordPair.used) ||
     (nextKeyWordPair &&
-      publishedFlips.find(({hint}) => hint.id === nextKeyWordPair.id))
+      publishingFlips.find(({hint}) => hint.id === nextKeyWordPair.id))
 
   if (isUsed) {
     // get next free pair
@@ -95,7 +95,7 @@ export function getNextKeyWordsHint(
 
     return getNextKeyWordsHint(
       flipKeyWordPairs,
-      publishedFlips,
+      publishingFlips,
       nextKeyWordPair.id,
       i - 1
     )
