@@ -502,6 +502,7 @@ function Bandwidth({strength, syncing}) {
       <div>
         {Array.from({length: 4}).map((_, idx) => (
           <BandwidthItem
+            key={`bw-${idx}`}
             active={idx < strength}
             variant={syncing ? 'warning' : 'success'}
             height={(idx + 1) * 3}
