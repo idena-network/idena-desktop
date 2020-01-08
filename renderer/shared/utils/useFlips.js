@@ -92,7 +92,7 @@ function useFlips() {
   useInterval(
     () => {
       const txPromises = flips
-        .filter(f => f.type === FlipType.Published)
+        .filter(f => f.type === FlipType.Publishing)
         .map(f => f.txHash)
         .map(fetchTx)
       Promise.all(txPromises).then(txs => {
