@@ -315,8 +315,7 @@ export function OfflineApp() {
             nodeProgress && (
               <>
                 <Flex width="100%">
-                  <img src="/static/idena_white.svg" alt="logo" />
-                  {/* icon here */}
+                  <img src="/idena_white.svg" alt="logo" />
                   <Flex direction="column" justify="space-between" flex="1">
                     <h2>Downloding Idena Node...</h2>
 
