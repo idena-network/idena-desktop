@@ -14,6 +14,7 @@ const {
 } = global.flipStore || {}
 
 export const FlipType = {
+  Publishing: 'publishing',
   Published: 'published',
   Draft: 'draft',
   Archived: 'archived',
@@ -91,25 +92,25 @@ function useFlips() {
   useInterval(
     () => {
       const txPromises = flips
-        .filter(f => f.type === FlipType.Published)
+        .filter(f => f.type === FlipType.Publishing)
         .map(f => f.txHash)
         .map(fetchTx)
       Promise.all(txPromises).then(txs => {
         const nextFlips = flips.map(flip => {
           const tx = txs.find(({hash}) => hash === flip.txHash)
+          const mined =
+            tx && tx.result && tx.result.blockHash !== HASH_IN_MEMPOOL
           return {
             ...flip,
-            mined: tx && tx.result && tx.result.blockHash !== HASH_IN_MEMPOOL,
+            mined,
+            type: mined ? FlipType.Published : flip.type,
           }
         })
         setFlips(nextFlips)
         saveFlips(nextFlips)
       })
     },
-    flips.filter(({type, mined}) => type === FlipType.Published && !mined)
-      .length
-      ? 10000
-      : null
+    flips.some(({type}) => type === FlipType.Publishing) ? 1000 * 10 : null
   )
 
   const getDraft = useCallback(
@@ -184,7 +185,7 @@ function useFlips() {
               pics,
               order,
               ...result,
-              type: FlipType.Published,
+              type: FlipType.Publishing,
               modifiedAt: Date.now(),
             },
             ...prevFlips.slice(flipIdx + 1),
@@ -206,13 +207,15 @@ function useFlips() {
   }, [])
 
   const archiveFlips = useCallback(() => {
-    const nextFlips = flips.map(f => ({
-      ...f,
-      type: FlipType.Archived,
-    }))
-    setFlips(nextFlips)
-    saveFlips(nextFlips)
-  }, [flips])
+    setFlips(prevFlips => {
+      const nextFlips = prevFlips.map(flip => ({
+        ...flip,
+        type: FlipType.Archived,
+      }))
+      saveFlips(nextFlips)
+      return nextFlips
+    })
+  }, [])
 
   return {
     flips,

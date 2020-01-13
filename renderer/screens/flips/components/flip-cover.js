@@ -111,7 +111,7 @@ function FlipCover({
     <Box w={width}>
       <Box my={theme.spacings.small} css={position('relative')}>
         <FlipImage src={pics[0]} />
-        {type === FlipType.Published && !mined && (
+        {type === FlipType.Publishing && (
           <Absolute
             bottom="0"
             left="135px"
