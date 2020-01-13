@@ -1,5 +1,5 @@
 import React from 'react'
-import App, {Container} from 'next/app'
+import App from 'next/app'
 import Router from 'next/router'
 import NProgress from 'nprogress'
 import GlobalStyle from '../shared/components/global-style'
@@ -19,15 +19,14 @@ export default class MyApp extends App {
 
     // Workaround for https://github.com/zeit/next.js/issues/8592
     const {err} = this.props
-    const modifiedPageProps = {...pageProps, err}
 
     return (
-      <Container>
+      <>
         <GlobalStyle />
         <AppProviders>
-          <Component {...modifiedPageProps} />
+          <Component {...{...pageProps, err}} />
         </AppProviders>
-      </Container>
+      </>
     )
   }
 }
@@ -54,14 +53,6 @@ function AppProviders(props) {
   )
 }
 
-Router.events.on('routeChangeStart', () => {
-  NProgress.start()
-})
-
-Router.events.on('routeChangeComplete', () => {
-  NProgress.done()
-})
-
-Router.events.on('routeChangeError', () => {
-  NProgress.done()
-})
+Router.events.on('routeChangeStart', NProgress.start)
+Router.events.on('routeChangeComplete', NProgress.done)
+Router.events.on('routeChangeError', NProgress.done)
