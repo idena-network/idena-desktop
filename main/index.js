@@ -117,7 +117,7 @@ const createMenu = () => {
       {
         label: 'Dev tools',
         accelerator:
-          process.platform === 'darwin' ? 'Cmd+Shift+I' : 'Ctrl+Shift+I',
+          process.platform === 'darwin' ? 'Command+Alt+I' : 'Ctrl+Shift+I',
         role: 'toggleDevTools',
         visible: false,
       },

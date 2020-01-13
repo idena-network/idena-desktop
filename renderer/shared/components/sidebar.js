@@ -122,7 +122,7 @@ export function Logo() {
         ...margin(rem(32), 0),
       }}
     >
-      <img src="/logo.svg" alt="Idena logo" />
+      <img src="/static/logo.svg" alt="Idena logo" />
       <style jsx>{`
         img {
           width: ${rem(56)};

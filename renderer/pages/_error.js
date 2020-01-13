@@ -6,6 +6,11 @@ import Layout from '../shared/components/layout'
 import {Button} from '../shared/components'
 import theme from '../shared/theme'
 
+// make ssr happy
+global.logger = global.logger || {
+  error() {},
+}
+
 // eslint-disable-next-line react/prop-types
 function MyError({statusCode, hasGetInitialPropsRun, err}) {
   if (!hasGetInitialPropsRun && err) {
