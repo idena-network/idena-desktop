@@ -14,6 +14,7 @@ const logger = pino(
       'flips[*].pics',
       'flips[*].urls',
     ],
+    timestamp: () => `,"time":"${new Date().toISOString()}"`,
   },
   path.join(appDataPath('logs'), 'idena.log')
 )
