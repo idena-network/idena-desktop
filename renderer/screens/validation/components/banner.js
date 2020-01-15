@@ -73,11 +73,11 @@ function ValidationRunning() {
 
   const identity = useIdentityState()
 
-  React.useEffect(() => {
-    if (isShortSession && !shortAnswersSubmitted && canValidate(identity)) {
-      Router.push('/validation/short')
-    }
-  }, [identity, isShortSession, shortAnswersSubmitted])
+  // React.useEffect(() => {
+  //   if (isShortSession && !shortAnswersSubmitted && canValidate(identity)) {
+  //     Router.push('/validation/short')
+  //   }
+  // }, [identity, isShortSession, shortAnswersSubmitted])
 
   const seconds = isShortSession
     ? secondsLeftForShortSession

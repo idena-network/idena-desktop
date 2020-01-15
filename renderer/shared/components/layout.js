@@ -7,6 +7,7 @@ import ValidationBanner from '../../screens/validation/components/banner'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {GlobalModals} from './modal'
 import {useDebounce} from '../hooks/use-debounce'
+import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 
 const AVAILABLE_TIMEOUT = 1000 * 5
 
@@ -47,7 +48,14 @@ Layout.propTypes = {
 }
 
 function NormalApp(props) {
-  const {pathname} = useRouter()
+  const {pathname, push} = useRouter()
+
+  const epoch = useEpochState()
+
+  React.useEffect(() => {
+    if (epoch && epoch.currentPeriod === EpochPeriod.ShortSession)
+      push('/validation')
+  }, [epoch, push])
 
   return (
     <section>
