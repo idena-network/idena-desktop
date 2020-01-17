@@ -10,279 +10,261 @@ import {
   rgba,
 } from 'polished'
 import {FiCheck, FiXCircle} from 'react-icons/fi'
-import {Col, Box, Fill, Button} from '../../../shared/components'
+import {Box, Fill, Heading} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import Arrow from './arrow'
 import {reorderList} from '../../../shared/utils/arr'
 import Spinner from './spinner'
 import theme, {rem} from '../../../shared/theme'
 import {
-  AnswerType,
   hasAnswer,
   SessionType,
 } from '../../../shared/providers/validation-context'
 
-export function ValidationScene({
-  flip: {images, option, orders, loaded, failed},
-  isFirst,
-  isLast,
-  type,
-  onAnswer,
-  onNext,
-  onPrev,
-}) {
-  const leftImages = reorderList(images, orders[0])
-  const rightImages = reorderList(images, orders[1])
+export function Scene(props) {
   return (
     <Flex
-      // justify="space-between"
-      // flex={1}
+      direction="column"
       css={{
-        ...margin(0, rem(theme.spacings.medium24), 0),
+        background: theme.colors.black,
+        height: '100vh',
+        ...padding(
+          rem(theme.spacings.medium24),
+          rem(theme.spacings.large),
+          rem(theme.spacings.medium16)
+        ),
       }}
-    >
-      <Box onClick={onPrev} hidden={isFirst}>
-        <Arrow dir="prev" type={type} />
-      </Box>
-      <Flex align="center">
-        <Flex
-          direction="column"
-          justify="center"
-          align="center"
-          css={style(option, AnswerType.Left)}
-        >
-          {loaded &&
-            leftImages.map((src, idx) => (
-              <Box
-                key={orders[0][idx]}
-                css={{
-                  height: rem(110),
-                  width: rem(147),
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-                onClick={() => onAnswer(AnswerType.Left)}
-              >
-                {/* eslint-disable-next-line no-use-before-define */}
-                <div style={blurStyle(src)} />
-                <img
-                  src={src}
-                  alt="currentFlip"
-                  height={110}
-                  width={147}
-                  style={{
-                    ...borderRadius(
-                      'top',
-                      idx === 0 ? rem(8, theme.fontSizes.base) : 'none'
-                    ),
-                    ...borderRadius(
-                      'bottom',
-                      idx === images.length - 1
-                        ? rem(8, theme.fontSizes.base)
-                        : 'none'
-                    ),
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 1,
-                    textAlign: 'center',
-                    objectFit: 'contain',
-                    objectPosition: 'center',
-                    height: rem(110, theme.fontSizes.base),
-                    width: rem(147, theme.fontSizes.base),
-                  }}
-                />
-              </Box>
-            ))}
-          {!loaded && (
-            <Fill>
-              <Spinner />
-            </Fill>
-          )}
-          {failed &&
-            [1, 2, 3, 4].map((_, idx) => (
-              <Box key={`left-${idx}`}>
-                <img
-                  alt="noImage"
-                  height={110}
-                  width={147}
-                  style={{
-                    background: theme.colors.white,
-                    objectFit: 'contain',
-                    objectPosition: 'center',
-                  }}
-                  src="https://placehold.it/147x110?text=No+data"
-                />
-              </Box>
-            ))}
-        </Flex>
-        <Flex
-          direction="column"
-          justify="center"
-          align="center"
-          css={style(option, AnswerType.Right)}
-        >
-          {loaded &&
-            rightImages.map((src, idx) => (
-              <Box
-                key={orders[1][idx]}
-                css={{
-                  height: rem(110, theme.fontSizes.base),
-                  width: rem(147, theme.fontSizes.base),
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-                onClick={() => onAnswer(AnswerType.Right)}
-              >
-                {/* eslint-disable-next-line no-use-before-define */}
-                <div style={blurStyle(src)} />
-                <img
-                  alt="currentFlip"
-                  style={{
-                    ...borderRadius(
-                      'top',
-                      idx === 0 ? rem(8, theme.fontSizes.base) : 'none'
-                    ),
-                    ...borderRadius(
-                      'bottom',
-                      idx === images.length - 1
-                        ? rem(8, theme.fontSizes.base)
-                        : 'none'
-                    ),
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 1,
-                    textAlign: 'center',
-                    objectFit: 'contain',
-                    objectPosition: 'center',
-                    height: rem(110, theme.fontSizes.base),
-                    width: rem(147, theme.fontSizes.base),
-                  }}
-                  src={src}
-                />
-              </Box>
-            ))}
-          {!loaded && (
-            <Fill>
-              <Spinner />
-            </Fill>
-          )}
-          {failed &&
-            [1, 2, 3, 4].map((_, idx) => (
-              <Box key={`right-${idx}`}>
-                <img
-                  alt="noImage"
-                  height={110}
-                  width={147}
-                  style={{
-                    background: theme.colors.white,
-                    objectFit: 'contain',
-                    objectPosition: 'center',
-                  }}
-                  src="https://placehold.it/147x110?text=No+data"
-                />
-              </Box>
-            ))}
-        </Flex>
-        {/* {type === SessionType.Long &&
-          stage === SessionType.Qualification &&
-          ready &&
-          !failed && <Words key={hash} words={words} />} */}
-      </Flex>
-      {(true ||
-        shouldAllowNext(
-          isLast,
-          loaded,
-          SessionType.Qualification,
-          option,
-          null, // irrelevantWords,
-          null // words
-        )) && (
-        <Col onClick={onNext} w={4}>
-          <Arrow dir="next" type={type} />
-        </Col>
-      )}
-    </Flex>
+      {...props}
+    />
   )
 }
 
-function shouldAllowNext(isLast, ready, stage, answer, irrelevantWords, words) {
-  if (isLast) {
-    return false
-  }
-
-  if (!ready) {
-    return true
-  }
-
-  if (stage === SessionType.Qualification) {
-    return !words || (irrelevantWords !== null && irrelevantWords !== undefined)
-  }
-
-  return hasAnswer(answer)
+export function Header(props) {
+  return (
+    <Flex
+      justify="space-between"
+      align="center"
+      css={{...margin(0, 0, rem(40))}}
+      {...props}
+    />
+  )
 }
 
-const defaultStyle = {
-  borderRadius: rem(8, theme.fontSizes.base),
-  boxShadow: `0 0 1px 0 ${theme.colors.primary2}`,
-  ...margin(0, rem(theme.spacings.medium24, theme.fontSizes.base), 0),
-  minWidth: rem(147, theme.fontSizes.base),
-  position: 'relative',
-  ...padding(rem(4, theme.fontSizes.base)),
-  height: '100%',
-  opacity: 1,
+export function Title(props) {
+  return (
+    <Heading
+      fontSize={rem(28)}
+      fontWeight={500}
+      color={theme.colors.white}
+      {...props}
+    />
+  )
 }
 
-const answeredStyle = {
-  ...defaultStyle,
-  border: `solid 2px ${theme.colors.primary}`,
-  boxShadow: '0 0 4px 6px rgba(87, 143, 255, 0.25)',
-  opacity: 1,
+export function SessionTitle({current, total}) {
+  return (
+    <Title>
+      Select meaningful story: left or right ({current} out of {total})
+    </Title>
+  )
 }
 
-const oppositeAnsweredStyle = {
-  ...defaultStyle,
-  opacity: 0.3,
+export function CurrentStep(props) {
+  return (
+    <Flex
+      justify="center"
+      flex={1}
+      css={{
+        ...margin(0, 0, rem(theme.spacings.medium24)),
+        display: 'grid',
+        gridTemplate: 1 / 1,
+      }}
+      {...props}
+    />
+  )
 }
 
-const blurStyle = src => ({
-  background: `center center / cover no-repeat url(${src})`,
-  filter: 'blur(6px)',
-  ...cover(),
-  zIndex: 1,
-})
-
-function style(answer, target) {
-  if (!answer || answer === AnswerType.None) {
-    return defaultStyle
-  }
-  return answer === target ? answeredStyle : oppositeAnsweredStyle
+export function FlipChallenge(props) {
+  return <Flex justify="center" {...props} />
 }
 
-export function ValidationActions({onSubmitAnswers, canSubmit, countdown}) {
+export function Flip({
+  images,
+  orders,
+  loaded,
+  failed,
+  decoded,
+  option,
+  variant,
+  onChoose,
+}) {
+  const ready = loaded && decoded
+
+  if (!ready) return <LoadingFlip />
+  if (failed) return <FailedFlip />
+
+  return (
+    <FlipHolder css={answeredStyle(option, variant)}>
+      {reorderList(images, orders[variant - 1]).map((src, idx) => (
+        <Box
+          key={idx}
+          css={{
+            height: rem(110),
+            width: rem(147),
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+          onClick={onChoose}
+        >
+          <FlipBlur src={src} />
+          <FlipImage
+            src={src}
+            alt="current-flip"
+            style={{
+              ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
+              ...borderRadius(
+                'bottom',
+                idx === images.length - 1 ? rem(8) : 'none'
+              ),
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 1,
+            }}
+          />
+        </Box>
+      ))}
+    </FlipHolder>
+  )
+}
+
+function FlipHolder({css, ...props}) {
+  return (
+    <Box
+      css={{
+        borderRadius: rem(8),
+        border: `solid 2px ${transparentize(0.8, theme.colors.primary2)}`,
+        boxShadow: `0 0 2px 0 ${transparentize(0.8, theme.colors.primary2)}`,
+        ...margin(0, rem(10)),
+        ...padding(rem(4)),
+        position: 'relative',
+        minWidth: rem(147),
+        ...css,
+      }}
+      {...props}
+    />
+  )
+}
+
+function LoadingFlip() {
+  return (
+    <FlipHolder>
+      <Fill>
+        <Spinner />
+      </Fill>
+    </FlipHolder>
+  )
+}
+
+function FailedFlip() {
+  return (
+    <FlipHolder>
+      {[1, 2, 3, 4].map((_, idx) => (
+        <Box key={`left-${idx}`}>
+          <FlipImage
+            src="https://placehold.it/147x110?text=No+data"
+            alt={`failed-flip-${idx}`}
+          />
+        </Box>
+      ))}
+    </FlipHolder>
+  )
+}
+
+function FlipBlur({src}) {
+  return (
+    <div
+      style={{
+        background: `center center / cover no-repeat url(${src})`,
+        filter: 'blur(6px)',
+        ...cover(),
+        zIndex: 1,
+      }}
+    />
+  )
+}
+
+function FlipImage({
+  height = 110,
+  width = 147,
+  fit = 'contain',
+  style,
+  ...props
+}) {
+  return (
+    // eslint-disable-next-line jsx-a11y/alt-text
+    <img
+      style={{
+        height: rem(height),
+        width: rem(width),
+        objectFit: fit,
+        objectPosition: 'center',
+        textAlign: 'center',
+        ...style,
+      }}
+      {...props}
+    />
+  )
+}
+
+// {type === SessionType.Long &&
+//   stage === SessionType.Qualification &&
+//   ready &&
+//   !failed && <Words key={hash} words={words} />}
+
+export function PrevButton({type, ...props}) {
+  return (
+    <Box {...props}>
+      <Arrow dir="prev" type={type} />
+    </Box>
+  )
+}
+
+// {shouldAllowNext(
+//   isLast,
+//   loaded,
+//   SessionType.Qualification,
+//   option,
+//   null, // irrelevantWords,
+//   null // words
+// ) && (
+//   <Col onClick={onNext} w={4}>
+//     <Arrow dir="next" type={type} />
+//   </Col>
+// )}
+export function NextButton({type, ...props}) {
+  return (
+    <Box {...props}>
+      <Arrow dir="prev" type={type} />
+    </Box>
+  )
+}
+
+export function ActionBar(props) {
   return (
     <Flex
       justify="space-between"
       css={{
-        ...margin(rem(29), 0, theme.spacings.medium16),
+        ...margin(0, 0, rem(theme.spacings.medium16)),
       }}
-    >
-      <Flex justify="flex-start" css={{flex: 1}}>
-        &nbsp;
-      </Flex>
-      <Flex justify="center" css={{width: '33%'}}>
-        {countdown}
-      </Flex>
-      <Flex justify="flex-end" css={{flex: 1}}>
-        <Button onClick={onSubmitAnswers} disabled={!canSubmit}>
-          Submit answers
-        </Button>
-      </Flex>
-    </Flex>
+      {...props}
+    />
   )
+}
+
+export function ActionBarItem(props) {
+  return <Flex flex={1} {...props} />
 }
 
 const thumbBorderWidth = 2
@@ -290,118 +272,146 @@ const thumbMargin = 4
 const thumbWidth = 32
 const totalThumbWidth = thumbBorderWidth * 2 + thumbMargin * 2 + thumbWidth
 
-const activeThumbStyle = {
-  border: `solid ${rem(thumbBorderWidth)} ${theme.colors.primary}`,
-}
-
-const thumbStyle = {
-  border: `solid ${rem(thumbBorderWidth)} transparent`,
-  borderRadius: rem(12),
-}
-
-export function FlipThumbnails({flips, currentIndex, onPick}) {
+export function Thumbnails({currentIndex, ...props}) {
   return (
     <Flex
       align="center"
       css={{
         minHeight: rem(48),
-        marginLeft: `calc(50% - ${rem(
+        transform: `translateX(50%) translateX(-${rem(
           totalThumbWidth * (currentIndex + 1 / 2)
         )})`,
+        transition: 'transform .3s ease-out',
       }}
-    >
-      {flips.map(
-        (flip, idx) =>
-          !flip.extra && (
-            <Thumb
-              key={flip.hash}
-              {...flip}
-              isCurrent={currentIndex === idx}
-              onPick={() => onPick(idx)}
-            />
-          )
-      )}
-    </Flex>
+      {...props}
+    />
   )
 }
 
-function Thumb({
-  hash,
+export function Thumbnail({
   images,
-  option,
   loaded,
+  decoded,
   failed,
+  option,
   isCurrent,
   onPick,
   irrelevantWords,
 }) {
   const hasQualified = irrelevantWords !== null && irrelevantWords !== undefined
   const hasIrrelevantWords = hasQualified && irrelevantWords
+
+  const ready = loaded && decoded
+
+  return (
+    <ThumbnailHolder isCurrent={isCurrent} onClick={onPick}>
+      {failed && <FailedThumbnail />}
+      {!ready && <LoadingThumbnail />}
+      {ready && (
+        <>
+          {(hasAnswer(option) || hasQualified) && (
+            <ThumbnailOverlay
+              hasQualified={hasQualified}
+              hasIrrelevantWords={hasIrrelevantWords}
+              option={option}
+            />
+          )}
+          <FlipImage
+            src={images[0]}
+            alt={images[0]}
+            height={32}
+            width={32}
+            fit="cover"
+            style={{
+              borderRadius: rem(12),
+            }}
+          />
+        </>
+      )}
+    </ThumbnailHolder>
+  )
+}
+
+function ThumbnailHolder({isCurrent, children, ...props}) {
   return (
     <Flex
-      key={hash}
       justify="center"
       align="center"
-      css={isCurrent ? {...thumbStyle, ...activeThumbStyle} : thumbStyle}
-      onClick={onPick}
+      css={{
+        border: `solid ${rem(thumbBorderWidth)} ${
+          isCurrent ? theme.colors.primary : 'transparent'
+        }`,
+        borderRadius: rem(12),
+      }}
+      {...props}
     >
       <Box
         css={{
           height: rem(thumbWidth),
           width: rem(thumbWidth),
-          margin: rem(margin),
+          margin: rem(thumbMargin),
           ...position('relative'),
         }}
       >
-        {(hasAnswer(option) || hasQualified) && (
-          <Fill
-            bg={
-              // eslint-disable-next-line no-nested-ternary
-              hasQualified
-                ? hasIrrelevantWords
-                  ? transparentize(0.1, theme.colors.danger)
-                  : rgba(87, 143, 255, 0.9)
-                : rgba(89, 89, 89, 0.95)
-            }
-            css={{
-              borderRadius: rem(12),
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            {hasAnswer(option) && (
-              <FiCheck size={rem(20)} color={theme.colors.white} />
-            )}
-          </Fill>
-        )}
-        {failed && (
-          <Fill
-            bg={rgba(89, 89, 89, 0.95)}
-            css={{
-              borderRadius: rem(12),
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <FiXCircle size={rem(20)} color={theme.colors.white} />
-          </Fill>
-        )}
-        {loaded ? (
-          <img
-            src={images[0]}
-            alt={images[0]}
-            style={{
-              height: rem(32),
-              width: rem(32),
-              borderRadius: rem(12),
-            }}
-          />
-        ) : (
-          <Spinner size={24} />
-        )}
+        {children}
       </Box>
     </Flex>
   )
+}
+
+function LoadingThumbnail() {
+  return <Spinner size={24} />
+}
+
+function FailedThumbnail() {
+  return (
+    <Fill
+      bg={rgba(89, 89, 89, 0.95)}
+      css={{
+        borderRadius: rem(12),
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <FiXCircle size={rem(20)} color={theme.colors.white} />
+    </Fill>
+  )
+}
+
+function ThumbnailOverlay({option, isQualifed, hasIrrelevantWords}) {
+  return (
+    <Fill
+      bg={
+        // eslint-disable-next-line no-nested-ternary
+        isQualifed
+          ? hasIrrelevantWords
+            ? transparentize(0.1, theme.colors.danger)
+            : rgba(87, 143, 255, 0.9)
+          : rgba(89, 89, 89, 0.95)
+      }
+      css={{
+        borderRadius: rem(12),
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      {option && <FiCheck size={rem(20)} color={theme.colors.white} />}
+    </Fill>
+  )
+}
+
+function answeredStyle(answer, target) {
+  if (!answer) return null
+  return answer === target
+    ? {
+        borderColor: theme.colors.primary,
+        boxShadow: `0 0 2px 3px ${transparentize(0.75, theme.colors.primary)}`,
+        transition: 'opacity 0.3s ease-in',
+      }
+    : {
+        opacity: 0.3,
+        transition: 'opacity 0.3s ease-out',
+      }
 }

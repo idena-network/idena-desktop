@@ -7,7 +7,7 @@ export function Heading({
   color,
   fontSize,
   fontWeight,
-  margin,
+  margin = 0,
   style,
   children,
 }) {
