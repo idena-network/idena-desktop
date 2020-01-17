@@ -13,16 +13,25 @@ import Avatar from '../../../shared/components/avatar'
 import theme from '../../../shared/theme'
 import useFullName from '../../../shared/hooks/use-full-name'
 import useUsername from '../../../shared/hooks/use-username'
-
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
+import {useIdentityState} from '../../../shared/providers/identity-context'
 
-function KillInvite({receiver, firstName, lastName, stake, onSuccess, onFail}) {
-  const address = receiver
-  const username = useUsername({address})
+function KillInvite({
+  id,
+  receiver,
+  firstName,
+  lastName,
+  state,
+  stake,
+  onSuccess,
+  onFail,
+}) {
+  const inviteeAddress = receiver
+  const username = useUsername({address: inviteeAddress})
   const fullName = useFullName({firstName, lastName})
-  const [to, setTo] = React.useState()
   const [submitting, setSubmitting] = React.useState(false)
+  const {address: myAddress} = useIdentityState()
 
   const {killInvite} = useInviteDispatch()
 
@@ -56,26 +65,16 @@ function KillInvite({receiver, firstName, lastName, stake, onSuccess, onFail}) {
         }}
       >
         <SubHeading css={{...margin(0, 0, theme.spacings.small8)}}>
-          Terminate invited identity
+          Terminate invitation
         </SubHeading>
-        <Text>Terminate invited identity and withdraw its stake.</Text>
       </Box>
 
       <FormGroup>
-        <Field
-          disabled
-          label="Withraw stake, DNA"
-          value={stake}
-          type="number"
-        />
+        <Field label="Status" value={state} disabled />
       </FormGroup>
 
       <FormGroup>
-        <Field
-          label="To address"
-          value={to}
-          onChange={e => setTo(e.target.value)}
-        />
+        <Field disabled label="Stake, DNA" value={stake} type="number" />
       </FormGroup>
 
       <FormGroup
@@ -83,12 +82,16 @@ function KillInvite({receiver, firstName, lastName, stake, onSuccess, onFail}) {
         className="text-right"
       >
         <Button
-          disabled={submitting || !to}
+          disabled={submitting}
           danger
           onClick={async () => {
             try {
               setSubmitting(true)
-              const {result, error} = await killInvite({from: address, to})
+              const {result, error} = await killInvite(
+                id,
+                myAddress,
+                inviteeAddress
+              )
               setSubmitting(false)
 
               if (error) {
@@ -123,10 +126,12 @@ function KillInvite({receiver, firstName, lastName, stake, onSuccess, onFail}) {
 }
 
 KillInvite.propTypes = {
+  id: PropTypes.string,
   receiver: PropTypes.string,
   firstName: PropTypes.string,
   lastName: PropTypes.string,
-  stake: PropTypes.number,
+  state: PropTypes.string,
+  stake: PropTypes.string,
   onSuccess: PropTypes.func,
   onFail: PropTypes.func,
 }

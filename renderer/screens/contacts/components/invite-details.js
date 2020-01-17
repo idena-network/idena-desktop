@@ -39,7 +39,7 @@ function InviteDetails({dbkey, onClose, onSelect}) {
     return null
   }
 
-  const {key, receiver, canKill, mining, activated} = invite
+  const {key, receiver, canKill, mining, terminating, activated} = invite
   const inviteIsExpired =
     identity &&
     identity.state === 'Undefined' &&
@@ -53,6 +53,8 @@ function InviteDetails({dbkey, onClose, onSelect}) {
     ? 'Invitation'
     : mining
     ? 'Mining...'
+    : terminating
+    ? 'Terminating...'
     : identity && mapToFriendlyStatus(identity.state)
 
   return (
@@ -125,8 +127,10 @@ function InviteDetails({dbkey, onClose, onSelect}) {
           setShowKillInviteForm(false)
         }}
       >
+        }
         <KillInvite
           {...invite}
+          state={state}
           stake={stake}
           onSuccess={async () => {
             setShowKillInviteForm(false)

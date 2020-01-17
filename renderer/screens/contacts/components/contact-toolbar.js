@@ -54,7 +54,7 @@ function ContactToolbar({onRename, onKill, onDelete}) {
             onKill()
           }}
         >
-          Kill
+          Terminate
         </IconLink>
       </Actions>
     </Box>

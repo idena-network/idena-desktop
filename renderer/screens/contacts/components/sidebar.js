@@ -125,11 +125,20 @@ InviteList.propTypes = {
   onSelectInvite: PropTypes.func,
 }
 
-function InviteCard({receiver, mining, activated, state, ...props}) {
+function InviteCard({
+  receiver,
+  mining,
+  terminating,
+  activated,
+  state,
+  ...props
+}) {
   const fullName = useFullName(props)
 
   const hint = mining
     ? 'Mining...'
+    : terminating
+    ? 'Terminating...'
     : activated
     ? mapToFriendlyStatus(state)
     : ''
@@ -183,6 +192,7 @@ InviteCard.propTypes = {
   receiver: PropTypes.string,
   mined: PropTypes.bool,
   mining: PropTypes.bool,
+  terminating: PropTypes.bool,
   activated: PropTypes.bool,
   canKill: PropTypes.bool,
   state: PropTypes.string,
