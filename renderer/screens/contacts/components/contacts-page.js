@@ -9,7 +9,7 @@ import {ContactProvider} from '../../../shared/providers/contact-context'
 import Sidebar from './sidebar'
 import SendInviteForm from './send-invite-form'
 import InviteDetails from './invite-details'
-import {useInviteState} from '../../../shared/providers/invite-context'
+import {useChainState} from '../../../shared/providers/chain-context'
 
 function ContactsPage({showNewInviteForm = false}) {
   const [selectedContact, setSelectedContact] = React.useState(null)
@@ -24,11 +24,11 @@ function ContactsPage({showNewInviteForm = false}) {
     setIsSendInviteOpen(false)
   }
 
-  const {invites} = useInviteState()
+  const {syncing, offline, loading} = useChainState()
 
   return (
     <ContactProvider>
-      <Layout>
+      <Layout syncing={syncing} offline={offline} loading={loading}>
         <Flex>
           <Sidebar
             onSelectContact={setSelectedContact}
@@ -49,10 +49,11 @@ function ContactsPage({showNewInviteForm = false}) {
           >
             {showInvite && (
               <InviteDetails
-                {...selectedInvite}
+                dbkey={selectedInvite.id}
                 code={selectedInvite && selectedInvite.key}
                 onClose={() => {
                   setShowInvite(false)
+                  setSelectedInvite(null)
                 }}
                 onSelect={invite => {
                   setShowInvite(true)
@@ -63,7 +64,7 @@ function ContactsPage({showNewInviteForm = false}) {
 
             {showContact && <ContactDetails {...selectedContact} />}
 
-            {!showContact && !showInvite && (
+            {!showContact && !showInvite && !selectedInvite && (
               <Placeholder
                 icon={<FiUsers />}
                 text={
@@ -80,6 +81,7 @@ function ContactsPage({showNewInviteForm = false}) {
               onSuccess={invite => {
                 handleCloseSendInvite()
                 setSelectedInvite(invite)
+                setShowInvite(true)
               }}
               onFail={handleCloseSendInvite}
             />

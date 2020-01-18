@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import React from 'react'
+import React, {useCallback} from 'react'
 import * as api from '../api'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL} from '../utils/tx'
@@ -25,11 +25,33 @@ function InviteProvider({children}) {
 
     async function fetchData(savedInvites) {
       const txs = await Promise.all(
-        savedInvites.map(({hash}) => hash).map(api.fetchTx)
+        savedInvites
+          .filter(({activated, deletedAt}) => !activated && !deletedAt)
+          .map(({hash}) => hash)
+          .map(api.fetchTx)
       )
 
       const invitedIdentities = await Promise.all(
-        savedInvites.map(({receiver}) => receiver).map(api.fetchIdentity)
+        savedInvites
+          .filter(({deletedAt}) => !deletedAt)
+          .map(({receiver}) => receiver)
+          .map(api.fetchIdentity)
+      )
+
+      const inviteesIdetities =
+        invitees &&
+        (await Promise.all(
+          invitees.map(({Address}) => Address).map(api.fetchIdentity)
+        ))
+
+      console.log('inviteesIdetities:')
+      console.log(inviteesIdetities)
+
+      const terminateTxs = await Promise.all(
+        savedInvites
+          .filter(({terminateHash, deletedAt}) => terminateHash && !deletedAt)
+          .map(({terminateHash}) => terminateHash)
+          .map(api.fetchTx)
       )
 
       const nextInvites = savedInvites.map(invite => {
@@ -40,10 +62,16 @@ function InviteProvider({children}) {
         const invitee =
           invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
 
+        // find invitee identity
+        const inviteeIdentity =
+          inviteesIdetities &&
+          invitee &&
+          inviteesIdetities.find(({address: addr}) => addr === invitee.Address)
+
         // find all identities/invites
-        const invitedIdentity = invitedIdentities.find(
-          ({address: addr}) => addr === invite.receiver
-        )
+        const invitedIdentity =
+          inviteeIdentity ||
+          invitedIdentities.find(({address: addr}) => addr === invite.receiver)
 
         // becomes activated once invitee is found
         const isNewInviteActivated = !!invitee
@@ -51,12 +79,17 @@ function InviteProvider({children}) {
         const canKill =
           !!invitee &&
           !!invitedIdentity &&
-          (invitedIdentity.state === 'Invite' ||
-            invitedIdentity.state === 'Candidate' ||
-            invitedIdentity.state === 'Newbie')
+          invitedIdentity.state === 'Candidate'
 
         const isMining =
           tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL
+
+        const terminateTx = terminateTxs.find(
+          ({hash}) => hash === invite.terminateHash
+        )
+
+        const isTerminating =
+          terminateTx && terminateTx.result.blockHash === HASH_IN_MEMPOOL
 
         const nextInvite = {
           ...invite,
@@ -74,6 +107,7 @@ function InviteProvider({children}) {
           ...nextInvite,
           dbkey: invite.id,
           mining: isMining,
+          terminating: isTerminating,
           identity: invitedIdentity,
         }
       })
@@ -127,10 +161,13 @@ function InviteProvider({children}) {
       )
       setInvites(
         invites.map(invite => {
+          const invitedIdentity = api.fetchIdentity(invite.receiver)
+
           const tx = txs.find(({hash}) => hash === invite.hash)
           if (tx) {
             return {
               ...invite,
+              identity: invitedIdentity,
               mining:
                 tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
             }
@@ -140,6 +177,33 @@ function InviteProvider({children}) {
       )
     },
     invites.filter(({mining}) => mining).length ? 5000 : null
+  )
+
+  useInterval(
+    async () => {
+      const txs = await Promise.all(
+        invites
+          .filter(({terminating}) => terminating)
+          .map(({hash}) => hash)
+          .map(api.fetchTx)
+      )
+      setInvites(
+        invites.map(invite => {
+          const invitedIdentity = api.fetchIdentity(invite.receiver)
+
+          const tx = txs.find(({hash}) => hash === invite.hash)
+          if (tx) {
+            return {
+              ...invite,
+              terminating:
+                invitedIdentity && invitedIdentity.state !== 'Undefined',
+            }
+          }
+          return invite
+        })
+      )
+    },
+    invites.filter(({terminating}) => terminating).length ? 5000 : null
   )
 
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
@@ -154,8 +218,8 @@ function InviteProvider({children}) {
         canKill: true,
       }
 
-      db.addInvite(saveInvite)
-      const invite = {...saveInvite, mining: true}
+      const id = db.addInvite(saveInvite)
+      const invite = {...saveInvite, id, mining: true}
       setInvites([...invites, invite])
 
       return invite
@@ -200,6 +264,31 @@ function InviteProvider({children}) {
     )
     const invite = {id: key, deletedAt: Date.now()}
     db.updateInvite(id, invite)
+  }
+
+  const killInvite = async (id, myAddress, inviteeAddress) => {
+    const from = myAddress
+    const to = inviteeAddress
+    const resp = await api.killInvitee(from, to)
+    const {result} = resp
+
+    if (result) {
+      const key = id
+      setInvites(
+        invites.map(inv => {
+          if (inv.id === id) {
+            return {
+              ...inv,
+              terminating: true,
+            }
+          }
+          return inv
+        })
+      )
+      const invite = {id: key, terminateHash: result, terminatedAt: Date.now()}
+      db.updateInvite(id, invite)
+    }
+    return resp
   }
 
   const recoverInvite = async id => {
@@ -253,6 +342,7 @@ function InviteProvider({children}) {
           recoverInvite,
           activateInvite,
           resetActivation,
+          killInvite,
         }}
       >
         {children}

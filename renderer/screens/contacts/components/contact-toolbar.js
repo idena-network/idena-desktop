@@ -26,16 +26,8 @@ function ContactToolbar({onRename, onKill, onDelete}) {
         <IconLink disabled icon={<FiDollarSign />}>
           Send coins
         </IconLink>
-          <IconLink
-            disabled={onKill == null}
-            icon={<FiSlash />}
-            onClick={() => {
-              onKill()
-            }}
-          >
-            Kill
-        </IconLink>
         */}
+
         <IconLink
           disabled={onRename == null}
           onClick={() => {
@@ -53,6 +45,16 @@ function ContactToolbar({onRename, onKill, onDelete}) {
           }}
         >
           Delete
+        </IconLink>
+
+        <IconLink
+          disabled={onKill == null}
+          icon={<i className="icon icon--delete" />}
+          onClick={() => {
+            onKill()
+          }}
+        >
+          Terminate
         </IconLink>
       </Actions>
     </Box>

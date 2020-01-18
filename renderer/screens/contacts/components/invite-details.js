@@ -14,27 +14,32 @@ import ContactInfo from './contact-info'
 import ContactToolbar from './contact-toolbar'
 import {Figure} from '../../../shared/components/utils'
 import RenameInvite from './invite-form'
+import KillInvite from './kill-invite-form'
 
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 
 function InviteDetails({dbkey, onClose, onSelect}) {
   const [showRenameForm, setShowRenameForm] = useState(false)
+  const [showKillInviteForm, setShowKillInviteForm] = useState(false)
   const {updateInvite, deleteInvite, recoverInvite} = useInviteDispatch()
   const {addNotificationWithAction} = useNotificationDispatch()
 
   const {invites} = useInviteState()
-
   const invite = invites && invites.find(({id}) => id === dbkey)
+
   const identity = invite && invite.identity
+  const stake = identity && identity.stake
 
   const onDeleteUndo = React.useCallback(() => {
     recoverInvite(dbkey)
     onSelect(invite)
   }, [dbkey, invite, onSelect, recoverInvite])
 
-  if (!invite) return null
+  if (!invite) {
+    return null
+  }
 
-  const {key, receiver, canKill, mining, activated} = invite
+  const {key, receiver, canKill, mining, terminating, activated} = invite
   const inviteIsExpired =
     identity &&
     identity.state === 'Undefined' &&
@@ -48,6 +53,8 @@ function InviteDetails({dbkey, onClose, onSelect}) {
     ? 'Invitation'
     : mining
     ? 'Mining...'
+    : terminating
+    ? 'Terminating...'
     : identity && mapToFriendlyStatus(identity.state)
 
   return (
@@ -72,7 +79,7 @@ function InviteDetails({dbkey, onClose, onSelect}) {
           onKill={
             canKill
               ? () => {
-                  /* TODO */
+                  setShowKillInviteForm(true)
                 }
               : null
           }
@@ -84,6 +91,8 @@ function InviteDetails({dbkey, onClose, onSelect}) {
             identity.state !== 'Invite' &&
             !inviteIsExpired &&
             !mining && <Figure label="Address" value={receiver} />}
+
+          {stake > 0 && <Figure label="Stake" value={`${stake} DNA`} />}
 
           {!inviteIsExpired && !activated && (
             <WideField
@@ -108,6 +117,26 @@ function InviteDetails({dbkey, onClose, onSelect}) {
             setShowRenameForm(false)
             const id = dbkey
             await updateInvite(id, firstName, lastName)
+          }}
+        />
+      </Drawer>
+
+      <Drawer
+        show={showKillInviteForm}
+        onHide={() => {
+          setShowKillInviteForm(false)
+        }}
+      >
+        }
+        <KillInvite
+          {...invite}
+          state={state}
+          stake={stake}
+          onSuccess={async () => {
+            setShowKillInviteForm(false)
+          }}
+          onFail={async () => {
+            setShowKillInviteForm(false)
           }}
         />
       </Drawer>
