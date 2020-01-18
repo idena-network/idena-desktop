@@ -68,9 +68,9 @@ function decodeFlips(data, currentFlips) {
         let pics
         let urls
         let orders
-        if (publicHex && privateHex) {
+        if (privateHex && privateHex !== '0x') {
           const decodedPublicFlipPart = decode(
-            fromHexString(publicHex.substring(2))
+            fromHexString((publicHex || hex).substring(2))
           )
           ;[pics] = decodedPublicFlipPart
           const decodedPrivateFlipPart = decode(
