@@ -30,6 +30,7 @@ function chainReducer(state, action) {
         ...action.payload,
         offline: false,
         loading: false,
+        syncing: false,
       }
     }
     case FETCH_SYNC_FAILED:
