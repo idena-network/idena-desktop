@@ -64,12 +64,33 @@ function decodeFlips(data, currentFlips) {
     const item = data.find(x => x.hash === flip.hash)
     if (item.ready) {
       try {
-        const decodedFlip = decode(fromHexString(item.hex.substring(2)))
-        const pics = decodedFlip[0]
-        const urls = pics.map(pic =>
-          URL.createObjectURL(new Blob([pic], {type: 'image/jpeg'}))
-        )
-        const orders = decodedFlip[1].map(order => order.map(x => x[0] || 0))
+        const {hex, publicHex, privateHex} = item
+        let pics
+        let urls
+        let orders
+        if (privateHex && privateHex !== '0x') {
+          const decodedPublicFlipPart = decode(
+            fromHexString((publicHex || hex).substring(2))
+          )
+          ;[pics] = decodedPublicFlipPart
+          const decodedPrivateFlipPart = decode(
+            fromHexString(privateHex.substring(2))
+          )
+          pics = pics.concat(decodedPrivateFlipPart[0])
+          urls = pics.map(pic =>
+            URL.createObjectURL(new Blob([pic], {type: 'image/jpeg'}))
+          )
+          orders = decodedPrivateFlipPart[1].map(order =>
+            order.map(x => x[0] || 0)
+          )
+        } else {
+          const decodedFlip = decode(fromHexString(hex.substring(2)))
+          ;[pics] = decodedFlip
+          urls = pics.map(pic =>
+            URL.createObjectURL(new Blob([pic], {type: 'image/jpeg'}))
+          )
+          orders = decodedFlip[1].map(order => order.map(x => x[0] || 0))
+        }
         return {
           ...flip,
           ready: true,

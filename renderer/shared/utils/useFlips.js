@@ -60,15 +60,9 @@ function shufflePics(pics, shuffledOrder, seed) {
   }
 }
 
-function toHex(pics, order, nonSensePic, nonSenseOrder) {
-  const seed = nonSenseOrder >= 0 ? perm(FLIP_LENGTH + 1) : perm(FLIP_LENGTH)
-
-  const k = order.findIndex(idx => idx === nonSenseOrder)
-  const nextPics = k >= 0 ? [...pics, nonSensePic] : pics
-  const nextOrder =
-    k >= 0 ? [...order.slice(0, k), FLIP_LENGTH, ...order.slice(k + 1)] : order
-
-  const shuffled = shufflePics(nextPics, nextOrder, seed)
+function toHex(pics, order) {
+  const seed = perm(FLIP_LENGTH)
+  const shuffled = shufflePics(pics, order, seed)
 
   const rlp = encode([
     shuffled.pics.map(src =>
@@ -76,7 +70,24 @@ function toHex(pics, order, nonSensePic, nonSenseOrder) {
     ),
     shuffled.orders,
   ])
-  return `0x${rlp.toString('hex')}`
+
+  const publicRlp = encode([
+    shuffled.pics
+      .slice(0, 2)
+      .map(src =>
+        Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
+      ),
+  ])
+
+  const privateRlp = encode([
+    shuffled.pics
+      .slice(2)
+      .map(src =>
+        Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
+      ),
+    shuffled.orders,
+  ])
+  return [rlp, publicRlp, privateRlp].map(x => `0x${x.toString('hex')}`)
 }
 
 function useFlips() {
@@ -139,7 +150,7 @@ function useFlips() {
   }, [])
 
   const submitFlip = useCallback(
-    async ({id, pics, order, nonSensePic, nonSenseOrder, hint}) => {
+    async ({id, pics, order, hint}) => {
       if (
         flips.filter(
           f => f.type === FlipType.Published && areSame(f.pics, pics)
@@ -149,7 +160,7 @@ function useFlips() {
           error: {message: 'You already submitted this flip'},
         }
       }
-      if (areEual(order, DEFAULT_ORDER) && nonSenseOrder < 0) {
+      if (areEual(order, DEFAULT_ORDER)) {
         return {
           error: {message: 'You must shuffle flip before submit'},
         }
@@ -169,7 +180,7 @@ function useFlips() {
       }
 
       const resp = await api.submitFlip(
-        toHex(pics, order, nonSensePic, nonSenseOrder),
+        ...toHex(pics, order),
         Math.max(0, pairId)
       )
       const {result} = resp
