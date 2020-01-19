@@ -107,15 +107,21 @@ function useFlips() {
         .map(f => f.txHash)
         .map(fetchTx)
       Promise.all(txPromises).then(txs => {
-        const nextFlips = flips.map(flip => {
-          const tx = txs.find(({hash}) => hash && hash === flip.txHash)
-          const type = checkFlipType(flip, tx)
-          return {
-            ...flip,
-            mined: type === FlipType.Published,
-            type,
-          }
-        })
+        const publishingFlips = flips.filter(
+          f => f.type === FlipType.Publishing
+        )
+        const otherFlips = flips.filter(f => f.type !== FlipType.Publishing)
+        const nextFlips = publishingFlips
+          .map(flip => {
+            const tx = txs.find(({hash}) => hash && hash === flip.txHash)
+            const type = checkFlipType(flip, tx)
+            return {
+              ...flip,
+              mined: type === FlipType.Published,
+              type,
+            }
+          })
+          .concat(otherFlips)
         setFlips(nextFlips)
         saveFlips(nextFlips)
       })
@@ -238,11 +244,14 @@ function useFlips() {
 }
 
 function checkFlipType(flip, tx) {
-  const txExists = tx && tx.result
-  if (!txExists) return FlipType.Draft
-  return txExists && tx.result.blockHash !== HASH_IN_MEMPOOL
-    ? FlipType.Published
-    : flip.type
+  if (flip.type === FlipType.Publishing) {
+    const txExists = tx && tx.result
+    if (!txExists) return FlipType.Draft
+    return txExists && tx.result.blockHash !== HASH_IN_MEMPOOL
+      ? FlipType.Published
+      : flip.type
+  }
+  return flip.type
 }
 
 export default useFlips
