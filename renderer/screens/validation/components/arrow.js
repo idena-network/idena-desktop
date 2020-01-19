@@ -4,13 +4,13 @@ import {rem} from 'polished'
 import {FiChevronLeft, FiChevronRight} from 'react-icons/fi'
 import theme from '../../../shared/theme'
 
-function Arrow({dir, type}) {
+function Arrow({dir, type, ...props}) {
   const prev = dir === 'prev'
   const isShort = type.toLowerCase() === 'short'
   const bg = isShort ? theme.colors.white01 : theme.colors.gray
   const color = isShort ? theme.colors.white : theme.colors.text
   return (
-    <div>
+    <div {...props}>
       <span>
         {prev ? (
           <FiChevronLeft fontSize={theme.fontSizes.large} color={color} />

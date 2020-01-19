@@ -230,15 +230,28 @@ export const validationMachine = Machine({
               },
             },
             submittingShortSession: {
-              invoke: {
-                src: ({shortAnswers, epoch}) =>
-                  submitShortAnswers(shortAnswers, 0, epoch),
-                onDone: {
-                  target: '#longSession',
+              initial: 'normal',
+              states: {
+                normal: {
+                  invoke: {
+                    src: ({shortFlips, epoch}) =>
+                      submitShortAnswers(
+                        shortFlips.map(({option: answer = 0, hash}) => ({
+                          answer,
+                          hash,
+                        })),
+                        0,
+                        epoch
+                      ),
+                    onDone: {
+                      target: '#longSession',
+                    },
+                    onError: {
+                      target: 'fail',
+                    },
+                  },
                 },
-                onError: {
-                  target: 'normal',
-                },
+                fail: {},
               },
             },
           },
@@ -290,6 +303,9 @@ export const validationMachine = Machine({
     longSession: {
       id: 'longSession',
       initial: 'fetchLongHashes',
+      entry: assign({
+        currentIndex: 0,
+      }),
       states: {
         fetchLongHashes: {
           initial: 'fetching',
@@ -334,12 +350,16 @@ export const validationMachine = Machine({
         },
         decodeLongFlips: {
           id: 'decodeLongFlips',
+          initial: 'decoding',
           states: {
             decoding: {
               invoke: {
                 src: ({longFlips}) => cb => {
                   try {
-                    cb({type: 'DECODED', data: longFlips.map(decodeFlip)})
+                    const flips = longFlips
+                      .filter(({loaded, decoded}) => loaded && !decoded)
+                      .map(decodeFlip)
+                    cb({type: 'DECODED', flips})
                   } catch (error) {
                     cb('DECODING_FAILED')
                   }
@@ -351,10 +371,13 @@ export const validationMachine = Machine({
           on: {
             DECODED: {
               target: 'solveLongSession',
-              actions: assign({
-                longFlips: ({longFlips}, {data}) =>
-                  mergeFlipsByHash(longFlips, data),
-              }),
+              actions: [
+                assign({
+                  longFlips: ({longFlips}, {flips}) =>
+                    mergeFlipsByHash(longFlips, flips),
+                }),
+                log(),
+              ],
             },
             DECODING_FAILED: '.fail',
           },
@@ -363,15 +386,14 @@ export const validationMachine = Machine({
           on: {
             ANSWER: {
               actions: assign({
-                longAnswers: ({longFlips, currentIndex}, {value}) => [
+                longFlips: ({longFlips, currentIndex}, {option}) => [
                   ...longFlips.slice(0, currentIndex),
                   {
                     ...longFlips[currentIndex],
-                    option: value,
+                    option,
                   },
                   ...longFlips.slice(currentIndex + 1),
                 ],
-                currentIndex: ({currentIndex}) => currentIndex + 1,
               }),
             },
             NEXT: {
@@ -416,17 +438,48 @@ export const validationMachine = Machine({
               }),
             },
             SUBMIT: {
+              target: 'submittingLongSession',
+            },
+          },
+        },
+        submittingLongSession: {
+          initial: 'normal',
+          states: {
+            normal: {
               invoke: {
-                src: ({longAnswers, epoch}) =>
-                  submitLongAnswers(longAnswers, 0, epoch),
-                onDone: 'validationSucceeded',
+                src: ({longFlips, epoch}) =>
+                  submitLongAnswers(
+                    longFlips.map(
+                      ({
+                        option: answer = 0,
+                        reportWords: wrongWords,
+                        hash,
+                      }) => ({
+                        answer,
+                        wrongWords,
+                        hash,
+                      })
+                    ),
+                    0,
+                    epoch
+                  ),
+                onDone: {
+                  target: '#validationSucceeded',
+                },
+                onError: {
+                  target: 'fail',
+                },
               },
             },
+            fail: {},
           },
         },
       },
     },
-    validationSucceeded: {},
+    validationSucceeded: {
+      id: 'validationSucceeded',
+      type: 'final',
+    },
   },
 })
 

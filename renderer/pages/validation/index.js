@@ -13,38 +13,53 @@ import {
   Flip,
   ActionBarItem,
   Thumbnail,
+  FlipWords,
+  PrevButton,
+  NextButton,
+  NavButton,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
-import {IconClose, Button} from '../../shared/components'
+import {IconClose, Button, Absolute} from '../../shared/components'
 import {
   SessionType,
   AnswerType,
 } from '../../shared/providers/validation-context'
 import Timer from '../../screens/validation/components/timer'
+import Arrow from '../../screens/validation/components/arrow'
 
 export default function ValidationPage() {
   const [state, send] = useMachine(validationMachine)
 
-  const {shortFlips, longFlips, currentIndex} = state.context
-  const isLastFlip = state.matches({solveShortSession: 'lastFlip'})
+  const {shortFlips, currentIndex} = state.context
+
+  if (state.matches('validationSucceeded'))
+    return (
+      <Scene
+        bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
+      >
+        Done
+      </Scene>
+    )
 
   return (
-    <Scene>
+    <Scene bg={isShortSession(state) ? theme.colors.black : theme.colors.white}>
       <Header>
-        {state.matches('shortSession') && (
+        {!isQualification(state) ? (
           <SessionTitle
+            color={
+              isShortSession(state) ? theme.colors.white : theme.colors.text
+            }
             current={currentIndex + 1}
-            total={filterFlips(shortFlips).length}
+            total={sessionFlips(state).length}
           />
-        )}
-        {state.matches('longSession.solveLongSession') && (
-          <SessionTitle
-            current={currentIndex + 1}
-            total={filterFlips(longFlips).length}
-          />
-        )}
-        {state.matches('longSession.qualification') && (
-          <Title>Check flips quality</Title>
+        ) : (
+          <Title
+            color={
+              isShortSession(state) ? theme.colors.white : theme.colors.text
+            }
+          >
+            Check flips quality
+          </Title>
         )}
         {state.matches('longSession') && (
           <Link href="/dashboard">
@@ -53,61 +68,130 @@ export default function ValidationPage() {
         )}
       </Header>
       <CurrentStep>
-        {state.matches('shortSession.solveShortSession.normal') && (
-          <FlipChallenge>
-            <Flip
-              {...currentFlip(shortFlips, currentIndex)}
-              variant={AnswerType.Left}
-              onChoose={() => send({type: 'ANSWER', option: AnswerType.Left})}
-            />
-            <Flip
-              {...currentFlip(shortFlips, currentIndex)}
-              variant={AnswerType.Right}
-              onChoose={() => send({type: 'ANSWER', option: AnswerType.Right})}
-            />
-          </FlipChallenge>
-        )}
+        <FlipChallenge>
+          <Flip
+            {...currentFlip(state)}
+            variant={AnswerType.Left}
+            onChoose={() => send({type: 'ANSWER', option: AnswerType.Left})}
+          />
+          <Flip
+            {...currentFlip(state)}
+            variant={AnswerType.Right}
+            onChoose={() => send({type: 'ANSWER', option: AnswerType.Right})}
+          />
+          {isQualification(state) && (
+            <FlipWords words={[]} currentFlip={currentFlip(state)} />
+          )}
+        </FlipChallenge>
       </CurrentStep>
       <ActionBar>
         <ActionBarItem />
         <ActionBarItem justify="center">
-          <Timer type={SessionType.Short} />
+          <Timer
+            type={isShortSession(state) ? SessionType.Short : SessionType.Long}
+          />
         </ActionBarItem>
         <ActionBarItem justify="flex-end">
-          <Button
-            disabled={!(isLastFlip || hasAnswers(shortFlips))} // FIXME: define based on validation state too
-            onClick={() => send('SUBMIT')}
-          >
-            Submit answers
-          </Button>
+          {isShortSession(state) ? (
+            <Button
+              disabled={!hasAnswers(shortFlips) || isSubmittingAnwsers(state)} // FIXME: define based on validation state too
+              onClick={() => send('SUBMIT')}
+            >
+              {isSubmittingAnwsers(state)
+                ? 'Submitting answers...'
+                : 'Submit answers'}
+            </Button>
+          ) : (
+            <Button
+              disabled={!hasAnswers(shortFlips) || isSubmittingAnwsers(state)} // FIXME: define based on validation state too
+              onClick={() =>
+                send(isQualification(state) ? 'SUBMIT' : 'QUALIFY_WORDS')
+              }
+            >
+              {/* eslint-disable-next-line no-nested-ternary */}
+              {isSubmittingAnwsers(state)
+                ? 'Submitting answers...'
+                : isQualification(state)
+                ? 'Submit answers'
+                : 'Next'}
+            </Button>
+          )}
         </ActionBarItem>
       </ActionBar>
       <Thumbnails currentIndex={currentIndex}>
-        {state.matches('shortSession.solveShortSession.normal') &&
-          filterFlips(shortFlips).map((flip, idx) => (
-            <Thumbnail
-              key={flip.hash}
-              {...flip}
-              isCurrent={currentIndex === idx}
-              onPick={() => send({type: 'PICK', index: idx})}
-            />
-          ))}
+        {sessionFlips(state).map((flip, idx) => (
+          <Thumbnail
+            key={flip.hash}
+            {...flip}
+            isCurrent={currentIndex === idx}
+            onPick={() => send({type: 'PICK', index: idx})}
+          />
+        ))}
       </Thumbnails>
+      <NavButton left={0}>
+        <Arrow
+          dir="prev"
+          type={isShortSession(state) ? SessionType.Short : SessionType.Long}
+          onClick={() => send({type: 'PREV'})}
+        />
+      </NavButton>
+      <NavButton right={0}>
+        <Arrow
+          dir="next"
+          type={isShortSession(state) ? SessionType.Short : SessionType.Long}
+          onClick={() => send({type: 'NEXT'})}
+        />
+      </NavButton>
       {/* <InviteQualificationModal
           show={showModal}
           onHide={() => setShowModal(false)}
           onSubmit={() => Router.push('/validation/long')}
         /> */}
+      <Absolute bottom={10} left={10}>
+        <pre>{JSON.stringify(state.value, null, 2)}</pre>
+        <style jsx>{`
+          pre {
+            background: whitesmoke;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            opacity: 0.7;
+          }
+        `}</style>
+      </Absolute>
     </Scene>
   )
 }
 
-function filterFlips(flips) {
+function isShortSession(state) {
+  return state.matches('shortSession')
+}
+
+function isSubmittingAnwsers(state) {
+  return (
+    state.matches('shortSession.solveShortSession.submittingShortSession') ||
+    state.matches('longSession.solveLongSession.submittingLongSession')
+  )
+}
+
+function isQualification(state) {
+  return state.matches('longSession.qualification')
+}
+
+function sessionFlips(state) {
+  const {
+    context: {shortFlips, longFlips},
+  } = state
+  const flips = isShortSession(state)
+    ? shortFlips
+    : longFlips.filter(({loaded, decoded}) => loaded && decoded)
   return flips.filter(({extra}) => !extra)
 }
 
-function currentFlip(flips, idx) {
-  return filterFlips(flips)[idx]
+function currentFlip(state) {
+  const {
+    context: {currentIndex},
+  } = state
+  return sessionFlips(state)[currentIndex]
 }
 
 function hasAnswers(flips) {
