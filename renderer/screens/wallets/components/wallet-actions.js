@@ -116,7 +116,7 @@ function WalletTransfer() {
                           tx.counterPartyWallet
                             ? `wallet ${tx.counterPartyWallet.name}`
                             : 'address'
-                        } 
+                        }
                          `}
                         </div>
                         <TableHint style={{...ellipsis(rem(130))}}>
@@ -180,7 +180,7 @@ function WalletTransfer() {
             lineHeight: '40vh',
           }}
         >
-          {txFetching ? '' : 'You have no any transactions yet'}
+          {txFetching ? '' : 'You do not have any transactions yet'}
         </div>
       )}
     </div>
