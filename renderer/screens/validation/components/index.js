@@ -12,12 +12,12 @@ import {
 import {FiCheck, FiXCircle} from 'react-icons/fi'
 import {Box, Fill, Heading, Button, Absolute} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
-import Arrow from './arrow'
 import {reorderList} from '../../../shared/utils/arr'
 import Spinner from './spinner'
 import theme, {rem} from '../../../shared/theme'
 import {hasAnswer} from '../../../shared/providers/validation-context'
 import {TranslateWords} from '../../../shared/components/translate-button'
+import {RelevanceType} from '../validation-machine'
 
 export function Scene({bg: background = theme.colors.black, ...props}) {
   return (
@@ -99,9 +99,9 @@ export function Flip({
         option
           ? option === variant
             ? {
-                borderColor: theme.colors.primary,
+                border: `solid 2px ${theme.colors.primary}`,
                 boxShadow: `0 0 2px 3px ${transparentize(
-                  0.75,
+                  0.8,
                   theme.colors.primary
                 )}`,
                 transition: 'opacity 0.3s ease-in',
@@ -110,7 +110,7 @@ export function Flip({
                 opacity: 0.3,
                 transition: 'opacity 0.3s ease-out',
               }
-          : null
+          : {}
       }
     >
       {reorderList(images, orders[variant - 1]).map((src, idx) => (
@@ -226,11 +226,6 @@ function FlipImage({
     />
   )
 }
-
-// {type === SessionType.Long &&
-//   stage === SessionType.Qualification &&
-//   ready &&
-//   !failed && <Words key={hash} words={words} />}
 
 export function NavButton({left, right, ...props}) {
   return (
@@ -404,35 +399,27 @@ function ThumbnailOverlay({option, isQualifed, hasIrrelevantWords}) {
   )
 }
 
-export function FlipWords({words = [], currentFlip}) {
-  const haveWords = words.length
-  const {reportWords} = currentFlip
-  const hasQualified = reportWords !== null && reportWords !== undefined
-
+export function FlipWords({currentFlip: {words = []}, children}) {
   return (
     <Box
       css={{
-        ...margin(0, 0, 0, rem(36, theme.fontSizes.base)),
-        width: rem(280, theme.fontSizes.base),
+        ...margin(0, 0, 0, rem(36)),
+        width: rem(280),
       }}
     >
-      <Heading fontSize={rem(18, theme.fontSizes.base)} fontWeight={500}>
+      <Heading fontSize={rem(18)} fontWeight={500}>
         Are both keywords relevant to the flip?
       </Heading>
       <Box>
         <Box
           style={{
             background: theme.colors.gray,
-            borderRadius: rem(8, theme.fontSizes.base),
-            ...margin(rem(32, theme.fontSizes.base), 0),
-            ...padding(
-              rem(33, theme.fontSizes.base),
-              rem(40, theme.fontSizes.base),
-              rem(39, theme.fontSizes.base)
-            ),
+            borderRadius: rem(8),
+            ...margin(rem(32), 0),
+            ...padding(rem(33), rem(40), rem(39)),
           }}
         >
-          {haveWords ? (
+          {words.length ? (
             <Box>
               {words.map(({name, desc}, idx) => (
                 <React.Fragment key={`name-${idx}`}>
@@ -440,7 +427,7 @@ export function FlipWords({words = [], currentFlip}) {
                     style={{
                       color: theme.colors.primary2,
                       fontWeight: 500,
-                      lineHeight: rem(20, theme.fontSizes.base),
+                      lineHeight: rem(20),
                       textTransform: 'capitalize',
                     }}
                   >
@@ -449,12 +436,8 @@ export function FlipWords({words = [], currentFlip}) {
                   <Box
                     style={{
                       color: theme.colors.muted,
-                      lineHeight: rem(20, theme.fontSizes.base),
-                      ...margin(
-                        0,
-                        0,
-                        rem(theme.spacings.medium24, theme.fontSizes.base)
-                      ),
+                      lineHeight: rem(20),
+                      ...margin(0, 0, rem(theme.spacings.medium24)),
                     }}
                   >
                     {desc}
@@ -469,84 +452,84 @@ export function FlipWords({words = [], currentFlip}) {
                 style={{
                   color: theme.colors.primary2,
                   fontWeight: 500,
-                  lineHeight: rem(20, theme.fontSizes.base),
+                  lineHeight: rem(20),
                 }}
               >
                 Getting flip keywords...
               </Box>
               {[
                 'Can not load the flip keywords to moderate the story. Please wait or skip this flip.',
-              ].map((w, idx) => (
+              ].map((word, idx) => (
                 <Box
                   key={`desc-${idx}`}
                   style={{
                     color: theme.colors.muted,
-                    lineHeight: rem(20, theme.fontSizes.base),
-                    ...margin(
-                      rem(theme.spacings.small8, theme.fontSizes.base),
-                      0,
-                      0
-                    ),
+                    lineHeight: rem(20),
+                    ...margin(rem(theme.spacings.small8), 0, 0),
                   }}
                 >
-                  {w}
+                  {word}
                 </Box>
               ))}
             </>
           )}
         </Box>
-        <Flex align="center" justify="space-between">
-          <Button
-            variant={hasQualified && !reportWords ? 'primary' : 'secondary'}
-            onClick={() =>
-              // dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: false})
-              console.log('sending')
-            }
-            style={{fontWeight: 500, width: rem(136, theme.fontSizes.base)}}
-          >
-            <Flex align="center" justify="center">
-              {hasQualified && !reportWords && (
-                <FiCheck
-                  size={16}
-                  style={margin(0, rem(4, theme.fontSizes.base), 0, 0)}
-                />
-              )}
-              <Box style={{whiteSpace: 'nowrap'}}>Both relevant</Box>
-            </Flex>
-          </Button>
-          <Button
-            style={
-              hasQualified && reportWords
-                ? {
-                    backgroundColor: theme.colors.danger,
-                    color: theme.colors.white,
-                    fontWeight: 500,
-                    width: rem(136, theme.fontSizes.base),
-                  }
-                : {
-                    backgroundColor: theme.colors.danger02,
-                    color: theme.colors.danger,
-                    fontWeight: 500,
-                    width: rem(136, theme.fontSizes.base),
-                  }
-            }
-            onClick={
-              () => console.log('report')
-              // dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: true})
-            }
-          >
-            <Flex align="center" justify="center">
-              {hasQualified && reportWords && (
-                <FiCheck
-                  size={16}
-                  style={margin(0, rem(4, theme.fontSizes.base), 0, 0)}
-                />
-              )}
-              <Box>Irrelevant</Box>
-            </Flex>
-          </Button>
-        </Flex>
+        {children}
       </Box>
     </Box>
+  )
+}
+
+export function QualificationActions(props) {
+  return <Flex align="center" justify="space-between" {...props} />
+}
+
+export function QualificationButton({
+  flip: {relevance},
+  variant,
+  children,
+  ...props
+}) {
+  const buttonVariant =
+    // eslint-disable-next-line no-nested-ternary
+    variant === RelevanceType.Relevant
+      ? relevance === variant
+        ? 'primary'
+        : 'secondary'
+      : null
+  const style =
+    // eslint-disable-next-line no-nested-ternary
+    variant === RelevanceType.Irrelevant
+      ? relevance === variant
+        ? {
+            backgroundColor: theme.colors.danger,
+            color: theme.colors.white,
+          }
+        : {
+            backgroundColor: theme.colors.danger02,
+            color: theme.colors.danger,
+          }
+      : null
+  return (
+    <Button
+      variant={buttonVariant}
+      style={{
+        fontWeight: 500,
+        width: rem(136),
+        transition: 'none',
+        ...style,
+      }}
+      {...props}
+    >
+      {relevance === variant && (
+        <FiCheck
+          size={16}
+          style={{...margin(0, rem(4), 0, 0), verticalAlign: 'middle'}}
+        />
+      )}
+      <span style={{display: 'inline-block', verticalAlign: 'middle'}}>
+        {children}
+      </span>
+    </Button>
   )
 }

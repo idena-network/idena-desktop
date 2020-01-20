@@ -1,6 +1,9 @@
 import {useMachine} from '@xstate/react'
 import Link from 'next/link'
-import {validationMachine} from '../../screens/validation/validation-machine'
+import {
+  validationMachine,
+  RelevanceType,
+} from '../../screens/validation/validation-machine'
 import {
   Scene,
   ActionBar,
@@ -14,9 +17,9 @@ import {
   ActionBarItem,
   Thumbnail,
   FlipWords,
-  PrevButton,
-  NextButton,
   NavButton,
+  QualificationActions,
+  QualificationButton,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {IconClose, Button, Absolute} from '../../shared/components'
@@ -30,7 +33,7 @@ import Arrow from '../../screens/validation/components/arrow'
 export default function ValidationPage() {
   const [state, send] = useMachine(validationMachine)
 
-  const {shortFlips, currentIndex} = state.context
+  const {shortFlips, longFlips, currentIndex} = state.context
 
   if (state.matches('validationSucceeded'))
     return (
@@ -80,7 +83,26 @@ export default function ValidationPage() {
             onChoose={() => send({type: 'ANSWER', option: AnswerType.Right})}
           />
           {isQualification(state) && (
-            <FlipWords words={[]} currentFlip={currentFlip(state)} />
+            <FlipWords currentFlip={currentFlip(state)}>
+              <QualificationActions>
+                {Object.values(RelevanceType).map(relevance => (
+                  <QualificationButton
+                    key={relevance}
+                    flip={currentFlip(state)}
+                    variant={relevance}
+                    onClick={() =>
+                      send({
+                        type: 'TOGGLE_WORDS',
+                        relevance,
+                      })
+                    }
+                  >
+                    {relevance === RelevanceType.Relevant && 'Both relevant'}
+                    {relevance === RelevanceType.Irrelevant && 'Irrelevant'}
+                  </QualificationButton>
+                ))}
+              </QualificationActions>
+            </FlipWords>
           )}
         </FlipChallenge>
       </CurrentStep>
@@ -103,7 +125,7 @@ export default function ValidationPage() {
             </Button>
           ) : (
             <Button
-              disabled={!hasAnswers(shortFlips) || isSubmittingAnwsers(state)} // FIXME: define based on validation state too
+              disabled={!hasAnswers(longFlips) || isSubmittingAnwsers(state)} // FIXME: define based on validation state too
               onClick={() =>
                 send(isQualification(state) ? 'SUBMIT' : 'QUALIFY_WORDS')
               }
@@ -169,12 +191,14 @@ function isShortSession(state) {
 function isSubmittingAnwsers(state) {
   return (
     state.matches('shortSession.solveShortSession.submittingShortSession') ||
-    state.matches('longSession.solveLongSession.submittingLongSession')
+    state.matches(
+      'longSession.solveLongSession.solveFlips.submittingLongSession'
+    )
   )
 }
 
 function isQualification(state) {
-  return state.matches('longSession.qualification')
+  return state.matches('longSession.solveLongSession.solveFlips.qualification')
 }
 
 function sessionFlips(state) {

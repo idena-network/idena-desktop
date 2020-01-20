@@ -30,7 +30,8 @@ function Button({
           font-size: ${`${size}em`};
           padding: ${`${0.5 * size}em ${size}em`};
           outline: none;
-          transition: background 0.3s ease, color 0.3s ease;
+          transition: all 0.3s ease;
+          transition-property: background, color;
         }
         button:hover {
           background: ${darken(0.1, bg)};

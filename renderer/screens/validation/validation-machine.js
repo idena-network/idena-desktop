@@ -8,9 +8,11 @@ import {
 } from '../../shared/api/validation'
 import {SessionType} from '../../shared/providers/validation-context'
 import {fetchFlip} from '../../shared/api'
+import apiClient from '../../shared/api/api-client'
+import vocabulary from '../flips/utils/words'
 
 export const validationMachine = Machine({
-  initial: 'shortSession',
+  initial: 'longSession',
   context: {
     shortFlips: [],
     longFlips: [],
@@ -383,95 +385,166 @@ export const validationMachine = Machine({
           },
         },
         solveLongSession: {
-          on: {
-            ANSWER: {
-              actions: assign({
-                longFlips: ({longFlips, currentIndex}, {option}) => [
-                  ...longFlips.slice(0, currentIndex),
-                  {
-                    ...longFlips[currentIndex],
-                    option,
-                  },
-                  ...longFlips.slice(currentIndex + 1),
-                ],
-              }),
-            },
-            NEXT: {
-              actions: assign({
-                currentIndex: ({currentIndex}) => currentIndex + 1,
-              }),
-              cond: ({longFlips, currentIndex}) =>
-                currentIndex <= longFlips.length - 1,
-            },
-            PREV: {
-              actions: assign({
-                currentIndex: ({currentIndex}) => currentIndex - 1,
-              }),
-              cond: ({longFlips, currentIndex}) =>
-                currentIndex <= longFlips.length - 1,
-            },
-            PICK: {
-              actions: [
-                assign({
-                  currentIndex: (_, {index}) => index,
-                }),
-                log(),
-              ],
-            },
-            QUALIFY_WORDS: {
-              target: 'qualification',
-            },
-          },
-        },
-        qualification: {
-          on: {
-            TOGGLE_WORDS: {
-              actions: assign({
-                longAnswers: ({longAnswers, currentIndex}, {value}) => [
-                  ...longAnswers.slice(0, currentIndex),
-                  {
-                    ...longAnswers[currentIndex],
-                    reportWords: value,
-                  },
-                  ...longAnswers.slice(currentIndex + 1),
-                ],
-              }),
-            },
-            SUBMIT: {
-              target: 'submittingLongSession',
-            },
-          },
-        },
-        submittingLongSession: {
-          initial: 'normal',
+          type: 'parallel',
           states: {
-            normal: {
-              invoke: {
-                src: ({longFlips, epoch}) =>
-                  submitLongAnswers(
-                    longFlips.map(
-                      ({
-                        option: answer = 0,
-                        reportWords: wrongWords,
-                        hash,
-                      }) => ({
-                        answer,
-                        wrongWords,
-                        hash,
-                      })
-                    ),
-                    0,
-                    epoch
-                  ),
-                onDone: {
-                  target: '#validationSucceeded',
+            fetchWords: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: ({longFlips}) =>
+                      Promise.all(
+                        longFlips
+                          .filter(({ready}) => ready)
+                          .map(({hash}) =>
+                            fetchWords(hash)
+                              .then(({result}) => ({hash, ...result}))
+                              .catch(() => {})
+                          )
+                      ),
+                    onDone: {
+                      target: '#success',
+                      actions: assign({
+                        longFlips: ({longFlips}, {data}) =>
+                          mergeFlipsByHash(
+                            longFlips,
+                            data.map(({hash, words = []}) => ({
+                              hash,
+                              words: words.map(idx => vocabulary[idx]),
+                            }))
+                          ),
+                      }),
+                    },
+                  },
                 },
-                onError: {
-                  target: 'fail',
+                suceess: {
+                  id: 'success',
+                  after: {
+                    1000: [
+                      {
+                        target: 'fetching',
+                        cond: ({longFlips}) =>
+                          longFlips
+                            .filter(({ready}) => ready)
+                            .some(({words}) => !words),
+                      },
+                      {
+                        target: 'done',
+                      },
+                    ],
+                  },
+                },
+                done: {
+                  type: 'final',
                 },
               },
             },
-            fail: {},
+            solveFlips: {
+              initial: 'flips',
+              states: {
+                flips: {
+                  on: {
+                    QUALIFY_WORDS: {
+                      target: 'qualification',
+                    },
+                  },
+                },
+                qualification: {
+                  entry: assign({
+                    currentIndex: 0,
+                  }),
+                  on: {
+                    TOGGLE_WORDS: {
+                      actions: [
+                        assign({
+                          longFlips: (
+                            {longFlips, currentIndex},
+                            {relevance}
+                          ) => [
+                            ...longFlips.slice(0, currentIndex),
+                            {
+                              ...longFlips[currentIndex],
+                              relevance,
+                            },
+                            ...longFlips.slice(currentIndex + 1),
+                          ],
+                        }),
+                        log(),
+                      ],
+                    },
+                    SUBMIT: {
+                      target: 'submittingLongSession',
+                    },
+                  },
+                },
+                submittingLongSession: {
+                  initial: 'normal',
+                  states: {
+                    normal: {
+                      invoke: {
+                        src: ({longFlips, epoch}) =>
+                          submitLongAnswers(
+                            longFlips.map(
+                              ({option: answer = 0, relevance, hash}) => ({
+                                answer,
+                                wrongWords:
+                                  // eslint-disable-next-line no-use-before-define
+                                  relevance === RelevanceType.Irrelevant,
+                                hash,
+                              })
+                            ),
+                            0,
+                            epoch
+                          ),
+                        onDone: {
+                          target: '#validationSucceeded',
+                        },
+                        onError: {
+                          target: 'fail',
+                        },
+                      },
+                    },
+                    fail: {},
+                  },
+                },
+              },
+              on: {
+                ANSWER: {
+                  actions: assign({
+                    longFlips: ({longFlips, currentIndex}, {option}) => [
+                      ...longFlips.slice(0, currentIndex),
+                      {
+                        ...longFlips[currentIndex],
+                        option,
+                      },
+                      ...longFlips.slice(currentIndex + 1),
+                    ],
+                  }),
+                },
+                NEXT: {
+                  actions: assign({
+                    currentIndex: ({currentIndex}) => currentIndex + 1,
+                  }),
+                  cond: ({longFlips, currentIndex}) =>
+                    currentIndex <= longFlips.length - 1,
+                },
+                PREV: {
+                  actions: assign({
+                    currentIndex: ({currentIndex}) => currentIndex - 1,
+                  }),
+                  cond: ({longFlips, currentIndex}) =>
+                    currentIndex <= longFlips.length - 1,
+                },
+                PICK: {
+                  actions: [
+                    assign({
+                      currentIndex: (_, {index}) => index,
+                    }),
+                    log(),
+                  ],
+                },
+              },
+            },
           },
         },
       },
@@ -519,4 +592,17 @@ function mergeFlipsByHash(flips, anotherFlips) {
     ...flip,
     ...anotherFlips.find(({hash}) => hash === flip.hash),
   }))
+}
+
+async function fetchWords(hash) {
+  return (await apiClient().post('/', {
+    method: 'flip_words',
+    params: [hash],
+    id: 1,
+  })).data
+}
+
+export const RelevanceType = {
+  Relevant: 1,
+  Irrelevant: 2,
 }
