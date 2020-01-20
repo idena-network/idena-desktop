@@ -12,7 +12,7 @@ import apiClient from '../../shared/api/api-client'
 import vocabulary from '../flips/utils/words'
 
 export const validationMachine = Machine({
-  initial: 'longSession',
+  initial: 'shortSession',
   context: {
     shortFlips: [],
     longFlips: [],
@@ -208,7 +208,7 @@ export const validationMachine = Machine({
                   {
                     target: 'normal',
                     cond: ({shortFlips}) =>
-                      shortFlips.some(flip => flip.loaded),
+                      shortFlips.some(({loaded, decoded}) => loaded && decoded),
                   },
                 ],
               },
@@ -277,7 +277,8 @@ export const validationMachine = Machine({
               {
                 target: '.pickingNextFlip',
                 cond: ({currentIndex, shortFlips}) =>
-                  currentIndex < shortFlips.length - 1,
+                  currentIndex <
+                  shortFlips.filter(({extra}) => !extra).length - 1,
                 actions: [log()],
               },
               {target: '.lastFlip'},
@@ -526,14 +527,14 @@ export const validationMachine = Machine({
                     currentIndex: ({currentIndex}) => currentIndex + 1,
                   }),
                   cond: ({longFlips, currentIndex}) =>
-                    currentIndex <= longFlips.length - 1,
+                    currentIndex <
+                    longFlips.filter(({ready}) => ready).length - 1,
                 },
                 PREV: {
                   actions: assign({
                     currentIndex: ({currentIndex}) => currentIndex - 1,
                   }),
-                  cond: ({longFlips, currentIndex}) =>
-                    currentIndex <= longFlips.length - 1,
+                  cond: ({currentIndex}) => currentIndex > 0,
                 },
                 PICK: {
                   actions: [

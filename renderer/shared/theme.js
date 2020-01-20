@@ -103,7 +103,7 @@ export default {
   },
   Button: {
     color: colors.text,
-    size: 1,
+    size: fontSizes.base,
   },
 }
 

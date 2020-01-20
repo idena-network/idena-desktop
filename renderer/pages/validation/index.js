@@ -66,7 +66,7 @@ export default function ValidationPage() {
         )}
         {state.matches('longSession') && (
           <Link href="/dashboard">
-            <IconClose color={theme.colors.white} size={rem(20)} />
+            <IconClose color={theme.colors.black} size={rem(20)} />
           </Link>
         )}
       </Header>

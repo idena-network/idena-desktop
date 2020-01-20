@@ -42,7 +42,7 @@ export function Header(props) {
     <Flex
       justify="space-between"
       align="center"
-      css={{...margin(0, 0, rem(40))}}
+      css={{...margin(0, 0, rem(32))}}
       {...props}
     />
   )
@@ -99,16 +99,17 @@ export function Flip({
         option
           ? option === variant
             ? {
-                border: `solid 2px ${theme.colors.primary}`,
-                boxShadow: `0 0 2px 3px ${transparentize(
-                  0.8,
+                border: `solid ${rem(2)} ${theme.colors.primary}`,
+                boxShadow: `0 0 ${rem(2)} ${rem(3)} ${transparentize(
+                  0.75,
                   theme.colors.primary
                 )}`,
-                transition: 'opacity 0.3s ease-in',
+                transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
               }
             : {
                 opacity: 0.3,
-                transition: 'opacity 0.3s ease-out',
+                transform: 'scale(0.97)',
+                transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
               }
           : {}
       }
@@ -152,13 +153,20 @@ function FlipHolder({css, ...props}) {
     <Box
       css={{
         borderRadius: rem(8),
-        border: `solid 2px ${transparentize(0.8, theme.colors.primary2)}`,
-        boxShadow: `0 0 2px 0 ${transparentize(0.8, theme.colors.primary2)}`,
+        border: `solid ${rem(2)} ${transparentize(
+          0.95,
+          theme.colors.primary2
+        )}`,
+        boxShadow: `0 0 ${rem(2)} 0 ${transparentize(
+          0.95,
+          theme.colors.primary2
+        )}`,
         ...margin(0, rem(10)),
         ...padding(rem(4)),
         position: 'relative',
         minWidth: rem(147),
-        height: '100%',
+        minHeight: '100%',
+        transitionProperty: 'opacity, transform',
         ...css,
       }}
       {...props}
@@ -196,7 +204,7 @@ function FlipBlur({src}) {
     <div
       style={{
         background: `center center / cover no-repeat url(${src})`,
-        filter: 'blur(6px)',
+        filter: `blur(${rem(6)})`,
         ...cover(),
         zIndex: 1,
       }}
@@ -234,19 +242,6 @@ export function NavButton({left, right, ...props}) {
     </Absolute>
   )
 }
-
-// {shouldAllowNext(
-//   isLast,
-//   loaded,
-//   SessionType.Qualification,
-//   option,
-//   null, // irrelevantWords,
-//   null // words
-// ) && (
-//   <Col onClick={onNext} w={4}>
-//     <Arrow dir="next" type={type} />
-//   </Col>
-// )}
 
 export function ActionBar(props) {
   return (
@@ -523,11 +518,17 @@ export function QualificationButton({
     >
       {relevance === variant && (
         <FiCheck
-          size={16}
+          size={rem(20)}
+          fontSize={rem(13)}
           style={{...margin(0, rem(4), 0, 0), verticalAlign: 'middle'}}
         />
       )}
-      <span style={{display: 'inline-block', verticalAlign: 'middle'}}>
+      <span
+        style={{
+          display: 'inline-block',
+          verticalAlign: 'middle',
+        }}
+      >
         {children}
       </span>
     </Button>
