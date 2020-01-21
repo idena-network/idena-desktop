@@ -768,10 +768,7 @@ export const createValidationMachine = ({
         BUMP_EXTRA_FLIPS: 1000 * 35,
         // eslint-disable-next-line no-shadow
         SHORT_SESSION_AUTO_SUBMIT: ({validationStart, shortSessionDuration}) =>
-          dayjs(validationStart)
-            .add(shortSessionDuration, 's')
-            .subtract(10, 's')
-            .diff(dayjs(), 's'),
+          adjustDuration(validationStart, shortSessionDuration - 10) * 1000,
       },
     }
   )
