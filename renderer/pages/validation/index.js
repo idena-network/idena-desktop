@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import {useMachine} from '@xstate/react'
 import Link from 'next/link'
-import {useMemo} from 'react'
+import {useMemo, useEffect} from 'react'
 import {useRouter} from 'next/router'
 import {
   createValidationMachine,
@@ -39,6 +39,7 @@ import {
 import {Debug} from '../../shared/components/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'
+import {persistState, loadState} from '../../shared/utils/persist'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -73,10 +74,16 @@ function ValidationSession({
       }),
     [epoch, longSessionDuration, shortSessionDuration, validationStart]
   )
-  const [state, send] = useMachine(validationMachine)
+  const [state, send] = useMachine(validationMachine, {
+    state: loadState('validation2'),
+  })
   const {currentIndex} = state.context
 
   const router = useRouter()
+
+  useEffect(() => {
+    persistState('validation2', state)
+  }, [state])
 
   if (state.matches('validationSucceeded'))
     return (
