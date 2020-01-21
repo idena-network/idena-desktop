@@ -16,6 +16,7 @@ export const createValidationMachine = ({
   epoch,
   validationStart,
   shortSessionDuration,
+  longSessionDuration,
 }) =>
   Machine(
     {
@@ -27,31 +28,12 @@ export const createValidationMachine = ({
         epoch,
         validationStart,
         shortSessionDuration,
+        longSessionDuration,
       },
       states: {
         shortSession: {
-          entry: log('Validation started!'),
+          entry: log('VALIDATION STARTED!'),
           type: 'parallel',
-          after: {
-            BUMP_EXTRA_FLIPS: {
-              target: '.fetch.bumpExtraFlips',
-              cond: ({shortFlips}) =>
-                shortFlips.some(({ready, extra}) => !ready && !extra),
-            },
-            SHORT_SESSION_AUTO_SUBMIT: {
-              target: '.solve.answer.submitShortSession',
-              cond: ({shortFlips}) => {
-                const readyFlips = shortFlips.filter(
-                  ({loaded, decoded}) => loaded && decoded
-                )
-                return (
-                  readyFlips.length > 0 &&
-                  readyFlips.filter(({option}) => !!option).length >=
-                    readyFlips.length / 2
-                )
-              },
-            },
-          },
           states: {
             fetch: {
               initial: 'check',
@@ -384,6 +366,29 @@ export const createValidationMachine = ({
                 },
               },
             },
+          },
+          after: {
+            BUMP_EXTRA_FLIPS: {
+              target: '.fetch.bumpExtraFlips',
+              cond: ({shortFlips}) =>
+                shortFlips.some(({ready, extra}) => !ready && !extra),
+            },
+            SHORT_SESSION_AUTO_SUBMIT: [
+              {
+                target: '.solve.answer.submitShortSession',
+                cond: ({shortFlips}) => {
+                  const readyFlips = shortFlips.filter(({ready}) => ready)
+                  return (
+                    readyFlips.length > 0 &&
+                    readyFlips.filter(({option}) => option).length >=
+                      readyFlips.length / 2
+                  )
+                },
+              },
+              {
+                target: 'validationFailed',
+              },
+            ],
           },
         },
         longSession: {
@@ -752,6 +757,20 @@ export const createValidationMachine = ({
               },
             },
           },
+          after: {
+            LONG_SESSION_CHECK: [
+              {
+                target: 'validationFailed',
+                cond: ({longFlips}) => {
+                  const readyFlips = longFlips.filter(({ready}) => ready)
+                  return (
+                    readyFlips.filter(({option}) => option).length <
+                    readyFlips.length / 2
+                  )
+                },
+              },
+            ],
+          },
         },
         validationFailed: {
           id: 'validationFailed',
@@ -769,6 +788,12 @@ export const createValidationMachine = ({
         // eslint-disable-next-line no-shadow
         SHORT_SESSION_AUTO_SUBMIT: ({validationStart, shortSessionDuration}) =>
           adjustDuration(validationStart, shortSessionDuration - 10) * 1000,
+        // eslint-disable-next-line no-shadow
+        LONG_SESSION_CHECK: ({validationStart, longSessionDuration}) =>
+          adjustDuration(
+            validationStart,
+            shortSessionDuration + longSessionDuration
+          ) * 1000,
       },
     }
   )

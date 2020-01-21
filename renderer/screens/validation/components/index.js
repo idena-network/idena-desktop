@@ -549,12 +549,12 @@ export function WelcomeQualificationDialog({isOpen, onSubmit}) {
     <Modal show={isOpen} showCloseIcon={false}>
       <Box css={{...margin(0, 0, rem(18))}}>
         <SubHeading>Welcome to qualification session</SubHeading>
-        <Text>
+        <Text css={{...margin(0, 0, rem(10))}}>
           Your answers for the validation session have been submitted
           successfully!
         </Text>
         <Text>
-          Now solve a bunch of flips to check its quality. The flip is qualified
+          Now solve bunch of flips to check its quality. The flip is qualified
           if the majority, equals more than 2/3 participants, gives the same
           answer.
         </Text>
@@ -627,7 +627,7 @@ export function WelcomeKeywordsQualificationDialog({isOpen, onSubmit}) {
         <SubHeading css={margin(0, 0, rem(10))}>
           Your answers are not yet submitted
         </SubHeading>
-        <Text css={margin(0, 0, rem(16))}>
+        <Text css={margin(0, 0, rem(10))}>
           Please qualify the keywords relevance and submit the answers.
         </Text>
         <Text>The flips with irrelevant keywords will be penalized.</Text>
@@ -692,5 +692,44 @@ export function TimerClock({duration, color}) {
             .join(':')}
       </Text>
     </Box>
+  )
+}
+
+export function ValidationSucceededDialog({isOpen, onSubmit}) {
+  return (
+    <Modal show={isOpen} showCloseIcon={false}>
+      <Box css={{...margin(0, 0, rem(24))}}>
+        <SubHeading css={margin(0, 0, rem(10))}>Validation finished</SubHeading>
+        <Text>
+          Your answers have been submitted successfully. Please wait until the
+          end of the validation session.
+        </Text>
+      </Box>
+      <Flex align="center" justify="flex-end">
+        <Box px="4px">
+          <Button onClick={onSubmit}>Go to My Idena</Button>
+        </Box>
+      </Flex>
+    </Modal>
+  )
+}
+
+export function ValidationFailedDialog({isOpen, onSubmit}) {
+  return (
+    <Modal show={isOpen} showCloseIcon={false}>
+      <Box css={{...margin(0, 0, rem(18))}}>
+        <SubHeading css={margin(0, 0, rem(10))}>Validation failed</SubHeading>
+        <Text css={margin(0, 0, rem(10))}>
+          Sorry your answers won’t be submitted since the validation session is
+          over.
+        </Text>
+        <Text>Come back soon!</Text>
+      </Box>
+      <Flex align="center" justify="flex-end">
+        <Box px="4px">
+          <Button onClick={onSubmit}>Go to My Idena</Button>
+        </Box>
+      </Flex>
+    </Modal>
   )
 }

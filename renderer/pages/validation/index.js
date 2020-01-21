@@ -2,6 +2,7 @@
 import {useMachine} from '@xstate/react'
 import Link from 'next/link'
 import {useMemo} from 'react'
+import {useRouter} from 'next/router'
 import {
   createValidationMachine,
   RelevanceType,
@@ -26,6 +27,8 @@ import {
   Arrow,
   WelcomeKeywordsQualificationDialog,
   ValidationTimer,
+  ValidationFailedDialog,
+  ValidationSucceededDialog,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {IconClose, Button} from '../../shared/components'
@@ -66,29 +69,28 @@ function ValidationSession({
         epoch,
         validationStart,
         shortSessionDuration,
+        longSessionDuration,
       }),
-    [epoch, shortSessionDuration, validationStart]
+    [epoch, longSessionDuration, shortSessionDuration, validationStart]
   )
   const [state, send] = useMachine(validationMachine)
   const {currentIndex} = state.context
 
+  const router = useRouter()
+
   if (state.matches('validationSucceeded'))
     return (
-      <Scene
-        bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
-      >
-        Done
-        <Link href="/dashboard">
-          <a>Back to My Idena</a>
-        </Link>
+      <Scene bg={theme.colors.white}>
+        <ValidationSucceededDialog
+          isOpen
+          onSubmit={() => router.push('/dashboard')}
+        />
       </Scene>
     )
 
   if (state.matches('shortSession.solve.answer.submitShortSession.done'))
     return (
-      <Scene
-        bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
-      >
+      <Scene bg={theme.colors.black}>
         <WelcomeQualificationDialog
           isOpen
           onSubmit={() => send('START_LONG_SESSION')}
@@ -98,12 +100,19 @@ function ValidationSession({
 
   if (state.matches('longSession.solve.answer.finishFlips'))
     return (
-      <Scene
-        bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
-      >
+      <Scene bg={theme.colors.white}>
         <WelcomeKeywordsQualificationDialog
           isOpen
           onSubmit={() => send('START_KEYWORDS_QUALIFICATION')}
+        />
+      </Scene>
+    )
+  if (state.matches('validationFailed'))
+    return (
+      <Scene bg={theme.colors.black}>
+        <ValidationFailedDialog
+          isOpen
+          onSubmit={() => router.push('/dashboard')}
         />
       </Scene>
     )
@@ -246,11 +255,15 @@ function isLongSession(state) {
 }
 
 function isLongSessionFlips(state) {
-  return state.matches('longSession.solve.answer.flips')
+  return ['flips', 'finishFlips']
+    .map(substate => `longSession.solve.answer.${substate}`)
+    .some(state.matches)
 }
 
 function isLongSessionKeywords(state) {
-  return state.matches('longSession.solve.answer.keywords')
+  return ['keywords', 'submitLongSession']
+    .map(substate => `longSession.solve.answer.${substate}`)
+    .some(state.matches)
 }
 
 function isSubmitting(state) {
@@ -263,7 +276,7 @@ function isSubmitting(state) {
 
 function isFirstFlip(state) {
   return ['shortSession', 'longSession']
-    .map(type => `${type}.solve.nav.firstFlip`)
+    .map(substate => `${substate}.solve.nav.firstFlip`)
     .some(state.matches)
 }
 
