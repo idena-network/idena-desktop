@@ -43,7 +43,7 @@ Button.defaultProps = {
   ...theme.Button,
 }
 Button.propTypes = {
-  size: PropTypes.number,
+  size: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   disabled: PropTypes.bool,
   danger: PropTypes.bool,
   variant: PropTypes.oneOf(['primary', 'secondary']),

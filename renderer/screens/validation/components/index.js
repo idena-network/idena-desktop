@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, {useMemo} from 'react'
 import {
   margin,
   padding,
@@ -9,7 +9,14 @@ import {
   transparentize,
   rgba,
 } from 'polished'
-import {FiCheck, FiXCircle, FiChevronLeft, FiChevronRight} from 'react-icons/fi'
+import {
+  FiCheck,
+  FiXCircle,
+  FiChevronLeft,
+  FiChevronRight,
+  FiClock,
+} from 'react-icons/fi'
+import {useMachine} from '@xstate/react'
 import {
   Box,
   Fill,
@@ -24,9 +31,12 @@ import Flex from '../../../shared/components/flex'
 import {reorderList} from '../../../shared/utils/arr'
 import Spinner from './spinner'
 import theme, {rem} from '../../../shared/theme'
-import {hasAnswer} from '../../../shared/providers/validation-context'
 import {TranslateWords} from '../../../shared/components/translate-button'
-import {RelevanceType} from '../validation-machine'
+import {
+  RelevanceType,
+  createTimerMachine,
+  adjustDuration,
+} from '../validation-machine'
 
 export function Scene({bg: background = theme.colors.black, ...props}) {
   return (
@@ -631,6 +641,56 @@ export function WelcomeKeywordsQualificationDialog({isOpen, onSubmit}) {
   )
 }
 
-export function Timer({duration}) {
-  return <Box color={theme.colors.danger}>{duration} seconds</Box>
+export function ValidationTimer({validationStart, duration}) {
+  const adjustedDuration = useMemo(
+    () => adjustDuration(validationStart, duration),
+    [duration, validationStart]
+  )
+
+  return (
+    <Timer>
+      <TimerIcon color={theme.colors.danger} />
+      <TimerClock duration={adjustedDuration} color={theme.colors.danger} />
+    </Timer>
+  )
+}
+
+export function Timer(props) {
+  return <Flex align="center" {...props} />
+}
+
+export function TimerIcon({color}) {
+  return (
+    <FiClock
+      size={rem(20)}
+      color={color}
+      style={{marginRight: rem(theme.spacings.small8)}}
+      width={rem(20)}
+    />
+  )
+}
+
+export function TimerClock({duration, color}) {
+  const [state, send] = useMachine(
+    useMemo(() => createTimerMachine(duration), [duration])
+  )
+
+  React.useEffect(() => {
+    send('DURATION_UPDATE', {duration})
+  }, [duration, send])
+
+  const {elapsed} = state.context
+  const remaining = duration - elapsed
+
+  return (
+    <Box w={rem(37)} style={{fontVariantNumeric: 'tabular-nums'}}>
+      <Text color={color} fontWeight={600}>
+        {state.matches('stopped') && '00:00'}
+        {state.matches('running') &&
+          [Math.floor(remaining / 60), remaining % 60]
+            .map(t => t.toString().padStart(2, 0))
+            .join(':')}
+      </Text>
+    </Box>
+  )
 }

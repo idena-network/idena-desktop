@@ -1,7 +1,9 @@
+/* eslint-disable react/prop-types */
 import {useMachine} from '@xstate/react'
 import Link from 'next/link'
+import {useMemo} from 'react'
 import {
-  validationMachine,
+  createValidationMachine,
   RelevanceType,
 } from '../../screens/validation/validation-machine'
 import {
@@ -23,7 +25,7 @@ import {
   WelcomeQualificationDialog,
   Arrow,
   WelcomeKeywordsQualificationDialog,
-  Timer,
+  ValidationTimer,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {IconClose, Button} from '../../shared/components'
@@ -32,10 +34,42 @@ import {
   AnswerType,
 } from '../../shared/providers/validation-context'
 import {Debug} from '../../shared/components/utils'
+import {useEpochState} from '../../shared/providers/epoch-context'
+import {useTimingState} from '../../shared/providers/timing-context'
 
 export default function ValidationPage() {
-  const [state, send] = useMachine(validationMachine)
+  const epoch = useEpochState()
+  const timing = useTimingState()
 
+  if (epoch && timing && timing.shortSession)
+    return (
+      <ValidationSession
+        epoch={epoch.epoch}
+        validationStart={new Date(epoch.nextValidation).getTime()}
+        shortSessionDuration={timing.shortSession}
+        longSessionDuration={timing.longSession}
+      />
+    )
+
+  return null
+}
+
+function ValidationSession({
+  epoch,
+  validationStart,
+  shortSessionDuration,
+  longSessionDuration,
+}) {
+  const validationMachine = useMemo(
+    () =>
+      createValidationMachine({
+        epoch,
+        validationStart,
+        shortSessionDuration,
+      }),
+    [epoch, shortSessionDuration, validationStart]
+  )
+  const [state, send] = useMachine(validationMachine)
   const {currentIndex} = state.context
 
   if (state.matches('validationSucceeded'))
@@ -44,7 +78,9 @@ export default function ValidationPage() {
         bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
       >
         Done
-        <Link href="/dashboard">Back to My Idena</Link>
+        <Link href="/dashboard">
+          <a>Back to My Idena</a>
+        </Link>
       </Scene>
     )
 
@@ -75,7 +111,7 @@ export default function ValidationPage() {
   return (
     <Scene bg={isShortSession(state) ? theme.colors.black : theme.colors.white}>
       <Header>
-        {!isQualification(state) ? (
+        {!isLongSessionKeywords(state) ? (
           <SessionTitle
             color={
               isShortSession(state) ? theme.colors.white : theme.colors.text
@@ -94,7 +130,9 @@ export default function ValidationPage() {
         )}
         {state.matches('longSession') && (
           <Link href="/dashboard">
-            <IconClose color={theme.colors.black} size={rem(20)} />
+            <a>
+              <IconClose color={theme.colors.black} size={rem(20)} />
+            </a>
           </Link>
         )}
       </Header>
@@ -110,7 +148,7 @@ export default function ValidationPage() {
             variant={AnswerType.Right}
             onChoose={() => send({type: 'ANSWER', option: AnswerType.Right})}
           />
-          {isQualification(state) && (
+          {isLongSessionKeywords(state) && (
             <FlipWords currentFlip={currentFlip(state)}>
               <QualificationActions>
                 {Object.values(RelevanceType).map(relevance => (
@@ -137,19 +175,26 @@ export default function ValidationPage() {
       <ActionBar>
         <ActionBarItem />
         <ActionBarItem justify="center">
-          {/* TODO: make it proper, see xstate example */}
-          <Timer
-            duration={120}
-            type={isShortSession(state) ? SessionType.Short : SessionType.Long}
-          />
+          {isShortSession(state) && (
+            <ValidationTimer
+              validationStart={validationStart}
+              duration={shortSessionDuration - 10}
+            />
+          )}
+          {isLongSession(state) && (
+            <ValidationTimer
+              validationStart={validationStart}
+              duration={shortSessionDuration - 10 + longSessionDuration}
+            />
+          )}
         </ActionBarItem>
         <ActionBarItem justify="flex-end">
-          {(isShortSession(state) || isQualification(state)) && (
+          {(isShortSession(state) || isLongSessionKeywords(state)) && (
             <Button disabled={!canSubmit(state)} onClick={() => send('SUBMIT')}>
               {isSubmitting(state) ? 'Submitting answers...' : 'Submit answers'}
             </Button>
           )}
-          {isLongSession(state) && (
+          {isLongSessionFlips(state) && (
             <Button
               disabled={!canSubmit(state)}
               onClick={() => send('FINISH_FLIPS')}
@@ -197,10 +242,14 @@ function isShortSession(state) {
 }
 
 function isLongSession(state) {
+  return state.matches('longSession')
+}
+
+function isLongSessionFlips(state) {
   return state.matches('longSession.solve.answer.flips')
 }
 
-function isQualification(state) {
+function isLongSessionKeywords(state) {
   return state.matches('longSession.solve.answer.keywords')
 }
 
@@ -225,13 +274,13 @@ function isLastFlip(state) {
 }
 
 function canSubmit(state) {
-  if (isShortSession(state) || isLongSession(state))
+  if (isShortSession(state) || isLongSessionFlips(state))
     return (
       (hasAllAnswers(sessionFlips(state)) || isLastFlip(state)) &&
       !isSubmitting(state)
     )
 
-  if (isQualification(state))
+  if (isLongSessionKeywords(state))
     return (
       (hasAllRelevanceMarks(sessionFlips(state)) || isLastFlip(state)) &&
       !isSubmitting(state)
@@ -257,10 +306,6 @@ function currentFlip(state) {
 
 function hasAllAnswers(flips) {
   return flips.length && flips.every(({option}) => option)
-}
-
-function hasSomeAnswer(flips) {
-  return flips.some(({option}) => option)
 }
 
 function hasAllRelevanceMarks(flips) {

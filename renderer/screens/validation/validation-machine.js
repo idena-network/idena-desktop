@@ -1,6 +1,7 @@
-import {Machine, assign, createMachine} from 'xstate'
+import {Machine, assign} from 'xstate'
 import {decode} from 'rlp'
 import {log} from 'xstate/lib/actions'
+import dayjs from 'dayjs'
 import {
   fetchFlipHashes,
   submitShortAnswers,
@@ -11,783 +12,823 @@ import {fetchFlip} from '../../shared/api'
 import apiClient from '../../shared/api/api-client'
 import vocabulary from '../flips/utils/words'
 
-export const validationMachine = Machine({
-  initial: 'shortSession',
-  context: {
-    shortFlips: [],
-    longFlips: [],
-    currentIndex: 0,
-  },
-  states: {
-    shortSession: {
-      type: 'parallel',
-      after: {
-        [1000 * 10]: {
-          target: '.fetch.bumpExtraFlips',
-          cond: ({shortFlips}) =>
-            shortFlips.some(({loaded, extra}) => !loaded && !extra),
-        },
-        [1000 * (60 * 2 - 10)]: {
-          target: '.solve.answer.submitShortSession',
-          cond: ({shortFlips}) => {
-            const readyFlips = shortFlips.filter(
-              ({loaded, decoded}) => loaded && decoded
-            )
-            return (
-              readyFlips.length > 0 &&
-              readyFlips.filter(({option}) => !!option).length >=
-                readyFlips.length / 2
-            )
-          },
-        },
-      },
-      states: {
-        fetch: {
-          initial: 'check',
-          states: {
-            check: {
-              id: 'check',
-              on: {
-                '': [
-                  {
-                    target: 'done',
-                    cond: ({shortFlips}) =>
-                      shortFlips.length && shortFlips.every(({ready}) => ready),
-                  },
-                  {
-                    target: 'fetchHashes',
-                  },
-                ],
-              },
-            },
-            fetchHashes: {
-              initial: 'fetching',
-              states: {
-                fetching: {
-                  invoke: {
-                    src: () => fetchFlipHashes(SessionType.Short),
-                    onDone: {
-                      target: '#fetchShortFlips',
-                      actions: [
-                        assign({
-                          shortFlips: ({shortFlips}, {data}) =>
-                            shortFlips.length
-                              ? mergeFlipsByHash(shortFlips, data)
-                              : mergeFlipsByHash(data, shortFlips),
-                        }),
-                      ],
-                    },
-                    onError: {
-                      target: 'fail',
-                    },
-                  },
-                },
-                fail: {
-                  after: {
-                    1000: 'fetching',
-                  },
-                },
-              },
-            },
-            fetchFlips: {
-              id: 'fetchShortFlips',
-              initial: 'fetching',
-              states: {
-                fetching: {
-                  invoke: {
-                    src: ({shortFlips}) =>
-                      fetchFlips(
-                        shortFlips
-                          .filter(({ready, loaded}) => ready && !loaded)
-                          .map(({hash}) => hash)
-                      ),
-                    onDone: {
-                      target: '#decodeShortFlips',
-                      actions: assign({
-                        shortFlips: ({shortFlips}, {data}) =>
-                          mergeFlipsByHash(shortFlips, data),
-                      }),
-                    },
-                    onError: {
-                      target: 'fail',
-                    },
-                  },
-                },
-                fail: {
-                  after: {
-                    1000: 'fetching',
-                  },
-                },
-              },
-            },
-            decodeFlips: {
-              id: 'decodeShortFlips',
-              initial: 'decoding',
-              states: {
-                decoding: {
-                  invoke: {
-                    src: async ({shortFlips}) =>
-                      shortFlips
-                        .filter(({loaded, decoded}) => loaded && !decoded)
-                        .map(decodeFlip),
-                    onDone: {
-                      target: 'decoded',
-                      actions: [
-                        assign({
-                          shortFlips: ({shortFlips}, {data}) =>
-                            mergeFlipsByHash(shortFlips, data),
-                        }),
-                      ],
-                    },
-                    onError: {
-                      target: 'fail',
-                    },
-                  },
-                },
-                decoded: {
-                  after: {
-                    1000: '#check',
-                  },
-                },
-                fail: {},
-              },
-            },
-            bumpExtraFlips: {
-              invoke: {
-                src: ({shortFlips}) => cb => {
-                  let neededExtraFlipsCount = shortFlips.filter(
-                    ({loaded, extra}) => !loaded && !extra
-                  ).length
-                  let pulledExtraFlipsCount = 0
-
-                  const flips = shortFlips.map(flip => {
-                    if (!flip.extra) return flip
-
-                    const shouldBecomeAvailable =
-                      flip.loaded && neededExtraFlipsCount > 0
-                    neededExtraFlipsCount -= 1
-                    pulledExtraFlipsCount += 1
-
-                    return {
-                      ...flip,
-                      extra: !shouldBecomeAvailable,
-                    }
-                  })
-
-                  for (let i = flips.length - 1; i >= 0; i -= 1) {
-                    if (
-                      pulledExtraFlipsCount > 0 &&
-                      (!flips[i].loaded || flips[i].failed)
-                    ) {
-                      pulledExtraFlipsCount -= 1
-                      flips[i].extra = true
-                    }
-                  }
-                  cb({type: 'EXTRA_FLIPS_PULLED', flips})
-                  return flips
-                },
-              },
-              on: {
-                EXTRA_FLIPS_PULLED: {
-                  target: 'done',
-                  actions: assign({
-                    shortFlips: (_, {flips}) => flips,
-                  }),
-                },
-              },
-            },
-            done: {type: 'final'},
-          },
-        },
-        solve: {
-          type: 'parallel',
-          states: {
-            nav: {
-              initial: 'firstFlip',
-              states: {
-                firstFlip: {},
-                normal: {},
-                lastFlip: {},
-              },
-              on: {
-                PREV: [
-                  {
-                    target: undefined,
-                    cond: ({shortFlips}) =>
-                      shortFlips.filter(
-                        ({loaded, decoded}) => loaded && decoded
-                      ).length === 0,
-                  },
-                  {
-                    target: '.normal',
-                    cond: ({currentIndex}) => currentIndex > 1,
-                    actions: [
-                      assign({
-                        currentIndex: ({currentIndex}) => currentIndex - 1,
-                      }),
-                      log(),
-                    ],
-                  },
-                  {
-                    target: '.firstFlip',
-                    cond: ({currentIndex}) => currentIndex === 1,
-                    actions: [
-                      assign({
-                        currentIndex: ({currentIndex}) => currentIndex - 1,
-                      }),
-                      log(),
-                    ],
-                  },
-                ],
-                NEXT: [
-                  {
-                    target: undefined,
-                    cond: ({shortFlips}) =>
-                      shortFlips.filter(
-                        ({loaded, decoded}) => loaded && decoded
-                      ).length === 0,
-                  },
-                  {
-                    target: '.lastFlip',
-                    cond: ({currentIndex, shortFlips}) =>
-                      currentIndex ===
-                      shortFlips.filter(({extra}) => !extra).length - 2,
-                    actions: [
-                      assign({
-                        currentIndex: ({currentIndex}) => currentIndex + 1,
-                      }),
-                      log(),
-                    ],
-                  },
-                  {
-                    target: '.normal',
-                    cond: ({currentIndex, shortFlips}) =>
-                      currentIndex <
-                      shortFlips.filter(({extra}) => !extra).length - 2,
-                    actions: [
-                      assign({
-                        currentIndex: ({currentIndex}) => currentIndex + 1,
-                      }),
-                      log(),
-                    ],
-                  },
-                ],
-                PICK: [
-                  {
-                    target: '.firstFlip',
-                    cond: (_, {index}) => index === 0,
-                    actions: [
-                      assign({
-                        currentIndex: (_, {index}) => index,
-                      }),
-                      log(),
-                    ],
-                  },
-                  {
-                    target: '.lastFlip',
-                    cond: ({shortFlips}, {index}) =>
-                      index ===
-                      shortFlips.filter(({extra}) => !extra).length - 1,
-                    actions: [
-                      assign({
-                        currentIndex: (_, {index}) => index,
-                      }),
-                      log(),
-                    ],
-                  },
-                  {
-                    target: '.normal',
-                    actions: [
-                      assign({
-                        currentIndex: (_, {index}) => index,
-                      }),
-                      log(),
-                    ],
-                  },
-                ],
-              },
-            },
-            answer: {
-              initial: 'normal',
-              states: {
-                normal: {
-                  on: {
-                    ANSWER: {
-                      actions: [
-                        assign({
-                          shortFlips: (
-                            {shortFlips, currentIndex},
-                            {option}
-                          ) => [
-                            ...shortFlips.slice(0, currentIndex),
-                            {
-                              ...shortFlips[currentIndex],
-                              option,
-                            },
-                            ...shortFlips.slice(currentIndex + 1),
-                          ],
-                        }),
-                        log(),
-                      ],
-                    },
-                    SUBMIT: {
-                      target: 'submitShortSession',
-                    },
-                  },
-                },
-                submitShortSession: {
-                  initial: 'submitting',
-                  states: {
-                    submitting: {
-                      invoke: {
-                        src: ({shortFlips, epoch}) =>
-                          submitShortAnswers(
-                            shortFlips.map(({option: answer = 0, hash}) => ({
-                              answer,
-                              hash,
-                            })),
-                            0,
-                            epoch
-                          ),
-                        onDone: {
-                          target: 'done',
-                        },
-                        onError: {
-                          target: 'fail',
-                        },
-                      },
-                    },
-                    done: {
-                      on: {
-                        START_LONG_SESSION: '#longSession',
-                      },
-                    },
-                    fail: {},
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    longSession: {
-      id: 'longSession',
-      entry: assign({
+export const createValidationMachine = ({
+  epoch,
+  validationStart,
+  shortSessionDuration,
+}) =>
+  Machine(
+    {
+      initial: 'shortSession',
+      context: {
+        shortFlips: [],
+        longFlips: [],
         currentIndex: 0,
-      }),
-      type: 'parallel',
+        epoch,
+        validationStart,
+        shortSessionDuration,
+      },
       states: {
-        fetch: {
+        shortSession: {
+          entry: log('Validation started!'),
           type: 'parallel',
+          after: {
+            BUMP_EXTRA_FLIPS: {
+              target: '.fetch.bumpExtraFlips',
+              cond: ({shortFlips}) =>
+                shortFlips.some(({ready, extra}) => !ready && !extra),
+            },
+            SHORT_SESSION_AUTO_SUBMIT: {
+              target: '.solve.answer.submitShortSession',
+              cond: ({shortFlips}) => {
+                const readyFlips = shortFlips.filter(
+                  ({loaded, decoded}) => loaded && decoded
+                )
+                return (
+                  readyFlips.length > 0 &&
+                  readyFlips.filter(({option}) => !!option).length >=
+                    readyFlips.length / 2
+                )
+              },
+            },
+          },
           states: {
-            flips: {
-              initial: 'fetchHashes',
+            fetch: {
+              initial: 'check',
               states: {
+                check: {
+                  id: 'check',
+                  on: {
+                    '': [
+                      {
+                        target: 'done',
+                        cond: ({shortFlips}) =>
+                          shortFlips.length &&
+                          shortFlips.every(({ready}) => ready),
+                      },
+                      {
+                        target: 'fetchHashes',
+                      },
+                    ],
+                  },
+                },
                 fetchHashes: {
                   initial: 'fetching',
                   states: {
                     fetching: {
                       invoke: {
-                        src: () => fetchFlipHashes(SessionType.Long),
+                        src: () => fetchFlipHashes(SessionType.Short),
                         onDone: {
-                          target: '#fetchLongFlips',
-                          actions: assign({
-                            longFlips: (_, {data}) => data,
-                          }),
-                        },
-                        onError: 'fail',
-                      },
-                    },
-                    fail: {},
-                  },
-                },
-                fetchFlips: {
-                  id: 'fetchLongFlips',
-                  initial: 'fetching',
-                  states: {
-                    fetching: {
-                      invoke: {
-                        src: ({longFlips}) =>
-                          fetchFlips(
-                            longFlips
-                              .filter(({ready}) => ready)
-                              .map(({hash}) => hash)
-                          ),
-                        onDone: {
-                          target: '#decodeLongFlips',
-                          actions: assign({
-                            longFlips: ({longFlips}, {data}) =>
-                              mergeFlipsByHash(longFlips, data),
-                          }),
-                        },
-                        onError: 'fail',
-                      },
-                    },
-                    fail: {},
-                  },
-                },
-                decodeFlips: {
-                  id: 'decodeLongFlips',
-                  initial: 'decoding',
-                  states: {
-                    decoding: {
-                      invoke: {
-                        src: async ({longFlips}) =>
-                          longFlips
-                            .filter(({loaded, decoded}) => loaded && !decoded)
-                            .map(decodeFlip),
-                        onDone: {
-                          target: '#fetchLongFlipsDone',
+                          target: '#fetchShortFlips',
                           actions: [
                             assign({
-                              longFlips: ({longFlips}, {data}) =>
-                                mergeFlipsByHash(longFlips, data),
+                              shortFlips: ({shortFlips}, {data}) =>
+                                shortFlips.length
+                                  ? mergeFlipsByHash(shortFlips, data)
+                                  : mergeFlipsByHash(data, shortFlips),
                             }),
-                            log(),
                           ],
-                        },
-                      },
-                    },
-                    fail: {},
-                  },
-                },
-                done: {
-                  id: 'fetchLongFlipsDone',
-                  type: 'final',
-                },
-              },
-            },
-            keywords: {
-              initial: 'fetching',
-              states: {
-                fetching: {
-                  invoke: {
-                    src: ({longFlips}) =>
-                      Promise.all(
-                        longFlips
-                          .filter(({ready}) => ready)
-                          .map(({hash}) =>
-                            fetchWords(hash)
-                              .then(({result}) => ({hash, ...result}))
-                              .catch(() => {})
-                          )
-                      ),
-                    onDone: {
-                      target: '#success',
-                      actions: assign({
-                        longFlips: ({longFlips}, {data}) =>
-                          mergeFlipsByHash(
-                            longFlips,
-                            data.map(({hash, words = []}) => ({
-                              hash,
-                              words: words.map(idx => vocabulary[idx]),
-                            }))
-                          ),
-                      }),
-                    },
-                  },
-                },
-                suceess: {
-                  id: 'success',
-                  after: {
-                    1000: [
-                      {
-                        target: 'fetching',
-                        cond: ({longFlips}) =>
-                          longFlips
-                            .filter(({ready}) => ready)
-                            .some(({words}) => !words),
-                      },
-                      {
-                        target: 'done',
-                      },
-                    ],
-                  },
-                },
-                done: {
-                  type: 'final',
-                },
-              },
-            },
-          },
-        },
-        solve: {
-          type: 'parallel',
-          states: {
-            nav: {
-              initial: 'firstFlip',
-              states: {
-                firstFlip: {},
-                normal: {},
-                lastFlip: {},
-              },
-              on: {
-                PREV: [
-                  {
-                    target: undefined,
-                    cond: ({longFlips}) =>
-                      longFlips.filter(({loaded, decoded}) => loaded && decoded)
-                        .length === 0,
-                  },
-                  {
-                    target: '.normal',
-                    cond: ({currentIndex}) => currentIndex > 1,
-                    actions: [
-                      assign({
-                        currentIndex: ({currentIndex}) => currentIndex - 1,
-                      }),
-                      log(),
-                    ],
-                  },
-                  {
-                    target: '.firstFlip',
-                    cond: ({currentIndex}) => currentIndex === 1,
-                    actions: [
-                      assign({
-                        currentIndex: ({currentIndex}) => currentIndex - 1,
-                      }),
-                      log(),
-                    ],
-                  },
-                ],
-                NEXT: [
-                  {
-                    target: undefined,
-                    cond: ({longFlips}) =>
-                      longFlips.filter(({loaded, decoded}) => loaded && decoded)
-                        .length === 0,
-                  },
-                  {
-                    target: '.lastFlip',
-                    cond: ({longFlips, currentIndex}) =>
-                      currentIndex ===
-                      longFlips.filter(({ready}) => ready).length - 2,
-                    actions: [
-                      assign({
-                        currentIndex: ({currentIndex}) => currentIndex + 1,
-                      }),
-                      log(),
-                    ],
-                  },
-                  {
-                    target: '.normal',
-                    cond: ({longFlips, currentIndex}) =>
-                      currentIndex <
-                      longFlips.filter(({ready}) => ready).length - 2,
-                    actions: [
-                      assign({
-                        currentIndex: ({currentIndex}) => currentIndex + 1,
-                      }),
-                      log(),
-                    ],
-                  },
-                ],
-                PICK: [
-                  {
-                    target: '.firstFlip',
-                    cond: (_, {index}) => index === 0,
-                    actions: [
-                      assign({
-                        currentIndex: (_, {index}) => index,
-                      }),
-                      log(),
-                    ],
-                  },
-                  {
-                    target: '.lastFlip',
-                    cond: ({longFlips}, {index}) =>
-                      index === longFlips.filter(({ready}) => ready).length - 1,
-                    actions: [
-                      assign({
-                        currentIndex: (_, {index}) => index,
-                      }),
-                      log(),
-                    ],
-                  },
-                  {
-                    target: '.normal',
-                    actions: [
-                      assign({
-                        currentIndex: (_, {index}) => index,
-                      }),
-                      log(),
-                    ],
-                  },
-                ],
-              },
-            },
-            answer: {
-              initial: 'flips',
-              states: {
-                flips: {
-                  on: {
-                    ANSWER: {
-                      actions: [
-                        assign({
-                          longFlips: ({longFlips, currentIndex}, {option}) => [
-                            ...longFlips.slice(0, currentIndex),
-                            {
-                              ...longFlips[currentIndex],
-                              option,
-                            },
-                            ...longFlips.slice(currentIndex + 1),
-                          ],
-                        }),
-                        log(),
-                      ],
-                    },
-                    FINISH_FLIPS: {
-                      target: 'finishFlips',
-                    },
-                  },
-                },
-                finishFlips: {
-                  on: {
-                    START_KEYWORDS_QUALIFICATION: {
-                      target: 'keywords',
-                    },
-                  },
-                },
-                keywords: {
-                  invoke: {src: () => cb => cb({type: 'PICK', index: 0})},
-                  on: {
-                    ANSWER: {
-                      actions: [
-                        assign({
-                          longFlips: ({longFlips, currentIndex}, {option}) => [
-                            ...longFlips.slice(0, currentIndex),
-                            {
-                              ...longFlips[currentIndex],
-                              option,
-                            },
-                            ...longFlips.slice(currentIndex + 1),
-                          ],
-                        }),
-                        log(),
-                      ],
-                    },
-                    TOGGLE_WORDS: {
-                      actions: [
-                        assign({
-                          longFlips: (
-                            {longFlips, currentIndex},
-                            {relevance}
-                          ) => [
-                            ...longFlips.slice(0, currentIndex),
-                            {
-                              ...longFlips[currentIndex],
-                              relevance,
-                            },
-                            ...longFlips.slice(currentIndex + 1),
-                          ],
-                        }),
-                        log(),
-                      ],
-                    },
-                    SUBMIT: {
-                      target: 'submitLongSession',
-                    },
-                  },
-                },
-                submitLongSession: {
-                  initial: 'submitting',
-                  states: {
-                    submitting: {
-                      invoke: {
-                        src: ({longFlips, epoch}) =>
-                          submitLongAnswers(
-                            longFlips.map(
-                              ({option: answer = 0, relevance, hash}) => ({
-                                answer,
-                                wrongWords:
-                                  // eslint-disable-next-line no-use-before-define
-                                  relevance === RelevanceType.Irrelevant,
-                                hash,
-                              })
-                            ),
-                            0,
-                            epoch
-                          ),
-                        onDone: {
-                          target: '#validationSucceeded',
                         },
                         onError: {
                           target: 'fail',
                         },
                       },
                     },
+                    fail: {
+                      after: {
+                        1000: 'fetching',
+                      },
+                    },
+                  },
+                },
+                fetchFlips: {
+                  id: 'fetchShortFlips',
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: ({shortFlips}) =>
+                          fetchFlips(
+                            shortFlips
+                              .filter(({ready, loaded}) => ready && !loaded)
+                              .map(({hash}) => hash)
+                          ),
+                        onDone: {
+                          target: '#decodeShortFlips',
+                          actions: assign({
+                            shortFlips: ({shortFlips}, {data}) =>
+                              mergeFlipsByHash(shortFlips, data),
+                          }),
+                        },
+                        onError: {
+                          target: 'fail',
+                        },
+                      },
+                    },
+                    fail: {
+                      after: {
+                        1000: 'fetching',
+                      },
+                    },
+                  },
+                },
+                decodeFlips: {
+                  id: 'decodeShortFlips',
+                  initial: 'decoding',
+                  states: {
+                    decoding: {
+                      invoke: {
+                        src: async ({shortFlips}) =>
+                          shortFlips
+                            .filter(({loaded, decoded}) => loaded && !decoded)
+                            .map(decodeFlip),
+                        onDone: {
+                          target: 'decoded',
+                          actions: [
+                            assign({
+                              shortFlips: ({shortFlips}, {data}) =>
+                                mergeFlipsByHash(shortFlips, data),
+                            }),
+                          ],
+                        },
+                        onError: {
+                          target: 'fail',
+                        },
+                      },
+                    },
+                    decoded: {
+                      after: {
+                        1000: '#check',
+                      },
+                    },
                     fail: {},
+                  },
+                },
+                bumpExtraFlips: {
+                  invoke: {
+                    src: ({shortFlips}) => cb => {
+                      let neededExtraFlipsCount = shortFlips.filter(
+                        ({loaded, extra}) => !loaded && !extra
+                      ).length
+                      let pulledExtraFlipsCount = 0
+
+                      const flips = shortFlips.map(flip => {
+                        if (!flip.extra) return flip
+
+                        const shouldBecomeAvailable =
+                          flip.loaded && neededExtraFlipsCount > 0
+                        neededExtraFlipsCount -= 1
+                        pulledExtraFlipsCount += 1
+
+                        return {
+                          ...flip,
+                          extra: !shouldBecomeAvailable,
+                        }
+                      })
+
+                      for (let i = flips.length - 1; i >= 0; i -= 1) {
+                        if (
+                          pulledExtraFlipsCount > 0 &&
+                          (!flips[i].loaded || flips[i].failed)
+                        ) {
+                          pulledExtraFlipsCount -= 1
+                          flips[i].extra = true
+                        }
+                      }
+                      cb({type: 'EXTRA_FLIPS_PULLED', flips})
+                      return flips
+                    },
+                  },
+                  on: {
+                    EXTRA_FLIPS_PULLED: {
+                      target: 'done',
+                      actions: assign({
+                        shortFlips: (_, {flips}) => flips,
+                      }),
+                    },
+                  },
+                },
+                done: {type: 'final'},
+              },
+            },
+            solve: {
+              type: 'parallel',
+              states: {
+                nav: {
+                  initial: 'firstFlip',
+                  states: {
+                    firstFlip: {},
+                    normal: {},
+                    lastFlip: {},
+                  },
+                  on: {
+                    PREV: [
+                      {
+                        target: undefined,
+                        cond: ({shortFlips}) =>
+                          shortFlips.filter(
+                            ({loaded, decoded}) => loaded && decoded
+                          ).length === 0,
+                      },
+                      {
+                        target: '.normal',
+                        cond: ({currentIndex}) => currentIndex > 1,
+                        actions: [
+                          assign({
+                            currentIndex: ({currentIndex}) => currentIndex - 1,
+                          }),
+                          log(),
+                        ],
+                      },
+                      {
+                        target: '.firstFlip',
+                        cond: ({currentIndex}) => currentIndex === 1,
+                        actions: [
+                          assign({
+                            currentIndex: ({currentIndex}) => currentIndex - 1,
+                          }),
+                          log(),
+                        ],
+                      },
+                    ],
+                    NEXT: [
+                      {
+                        target: undefined,
+                        cond: ({shortFlips}) =>
+                          shortFlips.filter(
+                            ({loaded, decoded}) => loaded && decoded
+                          ).length === 0,
+                      },
+                      {
+                        target: '.lastFlip',
+                        cond: ({currentIndex, shortFlips}) =>
+                          currentIndex ===
+                          shortFlips.filter(({extra}) => !extra).length - 2,
+                        actions: [
+                          assign({
+                            currentIndex: ({currentIndex}) => currentIndex + 1,
+                          }),
+                          log(),
+                        ],
+                      },
+                      {
+                        target: '.normal',
+                        cond: ({currentIndex, shortFlips}) =>
+                          currentIndex <
+                          shortFlips.filter(({extra}) => !extra).length - 2,
+                        actions: [
+                          assign({
+                            currentIndex: ({currentIndex}) => currentIndex + 1,
+                          }),
+                          log(),
+                        ],
+                      },
+                    ],
+                    PICK: [
+                      {
+                        target: '.firstFlip',
+                        cond: (_, {index}) => index === 0,
+                        actions: [
+                          assign({
+                            currentIndex: (_, {index}) => index,
+                          }),
+                          log(),
+                        ],
+                      },
+                      {
+                        target: '.lastFlip',
+                        cond: ({shortFlips}, {index}) =>
+                          index ===
+                          shortFlips.filter(({extra}) => !extra).length - 1,
+                        actions: [
+                          assign({
+                            currentIndex: (_, {index}) => index,
+                          }),
+                          log(),
+                        ],
+                      },
+                      {
+                        target: '.normal',
+                        actions: [
+                          assign({
+                            currentIndex: (_, {index}) => index,
+                          }),
+                          log(),
+                        ],
+                      },
+                    ],
+                  },
+                },
+                answer: {
+                  initial: 'normal',
+                  states: {
+                    normal: {
+                      on: {
+                        ANSWER: {
+                          actions: [
+                            assign({
+                              shortFlips: (
+                                {shortFlips, currentIndex},
+                                {option}
+                              ) => [
+                                ...shortFlips.slice(0, currentIndex),
+                                {
+                                  ...shortFlips[currentIndex],
+                                  option,
+                                },
+                                ...shortFlips.slice(currentIndex + 1),
+                              ],
+                            }),
+                            log(),
+                          ],
+                        },
+                        SUBMIT: {
+                          target: 'submitShortSession',
+                        },
+                      },
+                    },
+                    submitShortSession: {
+                      initial: 'submitting',
+                      states: {
+                        submitting: {
+                          invoke: {
+                            // eslint-disable-next-line no-shadow
+                            src: ({shortFlips, epoch}) =>
+                              submitShortAnswers(
+                                shortFlips.map(
+                                  ({option: answer = 0, hash}) => ({
+                                    answer,
+                                    hash,
+                                  })
+                                ),
+                                0,
+                                epoch
+                              ),
+                            onDone: {
+                              target: 'done',
+                            },
+                            onError: {
+                              target: 'fail',
+                            },
+                          },
+                        },
+                        done: {
+                          on: {
+                            START_LONG_SESSION: '#longSession',
+                          },
+                        },
+                        fail: {},
+                      },
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    },
-    validationFailed: {
-      id: 'validationFailed',
-      type: 'final',
-    },
-    validationSucceeded: {
-      id: 'validationSucceeded',
-      type: 'final',
-    },
-  },
-})
-
-export const timerMachine = duration => ({
-  initial: 'running',
-  context: {
-    elapsed: 0,
-    duration,
-    interval: 1,
-  },
-  states: {
-    running: {
-      invoke: {
-        src: ({interval}) => cb => {
-          const intervalId = setInterval(() => cb('TICK'), 1000 * interval)
-          return () => clearInterval(intervalId)
-        },
-      },
-      on: {
-        '': {
-          target: 'paused',
-          // eslint-disable-next-line no-shadow
-          cond: ({elapsed, duration}) => elapsed >= duration,
-        },
-        TICK: {
-          actions: assign({
-            elapsed: ({elapsed, interval}) => +(elapsed + interval).toFixed(2),
+        longSession: {
+          id: 'longSession',
+          entry: assign({
+            currentIndex: 0,
           }),
+          type: 'parallel',
+          states: {
+            fetch: {
+              type: 'parallel',
+              states: {
+                flips: {
+                  initial: 'fetchHashes',
+                  states: {
+                    fetchHashes: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: () => fetchFlipHashes(SessionType.Long),
+                            onDone: {
+                              target: '#fetchLongFlips',
+                              actions: assign({
+                                longFlips: (_, {data}) => data,
+                              }),
+                            },
+                            onError: 'fail',
+                          },
+                        },
+                        fail: {},
+                      },
+                    },
+                    fetchFlips: {
+                      id: 'fetchLongFlips',
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: ({longFlips}) =>
+                              fetchFlips(
+                                longFlips
+                                  .filter(({ready}) => ready)
+                                  .map(({hash}) => hash)
+                              ),
+                            onDone: {
+                              target: '#decodeLongFlips',
+                              actions: assign({
+                                longFlips: ({longFlips}, {data}) =>
+                                  mergeFlipsByHash(longFlips, data),
+                              }),
+                            },
+                            onError: 'fail',
+                          },
+                        },
+                        fail: {},
+                      },
+                    },
+                    decodeFlips: {
+                      id: 'decodeLongFlips',
+                      initial: 'decoding',
+                      states: {
+                        decoding: {
+                          invoke: {
+                            src: async ({longFlips}) =>
+                              longFlips
+                                .filter(
+                                  ({loaded, decoded}) => loaded && !decoded
+                                )
+                                .map(decodeFlip),
+                            onDone: {
+                              target: '#fetchLongFlipsDone',
+                              actions: [
+                                assign({
+                                  longFlips: ({longFlips}, {data}) =>
+                                    mergeFlipsByHash(longFlips, data),
+                                }),
+                                log(),
+                              ],
+                            },
+                          },
+                        },
+                        fail: {},
+                      },
+                    },
+                    done: {
+                      id: 'fetchLongFlipsDone',
+                      type: 'final',
+                    },
+                  },
+                },
+                keywords: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: ({longFlips}) =>
+                          Promise.all(
+                            longFlips
+                              .filter(({ready}) => ready)
+                              .map(({hash}) =>
+                                fetchWords(hash)
+                                  .then(({result}) => ({hash, ...result}))
+                                  .catch(() => {})
+                              )
+                          ),
+                        onDone: {
+                          target: '#success',
+                          actions: assign({
+                            longFlips: ({longFlips}, {data}) =>
+                              mergeFlipsByHash(
+                                longFlips,
+                                data.map(({hash, words = []}) => ({
+                                  hash,
+                                  words: words.map(idx => vocabulary[idx]),
+                                }))
+                              ),
+                          }),
+                        },
+                      },
+                    },
+                    suceess: {
+                      id: 'success',
+                      after: {
+                        1000: [
+                          {
+                            target: 'fetching',
+                            cond: ({longFlips}) =>
+                              longFlips
+                                .filter(({ready}) => ready)
+                                .some(({words}) => !words),
+                          },
+                          {
+                            target: 'done',
+                          },
+                        ],
+                      },
+                    },
+                    done: {
+                      type: 'final',
+                    },
+                  },
+                },
+              },
+            },
+            solve: {
+              type: 'parallel',
+              states: {
+                nav: {
+                  initial: 'firstFlip',
+                  states: {
+                    firstFlip: {},
+                    normal: {},
+                    lastFlip: {},
+                  },
+                  on: {
+                    PREV: [
+                      {
+                        target: undefined,
+                        cond: ({longFlips}) =>
+                          longFlips.filter(
+                            ({loaded, decoded}) => loaded && decoded
+                          ).length === 0,
+                      },
+                      {
+                        target: '.normal',
+                        cond: ({currentIndex}) => currentIndex > 1,
+                        actions: [
+                          assign({
+                            currentIndex: ({currentIndex}) => currentIndex - 1,
+                          }),
+                          log(),
+                        ],
+                      },
+                      {
+                        target: '.firstFlip',
+                        cond: ({currentIndex}) => currentIndex === 1,
+                        actions: [
+                          assign({
+                            currentIndex: ({currentIndex}) => currentIndex - 1,
+                          }),
+                          log(),
+                        ],
+                      },
+                    ],
+                    NEXT: [
+                      {
+                        target: undefined,
+                        cond: ({longFlips}) =>
+                          longFlips.filter(
+                            ({loaded, decoded}) => loaded && decoded
+                          ).length === 0,
+                      },
+                      {
+                        target: '.lastFlip',
+                        cond: ({longFlips, currentIndex}) =>
+                          currentIndex ===
+                          longFlips.filter(({ready}) => ready).length - 2,
+                        actions: [
+                          assign({
+                            currentIndex: ({currentIndex}) => currentIndex + 1,
+                          }),
+                          log(),
+                        ],
+                      },
+                      {
+                        target: '.normal',
+                        cond: ({longFlips, currentIndex}) =>
+                          currentIndex <
+                          longFlips.filter(({ready}) => ready).length - 2,
+                        actions: [
+                          assign({
+                            currentIndex: ({currentIndex}) => currentIndex + 1,
+                          }),
+                          log(),
+                        ],
+                      },
+                    ],
+                    PICK: [
+                      {
+                        target: '.firstFlip',
+                        cond: (_, {index}) => index === 0,
+                        actions: [
+                          assign({
+                            currentIndex: (_, {index}) => index,
+                          }),
+                          log(),
+                        ],
+                      },
+                      {
+                        target: '.lastFlip',
+                        cond: ({longFlips}, {index}) =>
+                          index ===
+                          longFlips.filter(({ready}) => ready).length - 1,
+                        actions: [
+                          assign({
+                            currentIndex: (_, {index}) => index,
+                          }),
+                          log(),
+                        ],
+                      },
+                      {
+                        target: '.normal',
+                        actions: [
+                          assign({
+                            currentIndex: (_, {index}) => index,
+                          }),
+                          log(),
+                        ],
+                      },
+                    ],
+                  },
+                },
+                answer: {
+                  initial: 'flips',
+                  states: {
+                    flips: {
+                      on: {
+                        ANSWER: {
+                          actions: [
+                            assign({
+                              longFlips: (
+                                {longFlips, currentIndex},
+                                {option}
+                              ) => [
+                                ...longFlips.slice(0, currentIndex),
+                                {
+                                  ...longFlips[currentIndex],
+                                  option,
+                                },
+                                ...longFlips.slice(currentIndex + 1),
+                              ],
+                            }),
+                            log(),
+                          ],
+                        },
+                        FINISH_FLIPS: {
+                          target: 'finishFlips',
+                        },
+                      },
+                    },
+                    finishFlips: {
+                      on: {
+                        START_KEYWORDS_QUALIFICATION: {
+                          target: 'keywords',
+                        },
+                      },
+                    },
+                    keywords: {
+                      invoke: {src: () => cb => cb({type: 'PICK', index: 0})},
+                      on: {
+                        ANSWER: {
+                          actions: [
+                            assign({
+                              longFlips: (
+                                {longFlips, currentIndex},
+                                {option}
+                              ) => [
+                                ...longFlips.slice(0, currentIndex),
+                                {
+                                  ...longFlips[currentIndex],
+                                  option,
+                                },
+                                ...longFlips.slice(currentIndex + 1),
+                              ],
+                            }),
+                            log(),
+                          ],
+                        },
+                        TOGGLE_WORDS: {
+                          actions: [
+                            assign({
+                              longFlips: (
+                                {longFlips, currentIndex},
+                                {relevance}
+                              ) => [
+                                ...longFlips.slice(0, currentIndex),
+                                {
+                                  ...longFlips[currentIndex],
+                                  relevance,
+                                },
+                                ...longFlips.slice(currentIndex + 1),
+                              ],
+                            }),
+                            log(),
+                          ],
+                        },
+                        SUBMIT: {
+                          target: 'submitLongSession',
+                        },
+                      },
+                    },
+                    submitLongSession: {
+                      initial: 'submitting',
+                      states: {
+                        submitting: {
+                          invoke: {
+                            // eslint-disable-next-line no-shadow
+                            src: ({longFlips, epoch}) =>
+                              submitLongAnswers(
+                                longFlips.map(
+                                  ({option: answer = 0, relevance, hash}) => ({
+                                    answer,
+                                    wrongWords:
+                                      // eslint-disable-next-line no-use-before-define
+                                      relevance === RelevanceType.Irrelevant,
+                                    hash,
+                                  })
+                                ),
+                                0,
+                                epoch
+                              ),
+                            onDone: {
+                              target: '#validationSucceeded',
+                            },
+                            onError: {
+                              target: 'fail',
+                            },
+                          },
+                        },
+                        fail: {},
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        validationFailed: {
+          id: 'validationFailed',
+          type: 'final',
+        },
+        validationSucceeded: {
+          id: 'validationSucceeded',
+          type: 'final',
         },
       },
     },
-    paused: {
-      on: {
-        '': {
-          target: 'running',
+    {
+      delays: {
+        BUMP_EXTRA_FLIPS: 1000 * 35,
+        // eslint-disable-next-line no-shadow
+        SHORT_SESSION_AUTO_SUBMIT: ({validationStart, shortSessionDuration}) =>
+          dayjs(validationStart)
+            .add(shortSessionDuration, 's')
+            .subtract(10, 's')
+            .diff(dayjs(), 's'),
+      },
+    }
+  )
+
+export const createTimerMachine = duration =>
+  Machine({
+    initial: 'running',
+    context: {
+      elapsed: 0,
+      duration,
+      interval: 1,
+    },
+    states: {
+      running: {
+        invoke: {
+          src: ({interval}) => cb => {
+            const intervalId = setInterval(() => cb('TICK'), 1000 * interval)
+            return () => clearInterval(intervalId)
+          },
+        },
+        on: {
+          '': {
+            target: 'stopped',
+            // eslint-disable-next-line no-shadow
+            cond: ({elapsed, duration}) => elapsed >= duration,
+          },
+          TICK: {
+            actions: assign({
+              elapsed: ({elapsed, interval}) => elapsed + interval,
+            }),
+          },
+        },
+      },
+      stopped: {
+        on: {
+          '': {
+            target: 'running',
+            // eslint-disable-next-line no-shadow
+            cond: ({elapsed, duration}) => elapsed < duration,
+          },
+        },
+      },
+    },
+    on: {
+      DURATION_UPDATE: {
+        actions: assign({
           // eslint-disable-next-line no-shadow
-          cond: ({elapsed, duration}) => elapsed < duration,
-        },
+          duration: (_, {duration}) => duration,
+        }),
+      },
+      RESET: {
+        actions: assign({
+          elapsed: 0,
+        }),
       },
     },
-  },
-  on: {
-    'DURATION.UPDATE': {
-      actions: assign({
-        duration: (_, {value}) => value,
-      }),
-    },
-    RESET: {
-      actions: assign({
-        elapsed: 0,
-      }),
-    },
-  },
-})
+  })
 
 function fetchFlips(hashes) {
   return Promise.all(
@@ -838,4 +879,10 @@ async function fetchWords(hash) {
 export const RelevanceType = {
   Relevant: 1,
   Irrelevant: 2,
+}
+
+export function adjustDuration(validationStart, duration) {
+  return dayjs(validationStart)
+    .add(duration, 's')
+    .diff(dayjs(), 's')
 }
