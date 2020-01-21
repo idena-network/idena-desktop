@@ -775,10 +775,12 @@ export const createValidationMachine = ({
         validationFailed: {
           id: 'validationFailed',
           type: 'final',
+          entry: log('VALIDATION FAILED'),
         },
         validationSucceeded: {
           id: 'validationSucceeded',
           type: 'final',
+          entry: log('VALIDATION SUCCEEDED'),
         },
       },
     },

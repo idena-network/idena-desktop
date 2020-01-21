@@ -76,6 +76,7 @@ function ValidationSession({
   )
   const [state, send] = useMachine(validationMachine, {
     state: loadState('validation2'),
+    logger: (...args) => global.logger.debug(...args),
   })
   const {currentIndex} = state.context
 
