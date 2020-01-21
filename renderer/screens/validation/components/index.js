@@ -9,8 +9,17 @@ import {
   transparentize,
   rgba,
 } from 'polished'
-import {FiCheck, FiXCircle} from 'react-icons/fi'
-import {Box, Fill, Heading, Button, Absolute} from '../../../shared/components'
+import {FiCheck, FiXCircle, FiChevronLeft, FiChevronRight} from 'react-icons/fi'
+import {
+  Box,
+  Fill,
+  Heading,
+  Button,
+  Absolute,
+  Modal,
+  SubHeading,
+  Text,
+} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import {reorderList} from '../../../shared/utils/arr'
 import Spinner from './spinner'
@@ -235,14 +244,6 @@ function FlipImage({
   )
 }
 
-export function NavButton({left, right, ...props}) {
-  return (
-    <Absolute top="50%" left={left} right={right}>
-      <Box {...props} />
-    </Absolute>
-  )
-}
-
 export function ActionBar(props) {
   return (
     <Flex
@@ -286,12 +287,12 @@ export function Thumbnail({
   decoded,
   failed,
   option,
+  relevance,
   isCurrent,
   onPick,
-  irrelevantWords,
 }) {
-  const hasQualified = irrelevantWords !== null && irrelevantWords !== undefined
-  const hasIrrelevantWords = hasQualified && irrelevantWords
+  const isQualified = !!relevance
+  const hasIrrelevantWords = relevance === RelevanceType.Irrelevant
 
   const ready = loaded && decoded
 
@@ -301,11 +302,11 @@ export function Thumbnail({
       {!ready && <LoadingThumbnail />}
       {ready && (
         <>
-          {(hasAnswer(option) || hasQualified) && (
+          {(option || isQualified) && (
             <ThumbnailOverlay
-              hasQualified={hasQualified}
-              hasIrrelevantWords={hasIrrelevantWords}
               option={option}
+              isQualified={isQualified}
+              hasIrrelevantWords={hasIrrelevantWords}
             />
           )}
           <FlipImage
@@ -314,9 +315,7 @@ export function Thumbnail({
             height={32}
             width={32}
             fit="cover"
-            style={{
-              borderRadius: rem(12),
-            }}
+            style={{borderRadius: rem(12)}}
           />
         </>
       )}
@@ -371,12 +370,12 @@ function FailedThumbnail() {
   )
 }
 
-function ThumbnailOverlay({option, isQualifed, hasIrrelevantWords}) {
+function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
   return (
     <Fill
       bg={
         // eslint-disable-next-line no-nested-ternary
-        isQualifed
+        isQualified
           ? hasIrrelevantWords
             ? transparentize(0.1, theme.colors.danger)
             : rgba(87, 143, 255, 0.9)
@@ -533,4 +532,105 @@ export function QualificationButton({
       </span>
     </Button>
   )
+}
+
+export function WelcomeQualificationDialog({isOpen, onSubmit}) {
+  return (
+    <Modal show={isOpen} showCloseIcon={false}>
+      <Box css={{...margin(0, 0, rem(18))}}>
+        <SubHeading>Welcome to qualification session</SubHeading>
+        <Text>
+          Your answers for the validation session have been submitted
+          successfully!
+        </Text>
+        <Text>
+          Now solve a bunch of flips to check its quality. The flip is qualified
+          if the majority, equals more than 2/3 participants, gives the same
+          answer.
+        </Text>
+      </Box>
+      <Flex align="center" justify="flex-end">
+        <Button onClick={onSubmit}>Okay, let’s start</Button>
+      </Flex>
+    </Modal>
+  )
+}
+
+export function NavButton({left, right, ...props}) {
+  return (
+    <Absolute top="50%" left={left} right={right}>
+      <Box {...props} />
+    </Absolute>
+  )
+}
+
+export function Arrow({dir, type, ...props}) {
+  const prev = dir === 'prev'
+  const isShort = type.toLowerCase() === 'short'
+  const bg = isShort ? theme.colors.white01 : theme.colors.gray
+  const color = isShort ? theme.colors.white : theme.colors.text
+  return (
+    <div {...props}>
+      <span>
+        {prev ? (
+          <FiChevronLeft fontSize={rem(20)} color={color} />
+        ) : (
+          <FiChevronRight fontSize={rem(20)} color={color} />
+        )}
+      </span>
+      <style jsx>{`
+        div {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: ${rem(600)};
+          height: ${rem(600)};
+
+          position: absolute;
+          top: 50%;
+          ${prev ? 'left: 0' : 'right: 0'};
+
+          border-radius: 50%;
+          transition: all 0.5s ease;
+          transform: ${`translate(${prev ? '-320px' : '320px'}, -50%);`};
+        }
+        div:hover {
+          background: ${bg};
+          border-radius: 50%;
+        }
+        span {
+          left: ${prev ? '75%' : '25%'};
+          position: absolute;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          text-align: center;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+export function WelcomeKeywordsQualificationDialog({isOpen, onSubmit}) {
+  return (
+    <Modal show={isOpen} showCloseIcon={false}>
+      <Box css={{...margin(0, 0, rem(18))}}>
+        <SubHeading css={margin(0, 0, rem(10))}>
+          Your answers are not yet submitted
+        </SubHeading>
+        <Text css={margin(0, 0, rem(16))}>
+          Please qualify the keywords relevance and submit the answers.
+        </Text>
+        <Text>The flips with irrelevant keywords will be penalized.</Text>
+      </Box>
+      <Flex align="center" justify="flex-end">
+        <Box px="4px">
+          <Button onClick={onSubmit}>Ok, I understand</Button>
+        </Box>
+      </Flex>
+    </Modal>
+  )
+}
+
+export function Timer({duration}) {
+  return <Box color={theme.colors.danger}>{duration} seconds</Box>
 }

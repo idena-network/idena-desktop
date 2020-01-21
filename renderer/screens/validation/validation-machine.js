@@ -1,4 +1,4 @@
-import {Machine, assign} from 'xstate'
+import {Machine, assign, createMachine} from 'xstate'
 import {decode} from 'rlp'
 import {log} from 'xstate/lib/actions'
 import {
@@ -23,12 +23,12 @@ export const validationMachine = Machine({
       type: 'parallel',
       after: {
         [1000 * 10]: {
-          target: '.retrieveFlips.bumpExtraFlips',
+          target: '.fetch.bumpExtraFlips',
           cond: ({shortFlips}) =>
             shortFlips.some(({loaded, extra}) => !loaded && !extra),
         },
         [1000 * (60 * 2 - 10)]: {
-          target: '.solveShortSession.submittingShortSession',
+          target: '.solve.answer.submitShortSession',
           cond: ({shortFlips}) => {
             const readyFlips = shortFlips.filter(
               ({loaded, decoded}) => loaded && decoded
@@ -42,11 +42,11 @@ export const validationMachine = Machine({
         },
       },
       states: {
-        retrieveFlips: {
-          initial: 'checkFlips',
+        fetch: {
+          initial: 'check',
           states: {
-            checkFlips: {
-              id: 'checkFlips',
+            check: {
+              id: 'check',
               on: {
                 '': [
                   {
@@ -55,12 +55,12 @@ export const validationMachine = Machine({
                       shortFlips.length && shortFlips.every(({ready}) => ready),
                   },
                   {
-                    target: 'fetchShortHashes',
+                    target: 'fetchHashes',
                   },
                 ],
               },
             },
-            fetchShortHashes: {
+            fetchHashes: {
               initial: 'fetching',
               states: {
                 fetching: {
@@ -89,7 +89,7 @@ export const validationMachine = Machine({
                 },
               },
             },
-            fetchShortFlips: {
+            fetchFlips: {
               id: 'fetchShortFlips',
               initial: 'fetching',
               states: {
@@ -120,7 +120,7 @@ export const validationMachine = Machine({
                 },
               },
             },
-            decodeShortFlips: {
+            decodeFlips: {
               id: 'decodeShortFlips',
               initial: 'decoding',
               states: {
@@ -146,7 +146,7 @@ export const validationMachine = Machine({
                 },
                 decoded: {
                   after: {
-                    1000: '#checkFlips',
+                    1000: '#check',
                   },
                 },
                 fail: {},
@@ -199,105 +199,173 @@ export const validationMachine = Machine({
             done: {type: 'final'},
           },
         },
-        solveShortSession: {
-          initial: 'waiting',
+        solve: {
+          type: 'parallel',
           states: {
-            waiting: {
+            nav: {
+              initial: 'firstFlip',
+              states: {
+                firstFlip: {},
+                normal: {},
+                lastFlip: {},
+              },
               on: {
-                '': [
+                PREV: [
                   {
-                    target: 'normal',
+                    target: undefined,
                     cond: ({shortFlips}) =>
-                      shortFlips.some(({loaded, decoded}) => loaded && decoded),
+                      shortFlips.filter(
+                        ({loaded, decoded}) => loaded && decoded
+                      ).length === 0,
+                  },
+                  {
+                    target: '.normal',
+                    cond: ({currentIndex}) => currentIndex > 1,
+                    actions: [
+                      assign({
+                        currentIndex: ({currentIndex}) => currentIndex - 1,
+                      }),
+                      log(),
+                    ],
+                  },
+                  {
+                    target: '.firstFlip',
+                    cond: ({currentIndex}) => currentIndex === 1,
+                    actions: [
+                      assign({
+                        currentIndex: ({currentIndex}) => currentIndex - 1,
+                      }),
+                      log(),
+                    ],
+                  },
+                ],
+                NEXT: [
+                  {
+                    target: undefined,
+                    cond: ({shortFlips}) =>
+                      shortFlips.filter(
+                        ({loaded, decoded}) => loaded && decoded
+                      ).length === 0,
+                  },
+                  {
+                    target: '.lastFlip',
+                    cond: ({currentIndex, shortFlips}) =>
+                      currentIndex ===
+                      shortFlips.filter(({extra}) => !extra).length - 2,
+                    actions: [
+                      assign({
+                        currentIndex: ({currentIndex}) => currentIndex + 1,
+                      }),
+                      log(),
+                    ],
+                  },
+                  {
+                    target: '.normal',
+                    cond: ({currentIndex, shortFlips}) =>
+                      currentIndex <
+                      shortFlips.filter(({extra}) => !extra).length - 2,
+                    actions: [
+                      assign({
+                        currentIndex: ({currentIndex}) => currentIndex + 1,
+                      }),
+                      log(),
+                    ],
+                  },
+                ],
+                PICK: [
+                  {
+                    target: '.firstFlip',
+                    cond: (_, {index}) => index === 0,
+                    actions: [
+                      assign({
+                        currentIndex: (_, {index}) => index,
+                      }),
+                      log(),
+                    ],
+                  },
+                  {
+                    target: '.lastFlip',
+                    cond: ({shortFlips}, {index}) =>
+                      index ===
+                      shortFlips.filter(({extra}) => !extra).length - 1,
+                    actions: [
+                      assign({
+                        currentIndex: (_, {index}) => index,
+                      }),
+                      log(),
+                    ],
+                  },
+                  {
+                    target: '.normal',
+                    actions: [
+                      assign({
+                        currentIndex: (_, {index}) => index,
+                      }),
+                      log(),
+                    ],
                   },
                 ],
               },
             },
-            normal: {},
-            lastFlip: {},
-            pickingNextFlip: {
-              entry: assign({
-                currentIndex: ({currentIndex}) => currentIndex + 1,
-              }),
-              on: {
-                '': 'normal',
-              },
-            },
-            pickingPrevFlip: {
-              entry: assign({
-                currentIndex: ({currentIndex}) => currentIndex - 1,
-              }),
-              on: {
-                '': 'normal',
-              },
-            },
-            submittingShortSession: {
+            answer: {
               initial: 'normal',
               states: {
                 normal: {
-                  invoke: {
-                    src: ({shortFlips, epoch}) =>
-                      submitShortAnswers(
-                        shortFlips.map(({option: answer = 0, hash}) => ({
-                          answer,
-                          hash,
-                        })),
-                        0,
-                        epoch
-                      ),
-                    onDone: {
-                      target: '#longSession',
+                  on: {
+                    ANSWER: {
+                      actions: [
+                        assign({
+                          shortFlips: (
+                            {shortFlips, currentIndex},
+                            {option}
+                          ) => [
+                            ...shortFlips.slice(0, currentIndex),
+                            {
+                              ...shortFlips[currentIndex],
+                              option,
+                            },
+                            ...shortFlips.slice(currentIndex + 1),
+                          ],
+                        }),
+                        log(),
+                      ],
                     },
-                    onError: {
-                      target: 'fail',
+                    SUBMIT: {
+                      target: 'submitShortSession',
                     },
                   },
                 },
-                fail: {},
-              },
-            },
-          },
-          on: {
-            ANSWER: {
-              actions: [
-                assign({
-                  shortFlips: ({shortFlips, currentIndex}, {option}) => [
-                    ...shortFlips.slice(0, currentIndex),
-                    {
-                      ...shortFlips[currentIndex],
-                      option,
+                submitShortSession: {
+                  initial: 'submitting',
+                  states: {
+                    submitting: {
+                      invoke: {
+                        src: ({shortFlips, epoch}) =>
+                          submitShortAnswers(
+                            shortFlips.map(({option: answer = 0, hash}) => ({
+                              answer,
+                              hash,
+                            })),
+                            0,
+                            epoch
+                          ),
+                        onDone: {
+                          target: 'done',
+                        },
+                        onError: {
+                          target: 'fail',
+                        },
+                      },
                     },
-                    ...shortFlips.slice(currentIndex + 1),
-                  ],
-                }),
-                log(),
-              ],
-            },
-            NEXT: [
-              {
-                target: '.pickingNextFlip',
-                cond: ({currentIndex, shortFlips}) =>
-                  currentIndex <
-                  shortFlips.filter(({extra}) => !extra).length - 1,
-                actions: [log()],
+                    done: {
+                      on: {
+                        START_LONG_SESSION: '#longSession',
+                      },
+                    },
+                    fail: {},
+                  },
+                },
               },
-              {target: '.lastFlip'},
-            ],
-            PREV: {
-              target: '.pickingPrevFlip',
-              cond: ({currentIndex}) => currentIndex > 0,
-              actions: [log()],
-            },
-            PICK: {
-              actions: [
-                assign({
-                  currentIndex: (_, {index}) => index,
-                }),
-                log(),
-              ],
-            },
-            SUBMIT: {
-              target: '.submittingShortSession',
             },
           },
         },
@@ -305,90 +373,92 @@ export const validationMachine = Machine({
     },
     longSession: {
       id: 'longSession',
-      initial: 'fetchLongHashes',
       entry: assign({
         currentIndex: 0,
       }),
+      type: 'parallel',
       states: {
-        fetchLongHashes: {
-          initial: 'fetching',
-          states: {
-            fetching: {
-              invoke: {
-                src: () => fetchFlipHashes(SessionType.Long),
-                onDone: {
-                  target: '#fetchLongFlips',
-                  actions: assign({
-                    longFlips: (_, {data}) => data,
-                  }),
-                },
-                onError: 'fail',
-              },
-            },
-            fail: {},
-          },
-        },
-        fetchLongFlips: {
-          id: 'fetchLongFlips',
-          initial: 'fetching',
-          states: {
-            fetching: {
-              invoke: {
-                src: ({longFlips}) =>
-                  fetchFlips(
-                    longFlips.filter(({ready}) => ready).map(({hash}) => hash)
-                  ),
-                onDone: {
-                  target: '#decodeLongFlips',
-                  actions: assign({
-                    longFlips: ({longFlips}, {data}) =>
-                      mergeFlipsByHash(longFlips, data),
-                  }),
-                },
-                onError: 'fail',
-              },
-            },
-            fail: {},
-          },
-        },
-        decodeLongFlips: {
-          id: 'decodeLongFlips',
-          initial: 'decoding',
-          states: {
-            decoding: {
-              invoke: {
-                src: ({longFlips}) => cb => {
-                  try {
-                    const flips = longFlips
-                      .filter(({loaded, decoded}) => loaded && !decoded)
-                      .map(decodeFlip)
-                    cb({type: 'DECODED', flips})
-                  } catch (error) {
-                    cb('DECODING_FAILED')
-                  }
-                },
-              },
-            },
-            fail: {},
-          },
-          on: {
-            DECODED: {
-              target: 'solveLongSession',
-              actions: [
-                assign({
-                  longFlips: ({longFlips}, {flips}) =>
-                    mergeFlipsByHash(longFlips, flips),
-                }),
-                log(),
-              ],
-            },
-            DECODING_FAILED: '.fail',
-          },
-        },
-        solveLongSession: {
+        fetch: {
           type: 'parallel',
           states: {
-            fetchWords: {
+            flips: {
+              initial: 'fetchHashes',
+              states: {
+                fetchHashes: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: () => fetchFlipHashes(SessionType.Long),
+                        onDone: {
+                          target: '#fetchLongFlips',
+                          actions: assign({
+                            longFlips: (_, {data}) => data,
+                          }),
+                        },
+                        onError: 'fail',
+                      },
+                    },
+                    fail: {},
+                  },
+                },
+                fetchFlips: {
+                  id: 'fetchLongFlips',
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: ({longFlips}) =>
+                          fetchFlips(
+                            longFlips
+                              .filter(({ready}) => ready)
+                              .map(({hash}) => hash)
+                          ),
+                        onDone: {
+                          target: '#decodeLongFlips',
+                          actions: assign({
+                            longFlips: ({longFlips}, {data}) =>
+                              mergeFlipsByHash(longFlips, data),
+                          }),
+                        },
+                        onError: 'fail',
+                      },
+                    },
+                    fail: {},
+                  },
+                },
+                decodeFlips: {
+                  id: 'decodeLongFlips',
+                  initial: 'decoding',
+                  states: {
+                    decoding: {
+                      invoke: {
+                        src: async ({longFlips}) =>
+                          longFlips
+                            .filter(({loaded, decoded}) => loaded && !decoded)
+                            .map(decodeFlip),
+                        onDone: {
+                          target: '#fetchLongFlipsDone',
+                          actions: [
+                            assign({
+                              longFlips: ({longFlips}, {data}) =>
+                                mergeFlipsByHash(longFlips, data),
+                            }),
+                            log(),
+                          ],
+                        },
+                      },
+                    },
+                    fail: {},
+                  },
+                },
+                done: {
+                  id: 'fetchLongFlipsDone',
+                  type: 'final',
+                },
+              },
+            },
+            keywords: {
               initial: 'fetching',
               states: {
                 fetching: {
@@ -440,21 +510,163 @@ export const validationMachine = Machine({
                 },
               },
             },
-            solveFlips: {
+          },
+        },
+        solve: {
+          type: 'parallel',
+          states: {
+            nav: {
+              initial: 'firstFlip',
+              states: {
+                firstFlip: {},
+                normal: {},
+                lastFlip: {},
+              },
+              on: {
+                PREV: [
+                  {
+                    target: undefined,
+                    cond: ({longFlips}) =>
+                      longFlips.filter(({loaded, decoded}) => loaded && decoded)
+                        .length === 0,
+                  },
+                  {
+                    target: '.normal',
+                    cond: ({currentIndex}) => currentIndex > 1,
+                    actions: [
+                      assign({
+                        currentIndex: ({currentIndex}) => currentIndex - 1,
+                      }),
+                      log(),
+                    ],
+                  },
+                  {
+                    target: '.firstFlip',
+                    cond: ({currentIndex}) => currentIndex === 1,
+                    actions: [
+                      assign({
+                        currentIndex: ({currentIndex}) => currentIndex - 1,
+                      }),
+                      log(),
+                    ],
+                  },
+                ],
+                NEXT: [
+                  {
+                    target: undefined,
+                    cond: ({longFlips}) =>
+                      longFlips.filter(({loaded, decoded}) => loaded && decoded)
+                        .length === 0,
+                  },
+                  {
+                    target: '.lastFlip',
+                    cond: ({longFlips, currentIndex}) =>
+                      currentIndex ===
+                      longFlips.filter(({ready}) => ready).length - 2,
+                    actions: [
+                      assign({
+                        currentIndex: ({currentIndex}) => currentIndex + 1,
+                      }),
+                      log(),
+                    ],
+                  },
+                  {
+                    target: '.normal',
+                    cond: ({longFlips, currentIndex}) =>
+                      currentIndex <
+                      longFlips.filter(({ready}) => ready).length - 2,
+                    actions: [
+                      assign({
+                        currentIndex: ({currentIndex}) => currentIndex + 1,
+                      }),
+                      log(),
+                    ],
+                  },
+                ],
+                PICK: [
+                  {
+                    target: '.firstFlip',
+                    cond: (_, {index}) => index === 0,
+                    actions: [
+                      assign({
+                        currentIndex: (_, {index}) => index,
+                      }),
+                      log(),
+                    ],
+                  },
+                  {
+                    target: '.lastFlip',
+                    cond: ({longFlips}, {index}) =>
+                      index === longFlips.filter(({ready}) => ready).length - 1,
+                    actions: [
+                      assign({
+                        currentIndex: (_, {index}) => index,
+                      }),
+                      log(),
+                    ],
+                  },
+                  {
+                    target: '.normal',
+                    actions: [
+                      assign({
+                        currentIndex: (_, {index}) => index,
+                      }),
+                      log(),
+                    ],
+                  },
+                ],
+              },
+            },
+            answer: {
               initial: 'flips',
               states: {
                 flips: {
                   on: {
-                    QUALIFY_WORDS: {
-                      target: 'qualification',
+                    ANSWER: {
+                      actions: [
+                        assign({
+                          longFlips: ({longFlips, currentIndex}, {option}) => [
+                            ...longFlips.slice(0, currentIndex),
+                            {
+                              ...longFlips[currentIndex],
+                              option,
+                            },
+                            ...longFlips.slice(currentIndex + 1),
+                          ],
+                        }),
+                        log(),
+                      ],
+                    },
+                    FINISH_FLIPS: {
+                      target: 'finishFlips',
                     },
                   },
                 },
-                qualification: {
-                  entry: assign({
-                    currentIndex: 0,
-                  }),
+                finishFlips: {
                   on: {
+                    START_KEYWORDS_QUALIFICATION: {
+                      target: 'keywords',
+                    },
+                  },
+                },
+                keywords: {
+                  invoke: {src: () => cb => cb({type: 'PICK', index: 0})},
+                  on: {
+                    ANSWER: {
+                      actions: [
+                        assign({
+                          longFlips: ({longFlips, currentIndex}, {option}) => [
+                            ...longFlips.slice(0, currentIndex),
+                            {
+                              ...longFlips[currentIndex],
+                              option,
+                            },
+                            ...longFlips.slice(currentIndex + 1),
+                          ],
+                        }),
+                        log(),
+                      ],
+                    },
                     TOGGLE_WORDS: {
                       actions: [
                         assign({
@@ -474,14 +686,14 @@ export const validationMachine = Machine({
                       ],
                     },
                     SUBMIT: {
-                      target: 'submittingLongSession',
+                      target: 'submitLongSession',
                     },
                   },
                 },
-                submittingLongSession: {
-                  initial: 'normal',
+                submitLongSession: {
+                  initial: 'submitting',
                   states: {
-                    normal: {
+                    submitting: {
                       invoke: {
                         src: ({longFlips, epoch}) =>
                           submitLongAnswers(
@@ -509,50 +721,70 @@ export const validationMachine = Machine({
                   },
                 },
               },
-              on: {
-                ANSWER: {
-                  actions: assign({
-                    longFlips: ({longFlips, currentIndex}, {option}) => [
-                      ...longFlips.slice(0, currentIndex),
-                      {
-                        ...longFlips[currentIndex],
-                        option,
-                      },
-                      ...longFlips.slice(currentIndex + 1),
-                    ],
-                  }),
-                },
-                NEXT: {
-                  actions: assign({
-                    currentIndex: ({currentIndex}) => currentIndex + 1,
-                  }),
-                  cond: ({longFlips, currentIndex}) =>
-                    currentIndex <
-                    longFlips.filter(({ready}) => ready).length - 1,
-                },
-                PREV: {
-                  actions: assign({
-                    currentIndex: ({currentIndex}) => currentIndex - 1,
-                  }),
-                  cond: ({currentIndex}) => currentIndex > 0,
-                },
-                PICK: {
-                  actions: [
-                    assign({
-                      currentIndex: (_, {index}) => index,
-                    }),
-                    log(),
-                  ],
-                },
-              },
             },
           },
         },
       },
     },
+    validationFailed: {
+      id: 'validationFailed',
+      type: 'final',
+    },
     validationSucceeded: {
       id: 'validationSucceeded',
       type: 'final',
+    },
+  },
+})
+
+export const timerMachine = duration => ({
+  initial: 'running',
+  context: {
+    elapsed: 0,
+    duration,
+    interval: 1,
+  },
+  states: {
+    running: {
+      invoke: {
+        src: ({interval}) => cb => {
+          const intervalId = setInterval(() => cb('TICK'), 1000 * interval)
+          return () => clearInterval(intervalId)
+        },
+      },
+      on: {
+        '': {
+          target: 'paused',
+          // eslint-disable-next-line no-shadow
+          cond: ({elapsed, duration}) => elapsed >= duration,
+        },
+        TICK: {
+          actions: assign({
+            elapsed: ({elapsed, interval}) => +(elapsed + interval).toFixed(2),
+          }),
+        },
+      },
+    },
+    paused: {
+      on: {
+        '': {
+          target: 'running',
+          // eslint-disable-next-line no-shadow
+          cond: ({elapsed, duration}) => elapsed < duration,
+        },
+      },
+    },
+  },
+  on: {
+    'DURATION.UPDATE': {
+      actions: assign({
+        duration: (_, {value}) => value,
+      }),
+    },
+    RESET: {
+      actions: assign({
+        elapsed: 0,
+      }),
     },
   },
 })

@@ -20,20 +20,23 @@ import {
   NavButton,
   QualificationActions,
   QualificationButton,
+  WelcomeQualificationDialog,
+  Arrow,
+  WelcomeKeywordsQualificationDialog,
+  Timer,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
-import {IconClose, Button, Absolute} from '../../shared/components'
+import {IconClose, Button} from '../../shared/components'
 import {
   SessionType,
   AnswerType,
 } from '../../shared/providers/validation-context'
-import Timer from '../../screens/validation/components/timer'
-import Arrow from '../../screens/validation/components/arrow'
+import {Debug} from '../../shared/components/utils'
 
 export default function ValidationPage() {
   const [state, send] = useMachine(validationMachine)
 
-  const {shortFlips, longFlips, currentIndex} = state.context
+  const {currentIndex} = state.context
 
   if (state.matches('validationSucceeded'))
     return (
@@ -41,6 +44,31 @@ export default function ValidationPage() {
         bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
       >
         Done
+        <Link href="/dashboard">Back to My Idena</Link>
+      </Scene>
+    )
+
+  if (state.matches('shortSession.solve.answer.submitShortSession.done'))
+    return (
+      <Scene
+        bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
+      >
+        <WelcomeQualificationDialog
+          isOpen
+          onSubmit={() => send('START_LONG_SESSION')}
+        />
+      </Scene>
+    )
+
+  if (state.matches('longSession.solve.answer.finishFlips'))
+    return (
+      <Scene
+        bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
+      >
+        <WelcomeKeywordsQualificationDialog
+          isOpen
+          onSubmit={() => send('START_KEYWORDS_QUALIFICATION')}
+        />
       </Scene>
     )
 
@@ -109,33 +137,24 @@ export default function ValidationPage() {
       <ActionBar>
         <ActionBarItem />
         <ActionBarItem justify="center">
+          {/* TODO: make it proper, see xstate example */}
           <Timer
+            duration={120}
             type={isShortSession(state) ? SessionType.Short : SessionType.Long}
           />
         </ActionBarItem>
         <ActionBarItem justify="flex-end">
-          {isShortSession(state) ? (
-            <Button
-              disabled={!hasAnswers(shortFlips) || isSubmittingAnwsers(state)} // FIXME: define based on validation state too
-              onClick={() => send('SUBMIT')}
-            >
-              {isSubmittingAnwsers(state)
-                ? 'Submitting answers...'
-                : 'Submit answers'}
+          {(isShortSession(state) || isQualification(state)) && (
+            <Button disabled={!canSubmit(state)} onClick={() => send('SUBMIT')}>
+              {isSubmitting(state) ? 'Submitting answers...' : 'Submit answers'}
             </Button>
-          ) : (
+          )}
+          {isLongSession(state) && (
             <Button
-              disabled={!hasAnswers(longFlips) || isSubmittingAnwsers(state)} // FIXME: define based on validation state too
-              onClick={() =>
-                send(isQualification(state) ? 'SUBMIT' : 'QUALIFY_WORDS')
-              }
+              disabled={!canSubmit(state)}
+              onClick={() => send('FINISH_FLIPS')}
             >
-              {/* eslint-disable-next-line no-nested-ternary */}
-              {isSubmittingAnwsers(state)
-                ? 'Submitting answers...'
-                : isQualification(state)
-                ? 'Submit answers'
-                : 'Next'}
+              Start checking keywords
             </Button>
           )}
         </ActionBarItem>
@@ -150,36 +169,25 @@ export default function ValidationPage() {
           />
         ))}
       </Thumbnails>
-      <NavButton left={0}>
-        <Arrow
-          dir="prev"
-          type={isShortSession(state) ? SessionType.Short : SessionType.Long}
-          onClick={() => send({type: 'PREV'})}
-        />
-      </NavButton>
-      <NavButton right={0}>
-        <Arrow
-          dir="next"
-          type={isShortSession(state) ? SessionType.Short : SessionType.Long}
-          onClick={() => send({type: 'NEXT'})}
-        />
-      </NavButton>
-      {/* <InviteQualificationModal
-          show={showModal}
-          onHide={() => setShowModal(false)}
-          onSubmit={() => Router.push('/validation/long')}
-        /> */}
-      <Absolute bottom={10} left={10}>
-        <pre>{JSON.stringify(state.value, null, 2)}</pre>
-        <style jsx>{`
-          pre {
-            background: whitesmoke;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            opacity: 0.7;
-          }
-        `}</style>
-      </Absolute>
+      {!isFirstFlip(state) && (
+        <NavButton left={0}>
+          <Arrow
+            dir="prev"
+            type={isShortSession(state) ? SessionType.Short : SessionType.Long}
+            onClick={() => send({type: 'PREV'})}
+          />
+        </NavButton>
+      )}
+      {!isLastFlip(state) && (
+        <NavButton right={0}>
+          <Arrow
+            dir="next"
+            type={isShortSession(state) ? SessionType.Short : SessionType.Long}
+            onClick={() => send({type: 'NEXT'})}
+          />
+        </NavButton>
+      )}
+      <Debug>{JSON.stringify(state.value, null, 2)}</Debug>
     </Scene>
   )
 }
@@ -188,17 +196,46 @@ function isShortSession(state) {
   return state.matches('shortSession')
 }
 
-function isSubmittingAnwsers(state) {
-  return (
-    state.matches('shortSession.solveShortSession.submittingShortSession') ||
-    state.matches(
-      'longSession.solveLongSession.solveFlips.submittingLongSession'
-    )
-  )
+function isLongSession(state) {
+  return state.matches('longSession.solve.answer.flips')
 }
 
 function isQualification(state) {
-  return state.matches('longSession.solveLongSession.solveFlips.qualification')
+  return state.matches('longSession.solve.answer.keywords')
+}
+
+function isSubmitting(state) {
+  return [
+    'shortSession.solve.answer.submitShortSession',
+    'longSession.solve.answer.finishFlips',
+    'longSession.solve.answer.submitLongSession',
+  ].some(state.matches)
+}
+
+function isFirstFlip(state) {
+  return ['shortSession', 'longSession']
+    .map(type => `${type}.solve.nav.firstFlip`)
+    .some(state.matches)
+}
+
+function isLastFlip(state) {
+  return ['shortSession', 'longSession']
+    .map(type => `${type}.solve.nav.lastFlip`)
+    .some(state.matches)
+}
+
+function canSubmit(state) {
+  if (isShortSession(state) || isLongSession(state))
+    return (
+      (hasAllAnswers(sessionFlips(state)) || isLastFlip(state)) &&
+      !isSubmitting(state)
+    )
+
+  if (isQualification(state))
+    return (
+      (hasAllRelevanceMarks(sessionFlips(state)) || isLastFlip(state)) &&
+      !isSubmitting(state)
+    )
 }
 
 function sessionFlips(state) {
@@ -218,6 +255,14 @@ function currentFlip(state) {
   return sessionFlips(state)[currentIndex]
 }
 
-function hasAnswers(flips) {
+function hasAllAnswers(flips) {
+  return flips.length && flips.every(({option}) => option)
+}
+
+function hasSomeAnswer(flips) {
   return flips.some(({option}) => option)
+}
+
+function hasAllRelevanceMarks(flips) {
+  return flips.length && flips.every(({relevance}) => relevance)
 }
