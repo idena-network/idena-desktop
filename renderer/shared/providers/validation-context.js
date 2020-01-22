@@ -7,7 +7,6 @@ import useFlips from '../utils/useFlips'
 import {useValidationTimer} from '../hooks/use-validation-timer'
 import useLogger from '../hooks/use-logger'
 import {fetchFlip} from '../api'
-import {persistState} from '../utils/persist'
 
 export const AnswerType = {
   None: 0,
@@ -426,7 +425,6 @@ export function ValidationProvider({children}) {
       if (epoch.epoch !== savedEpoch) {
         archiveFlips()
         db.resetValidation(epoch.epoch)
-        persistState('validation2', null)
         dispatch({type: RESET_EPOCH, epoch: epoch.epoch})
       }
     }

@@ -6,6 +6,8 @@ import {useRouter} from 'next/router'
 import {
   createValidationMachine,
   RelevanceType,
+  persistValidationState,
+  loadValidationState,
 } from '../../screens/validation/validation-machine'
 import {
   Scene,
@@ -39,7 +41,6 @@ import {
 import {Debug} from '../../shared/components/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'
-import {persistState, loadState} from '../../shared/utils/persist'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -75,15 +76,16 @@ function ValidationSession({
     [epoch, longSessionDuration, shortSessionDuration, validationStart]
   )
   const [state, send] = useMachine(validationMachine, {
-    state: loadState('validation2'),
+    state: loadValidationState(),
     logger: (...args) => global.logger.debug(...args),
   })
+
   const {currentIndex} = state.context
 
   const router = useRouter()
 
   useEffect(() => {
-    persistState('validation2', state)
+    persistValidationState(state)
   }, [state])
 
   if (state.matches('validationSucceeded'))
