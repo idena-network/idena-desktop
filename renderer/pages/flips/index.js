@@ -3,7 +3,7 @@ import {rem, margin} from 'polished'
 
 import useLocalStorage from '../../shared/hooks/use-local-storage'
 import Layout from '../../shared/components/layout'
-import {Heading, Box} from '../../shared/components'
+import {Box, PageTitle} from '../../shared/components'
 import theme from '../../shared/theme'
 import FlipToolbar, {
   FlipToolbarItem,
@@ -34,7 +34,7 @@ function Flips() {
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
-        <Heading>My Flips</Heading>
+        <PageTitle>My Flips</PageTitle>
         <FlipToolbar>
           <Flex>
             {Object.values(FlipType)

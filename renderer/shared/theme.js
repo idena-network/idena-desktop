@@ -76,7 +76,7 @@ export default {
     color: colors.text,
     fontSize: fontSizes.heading,
     fontWeight: fontWeights.semi,
-    ...margin([0, 0, spacings.normal]),
+    ...margin(0),
   },
   SubHeading: {
     color: colors.text,

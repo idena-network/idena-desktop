@@ -4,7 +4,7 @@ import {FiChevronRight} from 'react-icons/fi'
 
 import theme from '../../shared/theme'
 import Layout from '../../shared/components/layout'
-import {Box, Drawer, Heading} from '../../shared/components'
+import {Box, Drawer, PageTitle} from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import Actions from '../../shared/components/actions'
 import IconLink from '../../shared/components/icon-link'
@@ -46,7 +46,7 @@ export default function Index() {
   return (
     <Layout syncing={syncing} offline={offline}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
-        <Heading>Wallets</Heading>
+        <PageTitle>Wallets</PageTitle>
         <Box>
           {fetching ? (
             <Loading color={theme.colors.text} />
