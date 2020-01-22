@@ -878,10 +878,12 @@ function decodeFlip({hash, hex}) {
   return {
     hash,
     decoded: true,
-    images: images.map(buffer =>
-      URL.createObjectURL(new Blob([buffer], {type: 'image/png'}))
+    images: images.map(
+      buffer => `data:image/png;base64,${buffer.toString('base64')}`
+      // buffer => URL.createObjectURL(new Blob([buffer], {type: 'image/png'}))
     ),
     orders: orders.map(order => order.map(([idx = 0]) => idx)),
+    hex: '',
   }
 }
 
