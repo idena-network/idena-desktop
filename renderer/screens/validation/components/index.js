@@ -692,6 +692,24 @@ export function TimerClock({duration, color}) {
   )
 }
 
+export function SubmitFailedDialog({isOpen, onSubmit}) {
+  return (
+    <Modal show={isOpen} showCloseIcon={false}>
+      <Box css={{...margin(0, 0, rem(18))}}>
+        <SubHeading css={margin(0, 0, rem(10))}>Submit failed</SubHeading>
+        <Text css={margin(0, 0, rem(10))}>
+          An error occured while submitting your answers.
+        </Text>
+      </Box>
+      <Flex align="center" justify="flex-end">
+        <Box px="4px">
+          <Button onClick={onSubmit}>Retry</Button>
+        </Box>
+      </Flex>
+    </Modal>
+  )
+}
+
 export function ValidationSucceededDialog({isOpen, onSubmit}) {
   return (
     <Modal show={isOpen} showCloseIcon={false}>

@@ -42,6 +42,7 @@ export const createValidationMachine = ({
         validationStart,
         shortSessionDuration,
         longSessionDuration,
+        errorMessage: null,
       },
       states: {
         shortSession: {
@@ -350,6 +351,15 @@ export const createValidationMachine = ({
                             },
                             onError: {
                               target: 'fail',
+                              actions: [
+                                assign({
+                                  errorMessage: (_, {data}) => data,
+                                }),
+                                log(
+                                  (ctx, ev) => ({ctx, ev}),
+                                  'Short session submit failed'
+                                ),
+                              ],
                             },
                           },
                         },
@@ -359,7 +369,13 @@ export const createValidationMachine = ({
                             START_LONG_SESSION: '#longSession',
                           },
                         },
-                        fail: {},
+                        fail: {
+                          on: {
+                            RETRY_SUBMIT: {
+                              target: 'submitting',
+                            },
+                          },
+                        },
                       },
                     },
                   },
@@ -721,11 +737,25 @@ export const createValidationMachine = ({
                             },
                             onError: {
                               target: 'fail',
-                              actions: log(),
+                              actions: [
+                                assign({
+                                  errorMessage: (_, {data}) => data,
+                                }),
+                                log(
+                                  (ctx, ev) => ({ctx, ev}),
+                                  'Long session submit failed'
+                                ),
+                              ],
                             },
                           },
                         },
-                        fail: {},
+                        fail: {
+                          on: {
+                            RETRY_SUBMIT: {
+                              target: 'submitting',
+                            },
+                          },
+                        },
                       },
                     },
                   },
@@ -739,9 +769,11 @@ export const createValidationMachine = ({
                 target: 'validationFailed',
                 cond: ({longFlips}) => {
                   const validFlips = filterSolvableFlips(longFlips)
+                  const answers = validFlips.filter(({option}) => option)
                   return (
-                    validFlips.filter(({option}) => option).length <
-                    validFlips.length / 2
+                    !validFlips.length ||
+                    (validFlips.length &&
+                      answers.length < validFlips.length / 2)
                   )
                 },
               },

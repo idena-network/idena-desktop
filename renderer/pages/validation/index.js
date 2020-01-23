@@ -31,6 +31,7 @@ import {
   ValidationTimer,
   ValidationFailedDialog,
   ValidationSucceededDialog,
+  SubmitFailedDialog,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {IconClose, Button} from '../../shared/components'
@@ -124,6 +125,7 @@ function ValidationSession({
         />
       </Scene>
     )
+
   if (state.matches('validationFailed'))
     return (
       <Scene bg={theme.colors.black}>
@@ -274,6 +276,9 @@ function ValidationSession({
           />
         </NavButton>
       )}
+      {isSubmitFailed(state) && (
+        <SubmitFailedDialog isOpen onSubmit={() => send('RETRY_SUBMIT')} />
+      )}
       <Debug>{JSON.stringify(state.value, null, 2)}</Debug>
     </Scene>
   )
@@ -305,6 +310,15 @@ function isSubmitting(state) {
     'longSession.solve.answer.finishFlips',
     'longSession.solve.answer.submitLongSession',
   ].some(state.matches)
+}
+
+function isSubmitFailed(state) {
+  return [
+    ['shortSession', 'submitShortSession'],
+    ['longSession', 'submitLongSession'],
+  ]
+    .map(([state1, state2]) => `${state1}.solve.answer.${state2}.fail`)
+    .some(state.matches)
 }
 
 function isFirstFlip(state) {
