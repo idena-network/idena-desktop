@@ -502,13 +502,14 @@ export const createValidationMachine = ({
                   initial: 'fetching',
                   states: {
                     fetching: {
+                      entry: log('fetching words'),
                       invoke: {
                         src: ({longFlips}) =>
                           Promise.all(
                             filterReadyFlips(longFlips).map(({hash}) =>
                               fetchWords(hash)
                                 .then(({result}) => ({hash, ...result}))
-                                .catch(() => {})
+                                .catch(() => ({hash}))
                             )
                           ),
                         onDone: {
