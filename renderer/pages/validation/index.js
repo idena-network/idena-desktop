@@ -41,6 +41,11 @@ import {
 import {Debug} from '../../shared/components/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'
+import {
+  filterRegularFlips,
+  filterValidFlips,
+  rearrangeFlips,
+} from '../../screens/validation/utils'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -77,7 +82,9 @@ function ValidationSession({
   )
   const [state, send] = useMachine(validationMachine, {
     state: loadValidationState(),
-    logger: (...args) => global.logger.debug(...args),
+    logger: global.isDev
+      ? console.log
+      : (...args) => global.logger.debug(...args),
   })
 
   const {currentIndex} = state.context
@@ -160,32 +167,48 @@ function ValidationSession({
           <Flip
             {...currentFlip(state)}
             variant={AnswerType.Left}
-            onChoose={() => send({type: 'ANSWER', option: AnswerType.Left})}
+            onChoose={hash =>
+              send({
+                type: 'ANSWER',
+                hash,
+                option: AnswerType.Left,
+              })
+            }
           />
           <Flip
             {...currentFlip(state)}
             variant={AnswerType.Right}
-            onChoose={() => send({type: 'ANSWER', option: AnswerType.Right})}
+            onChoose={hash =>
+              send({
+                type: 'ANSWER',
+                hash,
+                option: AnswerType.Right,
+              })
+            }
           />
           {isLongSessionKeywords(state) && (
             <FlipWords currentFlip={currentFlip(state)}>
               <QualificationActions>
-                {Object.values(RelevanceType).map(relevance => (
-                  <QualificationButton
-                    key={relevance}
-                    flip={currentFlip(state)}
-                    variant={relevance}
-                    onClick={() =>
-                      send({
-                        type: 'TOGGLE_WORDS',
-                        relevance,
-                      })
-                    }
-                  >
-                    {relevance === RelevanceType.Relevant && 'Both relevant'}
-                    {relevance === RelevanceType.Irrelevant && 'Irrelevant'}
-                  </QualificationButton>
-                ))}
+                {Object.values(RelevanceType).map(relevance => {
+                  const flip = currentFlip(state)
+                  return (
+                    <QualificationButton
+                      key={relevance}
+                      flip={flip}
+                      variant={relevance}
+                      onClick={() =>
+                        send({
+                          type: 'TOGGLE_WORDS',
+                          hash: flip.hash,
+                          relevance,
+                        })
+                      }
+                    >
+                      {relevance === RelevanceType.Relevant && 'Both relevant'}
+                      {relevance === RelevanceType.Irrelevant && 'Irrelevant'}
+                    </QualificationButton>
+                  )
+                })}
               </QualificationActions>
             </FlipWords>
           )}
@@ -298,15 +321,11 @@ function isLastFlip(state) {
 
 function canSubmit(state) {
   if (isShortSession(state) || isLongSessionFlips(state))
-    return (
-      (hasAllAnswers(sessionFlips(state)) || isLastFlip(state)) &&
-      !isSubmitting(state)
-    )
+    return (hasAllAnswers(state) || isLastFlip(state)) && !isSubmitting(state)
 
   if (isLongSessionKeywords(state))
     return (
-      (hasAllRelevanceMarks(sessionFlips(state)) || isLastFlip(state)) &&
-      !isSubmitting(state)
+      (hasAllRelevanceMarks(state) || isLastFlip(state)) && !isSubmitting(state)
     )
 }
 
@@ -314,10 +333,11 @@ function sessionFlips(state) {
   const {
     context: {shortFlips, longFlips},
   } = state
-  const flips = isShortSession(state)
-    ? shortFlips
-    : longFlips.filter(({loaded, decoded}) => loaded && decoded)
-  return flips.filter(({extra}) => !extra)
+  return rearrangeFlips(
+    isShortSession(state)
+      ? filterRegularFlips(shortFlips)
+      : filterValidFlips(longFlips)
+  )
 }
 
 function currentFlip(state) {
@@ -327,10 +347,17 @@ function currentFlip(state) {
   return sessionFlips(state)[currentIndex]
 }
 
-function hasAllAnswers(flips) {
+function hasAllAnswers(state) {
+  const {
+    context: {shortFlips, longFlips},
+  } = state
+  const flips = isShortSession(state)
+    ? shortFlips.filter(({loaded, extra}) => loaded && !extra)
+    : filterValidFlips(longFlips)
   return flips.length && flips.every(({option}) => option)
 }
 
-function hasAllRelevanceMarks(flips) {
+function hasAllRelevanceMarks({context: {longFlips}}) {
+  const flips = filterValidFlips(longFlips)
   return flips.length && flips.every(({relevance}) => relevance)
 }

@@ -1,5 +1,4 @@
 import React from 'react'
-import Router from 'next/router'
 import {padding, rem, backgrounds} from 'polished'
 
 import {Box, Text, Fill, Link} from '../../../shared/components'
@@ -56,11 +55,7 @@ function ValidationSoon() {
 
 function ValidationRunning() {
   const {currentPeriod} = useEpochState()
-  const {
-    shortAnswers,
-    longAnswers,
-    shortAnswersSubmitted,
-  } = useValidationState()
+  const {shortAnswers, longAnswers} = useValidationState()
 
   const isShortSession = currentPeriod === EpochPeriod.ShortSession
   const sessionType = isShortSession ? SessionType.Short : SessionType.Long
@@ -125,7 +120,7 @@ function ValidationRunning() {
       {!hasAnswers && !!seconds && canValidate(identity) && (
         <Flex css={padding(theme.spacings.normal)}>
           <Divider vertical m={rem(theme.spacings.medium16)} />
-          <Link href={`/validation/${isShortSession ? 'short' : 'long'}`}>
+          <Link href="/validation">
             <Text
               color={theme.colors.white}
               fontWeight={theme.fontWeights.semi}

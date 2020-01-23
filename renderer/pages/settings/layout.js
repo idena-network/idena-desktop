@@ -47,7 +47,7 @@ function SettingsLayout({children}) {
 }
 
 SettingsLayout.propTypes = {
-  children: PropTypes.object,
+  children: PropTypes.node,
 }
 
 export default SettingsLayout

@@ -97,19 +97,18 @@ export function FlipChallenge(props) {
 }
 
 export function Flip({
+  hash,
   images,
   orders,
-  loaded,
+  fetched,
   failed,
   decoded,
   option,
   variant,
   onChoose,
 }) {
-  const ready = loaded && decoded
-
-  if (!ready) return <LoadingFlip />
-  if (failed) return <FailedFlip />
+  if (!fetched) return <LoadingFlip />
+  if (fetched && !decoded) return <FailedFlip />
 
   return (
     <FlipHolder
@@ -142,7 +141,7 @@ export function Flip({
             position: 'relative',
             overflow: 'hidden',
           }}
-          onClick={onChoose}
+          onClick={() => onChoose(hash)}
         >
           <FlipBlur src={src} />
           <FlipImage
@@ -195,7 +194,7 @@ function FlipHolder({css, ...props}) {
 
 function LoadingFlip() {
   return (
-    <FlipHolder>
+    <FlipHolder css={{cursor: 'not-allowed'}}>
       <Fill>
         <Spinner />
       </Fill>
@@ -205,7 +204,7 @@ function LoadingFlip() {
 
 function FailedFlip() {
   return (
-    <FlipHolder>
+    <FlipHolder css={{cursor: 'not-allowed'}}>
       {[1, 2, 3, 4].map((_, idx) => (
         <Box key={`left-${idx}`}>
           <FlipImage
@@ -293,7 +292,7 @@ export function Thumbnails({currentIndex, ...props}) {
 
 export function Thumbnail({
   images,
-  loaded,
+  fetched,
   decoded,
   failed,
   option,
@@ -304,13 +303,11 @@ export function Thumbnail({
   const isQualified = !!relevance
   const hasIrrelevantWords = relevance === RelevanceType.Irrelevant
 
-  const ready = loaded && decoded
-
   return (
     <ThumbnailHolder isCurrent={isCurrent} onClick={onPick}>
-      {failed && <FailedThumbnail />}
-      {!ready && <LoadingThumbnail />}
-      {ready && (
+      {!fetched && <LoadingThumbnail />}
+      {fetched && !decoded && <FailedThumbnail />}
+      {fetched && decoded && (
         <>
           {(option || isQualified) && (
             <ThumbnailOverlay
