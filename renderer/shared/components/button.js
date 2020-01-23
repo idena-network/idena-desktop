@@ -51,7 +51,7 @@ Button.propTypes = {
   css: PropTypes.object,
 }
 
-function FlatButton({size = 1, color, disabled, css, ...props}) {
+function FlatButton({size, color, disabled, css, ...props}) {
   return (
     <>
       <button type="button" disabled={disabled} style={css} {...props} />
@@ -62,7 +62,7 @@ function FlatButton({size = 1, color, disabled, css, ...props}) {
           border-radius: 6px;
           color: ${color};
           cursor: ${disabled ? 'not-allowed' : 'pointer'};
-          font-size: ${`${size}em`};
+          font-size: ${rem(size)};
           padding: 0;
           outline: none;
           ${disabled && `opacity: 0.5`};

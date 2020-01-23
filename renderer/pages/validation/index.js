@@ -279,7 +279,7 @@ function ValidationSession({
       {isSubmitFailed(state) && (
         <SubmitFailedDialog isOpen onSubmit={() => send('RETRY_SUBMIT')} />
       )}
-      <Debug>{JSON.stringify(state.value, null, 2)}</Debug>
+      {global.isDev && <Debug>{JSON.stringify(state.value, null, 2)}</Debug>}
     </Scene>
   )
 }

@@ -26,7 +26,7 @@ const colors = {
 }
 
 const fontSizes = {
-  base: '13px',
+  base: 13,
   heading: '2rem',
   subHeading: '1.4em',
   blockHeading: '1rem',
