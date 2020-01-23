@@ -205,6 +205,12 @@ export const createValidationMachine = ({
                 },
                 done: {type: 'final'},
               },
+              after: {
+                BUMP_EXTRA_FLIPS: {
+                  target: '.bumpExtraFlips',
+                  cond: ({shortFlips}) => failedFlips(shortFlips).some(x => x),
+                },
+              },
             },
             solve: {
               type: 'parallel',
@@ -327,6 +333,27 @@ export const createValidationMachine = ({
                           target: 'submitShortSession',
                         },
                       },
+                      after: {
+                        SHORT_SESSION_AUTO_SUBMIT: [
+                          {
+                            target: 'submitShortSession',
+                            cond: ({shortFlips}) => {
+                              const solvableFlips = shortFlips.filter(
+                                ({decoded, extra}) => decoded && !extra
+                              )
+                              return (
+                                solvableFlips.length &&
+                                solvableFlips.filter(({option}) => option)
+                                  .length >=
+                                  solvableFlips.length / 2
+                              )
+                            },
+                          },
+                          {
+                            target: '#validationFailed',
+                          },
+                        ],
+                      },
                     },
                     submitShortSession: {
                       initial: 'submitting',
@@ -382,30 +409,6 @@ export const createValidationMachine = ({
                 },
               },
             },
-          },
-          after: {
-            BUMP_EXTRA_FLIPS: {
-              target: '.fetch.bumpExtraFlips',
-              cond: ({shortFlips}) => failedFlips(shortFlips).some(x => x),
-            },
-            SHORT_SESSION_AUTO_SUBMIT: [
-              {
-                target: '.solve.answer.submitShortSession',
-                cond: ({shortFlips}) => {
-                  const solvableFlips = shortFlips.filter(
-                    ({decoded, extra}) => decoded && !extra
-                  )
-                  return (
-                    solvableFlips.length &&
-                    solvableFlips.filter(({option}) => option).length >=
-                      solvableFlips.length / 2
-                  )
-                },
-              },
-              {
-                target: 'validationFailed',
-              },
-            ],
           },
         },
         longSession: {
@@ -764,33 +767,32 @@ export const createValidationMachine = ({
               },
             },
           },
-          after: {
-            LONG_SESSION_CHECK: [
-              {
-                target: 'validationFailed',
-                cond: ({longFlips}) => {
-                  const validFlips = filterSolvableFlips(longFlips)
-                  const answers = validFlips.filter(({option}) => option)
-                  return (
-                    !validFlips.length ||
-                    (validFlips.length &&
-                      answers.length < validFlips.length / 2)
-                  )
-                },
-              },
-            ],
-          },
         },
         validationFailed: {
           id: 'validationFailed',
           type: 'final',
-          entry: log('VALIDATION FAILED'),
+          entry: log((ctx, ev) => ({ctx, ev}), 'VALIDATION FAILED'),
         },
         validationSucceeded: {
           id: 'validationSucceeded',
           type: 'final',
           entry: log('VALIDATION SUCCEEDED'),
         },
+      },
+      after: {
+        LONG_SESSION_CHECK: [
+          {
+            target: '.validationFailed',
+            cond: ({longFlips}) => {
+              const validFlips = filterSolvableFlips(longFlips)
+              const answers = validFlips.filter(({option}) => option)
+              return (
+                !validFlips.length ||
+                (validFlips.length && answers.length < validFlips.length / 2)
+              )
+            },
+          },
+        ],
       },
     },
     {
