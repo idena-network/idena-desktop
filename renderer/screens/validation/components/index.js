@@ -107,8 +107,8 @@ export function Flip({
   variant,
   onChoose,
 }) {
+  if ((fetched && !decoded) || failed) return <FailedFlip />
   if (!fetched) return <LoadingFlip />
-  if (fetched && !decoded) return <FailedFlip />
 
   return (
     <FlipHolder
@@ -305,8 +305,8 @@ export function Thumbnail({
 
   return (
     <ThumbnailHolder isCurrent={isCurrent} onClick={onPick}>
+      {((fetched && !decoded) || failed) && <FailedThumbnail />}
       {!fetched && <LoadingThumbnail />}
-      {fetched && !decoded && <FailedThumbnail />}
       {fetched && decoded && (
         <>
           {(option || isQualified) && (

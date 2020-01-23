@@ -43,7 +43,7 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'
 import {
   filterRegularFlips,
-  filterValidFlips,
+  filterSolvableFlips,
   rearrangeFlips,
 } from '../../screens/validation/utils'
 
@@ -333,11 +333,9 @@ function sessionFlips(state) {
   const {
     context: {shortFlips, longFlips},
   } = state
-  return rearrangeFlips(
-    isShortSession(state)
-      ? filterRegularFlips(shortFlips)
-      : filterValidFlips(longFlips)
-  )
+  return isShortSession(state)
+    ? rearrangeFlips(filterRegularFlips(shortFlips))
+    : filterSolvableFlips(longFlips)
 }
 
 function currentFlip(state) {
@@ -352,12 +350,12 @@ function hasAllAnswers(state) {
     context: {shortFlips, longFlips},
   } = state
   const flips = isShortSession(state)
-    ? shortFlips.filter(({loaded, extra}) => loaded && !extra)
-    : filterValidFlips(longFlips)
+    ? shortFlips.filter(({decoded, extra}) => decoded && !extra)
+    : filterSolvableFlips(longFlips)
   return flips.length && flips.every(({option}) => option)
 }
 
 function hasAllRelevanceMarks({context: {longFlips}}) {
-  const flips = filterValidFlips(longFlips)
+  const flips = filterSolvableFlips(longFlips)
   return flips.length && flips.every(({relevance}) => relevance)
 }

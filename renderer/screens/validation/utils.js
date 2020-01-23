@@ -42,13 +42,12 @@ export function filterWaitingForDecoding(flips) {
   )
 }
 
-const validFlip = ({ready, fetched, decoded}) => ready && fetched && decoded
 /**
  * Fully fetched and decoded flips
  * @param {*} flips
  */
-export function filterValidFlips(flips) {
-  return flips.filter(validFlip)
+export function filterSolvableFlips(flips) {
+  return flips.filter(({decoded}) => decoded)
 }
 
 export function everyFlipFetched(flips = []) {
@@ -68,7 +67,23 @@ export function failedFlips(flips = []) {
 }
 
 export function rearrangeFlips(flips) {
-  return flips
+  const solvable = []
+  const loading = []
+  const invalid = []
+  const extras = []
+  for (let i = 0; i < flips.length; i += 1) {
+    const {fetched, decoded, failed, extra} = flips[i]
+    if (extra) {
+      extras.push(flips[i])
+    } else if (decoded) {
+      solvable.push(flips[i])
+    } else if (failed || fetched) {
+      invalid.push(flips[i])
+    } else {
+      loading.push(flips[i])
+    }
+  }
+  return [...solvable, ...loading, ...invalid, ...extras]
 }
 
 export function flipExtraFlip({extra, ...flip}) {

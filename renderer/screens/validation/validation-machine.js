@@ -21,7 +21,7 @@ import {
   filterRegularFlips,
   failedFlips,
   filterReadyFlips,
-  filterValidFlips,
+  filterSolvableFlips,
   flipExtraFlip,
 } from './utils'
 
@@ -178,6 +178,9 @@ export const createValidationMachine = ({
                                   ...replacingFlips
                                     .slice(0, availableExtraFlips.length)
                                     .map(flipExtraFlip),
+                                  ...replacingFlips
+                                    .slice(availableExtraFlips.length)
+                                    .map(flip => ({...flip, failed: true})),
                                   ...availableExtraFlips.map(flipExtraFlip),
                                 ],
                         })
@@ -326,6 +329,7 @@ export const createValidationMachine = ({
                     },
                     submitShortSession: {
                       initial: 'submitting',
+                      entry: log(),
                       states: {
                         submitting: {
                           invoke: {
@@ -350,6 +354,7 @@ export const createValidationMachine = ({
                           },
                         },
                         done: {
+                          entry: log(),
                           on: {
                             START_LONG_SESSION: '#longSession',
                           },
@@ -389,9 +394,12 @@ export const createValidationMachine = ({
         },
         longSession: {
           id: 'longSession',
-          entry: assign({
-            currentIndex: 0,
-          }),
+          entry: [
+            assign({
+              currentIndex: 0,
+            }),
+            log('Starting long session'),
+          ],
           type: 'parallel',
           states: {
             fetch: {
@@ -509,12 +517,11 @@ export const createValidationMachine = ({
                         1000: [
                           {
                             target: 'fetching',
-                            cond: ({longFlips}) => {
-                              const flips = filterReadyFlips(longFlips)
-                              return (
-                                !flips.length || flips.some(({words}) => !words)
-                              )
-                            },
+                            cond: ({longFlips}) =>
+                              longFlips.length === 0 ||
+                              filterReadyFlips(longFlips).some(
+                                ({words}) => !words
+                              ),
                           },
                           {
                             target: 'done',
@@ -544,7 +551,7 @@ export const createValidationMachine = ({
                       {
                         target: undefined,
                         cond: ({longFlips}) =>
-                          filterValidFlips(longFlips).length === 0,
+                          filterSolvableFlips(longFlips).length === 0,
                       },
                       {
                         target: '.normal',
@@ -571,13 +578,13 @@ export const createValidationMachine = ({
                       {
                         target: undefined,
                         cond: ({longFlips}) =>
-                          filterValidFlips(longFlips).length === 0,
+                          filterSolvableFlips(longFlips).length === 0,
                       },
                       {
                         target: '.lastFlip',
                         cond: ({longFlips, currentIndex}) =>
                           currentIndex ===
-                          filterValidFlips(longFlips).length - 2,
+                          filterSolvableFlips(longFlips).length - 2,
                         actions: [
                           assign({
                             currentIndex: ({currentIndex}) => currentIndex + 1,
@@ -588,7 +595,8 @@ export const createValidationMachine = ({
                       {
                         target: '.normal',
                         cond: ({longFlips, currentIndex}) =>
-                          currentIndex < filterValidFlips(longFlips).length - 2,
+                          currentIndex <
+                          filterSolvableFlips(longFlips).length - 2,
                         actions: [
                           assign({
                             currentIndex: ({currentIndex}) => currentIndex + 1,
@@ -611,7 +619,7 @@ export const createValidationMachine = ({
                       {
                         target: '.lastFlip',
                         cond: ({longFlips}, {index}) =>
-                          index === filterValidFlips(longFlips).length - 1,
+                          index === filterSolvableFlips(longFlips).length - 1,
                         actions: [
                           assign({
                             currentIndex: (_, {index}) => index,
@@ -730,7 +738,7 @@ export const createValidationMachine = ({
               {
                 target: 'validationFailed',
                 cond: ({longFlips}) => {
-                  const validFlips = filterValidFlips(longFlips)
+                  const validFlips = filterSolvableFlips(longFlips)
                   return (
                     validFlips.filter(({option}) => option).length <
                     validFlips.length / 2
