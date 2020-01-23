@@ -534,13 +534,13 @@ export const createValidationMachine = ({
                       id: 'success',
                       entry: log(),
                       after: {
-                        1000: [
+                        10000: [
                           {
                             target: 'fetching',
                             cond: ({longFlips}) =>
                               longFlips.length === 0 ||
                               filterReadyFlips(longFlips).some(
-                                ({words}) => !words
+                                ({words}) => !words || !words.length
                               ),
                           },
                           {
