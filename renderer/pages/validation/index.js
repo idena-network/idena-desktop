@@ -96,46 +96,6 @@ function ValidationSession({
     persistValidationState(state)
   }, [state])
 
-  if (state.matches('validationSucceeded'))
-    return (
-      <Scene bg={theme.colors.white}>
-        <ValidationSucceededDialog
-          isOpen
-          onSubmit={() => router.push('/dashboard')}
-        />
-      </Scene>
-    )
-
-  if (state.matches('shortSession.solve.answer.submitShortSession.done'))
-    return (
-      <Scene bg={theme.colors.black}>
-        <WelcomeQualificationDialog
-          isOpen
-          onSubmit={() => send('START_LONG_SESSION')}
-        />
-      </Scene>
-    )
-
-  if (state.matches('longSession.solve.answer.finishFlips'))
-    return (
-      <Scene bg={theme.colors.white}>
-        <WelcomeKeywordsQualificationDialog
-          isOpen
-          onSubmit={() => send('START_KEYWORDS_QUALIFICATION')}
-        />
-      </Scene>
-    )
-
-  if (state.matches('validationFailed'))
-    return (
-      <Scene bg={theme.colors.black}>
-        <ValidationFailedDialog
-          isOpen
-          onSubmit={() => router.push('/dashboard')}
-        />
-      </Scene>
-    )
-
   return (
     <Scene bg={isShortSession(state) ? theme.colors.black : theme.colors.white}>
       <Header>
@@ -279,6 +239,34 @@ function ValidationSession({
       {isSubmitFailed(state) && (
         <SubmitFailedDialog isOpen onSubmit={() => send('RETRY_SUBMIT')} />
       )}
+
+      {state.matches('longSession.solve.answer.welcomeQualification') && (
+        <WelcomeQualificationDialog
+          isOpen
+          onSubmit={() => send('START_LONG_SESSION')}
+        />
+      )}
+      {state.matches('longSession.solve.answer.finishFlips') && (
+        <WelcomeKeywordsQualificationDialog
+          isOpen
+          onSubmit={() => send('START_KEYWORDS_QUALIFICATION')}
+        />
+      )}
+
+      {state.matches('validationSucceeded') && (
+        <ValidationSucceededDialog
+          isOpen
+          onSubmit={() => router.push('/dashboard')}
+        />
+      )}
+
+      {state.matches('validationFailed') && (
+        <ValidationFailedDialog
+          isOpen
+          onSubmit={() => router.push('/dashboard')}
+        />
+      )}
+
       {global.isDev && <Debug>{JSON.stringify(state.value, null, 2)}</Debug>}
     </Scene>
   )

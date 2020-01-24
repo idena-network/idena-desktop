@@ -714,10 +714,17 @@ export function ValidationSucceededDialog({isOpen, onSubmit}) {
   return (
     <Modal show={isOpen} showCloseIcon={false}>
       <Box css={{...margin(0, 0, rem(24))}}>
-        <SubHeading css={margin(0, 0, rem(10))}>Validation finished</SubHeading>
+        <SubHeading css={margin(0, 0, rem(10))}>
+          Wait for validation results
+        </SubHeading>
+        <Text css={margin(0, 0, rem(10))}>
+          Your answers for the qualification session have been submited
+          successfully!
+        </Text>
         <Text>
-          Your answers have been submitted successfully. Please wait until the
-          end of the validation session.
+          Please wait for the validation results. It will take some time for
+          network to reach consensus about the list of validated accounts. You
+          can find the validation end time on the left panel.
         </Text>
       </Box>
       <Flex align="center" justify="flex-end">

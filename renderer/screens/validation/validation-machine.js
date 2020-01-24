@@ -374,7 +374,8 @@ export const createValidationMachine = ({
                                 epoch
                               ),
                             onDone: {
-                              target: 'done',
+                              target: '#longSession',
+                              actions: [log()],
                             },
                             onError: {
                               target: 'fail',
@@ -388,12 +389,6 @@ export const createValidationMachine = ({
                                 ),
                               ],
                             },
-                          },
-                        },
-                        done: {
-                          entry: log(),
-                          on: {
-                            START_LONG_SESSION: '#longSession',
                           },
                         },
                         fail: {
@@ -660,8 +655,13 @@ export const createValidationMachine = ({
                   },
                 },
                 answer: {
-                  initial: 'flips',
+                  initial: 'welcomeQualification',
                   states: {
+                    welcomeQualification: {
+                      on: {
+                        START_LONG_SESSION: 'flips',
+                      },
+                    },
                     flips: {
                       on: {
                         ANSWER: {
@@ -763,6 +763,24 @@ export const createValidationMachine = ({
                       },
                     },
                   },
+                  after: {
+                    LONG_SESSION_CHECK: [
+                      {
+                        target: '#validationFailed',
+                        cond: ({longFlips}) => {
+                          const validFlips = filterSolvableFlips(longFlips)
+                          const answers = validFlips.filter(
+                            ({option}) => option
+                          )
+                          return (
+                            !validFlips.length ||
+                            (validFlips.length &&
+                              answers.length < validFlips.length / 2)
+                          )
+                        },
+                      },
+                    ],
+                  },
                 },
               },
             },
@@ -779,21 +797,6 @@ export const createValidationMachine = ({
           entry: log('VALIDATION SUCCEEDED'),
         },
       },
-      after: {
-        LONG_SESSION_CHECK: [
-          {
-            target: '.validationFailed',
-            cond: ({longFlips}) => {
-              const validFlips = filterSolvableFlips(longFlips)
-              const answers = validFlips.filter(({option}) => option)
-              return (
-                !validFlips.length ||
-                (validFlips.length && answers.length < validFlips.length / 2)
-              )
-            },
-          },
-        ],
-      },
     },
     {
       delays: {
@@ -805,7 +808,7 @@ export const createValidationMachine = ({
         LONG_SESSION_CHECK: ({validationStart, longSessionDuration}) =>
           adjustDuration(
             validationStart,
-            shortSessionDuration + longSessionDuration
+            shortSessionDuration - 10 + longSessionDuration
           ) * 1000,
       },
     }

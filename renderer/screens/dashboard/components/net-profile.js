@@ -72,7 +72,7 @@ function NetProfile() {
           label="Mining penalty"
           value={penalty}
           postfix="DNA"
-          tooltip="Your node was offline more that 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins."
+          tooltip="Your node was offline more that 1 hour.&#10;The penalty will be charged automatically.&#10;Once it's fully paid you'll continue to mine coins."
         />
       )}
       {age > 0 && <Figure label="Age" value={age} postfix="epochs" />}
