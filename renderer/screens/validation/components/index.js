@@ -50,6 +50,8 @@ export function Scene({bg: background = theme.colors.black, ...props}) {
           rem(theme.spacings.large),
           rem(theme.spacings.medium16)
         ),
+        overflow: 'hidden',
+        maxWidth: '100%',
       }}
       {...props}
     />
@@ -266,7 +268,7 @@ export function ActionBar(props) {
 }
 
 export function ActionBarItem(props) {
-  return <Flex flex={1} {...props} />
+  return <Flex flex={1} css={{zIndex: 1}} {...props} />
 }
 
 const thumbBorderWidth = 2
@@ -284,6 +286,7 @@ export function Thumbnails({currentIndex, ...props}) {
           totalThumbWidth * (currentIndex + 1 / 2)
         )})`,
         transition: 'transform .3s ease-out',
+        zIndex: 1,
       }}
       {...props}
     />
@@ -565,7 +568,18 @@ export function WelcomeQualificationDialog({isOpen, onSubmit}) {
 
 export function NavButton({left, right, ...props}) {
   return (
-    <Absolute top="50%" left={left} right={right}>
+    <Absolute
+      top="50%"
+      left={left}
+      right={right}
+      width={rem(280)}
+      zIndex={0}
+      css={{
+        transform: 'translate(0, -50%)',
+        overflow: 'hidden',
+        height: rem(600),
+      }}
+    >
       <Box {...props} />
     </Absolute>
   )

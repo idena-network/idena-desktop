@@ -384,7 +384,7 @@ export const createValidationMachine = ({
                                   errorMessage: (_, {data}) => data,
                                 }),
                                 log(
-                                  (ctx, ev) => ({ctx, ev}),
+                                  (context, event) => ({context, event}),
                                   'Short session submit failed'
                                 ),
                               ],
@@ -746,7 +746,7 @@ export const createValidationMachine = ({
                                   errorMessage: (_, {data}) => data,
                                 }),
                                 log(
-                                  (ctx, ev) => ({ctx, ev}),
+                                  (context, event) => ({context, event}),
                                   'Long session submit failed'
                                 ),
                               ],
@@ -789,7 +789,10 @@ export const createValidationMachine = ({
         validationFailed: {
           id: 'validationFailed',
           type: 'final',
-          entry: log((ctx, ev) => ({ctx, ev}), 'VALIDATION FAILED'),
+          entry: log(
+            (context, event) => ({context, event}),
+            'VALIDATION FAILED'
+          ),
         },
         validationSucceeded: {
           id: 'validationSucceeded',
