@@ -219,22 +219,20 @@ function ValidationSession({
         ))}
       </Thumbnails>
       {!isFirstFlip(state) && (
-        <NavButton left={0}>
-          <Arrow
-            dir="prev"
-            type={isShortSession(state) ? SessionType.Short : SessionType.Long}
-            onClick={() => send({type: 'PREV'})}
-          />
-        </NavButton>
+        <NavButton
+          type="prev"
+          bg={isShortSession(state) ? theme.colors.white01 : theme.colors.gray}
+          color={isShortSession(state) ? theme.colors.white : theme.colors.text}
+          onClick={() => send({type: 'PREV'})}
+        />
       )}
       {!isLastFlip(state) && (
-        <NavButton right={0}>
-          <Arrow
-            dir="next"
-            type={isShortSession(state) ? SessionType.Short : SessionType.Long}
-            onClick={() => send({type: 'NEXT'})}
-          />
-        </NavButton>
+        <NavButton
+          type="next"
+          bg={isShortSession(state) ? theme.colors.white01 : theme.colors.gray}
+          color={isShortSession(state) ? theme.colors.white : theme.colors.text}
+          onClick={() => send({type: 'NEXT'})}
+        />
       )}
       {isSubmitFailed(state) && (
         <SubmitFailedDialog isOpen onSubmit={() => send('RETRY_SUBMIT')} />

@@ -566,12 +566,14 @@ export function WelcomeQualificationDialog({isOpen, onSubmit}) {
   )
 }
 
-export function NavButton({left, right, ...props}) {
+export function NavButton({type, bg, color, ...props}) {
+  const isPrev = type === 'prev'
+  const Icon = isPrev ? FiChevronLeft : FiChevronRight
   return (
     <Absolute
       top="50%"
-      left={left}
-      right={right}
+      left={isPrev && 0}
+      right={isPrev || 0}
       width={rem(280)}
       zIndex={0}
       css={{
@@ -579,55 +581,38 @@ export function NavButton({left, right, ...props}) {
         overflow: 'hidden',
         height: rem(600),
       }}
+      {...props}
     >
-      <Box {...props} />
+      <div>
+        <Icon
+          fontSize={rem(20)}
+          color={color}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: `translate(-50%, -50%) translateX(${
+              isPrev ? rem(80) : rem(-80)
+            })`,
+          }}
+        />
+        <style jsx>{`
+          div {
+            border-radius: 50%;
+            cursor: pointer;
+            height: 100%;
+            width: ${rem(560)};
+            position: relative;
+            transform: translateX(${isPrev ? '-50%' : ''});
+            transition: all 0.5s ease;
+            transition-property: background;
+          }
+          div:hover {
+            background: ${bg};
+          }
+        `}</style>
+      </div>
     </Absolute>
-  )
-}
-
-export function Arrow({dir, type, ...props}) {
-  const prev = dir === 'prev'
-  const isShort = type.toLowerCase() === 'short'
-  const bg = isShort ? theme.colors.white01 : theme.colors.gray
-  const color = isShort ? theme.colors.white : theme.colors.text
-  return (
-    <div {...props}>
-      <span>
-        {prev ? (
-          <FiChevronLeft fontSize={rem(20)} color={color} />
-        ) : (
-          <FiChevronRight fontSize={rem(20)} color={color} />
-        )}
-      </span>
-      <style jsx>{`
-        div {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: ${rem(600)};
-          height: ${rem(600)};
-
-          position: absolute;
-          top: 50%;
-          ${prev ? 'left: 0' : 'right: 0'};
-
-          border-radius: 50%;
-          transition: all 0.5s ease;
-          transform: ${`translate(${prev ? '-320px' : '320px'}, -50%);`};
-        }
-        div:hover {
-          background: ${bg};
-          border-radius: 50%;
-        }
-        span {
-          left: ${prev ? '75%' : '25%'};
-          position: absolute;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          text-align: center;
-        }
-      `}</style>
-    </div>
   )
 }
 
