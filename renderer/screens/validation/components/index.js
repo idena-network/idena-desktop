@@ -604,7 +604,7 @@ export function NavButton({type, bg, color, ...props}) {
             width: ${rem(560)};
             position: relative;
             transform: translateX(${isPrev ? '-50%' : ''});
-            transition: all 0.5s ease;
+            transition: all 0.5s ease-out;
             transition-property: background;
           }
           div:hover {
