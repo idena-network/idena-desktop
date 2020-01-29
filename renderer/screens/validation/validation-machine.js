@@ -25,6 +25,17 @@ import {
   flipExtraFlip,
 } from './utils'
 
+// 1. refetch flips -> blobs
+// 2. update to pub/priv flip parts
+// 3. loadWord
+// 4. tooltip
+// 5. FlipLottery -> Flip lottery
+// 6. travis build
+// 7. merge fetch and decode flips
+// 8. move validation services to serializable objects
+// 9. improve animation perf
+// 10. control timers with timerService
+// 11. check Timer component correctness
 export const createValidationMachine = ({
   epoch,
   validationStart,
@@ -204,6 +215,19 @@ export const createValidationMachine = ({
                   },
                 },
                 done: {type: 'final'},
+              },
+              on: {
+                REFETCH_FLIPS: {
+                  target: '#fetchShortFlips',
+                  actions: assign({
+                    shortFlips: ({shortFlips}) =>
+                      shortFlips.map(flip => ({
+                        ...flip,
+                        fetched: false,
+                        decoded: false,
+                      })),
+                  }),
+                },
               },
               after: {
                 BUMP_EXTRA_FLIPS: {
@@ -493,6 +517,19 @@ export const createValidationMachine = ({
                     done: {
                       id: 'fetchLongFlipsDone',
                       type: 'final',
+                    },
+                  },
+                  on: {
+                    REFETCH_FLIPS: {
+                      target: '#fetchLongFlips',
+                      actions: assign({
+                        longFlips: ({longFlips}) =>
+                          longFlips.map(flip => ({
+                            ...flip,
+                            fetched: false,
+                            decoded: false,
+                          })),
+                      }),
                     },
                   },
                 },

@@ -108,6 +108,7 @@ export function Flip({
   option,
   variant,
   onChoose,
+  onImageFail,
 }) {
   if ((fetched && !decoded) || failed) return <FailedFlip />
   if (!fetched) return <LoadingFlip />
@@ -161,6 +162,7 @@ export function Flip({
               transform: 'translate(-50%, -50%)',
               zIndex: 1,
             }}
+            onError={onImageFail}
           />
         </Box>
       ))}
