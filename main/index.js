@@ -15,6 +15,7 @@ const express = require('express')
 const net = require('net')
 const loadRoute = require('./utils/routes')
 const logger = require('./logger')
+const {promiseTimeout} = require('./utils')
 
 logger.info('idena started', global.appVersion || app.getVersion())
 
@@ -321,7 +322,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
 
   switch (command) {
     case 'init-local-node': {
-      getCurrentVersion()
+      promiseTimeout(3000, getCurrentVersion())
         .then(version => {
           sendMainWindowMsg(NODE_EVENT, 'node-ready', version)
         })
