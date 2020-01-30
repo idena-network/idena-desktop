@@ -56,7 +56,7 @@ If.propTypes = {
 
 export function Debug(props) {
   return (
-    <Absolute bottom={10} left={10}>
+    <Absolute bottom={10} left={10} zIndex={9}>
       <pre {...props} />
       <style jsx>{`
         pre {

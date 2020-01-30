@@ -25,17 +25,20 @@ import {
   flipExtraFlip,
 } from './utils'
 
-// 1. refetch flips -> blobs
-// 2. update to pub/priv flip parts
-// 3. loadWord
-// 4. tooltip
-// 5. FlipLottery -> Flip lottery
-// 6. travis build
-// 7. merge fetch and decode flips
-// 8. move validation services to serializable objects
-// 9. improve animation perf
-// 10. control timers with timerService
-// 11. check Timer component correctness
+// [x] refetch flips -> blobs
+// [x] update to pub/priv flip parts
+// [ ] loadWord
+// [ ] tooltip
+// [ ] FlipLottery -> Flip lottery
+// [ ] travis build
+// [ ] merge fetch and decode flips
+// [ ] move validation services to serializable objects
+// [ ] improve animation perf
+// [ ] control timers with timerService
+// [ ] check Timer component correctness
+// [ ] revokeObjectURLs
+// [ ] check log timestamp format
+// [ ] update next.js 9.2
 export const createValidationMachine = ({
   epoch,
   validationStart,
@@ -925,15 +928,25 @@ function fetchFlips(hashes) {
   )
 }
 
-function decodeFlip({hash, hex}) {
+function decodeFlip({hash, hex, publicHex, privateHex}) {
   try {
-    const [images, orders] = decode(hex)
+    let images
+    let orders
+
+    if (privateHex && privateHex !== '0x') {
+      ;[images] = decode(publicHex || hex)
+      let privateImages
+      ;[privateImages, orders] = decode(privateHex)
+      images = images.concat(privateImages)
+    } else {
+      ;[images, orders] = decode(hex)
+    }
+
     return {
       hash,
       decoded: true,
-      images: images.map(
-        // buffer => `data:image/png;base64,${buffer.toString('base64')}`
-        buffer => URL.createObjectURL(new Blob([buffer], {type: 'image/png'}))
+      images: images.map(buffer =>
+        URL.createObjectURL(new Blob([buffer], {type: 'image/png'}))
       ),
       orders: orders.map(order => order.map(([idx = 0]) => idx)),
       hex: '',
