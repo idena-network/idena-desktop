@@ -267,7 +267,7 @@ export function ActionBar(props) {
 }
 
 export function ActionBarItem(props) {
-  return <Flex flex={1} css={{zIndex: 1}} {...props} />
+  return <Flex flex={1} css={{minHeight: rem(32), zIndex: 1}} {...props} />
 }
 
 const thumbBorderWidth = 2

@@ -247,18 +247,14 @@ function ValidationSession({
       <ActionBar>
         <ActionBarItem />
         <ActionBarItem justify="center">
-          {isShortSession(state) && (
-            <ValidationTimer
-              validationStart={validationStart}
-              duration={shortSessionDuration - 10}
-            />
-          )}
-          {isLongSession(state) && (
-            <ValidationTimer
-              validationStart={validationStart}
-              duration={shortSessionDuration - 10 + longSessionDuration}
-            />
-          )}
+          <ValidationTimer
+            validationStart={validationStart}
+            duration={
+              shortSessionDuration -
+              10 +
+              (isShortSession(state) ? 0 : longSessionDuration)
+            }
+          />
         </ActionBarItem>
         <ActionBarItem justify="flex-end">
           {(isShortSession(state) || isLongSessionKeywords(state)) && (
@@ -286,22 +282,36 @@ function ValidationSession({
           />
         ))}
       </Thumbnails>
-      {!isFirstFlip(state) && (
-        <NavButton
-          type="prev"
-          bg={isShortSession(state) ? theme.colors.white01 : theme.colors.gray}
-          color={isShortSession(state) ? theme.colors.white : theme.colors.text}
-          onClick={() => send({type: 'PREV'})}
-        />
-      )}
-      {!isLastFlip(state) && (
-        <NavButton
-          type="next"
-          bg={isShortSession(state) ? theme.colors.white01 : theme.colors.gray}
-          color={isShortSession(state) ? theme.colors.white : theme.colors.text}
-          onClick={() => send({type: 'NEXT'})}
-        />
-      )}
+      {!isFirstFlip(state) &&
+        hasManyFlips(state) &&
+        isSolving(state) &&
+        !isSubmitting(state) && (
+          <NavButton
+            type="prev"
+            bg={
+              isShortSession(state) ? theme.colors.white01 : theme.colors.gray
+            }
+            color={
+              isShortSession(state) ? theme.colors.white : theme.colors.text
+            }
+            onClick={() => send({type: 'PREV'})}
+          />
+        )}
+      {!isLastFlip(state) &&
+        hasManyFlips(state) &&
+        isSolving(state) &&
+        !isSubmitting(state) && (
+          <NavButton
+            type="next"
+            bg={
+              isShortSession(state) ? theme.colors.white01 : theme.colors.gray
+            }
+            color={
+              isShortSession(state) ? theme.colors.white : theme.colors.text
+            }
+            onClick={() => send({type: 'NEXT'})}
+          />
+        )}
       {isSubmitFailed(state) && (
         <SubmitFailedDialog isOpen onSubmit={() => send('RETRY_SUBMIT')} />
       )}
@@ -358,6 +368,10 @@ function isLongSessionKeywords(state) {
     .some(state.matches)
 }
 
+function isSolving(state) {
+  return ['shortSession', 'longSession'].some(state.matches)
+}
+
 function isSubmitting(state) {
   return [
     'shortSession.solve.answer.submitShortSession',
@@ -385,6 +399,10 @@ function isLastFlip(state) {
   return ['shortSession', 'longSession']
     .map(type => `${type}.solve.nav.lastFlip`)
     .some(state.matches)
+}
+
+function hasManyFlips(state) {
+  return sessionFlips(state).length > 1
 }
 
 function canSubmit(state) {
