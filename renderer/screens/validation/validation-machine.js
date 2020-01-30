@@ -36,9 +36,9 @@ import {
 // [ ] control timers with timerService
 // [ ] check Timer component correctness
 // [x] revokeObjectURLs
-// [ ] check log timestamp format
+// [x] check log timestamp format
 // [ ] update next.js 9.2
-// [ ] check Validate button in banner against final state
+// [x] check Validate button in banner against final state
 export const createValidationMachine = ({
   epoch,
   validationStart,
@@ -826,6 +826,7 @@ export const createValidationMachine = ({
               },
             },
           },
+          exit: ['cleanupLongFlips'],
         },
         validationFailed: {
           id: 'validationFailed',
@@ -841,7 +842,6 @@ export const createValidationMachine = ({
           entry: log('VALIDATION SUCCEEDED'),
         },
       },
-      exit: ['cleanupLongFlips'],
     },
     {
       delays: {

@@ -14,11 +14,9 @@ import {
   EpochPeriod,
 } from '../../../shared/providers/epoch-context'
 import {useValidationTimer} from '../../../shared/hooks/use-validation-timer'
-import {
-  useIdentityState,
-  canValidate,
-} from '../../../shared/providers/identity-context'
+import {useIdentityState} from '../../../shared/providers/identity-context'
 import Timer from './timer'
+import {shouldStartValidation} from '../validation-machine'
 
 function Banner() {
   const epoch = useEpochState()
@@ -54,7 +52,8 @@ function ValidationSoon() {
 }
 
 function ValidationRunning() {
-  const {currentPeriod} = useEpochState()
+  const epoch = useEpochState()
+  const {currentPeriod} = epoch
   const {shortAnswers, longAnswers} = useValidationState()
 
   const isShortSession = currentPeriod === EpochPeriod.ShortSession
@@ -67,12 +66,6 @@ function ValidationRunning() {
   } = useValidationTimer()
 
   const identity = useIdentityState()
-
-  // React.useEffect(() => {
-  //   if (isShortSession && !shortAnswersSubmitted && canValidate(identity)) {
-  //     Router.push('/validation/short')
-  //   }
-  // }, [identity, isShortSession, shortAnswersSubmitted])
 
   const seconds = isShortSession
     ? secondsLeftForShortSession
@@ -117,7 +110,7 @@ function ValidationRunning() {
           </Box>
         )}
       </Flex>
-      {isShortSession && !hasAnswers && !!seconds && canValidate(identity) && (
+      {shouldStartValidation(epoch, identity) && (
         <Flex css={padding(theme.spacings.normal)}>
           <Divider vertical m={rem(theme.spacings.medium16)} />
           <Link href="/validation">
