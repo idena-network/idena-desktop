@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const path = require('path')
 const fs = require('fs-extra')
-const {spawn, exec} = require('child_process')
+const {spawn} = require('child_process')
 const axios = require('axios')
 const progress = require('progress-stream')
 const semver = require('semver')
@@ -15,8 +15,6 @@ const idenaBin = 'idena-go'
 const idenaNodeReleasesUrl =
   'https://api.github.com/repos/idena-network/idena-go/releases/latest'
 const idenaChainDbFolder = 'idenachain.db'
-
-const nodeVersionRegex = /\d+.\d+.\d+/
 
 const getBinarySuffix = () => (process.platform === 'win32' ? '.exe' : '')
 
@@ -190,23 +188,35 @@ async function stopNode(node) {
 function getCurrentVersion(tempNode) {
   return new Promise((resolve, reject) => {
     const node = tempNode ? getTempNodeFile() : getNodeFile()
+
     try {
-      exec(
-        `"${node}" --version`,
-        {windowsHide: true},
-        (err, stdout, stderr) => {
-          if (err) {
-            return reject(new Error(stderr))
-          }
+      const nodeVersion = spawn(node, ['--version'])
+      nodeVersion.stdout.on('data', data => {
+        const {version} = semver.coerce(data.toString())
+        return semver.valid(version)
+          ? resolve(version)
+          : reject(
+              new Error(
+                `cannot resolve node version, stdout: ${data.toString()}`
+              )
+            )
+      })
 
-          const m = stdout.match(nodeVersionRegex)
-          if (m && m.length && semver.valid(m[0])) {
-            return resolve(semver.clean(m[0]))
-          }
-
-          return reject(new Error('cannot resolve node version'))
-        }
+      nodeVersion.stderr.on('data', data =>
+        reject(
+          new Error(`cannot resolve node version, stderr: ${data.toString()}`)
+        )
       )
+
+      nodeVersion.on('exit', code => {
+        if (code) {
+          return reject(
+            new Error(`cannot resolve node version, exit code ${code}`)
+          )
+        }
+      })
+
+      nodeVersion.on('error', err => reject(err))
     } catch (e) {
       return reject(e)
     }
