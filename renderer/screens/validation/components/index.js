@@ -189,6 +189,7 @@ function FlipHolder({css, ...props}) {
         minWidth: rem(147),
         minHeight: '100%',
         transitionProperty: 'opacity, transform',
+        willChange: 'opacity, transform',
         ...css,
       }}
       {...props}
@@ -288,6 +289,7 @@ export function Thumbnails({currentIndex, ...props}) {
           totalThumbWidth * (currentIndex + 1 / 2)
         )})`,
         transition: 'transform .3s ease-out',
+        willChange: 'transform',
         zIndex: 1,
       }}
       {...props}
@@ -608,6 +610,7 @@ export function NavButton({type, bg, color, ...props}) {
             transform: translateX(${isPrev ? '-50%' : ''});
             transition: all 0.5s ease-out;
             transition-property: background;
+            will-change: background;
           }
           div:hover {
             background: ${bg};

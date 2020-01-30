@@ -28,8 +28,8 @@ import {
 // [x] update to pub/priv flip parts
 // [x] loadWord
 // [ ] tooltip
-// [ ] FlipLottery -> Flip lottery
-// [ ] travis build
+// [x] FlipLottery -> Flip lottery
+// [x] travis build
 // [ ] merge fetch and decode flips
 // [ ] move validation services to serializable objects
 // [ ] improve animation perf
