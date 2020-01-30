@@ -1,6 +1,6 @@
+/* eslint-disable no-useless-escape */
 import React from 'react'
-import {rem} from 'polished'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 
 // eslint-disable-next-line react/display-name
 export default () => (
@@ -140,187 +140,187 @@ export default () => (
     }
 
     .icon--add_btn:before {
-      content: '\\e906';
+      content: '\e906';
     }
     .icon--share:before {
-      content: '\\e900';
+      content: '\e900';
     }
     .icon--Info:before {
-      content: '\\e901';
+      content: '\e901';
     }
     .icon--add_contact:before {
-      content: '\\e902';
+      content: '\e902';
     }
     .icon--scan:before {
-      content: '\\e904';
+      content: '\e904';
     }
     .icon--withdraw:before {
-      content: '\\e905';
+      content: '\e905';
     }
     .icon--user:before {
-      content: '\\e907';
+      content: '\e907';
     }
     .icon--delete:before {
-      content: '\\e909';
+      content: '\e909';
     }
     .icon--tick:before {
-      content: '\\e90a';
+      content: '\e90a';
     }
     .icon--reject:before {
-      content: '\\e90b';
+      content: '\e90b';
     }
     .icon--change:before {
-      content: '\\e90c';
+      content: '\e90c';
     }
     .icon--key:before {
-      content: '\\e941';
+      content: '\e941';
     }
     .icon--extrasmall_check:before {
-      content: '\\e90d';
+      content: '\e90d';
     }
     .icon--large_pic:before {
-      content: '\\e90e';
+      content: '\e90e';
     }
     .icon--left_arrow:before {
-      content: '\\e90f';
+      content: '\e90f';
     }
     .icon--add:before {
-      content: '\\e911';
+      content: '\e911';
     }
     .icon--block:before {
-      content: '\\e912';
+      content: '\e912';
     }
     .icon--change:before {
-      content: '\\e914';
+      content: '\e914';
     }
     .icon--coins:before {
-      content: '\\e915';
+      content: '\e915';
     }
     .icon--deposit:before {
-      content: '\\e916';
+      content: '\e916';
     }
     .icon--doc:before {
-      content: '\\e917';
+      content: '\e917';
     }
     .icon--down_arrow:before {
-      content: '\\e918';
+      content: '\e918';
     }
     .icon--download:before {
-      content: '\\e919';
+      content: '\e919';
     }
     .icon--edit:before {
-      content: '\\e91a';
+      content: '\e91a';
     }
     .icon--expand:before {
-      content: '\\e91b';
+      content: '\e91b';
     }
     .icon--hor_flip:before {
-      content: '\\e91c';
+      content: '\e91c';
     }
     .icon--info:before {
-      content: '\\e91d';
+      content: '\e91d';
     }
     .icon--laptop:before {
-      content: '\\e91e';
+      content: '\e91e';
     }
     .icon--large_exit:before {
-      content: '\\e91f';
+      content: '\e91f';
     }
     .icon--move:before {
-      content: '\\e920';
+      content: '\e920';
     }
     .icon--new:before {
-      content: '\\e921';
+      content: '\e921';
     }
     .icon--ok:before {
-      content: '\\e922';
+      content: '\e922';
     }
     .icon--open:before {
-      content: '\\e923';
+      content: '\e923';
     }
     .icon--options:before {
-      content: '\\e924';
+      content: '\e924';
     }
     .icon--photo:before {
-      content: '\\e925';
+      content: '\e925';
     }
     .icon--pic:before {
-      content: '\\e926';
+      content: '\e926';
     }
     .icon--play:before {
-      content: '\\e927';
+      content: '\e927';
     }
     .icon--return:before {
-      content: '\\e929';
+      content: '\e929';
     }
     .icon--search:before {
-      content: '\\e92a';
+      content: '\e92a';
     }
     .icon--send:before {
-      content: '\\e92b';
+      content: '\e92b';
     }
     .icon--settings:before {
-      content: '\\e92c';
+      content: '\e92c';
     }
     .icon--small_exit:before {
-      content: '\\e92d';
+      content: '\e92d';
     }
     .icon--thin_arrow_down:before {
-      content: '\\e92e';
+      content: '\e92e';
     }
     .icon--thin_arrow_up:before {
-      content: '\\e92f';
+      content: '\e92f';
     }
     .icon--timer:before {
-      content: '\\e930';
+      content: '\e930';
     }
     .icon--undo:before {
-      content: '\\e931';
+      content: '\e931';
     }
     .icon--up_arrow:before {
-      content: '\\e932';
+      content: '\e932';
     }
     .icon--update:before {
-      content: '\\e933';
+      content: '\e933';
     }
     .icon--upload:before {
-      content: '\\e934';
+      content: '\e934';
     }
     .icon--ver_flip:before {
-      content: '\\e935';
+      content: '\e935';
     }
     .icon--micro_check:before {
-      content: '\\e936';
+      content: '\e936';
     }
     .icon--right_arrow:before {
-      content: '\\e937';
+      content: '\e937';
     }
     .icon--small_balance:before {
-      content: '\\e938';
+      content: '\e938';
     }
     .icon--small_lock:before {
-      content: '\\e939';
+      content: '\e939';
     }
     .icon--small_status:before {
-      content: '\\e93a';
+      content: '\e93a';
     }
     .icon--menu_buy:before {
-      content: '\\e93b';
+      content: '\e93b';
     }
     .icon--menu_chats:before {
-      content: '\\e93c';
+      content: '\e93c';
     }
     .icon--menu_contacts:before {
-      content: '\\e93d';
+      content: '\e93d';
     }
     .icon--menu_wallets:before {
-      content: '\\e940';
+      content: '\e940';
     }
     .icon--menu_gallery:before {
-      content: '\\e903';
+      content: '\e903';
     }
     .icon--menu_editor:before {
-      content: '\\e908';
+      content: '\e908';
     }
   `}</style>
 )
