@@ -868,6 +868,9 @@ export const createTimerMachine = duration =>
     },
     states: {
       running: {
+        entry: assign({
+          start: dayjs(),
+        }),
         invoke: {
           src: ({interval}) => cb => {
             const intervalId = setInterval(() => cb('TICK'), 1000 * interval)
@@ -882,7 +885,7 @@ export const createTimerMachine = duration =>
           },
           TICK: {
             actions: assign({
-              elapsed: ({elapsed, interval}) => elapsed + interval,
+              elapsed: ({start}) => dayjs().diff(start, 's'),
             }),
           },
         },
