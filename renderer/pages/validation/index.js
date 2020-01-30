@@ -10,7 +10,7 @@ import {
   RelevanceType,
   persistValidationState,
   loadValidationState,
-} from '../../screens/validation/validation-machine'
+} from '../../screens/validation/machine'
 import {
   Scene,
   ActionBar,

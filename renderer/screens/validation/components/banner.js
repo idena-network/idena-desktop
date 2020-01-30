@@ -16,7 +16,7 @@ import {
 import {useValidationTimer} from '../../../shared/hooks/use-validation-timer'
 import {useIdentityState} from '../../../shared/providers/identity-context'
 import Timer from './timer'
-import {shouldStartValidation} from '../validation-machine'
+import {shouldStartValidation} from '../machine'
 
 function Banner() {
   const epoch = useEpochState()

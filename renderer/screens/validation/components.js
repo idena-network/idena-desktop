@@ -26,17 +26,13 @@ import {
   Modal,
   SubHeading,
   Text,
-} from '../../../shared/components'
-import Flex from '../../../shared/components/flex'
-import {reorderList} from '../../../shared/utils/arr'
-import Spinner from './spinner'
-import theme, {rem} from '../../../shared/theme'
-import {TranslateWords} from '../../../shared/components/translate-button'
-import {
-  RelevanceType,
-  createTimerMachine,
-  adjustDuration,
-} from '../validation-machine'
+} from '../../shared/components'
+import Flex from '../../shared/components/flex'
+import {reorderList} from '../../shared/utils/arr'
+import Spinner from './components/spinner'
+import theme, {rem} from '../../shared/theme'
+import {TranslateWords} from '../../shared/components/translate-button'
+import {RelevanceType, createTimerMachine, adjustDuration} from './machine'
 
 export function Scene({bg: background = theme.colors.black, ...props}) {
   return (
@@ -543,6 +539,7 @@ export function QualificationButton({
         fontWeight: 500,
         width: rem(136),
         transition: 'none',
+        zIndex: 1,
         ...style,
       }}
       onClick={() => onVote(hash)}

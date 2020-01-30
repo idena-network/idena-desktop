@@ -24,19 +24,8 @@ import {
   flipExtraFlip,
 } from './utils'
 
-// [x] refetch flips -> blobs
-// [x] update to pub/priv flip parts
-// [x] loadWord
-// [x] tooltip
-// [x] FlipLottery -> Flip lottery
-// [x] travis build
 // TODO: merge fetch and decode flips, move validation services to serializable objects
-// [x] improve animation perf
-// [ ] control timers with timerService, check Timer component correctness
-// [x] revokeObjectURLs
-// [x] check log timestamp format
-// [ ] update next.js 9.2
-// [x] check Validate button in banner against final state
+// TODO: check timerMachine and Timer component correctness, control with timerService/setInterval if needed
 export const createValidationMachine = ({
   epoch,
   validationStart,
