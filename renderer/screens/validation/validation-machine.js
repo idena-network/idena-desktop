@@ -10,7 +10,6 @@ import {
 import {SessionType} from '../../shared/providers/validation-context'
 import {fetchFlip} from '../../shared/api'
 import apiClient from '../../shared/api/api-client'
-import vocabulary from '../flips/utils/words'
 import {persistState, loadState} from '../../shared/utils/persist'
 import {EpochPeriod} from '../../shared/providers/epoch-context'
 import {canValidate} from '../../shared/providers/identity-context'
@@ -27,7 +26,7 @@ import {
 
 // [x] refetch flips -> blobs
 // [x] update to pub/priv flip parts
-// [ ] loadWord
+// [x] loadWord
 // [ ] tooltip
 // [ ] FlipLottery -> Flip lottery
 // [ ] travis build
@@ -39,6 +38,7 @@ import {
 // [ ] revokeObjectURLs
 // [ ] check log timestamp format
 // [ ] update next.js 9.2
+// [ ] check Validate button in banner against final state
 export const createValidationMachine = ({
   epoch,
   validationStart,
@@ -558,7 +558,7 @@ export const createValidationMachine = ({
                                 longFlips,
                                 data.map(({hash, words = []}) => ({
                                   hash,
-                                  words: words.map(idx => vocabulary[idx]),
+                                  words: words.map(global.loadKeyword),
                                 }))
                               ),
                           }),

@@ -16,6 +16,7 @@ const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
 const logger = require('./logger')
 const {prepareDb, checkDbExists} = require('./stores/setup')
+const {loadKeyword} = require('./utils/keywords')
 
 const isFirstRun = !checkDbExists('settings')
 
@@ -27,6 +28,8 @@ process.once('loaded', () => {
   global.validationDb = validation
   global.invitesDb = invites
   global.contactsDb = contacts
+
+  global.loadKeyword = loadKeyword
 
   global.logger = logger
 
