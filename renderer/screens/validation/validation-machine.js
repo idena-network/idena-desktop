@@ -32,10 +32,10 @@ import {
 // [x] travis build
 // [ ] merge fetch and decode flips
 // [ ] move validation services to serializable objects
-// [ ] improve animation perf
+// [x] improve animation perf
 // [ ] control timers with timerService
 // [ ] check Timer component correctness
-// [ ] revokeObjectURLs
+// [x] revokeObjectURLs
 // [ ] check log timestamp format
 // [ ] update next.js 9.2
 // [ ] check Validate button in banner against final state
@@ -432,6 +432,7 @@ export const createValidationMachine = ({
               },
             },
           },
+          exit: ['cleanupShortFlips'],
         },
         longSession: {
           id: 'longSession',
@@ -840,6 +841,7 @@ export const createValidationMachine = ({
           entry: log('VALIDATION SUCCEEDED'),
         },
       },
+      exit: ['cleanupLongFlips'],
     },
     {
       delays: {
@@ -853,6 +855,18 @@ export const createValidationMachine = ({
             validationStart,
             shortSessionDuration - 10 + longSessionDuration
           ) * 1000,
+      },
+      actions: {
+        cleanupShortFlips: ({shortFlips}) => {
+          filterSolvableFlips(shortFlips).forEach(({images}) =>
+            images.forEach(URL.revokeObjectURL)
+          )
+        },
+        cleanupLongFlips: ({longFlips}) => {
+          filterSolvableFlips(longFlips).forEach(({images}) =>
+            images.forEach(URL.revokeObjectURL)
+          )
+        },
       },
     }
   )
