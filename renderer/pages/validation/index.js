@@ -3,6 +3,8 @@ import {useMachine} from '@xstate/react'
 import Link from 'next/link'
 import {useMemo, useEffect} from 'react'
 import {useRouter} from 'next/router'
+import {padding, margin} from 'polished'
+import {FiCheck, FiThumbsDown} from 'react-icons/fi'
 import {
   createValidationMachine,
   RelevanceType,
@@ -33,7 +35,7 @@ import {
   SubmitFailedDialog,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
-import {IconClose, Button} from '../../shared/components'
+import {IconClose, Button, Tooltip, Box, Text} from '../../shared/components'
 import {AnswerType} from '../../shared/providers/validation-context'
 import {Debug} from '../../shared/components/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -145,29 +147,98 @@ function ValidationSession({
             }
             onImageFail={() => send('REFETCH_FLIPS')}
           />
-          {isLongSessionKeywords(state) && (
+          {isLongSessionKeywords(state) && currentFlip(state) && (
             <FlipWords currentFlip={currentFlip(state)}>
               <QualificationActions>
-                {Object.values(RelevanceType).map(relevance => {
-                  const flip = currentFlip(state)
-                  return (
-                    <QualificationButton
-                      key={relevance}
-                      flip={flip}
-                      variant={relevance}
-                      onClick={() =>
-                        send({
-                          type: 'TOGGLE_WORDS',
-                          hash: flip.hash,
-                          relevance,
-                        })
-                      }
+                <QualificationButton
+                  flip={currentFlip(state)}
+                  variant={RelevanceType.Relevant}
+                  onVote={hash =>
+                    send({
+                      type: 'TOGGLE_WORDS',
+                      hash,
+                      relevance: RelevanceType.Relevant,
+                    })
+                  }
+                >
+                  {currentFlip(state).relevance === RelevanceType.Relevant && (
+                    <FiCheck
+                      size={rem(20)}
+                      fontSize={rem(13)}
+                      style={{
+                        ...margin(0, rem(4), 0, 0),
+                        verticalAlign: 'middle',
+                      }}
+                    />
+                  )}
+                  Both relevant
+                </QualificationButton>
+                <Tooltip
+                  content={
+                    <Box
+                      w={rem(350)}
+                      css={{
+                        ...padding(rem(theme.spacings.medium16)),
+                        wordWrap: 'break-word',
+                        wordBreak: 'keep-all',
+                        whiteSpace: 'pre-wrap',
+                      }}
                     >
-                      {relevance === RelevanceType.Relevant && 'Both relevant'}
-                      {relevance === RelevanceType.Irrelevant && 'Irrelevant'}
-                    </QualificationButton>
-                  )
-                })}
+                      <Text
+                        color={theme.colors.white}
+                        fontSize={theme.fontSizes.large}
+                        fontWeight="500"
+                        css={{
+                          ...margin(0, 0, rem(theme.spacings.small12)),
+                        }}
+                      >
+                        Please also report the flip when you see one of the
+                        following:
+                      </Text>
+                      <Box color={theme.colors.white} w={rem(350)}>
+                        {[
+                          '1. You need to read the text in the flip to solve it',
+                          '2. You see inappropriate content',
+                          '3. You see numbers or letters or other labels on top of the images showing their order',
+                        ].map(phrase => (
+                          <Box
+                            css={{
+                              fontSize: theme.fontSizes.normal,
+                              ...margin(0, 0, rem(theme.spacings.small12)),
+                            }}
+                          >
+                            {phrase}
+                          </Box>
+                        ))}
+                      </Box>
+                      <Text color={theme.colors.muted}>
+                        Skip the flip if the keywords are not loaded
+                      </Text>
+                    </Box>
+                  }
+                >
+                  <QualificationButton
+                    flip={currentFlip(state)}
+                    variant={RelevanceType.Irrelevant}
+                    onVote={hash =>
+                      send({
+                        type: 'TOGGLE_WORDS',
+                        hash,
+                        relevance: RelevanceType.Irrelevant,
+                      })
+                    }
+                  >
+                    <FiThumbsDown
+                      size={rem(20)}
+                      fontSize={rem(13)}
+                      style={{
+                        ...margin(0, rem(4), 0, 0),
+                        verticalAlign: 'middle',
+                      }}
+                    />
+                    Report
+                  </QualificationButton>
+                </Tooltip>
               </QualificationActions>
             </FlipWords>
           )}

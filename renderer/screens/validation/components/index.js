@@ -311,7 +311,23 @@ export function Thumbnail({
   const hasIrrelevantWords = relevance === RelevanceType.Irrelevant
 
   return (
-    <ThumbnailHolder isCurrent={isCurrent} onClick={onPick}>
+    <ThumbnailHolder
+      isCurrent={isCurrent}
+      css={{
+        border: `solid ${rem(thumbBorderWidth)} ${
+          // eslint-disable-next-line no-nested-ternary
+          isCurrent
+            ? // eslint-disable-next-line no-nested-ternary
+              isQualified
+              ? hasIrrelevantWords
+                ? theme.colors.danger
+                : rgba(87, 143, 255, 0.9)
+              : theme.colors.primary
+            : 'transparent'
+        }`,
+      }}
+      onClick={onPick}
+    >
       {((fetched && !decoded) || failed) && <FailedThumbnail />}
       {!fetched && <LoadingThumbnail />}
       {fetched && decoded && (
@@ -337,7 +353,7 @@ export function Thumbnail({
   )
 }
 
-function ThumbnailHolder({isCurrent, children, ...props}) {
+function ThumbnailHolder({isCurrent, css, children, ...props}) {
   return (
     <Flex
       justify="center"
@@ -347,6 +363,7 @@ function ThumbnailHolder({isCurrent, children, ...props}) {
           isCurrent ? theme.colors.primary : 'transparent'
         }`,
         borderRadius: rem(12),
+        ...css,
       }}
       {...props}
     >
@@ -493,9 +510,10 @@ export function QualificationActions(props) {
 }
 
 export function QualificationButton({
-  flip: {relevance},
+  flip: {hash, relevance},
   variant,
   children,
+  onVote,
   ...props
 }) {
   const buttonVariant =
@@ -527,15 +545,9 @@ export function QualificationButton({
         transition: 'none',
         ...style,
       }}
+      onClick={() => onVote(hash)}
       {...props}
     >
-      {relevance === variant && (
-        <FiCheck
-          size={rem(20)}
-          fontSize={rem(13)}
-          style={{...margin(0, rem(4), 0, 0), verticalAlign: 'middle'}}
-        />
-      )}
       <span
         style={{
           display: 'inline-block',

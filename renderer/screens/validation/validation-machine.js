@@ -27,14 +27,12 @@ import {
 // [x] refetch flips -> blobs
 // [x] update to pub/priv flip parts
 // [x] loadWord
-// [ ] tooltip
+// [x] tooltip
 // [x] FlipLottery -> Flip lottery
 // [x] travis build
-// [ ] merge fetch and decode flips
-// [ ] move validation services to serializable objects
+// TODO: merge fetch and decode flips, move validation services to serializable objects
 // [x] improve animation perf
-// [ ] control timers with timerService
-// [ ] check Timer component correctness
+// [ ] control timers with timerService, check Timer component correctness
 // [x] revokeObjectURLs
 // [x] check log timestamp format
 // [ ] update next.js 9.2
