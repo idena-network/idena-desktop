@@ -374,7 +374,7 @@ function CurrentTask({period, identity}) {
   }
 
   if (period === EpochPeriod.FlipLottery) {
-    return 'Flip lottery'
+    return 'Shuffling flips...'
   }
 
   if (period === EpochPeriod.AfterLongSession) {
