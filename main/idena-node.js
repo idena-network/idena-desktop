@@ -16,8 +16,6 @@ const idenaNodeReleasesUrl =
   'https://api.github.com/repos/idena-network/idena-go/releases/latest'
 const idenaChainDbFolder = 'idenachain.db'
 
-const nodeVersionRegex = /\d+.\d+.\d+/
-
 const getBinarySuffix = () => (process.platform === 'win32' ? '.exe' : '')
 
 const getNodeDir = () => path.join(appDataPath('userData'), 'node')
@@ -194,12 +192,14 @@ function getCurrentVersion(tempNode) {
     try {
       const nodeVersion = spawn(node, ['--version'])
       nodeVersion.stdout.on('data', data => {
-        const str = data.toString()
-        const m = str.match(nodeVersionRegex)
-        if (m && m.length && semver.valid(m[0])) {
-          return resolve(semver.clean(m[0]))
-        }
-        return reject(new Error(`cannot resolve node version, stdout: ${str}`))
+        const {version} = semver.coerce(data.toString())
+        return semver.valid(version)
+          ? resolve(version)
+          : reject(
+              new Error(
+                `cannot resolve node version, stdout: ${data.toString()}`
+              )
+            )
       })
 
       nodeVersion.stderr.on('data', data =>
