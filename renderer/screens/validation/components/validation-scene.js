@@ -1,8 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, margin, padding, borderRadius, cover} from 'polished'
-import {FiCheck} from 'react-icons/fi'
-import {Col, Box, Fill, Button, Heading} from '../../../shared/components'
+import {FiCheck, FiThumbsDown} from 'react-icons/fi'
+import {
+  Col,
+  Box,
+  Fill,
+  Button,
+  Heading,
+  Tooltip,
+  Text,
+} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import Arrow from './arrow'
 import {reorderList} from '../../../shared/utils/arr'
@@ -335,36 +343,78 @@ function Words({words}) {
               <Box style={{whiteSpace: 'nowrap'}}>Both relevant</Box>
             </Flex>
           </Button>
-          <Button
-            style={
-              hasQualified && irrelevantWords
-                ? {
-                    backgroundColor: theme.colors.danger,
-                    color: theme.colors.white,
-                    fontWeight: 500,
-                    width: rem(136, theme.fontSizes.base),
-                  }
-                : {
-                    backgroundColor: theme.colors.danger02,
-                    color: theme.colors.danger,
-                    fontWeight: 500,
-                    width: rem(136, theme.fontSizes.base),
-                  }
-            }
-            onClick={() =>
-              dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: true})
+          <Tooltip
+            content={
+              <Box
+                w={rem(380)}
+                css={{
+                  ...padding(rem(theme.spacings.medium16)),
+                  wordWrap: 'break-word',
+                  wordBreak: 'keep-all',
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                <Text
+                  color={theme.colors.white}
+                  fontSize={theme.fontSizes.large}
+                  fontWeight="500"
+                  css={{
+                    ...margin(0, 0, rem(theme.spacings.small12)),
+                  }}
+                >
+                  Please also report the flip when you see one of the following:
+                </Text>
+                <Box color={theme.colors.white} w={rem(350)}>
+                  {[
+                    '1. You need to read the text in the flip to solve it',
+                    '2. You see inappropriate content',
+                    '3. You see numbers or letters or other labels on top of the images showing their order',
+                  ].map(phrase => (
+                    <Box
+                      css={{
+                        fontSize: theme.fontSizes.normal,
+                        ...margin(0, 0, rem(theme.spacings.small12)),
+                      }}
+                    >
+                      {phrase}
+                    </Box>
+                  ))}
+                </Box>
+                <Text color={theme.colors.muted}>
+                  Skip the flip if the keywords are not loaded
+                </Text>
+              </Box>
             }
           >
-            <Flex align="center" justify="center">
-              {hasQualified && irrelevantWords && (
-                <FiCheck
+            <Button
+              style={
+                hasQualified && irrelevantWords
+                  ? {
+                      backgroundColor: theme.colors.danger,
+                      color: theme.colors.white,
+                      fontWeight: 500,
+                      width: rem(136, theme.fontSizes.base),
+                    }
+                  : {
+                      backgroundColor: theme.colors.danger02,
+                      color: theme.colors.danger,
+                      fontWeight: 500,
+                      width: rem(136, theme.fontSizes.base),
+                    }
+              }
+              onClick={() =>
+                dispatch({type: IRRELEVANT_WORDS_TOGGLED, irrelevant: true})
+              }
+            >
+              <Flex align="center" justify="center">
+                <FiThumbsDown
                   size={16}
                   style={margin(0, rem(4, theme.fontSizes.base), 0, 0)}
                 />
-              )}
-              <Box>Irrelevant</Box>
-            </Flex>
-          </Button>
+                <Box>Report</Box>
+              </Flex>
+            </Button>
+          </Tooltip>
         </Flex>
       </Box>
     </Box>

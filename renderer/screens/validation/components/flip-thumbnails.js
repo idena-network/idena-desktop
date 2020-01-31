@@ -17,9 +17,16 @@ const margin = 4
 const width = 32
 const totalWidth = borderWidth * 2 + margin * 2 + width
 
-const activeStyle = {
-  border: `solid ${rem(borderWidth)} ${theme.colors.primary}`,
-}
+const activeStyle = (isQualified, hasIrrelevantWords) => ({
+  border: `solid ${rem(borderWidth)} ${
+    // eslint-disable-next-line no-nested-ternary
+    isQualified
+      ? hasIrrelevantWords
+        ? theme.colors.danger
+        : rgba(87, 143, 255, 0.9)
+      : theme.colors.primary
+  }`,
+})
 
 const style = {
   border: `solid ${rem(borderWidth)} transparent`,
@@ -72,7 +79,11 @@ function Thumb({
       key={hash}
       justify="center"
       align="center"
-      css={isCurrent ? {...style, ...activeStyle} : style}
+      css={
+        isCurrent
+          ? {...style, ...activeStyle(hasQualified, hasIrrelevantWords)}
+          : style
+      }
       onClick={onClick}
     >
       <Box
