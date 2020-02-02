@@ -274,15 +274,17 @@ function checkForUpdates() {
     return
   }
 
-  setInterval(() => {
+  async function runCheck() {
     try {
-      autoUpdater.checkForUpdates()
+      await autoUpdater.checkForUpdates()
     } catch (e) {
       logger.error('error while checking UI update', e.toString())
+    } finally {
+      setTimeout(runCheck, 10 * 60 * 1000)
     }
-  }, 10 * 60 * 1000)
+  }
 
-  autoUpdater.checkForUpdates()
+  runCheck()
 }
 
 // Prepare the renderer once the app is ready
