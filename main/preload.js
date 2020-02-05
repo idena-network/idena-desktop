@@ -42,8 +42,6 @@ process.once('loaded', () => {
   global.isFirstRun = isFirstRun
   ;[global.locale] = app.getLocale().split('-')
 
-  global.getZoomFactor = () => webFrame.getZoomFactor()
-  global.setZoomFactor = factor => webFrame.setZoomFactor(factor)
   global.getZoomLevel = () => webFrame.getZoomLevel()
   global.setZoomLevel = level => webFrame.setZoomLevel(level)
 
