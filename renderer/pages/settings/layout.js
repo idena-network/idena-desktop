@@ -1,9 +1,8 @@
 import React from 'react'
-
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import Layout from '../../shared/components/layout'
-import {Box, Heading} from '../../shared/components'
+import {Box, PageTitle} from '../../shared/components'
 import theme from '../../shared/theme'
 import Flex from '../../shared/components/flex'
 import FlipToolbar, {
@@ -17,7 +16,7 @@ function SettingsLayout({children}) {
     <Layout>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Box>
-          <Heading>Settings</Heading>
+          <PageTitle>Settings</PageTitle>
           <FlipToolbar>
             <Flex>
               <FlipToolbarItem
@@ -48,7 +47,7 @@ function SettingsLayout({children}) {
 }
 
 SettingsLayout.propTypes = {
-  children: PropTypes.object,
+  children: PropTypes.node,
 }
 
 export default SettingsLayout

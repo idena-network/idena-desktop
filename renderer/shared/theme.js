@@ -26,7 +26,7 @@ const colors = {
 }
 
 const fontSizes = {
-  base: '13px',
+  base: 13,
   heading: '2rem',
   subHeading: '1.4em',
   blockHeading: '1rem',
@@ -76,7 +76,7 @@ export default {
     color: colors.text,
     fontSize: fontSizes.heading,
     fontWeight: fontWeights.semi,
-    ...margin([0, 0, spacings.normal]),
+    ...margin(0),
   },
   SubHeading: {
     color: colors.text,
@@ -103,7 +103,7 @@ export default {
   },
   Button: {
     color: colors.text,
-    size: 1,
+    size: fontSizes.base,
   },
 }
 

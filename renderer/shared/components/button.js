@@ -1,16 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, transparentize, darken} from 'polished'
-import theme from '../theme'
+import {transparentize, darken} from 'polished'
+import theme, {rem} from '../theme'
 
-function Button({
-  size = 1,
-  disabled,
-  danger,
-  variant = 'primary',
-  css,
-  ...props
-}) {
+function Button({size, disabled, danger, variant = 'primary', css, ...props}) {
   const isPrimary = variant === 'primary'
   const bgColor = danger ? theme.colors.danger : theme.colors.primary
 
@@ -27,17 +20,19 @@ function Button({
           border-radius: 6px;
           color: ${color};
           cursor: pointer;
-          font-size: ${`${size}em`};
-          padding: ${`${0.5 * size}em ${size}em`};
+          font-size: ${rem(size)};
+          padding: ${rem(6)} ${rem(16)};
           outline: none;
-          transition: background 0.3s ease, color 0.3s ease;
+          transition: all 0.3s ease;
+          transition-property: background, color;
+          min-height: ${rem(32)};
         }
         button:hover {
           background: ${darken(0.1, bg)};
           color: ${darken(0.05, color)};
         }
         button:disabled {
-          cursor: default;
+          cursor: not-allowed;
           opacity: 0.5;
         }
       `}</style>
@@ -48,7 +43,7 @@ Button.defaultProps = {
   ...theme.Button,
 }
 Button.propTypes = {
-  size: PropTypes.number,
+  size: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   disabled: PropTypes.bool,
   danger: PropTypes.bool,
   variant: PropTypes.oneOf(['primary', 'secondary']),
@@ -56,7 +51,7 @@ Button.propTypes = {
   css: PropTypes.object,
 }
 
-function FlatButton({size = 1, color, disabled, css, ...props}) {
+function FlatButton({size, color, disabled, css, ...props}) {
   return (
     <>
       <button type="button" disabled={disabled} style={css} {...props} />
@@ -67,7 +62,7 @@ function FlatButton({size = 1, color, disabled, css, ...props}) {
           border-radius: 6px;
           color: ${color};
           cursor: ${disabled ? 'not-allowed' : 'pointer'};
-          font-size: ${`${size}em`};
+          font-size: ${rem(size)};
           padding: 0;
           outline: none;
           ${disabled && `opacity: 0.5`};

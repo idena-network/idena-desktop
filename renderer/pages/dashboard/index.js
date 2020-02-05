@@ -1,9 +1,8 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {rem} from 'polished'
-
 import Layout from '../../shared/components/layout'
-import {Heading, Drawer, Box} from '../../shared/components'
+import {Drawer, Box, PageTitle} from '../../shared/components'
 import SendInviteForm from '../../screens/contacts/components/send-invite-form'
 import theme from '../../shared/theme'
 import {InviteProvider} from '../../shared/providers/invite-context'
@@ -40,7 +39,7 @@ function Dashboard() {
           py={theme.spacings.large}
           w={rem(700, theme.fontSizes.base)}
         >
-          <Heading>Profile</Heading>
+          <PageTitle>Profile</PageTitle>
           <Actions>
             {/*
             <IconLink icon={<i className="icon icon--share" />}>Share</IconLink>

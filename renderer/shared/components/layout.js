@@ -7,6 +7,9 @@ import ValidationBanner from '../../screens/validation/components/banner'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {GlobalModals} from './modal'
 import {useDebounce} from '../hooks/use-debounce'
+import {useEpochState} from '../providers/epoch-context'
+import {shouldStartValidation} from '../../screens/validation/machine'
+import {useIdentityState} from '../providers/identity-context'
 
 const AVAILABLE_TIMEOUT = 1000 * 5
 
@@ -47,7 +50,15 @@ Layout.propTypes = {
 }
 
 function NormalApp(props) {
-  const {pathname} = useRouter()
+  const router = useRouter()
+  const {pathname} = router
+
+  const epoch = useEpochState()
+  const identity = useIdentityState()
+
+  React.useEffect(() => {
+    if (shouldStartValidation(epoch, identity)) router.push('/validation')
+  }, [epoch, identity, router])
 
   return (
     <section>

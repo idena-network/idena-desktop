@@ -1,5 +1,4 @@
 import React from 'react'
-import Router from 'next/router'
 import {padding, rem, backgrounds} from 'polished'
 
 import {Box, Text, Fill, Link} from '../../../shared/components'
@@ -15,11 +14,9 @@ import {
   EpochPeriod,
 } from '../../../shared/providers/epoch-context'
 import {useValidationTimer} from '../../../shared/hooks/use-validation-timer'
-import {
-  useIdentityState,
-  canValidate,
-} from '../../../shared/providers/identity-context'
+import {useIdentityState} from '../../../shared/providers/identity-context'
 import Timer from './timer'
+import {shouldStartValidation} from '../machine'
 
 function Banner() {
   const epoch = useEpochState()
@@ -55,12 +52,9 @@ function ValidationSoon() {
 }
 
 function ValidationRunning() {
-  const {currentPeriod} = useEpochState()
-  const {
-    shortAnswers,
-    longAnswers,
-    shortAnswersSubmitted,
-  } = useValidationState()
+  const epoch = useEpochState()
+  const {currentPeriod} = epoch
+  const {shortAnswers, longAnswers} = useValidationState()
 
   const isShortSession = currentPeriod === EpochPeriod.ShortSession
   const sessionType = isShortSession ? SessionType.Short : SessionType.Long
@@ -72,12 +66,6 @@ function ValidationRunning() {
   } = useValidationTimer()
 
   const identity = useIdentityState()
-
-  React.useEffect(() => {
-    if (isShortSession && !shortAnswersSubmitted && canValidate(identity)) {
-      Router.push('/validation/short')
-    }
-  }, [identity, isShortSession, shortAnswersSubmitted])
 
   const seconds = isShortSession
     ? secondsLeftForShortSession
@@ -122,10 +110,10 @@ function ValidationRunning() {
           </Box>
         )}
       </Flex>
-      {!hasAnswers && !!seconds && canValidate(identity) && (
+      {shouldStartValidation(epoch, identity) && (
         <Flex css={padding(theme.spacings.normal)}>
           <Divider vertical m={rem(theme.spacings.medium16)} />
-          <Link href={`/validation/${isShortSession ? 'short' : 'long'}`}>
+          <Link href="/validation">
             <Text
               color={theme.colors.white}
               fontWeight={theme.fontWeights.semi}

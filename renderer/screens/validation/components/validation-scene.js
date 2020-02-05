@@ -30,7 +30,16 @@ import {
 import {TranslateWords} from '../../../shared/components/translate-button'
 
 export default function ValidationScene({
-  flip: {urls, answer, ready, orders, failed, hash, words, irrelevantWords},
+  flip: {
+    images: urls,
+    answer,
+    ready,
+    orders,
+    failed,
+    hash,
+    words,
+    irrelevantWords,
+  },
   isFirst,
   isLast,
   type,

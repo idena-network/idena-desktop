@@ -1,13 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 import {Dim} from './box'
 
 export function Heading({
   color,
   fontSize,
   fontWeight,
-  margin,
+  margin = 0,
   style,
   children,
 }) {
@@ -142,4 +142,8 @@ Text.propTypes = {
 // eslint-disable-next-line react/prop-types
 export function BlockText({css, ...props}) {
   return <Text {...props} css={{...css, display: 'block'}} />
+}
+
+export function PageTitle(props) {
+  return <Heading margin={`${rem(24)} 0 ${rem(24)}`} {...props} />
 }

@@ -78,10 +78,7 @@ function FlipCover({
   id,
   hint,
   pics,
-  nonSensePic,
-  nonSenseOrder,
   type,
-  mined,
   createdAt,
   modifiedAt,
   width,
@@ -101,11 +98,7 @@ function FlipCover({
 
   const isDraft = type === FlipType.Draft
   const canSubmit =
-    global.isDev ||
-    (!syncing &&
-      canSubmitFlip &&
-      pics.every(hasDataUrl) &&
-      (nonSenseOrder < 0 || (nonSenseOrder >= 0 && hasDataUrl(nonSensePic))))
+    global.isDev || (!syncing && canSubmitFlip && pics.every(hasDataUrl))
 
   return (
     <Box w={width}>
@@ -196,10 +189,7 @@ FlipCover.propTypes = {
   id: PropTypes.string.isRequired,
   hint: PropTypes.arrayOf(PropTypes.object).isRequired,
   pics: PropTypes.arrayOf(PropTypes.string).isRequired,
-  nonSensePic: PropTypes.string.isRequired,
-  nonSenseOrder: PropTypes.number.isRequired,
   type: PropTypes.oneOf(Object.values(FlipType)),
-  mined: PropTypes.bool,
   createdAt: PropTypes.number.isRequired,
   modifiedAt: PropTypes.number,
   width: PropTypes.string,

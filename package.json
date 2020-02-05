@@ -61,6 +61,7 @@
     "run-electron": "^1.0.0"
   },
   "dependencies": {
+    "@xstate/react": "^0.8.1",
     "ansi-to-html": "^0.6.10",
     "axios": "^0.18.1",
     "dayjs": "^1.8.14",
@@ -75,7 +76,7 @@
     "lowdb": "^1.0.0",
     "mousetrap": "^1.6.3",
     "nanoid": "^2.0.1",
-    "next": "^9.1.7",
+    "next": "^9.2.1",
     "nprogress": "^0.2.0",
     "pino": "^5.13.2",
     "polished": "^3.3.0",
@@ -90,7 +91,8 @@
     "semver": "^6.3.0",
     "styled-jsx": "^3.2.2",
     "tree-kill": "^1.2.2",
-    "use-deep-compare-effect": "^1.2.0"
+    "use-deep-compare-effect": "^1.2.0",
+    "xstate": "^4.7.6"
   },
   "prettier": {
     "trailingComma": "es5",

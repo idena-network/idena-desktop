@@ -46,6 +46,7 @@ function FlipThumbnails({flips, currentIndex, onPick}) {
         (flip, idx) =>
           !flip.hidden && (
             <Thumb
+              key={flip.hash}
               {...flip}
               isCurrent={currentIndex === idx}
               onClick={() => onPick(idx)}
@@ -64,7 +65,7 @@ FlipThumbnails.propTypes = {
 
 function Thumb({
   hash,
-  urls,
+  images: urls,
   answer,
   ready,
   failed,
@@ -151,7 +152,7 @@ function Thumb({
 
 Thumb.propTypes = {
   hash: PropTypes.string,
-  urls: PropTypes.arrayOf(PropTypes.string),
+  images: PropTypes.arrayOf(PropTypes.string),
   answer: PropTypes.number,
   ready: PropTypes.bool,
   failed: PropTypes.bool,

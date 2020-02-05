@@ -283,7 +283,7 @@ function Block({title, children, fallback = <Loading />}) {
       <Text
         color={theme.colors.white}
         fontWeight={500}
-        css={{lineHeight: rem(20)}}
+        css={{display: 'block', lineHeight: rem(20)}}
       >
         {children || fallback}
       </Text>

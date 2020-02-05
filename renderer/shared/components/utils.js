@@ -3,6 +3,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import theme from '../theme'
 import {Box, Text, Tooltip, TooltipControl} from '.'
+import {Absolute} from './position'
 
 export const Figure = ({label, value, postfix, tooltip}) => (
   <Box m="0 0 1em">
@@ -51,4 +52,20 @@ If.propTypes = {
   condition: PropTypes.bool,
   fallback: PropTypes.node,
   children: PropTypes.node,
+}
+
+export function Debug(props) {
+  return (
+    <Absolute bottom={10} left={10} zIndex={9}>
+      <pre {...props} />
+      <style jsx>{`
+        pre {
+          background: whitesmoke;
+          border-radius: 0.5rem;
+          padding: 1rem;
+          opacity: 0.7;
+        }
+      `}</style>
+    </Absolute>
+  )
 }
