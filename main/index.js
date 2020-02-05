@@ -117,13 +117,13 @@ const createMenu = () => {
       {
         label: 'Dev tools',
         accelerator:
-          process.platform === 'darwin' ? 'Command+Alt+I' : 'Ctrl+Shift+I',
+          process.platform === 'darwin' ? 'Cmd+Alt+I' : 'Ctrl+Shift+I',
         role: 'toggleDevTools',
         visible: false,
       },
       {
         label: 'Quit',
-        accelerator: 'Command+Q',
+        accelerator: 'Cmd+Q',
         selector: 'terminate:',
         click: () => {
           app.quit()
@@ -171,7 +171,28 @@ const createMenu = () => {
     ],
   }
 
-  const template = [application, edit]
+  const view = {
+    label: 'View',
+    submenu: [
+      {
+        label: 'Zoom In',
+        accelerator: 'CmdOrCtrl+=',
+        role: 'zoomin',
+      },
+      {
+        label: 'Zoom Out',
+        accelerator: 'CmdOrCtrl+-',
+        role: 'zoomout',
+      },
+      {
+        label: 'Reset Zoom',
+        accelerator: 'CmdOrCtrl+0',
+        role: 'resetzoom',
+      },
+    ],
+  }
+
+  const template = [application, edit, view]
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
@@ -209,7 +230,7 @@ const createTray = () => {
     },
     {
       label: 'Quit',
-      accelerator: 'Command+Q',
+      accelerator: 'Cmd+Q',
       selector: 'terminate:',
       click: () => {
         app.quit()

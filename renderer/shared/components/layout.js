@@ -10,6 +10,7 @@ import {useDebounce} from '../hooks/use-debounce'
 import {useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/machine'
 import {useIdentityState} from '../providers/identity-context'
+import {addWheelHandler} from '../utils/mouse'
 
 const AVAILABLE_TIMEOUT = 1000 * 5
 
@@ -59,6 +60,12 @@ function NormalApp(props) {
   React.useEffect(() => {
     if (shouldStartValidation(epoch, identity)) router.push('/validation')
   }, [epoch, identity, router])
+
+  const [zoomLevel, setZoomLevel] = React.useState(0)
+  React.useEffect(() => addWheelHandler(setZoomLevel), [])
+  React.useEffect(() => {
+    global.setZoomLevel(zoomLevel)
+  }, [zoomLevel])
 
   return (
     <section>
