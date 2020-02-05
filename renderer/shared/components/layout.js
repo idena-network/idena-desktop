@@ -17,6 +17,13 @@ const AVAILABLE_TIMEOUT = 1000 * 5
 export default function Layout({loading, syncing, offline, ...props}) {
   const debouncedSyncing = useDebounce(syncing, AVAILABLE_TIMEOUT)
   const debouncedOffline = useDebounce(offline, AVAILABLE_TIMEOUT)
+
+  const [zoomLevel, setZoomLevel] = React.useState(0)
+  React.useEffect(() => addWheelHandler(setZoomLevel), [])
+  React.useEffect(() => {
+    global.setZoomLevel(zoomLevel)
+  }, [zoomLevel])
+
   return (
     <main>
       <Sidebar />
@@ -60,12 +67,6 @@ function NormalApp(props) {
   React.useEffect(() => {
     if (shouldStartValidation(epoch, identity)) router.push('/validation')
   }, [epoch, identity, router])
-
-  const [zoomLevel, setZoomLevel] = React.useState(0)
-  React.useEffect(() => addWheelHandler(setZoomLevel), [])
-  React.useEffect(() => {
-    global.setZoomLevel(zoomLevel)
-  }, [zoomLevel])
 
   return (
     <section>

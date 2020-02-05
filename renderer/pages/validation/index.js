@@ -51,6 +51,9 @@ export default function ValidationPage() {
   const epoch = useEpochState()
   const timing = useTimingState()
 
+  // the reason why it's not wrapped with the Layout is lack of this layout for the validatio things
+  // we're just painting on a blank canvas here, but 👇
+  // TODO: move it to the Page component, allowing for Layout prop equals `null` in our case
   const [zoomLevel, setZoomLevel] = useState(0)
   useEffect(() => addWheelHandler(setZoomLevel), [])
   useEffect(() => {

@@ -175,19 +175,14 @@ const createMenu = () => {
     label: 'View',
     submenu: [
       {
-        label: 'Zoom In',
         accelerator: 'CmdOrCtrl+=',
-        role: 'zoomin',
+        role: 'zoomIn',
       },
       {
-        label: 'Zoom Out',
-        accelerator: 'CmdOrCtrl+-',
-        role: 'zoomout',
+        role: 'zoomOut',
       },
       {
-        label: 'Reset Zoom',
-        accelerator: 'CmdOrCtrl+0',
-        role: 'resetzoom',
+        role: 'resetZoom',
       },
     ],
   }
