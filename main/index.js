@@ -177,7 +177,6 @@ const createMenu = () => {
     label: 'View',
     submenu: [
       {
-        // role: 'zoomIn',
         label: 'Zoom In',
         accelerator: 'CmdOrCtrl+=',
         click: (_, window) => {
@@ -189,7 +188,6 @@ const createMenu = () => {
         },
       },
       {
-        // role: 'zoomOut',
         label: 'Zoom Out',
         accelerator: 'CmdOrCtrl+-',
         click: (_, window) => {
@@ -201,7 +199,6 @@ const createMenu = () => {
         },
       },
       {
-        // role: 'resetZoom',
         label: 'Actual Size',
         accelerator: 'CmdOrCtrl+0',
         click: (_, window) => {
@@ -551,7 +548,6 @@ function createSearchWindow() {
     webPreferences: {
       nodeIntegration: false,
       preload: join(__dirname, 'preload.js'),
-      zoomFactor: 1,
     },
     parent: mainWindow,
     show: false,
