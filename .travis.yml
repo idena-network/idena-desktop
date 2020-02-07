@@ -8,6 +8,7 @@ matrix:
     - if: branch =~ /v\d+\.\d+\.\d+/
       os: windows
     - os: osx
+    - os: linux
 
 env:
   global:
@@ -39,3 +40,6 @@ script:
 
   - echo "Build mac"
   - if [[ "$TRAVIS_OS_NAME" == "osx" && "$TRAVIS_TAG" != "" ]]; then npm run dist:mac; fi
+
+  - echo "Build linux"
+  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_TAG" != "" ]]; then npm run dist:linux; fi
