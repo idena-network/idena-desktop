@@ -6,6 +6,7 @@ const {
   ipcRenderer,
   remote: {app},
   shell,
+  webFrame,
 } = electron
 
 const isDev = require('electron-is-dev')
@@ -40,6 +41,9 @@ process.once('loaded', () => {
   global.clipboard = clipboard
   global.isFirstRun = isFirstRun
   ;[global.locale] = app.getLocale().split('-')
+
+  global.getZoomLevel = () => webFrame.getZoomLevel()
+  global.setZoomLevel = level => webFrame.setZoomLevel(level)
 
   global.appVersion = app.getVersion()
 

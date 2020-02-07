@@ -117,7 +117,11 @@ function SettingsProvider({children}) {
   })
 
   useEffect(() => {
-    if (state.uiVersion && semver.lt(state.uiVersion, global.appVersion)) {
+    if (
+      state.uiVersion &&
+      global.appVersion &&
+      semver.lt(state.uiVersion, global.appVersion)
+    ) {
       dispatch({type: UPDATE_UI_VERSION, data: global.appVersion})
     }
   })

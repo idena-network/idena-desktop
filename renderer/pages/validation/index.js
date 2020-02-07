@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import {useMachine} from '@xstate/react'
 import Link from 'next/link'
-import {useMemo, useEffect} from 'react'
+import {useMemo, useEffect, useState} from 'react'
 import {useRouter} from 'next/router'
 import {padding, margin} from 'polished'
 import {FiCheck, FiThumbsDown} from 'react-icons/fi'
@@ -45,10 +45,20 @@ import {
   filterSolvableFlips,
   rearrangeFlips,
 } from '../../screens/validation/utils'
+import {addWheelHandler} from '../../shared/utils/mouse'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
   const timing = useTimingState()
+
+  // the reason why it's not wrapped with the Layout is lack of this layout for the validatio things
+  // we're just painting on a blank canvas here, but 👇
+  // TODO: move it to the Page component, allowing for Layout prop equals `null` in our case
+  const [zoomLevel, setZoomLevel] = useState(0)
+  useEffect(() => addWheelHandler(setZoomLevel), [])
+  useEffect(() => {
+    global.setZoomLevel(zoomLevel)
+  }, [zoomLevel])
 
   if (epoch && timing && timing.shortSession)
     return (
@@ -350,10 +360,6 @@ function ValidationSession({
 
 function isShortSession(state) {
   return state.matches('shortSession')
-}
-
-function isLongSession(state) {
-  return state.matches('longSession')
 }
 
 function isLongSessionFlips(state) {

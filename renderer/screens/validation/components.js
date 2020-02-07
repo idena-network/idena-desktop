@@ -91,7 +91,7 @@ export function CurrentStep(props) {
 }
 
 export function FlipChallenge(props) {
-  return <Flex justify="center" align="center" {...props} />
+  return <Flex justify="center" align="center" css={{zIndex: 1}} {...props} />
 }
 
 export function Flip({

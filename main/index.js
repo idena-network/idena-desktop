@@ -6,6 +6,7 @@ const {
   Tray,
   Menu,
   systemPreferences,
+  shell,
   // eslint-disable-next-line import/no-extraneous-dependencies
 } = require('electron')
 const {autoUpdater} = require('electron-updater')
@@ -40,6 +41,7 @@ const {
 } = require('./idena-node')
 
 const NodeUpdater = require('./node-updater')
+const {persistZoomLevel} = require('./stores/settings')
 
 let mainWindow
 let node
@@ -79,9 +81,14 @@ const createMainWindow = () => {
       preload: join(__dirname, 'preload.js'),
     },
     icon: resolve(__dirname, 'static', 'icon-128@2x.png'),
+    show: false,
   })
 
   loadRoute(mainWindow, 'dashboard')
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show()
+  })
 
   mainWindow.on('close', e => {
     if (mainWindow.forceClose) {
@@ -115,19 +122,14 @@ const createMenu = () => {
         type: 'separator',
       },
       {
-        label: 'Dev tools',
-        accelerator:
-          process.platform === 'darwin' ? 'Command+Alt+I' : 'Ctrl+Shift+I',
+        label: 'Toggle Developer Tools',
         role: 'toggleDevTools',
         visible: false,
       },
       {
         label: 'Quit',
-        accelerator: 'Command+Q',
-        selector: 'terminate:',
-        click: () => {
-          app.quit()
-        },
+        accelerator: 'Cmd+Q',
+        role: 'quit',
       },
     ],
   }
@@ -171,7 +173,68 @@ const createMenu = () => {
     ],
   }
 
-  const template = [application, edit]
+  const view = {
+    label: 'View',
+    submenu: [
+      {
+        label: 'Zoom In',
+        accelerator: 'CmdOrCtrl+=',
+        click: (_, window) => {
+          window.webContents.getZoomLevel(level => {
+            const nextLevel = level + 1
+            window.webContents.setZoomLevel(nextLevel)
+            persistZoomLevel(nextLevel)
+          })
+        },
+      },
+      {
+        label: 'Zoom Out',
+        accelerator: 'CmdOrCtrl+-',
+        click: (_, window) => {
+          window.webContents.getZoomLevel(level => {
+            const nextLevel = level - 1
+            window.webContents.setZoomLevel(nextLevel)
+            persistZoomLevel(nextLevel)
+          })
+        },
+      },
+      {
+        label: 'Actual Size',
+        accelerator: 'CmdOrCtrl+0',
+        click: (_, window) => {
+          window.webContents.setZoomLevel(0)
+          persistZoomLevel(0)
+        },
+      },
+    ],
+  }
+
+  const help = {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'Website',
+        click: () => {
+          shell.openExternal('https://idena.io/')
+        },
+      },
+      {
+        label: 'Explorer',
+        click: () => {
+          shell.openExternal('https://scan.idena.io/')
+        },
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Toggle Developer Tools',
+        role: 'toggleDevTools',
+      },
+    ],
+  }
+
+  const template = [application, edit, view, help]
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
@@ -209,82 +272,11 @@ const createTray = () => {
     },
     {
       label: 'Quit',
-      accelerator: 'Command+Q',
-      selector: 'terminate:',
-      click: () => {
-        app.quit()
-      },
+      accelerator: 'Cmd+Q',
+      role: 'quit',
     },
   ])
   tray.setContextMenu(contextMenu)
-}
-
-nodeUpdater.on('update-available', info => {
-  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-available', info)
-})
-
-nodeUpdater.on('download-progress', info => {
-  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-download-progress', info)
-})
-
-nodeUpdater.on('update-downloaded', info => {
-  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-ready', info)
-})
-
-autoUpdater.on('download-progress', info => {
-  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-download-progress', info)
-})
-
-autoUpdater.on('update-downloaded', info => {
-  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-update-ready', info)
-})
-
-ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
-  logger.info(`new autoupdate command`, command, data)
-  switch (command) {
-    case 'start-checking': {
-      nodeUpdater.checkForUpdates(data.nodeCurrentVersion, data.isInternalNode)
-      break
-    }
-    case 'update-ui': {
-      autoUpdater.quitAndInstall()
-      break
-    }
-    case 'update-node': {
-      stopNode(node)
-        .then(async () => {
-          sendMainWindowMsg(NODE_EVENT, 'node-stopped')
-          await updateNode()
-          sendMainWindowMsg(NODE_EVENT, 'node-ready')
-          sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-updated')
-        })
-        .catch(e => {
-          sendMainWindowMsg(NODE_EVENT, 'node-failed')
-          sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-failed')
-          logger.error('error while updating node', e.toString())
-        })
-      break
-    }
-    default:
-  }
-})
-
-function checkForUpdates() {
-  if (isDev) {
-    return
-  }
-
-  async function runCheck() {
-    try {
-      await autoUpdater.checkForUpdates()
-    } catch (e) {
-      logger.error('error while checking UI update', e.toString())
-    } finally {
-      setTimeout(runCheck, 10 * 60 * 1000)
-    }
-  }
-
-  runCheck()
 }
 
 // Prepare the renderer once the app is ready
@@ -430,6 +422,74 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
     default:
   }
 })
+
+nodeUpdater.on('update-available', info => {
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-available', info)
+})
+
+nodeUpdater.on('download-progress', info => {
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-download-progress', info)
+})
+
+nodeUpdater.on('update-downloaded', info => {
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-ready', info)
+})
+
+autoUpdater.on('download-progress', info => {
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-download-progress', info)
+})
+
+autoUpdater.on('update-downloaded', info => {
+  sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-update-ready', info)
+})
+
+ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
+  logger.info(`new autoupdate command`, command, data)
+  switch (command) {
+    case 'start-checking': {
+      nodeUpdater.checkForUpdates(data.nodeCurrentVersion, data.isInternalNode)
+      break
+    }
+    case 'update-ui': {
+      autoUpdater.quitAndInstall()
+      break
+    }
+    case 'update-node': {
+      stopNode(node)
+        .then(async () => {
+          sendMainWindowMsg(NODE_EVENT, 'node-stopped')
+          await updateNode()
+          sendMainWindowMsg(NODE_EVENT, 'node-ready')
+          sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-updated')
+        })
+        .catch(e => {
+          sendMainWindowMsg(NODE_EVENT, 'node-failed')
+          sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-failed')
+          logger.error('error while updating node', e.toString())
+        })
+      break
+    }
+    default:
+  }
+})
+
+function checkForUpdates() {
+  if (isDev) {
+    return
+  }
+
+  async function runCheck() {
+    try {
+      await autoUpdater.checkForUpdates()
+    } catch (e) {
+      logger.error('error while checking UI update', e.toString())
+    } finally {
+      setTimeout(runCheck, 10 * 60 * 1000)
+    }
+  }
+
+  runCheck()
+}
 
 // listen specific `node` messages
 ipcMain.on('node-log', ({sender}, message) => {
