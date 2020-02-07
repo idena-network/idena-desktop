@@ -551,6 +551,7 @@ function createSearchWindow() {
     webPreferences: {
       nodeIntegration: false,
       preload: join(__dirname, 'preload.js'),
+      zoomFactor: 1,
     },
     parent: mainWindow,
     show: false,
