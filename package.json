@@ -39,8 +39,7 @@
     },
     "linux": {
       "target": [
-        "deb",
-        "rpm"
+        "deb"
       ],
       "publish": [
         "github"
