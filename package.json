@@ -45,7 +45,8 @@
       "publish": [
         "github"
       ],
-      "icon": "main/static/icons/icon-512@2x.icns"
+      "icon": "main/static/icons/icon-512@2x.icns",
+      "maintainer": "Idena <info@idena.io> (https://idena.io/)"
     }
   },
   "devDependencies": {
