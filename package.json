@@ -36,6 +36,16 @@
         "github"
       ],
       "icon": "main/static/icons/icon-512@2x.icns"
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "rpm"
+      ],
+      "publish": [
+        "github"
+      ],
+      "icon": "main/static/icons/icon-512@2x.icns"
     }
   },
   "devDependencies": {
