@@ -10,6 +10,7 @@
     "dist": "npm run build && electron-builder",
     "dist:win": "npm run build && electron-builder --win --publish onTag",
     "dist:mac": "npm run build && electron-builder --mac --publish onTag",
+    "dist:linux": "npm run build && electron-builder --linux --publish onTag",
     "pack": "npm run build && electron-builder --dir",
     "clean": "rm -rf renderer/out dist",
     "lint": "eslint .",
@@ -35,6 +36,16 @@
         "github"
       ],
       "icon": "main/static/icons/icon-512@2x.icns"
+    },
+    "linux": {
+      "target": [
+        "deb"
+      ],
+      "publish": [
+        "github"
+      ],
+      "icon": "main/static/icons/icon-512@2x.icns",
+      "maintainer": "Idena <info@idena.io> (https://idena.io/)"
     }
   },
   "devDependencies": {
