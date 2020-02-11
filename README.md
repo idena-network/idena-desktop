@@ -18,7 +18,7 @@ Follow installation instructions for your system.
 
 ### Get to know Idena
 
-Visit Idena website for the [most common questions](https://idena.io/?view=faq) and [guidelines](https://idena.io/?view=guide).
+Visit [Idena](https://idena.io) for the [most common questions](https://idena.io/?view=faq) and [guidelines](https://idena.io/?view=guide).
 
 ### Configuration
 
