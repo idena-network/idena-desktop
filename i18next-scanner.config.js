@@ -1,4 +1,4 @@
-const {AVAILABLE_LANGS} = require('./renderer/i18n')
+const AVAILABLE_LANGS = ['en', 'fr', 'de', 'es', 'ru', 'zh', 'ko']
 
 module.exports = {
   input: ['renderer/**/*.{js,jsx}', '!**/node_modules/**'],
@@ -11,6 +11,9 @@ module.exports = {
       extensions: ['.js', '.jsx'],
     },
     lngs: AVAILABLE_LANGS,
+    defaultValue(_lng, _ns, key) {
+      return key
+    },
     ns: ['error'],
     resource: {
       loadPath: 'locales/{{lng}}/{{ns}}.json',

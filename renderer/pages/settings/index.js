@@ -228,7 +228,7 @@ function PkDialog({children, onHide, ...props}) {
   return (
     <Modal onHide={onHide} {...props}>
       <Box m="0 0 18px">
-        <SubHeading>{t('settings:Encrypted private key')}</SubHeading>
+        <SubHeading>{t('Encrypted private key')}</SubHeading>
         <Text>
           {t(
             'Scan QR by your mobile phone or copy code below for export privatekey.'
