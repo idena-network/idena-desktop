@@ -1012,15 +1012,18 @@ export function clearValidationState() {
 //
 // TODO: add tests you cowards 👊
 export function shouldStartValidation(epoch, identity) {
-  const isShortSession =
-    epoch && epoch.currentPeriod === EpochPeriod.ShortSession
+  const isValidationRunning =
+    epoch &&
+    [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+      epoch.currentPeriod
+    )
 
-  if (isShortSession && canValidate(identity)) {
+  if (isValidationRunning && canValidate(identity)) {
     // Hooray! We're in but still need to check against persisted validation state and epoch
     const validationStateDefinition = loadValidationState()
     if (validationStateDefinition) {
       const persistedValidationState = State.create(validationStateDefinition)
-      const isDone = persistedValidationState.done // is it DONE? any positive or negative
+      const isDone = persistedValidationState.done // is it DONE? any positive or negative, validation-wise
 
       // One possible way to break this kinda magic case is stucking with node version before the fork
       if (epoch.epoch >= persistedValidationState.context.epoch) {
@@ -1029,9 +1032,8 @@ export function shouldStartValidation(epoch, identity) {
 
         if (!isSameEpoch) {
           clearValidationState()
-          return isDone
         }
-        return !isDone
+        return !isDone || !isSameEpoch
 
         // Below cases simplified
         //
@@ -1041,11 +1043,11 @@ export function shouldStartValidation(epoch, identity) {
 
         // DONE and SAME EPOCH
         // We're done! Keep calm and wait for results
-        // if (isDone && isSameEpoch) return
+        // if (isDone && isSameEpoch) return false
 
         // NOT DONE and NOT SAME EPOCH
         // Not finised prev validation. Even more, still in the middle of PREV validation! Not sure it makes sense to proceed, clearing
-        // if (!isDone && !isSameEpoch) return false
+        // if (!isDone && !isSameEpoch) return true
 
         // NOT DONE and SAME EPOCH
         // Just bumping persisted state, let's say after restarting the app
