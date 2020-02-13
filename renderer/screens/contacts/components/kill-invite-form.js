@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import {wordWrap, margin, rem, padding} from 'polished'
 import {
   Box,
-  Text,
   Button,
   FormGroup,
   SubHeading,

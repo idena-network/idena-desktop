@@ -7,7 +7,7 @@ import {Box} from '../../../shared/components'
 import Actions from '../../../shared/components/actions'
 import IconLink from '../../../shared/components/icon-link'
 
-export default function ContactToolbar({onRename, onDelete}) {
+export default function ContactToolbar({onRename, onDelete, onKill}) {
   const {t} = useTranslation()
   return (
     <Box
@@ -33,9 +33,7 @@ export default function ContactToolbar({onRename, onDelete}) {
         <IconLink
           disabled={onKill == null}
           icon={<i className="icon icon--delete" />}
-          onClick={() => {
-            onKill()
-          }}
+          onClick={onKill}
         >
           Terminate
         </IconLink>
@@ -47,4 +45,5 @@ export default function ContactToolbar({onRename, onDelete}) {
 ContactToolbar.propTypes = {
   onRename: PropTypes.func,
   onDelete: PropTypes.func,
+  onKill: PropTypes.func,
 }

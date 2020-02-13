@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import React, {useCallback} from 'react'
+import React from 'react'
 import * as api from '../api'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL} from '../utils/tx'
