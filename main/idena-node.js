@@ -173,12 +173,6 @@ async function stopNode(node) {
         }
         return resolve(`node ${node.pid} stopped successfully`)
       })
-      // if (process.platform !== 'win32') {
-      // } else {
-      //   node.on('exit', () => resolve(`node ${node.pid} stopped successfully`))
-      //   node.on('error', reject)
-      //   node.kill()
-      // }
     } catch (e) {
       return reject(e)
     }
