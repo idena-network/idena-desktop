@@ -158,7 +158,7 @@ export async function submitFlip(hex, publicHex, privateHex, pairId) {
   console.warn('hex will be depreacted soon, consider using pub/priv parts')
   const {data} = await api().post('/', {
     method: 'flip_submit',
-    params: [{hex, pairId}],
+    params: [{publicHex, privateHex, pairId}],
     id: 1,
   })
   return data
