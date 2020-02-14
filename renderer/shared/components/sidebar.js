@@ -87,14 +87,22 @@ function NodeStatus() {
     >
       <Tooltip
         content={
-          offline
-            ? null
-            : [
-                !offline ? `Peers: ${(peers || []).length}` : '',
-                syncing
-                  ? `Blocks: ${currentBlock} out of ${highestBlock}`
-                  : `Current block: ${currentBlock}`,
-              ].join('\n')
+          <div style={{minWidth: rem(90)}}>
+            {offline
+              ? null
+              : [
+                  !offline ? `Peers: ${(peers || []).length}` : '',
+                  syncing
+                    ? `Blocks: ${currentBlock} out of ${highestBlock}`
+                    : `Current block: ${currentBlock}`,
+                ].map(t => (
+                  <div
+                    style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
+                  >
+                    {t}
+                  </div>
+                ))}
+          </div>
         }
         placement="bottom"
       >

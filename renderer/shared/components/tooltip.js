@@ -40,12 +40,14 @@ export function Tooltip({children, content, placement, pinned, ...props}) {
           font-size: ${rem(11, theme.fontSizes.base)};
           font-weight: 500;
           line-height: 1.45;
+          max-width: ${rem(270)};
           white-space: pre;
+          word-break: break-word;
           opacity: 0;
           visibility: hidden;
           transform: translate(-50%, 0);
           transition: all 0.3s ease;
-          z-index: 999;
+          z-index: 99;
         }
         .tooltip:after {
           top: 100%;
