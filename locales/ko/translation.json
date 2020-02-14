@@ -132,5 +132,6 @@
   "Blockchain transaction ID": "Blockchain transaction ID",
   "Fee limit": "Fee limit",
   "Confirmed": "Confirmed",
-  "You don't have any transactions yet": "You don't have any transactions yet"
+  "You don't have any transactions yet": "You don't have any transactions yet",
+  "General": "General"
 }

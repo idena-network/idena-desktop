@@ -28,7 +28,7 @@ function SettingsLayout({children}) {
                 }}
                 isCurrent={router.pathname === '/settings'}
               >
-                {t('Private key')}
+                {t('General')}
               </FlipToolbarItem>
               <FlipToolbarItem
                 key="node"
