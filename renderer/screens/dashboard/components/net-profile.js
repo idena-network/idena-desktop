@@ -36,9 +36,12 @@ export function NetProfile() {
         label={t('Status')}
         value={mapToFriendlyStatus(state)}
         tooltip={
-          state === 'Newbie'
-            ? t('Solve more than 10 flips&#10;to become Verified')
-            : null
+          state === 'Newbie' ? (
+            <>
+              <div>{t('Solve more than 10 flips')}</div>
+              <div>{t('to become Verified')}</div>
+            </>
+          ) : null
         }
       />
 
@@ -59,9 +62,13 @@ export function NetProfile() {
             label={t('Stake')}
             value={stake}
             postfix="DNA"
-            tooltip={t(
-              'In order to withdraw the&#10;stake you have to&#10;terminate your identity'
-            )}
+            tooltip={
+              <>
+                <div>{t('In order to withdraw the')}</div>
+                <div>{t('stake you have to')}</div>
+                <div>{t(`terminate your identity`)}</div>
+              </>
+            }
           />
         </>
       )}
@@ -71,9 +78,17 @@ export function NetProfile() {
           label={t('Mining penalty')}
           value={penalty}
           postfix="DNA"
-          tooltip={t(
-            "Your node was offline more than 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins."
-          )}
+          tooltip={
+            <>
+              <div>{t('Your node was offline more than 1 hour.')}</div>
+              <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}>
+                {t('The penalty will be charged automaically.')}
+              </div>
+              <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}>
+                {t(`Once it's fully paid you'll continue to mine coins.`)}
+              </div>
+            </>
+          }
         />
       )}
       {age > 0 && <Figure label="Age" value={age} postfix={t('epochs')} />}
@@ -85,7 +100,12 @@ export function NetProfile() {
             value={`${totalShortFlipPoints} out of ${totalQualifiedFlips} (${Math.round(
               (totalShortFlipPoints / totalQualifiedFlips) * 10000
             ) / 100}%) `}
-            tooltip={t('Total score for&#10;all validations')}
+            tooltip={
+              <>
+                <div>{t('Total score for')}</div>
+                <div>{t('all validations')}</div>
+              </>
+            }
           />
         </>
       )}
