@@ -1,6 +1,7 @@
 import React from 'react'
 import {rem, margin} from 'polished'
 
+import {useTranslation} from 'react-i18next'
 import useLocalStorage from '../../shared/hooks/use-local-storage'
 import Layout from '../../shared/components/layout'
 import {Box, PageTitle} from '../../shared/components'
@@ -16,6 +17,7 @@ import {useNotificationDispatch} from '../../shared/providers/notification-conte
 import {useChainState} from '../../shared/providers/chain-context'
 
 function Flips() {
+  const {t} = useTranslation('error')
   const {flips, submitFlip, deleteFlip} = useFlips()
   const {addNotification, addError} = useNotificationDispatch()
   const {syncing, offline, loading} = useChainState()
@@ -34,7 +36,7 @@ function Flips() {
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
-        <PageTitle>My Flips</PageTitle>
+        <PageTitle>{t('My Flips')}</PageTitle>
         <FlipToolbar>
           <Flex>
             {Object.values(FlipType)
@@ -55,7 +57,7 @@ function Flips() {
               href="/flips/new"
               icon={<i className="icon icon--add_btn" />}
             >
-              New flip
+              {t('New flip')}
             </IconLink>
           </Flex>
         </FlipToolbar>
@@ -71,36 +73,34 @@ function Flips() {
                 try {
                   if (!flip.hint) {
                     addError({
-                      title: 'Can not submit flip',
-                      body: 'Keywords are not specified',
+                      title: t('error:Can not submit flip'),
+                      body: t('error:Keywords are not specified'),
                     })
                   }
                   const {result, error} = await submitFlip(flip)
 
                   if (error) {
                     addError({
-                      title: 'Error while uploading flip',
+                      title: t('error:Error while uploading flip'),
                       body: error.message,
                     })
                   } else {
                     addNotification({
-                      title: 'Flip saved',
+                      title: t('Flip saved'),
                       body: result.hash,
                     })
                   }
                 } catch (error) {
-                  let message = 'Something went wrong'
+                  let message = t('error:Something went wrong')
                   if (error.response && error.response.status === 413) {
-                    message = 'Maximum image size exceeded'
+                    message = t('error:Maximum image size exceeded')
                   }
                   addError({
                     title: message,
                   })
                 }
               }}
-              onDelete={() => {
-                deleteFlip(flip)
-              }}
+              onDelete={() => deleteFlip(flip)}
             />
           ))}
         </FlipList>

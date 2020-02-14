@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {margin, rem, padding, borderRadius, backgrounds} from 'polished'
+import {useTranslation} from 'react-i18next'
 import {SubHeading, FormGroup, Text, Box} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
@@ -10,6 +11,8 @@ import useUsername from '../../../shared/hooks/use-username'
 import useFullName from '../../../shared/hooks/use-full-name'
 
 function ContactInfo({address, firstName, lastName, mining, showMining}) {
+  const {t} = useTranslation()
+
   const fullName = useFullName({firstName, lastName})
   const username = useUsername({address})
 
@@ -33,7 +36,7 @@ function ContactInfo({address, firstName, lastName, mining, showMining}) {
               <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}>
                 <Status mined={!mining}>
                   {' '}
-                  {!mining ? 'Mined' : 'Mining...'}{' '}
+                  {!mining ? t('Mined') : t('Mining...')}{' '}
                 </Status>
               </FormGroup>
             </>

@@ -338,7 +338,7 @@ ipcMain.on(NODE_COMMAND, async (event, command, data) => {
             })
             .catch(err => {
               sendMainWindowMsg(NODE_EVENT, 'node-failed')
-              logger.error('error while downlading node', err.toString())
+              logger.error('error while downloading node', err.toString())
             })
             .finally(() => {
               nodeDownloadPromise = null

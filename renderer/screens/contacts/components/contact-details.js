@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {useTranslation} from 'react-i18next'
 import UserInfo from '../../dashboard/components/user-info'
 import ContactToolbar from './contact-toolbar'
 import theme from '../../../shared/theme'
@@ -10,6 +11,7 @@ import {
 } from '../../../shared/providers/identity-context'
 
 function ContactDetails(props) {
+  const {t} = useTranslation()
   const identity = useIdentityState
   const {address, state, age} = identity
   return (
@@ -19,12 +21,12 @@ function ContactDetails(props) {
         <ContactToolbar />
         <div>
           {state && (
-            <Figure label="Status" value={mapToFriendlyStatus(state)} />
+            <Figure label={t('Status')} value={mapToFriendlyStatus(state)} />
           )}
           {Number.isFinite(age) && (
-            <Figure label="Age" value={age} postfix="epochs" />
+            <Figure label={t('Age')} value={age} postfix={t('epochs')} />
           )}
-          <Figure label="Address" value={address} />
+          <Figure label={t('Address')} value={address} />
         </div>
       </section>
       <style jsx>{`

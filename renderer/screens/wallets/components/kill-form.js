@@ -2,6 +2,8 @@ import React from 'react'
 import {rem, margin, padding} from 'polished'
 import PropTypes from 'prop-types'
 import {FiLoader} from 'react-icons/fi'
+import {useTranslation} from 'react-i18next'
+
 import theme from '../../../shared/theme'
 import {
   Box,
@@ -20,6 +22,7 @@ import {
 } from '../../../shared/providers/identity-context'
 
 function KillForm({onSuccess, onFail}) {
+  const {t} = useTranslation(['walets', 'error'])
   const {address, stake} = useIdentityState()
   const {killMe} = useIdentityDispatch()
 
@@ -48,18 +51,18 @@ function KillForm({onSuccess, onFail}) {
           }}
         >
           <SubHeading css={{...margin(0, 0, theme.spacings.small8)}}>
-            Terminate identity
+            {t('Terminate identity')}
           </SubHeading>
           <Text>
-            Terminate your identity and withdraw the stake. Your identity status
-            will be reset to 'Not validated'.
+            {t(`Terminate your identity and withdraw the stake. Your identity status
+            will be reset to 'Not validated'.`)}
           </Text>
         </Box>
 
         <FormGroup>
           <Field
             disabled
-            label="Withraw stake, DNA"
+            label={t('Withraw stake, DNA')}
             value={stake}
             type="number"
           />
@@ -67,17 +70,12 @@ function KillForm({onSuccess, onFail}) {
 
         <FormGroup>
           <Field
-            label="To address"
+            label={t('To address')}
             value={to}
             onChange={e => setTo(e.target.value)}
           />
         </FormGroup>
 
-        {/*
-        <FormGroup>
-          <Field label="Comment" value="" textarea />
-        </FormGroup>
-        */}
         <FormGroup
           css={margin(rem(theme.spacings.medium24), 0, 0)}
           className="text-right"
@@ -94,12 +92,12 @@ function KillForm({onSuccess, onFail}) {
 
                 if (error) {
                   addError({
-                    title: 'Error while sending transaction',
+                    title: t('error:Error while sending transaction'),
                     body: error.message,
                   })
                 } else {
                   addNotification({
-                    title: 'Transaction sent',
+                    title: t('error:Transaction sent'),
                     body: result,
                   })
                   if (onSuccess) onSuccess(result)
@@ -108,7 +106,7 @@ function KillForm({onSuccess, onFail}) {
                 setSubmitting(false)
                 if (onFail) {
                   addError({
-                    title: 'Something went wrong',
+                    title: t('error:Something went wrong'),
                     body: error.message,
                   })
                   onFail(error)
@@ -116,7 +114,7 @@ function KillForm({onSuccess, onFail}) {
               }
             }}
           >
-            {submitting ? <FiLoader /> : 'Terminate'}
+            {submitting ? <FiLoader /> : t('Terminate')}
           </Button>
         </FormGroup>
       </Box>

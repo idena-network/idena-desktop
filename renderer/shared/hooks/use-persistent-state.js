@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef} from 'react'
 import {
-  loadItem,
+  loadPersistentStateValue,
   persistItem,
   persistState,
   shouldPersist,
@@ -8,7 +8,7 @@ import {
 
 export function usePersistentState(dbName, key, initialValue) {
   const [value, setValue] = useState(
-    () => loadItem(dbName, key) || initialValue
+    () => loadPersistentStateValue(dbName, key) || initialValue
   )
 
   useEffect(() => {

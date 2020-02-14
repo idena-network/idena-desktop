@@ -3,6 +3,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {padding, rem, margin, wordWrap} from 'polished'
 import {FiLoader} from 'react-icons/fi'
+import {useTranslation} from 'react-i18next'
 import {
   Box,
   SubHeading,
@@ -17,6 +18,8 @@ import {useInviteDispatch} from '../../../shared/providers/invite-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 
 function SendInviteForm({onSuccess, onFail}) {
+  const {t} = useTranslation()
+
   const [firstName, setFirstName] = React.useState()
   const [lastName, setLastName] = React.useState()
   const [address] = React.useState()
@@ -42,35 +45,21 @@ function SendInviteForm({onSuccess, onFail}) {
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          Invite new person
+          {t('Invite new person')}
         </SubHeading>
       </Box>
       <Flex justify="space-between">
         <NameField
-          label="First name"
+          label={t('First name')}
           value={firstName}
           onChange={e => setFirstName(e.target.value)}
         />
         <NameField
-          label="Last name"
+          label={t('Last name')}
           value={lastName}
           onChange={e => setLastName(e.target.value)}
         />
       </Flex>
-      {/* <WideField
-        label="Address"
-        value={address}
-        onChange={e => setAddress(e.target.value)}
-      /> */}
-      {/* <WideField
-        label="Amount"
-        type="number"
-        value={amount}
-        onChange={e => setAmount(e.target.value)}
-      >
-        <Hint label="Fee" value="0.999 DNA" />
-        <Hint label="Total amount" value="1000.999 DNA" />
-      </WideField> */}
       <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}>
         <Button
           disabled={submitting}
@@ -86,7 +75,7 @@ function SendInviteForm({onSuccess, onFail}) {
               setSubmitting(false)
               if (onSuccess) {
                 addNotification({
-                  title: 'Invitation code created',
+                  title: t('Invitation code created'),
                 })
                 onSuccess(invite)
               }
@@ -101,7 +90,7 @@ function SendInviteForm({onSuccess, onFail}) {
             }
           }}
         >
-          {submitting ? <FiLoader /> : 'Create invitation'}
+          {submitting ? <FiLoader /> : t('Create invitation')}
         </Button>
       </FormGroup>
     </Box>
@@ -114,6 +103,5 @@ SendInviteForm.propTypes = {
 }
 
 const NameField = props => <Field {...props} style={{width: rem(140)}} />
-const WideField = props => <Field {...props} style={{width: rem(296)}} />
 
 export default SendInviteForm

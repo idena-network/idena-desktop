@@ -3,6 +3,7 @@ import nanoid from 'nanoid'
 import {rem} from 'polished'
 import {useRouter} from 'next/router'
 
+import {useTranslation} from 'react-i18next'
 import {Heading, Box, IconClose} from '../../shared/components'
 import FlipMaster from '../../screens/flips/components/flip-master'
 import Layout from '../../shared/components/layout'
@@ -12,6 +13,8 @@ import {useNotificationDispatch} from '../../shared/providers/notification-conte
 import {useChainState} from '../../shared/providers/chain-context'
 
 function NewFlip() {
+  const {t} = useTranslation()
+
   const {syncing} = useChainState()
 
   const router = useRouter()
@@ -21,7 +24,7 @@ function NewFlip() {
 
   const handleClose = () => {
     addNotification({
-      title: 'Flip has been saved to drafts',
+      title: t('Flip has been saved to drafts'),
     })
     router.push('/flips')
   }
@@ -30,7 +33,7 @@ function NewFlip() {
     <Layout syncing={syncing}>
       <Box px={rem(theme.spacings.large)} py={rem(theme.spacings.medium24)}>
         <Flex align="center" justify="space-between">
-          <Heading margin={0}>New flip</Heading>
+          <Heading margin={0}>{t('New flip')}</Heading>
           <IconClose onClick={handleClose} />
         </Flex>
         <FlipMaster id={id} onClose={handleClose} />

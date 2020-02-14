@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
+import {useTranslation} from 'react-i18next'
 import Layout from '../../shared/components/layout'
 import {Box, PageTitle} from '../../shared/components'
 import theme from '../../shared/theme'
@@ -11,12 +12,13 @@ import FlipToolbar, {
 
 function SettingsLayout({children}) {
   const router = useRouter()
+  const {t} = useTranslation()
 
   return (
     <Layout>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Box>
-          <PageTitle>Settings</PageTitle>
+          <PageTitle>{t('Settings')}</PageTitle>
           <FlipToolbar>
             <Flex>
               <FlipToolbarItem
@@ -26,7 +28,7 @@ function SettingsLayout({children}) {
                 }}
                 isCurrent={router.pathname === '/settings'}
               >
-                Private key
+                {t('Private key')}
               </FlipToolbarItem>
               <FlipToolbarItem
                 key="node"
@@ -35,7 +37,7 @@ function SettingsLayout({children}) {
                 }}
                 isCurrent={router.pathname === '/settings/node'}
               >
-                Node
+                {t('Node')}
               </FlipToolbarItem>
             </Flex>
           </FlipToolbar>

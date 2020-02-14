@@ -1,7 +1,7 @@
 import React from 'react'
 import Error from 'next/error'
 import {rem, margin} from 'polished'
-
+import {useTranslation} from 'react-i18next'
 import Layout from '../shared/components/layout'
 import {Button} from '../shared/components'
 import theme from '../shared/theme'
@@ -20,20 +20,22 @@ function MyError({statusCode, hasGetInitialPropsRun, err}) {
     global.logger.error(err)
   }
 
+  const {t} = useTranslation()
+
   return (
     <Layout>
       <article>
-        <div>Oopsie, something went wrong...</div>
+        <div>{t('Something went wrong')}</div>
         <div>
           <section>
             <h2>
               {statusCode
                 ? `An error ${statusCode} occurred on server`
-                : 'An error occurred on client'}
+                : t('An error occurred on client')}
             </h2>
             <div>
               <Button onClick={() => global.ipcRenderer.send('reload')}>
-                Go to My Idena
+                {t('Go to My Idena')}
               </Button>
             </div>
           </section>

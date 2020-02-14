@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react'
 import semver from 'semver'
 import {usePersistence} from '../hooks/use-persistent-state'
-import {loadState} from '../utils/persist'
+import {loadPersistentState} from '../utils/persist'
 import {BASE_API_URL, BASE_INTERNAL_API_PORT} from '../api/api-client'
 import useLogger from '../hooks/use-logger'
+import {AVAILABLE_LANGS} from '../../i18n'
 
 const SETTINGS_INITIALIZE = 'SETTINGS_INITIALIZE'
 const TOGGLE_USE_EXTERNAL_NODE = 'TOGGLE_USE_EXTERNAL_NODE'
@@ -24,6 +25,8 @@ const randomKey = () =>
     .toString(36)
     .substring(2, 15)
 
+const CHANGE_LANGUAGE = 'CHANGE_LANGUAGE'
+
 const initialState = {
   url: BASE_API_URL,
   internalPort: BASE_INTERNAL_API_PORT,
@@ -34,6 +37,7 @@ const initialState = {
   runInternalNode: false,
   internalApiKey: randomKey(),
   externalApiKey: '',
+  lng: AVAILABLE_LANGS[0],
 }
 
 function settingsReducer(state, action) {
@@ -80,6 +84,12 @@ function settingsReducer(state, action) {
         externalApiKey: action.data,
       }
     }
+    case CHANGE_LANGUAGE: {
+      return {
+        ...state,
+        lng: action.lng,
+      }
+    }
     default:
       return state
   }
@@ -94,7 +104,10 @@ function SettingsProvider({children}) {
 
   const [state, dispatch] = usePersistence(
     useLogger(
-      React.useReducer(settingsReducer, loadState('settings') || initialState)
+      React.useReducer(
+        settingsReducer,
+        loadPersistentState('settings') || initialState
+      )
     ),
     'settings'
   )
@@ -142,6 +155,8 @@ function SettingsProvider({children}) {
     dispatch({type: SET_EXTERNAL_KEY, data: key})
   }
 
+  const changeLanguage = lng => dispatch({type: CHANGE_LANGUAGE, lng})
+
   return (
     <SettingsStateContext.Provider value={{...state, showTransferModal}}>
       <SettingsDispatchContext.Provider
@@ -151,6 +166,7 @@ function SettingsProvider({children}) {
           toggleRunInternalNode,
           toggleTransferModal,
           saveExternalApiKey,
+          changeLanguage,
         }}
       >
         {children}

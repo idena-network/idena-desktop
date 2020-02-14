@@ -1,14 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, padding, margin} from 'polished'
-import {FiSend, FiXCircle, FiDollarSign, FiSlash} from 'react-icons/fi'
+import {useTranslation} from 'react-i18next'
 import theme from '../../../shared/theme'
 import {Box} from '../../../shared/components'
-
 import Actions from '../../../shared/components/actions'
 import IconLink from '../../../shared/components/icon-link'
 
-function ContactToolbar({onRename, onKill, onDelete}) {
+export default function ContactToolbar({onRename, onDelete, onKill}) {
+  const {t} = useTranslation()
   return (
     <Box
       py={theme.spacings.large}
@@ -19,40 +19,21 @@ function ContactToolbar({onRename, onKill, onDelete}) {
       }}
     >
       <Actions>
-        {/* TODO:
-        <IconLink disabled icon={<FiSend />}>
-          Send message
+        <IconLink disabled={onRename == null} onClick={onRename}>
+          {t('Rename')}
         </IconLink>
-        <IconLink disabled icon={<FiDollarSign />}>
-          Send coins
-        </IconLink>
-        */}
-
-        <IconLink
-          disabled={onRename == null}
-          onClick={() => {
-            onRename()
-          }}
-        >
-          Rename
-        </IconLink>
-
         <IconLink
           disabled={onDelete == null}
           icon={<i className="icon icon--small_exit" />}
-          onClick={() => {
-            onDelete()
-          }}
+          onClick={onDelete}
         >
-          Delete
+          {t('Delete')}
         </IconLink>
 
         <IconLink
           disabled={onKill == null}
           icon={<i className="icon icon--delete" />}
-          onClick={() => {
-            onKill()
-          }}
+          onClick={onKill}
         >
           Terminate
         </IconLink>
@@ -63,8 +44,6 @@ function ContactToolbar({onRename, onKill, onDelete}) {
 
 ContactToolbar.propTypes = {
   onRename: PropTypes.func,
-  onKill: PropTypes.func,
   onDelete: PropTypes.func,
+  onKill: PropTypes.func,
 }
-
-export default ContactToolbar

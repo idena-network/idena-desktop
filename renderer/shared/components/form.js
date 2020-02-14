@@ -39,21 +39,20 @@ Label.propTypes = {
   htmlFor: PropTypes.string.isRequired,
 }
 
-function Select({options, disabled, ...otherProps}) {
+function Select({options, ...props}) {
+  const {disabled} = props
   return (
-    <>
-      <div>
-        <select disabled={disabled} {...otherProps}>
-          {options.map(option => (
-            <option value={option} key={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <span className="icon">
-          <FiChevronDown />
-        </span>
-      </div>
+    <div>
+      <select {...props}>
+        {options.map(option => (
+          <option value={option} key={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+      <span className="icon">
+        <FiChevronDown />
+      </span>
       <style jsx>{`
         div {
           position: relative;
@@ -92,7 +91,7 @@ function Select({options, disabled, ...otherProps}) {
           ${disabled && 'cursor: not-allowed'};
         }
       `}</style>
-    </>
+    </div>
   )
 }
 

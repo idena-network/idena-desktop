@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import Router from 'next/router'
 import {FiCheckCircle, FiCircle} from 'react-icons/fi'
 import {rem, margin} from 'polished'
+import {useTranslation} from 'react-i18next'
 import FlipStep from './flip-step'
 import {Box, Text} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
@@ -32,6 +33,8 @@ import {
 import {useChainState} from '../../../shared/providers/chain-context'
 
 function FlipMaster({id, onClose}) {
+  const {t} = useTranslation(['flips', 'error'])
+
   const {
     canSubmitFlip,
     flipKeyWordPairs,
@@ -106,15 +109,19 @@ function FlipMaster({id, onClose}) {
             IdentityStatus.Zombie,
           ].includes(identityState)
         ) {
-          message = `You can not submit flips having 'Candidate' status`
+          message = t(
+            `error:You can not submit flips having 'Candidate' status`
+          )
         } else if (
           [IdentityStatus.Newbie, IdentityStatus.Verified].includes(
             identityState
           )
         ) {
-          message = 'You cannot submit more flips until the next validation'
+          message = t(
+            'error:You cannot submit more flips until the next validation'
+          )
         } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
-          message = `Can not submit flip during the validation session`
+          message = t(`error:Can not submit flip during the validation session`)
         } else {
           // eslint-disable-next-line prefer-destructuring
           message = error.message
@@ -122,7 +129,7 @@ function FlipMaster({id, onClose}) {
       }
 
       addNotification({
-        title: error ? 'Error while uploading flip' : 'Flip saved!',
+        title: error ? t('error:Error while uploading flip') : t('Flip saved!'),
         body: error ? message : `Hash ${result.hash}`,
         type: error ? NotificationType.Error : NotificationType.Info,
       })
@@ -130,8 +137,8 @@ function FlipMaster({id, onClose}) {
     } catch ({response: {status}}) {
       setSubmitResult(
         status === 413
-          ? 'Maximum image size exceeded'
-          : 'Unexpected error occurred'
+          ? t('error:Maximum image size exceeded')
+          : t('error:Something went wrong')
       )
     }
   }
@@ -145,10 +152,12 @@ function FlipMaster({id, onClose}) {
 
   const steps = [
     {
-      caption: 'Think up a story',
-      title: 'Think up a story',
-      desc:
-        'Think up a short story about someone/something related to the two key words below according to the template: "Before - Something happens - After"',
+      caption: t('Think up a story'),
+      title: t('Think up a story'),
+      desc: `${t(
+        'Think up a short story about someone/something related to the two key words below according to the template'
+      )}: ${t('Before - Something happens - After')}'
+      )`,
       children: (
         <FlipHint
           {...flip}
@@ -167,9 +176,11 @@ function FlipMaster({id, onClose}) {
       ),
     },
     {
-      caption: 'Select images',
-      title: `Select 4 images to tell your story (${composeHint(flip.hint)})`,
-      desc: flip ? `Please no text on images to explain your story` : '',
+      caption: t('Select images'),
+      title: `${t('Select 4 images to tell your story')}: ${composeHint(
+        flip.hint
+      )})`,
+      desc: flip ? t(`Please no text on images to explain your story`) : '',
       children: (
         <FlipPics
           {...flip}
@@ -180,9 +191,9 @@ function FlipMaster({id, onClose}) {
       ),
     },
     {
-      caption: 'Shuffle images',
-      title: 'Shuffle images',
-      desc: 'Shuffle images in order to make a nonsense sequence of images',
+      caption: t('Shuffle images'),
+      title: t('Shuffle images'),
+      desc: t('Shuffle images in order to make a nonsense sequence of images'),
       children: (
         <FlipShuffle
           {...flip}
@@ -196,9 +207,11 @@ function FlipMaster({id, onClose}) {
       ),
     },
     {
-      caption: 'Submit flip',
-      title: `Submit flip (${composeHint(flip.hint)})`,
-      desc: `Make sure it is not possible to read the shuffled images as a meaningful story?`,
+      caption: t('Submit flip'),
+      title: `${t('Submit flip')} (${composeHint(flip.hint)})`,
+      desc: t(
+        `Make sure it is not possible to read the shuffled images as a meaningful story`
+      ),
       children: <SubmitFlip {...flip} submitFlipResult={submitResult} />,
     },
   ]

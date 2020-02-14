@@ -1,5 +1,6 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
+import {useTranslation} from 'react-i18next'
 import {
   Box,
   SubHeading,
@@ -11,6 +12,8 @@ import {
 import Avatar from '../../../shared/components/avatar'
 
 export function NewContactForm({name, lastName, addr, username, onSave}) {
+  const {t} = useTranslation()
+
   const nameRef = useRef(null)
   const lastNameRef = useRef(null)
   const addrRef = useRef(null)
@@ -18,35 +21,35 @@ export function NewContactForm({name, lastName, addr, username, onSave}) {
   return (
     <Box p="2em">
       <Avatar username={name} size={24} />
-      <SubHeading>Personal data</SubHeading>
+      <SubHeading>{t('Personal data')}</SubHeading>
       <FormGroup>
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">{t('Name')}</Label>
         <Input defaultValue={name} ref={nameRef} id="name" />
       </FormGroup>
       <FormGroup>
-        <Label htmlFor="lastName">Last Name</Label>
+        <Label htmlFor="lastName">{t('Last Name')}</Label>
         <Input defaultValue={lastName} ref={lastNameRef} id="lastName" />
       </FormGroup>
-      <SubHeading>Idena data</SubHeading>
+      <SubHeading>{t('Idena data')}</SubHeading>
       <FormGroup>
-        <Label htmlFor="addr">Address</Label>
+        <Label htmlFor="addr">{t('Address')}</Label>
         <Input defaultValue={addr} ref={addrRef} id="addr" />
       </FormGroup>
       <FormGroup>
-        <Label htmlFor="username">Username</Label>
+        <Label htmlFor="username">{t('Username')}</Label>
         <Input defaultValue={username} ref={usernameRef} id="username" />
       </FormGroup>
       <Button
-        onClick={() => {
+        onClick={() =>
           onSave({
             name: nameRef.current.value,
             lastName: lastNameRef.current.value,
             addr: addrRef.current.value,
             username: usernameRef.current.value,
           })
-        }}
+        }
       >
-        Save contact
+        {t('Save contact')}
       </Button>
     </Box>
   )

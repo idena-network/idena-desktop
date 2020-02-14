@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {FiUsers} from 'react-icons/fi'
+import {useTranslation} from 'react-i18next'
 import {Box, Drawer, Placeholder} from '../../../shared/components'
 import Layout from '../../../shared/components/layout'
 import Flex from '../../../shared/components/flex'
@@ -12,6 +13,8 @@ import InviteDetails from './invite-details'
 import {useChainState} from '../../../shared/providers/chain-context'
 
 function ContactsPage({showNewInviteForm = false}) {
+  const {t} = useTranslation()
+
   const [selectedContact, setSelectedContact] = React.useState(null)
   const [selectedInvite, setSelectedInvite] = React.useState(null)
   const [showInvite, setShowInvite] = React.useState(false)
@@ -36,9 +39,7 @@ function ContactsPage({showNewInviteForm = false}) {
               setSelectedInvite(invite)
               setShowInvite(true)
             }}
-            onNewInvite={() => {
-              setIsSendInviteOpen(true)
-            }}
+            onNewInvite={() => setIsSendInviteOpen(true)}
           />
           <Box
             css={{
@@ -69,7 +70,7 @@ function ContactsPage({showNewInviteForm = false}) {
                 icon={<FiUsers />}
                 text={
                   <>
-                    You haven’t selected contacts yet. <br />
+                    {t('You haven’t selected contacts yet.')} <br />
                   </>
                 }
               />

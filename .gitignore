@@ -90,8 +90,6 @@ typings/
 
 # idena
 datadir
-**/invites.json
-**/contacts.json
 
 .idea
 

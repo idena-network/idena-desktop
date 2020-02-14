@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, margin, border, padding} from 'polished'
+import {useTranslation} from 'react-i18next'
 import {Box, Button, SubHeading, Text} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import theme from '../../../shared/theme'
@@ -17,6 +18,7 @@ function FlipStep({
   isLast,
   allowSubmit,
 }) {
+  const {t} = useTranslation()
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const shouldClose = isLast && !allowSubmit
   const shouldSubmit = isLast && allowSubmit
@@ -44,10 +46,10 @@ function FlipStep({
           css={margin(0, rem(theme.spacings.small8), 0)}
           onClick={onPrev}
         >
-          Previous step
+          {t('Previous step')}
         </Button>
-        {shouldNext && <Button onClick={onNext}>Next step</Button>}
-        {shouldClose && <Button onClick={onClose}>Close</Button>}
+        {shouldNext && <Button onClick={onNext}>{t('Next step')}</Button>}
+        {shouldClose && <Button onClick={onClose}>{t('Close')}</Button>}
         {shouldSubmit && (
           <Button
             disabled={isSubmitting}
@@ -57,7 +59,7 @@ function FlipStep({
               setIsSubmitting(false)
             }}
           >
-            Submit
+            {t('Submit')}
           </Button>
         )}
       </Flex>

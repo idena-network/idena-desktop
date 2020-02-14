@@ -2,6 +2,8 @@ import React from 'react'
 import App from 'next/app'
 import Router from 'next/router'
 import NProgress from 'nprogress'
+import '../i18n'
+
 import GlobalStyle from '../shared/components/global-style'
 import {EpochProvider} from '../shared/providers/epoch-context'
 import {IdentityProvider} from '../shared/providers/identity-context'

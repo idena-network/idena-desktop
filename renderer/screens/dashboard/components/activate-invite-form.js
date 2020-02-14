@@ -1,5 +1,7 @@
 import React, {useRef} from 'react'
 import {margin, rem} from 'polished'
+import {useTranslation} from 'react-i18next'
+
 import {Box, FormGroup, Label, Input, Button} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
@@ -14,6 +16,7 @@ import {
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 
 function ActivateInviteForm() {
+  const {t} = useTranslation()
   const keyRef = useRef()
 
   const {addError} = useNotificationDispatch()
@@ -32,7 +35,7 @@ function ActivateInviteForm() {
   return (
     <Box py={theme.spacings.normal}>
       <FormGroup>
-        <Label htmlFor="activateInviteKey">Invitation code</Label>
+        <Label htmlFor="activateInviteKey">{t('Invitation code')}</Label>
         <Flex align="center">
           <Input
             ref={keyRef}
@@ -56,7 +59,7 @@ function ActivateInviteForm() {
               }
             }}
           >
-            {mining ? 'Mining...' : 'Activate invite'}
+            {mining ? t('Mining...') : t('Activate invite')}
           </Button>
         </Flex>
       </FormGroup>

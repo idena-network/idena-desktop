@@ -2,6 +2,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, padding, border, margin, ellipsis, backgrounds} from 'polished'
+import {useTranslation} from 'react-i18next'
 import {Box, Group, Text, Input, Button} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
@@ -39,16 +40,6 @@ function Sidebar({onSelectContact, onSelectInvite, onNewInvite}) {
       <InviteSection onNewInvite={onNewInvite}>
         <InviteList filter={term} onSelectInvite={onSelectInvite} />
       </InviteSection>
-
-      {/*
-      <Actions />
-      <InviteSection  filter={term} onNewInvite={onNewInvite}>
-        <InviteList onSelectInvite={onSelectInvite} />
-      </InviteSection>
-      <ContactSection>
-        <ContactList filter={term} onSelectContact={onSelectContact} />
-      </ContactSection>
-      */}
     </Box>
   )
 }
@@ -61,12 +52,12 @@ Sidebar.propTypes = {
 
 // eslint-disable-next-line react/prop-types
 function InviteSection({onNewInvite, children}) {
+  const {t} = useTranslation()
   const {invites: invitesCount} = useIdentityState()
-
   return (
     <SidebarHeading
       onNewInvite={invitesCount ? onNewInvite : null}
-      title={`Invites (${invitesCount} left)`}
+      title={t(`Invites (${invitesCount} left)`)}
     >
       {children}
     </SidebarHeading>
@@ -74,6 +65,8 @@ function InviteSection({onNewInvite, children}) {
 }
 
 function InviteList({filter, onSelectInvite}) {
+  const {t} = useTranslation()
+
   const {invites} = useInviteState()
 
   const [filteredInvites, setFilteredInvites] = React.useState([])
@@ -95,7 +88,7 @@ function InviteList({filter, onSelectInvite}) {
   if (filter && filteredInvites.length === 0) {
     return (
       <Text css={padding(rem(theme.spacings.medium16))}>
-        No invites found...
+        {t('No invites found...')}
       </Text>
     )
   }
@@ -135,10 +128,12 @@ function InviteCard({
 }) {
   const fullName = useFullName(props)
 
+  const {t} = useTranslation()
+
   const hint = mining
-    ? 'Mining...'
+    ? t('Mining...')
     : terminating
-    ? 'Terminating...'
+    ? t('Terminating...')
     : activated
     ? mapToFriendlyStatus(state)
     : ''
@@ -199,6 +194,7 @@ InviteCard.propTypes = {
 }
 
 function ContactList({filter, onSelectContact}) {
+  const {t} = useTranslation()
   const {contacts} = useContactState()
 
   const [currentIdx, setCurrentIdx] = React.useState(0)
@@ -221,7 +217,7 @@ function ContactList({filter, onSelectContact}) {
   if (filteredContacts.length === 0) {
     return (
       <Text css={padding(rem(theme.spacings.medium16))}>
-        No contacts found...
+        {t('No contacts found...')}
       </Text>
     )
   }
@@ -317,11 +313,12 @@ ContactCard.propTypes = {
 }
 
 function Search(props) {
+  const {t} = useTranslation()
   return (
     <Box p={rem(theme.spacings.medium16)}>
       <Input
         type="search"
-        placeholder="Search"
+        placeholder={t('Search')}
         style={{
           ...backgrounds(theme.colors.gray),
           border: 'none',

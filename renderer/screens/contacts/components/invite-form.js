@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {wordWrap, margin, rem, padding} from 'polished'
+import {useTranslation} from 'react-i18next'
 import {
   Box,
   Button,
@@ -16,6 +17,8 @@ import useFullName from '../../../shared/hooks/use-full-name'
 import useUsername from '../../../shared/hooks/use-username'
 
 function RenameInvite({receiver, firstName, lastName, onSave}) {
+  const {t} = useTranslation()
+
   const fullName = useFullName({firstName, lastName})
 
   const address = receiver
@@ -47,13 +50,13 @@ function RenameInvite({receiver, firstName, lastName, onSave}) {
 
       <Flex justify="space-between">
         <NameField
-          label="First name"
+          label={t('First name')}
           id="firstNameEidt"
           defaultValue={firstName}
           onChange={e => setNewFirstName(e.target.value)}
         />
         <NameField
-          label="Last name"
+          label={t('Last name')}
           id="lastNameEdit"
           defaultValue={lastName}
           onChange={e => setNewLastName(e.target.value)}
@@ -61,12 +64,8 @@ function RenameInvite({receiver, firstName, lastName, onSave}) {
       </Flex>
 
       <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}>
-        <Button
-          onClick={() => {
-            onSave(newFirstName, newLastName)
-          }}
-        >
-          Done
+        <Button onClick={() => onSave(newFirstName, newLastName)}>
+          {t('Done')}
         </Button>
       </FormGroup>
     </Box>
