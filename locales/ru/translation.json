@@ -133,5 +133,15 @@
   "Fee limit": "Fee limit",
   "Confirmed": "Confirmed",
   "You don't have any transactions yet": "You don't have any transactions yet",
-  "General": "General"
+  "General": "General",
+  "Solve more than 10 flips": "Solve more than 10 flips",
+  "to become Verified": "to become Verified",
+  "In order to withdraw the": "In order to withdraw the",
+  "stake you have to": "stake you have to",
+  "terminate your identity": "terminate your identity",
+  "Your node was offline more than 1 hour.": "Your node was offline more than 1 hour.",
+  "The penalty will be charged automaically.": "The penalty will be charged automaically.",
+  "Once it's fully paid you'll continue to mine coins.": "Once it's fully paid you'll continue to mine coins.",
+  "Total score for": "Total score for",
+  "all validations": "all validations"
 }
