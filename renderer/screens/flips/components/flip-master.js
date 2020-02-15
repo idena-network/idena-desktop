@@ -179,7 +179,7 @@ function FlipMaster({id, onClose}) {
       caption: t('Select images'),
       title: `${t('Select 4 images to tell your story')}: ${composeHint(
         flip.hint
-      )})`,
+      )}`,
       desc: flip ? t(`Please no text on images to explain your story`) : '',
       children: (
         <FlipPics
