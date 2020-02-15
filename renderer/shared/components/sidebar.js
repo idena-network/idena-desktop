@@ -95,8 +95,9 @@ function NodeStatus() {
                   syncing
                     ? `Blocks: ${currentBlock} out of ${highestBlock}`
                     : `Current block: ${currentBlock}`,
-                ].map(t => (
+                ].map((t, idx) => (
                   <div
+                    key={idx}
                     style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
                   >
                     {t}

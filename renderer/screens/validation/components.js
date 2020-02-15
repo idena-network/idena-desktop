@@ -538,7 +538,9 @@ export function QualificationButton({
       style={{
         fontWeight: 500,
         width: rem(136),
+        minWidth: rem(136),
         transition: 'none',
+        whiteSpace: 'nowrap',
         zIndex: 1,
         ...style,
       }}
