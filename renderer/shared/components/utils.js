@@ -39,7 +39,7 @@ export const Figure = ({label, value, postfix, tooltip}) => (
 
 Figure.propTypes = {
   label: PropTypes.string,
-  tooltip: PropTypes.string,
+  tooltip: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   postfix: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 }

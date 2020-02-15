@@ -40,7 +40,6 @@ export function Tooltip({children, content, placement, pinned, ...props}) {
           font-size: ${rem(11, theme.fontSizes.base)};
           font-weight: 500;
           line-height: 1.45;
-          max-width: ${rem(270)};
           white-space: pre;
           word-break: break-word;
           opacity: 0;
