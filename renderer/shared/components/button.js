@@ -82,6 +82,7 @@ FlatButton.defaultProps = {
 }
 FlatButton.propTypes = Button.propTypes
 
+// eslint-disable-next-line react/prop-types
 function IconButton({icon, children, disabled, danger, ...props}, ref) {
   const color = danger ? theme.colors.danger : theme.colors.primary
   return (
