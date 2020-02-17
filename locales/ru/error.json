@@ -1,14 +1,14 @@
 {
-  "Can not submit flip": "Can not submit flip",
-  "Keywords are not specified": "Keywords are not specified",
-  "Error while uploading flip": "Error while uploading flip",
-  "Something went wrong": "Something went wrong",
-  "Maximum image size exceeded": "Maximum image size exceeded",
-  "Error while importing key": "Error while importing key",
-  "Internal node is not available, try again in a few seconds": "Internal node is not available, try again in a few seconds",
-  "You can not submit flips having 'Candidate' status": "You can not submit flips having 'Candidate' status",
-  "You cannot submit more flips until the next validation": "You cannot submit more flips until the next validation",
-  "Can not submit flip during the validation session": "Can not submit flip during the validation session",
-  "Error while sending transaction": "Error while sending transaction",
-  "Transaction sent": "Transaction sent"
+  "Can not submit flip": "Невозможно предложить флип",
+  "Keywords are not specified": "Ключевые слова не указаны",
+  "Error while uploading flip": "Ошибка во время загрузки флипа",
+  "Something went wrong": "Что-то пошло не так",
+  "Maximum image size exceeded": "Превышен максимально допустимый размер изображения",
+  "Error while importing key": "Ошибка во время импорта ключа",
+  "Internal node is not available, try again in a few seconds": "Встроенная нода (узел) не доступна, попробуйте снова через несколько секунд",
+  "You can not submit flips having 'Candidate' status": "Вы не можете предлагать флипы имея статус 'Кандидат'",
+  "You cannot submit more flips until the next validation": "Вы сможете предложить больше флипов только после следующей валидации",
+  "Can not submit flip during the validation session": "Нельзя предлагать флипы непосредственно во время валидации",
+  "Error while sending transaction": "Ошибка при отправке транзакции",
+  "Transaction sent": "Транзакция отправлена"
 }
