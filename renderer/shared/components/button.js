@@ -82,10 +82,10 @@ FlatButton.defaultProps = {
 }
 FlatButton.propTypes = Button.propTypes
 
-function IconButton({icon, children, disabled, danger, ...props}) {
+function IconButton({icon, children, disabled, danger, ...props}, ref) {
   const color = danger ? theme.colors.danger : theme.colors.primary
   return (
-    <button type="button" disabled={disabled} {...props}>
+    <button type="button" disabled={disabled} ref={ref} {...props}>
       {icon}
       <span>{children}</span>
       <style jsx>{`
@@ -122,6 +122,7 @@ function IconButton({icon, children, disabled, danger, ...props}) {
     </button>
   )
 }
+
 IconButton.propTypes = {
   icon: PropTypes.node,
   children: PropTypes.node,
@@ -129,5 +130,7 @@ IconButton.propTypes = {
   danger: PropTypes.bool,
 }
 
-export {FlatButton, IconButton}
+const IconButtonRef = React.forwardRef(IconButton)
+
+export {FlatButton, IconButtonRef as IconButton}
 export default Button
