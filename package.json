@@ -5,7 +5,7 @@
   "main": "main/index.js",
   "repository": "idena-network/idena-desktop",
   "scripts": {
-    "start": "run-electron .",
+    "start": "electron .",
     "build": "next build renderer && next export renderer",
     "dist": "npm run build && electron-builder",
     "dist:win": "npm run build && electron-builder --win --publish onTag",
@@ -57,7 +57,7 @@
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.9.0",
     "devtron": "^1.4.0",
-    "electron": "^4.1.0",
+    "electron": "^8.0.1",
     "electron-builder": "^21.2.0",
     "eslint": "^5.14.1",
     "eslint-config-airbnb": "^17.1.0",
@@ -72,12 +72,10 @@
     "i18next-scanner": "^2.10.3",
     "jest": "^24.9.0",
     "prettier": "^1.16.4",
-    "react-dom": "^16.8.4",
-    "run-electron": "^1.0.0"
+    "react-dom": "^16.8.4"
   },
   "dependencies": {
     "@xstate/react": "^0.8.1",
-    "ansi-to-html": "^0.6.10",
     "axios": "^0.18.1",
     "dayjs": "^1.8.14",
     "dequal": "^1.0.0",
