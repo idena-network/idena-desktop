@@ -144,11 +144,13 @@ export async function fetchCoinbaseAddress() {
  * @returns {Flip} Encoded flip
  */
 export async function fetchFlip(hash) {
+  global.logger.debug(`flip_get request`, hash)
   const {data} = await api().post('/', {
     method: 'flip_get',
     params: [hash],
     id: 1,
   })
+  global.logger.debug(`flip_get response`, hash)
   return data
 }
 

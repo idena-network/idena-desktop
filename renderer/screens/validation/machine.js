@@ -51,9 +51,11 @@ export const createValidationMachine = ({
           type: 'parallel',
           states: {
             fetch: {
+              entry: log('Start fetching short flips'),
               initial: 'check',
               states: {
                 check: {
+                  entry: log('Check all available flips are fetched'),
                   id: 'check',
                   on: {
                     '': [
@@ -71,6 +73,7 @@ export const createValidationMachine = ({
                   initial: 'fetching',
                   states: {
                     fetching: {
+                      entry: log('Fetching short hashes'),
                       invoke: {
                         src: () => fetchFlipHashes(SessionType.Short),
                         onDone: {
@@ -82,10 +85,12 @@ export const createValidationMachine = ({
                                   ? mergeFlipsByHash(shortFlips, data)
                                   : mergeFlipsByHash(data, shortFlips),
                             }),
+                            log(),
                           ],
                         },
                         onError: {
                           target: 'fail',
+                          actions: log(),
                         },
                       },
                     },
@@ -101,6 +106,7 @@ export const createValidationMachine = ({
                   initial: 'fetching',
                   states: {
                     fetching: {
+                      entry: log('Fetching short flips'),
                       invoke: {
                         src: ({shortFlips}) =>
                           fetchFlips(
@@ -110,13 +116,17 @@ export const createValidationMachine = ({
                           ),
                         onDone: {
                           target: '#decodeShortFlips',
-                          actions: assign({
-                            shortFlips: ({shortFlips}, {data}) =>
-                              mergeFlipsByHash(shortFlips, data),
-                          }),
+                          actions: [
+                            assign({
+                              shortFlips: ({shortFlips}, {data}) =>
+                                mergeFlipsByHash(shortFlips, data),
+                            }),
+                            log(),
+                          ],
                         },
                         onError: {
                           target: 'fail',
+                          actions: log(),
                         },
                       },
                     },
@@ -133,6 +143,7 @@ export const createValidationMachine = ({
                   states: {
                     decoding: {
                       invoke: {
+                        entry: log('Decoding short flips'),
                         src: async ({shortFlips}) =>
                           filterWaitingForDecoding(shortFlips).map(decodeFlip),
                         onDone: {
@@ -142,10 +153,12 @@ export const createValidationMachine = ({
                               shortFlips: ({shortFlips}, {data}) =>
                                 mergeFlipsByHash(shortFlips, data),
                             }),
+                            log(),
                           ],
                         },
                         onError: {
                           target: 'fail',
+                          actions: log(),
                         },
                       },
                     },
@@ -154,7 +167,9 @@ export const createValidationMachine = ({
                         1000: '#check',
                       },
                     },
-                    fail: {},
+                    fail: {
+                      entry: log(),
+                    },
                   },
                 },
                 bumpExtraFlips: {
@@ -194,10 +209,13 @@ export const createValidationMachine = ({
                   on: {
                     EXTRA_FLIPS_PULLED: {
                       target: 'done',
-                      actions: assign({
-                        shortFlips: ({shortFlips}, {flips}) =>
-                          mergeFlipsByHash(shortFlips, flips),
-                      }),
+                      actions: [
+                        assign({
+                          shortFlips: ({shortFlips}, {flips}) =>
+                            mergeFlipsByHash(shortFlips, flips),
+                        }),
+                        log(),
+                      ],
                     },
                     EXTRA_FLIPS_MISSED: {
                       target: 'done',
@@ -209,14 +227,17 @@ export const createValidationMachine = ({
               on: {
                 REFETCH_FLIPS: {
                   target: '#fetchShortFlips',
-                  actions: assign({
-                    shortFlips: ({shortFlips}) =>
-                      shortFlips.map(flip => ({
-                        ...flip,
-                        fetched: false,
-                        decoded: false,
-                      })),
-                  }),
+                  actions: [
+                    assign({
+                      shortFlips: ({shortFlips}) =>
+                        shortFlips.map(flip => ({
+                          ...flip,
+                          fetched: false,
+                          decoded: false,
+                        })),
+                    }),
+                    log('Re-fetching flips after re-entering short session'),
+                  ],
                 },
               },
               after: {
@@ -427,7 +448,7 @@ export const createValidationMachine = ({
             assign({
               currentIndex: 0,
             }),
-            log('Starting long session'),
+            log('Entering long session'),
           ],
           type: 'parallel',
           states: {
@@ -436,20 +457,28 @@ export const createValidationMachine = ({
               states: {
                 flips: {
                   initial: 'fetchHashes',
+                  entry: log('Start fetching long flips'),
                   states: {
                     fetchHashes: {
                       initial: 'fetching',
                       states: {
                         fetching: {
+                          entry: log('Fetching long hashes'),
                           invoke: {
                             src: () => fetchFlipHashes(SessionType.Long),
                             onDone: {
                               target: '#fetchLongFlips',
-                              actions: assign({
-                                longFlips: (_, {data}) => data,
-                              }),
+                              actions: [
+                                assign({
+                                  longFlips: (_, {data}) => data,
+                                }),
+                                log(),
+                              ],
                             },
-                            onError: 'fail',
+                            onError: {
+                              target: 'fail',
+                              actions: log(),
+                            },
                           },
                         },
                         fail: {},
@@ -460,6 +489,7 @@ export const createValidationMachine = ({
                       initial: 'fetching',
                       states: {
                         fetching: {
+                          entry: log('Fetching long flips'),
                           invoke: {
                             src: ({longFlips}) =>
                               fetchFlips(
@@ -469,12 +499,18 @@ export const createValidationMachine = ({
                               ),
                             onDone: {
                               target: '#decodeLongFlips',
-                              actions: assign({
-                                longFlips: ({longFlips}, {data}) =>
-                                  mergeFlipsByHash(longFlips, data),
-                              }),
+                              actions: [
+                                assign({
+                                  longFlips: ({longFlips}, {data}) =>
+                                    mergeFlipsByHash(longFlips, data),
+                                }),
+                                log(),
+                              ],
                             },
-                            onError: 'fail',
+                            onError: {
+                              target: 'fail',
+                              actions: log(),
+                            },
                           },
                         },
                         fail: {},
@@ -485,6 +521,7 @@ export const createValidationMachine = ({
                       initial: 'decoding',
                       states: {
                         decoding: {
+                          entry: log('Decoding long flips'),
                           invoke: {
                             src: async ({longFlips}) =>
                               filterWaitingForDecoding(longFlips).map(
@@ -502,25 +539,31 @@ export const createValidationMachine = ({
                             },
                           },
                         },
-                        fail: {},
+                        fail: {entry: log()},
                       },
                     },
                     done: {
                       id: 'fetchLongFlipsDone',
                       type: 'final',
+                      entry: log(),
                     },
                   },
                   on: {
                     REFETCH_FLIPS: {
                       target: '#fetchLongFlips',
-                      actions: assign({
-                        longFlips: ({longFlips}) =>
-                          longFlips.map(flip => ({
-                            ...flip,
-                            fetched: false,
-                            decoded: false,
-                          })),
-                      }),
+                      actions: [
+                        assign({
+                          longFlips: ({longFlips}) =>
+                            longFlips.map(flip => ({
+                              ...flip,
+                              fetched: false,
+                              decoded: false,
+                            })),
+                        }),
+                        log(
+                          'Re-fetching long flips after re-entering long session'
+                        ),
+                      ],
                     },
                   },
                 },
@@ -528,7 +571,7 @@ export const createValidationMachine = ({
                   initial: 'fetching',
                   states: {
                     fetching: {
-                      entry: log('fetching words'),
+                      entry: log('Fetching words'),
                       invoke: {
                         src: ({longFlips}) =>
                           Promise.all(
@@ -916,18 +959,25 @@ export const createTimerMachine = duration =>
   })
 
 function fetchFlips(hashes) {
+  global.logger.debug(`Calling flip_get rpc for hashes`, hashes)
   return Promise.all(
     hashes.map(hash =>
       fetchFlip(hash)
-        .then(({result, error}) => ({
-          ...result,
-          hash,
-          fetched: !!result && !error,
-        }))
-        .catch(() => ({
-          hash,
-          fetched: false,
-        }))
+        .then(({result, error}) => {
+          global.logger.debug(`Get flip_get response`, hash)
+          return {
+            ...result,
+            hash,
+            fetched: !!result && !error,
+          }
+        })
+        .catch(() => {
+          global.logger.debug(`Catch flip_get reject`, hash)
+          return {
+            hash,
+            fetched: false,
+          }
+        })
     )
   )
 }
