@@ -5,7 +5,6 @@ const {
   ipcMain,
   Tray,
   Menu,
-  systemPreferences,
   nativeTheme,
   shell,
   // eslint-disable-next-line import/no-extraneous-dependencies
@@ -21,7 +20,6 @@ const logger = require('./logger')
 logger.info('idena started', global.appVersion || app.getVersion())
 
 autoUpdater.logger = logger
-autoUpdater.logger.transports.file.level = 'info'
 
 const {
   IMAGE_SEARCH_TOGGLE,
@@ -53,9 +51,10 @@ let expressPort = 3051
 
 const nodeUpdater = new NodeUpdater(logger)
 
-// Possible values are: 'darwin', 'freebsd', 'linux', 'sunos' or 'win32'
 const isWin = process.platform === 'win32'
 const isMac = process.platform === 'darwin'
+
+app.allowRendererProcessReuse = true
 
 app.on('second-instance', () => {
   // Someone tried to run a second instance, we should focus our window.
@@ -248,12 +247,9 @@ function trayIcon() {
 }
 
 if (isMac) {
-  systemPreferences.subscribeNotification(
-    'AppleInterfaceThemeChangedNotification',
-    () => {
-      tray.setImage(resolve(__dirname, 'static', 'tray', trayIcon()))
-    }
-  )
+  nativeTheme.on('updated', () => {
+    tray.setImage(resolve(__dirname, 'static', 'tray', trayIcon()))
+  })
 }
 
 const createTray = () => {
