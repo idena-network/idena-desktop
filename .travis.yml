@@ -8,8 +8,9 @@ matrix:
   include:
     - if: branch =~ /v\d+\.\d+\.\d+/
       os: windows
+    - if: branch =~ /v\d+\.\d+\.\d+/
+      os: linux
     - os: osx
-    - os: linux
 
 env:
   global:
