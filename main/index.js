@@ -6,6 +6,7 @@ const {
   Tray,
   Menu,
   systemPreferences,
+  nativeTheme,
   shell,
   // eslint-disable-next-line import/no-extraneous-dependencies
 } = require('electron')
@@ -19,8 +20,8 @@ const logger = require('./logger')
 
 logger.info('idena started', global.appVersion || app.getVersion())
 
-// autoUpdater.logger = logger
-// autoUpdater.logger.transports.file.level = 'info'
+autoUpdater.logger = logger
+autoUpdater.logger.transports.file.level = 'info'
 
 const {
   IMAGE_SEARCH_TOGGLE,
@@ -73,7 +74,7 @@ if (!isFirstInstance) {
 
 const createMainWindow = () => {
   mainWindow = new BrowserWindow({
-    title: app.getName(),
+    title: app.name,
     width: 1080,
     height: 700,
     webPreferences: {
@@ -242,7 +243,7 @@ const createMenu = () => {
 function trayIcon() {
   const icon = 'icon-16-white@2x.png'
   return isMac
-    ? `icon-16${systemPreferences.isDarkMode() ? '-white' : ''}@2x.png`
+    ? `icon-16${nativeTheme.shouldUseDarkColors ? '-white' : ''}@2x.png`
     : icon
 }
 

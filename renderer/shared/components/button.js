@@ -123,14 +123,14 @@ function IconButton({icon, children, disabled, danger, ...props}, ref) {
   )
 }
 
-IconButton.propTypes = {
+const IconButtonRef = React.forwardRef(IconButton)
+
+IconButtonRef.propTypes = {
   icon: PropTypes.node,
   children: PropTypes.node,
   disabled: PropTypes.bool,
   danger: PropTypes.bool,
 }
-
-const IconButtonRef = React.forwardRef(IconButton)
 
 export {FlatButton, IconButtonRef as IconButton}
 export default Button
