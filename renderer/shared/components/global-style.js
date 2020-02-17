@@ -5,16 +5,24 @@ import theme, {rem} from '../theme'
 // eslint-disable-next-line react/display-name
 export default () => (
   <style jsx global>{`
+    @import url('/fonts/inter.css');
     html {
       box-sizing: border-box;
       font-size: 13px;
+      font-family: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Helvetica,
+        Arial, sans-serif;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    @supports (font-variation-settings: normal) {
+      html {
+        font-family: 'Inter var', sans-serif;
+      }
     }
     body {
       box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-        Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Helvetica, Arial,
-        sans-serif;
       font-size: 1rem;
       margin: 0;
       padding: 0;
@@ -116,10 +124,10 @@ export default () => (
 
     @font-face {
       font-family: 'icons';
-      src: url('/static/fonts/icons.eot');
-      src: url('/static/fonts/icons.ttf') format('truetype'),
-        url('/static/fonts/icons.woff') format('woff'),
-        url('/static/fonts/icons.svg#icons') format('svg');
+      src: url('/fonts/icons.eot');
+      src: url('/fonts/icons.ttf') format('truetype'),
+        url('/fonts/icons.woff') format('woff'),
+        url('/fonts/icons.svg#icons') format('svg');
       font-weight: normal;
       font-style: normal;
       font-display: block;
