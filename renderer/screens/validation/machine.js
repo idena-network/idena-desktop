@@ -959,18 +959,25 @@ export const createTimerMachine = duration =>
   })
 
 function fetchFlips(hashes) {
+  global.logger.debug(`Calling flip_get rpc for hashes`, hashes)
   return Promise.all(
     hashes.map(hash =>
       fetchFlip(hash)
-        .then(({result, error}) => ({
-          ...result,
-          hash,
-          fetched: !!result && !error,
-        }))
-        .catch(() => ({
-          hash,
-          fetched: false,
-        }))
+        .then(({result, error}) => {
+          global.logger.debug(`Get flip_get response`, hash)
+          return {
+            ...result,
+            hash,
+            fetched: !!result && !error,
+          }
+        })
+        .catch(() => {
+          global.logger.debug(`Catch flip_get reject`, hash)
+          return {
+            hash,
+            fetched: false,
+          }
+        })
     )
   )
 }
