@@ -268,9 +268,22 @@ function ValidationSession({
         </ActionBarItem>
         <ActionBarItem justify="flex-end">
           {(isShortSession(state) || isLongSessionKeywords(state)) && (
-            <Button disabled={!canSubmit(state)} onClick={() => send('SUBMIT')}>
-              {isSubmitting(state) ? 'Submitting answers...' : 'Submit answers'}
-            </Button>
+            <Tooltip
+              content={
+                hasAllRelevanceMarks(state) || isLastFlip(state)
+                  ? null
+                  : 'Go to last flip'
+              }
+            >
+              <Button
+                disabled={!canSubmit(state)}
+                onClick={() => send('SUBMIT')}
+              >
+                {isSubmitting(state)
+                  ? 'Submitting answers...'
+                  : 'Submit answers'}
+              </Button>
+            </Tooltip>
           )}
           {isLongSessionFlips(state) && (
             <Button
