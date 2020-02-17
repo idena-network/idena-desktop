@@ -82,10 +82,11 @@ FlatButton.defaultProps = {
 }
 FlatButton.propTypes = Button.propTypes
 
-function IconButton({icon, children, disabled, danger, ...props}) {
+// eslint-disable-next-line react/prop-types
+function IconButton({icon, children, disabled, danger, ...props}, ref) {
   const color = danger ? theme.colors.danger : theme.colors.primary
   return (
-    <button type="button" disabled={disabled} {...props}>
+    <button type="button" disabled={disabled} ref={ref} {...props}>
       {icon}
       <span>{children}</span>
       <style jsx>{`
@@ -122,12 +123,15 @@ function IconButton({icon, children, disabled, danger, ...props}) {
     </button>
   )
 }
-IconButton.propTypes = {
+
+const IconButtonRef = React.forwardRef(IconButton)
+
+IconButtonRef.propTypes = {
   icon: PropTypes.node,
   children: PropTypes.node,
   disabled: PropTypes.bool,
   danger: PropTypes.bool,
 }
 
-export {FlatButton, IconButton}
+export {FlatButton, IconButtonRef as IconButton}
 export default Button

@@ -5,7 +5,7 @@ const {
   ipcMain,
   Tray,
   Menu,
-  systemPreferences,
+  nativeTheme,
   shell,
   // eslint-disable-next-line import/no-extraneous-dependencies
 } = require('electron')
@@ -19,8 +19,7 @@ const logger = require('./logger')
 
 logger.info('idena started', global.appVersion || app.getVersion())
 
-// autoUpdater.logger = logger
-// autoUpdater.logger.transports.file.level = 'info'
+autoUpdater.logger = logger
 
 const {
   IMAGE_SEARCH_TOGGLE,
@@ -52,9 +51,10 @@ let expressPort = 3051
 
 const nodeUpdater = new NodeUpdater(logger)
 
-// Possible values are: 'darwin', 'freebsd', 'linux', 'sunos' or 'win32'
 const isWin = process.platform === 'win32'
 const isMac = process.platform === 'darwin'
+
+app.allowRendererProcessReuse = true
 
 app.on('second-instance', () => {
   // Someone tried to run a second instance, we should focus our window.
@@ -73,7 +73,7 @@ if (!isFirstInstance) {
 
 const createMainWindow = () => {
   mainWindow = new BrowserWindow({
-    title: app.getName(),
+    title: app.name,
     width: 1080,
     height: 700,
     webPreferences: {
@@ -242,17 +242,14 @@ const createMenu = () => {
 function trayIcon() {
   const icon = 'icon-16-white@2x.png'
   return isMac
-    ? `icon-16${systemPreferences.isDarkMode() ? '-white' : ''}@2x.png`
+    ? `icon-16${nativeTheme.shouldUseDarkColors ? '-white' : ''}@2x.png`
     : icon
 }
 
 if (isMac) {
-  systemPreferences.subscribeNotification(
-    'AppleInterfaceThemeChangedNotification',
-    () => {
-      tray.setImage(resolve(__dirname, 'static', 'tray', trayIcon()))
-    }
-  )
+  nativeTheme.on('updated', () => {
+    tray.setImage(resolve(__dirname, 'static', 'tray', trayIcon()))
+  })
 }
 
 const createTray = () => {
