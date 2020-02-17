@@ -15,6 +15,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiClock,
+  FiImage,
 } from 'react-icons/fi'
 import {useMachine} from '@xstate/react'
 import {
@@ -203,16 +204,37 @@ function LoadingFlip() {
   )
 }
 
+const defaultOrder = [1, 2, 3, 4]
 function FailedFlip() {
   return (
-    <FlipHolder css={{cursor: 'not-allowed'}}>
-      {[1, 2, 3, 4].map((_, idx) => (
-        <Box key={`left-${idx}`}>
-          <FlipImage
-            src="https://placehold.it/147x110?text=No+data"
-            alt={`failed-flip-${idx}`}
-          />
-        </Box>
+    <FlipHolder
+      css={{
+        cursor: 'not-allowed',
+      }}
+    >
+      {defaultOrder.map((_, idx) => (
+        <Flex
+          key={`left-${idx}`}
+          justify="center"
+          align="center"
+          css={{
+            background: theme.colors.gray5,
+            borderBottom:
+              idx === defaultOrder.length - 1
+                ? 'none'
+                : 'solid 1px rgba(210, 212, 217, 0.16)',
+            ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
+            ...borderRadius(
+              'bottom',
+              idx === defaultOrder.length - 1 ? rem(8) : 'none'
+            ),
+            height: rem(110),
+            width: rem(147),
+            overflow: 'hidden',
+          }}
+        >
+          <FiImage size={rem(40)} color={theme.colors.white} opacity={0.3} />
+        </Flex>
       ))}
     </FlipHolder>
   )

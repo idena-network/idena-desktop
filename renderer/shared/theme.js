@@ -1,4 +1,4 @@
-import {rem as remp} from 'polished'
+import {rem as remp, rgb} from 'polished'
 import {margin} from './components/system/spacings'
 
 const colors = {
@@ -10,6 +10,7 @@ const colors = {
   gray2: 'rgb(232, 234, 237)',
   gray3: 'rgba(83, 86, 92, 0.3)',
   gray4: 'rgb(210, 212, 217)',
+  gray5: rgb(64, 64, 64),
   white: 'rgb(255, 255, 255)',
   white05: 'rgba(255, 255, 255, 0.5)',
   white01: 'rgba(255, 255, 255, 0.1)',
