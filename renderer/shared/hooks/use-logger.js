@@ -2,6 +2,7 @@ import React from 'react'
 
 const {logger} = global
 
+// TODO: pass log fn default to console.log
 export default function useLogger([state, dispatch]) {
   const actionRef = React.useRef()
 

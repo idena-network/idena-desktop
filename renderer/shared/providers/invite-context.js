@@ -44,9 +44,6 @@ function InviteProvider({children}) {
           invitees.map(({Address}) => Address).map(api.fetchIdentity)
         ))
 
-      console.log('inviteesIdetities:')
-      console.log(inviteesIdetities)
-
       const terminateTxs = await Promise.all(
         savedInvites
           .filter(({terminateHash, deletedAt}) => terminateHash && !deletedAt)
