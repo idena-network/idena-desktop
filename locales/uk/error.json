@@ -1,0 +1,14 @@
+{
+  "Can not submit flip": "Неможливо запропонувати фліп",
+  "Keywords are not specified": "Ключові слова не вказані",
+  "Error while uploading flip": "Помилка під час завантаження фліпа",
+  "Something went wrong": "Щось пішло не так",
+  "Maximum image size exceeded": "Перевищено максимально можливий розмір зображення",
+  "Error while importing key": "Помилка під час імпорту ключа",
+  "Internal node is not available, try again in a few seconds": "Вбудована нода (вузел) недоступна, спробуйте знову за кілька секунд",
+  "You can not submit flips having 'Candidate' status": "Ви не можете пропонувати фліпи зі статусом 'Кандидат'",
+  "You cannot submit more flips until the next validation": "Ви не можете запропонувати більше фліпів до наступної валідації",
+  "Can not submit flip during the validation session": "Не можна пропонувати фліпи підчас валідаційної сесії",
+  "Error while sending transaction": "Помилка при відправці транзакції",
+  "Transaction sent": "Транзакцію відправлено"
+}
