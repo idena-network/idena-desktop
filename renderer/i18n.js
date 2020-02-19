@@ -17,8 +17,10 @@ import zh_translation from '../locales/zh/translation.json'
 import zh_error from '../locales/zh/error.json'
 import ko_translation from '../locales/ko/translation.json'
 import ko_error from '../locales/ko/error.json'
+import hr_translation from '../locales/hr/translation.json'
+import hr_error from '../locales/hr/error.json'
 
-export const AVAILABLE_LANGS = ['en', 'fr', 'de', 'es', 'ru', 'zh', 'ko']
+export const AVAILABLE_LANGS = ['en', 'fr', 'de', 'es', 'ru', 'zh', 'ko', 'hr']
 
 i18n.use(initReactI18next).init({
   debug: global.isDev,
@@ -30,6 +32,7 @@ i18n.use(initReactI18next).init({
     ru: {translation: ru_translation, error: ru_error},
     zh: {translation: zh_translation, error: zh_error},
     ko: {translation: ko_translation, error: ko_error},
+    hr: {translation: hr_translation, error: hr_error},
   },
   lng: loadPersistentStateValue('settings', 'lng'),
   fallbackLng: 'en',
