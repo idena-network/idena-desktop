@@ -22,7 +22,17 @@ import hr_error from '../locales/hr/error.json'
 import uk_translation from '../locales/uk/translation.json'
 import uk_error from '../locales/uk/error.json'
 
-export const AVAILABLE_LANGS = ['en', 'fr', 'de', 'es', 'ru', 'zh', 'ko', 'hr', 'uk']
+export const AVAILABLE_LANGS = [
+  'en',
+  'fr',
+  'de',
+  'es',
+  'ru',
+  'zh',
+  'ko',
+  'hr',
+  'uk',
+]
 
 i18n.use(initReactI18next).init({
   debug: global.isDev,
