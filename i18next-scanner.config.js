@@ -1,4 +1,4 @@
-const AVAILABLE_LANGS = ['en', 'fr', 'de', 'es', 'ru', 'zh', 'ko']
+const AVAILABLE_LANGS = ['en', 'fr', 'de', 'es', 'ru', 'zh', 'ko', 'hr']
 
 module.exports = {
   input: ['renderer/**/*.{js,jsx}', '!**/node_modules/**'],

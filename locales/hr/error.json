@@ -1,0 +1,14 @@
+{
+  "Can not submit flip": "Nemogu priloziti flipove",
+  "Keywords are not specified": "Kljucne rijeci nisu odredene",
+  "Error while uploading flip": "Greska kod ucitavanja flipa",
+  "Something went wrong": "Nesto je krenulo krivo",
+  "Maximum image size exceeded": "Maksimalna velicina slike je prekoracena",
+  "Error while importing key": "Greska prilikom uvoza kljuca",
+  "Internal node is not available, try again in a few seconds": "Interni node nije dostupan, probajte opet za par sekundi",
+  "You can not submit flips having 'Candidate' status": "Nemozete prilagati flipove dok imate 'Kandidat' status",
+  "You cannot submit more flips until the next validation": "Nemozete priloziti vise flipova do iduce validacije",
+  "Can not submit flip during the validation session": "Nemozete priloziti flipove dok traje validacija",
+  "Error while sending transaction": "Greska kod slanja transakcije",
+  "Transaction sent": "Tranakcija poslata"
+}
