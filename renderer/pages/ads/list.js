@@ -1,46 +1,129 @@
 import React from 'react'
-import Layout from '../../shared/components/layout'
-import {Box, PageTitle} from '../../shared/components'
-import {margin, padding} from 'polished'
-import {rem} from '../../shared/theme'
-import {Page, AdList, AdListItem} from '../../screens/ads/components'
-import {AdRelevance} from '../../screens/ads/utils'
+import {FaBullhorn} from 'react-icons/fa'
+import {useTranslation} from 'react-i18next'
+import {margin} from 'polished'
+import {
+  Page,
+  AdTable,
+  AdRow,
+  Toolbar,
+  ToolbarItem,
+  ToolbarButton,
+  Figure,
+  FigureLabel,
+  ToolbarGroup,
+  FigureNumber,
+  AdHeader,
+  AdHeaderCell,
+  AdTableBody,
+  AdCell,
+  AdImage,
+  TargetCondition,
+  AdDetails,
+  AdStatus,
+} from '../../screens/ads/components'
+import {useAds} from '../../screens/ads/machine'
+import {useIdentityState} from '../../shared/providers/identity-context'
+import {add} from '../../shared/utils/math'
+import {IconButton} from '../../shared/components/button'
+import theme, {rem} from '../../shared/theme'
+import {adStatusColor, AdStatus as AdStatusEnum} from '../../screens/ads/utils'
+import Flex from '../../shared/components/flex'
 
-const ads = [
-  {
-    key: 1,
-    title: 'New ICO is running. DNA is accepted',
-    address: 'a0xSF12FEJ320DWF3FFa0xaDWF3FFa0',
-    burnt: 58,
-    relevance: AdRelevance.Top,
-    score: 28,
-  },
-  {
-    key: 2,
-    title: 'New iPhone selling 12345 DNA',
-    address: '0x5A3abB61A9c5475B8243',
-    burnt: 46,
-    relevance: AdRelevance.Top,
-    score: 26,
-  },
-  {
-    key: 3,
-    title: 'New Samsung selling 12345 DNA',
-    address: 'Oxe67DE87789987998878888',
-    burnt: 34,
-    relevance: AdRelevance.Top,
-    score: -2,
-  },
-]
+export default function MyAds() {
+  const {t} = useTranslation()
 
-export default function AdListPage() {
+  const [ads] = useAds()
+  const {balance} = useIdentityState()
+
+  const hasPendingChanges = ads.some(({burnt}) => burnt <= 0)
+  const competitors = 10
+
   return (
-    <Page title="All offers">
-      <AdList>
-        {ads.map(ad => (
-          <AdListItem {...ad} />
-        ))}
-      </AdList>
+    <Page title="My ads">
+      <Toolbar>
+        <ToolbarGroup>
+          <ToolbarItem>
+            <Figure>
+              <FigureLabel>My balance</FigureLabel>
+              <FigureNumber>
+                {balance && balance.toLocaleString()} DNA
+              </FigureNumber>
+            </Figure>
+          </ToolbarItem>
+          <ToolbarItem>
+            <Figure>
+              <FigureLabel>Total burnt, 24 hrs</FigureLabel>
+              <FigureNumber>
+                {ads
+                  .map(({burnt}) => burnt)
+                  .reduce(add)
+                  .toLocaleString()}{' '}
+                DNA
+              </FigureNumber>
+            </Figure>
+          </ToolbarItem>
+        </ToolbarGroup>
+        <ToolbarGroup>
+          <ToolbarButton>
+            <IconButton
+              disabled={!hasPendingChanges}
+              icon={<FaBullhorn size={rem(18)} />}
+            >
+              Publish
+            </IconButton>
+          </ToolbarButton>
+          <ToolbarButton>
+            <IconButton icon={<i className="icon icon--add_btn" />}>
+              New banner
+            </IconButton>
+          </ToolbarButton>
+        </ToolbarGroup>
+      </Toolbar>
+      <AdTable>
+        <AdHeader>
+          <AdHeaderCell>{t('Ad')}</AdHeaderCell>
+          <AdHeaderCell>{t('Limit, DNA/h')}</AdHeaderCell>
+          <AdHeaderCell>{t('Burnt, 24 hrs')}</AdHeaderCell>
+          <AdHeaderCell>{t('Total burnt, DNA')}</AdHeaderCell>
+          <AdHeaderCell>{t('Competitors, #')}</AdHeaderCell>
+          <AdHeaderCell>{t('Last tx')}</AdHeaderCell>
+        </AdHeader>
+        <AdTableBody>
+          {ads.map(({imageUrl, title, limit, burnt, lastTx, status}) => (
+            <>
+              <AdRow>
+                <AdCell>
+                  <Flex align="top">
+                    <AdImage
+                      src={imageUrl || '//placekitten.com/32/32'}
+                      alt={title}
+                      size={32}
+                      css={{...margin(0, rem(theme.spacings.small12), 0, 0)}}
+                    />
+                    {title}
+                  </Flex>
+                </AdCell>
+                <AdCell>{limit}</AdCell>
+                <AdCell>{burnt}</AdCell>
+                <AdCell>{burnt}</AdCell>
+                <AdCell>{competitors}</AdCell>
+                <AdCell>{lastTx.toString()}</AdCell>
+              </AdRow>
+              <AdDetails
+                css={{borderLeft: `solid 2px ${adStatusColor(status)}`}}
+              >
+                <AdStatus color={adStatusColor(status)}>{status}</AdStatus>
+                <TargetCondition name="Location" value="USA" />
+                <TargetCondition name="Language" value="en" />
+                <TargetCondition name="Stake" value=">10000" />
+                <TargetCondition name="Age" value=">10" />
+                <TargetCondition name="OS" value="macOS" />
+              </AdDetails>
+            </>
+          ))}
+        </AdTableBody>
+      </AdTable>
     </Page>
   )
 }
