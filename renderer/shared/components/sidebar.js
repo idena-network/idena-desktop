@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 
+import {useTranslation} from 'react-i18next'
 import {Box, List, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
@@ -142,6 +143,7 @@ export function Logo() {
 }
 
 function Nav() {
+  const {t} = useTranslation()
   const {nickname} = useIdentityState()
   return (
     <nav>
@@ -151,25 +153,25 @@ function Nav() {
           active
           icon={<i className="icon icon--user" />}
         >
-          {'My Idena' || nickname}
+          {t('My Idena') || nickname}
         </NavItem>
         <NavItem
           href="/wallets"
           icon={<i className="icon icon--menu_wallets" />}
         >
-          Wallets
+          {t('Wallets')}
         </NavItem>
         <NavItem href="/flips" icon={<i className="icon icon--menu_gallery" />}>
-          Flips
+          {t('Flips')}
         </NavItem>
         <NavItem
           href="/contacts"
           icon={<i className="icon icon--menu_contacts" />}
         >
-          Contacts
+          {t('Contacts')}
         </NavItem>
         <NavItem href="/settings" icon={<i className="icon icon--settings" />}>
-          Settings
+          {t('Settings')}
         </NavItem>
       </List>
       <style jsx>{`
