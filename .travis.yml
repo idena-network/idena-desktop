@@ -2,7 +2,7 @@ osx_image: xcode10.2
 dist: bionic
 
 language: node_js
-node_js: '10'
+node_js: "10"
 
 matrix:
   include:
@@ -27,6 +27,7 @@ cache:
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
     - $HOME/.npm/_prebuilds
+    - .next/cache
 
 install:
   - npm ci
