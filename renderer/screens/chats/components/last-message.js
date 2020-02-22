@@ -1,8 +1,8 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import {Row, Col, Text} from '../../../shared/components'
 import theme from '../../../shared/theme'
 
-// eslint-disable-next-line react/prop-types
 export default function LastMessage({chat}) {
   return (
     <Row align="center">

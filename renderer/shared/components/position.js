@@ -1,7 +1,6 @@
 import React, {forwardRef} from 'react'
 import PropTypes from 'prop-types'
-import {Box} from '.'
-import {Dim} from './box'
+import Box, {Dim} from './box'
 
 // eslint-disable-next-line react/display-name
 export const Absolute = forwardRef(

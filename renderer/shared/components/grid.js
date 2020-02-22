@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Box} from '.'
+import Box from './box'
 
 export function Row({
   justify = 'initial',

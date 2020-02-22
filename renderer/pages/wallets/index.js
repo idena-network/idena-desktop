@@ -112,9 +112,7 @@ export default function Index() {
                 color={theme.colors.primary}
                 onClick={() =>
                   global.openExternal(
-                    `https://scan.idena.io/address?address=${
-                      activeWallet.address
-                    }#rewards`
+                    `https://scan.idena.io/address?address=${activeWallet.address}#rewards`
                   )
                 }
                 style={{

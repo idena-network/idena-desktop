@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {FiGlobe, FiChevronRight} from 'react-icons/fi'
 import {padding, margin} from 'polished'
 import Box from './box'
@@ -6,7 +7,6 @@ import theme, {rem} from '../theme'
 import {Text} from './typo'
 import Flex from './flex'
 
-// eslint-disable-next-line react/prop-types
 export function TranslateButon({text}) {
   return (
     <Box css={margin(rem(theme.spacings.medium24), 0, 0)}>
@@ -36,7 +36,6 @@ export function TranslateButon({text}) {
   )
 }
 
-// eslint-disable-next-line react/prop-types
 export function TranslateWords({words}) {
   return (
     <TranslateButon

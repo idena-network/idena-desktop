@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Box, Text} from '.'
 import theme from '../theme'
+import Box from './box'
+import {Text} from './typo'
 
 function Group({title, children, addon, ...props}) {
   return (

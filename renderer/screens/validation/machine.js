@@ -25,7 +25,6 @@ import {
 } from './utils'
 
 // TODO: merge fetch and decode flips, move validation services to serializable objects
-// TODO: check timerMachine and Timer component correctness, control with timerService/setInterval if needed
 export const createValidationMachine = ({
   epoch,
   validationStart,
@@ -1021,11 +1020,13 @@ function mergeFlipsByHash(flips, anotherFlips) {
 }
 
 async function fetchWords(hash) {
-  return (await apiClient().post('/', {
-    method: 'flip_words',
-    params: [hash],
-    id: 1,
-  })).data
+  return (
+    await apiClient().post('/', {
+      method: 'flip_words',
+      params: [hash],
+      id: 1,
+    })
+  ).data
 }
 
 export const RelevanceType = {

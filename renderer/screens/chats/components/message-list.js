@@ -1,7 +1,7 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import Message from './message'
 
-// eslint-disable-next-line react/prop-types
 export default function MessageList({messages}) {
   return (
     <ul>

@@ -1,10 +1,10 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import {rem} from 'polished'
 import Flex from './flex'
 import Divider from './divider'
 import theme from '../theme'
 
-// eslint-disable-next-line react/prop-types
 function Actions({children}) {
   return (
     <Flex align="center">
