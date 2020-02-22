@@ -1,7 +1,7 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import LastMessage from './last-message'
 
-// eslint-disable-next-line react/prop-types
 export default function ChatList({chats}) {
   return (
     <div>

@@ -5,7 +5,7 @@ import theme, {rem} from '../theme'
 // eslint-disable-next-line react/display-name
 export default () => (
   <style jsx global>{`
-    @import url('/fonts/inter.css');
+    @import url('/static/fonts/inter.css');
     html {
       box-sizing: border-box;
       font-size: 13px;
@@ -124,10 +124,10 @@ export default () => (
 
     @font-face {
       font-family: 'icons';
-      src: url('/fonts/icons.eot');
-      src: url('/fonts/icons.ttf') format('truetype'),
-        url('/fonts/icons.woff') format('woff'),
-        url('/fonts/icons.svg#icons') format('svg');
+      src: url('/static/fonts/icons.eot');
+      src: url('/static/fonts/icons.ttf') format('truetype'),
+        url('/static/fonts/icons.woff') format('woff'),
+        url('/static/fonts/icons.svg#icons') format('svg');
       font-weight: normal;
       font-style: normal;
       font-display: block;

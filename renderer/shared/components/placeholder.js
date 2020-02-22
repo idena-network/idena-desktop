@@ -2,8 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {rem} from 'polished'
 import Flex from './flex'
-import {Box} from '.'
 import theme from '../theme'
+import Box from './box'
 
 export function Placeholder({children, icon, text, ...props}) {
   return (

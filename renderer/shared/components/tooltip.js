@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {rem} from 'polished'
-import {Box} from '.'
+import Box from './box'
 import theme from '../theme'
 
 export function Tooltip({children, content, placement, pinned, ...props}) {

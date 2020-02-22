@@ -4,7 +4,6 @@ import {FiX} from 'react-icons/fi'
 import {rem} from 'polished'
 import Router from 'next/router'
 import theme from '../theme'
-import {Box, Fill, Absolute, Button} from '.'
 import useClickOutside from '../hooks/use-click-outside'
 import {
   useAutoUpdateState,
@@ -12,11 +11,13 @@ import {
 } from '../providers/update-context'
 import {SubHeading, Text} from './typo'
 import Flex from './flex'
-import {FlatButton} from './button'
+import Button, {FlatButton} from './button'
 import {
   useSettingsState,
   useSettingsDispatch,
 } from '../providers/settings-context'
+import Box from './box'
+import {Fill, Absolute} from './position'
 
 export function GlobalModals() {
   const {showExternalUpdateModal} = useAutoUpdateState()
