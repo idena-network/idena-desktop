@@ -129,7 +129,9 @@ function FlipMaster({id, onClose}) {
       }
 
       addNotification({
-        title: error ? t('error:Error while uploading flip') : t('Flip saved!'),
+        title: error
+          ? t('error:Error while uploading flip')
+          : t('translation:Flip saved!'),
         body: error ? message : `Hash ${result.hash}`,
         type: error ? NotificationType.Error : NotificationType.Info,
       })
@@ -152,12 +154,12 @@ function FlipMaster({id, onClose}) {
 
   const steps = [
     {
-      caption: t('Think up a story'),
-      title: t('Think up a story'),
+      caption: t('translation:Think up a story'),
+      title: t('translation:Think up a story'),
       desc: `${t(
-        'Think up a short story about someone/something related to the two key words below according to the template'
-      )}: ${t('Before - Something happens - After')}'
-      )`,
+        'translation:Think up a short story about someone/something related to the two key words below according to the template'
+      )}: ${t('translation:Before - Something happens - After')}
+      `,
       children: (
         <FlipHint
           {...flip}
@@ -176,11 +178,13 @@ function FlipMaster({id, onClose}) {
       ),
     },
     {
-      caption: t('Select images'),
-      title: `${t('Select 4 images to tell your story')}: ${composeHint(
-        flip.hint
-      )}`,
-      desc: flip ? t(`Please no text on images to explain your story`) : '',
+      caption: t('translation:Select images'),
+      title: `${t(
+        'translation:Select 4 images to tell your story'
+      )}: ${composeHint(flip.hint)}`,
+      desc: flip
+        ? t(`translation:Please no text on images to explain your story`)
+        : '',
       children: (
         <FlipPics
           {...flip}
@@ -191,9 +195,11 @@ function FlipMaster({id, onClose}) {
       ),
     },
     {
-      caption: t('Shuffle images'),
-      title: t('Shuffle images'),
-      desc: t('Shuffle images in order to make a nonsense sequence of images'),
+      caption: t('translation:Shuffle images'),
+      title: t('translation:Shuffle images'),
+      desc: t(
+        'translation:Shuffle images in order to make a nonsense sequence of images'
+      ),
       children: (
         <FlipShuffle
           {...flip}
@@ -207,10 +213,10 @@ function FlipMaster({id, onClose}) {
       ),
     },
     {
-      caption: t('Submit flip'),
-      title: `${t('Submit flip')} (${composeHint(flip.hint)})`,
+      caption: t('translation:Submit flip'),
+      title: `${t('translation:Submit flip')} (${composeHint(flip.hint)})`,
       desc: t(
-        `Make sure it is not possible to read the shuffled images as a meaningful story`
+        `translation:Make sure it is not possible to read the shuffled images as a meaningful story`
       ),
       children: <SubmitFlip {...flip} submitFlipResult={submitResult} />,
     },

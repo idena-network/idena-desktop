@@ -1,4 +1,5 @@
 import {useState, useEffect, useCallback} from 'react'
+import {useTranslation} from 'react-i18next'
 import * as api from '../api/dna'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL} from './tx'
@@ -29,6 +30,7 @@ function getTransactionTypeName(tx) {
 }
 
 function useWallets() {
+  const {t} = useTranslation()
   const [wallets, setWallets] = useState([])
   const [totalAmount, setTotalAmount] = useState()
   const {address} = useIdentityState()
@@ -50,7 +52,7 @@ function useWallets() {
           return {
             ...account,
             balance: walletBalance,
-            name: account.isStake ? 'Stake' : 'Main',
+            name: account.isStake ? t('Stake') : t('Main'),
           }
         })
       )

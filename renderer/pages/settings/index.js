@@ -171,7 +171,9 @@ function ImportPK() {
         importNodeKey()
         addNotification({
           title: 'Success',
-          body: t('Key was imported, please, wait, while node is restarting'),
+          body: t(
+            'translation:Key was imported, please, wait, while node is restarting'
+          ),
         })
         setKey('')
         setPassword('')
@@ -187,14 +189,14 @@ function ImportPK() {
   }
 
   return (
-    <Section title={t('Import private key')}>
+    <Section title={t('translation:Import private key')}>
       <form
         onSubmit={async e => {
           e.preventDefault()
           await submit()
         }}
       >
-        <Label htmlFor="key">{t('Encrypted private key')}</Label>
+        <Label htmlFor="key">{t('translation:Encrypted private key')}</Label>
         <Input
           value={key}
           type="text"
@@ -204,7 +206,7 @@ function ImportPK() {
           }}
           onChange={e => setKey(e.target.value)}
         />
-        <Label htmlFor="password">{t('Password')}</Label>
+        <Label htmlFor="password">{t('translation:Password')}</Label>
         <Input
           value={password}
           type="password"
@@ -215,7 +217,7 @@ function ImportPK() {
           onChange={e => setPassword(e.target.value)}
         />
         <Button type="submit" disabled={!password || !key}>
-          {t('Import')}
+          {t('translation:Import')}
         </Button>
       </form>
     </Section>

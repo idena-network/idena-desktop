@@ -36,7 +36,7 @@ function Flips() {
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
-        <PageTitle>{t('My Flips')}</PageTitle>
+        <PageTitle>{t('translation:My Flips')}</PageTitle>
         <FlipToolbar>
           <Flex>
             {Object.values(FlipType)
@@ -57,7 +57,7 @@ function Flips() {
               href="/flips/new"
               icon={<i className="icon icon--add_btn" />}
             >
-              {t('New flip')}
+              {t('translation:New flip')}
             </IconLink>
           </Flex>
         </FlipToolbar>
@@ -86,7 +86,7 @@ function Flips() {
                     })
                   } else {
                     addNotification({
-                      title: t('Flip saved'),
+                      title: t('translation:Flip saved'),
                       body: result.hash,
                     })
                   }

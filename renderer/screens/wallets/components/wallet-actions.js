@@ -85,16 +85,18 @@ function WalletTransfer() {
       <Table>
         <thead>
           <TableRow>
-            <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
-            <TableHeaderCol>{t('Address')}</TableHeaderCol>
+            <TableHeaderCol>{t('translation:Transaction')}</TableHeaderCol>
+            <TableHeaderCol>{t('translation:Address')}</TableHeaderCol>
             <TableHeaderCol className="text-right">
-              {t('Amount, DNA')}
+              {t('translation:Amount, DNA')}
             </TableHeaderCol>
             <TableHeaderCol className="text-right">
-              {t('Fee, DNA')}
+              {t('translation:Fee, DNA')}
             </TableHeaderCol>
-            <TableHeaderCol>{t('Date')}</TableHeaderCol>
-            <TableHeaderCol>{t('Blockchain transaction ID')}</TableHeaderCol>
+            <TableHeaderCol>{t('translation:Date')}</TableHeaderCol>
+            <TableHeaderCol>
+              {t('translation:Blockchain transaction ID')}
+            </TableHeaderCol>
           </TableRow>
         </thead>
         <tbody>
