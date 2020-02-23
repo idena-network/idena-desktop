@@ -54,11 +54,11 @@ function TransferForm({onSuccess, onFail}) {
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          {t(`Send DNA’s`)}
+          {t(`translation:Send DNA’s`)}
         </SubHeading>
 
         <FormGroup>
-          <Field label={t('From')} select>
+          <Field label={t('translation:From')} select>
             <Select
               name="select"
               id=""
@@ -70,11 +70,14 @@ function TransferForm({onSuccess, onFail}) {
           </Field>
         </FormGroup>
         <FormGroup>
-          <Field label={t('To')} onChange={e => setTo(e.target.value)} />
+          <Field
+            label={t('translation:To')}
+            onChange={e => setTo(e.target.value)}
+          />
         </FormGroup>
         <FormGroup>
           <Field
-            label={t('Amount, DNA')}
+            label={t('translation:Amount, DNA')}
             type="number"
             onChange={e => setAmount(e.target.value)}
           />
@@ -103,7 +106,7 @@ function TransferForm({onSuccess, onFail}) {
                   })
                 } else {
                   addNotification({
-                    title: t('Transaction sent'),
+                    title: t('translation:Transaction sent'),
                     body: result,
                   })
                   if (onSuccess) onSuccess(result)
@@ -120,7 +123,7 @@ function TransferForm({onSuccess, onFail}) {
               }
             }}
           >
-            {submitting ? <FiLoader /> : t('Transfer')}
+            {submitting ? <FiLoader /> : t('translation:Transfer')}
           </Button>
         </FormGroup>
       </Box>

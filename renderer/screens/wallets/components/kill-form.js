@@ -51,10 +51,10 @@ function KillForm({onSuccess, onFail}) {
           }}
         >
           <SubHeading css={{...margin(0, 0, theme.spacings.small8)}}>
-            {t('Terminate identity')}
+            {t('translation:Terminate identity')}
           </SubHeading>
           <Text>
-            {t(`Terminate your identity and withdraw the stake. Your identity status
+            {t(`translation:Terminate your identity and withdraw the stake. Your identity status
             will be reset to 'Not validated'.`)}
           </Text>
         </Box>
@@ -62,7 +62,7 @@ function KillForm({onSuccess, onFail}) {
         <FormGroup>
           <Field
             disabled
-            label={t('Withraw stake, DNA')}
+            label={t('translation:Withraw stake, DNA')}
             value={stake}
             type="number"
           />
@@ -70,7 +70,7 @@ function KillForm({onSuccess, onFail}) {
 
         <FormGroup>
           <Field
-            label={t('To address')}
+            label={t('translation:To address')}
             value={to}
             onChange={e => setTo(e.target.value)}
           />
@@ -114,7 +114,7 @@ function KillForm({onSuccess, onFail}) {
               }
             }}
           >
-            {submitting ? <FiLoader /> : t('Terminate')}
+            {submitting ? <FiLoader /> : t('translation:Terminate')}
           </Button>
         </FormGroup>
       </Box>

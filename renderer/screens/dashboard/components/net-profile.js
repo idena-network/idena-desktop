@@ -91,7 +91,7 @@ export function NetProfile() {
           }
         />
       )}
-      {age > 0 && <Figure label="Age" value={age} postfix={t('epochs')} />}
+      {age > 0 && <Figure label={t('Age')} value={age} postfix={t('epochs')} />}
 
       {totalQualifiedFlips > 0 && (
         <>
