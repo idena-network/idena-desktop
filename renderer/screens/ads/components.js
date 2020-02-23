@@ -1,24 +1,28 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, {useState} from 'react'
 import {useTranslation} from 'react-i18next'
-import {FiThumbsUp, FiThumbsDown} from 'react-icons/fi'
-import {padding, margin, transparentize, triangle, position} from 'polished'
+import {
+  padding,
+  margin,
+  transparentize,
+  triangle,
+  position,
+  backgrounds,
+} from 'polished'
+import {MenuItem} from '@reach/menu-button'
 import {
   Table,
   TableRow,
   TableCol,
   TableHeaderCol,
   Box,
-  TableHint,
   PageTitle,
-  Heading,
   SubHeading,
   Text,
   Absolute,
 } from '../../shared/components'
 import theme, {rem} from '../../shared/theme'
 import Flex from '../../shared/components/flex'
-import Avatar from '../../shared/components/avatar'
 import Layout from '../../shared/components/layout'
 import Divider from '../../shared/components/divider'
 
@@ -224,6 +228,41 @@ export function TargetCondition({name, value, ...props}) {
       <FigureLabel fontSize={rem(11)}>{name}</FigureLabel>
       <FigureNumber fontSize={rem(11)}>{value}</FigureNumber>
     </Figure>
+  )
+}
+
+export function AdRowMenuItem({children, variant = 'text', ...props}) {
+  const [isHovered, setIsHovered] = useState(false)
+  return (
+    <MenuItem
+      style={{
+        ...backgrounds(isHovered ? theme.colors.gray : ''),
+        color: theme.colors[variant],
+        cursor: 'pointer',
+        fontWeight: theme.fontWeights.medium,
+        ...padding(rem(6), rem(12)),
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      {...props}
+    >
+      <Flex align="center" css={{display: 'inline-flex'}}>
+        {children}
+      </Flex>
+    </MenuItem>
+  )
+}
+
+export function AdRowMenuIcon({icon: Icon, variant = 'primary', ...props}) {
+  return (
+    <Icon
+      size={rem(16)}
+      style={{...margin(0, rem(12), 0, 0)}}
+      color={theme.colors[variant]}
+      // eslint-disable-next-line react/destructuring-assignment
+      aria-label={props.children}
+      {...props}
+    />
   )
 }
 

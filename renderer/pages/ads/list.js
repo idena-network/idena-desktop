@@ -1,7 +1,9 @@
 import React from 'react'
 import {FaBullhorn} from 'react-icons/fa'
 import {useTranslation} from 'react-i18next'
-import {margin} from 'polished'
+import {margin, padding, backgrounds, borderRadius} from 'polished'
+import {FiMoreVertical, FiEdit, FiPause, FiDelete} from 'react-icons/fi'
+import {Menu, MenuButton, MenuList, MenuItem} from '@reach/menu-button'
 import {
   Page,
   AdTable,
@@ -21,14 +23,17 @@ import {
   TargetCondition,
   AdDetails,
   AdStatus,
+  AdRowMenuItem,
+  AdRowMenuIcon,
 } from '../../screens/ads/components'
 import {useAds} from '../../screens/ads/machine'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {add} from '../../shared/utils/math'
 import {IconButton} from '../../shared/components/button'
 import theme, {rem} from '../../shared/theme'
-import {adStatusColor, AdStatus as AdStatusEnum} from '../../screens/ads/utils'
+import {adStatusColor} from '../../screens/ads/utils'
 import Flex from '../../shared/components/flex'
+import Divider from '../../shared/components/divider'
 
 export default function MyAds() {
   const {t} = useTranslation()
@@ -108,7 +113,46 @@ export default function MyAds() {
                 <AdCell>{burnt}</AdCell>
                 <AdCell>{burnt}</AdCell>
                 <AdCell>{competitors}</AdCell>
-                <AdCell>{lastTx.toString()}</AdCell>
+                <AdCell>
+                  <Flex>
+                    {lastTx.toString()}
+                    <Menu>
+                      <MenuButton
+                        style={{
+                          backgroundColor: 'none',
+                          border: 'none',
+                        }}
+                      >
+                        <FiMoreVertical size={rem(20)} />
+                      </MenuButton>
+                      <MenuList
+                        style={{
+                          ...backgrounds(theme.colors.white),
+                          ...borderRadius('top', rem(4)),
+                          ...borderRadius('bottom', rem(4)),
+                          boxShadow:
+                            '0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)',
+                          ...padding(rem(8), 0),
+                          width: rem(180),
+                        }}
+                      >
+                        <AdRowMenuItem>
+                          <AdRowMenuIcon icon={FiEdit} />
+                          Edit
+                        </AdRowMenuItem>
+                        <AdRowMenuItem>
+                          <AdRowMenuIcon icon={FiPause} />
+                          Disable
+                        </AdRowMenuItem>
+                        <AdRowMenuItem as={Divider} />
+                        <AdRowMenuItem variant="danger">
+                          <AdRowMenuIcon icon={FiDelete} variant="danger" />
+                          Delete
+                        </AdRowMenuItem>
+                      </MenuList>
+                    </Menu>
+                  </Flex>
+                </AdCell>
               </AdRow>
               <AdDetails
                 css={{borderLeft: `solid 2px ${adStatusColor(status)}`}}
