@@ -1,14 +1,14 @@
 {
-  "Can not submit flip": "Can not submit flip",
-  "Keywords are not specified": "Keywords are not specified",
-  "Error while uploading flip": "Error while uploading flip",
-  "Something went wrong": "Something went wrong",
-  "Maximum image size exceeded": "Maximum image size exceeded",
-  "Error while importing key": "Error while importing key",
-  "Internal node is not available, try again in a few seconds": "Internal node is not available, try again in a few seconds",
-  "You can not submit flips having 'Candidate' status": "You can not submit flips having 'Candidate' status",
-  "You cannot submit more flips until the next validation": "You cannot submit more flips until the next validation",
-  "Can not submit flip during the validation session": "Can not submit flip during the validation session",
-  "Error while sending transaction": "Error while sending transaction",
-  "Transaction sent": "Transaction sent"
+  "Can not submit flip": "无法提交翻转",
+  "Keywords are not specified": "未知Keywords",
+  "Error while uploading flip": "上传翻转时出错",
+  "Something went wrong": "出现异常",
+  "Maximum image size exceeded": "超出最大图像大小",
+  "Error while importing key": "导入私钥时出错",
+  "Internal node is not available, try again in a few seconds": "内部节点不可用，请在几秒钟后重试",
+  "You can not submit flips having 'Candidate' status": "账号“候选”状态时，你无法提交翻转",
+  "You cannot submit more flips until the next validation": "在下次验证之前，你无法提交更多翻转",
+  "Can not submit flip during the validation session": "无法在验证会话期间提交翻转",
+  "Error while sending transaction": "发送交易时出错",
+  "Transaction sent": "已提交的交易"
 }
