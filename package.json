@@ -18,7 +18,7 @@
     "test": "jest",
     "i18n": "npm run i18n:clean && npm run i18n:scan",
     "i18n:scan": "i18next-scanner",
-    "i18n:clean": "rm -rf locales/en locales/fr locales/de locales/es locales/ru locales/zh locales/ko locales/hr locales/uk"
+    "i18n:clean": "rm -rf locales/en locales/fr locales/de locales/es locales/ru locales/zh locales/ko locales/hr locales/uk locales/sr"
   },
   "build": {
     "appId": "io.idena",
