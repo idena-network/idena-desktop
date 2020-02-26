@@ -33,6 +33,7 @@ export const createValidationMachine = ({
 }) =>
   Machine(
     {
+      id: 'validation',
       initial: 'shortSession',
       context: {
         shortFlips: [],
@@ -55,7 +56,6 @@ export const createValidationMachine = ({
               states: {
                 check: {
                   entry: log('Check all available flips are fetched'),
-                  id: 'check',
                   on: {
                     '': [
                       {
@@ -76,7 +76,7 @@ export const createValidationMachine = ({
                       invoke: {
                         src: () => fetchFlipHashes(SessionType.Short),
                         onDone: {
-                          target: '#fetchShortFlips',
+                          target: '#validation.shortSession.fetch.fetchFlips',
                           actions: [
                             assign({
                               shortFlips: ({shortFlips}, {data}) =>
@@ -101,7 +101,6 @@ export const createValidationMachine = ({
                   },
                 },
                 fetchFlips: {
-                  id: 'fetchShortFlips',
                   initial: 'fetching',
                   states: {
                     fetching: {
@@ -114,7 +113,7 @@ export const createValidationMachine = ({
                             )
                           ),
                         onDone: {
-                          target: '#decodeShortFlips',
+                          target: '#validation.shortSession.fetch.decodeFlips',
                           actions: [
                             assign({
                               shortFlips: ({shortFlips}, {data}) =>
@@ -137,7 +136,6 @@ export const createValidationMachine = ({
                   },
                 },
                 decodeFlips: {
-                  id: 'decodeShortFlips',
                   initial: 'decoding',
                   states: {
                     decoding: {
@@ -163,7 +161,7 @@ export const createValidationMachine = ({
                     },
                     decoded: {
                       after: {
-                        1000: '#check',
+                        1000: '#validation.shortSession.fetch.check',
                       },
                     },
                     fail: {
@@ -207,7 +205,7 @@ export const createValidationMachine = ({
                   },
                   on: {
                     EXTRA_FLIPS_PULLED: {
-                      target: 'done',
+                      target: '#validation.shortSession.fetch.fetchFlips',
                       actions: [
                         assign({
                           shortFlips: ({shortFlips}, {flips}) =>
@@ -217,7 +215,7 @@ export const createValidationMachine = ({
                       ],
                     },
                     EXTRA_FLIPS_MISSED: {
-                      target: 'done',
+                      target: '#validation.shortSession.fetch.fetchFlips',
                     },
                   },
                 },
@@ -225,7 +223,7 @@ export const createValidationMachine = ({
               },
               on: {
                 REFETCH_FLIPS: {
-                  target: '#fetchShortFlips',
+                  target: '#validation.shortSession.fetch.fetchFlips',
                   actions: [
                     assign({
                       shortFlips: ({shortFlips}) =>
@@ -384,7 +382,7 @@ export const createValidationMachine = ({
                             },
                           },
                           {
-                            target: '#validationFailed',
+                            target: '#validation.validationFailed',
                           },
                         ],
                       },
@@ -408,7 +406,7 @@ export const createValidationMachine = ({
                                 epoch
                               ),
                             onDone: {
-                              target: '#longSession',
+                              target: '#validation.longSession',
                               actions: [log()],
                             },
                             onError: {
@@ -466,7 +464,8 @@ export const createValidationMachine = ({
                           invoke: {
                             src: () => fetchFlipHashes(SessionType.Long),
                             onDone: {
-                              target: '#fetchLongFlips',
+                              target:
+                                '#validation.longSession.fetch.flips.fetchFlips',
                               actions: [
                                 assign({
                                   longFlips: (_, {data}) => data,
@@ -484,7 +483,6 @@ export const createValidationMachine = ({
                       },
                     },
                     fetchFlips: {
-                      id: 'fetchLongFlips',
                       initial: 'fetching',
                       states: {
                         fetching: {
@@ -497,7 +495,8 @@ export const createValidationMachine = ({
                                 )
                               ),
                             onDone: {
-                              target: '#decodeLongFlips',
+                              target:
+                                '#validation.longSession.fetch.flips.decodeFlips',
                               actions: [
                                 assign({
                                   longFlips: ({longFlips}, {data}) =>
@@ -516,7 +515,6 @@ export const createValidationMachine = ({
                       },
                     },
                     decodeFlips: {
-                      id: 'decodeLongFlips',
                       initial: 'decoding',
                       states: {
                         decoding: {
@@ -527,7 +525,8 @@ export const createValidationMachine = ({
                                 decodeFlip
                               ),
                             onDone: {
-                              target: '#fetchLongFlipsDone',
+                              target:
+                                '#validation.longSession.fetch.flips.done',
                               actions: [
                                 assign({
                                   longFlips: ({longFlips}, {data}) =>
@@ -542,14 +541,13 @@ export const createValidationMachine = ({
                       },
                     },
                     done: {
-                      id: 'fetchLongFlipsDone',
                       type: 'final',
                       entry: log(),
                     },
                   },
                   on: {
                     REFETCH_FLIPS: {
-                      target: '#fetchLongFlips',
+                      target: '#validation.longSession.fetch.flips.fetchFlips',
                       actions: [
                         assign({
                           longFlips: ({longFlips}) =>
@@ -581,7 +579,8 @@ export const createValidationMachine = ({
                             )
                           ),
                         onDone: {
-                          target: '#success',
+                          target:
+                            '#validation.longSession.fetch.keywords.success',
                           actions: assign({
                             longFlips: ({longFlips}, {data}) =>
                               mergeFlipsByHash(
@@ -596,7 +595,6 @@ export const createValidationMachine = ({
                       },
                     },
                     success: {
-                      id: 'success',
                       entry: log(),
                       after: {
                         10000: [
@@ -807,7 +805,7 @@ export const createValidationMachine = ({
                                 epoch
                               ),
                             onDone: {
-                              target: '#validationSucceeded',
+                              target: '#validation.validationSucceeded',
                             },
                             onError: {
                               target: 'fail',
@@ -836,7 +834,7 @@ export const createValidationMachine = ({
                   after: {
                     LONG_SESSION_CHECK: [
                       {
-                        target: '#validationFailed',
+                        target: '#validation.validationFailed',
                         cond: ({longFlips}) => {
                           const validFlips = filterSolvableFlips(longFlips)
                           const answers = validFlips.filter(
@@ -858,7 +856,6 @@ export const createValidationMachine = ({
           exit: ['cleanupLongFlips'],
         },
         validationFailed: {
-          id: 'validationFailed',
           type: 'final',
           entry: log(
             (context, event) => ({context, event}),
@@ -866,7 +863,6 @@ export const createValidationMachine = ({
           ),
         },
         validationSucceeded: {
-          id: 'validationSucceeded',
           type: 'final',
           entry: log('VALIDATION SUCCEEDED'),
         },
