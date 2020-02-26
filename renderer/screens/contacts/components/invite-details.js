@@ -59,7 +59,7 @@ function InviteDetails({dbkey, onClose, onSelect}) {
     : identity && mapToFriendlyStatus(identity.state)
 
   return (
-    <div style={{width: rem('700px')}}>
+    <div style={{minWidth: rem('700px')}}>
       <section>
         <ContactInfo {...invite} address={receiver} showMining={mining} />
 
