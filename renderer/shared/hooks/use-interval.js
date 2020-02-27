@@ -22,7 +22,6 @@ export function useIntervalInterval(callback, delay, useImmediately = false) {
   }, [delay, useImmediately])
 }
 
-// TODO: move to usePoll later, yay
 export function useInterval(callback, delay, useImmediately = false) {
   const savedCallback = useRef()
   useEffect(() => {
@@ -32,19 +31,15 @@ export function useInterval(callback, delay, useImmediately = false) {
   useEffect(() => {
     let timeoutId
 
-    function tick() {
+    async function tick() {
       clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        savedCallback.current()
-        tick()
-      }, delay)
+      await savedCallback.current()
+      timeoutId = setTimeout(tick, delay)
     }
 
     if (delay !== null) {
-      if (useImmediately) {
-        savedCallback.current()
-      }
-      tick()
+      if (useImmediately) tick()
+      else setTimeout(tick, delay)
       return () => clearTimeout(timeoutId)
     }
   }, [delay, useImmediately])

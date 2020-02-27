@@ -101,12 +101,12 @@ function useFlips() {
   }, [])
 
   useInterval(
-    () => {
+    async () => {
       const txPromises = flips
         .filter(f => f.type === FlipType.Publishing)
         .map(f => f.txHash)
         .map(fetchTx)
-      Promise.all(txPromises).then(txs => {
+      await Promise.all(txPromises).then(txs => {
         const publishingFlips = flips.filter(
           f => f.type === FlipType.Publishing
         )
