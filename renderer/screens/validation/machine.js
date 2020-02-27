@@ -23,6 +23,7 @@ import {
   filterSolvableFlips,
   flipExtraFlip,
 } from './utils'
+import {forEachAsync, pipeAsync, wait} from '../../shared/utils/fn'
 
 // TODO: merge fetch and decode flips, move validation services to serializable objects
 export const createValidationMachine = ({
@@ -44,6 +45,7 @@ export const createValidationMachine = ({
         shortSessionDuration,
         longSessionDuration,
         errorMessage: null,
+        retries: 0,
       },
       states: {
         shortSession: {
@@ -83,6 +85,7 @@ export const createValidationMachine = ({
                                 shortFlips.length
                                   ? mergeFlipsByHash(shortFlips, data)
                                   : mergeFlipsByHash(data, shortFlips),
+                              retries: ({retries}) => retries + 1,
                             }),
                             log(),
                           ],
@@ -106,11 +109,12 @@ export const createValidationMachine = ({
                     fetching: {
                       entry: log('Fetching short flips'),
                       invoke: {
-                        src: ({shortFlips}) =>
+                        src: ({shortFlips, retries}) =>
                           fetchFlips(
                             filterWaitingForFetching(shortFlips).map(
                               ({hash}) => hash
-                            )
+                            ),
+                            retries
                           ),
                         onDone: {
                           target: '#validation.shortSession.fetch.decodeFlips',
@@ -198,14 +202,11 @@ export const createValidationMachine = ({
                                   ...availableExtraFlips.map(flipExtraFlip),
                                 ],
                         })
-                      } else {
-                        cb('EXTRA_FLIPS_MISSED')
                       }
                     },
                   },
                   on: {
                     EXTRA_FLIPS_PULLED: {
-                      target: '#validation.shortSession.fetch.fetchFlips',
                       actions: [
                         assign({
                           shortFlips: ({shortFlips}, {flips}) =>
@@ -213,9 +214,6 @@ export const createValidationMachine = ({
                         }),
                         log(),
                       ],
-                    },
-                    EXTRA_FLIPS_MISSED: {
-                      target: '#validation.shortSession.fetch.fetchFlips',
                     },
                   },
                 },
@@ -444,6 +442,7 @@ export const createValidationMachine = ({
           entry: [
             assign({
               currentIndex: 0,
+              retries: 0,
             }),
             log('Entering long session'),
           ],
@@ -488,11 +487,12 @@ export const createValidationMachine = ({
                         fetching: {
                           entry: log('Fetching long flips'),
                           invoke: {
-                            src: ({longFlips}) =>
+                            src: ({longFlips, retries}) =>
                               fetchFlips(
                                 filterReadyFlips(longFlips).map(
                                   ({hash}) => hash
-                                )
+                                ),
+                                retries
                               ),
                             onDone: {
                               target:
@@ -501,6 +501,7 @@ export const createValidationMachine = ({
                                 assign({
                                   longFlips: ({longFlips}, {data}) =>
                                     mergeFlipsByHash(longFlips, data),
+                                  retries: ({retries}) => retries + 1,
                                 }),
                                 log(),
                               ],
@@ -526,7 +527,7 @@ export const createValidationMachine = ({
                               ),
                             onDone: {
                               target:
-                                '#validation.longSession.fetch.flips.done',
+                                '#validation.longSession.fetch.flips.checkFlips',
                               actions: [
                                 assign({
                                   longFlips: ({longFlips}, {data}) =>
@@ -538,6 +539,21 @@ export const createValidationMachine = ({
                           },
                         },
                         fail: {entry: log()},
+                      },
+                    },
+                    checkFlips: {
+                      entry: log(),
+                      on: {
+                        '': [
+                          {
+                            target: 'fetchFlips',
+                            cond: ({longFlips}) =>
+                              longFlips.some(
+                                ({ready, fetched}) => ready && !fetched
+                              ),
+                          },
+                          {target: 'done'},
+                        ],
                       },
                     },
                     done: {
@@ -953,28 +969,37 @@ export const createTimerMachine = duration =>
     },
   })
 
-function fetchFlips(hashes) {
+function fetchFlips(hashes, retries) {
   global.logger.debug(`Calling flip_get rpc for hashes`, hashes)
-  return Promise.all(
-    hashes.map(hash =>
-      fetchFlip(hash)
-        .then(({result, error}) => {
-          global.logger.debug(`Get flip_get response`, hash)
-          return {
-            ...result,
-            hash,
-            fetched: !!result && !error,
-          }
-        })
-        .catch(() => {
-          global.logger.debug(`Catch flip_get reject`, hash)
-          return {
-            hash,
-            fetched: false,
-          }
-        })
+  const flips = []
+  return forEachAsync(
+    hashes,
+    pipeAsync(
+      hash =>
+        Promise.race([
+          fetchFlip(hash)
+            .then(({result, error}) => {
+              global.logger.debug(`Get flip_get response`, hash)
+              flips.push({
+                ...result,
+                hash,
+                fetched: !!result && !error,
+              })
+              return Promise.resolve()
+            })
+            .catch(() => {
+              global.logger.debug(`Catch flip_get reject`, hash)
+              flips.push({
+                hash,
+                fetched: false,
+              })
+              return Promise.resolve()
+            }),
+          wait(2 ** retries - 1),
+        ]).then(() => Promise.resolve(1000)),
+      wait
     )
-  )
+  ).then(() => flips)
 }
 
 function decodeFlip({hash, hex, publicHex, privateHex}) {
