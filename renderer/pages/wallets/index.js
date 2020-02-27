@@ -15,17 +15,15 @@ import WalletList from '../../screens/wallets/components/wallet-list'
 import WalletActions from '../../screens/wallets/components/wallet-actions'
 import TransferForm from '../../screens/wallets/components/transfer-form'
 import ReceiveForm from '../../screens/wallets/components/receive-form'
-
 import KillForm from '../../screens/wallets/components/kill-form'
-
 import Loading from '../../shared/components/loading'
-import useWallets from '../../shared/utils/useWallets'
+import {useWallets} from '../../shared/hooks/use-wallets'
 import {useChainState} from '../../shared/providers/chain-context'
 import {FlatButton} from '../../shared/components/button'
 
 export default function Index() {
   const {t} = useTranslation()
-  const {wallets, totalAmount, fetching} = useWallets()
+  const {wallets, totalAmount, txs, status} = useWallets()
 
   const [isReceiveFormOpen, setIsReceiveFormOpen] = React.useState(false)
   const [isTransferFormOpen, setIsTransferFormOpen] = React.useState(false)
@@ -50,9 +48,8 @@ export default function Index() {
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <PageTitle>{t('Wallets')}</PageTitle>
         <Box>
-          {fetching ? (
-            <Loading color={theme.colors.text} />
-          ) : (
+          {status === 'fetching' && <Loading color={theme.colors.text} />}
+          {['success', 'polling'].includes(status) && (
             <>
               <Flex css={{justifyContent: 'space-between', marginBottom: 24}}>
                 <div>
@@ -110,11 +107,11 @@ export default function Index() {
 
               <FlatButton
                 color={theme.colors.primary}
-                onClick={() =>
+                onClick={() => {
                   global.openExternal(
                     `https://scan.idena.io/address?address=${activeWallet.address}#rewards`
                   )
-                }
+                }}
                 style={{
                   marginBottom: rem(19),
                 }}
@@ -129,8 +126,7 @@ export default function Index() {
                   fontSize={rem(19)}
                 />
               </FlatButton>
-
-              <WalletActions />
+              <WalletActions transactions={txs} />
             </>
           )}
         </Box>
