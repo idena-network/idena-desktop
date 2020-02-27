@@ -58,7 +58,7 @@ function IdentityProvider({children}) {
   }, [callRpc])
 
   useInterval(
-    () => {
+    async () => {
       async function fetchData() {
         try {
           const nextIdentity = await fetchIdentity()
@@ -80,7 +80,7 @@ function IdentityProvider({children}) {
         }
       }
 
-      fetchData()
+      await fetchData()
     },
     identity ? 1000 * 1 : 1000 * 5
   )
