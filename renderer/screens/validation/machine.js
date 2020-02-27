@@ -996,7 +996,7 @@ function fetchFlips(hashes, retries) {
               return Promise.resolve()
             }),
           wait(2 ** retries - 1),
-        ]).then(() => Promise.resolve(1000)),
+        ]).then(() => Promise.resolve(100)),
       wait
     )
   ).then(() => flips)
