@@ -155,8 +155,7 @@ function MinerStatusSwitcher() {
                 {t('Submit the form to deactivate your mining status.')}
                 <br />
                 <br />
-                {/* eslint-disable-next-line react/jsx-curly-brace-presence */}
-                (t{'You can activate it again afterwards.'})
+                {t('You can activate it again afterwards.')}
               </span>
             )}
           </Text>
