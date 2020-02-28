@@ -134,7 +134,7 @@ function WalletTransfer({transactions = []}) {
                         : theme.colors.text,
                   }}
                 >
-                  {(tx.type === 'kill' && 'See in Explorer...') ||
+                  {(tx.type === 'kill' && t('See in Explorer...')) ||
                     (tx.amount === '0' ? '\u2013' : tx.signAmount)}
                 </div>
               </TableCol>
