@@ -329,7 +329,13 @@ function CurrentTask({period, identity}) {
     )
   }
 
-  if ([IdentityStatus.Verified, IdentityStatus.Newbie].includes(state)) {
+  if (
+    [
+      IdentityStatus.Human,
+      IdentityStatus.Verified,
+      IdentityStatus.Newbie,
+    ].includes(state)
+  ) {
     if (period === EpochPeriod.None) {
       const numOfFlipsToSubmit = requiredFlips - (flips || []).length
       const shouldSendFlips = numOfFlipsToSubmit > 0

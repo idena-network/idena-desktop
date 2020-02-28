@@ -14,6 +14,7 @@ export const IdentityStatus = {
   Zombie: 'Zombie',
   Killed: 'Killed',
   Terminating: 'Terminating',
+  Human: 'Human',
 }
 
 export function mapToFriendlyStatus(status) {
@@ -99,7 +100,11 @@ function IdentityProvider({children}) {
 
   const canSubmitFlip =
     identity &&
-    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(identity.state) &&
+    [
+      IdentityStatus.Newbie,
+      IdentityStatus.Verified,
+      IdentityStatus.Human,
+    ].includes(identity.state) &&
     identity.requiredFlips > 0 &&
     (identity.flips || []).length < identity.requiredFlips
 
@@ -112,6 +117,7 @@ function IdentityProvider({children}) {
       IdentityStatus.Verified,
       IdentityStatus.Suspended,
       IdentityStatus.Zombie,
+      IdentityStatus.Human,
     ].includes(identity.state)
 
   const canTerminate =
@@ -122,11 +128,16 @@ function IdentityProvider({children}) {
       IdentityStatus.Verified,
       IdentityStatus.Suspended,
       IdentityStatus.Zombie,
+      IdentityStatus.Human,
     ].includes(identity.state)
 
   const canMine =
     identity &&
-    [IdentityStatus.Newbie, IdentityStatus.Verified].includes(identity.state)
+    [
+      IdentityStatus.Newbie,
+      IdentityStatus.Verified,
+      IdentityStatus.Human,
+    ].includes(identity.state)
 
   const killMe = useCallback(
     async ({to}) => {
@@ -190,7 +201,11 @@ export function canValidate(identity) {
   const shouldSendFlips = numOfFlipsToSubmit > 0
 
   return (
-    ([IdentityStatus.Verified, IdentityStatus.Newbie].includes(state) &&
+    ([
+      IdentityStatus.Human,
+      IdentityStatus.Verified,
+      IdentityStatus.Newbie,
+    ].includes(state) &&
       !shouldSendFlips) ||
     [
       IdentityStatus.Candidate,
