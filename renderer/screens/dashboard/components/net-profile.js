@@ -8,6 +8,7 @@ import {Figure} from '../../../shared/components/utils'
 import {
   useIdentityState,
   mapToFriendlyStatus,
+  IdentityStatus,
 } from '../../../shared/providers/identity-context'
 
 export function NetProfile() {
@@ -56,18 +57,54 @@ export function NetProfile() {
         </>
       )}
 
-      {stake > 0 && (
+      {stake > 0 && state !== IdentityStatus.Newbie && (
+        <Figure
+          label={t('Stake')}
+          value={stake}
+          postfix="DNA"
+          tooltip={
+            <Box
+              w={rem(180)}
+              style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
+            >
+              {t(
+                'In order to withdraw the stake you have to terminate your identity'
+              )}
+            </Box>
+          }
+        />
+      )}
+
+      {stake > 0 && state === IdentityStatus.Newbie && (
         <>
           <Figure
             label={t('Stake')}
-            value={stake}
+            value={stake * 0.25}
             postfix="DNA"
             tooltip={
-              <>
-                <div>{t('In order to withdraw the')}</div>
-                <div>{t('stake you have to')}</div>
-                <div>{t(`terminate your identity`)}</div>
-              </>
+              <Box
+                w={rem(180)}
+                style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
+              >
+                {t(
+                  'You need to get Verified status to be able to terminate your identity and withdraw the stake'
+                )}
+              </Box>
+            }
+          />
+          <Figure
+            label={t('Locked')}
+            value={stake * 0.75}
+            postfix="DNA"
+            tooltip={
+              <Box
+                w={rem(180)}
+                style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
+              >
+                {t(
+                  'You need to get Verified status to get the locked funds into the normal wallet'
+                )}
+              </Box>
             }
           />
         </>
