@@ -1,5 +1,5 @@
 import React from 'react'
-import {margin, rem, wordWrap} from 'polished'
+import {margin, rem} from 'polished'
 import {useTranslation} from 'react-i18next'
 
 import theme from '../../../shared/theme'
@@ -63,11 +63,14 @@ export function NetProfile() {
           value={stake}
           postfix="DNA"
           tooltip={
-            <>
-              <div>{t('In order to withdraw the')}</div>
-              <div>{t('stake you have to')}</div>
-              <div>{t(`terminate your identity`)}</div>
-            </>
+            <Box
+              w={rem(180)}
+              style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
+            >
+              {t(
+                'In order to withdraw the stake you have to terminate your identity'
+              )}
+            </Box>
           }
         />
       )}
@@ -79,10 +82,13 @@ export function NetProfile() {
             value={stake * 0.25}
             postfix="DNA"
             tooltip={
-              <Box>
-                <div>{t('You need to get Verified status')}</div>
-                <div>{t('to be able to terminate your identity')}</div>
-                <div>{t(`and withdraw the stake`)}</div>
+              <Box
+                w={rem(180)}
+                style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
+              >
+                {t(
+                  'You need to get Verified status to be able to terminate your identity and withdraw the stake'
+                )}
               </Box>
             }
           />
@@ -91,11 +97,14 @@ export function NetProfile() {
             value={stake * 0.75}
             postfix="DNA"
             tooltip={
-              <>
-                <div>{t('You need to get Verified status')}</div>
-                <div>{t('to get the locked funds')}</div>
-                <div>{t(`into the normal wallet`)}</div>
-              </>
+              <Box
+                w={rem(180)}
+                style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
+              >
+                {t(
+                  'You need to get Verified status to get the locked funds into the normal wallet'
+                )}
+              </Box>
             }
           />
         </>
