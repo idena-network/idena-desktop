@@ -1,14 +1,14 @@
 {
-  "Can not submit flip": "Nemogu priloziti flipove",
-  "Keywords are not specified": "Kljucne rijeci nisu odredene",
-  "Error while uploading flip": "Greska kod ucitavanja flipa",
-  "Something went wrong": "Nesto je krenulo krivo",
-  "Maximum image size exceeded": "Maksimalna velicina slike je prekoracena",
-  "Error while importing key": "Greska prilikom uvoza kljuca",
-  "Internal node is not available, try again in a few seconds": "Interni node nije dostupan, probajte opet za par sekundi",
-  "You can not submit flips having 'Candidate' status": "Nemozete prilagati flipove dok imate 'Kandidat' status",
-  "You cannot submit more flips until the next validation": "Nemozete priloziti vise flipova do iduce validacije",
-  "Can not submit flip during the validation session": "Nemozete priloziti flipove dok traje validacija",
-  "Error while sending transaction": "Greska kod slanja transakcije",
-  "Transaction sent": "Tranakcija poslata"
+  "Can not submit flip": "Ne mogu da pošaljem flipove",
+  "Keywords are not specified": "Ključne riječi nisu određene",
+  "Error while uploading flip": "Greška pri slanju flipa na mrežu",
+  "Something went wrong": "Nešto nije u redu",
+  "Maximum image size exceeded": "Prekoračena je maksimalna veličina slike",
+  "Error while importing key": "Greška pri uvozu ključa",
+  "Internal node is not available, try again in a few seconds": "Interni node nije dostupan, probajte ponovo za par sekundi",
+  "You can not submit flips having 'Candidate' status": "Dok ste Kandidat, ne možete da prilažete flipove",
+  "You cannot submit more flips until the next validation": "Ne možete da priložite više flipova pre iduće validacije",
+  "Can not submit flip during the validation session": "Ne možete da priložite flipove dok je validacija u toku",
+  "Error while sending transaction": "Greška pri slanju transakcije",
+  "Transaction sent": "Transakcija je poslata"
 }
