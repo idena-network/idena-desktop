@@ -80,7 +80,7 @@
   "Online mining status": "Статус рударења на мрежи",
   "Activate mining status": "Активирај рударење",
   "Deactivate mining status": "Деактивирај рударење",
-  "Submit the form to start mining. Your node has to be online\n                unless you deactivate your status. Otherwise penalties might be\n                charged after being offline more than 1 hour.": "Почињете са рударењем. Ваш нод мора бити на мрежи\n                уколико не искључите статус рударења. Уколико\н                будете ван мреже више од једног сата, следи наплата пенала.",
+  "Submit the form to start mining. Your node has to be online\n                unless you deactivate your status. Otherwise penalties might be\n                charged after being offline more than 1 hour.": "Почињете са рударењем. Ваш нод мора бити на мрежи\n                уколико не искључите статус рударења. Уколико\n                будете ван мреже више од једног сата, следи наплата пенала.",
   "You can deactivate your online status at any time.": "Можете да деактивирате рударење у било ком тренутку.",
   "Submit the form to deactivate your mining status.": "Деактивирај рударење.",
   "Cancel": "Откажи",
