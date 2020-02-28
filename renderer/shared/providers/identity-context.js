@@ -106,7 +106,7 @@ function IdentityProvider({children}) {
       IdentityStatus.Human,
     ].includes(identity.state) &&
     identity.requiredFlips > 0 &&
-    (identity.flips || []).length < identity.requiredFlips
+    (identity.flips || []).length < identity.availableFlips
 
   // eslint-disable-next-line no-shadow
   const canValidate =
