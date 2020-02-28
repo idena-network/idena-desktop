@@ -20,6 +20,7 @@ export const FlipType = {
   Archived: 'archived',
 }
 
+const FLIP_MAX_SIZE = 1024 * 1024 // 1 mb
 const DEFAULT_ORDER = [0, 1, 2, 3]
 
 const FLIP_LENGTH = DEFAULT_ORDER.length
@@ -185,8 +186,17 @@ function useFlips() {
         }
       }
 
+      const [hex, publicHex, privateHex] = toHex(pics, order)
+      if (publicHex.length + privateHex.length > 2 * FLIP_MAX_SIZE) {
+        return {
+          error: {message: 'Flip is too large'},
+        }
+      }
+
       const resp = await api.submitFlip(
-        ...toHex(pics, order),
+        hex,
+        publicHex,
+        privateHex,
         Math.max(0, pairId)
       )
       const {result} = resp
