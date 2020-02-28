@@ -503,7 +503,8 @@ export function Version() {
         {!autoUpdate.uiCanUpdate &&
         autoUpdate.nodeCanUpdate &&
         autoUpdate.nodeProgress &&
-        autoUpdate.nodeProgress.percentage === 100 ? (
+        (!autoUpdate.nodeProgress ||
+          autoUpdate.nodeProgress.percentage === 100) ? (
           <UpdateButton
             text="Update Node Version"
             version={autoUpdate.nodeRemoteVersion}
