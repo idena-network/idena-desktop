@@ -47,7 +47,7 @@ function WalletList({
         .scroll {
           overflow: hidden;
           width: 100%;
-          height: 98px;
+          min-height: ${rem(100)};
           margin-bottom: ${rem(30)};
         }
 
