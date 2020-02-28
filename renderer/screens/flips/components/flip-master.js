@@ -113,9 +113,11 @@ function FlipMaster({id, onClose}) {
             `error:You can not submit flips having 'Candidate' status`
           )
         } else if (
-          [IdentityStatus.Newbie, IdentityStatus.Verified].includes(
-            identityState
-          )
+          [
+            IdentityStatus.Newbie,
+            IdentityStatus.Verified,
+            IdentityStatus.Human,
+          ].includes(identityState)
         ) {
           message = t(
             'error:You cannot submit more flips until the next validation'
