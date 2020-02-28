@@ -12,9 +12,8 @@ import {
   Button,
   Select,
 } from '../../../shared/components'
-
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
-import useWallets from '../../../shared/utils/useWallets'
+import {useWallets} from '../../../shared/hooks/use-wallets'
 
 function TransferForm({onSuccess, onFail}) {
   const {wallets, sendTransaction} = useWallets()
