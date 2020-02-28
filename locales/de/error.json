@@ -1,14 +1,14 @@
 {
-  "Can not submit flip": "Can not submit flip",
-  "Keywords are not specified": "Keywords are not specified",
-  "Error while uploading flip": "Error while uploading flip",
-  "Something went wrong": "Something went wrong",
-  "Maximum image size exceeded": "Maximum image size exceeded",
-  "Error while importing key": "Error while importing key",
-  "Internal node is not available, try again in a few seconds": "Internal node is not available, try again in a few seconds",
-  "You can not submit flips having 'Candidate' status": "You can not submit flips having 'Candidate' status",
-  "You cannot submit more flips until the next validation": "You cannot submit more flips until the next validation",
-  "Can not submit flip during the validation session": "Can not submit flip during the validation session",
-  "Error while sending transaction": "Error while sending transaction",
-  "Transaction sent": "Transaction sent"
+  "Can not submit flip": "Flip kann nicht übertragen werden",
+  "Keywords are not specified": "Schlüsselwörter sind nicht angegeben",
+  "Error while uploading flip": "Fehler beim Hochladen des Flips",
+  "Something went wrong": "Etwas ist schief gelaufen",
+  "Maximum image size exceeded": "Maximale Bildgröße überschritten",
+  "Error while importing key": "Fehler beim Importieren des Schlüssels",
+  "Internal node is not available, try again in a few seconds": "Interner Netzknoten ist nicht verfügbar, versuche es in ein paar Sekunden erneut",
+  "You can not submit flips having 'Candidate' status": "Du kannst im Status 'Kandidat' keine Flips einreichen",
+  "You cannot submit more flips until the next validation": "Bis zur nächsten Validierung können keine weiteren Flips eingereicht werden",
+  "Can not submit flip during the validation session": "Während der Validierungssitzung kann kein Flip eingereicht werden",
+  "Error while sending transaction": "Fehler beim Senden der Transaktion",
+  "Transaction sent": "Transaktion gesendet"
 }

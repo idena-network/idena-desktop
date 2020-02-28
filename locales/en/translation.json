@@ -92,7 +92,7 @@
   "Stake": "Stake",
   "In order to withdraw the&#10;stake you have to&#10;terminate your identity": "In order to withdraw the&#10;stake you have to&#10;terminate your identity",
   "Mining penalty": "Mining penalty",
-  "Your node was offline more than 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins.": "Your node was offline more than 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins.",
+  "Your node was offline more than 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins.": "Your node was offline more than 1 hour.&#10;The penalty will be charged automatically.&#10;Once it's fully paid you'll continue to mine coins.",
   "Total score": "Total score",
   "Total score for&#10;all validations": "Total score for&#10;all validations",
   "Submit flip": "Submit flip",
