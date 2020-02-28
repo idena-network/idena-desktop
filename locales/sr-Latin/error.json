@@ -1,0 +1,14 @@
+{
+  "Can not submit flip": "Flip se ne može poslati",
+  "Keywords are not specified": "Ključne reči nisu navedene",
+  "Error while uploading flip": "Greška pri slanju flipa",
+  "Something went wrong": "Nešto nije u redu",
+  "Maximum image size exceeded": "Prekoračena je maksimalna veličina slike",
+  "Error while importing key": "Greška pri uvozu privatnog ključa",
+  "Internal node is not available, try again in a few seconds": "Interni nod nije dostupan, pokušajte ponovo za par sekundi",
+  "You can not submit flips having 'Candidate' status": "Dok ste kandidat, ne možete da pošaljete flipove",
+  "You cannot submit more flips until the next validation": "Ne možete poslati više flipova pre sledeće validacije",
+  "Can not submit flip during the validation session": "Ne možete poslati flip dok je validacija u toku",
+  "Error while sending transaction": "Greška pri slanju transakcije",
+  "Transaction sent": "Transakcija je poslata"
+}
