@@ -502,6 +502,7 @@ export function Version() {
         ) : null}
         {!autoUpdate.uiCanUpdate &&
         autoUpdate.nodeCanUpdate &&
+        autoUpdate.nodeProgress &&
         autoUpdate.nodeProgress.percentage === 100 ? (
           <UpdateButton
             text="Update Node Version"
