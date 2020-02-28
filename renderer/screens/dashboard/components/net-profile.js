@@ -1,5 +1,5 @@
 import React from 'react'
-import {margin, rem} from 'polished'
+import {margin, rem, wordWrap} from 'polished'
 import {useTranslation} from 'react-i18next'
 
 import theme from '../../../shared/theme'
@@ -8,6 +8,7 @@ import {Figure} from '../../../shared/components/utils'
 import {
   useIdentityState,
   mapToFriendlyStatus,
+  IdentityStatus,
 } from '../../../shared/providers/identity-context'
 
 export function NetProfile() {
@@ -56,17 +57,44 @@ export function NetProfile() {
         </>
       )}
 
-      {stake > 0 && (
+      {stake > 0 && state !== IdentityStatus.Newbie && (
+        <Figure
+          label={t('Stake')}
+          value={stake}
+          postfix="DNA"
+          tooltip={
+            <>
+              <div>{t('In order to withdraw the')}</div>
+              <div>{t('stake you have to')}</div>
+              <div>{t(`terminate your identity`)}</div>
+            </>
+          }
+        />
+      )}
+
+      {stake > 0 && state === IdentityStatus.Newbie && (
         <>
           <Figure
             label={t('Stake')}
-            value={stake}
+            value={stake * 0.25}
+            postfix="DNA"
+            tooltip={
+              <Box>
+                <div>{t('You need to get Verified status')}</div>
+                <div>{t('to be able to terminate your identity')}</div>
+                <div>{t(`and withdraw the stake`)}</div>
+              </Box>
+            }
+          />
+          <Figure
+            label={t('Locked')}
+            value={stake * 0.75}
             postfix="DNA"
             tooltip={
               <>
-                <div>{t('In order to withdraw the')}</div>
-                <div>{t('stake you have to')}</div>
-                <div>{t(`terminate your identity`)}</div>
+                <div>{t('You need to get Verified status')}</div>
+                <div>{t('to get the locked funds')}</div>
+                <div>{t(`into the normal wallet`)}</div>
               </>
             }
           />

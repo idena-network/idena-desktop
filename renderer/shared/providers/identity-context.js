@@ -124,7 +124,6 @@ function IdentityProvider({children}) {
     identity &&
     [
       IdentityStatus.Candidate,
-      IdentityStatus.Newbie,
       IdentityStatus.Verified,
       IdentityStatus.Suspended,
       IdentityStatus.Zombie,
