@@ -500,7 +500,9 @@ export function Version() {
             onClick={uiUpdate}
           />
         ) : null}
-        {!autoUpdate.uiCanUpdate && autoUpdate.nodeCanUpdate ? (
+        {!autoUpdate.uiCanUpdate &&
+        autoUpdate.nodeCanUpdate &&
+        autoUpdate.nodeProgress.percentage === 100 ? (
           <UpdateButton
             text="Update Node Version"
             version={autoUpdate.nodeRemoteVersion}
