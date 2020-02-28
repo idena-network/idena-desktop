@@ -19,7 +19,7 @@ const logger = require('./logger')
 
 logger.info('idena started', global.appVersion || app.getVersion())
 
-autoUpdater.logger = logger
+// autoUpdater.logger = logger
 
 const {
   IMAGE_SEARCH_TOGGLE,
