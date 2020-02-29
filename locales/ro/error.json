@@ -1,4 +1,5 @@
- "Can not submit flip": "Flipul nu a putut fi trimis",
+{
+  "Can not submit flip": "Flipul nu a putut fi trimis",
   "Keywords are not specified": "Cuvintele cheie nu sunt specificate",
   "Error while uploading flip": "Eroare la încărcarea flipului",
   "Something went wrong": "Ceva n-a mers bine",
@@ -10,3 +11,4 @@
   "Can not submit flip during the validation session": "Nu poate trimite flipuri în timpul sesiunii de validare",
   "Error while sending transaction": "Eroare la trimiterea tranzacției",
   "Transaction sent": "Tranzacția trimisă"
+}
