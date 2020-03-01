@@ -41,9 +41,7 @@ export function useInterval(callback, delay, useImmediately = false) {
     }
 
     if (delay !== null) {
-      if (useImmediately) {
-        savedCallback.current()
-      }
+      if (useImmediately) savedCallback.current()
       tick()
       return () => {
         clearTimeout(timeoutId)
