@@ -17,7 +17,7 @@ const EpochDispatchContext = React.createContext()
 // eslint-disable-next-line react/prop-types
 function EpochProvider({children}) {
   const [epoch, setEpoch] = React.useState(null)
-  const [interval, setInterval] = React.useState(1000 * 1)
+  const [interval, setInterval] = React.useState(1000 * 3)
 
   React.useEffect(() => {
     let ignore = false

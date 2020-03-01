@@ -106,7 +106,7 @@ export default function useTx(initialHash) {
         }
       }
     },
-    hash && !state.mined ? 1000 : null
+    hash && !state.mined ? 1000 * 10 : null
   )
 
   return [state, setHash]

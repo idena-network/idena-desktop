@@ -24,6 +24,7 @@ export function useIntervalInterval(callback, delay, useImmediately = false) {
 
 export function useInterval(callback, delay, useImmediately = false) {
   const savedCallback = useRef()
+
   useEffect(() => {
     savedCallback.current = callback
   }, [callback])
@@ -31,16 +32,20 @@ export function useInterval(callback, delay, useImmediately = false) {
   useEffect(() => {
     let timeoutId
 
-    async function tick() {
+    function tick() {
       clearTimeout(timeoutId)
-      await savedCallback.current()
-      timeoutId = setTimeout(tick, delay)
+      timeoutId = setTimeout(() => {
+        savedCallback.current()
+        tick()
+      }, delay)
     }
 
     if (delay !== null) {
-      if (useImmediately) tick()
-      else setTimeout(tick, delay)
-      return () => clearTimeout(timeoutId)
+      if (useImmediately) savedCallback.current()
+      tick()
+      return () => {
+        clearTimeout(timeoutId)
+      }
     }
   }, [delay, useImmediately])
 }

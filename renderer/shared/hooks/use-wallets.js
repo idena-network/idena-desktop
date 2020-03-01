@@ -163,7 +163,7 @@ export function useWallets() {
     () => {
       dispatch({type: 'POLL'})
     },
-    address ? 3000 : null
+    address ? 1000 * 5 : null
   )
 
   const sendTransaction = useCallback(async ({from, to, amount}) => {

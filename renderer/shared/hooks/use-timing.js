@@ -13,7 +13,7 @@ const initialTiming = {
 
 function useTiming() {
   const [timing, setTiming] = React.useState(initialTiming)
-  const [interval, setInterval] = React.useState(1000 * 1)
+  const [interval, setInterval] = React.useState(1000 * 60)
 
   useInterval(
     async () => {
