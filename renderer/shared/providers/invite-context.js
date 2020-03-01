@@ -145,7 +145,7 @@ function InviteProvider({children}) {
         })
       }
     },
-    activationTx ? 3000 : null
+    activationTx ? 1000 * 10 : null
   )
 
   useInterval(
@@ -173,7 +173,7 @@ function InviteProvider({children}) {
         })
       )
     },
-    invites.filter(({mining}) => mining).length ? 5000 : null
+    invites.filter(({mining}) => mining).length ? 1000 * 10 : null
   )
 
   useInterval(
@@ -200,7 +200,7 @@ function InviteProvider({children}) {
         })
       )
     },
-    invites.filter(({terminating}) => terminating).length ? 5000 : null
+    invites.filter(({terminating}) => terminating).length ? 1000 * 10 : null
   )
 
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
