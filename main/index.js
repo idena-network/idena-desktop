@@ -15,7 +15,6 @@ const prepareNext = require('electron-next')
 const express = require('express')
 const net = require('net')
 const loadRoute = require('./utils/routes')
-const logger = require('./logger')
 
 const isWin = process.platform === 'win32'
 const isMac = process.platform === 'darwin'
@@ -25,6 +24,8 @@ app.allowRendererProcessReuse = true
 if (isWin) {
   app.setAppLogsPath(join(app.getPath('userData'), 'logs'))
 }
+
+const logger = require('./logger')
 
 logger.info('idena started', global.appVersion || app.getVersion())
 
