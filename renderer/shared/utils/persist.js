@@ -19,15 +19,23 @@ export function loadPersistentStateValue(dbName, key) {
 
 export function persistItem(dbName, key, value) {
   // if we have something to save
-  loadDb(dbName)
-    .set(key, value)
-    .write()
+  try {
+    loadDb(dbName)
+      .set(key, value)
+      .write()
+  } catch {
+    global.logger.error('error writing to file: ', dbName, key, value)
+  }
 }
 
 export function persistState(name, state) {
-  loadDb(name)
-    .setState(state)
-    .write()
+  try {
+    loadDb(name)
+      .setState(state)
+      .write()
+  } catch {
+    global.logger.error('error writing to file: ', name, state)
+  }
 }
 
 /**
