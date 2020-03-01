@@ -17,9 +17,16 @@ const net = require('net')
 const loadRoute = require('./utils/routes')
 const logger = require('./logger')
 
-logger.info('idena started', global.appVersion || app.getVersion())
+const isWin = process.platform === 'win32'
+const isMac = process.platform === 'darwin'
 
-// autoUpdater.logger = logger
+app.allowRendererProcessReuse = true
+
+if (isWin) {
+  app.setAppLogsPath(join(app.getPath('userData'), 'logs'))
+}
+
+logger.info('idena started', global.appVersion || app.getVersion())
 
 const {
   IMAGE_SEARCH_TOGGLE,
@@ -50,11 +57,6 @@ let tray
 let expressPort = 3051
 
 const nodeUpdater = new NodeUpdater(logger)
-
-const isWin = process.platform === 'win32'
-const isMac = process.platform === 'darwin'
-
-app.allowRendererProcessReuse = true
 
 app.on('second-instance', () => {
   // Someone tried to run a second instance, we should focus our window.
