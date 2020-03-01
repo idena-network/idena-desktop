@@ -15,11 +15,19 @@ const prepareNext = require('electron-next')
 const express = require('express')
 const net = require('net')
 const loadRoute = require('./utils/routes')
+
+const isWin = process.platform === 'win32'
+const isMac = process.platform === 'darwin'
+
+app.allowRendererProcessReuse = true
+
+if (isWin) {
+  app.setAppLogsPath(join(app.getPath('userData'), 'logs'))
+}
+
 const logger = require('./logger')
 
 logger.info('idena started', global.appVersion || app.getVersion())
-
-// autoUpdater.logger = logger
 
 const {
   IMAGE_SEARCH_TOGGLE,
@@ -50,11 +58,6 @@ let tray
 let expressPort = 3051
 
 const nodeUpdater = new NodeUpdater(logger)
-
-const isWin = process.platform === 'win32'
-const isMac = process.platform === 'darwin'
-
-app.allowRendererProcessReuse = true
 
 app.on('second-instance', () => {
   // Someone tried to run a second instance, we should focus our window.
