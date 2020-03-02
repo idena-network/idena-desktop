@@ -997,7 +997,7 @@ function fetchFlips(hashes, retries) {
               })
               return Promise.resolve()
             }),
-          wait(Math.max(1, 2 ** retries - 1)),
+          wait(Math.max(1, 2 ** retries - 1) * 1000),
         ]).then(() => Promise.resolve(100)),
       wait
     )
