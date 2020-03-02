@@ -489,9 +489,11 @@ export const createValidationMachine = ({
                           invoke: {
                             src: ({longFlips, retries}) =>
                               fetchFlips(
-                                filterReadyFlips(longFlips).map(
-                                  ({hash}) => hash
-                                ),
+                                longFlips
+                                  .filter(
+                                    ({ready, fetched}) => ready && !fetched
+                                  )
+                                  .map(({hash}) => hash),
                                 retries
                               ),
                             onDone: {
@@ -995,7 +997,7 @@ function fetchFlips(hashes, retries) {
               })
               return Promise.resolve()
             }),
-          wait(2 ** retries - 1),
+          wait(Math.max(1, 2 ** retries - 1)),
         ]).then(() => Promise.resolve(100)),
       wait
     )
