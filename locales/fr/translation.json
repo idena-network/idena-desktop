@@ -132,7 +132,7 @@
 	  "Blockchain transaction ID": "ID de transaction blockchain",
 	  "Fee limit": "Limite de frais",
 	  "Confirmed": "Confirmé",
-    "You don't have any transactions yet": "Vous n’avez aucune transaction pour le moment",
+          "You don't have any transactions yet": "Vous n’avez aucune transaction pour le moment",
 	  "General": "Général",
 	  "Solve more than 10 flips": "Résolvez plus de 10 flips",
 	  "to become Verified": "pour devenir Vérifié",
@@ -144,6 +144,6 @@
 	  "Once it's fully paid you'll continue to mine coins.": "Vous pourrez reprendre le minage une fois la pénalité intégralement payée.",
 	  "Total score for": "Score total pour",
 	  "all validations": "toutes les validations"
-    "My Idena": "Mon Idena",
-    "Contacts": "Contacts"
+          "My Idena": "Mon Idena",
+          "Contacts": "Contacts"
 }
