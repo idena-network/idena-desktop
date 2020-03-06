@@ -101,8 +101,9 @@
 	  "Change words": "키워드 수정",
 	  "Flip saved!": "플립(flip)이 저장되었음",
 	  "Think up a story": "줄거리를 고안해 보세요",
-	  "Think up a short story about someone/something related to the two key words below according to the template": "아래 2개 견본 키워드를 보고 사람이나 물건에 관한 짧은 이야기를 고안해 보세요 : 이전상황ㅡ전개상황ㅡ이후상황",
-	"Select images": "이미지들을 선택하세요",
+	  "Think up a short story about someone/something related to the two key words below according to the template": "아래 2개 견본 키워드를 보고 사람이나 물건에 관한 짧은 이야기를 고안해 보세요"
+	  "Before - Something happens - After": "이전상황ㅡ전개상황ㅡ이후상황",
+	  "Select images": "이미지들을 선택하세요",
 	  "Select 4 images to tell your story": "당신이 고안한 이야기의 줄거리를 표현하기위해 4개의 이미지를 선택하세요",
 	  "Please no text on images to explain your story": "이해를 돕기위한 목적으로 선택된 이미지에 문구나 글자가 삽입되어서는 안됩니다",
 	  "Shuffle images": "이미지들을 섞으세요",
