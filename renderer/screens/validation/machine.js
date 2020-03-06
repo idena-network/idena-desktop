@@ -1,6 +1,6 @@
 import {Machine, assign, State} from 'xstate'
 import {decode} from 'rlp'
-import {log} from 'xstate/lib/actions'
+import {log, send} from 'xstate/lib/actions'
 import dayjs from 'dayjs'
 import {
   fetchFlipHashes,
@@ -22,6 +22,7 @@ import {
   filterReadyFlips,
   filterSolvableFlips,
   flipExtraFlip,
+  readyNotFetched,
 } from './utils'
 import {forEachAsync, pipeAsync, wait} from '../../shared/utils/fn'
 
@@ -104,72 +105,18 @@ export const createValidationMachine = ({
                   },
                 },
                 fetchFlips: {
-                  initial: 'fetching',
-                  states: {
-                    fetching: {
-                      entry: log('Fetching short flips'),
-                      invoke: {
-                        src: ({shortFlips, retries}) =>
-                          fetchFlips(
-                            filterWaitingForFetching(shortFlips).map(
-                              ({hash}) => hash
-                            ),
-                            retries
-                          ),
-                        onDone: {
-                          target: '#validation.shortSession.fetch.decodeFlips',
-                          actions: [
-                            assign({
-                              shortFlips: ({shortFlips}, {data}) =>
-                                mergeFlipsByHash(shortFlips, data),
-                            }),
-                            log(),
-                          ],
-                        },
-                        onError: {
-                          target: 'fail',
-                          actions: log(),
-                        },
-                      },
-                    },
-                    fail: {
-                      after: {
-                        1000: 'fetching',
-                      },
-                    },
+                  invoke: {
+                    src: 'fetchShortFlips',
                   },
-                },
-                decodeFlips: {
-                  initial: 'decoding',
-                  states: {
-                    decoding: {
-                      invoke: {
-                        entry: log('Decoding short flips'),
-                        src: async ({shortFlips}) =>
-                          filterWaitingForDecoding(shortFlips).map(decodeFlip),
-                        onDone: {
-                          target: 'decoded',
-                          actions: [
-                            assign({
-                              shortFlips: ({shortFlips}, {data}) =>
-                                mergeFlipsByHash(shortFlips, data),
-                            }),
-                            log(),
-                          ],
-                        },
-                        onError: {
-                          target: 'fail',
-                          actions: log(),
-                        },
-                      },
-                    },
-                    decoded: {
-                      after: {
-                        1000: '#validation.shortSession.fetch.check',
-                      },
-                    },
-                    fail: {
-                      entry: log(),
+                  on: {
+                    FLIP: {
+                      actions: [
+                        assign({
+                          shortFlips: ({shortFlips}, {flip}) =>
+                            mergeFlipsByHash(shortFlips, [flip]),
+                        }),
+                        log(),
+                      ],
                     },
                   },
                 },
@@ -202,11 +149,16 @@ export const createValidationMachine = ({
                                   ...availableExtraFlips.map(flipExtraFlip),
                                 ],
                         })
+                      } else {
+                        cb({
+                          type: 'EXTRA_FLIPS_MISSING',
+                        })
                       }
                     },
                   },
                   on: {
                     EXTRA_FLIPS_PULLED: {
+                      target: 'fetchFlips',
                       actions: [
                         assign({
                           shortFlips: ({shortFlips}, {flips}) =>
@@ -215,6 +167,7 @@ export const createValidationMachine = ({
                         log(),
                       ],
                     },
+                    EXTRA_FLIPS_MISSING: {target: 'fetchFlips'},
                   },
                 },
                 done: {type: 'final'},
@@ -482,63 +435,19 @@ export const createValidationMachine = ({
                       },
                     },
                     fetchFlips: {
-                      initial: 'fetching',
-                      states: {
-                        fetching: {
-                          entry: log('Fetching long flips'),
-                          invoke: {
-                            src: ({longFlips, retries}) =>
-                              fetchFlips(
-                                filterReadyFlips(longFlips).map(
-                                  ({hash}) => hash
-                                ),
-                                retries
-                              ),
-                            onDone: {
-                              target:
-                                '#validation.longSession.fetch.flips.decodeFlips',
-                              actions: [
-                                assign({
-                                  longFlips: ({longFlips}, {data}) =>
-                                    mergeFlipsByHash(longFlips, data),
-                                  retries: ({retries}) => retries + 1,
-                                }),
-                                log(),
-                              ],
-                            },
-                            onError: {
-                              target: 'fail',
-                              actions: log(),
-                            },
-                          },
-                        },
-                        fail: {},
+                      invoke: {
+                        src: 'fetchLongFlips',
                       },
-                    },
-                    decodeFlips: {
-                      initial: 'decoding',
-                      states: {
-                        decoding: {
-                          entry: log('Decoding long flips'),
-                          invoke: {
-                            src: async ({longFlips}) =>
-                              filterWaitingForDecoding(longFlips).map(
-                                decodeFlip
-                              ),
-                            onDone: {
-                              target:
-                                '#validation.longSession.fetch.flips.checkFlips',
-                              actions: [
-                                assign({
-                                  longFlips: ({longFlips}, {data}) =>
-                                    mergeFlipsByHash(longFlips, data),
-                                }),
-                                log(),
-                              ],
-                            },
-                          },
+                      on: {
+                        FLIP: {
+                          actions: [
+                            assign({
+                              longFlips: ({longFlips}, {flip}) =>
+                                mergeFlipsByHash(longFlips, [flip]),
+                            }),
+                            log(),
+                          ],
                         },
-                        fail: {entry: log()},
                       },
                     },
                     checkFlips: {
@@ -885,6 +794,10 @@ export const createValidationMachine = ({
       },
     },
     {
+      services: {
+        fetchShortFlips: ({shortFlips}) => cb => fetchFlips(shortFlips, cb),
+        fetchLongFlips: ({longFlips}) => cb => fetchFlips(longFlips, cb),
+      },
       delays: {
         BUMP_EXTRA_FLIPS: 1000 * 35,
         // eslint-disable-next-line no-shadow
@@ -912,94 +825,35 @@ export const createValidationMachine = ({
     }
   )
 
-export const createTimerMachine = duration =>
-  Machine({
-    initial: 'running',
-    context: {
-      elapsed: 0,
-      duration,
-      interval: 1,
-    },
-    states: {
-      running: {
-        entry: assign({
-          start: dayjs(),
-        }),
-        invoke: {
-          src: ({interval}) => cb => {
-            const intervalId = setInterval(() => cb('TICK'), 1000 * interval)
-            return () => clearInterval(intervalId)
-          },
-        },
-        on: {
-          '': {
-            target: 'stopped',
-            // eslint-disable-next-line no-shadow
-            cond: ({elapsed, duration}) => elapsed >= duration,
-          },
-          TICK: {
-            actions: assign({
-              elapsed: ({start}) => dayjs().diff(start, 's'),
-            }),
-          },
-        },
-      },
-      stopped: {
-        on: {
-          '': {
-            target: 'running',
-            // eslint-disable-next-line no-shadow
-            cond: ({elapsed, duration}) => elapsed < duration,
-          },
-        },
-      },
-    },
-    on: {
-      DURATION_UPDATE: {
-        actions: assign({
-          // eslint-disable-next-line no-shadow
-          duration: (_, {duration}) => duration,
-        }),
-      },
-      RESET: {
-        actions: assign({
-          elapsed: 0,
-        }),
-      },
-    },
-  })
+function fetchFlips(flips, cb) {
+  const hashes = flips.filter(readyNotFetched).map(({hash}) => hash)
 
-function fetchFlips(hashes, retries) {
   global.logger.debug(`Calling flip_get rpc for hashes`, hashes)
-  const flips = []
-  return forEachAsync(
-    hashes,
-    pipeAsync(
-      hash =>
-        Promise.race([
-          fetchFlip(hash)
-            .then(({result, error}) => {
-              global.logger.debug(`Get flip_get response`, hash)
-              flips.push({
-                ...result,
-                hash,
-                fetched: !!result && !error,
-              })
-              return Promise.resolve()
-            })
-            .catch(() => {
-              global.logger.debug(`Catch flip_get reject`, hash)
-              flips.push({
-                hash,
-                fetched: false,
-              })
-              return Promise.resolve()
-            }),
-          wait(2 ** retries - 1),
-        ]).then(() => Promise.resolve(100)),
-      wait
-    )
-  ).then(() => flips)
+
+  forEachAsync(hashes, hash =>
+    fetchFlip(hash)
+      .then(({result, error}) => {
+        global.logger.debug(`Get flip_get response`, hash)
+        cb({
+          type: 'FLIP',
+          flip: {
+            ...decodeFlip({...result}),
+            hash,
+            fetched: !!result && !error,
+          },
+        })
+      })
+      .catch(() => {
+        global.logger.debug(`Catch flip_get reject`, hash)
+        cb({
+          type: 'FLIP',
+          flip: {
+            hash,
+            fetched: false,
+          },
+        })
+      })
+  )
 }
 
 function decodeFlip({hash, hex, publicHex, privateHex}) {
@@ -1131,3 +985,60 @@ export function shouldStartValidation(epoch, identity) {
     }
   } else return false
 }
+
+export const createTimerMachine = duration =>
+  Machine({
+    initial: 'running',
+    context: {
+      elapsed: 0,
+      duration,
+      interval: 1,
+    },
+    states: {
+      running: {
+        entry: assign({
+          start: dayjs(),
+        }),
+        invoke: {
+          src: ({interval}) => cb => {
+            const intervalId = setInterval(() => cb('TICK'), 1000 * interval)
+            return () => clearInterval(intervalId)
+          },
+        },
+        on: {
+          '': {
+            target: 'stopped',
+            // eslint-disable-next-line no-shadow
+            cond: ({elapsed, duration}) => elapsed >= duration,
+          },
+          TICK: {
+            actions: assign({
+              elapsed: ({start}) => dayjs().diff(start, 's'),
+            }),
+          },
+        },
+      },
+      stopped: {
+        on: {
+          '': {
+            target: 'running',
+            // eslint-disable-next-line no-shadow
+            cond: ({elapsed, duration}) => elapsed < duration,
+          },
+        },
+      },
+    },
+    on: {
+      DURATION_UPDATE: {
+        actions: assign({
+          // eslint-disable-next-line no-shadow
+          duration: (_, {duration}) => duration,
+        }),
+      },
+      RESET: {
+        actions: assign({
+          elapsed: 0,
+        }),
+      },
+    },
+  })

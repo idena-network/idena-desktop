@@ -24,12 +24,13 @@ export function filterAvailableForFetching(flips) {
   return flips.filter(({ready, extra}) => ready && !extra)
 }
 
+export const readyNotFetched = ({ready, fetched}) => ready && !fetched
 /**
  * Waiting for fetching flips
  * @param {*} flips
  */
 export function filterWaitingForFetching(flips) {
-  return flips.filter(({ready, fetched}) => ready && !fetched)
+  return flips.filter()
 }
 
 /**

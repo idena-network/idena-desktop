@@ -440,7 +440,7 @@ function sessionFlips(state) {
   } = state
   return isShortSession(state)
     ? rearrangeFlips(filterRegularFlips(shortFlips))
-    : filterSolvableFlips(longFlips)
+    : rearrangeFlips(longFlips)
 }
 
 function currentFlip(state) {
@@ -456,7 +456,7 @@ function hasAllAnswers(state) {
   } = state
   const flips = isShortSession(state)
     ? shortFlips.filter(({decoded, extra}) => decoded && !extra)
-    : filterSolvableFlips(longFlips)
+    : longFlips.filter(({decoded}) => decoded)
   return flips.length && flips.every(({option}) => option)
 }
 
