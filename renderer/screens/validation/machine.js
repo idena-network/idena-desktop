@@ -1,6 +1,6 @@
 import {Machine, assign, State} from 'xstate'
 import {decode} from 'rlp'
-import {log, send} from 'xstate/lib/actions'
+import {log} from 'xstate/lib/actions'
 import dayjs from 'dayjs'
 import {
   fetchFlipHashes,
@@ -14,9 +14,6 @@ import {persistState, loadPersistentState} from '../../shared/utils/persist'
 import {EpochPeriod} from '../../shared/providers/epoch-context'
 import {canValidate} from '../../shared/providers/identity-context'
 import {
-  everyFlipFetched,
-  filterWaitingForFetching,
-  filterWaitingForDecoding,
   filterRegularFlips,
   failedFlips,
   filterReadyFlips,
@@ -24,9 +21,8 @@ import {
   flipExtraFlip,
   readyNotFetched,
 } from './utils'
-import {forEachAsync, pipeAsync, wait} from '../../shared/utils/fn'
+import {forEachAsync} from '../../shared/utils/fn'
 
-// TODO: merge fetch and decode flips, move validation services to serializable objects
 export const createValidationMachine = ({
   epoch,
   validationStart,
@@ -55,72 +51,101 @@ export const createValidationMachine = ({
           states: {
             fetch: {
               entry: log('Start fetching short flips'),
-              initial: 'check',
+              initial: 'polling',
               states: {
-                check: {
-                  entry: log('Check all available flips are fetched'),
-                  on: {
-                    '': [
-                      {
-                        target: 'done',
-                        cond: ({shortFlips}) => everyFlipFetched(shortFlips),
-                      },
-                      {
-                        target: 'fetchHashes',
-                      },
-                    ],
-                  },
-                },
-                fetchHashes: {
-                  initial: 'fetching',
+                polling: {
+                  type: 'parallel',
                   states: {
-                    fetching: {
-                      entry: log('Fetching short hashes'),
-                      invoke: {
-                        src: () => fetchFlipHashes(SessionType.Short),
-                        onDone: {
-                          target: '#validation.shortSession.fetch.fetchFlips',
-                          actions: [
-                            assign({
-                              shortFlips: ({shortFlips}, {data}) =>
-                                shortFlips.length
-                                  ? mergeFlipsByHash(shortFlips, data)
-                                  : mergeFlipsByHash(data, shortFlips),
-                              retries: ({retries}) => retries + 1,
-                            }),
-                            log(),
-                          ],
+                    fetchHashes: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          entry: log('Fetching short hashes'),
+                          invoke: {
+                            src: 'fetchShortHashes',
+                            onDone: {
+                              target: 'check',
+                              actions: [
+                                assign({
+                                  shortFlips: ({shortFlips}, {data}) =>
+                                    shortFlips.length
+                                      ? mergeFlipsByHash(shortFlips, data)
+                                      : mergeFlipsByHash(data, shortFlips),
+                                }),
+                                log(),
+                              ],
+                            },
+                          },
                         },
-                        onError: {
-                          target: 'fail',
-                          actions: log(),
+                        check: {
+                          after: {
+                            5000: [
+                              {
+                                target: '#validation.shortSession.fetch.done',
+                                cond: 'didFetchShortFlips',
+                              },
+                              {target: 'fetching'},
+                            ],
+                          },
                         },
                       },
                     },
-                    fail: {
-                      after: {
-                        1000: 'fetching',
+                    fetchFlips: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: 'fetchShortFlips',
+                            onDone: {
+                              target: 'check',
+                              actions: [
+                                assign({
+                                  retries: ({retries}) => retries + 1,
+                                }),
+                              ],
+                            },
+                          },
+                          on: {
+                            FLIP: {
+                              actions: [
+                                assign({
+                                  shortFlips: ({shortFlips, retries}, {flip}) =>
+                                    mergeFlipsByHash(shortFlips, [
+                                      {...flip, retries},
+                                    ]),
+                                }),
+                                log(),
+                              ],
+                            },
+                          },
+                        },
+                        check: {
+                          entry: log(),
+                          after: {
+                            1000: [
+                              {
+                                target: '#validation.shortSession.fetch.done',
+                                cond: 'didFetchShortFlips',
+                              },
+                              {target: 'fetching'},
+                            ],
+                          },
+                        },
                       },
                     },
                   },
-                },
-                fetchFlips: {
-                  invoke: {
-                    src: 'fetchShortFlips',
-                  },
-                  on: {
-                    FLIP: {
-                      actions: [
-                        assign({
-                          shortFlips: ({shortFlips}, {flip}) =>
-                            mergeFlipsByHash(shortFlips, [flip]),
-                        }),
-                        log(),
-                      ],
+                  after: {
+                    BUMP_EXTRA_FLIPS: {
+                      target: 'extraFlips',
+                      cond: ({shortFlips}) =>
+                        shortFlips.some(
+                          ({ready, decoded, extra}) =>
+                            !extra && (!ready || !decoded)
+                        ),
                     },
                   },
                 },
-                bumpExtraFlips: {
+                extraFlips: {
                   entry: log('bump extra flips'),
                   invoke: {
                     src: ({shortFlips}) => cb => {
@@ -158,7 +183,7 @@ export const createValidationMachine = ({
                   },
                   on: {
                     EXTRA_FLIPS_PULLED: {
-                      target: 'fetchFlips',
+                      target: 'polling',
                       actions: [
                         assign({
                           shortFlips: ({shortFlips}, {flips}) =>
@@ -167,14 +192,14 @@ export const createValidationMachine = ({
                         log(),
                       ],
                     },
-                    EXTRA_FLIPS_MISSING: {target: 'fetchFlips'},
+                    EXTRA_FLIPS_MISSING: {target: 'polling'},
                   },
                 },
                 done: {type: 'final'},
               },
               on: {
                 REFETCH_FLIPS: {
-                  target: '#validation.shortSession.fetch.fetchFlips',
+                  target: '#validation.shortSession.fetch.polling.fetchFlips',
                   actions: [
                     assign({
                       shortFlips: ({shortFlips}) =>
@@ -186,12 +211,6 @@ export const createValidationMachine = ({
                     }),
                     log('Re-fetching flips after re-entering short session'),
                   ],
-                },
-              },
-              after: {
-                BUMP_EXTRA_FLIPS: {
-                  target: '.bumpExtraFlips',
-                  cond: ({shortFlips}) => failedFlips(shortFlips).some(x => x),
                 },
               },
             },
@@ -391,7 +410,6 @@ export const createValidationMachine = ({
           exit: ['cleanupShortFlips'],
         },
         longSession: {
-          id: 'longSession',
           entry: [
             assign({
               currentIndex: 0,
@@ -437,32 +455,25 @@ export const createValidationMachine = ({
                     fetchFlips: {
                       invoke: {
                         src: 'fetchLongFlips',
+                        onDone: {
+                          target: 'done',
+                          actions: assign({
+                            retries: ({retries}) => retries + 1,
+                          }),
+                        },
                       },
                       on: {
                         FLIP: {
                           actions: [
                             assign({
-                              longFlips: ({longFlips}, {flip}) =>
-                                mergeFlipsByHash(longFlips, [flip]),
+                              longFlips: ({longFlips, retries}, {flip}) =>
+                                mergeFlipsByHash(longFlips, [
+                                  {...flip, retries},
+                                ]),
                             }),
                             log(),
                           ],
                         },
-                      },
-                    },
-                    checkFlips: {
-                      entry: log(),
-                      on: {
-                        '': [
-                          {
-                            target: 'fetchFlips',
-                            cond: ({longFlips}) =>
-                              longFlips.some(
-                                ({ready, fetched}) => ready && !fetched
-                              ),
-                          },
-                          {target: 'done'},
-                        ],
                       },
                     },
                     done: {
@@ -795,8 +806,18 @@ export const createValidationMachine = ({
     },
     {
       services: {
-        fetchShortFlips: ({shortFlips}) => cb => fetchFlips(shortFlips, cb),
-        fetchLongFlips: ({longFlips}) => cb => fetchFlips(longFlips, cb),
+        fetchShortHashes: () => fetchFlipHashes(SessionType.Short),
+        fetchShortFlips: ({shortFlips}) => cb =>
+          fetchFlips(
+            shortFlips.filter(readyNotFetched).map(({hash}) => hash),
+            cb
+          ),
+        fetchLongHashes: () => fetchFlipHashes(SessionType.Long),
+        fetchLongFlips: ({longFlips}) => cb =>
+          fetchFlips(
+            longFlips.filter(readyNotFetched).map(({hash}) => hash),
+            cb
+          ),
       },
       delays: {
         BUMP_EXTRA_FLIPS: 1000 * 35,
@@ -822,15 +843,19 @@ export const createValidationMachine = ({
           )
         },
       },
+      guards: {
+        didFetchShortFlips: ({shortFlips}) =>
+          shortFlips.length &&
+          shortFlips
+            .filter(({extra}) => !extra)
+            .every(({ready, fetched}) => ready && fetched),
+      },
     }
   )
 
-function fetchFlips(flips, cb) {
-  const hashes = flips.filter(readyNotFetched).map(({hash}) => hash)
-
+function fetchFlips(hashes, cb) {
   global.logger.debug(`Calling flip_get rpc for hashes`, hashes)
-
-  forEachAsync(hashes, hash =>
+  return forEachAsync(hashes, hash =>
     fetchFlip(hash)
       .then(({result, error}) => {
         global.logger.debug(`Get flip_get response`, hash)

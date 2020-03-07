@@ -571,8 +571,8 @@ export function QualificationButton({
     >
       <span
         style={{
-          display: 'inline-block',
-          verticalAlign: 'middle',
+          display: 'inline-flex',
+          alignItems: 'center',
         }}
       >
         {children}
