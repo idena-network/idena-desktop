@@ -853,9 +853,7 @@ export const createValidationMachine = ({
       guards: {
         didFetchShortFlips: ({shortFlips}) =>
           shortFlips.length &&
-          shortFlips
-            .filter(({extra}) => !extra)
-            .every(({ready, fetched}) => ready && fetched),
+          shortFlips.every(({ready, fetched}) => ready && fetched),
       },
     }
   )
