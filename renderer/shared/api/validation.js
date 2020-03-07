@@ -32,10 +32,10 @@ export async function fetchFlipHashes(type) {
 /**
  * Format used for submitting validation session answers
  * @typedef {Object} Answer
- * @property {import('../providers/validation-context').AnswerType} answer Answer type enumeration: 0 - none, 1 - left, 2 - right, 3 - inappropriate
+ * @property {import('../../screens/validation/machine').AnswerType} answer Answer type enumeration: 0 - none, 1 - left, 2 - right, 3 - inappropriate
  * @property {boolean} easy Treat as not enough complex for validation or not
  *
- * @example {hash: "0x123", easy: false, answer: 1}
+ * @example {hash: "0123456789abcdef", easy: false, answer: 1}
  */
 
 /**

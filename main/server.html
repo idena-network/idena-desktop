@@ -22,15 +22,8 @@
         if (pickerApiLoaded) {
           const view = new google.picker.View(google.picker.ViewId.IMAGE_SEARCH)
           view.setMimeTypes('image/png,image/jpeg,image/jpg')
-          // const view = new google.picker.ImageSearchView()
-          // view.setLicense(
-          //   google.picker.ImageSearchView.License.REUSE_WITH_MODIFICATION
-          // )
-          // view.setSize(google.picker.ImageSearchView.Size.SIZE_VGA)
-
           picker = new google.picker.PickerBuilder()
             .addView(view)
-            // .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
             .enableFeature(google.picker.Feature.NAV_HIDDEN)
             .hideTitleBar()
             .setCallback(pickerCallback)

@@ -1,5 +1,5 @@
-import dict from './words'
-import {capitalize} from '../../../shared/utils/string'
+import dict from '../../../locales/keywords'
+import {capitalize} from '../../shared/utils/string'
 
 /**
  * Composes hint for the flip
@@ -101,4 +101,21 @@ export function getNextKeyWordsHint(
     )
   }
   return getKeyWordsHint(flipKeyWordPairs, nextKeyWordPair.id)
+}
+
+export function convertToBase64Url(url, callback, outputFormat) {
+  const img = new Image()
+  img.crossOrigin = 'anonymous'
+  img.onload = () => {
+    let canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    let dataURL = ''
+    canvas.height = img.height
+    canvas.width = img.width
+    ctx.drawImage(img, 0, 0)
+    dataURL = canvas.toDataURL(outputFormat)
+    callback(dataURL)
+    canvas = null
+  }
+  img.src = url
 }

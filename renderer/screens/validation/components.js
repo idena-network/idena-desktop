@@ -8,6 +8,7 @@ import {
   position,
   transparentize,
   rgba,
+  backgrounds,
 } from 'polished'
 import {
   FiCheck,
@@ -18,6 +19,8 @@ import {
   FiImage,
 } from 'react-icons/fi'
 import {useMachine} from '@xstate/react'
+import Link from 'next/link'
+import {State} from 'xstate'
 import {
   Box,
   Fill,
@@ -30,10 +33,19 @@ import {
 } from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
-import Spinner from './components/spinner'
 import theme, {rem} from '../../shared/theme'
 import {TranslateWords} from '../../shared/components/translate-button'
-import {RelevanceType, createTimerMachine, adjustDuration} from './machine'
+import {
+  RelevanceType,
+  createTimerMachine,
+  adjustDuration,
+  shouldStartValidation,
+  loadValidationState,
+} from './machine'
+import {useIdentityState} from '../../shared/providers/identity-context'
+import {EpochPeriod, useEpochState} from '../../shared/providers/epoch-context'
+import Divider from '../../shared/components/divider'
+import {useTimingState} from '../../shared/providers/timing-context'
 
 export function Scene({bg: background = theme.colors.black, ...props}) {
   return (
@@ -790,5 +802,171 @@ export function ValidationFailedDialog({isOpen, onSubmit}) {
         </Box>
       </Flex>
     </Modal>
+  )
+}
+
+export function Banner() {
+  const epoch = useEpochState()
+
+  if (!epoch) {
+    return null
+  }
+
+  const {currentPeriod} = epoch
+  const isValidation = [
+    EpochPeriod.ShortSession,
+    EpochPeriod.LongSession,
+  ].includes(currentPeriod)
+  return (
+    <Box>
+      {currentPeriod === EpochPeriod.FlipLottery && <ValidationSoon />}
+      {isValidation && <ValidationRunning />}
+      {currentPeriod === EpochPeriod.AfterLongSession && <AfterLongSession />}
+    </Box>
+  )
+}
+
+function ValidationSoon() {
+  return (
+    <Box
+      bg={theme.colors.danger}
+      p={rem(theme.spacings.medium16)}
+      css={{minHeight: rem(44)}}
+    >
+      <Text color={theme.colors.white}>Idena validation will start soon</Text>
+    </Box>
+  )
+}
+
+function ValidationRunning() {
+  const epoch = useEpochState()
+  const {currentPeriod, nextValidation} = epoch
+
+  const validationStateDefinition = loadValidationState()
+  const validationState =
+    validationStateDefinition && State.create(validationStateDefinition)
+
+  const identity = useIdentityState()
+  const {shortSession, longSession} = useTimingState()
+
+  if (!identity || !validationStateDefinition || !shortSession || !longSession)
+    return null
+
+  return (
+    <Flex
+      justify="space-between"
+      align="center"
+      css={{
+        ...backgrounds(theme.colors.primary),
+        color: theme.colors.white,
+      }}
+    >
+      <Flex align="center">
+        <Flex
+          justify="center"
+          width={rem(120)}
+          css={{
+            position: 'relative',
+            minHeight: rem(44),
+          }}
+        >
+          <BannerTimer
+            validationStart={nextValidation}
+            duration={
+              validationState.matches('shortSession')
+                ? shortSession
+                : longSession
+            }
+          />
+          <Fill bg="rgba(0,0,0,0.1)" />
+        </Flex>
+        {validationState.done ? (
+          <Box p={theme.spacings.normal}>
+            Waiting for the end of {currentPeriod}
+          </Box>
+        ) : (
+          <Box p={theme.spacings.normal}>
+            {validationState.matches('shortSession') &&
+              `Idena ${currentPeriod} has started`}
+            {validationState.matches(
+              'shortSession.solve.answer.submitShortSession'
+            ) && `Submitting answers for ${currentPeriod}`}
+          </Box>
+        )}
+      </Flex>
+      {shouldStartValidation(epoch, identity) && (
+        <Flex css={padding(theme.spacings.normal)}>
+          <Divider vertical m={rem(theme.spacings.medium16)} />
+          <Link href="/validation">
+            <Text
+              color={theme.colors.white}
+              fontWeight={theme.fontWeights.semi}
+            >
+              Validate
+            </Text>
+          </Link>
+        </Flex>
+      )}
+    </Flex>
+  )
+}
+
+function BannerTimer({validationStart, duration}) {
+  const adjustedDuration = useMemo(
+    () => adjustDuration(validationStart, duration),
+    [duration, validationStart]
+  )
+
+  return (
+    <Timer>
+      <TimerClock duration={adjustedDuration} color={theme.colors.white} />
+    </Timer>
+  )
+}
+
+function AfterLongSession() {
+  return (
+    <Box
+      bg={theme.colors.success}
+      p={rem(theme.spacings.medium16)}
+      css={{minHeight: rem(44)}}
+    >
+      <Text color={theme.colors.white}>
+        Please wait. The network is reaching consensus about validated
+        identities
+      </Text>
+    </Box>
+  )
+}
+
+function Spinner({size = 30}) {
+  return (
+    <div>
+      <style jsx>{`
+        @keyframes donut-spin {
+          0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+          }
+          100% {
+            transform: translate(-50%, -50%) rotate(360deg);
+          }
+        }
+        div {
+          display: inline-block;
+          border: 4px solid rgba(0, 0, 0, 0.1);
+          border-left-color: ${theme.colors.primary};
+          border-radius: 50%;
+          width: ${rem(size)};
+          height: ${rem(size)};
+          animation: donut-spin 1.2s linear infinite;
+
+          left: 50%;
+          position: absolute;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          text-align: center;
+        }
+      `}</style>
+    </div>
   )
 }

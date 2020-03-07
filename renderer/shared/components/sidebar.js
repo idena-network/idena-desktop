@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
-
 import {useTranslation} from 'react-i18next'
 import {Box, List, Link, Text} from '.'
 import Flex from './flex'
@@ -11,7 +10,6 @@ import Loading from './loading'
 import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
-import {useValidationState} from '../providers/validation-context'
 import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
@@ -19,6 +17,8 @@ import {
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
+import {loadValidationState} from '../../screens/validation/machine'
+import {State} from 'xstate'
 
 function Sidebar() {
   return (
@@ -309,12 +309,6 @@ Block.propTypes = {
 }
 
 function CurrentTask({period, identity}) {
-  const {
-    running: validationRunning = false,
-    shortAnswers,
-    longAnswers,
-  } = useValidationState()
-
   if (!period || !identity || !identity.state) {
     return null
   }
@@ -347,18 +341,17 @@ function CurrentTask({period, identity}) {
         'Wait for validation'
       )
     }
-    if (validationRunning) {
-      if (
-        (period === EpochPeriod.ShortSession && shortAnswers.length) ||
-        (period === EpochPeriod.LongSession && longAnswers.length)
-      ) {
-        return `Wait for ${period} end`
-      }
-      const href = `/validation/${
-        period === EpochPeriod.ShortSession ? 'short' : 'long'
-      }`
+    const validationStateDefinition = loadValidationState()
+    if (validationStateDefinition) {
+      const validationState = State.create(validationStateDefinition)
+      if (validationState.done) return `Wait for ${period} end`
       return (
-        <Link href={href} color={theme.colors.white}>
+        <Link
+          href={`/validation/${
+            period === EpochPeriod.ShortSession ? 'short' : 'long'
+          }`}
+          color={theme.colors.white}
+        >
           Solve flips now!
         </Link>
       )

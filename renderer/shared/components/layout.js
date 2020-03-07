@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
-import ValidationBanner from '../../screens/validation/components/banner'
+import {Banner} from '../../screens/validation/components'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {GlobalModals} from './modal'
 import {useDebounce} from '../hooks/use-debounce'
@@ -78,7 +78,7 @@ function NormalApp(props) {
 
   return (
     <section>
-      {!pathname.startsWith('/validation') && <ValidationBanner />}
+      {!pathname.startsWith('/validation') && <Banner />}
       <div {...props} />
       <Notifications />
       <GlobalModals />

@@ -1,6 +1,6 @@
-/* eslint-disable react/prop-types */
 import React from 'react'
 
+// eslint-disable-next-line react/prop-types
 export default function List({m, children, ...props}) {
   return (
     <ul {...props}>

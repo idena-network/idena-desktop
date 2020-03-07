@@ -7,7 +7,6 @@ import {
   submitShortAnswers,
   submitLongAnswers,
 } from '../../shared/api/validation'
-import {SessionType} from '../../shared/providers/validation-context'
 import {fetchFlip} from '../../shared/api'
 import apiClient from '../../shared/api/api-client'
 import {persistState, loadPersistentState} from '../../shared/utils/persist'
@@ -1074,3 +1073,16 @@ export const createTimerMachine = duration =>
       },
     },
   })
+
+export const SessionType = {
+  Short: 'short',
+  Long: 'long',
+  Qualification: 'qualification',
+}
+
+export const AnswerType = {
+  None: 0,
+  Left: 1,
+  Right: 2,
+  Inappropriate: 3,
+}

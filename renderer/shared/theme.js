@@ -1,5 +1,4 @@
-import {rem as remp, rgb} from 'polished'
-import {margin} from './components/system/spacings'
+import {rem as remp, rgb, margin} from 'polished'
 
 const colors = {
   primary: 'rgb(87, 143, 255)',

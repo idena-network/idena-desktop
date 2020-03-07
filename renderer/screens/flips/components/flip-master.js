@@ -12,20 +12,16 @@ import FlipPics from './flip-pics'
 import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import SubmitFlip from './submit-flip'
-
 import useFlips, {FlipType} from '../../../shared/utils/useFlips'
 import {
   useIdentityState,
   IdentityStatus,
 } from '../../../shared/providers/identity-context'
-
 import {
   NotificationType,
   useNotificationDispatch,
 } from '../../../shared/providers/notification-context'
-
-import {composeHint, hasDataUrl, getNextKeyWordsHint} from '../utils/flip'
-
+import {composeHint, hasDataUrl, getNextKeyWordsHint} from '../utils'
 import {
   useEpochState,
   EpochPeriod,
