@@ -58,7 +58,6 @@ async function fetchTxs({address, wallets}) {
     'submitAnswersHash',
   ]
 
-  console.log(joinedTxs)
   return joinedTxs
     .filter(tx => tx && !hiddenTypes.find(type => tx.type === type))
     .map(tx => {
