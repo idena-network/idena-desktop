@@ -69,7 +69,14 @@ export const createValidationMachine = ({
                                 assign({
                                   shortFlips: ({shortFlips}, {data}) =>
                                     shortFlips.length
-                                      ? mergeFlipsByHash(shortFlips, data)
+                                      ? mergeFlipsByHash(
+                                          shortFlips,
+                                          data.filter(({hash, ready}) =>
+                                            shortFlips.find(
+                                              f => f.hash === hash && !ready
+                                            )
+                                          )
+                                        )
                                       : mergeFlipsByHash(data, shortFlips),
                                 }),
                                 log(),
