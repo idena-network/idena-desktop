@@ -1,5 +1,3 @@
-// NOTE: decoded === readyToSolve
-
 /**
  * Ready to be fetched flips, including extra
  * @param {*} flips
@@ -16,32 +14,7 @@ export function filterRegularFlips(flips) {
   return flips.filter(({extra}) => !extra)
 }
 
-/**
- * Available for fetching flips
- * @param {*} flips
- */
-export function filterAvailableForFetching(flips) {
-  return flips.filter(({ready, extra}) => ready && !extra)
-}
-
 export const readyNotFetched = ({ready, fetched}) => ready && !fetched
-/**
- * Waiting for fetching flips
- * @param {*} flips
- */
-export function filterWaitingForFetching(flips) {
-  return flips.filter()
-}
-
-/**
- * Waiting for decoding flips
- * @param {*} flips
- */
-export function filterWaitingForDecoding(flips) {
-  return flips.filter(
-    ({ready, fetched, decoded}) => ready && fetched && !decoded
-  )
-}
 
 /**
  * Fully fetched and decoded flips
@@ -49,10 +22,6 @@ export function filterWaitingForDecoding(flips) {
  */
 export function filterSolvableFlips(flips) {
   return flips.filter(({decoded}) => decoded)
-}
-
-export function everyFlipFetched(flips = []) {
-  return flips.length && flips.every(({ready, fetched}) => ready && fetched)
 }
 
 /**
