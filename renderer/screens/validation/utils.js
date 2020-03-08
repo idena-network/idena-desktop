@@ -14,7 +14,7 @@ export function filterRegularFlips(flips) {
   return flips.filter(({extra}) => !extra)
 }
 
-export const readyNotFetched = ({ready, fetched}) => ready && !fetched
+export const readyNotFetchedFlip = ({ready, fetched}) => ready && !fetched
 
 /**
  * Fully fetched and decoded flips
@@ -24,16 +24,10 @@ export function filterSolvableFlips(flips) {
   return flips.filter(({decoded}) => decoded)
 }
 
-/**
- * Flips failed to fetch or decode for some reason
- * @param {*} flips
- */
-export function failedFlips(flips = []) {
-  return flips.filter(
-    ({ready, decoded, extra}) =>
-      (!ready && !extra) || (ready && !extra && !decoded)
-  )
-}
+export const failedFlip = ({ready, decoded, extra}) =>
+  !extra && (!ready || !decoded)
+
+export const availableExtraFlip = ({extra, decoded}) => extra && decoded
 
 export function rearrangeFlips(flips) {
   const solvable = []

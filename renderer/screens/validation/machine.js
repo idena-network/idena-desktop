@@ -15,11 +15,12 @@ import {EpochPeriod} from '../../shared/providers/epoch-context'
 import {canValidate} from '../../shared/providers/identity-context'
 import {
   filterRegularFlips,
-  failedFlips,
   filterReadyFlips,
   filterSolvableFlips,
   flipExtraFlip,
-  readyNotFetched,
+  readyNotFetchedFlip,
+  availableExtraFlip,
+  failedFlip,
 } from './utils'
 import {forEachAsync} from '../../shared/utils/fn'
 
@@ -146,34 +147,24 @@ export const createValidationMachine = ({
                   entry: log('bump extra flips'),
                   invoke: {
                     src: ({shortFlips}) => cb => {
-                      const availableExtraFlips = shortFlips.filter(
-                        ({extra, decoded}) => extra && decoded
-                      )
-                      if (availableExtraFlips.length) {
-                        const replacingFlips = failedFlips(shortFlips)
-                        cb({
-                          type: 'EXTRA_FLIPS_PULLED',
-                          flips:
-                            availableExtraFlips.length >= replacingFlips.length
-                              ? replacingFlips
-                                  .map(flipExtraFlip)
-                                  .concat(
-                                    availableExtraFlips
-                                      .slice(0, replacingFlips.length)
-                                      .map(flipExtraFlip)
-                                  )
-                              : replacingFlips
-                                  .slice(0, availableExtraFlips.length)
-                                  .map(flipExtraFlip)
-                                  .concat(
-                                    availableExtraFlips.map(flipExtraFlip)
-                                  ),
-                        })
-                      } else {
-                        cb({
-                          type: 'EXTRA_FLIPS_MISSING',
-                        })
-                      }
+                      const extraFlips = shortFlips.filter(availableExtraFlip)
+                      const replacingFlips = shortFlips.filter(failedFlip)
+                      cb({
+                        type: 'EXTRA_FLIPS_PULLED',
+                        flips:
+                          extraFlips.length >= replacingFlips.length
+                            ? replacingFlips
+                                .map(flipExtraFlip)
+                                .concat(
+                                  extraFlips
+                                    .slice(0, replacingFlips.length)
+                                    .map(flipExtraFlip)
+                                )
+                            : replacingFlips
+                                .slice(0, extraFlips.length)
+                                .map(flipExtraFlip)
+                                .concat(extraFlips.map(flipExtraFlip)),
+                      })
                     },
                   },
                   on: {
@@ -187,10 +178,9 @@ export const createValidationMachine = ({
                         log(),
                       ],
                     },
-                    EXTRA_FLIPS_MISSING: 'polling',
                   },
                 },
-                done: {type: 'final'},
+                done: {type: 'final', entry: log('Fetching short flips done')},
               },
               on: {
                 REFETCH_FLIPS: {
@@ -212,10 +202,8 @@ export const createValidationMachine = ({
                 BUMP_EXTRA_FLIPS: {
                   target: '.extraFlips',
                   cond: ({shortFlips}) =>
-                    shortFlips.some(
-                      ({ready, decoded, extra}) =>
-                        !extra && (!ready || !decoded)
-                    ),
+                    shortFlips.some(failedFlip) &&
+                    shortFlips.some(availableExtraFlip),
                 },
                 FINALIZE_FLIPS: {
                   target: '.done',
@@ -224,7 +212,7 @@ export const createValidationMachine = ({
                       shortFlips: ({shortFlips}) =>
                         mergeFlipsByHash(
                           shortFlips,
-                          failedFlips(shortFlips).map(flip => ({
+                          shortFlips.filter(failedFlip).map(flip => ({
                             ...flip,
                             failed: true,
                           }))
@@ -590,8 +578,7 @@ export const createValidationMachine = ({
                     PREV: [
                       {
                         target: undefined,
-                        cond: ({longFlips}) =>
-                          filterSolvableFlips(longFlips).length === 0,
+                        cond: ({longFlips}) => longFlips.length === 0,
                       },
                       {
                         target: '.normal',
@@ -790,14 +777,14 @@ export const createValidationMachine = ({
                       {
                         target: '#validation.validationFailed',
                         cond: ({longFlips}) => {
-                          const validFlips = filterSolvableFlips(longFlips)
-                          const answers = validFlips.filter(
+                          const solvableFlips = filterSolvableFlips(longFlips)
+                          const answers = solvableFlips.filter(
                             ({option}) => option
                           )
                           return (
-                            !validFlips.length ||
-                            (validFlips.length &&
-                              answers.length < validFlips.length / 2)
+                            !solvableFlips.length ||
+                            (solvableFlips.length &&
+                              answers.length < solvableFlips.length / 2)
                           )
                         },
                       },
@@ -827,13 +814,13 @@ export const createValidationMachine = ({
         fetchShortHashes: () => fetchFlipHashes(SessionType.Short),
         fetchShortFlips: ({shortFlips}) => cb =>
           fetchFlips(
-            shortFlips.filter(readyNotFetched).map(({hash}) => hash),
+            shortFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
             cb
           ),
         fetchLongHashes: () => fetchFlipHashes(SessionType.Long),
         fetchLongFlips: ({longFlips}) => cb =>
           fetchFlips(
-            longFlips.filter(readyNotFetched).map(({hash}) => hash),
+            longFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
             cb
           ),
       },
@@ -863,9 +850,15 @@ export const createValidationMachine = ({
         },
       },
       guards: {
-        didFetchShortFlips: ({shortFlips}) =>
-          shortFlips.length &&
-          shortFlips.every(({ready, fetched}) => ready && fetched),
+        didFetchShortFlips: ({shortFlips}) => {
+          const regularFlips = filterRegularFlips(shortFlips)
+          return (
+            regularFlips.some(x => x) &&
+            regularFlips.every(
+              ({ready, fetched, decoded}) => ready && fetched && decoded
+            )
+          )
+        },
       },
     }
   )
