@@ -71,9 +71,12 @@ export const createValidationMachine = ({
                                     shortFlips.length
                                       ? mergeFlipsByHash(
                                           shortFlips,
-                                          data.filter(({hash, ready}) =>
+                                          data.filter(({hash}) =>
                                             shortFlips.find(
-                                              f => f.hash === hash && !ready
+                                              f =>
+                                                f.hash === hash &&
+                                                !f.failed &&
+                                                !f.flipped
                                             )
                                           )
                                         )
@@ -166,19 +169,31 @@ export const createValidationMachine = ({
                           flips:
                             availableExtraFlips.length >= replacingFlips.length
                               ? [
-                                  ...replacingFlips.map(flipExtraFlip),
+                                  ...replacingFlips.map(flip => ({
+                                    ...flipExtraFlip(flip),
+                                    failed: true,
+                                  })),
                                   ...availableExtraFlips
                                     .slice(0, replacingFlips.length)
-                                    .map(flipExtraFlip),
+                                    .map(flip => ({
+                                      ...flipExtraFlip(flip),
+                                      flipped: true,
+                                    })),
                                 ]
                               : [
                                   ...replacingFlips
                                     .slice(0, availableExtraFlips.length)
-                                    .map(flipExtraFlip),
+                                    .map(flip => ({
+                                      ...flipExtraFlip(flip),
+                                      failed: true,
+                                    })),
                                   ...replacingFlips
                                     .slice(availableExtraFlips.length)
                                     .map(flip => ({...flip, failed: true})),
-                                  ...availableExtraFlips.map(flipExtraFlip),
+                                  ...availableExtraFlips.map(flip => ({
+                                    ...flipExtraFlip(flip),
+                                    flipped: true,
+                                  })),
                                 ],
                         })
                       } else {
