@@ -73,10 +73,7 @@ export const createValidationMachine = ({
                                           shortFlips,
                                           data.filter(({hash}) =>
                                             shortFlips.find(
-                                              f =>
-                                                f.hash === hash &&
-                                                !f.failed &&
-                                                !f.flipped
+                                              f => f.hash === hash && !f.flipped
                                             )
                                           )
                                         )
@@ -144,16 +141,6 @@ export const createValidationMachine = ({
                       },
                     },
                   },
-                  after: {
-                    BUMP_EXTRA_FLIPS: {
-                      target: 'extraFlips',
-                      cond: ({shortFlips}) =>
-                        shortFlips.some(
-                          ({ready, decoded, extra}) =>
-                            !extra && (!ready || !decoded)
-                        ),
-                    },
-                  },
                 },
                 extraFlips: {
                   entry: log('bump extra flips'),
@@ -168,33 +155,19 @@ export const createValidationMachine = ({
                           type: 'EXTRA_FLIPS_PULLED',
                           flips:
                             availableExtraFlips.length >= replacingFlips.length
-                              ? [
-                                  ...replacingFlips.map(flip => ({
-                                    ...flipExtraFlip(flip),
-                                    failed: true,
-                                  })),
-                                  ...availableExtraFlips
-                                    .slice(0, replacingFlips.length)
-                                    .map(flip => ({
-                                      ...flipExtraFlip(flip),
-                                      flipped: true,
-                                    })),
-                                ]
-                              : [
-                                  ...replacingFlips
-                                    .slice(0, availableExtraFlips.length)
-                                    .map(flip => ({
-                                      ...flipExtraFlip(flip),
-                                      failed: true,
-                                    })),
-                                  ...replacingFlips
-                                    .slice(availableExtraFlips.length)
-                                    .map(flip => ({...flip, failed: true})),
-                                  ...availableExtraFlips.map(flip => ({
-                                    ...flipExtraFlip(flip),
-                                    flipped: true,
-                                  })),
-                                ],
+                              ? replacingFlips
+                                  .map(flipExtraFlip)
+                                  .concat(
+                                    availableExtraFlips
+                                      .slice(0, replacingFlips.length)
+                                      .map(flipExtraFlip)
+                                  )
+                              : replacingFlips
+                                  .slice(0, availableExtraFlips.length)
+                                  .map(flipExtraFlip)
+                                  .concat(
+                                    availableExtraFlips.map(flipExtraFlip)
+                                  ),
                         })
                       } else {
                         cb({
@@ -214,7 +187,7 @@ export const createValidationMachine = ({
                         log(),
                       ],
                     },
-                    EXTRA_FLIPS_MISSING: {target: 'polling'},
+                    EXTRA_FLIPS_MISSING: 'polling',
                   },
                 },
                 done: {type: 'final'},
@@ -232,6 +205,32 @@ export const createValidationMachine = ({
                         })),
                     }),
                     log('Re-fetching flips after re-entering short session'),
+                  ],
+                },
+              },
+              after: {
+                BUMP_EXTRA_FLIPS: {
+                  target: '.extraFlips',
+                  cond: ({shortFlips}) =>
+                    shortFlips.some(
+                      ({ready, decoded, extra}) =>
+                        !extra && (!ready || !decoded)
+                    ),
+                },
+                FINALIZE_FLIPS: {
+                  target: '.done',
+                  actions: [
+                    assign({
+                      shortFlips: ({shortFlips}) =>
+                        mergeFlipsByHash(
+                          shortFlips,
+                          failedFlips(shortFlips).map(flip => ({
+                            ...flip,
+                            failed: true,
+                          }))
+                        ),
+                    }),
+                    log(),
                   ],
                 },
               },
@@ -618,14 +617,12 @@ export const createValidationMachine = ({
                     NEXT: [
                       {
                         target: undefined,
-                        cond: ({longFlips}) =>
-                          filterSolvableFlips(longFlips).length === 0,
+                        cond: ({longFlips}) => longFlips.length === 0,
                       },
                       {
                         target: '.lastFlip',
                         cond: ({longFlips, currentIndex}) =>
-                          currentIndex ===
-                          filterSolvableFlips(longFlips).length - 2,
+                          currentIndex === longFlips.length - 2,
                         actions: [
                           assign({
                             currentIndex: ({currentIndex}) => currentIndex + 1,
@@ -636,8 +633,7 @@ export const createValidationMachine = ({
                       {
                         target: '.normal',
                         cond: ({longFlips, currentIndex}) =>
-                          currentIndex <
-                          filterSolvableFlips(longFlips).length - 2,
+                          currentIndex < longFlips.length - 2,
                         actions: [
                           assign({
                             currentIndex: ({currentIndex}) => currentIndex + 1,
@@ -660,7 +656,7 @@ export const createValidationMachine = ({
                       {
                         target: '.lastFlip',
                         cond: ({longFlips}, {index}) =>
-                          index === filterSolvableFlips(longFlips).length - 1,
+                          index === longFlips.length - 1,
                         actions: [
                           assign({
                             currentIndex: (_, {index}) => index,
@@ -843,6 +839,7 @@ export const createValidationMachine = ({
       },
       delays: {
         BUMP_EXTRA_FLIPS: 1000 * 35,
+        FINALIZE_FLIPS: 1000 * 90,
         // eslint-disable-next-line no-shadow
         SHORT_SESSION_AUTO_SUBMIT: ({validationStart, shortSessionDuration}) =>
           adjustDuration(validationStart, shortSessionDuration - 10) * 1000,

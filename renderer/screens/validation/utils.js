@@ -29,7 +29,6 @@ export function filterSolvableFlips(flips) {
  * @param {*} flips
  */
 export function failedFlips(flips = []) {
-  // Hmm, do we need to bump extra flip if it's ready but failed to fetch
   return flips.filter(
     ({ready, decoded, extra}) =>
       (!ready && !extra) || (ready && !extra && !decoded)
@@ -58,5 +57,5 @@ export function rearrangeFlips(flips) {
 }
 
 export function flipExtraFlip({extra, ...flip}) {
-  return {...flip, extra: !extra}
+  return {...flip, extra: !extra, flipped: true}
 }
