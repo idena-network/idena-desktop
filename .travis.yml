@@ -34,7 +34,7 @@ install:
 
 before_script:
   - echo "Printing travis tag"
-  - echo $TRAVIS_TAG
+  - echo "$TRAVIS_TAG"
   - if [[ "$TRAVIS_TAG" != "" ]]; then npm --no-git-tag-version version ${TRAVIS_TAG:1}; fi
 
 script:
