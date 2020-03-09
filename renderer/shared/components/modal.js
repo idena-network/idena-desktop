@@ -1,7 +1,7 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
 import {FiX} from 'react-icons/fi'
-import {rem} from 'polished'
+import {rem, transparentize} from 'polished'
 import Router from 'next/router'
 import theme from '../theme'
 import useClickOutside from '../hooks/use-click-outside'
@@ -123,7 +123,7 @@ function Modal({show, showCloseIcon = true, width = 360, onHide, ...props}) {
   })
 
   return show ? (
-    <Fill bg={theme.colors.gray3} zIndex={1}>
+    <Fill bg={transparentize(0.2, theme.colors.black)} zIndex={1}>
       <div>
         <Box ref={ref} {...props} />
       </div>

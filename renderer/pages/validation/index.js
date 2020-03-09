@@ -108,7 +108,7 @@ function ValidationSession({
     <Scene bg={isShortSession(state) ? theme.colors.black : theme.colors.white}>
       <Header>
         {!isLongSessionKeywords(state) &&
-        !['validationSucceeded', 'validationFailed'].some(state.matches) ? (
+        !state.matches('validationSucceeded') ? (
           <SessionTitle
             color={
               isShortSession(state) ? theme.colors.white : theme.colors.text
