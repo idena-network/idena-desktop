@@ -2,7 +2,7 @@ osx_image: xcode10.2
 dist: bionic
 
 language: node_js
-node_js: "10"
+node_js: '10'
 
 matrix:
   include:
@@ -33,10 +33,13 @@ install:
   - npm ci
 
 before_script:
+  - echo "Printing travis tag"
+  - echo "$TRAVIS_TAG"
   - if [[ "$TRAVIS_TAG" != "" ]]; then npm --no-git-tag-version version ${TRAVIS_TAG:1}; fi
 
 script:
   - npm run lint
+  - npm run build
 
   - echo "Build win"
   - if [[ "$TRAVIS_OS_NAME" == "windows" && "$TRAVIS_TAG" != "" ]]; then npm run dist:win; fi
