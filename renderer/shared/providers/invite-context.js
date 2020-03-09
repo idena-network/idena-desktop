@@ -81,12 +81,14 @@ function InviteProvider({children}) {
         const isMining =
           tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL
 
-        const terminateTx = terminateTxs.find(
-          ({hash}) => hash === invite.terminateHash
-        )
+        const terminateTx =
+          terminateTxs &&
+          terminateTxs.find(({hash}) => hash === invite.terminateHash)
 
         const isTerminating =
-          terminateTx && terminateTx.result.blockHash === HASH_IN_MEMPOOL
+          terminateTx &&
+          terminateTx.result &&
+          terminateTx.result.blockHash === HASH_IN_MEMPOOL
 
         const nextInvite = {
           ...invite,
