@@ -1,9 +1,11 @@
+export const readyFlip = ({ready}) => ready
+
 /**
  * Ready to be fetched flips, including extra
  * @param {*} flips
  */
 export function filterReadyFlips(flips) {
-  return flips.filter(({ready}) => ready)
+  return flips.filter(readyFlip)
 }
 
 /**

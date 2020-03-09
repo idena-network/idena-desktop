@@ -21,6 +21,7 @@ import {
   readyNotFetchedFlip,
   availableExtraFlip,
   failedFlip,
+  readyFlip,
 } from './utils'
 import {forEachAsync} from '../../shared/utils/fn'
 
@@ -817,16 +818,21 @@ export const createValidationMachine = ({
             shortFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
             cb
           ),
-        fetchLongHashes: () => fetchFlipHashes(SessionType.Long),
+        fetchLongHashes: () =>
+          fetchFlipHashes(SessionType.Long).filter(readyFlip),
         fetchLongFlips: ({longFlips}) => cb =>
           fetchFlips(
-            longFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
+            longFlips.map(({hash}) => hash),
             cb
           ),
       },
       delays: {
-        BUMP_EXTRA_FLIPS: 1000 * 35,
-        FINALIZE_FLIPS: 1000 * 90,
+        // eslint-disable-next-line no-shadow
+        BUMP_EXTRA_FLIPS: ({validationStart}) =>
+          Math.max(adjustDuration(validationStart, 35), 5) * 1000,
+        // eslint-disable-next-line no-shadow
+        FINALIZE_FLIPS: ({validationStart}) =>
+          Math.max(adjustDuration(validationStart, 90), 5) * 1000,
         // eslint-disable-next-line no-shadow
         SHORT_SESSION_AUTO_SUBMIT: ({validationStart, shortSessionDuration}) =>
           adjustDuration(validationStart, shortSessionDuration - 10) * 1000,
