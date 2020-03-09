@@ -36,7 +36,6 @@ function NodeSettings() {
     saveExternalUrl,
     toggleUseExternalNode,
     toggleRunInternalNode,
-    toggleTransferModal,
     saveExternalApiKey,
   } = useSettingsDispatch()
   const {nodeFailed} = useNodeState()
@@ -129,13 +128,7 @@ function NodeSettings() {
             <Switcher
               isChecked={settings.runInternalNode}
               onChange={() => {
-                if (settings.runInternalNode) {
-                  toggleRunInternalNode(false)
-                } else if (settings.userBeforeInternalNode) {
-                  toggleTransferModal(true)
-                } else {
-                  toggleRunInternalNode(true)
-                }
+                toggleRunInternalNode(!settings.runInternalNode)
               }}
               bgOn={theme.colors.primary}
             />

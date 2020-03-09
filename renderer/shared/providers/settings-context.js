@@ -34,7 +34,7 @@ const initialState = {
   ipfsPort: 50506,
   uiVersion: global.appVersion,
   useExternalNode: false,
-  runInternalNode: false,
+  runInternalNode: true,
   internalApiKey: randomKey(),
   externalApiKey: '',
   lng: AVAILABLE_LANGS[0],
@@ -47,9 +47,6 @@ function settingsReducer(state, action) {
     }
     case TOGGLE_RUN_INTERNAL_NODE: {
       const newState = {...state, runInternalNode: action.data}
-      if (newState.userBeforeInternalNode && newState.runInternalNode) {
-        delete newState.userBeforeInternalNode
-      }
       if (newState.runInternalNode) {
         newState.useExternalNode = false
       }
@@ -62,9 +59,6 @@ function settingsReducer(state, action) {
         ...initialState,
         ...state,
         initialized: true,
-        useExternalNode: action.data.useExternalNode,
-        runInternalNode: !action.data.useExternalNode,
-        userBeforeInternalNode: action.data.useExternalNode,
       }
     case UPDATE_UI_VERSION: {
       return {
@@ -100,8 +94,6 @@ const SettingsDispatchContext = React.createContext()
 
 // eslint-disable-next-line react/prop-types
 function SettingsProvider({children}) {
-  const firstRun = global.isFirstRun
-
   const [state, dispatch] = usePersistence(
     useLogger(
       React.useReducer(
@@ -112,16 +104,13 @@ function SettingsProvider({children}) {
     'settings'
   )
 
-  const [showTransferModal, toggleTransferModal] = useState(false)
-
   useEffect(() => {
     if (!state.initialized) {
       dispatch({
         type: SETTINGS_INITIALIZE,
-        data: {useExternalNode: !firstRun},
       })
     }
-  }, [dispatch, firstRun, state.initialized])
+  }, [dispatch, state.initialized])
 
   useEffect(() => {
     if (!state.internalApiKey) {
@@ -158,13 +147,12 @@ function SettingsProvider({children}) {
   const changeLanguage = lng => dispatch({type: CHANGE_LANGUAGE, lng})
 
   return (
-    <SettingsStateContext.Provider value={{...state, showTransferModal}}>
+    <SettingsStateContext.Provider value={state}>
       <SettingsDispatchContext.Provider
         value={{
           saveExternalUrl,
           toggleUseExternalNode,
           toggleRunInternalNode,
-          toggleTransferModal,
           saveExternalApiKey,
           changeLanguage,
         }}

@@ -147,7 +147,7 @@ function AutoUpdateProvider({children}) {
   })
 
   useEffect(() => {
-    if (settings.initialized && state.nodeCurrentVersion !== '0.0.0') {
+    if (state.nodeCurrentVersion !== '0.0.0') {
       global.ipcRenderer.send(AUTO_UPDATE_COMMAND, 'start-checking', {
         nodeCurrentVersion: state.nodeCurrentVersion,
         isInternalNode: !settings.useExternalNode,
