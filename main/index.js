@@ -78,7 +78,7 @@ const createMainWindow = () => {
   mainWindow = new BrowserWindow({
     title: app.name,
     width: 1080,
-    height: 700,
+    height: 740,
     webPreferences: {
       nodeIntegration: false,
       preload: join(__dirname, 'preload.js'),

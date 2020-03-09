@@ -1,11 +1,11 @@
-// NOTE: decoded === readyToSolve
+export const readyFlip = ({ready}) => ready
 
 /**
  * Ready to be fetched flips, including extra
  * @param {*} flips
  */
 export function filterReadyFlips(flips) {
-  return flips.filter(({ready}) => ready)
+  return flips.filter(readyFlip)
 }
 
 /**
@@ -16,31 +16,7 @@ export function filterRegularFlips(flips) {
   return flips.filter(({extra}) => !extra)
 }
 
-/**
- * Available for fetching flips
- * @param {*} flips
- */
-export function filterAvailableForFetching(flips) {
-  return flips.filter(({ready, extra}) => ready && !extra)
-}
-
-/**
- * Waiting for fetching flips
- * @param {*} flips
- */
-export function filterWaitingForFetching(flips) {
-  return flips.filter(({ready, fetched}) => ready && !fetched)
-}
-
-/**
- * Waiting for decoding flips
- * @param {*} flips
- */
-export function filterWaitingForDecoding(flips) {
-  return flips.filter(
-    ({ready, fetched, decoded}) => ready && fetched && !decoded
-  )
-}
+export const readyNotFetchedFlip = ({ready, fetched}) => ready && !fetched
 
 /**
  * Fully fetched and decoded flips
@@ -50,21 +26,10 @@ export function filterSolvableFlips(flips) {
   return flips.filter(({decoded}) => decoded)
 }
 
-export function everyFlipFetched(flips = []) {
-  return flips.length && flips.every(({ready, fetched}) => ready && fetched)
-}
+export const failedFlip = ({ready, decoded, extra}) =>
+  !extra && (!ready || !decoded)
 
-/**
- * Flips failed to fetch or decode for some reason
- * @param {*} flips
- */
-export function failedFlips(flips = []) {
-  // Hmm, do we need to bump extra flip if it's ready but failed to fetch
-  return flips.filter(
-    ({ready, decoded, extra}) =>
-      (!ready && !extra) || (ready && !extra && !decoded)
-  )
-}
+export const availableExtraFlip = ({extra, decoded}) => extra && decoded
 
 export function rearrangeFlips(flips) {
   const solvable = []
@@ -83,9 +48,10 @@ export function rearrangeFlips(flips) {
       loading.push(flips[i])
     }
   }
+  solvable.sort((a, b) => a.retries - b.retries)
   return [...solvable, ...loading, ...invalid, ...extras]
 }
 
 export function flipExtraFlip({extra, ...flip}) {
-  return {...flip, extra: !extra}
+  return {...flip, extra: !extra, flipped: true}
 }

@@ -14,18 +14,17 @@ import {persistState, loadPersistentState} from '../../shared/utils/persist'
 import {EpochPeriod} from '../../shared/providers/epoch-context'
 import {canValidate} from '../../shared/providers/identity-context'
 import {
-  everyFlipFetched,
-  filterWaitingForFetching,
-  filterWaitingForDecoding,
   filterRegularFlips,
-  failedFlips,
   filterReadyFlips,
   filterSolvableFlips,
   flipExtraFlip,
+  readyNotFetchedFlip,
+  availableExtraFlip,
+  failedFlip,
+  readyFlip,
 } from './utils'
-import {forEachAsync, pipeAsync, wait} from '../../shared/utils/fn'
+import {forEachAsync} from '../../shared/utils/fn'
 
-// TODO: merge fetch and decode flips, move validation services to serializable objects
 export const createValidationMachine = ({
   epoch,
   validationStart,
@@ -54,159 +53,124 @@ export const createValidationMachine = ({
           states: {
             fetch: {
               entry: log('Start fetching short flips'),
-              initial: 'check',
+              initial: 'polling',
               states: {
-                check: {
-                  entry: log('Check all available flips are fetched'),
-                  on: {
-                    '': [
-                      {
-                        target: 'done',
-                        cond: ({shortFlips}) => everyFlipFetched(shortFlips),
-                      },
-                      {
-                        target: 'fetchHashes',
-                      },
-                    ],
-                  },
-                },
-                fetchHashes: {
-                  initial: 'fetching',
+                polling: {
+                  type: 'parallel',
                   states: {
-                    fetching: {
-                      entry: log('Fetching short hashes'),
-                      invoke: {
-                        src: () => fetchFlipHashes(SessionType.Short),
-                        onDone: {
-                          target: '#validation.shortSession.fetch.fetchFlips',
-                          actions: [
-                            assign({
-                              shortFlips: ({shortFlips}, {data}) =>
-                                shortFlips.length
-                                  ? mergeFlipsByHash(shortFlips, data)
-                                  : mergeFlipsByHash(data, shortFlips),
-                              retries: ({retries}) => retries + 1,
-                            }),
-                            log(),
-                          ],
+                    fetchHashes: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          entry: log('Fetching short hashes'),
+                          invoke: {
+                            src: 'fetchShortHashes',
+                            onDone: {
+                              target: 'check',
+                              actions: [
+                                assign({
+                                  shortFlips: ({shortFlips}, {data}) =>
+                                    shortFlips.length
+                                      ? mergeFlipsByHash(
+                                          shortFlips,
+                                          data.filter(({hash}) =>
+                                            shortFlips.find(
+                                              f => f.hash === hash && !f.flipped
+                                            )
+                                          )
+                                        )
+                                      : mergeFlipsByHash(data, shortFlips),
+                                }),
+                                log(),
+                              ],
+                            },
+                          },
                         },
-                        onError: {
-                          target: 'fail',
-                          actions: log(),
+                        check: {
+                          after: {
+                            5000: [
+                              {
+                                target: '#validation.shortSession.fetch.done',
+                                cond: 'didFetchShortFlips',
+                              },
+                              {target: 'fetching'},
+                            ],
+                          },
                         },
                       },
                     },
-                    fail: {
-                      after: {
-                        1000: 'fetching',
+                    fetchFlips: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: 'fetchShortFlips',
+                            onDone: {
+                              target: 'check',
+                              actions: [
+                                assign({
+                                  retries: ({retries}) => retries + 1,
+                                }),
+                              ],
+                            },
+                          },
+                          on: {
+                            FLIP: {
+                              actions: [
+                                assign({
+                                  shortFlips: ({shortFlips, retries}, {flip}) =>
+                                    mergeFlipsByHash(shortFlips, [
+                                      {...flip, retries},
+                                    ]),
+                                }),
+                                log(),
+                              ],
+                            },
+                          },
+                        },
+                        check: {
+                          entry: log(),
+                          after: {
+                            1000: [
+                              {
+                                target: '#validation.shortSession.fetch.done',
+                                cond: 'didFetchShortFlips',
+                              },
+                              {target: 'fetching'},
+                            ],
+                          },
+                        },
                       },
                     },
                   },
                 },
-                fetchFlips: {
-                  initial: 'fetching',
-                  states: {
-                    fetching: {
-                      entry: log('Fetching short flips'),
-                      invoke: {
-                        src: ({shortFlips, retries}) =>
-                          fetchFlips(
-                            filterWaitingForFetching(shortFlips).map(
-                              ({hash}) => hash
-                            ),
-                            retries
-                          ),
-                        onDone: {
-                          target: '#validation.shortSession.fetch.decodeFlips',
-                          actions: [
-                            assign({
-                              shortFlips: ({shortFlips}, {data}) =>
-                                mergeFlipsByHash(shortFlips, data),
-                            }),
-                            log(),
-                          ],
-                        },
-                        onError: {
-                          target: 'fail',
-                          actions: log(),
-                        },
-                      },
-                    },
-                    fail: {
-                      after: {
-                        1000: 'fetching',
-                      },
-                    },
-                  },
-                },
-                decodeFlips: {
-                  initial: 'decoding',
-                  states: {
-                    decoding: {
-                      invoke: {
-                        entry: log('Decoding short flips'),
-                        src: async ({shortFlips}) =>
-                          filterWaitingForDecoding(shortFlips).map(decodeFlip),
-                        onDone: {
-                          target: 'decoded',
-                          actions: [
-                            assign({
-                              shortFlips: ({shortFlips}, {data}) =>
-                                mergeFlipsByHash(shortFlips, data),
-                            }),
-                            log(),
-                          ],
-                        },
-                        onError: {
-                          target: 'fail',
-                          actions: log(),
-                        },
-                      },
-                    },
-                    decoded: {
-                      after: {
-                        1000: '#validation.shortSession.fetch.check',
-                      },
-                    },
-                    fail: {
-                      entry: log(),
-                    },
-                  },
-                },
-                bumpExtraFlips: {
+                extraFlips: {
                   entry: log('bump extra flips'),
                   invoke: {
                     src: ({shortFlips}) => cb => {
-                      const availableExtraFlips = shortFlips.filter(
-                        ({extra, decoded}) => extra && decoded
-                      )
-                      if (availableExtraFlips.length) {
-                        const replacingFlips = failedFlips(shortFlips)
-                        cb({
-                          type: 'EXTRA_FLIPS_PULLED',
-                          flips:
-                            availableExtraFlips.length >= replacingFlips.length
-                              ? [
-                                  ...replacingFlips.map(flipExtraFlip),
-                                  ...availableExtraFlips
+                      const extraFlips = shortFlips.filter(availableExtraFlip)
+                      const replacingFlips = shortFlips.filter(failedFlip)
+                      cb({
+                        type: 'EXTRA_FLIPS_PULLED',
+                        flips:
+                          extraFlips.length >= replacingFlips.length
+                            ? replacingFlips
+                                .map(flipExtraFlip)
+                                .concat(
+                                  extraFlips
                                     .slice(0, replacingFlips.length)
-                                    .map(flipExtraFlip),
-                                ]
-                              : [
-                                  ...replacingFlips
-                                    .slice(0, availableExtraFlips.length)
-                                    .map(flipExtraFlip),
-                                  ...replacingFlips
-                                    .slice(availableExtraFlips.length)
-                                    .map(flip => ({...flip, failed: true})),
-                                  ...availableExtraFlips.map(flipExtraFlip),
-                                ],
-                        })
-                      }
+                                    .map(flipExtraFlip)
+                                )
+                            : replacingFlips
+                                .slice(0, extraFlips.length)
+                                .map(flipExtraFlip)
+                                .concat(extraFlips.map(flipExtraFlip)),
+                      })
                     },
                   },
                   on: {
                     EXTRA_FLIPS_PULLED: {
+                      target: 'polling',
                       actions: [
                         assign({
                           shortFlips: ({shortFlips}, {flips}) =>
@@ -217,11 +181,11 @@ export const createValidationMachine = ({
                     },
                   },
                 },
-                done: {type: 'final'},
+                done: {type: 'final', entry: log('Fetching short flips done')},
               },
               on: {
                 REFETCH_FLIPS: {
-                  target: '#validation.shortSession.fetch.fetchFlips',
+                  target: '#validation.shortSession.fetch.polling.fetchFlips',
                   actions: [
                     assign({
                       shortFlips: ({shortFlips}) =>
@@ -237,8 +201,26 @@ export const createValidationMachine = ({
               },
               after: {
                 BUMP_EXTRA_FLIPS: {
-                  target: '.bumpExtraFlips',
-                  cond: ({shortFlips}) => failedFlips(shortFlips).some(x => x),
+                  target: '.extraFlips',
+                  cond: ({shortFlips}) =>
+                    shortFlips.some(failedFlip) &&
+                    shortFlips.some(availableExtraFlip),
+                },
+                FINALIZE_FLIPS: {
+                  target: '.done',
+                  actions: [
+                    assign({
+                      shortFlips: ({shortFlips}) =>
+                        mergeFlipsByHash(
+                          shortFlips,
+                          shortFlips.filter(failedFlip).map(flip => ({
+                            ...flip,
+                            failed: true,
+                          }))
+                        ),
+                    }),
+                    log(),
+                  ],
                 },
               },
             },
@@ -438,7 +420,6 @@ export const createValidationMachine = ({
           exit: ['cleanupShortFlips'],
         },
         longSession: {
-          id: 'longSession',
           entry: [
             assign({
               currentIndex: 0,
@@ -482,78 +463,27 @@ export const createValidationMachine = ({
                       },
                     },
                     fetchFlips: {
-                      initial: 'fetching',
-                      states: {
-                        fetching: {
-                          entry: log('Fetching long flips'),
-                          invoke: {
-                            src: ({longFlips, retries}) =>
-                              fetchFlips(
-                                filterReadyFlips(longFlips).map(
-                                  ({hash}) => hash
-                                ),
-                                retries
-                              ),
-                            onDone: {
-                              target:
-                                '#validation.longSession.fetch.flips.decodeFlips',
-                              actions: [
-                                assign({
-                                  longFlips: ({longFlips}, {data}) =>
-                                    mergeFlipsByHash(longFlips, data),
-                                  retries: ({retries}) => retries + 1,
-                                }),
-                                log(),
-                              ],
-                            },
-                            onError: {
-                              target: 'fail',
-                              actions: log(),
-                            },
-                          },
+                      invoke: {
+                        src: 'fetchLongFlips',
+                        onDone: {
+                          target: 'done',
+                          actions: assign({
+                            retries: ({retries}) => retries + 1,
+                          }),
                         },
-                        fail: {},
                       },
-                    },
-                    decodeFlips: {
-                      initial: 'decoding',
-                      states: {
-                        decoding: {
-                          entry: log('Decoding long flips'),
-                          invoke: {
-                            src: async ({longFlips}) =>
-                              filterWaitingForDecoding(longFlips).map(
-                                decodeFlip
-                              ),
-                            onDone: {
-                              target:
-                                '#validation.longSession.fetch.flips.checkFlips',
-                              actions: [
-                                assign({
-                                  longFlips: ({longFlips}, {data}) =>
-                                    mergeFlipsByHash(longFlips, data),
-                                }),
-                                log(),
-                              ],
-                            },
-                          },
-                        },
-                        fail: {entry: log()},
-                      },
-                    },
-                    checkFlips: {
-                      entry: log(),
                       on: {
-                        '': [
-                          {
-                            target: 'fetchFlips',
-                            cond: ({longFlips}) =>
-                              longFlips.some(
-                                ({ready, fetched}) => ready && !fetched
-                              ),
-                          },
-                          {target: 'done'},
-                        ],
+                        FLIP: {
+                          actions: [
+                            assign({
+                              longFlips: ({longFlips, retries}, {flip}) =>
+                                mergeFlipsByHash(longFlips, [
+                                  {...flip, retries},
+                                ]),
+                            }),
+                            log(),
+                          ],
+                        },
                       },
                     },
                     done: {
@@ -649,8 +579,7 @@ export const createValidationMachine = ({
                     PREV: [
                       {
                         target: undefined,
-                        cond: ({longFlips}) =>
-                          filterSolvableFlips(longFlips).length === 0,
+                        cond: ({longFlips}) => longFlips.length === 0,
                       },
                       {
                         target: '.normal',
@@ -676,14 +605,12 @@ export const createValidationMachine = ({
                     NEXT: [
                       {
                         target: undefined,
-                        cond: ({longFlips}) =>
-                          filterSolvableFlips(longFlips).length === 0,
+                        cond: ({longFlips}) => longFlips.length === 0,
                       },
                       {
                         target: '.lastFlip',
                         cond: ({longFlips, currentIndex}) =>
-                          currentIndex ===
-                          filterSolvableFlips(longFlips).length - 2,
+                          currentIndex === longFlips.length - 2,
                         actions: [
                           assign({
                             currentIndex: ({currentIndex}) => currentIndex + 1,
@@ -694,8 +621,7 @@ export const createValidationMachine = ({
                       {
                         target: '.normal',
                         cond: ({longFlips, currentIndex}) =>
-                          currentIndex <
-                          filterSolvableFlips(longFlips).length - 2,
+                          currentIndex < longFlips.length - 2,
                         actions: [
                           assign({
                             currentIndex: ({currentIndex}) => currentIndex + 1,
@@ -718,7 +644,7 @@ export const createValidationMachine = ({
                       {
                         target: '.lastFlip',
                         cond: ({longFlips}, {index}) =>
-                          index === filterSolvableFlips(longFlips).length - 1,
+                          index === longFlips.length - 1,
                         actions: [
                           assign({
                             currentIndex: (_, {index}) => index,
@@ -852,14 +778,14 @@ export const createValidationMachine = ({
                       {
                         target: '#validation.validationFailed',
                         cond: ({longFlips}) => {
-                          const validFlips = filterSolvableFlips(longFlips)
-                          const answers = validFlips.filter(
+                          const solvableFlips = filterSolvableFlips(longFlips)
+                          const answers = solvableFlips.filter(
                             ({option}) => option
                           )
                           return (
-                            !validFlips.length ||
-                            (validFlips.length &&
-                              answers.length < validFlips.length / 2)
+                            !solvableFlips.length ||
+                            (solvableFlips.length &&
+                              answers.length < solvableFlips.length / 2)
                           )
                         },
                       },
@@ -885,8 +811,28 @@ export const createValidationMachine = ({
       },
     },
     {
+      services: {
+        fetchShortHashes: () => fetchFlipHashes(SessionType.Short),
+        fetchShortFlips: ({shortFlips}) => cb =>
+          fetchFlips(
+            shortFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
+            cb
+          ),
+        fetchLongHashes: () =>
+          fetchFlipHashes(SessionType.Long).filter(readyFlip),
+        fetchLongFlips: ({longFlips}) => cb =>
+          fetchFlips(
+            longFlips.map(({hash}) => hash),
+            cb
+          ),
+      },
       delays: {
-        BUMP_EXTRA_FLIPS: 1000 * 35,
+        // eslint-disable-next-line no-shadow
+        BUMP_EXTRA_FLIPS: ({validationStart}) =>
+          Math.max(adjustDuration(validationStart, 35), 5) * 1000,
+        // eslint-disable-next-line no-shadow
+        FINALIZE_FLIPS: ({validationStart}) =>
+          Math.max(adjustDuration(validationStart, 90), 5) * 1000,
         // eslint-disable-next-line no-shadow
         SHORT_SESSION_AUTO_SUBMIT: ({validationStart, shortSessionDuration}) =>
           adjustDuration(validationStart, shortSessionDuration - 10) * 1000,
@@ -909,97 +855,46 @@ export const createValidationMachine = ({
           )
         },
       },
+      guards: {
+        didFetchShortFlips: ({shortFlips}) => {
+          const regularFlips = filterRegularFlips(shortFlips)
+          return (
+            regularFlips.some(x => x) &&
+            regularFlips.every(
+              ({ready, fetched, decoded}) => ready && fetched && decoded
+            )
+          )
+        },
+      },
     }
   )
 
-export const createTimerMachine = duration =>
-  Machine({
-    initial: 'running',
-    context: {
-      elapsed: 0,
-      duration,
-      interval: 1,
-    },
-    states: {
-      running: {
-        entry: assign({
-          start: dayjs(),
-        }),
-        invoke: {
-          src: ({interval}) => cb => {
-            const intervalId = setInterval(() => cb('TICK'), 1000 * interval)
-            return () => clearInterval(intervalId)
-          },
-        },
-        on: {
-          '': {
-            target: 'stopped',
-            // eslint-disable-next-line no-shadow
-            cond: ({elapsed, duration}) => elapsed >= duration,
-          },
-          TICK: {
-            actions: assign({
-              elapsed: ({start}) => dayjs().diff(start, 's'),
-            }),
-          },
-        },
-      },
-      stopped: {
-        on: {
-          '': {
-            target: 'running',
-            // eslint-disable-next-line no-shadow
-            cond: ({elapsed, duration}) => elapsed < duration,
-          },
-        },
-      },
-    },
-    on: {
-      DURATION_UPDATE: {
-        actions: assign({
-          // eslint-disable-next-line no-shadow
-          duration: (_, {duration}) => duration,
-        }),
-      },
-      RESET: {
-        actions: assign({
-          elapsed: 0,
-        }),
-      },
-    },
-  })
-
-function fetchFlips(hashes, retries) {
+function fetchFlips(hashes, cb) {
   global.logger.debug(`Calling flip_get rpc for hashes`, hashes)
-  const flips = []
-  return forEachAsync(
-    hashes,
-    pipeAsync(
-      hash =>
-        Promise.race([
-          fetchFlip(hash)
-            .then(({result, error}) => {
-              global.logger.debug(`Get flip_get response`, hash)
-              flips.push({
-                ...result,
-                hash,
-                fetched: !!result && !error,
-              })
-              return Promise.resolve()
-            })
-            .catch(() => {
-              global.logger.debug(`Catch flip_get reject`, hash)
-              flips.push({
-                hash,
-                fetched: false,
-              })
-              return Promise.resolve()
-            }),
-          wait(2 ** retries - 1),
-        ]).then(() => Promise.resolve(100)),
-      wait
-    )
-  ).then(() => flips)
+  return forEachAsync(hashes, hash =>
+    fetchFlip(hash)
+      .then(({result, error}) => {
+        global.logger.debug(`Get flip_get response`, hash)
+        cb({
+          type: 'FLIP',
+          flip: {
+            ...decodeFlip({...result}),
+            hash,
+            fetched: !!result && !error,
+          },
+        })
+      })
+      .catch(() => {
+        global.logger.debug(`Catch flip_get reject`, hash)
+        cb({
+          type: 'FLIP',
+          flip: {
+            hash,
+            fetched: false,
+          },
+        })
+      })
+  )
 }
 
 function decodeFlip({hash, hex, publicHex, privateHex}) {
@@ -1131,3 +1026,60 @@ export function shouldStartValidation(epoch, identity) {
     }
   } else return false
 }
+
+export const createTimerMachine = duration =>
+  Machine({
+    initial: 'running',
+    context: {
+      elapsed: 0,
+      duration,
+      interval: 1,
+    },
+    states: {
+      running: {
+        entry: assign({
+          start: dayjs(),
+        }),
+        invoke: {
+          src: ({interval}) => cb => {
+            const intervalId = setInterval(() => cb('TICK'), 1000 * interval)
+            return () => clearInterval(intervalId)
+          },
+        },
+        on: {
+          '': {
+            target: 'stopped',
+            // eslint-disable-next-line no-shadow
+            cond: ({elapsed, duration}) => elapsed >= duration,
+          },
+          TICK: {
+            actions: assign({
+              elapsed: ({start}) => dayjs().diff(start, 's'),
+            }),
+          },
+        },
+      },
+      stopped: {
+        on: {
+          '': {
+            target: 'running',
+            // eslint-disable-next-line no-shadow
+            cond: ({elapsed, duration}) => elapsed < duration,
+          },
+        },
+      },
+    },
+    on: {
+      DURATION_UPDATE: {
+        actions: assign({
+          // eslint-disable-next-line no-shadow
+          duration: (_, {duration}) => duration,
+        }),
+      },
+      RESET: {
+        actions: assign({
+          elapsed: 0,
+        }),
+      },
+    },
+  })

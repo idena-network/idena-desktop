@@ -107,7 +107,8 @@ function ValidationSession({
   return (
     <Scene bg={isShortSession(state) ? theme.colors.black : theme.colors.white}>
       <Header>
-        {!isLongSessionKeywords(state) ? (
+        {!isLongSessionKeywords(state) &&
+        !state.matches('validationSucceeded') ? (
           <SessionTitle
             color={
               isShortSession(state) ? theme.colors.white : theme.colors.text
@@ -157,101 +158,104 @@ function ValidationSession({
             }
             onImageFail={() => send('REFETCH_FLIPS')}
           />
-          {isLongSessionKeywords(state) && currentFlip(state) && (
-            <FlipWords currentFlip={currentFlip(state)}>
-              <QualificationActions>
-                <QualificationButton
-                  flip={currentFlip(state)}
-                  variant={RelevanceType.Relevant}
-                  onVote={hash =>
-                    send({
-                      type: 'TOGGLE_WORDS',
-                      hash,
-                      relevance: RelevanceType.Relevant,
-                    })
-                  }
-                >
-                  {currentFlip(state).relevance === RelevanceType.Relevant && (
-                    <FiCheck
-                      size={rem(20)}
-                      fontSize={rem(13)}
-                      style={{
-                        ...margin(0, rem(4), 0, 0),
-                        verticalAlign: 'middle',
-                      }}
-                    />
-                  )}
-                  Both relevant
-                </QualificationButton>
-                <Tooltip
-                  content={
-                    <Box
-                      w={rem(350)}
-                      css={{
-                        ...padding(rem(theme.spacings.medium16)),
-                        wordWrap: 'break-word',
-                        wordBreak: 'keep-all',
-                        whiteSpace: 'pre-wrap',
-                      }}
-                    >
-                      <Text
-                        color={theme.colors.white}
-                        fontSize={theme.fontSizes.large}
-                        fontWeight="500"
-                        css={{
-                          ...margin(0, 0, rem(theme.spacings.small12)),
-                        }}
-                      >
-                        Please also report the flip when you see one of the
-                        following:
-                      </Text>
-                      <Box color={theme.colors.white} w={rem(350)}>
-                        {[
-                          '1. You need to read the text in the flip to solve it',
-                          '2. You see inappropriate content',
-                          '3. You see numbers or letters or other labels on top of the images showing their order',
-                        ].map(phrase => (
-                          <Box
-                            css={{
-                              fontSize: theme.fontSizes.normal,
-                              ...margin(0, 0, rem(theme.spacings.small12)),
-                            }}
-                          >
-                            {phrase}
-                          </Box>
-                        ))}
-                      </Box>
-                      <Text color={theme.colors.muted}>
-                        Skip the flip if the keywords are not loaded
-                      </Text>
-                    </Box>
-                  }
-                >
+          {(isLongSessionKeywords(state) ||
+            state.matches('validationSucceeded')) &&
+            currentFlip(state) && (
+              <FlipWords currentFlip={currentFlip(state)}>
+                <QualificationActions>
                   <QualificationButton
                     flip={currentFlip(state)}
-                    variant={RelevanceType.Irrelevant}
+                    variant={RelevanceType.Relevant}
                     onVote={hash =>
                       send({
                         type: 'TOGGLE_WORDS',
                         hash,
-                        relevance: RelevanceType.Irrelevant,
+                        relevance: RelevanceType.Relevant,
                       })
                     }
                   >
-                    <FiThumbsDown
-                      size={rem(20)}
-                      fontSize={rem(13)}
-                      style={{
-                        ...margin(0, rem(4), 0, 0),
-                        verticalAlign: 'middle',
-                      }}
-                    />
-                    Report
+                    {currentFlip(state).relevance ===
+                      RelevanceType.Relevant && (
+                      <FiCheck
+                        size={rem(20)}
+                        fontSize={rem(13)}
+                        style={{
+                          ...margin(0, rem(4), 0, 0),
+                          verticalAlign: 'middle',
+                        }}
+                      />
+                    )}
+                    Both relevant
                   </QualificationButton>
-                </Tooltip>
-              </QualificationActions>
-            </FlipWords>
-          )}
+                  <Tooltip
+                    content={
+                      <Box
+                        w={rem(350)}
+                        css={{
+                          ...padding(rem(theme.spacings.medium16)),
+                          wordWrap: 'break-word',
+                          wordBreak: 'keep-all',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
+                        <Text
+                          color={theme.colors.white}
+                          fontSize={theme.fontSizes.large}
+                          fontWeight="500"
+                          css={{
+                            ...margin(0, 0, rem(theme.spacings.small12)),
+                          }}
+                        >
+                          Please also report the flip when you see one of the
+                          following:
+                        </Text>
+                        <Box color={theme.colors.white} w={rem(350)}>
+                          {[
+                            '1. You need to read the text in the flip to solve it',
+                            '2. You see inappropriate content',
+                            '3. You see numbers or letters or other labels on top of the images showing their order',
+                          ].map(phrase => (
+                            <Box
+                              css={{
+                                fontSize: theme.fontSizes.normal,
+                                ...margin(0, 0, rem(theme.spacings.small12)),
+                              }}
+                            >
+                              {phrase}
+                            </Box>
+                          ))}
+                        </Box>
+                        <Text color={theme.colors.muted}>
+                          Skip the flip if the keywords are not loaded
+                        </Text>
+                      </Box>
+                    }
+                  >
+                    <QualificationButton
+                      flip={currentFlip(state)}
+                      variant={RelevanceType.Irrelevant}
+                      onVote={hash =>
+                        send({
+                          type: 'TOGGLE_WORDS',
+                          hash,
+                          relevance: RelevanceType.Irrelevant,
+                        })
+                      }
+                    >
+                      <FiThumbsDown
+                        size={rem(20)}
+                        fontSize={rem(13)}
+                        style={{
+                          ...margin(0, rem(4), 0, 0),
+                          verticalAlign: 'middle',
+                        }}
+                      />
+                      Report
+                    </QualificationButton>
+                  </Tooltip>
+                </QualificationActions>
+              </FlipWords>
+            )}
         </FlipChallenge>
       </CurrentStep>
       <ActionBar>
@@ -440,7 +444,7 @@ function sessionFlips(state) {
   } = state
   return isShortSession(state)
     ? rearrangeFlips(filterRegularFlips(shortFlips))
-    : filterSolvableFlips(longFlips)
+    : rearrangeFlips(longFlips)
 }
 
 function currentFlip(state) {
@@ -456,7 +460,7 @@ function hasAllAnswers(state) {
   } = state
   const flips = isShortSession(state)
     ? shortFlips.filter(({decoded, extra}) => decoded && !extra)
-    : filterSolvableFlips(longFlips)
+    : longFlips.filter(({decoded}) => decoded)
   return flips.length && flips.every(({option}) => option)
 }
 
