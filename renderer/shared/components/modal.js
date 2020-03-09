@@ -12,18 +12,12 @@ import {
 import {SubHeading, Text} from './typo'
 import Flex from './flex'
 import Button, {FlatButton} from './button'
-import {
-  useSettingsState,
-  useSettingsDispatch,
-} from '../providers/settings-context'
 import Box from './box'
 import {Fill, Absolute} from './position'
 
 export function GlobalModals() {
   const {showExternalUpdateModal} = useAutoUpdateState()
-  const {showTransferModal} = useSettingsState()
   const {hideExternalNodeUpdateModal} = useAutoUpdateDispatch()
-  const {toggleTransferModal, toggleRunInternalNode} = useSettingsDispatch()
 
   return (
     <>
@@ -60,51 +54,6 @@ export function GlobalModals() {
               }}
             >
               Okay, got it
-            </Button>
-          </Box>
-        </Flex>
-      </Modal>
-      <Modal
-        show={showTransferModal}
-        onHide={() => {
-          toggleTransferModal(false)
-        }}
-        width={500}
-      >
-        <Box m="0 0 18px">
-          <SubHeading>Run the built-in node</SubHeading>
-          <Text css={{marginBottom: 10}}>
-            The built-in node will create a new address. If you want to keep
-            your existing address please do the following:
-          </Text>
-          <Text css={{marginBottom: 10}}>
-            1. Deactivate your miner status (if needed) <br />
-            2. Export your private key on the Settings page <br />
-            3. Run the built-in node with a new address <br />
-            4. Import your private key on the Settins page <br />
-            5. Shutdown your remote node
-          </Text>
-          <Text>It will take time for the built-in node to synchronize</Text>
-        </Box>
-        <Flex align="center" justify="space-between">
-          <Box px="4px">
-            <Button
-              onClick={() => {
-                toggleTransferModal(false)
-              }}
-            >
-              Okay, got it
-            </Button>
-          </Box>
-          <Box px="4px">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                toggleRunInternalNode(true)
-                toggleTransferModal(false)
-              }}
-            >
-              Run with a new address
             </Button>
           </Box>
         </Flex>

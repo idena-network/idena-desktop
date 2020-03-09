@@ -292,17 +292,9 @@ export function LoadingApp() {
 export function OfflineApp() {
   const {nodeReady, nodeFailed} = useNodeState()
   const {tryRestartNode} = useNodeDispatch()
-  const {
-    useExternalNode,
-    runInternalNode,
-    userBeforeInternalNode,
-  } = useSettingsState()
+  const {useExternalNode, runInternalNode} = useSettingsState()
   const {nodeProgress} = useAutoUpdateState()
-  const {
-    toggleTransferModal,
-    toggleRunInternalNode,
-    toggleUseExternalNode,
-  } = useSettingsDispatch()
+  const {toggleRunInternalNode, toggleUseExternalNode} = useSettingsDispatch()
   return (
     <>
       <GlobalModals />
@@ -353,9 +345,7 @@ export function OfflineApp() {
                 <Button
                   variant="primary"
                   onClick={() => {
-                    if (userBeforeInternalNode) {
-                      toggleTransferModal(true)
-                    } else if (!runInternalNode) {
+                    if (!runInternalNode) {
                       toggleRunInternalNode(true)
                     } else {
                       toggleUseExternalNode(false)

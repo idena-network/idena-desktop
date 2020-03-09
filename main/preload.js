@@ -16,10 +16,8 @@ const validation = require('./stores/validation')
 const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
 const logger = require('./logger')
-const {prepareDb, checkDbExists} = require('./stores/setup')
+const {prepareDb} = require('./stores/setup')
 const {loadKeyword} = require('./utils/keywords')
-
-const isFirstRun = !checkDbExists('settings')
 
 process.once('loaded', () => {
   global.ipcRenderer = ipcRenderer
@@ -39,7 +37,6 @@ process.once('loaded', () => {
   global.isMac = process.platform === 'darwin'
 
   global.clipboard = clipboard
-  global.isFirstRun = isFirstRun
   ;[global.locale] = app.getLocale().split('-')
 
   global.getZoomLevel = () => webFrame.getZoomLevel()
