@@ -25,6 +25,7 @@ import sr_translation from '../locales/sr/translation.json'
 import sr_error from '../locales/sr/error.json'
 import ro_translation from '../locales/ro/translation.json'
 import ro_error from '../locales/ro/error.json'
+
 export const AVAILABLE_LANGS = [
   'en',
   'fr',
