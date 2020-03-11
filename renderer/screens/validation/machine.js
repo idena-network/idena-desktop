@@ -442,7 +442,7 @@ export const createValidationMachine = ({
                         fetching: {
                           entry: log('Fetching long hashes'),
                           invoke: {
-                            src: () => fetchFlipHashes(SessionType.Long),
+                            src: 'fetchLongHashes',
                             onDone: {
                               target:
                                 '#validation.longSession.fetch.flips.fetchFlips',
