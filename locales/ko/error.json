@@ -1,14 +1,14 @@
-{	
-	  "Can not submit flip": "플립(flip)을 제출할 수 없습니다",
-	  "Keywords are not specified": "키워드(핵심어)가 명시되지 않았습니다",
-	  "Error while uploading flip": "플립(flip) 업로드 중 오류가 발생했습니다",
-	  "Something went wrong": "실수가  발견 되었습니다",
-	  "Maximum image size exceeded": "최대 이미지 용량이 초과 되었습니다",
-	  "Error while importing key": "키를 가져오는 중 오류가 발생했습니다",
-	  "Internal node is not available, try again in a few seconds": "내부 노드(node)사용이 불가능합니다",
-	  "You can not submit flips having 'Candidate' status": "후보자격으로는 플립(flip)을 제출할 수 없습니다",
-	  "You cannot submit more flips until the next validation": "차기검증까지 더 이상의 플립(flip)제출은 불가능합니다",
-	  "Can not submit flip during the validation session": "검증기간 중에는 플립(flip)을 제출할 수 없습니다",
-	  "Error while sending transaction": "전송 중 오류가 발생했습니다",
-	  "Transaction sent": "전송처리 되었습니다",
-	}
+{
+  "Can not submit flip": "플립(flip)을 제출할 수 없습니다",
+  "Keywords are not specified": "키워드(핵심어)가 명시되지 않았습니다",
+  "Error while uploading flip": "플립(flip) 업로드 중 오류가 발생했습니다",
+  "Something went wrong": "실수가  발견 되었습니다",
+  "Maximum image size exceeded": "최대 이미지 용량이 초과 되었습니다",
+  "Error while importing key": "키를 가져오는 중 오류가 발생했습니다",
+  "Internal node is not available, try again in a few seconds": "내부 노드(node)사용이 불가능합니다",
+  "You can not submit flips having 'Candidate' status": "후보자격으로는 플립(flip)을 제출할 수 없습니다",
+  "You cannot submit more flips until the next validation": "차기검증까지 더 이상의 플립(flip)제출은 불가능합니다",
+  "Can not submit flip during the validation session": "검증기간 중에는 플립(flip)을 제출할 수 없습니다",
+  "Error while sending transaction": "전송 중 오류가 발생했습니다",
+  "Transaction sent": "전송처리 되었습니다"
+}
