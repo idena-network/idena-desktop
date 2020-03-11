@@ -10,6 +10,7 @@ const AVAILABLE_LANGS = [
   'uk',
   'sr',
   'ro',
+  'it',
 ]
 
 module.exports = {
