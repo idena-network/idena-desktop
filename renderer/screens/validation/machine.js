@@ -448,7 +448,8 @@ export const createValidationMachine = ({
                                 '#validation.longSession.fetch.flips.fetchFlips',
                               actions: [
                                 assign({
-                                  longFlips: (_, {data}) => data,
+                                  longFlips: (_, {data}) =>
+                                    data.filter(readyFlip),
                                 }),
                                 log(),
                               ],
@@ -818,8 +819,7 @@ export const createValidationMachine = ({
             shortFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
             cb
           ),
-        fetchLongHashes: () =>
-          fetchFlipHashes(SessionType.Long).filter(readyFlip),
+        fetchLongHashes: () => fetchFlipHashes(SessionType.Long),
         fetchLongFlips: ({longFlips}) => cb =>
           fetchFlips(
             longFlips.map(({hash}) => hash),
