@@ -13,8 +13,8 @@ matrix:
   include:
     # - if: branch =~ /v\d+\.\d+\.\d+/
     - os: windows
-    # - if: branch =~ /v\d+\.\d+\.\d+/
-    - os: osx
+    - if: branch =~ /v\d+\.\d+\.\d+/
+      os: osx
     - os: linux
 
 env:
@@ -41,14 +41,12 @@ install:
   - npm ci
 
 before_script:
-  - echo "Printing travis tag"
-  - echo "$TRAVIS_TAG"
   - if [[ "$TRAVIS_TAG" != "" ]]; then npm --no-git-tag-version version ${TRAVIS_TAG:1}; fi
 
 script:
   - npm run lint
   - npm run build
-  - xvfb-maybe npm run e2e
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then xvfb-maybe npm run e2e; fi
 
   - echo "Build win"
   - if [[ "$TRAVIS_OS_NAME" == "windows" && "$TRAVIS_TAG" != "" ]]; then npm run dist:win; fi
