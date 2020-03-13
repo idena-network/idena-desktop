@@ -1,8 +1,12 @@
 import React, {createRef} from 'react'
 import PropTypes from 'prop-types'
-import ImageEditor from '@toast-ui/react-image-editor'
 
-function FlipEditor() {
+const ImageEditor =
+  typeof window !== 'undefined'
+    ? require('@toast-ui/react-image-editor').default
+    : null
+
+function FlipEditor({src}) {
   const editorRef = createRef()
 
   return (
@@ -10,7 +14,7 @@ function FlipEditor() {
       ref={editorRef}
       includeUI={{
         loadImage: {
-          path: '/static/128x128.png', // set image here, doesn't work with externals urls though :( like we have for defalt flips https://placehold.it/480?text=1
+          path: '/static/128x128.png' || src, // set image here, doesn't work with externals urls though :( like we have for defalt flips https://placehold.it/480?text=1
           name: 'DefaultImage',
         },
         // theme: myTheme,
