@@ -11,10 +11,10 @@ addons:
 
 matrix:
   include:
-    - if: branch =~ /v\d+\.\d+\.\d+/
-      os: windows
-    - if: branch =~ /v\d+\.\d+\.\d+/
-      os: osx
+    # - if: branch =~ /v\d+\.\d+\.\d+/
+    - os: windows
+    # - if: branch =~ /v\d+\.\d+\.\d+/
+    - os: osx
     - os: linux
 
 env:
