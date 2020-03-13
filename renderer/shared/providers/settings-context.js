@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect} from 'react'
 import semver from 'semver'
 import {usePersistence} from '../hooks/use-persistent-state'
 import {loadPersistentState} from '../utils/persist'
@@ -38,6 +38,12 @@ const initialState = {
   internalApiKey: randomKey(),
   externalApiKey: '',
   lng: AVAILABLE_LANGS[0],
+}
+
+if (global.env && global.env.NODE_ENV === 'e2e') {
+  initialState.url = global.env.NODE_MOCK
+  initialState.runInternalNode = false
+  initialState.useExternalNode = true
 }
 
 function settingsReducer(state, action) {

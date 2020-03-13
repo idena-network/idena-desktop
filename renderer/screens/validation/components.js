@@ -347,7 +347,7 @@ export function Thumbnail({
       onClick={onPick}
     >
       {((fetched && !decoded) || failed) && <FailedThumbnail />}
-      {!fetched && <LoadingThumbnail />}
+      {!fetched && !failed && <LoadingThumbnail />}
       {fetched && decoded && (
         <>
           {(option || isQualified) && (

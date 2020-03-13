@@ -18,7 +18,8 @@
     "test": "jest",
     "i18n": "npm run i18n:clean && npm run i18n:scan",
     "i18n:scan": "i18next-scanner",
-    "i18n:clean": "rm -rf locales/en locales/fr locales/de locales/es locales/ru locales/zh locales/ko locales/hr locales/ro locales/uk locales/sr locales/it"
+    "i18n:clean": "rm -rf locales/en locales/fr locales/de locales/es locales/ru locales/zh locales/ko locales/hr locales/ro locales/uk locales/sr locales/it",
+    "e2e": "dotenv -e .env.e2e testcafe electron"
   },
   "build": {
     "appId": "io.idena",
@@ -56,7 +57,9 @@
     "@testing-library/react": "^9.1.4",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.9.0",
+    "cors": "^2.8.5",
     "devtron": "^1.4.0",
+    "dotenv-cli": "^3.1.0",
     "electron": "^8.0.1",
     "electron-builder": "^21.2.0",
     "eslint": "^5.14.1",
@@ -69,10 +72,14 @@
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
     "eslint-plugin-react-hooks": "^1.6.0",
+    "eslint-plugin-testcafe": "^0.2.1",
     "i18next-scanner": "^2.10.3",
     "jest": "^24.9.0",
     "prettier": "^1.16.4",
-    "react-dom": "^16.8.4"
+    "react-dom": "^16.8.4",
+    "testcafe": "^1.8.2",
+    "testcafe-browser-provider-electron": "0.0.14",
+    "testcafe-react-selectors": "^4.0.0"
   },
   "dependencies": {
     "@xstate/react": "^0.8.1",
