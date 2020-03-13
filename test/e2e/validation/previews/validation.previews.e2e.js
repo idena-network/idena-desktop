@@ -3,15 +3,15 @@ const dayjs = require('dayjs')
 const {delay} = require('../../utils')
 const node = require('./node')
 
-fixture`ValidationPage`
+fixture`ValidationPagePreviews`
   .page('http://localhost:8000/dashboard')
+  .beforeEach(async () => {
+    await waitForReact()
+  })
   .before(async () => {
     node.sessionStartDate = dayjs().add(100, 'm')
     node.currentPeriod = 'None'
-    node.start()
-  })
-  .beforeEach(async () => {
-    await waitForReact()
+    await node.start()
   })
 
 test('check preview states changing', async t => {
@@ -51,4 +51,23 @@ test('check preview states changing', async t => {
   await t.expect(thumb2.findReact('FlipImage').exists).ok()
   await t.expect(thumb3.findReact('FailedThumbnail').exists).ok()
   await t.expect(thumb3.findReact('LoadingThumbnail').exists).notOk()
+
+  // submit empty answers
+  await t.click(thumb3)
+  await t.click(ReactSelector('ActionBarItem Button'))
+
+  // close welcome modal
+  const modal = ReactSelector('WelcomeQualificationDialog')
+  await t.expect(modal.exists).ok()
+  await t.click(modal.findReact('Button'))
+  await t.expect(modal.exists).notOk()
+
+  // only ready flip should be shown
+  const longThumbnails = ReactSelector('Thumbnails Thumbnail')
+  await t.expect(longThumbnails.count).eql(7)
+
+  for (let i = 0; i < 7; i += 1) {
+    const thumb = longThumbnails.nth(i)
+    await t.expect(thumb.findReact('FlipImage').exists).ok()
+  }
 })
