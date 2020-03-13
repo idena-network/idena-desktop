@@ -11,7 +11,7 @@ import {useTranslation} from 'react-i18next'
 import {Box, Input} from '../../../shared/components'
 import Divider from '../../../shared/components/divider'
 import Flex from '../../../shared/components/flex'
-import ImageEditor from './image-editor'
+import FlipEditor from './flip-editor'
 import theme from '../../../shared/theme'
 import {convertToBase64Url} from '../utils/use-data-url'
 import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
@@ -177,7 +177,7 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
       </Box>
 
       <Box>
-        <ImageEditor src={pics[selectedIndex]} />
+        <FlipEditor src={pics[selectedIndex]} />
         <Flex
           justify="space-between"
           align="center"

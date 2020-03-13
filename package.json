@@ -82,6 +82,7 @@
     "testcafe-react-selectors": "^4.0.0"
   },
   "dependencies": {
+    "@toast-ui/react-image-editor": "^1.2.0",
     "@xstate/react": "^0.8.1",
     "axios": "^0.18.1",
     "dayjs": "^1.8.14",
