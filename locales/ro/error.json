@@ -1,8 +1,8 @@
 {
-  "Can not submit flip": "Flipul nu a putut fi trimis",
+  "Can not submit flip": "Flip-ul nu a putut fi trimis",
   "Keywords are not specified": "Cuvintele cheie nu sunt specificate",
   "Error while uploading flip": "Eroare la încărcarea flipului",
-  "Something went wrong": "Ceva n-a mers bine",
+  "Something went wrong": "Ceva nu a mers bine",
   "Maximum image size exceeded": "Dimensiunea maximă a imaginii a fost depășită",
   "Error while importing key": "Eroare la importarea cheii",
   "Internal node is not available, try again in a few seconds": "Nodul intern nu este disponibil, încercați din nou în câteva secunde",
@@ -10,5 +10,5 @@
   "You cannot submit more flips until the next validation": "Nu puteți trimite mai multe flipuri până la următoarea validare",
   "Can not submit flip during the validation session": "Nu poate trimite flipuri în timpul sesiunii de validare",
   "Error while sending transaction": "Eroare la trimiterea tranzacției",
-  "Transaction sent": "Tranzacția trimisă"
+  "Transaction sent": "Tranzacția a fost trimisă"
 }
