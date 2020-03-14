@@ -4,9 +4,11 @@ import * as api from '../api'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL} from '../utils/tx'
 import {useNotificationDispatch, NotificationType} from './notification-context'
-import {useIdentityState} from './identity-context'
+import {useIdentityState, IdentityStatus} from './identity-context'
 
 const db = global.invitesDb || {}
+
+const killableIdentities = [IdentityStatus.Newbie, IdentityStatus.Candidate]
 
 const InviteStateContext = React.createContext()
 const InviteDispatchContext = React.createContext()
@@ -38,7 +40,7 @@ function InviteProvider({children}) {
           .map(api.fetchIdentity)
       )
 
-      const inviteesIdetities =
+      const inviteesIdentities =
         invitees &&
         (await Promise.all(
           invitees.map(({Address}) => Address).map(api.fetchIdentity)
@@ -61,9 +63,9 @@ function InviteProvider({children}) {
 
         // find invitee identity
         const inviteeIdentity =
-          inviteesIdetities &&
+          inviteesIdentities &&
           invitee &&
-          inviteesIdetities.find(({address: addr}) => addr === invitee.Address)
+          inviteesIdentities.find(({address: addr}) => addr === invitee.Address)
 
         // find all identities/invites
         const invitedIdentity =
@@ -76,7 +78,7 @@ function InviteProvider({children}) {
         const canKill =
           !!invitee &&
           !!invitedIdentity &&
-          invitedIdentity.state === 'Candidate'
+          killableIdentities.includes(invitedIdentity.state)
 
         const isMining =
           tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL
