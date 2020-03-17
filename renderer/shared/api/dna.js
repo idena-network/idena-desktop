@@ -164,6 +164,15 @@ export async function submitFlip(hex, publicHex, privateHex, pairId) {
   return data
 }
 
+export async function deleteFlip(hash) {
+  const {data} = await api().post('/', {
+    method: 'flip_delete',
+    params: [hash],
+    id: 1,
+  })
+  return data
+}
+
 export async function killIdentity(from, to) {
   const {data} = await api().post('/', {
     method: 'dna_sendTransaction',

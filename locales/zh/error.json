@@ -10,5 +10,6 @@
   "You cannot submit more flips until the next validation": "在下次验证之前，你无法提交更多翻转",
   "Can not submit flip during the validation session": "无法在验证会话期间提交翻转",
   "Error while sending transaction": "发送交易时出错",
-  "Transaction sent": "已提交的交易"
+  "Transaction sent": "已提交的交易",
+  "Error while deleting flip": "Error while deleting flip"
 }

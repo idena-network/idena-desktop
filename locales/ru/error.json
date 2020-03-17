@@ -10,5 +10,6 @@
   "You cannot submit more flips until the next validation": "Вы сможете предложить больше флипов только после следующей валидации",
   "Can not submit flip during the validation session": "Нельзя предлагать флипы непосредственно во время валидации",
   "Error while sending transaction": "Ошибка при отправке транзакции",
-  "Transaction sent": "Транзакция отправлена"
+  "Transaction sent": "Транзакция отправлена",
+  "Error while deleting flip": "Error while deleting flip"
 }

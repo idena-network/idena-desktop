@@ -100,6 +100,7 @@ function FlipCover({
   })
 
   const isDraft = type === FlipType.Draft
+  const isPublished = type === FlipType.Published
   const canSubmit =
     global.isDev || (!syncing && canSubmitFlip && pics.every(hasDataUrl))
 
@@ -107,7 +108,7 @@ function FlipCover({
     <Box w={width}>
       <Box my={theme.spacings.small} css={position('relative')}>
         <FlipImage src={pics[0]} />
-        {type === FlipType.Publishing && (
+        {(type === FlipType.Publishing || type === FlipType.Deleting) && (
           <Absolute
             bottom="0"
             left="135px"
@@ -131,7 +132,7 @@ function FlipCover({
         <Flex justify="space-between" align="center">
           <Text>{composeHint(hint)}</Text>
           <Box css={position('relative')}>
-            {isDraft && (
+            {(isDraft || isPublished) && (
               <FiMoreVertical
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 color={theme.colors.primary}
@@ -159,6 +160,21 @@ function FlipCover({
                     {t('Submit flip')}
                   </FlipMenuItem>
                   <Divider m={theme.spacings.small} />
+                  <FlipMenuItem
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      onDelete()
+                    }}
+                    icon={<FiXCircle color={theme.colors.danger} />}
+                  >
+                    {t('Delete flip')}
+                  </FlipMenuItem>
+                </FlipMenu>
+              </Absolute>
+            )}
+            {isPublished && isMenuOpen && (
+              <Absolute top="2em" right={0} zIndex={2}>
+                <FlipMenu ref={menuRef}>
                   <FlipMenuItem
                     onClick={() => {
                       setIsMenuOpen(false)

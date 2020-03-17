@@ -10,5 +10,6 @@
   "You cannot submit more flips until the next validation": "Non puoi inviare ulteriori flips prima della prossima validazione",
   "Can not submit flip during the validation session": "Impossibile inviare flip durante la sessione di validazione",
   "Error while sending transaction": "Errore durante l'invio della transazione",
-  "Transaction sent": "Transazione inviata"
+  "Transaction sent": "Transazione inviata",
+  "Error while deleting flip": "Error while deleting flip"
 }
