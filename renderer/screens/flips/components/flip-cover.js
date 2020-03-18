@@ -101,17 +101,19 @@ function FlipCover({
 
   const isDraft = type === FlipType.Draft
   const isPublished = type === FlipType.Published
+  const isDeleting = type === FlipType.Deleting
+  const isPending = isDeleting || type === FlipType.Publishing
   const canSubmit =
     global.isDev || (!syncing && canSubmitFlip && pics.every(hasDataUrl))
 
   return (
     <Box w={width}>
       <Box my={theme.spacings.small} css={position('relative')}>
-        <FlipImage src={pics[0]} />
-        {(type === FlipType.Publishing || type === FlipType.Deleting) && (
+        <FlipImage src={pics[0]} gradient={isPending} />
+        {isPending && (
           <Absolute
-            bottom="0"
-            left="135px"
+            bottom="8px"
+            left="8px"
             css={{
               ...backgrounds(theme.colors.white),
               ...borderRadius('top', '50%'),
@@ -120,11 +122,16 @@ function FlipCover({
               ...padding(0),
             }}
           >
-            <FiClock
-              color={theme.colors.danger}
-              fontSize={rem(24)}
-              title={t('Mining...')}
-            />
+            <Flex align="center">
+              <FiClock
+                color={theme.colors.white}
+                fontSize={rem(24)}
+                title={isDeleting ? t('Deleting...') : t('Mining...')}
+              />
+              <Text color={theme.colors.white} css={{paddingLeft: rem(4)}}>
+                {isDeleting ? t('Deleting...') : t('Mining...')}
+              </Text>
+            </Flex>
           </Absolute>
         )}
       </Box>

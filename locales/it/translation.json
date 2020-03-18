@@ -156,5 +156,6 @@
   "Terminate your identity and withdraw the stake. Your identity status\r\n            will be reset to 'Not validated'.": "Terminate your identity and withdraw the stake. Your identity status\r\n            will be reset to 'Not validated'.",
   "wallet": "wallet",
   "address": "address",
-  "See in Explorer...": "See in Explorer..."
+  "See in Explorer...": "See in Explorer...",
+  "Deleting...": "Deleting..."
 }
