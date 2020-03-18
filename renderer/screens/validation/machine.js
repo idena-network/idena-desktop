@@ -22,6 +22,7 @@ import {
   availableExtraFlip,
   failedFlip,
   readyFlip,
+  hasEnoughAnswers,
 } from './utils'
 import {forEachAsync} from '../../shared/utils/fn'
 
@@ -349,17 +350,8 @@ export const createValidationMachine = ({
                         SHORT_SESSION_AUTO_SUBMIT: [
                           {
                             target: 'submitShortSession',
-                            cond: ({shortFlips}) => {
-                              const solvableFlips = shortFlips.filter(
-                                ({decoded, extra}) => decoded && !extra
-                              )
-                              return (
-                                solvableFlips.length &&
-                                solvableFlips.filter(({option}) => option)
-                                  .length >=
-                                  solvableFlips.length / 2
-                              )
-                            },
+                            cond: ({shortFlips}) =>
+                              hasEnoughAnswers(shortFlips),
                           },
                           {
                             target: '#validation.validationFailed',
