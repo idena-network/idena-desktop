@@ -14,12 +14,18 @@ const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
 const express = require('express')
 const net = require('net')
+const fs = require('fs-extra')
 const loadRoute = require('./utils/routes')
 
 const isWin = process.platform === 'win32'
 const isMac = process.platform === 'darwin'
 
 app.allowRendererProcessReuse = true
+
+if (process.env.NODE_ENV === 'e2e') {
+  app.setPath('userData', join(app.getPath('userData'), 'tests'))
+  fs.removeSync(app.getPath('userData'))
+}
 
 if (isWin) {
   app.setAppLogsPath(join(app.getPath('userData'), 'logs'))

@@ -4,13 +4,18 @@ dist: bionic
 language: node_js
 node_js: '10'
 
+addons:
+  apt:
+    packages:
+      - xvfb
+
 matrix:
   include:
     - if: branch =~ /v\d+\.\d+\.\d+/
       os: windows
     - if: branch =~ /v\d+\.\d+\.\d+/
-      os: linux
-    - os: osx
+      os: osx
+    - os: linux
 
 env:
   global:
@@ -30,16 +35,18 @@ cache:
     - .next/cache
 
 install:
+  - export DISPLAY=':99.0'
+  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+  - npm install -g xvfb-maybe
   - npm ci
 
 before_script:
-  - echo "Printing travis tag"
-  - echo "$TRAVIS_TAG"
   - if [[ "$TRAVIS_TAG" != "" ]]; then npm --no-git-tag-version version ${TRAVIS_TAG:1}; fi
 
 script:
   - npm run lint
   - npm run build
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then xvfb-maybe npm run e2e; fi
 
   - echo "Build win"
   - if [[ "$TRAVIS_OS_NAME" == "windows" && "$TRAVIS_TAG" != "" ]]; then npm run dist:win; fi

@@ -829,10 +829,16 @@ export const createValidationMachine = ({
       delays: {
         // eslint-disable-next-line no-shadow
         BUMP_EXTRA_FLIPS: ({validationStart}) =>
-          Math.max(adjustDuration(validationStart, 35), 5) * 1000,
+          Math.max(
+            adjustDuration(validationStart, global.env.BUMP_EXTRA_FLIPS || 35),
+            5
+          ) * 1000,
         // eslint-disable-next-line no-shadow
         FINALIZE_FLIPS: ({validationStart}) =>
-          Math.max(adjustDuration(validationStart, 90), 5) * 1000,
+          Math.max(
+            adjustDuration(validationStart, global.env.FINALIZE_FLIPS || 90),
+            5
+          ) * 1000,
         // eslint-disable-next-line no-shadow
         SHORT_SESSION_AUTO_SUBMIT: ({validationStart, shortSessionDuration}) =>
           adjustDuration(validationStart, shortSessionDuration - 10) * 1000,

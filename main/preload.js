@@ -44,6 +44,13 @@ process.once('loaded', () => {
 
   global.appVersion = app.getVersion()
 
+  global.env = {
+    NODE_ENV: process.env.NODE_ENV,
+    NODE_MOCK: process.env.NODE_MOCK,
+    BUMP_EXTRA_FLIPS: process.env.BUMP_EXTRA_FLIPS,
+    FINALIZE_FLIPS: process.env.FINALIZE_FLIPS,
+  }
+
   if (isDev) {
     global.require = require
     // eslint-disable-next-line no-underscore-dangle
