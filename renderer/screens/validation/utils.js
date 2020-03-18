@@ -55,3 +55,9 @@ export function rearrangeFlips(flips) {
 export function flipExtraFlip({extra, ...flip}) {
   return {...flip, extra: !extra, flipped: true}
 }
+
+export function hasEnoughAnswers(flips) {
+  const solvable = flips.filter(({decoded, extra}) => decoded && !extra)
+  const answered = solvable.filter(({option}) => option)
+  return solvable.length && answered.length / solvable.length >= 0.6
+}
