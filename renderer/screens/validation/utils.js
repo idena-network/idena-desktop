@@ -31,6 +31,8 @@ export const failedFlip = ({ready, decoded, extra}) =>
 
 export const availableExtraFlip = ({extra, decoded}) => extra && decoded
 
+export const missingFlip = ({ready, missing}) => ready && missing
+
 export function rearrangeFlips(flips) {
   const solvable = []
   const loading = []
@@ -60,4 +62,8 @@ export function hasEnoughAnswers(flips) {
   const solvable = flips.filter(({decoded, extra}) => decoded && !extra)
   const answered = solvable.filter(({option}) => option)
   return solvable.length && answered.length / solvable.length >= 0.6
+}
+
+export function missingHashes(flips) {
+  return flips.filter(missingFlip).map(({hash}) => hash)
 }

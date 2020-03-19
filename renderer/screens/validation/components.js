@@ -169,7 +169,9 @@ export function Flip({
 
 function FlipHolder({css, ...props}) {
   return (
-    <Box
+    <Flex
+      justify="center"
+      direction="column"
       css={{
         borderRadius: rem(8),
         border: `solid ${rem(2)} ${transparentize(
