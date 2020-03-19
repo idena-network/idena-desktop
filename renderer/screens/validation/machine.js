@@ -23,6 +23,8 @@ import {
   failedFlip,
   readyFlip,
   hasEnoughAnswers,
+  missingFlip,
+  missingHashes,
 } from './utils'
 import {forEachAsync} from '../../shared/utils/fn'
 
@@ -459,24 +461,60 @@ export const createValidationMachine = ({
                       invoke: {
                         src: 'fetchLongFlips',
                         onDone: {
-                          target: 'done',
+                          target: 'fetchMissing',
                           actions: assign({
                             retries: ({retries}) => retries + 1,
                           }),
                         },
                       },
-                      on: {
-                        FLIP: {
-                          actions: [
-                            assign({
-                              longFlips: ({longFlips, retries}, {flip}) =>
-                                mergeFlipsByHash(longFlips, [
-                                  {...flip, retries},
-                                ]),
-                            }),
-                            log(),
-                          ],
+                    },
+                    fetchMissing: {
+                      invoke: {
+                        src: ({longFlips}) => cb => {
+                          async function fetchMissingFlips(flips) {
+                            const hashes = missingHashes(flips)
+                            if (hashes.some(x => x)) {
+                              const promises = hashes.map(async hash => {
+                                const flip = {
+                                  ...flips.find(f => f.hash === hash),
+                                  hash,
+                                }
+                                try {
+                                  const {result, error} = await fetchFlip(hash)
+                                  return result && !error
+                                    ? {
+                                        ...flip,
+                                        ...decodeFlip({hash, ...result}),
+                                        fetched: true,
+                                        missing: false,
+                                      }
+                                    : flip
+                                } catch (err) {
+                                  global.logger.error(err)
+                                  return flip
+                                }
+                              })
+
+                              const fetchedFlips = await Promise.all(promises)
+
+                              for (const flip of fetchedFlips) {
+                                if (!missingFlip(flip) && flip.decoded)
+                                  cb({type: 'FLIP', flip})
+                              }
+
+                              setTimeout(() => {
+                                fetchMissingFlips(
+                                  mergeFlipsByHash(flips, fetchedFlips)
+                                )
+                              }, 3000)
+                            } else cb('DONE')
+                          }
+
+                          fetchMissingFlips(longFlips)
                         },
+                      },
+                      on: {
+                        DONE: 'done',
                       },
                     },
                     done: {
@@ -485,6 +523,15 @@ export const createValidationMachine = ({
                     },
                   },
                   on: {
+                    FLIP: {
+                      actions: [
+                        assign({
+                          longFlips: ({longFlips, retries}, {flip}) =>
+                            mergeFlipsByHash(longFlips, [{...flip, retries}]),
+                        }),
+                        log(),
+                      ],
+                    },
                     REFETCH_FLIPS: {
                       target: '#validation.longSession.fetch.flips.fetchFlips',
                       actions: [
@@ -496,9 +543,7 @@ export const createValidationMachine = ({
                               decoded: false,
                             })),
                         }),
-                        log(
-                          'Re-fetching long flips after re-entering long session'
-                        ),
+                        log('Re-fetching long flips after rebooting app'),
                       ],
                     },
                   },
@@ -879,6 +924,7 @@ function fetchFlips(hashes, cb) {
             ...decodeFlip({...result}),
             hash,
             fetched: !!result && !error,
+            missing: !!error,
           },
         })
       })
