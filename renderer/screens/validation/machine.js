@@ -474,28 +474,34 @@ export const createValidationMachine = ({
                           async function fetchMissingFlips(flips) {
                             const hashes = missingHashes(flips)
                             if (hashes.some(x => x)) {
-                              const fetchedFlips = await Promise.all(
-                                hashes.map(hash =>
-                                  fetchFlip(hash).then(({result, error}) => {
-                                    const flip = {
-                                      ...flips.find(f => f.hash === hash),
-                                      hash,
-                                    }
-                                    return result && !error
-                                      ? {
-                                          ...flip,
-                                          ...decodeFlip({hash, ...result}),
-                                          fetched: true,
-                                          missing: false,
-                                        }
-                                      : flip
-                                  })
-                                )
-                              )
+                              const promises = hashes.map(async hash => {
+                                const flip = {
+                                  ...flips.find(f => f.hash === hash),
+                                  hash,
+                                }
+                                try {
+                                  const {result, error} = await fetchFlip(hash)
+                                  return result && !error
+                                    ? {
+                                        ...flip,
+                                        ...decodeFlip({hash, ...result}),
+                                        fetched: true,
+                                        missing: false,
+                                      }
+                                    : flip
+                                } catch (err) {
+                                  global.logger.error(err)
+                                  return flip
+                                }
+                              })
+
+                              const fetchedFlips = await Promise.all(promises)
+
                               for (const flip of fetchedFlips) {
                                 if (!missingFlip(flip) && flip.decoded)
                                   cb({type: 'FLIP', flip})
                               }
+
                               setTimeout(() => {
                                 fetchMissingFlips(
                                   mergeFlipsByHash(flips, fetchedFlips)
