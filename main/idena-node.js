@@ -167,12 +167,18 @@ async function stopNode(node) {
       if (node.exitCode != null) {
         return resolve(`node already exited with code ${node.exitCode}`)
       }
-      kill(node.pid, 'SIGINT', function(err) {
-        if (err) {
-          return reject(err)
-        }
-        return resolve(`node ${node.pid} stopped successfully`)
-      })
+      if (process.platform !== 'win32') {
+        kill(node.pid, 'SIGINT', function(err) {
+          if (err) {
+            return reject(err)
+          }
+          return resolve(`node ${node.pid} stopped successfully`)
+        })
+      } else {
+        node.on('exit', () => resolve(`node ${node.pid} stopped successfully`))
+        node.on('error', reject)
+        node.kill()
+      }
     } catch (e) {
       return reject(e)
     }
