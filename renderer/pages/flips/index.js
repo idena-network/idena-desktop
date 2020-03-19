@@ -29,7 +29,7 @@ function Flips() {
 
   const filteredFlips = flips.filter(({type}) =>
     filter === FlipType.Published
-      ? [FlipType.Publishing, filter].includes(type)
+      ? [FlipType.Publishing, FlipType.Deleting, filter].includes(type)
       : type === filter
   )
 
@@ -40,8 +40,13 @@ function Flips() {
         <FlipToolbar>
           <Flex>
             {Object.values(FlipType)
-              // alias Publishing to Published in userland
-              .filter(type => type !== FlipType.Publishing)
+              // alias Publishing and Deleting to Published in userland, hide Deleted
+              .filter(
+                type =>
+                  type !== FlipType.Publishing &&
+                  type !== FlipType.Deleting &&
+                  type !== FlipType.Deleted
+              )
               .map(type => (
                 <FlipToolbarItem
                   key={type}
@@ -100,7 +105,27 @@ function Flips() {
                   })
                 }
               }}
-              onDelete={() => deleteFlip(flip)}
+              onDelete={async () => {
+                try {
+                  const {result, error} = await deleteFlip(flip)
+                  if (error) {
+                    addError({
+                      title: t('error:Error while deleting flip'),
+                      body: error.message,
+                    })
+                  } else if (result) {
+                    addNotification({
+                      title: t('translation:Flip deleted'),
+                      body: result,
+                    })
+                  }
+                } catch (error) {
+                  addError({
+                    title: t('error:Something went wrong'),
+                    body: error,
+                  })
+                }
+              }}
             />
           ))}
         </FlipList>

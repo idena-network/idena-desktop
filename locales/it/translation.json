@@ -145,5 +145,17 @@
   "Total score for": "Punteggio totale per",
   "all validations": "tutte le convalide",
   "My Idena": "Il mio Idena",
-  "Contacts": "Contatti"
+  "Contacts": "Contatti",
+  "Flip deleted": "Flip deleted",
+  "Submit the form to start mining. Your node has to be online\r\n                unless you deactivate your status. Otherwise penalties might be\r\n                charged after being offline more than 1 hour.": "Submit the form to start mining. Your node has to be online\r\n                unless you deactivate your status. Otherwise penalties might be\r\n                charged after being offline more than 1 hour.",
+  "You can activate it again afterwards.": "You can activate it again afterwards.",
+  "In order to withdraw the stake you have to terminate your identity": "In order to withdraw the stake you have to terminate your identity",
+  "You need to get Verified status to be able to terminate your identity and withdraw the stake": "You need to get Verified status to be able to terminate your identity and withdraw the stake",
+  "Locked": "Locked",
+  "You need to get Verified status to get the locked funds into the normal wallet": "You need to get Verified status to get the locked funds into the normal wallet",
+  "Terminate your identity and withdraw the stake. Your identity status\r\n            will be reset to 'Not validated'.": "Terminate your identity and withdraw the stake. Your identity status\r\n            will be reset to 'Not validated'.",
+  "wallet": "wallet",
+  "address": "address",
+  "See in Explorer...": "See in Explorer...",
+  "Deleting...": "Deleting..."
 }

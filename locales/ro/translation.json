@@ -145,5 +145,15 @@
   "Total score for": "Scorul total pentru",
   "all validations": "toate validările",
   "My Idena": "Idena mea",
-  "Contacts": "Contacte"
+  "Contacts": "Contacte",
+  "Flip deleted": "Flip deleted",
+  "You can activate it again afterwards.": "You can activate it again afterwards.",
+  "In order to withdraw the stake you have to terminate your identity": "In order to withdraw the stake you have to terminate your identity",
+  "You need to get Verified status to be able to terminate your identity and withdraw the stake": "You need to get Verified status to be able to terminate your identity and withdraw the stake",
+  "Locked": "Locked",
+  "You need to get Verified status to get the locked funds into the normal wallet": "You need to get Verified status to get the locked funds into the normal wallet",
+  "wallet": "wallet",
+  "address": "address",
+  "See in Explorer...": "See in Explorer...",
+  "Deleting...": "Deleting..."
 }

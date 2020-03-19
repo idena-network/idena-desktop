@@ -10,5 +10,6 @@
   "You cannot submit more flips until the next validation": "Nu puteți trimite mai multe flipuri până la următoarea validare",
   "Can not submit flip during the validation session": "Nu poate trimite flipuri în timpul sesiunii de validare",
   "Error while sending transaction": "Eroare la trimiterea tranzacției",
-  "Transaction sent": "Tranzacția a fost trimisă"
+  "Transaction sent": "Tranzacția a fost trimisă",
+  "Error while deleting flip": "Error while deleting flip"
 }

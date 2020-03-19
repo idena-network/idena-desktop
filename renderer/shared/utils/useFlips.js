@@ -18,6 +18,8 @@ export const FlipType = {
   Published: 'published',
   Draft: 'draft',
   Archived: 'archived',
+  Deleted: 'deleted',
+  Deleting: 'deleting',
 }
 
 const FLIP_MAX_SIZE = 1024 * 1024 // 1 mb
@@ -104,17 +106,26 @@ function useFlips() {
   useInterval(
     async () => {
       const txPromises = flips
-        .filter(f => f.type === FlipType.Publishing)
-        .map(f => f.txHash)
+        .filter(
+          f => f.type === FlipType.Publishing || f.type === FlipType.Deleting
+        )
+        .map(f => (f.type === FlipType.Publishing ? f.txHash : f.deleteTxHash))
         .map(fetchTx)
       await Promise.all(txPromises).then(txs => {
-        const publishingFlips = flips.filter(
-          f => f.type === FlipType.Publishing
+        const pendingFlips = flips.filter(
+          f => f.type === FlipType.Publishing || f.type === FlipType.Deleting
         )
-        const otherFlips = flips.filter(f => f.type !== FlipType.Publishing)
-        const nextFlips = publishingFlips
+        const otherFlips = flips.filter(
+          f => f.type !== FlipType.Publishing && f.type !== FlipType.Deleting
+        )
+        const nextFlips = pendingFlips
           .map(flip => {
-            const tx = txs.find(({hash}) => hash && hash === flip.txHash)
+            const tx = txs.find(
+              ({hash}) =>
+                hash &&
+                ((flip.type === FlipType.Publishing && hash === flip.txHash) ||
+                  hash === flip.deleteTxHash)
+            )
             const type = checkFlipType(flip, tx)
             return {
               ...flip,
@@ -127,7 +138,11 @@ function useFlips() {
         saveFlips(nextFlips)
       })
     },
-    flips.some(({type}) => type === FlipType.Publishing) ? 1000 * 10 : null
+    flips.some(
+      ({type}) => type === FlipType.Publishing || type === FlipType.Deleting
+    )
+      ? 1000 * 10
+      : null
   )
 
   const getDraft = useCallback(
@@ -227,10 +242,37 @@ function useFlips() {
     [flips]
   )
 
-  const deleteFlip = useCallback(({id}) => {
-    deleteFromStore(id)
-    setFlips(prevFlips => prevFlips.filter(f => f.id !== id))
-  }, [])
+  const deleteFlip = useCallback(
+    async ({id}) => {
+      const flip = getDraft(id)
+      if (flip.type === FlipType.Published) {
+        const resp = await api.deleteFlip(flip.hash)
+        const {result} = resp
+        if (result) {
+          setFlips(prevFlips => {
+            const flipIdx = prevFlips.findIndex(f => f.id === id)
+            const nextFlips = [
+              ...prevFlips.slice(0, flipIdx),
+              {
+                ...prevFlips[flipIdx],
+                type: FlipType.Deleting,
+                deleteTxHash: result,
+                modifiedAt: Date.now(),
+              },
+              ...prevFlips.slice(flipIdx + 1),
+            ]
+            saveFlips(nextFlips)
+            return nextFlips
+          })
+        }
+        return resp
+      }
+      deleteFromStore(id)
+      setFlips(prevFlips => prevFlips.filter(f => f.id !== id))
+      return {}
+    },
+    [getDraft]
+  )
 
   const archiveFlips = useCallback(() => {
     setFlips(prevFlips => {
@@ -259,6 +301,13 @@ function checkFlipType(flip, tx) {
     if (!txExists) return FlipType.Draft
     return txExists && tx.result.blockHash !== HASH_IN_MEMPOOL
       ? FlipType.Published
+      : flip.type
+  }
+  if (flip.type === FlipType.Deleting) {
+    const txExists = tx && tx.result
+    if (!txExists) return FlipType.Published
+    return txExists && tx.result.blockHash !== HASH_IN_MEMPOOL
+      ? FlipType.Deleted
       : flip.type
   }
   return flip.type

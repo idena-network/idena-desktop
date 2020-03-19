@@ -10,5 +10,6 @@
   "You cannot submit more flips until the next validation": "Не можете послати више флипова пре следеће валидације",
   "Can not submit flip during the validation session": "Не можете послати флип док је валидација у току",
   "Error while sending transaction": "Грешка при слању трансакције",
-  "Transaction sent": "Трансакција послата"
+  "Transaction sent": "Трансакција послата",
+  "Error while deleting flip": "Error while deleting flip"
 }

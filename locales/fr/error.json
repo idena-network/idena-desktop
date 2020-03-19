@@ -1,14 +1,15 @@
 {
-	  "Can not submit flip": "Ne peut soumettre le flip",
-	  "Keywords are not specified": "Les mots-clés ne sont pas précisés",
-	  "Error while uploading flip": "Erreur lors du téléchargement du flip",
-	  "Something went wrong": "Une erreur a eu lieu",
-	  "Maximum image size exceeded": "Taille maximum des images dépassée",
-	  "Error while importing key": "Erreur lors de l’importation de la clé",
-	  "Internal node is not available, try again in a few seconds": "La node interne n’est pas disponible, réessayez dans quelques secondes",
-	  "You can not submit flips having 'Candidate' status": "Vous ne pouvez pas soumettre de flips avec le statut de « Candidat »",
-	  "You cannot submit more flips until the next validation": "Vous ne pouvez pas soumettre plus de flips jusqu’à la prochaine validation",
-	  "Can not submit flip during the validation session": "Vous ne pouvez pas soumettre de flips durant la session de validation",
-	  "Error while sending transaction": "Erreur lors de la validation de la transaction",
-	  "Transaction sent": "Transaction effectuée"
-	}
+  "Can not submit flip": "Ne peut soumettre le flip",
+  "Keywords are not specified": "Les mots-clés ne sont pas précisés",
+  "Error while uploading flip": "Erreur lors du téléchargement du flip",
+  "Something went wrong": "Une erreur a eu lieu",
+  "Maximum image size exceeded": "Taille maximum des images dépassée",
+  "Error while importing key": "Erreur lors de l’importation de la clé",
+  "Internal node is not available, try again in a few seconds": "La node interne n’est pas disponible, réessayez dans quelques secondes",
+  "You can not submit flips having 'Candidate' status": "Vous ne pouvez pas soumettre de flips avec le statut de « Candidat »",
+  "You cannot submit more flips until the next validation": "Vous ne pouvez pas soumettre plus de flips jusqu’à la prochaine validation",
+  "Can not submit flip during the validation session": "Vous ne pouvez pas soumettre de flips durant la session de validation",
+  "Error while sending transaction": "Erreur lors de la validation de la transaction",
+  "Transaction sent": "Transaction effectuée",
+  "Error while deleting flip": "Error while deleting flip"
+}
