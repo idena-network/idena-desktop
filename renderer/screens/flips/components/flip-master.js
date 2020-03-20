@@ -49,10 +49,15 @@ function FlipMaster({id, onClose}) {
 
   const [flip, setFlip] = useState({
     pics: [
-      `https://placehold.it/480?text=1`,
+      null,
+      null,
+      null,
+      null,
+      /* `https://placehold.it/480?text=1`,
       `https://placehold.it/480?text=2`,
       `https://placehold.it/480?text=3`,
       `https://placehold.it/480?text=4`,
+      */
     ],
     nonSensePic: `https://placehold.it/480?text=5`,
     nonSenseOrder: -1,

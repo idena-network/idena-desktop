@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {Draggable, DragDropContext, Droppable} from 'react-beautiful-dnd'
 import {FiRefreshCw, FiMove} from 'react-icons/fi'
+import {FaImage} from 'react-icons/fa'
 import {rem, position, backgrounds, padding, borderRadius} from 'polished'
 import {useTranslation} from 'react-i18next'
 import Flex from '../../../shared/components/flex'
@@ -46,7 +47,17 @@ function FlipShuffle({pics, order, onShuffleFlip}) {
             style = {...style, ...borderRadius('top', rem(8))}
           }
           if (k === order.length - 1) {
-            style = {...style, ...borderRadius('bottom', rem(8))}
+            style = {
+              ...style,
+              ...borderRadius('bottom', rem(8)),
+              borderBottom: 'solid 1px rgba(83, 86, 92, 0.16)',
+            }
+          }
+          style = {
+            ...style,
+            borderTop: 'solid 1px rgba(83, 86, 92, 0.16)',
+            borderRight: 'solid 1px rgba(83, 86, 92, 0.16)',
+            borderLeft: 'solid 1px rgba(83, 86, 92, 0.16)',
           }
 
           return (
@@ -69,7 +80,17 @@ function FlipShuffle({pics, order, onShuffleFlip}) {
                     style = {...style, ...borderRadius('top', rem(8))}
                   }
                   if (k === order.length - 1) {
-                    style = {...style, ...borderRadius('bottom', rem(8))}
+                    style = {
+                      ...style,
+                      ...borderRadius('bottom', rem(8)),
+                      borderBottom: 'solid 1px rgba(83, 86, 92, 0.16)',
+                    }
+                  }
+                  style = {
+                    ...style,
+                    borderTop: 'solid 1px rgba(83, 86, 92, 0.16)',
+                    borderRight: 'solid 1px rgba(83, 86, 92, 0.16)',
+                    borderLeft: 'solid 1px rgba(83, 86, 92, 0.16)',
                   }
 
                   return (
@@ -118,9 +139,43 @@ FlipShuffle.propTypes = {
 
 // eslint-disable-next-line react/prop-types
 function Image({src, style, children}) {
+  if (src) {
+    const imgBoxStyle = {
+      ...{
+        position: 'relative',
+        width: rem(149),
+        height: rem(112),
+        paddingLeft: '1px',
+        paddingTop: '1px',
+      },
+    }
+    const imgStyle = {...style, ...{width: rem(147), height: rem(110)}}
+    return (
+      <Box style={imgBoxStyle}>
+        <img alt="flip" src={src} style={imgStyle} />
+        {children}
+      </Box>
+    )
+  }
+
+  const boxStyle = {
+    ...style,
+    ...{
+      backgroundColor: '#f5f6f7',
+      width: rem(149),
+      height: rem(112),
+    },
+  }
   return (
-    <Box style={style}>
-      <img alt="flip" width={120} src={src} />
+    <Box style={boxStyle}>
+      <FaImage
+        style={{
+          fontSize: rem(40),
+          color: '#d2d4d9',
+          marginTop: rem(35),
+          marginLeft: rem(55),
+        }}
+      ></FaImage>
       {children}
     </Box>
   )
@@ -146,10 +201,12 @@ function Movable(props) {
         ...borderRadius('top', rem(6)),
         ...borderRadius('bottom', rem(6)),
         opacity: 0.8,
+        backgroundColor: theme.colors.primary2,
+        height: rem(36),
       }}
       {...props}
     >
-      <FiMove color={theme.colors.white} />
+      <FiMove color={theme.colors.white} fontSize="1.231rem" />
     </Absolute>
   )
 }
