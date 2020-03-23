@@ -1,19 +1,17 @@
-import React, {
-  createRef,
-  useRef,
-  useCallback,
-  useReducer,
-  useEffect,
-  useState,
-} from 'react'
-import PropTypes, {number} from 'prop-types'
-import {rem, position, borderRadius, margin} from 'polished'
-import {FiSearch, FiUpload, FiCopy} from 'react-icons/fi'
+import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
+import PropTypes from 'prop-types'
+import {rem, position} from 'polished'
+import {FaGoogle, FaPaste, FaRegFolder} from 'react-icons/fa'
+import {MdAddToPhotos} from 'react-icons/md'
 
 import {useTranslation} from 'react-i18next'
+import mousetrap from 'mousetrap'
+import useClickOutside from '../../../shared/hooks/use-click-outside'
+import {Menu, MenuItem} from '../../../shared/components/menu'
+
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {IconButton} from '../../../shared/components/button'
-import {Box, Input} from '../../../shared/components'
+import {Box, Absolute, Input} from '../../../shared/components'
 import Divider from '../../../shared/components/divider'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
@@ -42,6 +40,16 @@ const BLANK_IMAGE =
 
 function FlipEditor({idx = 0, src, visible, onChange}) {
   const {t} = useTranslation()
+
+  // Button menu
+  const [isInsertImageMenuOpen, setInsertImageMenuOpen] = useState(false)
+  const insertMenuRef = [useRef(), useRef(), useRef(), useRef()]
+
+  useClickOutside(insertMenuRef[idx], () => {
+    setInsertImageMenuOpen(false)
+  })
+
+  // Editors
   const editorRefs = useRef([
     createRef(),
     createRef(),
@@ -49,27 +57,22 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
     createRef(),
   ])
   const uploaderRef = useRef()
-
   const [editors, setEditors] = useState([null, null, null, null])
-
   const setEditor = (k, e) => {
     if (e) {
       setEditors([...editors.slice(0, k), e, ...editors.slice(k + 1)])
     }
   }
+
   // Postponed onChange() triggering
   const NOCHANGES = 0
   const NEWCHANGES = 1
-  const SILENTCHANGES = -1
   const [changesCnt, setChangesCnt] = useState(NOCHANGES)
-
   const handleOnChanging = useCallback(() => {
     if (changesCnt === -1) return
     if (!changesCnt) setChangesCnt(1)
   }, [changesCnt])
-
   useInterval(() => {
-    if (changesCnt === SILENTCHANGES) return
     if (changesCnt >= NEWCHANGES) setChangesCnt(changesCnt + 1)
     if (changesCnt >= 3) {
       setChangesCnt(NOCHANGES)
@@ -82,10 +85,11 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
 
   const setImageUrl = useCallback(
     data => {
-      const {url, insertMode} = data
-      const editor = editors[idx]
-      if (!url || !editor) return
+      const {url, insertMode, customEditor} = data
+      const editor = customEditor || editors[idx]
 
+      console.log(editor)
+      if (!url || !editor) return
       const nextInsertMode = insertMode || insertImageMode
 
       if (nextInsertMode === INSERT_OBJECT_IMAGE) {
@@ -94,17 +98,14 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
 
       if (nextInsertMode === INSERT_BACKGROUND_IMAGE) {
         editor.loadImageFromURL(BLANK_IMAGE, 'blank').then(() => {
-          const editor1 = editors[idx]
-          editor1.addImageObject(url).then(objectProps => {
+          editor.addImageObject(url).then(objectProps => {
             const {id} = objectProps
-
             const {width, height} = editor.getObjectProperties(id, [
               'left',
               'top',
               'width',
               'height',
             ])
-
             const {newWidth, newHeight} = resizing(
               width,
               height,
@@ -112,34 +113,28 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
               IMAGE_HEIGHT,
               false
             )
-
-            editor1.setObjectPropertiesQuietly(id, {
+            editor.setObjectPropertiesQuietly(id, {
               left: IMAGE_WIDTH / 2 + Math.random() * 200 - 400,
               top: IMAGE_HEIGHT / 2 + Math.random() * 200 - 400,
               width: newWidth * 10,
               height: newHeight * 10,
               opacity: 0.5,
             })
+            editor.loadImageFromURL(editor.toDataURL(), 'BlurBkgd').then(() => {
+              editor.addImageObject(url).then(objectProps2 => {
+                const {id: id2} = objectProps2
 
-            editor1
-              .loadImageFromURL(editor.toDataURL(), 'BlurBkgd')
-              .then(() => {
-                const editor2 = editors[idx]
-                editor2.addImageObject(url).then(objectProps2 => {
-                  const {id: id2} = objectProps2
-
-                  editor2.setObjectPropertiesQuietly(id2, {
-                    left: IMAGE_WIDTH / 2,
-                    top: IMAGE_HEIGHT / 2,
-                    width: newWidth,
-                    height: newHeight,
-                  })
-
-                  editor2
-                    .loadImageFromURL(editor2.toDataURL(), 'Bkgd')
-                    .then(handleOnChanging())
+                editor.setObjectPropertiesQuietly(id2, {
+                  left: IMAGE_WIDTH / 2,
+                  top: IMAGE_HEIGHT / 2,
+                  width: newWidth,
+                  height: newHeight,
                 })
+                editor
+                  .loadImageFromURL(editor.toDataURL(), 'Bkgd')
+                  .then(handleOnChanging())
               })
+            })
           })
         })
       }
@@ -147,6 +142,55 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
     [editors, handleOnChanging, idx, insertImageMode]
   )
 
+  // File upload handling
+  const handleUpload = e => {
+    e.preventDefault()
+    const file = e.target.files[0]
+    if (!file || !file.type.startsWith('image')) {
+      return
+    }
+    const reader = new FileReader()
+    reader.addEventListener('loadend', re => {
+      const img = global.nativeImage.createFromDataURL(re.target.result)
+      const url = imageResize(img, IMAGE_WIDTH, IMAGE_HEIGHT)
+      setImageUrl({url})
+      setInsertImageMode(0)
+    })
+    reader.readAsDataURL(file)
+  }
+
+  // Google search handling
+  useEffect(() => {
+    // eslint-disable-next-line no-shadow
+    const handleImageSearchPick = (_, data) => {
+      const [{url}] = data.docs[0].thumbnails
+      setImageUrl({url})
+      setInsertImageMode(0)
+    }
+
+    global.ipcRenderer.on(IMAGE_SEARCH_PICK, handleImageSearchPick)
+    return () => {
+      global.ipcRenderer.removeListener(
+        IMAGE_SEARCH_PICK,
+        handleImageSearchPick
+      )
+    }
+  }, [setImageUrl, insertImageMode])
+
+  // Clipbiard handling
+  const handleImageFromClipboard = insertMode => {
+    const url = getImageURLFromClipboard(IMAGE_WIDTH, IMAGE_HEIGHT)
+    if (url) {
+      setImageUrl({url, insertMode})
+    }
+  }
+
+  mousetrap.bind(['command+v', 'ctrl+v'], function() {
+    // handleImageFromClipboard(INSERT_BACKGROUND_IMAGE)
+    return false
+  })
+
+  // init editor
   useEffect(() => {
     const updateEvents = e => {
       e.on({
@@ -211,49 +255,6 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorRefs, src, idx])
 
-  // File upload handling
-  const handleUpload = e => {
-    e.preventDefault()
-    const file = e.target.files[0]
-    if (!file || !file.type.startsWith('image')) {
-      return
-    }
-    const reader = new FileReader()
-    reader.addEventListener('loadend', re => {
-      const img = global.nativeImage.createFromDataURL(re.target.result)
-      const url = imageResize(img, IMAGE_WIDTH, IMAGE_HEIGHT)
-      setImageUrl({url})
-      setInsertImageMode(0)
-    })
-    reader.readAsDataURL(file)
-  }
-
-  // Google search handling
-  useEffect(() => {
-    // eslint-disable-next-line no-shadow
-    const handleImageSearchPick = (_, data) => {
-      const [{url}] = data.docs[0].thumbnails
-      setImageUrl({url})
-      setInsertImageMode(0)
-    }
-
-    global.ipcRenderer.on(IMAGE_SEARCH_PICK, handleImageSearchPick)
-    return () => {
-      global.ipcRenderer.removeListener(
-        IMAGE_SEARCH_PICK,
-        handleImageSearchPick
-      )
-    }
-  }, [setImageUrl, insertImageMode])
-
-  // Clipbiard handling
-  const handleImageFromClipboard = insertMode => {
-    const url = getImageURLFromClipboard(IMAGE_WIDTH, IMAGE_HEIGHT)
-    if (url) {
-      setImageUrl({url, insertMode})
-    }
-  }
-
   return (
     <Box
       style={{
@@ -286,10 +287,16 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
       <Flex
         // justify="space-between"
         align="center"
-        css={margin(rem(theme.spacings.medium16), 0, 0)}
+        css={{marginTop: rem(10)}}
       >
         <IconButton
-          icon={<FiSearch />}
+          tooltip={t('Search on Google')}
+          icon={
+            <FaGoogle
+              color={theme.colors.primary2}
+              fontSize={theme.fontSizes.medium16}
+            />
+          }
           onClick={() => {
             setInsertImageMode(INSERT_BACKGROUND_IMAGE)
             global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
@@ -300,22 +307,19 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
         ></IconButton>
 
         <IconButton
-          tooltip=""
-          icon={<FiUpload />}
+          tooltip={t('Select file')}
+          icon={
+            <FaRegFolder color={theme.colors.primary2} fontSize={rem(20)} />
+          }
           onClick={() => {
             setInsertImageMode(INSERT_BACKGROUND_IMAGE)
             uploaderRef.current.click()
           }}
-        >
-          {
-            // t('Select file')
-            // <small> (150kb) </small>
-          }
-        </IconButton>
+        ></IconButton>
 
         <IconButton
-          tooltip=""
-          icon={<FiCopy />}
+          tooltip={t('Paste image')}
+          icon={<FaPaste color={theme.colors.primary2} fontSize={rem(20)} />}
           onClick={() => {
             handleImageFromClipboard(INSERT_BACKGROUND_IMAGE)
           }}
@@ -324,35 +328,15 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
         <Divider vertical />
 
         <IconButton
-          icon={<FiSearch />}
-          onClick={() => {
-            setInsertImageMode(INSERT_OBJECT_IMAGE)
-            global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
-              on: true,
-              id: `google-search-img`,
-            })
-          }}
-        ></IconButton>
-
-        <IconButton
-          tooltip=""
-          icon={<FiUpload />}
-          onClick={() => {
-            setInsertImageMode(INSERT_OBJECT_IMAGE)
-            uploaderRef.current.click()
-          }}
-        >
-          {
-            // t('Select file')
-            // <small> (150kb) </small>
+          tooltip={t('Add image')}
+          icon={
+            <MdAddToPhotos
+              color={theme.colors.primary2}
+              fontSize={theme.fontSizes.large}
+            />
           }
-        </IconButton>
-
-        <IconButton
-          tooltip=""
-          icon={<FiCopy />}
           onClick={() => {
-            handleImageFromClipboard(INSERT_OBJECT_IMAGE)
+            setInsertImageMenuOpen(!isInsertImageMenuOpen)
           }}
         ></IconButton>
 
@@ -371,6 +355,62 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
           />
         </Box>
       </Flex>
+
+      <Box>
+        <Flex>
+          <Box css={position('relative')}>
+            {isInsertImageMenuOpen && (
+              <Box ref={insertMenuRef[idx]}>
+                <Absolute top="-12em" right="-17em" zIndex={100}>
+                  <Menu>
+                    <MenuItem
+                      onClick={async () => {
+                        setInsertImageMenuOpen(false)
+                        setInsertImageMode(INSERT_OBJECT_IMAGE)
+                        global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
+                          on: true,
+                          id: `google-search-img`,
+                        })
+                      }}
+                      disabled={false}
+                      icon={
+                        <FaGoogle
+                          fontSize={theme.fontSizes.medium16}
+                          style={{marginTop: rem(3)}}
+                        />
+                      }
+                    >
+                      {t('Search on Google')}
+                    </MenuItem>
+                    <MenuItem
+                      onClick={async () => {
+                        setInsertImageMenuOpen(false)
+                        setInsertImageMode(INSERT_OBJECT_IMAGE)
+                        uploaderRef.current.click()
+                      }}
+                      disabled={false}
+                      icon={<FaRegFolder fontSize={rem(20)} />}
+                    >
+                      {t('Select file')}
+                    </MenuItem>
+                    <MenuItem
+                      onClick={async () => {
+                        setInsertImageMenuOpen(false)
+                        handleImageFromClipboard(INSERT_OBJECT_IMAGE)
+                      }}
+                      disabled={false}
+                      danger={false}
+                      icon={<FaPaste fontSize={rem(20)} />}
+                    >
+                      {t('Paste image')}
+                    </MenuItem>
+                  </Menu>
+                </Absolute>
+              </Box>
+            )}
+          </Box>
+        </Flex>
+      </Box>
     </Box>
   )
 }

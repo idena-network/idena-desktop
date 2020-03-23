@@ -18,7 +18,7 @@ const reorder = (list, startIndex, endIndex) => {
   return result
 }
 
-function FlipShuffle({pics, order, onShuffleFlip}) {
+function FlipShuffle({compressedPics, order, onShuffleFlip}) {
   function onDragEnd(result) {
     if (!result.destination) {
       return
@@ -40,7 +40,7 @@ function FlipShuffle({pics, order, onShuffleFlip}) {
   return (
     <Flex justify="center">
       <Flex direction="column" justify="center" align="center">
-        {pics.map((src, k) => {
+        {compressedPics.map((src, k) => {
           let style = {...position('relative'), opacity: 0.5}
 
           if (k === 0) {
@@ -102,7 +102,11 @@ function FlipShuffle({pics, order, onShuffleFlip}) {
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                         >
-                          <Image key={idx} src={pics[idx]} style={style}>
+                          <Image
+                            key={idx}
+                            src={compressedPics[idx]}
+                            style={style}
+                          >
                             <Movable />
                           </Image>
                         </div>
@@ -131,7 +135,7 @@ function FlipShuffle({pics, order, onShuffleFlip}) {
 }
 
 FlipShuffle.propTypes = {
-  pics: PropTypes.arrayOf(PropTypes.string),
+  compressedPics: PropTypes.arrayOf(PropTypes.string),
   order: PropTypes.arrayOf(PropTypes.number),
   onShuffleFlip: PropTypes.func.isRequired,
   onUpdateNonSensePic: PropTypes.func.isRequired,

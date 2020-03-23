@@ -3,19 +3,18 @@
 import React, {useState, useEffect} from 'react'
 
 import PropTypes from 'prop-types'
-import {rem, position, borderRadius, margin} from 'polished'
+import {rem, borderRadius, margin} from 'polished'
 
 import {FaImage} from 'react-icons/fa'
 import {Draggable, DragDropContext, Droppable} from 'react-beautiful-dnd'
-import mousetrap from 'mousetrap'
-import {useTranslation} from 'react-i18next'
+
+import {Jimp} from 'jimp'
 import {Box} from '../../../shared/components'
 
 import Flex from '../../../shared/components/flex'
 import FlipEditor from './flip-editor'
 import theme from '../../../shared/theme'
 import {convertToBase64Url} from '../utils/use-data-url'
-import {getImageURLFromClipboard} from '../../../shared/utils/clipboard'
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
@@ -24,17 +23,35 @@ const reorder = (list, startIndex, endIndex) => {
   return result
 }
 
-function FlipPics({id, pics, hint, onUpdateFlip}) {
-  const {t} = useTranslation()
-
+function FlipPics({pics, compressedPics, editorIndexes, onUpdateFlip}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [pickedUrl, setPickedUrl] = useState('')
   const [imageClipboard, setImageClipboard] = useState(null)
 
   const updatePic = (idx, url) => {
     if (url) {
-      convertToBase64Url(url, base64Url => {
-        onUpdateFlip([...pics.slice(0, idx), base64Url, ...pics.slice(idx + 1)])
+      global.Jimp.read(url).then(image => {
+        image
+          .resize(240, 180)
+          .quality(60) // jpeg quality
+          .getBase64Async('image/jpeg')
+          .then(compressedUrl => {
+            const editorIndex = editorIndexes.indexOf(idx)
+
+            onUpdateFlip(
+              [
+                ...pics.slice(0, editorIndex),
+                url,
+                ...pics.slice(editorIndex + 1),
+              ],
+              [
+                ...compressedPics.slice(0, editorIndex),
+                compressedUrl,
+                ...compressedPics.slice(editorIndex + 1),
+              ],
+              editorIndexes
+            )
+          })
       })
     }
   }
@@ -65,36 +82,32 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageClipboard, selectedIndex])
 
-  mousetrap.bind(['command+v', 'ctrl+v'], function() {
-    pasteImageFromClipboard()
-    return false
-  })
-
-  function pasteImageFromClipboard() {
-    const url = getImageURLFromClipboard()
-    if (url) {
-      setImageClipboard(url)
-    }
-  }
-
   function onDragEnd(result) {
     if (!result.destination) {
       return
     }
-
     if (result.destination.index === result.source.index) {
       return
     }
-
     setSelectedIndex(result.destination.index)
 
-    const nextOrder = reorder(
+    const nextPics = reorder(
       pics,
       result.source.index,
       result.destination.index
     )
 
-    onUpdateFlip(nextOrder)
+    const nextCompressedPics = reorder(
+      compressedPics,
+      result.source.index,
+      result.destination.index
+    )
+    const nextEditorIndexes = reorder(
+      editorIndexes,
+      result.source.index,
+      result.destination.index
+    )
+    onUpdateFlip(nextPics, nextCompressedPics, nextEditorIndexes)
   }
 
   return (
@@ -104,7 +117,7 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
           <Droppable droppableId="flip">
             {provided => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                {pics.map((src, idx) => {
+                {compressedPics.map((src, idx) => {
                   const isCurrent = idx === selectedIndex
 
                   let style = {
@@ -163,25 +176,27 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
       </Box>
 
       <Box>
-        {pics.map((src, idx) => (
-          <FlipEditor
-            key={idx}
-            idx={idx}
-            visible={idx === selectedIndex}
-            src={src}
-            onChange={url => {
-              updatePic(idx, url)
-            }}
-          />
-        ))}
+        {editorIndexes &&
+          pics.map((src, idx) => (
+            <FlipEditor
+              key={editorIndexes[idx]}
+              idx={editorIndexes[idx]}
+              visible={editorIndexes[idx] === editorIndexes[selectedIndex]}
+              src={src}
+              onChange={url => {
+                updatePic(editorIndexes[idx], url)
+              }}
+            />
+          ))}
       </Box>
     </Flex>
   )
 }
 
 FlipPics.propTypes = {
-  id: PropTypes.string,
   pics: PropTypes.arrayOf(PropTypes.string),
+  compressedPics: PropTypes.arrayOf(PropTypes.string),
+  editorIndexes: PropTypes.arrayOf(PropTypes.number),
   hint: PropTypes.any,
   onUpdateFlip: PropTypes.func.isRequired,
 }

@@ -4,9 +4,10 @@ import {rem, position, borderRadius} from 'polished'
 import {FaImage} from 'react-icons/fa'
 import {Box} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
+import {compressPics} from '../../../shared/utils/img'
 
 function SubmitFlip({
-  pics,
+  compressedPics,
   order,
   nonSensePic,
   nonSenseOrder,
@@ -17,13 +18,13 @@ function SubmitFlip({
       <Box>
         <Flex justify="center">
           <Flex direction="column" justify="center" align="center">
-            {pics.map((src, idx) => {
+            {compressedPics.map((src, idx) => {
               let style = {...position('relative')}
 
               if (idx === 0) {
                 style = {...style, ...borderRadius('top', rem(8))}
               }
-              if (idx === pics.length - 1) {
+              if (idx === compressedPics.length - 1) {
                 style = {
                   ...style,
                   ...borderRadius('bottom', rem(8)),
@@ -73,7 +74,9 @@ function SubmitFlip({
                 <Image
                   key={idx}
                   alt={`flip-${idx}`}
-                  src={idx === nonSenseOrder ? nonSensePic : pics[idx]}
+                  src={
+                    idx === nonSenseOrder ? nonSensePic : compressedPics[idx]
+                  }
                   style={style}
                 ></Image>
               )
@@ -139,7 +142,7 @@ function Image({src, style, children}) {
 }
 
 SubmitFlip.propTypes = {
-  pics: PropTypes.arrayOf(PropTypes.string),
+  compressedPics: PropTypes.arrayOf(PropTypes.string),
   order: PropTypes.arrayOf(PropTypes.number),
   nonSensePic: PropTypes.string,
   nonSenseOrder: PropTypes.number,
