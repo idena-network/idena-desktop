@@ -80,7 +80,9 @@ function FlipMaster({id, onClose}) {
     if (draft) {
       setIsFlipsLoaded(true)
       setFlip({
+        compressedPics: [null, null, null, null],
         ...draft,
+
         editorIndexes: [0, 1, 2, 3],
       })
     }
@@ -110,7 +112,9 @@ function FlipMaster({id, onClose}) {
           message = t(
             `error:You can not submit flips having 'Candidate' status`
           )
-        } else if (
+        } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
+          /* //commented in order to show error.message
+          else if ( 
           [
             IdentityStatus.Newbie,
             IdentityStatus.Verified,
@@ -120,7 +124,7 @@ function FlipMaster({id, onClose}) {
           message = t(
             'error:You cannot submit more flips until the next validation'
           )
-        } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
+        } */
           message = t(`error:Can not submit flip during the validation session`)
         } else {
           // eslint-disable-next-line prefer-destructuring

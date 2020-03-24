@@ -172,10 +172,12 @@ function useFlips() {
   }, [])
 
   const submitFlip = useCallback(
-    async ({id, compressedPics, order, hint}) => {
+    async ({id, pics, compressedPics, order, hint}) => {
       if (
         flips.filter(
-          f => f.type === FlipType.Published && areSame(f.pics, compressedPics)
+          f =>
+            f.type === FlipType.Published &&
+            areSame(f.compressedPics, compressedPics)
         ).length > 0
       ) {
         return {
@@ -224,6 +226,7 @@ function useFlips() {
               ...prevFlips[flipIdx],
               id,
               pics,
+              compressedPics,
               order,
               ...result,
               type: FlipType.Publishing,

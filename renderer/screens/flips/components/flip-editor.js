@@ -220,7 +220,7 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
       })
       e.on({
         objectActivated() {
-          // handleOnChanging()
+          handleOnChanging()
         },
       })
     }

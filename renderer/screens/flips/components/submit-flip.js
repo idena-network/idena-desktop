@@ -4,7 +4,6 @@ import {rem, position, borderRadius} from 'polished'
 import {FaImage} from 'react-icons/fa'
 import {Box} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
-import {compressPics} from '../../../shared/utils/img'
 
 function SubmitFlip({
   compressedPics,
