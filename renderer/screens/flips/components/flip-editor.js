@@ -2,7 +2,7 @@ import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position} from 'polished'
 import {FaGoogle, FaPaste, FaRegFolder} from 'react-icons/fa'
-import {MdAddToPhotos} from 'react-icons/md'
+import {MdAddToPhotos, MdCrop} from 'react-icons/md'
 
 import {useTranslation} from 'react-i18next'
 import mousetrap from 'mousetrap'
@@ -24,6 +24,9 @@ const ImageEditor =
   typeof window !== 'undefined'
     ? require('@toast-ui/react-image-editor').default
     : null
+
+const BOTTOM_MENU_MAIN = 0
+const BOTTOM_MENU_CROP = 1
 
 const IMAGE_WIDTH = 440
 const IMAGE_HEIGHT = 330
@@ -48,6 +51,8 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
   useClickOutside(insertMenuRef[idx], () => {
     setInsertImageMenuOpen(false)
   })
+
+  const [bottomMenuPanel, setBottomMenuPanel] = useState(BOTTOM_MENU_MAIN)
 
   // Editors
   const editorRefs = useRef([
@@ -88,7 +93,6 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
       const {url, insertMode, customEditor} = data
       const editor = customEditor || editors[idx]
 
-      console.log(editor)
       if (!url || !editor) return
       const nextInsertMode = insertMode || insertImageMode
 
@@ -284,84 +288,157 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
         />
       </div>
 
-      <Flex
-        // justify="space-between"
-        align="center"
-        css={{marginTop: rem(10)}}
-      >
-        <IconButton
-          tooltip={t('Search on Google')}
-          icon={
-            <FaGoogle
-              color={theme.colors.primary2}
-              fontSize={theme.fontSizes.medium16}
-            />
-          }
-          onClick={() => {
-            setInsertImageMode(INSERT_BACKGROUND_IMAGE)
-            global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
-              on: true,
-              id: `google-search-img`,
-            })
-          }}
-        ></IconButton>
-
-        <IconButton
-          tooltip={t('Select file')}
-          icon={
-            <FaRegFolder color={theme.colors.primary2} fontSize={rem(20)} />
-          }
-          onClick={() => {
-            setInsertImageMode(INSERT_BACKGROUND_IMAGE)
-            uploaderRef.current.click()
-          }}
-        ></IconButton>
-
-        <IconButton
-          tooltip={t('Paste image')}
-          icon={<FaPaste color={theme.colors.primary2} fontSize={rem(20)} />}
-          onClick={() => {
-            handleImageFromClipboard(INSERT_BACKGROUND_IMAGE)
-          }}
-        ></IconButton>
-
-        <Divider vertical />
-
-        <IconButton
-          tooltip={t('Add image')}
-          icon={
-            <MdAddToPhotos
-              color={theme.colors.primary2}
-              fontSize={theme.fontSizes.large}
-            />
-          }
-          onClick={() => {
-            setInsertImageMenuOpen(!isInsertImageMenuOpen)
-          }}
-        ></IconButton>
-
-        <Box>
-          <Input
-            ref={uploaderRef}
-            type="file"
-            accept="image/*"
-            style={{
-              display: 'none',
-              border: 'none',
-              paddingRight: 0,
-              width: rem(230),
+      {bottomMenuPanel === BOTTOM_MENU_MAIN && (
+        <Flex
+          // justify="space-between"
+          align="center"
+          css={{marginTop: rem(10)}}
+        >
+          <IconButton
+            tooltip={t('Search on Google')}
+            icon={
+              <FaGoogle
+                color={theme.colors.primary2}
+                fontSize={theme.fontSizes.medium16}
+              />
+            }
+            onClick={() => {
+              setInsertImageMode(INSERT_BACKGROUND_IMAGE)
+              global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
+                on: true,
+                id: `google-search-img`,
+              })
             }}
-            onChange={handleUpload}
-          />
-        </Box>
-      </Flex>
+          ></IconButton>
 
+          <IconButton
+            tooltip={t('Select file')}
+            icon={
+              <FaRegFolder color={theme.colors.primary2} fontSize={rem(20)} />
+            }
+            onClick={() => {
+              setInsertImageMode(INSERT_BACKGROUND_IMAGE)
+              uploaderRef.current.click()
+            }}
+          ></IconButton>
+
+          <IconButton
+            tooltip={t('Paste image')}
+            icon={<FaPaste color={theme.colors.primary2} fontSize={rem(20)} />}
+            onClick={() => {
+              handleImageFromClipboard(INSERT_BACKGROUND_IMAGE)
+            }}
+          ></IconButton>
+
+          <Divider vertical />
+
+          <IconButton
+            tooltip={t('Add image')}
+            icon={
+              <MdAddToPhotos
+                color={theme.colors.primary2}
+                fontSize={theme.fontSizes.large}
+              />
+            }
+            onClick={() => {
+              setInsertImageMenuOpen(!isInsertImageMenuOpen)
+            }}
+          ></IconButton>
+
+          <Divider vertical />
+
+          <IconButton
+            disabled={src === null}
+            tooltip={t('Crop image')}
+            icon={
+              <MdCrop
+                color={theme.colors.primary2}
+                fontSize={theme.fontSizes.large}
+              />
+            }
+            onClick={() => {
+              editors[idx].startDrawingMode('CROPPER')
+              setBottomMenuPanel(BOTTOM_MENU_CROP)
+            }}
+          ></IconButton>
+
+          <Box>
+            <Input
+              ref={uploaderRef}
+              type="file"
+              accept="image/*"
+              style={{
+                display: 'none',
+                border: 'none',
+                paddingRight: 0,
+                width: rem(230),
+              }}
+              onChange={handleUpload}
+            />
+          </Box>
+        </Flex>
+      )}
+
+      {bottomMenuPanel === BOTTOM_MENU_CROP && (
+        <Flex
+          justify="space-between"
+          align="center"
+          css={{
+            marginTop: rem(10),
+            paddingLeft: rem(20),
+            paddingRight: rem(20),
+          }}
+        >
+          {t('Corp image')}
+          <Flex align="center">
+            <IconButton
+              onClick={() => {
+                setBottomMenuPanel(BOTTOM_MENU_MAIN)
+                if (editors[idx]) {
+                  editors[idx].stopDrawingMode()
+                }
+              }}
+            >
+              {t('Cancel')}
+            </IconButton>
+
+            <Divider vertical />
+
+            <IconButton
+              style={{fontWeight: theme.fontWeights.bold}}
+              onClick={() => {
+                setBottomMenuPanel(BOTTOM_MENU_MAIN)
+                if (editors[idx]) {
+                  console.log(editors[idx].getCropzoneRect())
+                  const {width, height} = editors[idx].getCropzoneRect()
+                  if (width < 1 || height < 1) {
+                    editors[idx].stopDrawingMode()
+                  } else {
+                    editors[idx]
+                      .crop(editors[idx].getCropzoneRect())
+                      .then(() => {
+                        editors[idx].stopDrawingMode()
+                        setImageUrl({
+                          url: editors[idx].toDataURL(),
+                          insertMode: INSERT_BACKGROUND_IMAGE,
+                          customEditor: editors[idx],
+                        })
+                      })
+                  }
+                }
+              }}
+            >
+              {t('Done')}
+            </IconButton>
+          </Flex>
+        </Flex>
+      )}
       <Box>
         <Flex>
           <Box css={position('relative')}>
             {isInsertImageMenuOpen && (
               <Box ref={insertMenuRef[idx]}>
-                <Absolute top="-12em" right="-17em" zIndex={100}>
+                <Absolute top="-11.4em" right="-17em" zIndex={100}>
                   <Menu>
                     <MenuItem
                       onClick={async () => {

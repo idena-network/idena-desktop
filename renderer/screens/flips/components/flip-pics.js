@@ -8,7 +8,7 @@ import {rem, borderRadius, margin} from 'polished'
 import {FaImage} from 'react-icons/fa'
 import {Draggable, DragDropContext, Droppable} from 'react-beautiful-dnd'
 
-import {Jimp} from 'jimp'
+import Jimp from 'jimp'
 import {Box} from '../../../shared/components'
 
 import Flex from '../../../shared/components/flex'
@@ -30,7 +30,7 @@ function FlipPics({pics, compressedPics, editorIndexes, onUpdateFlip}) {
 
   const updatePic = (idx, url) => {
     if (url) {
-      global.Jimp.read(url).then(image => {
+      Jimp.read(url).then(image => {
         image
           .resize(240, 180)
           .quality(60) // jpeg quality

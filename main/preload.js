@@ -12,7 +12,6 @@ const {
 
 const isDev = require('electron-is-dev')
 
-const {Jimp} = require('@jimp/core')
 const flips = require('./stores/flips')
 const validation = require('./stores/validation')
 const invites = require('./stores/invites')
@@ -40,7 +39,6 @@ process.once('loaded', () => {
 
   global.clipboard = clipboard
   global.nativeImage = nativeImage
-  global.Jimp = Jimp
   ;[global.locale] = app.getLocale().split('-')
 
   global.getZoomLevel = () => webFrame.getZoomLevel()
