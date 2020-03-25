@@ -1,15 +1,15 @@
 {
-  "Can not submit flip": "Can not submit flip",
-  "Keywords are not specified": "Keywords are not specified",
-  "Error while uploading flip": "Error while uploading flip",
-  "Something went wrong": "Something went wrong",
-  "Maximum image size exceeded": "Maximum image size exceeded",
-  "Error while importing key": "Error while importing key",
-  "Internal node is not available, try again in a few seconds": "Internal node is not available, try again in a few seconds",
-  "You can not submit flips having 'Candidate' status": "You can not submit flips having 'Candidate' status",
-  "You cannot submit more flips until the next validation": "You cannot submit more flips until the next validation",
-  "Can not submit flip during the validation session": "Can not submit flip during the validation session",
-  "Error while sending transaction": "Error while sending transaction",
-  "Transaction sent": "Transaction sent",
-  "Error while deleting flip": "Error while deleting flip"
+  "Can not submit flip": "No se puede enviar el flip",
+  "Keywords are not specified": "Palabras clave no especificadas",
+  "Error while uploading flip": "Error al enviar el flip",
+  "Something went wrong": "Algo salio mal",
+  "Maximum image size exceeded": "Tamaño maximo de la imagen excedido",
+  "Error while importing key": "Error al importar la clave",
+  "Internal node is not available, try again in a few seconds": "El nodo interno no esta disponible, intentalo de nuevo en unos segundos",
+  "You can not submit flips having 'Candidate' status": "Mientras tu rango sea 'Candidato' no puedes enviar flips",
+  "You cannot submit more flips until the next validation": "No puedes enviar mas flips hasta la proxima validacion",
+  "Can not submit flip during the validation session": "No se pueden enviar flips durante la sesion de validacion",
+  "Error while sending transaction": "Error al enviar la transaccion",
+  "Transaction sent": "Transaccion enviada",
+  "Error while deleting flip": "Error al borrar el flip"
 }
