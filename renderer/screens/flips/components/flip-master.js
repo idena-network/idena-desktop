@@ -48,12 +48,9 @@ function FlipMaster({id, onClose}) {
   const publishingFlips = flips.filter(({type}) => type === FlipType.Publishing)
 
   const [flip, setFlip] = useState({
-    pics: [
-      `https://placehold.it/480?text=1`,
-      `https://placehold.it/480?text=2`,
-      `https://placehold.it/480?text=3`,
-      `https://placehold.it/480?text=4`,
-    ],
+    pics: [null, null, null, null],
+    compressedPics: [null, null, null, null],
+    editorIndexes: [0, 1, 2, 3],
     nonSensePic: `https://placehold.it/480?text=5`,
     nonSenseOrder: -1,
     order: Array.from({length: 4}, (_, i) => i),
@@ -83,7 +80,10 @@ function FlipMaster({id, onClose}) {
     if (draft) {
       setIsFlipsLoaded(true)
       setFlip({
+        compressedPics: [null, null, null, null],
         ...draft,
+
+        editorIndexes: [0, 1, 2, 3],
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,17 +110,7 @@ function FlipMaster({id, onClose}) {
           ].includes(identityState)
         ) {
           message = t(
-            `error:You can not submit flips having 'Candidate' status`
-          )
-        } else if (
-          [
-            IdentityStatus.Newbie,
-            IdentityStatus.Verified,
-            IdentityStatus.Human,
-          ].includes(identityState)
-        ) {
-          message = t(
-            'error:You cannot submit more flips until the next validation'
+            `error:It's not allowed to submit flips with your identity status`
           )
         } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
           message = t(`error:Can not submit flip during the validation session`)
@@ -190,8 +180,13 @@ function FlipMaster({id, onClose}) {
       children: (
         <FlipPics
           {...flip}
-          onUpdateFlip={nextPics => {
-            setFlip({...flip, pics: nextPics})
+          onUpdateFlip={(pics, compressedPics, editorIndexes) => {
+            setFlip({
+              ...flip,
+              pics,
+              compressedPics,
+              editorIndexes,
+            })
           }}
         />
       ),

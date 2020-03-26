@@ -82,6 +82,7 @@
     "testcafe-react-selectors": "^4.0.0"
   },
   "dependencies": {
+    "@toast-ui/react-image-editor": "^1.2.0",
     "@xstate/react": "^0.8.1",
     "axios": "^0.18.1",
     "dayjs": "^1.8.14",
@@ -94,6 +95,7 @@
     "follow-redirects": "^1.9.0",
     "fs-extra": "^8.1.0",
     "i18next": "^19.0.1",
+    "jimp": "^0.9.6",
     "lowdb": "^1.0.0",
     "mousetrap": "^1.6.3",
     "nanoid": "^2.0.1",

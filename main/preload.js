@@ -3,6 +3,7 @@ const electron = require('electron')
 
 const {
   clipboard,
+  nativeImage,
   ipcRenderer,
   remote: {app},
   shell,
@@ -37,6 +38,7 @@ process.once('loaded', () => {
   global.isMac = process.platform === 'darwin'
 
   global.clipboard = clipboard
+  global.nativeImage = nativeImage
   ;[global.locale] = app.getLocale().split('-')
 
   global.getZoomLevel = () => webFrame.getZoomLevel()

@@ -172,10 +172,12 @@ function useFlips() {
   }, [])
 
   const submitFlip = useCallback(
-    async ({id, pics, order, hint}) => {
+    async ({id, pics, compressedPics, order, hint}) => {
       if (
         flips.filter(
-          f => f.type === FlipType.Published && areSame(f.pics, pics)
+          f =>
+            f.type === FlipType.Published &&
+            areSame(f.compressedPics, compressedPics)
         ).length > 0
       ) {
         return {
@@ -201,7 +203,7 @@ function useFlips() {
         }
       }
 
-      const [hex, publicHex, privateHex] = toHex(pics, order)
+      const [hex, publicHex, privateHex] = toHex(compressedPics, order)
       if (publicHex.length + privateHex.length > 2 * FLIP_MAX_SIZE) {
         return {
           error: {message: 'Flip is too large'},
@@ -224,6 +226,7 @@ function useFlips() {
               ...prevFlips[flipIdx],
               id,
               pics,
+              compressedPics,
               order,
               ...result,
               type: FlipType.Publishing,

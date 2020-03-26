@@ -1,22 +1,20 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, {useRef, useState, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 
 import PropTypes from 'prop-types'
-import {rem, position, borderRadius, margin} from 'polished'
-import {FiSearch, FiUpload, FiCopy} from 'react-icons/fi'
+import {rem, borderRadius, margin} from 'polished'
+
+import {FaImage} from 'react-icons/fa'
 import {Draggable, DragDropContext, Droppable} from 'react-beautiful-dnd'
-import mousetrap from 'mousetrap'
-import {useTranslation} from 'react-i18next'
-import {Box, Input} from '../../../shared/components'
-import Divider from '../../../shared/components/divider'
+
+import Jimp from 'jimp'
+import {Box} from '../../../shared/components'
+
 import Flex from '../../../shared/components/flex'
-import ImageEditor from './image-editor'
+import FlipEditor from './flip-editor'
 import theme from '../../../shared/theme'
 import {convertToBase64Url} from '../utils/use-data-url'
-import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
-import {IconButton} from '../../../shared/components/button'
-import {getImageURLFromClipboard} from '../../../shared/utils/clipboard'
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
@@ -25,46 +23,37 @@ const reorder = (list, startIndex, endIndex) => {
   return result
 }
 
-function FlipPics({id, pics, hint, onUpdateFlip}) {
-  const {t} = useTranslation()
-
+function FlipPics({pics, compressedPics, editorIndexes, onUpdateFlip}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [pickedUrl, setPickedUrl] = useState('')
   const [imageClipboard, setImageClipboard] = useState(null)
 
-  const handleImageSearchPick = (_, data) => {
-    const [{url}] = data.docs[0].thumbnails
-    setPickedUrl(url)
-  }
+  const updatePic = (idx, url) => {
+    if (url) {
+      Jimp.read(url).then(image => {
+        image
+          .resize(240, 180)
+          .quality(60) // jpeg quality
+          .getBase64Async('image/jpeg')
+          .then(compressedUrl => {
+            const editorIndex = editorIndexes.indexOf(idx)
 
-  useEffect(() => {
-    global.ipcRenderer.on(IMAGE_SEARCH_PICK, handleImageSearchPick)
-    return () => {
-      global.ipcRenderer.removeListener(
-        IMAGE_SEARCH_PICK,
-        handleImageSearchPick
-      )
+            onUpdateFlip(
+              [
+                ...pics.slice(0, editorIndex),
+                url,
+                ...pics.slice(editorIndex + 1),
+              ],
+              [
+                ...compressedPics.slice(0, editorIndex),
+                compressedUrl,
+                ...compressedPics.slice(editorIndex + 1),
+              ],
+              editorIndexes
+            )
+          })
+      })
     }
-  }, [])
-
-  const handleUpload = e => {
-    e.preventDefault()
-
-    const file = e.target.files[0]
-
-    if (!file || !file.type.startsWith('image')) {
-      return
-    }
-
-    const reader = new FileReader()
-    reader.addEventListener('loadend', re => {
-      onUpdateFlip([
-        ...pics.slice(0, selectedIndex),
-        re.target.result,
-        ...pics.slice(selectedIndex + 1),
-      ])
-    })
-    reader.readAsDataURL(file)
   }
 
   useEffect(() => {
@@ -93,57 +82,60 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageClipboard, selectedIndex])
 
-  mousetrap.bind(['command+v', 'ctrl+v'], function() {
-    pasteImageFromClipboard()
-    return false
-  })
-
-  function pasteImageFromClipboard() {
-    const url = getImageURLFromClipboard()
-    if (url) {
-      setImageClipboard(url)
-    }
-  }
-
   function onDragEnd(result) {
     if (!result.destination) {
       return
     }
-
     if (result.destination.index === result.source.index) {
       return
     }
-
     setSelectedIndex(result.destination.index)
 
-    const nextOrder = reorder(
+    const nextPics = reorder(
       pics,
       result.source.index,
       result.destination.index
     )
 
-    onUpdateFlip(nextOrder)
+    const nextCompressedPics = reorder(
+      compressedPics,
+      result.source.index,
+      result.destination.index
+    )
+    const nextEditorIndexes = reorder(
+      editorIndexes,
+      result.source.index,
+      result.destination.index
+    )
+    onUpdateFlip(nextPics, nextCompressedPics, nextEditorIndexes)
   }
-
-  const uploaderRef = useRef()
 
   return (
     <Flex>
-      <Box css={margin(0, rem(40), 0)}>
+      <Box css={margin(0, rem(40), 0, 0)}>
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="flip">
             {provided => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                {pics.map((src, idx) => {
+                {compressedPics.map((src, idx) => {
                   const isCurrent = idx === selectedIndex
 
-                  let style = position('relative')
+                  let style = {
+                    position: 'relative',
+                  }
 
                   if (idx === 0) {
-                    style = {...style, ...borderRadius('top', rem(8))}
+                    style = {
+                      ...style,
+                      ...borderRadius('top', rem(8)),
+                    }
                   }
                   if (idx === pics.length - 1) {
-                    style = {...style, ...borderRadius('bottom', rem(8))}
+                    style = {
+                      ...style,
+                      ...borderRadius('bottom', rem(8)),
+                      borderBottom: 'solid 1px rgba(83, 86, 92, 0.16)',
+                    }
                   }
 
                   if (isCurrent) {
@@ -151,6 +143,13 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
                       ...style,
                       border: `solid 2px ${theme.colors.primary}`,
                       boxShadow: '0 0 4px 4px rgba(87, 143, 255, 0.25)',
+                    }
+                  } else {
+                    style = {
+                      ...style,
+                      borderTop: 'solid 1px rgba(83, 86, 92, 0.16)',
+                      borderRight: 'solid 1px rgba(83, 86, 92, 0.16)',
+                      borderLeft: 'solid 1px rgba(83, 86, 92, 0.16)',
                     }
                   }
 
@@ -177,78 +176,69 @@ function FlipPics({id, pics, hint, onUpdateFlip}) {
       </Box>
 
       <Box>
-        <ImageEditor src={pics[selectedIndex]} />
-        <Flex
-          justify="space-between"
-          align="center"
-          css={margin(rem(theme.spacings.medium16), 0, 0)}
-        >
-          <IconButton
-            icon={<FiSearch />}
-            onClick={() =>
-              global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
-                on: true,
-                id: `${id}-${hint.words.map(({name}) => name).join('-')}`,
-              })
-            }
-          >
-            {t('Search on Google')}
-          </IconButton>
-          <Divider vertical />
-
-          <IconButton
-            tooltip=""
-            icon={<FiUpload />}
-            onClick={() => {
-              uploaderRef.current.click()
-            }}
-          >
-            {t('Select file')}
-            <small> (150kb) </small>
-          </IconButton>
-
-          <Divider vertical />
-
-          <IconButton
-            tooltip=""
-            icon={<FiCopy />}
-            onClick={() => pasteImageFromClipboard()}
-          >
-            {t('Paste image')} ({global.isMac ? 'Cmd' : 'Ctrl'}+V)
-          </IconButton>
-
-          <Box>
-            <Input
-              ref={uploaderRef}
-              type="file"
-              accept="image/*"
-              style={{
-                display: 'none',
-                border: 'none',
-                paddingRight: 0,
-                width: rem(230),
+        {editorIndexes &&
+          pics.map((src, idx) => (
+            <FlipEditor
+              key={editorIndexes[idx]}
+              idx={editorIndexes[idx]}
+              visible={editorIndexes[idx] === editorIndexes[selectedIndex]}
+              src={src}
+              onChange={url => {
+                updatePic(editorIndexes[idx], url)
               }}
-              onChange={handleUpload}
             />
-          </Box>
-        </Flex>
+          ))}
       </Box>
     </Flex>
   )
 }
 
 FlipPics.propTypes = {
-  id: PropTypes.string,
   pics: PropTypes.arrayOf(PropTypes.string),
+  compressedPics: PropTypes.arrayOf(PropTypes.string),
+  editorIndexes: PropTypes.arrayOf(PropTypes.number),
   hint: PropTypes.any,
   onUpdateFlip: PropTypes.func.isRequired,
 }
 
 // eslint-disable-next-line react/prop-types
 function Image({src, style, children}) {
+  if (src) {
+    const imgBoxStyle = {
+      ...{
+        width: rem(149),
+        height: rem(112),
+        paddingLeft: '1px',
+        paddingTop: '1px',
+      },
+    }
+    const imgStyle = {...style, ...{width: rem(147), height: rem(110)}}
+    return (
+      <Box style={imgBoxStyle}>
+        <img alt="flip" src={src} style={imgStyle} />
+        {children}
+      </Box>
+    )
+  }
+
+  const boxStyle = {
+    ...style,
+    ...{
+      backgroundColor: '#f5f6f7',
+      width: rem(149),
+      height: rem(112),
+    },
+  }
   return (
-    <Box>
-      <img alt="flip" width={120} src={src} style={style} />
+    <Box style={boxStyle}>
+      <FaImage
+        style={{
+          fontSize: rem(40),
+          color: '#d2d4d9',
+          marginTop: rem(35),
+          marginLeft: rem(55),
+        }}
+      ></FaImage>
       {children}
     </Box>
   )

@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {transparentize, darken} from 'polished'
 import theme, {rem} from '../theme'
+import {Tooltip} from './tooltip'
 
 function Button({size, disabled, danger, variant = 'primary', css, ...props}) {
   const isPrimary = variant === 'primary'
@@ -82,45 +83,50 @@ FlatButton.defaultProps = {
 }
 FlatButton.propTypes = Button.propTypes
 
-// eslint-disable-next-line react/prop-types
-function IconButton({icon, children, disabled, danger, ...props}, ref) {
+function IconButton(
+  // eslint-disable-next-line react/prop-types
+  {icon, children, disabled, tooltip, danger, ...props},
+  ref
+) {
   const color = danger ? theme.colors.danger : theme.colors.primary
   return (
-    <button type="button" disabled={disabled} ref={ref} {...props}>
-      {icon}
-      <span>{children}</span>
-      <style jsx>{`
-        button {
-          background: none;
-          border: none;
-          cursor: ${disabled ? 'default' : 'pointer'};
-          font-size: 1em;
-          display: flex;
-          align-items: center;
-          text-decoration: none;
-          vertical-align: middle;
-          position: relative;
-          transition: color 0.5s ease;
-          ${disabled && `opacity: 0.5`};
-        }
-        span {
-          display: inline-block;
-        }
-      `}</style>
-      <style jsx>{`
-        button {
-          color: ${color};
-          font-weight: 500;
-          padding: ${rem(theme.spacings.small8)};
-        }
-        button:hover {
-          color: ${darken(0.1, color)};
-        }
-        span {
-          margin-left: ${theme.spacings.small};
-        }
-      `}</style>
-    </button>
+    <Tooltip content={tooltip}>
+      <button type="button" disabled={disabled} ref={ref} {...props}>
+        {icon}
+        <span>{children}</span>
+        <style jsx>{`
+          button {
+            background: none;
+            border: none;
+            cursor: ${disabled ? 'default' : 'pointer'};
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            vertical-align: middle;
+            position: relative;
+            transition: color 0.5s ease;
+            ${disabled && `opacity: 0.5`};
+          }
+          span {
+            display: inline-block;
+          }
+        `}</style>
+        <style jsx>{`
+          button {
+            color: ${color};
+            font-weight: 500;
+            padding: ${rem(theme.spacings.small8)};
+          }
+          button:hover {
+            color: ${darken(0.1, color)};
+          }
+          span {
+            margin-left: ${theme.spacings.small};
+          }
+        `}</style>
+      </button>
+    </Tooltip>
   )
 }
 
@@ -130,6 +136,7 @@ IconButtonRef.propTypes = {
   icon: PropTypes.node,
   children: PropTypes.node,
   disabled: PropTypes.bool,
+  tooltip: PropTypes.node,
   danger: PropTypes.bool,
 }
 
