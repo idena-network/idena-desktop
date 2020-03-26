@@ -110,21 +110,9 @@ function FlipMaster({id, onClose}) {
           ].includes(identityState)
         ) {
           message = t(
-            `error:You can not submit flips having 'Candidate' status`
+            `error:It's not allowed to submit flips with your identity status`
           )
         } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
-          /* //commented in order to show error.message
-          else if ( 
-          [
-            IdentityStatus.Newbie,
-            IdentityStatus.Verified,
-            IdentityStatus.Human,
-          ].includes(identityState)
-        ) {
-          message = t(
-            'error:You cannot submit more flips until the next validation'
-          )
-        } */
           message = t(`error:Can not submit flip during the validation session`)
         } else {
           // eslint-disable-next-line prefer-destructuring
