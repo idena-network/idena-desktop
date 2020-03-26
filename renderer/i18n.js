@@ -29,6 +29,8 @@ import it_translation from '../locales/it/translation.json'
 import it_error from '../locales/it/error.json'
 import pt_translation from '../locales/pt/translation.json'
 import pt_error from '../locales/pt/error.json'
+import sl_translation from '../locales/sl/translation.json'
+import sl_error from '../locales/sl/error.json'
 
 export const AVAILABLE_LANGS = [
   'en',
@@ -44,6 +46,7 @@ export const AVAILABLE_LANGS = [
   'ro',
   'it',
   'pt',
+  'sl',
 ]
 
 i18n.use(initReactI18next).init({
@@ -62,6 +65,7 @@ i18n.use(initReactI18next).init({
     ro: {translation: ro_translation, error: ro_error},
     it: {translation: it_translation, error: it_error},
     pt: {translation: pt_translation, error: pt_error},
+    sl: {translation: sl_translation, error: sl_error},
   },
   lng: loadPersistentStateValue('settings', 'lng'),
   fallbackLng: 'en',
