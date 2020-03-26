@@ -1,7 +1,6 @@
-import React, {forwardRef, useRef} from 'react'
+import React, {forwardRef} from 'react'
 import PropTypes from 'prop-types'
 import {borderRadius, rem} from 'polished'
-import useClickOutside from '../hooks/use-click-outside'
 
 import {Box, Link} from '.'
 import Flex from './flex'
