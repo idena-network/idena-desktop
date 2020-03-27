@@ -1,6 +1,3 @@
-osx_image: xcode10.2
-dist: bionic
-
 language: node_js
 node_js: '10'
 
@@ -8,14 +5,51 @@ addons:
   apt:
     packages:
       - xvfb
+      - libcairo2-dev
+      - libpango1.0-dev
+      - libjpeg-dev
+      - libgif-dev
+      - librsvg2-dev
+  homebrew:
+    packages:
+      - pkg-config
+      - cairo
+      - pango
+      - libpng
+      - jpeg
+      - giflib
+      - librsvg
 
 matrix:
   include:
     - if: branch =~ /v\d+\.\d+\.\d+/
       os: windows
+      env: PATH=/c/Python27:/c/Python27/Scripts:$PATH
+      before_install:
+        - choco install -y python2 gtk-runtime microsoft-build-tools libjpeg-turbo
+        - curl -LO http://ftp.gnome.org/pub/GNOME/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip
+        - 7z x gtk+-bundle_2.22.1-20101229_win64.zip -y -o/c/GTK
+      script:
+        - npm run dist:win
     - if: branch =~ /v\d+\.\d+\.\d+/
       os: osx
-    - os: linux
+      osx_image: xcode11.3
+      script:
+        - npm run dist:mac
+    - if: branch =~ /v\d+\.\d+\.\d+/
+      os: linux
+      script:
+        - npm run dist:linux
+    - if: branch = master
+      os: linux
+      before_install:
+        - export DISPLAY=':99.0'
+        - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        - npm install -g xvfb-maybe
+      script:
+        - npm run lint
+        - npm run build
+        - xvfb-maybe npm run e2e
 
 env:
   global:
@@ -35,24 +69,7 @@ cache:
     - .next/cache
 
 install:
-  - export DISPLAY=':99.0'
-  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-  - npm install -g xvfb-maybe
   - npm ci
 
 before_script:
   - if [[ "$TRAVIS_TAG" != "" ]]; then npm --no-git-tag-version version ${TRAVIS_TAG:1}; fi
-
-script:
-  - npm run lint
-  - npm run build
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then xvfb-maybe npm run e2e; fi
-
-  - echo "Build win"
-  - if [[ "$TRAVIS_OS_NAME" == "windows" && "$TRAVIS_TAG" != "" ]]; then npm run dist:win; fi
-
-  - echo "Build mac"
-  - if [[ "$TRAVIS_OS_NAME" == "osx" && "$TRAVIS_TAG" != "" ]]; then npm run dist:mac; fi
-
-  - echo "Build linux"
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_TAG" != "" ]]; then npm run dist:linux; fi
