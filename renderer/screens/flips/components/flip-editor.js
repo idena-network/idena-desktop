@@ -678,6 +678,7 @@ function Brushes({brush, onChange}) {
     <div>
       {brushes.map((b, i) => (
         <IconButton
+          key={i}
           active={brush === b}
           icon={
             <FaCircle
@@ -722,9 +723,9 @@ function ColorPicker({visible, color, onChange}) {
       <Box css={position('relative')} ref={colorPickerRef}>
         <Absolute top={-rem(24)} right={rem(40)} zIndex={100}>
           <Menu>
-            {colors.map(row => (
-              <Flex css={{marginLeft: rem(10), marginRight: rem(10)}}>
-                {row.map(c => {
+            {colors.map((row, i) => (
+              <Flex key={i} css={{marginLeft: rem(10), marginRight: rem(10)}}>
+                {row.map((c, j) => {
                   const showColor = c === 'ffffff' ? '#d2d4d9' : `#${c}`
                   const circleStyle = {
                     padding: rem(1),
@@ -734,6 +735,7 @@ function ColorPicker({visible, color, onChange}) {
                   }
                   return (
                     <IconButton
+                      key={`${j}${j}`}
                       icon={
                         c === 'ffffff' ? (
                           <FiCircle color={showColor} style={circleStyle} />
