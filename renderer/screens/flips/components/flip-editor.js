@@ -335,8 +335,13 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
               cssMaxHeight={IMAGE_HEIGHT}
               cssMaxWidth={IMAGE_WIDTH}
               selectionStyle={{
-                cornerSize: 20,
-                rotatingPointOffset: 70,
+                cornerSize: 10,
+                rotatingPointOffset: 20,
+                lineWidth: '1',
+                cornerColor: '#ffffff',
+                cornerStrokeColor: '#000000',
+                transparentCorners: false,
+                borderColor: `${theme.colors.primary}`,
               }}
               usageStatistics={false}
             />
