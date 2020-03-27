@@ -155,5 +155,9 @@
   "wallet": "wallet",
   "address": "address",
   "See in Explorer...": "See in Explorer...",
-  "Deleting...": "Deleting..."
+  "Deleting...": "Deleting...",
+  "Deleted flip will be moved to the drafts.": "Deleted flip will be moved to the drafts.",
+  "Flip hash": "Flip hash",
+  "Add image": "Add image",
+  "Crop image": "Crop image"
 }

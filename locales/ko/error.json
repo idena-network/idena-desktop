@@ -11,5 +11,6 @@
   "Can not submit flip during the validation session": "검증기간 중에는 플립(flip)을 제출할 수 없습니다",
   "Error while sending transaction": "전송 중 오류가 발생했습니다",
   "Transaction sent": "전송처리 되었습니다",
-  "Error while deleting flip": "Error while deleting flip"
+  "Error while deleting flip": "Error while deleting flip",
+  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
 }

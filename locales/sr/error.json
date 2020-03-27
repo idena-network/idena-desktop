@@ -11,5 +11,6 @@
   "Can not submit flip during the validation session": "Не можете послати флип док је валидација у току",
   "Error while sending transaction": "Грешка при слању трансакције",
   "Transaction sent": "Трансакција послата",
-  "Error while deleting flip": "Error while deleting flip"
+  "Error while deleting flip": "Error while deleting flip",
+  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
 }

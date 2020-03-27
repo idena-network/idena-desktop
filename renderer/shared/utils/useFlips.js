@@ -18,7 +18,6 @@ export const FlipType = {
   Published: 'published',
   Draft: 'draft',
   Archived: 'archived',
-  Deleted: 'deleted',
   Deleting: 'deleting',
 }
 
@@ -310,7 +309,7 @@ function checkFlipType(flip, tx) {
     const txExists = tx && tx.result
     if (!txExists) return FlipType.Published
     return txExists && tx.result.blockHash !== HASH_IN_MEMPOOL
-      ? FlipType.Deleted
+      ? FlipType.Draft
       : flip.type
   }
   return flip.type

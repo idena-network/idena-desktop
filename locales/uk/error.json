@@ -11,5 +11,6 @@
   "Can not submit flip during the validation session": "Не можна пропонувати фліпи підчас валідаційної сесії",
   "Error while sending transaction": "Помилка при відправці транзакції",
   "Transaction sent": "Транзакцію відправлено",
-  "Error while deleting flip": "Error while deleting flip"
+  "Error while deleting flip": "Error while deleting flip",
+  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
 }

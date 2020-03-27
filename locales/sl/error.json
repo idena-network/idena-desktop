@@ -10,5 +10,7 @@
   "You cannot submit more flips until the next validation": "Ni mogoče poslati več flipov pred naslednjo validacijo",
   "Can not submit flip during the validation session": "Ni mogoče pošiljati flipe, dokler je validacija v teku",
   "Error while sending transaction": "Napaka pri pošiljanju transakcije",
-  "Transaction sent": "Transakcija je poslana"
+  "Transaction sent": "Transakcija je poslana",
+  "Error while deleting flip": "Error while deleting flip",
+  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
 }
