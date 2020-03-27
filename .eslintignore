@@ -1,2 +1,3 @@
 renderer/.next/*
 renderer/out/*
+**/dist/*
