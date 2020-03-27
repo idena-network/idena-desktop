@@ -29,15 +29,25 @@ function FlipPics({pics, compressedPics, editorIndexes, onUpdateFlip}) {
   const [imageClipboard, setImageClipboard] = useState(null)
 
   const updatePic = (idx, url) => {
-    if (url) {
+    const editorIndex = editorIndexes.indexOf(idx)
+
+    if (!url) {
+      onUpdateFlip(
+        [...pics.slice(0, editorIndex), null, ...pics.slice(editorIndex + 1)],
+        [
+          ...compressedPics.slice(0, editorIndex),
+          null,
+          ...compressedPics.slice(editorIndex + 1),
+        ],
+        editorIndexes
+      )
+    } else {
       Jimp.read(url).then(image => {
         image
           .resize(240, 180)
           .quality(60) // jpeg quality
           .getBase64Async('image/jpeg')
           .then(compressedUrl => {
-            const editorIndex = editorIndexes.indexOf(idx)
-
             onUpdateFlip(
               [
                 ...pics.slice(0, editorIndex),

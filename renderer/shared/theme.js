@@ -33,6 +33,7 @@ const fontSizes = {
   blockHeading: '1rem',
   normal: '1rem',
   small: '0.72rem',
+  medium: '1.2rem',
   large: '1.4em',
 }
 

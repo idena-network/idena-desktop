@@ -85,7 +85,7 @@ FlatButton.propTypes = Button.propTypes
 
 function IconButton(
   // eslint-disable-next-line react/prop-types
-  {icon, children, disabled, tooltip, danger, ...props},
+  {icon, children, disabled, active, tooltip, danger, ...props},
   ref
 ) {
   const color = danger ? theme.colors.danger : theme.colors.primary
@@ -96,7 +96,7 @@ function IconButton(
         <span>{children}</span>
         <style jsx>{`
           button {
-            background: none;
+            background: ${active ? '#f5f6f7' : 'none'};
             border: none;
             cursor: ${disabled ? 'default' : 'pointer'};
             font-size: 1em;
@@ -122,7 +122,7 @@ function IconButton(
             color: ${darken(0.1, color)};
           }
           span {
-            margin-left: ${theme.spacings.small};
+            margin-left: ${children ? theme.spacings.small : '0'};
           }
         `}</style>
       </button>
