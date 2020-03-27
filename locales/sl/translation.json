@@ -145,5 +145,19 @@
   "Total score for": "Skupni rezultat za",
   "all validations": "vse validacije",
   "My Idena": "Moja Idena",
-  "Contacts": "Kontakti"
+  "Contacts": "Kontakti",
+  "Flip deleted": "Flip deleted",
+  "You can activate it again afterwards.": "You can activate it again afterwards.",
+  "In order to withdraw the stake you have to terminate your identity": "In order to withdraw the stake you have to terminate your identity",
+  "You need to get Verified status to be able to terminate your identity and withdraw the stake": "You need to get Verified status to be able to terminate your identity and withdraw the stake",
+  "Locked": "Locked",
+  "You need to get Verified status to get the locked funds into the normal wallet": "You need to get Verified status to get the locked funds into the normal wallet",
+  "Deleted flip will be moved to the drafts.": "Deleted flip will be moved to the drafts.",
+  "Flip hash": "Flip hash",
+  "Deleting...": "Deleting...",
+  "Add image": "Add image",
+  "Crop image": "Crop image",
+  "wallet": "wallet",
+  "address": "address",
+  "See in Explorer...": "See in Explorer..."
 }

@@ -4,7 +4,7 @@ import {rem, margin} from 'polished'
 import {useTranslation} from 'react-i18next'
 import useLocalStorage from '../../shared/hooks/use-local-storage'
 import Layout from '../../shared/components/layout'
-import {Box, PageTitle} from '../../shared/components'
+import {Box, Drawer, PageTitle} from '../../shared/components'
 import theme from '../../shared/theme'
 import FlipToolbar, {
   FlipToolbarItem,
@@ -15,12 +15,16 @@ import IconLink from '../../shared/components/icon-link'
 import FlipCover from '../../screens/flips/components/flip-cover'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {useChainState} from '../../shared/providers/chain-context'
+import DeleteFlipForm from '../../screens/flips/components/delete-flip-form'
 
 function Flips() {
   const {t} = useTranslation('error')
   const {flips, submitFlip, deleteFlip} = useFlips()
   const {addNotification, addError} = useNotificationDispatch()
   const {syncing, offline, loading} = useChainState()
+  const [isDeleteFlipFormOpen, setIsDeleteFlipFormOpen] = React.useState(false)
+  const handleCloseDeleteFlipForm = () => setIsDeleteFlipFormOpen(false)
+  const [flipToDelete, setFlipToDelete] = React.useState(false)
 
   const [filter, setFilter] = useLocalStorage(
     'flips/filter',
@@ -40,12 +44,10 @@ function Flips() {
         <FlipToolbar>
           <Flex>
             {Object.values(FlipType)
-              // alias Publishing and Deleting to Published in userland, hide Deleted
+              // alias Publishing and Deleting to Published in userland
               .filter(
                 type =>
-                  type !== FlipType.Publishing &&
-                  type !== FlipType.Deleting &&
-                  type !== FlipType.Deleted
+                  type !== FlipType.Publishing && type !== FlipType.Deleting
               )
               .map(type => (
                 <FlipToolbarItem
@@ -105,31 +107,52 @@ function Flips() {
                   })
                 }
               }}
-              onDelete={async () => {
-                try {
-                  const {result, error} = await deleteFlip(flip)
-                  if (error) {
-                    addError({
-                      title: t('error:Error while deleting flip'),
-                      body: error.message,
-                    })
-                  } else if (result) {
-                    addNotification({
-                      title: t('translation:Flip deleted'),
-                      body: result,
-                    })
-                  }
-                } catch (error) {
-                  addError({
-                    title: t('error:Something went wrong'),
-                    body: error,
-                  })
+              onDelete={() => {
+                if (flip.type === FlipType.Published) {
+                  setFlipToDelete({hash: flip.hash, pic: flip.pics[0]})
+                  setIsDeleteFlipFormOpen(true)
+                  return
                 }
+                deleteFlip(flip)
               }}
             />
           ))}
         </FlipList>
       </Box>
+      <Drawer show={isDeleteFlipFormOpen} onHide={handleCloseDeleteFlipForm}>
+        <DeleteFlipForm
+          hash={flipToDelete.hash}
+          pic={flipToDelete.pic}
+          onDelete={async () => {
+            try {
+              const {id} = flips.filter(
+                ({hash}) => hash === flipToDelete.hash
+              )[0]
+              const {result, error} = await deleteFlip({id})
+              if (error) {
+                addError({
+                  title: t('error:Error while deleting flip'),
+                  body: error.message,
+                })
+                return false
+              }
+              if (result) {
+                addNotification({
+                  title: t('translation:Flip deleted'),
+                  body: result,
+                })
+                handleCloseDeleteFlipForm()
+              }
+              return true
+            } catch (error) {
+              addError({
+                title: t('error:Something went wrong'),
+              })
+              return false
+            }
+          }}
+        />
+      </Drawer>
     </Layout>
   )
 }

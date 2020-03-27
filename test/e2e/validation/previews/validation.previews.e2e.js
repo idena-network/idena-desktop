@@ -46,7 +46,7 @@ test('check preview states changing', async t => {
   await t.expect(thumb3.findReact('LoadingThumbnail').exists).ok()
 
   // flip failed, states: shown, shown, failed
-  await delay(10000)
+  await delay(15000)
   await t.expect(thumb1.findReact('FlipImage').exists).ok()
   await t.expect(thumb2.findReact('FlipImage').exists).ok()
   await t.expect(thumb3.findReact('FailedThumbnail').exists).ok()

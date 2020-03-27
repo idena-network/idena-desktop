@@ -11,5 +11,6 @@
   "Can not submit flip during the validation session": "Can not submit flip during the validation session",
   "Error while sending transaction": "Error while sending transaction",
   "Transaction sent": "Transaction sent",
-  "Error while deleting flip": "Error while deleting flip"
+  "Error while deleting flip": "Error while deleting flip",
+  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
 }
