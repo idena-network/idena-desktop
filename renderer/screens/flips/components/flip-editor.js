@@ -222,9 +222,13 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
     })
   }
 
-  mousetrap.bind(['command+z', 'ctrl+z'], function() {
-    return true
-  })
+  mousetrap.bind(
+    ['command+z', 'ctrl+z', 'shift+ctrl+z', 'shift+command+z'],
+    function(e) {
+      e.stopImmediatePropagation()
+      return false
+    }
+  )
 
   // init editor
   useEffect(() => {
