@@ -7,6 +7,7 @@ import {
   FaPaste,
   FaRegFolder,
   FaPencilAlt,
+  FaRegTrashAlt,
 } from 'react-icons/fa'
 import {FiCircle} from 'react-icons/fi'
 
@@ -107,10 +108,17 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
   const setImageUrl = useCallback(
     data => {
       const {url, insertMode, customEditor} = data
-      const editor = customEditor || editors[idx]
-
-      if (!url || !editor) return
       const nextInsertMode = insertMode || insertImageMode
+      const editor = customEditor || editors[idx]
+      if (!editor) return
+
+      if (!url) {
+        editor.loadImageFromURL(BLANK_IMAGE, 'blank').then(() => {
+          setChangesCnt(NOCHANGES)
+          onChange(null)
+        })
+        return
+      }
 
       if (nextInsertMode === INSERT_OBJECT_IMAGE) {
         editor.addImageObject(url).then(handleOnChanging())
@@ -161,7 +169,7 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
         })
       }
     },
-    [editors, handleOnChanging, idx, insertImageMode]
+    [editors, handleOnChanging, idx, insertImageMode, onChange]
   )
 
   // File upload handling
@@ -461,6 +469,19 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
                     setRightMenuPanel(RIGHT_MENU_FREEDRAWING)
                     editor.startDrawingMode('FREE_DRAWING')
                   }
+                }}
+              ></IconButton>
+
+              <IconButton
+                tooltip={t('Clear')}
+                icon={
+                  <FaRegTrashAlt
+                    color={theme.colors.danger}
+                    fontSize={theme.fontSizes.medium}
+                  />
+                }
+                onClick={() => {
+                  setImageUrl({url: null})
                 }}
               ></IconButton>
 
