@@ -70,6 +70,7 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
   const [brush, setBrush] = useState(20)
   const [brushColor, setBrushColor] = useState('ff6666dd')
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [showArrowHint, setShowArrowHint] = useState(src === null && idx === 0)
 
   // Editors
   const editorRefs = useRef([
@@ -95,7 +96,10 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
     if (!changesCnt) setChangesCnt(1)
   }, [changesCnt])
   useInterval(() => {
-    if (changesCnt >= NEWCHANGES) setChangesCnt(changesCnt + 1)
+    if (changesCnt >= NEWCHANGES) {
+      setShowArrowHint(false)
+      setChangesCnt(changesCnt + 1)
+    }
     if (changesCnt >= 3) {
       setChangesCnt(NOCHANGES)
       const url = editors[idx].toDataURL()
@@ -234,6 +238,12 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
   useEffect(() => {
     const updateEvents = e => {
       e.on({
+        mouseDown() {
+          setShowArrowHint(false)
+        },
+      })
+
+      e.on({
         objectMoved() {
           handleOnChanging()
         },
@@ -370,6 +380,12 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
                 }}
               ></IconButton>
 
+              <ArrowHint
+                visible={showArrowHint}
+                hint={t('Start from uploading an image')}
+                leftHanded
+              />
+
               <IconButton
                 tooltip={t('Select file')}
                 icon={
@@ -456,6 +472,8 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
                 }}
               ></IconButton>
 
+              <ArrowHint visible={showArrowHint} hint={t('Or start drawing')} />
+
               <IconButton
                 tooltip={t('Draw')}
                 active={rightMenuPanel === RIGHT_MENU_FREEDRAWING}
@@ -470,6 +488,7 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
                   />
                 }
                 onClick={() => {
+                  setShowArrowHint(false)
                   const editor = editors[idx]
                   if (editor.getDrawingMode() === 'FREE_DRAWING') {
                     setRightMenuPanel(RIGHT_MENU_NONE)
@@ -773,4 +792,96 @@ ColorPicker.propTypes = {
   visible: PropTypes.bool,
   color: PropTypes.string,
   onChange: PropTypes.func,
+}
+
+function ArrowHint({hint, leftHanded, visible}) {
+  //
+  return (
+    visible && (
+      <div>
+        <Box css={position('relative')}>
+          <Absolute top={rem(-105)} left={rem(0)} zIndex={90}>
+            {leftHanded && (
+              <div>
+                <div
+                  style={{
+                    minWidth: rem(24),
+                    minHeight: rem(40),
+                    borderLeft: `2px solid ${theme.colors.primary}`,
+                    borderTop: `2px solid ${theme.colors.primary}`,
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '-5px',
+                    width: 0,
+                    height: 0,
+                    border: `6px solid transparent`,
+                    borderBottom: 0,
+                    borderTopColor: `${theme.colors.primary}`,
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '30px',
+                    top: '-25px',
+                    minWidth: '70px',
+                    color: `${theme.colors.muted}`,
+                    fontWeight: `${theme.fontWeights.normal}`,
+                  }}
+                >
+                  {hint}
+                </div>
+              </div>
+            )}
+
+            {!leftHanded && (
+              <div>
+                <div
+                  style={{
+                    minWidth: rem(24),
+                    minHeight: rem(40),
+                    borderRight: `2px solid ${theme.colors.primary}`,
+                    borderTop: `2px solid ${theme.colors.primary}`,
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '12px',
+                    width: 0,
+                    height: 0,
+                    marginLeft: '0px',
+                    border: `6px solid transparent`,
+                    borderBottom: 0,
+                    borderTopColor: `${theme.colors.primary}`,
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '-56px',
+                    top: '-25px',
+                    minWidth: '70px',
+                    color: `${theme.colors.muted}`,
+                    fontWeight: `${theme.fontWeights.normal}`,
+                  }}
+                >
+                  {hint}
+                </div>
+              </div>
+            )}
+          </Absolute>
+        </Box>
+      </div>
+    )
+  )
+}
+
+ArrowHint.propTypes = {
+  hint: PropTypes.string,
+  leftHanded: PropTypes.bool,
+  visible: PropTypes.bool,
 }
