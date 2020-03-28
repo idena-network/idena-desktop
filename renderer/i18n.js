@@ -31,6 +31,8 @@ import pt_translation from '../locales/pt/translation.json'
 import pt_error from '../locales/pt/error.json'
 import sl_translation from '../locales/sl/translation.json'
 import sl_error from '../locales/sl/error.json'
+import hi_translation from '../locales/hi/translation.json'
+import hi_error from '../locales/hi/error.json'
 
 export const AVAILABLE_LANGS = [
   'en',
@@ -41,6 +43,7 @@ export const AVAILABLE_LANGS = [
   'zh',
   'ko',
   'hr',
+  'hi',
   'uk',
   'sr',
   'ro',
@@ -60,6 +63,7 @@ i18n.use(initReactI18next).init({
     zh: {translation: zh_translation, error: zh_error},
     ko: {translation: ko_translation, error: ko_error},
     hr: {translation: hr_translation, error: hr_error},
+    hi: {translation: hi_translation, error: hi_error},
     uk: {translation: uk_translation, error: uk_error},
     sr: {translation: sr_translation, error: sr_error},
     ro: {translation: ro_translation, error: ro_error},
