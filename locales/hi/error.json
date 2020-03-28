@@ -8,7 +8,7 @@
   "Internal node is not available, try again in a few seconds": "इंटरनल नोड उपलब्ध नहीं है, कुछ सेकंड में पुन: प्रयास करें",
   "You can not submit flips having 'Candidate' status": "आप कैंडिडेट दर्जे में फ्लिप सबमिट नहीं कर सकते",
   "You cannot submit more flips until the next validation": "आप अगले वेलिडेशन तक फ्लिप सबमिट नहीं कर सकते",
-  "Can not submit flip during the validation session": "वेलिडेशन सेशन के दौरान फ्लिप सबमिट नहीं कर सकते",
+  "Can not submit flip during the validation session": "वेलिडेशन सेशन के दौरान फ्लिप सबमिट नहीं कर सकते हैं",
   "Error while sending transaction": "लेनदेन करते समय प्रॉब्लम",
   "Transaction sent": "लेनदेन भेजा गया",
   "Error while deleting flip": "फ्लिप डिलीट करते समय प्रॉब्लम"
