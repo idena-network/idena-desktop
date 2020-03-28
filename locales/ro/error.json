@@ -11,6 +11,6 @@
   "Can not submit flip during the validation session": "Nu poate trimite flipuri în timpul sesiunii de validare",
   "Error while sending transaction": "Eroare la trimiterea tranzacției",
   "Transaction sent": "Tranzacția a fost trimisă",
-  "Error while deleting flip": "Error while deleting flip",
-  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
+  "Error while deleting flip": "Eroare la ștergerea flipului",
+  "It's not allowed to submit flips with your identity status": "Nu este permis să trimiteți flipuri cu statutul tău de identitate"
 }
