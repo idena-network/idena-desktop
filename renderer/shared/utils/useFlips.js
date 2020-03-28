@@ -176,6 +176,7 @@ function useFlips() {
         flips.filter(
           f =>
             f.type === FlipType.Published &&
+            f.compressedPics &&
             areSame(f.compressedPics, compressedPics)
         ).length > 0
       ) {
