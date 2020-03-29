@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import i18n from 'i18next'
-import {initReactI18next} from 'react-i18next'
-import {loadPersistentStateValue} from './shared/utils/persist'
+import { initReactI18next } from 'react-i18next'
+import { loadPersistentStateValue } from './shared/utils/persist'
 
 import en_translation from '../locales/en/translation.json'
 import en_error from '../locales/en/error.json'
@@ -19,6 +19,8 @@ import ko_translation from '../locales/ko/translation.json'
 import ko_error from '../locales/ko/error.json'
 import hr_translation from '../locales/hr/translation.json'
 import hr_error from '../locales/hr/error.json'
+import id_translation from '../locales/id/translation.json'
+import id_error from '../locales/id/error.json'
 import uk_translation from '../locales/uk/translation.json'
 import uk_error from '../locales/uk/error.json'
 import sr_translation from '../locales/sr/translation.json'
@@ -43,6 +45,7 @@ export const AVAILABLE_LANGS = [
   'zh',
   'ko',
   'hr',
+  'id',
   'hi',
   'uk',
   'sr',
@@ -55,21 +58,22 @@ export const AVAILABLE_LANGS = [
 i18n.use(initReactI18next).init({
   debug: global.isDev,
   resources: {
-    en: {translation: en_translation, error: en_error},
-    fr: {translation: fr_translation, error: fr_error},
-    de: {translation: de_translation, error: de_error},
-    es: {translation: es_translation, error: es_error},
-    ru: {translation: ru_translation, error: ru_error},
-    zh: {translation: zh_translation, error: zh_error},
-    ko: {translation: ko_translation, error: ko_error},
-    hr: {translation: hr_translation, error: hr_error},
-    hi: {translation: hi_translation, error: hi_error},
-    uk: {translation: uk_translation, error: uk_error},
-    sr: {translation: sr_translation, error: sr_error},
-    ro: {translation: ro_translation, error: ro_error},
-    it: {translation: it_translation, error: it_error},
-    pt: {translation: pt_translation, error: pt_error},
-    sl: {translation: sl_translation, error: sl_error},
+    en: { translation: en_translation, error: en_error },
+    fr: { translation: fr_translation, error: fr_error },
+    de: { translation: de_translation, error: de_error },
+    es: { translation: es_translation, error: es_error },
+    ru: { translation: ru_translation, error: ru_error },
+    zh: { translation: zh_translation, error: zh_error },
+    ko: { translation: ko_translation, error: ko_error },
+    hr: { translation: hr_translation, error: hr_error },
+    id: { translation: id_translation, error: id_error },
+    hi: { translation: hi_translation, error: hi_error },
+    uk: { translation: uk_translation, error: uk_error },
+    sr: { translation: sr_translation, error: sr_error },
+    ro: { translation: ro_translation, error: ro_error },
+    it: { translation: it_translation, error: it_error },
+    pt: { translation: pt_translation, error: pt_error },
+    sl: { translation: sl_translation, error: sl_error },
   },
   lng: loadPersistentStateValue('settings', 'lng'),
   fallbackLng: 'en',
