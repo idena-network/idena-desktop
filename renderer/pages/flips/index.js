@@ -43,9 +43,10 @@ function Flips() {
   const {
     availableFlips,
     requiredFlips,
-    flips: publishedFlips = [],
+    flips: publishedFlips,
   } = useIdentityState()
-  const didPublishRequiredFlips = requiredFlips - publishedFlips.length <= 0
+  const didPublishRequiredFlips =
+    requiredFlips - (publishedFlips || []).length <= 0
   const optionalFlips = availableFlips - requiredFlips
 
   return (
