@@ -41,14 +41,20 @@ function Flips() {
       : type === filter
   )
 
-  const {
-    availableFlips,
-    requiredFlips,
-    flips: publishedFlips,
-  } = useIdentityState()
-  const publishedFlipNum = requiredFlips - (publishedFlips || []).length
-  const didPublishRequiredFlips = publishedFlipNum <= 0
-  const optionalFlips = availableFlips - requiredFlips
+  const {availableFlips, requiredFlips, flips: nodeFlips} = useIdentityState()
+  const publishedFlips = (nodeFlips || []).concat(
+    flips.filter(
+      ({type, hash}) =>
+        type === FlipType.Publishing ||
+        (type === FlipType.Published && !flips.includes(hash))
+    )
+  )
+
+  const remainingRequiredFlipsNum = requiredFlips - publishedFlips.length
+  const publishedFlipNum = requiredFlips - remainingRequiredFlipsNum
+  const didPublishRequiredFlips = remainingRequiredFlipsNum <= 0
+  const optionalFlips =
+    availableFlips - Math.max(requiredFlips, publishedFlipNum)
 
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
@@ -131,14 +137,14 @@ function Flips() {
             />
           ))}
           {filter === FlipType.Published &&
-            Array.from({length: publishedFlipNum}).map((_, idx) => (
-              <RequiredFlip key={idx} idx={idx} />
+            Array.from({length: remainingRequiredFlipsNum}).map((_, idx) => (
+              <RequiredFlip key={idx} idx={publishedFlipNum + idx} />
             ))}
           {filter === FlipType.Published &&
             Array.from({length: optionalFlips}).map((_, idx) => (
               <OptionalFlip
                 key={idx}
-                idx={idx}
+                idx={requiredFlips + idx}
                 disabled={!didPublishRequiredFlips}
               />
             ))}

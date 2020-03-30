@@ -20,6 +20,7 @@ import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
 import {pluralize} from '../utils/string'
+import useFlips, {FlipType} from '../utils/useFlips'
 
 function Sidebar() {
   return (
@@ -316,6 +317,8 @@ function CurrentTask({period, identity}) {
     longAnswers,
   } = useValidationState()
 
+  const {flips: persistedFlips} = useFlips()
+
   if (!period || !identity || !identity.state) {
     return null
   }
@@ -344,13 +347,24 @@ function CurrentTask({period, identity}) {
     ].includes(state)
   ) {
     if (period === EpochPeriod.None) {
-      const numOfFlipsToSubmit = requiredFlips - (flips || []).length
-      const shouldSendFlips = numOfFlipsToSubmit > 0
-      const optionalFlips = availableFlips - requiredFlips
+      const publishedFlips = (flips || []).concat(
+        persistedFlips.filter(
+          ({type, hash}) =>
+            type === FlipType.Publishing ||
+            (type === FlipType.Published && !flips.includes(hash))
+        )
+      )
+
+      const remainingRequiredFlipsNum = requiredFlips - publishedFlips.length
+      const shouldSendFlips = remainingRequiredFlipsNum > 0
+      const publishedFlipNum = requiredFlips - remainingRequiredFlipsNum
+
+      const optionalFlips =
+        availableFlips - Math.max(requiredFlips, publishedFlipNum)
       return shouldSendFlips ? (
         <Link href="/flips" color={theme.colors.white}>
-          Create {numOfFlipsToSubmit} required{' '}
-          {pluralize('flip', numOfFlipsToSubmit)}
+          Create {remainingRequiredFlipsNum} required{' '}
+          {pluralize('flip', remainingRequiredFlipsNum)}
         </Link>
       ) : (
         `Wait for validation${
