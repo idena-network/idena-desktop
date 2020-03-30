@@ -38,6 +38,7 @@ import id_error from '../locales/id/error.json'
 
 export const AVAILABLE_LANGS = [
   'en',
+  'id',
   'fr',
   'de',
   'es',
@@ -45,7 +46,6 @@ export const AVAILABLE_LANGS = [
   'zh',
   'ko',
   'hr',
-  'id',
   'hi',
   'uk',
   'sr',
@@ -59,6 +59,7 @@ i18n.use(initReactI18next).init({
   debug: global.isDev,
   resources: {
     en: { translation: en_translation, error: en_error },
+    id: { translation: id_translation, error: id_error },
     fr: { translation: fr_translation, error: fr_error },
     de: { translation: de_translation, error: de_error },
     es: { translation: es_translation, error: es_error },
@@ -66,7 +67,6 @@ i18n.use(initReactI18next).init({
     zh: { translation: zh_translation, error: zh_error },
     ko: { translation: ko_translation, error: ko_error },
     hr: { translation: hr_translation, error: hr_error },
-    id: { translation: id_translation, error: id_error },
     hi: { translation: hi_translation, error: hi_error },
     uk: { translation: uk_translation, error: uk_error },
     sr: { translation: sr_translation, error: sr_error },
