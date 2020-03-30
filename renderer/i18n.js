@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
-import { loadPersistentStateValue } from './shared/utils/persist'
+import { ·initReactI18next· } from 'react-i18next'
+import { ·loadPersistentStateValue· } from './shared/utils/persist'
 
 import en_translation from '../locales/en/translation.json'
 import en_error from '../locales/en/error.json'
