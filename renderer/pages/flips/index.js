@@ -1,11 +1,10 @@
 import React from 'react'
-import {rem, margin} from 'polished'
-
+import {margin} from 'polished'
 import {useTranslation} from 'react-i18next'
 import useLocalStorage from '../../shared/hooks/use-local-storage'
 import Layout from '../../shared/components/layout'
 import {Box, Drawer, PageTitle} from '../../shared/components'
-import theme from '../../shared/theme'
+import theme, {rem} from '../../shared/theme'
 import FlipToolbar, {
   FlipToolbarItem,
 } from '../../screens/flips/components/toolbar'
@@ -15,11 +14,13 @@ import IconLink from '../../shared/components/icon-link'
 import FlipCover, {
   RequiredFlip,
   OptionalFlip,
+  MissingFlip,
 } from '../../screens/flips/components/flip-cover'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {useChainState} from '../../shared/providers/chain-context'
 import DeleteFlipForm from '../../screens/flips/components/delete-flip-form'
 import {useIdentityState} from '../../shared/providers/identity-context'
+import {useEpochState} from '../../shared/providers/epoch-context'
 
 function Flips() {
   const {t} = useTranslation('error')
@@ -41,12 +42,23 @@ function Flips() {
       : type === filter
   )
 
-  const {availableFlips, requiredFlips, flips: nodeFlips} = useIdentityState()
+  const {
+    availableFlips,
+    requiredFlips,
+    flips: nodeFlips,
+    flipKeyWordPairs = [],
+  } = useIdentityState()
 
-  const publishedFlips = (nodeFlips || []).concat(
+  const epoch = useEpochState()
+  if (!epoch) return null
+
+  const {epoch: currentEpoch} = epoch
+
+  const knownFlips = nodeFlips || []
+  const publishedFlips = knownFlips.concat(
     flips.filter(
       ({type, hash}) =>
-        !(nodeFlips || []).includes(hash) &&
+        !knownFlips.includes(hash) &&
         [FlipType.Publishing, FlipType.Published, FlipType.Deleting].includes(
           type
         )
@@ -54,6 +66,25 @@ function Flips() {
   )
   const publishedFlipsNumber = publishedFlips.length
   const remainingRequiredFlipsNumber = requiredFlips - publishedFlipsNumber
+
+  const missingFlipsNumber = knownFlips.filter(
+    hash => !flips.find(f => f.hash === hash)
+  ).length
+  const usedWords = flipKeyWordPairs
+    .filter(
+      ({used, id}) =>
+        used &&
+        !flips.find(
+          // eslint-disable-next-line no-shadow
+          ({type, hint, epoch}) =>
+            type === FlipType.Published &&
+            epoch === currentEpoch &&
+            hint.id === id
+        )
+    )
+    .slice(0, missingFlipsNumber)
+    .map(({id, words}) => ({id, words: words.map(global.loadKeyword)}))
+
   const optionalFlipsNumber =
     availableFlips - Math.max(requiredFlips, publishedFlipsNumber)
 
@@ -97,7 +128,7 @@ function Flips() {
             <FlipCover
               key={flip.id}
               {...flip}
-              width="25%"
+              width={rem(150)}
               onSubmit={async () => {
                 try {
                   if (!flip.hint) {
@@ -106,7 +137,10 @@ function Flips() {
                       body: t('error:Keywords are not specified'),
                     })
                   }
-                  const {result, error} = await submitFlip(flip)
+                  const {result, error} = await submitFlip({
+                    ...flip,
+                    epoch: currentEpoch,
+                  })
 
                   if (error) {
                     addError({
@@ -139,18 +173,25 @@ function Flips() {
               }}
             />
           ))}
-          {filter === FlipType.Published &&
-            Array.from({length: remainingRequiredFlipsNumber}).map((_, idx) => (
-              <RequiredFlip key={idx} idx={publishedFlipsNumber + idx} />
-            ))}
-          {filter === FlipType.Published &&
-            Array.from({length: optionalFlipsNumber}).map((_, idx) => (
-              <OptionalFlip
-                key={idx}
-                idx={requiredFlips + idx}
-                disabled={!didPublishRequiredFlips}
-              />
-            ))}
+          {filter === FlipType.Published && (
+            <>
+              {Array.from({length: missingFlipsNumber}).map((_, idx) => (
+                <MissingFlip key={idx} hint={usedWords[idx]} idx={idx} />
+              ))}
+              {Array.from({length: remainingRequiredFlipsNumber}).map(
+                (_, idx) => (
+                  <RequiredFlip key={idx} idx={publishedFlipsNumber + idx} />
+                )
+              )}
+              {Array.from({length: optionalFlipsNumber}).map((_, idx) => (
+                <OptionalFlip
+                  key={idx}
+                  idx={requiredFlips + idx}
+                  disabled={!didPublishRequiredFlips}
+                />
+              ))}
+            </>
+          )}
         </FlipList>
       </Box>
       <Drawer show={isDeleteFlipFormOpen} onHide={handleCloseDeleteFlipForm}>

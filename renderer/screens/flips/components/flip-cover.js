@@ -8,16 +8,9 @@ import {
   FiUploadCloud,
   FiClock,
 } from 'react-icons/fi'
-import {
-  position,
-  borderRadius,
-  backgrounds,
-  padding,
-  rem,
-  margin,
-} from 'polished'
+import {position, borderRadius, backgrounds, padding, margin} from 'polished'
 import {useTranslation} from 'react-i18next'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import FlipImage from './flip-image'
 import {Box, Text, Link, Absolute, Tooltip} from '../../../shared/components'
 import {composeHint, hasDataUrl} from '../utils/flip'
@@ -116,7 +109,7 @@ function FlipCover({
     global.isDev || (!syncing && canSubmitFlip && pics.every(hasDataUrl))
 
   return (
-    <Box w={width}>
+    <Box w={width} style={{...margin(0, rem(40), 0, 0)}}>
       <Box my={theme.spacings.small} css={position('relative')}>
         <FlipImage src={pics[0]} gradient={isPending} />
         {isPending && (
@@ -146,7 +139,7 @@ function FlipCover({
       </Box>
       <Box my={theme.spacings.normal} css={{marginBottom: 0}} w="150px">
         <Flex justify="space-between" align="center">
-          <Text>{composeHint(hint)}</Text>
+          <FlipCardTitle>{composeHint(hint)}</FlipCardTitle>
           <Box css={position('relative')}>
             {(isDraft || isPublished) && (
               <FiMoreVertical
@@ -206,15 +199,12 @@ function FlipCover({
           </Box>
         </Flex>
       </Box>
-      <Box my={theme.spacings.small}>
-        <Text color={theme.colors.muted}>
-          {new Date(createdAt).toLocaleString()}
-        </Text>
-      </Box>
-      <Box my={theme.spacings.small}>
-        <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
-          {t('Modified')}: {new Date(createdAt || modifiedAt).toLocaleString()}
-        </Text>
+      <Box>
+        <FlipCardSubtitle>
+          {/* <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}> */}
+          {new Date(modifiedAt || createdAt).toLocaleString()}
+          {/* </Text> */}
+        </FlipCardSubtitle>
       </Box>
     </Box>
   )
@@ -233,6 +223,31 @@ FlipCover.propTypes = {
 }
 
 // eslint-disable-next-line react/prop-types
+export function MissingFlip({hint}) {
+  const {t} = useTranslation()
+  return (
+    <Box
+      style={{
+        ...padding(rem(8), 0),
+        width: '25%',
+      }}
+    >
+      <EmptyFlipBox>
+        <img src="/static/flips-cant-icn.svg" alt="Missing on client flip" />
+      </EmptyFlipBox>
+      <Box
+        style={{
+          ...margin(rem(16), 0, 0),
+        }}
+      >
+        <FlipCardTitle>{composeHint(hint)}</FlipCardTitle>
+        <FlipCardSubtitle>{t('Missing on client')}</FlipCardSubtitle>
+      </Box>
+    </Box>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
 export function RequiredFlip({idx}) {
   const {t} = useTranslation()
   return (
@@ -244,7 +259,7 @@ export function RequiredFlip({idx}) {
     >
       <NextLink href="/flips/new">
         <EmptyFlipBox>
-          <EmptyFlipImage />
+          <AddIcon hoverColor={theme.colors.primary} />
         </EmptyFlipBox>
       </NextLink>
       <Box
@@ -302,6 +317,7 @@ function EmptyFlipBox(props) {
       align="center"
       css={{
         border: `dashed 2px ${theme.colors.gray4}`,
+        borderRadius: rem(8),
         cursor: 'pointer',
         height: rem(150),
         width: rem(150),
@@ -315,8 +331,20 @@ function EmptyFlipImage() {
   return <IconLink href="/flips/new" icon={<AddIcon />}></IconLink>
 }
 
-function AddIcon() {
-  return <i className="icon icon--add_btn" style={{fontSize: rem(32)}} />
+// eslint-disable-next-line react/prop-types
+function AddIcon({hoverColor = theme.colors.gray4}) {
+  return (
+    <i
+      className="icon icon--add_btn"
+      style={{color: theme.colors.gray4, fontSize: rem(40)}}
+    >
+      <style jsx>{`
+        i:hover {
+          color: ${hoverColor} !important;
+        }
+      `}</style>
+    </i>
+  )
 }
 
 function FlipCardTitle(props) {
