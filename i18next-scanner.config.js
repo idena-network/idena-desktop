@@ -1,5 +1,6 @@
 const AVAILABLE_LANGS = [
   'en',
+  'id',
   'fr',
   'de',
   'es',
@@ -7,14 +8,13 @@ const AVAILABLE_LANGS = [
   'zh',
   'ko',
   'hr',
-  'id',
   'uk',
   'sr',
   'ro',
   'it',
   'pt',
   'sl',
-  'hi',
+  'hi'
 ]
 
 module.exports = {
