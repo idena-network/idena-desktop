@@ -19,8 +19,6 @@ import ko_translation from '../locales/ko/translation.json'
 import ko_error from '../locales/ko/error.json'
 import hr_translation from '../locales/hr/translation.json'
 import hr_error from '../locales/hr/error.json'
-import id_translation from '../locales/id/translation.json'
-import id_error from '../locales/id/error.json'
 import uk_translation from '../locales/uk/translation.json'
 import uk_error from '../locales/uk/error.json'
 import sr_translation from '../locales/sr/translation.json'
@@ -35,6 +33,8 @@ import sl_translation from '../locales/sl/translation.json'
 import sl_error from '../locales/sl/error.json'
 import hi_translation from '../locales/hi/translation.json'
 import hi_error from '../locales/hi/error.json'
+import id_translation from '../locales/id/translation.json'
+import id_error from '../locales/id/error.json'
 
 export const AVAILABLE_LANGS = [
   'en',
