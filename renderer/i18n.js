@@ -1,10 +1,12 @@
 /* eslint-disable camelcase */
 import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
-import { loadPersistentStateValue } from './shared/utils/persist'
+import {initReactI18next} from 'react-i18next'
+import {loadPersistentStateValue} from './shared/utils/persist'
 
 import en_translation from '../locales/en/translation.json'
 import en_error from '../locales/en/error.json'
+import id_translation from '../locales/id/translation.json'
+import id_error from '../locales/id/error.json'
 import fr_translation from '../locales/fr/translation.json'
 import fr_error from '../locales/fr/error.json'
 import de_translation from '../locales/de/translation.json'
@@ -33,8 +35,7 @@ import sl_translation from '../locales/sl/translation.json'
 import sl_error from '../locales/sl/error.json'
 import hi_translation from '../locales/hi/translation.json'
 import hi_error from '../locales/hi/error.json'
-import id_translation from '../locales/id/translation.json'
-import id_error from '../locales/id/error.json'
+
 
 export const AVAILABLE_LANGS = [
   'en',
