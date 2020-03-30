@@ -2,6 +2,7 @@ import React, {useReducer} from 'react'
 import {useRouter} from 'next/router'
 import {rem} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {State} from 'xstate'
 import Layout from '../../shared/components/layout'
 import {Drawer, Box, PageTitle, Absolute} from '../../shared/components'
 import SendInviteForm from '../../screens/contacts/components/send-invite-form'
@@ -22,6 +23,7 @@ import {FlatButton} from '../../shared/components/button'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {loadPersistentState} from '../../shared/utils/persist'
+import {loadValidationState} from '../../screens/validation/machine'
 
 function Dashboard() {
   const router = useRouter()
@@ -112,7 +114,10 @@ function Dashboard() {
           />
         </Drawer>
 
-        {!validationResultsEvidence[currentEpoch] && (
+        {shouldSeeValidationResults(
+          currentEpoch,
+          validationResultsEvidence
+        ) && (
           <Absolute bottom={theme.spacings.normal} left="0" right="0">
             <Notification
               type={NotificationType.Info}
@@ -133,6 +138,18 @@ function Dashboard() {
       </Layout>
     </InviteProvider>
   )
+}
+
+function shouldSeeValidationResults(currentEpoch, evidence) {
+  const validationStateDefinition = loadValidationState()
+  if (validationStateDefinition) {
+    const {
+      done,
+      context: {epoch},
+    } = State.create(validationStateDefinition)
+    return done && currentEpoch - epoch === 1 ? !evidence[currentEpoch] : false
+  }
+  return false
 }
 
 export default Dashboard
