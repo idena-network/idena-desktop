@@ -351,7 +351,7 @@ function CurrentTask({period, identity}) {
         persistedFlips.filter(
           ({type, hash}) =>
             type === FlipType.Publishing ||
-            (type === FlipType.Published && !flips.includes(hash))
+            (type === FlipType.Published && !(flips || []).includes(hash))
         )
       )
 

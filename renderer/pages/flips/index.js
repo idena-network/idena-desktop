@@ -46,7 +46,7 @@ function Flips() {
     flips.filter(
       ({type, hash}) =>
         type === FlipType.Publishing ||
-        (type === FlipType.Published && !nodeFlips.includes(hash))
+        (type === FlipType.Published && !(nodeFlips || []).includes(hash))
     )
   )
 
