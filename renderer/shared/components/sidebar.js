@@ -350,28 +350,32 @@ function CurrentTask({period, identity}) {
       const publishedFlips = (flips || []).concat(
         persistedFlips.filter(
           ({type, hash}) =>
-            type === FlipType.Publishing ||
-            (type === FlipType.Published && !(flips || []).includes(hash))
+            !(flips || []).includes(hash) &&
+            [
+              FlipType.Publishing,
+              FlipType.Published,
+              FlipType.Deleting,
+            ].includes(type)
         )
       )
+      const publishedFlipsNumber = publishedFlips.length
+      const remainingRequiredFlipsNumber = requiredFlips - publishedFlipsNumber
+      const optionalFlipsNumber =
+        availableFlips - Math.max(requiredFlips, publishedFlipsNumber)
 
-      const remainingRequiredFlipsNum = requiredFlips - publishedFlips.length
-      const shouldSendFlips = remainingRequiredFlipsNum > 0
-      const publishedFlipNum = requiredFlips - remainingRequiredFlipsNum
+      const shouldSendFlips = remainingRequiredFlipsNumber > 0
 
-      const optionalFlips =
-        availableFlips - Math.max(requiredFlips, publishedFlipNum)
       return shouldSendFlips ? (
         <Link href="/flips" color={theme.colors.white}>
-          Create {remainingRequiredFlipsNum} required{' '}
-          {pluralize('flip', remainingRequiredFlipsNum)}
+          Create {remainingRequiredFlipsNumber} required{' '}
+          {pluralize('flip', remainingRequiredFlipsNumber)}
         </Link>
       ) : (
         `Wait for validation${
-          optionalFlips > 0
-            ? ` or create ${optionalFlips} optional ${pluralize(
+          optionalFlipsNumber > 0
+            ? ` or create ${optionalFlipsNumber} optional ${pluralize(
                 'flip',
-                optionalFlips
+                optionalFlipsNumber
               )}`
             : ''
         }`
