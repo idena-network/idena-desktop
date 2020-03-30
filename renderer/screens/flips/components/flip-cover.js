@@ -232,7 +232,32 @@ FlipCover.propTypes = {
   onDelete: PropTypes.func,
 }
 
-export default FlipCover
+// eslint-disable-next-line react/prop-types
+export function RequiredFlip({idx}) {
+  const {t} = useTranslation()
+  return (
+    <Box
+      style={{
+        ...padding(rem(8), 0),
+        width: '25%',
+      }}
+    >
+      <NextLink href="/flips/new">
+        <EmptyFlipBox>
+          <EmptyFlipImage />
+        </EmptyFlipBox>
+      </NextLink>
+      <Box
+        style={{
+          ...margin(rem(16), 0, 0),
+        }}
+      >
+        <FlipCardTitle>Flip #{idx + 1}</FlipCardTitle>
+        <FlipCardSubtitle>{t('Required')}</FlipCardSubtitle>
+      </Box>
+    </Box>
+  )
+}
 
 // eslint-disable-next-line react/prop-types
 export function OptionalFlip({idx, disabled}) {
@@ -248,7 +273,7 @@ export function OptionalFlip({idx, disabled}) {
       {disabled ? (
         <EmptyFlipBox>
           <Tooltip content={t('Create required flips first')}>
-            <i className="icon icon--add_btn" />
+            <AddIcon />
           </Tooltip>
         </EmptyFlipBox>
       ) : (
@@ -287,12 +312,11 @@ function EmptyFlipBox(props) {
 }
 
 function EmptyFlipImage() {
-  return (
-    <IconLink
-      href="/flips/new"
-      icon={<i className="icon icon--add_btn" />}
-    ></IconLink>
-  )
+  return <IconLink href="/flips/new" icon={<AddIcon />}></IconLink>
+}
+
+function AddIcon() {
+  return <i className="icon icon--add_btn" style={{fontSize: rem(32)}} />
 }
 
 function FlipCardTitle(props) {
@@ -306,3 +330,5 @@ function FlipCardTitle(props) {
 function FlipCardSubtitle(props) {
   return <Text color={theme.colors.muted} {...props} />
 }
+
+export default FlipCover

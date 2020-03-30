@@ -13,6 +13,7 @@ import useFlips, {FlipType} from '../../shared/utils/useFlips'
 import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
 import FlipCover, {
+  RequiredFlip,
   OptionalFlip,
 } from '../../screens/flips/components/flip-cover'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
@@ -45,8 +46,8 @@ function Flips() {
     requiredFlips,
     flips: publishedFlips,
   } = useIdentityState()
-  const didPublishRequiredFlips =
-    requiredFlips - (publishedFlips || []).length <= 0
+  const publishedFlipNum = requiredFlips - (publishedFlips || []).length
+  const didPublishRequiredFlips = publishedFlipNum <= 0
   const optionalFlips = availableFlips - requiredFlips
 
   return (
@@ -129,6 +130,10 @@ function Flips() {
               }}
             />
           ))}
+          {filter === FlipType.Published &&
+            Array.from({length: publishedFlipNum}).map((_, idx) => (
+              <RequiredFlip key={idx} idx={idx} />
+            ))}
           {filter === FlipType.Published &&
             Array.from({length: optionalFlips}).map((_, idx) => (
               <OptionalFlip
