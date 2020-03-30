@@ -12,10 +12,13 @@ import FlipToolbar, {
 import useFlips, {FlipType} from '../../shared/utils/useFlips'
 import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
-import FlipCover from '../../screens/flips/components/flip-cover'
+import FlipCover, {
+  OptionalFlip,
+} from '../../screens/flips/components/flip-cover'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {useChainState} from '../../shared/providers/chain-context'
 import DeleteFlipForm from '../../screens/flips/components/delete-flip-form'
+import {useIdentityState} from '../../shared/providers/identity-context'
 
 function Flips() {
   const {t} = useTranslation('error')
@@ -36,6 +39,14 @@ function Flips() {
       ? [FlipType.Publishing, FlipType.Deleting, filter].includes(type)
       : type === filter
   )
+
+  const {
+    availableFlips,
+    requiredFlips,
+    flips: publishedFlips = [],
+  } = useIdentityState()
+  const didPublishRequiredFlips = requiredFlips - publishedFlips.length <= 0
+  const optionalFlips = availableFlips - requiredFlips
 
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
@@ -117,6 +128,14 @@ function Flips() {
               }}
             />
           ))}
+          {filter === FlipType.Published &&
+            Array.from({length: optionalFlips}).map((_, idx) => (
+              <OptionalFlip
+                key={idx}
+                idx={idx}
+                disabled={!didPublishRequiredFlips}
+              />
+            ))}
         </FlipList>
       </Box>
       <Drawer show={isDeleteFlipFormOpen} onHide={handleCloseDeleteFlipForm}>

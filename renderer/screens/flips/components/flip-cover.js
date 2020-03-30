@@ -1,4 +1,5 @@
 import React, {useState, useRef, forwardRef} from 'react'
+import NextLink from 'next/link'
 import PropTypes from 'prop-types'
 import {
   FiMoreVertical,
@@ -7,11 +8,18 @@ import {
   FiUploadCloud,
   FiClock,
 } from 'react-icons/fi'
-import {position, borderRadius, backgrounds, padding, rem} from 'polished'
+import {
+  position,
+  borderRadius,
+  backgrounds,
+  padding,
+  rem,
+  margin,
+} from 'polished'
 import {useTranslation} from 'react-i18next'
 import theme from '../../../shared/theme'
 import FlipImage from './flip-image'
-import {Box, Text, Link, Absolute} from '../../../shared/components'
+import {Box, Text, Link, Absolute, Tooltip} from '../../../shared/components'
 import {composeHint, hasDataUrl} from '../utils/flip'
 import Flex from '../../../shared/components/flex'
 import {FlatButton} from '../../../shared/components/button'
@@ -21,6 +29,7 @@ import useClickOutside from '../../../shared/hooks/use-click-outside'
 import useHover from '../../../shared/hooks/use-hover'
 import {FlipType} from '../../../shared/utils/useFlips'
 import {useChainState} from '../../../shared/providers/chain-context'
+import IconLink from '../../../shared/components/icon-link'
 
 // eslint-disable-next-line react/display-name
 const FlipMenu = forwardRef((props, ref) => (
@@ -224,3 +233,76 @@ FlipCover.propTypes = {
 }
 
 export default FlipCover
+
+// eslint-disable-next-line react/prop-types
+export function OptionalFlip({idx, disabled}) {
+  const {t} = useTranslation()
+  return (
+    <Box
+      style={{
+        ...padding(rem(8), 0),
+        width: '25%',
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      {disabled ? (
+        <EmptyFlipBox>
+          <Tooltip content={t('Create required flips first')}>
+            <i className="icon icon--add_btn" />
+          </Tooltip>
+        </EmptyFlipBox>
+      ) : (
+        <NextLink href="/flips/new">
+          <EmptyFlipBox>
+            <EmptyFlipImage />
+          </EmptyFlipBox>
+        </NextLink>
+      )}
+      <Box
+        style={{
+          ...margin(rem(16), 0, 0),
+        }}
+      >
+        <FlipCardTitle>Flip #{idx + 1}</FlipCardTitle>
+        <FlipCardSubtitle>{t('Optional')}</FlipCardSubtitle>
+      </Box>
+    </Box>
+  )
+}
+
+function EmptyFlipBox(props) {
+  return (
+    <Flex
+      justify="center"
+      align="center"
+      css={{
+        border: `dashed 2px ${theme.colors.gray4}`,
+        cursor: 'pointer',
+        height: rem(150),
+        width: rem(150),
+      }}
+      {...props}
+    />
+  )
+}
+
+function EmptyFlipImage() {
+  return (
+    <IconLink
+      href="/flips/new"
+      icon={<i className="icon icon--add_btn" />}
+    ></IconLink>
+  )
+}
+
+function FlipCardTitle(props) {
+  return (
+    <Box>
+      <Text fontWeight={500} style={{...margin(0, 0, '1px')}} {...props} />
+    </Box>
+  )
+}
+
+function FlipCardSubtitle(props) {
+  return <Text color={theme.colors.muted} {...props} />
+}

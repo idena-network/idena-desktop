@@ -19,6 +19,7 @@ import {
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
+import {pluralize} from '../utils/string'
 
 function Sidebar() {
   return (
@@ -319,7 +320,13 @@ function CurrentTask({period, identity}) {
     return null
   }
 
-  const {requiredFlips, flips, state, canActivateInvite} = identity
+  const {
+    requiredFlips,
+    flips,
+    availableFlips,
+    state,
+    canActivateInvite,
+  } = identity
 
   if (canActivateInvite && period === EpochPeriod.None) {
     return (
@@ -339,12 +346,21 @@ function CurrentTask({period, identity}) {
     if (period === EpochPeriod.None) {
       const numOfFlipsToSubmit = requiredFlips - (flips || []).length
       const shouldSendFlips = numOfFlipsToSubmit > 0
+      const optionalFlips = availableFlips - requiredFlips
       return shouldSendFlips ? (
         <Link href="/flips" color={theme.colors.white}>
-          Create {numOfFlipsToSubmit} flip{numOfFlipsToSubmit > 1 ? 's' : ''}
+          Create {numOfFlipsToSubmit} required{' '}
+          {pluralize('flip', numOfFlipsToSubmit)}
         </Link>
       ) : (
-        'Wait for validation'
+        `Wait for validation${
+          optionalFlips > 0
+            ? ` or create ${optionalFlips} optional ${pluralize(
+                'flip',
+                optionalFlips
+              )}`
+            : ''
+        }`
       )
     }
     if (validationRunning) {
