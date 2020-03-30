@@ -168,5 +168,7 @@
   "Draw": "Draw",
   "Clear": "Clear",
   "Required": "Required",
-  "Missing on client": "Missing on client"
+  "Missing on client": "Missing on client",
+  "Validation results": "Validation results",
+  "Click to see your validation results": "Click to see your validation results"
 }

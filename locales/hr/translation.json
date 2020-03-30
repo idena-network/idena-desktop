@@ -168,5 +168,7 @@
   "Draw": "Crtaj",
   "Clear": "Obriši",
   "Required": "Neophodno",
-  "Missing on client": "Nedostaje na klijentu"
+  "Missing on client": "Nedostaje na klijentu",
+  "Validation results": "Validation results",
+  "Click to see your validation results": "Click to see your validation results"
 }

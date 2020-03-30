@@ -181,5 +181,7 @@
   "Save": "Save",
   "Use default": "Use default",
   "Node api key": "Node api key",
-  "Built-in node log": "Built-in node log"
+  "Built-in node log": "Built-in node log",
+  "Validation results": "Validation results",
+  "Click to see your validation results": "Click to see your validation results"
 }

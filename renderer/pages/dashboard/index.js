@@ -1,10 +1,9 @@
-import React from 'react'
+import React, {useReducer} from 'react'
 import {useRouter} from 'next/router'
 import {rem} from 'polished'
 import {useTranslation} from 'react-i18next'
-
 import Layout from '../../shared/components/layout'
-import {Drawer, Box, PageTitle} from '../../shared/components'
+import {Drawer, Box, PageTitle, Absolute} from '../../shared/components'
 import SendInviteForm from '../../screens/contacts/components/send-invite-form'
 import theme from '../../shared/theme'
 import {InviteProvider} from '../../shared/providers/invite-context'
@@ -17,6 +16,12 @@ import {NetProfile} from '../../screens/dashboard/components/net-profile'
 import {useChainState} from '../../shared/providers/chain-context'
 import KillForm from '../../screens/wallets/components/kill-form'
 import {useIdentityState} from '../../shared/providers/identity-context'
+import {Notification} from '../../shared/components/notifications'
+import {NotificationType} from '../../shared/providers/notification-context'
+import {FlatButton} from '../../shared/components/button'
+import {usePersistence} from '../../shared/hooks/use-persistent-state'
+import {useEpochState} from '../../shared/providers/epoch-context'
+import {loadPersistentState} from '../../shared/utils/persist'
 
 function Dashboard() {
   const router = useRouter()
@@ -33,6 +38,20 @@ function Dashboard() {
   const {canTerminate, invites: invitesCount} = useIdentityState()
 
   const {t} = useTranslation()
+
+  const epoch = useEpochState()
+
+  const [validationResultsEvidence, dispatchEvidence] = usePersistence(
+    useReducer(
+      (state, action) => ({...state, ...action}),
+      loadPersistentState('validationResults') || {}
+    ),
+    'validationResults'
+  )
+
+  if (!epoch) return null
+
+  const {epoch: currentEpoch} = epoch
 
   return (
     <InviteProvider>
@@ -92,6 +111,25 @@ function Dashboard() {
             onFail={handleCloseWithdrawStakeForm}
           />
         </Drawer>
+
+        {!validationResultsEvidence[currentEpoch] && (
+          <Absolute bottom={theme.spacings.normal} left="0" right="0">
+            <Notification
+              type={NotificationType.Info}
+              title={t('Validation results')}
+              body={
+                <FlatButton
+                  onClick={() => {
+                    dispatchEvidence({[currentEpoch]: true})
+                    global.openExternal('https://scan.idena.io')
+                  }}
+                >
+                  {t('Click to see your validation results')}
+                </FlatButton>
+              }
+            ></Notification>
+          </Absolute>
+        )}
       </Layout>
     </InviteProvider>
   )

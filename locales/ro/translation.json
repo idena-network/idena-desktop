@@ -168,5 +168,7 @@
   "Draw": "Desenați",
   "Clear": "curăţa",
   "Required": "Necesar",
-  "Missing on client": "Lipsesc in client"
+  "Missing on client": "Lipsesc in client",
+  "Validation results": "Validation results",
+  "Click to see your validation results": "Click to see your validation results"
 }

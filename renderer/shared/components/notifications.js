@@ -25,7 +25,7 @@ function Notifications() {
   )
 }
 
-function Notification({
+export function Notification({
   title,
   body,
   type = NotificationType.Info,
