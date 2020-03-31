@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, {useEffect, useReducer, useRef} from 'react'
 import {margin, rem} from 'polished'
-
+import Ansi from 'ansi-to-react'
 import {
   Box,
   Input,
@@ -280,7 +280,7 @@ function NodeSettings() {
             }}
           >
             {state.logs.map((log, idx) => (
-              <div key={idx}>{log}</div>
+              <Ansi key={idx}>{log}</Ansi>
             ))}
           </div>
         </div>
