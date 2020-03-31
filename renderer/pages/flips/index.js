@@ -46,7 +46,7 @@ function Flips() {
     availableFlips,
     requiredFlips,
     flips: nodeFlips,
-    flipKeyWordPairs = [],
+    flipKeyWordPairs,
   } = useIdentityState()
 
   const epoch = useEpochState()
@@ -70,7 +70,7 @@ function Flips() {
   const missingFlipsNumber = knownFlips.filter(
     hash => !flips.find(f => f.hash === hash)
   ).length
-  const usedWords = flipKeyWordPairs
+  const usedWords = (flipKeyWordPairs || [])
     .filter(
       ({used, id}) =>
         used &&
