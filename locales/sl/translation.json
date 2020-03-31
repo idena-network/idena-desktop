@@ -168,5 +168,6 @@
   "Or start drawing": "Or start drawing",
   "Draw": "Draw",
   "Clear": "Clear",
-  "Required": "Required"
+  "Required": "Required",
+  "Missing on client": "Missing on client"
 }
