@@ -34,6 +34,8 @@ const getNodeChainDbFolder = () =>
 
 const getNodeLogsFile = () => path.join(getNodeDataDir(), 'logs', 'output.log')
 
+const getNodeErrorFile = () => path.join(getNodeDataDir(), 'logs', 'error.log')
+
 const getReleaseUrl = async () => {
   const {data} = await axios.get(idenaNodeReleasesUrl)
   let assetName = 'idena-node-linux'
@@ -99,6 +101,17 @@ async function downloadNode(onProgress) {
   })
 }
 
+function writeError(err) {
+  try {
+    fs.appendFileSync(
+      getNodeErrorFile(),
+      `-- node error, time: ${new Date().toUTCString()} --\n${err}\n -- end of error -- \n`
+    )
+  } catch (e) {
+    console.log(`cannot write error to file: ${e.toString()}`)
+  }
+}
+
 async function startNode(
   port,
   tcpPort,
@@ -140,6 +153,7 @@ async function startNode(
 
   idenaNode.stderr.on('data', err => {
     const str = err.toString()
+    writeError(str)
     if (onLog) onLog(str.split('\n').filter(x => x))
     if (useLogging) {
       console.error(str)
