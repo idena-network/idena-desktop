@@ -16,7 +16,10 @@ import UserInfo from '../../screens/dashboard/components/user-info'
 import {NetProfile} from '../../screens/dashboard/components/net-profile'
 import {useChainState} from '../../shared/providers/chain-context'
 import KillForm from '../../screens/wallets/components/kill-form'
-import {useIdentityState} from '../../shared/providers/identity-context'
+import {
+  useIdentityState,
+  IdentityStatus,
+} from '../../shared/providers/identity-context'
 import {Notification} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
 import {FlatButton} from '../../shared/components/button'
@@ -37,7 +40,17 @@ function Dashboard() {
   )
   const handleCloseWithdrawStakeForm = () => setIsWithdrawStakeFormOpen(false)
 
-  const {canTerminate, invites: invitesCount} = useIdentityState()
+  const {
+    address,
+    state,
+    canTerminate,
+    invites: invitesCount,
+  } = useIdentityState()
+  const isValidationSucceeded = [
+    IdentityStatus.Newbie,
+    IdentityStatus.Verified,
+    IdentityStatus.Human,
+  ].includes(state)
 
   const {t} = useTranslation()
 
@@ -45,6 +58,7 @@ function Dashboard() {
 
   const [validationResultsEvidence, dispatchEvidence] = usePersistence(
     useReducer(
+      // eslint-disable-next-line no-shadow
       (state, action) => ({...state, ...action}),
       loadPersistentState('validationResults') || {}
     ),
@@ -126,7 +140,11 @@ function Dashboard() {
                 <FlatButton
                   onClick={() => {
                     dispatchEvidence({[currentEpoch]: true})
-                    global.openExternal('https://scan.idena.io')
+                    global.openExternal(
+                      `https://scan.idena.io/${
+                        isValidationSucceeded ? 'reward' : 'answers'
+                      }?epoch=${currentEpoch}&identity=${address}`
+                    )
                   }}
                 >
                   {t('Click to see your validation results')}
