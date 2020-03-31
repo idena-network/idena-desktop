@@ -10,5 +10,7 @@
   "You cannot submit more flips until the next validation": "Nie możesz wysłać więcej flipów, poczekaj do następnej walidacji",
   "Can not submit flip during the validation session": "Nie można wysłać flipa w trakcie walidacji",
   "Error while sending transaction": "Błąd podczas wysyłania transakcji",
-  "Transaction sent": "Transakcja wysłana"
+  "Transaction sent": "Transakcja wysłana",
+  "Error while deleting flip": "Błąd podczas usuwania flipa",
+  "It's not allowed to submit flips with your identity status": "Przesyłanie flipów ze statusem tożsamości jest niedozwolone"
 }
