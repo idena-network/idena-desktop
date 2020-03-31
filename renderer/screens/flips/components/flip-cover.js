@@ -1,4 +1,5 @@
 import React, {useState, useRef, forwardRef} from 'react'
+import NextLink from 'next/link'
 import PropTypes from 'prop-types'
 import {
   FiMoreVertical,
@@ -7,11 +8,11 @@ import {
   FiUploadCloud,
   FiClock,
 } from 'react-icons/fi'
-import {position, borderRadius, backgrounds, padding, rem} from 'polished'
+import {position, borderRadius, backgrounds, padding, margin} from 'polished'
 import {useTranslation} from 'react-i18next'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import FlipImage from './flip-image'
-import {Box, Text, Link, Absolute} from '../../../shared/components'
+import {Box, Text, Link, Absolute, Tooltip} from '../../../shared/components'
 import {composeHint, hasDataUrl} from '../utils/flip'
 import Flex from '../../../shared/components/flex'
 import {FlatButton} from '../../../shared/components/button'
@@ -21,6 +22,7 @@ import useClickOutside from '../../../shared/hooks/use-click-outside'
 import useHover from '../../../shared/hooks/use-hover'
 import {FlipType} from '../../../shared/utils/useFlips'
 import {useChainState} from '../../../shared/providers/chain-context'
+import IconLink from '../../../shared/components/icon-link'
 
 // eslint-disable-next-line react/display-name
 const FlipMenu = forwardRef((props, ref) => (
@@ -107,7 +109,7 @@ function FlipCover({
     global.isDev || (!syncing && canSubmitFlip && pics.every(hasDataUrl))
 
   return (
-    <Box w={width}>
+    <Box w={width} style={{...margin(0, rem(40), 0, 0)}}>
       <Box my={theme.spacings.small} css={position('relative')}>
         <FlipImage src={pics[0]} gradient={isPending} />
         {isPending && (
@@ -137,7 +139,7 @@ function FlipCover({
       </Box>
       <Box my={theme.spacings.normal} css={{marginBottom: 0}} w="150px">
         <Flex justify="space-between" align="center">
-          <Text>{composeHint(hint)}</Text>
+          <FlipCardTitle>{composeHint(hint)}</FlipCardTitle>
           <Box css={position('relative')}>
             {(isDraft || isPublished) && (
               <FiMoreVertical
@@ -197,15 +199,10 @@ function FlipCover({
           </Box>
         </Flex>
       </Box>
-      <Box my={theme.spacings.small}>
-        <Text color={theme.colors.muted}>
-          {new Date(createdAt).toLocaleString()}
-        </Text>
-      </Box>
-      <Box my={theme.spacings.small}>
-        <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}>
-          {t('Modified')}: {new Date(createdAt || modifiedAt).toLocaleString()}
-        </Text>
+      <Box>
+        <FlipCardSubtitle>
+          {new Date(modifiedAt || createdAt).toLocaleString()}
+        </FlipCardSubtitle>
       </Box>
     </Box>
   )
@@ -221,6 +218,135 @@ FlipCover.propTypes = {
   width: PropTypes.string,
   onSubmit: PropTypes.func,
   onDelete: PropTypes.func,
+}
+
+// eslint-disable-next-line react/prop-types
+export function MissingFlip({hint}) {
+  const {t} = useTranslation()
+  return (
+    <Box
+      style={{
+        ...padding(rem(8), 0),
+        width: '25%',
+      }}
+    >
+      <EmptyFlipBox cursor="auto">
+        <img src="/static/flips-cant-icn.svg" alt="Missing on client flip" />
+      </EmptyFlipBox>
+      <Box
+        style={{
+          ...margin(rem(16), 0, 0),
+        }}
+      >
+        <FlipCardTitle>{composeHint(hint)}</FlipCardTitle>
+        <FlipCardSubtitle>{t('Missing on client')}</FlipCardSubtitle>
+      </Box>
+    </Box>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+export function RequiredFlip({idx}) {
+  const {t} = useTranslation()
+  return (
+    <Box
+      style={{
+        ...padding(rem(8), 0),
+        width: '25%',
+      }}
+    >
+      <NextLink href="/flips/new">
+        <EmptyFlipBox hoverColor={theme.colors.primary}>
+          <AddIcon />
+        </EmptyFlipBox>
+      </NextLink>
+      <Box
+        style={{
+          ...margin(rem(16), 0, 0),
+        }}
+      >
+        <FlipCardTitle>Flip #{idx + 1}</FlipCardTitle>
+        <FlipCardSubtitle>{t('Required')}</FlipCardSubtitle>
+      </Box>
+    </Box>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+export function OptionalFlip({idx, disabled}) {
+  const {t} = useTranslation()
+  return (
+    <Box
+      style={{
+        ...padding(rem(8), 0),
+        width: '25%',
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      {disabled ? (
+        <EmptyFlipBox>
+          <Tooltip content={t('Create required flips first')}>
+            <AddIcon />
+          </Tooltip>
+        </EmptyFlipBox>
+      ) : (
+        <NextLink href="/flips/new">
+          <EmptyFlipBox>
+            <EmptyFlipImage />
+          </EmptyFlipBox>
+        </NextLink>
+      )}
+      <Box
+        style={{
+          ...margin(rem(16), 0, 0),
+        }}
+      >
+        <FlipCardTitle>Flip #{idx + 1}</FlipCardTitle>
+        <FlipCardSubtitle>{t('Optional')}</FlipCardSubtitle>
+      </Box>
+    </Box>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+function EmptyFlipBox({cursor = 'pointer', hoverColor, ...props}) {
+  return (
+    <Flex
+      justify="center"
+      align="center"
+      hoverColor={hoverColor}
+      css={{
+        border: `dashed 2px ${theme.colors.gray4}`,
+        borderRadius: rem(8),
+        color: theme.colors.muted,
+        cursor,
+        height: rem(150),
+        width: rem(150),
+      }}
+      {...props}
+    />
+  )
+}
+
+function EmptyFlipImage() {
+  return <IconLink href="/flips/new" icon={<AddIcon />}></IconLink>
+}
+
+// eslint-disable-next-line react/prop-types
+function AddIcon() {
+  return <i className="icon icon--add_btn" style={{fontSize: rem(40)}} />
+}
+
+function FlipCardTitle(props) {
+  return (
+    <Box>
+      <Text fontWeight={500} style={{...margin(0, 0, '1px')}} {...props} />
+    </Box>
+  )
+}
+
+function FlipCardSubtitle(props) {
+  return <Text color={theme.colors.muted} {...props} />
 }
 
 export default FlipCover

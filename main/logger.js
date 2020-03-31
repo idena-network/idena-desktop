@@ -1,3 +1,4 @@
+const {platform, getSystemVersion} = require('process')
 const path = require('path')
 const pino = require('pino')
 
@@ -6,7 +7,7 @@ const appDataPath = require('./app-data-path')
 const logger = pino(
   {
     level: process.env.LOG_LEVEL || 'debug',
-    base: {pid: process.pid},
+    base: {pid: process.pid, os: `${platform} ${getSystemVersion()}`},
     redact: [
       'hex',
       'data[*].hex',
@@ -23,6 +24,9 @@ const logger = pino(
       'context.longFlips[*].privateHex',
       'context.shortFlips[*].images',
       'context.longFlips[*].images',
+      'context.longFlips[*].images',
+      'internalApiKey',
+      'externalApiKey',
     ],
     timestamp: () => `,"time":"${new Date().toISOString()}"`,
   },

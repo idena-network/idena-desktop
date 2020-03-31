@@ -540,7 +540,7 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
                 paddingRight: rem(20),
               }}
             >
-              {t('Corp image')}
+              {t('Crop image')}
               <Flex align="center">
                 <IconButton
                   onClick={() => {
