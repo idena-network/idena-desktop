@@ -39,7 +39,7 @@ export function NetProfile() {
         tooltip={
           state === 'Newbie' ? (
             <>
-              <div>{t('Solve more than 10 flips')}</div>
+              <div>{t('Solve more than 12 flips')}</div>
               <div>{t('to become Verified')}</div>
             </>
           ) : null
