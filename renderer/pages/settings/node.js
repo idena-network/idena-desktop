@@ -1,8 +1,9 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, {useEffect, useReducer, useRef} from 'react'
-import {margin, rem} from 'polished'
+import React, {useEffect, useReducer, useRef, useState} from 'react'
+import {margin, rem, padding, borderRadius} from 'polished'
 import Ansi from 'ansi-to-react'
+import {FiEye, FiEyeOff} from 'react-icons/fi'
 import {
   Box,
   Input,
@@ -119,6 +120,8 @@ function NodeSettings() {
       title: 'Settings updated',
       body: `Connected to ${state.url}`,
     })
+
+  const [revealApiKey, setRevealApiKey] = useState(false)
 
   return (
     <SettingsLayout>
@@ -238,17 +241,40 @@ function NodeSettings() {
             <Label htmlFor="url" style={{width: 80}}>
               Node api key{' '}
             </Label>
-            <Input
-              id="key"
-              value={state.apiKey}
-              onChange={e =>
-                dispatch({type: 'SET_API_KEY', data: e.target.value})
-              }
-              style={{
-                ...margin(0, theme.spacings.normal, 0, theme.spacings.small),
-                width: rem(300),
-              }}
-            />
+            <Box style={{position: 'relative'}}>
+              <Input
+                id="key"
+                value={state.apiKey}
+                type={revealApiKey ? 'text' : 'password'}
+                onChange={e =>
+                  dispatch({type: 'SET_API_KEY', data: e.target.value})
+                }
+                style={{
+                  ...margin(0, theme.spacings.normal, 0, theme.spacings.small),
+                  width: rem(300),
+                }}
+              ></Input>
+              <Box
+                style={{
+                  background: theme.colors.gray2,
+                  ...borderRadius('right', rem(6)),
+                  cursor: 'pointer',
+                  fontSize: rem(20),
+                  position: 'absolute',
+                  ...padding(0, rem(8)),
+                  top: 0,
+                  height: '100%',
+                  right: '12px',
+                }}
+                onClick={() => setRevealApiKey(!revealApiKey)}
+              >
+                {revealApiKey ? (
+                  <FiEyeOff style={{transform: 'translate(0, 50%)'}} />
+                ) : (
+                  <FiEye style={{transform: 'translate(0, 50%)'}} />
+                )}
+              </Box>
+            </Box>
             <Button
               onClick={() => {
                 saveExternalApiKey(state.apiKey)
