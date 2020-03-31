@@ -201,9 +201,7 @@ function FlipCover({
       </Box>
       <Box>
         <FlipCardSubtitle>
-          {/* <Text color={theme.colors.muted} fontSize={theme.fontSizes.small}> */}
           {new Date(modifiedAt || createdAt).toLocaleString()}
-          {/* </Text> */}
         </FlipCardSubtitle>
       </Box>
     </Box>
@@ -232,7 +230,7 @@ export function MissingFlip({hint}) {
         width: '25%',
       }}
     >
-      <EmptyFlipBox>
+      <EmptyFlipBox cursor="auto">
         <img src="/static/flips-cant-icn.svg" alt="Missing on client flip" />
       </EmptyFlipBox>
       <Box
@@ -258,8 +256,8 @@ export function RequiredFlip({idx}) {
       }}
     >
       <NextLink href="/flips/new">
-        <EmptyFlipBox>
-          <AddIcon hoverColor={theme.colors.primary} />
+        <EmptyFlipBox hoverColor={theme.colors.primary}>
+          <AddIcon />
         </EmptyFlipBox>
       </NextLink>
       <Box
@@ -310,15 +308,18 @@ export function OptionalFlip({idx, disabled}) {
   )
 }
 
-function EmptyFlipBox(props) {
+// eslint-disable-next-line react/prop-types
+function EmptyFlipBox({cursor = 'pointer', hoverColor, ...props}) {
   return (
     <Flex
       justify="center"
       align="center"
+      hoverColor={hoverColor}
       css={{
         border: `dashed 2px ${theme.colors.gray4}`,
         borderRadius: rem(8),
-        cursor: 'pointer',
+        color: theme.colors.muted,
+        cursor,
         height: rem(150),
         width: rem(150),
       }}
@@ -332,19 +333,8 @@ function EmptyFlipImage() {
 }
 
 // eslint-disable-next-line react/prop-types
-function AddIcon({hoverColor = theme.colors.gray4}) {
-  return (
-    <i
-      className="icon icon--add_btn"
-      style={{color: theme.colors.gray4, fontSize: rem(40)}}
-    >
-      <style jsx>{`
-        i:hover {
-          color: ${hoverColor} !important;
-        }
-      `}</style>
-    </i>
-  )
+function AddIcon() {
+  return <i className="icon icon--add_btn" style={{fontSize: rem(40)}} />
 }
 
 function FlipCardTitle(props) {
