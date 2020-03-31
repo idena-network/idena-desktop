@@ -155,5 +155,19 @@
   "wallet": "वॉलेट",
   "address": "एड्रेस",
   "See in Explorer...": "एक्स्प्लोरर में देखे...",
-  "Deleting...": "डिलीट कर रहे हैं..."
+  "Deleting...": "डिलीट कर रहे हैं...",
+  "Deleted flip will be moved to the drafts.": "Deleted flip will be moved to the drafts.",
+  "Flip hash": "Flip hash",
+  "Create required flips first": "Create required flips first",
+  "Optional": "Optional",
+  "Start from uploading an image": "Start from uploading an image",
+  "Add image": "Add image",
+  "Undo": "Undo",
+  "Redo": "Redo",
+  "Crop image": "Crop image",
+  "Or start drawing": "Or start drawing",
+  "Draw": "Draw",
+  "Clear": "Clear",
+  "Required": "Required",
+  "Missing on client": "Missing on client"
 }

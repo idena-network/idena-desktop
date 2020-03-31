@@ -159,5 +159,15 @@
   "Crop image": "Crop image",
   "wallet": "wallet",
   "address": "address",
-  "See in Explorer...": "See in Explorer..."
+  "See in Explorer...": "See in Explorer...",
+  "Create required flips first": "Create required flips first",
+  "Optional": "Optional",
+  "Start from uploading an image": "Start from uploading an image",
+  "Undo": "Undo",
+  "Redo": "Redo",
+  "Or start drawing": "Or start drawing",
+  "Draw": "Draw",
+  "Clear": "Clear",
+  "Required": "Required",
+  "Missing on client": "Missing on client"
 }

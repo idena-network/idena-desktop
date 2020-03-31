@@ -11,5 +11,6 @@
   "Can not submit flip during the validation session": "वेलिडेशन सेशन के दौरान फ्लिप सबमिट नहीं कर सकते हैं",
   "Error while sending transaction": "लेनदेन करते समय प्रॉब्लम",
   "Transaction sent": "लेनदेन भेजा गया",
-  "Error while deleting flip": "फ्लिप डिलीट करते समय प्रॉब्लम"
+  "Error while deleting flip": "फ्लिप डिलीट करते समय प्रॉब्लम",
+  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
 }

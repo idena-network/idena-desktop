@@ -97,7 +97,11 @@ function FlipMaster({id, onClose}) {
 
   const handleSubmitFlip = async () => {
     try {
-      const {result, error} = await submitFlip({id, ...flip})
+      const {result, error} = await submitFlip({
+        id,
+        ...flip,
+        epoch: epoch.epoch,
+      })
 
       let message = ''
       if (error) {

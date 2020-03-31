@@ -155,5 +155,19 @@
   "wallet": "wallet",
   "address": "address",
   "See in Explorer...": "See in Explorer...",
-  "Deleting...": "Deleting..."
+  "Deleting...": "Deleting...",
+  "Deleted flip will be moved to the drafts.": "Deleted flip will be moved to the drafts.",
+  "Flip hash": "Flip hash",
+  "Add image": "Add image",
+  "Crop image": "Crop image",
+  "Create required flips first": "Create required flips first",
+  "Optional": "Optional",
+  "Start from uploading an image": "Start from uploading an image",
+  "Undo": "Undo",
+  "Redo": "Redo",
+  "Or start drawing": "Or start drawing",
+  "Draw": "Draw",
+  "Clear": "Clear",
+  "Required": "Required",
+  "Missing on client": "Missing on client"
 }
