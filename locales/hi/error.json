@@ -12,5 +12,5 @@
   "Error while sending transaction": "लेनदेन करते समय प्रॉब्लम",
   "Transaction sent": "लेनदेन भेजा गया",
   "Error while deleting flip": "फ्लिप डिलीट करते समय प्रॉब्लम",
-  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
+  "It's not allowed to submit flips with your identity status": "आपकी पहचान की स्थिति के साथ फ़्लिप सबमिट करने की अनुमति नहीं है"
 }
