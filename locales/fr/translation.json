@@ -168,5 +168,18 @@
   "Draw": "Dessiner",
   "Clear": "Clear",
   "Required": "Requis",
-  "Missing on client": "Missing on client"
+  "Missing on client": "Missing on client",
+  "Settings updated": "Paramètres mis à jour",
+  "Connected to url": "Connecté a {{url}}",
+  "Run built-in node": "Run built-in node",
+  "Use built-in node to have automatic updates": "Use built-in node to have automatic updates",
+  "Node failed to start": "Le node n'a pu démarrer",
+  "Try restart": "Essayer de le redémarrer",
+  "Connect to remote node": "Connexion à un node distant",
+  "Specify the Node address if you want to connect to remote node": "Saisissez l'adresse du node pour vous y connecter",
+  "Node address": "Adresse du node",
+  "Save": "Enregistrer",
+  "Use default": "Use default",
+  "Node api key": "Clé API du node",
+  "Built-in node log": "Built-in node log"
 }
