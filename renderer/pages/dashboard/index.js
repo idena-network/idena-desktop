@@ -22,7 +22,6 @@ import {
 } from '../../shared/providers/identity-context'
 import {Notification} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
-import {FlatButton} from '../../shared/components/button'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {loadPersistentState} from '../../shared/utils/persist'
@@ -132,24 +131,19 @@ function Dashboard() {
           currentEpoch,
           validationResultsEvidence
         ) && (
-          <Absolute bottom={theme.spacings.normal} left="0" right="0">
+          <Absolute bottom={0} left={0} right={0}>
             <Notification
               type={NotificationType.Info}
-              title={t('Validation results')}
-              body={
-                <FlatButton
-                  onClick={() => {
-                    dispatchEvidence({[currentEpoch]: true})
-                    global.openExternal(
-                      `https://scan.idena.io/${
-                        isValidationSucceeded ? 'reward' : 'answers'
-                      }?epoch=${currentEpoch}&identity=${address}`
-                    )
-                  }}
-                >
-                  {t('Click to see your validation results')}
-                </FlatButton>
-              }
+              title={t('Click to see your validation results')}
+              action={() => {
+                dispatchEvidence({[currentEpoch]: true})
+                global.openExternal(
+                  `https://scan.idena.io/${
+                    isValidationSucceeded ? 'reward' : 'answers'
+                  }?epoch=${currentEpoch}&identity=${address}`
+                )
+              }}
+              actionName="Open"
             ></Notification>
           </Absolute>
         )}
@@ -165,7 +159,7 @@ function shouldSeeValidationResults(currentEpoch, evidence) {
       done,
       context: {epoch},
     } = State.create(validationStateDefinition)
-    return done && currentEpoch - epoch === 1 ? !evidence[currentEpoch] : false
+    return true // done && currentEpoch - epoch === 1 ? !evidence[currentEpoch] : false
   }
   return false
 }
