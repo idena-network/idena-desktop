@@ -110,7 +110,7 @@ function FlipCover({
 
   return (
     <Box w={width} style={{...margin(0, rem(40), 0, 0)}}>
-      <Box my={theme.spacings.small} css={position('relative')}>
+      <Box css={position('relative')}>
         <FlipImage src={pics[0]} gradient={isPending} />
         {isPending && (
           <Absolute
