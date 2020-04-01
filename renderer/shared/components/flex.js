@@ -9,6 +9,7 @@ function Flex({
   flex,
   width,
   css,
+  hoverColor,
   onClick,
   children,
 }) {
@@ -24,6 +25,9 @@ function Flex({
           align-items: ${align};
           ${flex && `flex: ${flex}`};
           ${width && `width: ${width}`};
+        }
+        div:hover {
+          ${hoverColor ? `color: ${hoverColor} !important` : ''};
         }
       `}</style>
     </div>
@@ -44,6 +48,7 @@ Flex.propTypes = {
   onClick: PropTypes.func,
   // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,
+  hoverColor: PropTypes.string,
 }
 
 export default Flex

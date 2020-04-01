@@ -86,7 +86,6 @@
   "Cancel": "Prekliči",
   "Waiting...": "Čakam...",
   "Submit": "Potrdi",
-  "Solve more than 10 flips&#10;to become Verified": "Reši več kot 10 flipov&#10;da postaneš Preverjen",
   "Balance": "Stanje",
   "Main wallet balance": "Stanje glavne denarnice",
   "Stake": "Nagrada",
@@ -134,7 +133,7 @@
   "Confirmed": "Potrjeno",
   "You don't have any transactions yet": "Še vedno nimate transakcije",
   "General": "Splošno",
-  "Solve more than 10 flips": "Rešite več kot 10 flipov",
+  "Solve more than 12 flips": "Rešite več kot 12 flipov",
   "to become Verified": "da postanete Preverjen",
   "In order to withdraw the": "Da bi izplačali",
   "stake you have to": "nagrado, morate",
@@ -159,5 +158,15 @@
   "Crop image": "Crop image",
   "wallet": "wallet",
   "address": "address",
-  "See in Explorer...": "See in Explorer..."
+  "See in Explorer...": "See in Explorer...",
+  "Create required flips first": "Create required flips first",
+  "Optional": "Optional",
+  "Start from uploading an image": "Start from uploading an image",
+  "Undo": "Undo",
+  "Redo": "Redo",
+  "Or start drawing": "Or start drawing",
+  "Draw": "Draw",
+  "Clear": "Clear",
+  "Required": "Required",
+  "Missing on client": "Missing on client"
 }

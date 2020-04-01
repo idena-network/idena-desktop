@@ -12,6 +12,9 @@ export const bufferToHex = buffer => {
 
 export const capitalize = str => str[0].toUpperCase() + str.substr(1)
 
+export function pluralize(word, num) {
+  return num > 1 ? `${word}s` : word
+}
 // Converts an ArrayBuffer directly to base64, without any intermediate 'convert to string then
 // use window.btoa' step. According to my tests, this appears to be a faster approach:
 // http://jsperf.com/encoding-xhr-image-data/5

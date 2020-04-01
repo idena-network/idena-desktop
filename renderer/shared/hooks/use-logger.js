@@ -2,6 +2,8 @@ import React from 'react'
 
 const {logger} = global
 
+const EXPLICIT_REDACTIONS = ['SET_EXTERNAL_KEY', 'SET_INTERNAL_KEY']
+
 // TODO: pass log fn default to console.log
 export default function useLogger([state, dispatch]) {
   const actionRef = React.useRef()
@@ -14,7 +16,7 @@ export default function useLogger([state, dispatch]) {
   React.useEffect(() => {
     const action = actionRef.current
 
-    if (action) {
+    if (action && !EXPLICIT_REDACTIONS.includes(action.type)) {
       const plainAction = {...action}
       const plainState = {...state}
 

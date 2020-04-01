@@ -86,7 +86,6 @@
   "Cancel": "Cancelar",
   "Waiting...": "Esperando...",
   "Submit": "Enviar",
-  "Solve more than 10 flips&#10;to become Verified": "Resuelve mas de 10 flips&#10;para convertirte en Verificado",
   "Balance": "Saldo",
   "Main wallet balance": "Saldo del monedero principal",
   "Stake": "Stake",
@@ -134,7 +133,7 @@
   "Confirmed": "Confirmado",
   "You don't have any transactions yet": "Todavia no tienes transacciones",
   "General": "General",
-  "Solve more than 10 flips": "Resuelve mas de 10 flips",
+  "Solve more than 12 flips": "Resuelve mas de 12 flips",
   "to become Verified": "para convertirte en Verificado",
   "In order to withdraw the": "Para poder disponer del",
   "stake you have to": "stake tienes que",
@@ -159,5 +158,15 @@
   "Deleted flip will be moved to the drafts.": "Deleted flip will be moved to the drafts.",
   "Flip hash": "Flip hash",
   "Add image": "Add image",
-  "Crop image": "Crop image"
+  "Crop image": "Crop image",
+  "Create required flips first": "Create required flips first",
+  "Optional": "Optional",
+  "Start from uploading an image": "Start from uploading an image",
+  "Undo": "Undo",
+  "Redo": "Redo",
+  "Or start drawing": "Or start drawing",
+  "Draw": "Draw",
+  "Clear": "Clear",
+  "Required": "Required",
+  "Missing on client": "Missing on client"
 }

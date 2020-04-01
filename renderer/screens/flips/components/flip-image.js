@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem} from 'polished'
+import {rem} from '../../../shared/theme'
 
 function FlipImage({src, size = 150, gradient = false, ...props}) {
   return (

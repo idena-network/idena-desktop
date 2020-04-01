@@ -19,6 +19,8 @@ import {
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
+import {pluralize} from '../utils/string'
+import useFlips, {FlipType} from '../utils/useFlips'
 
 function Sidebar() {
   return (
@@ -315,11 +317,19 @@ function CurrentTask({period, identity}) {
     longAnswers,
   } = useValidationState()
 
+  const {flips: persistedFlips} = useFlips()
+
   if (!period || !identity || !identity.state) {
     return null
   }
 
-  const {requiredFlips, flips, state, canActivateInvite} = identity
+  const {
+    requiredFlips,
+    flips,
+    availableFlips,
+    state,
+    canActivateInvite,
+  } = identity
 
   if (canActivateInvite && period === EpochPeriod.None) {
     return (
@@ -337,14 +347,38 @@ function CurrentTask({period, identity}) {
     ].includes(state)
   ) {
     if (period === EpochPeriod.None) {
-      const numOfFlipsToSubmit = requiredFlips - (flips || []).length
-      const shouldSendFlips = numOfFlipsToSubmit > 0
+      const publishedFlips = (flips || []).concat(
+        persistedFlips.filter(
+          ({type, hash}) =>
+            !(flips || []).includes(hash) &&
+            [
+              FlipType.Publishing,
+              FlipType.Published,
+              FlipType.Deleting,
+            ].includes(type)
+        )
+      )
+      const publishedFlipsNumber = publishedFlips.length
+      const remainingRequiredFlipsNumber = requiredFlips - publishedFlipsNumber
+      const optionalFlipsNumber =
+        availableFlips - Math.max(requiredFlips, publishedFlipsNumber)
+
+      const shouldSendFlips = remainingRequiredFlipsNumber > 0
+
       return shouldSendFlips ? (
         <Link href="/flips" color={theme.colors.white}>
-          Create {numOfFlipsToSubmit} flip{numOfFlipsToSubmit > 1 ? 's' : ''}
+          Create {remainingRequiredFlipsNumber} required{' '}
+          {pluralize('flip', remainingRequiredFlipsNumber)}
         </Link>
       ) : (
-        'Wait for validation'
+        `Wait for validation${
+          optionalFlipsNumber > 0
+            ? ` or create ${optionalFlipsNumber} optional ${pluralize(
+                'flip',
+                optionalFlipsNumber
+              )}`
+            : ''
+        }`
       )
     }
     if (validationRunning) {
