@@ -7,10 +7,10 @@
   "Error while importing key": "Greška pri uvozu ključa",
   "Internal node is not available, try again in a few seconds": "Interni node nije dostupan, probajte ponovo za par sekundi",
   "You can not submit flips having 'Candidate' status": "Dok ste Kandidat, ne možete da prilažete flipove",
-  "You cannot submit more flips until the next validation": "Ne možete da priložite više flipova pre iduće validacije",
+  "You cannot submit more flips until the next validation": "Ne možete da priložite više flipova prije iduće validacije",
   "Can not submit flip during the validation session": "Ne možete da priložite flipove dok je validacija u toku",
   "Error while sending transaction": "Greška pri slanju transakcije",
   "Transaction sent": "Transakcija je poslata",
-  "Error while deleting flip": "Error while deleting flip",
-  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
+  "Error while deleting flip": "Greška pri brisanju flipa",
+  "It's not allowed to submit flips with your identity status": "Identitet sa Vašim statusom ne može da pošalje flip"
 }
