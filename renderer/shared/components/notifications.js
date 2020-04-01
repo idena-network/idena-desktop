@@ -65,7 +65,7 @@ export function Notification({
               marginRight: rem(12),
             }}
           />
-          <Box css={{lineHeight: rem(20)}}>
+          <Box style={{lineHeight: rem(20)}}>
             <Box style={{fontWeight: theme.fontWeights.medium}}>{title}</Box>
             {body && <Text style={wordWrap('break-word')}>{body}</Text>}
           </Box>
@@ -82,6 +82,7 @@ export function Notification({
                     type === NotificationType.Error
                       ? theme.colors.danger
                       : theme.colors.primary,
+                  lineHeight: rem(20),
                   ...padding(0),
                 }}
                 onClick={() => {

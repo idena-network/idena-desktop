@@ -53,8 +53,6 @@ function Dashboard() {
 
   const {t} = useTranslation()
 
-  const epoch = useEpochState()
-
   const [validationResultsEvidence, dispatchEvidence] = usePersistence(
     useReducer(
       // eslint-disable-next-line no-shadow
@@ -64,9 +62,7 @@ function Dashboard() {
     'validationResults'
   )
 
-  if (!epoch) return null
-
-  const {epoch: currentEpoch} = epoch
+  const epoch = useEpochState()
 
   return (
     <InviteProvider>
@@ -127,30 +123,35 @@ function Dashboard() {
           />
         </Drawer>
 
-        {shouldSeeValidationResults(
-          currentEpoch,
-          validationResultsEvidence
-        ) && (
-          <Absolute bottom={0} left={0} right={0}>
-            <Notification
-              type={NotificationType.Info}
-              title={
-                isValidationSucceeded
-                  ? t('See your validation rewards in the blockchain explorer')
-                  : t('See your validation results in the blockchain explorer')
-              }
-              action={() => {
-                dispatchEvidence({[currentEpoch]: true})
-                global.openExternal(
-                  `https://scan.idena.io/${
-                    isValidationSucceeded ? 'reward' : 'answers'
-                  }?epoch=${currentEpoch}&identity=${address}`
-                )
-              }}
-              actionName={t('Open')}
-            ></Notification>
-          </Absolute>
-        )}
+        {epoch &&
+          shouldSeeValidationResults(
+            epoch.epoch,
+            validationResultsEvidence
+          ) && (
+            <Absolute bottom={0} left={0} right={0}>
+              <Notification
+                type={NotificationType.Info}
+                title={
+                  isValidationSucceeded
+                    ? t(
+                        'See your validation rewards in the blockchain explorer'
+                      )
+                    : t(
+                        'See your validation results in the blockchain explorer'
+                      )
+                }
+                action={() => {
+                  dispatchEvidence({[epoch.epoch]: true})
+                  global.openExternal(
+                    `https://scan.idena.io/${
+                      isValidationSucceeded ? 'reward' : 'answers'
+                    }?epoch=${epoch.epoch}&identity=${address}`
+                  )
+                }}
+                actionName={t('Open')}
+              ></Notification>
+            </Absolute>
+          )}
       </Layout>
     </InviteProvider>
   )
