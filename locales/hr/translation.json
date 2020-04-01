@@ -169,6 +169,7 @@
   "Clear": "Obriši",
   "Required": "Neophodno",
   "Missing on client": "Nedostaje na klijentu",
-  "Validation results": "Validation results",
-  "Click to see your validation results": "Click to see your validation results"
+  "See your validation rewards in the blockchain explorer": "See your validation rewards in the blockchain explorer",
+  "See your validation results in the blockchain explorer": "See your validation results in the blockchain explorer",
+  "Open": "Open"
 }

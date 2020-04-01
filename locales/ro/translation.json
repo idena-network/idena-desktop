@@ -169,6 +169,7 @@
   "Clear": "curăţa",
   "Required": "Necesar",
   "Missing on client": "Lipsesc in client",
-  "Validation results": "Validation results",
-  "Click to see your validation results": "Click to see your validation results"
+  "See your validation rewards in the blockchain explorer": "See your validation rewards in the blockchain explorer",
+  "See your validation results in the blockchain explorer": "See your validation results in the blockchain explorer",
+  "Open": "Open"
 }

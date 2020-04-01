@@ -169,6 +169,7 @@
   "Clear": "क्लियर करे",
   "Required": "जरूरी",
   "Missing on client": "क्लाइंट में मिसिंग है",
-  "Validation results": "Validation results",
-  "Click to see your validation results": "Click to see your validation results"
+  "See your validation rewards in the blockchain explorer": "See your validation rewards in the blockchain explorer",
+  "See your validation results in the blockchain explorer": "See your validation results in the blockchain explorer",
+  "Open": "Open"
 }

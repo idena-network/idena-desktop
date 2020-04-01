@@ -134,7 +134,11 @@ function Dashboard() {
           <Absolute bottom={0} left={0} right={0}>
             <Notification
               type={NotificationType.Info}
-              title={t('Click to see your validation results')}
+              title={
+                isValidationSucceeded
+                  ? t('See your validation rewards in the blockchain explorer')
+                  : t('See your validation results in the blockchain explorer')
+              }
               action={() => {
                 dispatchEvidence({[currentEpoch]: true})
                 global.openExternal(
@@ -143,7 +147,7 @@ function Dashboard() {
                   }?epoch=${currentEpoch}&identity=${address}`
                 )
               }}
-              actionName="Open"
+              actionName={t('Open')}
             ></Notification>
           </Absolute>
         )}
