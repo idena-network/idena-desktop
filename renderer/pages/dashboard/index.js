@@ -159,7 +159,7 @@ function shouldSeeValidationResults(currentEpoch, evidence) {
       done,
       context: {epoch},
     } = State.create(validationStateDefinition)
-    return true // done && currentEpoch - epoch === 1 ? !evidence[currentEpoch] : false
+    return done && currentEpoch - epoch === 1 ? !evidence[currentEpoch] : false
   }
   return false
 }
