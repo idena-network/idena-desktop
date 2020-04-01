@@ -1,0 +1,16 @@
+{
+  "Can not submit flip": "Tidak dapat mengirim flip",
+  "Keywords are not specified": "Kata kunci tidak ditentukan",
+  "Error while uploading flip": "Terjadi kesalahan ketika mengunggah flip",
+  "Something went wrong": "Ada yang salah",
+  "Maximum image size exceeded": "Ukuran gambar maksimum terlampaui",
+  "Error while importing key": "Terjadi kesalahan ketika mengimpor kunci",
+  "Internal node is not available, try again in a few seconds": "Node internal tidak tersedia, coba lagi dalam beberapa detik",
+  "You can not submit flips having 'Candidate' status": "Anda tidak dapat mengirim flips yang berstatus 'Candidate'",
+  "You cannot submit more flips until the next validation": "Anda tidak dapat mengirim lebih banyak flips hingga validasi berikutnya",
+  "Can not submit flip during the validation session": "Can not submit flip during the validation session",
+  "Error while sending transaction": "Terjadi kesalahan ketika mengirim transaksi",
+  "Transaction sent": "Transaksi terkirim",
+  "Error while deleting flip": "Terjadi kesalahan ketika menghapus flip",
+  "It's not allowed to submit flips with your identity status": "Tidak diizinkan mengirim flip dengan status identitas Anda"
+}
