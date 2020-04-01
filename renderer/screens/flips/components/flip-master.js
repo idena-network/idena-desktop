@@ -100,7 +100,6 @@ function FlipMaster({id, onClose}) {
       const {result, error} = await submitFlip({
         id,
         ...flip,
-        epoch: epoch.epoch,
       })
 
       let message = ''

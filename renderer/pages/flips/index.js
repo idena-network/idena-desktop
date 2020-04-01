@@ -20,7 +20,6 @@ import {useNotificationDispatch} from '../../shared/providers/notification-conte
 import {useChainState} from '../../shared/providers/chain-context'
 import DeleteFlipForm from '../../screens/flips/components/delete-flip-form'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {useEpochState} from '../../shared/providers/epoch-context'
 
 function Flips() {
   const {t} = useTranslation('error')
@@ -49,11 +48,6 @@ function Flips() {
     flipKeyWordPairs,
   } = useIdentityState()
 
-  const epoch = useEpochState()
-  if (!epoch) return null
-
-  const {epoch: currentEpoch} = epoch
-
   const knownFlips = nodeFlips || []
   const publishedFlips = knownFlips.concat(
     flips.filter(
@@ -75,11 +69,7 @@ function Flips() {
       ({used, id}) =>
         used &&
         !flips.find(
-          // eslint-disable-next-line no-shadow
-          ({type, hint, epoch}) =>
-            type === FlipType.Published &&
-            epoch === currentEpoch &&
-            hint.id === id
+          ({type, hint}) => type === FlipType.Published && hint.id === id
         )
     )
     .slice(0, missingFlipsNumber)
@@ -136,12 +126,9 @@ function Flips() {
                       title: t('error:Can not submit flip'),
                       body: t('error:Keywords are not specified'),
                     })
+                    return
                   }
-                  const {result, error} = await submitFlip({
-                    ...flip,
-                    epoch: currentEpoch,
-                  })
-
+                  const {result, error} = await submitFlip(flip)
                   if (error) {
                     addError({
                       title: t('error:Error while uploading flip'),
