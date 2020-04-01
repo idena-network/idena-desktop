@@ -50,9 +50,6 @@ function Flips() {
   } = useIdentityState()
 
   const epoch = useEpochState()
-  if (!epoch) return null
-
-  const {epoch: currentEpoch} = epoch
 
   const knownFlips = nodeFlips || []
   const publishedFlips = knownFlips.concat(
@@ -76,9 +73,10 @@ function Flips() {
         used &&
         !flips.find(
           // eslint-disable-next-line no-shadow
-          ({type, hint, epoch}) =>
+          ({type, hint, epoch: flipEpoch}) =>
             type === FlipType.Published &&
-            epoch === currentEpoch &&
+            epoch &&
+            flipEpoch === epoch.epoch &&
             hint.id === id
         )
     )
@@ -136,10 +134,11 @@ function Flips() {
                       title: t('error:Can not submit flip'),
                       body: t('error:Keywords are not specified'),
                     })
+                    return
                   }
                   const {result, error} = await submitFlip({
                     ...flip,
-                    epoch: currentEpoch,
+                    epoch: epoch.epoch,
                   })
 
                   if (error) {
