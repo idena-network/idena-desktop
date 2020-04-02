@@ -18,7 +18,7 @@
     "test": "jest",
     "i18n": "npm run i18n:clean && npm run i18n:scan",
     "i18n:scan": "i18next-scanner",
-    "i18n:clean": "rm -rf locales/en locales/id locales/fr locales/de locales/es locales/ru locales/zh locales/ko locales/hr locales/hi locales/ro locales/uk locales/sr locales/it locales/pt locales/si",
+    "i18n:clean": "rm -rf locales/en locales/id locales/fr locales/de locales/es locales/ru locales/zh locales/ko locales/hr locales/hi locales/ro locales/uk locales/sr locales/it locales/pt locales/pl locales/si",
     "e2e": "dotenv -e .env.e2e testcafe electron"
   },
   "build": {

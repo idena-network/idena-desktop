@@ -13,6 +13,7 @@ const AVAILABLE_LANGS = [
   'ro',
   'it',
   'pt',
+  'pl',
   'sl',
   'hi',
 ]
