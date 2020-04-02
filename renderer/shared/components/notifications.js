@@ -1,31 +1,30 @@
 import React, {useState} from 'react'
 import PropTypes from 'prop-types'
-import {wordWrap, rem} from 'polished'
-import {FiFile} from 'react-icons/fi'
+import {wordWrap, padding, margin} from 'polished'
 import {Absolute, Box} from '.'
 import Flex from './flex'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 import {
   useNotificationState,
   NotificationType,
 } from '../providers/notification-context'
 import useId from '../hooks/use-id'
 import {IconButton} from './button'
+import {Text} from './typo'
 
 function Notifications() {
   const {notifications} = useNotificationState()
   const id = useId()
   return (
-    <Absolute bottom={theme.spacings.normal} left="0" right="0">
+    <Absolute bottom={0} left={0} right={0}>
       {notifications.map((notification, idx) => (
-        // eslint-disable-next-line react/no-array-index-key
         <Notification key={`notification-${id}-${idx}`} {...notification} />
       ))}
     </Absolute>
   )
 }
 
-function Notification({
+export function Notification({
   title,
   body,
   type = NotificationType.Info,
@@ -36,49 +35,63 @@ function Notification({
 
   return (
     !hidden && (
-      <div>
-        <Flex width="100%" justify="center">
-          <Box
-            bg={theme.colors.white}
-            px={rem(16)}
-            py={rem(12)}
-            my={rem(theme.spacings.small8)}
-            css={{
-              borderRadius: rem(8),
-              boxShadow: `0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)`,
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          ...margin(0, 0, rem(20)),
+        }}
+      >
+        <Flex
+          align="center"
+          css={{
+            background: theme.colors.white,
+            borderRadius: rem(8),
+            boxShadow: `0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)`,
+            color: theme.colors.text,
+            ...padding(rem(6), rem(8), rem(6), rem(16)),
+            width: rem(480),
+            zIndex: 9,
+          }}
+        >
+          <i
+            className="icon icon--Info"
+            style={{
               color:
                 type === NotificationType.Error
                   ? theme.colors.danger
-                  : theme.colors.text,
-              zIndex: 9,
+                  : theme.colors.primary,
+              fontSize: rem(20),
+              marginRight: rem(12),
             }}
-            w="260px"
+          />
+          <Box style={{lineHeight: rem(20)}}>
+            <Box style={{fontWeight: theme.fontWeights.medium}}>{title}</Box>
+            {body && <Text style={wordWrap('break-word')}>{body}</Text>}
+          </Box>
+          <Box
+            css={{
+              ...margin(0, 0, 0, 'auto'),
+              ...padding(rem(6), rem(12)),
+            }}
           >
-            <Box
-              my={theme.spacings.small}
-              css={{fontWeight: theme.fontWeights.semi}}
-            >
-              <Flex justify="center" align="center">
-                <FiFile style={{marginRight: rem(12)}} />
-                {title}
-                <Box css={{paddingTop: rem(3), paddingLeft: rem(20)}}>
-                  {action && (
-                    <IconButton
-                      onClick={() => {
-                        action()
-                        setHidden(true)
-                      }}
-                    >
-                      {actionName}
-                    </IconButton>
-                  )}
-                </Box>
-              </Flex>
-            </Box>
-            {body && (
-              <Flex>
-                <Box css={wordWrap('break-word')}>{body}</Box>
-              </Flex>
+            {action && (
+              <IconButton
+                style={{
+                  color:
+                    type === NotificationType.Error
+                      ? theme.colors.danger
+                      : theme.colors.primary,
+                  lineHeight: rem(20),
+                  ...padding(0),
+                }}
+                onClick={() => {
+                  action()
+                  setHidden(true)
+                }}
+              >
+                {actionName}
+              </IconButton>
             )}
           </Box>
         </Flex>

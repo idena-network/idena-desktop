@@ -1,5 +1,6 @@
 const AVAILABLE_LANGS = [
   'en',
+  'id',
   'fr',
   'de',
   'es',
@@ -12,6 +13,7 @@ const AVAILABLE_LANGS = [
   'ro',
   'it',
   'pt',
+  'pl',
   'sl',
   'hi',
 ]

@@ -1,6 +1,6 @@
 import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
-import {rem, position} from 'polished'
+import {rem, position, wordWrap} from 'polished'
 import {
   FaGoogle,
   FaCircle,
@@ -864,9 +864,11 @@ function ArrowHint({hint, leftHanded, visible}) {
                     position: 'absolute',
                     left: '-56px',
                     top: '-25px',
-                    minWidth: '70px',
+                    minWidth: rem(50, theme.fontSizes.base),
+                    width: rem(50, theme.fontSizes.base),
                     color: `${theme.colors.muted}`,
                     fontWeight: `${theme.fontWeights.normal}`,
+                    ...wordWrap('break-all'),
                   }}
                 >
                   {hint}

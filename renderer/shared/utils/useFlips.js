@@ -171,7 +171,7 @@ function useFlips() {
   }, [])
 
   const submitFlip = useCallback(
-    async ({id, pics, compressedPics, order, hint, epoch}) => {
+    async ({id, pics, compressedPics, order, hint}) => {
       if (
         flips.filter(
           f =>
@@ -231,7 +231,6 @@ function useFlips() {
               ...result,
               type: FlipType.Publishing,
               modifiedAt: Date.now(),
-              epoch,
             },
             ...prevFlips.slice(flipIdx + 1),
           ]

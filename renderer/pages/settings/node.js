@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, {useEffect, useReducer, useRef, useState} from 'react'
 import {margin, rem, padding, borderRadius} from 'polished'
+import {useTranslation} from 'react-i18next'
 import Ansi from 'ansi-to-react'
 import {FiEye, FiEyeOff} from 'react-icons/fi'
 import {
@@ -32,6 +33,7 @@ import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
 
 function NodeSettings() {
   const {addNotification} = useNotificationDispatch()
+  const {t} = useTranslation()
   const settings = useSettingsState()
   const {
     saveExternalUrl,
@@ -117,8 +119,8 @@ function NodeSettings() {
 
   const notify = () =>
     addNotification({
-      title: 'Settings updated',
-      body: `Connected to ${state.url}`,
+      title: t('Settings updated'),
+      body: t('Connected to url', {url: state.url}),
     })
 
   const [revealApiKey, setRevealApiKey] = useState(false)
@@ -146,8 +148,8 @@ function NodeSettings() {
               ),
             }}
           >
-            <strong>Run built-in node</strong>
-            <div>Use built-in node to have automatic updates</div>
+            <strong>{t('Run built-in node')}</strong>
+            <div>{t('Use built-in node to have automatic updates')}</div>
           </div>
           {settings.runInternalNode && nodeFailed && (
             <div
@@ -161,14 +163,14 @@ function NodeSettings() {
               }}
             >
               <Text css={{color: theme.colors.warning}}>
-                Node failed to start
+                {t('Node failed to start')}
               </Text>
               <Button
                 variant="secondary"
                 css={{marginLeft: 10}}
                 onClick={() => tryRestartNode()}
               >
-                Try restart
+                {t('Try restart')}
               </Button>
             </div>
           )}
@@ -195,9 +197,11 @@ function NodeSettings() {
               ),
             }}
           >
-            <strong>Connect to remote node</strong>
+            <strong>{t('Connect to remote node')}</strong>
             <div>
-              Specify the Node address if you want to connect to remote node
+              {t(
+                'Specify the Node address if you want to connect to remote node'
+              )}
             </div>
           </div>
         </Flex>
@@ -205,8 +209,8 @@ function NodeSettings() {
       {settings.useExternalNode && (
         <Box py={theme.spacings.xlarge}>
           <Flex align="center">
-            <Label htmlFor="url" style={{width: 80}}>
-              Node address
+            <Label htmlFor="url" style={{width: 120}}>
+              {t('Node address')}
             </Label>
             <Input
               id="url"
@@ -223,7 +227,7 @@ function NodeSettings() {
                 notify()
               }}
             >
-              Save
+              {t('Save')}
             </Button>
             <Divider vertical m={theme.spacings.small} />
             <FlatButton
@@ -234,12 +238,12 @@ function NodeSettings() {
                 notify()
               }}
             >
-              Use default
+              {t('Use default')}
             </FlatButton>
           </Flex>
           <Flex align="center" css={{marginTop: 10}}>
-            <Label htmlFor="url" style={{width: 80}}>
-              Node api key{' '}
+            <Label htmlFor="url" style={{width: 120}}>
+              {`${t('Node api key')} `}
             </Label>
             <Box style={{position: 'relative'}}>
               <Input
@@ -281,7 +285,7 @@ function NodeSettings() {
                 notify()
               }}
             >
-              Save
+              {t('Save')}
             </Button>
           </Flex>
         </Box>
@@ -291,7 +295,7 @@ function NodeSettings() {
           <SubHeading
             css={margin(theme.spacings.medium24, 0, theme.spacings.medium16, 0)}
           >
-            Built-in node log
+            {t('Built-in node log')}
           </SubHeading>
           <div
             ref={logsRef}

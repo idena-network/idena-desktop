@@ -5,6 +5,8 @@ import {loadPersistentStateValue} from './shared/utils/persist'
 
 import en_translation from '../locales/en/translation.json'
 import en_error from '../locales/en/error.json'
+import ri_translation from '../locales/id/translation.json'
+import ri_error from '../locales/id/error.json'
 import fr_translation from '../locales/fr/translation.json'
 import fr_error from '../locales/fr/error.json'
 import de_translation from '../locales/de/translation.json'
@@ -33,9 +35,12 @@ import sl_translation from '../locales/sl/translation.json'
 import sl_error from '../locales/sl/error.json'
 import hi_translation from '../locales/hi/translation.json'
 import hi_error from '../locales/hi/error.json'
+import pl_translation from '../locales/pl/translation.json'
+import pl_error from '../locales/pl/error.json'
 
 export const AVAILABLE_LANGS = [
   'en',
+  'id',
   'fr',
   'de',
   'es',
@@ -49,6 +54,7 @@ export const AVAILABLE_LANGS = [
   'ro',
   'it',
   'pt',
+  'pl',
   'sl',
 ]
 
@@ -56,6 +62,7 @@ i18n.use(initReactI18next).init({
   debug: global.isDev,
   resources: {
     en: {translation: en_translation, error: en_error},
+    id: {translation: ri_translation, error: ri_error},
     fr: {translation: fr_translation, error: fr_error},
     de: {translation: de_translation, error: de_error},
     es: {translation: es_translation, error: es_error},
@@ -69,6 +76,7 @@ i18n.use(initReactI18next).init({
     ro: {translation: ro_translation, error: ro_error},
     it: {translation: it_translation, error: it_error},
     pt: {translation: pt_translation, error: pt_error},
+    pl: {translation: pl_translation, error: pl_error},
     sl: {translation: sl_translation, error: sl_error},
   },
   lng: loadPersistentStateValue('settings', 'lng'),

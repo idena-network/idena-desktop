@@ -168,5 +168,8 @@
   "Draw": "Draw",
   "Clear": "Clear",
   "Required": "Required",
-  "Missing on client": "Missing on client"
+  "Missing on client": "Missing on client",
+  "See your validation rewards in the blockchain explorer": "See your validation rewards in the blockchain explorer",
+  "See your validation results in the blockchain explorer": "See your validation results in the blockchain explorer",
+  "Open": "Open"
 }

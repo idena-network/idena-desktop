@@ -110,7 +110,7 @@ function FlipCover({
 
   return (
     <Box w={width} style={{...margin(0, rem(40), 0, 0)}}>
-      <Box my={theme.spacings.small} css={position('relative')}>
+      <Box css={position('relative')}>
         <FlipImage src={pics[0]} gradient={isPending} />
         {isPending && (
           <Absolute
@@ -224,12 +224,7 @@ FlipCover.propTypes = {
 export function MissingFlip({hint}) {
   const {t} = useTranslation()
   return (
-    <Box
-      style={{
-        ...padding(rem(8), 0),
-        width: '25%',
-      }}
-    >
+    <FlipCard>
       <EmptyFlipBox cursor="auto">
         <img src="/static/flips-cant-icn.svg" alt="Missing on client flip" />
       </EmptyFlipBox>
@@ -241,7 +236,7 @@ export function MissingFlip({hint}) {
         <FlipCardTitle>{composeHint(hint)}</FlipCardTitle>
         <FlipCardSubtitle>{t('Missing on client')}</FlipCardSubtitle>
       </Box>
-    </Box>
+    </FlipCard>
   )
 }
 
@@ -249,12 +244,7 @@ export function MissingFlip({hint}) {
 export function RequiredFlip({idx}) {
   const {t} = useTranslation()
   return (
-    <Box
-      style={{
-        ...padding(rem(8), 0),
-        width: '25%',
-      }}
-    >
+    <FlipCard>
       <NextLink href="/flips/new">
         <EmptyFlipBox hoverColor={theme.colors.primary}>
           <AddIcon />
@@ -268,7 +258,7 @@ export function RequiredFlip({idx}) {
         <FlipCardTitle>Flip #{idx + 1}</FlipCardTitle>
         <FlipCardSubtitle>{t('Required')}</FlipCardSubtitle>
       </Box>
-    </Box>
+    </FlipCard>
   )
 }
 
@@ -276,13 +266,7 @@ export function RequiredFlip({idx}) {
 export function OptionalFlip({idx, disabled}) {
   const {t} = useTranslation()
   return (
-    <Box
-      style={{
-        ...padding(rem(8), 0),
-        width: '25%',
-        opacity: disabled ? 0.5 : 1,
-      }}
-    >
+    <FlipCard opacity={disabled ? 0.5 : 1}>
       {disabled ? (
         <EmptyFlipBox>
           <Tooltip content={t('Create required flips first')}>
@@ -304,7 +288,20 @@ export function OptionalFlip({idx, disabled}) {
         <FlipCardTitle>Flip #{idx + 1}</FlipCardTitle>
         <FlipCardSubtitle>{t('Optional')}</FlipCardSubtitle>
       </Box>
-    </Box>
+    </FlipCard>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+function FlipCard({opacity, ...props}) {
+  return (
+    <Box
+      style={{
+        ...margin(0, rem(40), rem(32), 0),
+        opacity,
+      }}
+      {...props}
+    />
   )
 }
 

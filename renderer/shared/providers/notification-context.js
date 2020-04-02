@@ -18,7 +18,7 @@ function NotificationProvider({children}) {
       if (notifications.length) {
         setNotifications(notifications.slice(1))
       }
-    }, 3500)
+    }, 3000)
     return () => {
       clearTimeout(timeoutId)
     }
