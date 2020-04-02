@@ -168,5 +168,8 @@
   "Draw": "Crtaj",
   "Clear": "Obriši",
   "Required": "Neophodno",
-  "Missing on client": "Nedostaje na klijentu"
+  "Missing on client": "Nedostaje na klijentu",
+  "See your validation rewards in the blockchain explorer": "See your validation rewards in the blockchain explorer",
+  "See your validation results in the blockchain explorer": "See your validation results in the blockchain explorer",
+  "Open": "Open"
 }

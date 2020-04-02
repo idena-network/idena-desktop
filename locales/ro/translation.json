@@ -168,5 +168,8 @@
   "Draw": "Desenați",
   "Clear": "curăţa",
   "Required": "Necesar",
-  "Missing on client": "Lipsesc in client"
+  "Missing on client": "Lipsesc in client",
+  "See your validation rewards in the blockchain explorer": "See your validation rewards in the blockchain explorer",
+  "See your validation results in the blockchain explorer": "See your validation results in the blockchain explorer",
+  "Open": "Open"
 }

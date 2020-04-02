@@ -181,5 +181,8 @@
   "Save": "Enregistrer",
   "Use default": "Use default",
   "Node api key": "Clé API du node",
-  "Built-in node log": "Built-in node log"
+  "Built-in node log": "Built-in node log",
+  "See your validation rewards in the blockchain explorer": "See your validation rewards in the blockchain explorer",
+  "See your validation results in the blockchain explorer": "See your validation results in the blockchain explorer",
+  "Open": "Open"
 }
