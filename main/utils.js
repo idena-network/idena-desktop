@@ -1,3 +1,5 @@
+const {persistZoomLevel} = require('./stores/settings')
+
 function promiseTimeout(ms, promise) {
   const timeout = new Promise((resolve, reject) => {
     const id = setTimeout(() => {
@@ -16,4 +18,18 @@ function sleep(ms) {
 module.exports = {
   promiseTimeout,
   sleep,
+  zoomIn(window) {
+    const nextLevel = window.webContents.zoomLevel + 1
+    window.webContents.zoomLevel = nextLevel
+    persistZoomLevel(nextLevel)
+  },
+  zoomOut(window) {
+    const nextLevel = window.webContents.zoomLevel - 1
+    window.webContents.zoomLevel = nextLevel
+    persistZoomLevel(nextLevel)
+  },
+  resetZoom(window) {
+    window.webContents.zoomLevel = 0
+    persistZoomLevel(0)
+  },
 }
