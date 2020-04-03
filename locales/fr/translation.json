@@ -189,5 +189,21 @@
   "Built-in node log": "Built-in node log",
   "See your validation rewards in the blockchain explorer": "See your validation rewards in the blockchain explorer",
   "See your validation results in the blockchain explorer": "See your validation results in the blockchain explorer",
-  "Open": "Open"
+  "Open": "Open",
+  "About Idena": "À propos d'Idena",
+  "Toggle Developer Tools": "Toggle Developer Tools",
+  "Quit": "Quitter",
+  "Open Idena": "Ouvrir Idena",
+  "Edit": "Édition",
+  "Cut": "Couper",
+  "Copy": "Copier",
+  "Paste": "Coller",
+  "Select All": "Tout sélectionner",
+  "View": "Affichage",
+  "Zoom In": "Zoom avant",
+  "Zoom Out": "Zoom arrière",
+  "Actual Size": "Taille réelle",
+  "Help": "Aide",
+  "Website": "Site web",
+  "Explorer": "Exploreur"
 }
