@@ -64,18 +64,6 @@ function Dashboard() {
 
   const epoch = useEpochState()
 
-  function notifyMe() {
-    const notification = new window.Notification('Validation soon', {
-      body: 'Keep your app opened',
-    })
-
-    notification.onclick = () => {
-      global.ipcRenderer.send('showMainWindow')
-      console.log('Clicked')
-    }
-    notification.onclose = () => console.log('Closed')
-  }
-
   return (
     <InviteProvider>
       <Layout syncing={syncing} offline={offline} loading={loading}>
