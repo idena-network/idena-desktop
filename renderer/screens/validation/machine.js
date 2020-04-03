@@ -556,7 +556,6 @@ export const createValidationMachine = ({
                   initial: 'fetching',
                   states: {
                     fetching: {
-                      entry: log('Fetching words'),
                       invoke: {
                         src: ({longFlips}) =>
                           Promise.all(
@@ -583,7 +582,6 @@ export const createValidationMachine = ({
                       },
                     },
                     success: {
-                      entry: log(),
                       after: {
                         10000: [
                           {
