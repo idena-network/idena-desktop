@@ -588,5 +588,3 @@ function sendMainWindowMsg(channel, message, data) {
     logger.error('cannot send msg to main window', e.toString())
   }
 }
-
-ipcMain.on('showMainWindow', showMainWindow)

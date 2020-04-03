@@ -85,13 +85,6 @@ function Dashboard() {
           w={rem(700, theme.fontSizes.base)}
         >
           <PageTitle>{t('Profile')}</PageTitle>
-          <button
-            onClick={() => {
-              setTimeout(notifyMe, 3000)
-            }}
-          >
-            notify
-          </button>
           <Actions>
             <IconLink
               disabled={invitesCount === 0}
