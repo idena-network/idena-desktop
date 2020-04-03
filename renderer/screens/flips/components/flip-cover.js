@@ -109,7 +109,7 @@ function FlipCover({
     global.isDev || (!syncing && canSubmitFlip && pics.every(hasDataUrl))
 
   return (
-    <Box w={width} style={{...margin(0, rem(40), 0, 0)}}>
+    <Box w={width} style={{...margin(0, rem(40), rem(32), 0)}}>
       <Box css={position('relative')}>
         <FlipImage src={pics[0]} gradient={isPending} />
         {isPending && (
