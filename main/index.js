@@ -15,6 +15,7 @@ const prepareNext = require('electron-next')
 const express = require('express')
 const net = require('net')
 const fs = require('fs-extra')
+const {zoomIn, zoomOut, resetZoom} = require('./utils')
 const loadRoute = require('./utils/routes')
 
 const isWin = process.platform === 'win32'
@@ -54,7 +55,6 @@ const {
 } = require('./idena-node')
 
 const NodeUpdater = require('./node-updater')
-const {persistZoomLevel} = require('./stores/settings')
 
 let mainWindow
 let node
@@ -189,30 +189,21 @@ const createMenu = () => {
         label: 'Zoom In',
         accelerator: 'CmdOrCtrl+=',
         click: (_, window) => {
-          window.webContents.getZoomLevel(level => {
-            const nextLevel = level + 1
-            window.webContents.setZoomLevel(nextLevel)
-            persistZoomLevel(nextLevel)
-          })
+          zoomIn(window)
         },
       },
       {
         label: 'Zoom Out',
         accelerator: 'CmdOrCtrl+-',
         click: (_, window) => {
-          window.webContents.getZoomLevel(level => {
-            const nextLevel = level - 1
-            window.webContents.setZoomLevel(nextLevel)
-            persistZoomLevel(nextLevel)
-          })
+          zoomOut(window)
         },
       },
       {
         label: 'Actual Size',
         accelerator: 'CmdOrCtrl+0',
         click: (_, window) => {
-          window.webContents.setZoomLevel(0)
-          persistZoomLevel(0)
+          resetZoom(window)
         },
       },
     ],
