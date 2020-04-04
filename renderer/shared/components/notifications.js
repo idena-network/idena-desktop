@@ -1,12 +1,13 @@
 import React, {useState} from 'react'
 import PropTypes from 'prop-types'
-import {wordWrap, padding, margin} from 'polished'
+import {wordWrap, padding, margin, borderRadius} from 'polished'
 import {Absolute, Box} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
 import {
   useNotificationState,
   NotificationType,
+  NOTIFICATION_DELAY,
 } from '../providers/notification-context'
 import useId from '../hooks/use-id'
 import {IconButton} from './button'
@@ -37,8 +38,6 @@ export function Notification({
     !hidden && (
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'center',
           ...margin(0, 0, rem(20)),
         }}
       >
@@ -49,7 +48,9 @@ export function Notification({
             borderRadius: rem(8),
             boxShadow: `0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)`,
             color: theme.colors.text,
+            ...margin(0, 'auto'),
             ...padding(rem(6), rem(8), rem(6), rem(16)),
+            position: 'relative',
             width: rem(480),
             zIndex: 9,
           }}
@@ -94,7 +95,29 @@ export function Notification({
               </IconButton>
             )}
           </Box>
+          <Box
+            style={{
+              background: theme.colors.gray2,
+              height: rem(3),
+              ...borderRadius('bottom', rem(8)),
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              animation: `escape ${NOTIFICATION_DELAY}ms linear forwards`,
+            }}
+          />
         </Flex>
+        <style jsx global>{`
+          @keyframes escape {
+            from {
+              right: 0;
+            }
+            to {
+              right: 100%;
+            }
+          }
+        `}</style>
       </div>
     )
   )
