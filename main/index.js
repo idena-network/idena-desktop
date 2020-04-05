@@ -15,8 +15,10 @@ const prepareNext = require('electron-next')
 const express = require('express')
 const net = require('net')
 const fs = require('fs-extra')
+const i18next = require('i18next')
 const {zoomIn, zoomOut, resetZoom} = require('./utils')
 const loadRoute = require('./utils/routes')
+const {getI18nConfig} = require('./language')
 
 const isWin = process.platform === 'win32'
 const isMac = process.platform === 'darwin'
@@ -124,19 +126,19 @@ const createMenu = () => {
     label: 'Idena',
     submenu: [
       {
-        label: 'About Idena',
+        label: i18next.t('About Idena'),
         role: 'about',
       },
       {
         type: 'separator',
       },
       {
-        label: 'Toggle Developer Tools',
+        label: i18next.t('Toggle Developer Tools'),
         role: 'toggleDevTools',
         visible: false,
       },
       {
-        label: 'Quit',
+        label: i18next.t('Quit'),
         accelerator: 'Cmd+Q',
         role: 'quit',
       },
@@ -144,15 +146,15 @@ const createMenu = () => {
   }
 
   const edit = {
-    label: 'Edit',
+    label: i18next.t('Edit'),
     submenu: [
       {
-        label: 'Undo',
+        label: i18next.t('Undo'),
         accelerator: 'CmdOrCtrl+Z',
         role: 'undo',
       },
       {
-        label: 'Redo',
+        label: i18next.t('Redo'),
         accelerator: 'Shift+CmdOrCtrl+Z',
         role: 'redo',
       },
@@ -160,22 +162,22 @@ const createMenu = () => {
         type: 'separator',
       },
       {
-        label: 'Cut',
+        label: i18next.t('Cut'),
         accelerator: 'CmdOrCtrl+X',
         role: 'cut',
       },
       {
-        label: 'Copy',
+        label: i18next.t('Copy'),
         accelerator: 'CmdOrCtrl+C',
         role: 'copy',
       },
       {
-        label: 'Paste',
+        label: i18next.t('Paste'),
         accelerator: 'CmdOrCtrl+V',
         role: 'paste',
       },
       {
-        label: 'Select All',
+        label: i18next.t('Select All'),
         accelerator: 'CmdOrCtrl+A',
         role: 'selectAll',
       },
@@ -183,24 +185,24 @@ const createMenu = () => {
   }
 
   const view = {
-    label: 'View',
+    label: i18next.t('View'),
     submenu: [
       {
-        label: 'Zoom In',
+        label: i18next.t('Zoom In'),
         accelerator: 'CmdOrCtrl+=',
         click: (_, window) => {
           zoomIn(window)
         },
       },
       {
-        label: 'Zoom Out',
+        label: i18next.t('Zoom Out'),
         accelerator: 'CmdOrCtrl+-',
         click: (_, window) => {
           zoomOut(window)
         },
       },
       {
-        label: 'Actual Size',
+        label: i18next.t('Actual Size'),
         accelerator: 'CmdOrCtrl+0',
         click: (_, window) => {
           resetZoom(window)
@@ -210,16 +212,16 @@ const createMenu = () => {
   }
 
   const help = {
-    label: 'Help',
+    label: i18next.t('Help'),
     submenu: [
       {
-        label: 'Website',
+        label: i18next.t('Website'),
         click: () => {
           shell.openExternal('https://idena.io/')
         },
       },
       {
-        label: 'Explorer',
+        label: i18next.t('Explorer'),
         click: () => {
           shell.openExternal('https://scan.idena.io/')
         },
@@ -228,7 +230,7 @@ const createMenu = () => {
         type: 'separator',
       },
       {
-        label: 'Toggle Developer Tools',
+        label: i18next.t('Toggle Developer Tools'),
         role: 'toggleDevTools',
       },
     ],
@@ -261,14 +263,14 @@ const createTray = () => {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Open Idena',
+      label: i18next.t('Open Idena'),
       click: showMainWindow,
     },
     {
       type: 'separator',
     },
     {
-      label: 'Quit',
+      label: i18next.t('Quit'),
       accelerator: 'Cmd+Q',
       role: 'quit',
     },
@@ -279,17 +281,25 @@ const createTray = () => {
 // Prepare the renderer once the app is ready
 app.on('ready', async () => {
   await prepareNext('./renderer')
+  const i18nConfig = getI18nConfig()
 
-  createMainWindow()
+  i18next.init(i18nConfig, function(err) {
+    if (err) {
+      console.log(err)
+    }
 
-  if (!isDev) {
-    createMenu()
-  }
-  createTray()
+    createMainWindow()
 
-  if (isWin) {
-    checkForUpdates()
-  }
+    if (!isDev) {
+      createMenu()
+    }
+
+    createTray()
+
+    if (isWin) {
+      checkForUpdates()
+    }
+  })
 })
 
 app.on('before-quit', () => {
