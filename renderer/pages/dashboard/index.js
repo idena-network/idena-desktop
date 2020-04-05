@@ -130,6 +130,7 @@ function Dashboard() {
           ) && (
             <Absolute bottom={0} left={0} right={0}>
               <Notification
+                pinned
                 type={NotificationType.Info}
                 title={
                   isValidationSucceeded
