@@ -3,14 +3,14 @@
   "Keywords are not specified": "Кључне речи нису наведене",
   "Error while uploading flip": "Грешка при отпреми флипа",
   "Something went wrong": "Нешто није у реду",
-  "Maximum image size exceeded": "Прекорачена максимална величина слике",
+  "Maximum image size exceeded": "Прекорачена је максимална величина слике",
   "Error while importing key": "Грешка при увозу приватног кључа",
   "Internal node is not available, try again in a few seconds": "Интерни нод није доступан, покушајте поново за пар секунди",
   "You can not submit flips having 'Candidate' status": "Док сте кандидат, не можете да пошаљете флипове",
   "You cannot submit more flips until the next validation": "Не можете послати више флипова пре следеће валидације",
   "Can not submit flip during the validation session": "Не можете послати флип док је валидација у току",
   "Error while sending transaction": "Грешка при слању трансакције",
-  "Transaction sent": "Трансакција послата",
-  "Error while deleting flip": "Error while deleting flip",
-  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
+  "Transaction sent": "Трансакција је послата",
+  "Error while deleting flip": "Грешка при брисању флипа",
+  "It's not allowed to submit flips with your identity status": "Идентитет са Вашим статусом не може да пошаље флип"
 }
