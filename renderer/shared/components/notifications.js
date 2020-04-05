@@ -31,6 +31,7 @@ export function Notification({
   type = NotificationType.Info,
   action = null,
   actionName = '',
+  pinned,
 }) {
   const [hidden, setHidden] = useState(false)
 
@@ -95,18 +96,20 @@ export function Notification({
               </IconButton>
             )}
           </Box>
-          <Box
-            style={{
-              background: theme.colors.gray2,
-              height: rem(3),
-              ...borderRadius('bottom', rem(8)),
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              animation: `escape ${NOTIFICATION_DELAY}ms linear forwards`,
-            }}
-          />
+          {!pinned && (
+            <Box
+              style={{
+                background: theme.colors.gray2,
+                height: rem(3),
+                ...borderRadius('bottom', rem(8)),
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                animation: `escape ${NOTIFICATION_DELAY}ms linear forwards`,
+              }}
+            />
+          )}
         </Flex>
         <style jsx global>{`
           @keyframes escape {
@@ -129,6 +132,7 @@ Notification.propTypes = {
   type: PropTypes.oneOf(Object.values(NotificationType)),
   action: PropTypes.func,
   actionName: PropTypes.string,
+  pinned: PropTypes.bool,
 }
 
 export default Notifications
