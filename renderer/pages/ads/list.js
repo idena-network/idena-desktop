@@ -3,7 +3,6 @@ import {FaBullhorn} from 'react-icons/fa'
 import {useTranslation} from 'react-i18next'
 import {margin, padding, backgrounds, borderRadius} from 'polished'
 import {FiMoreVertical, FiEdit, FiPause, FiDelete} from 'react-icons/fi'
-import {Menu, MenuButton, MenuList, MenuItem} from '@reach/menu-button'
 import {
   Page,
   AdTable,
@@ -116,7 +115,7 @@ export default function MyAds() {
                 <AdCell>
                   <Flex>
                     {lastTx.toString()}
-                    <Menu>
+                    {/* <Menu>
                       <MenuButton
                         style={{
                           backgroundColor: 'none',
@@ -150,7 +149,7 @@ export default function MyAds() {
                           Delete
                         </AdRowMenuItem>
                       </MenuList>
-                    </Menu>
+                    </Menu> */}
                   </Flex>
                 </AdCell>
               </AdRow>

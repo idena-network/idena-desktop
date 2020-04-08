@@ -9,7 +9,7 @@ import {
   position,
   backgrounds,
 } from 'polished'
-import {MenuItem} from '@reach/menu-button'
+// import {MenuItem} from '@reach/menu-button'
 import {
   Table,
   TableRow,
@@ -234,7 +234,7 @@ export function TargetCondition({name, value, ...props}) {
 export function AdRowMenuItem({children, variant = 'text', ...props}) {
   const [isHovered, setIsHovered] = useState(false)
   return (
-    <MenuItem
+    <Box
       style={{
         ...backgrounds(isHovered ? theme.colors.gray : ''),
         color: theme.colors[variant],
@@ -249,7 +249,7 @@ export function AdRowMenuItem({children, variant = 'text', ...props}) {
       <Flex align="center" css={{display: 'inline-flex'}}>
         {children}
       </Flex>
-    </MenuItem>
+    </Box>
   )
 }
 
