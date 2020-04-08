@@ -1,3 +1,8 @@
 module.exports = {
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  testPathIgnorePatterns: [
+    '<rootDir>/renderer/.next/',
+    '<rootDir>/renderer/out/',
+    '<rootDir>/dist/',
+    '<rootDir>/node_modules/',
+  ],
 }

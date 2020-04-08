@@ -67,3 +67,7 @@ export function hasEnoughAnswers(flips) {
 export function missingHashes(flips) {
   return flips.filter(missingFlip).map(({hash}) => hash)
 }
+
+export function exponentialBackoff(retry) {
+  return Math.min(2 ** retry + Math.random(), 32)
+}

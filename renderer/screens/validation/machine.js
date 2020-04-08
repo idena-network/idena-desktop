@@ -23,10 +23,10 @@ import {
   failedFlip,
   readyFlip,
   hasEnoughAnswers,
-  missingFlip,
   missingHashes,
+  exponentialBackoff,
 } from './utils'
-import {forEachAsync} from '../../shared/utils/fn'
+import {forEachAsync, wait} from '../../shared/utils/fn'
 
 export const createValidationMachine = ({
   epoch,
@@ -461,60 +461,64 @@ export const createValidationMachine = ({
                       invoke: {
                         src: 'fetchLongFlips',
                         onDone: {
-                          target: 'fetchMissing',
+                          target: 'detectMissing',
                           actions: assign({
                             retries: ({retries}) => retries + 1,
                           }),
                         },
                       },
                     },
-                    fetchMissing: {
-                      invoke: {
-                        src: ({longFlips}) => cb => {
-                          async function fetchMissingFlips(flips) {
-                            const hashes = missingHashes(flips)
-                            if (hashes.some(x => x)) {
-                              const promises = hashes.map(async hash => {
-                                const flip = {
-                                  ...flips.find(f => f.hash === hash),
-                                  hash,
-                                }
-                                try {
-                                  const {result, error} = await fetchFlip(hash)
-                                  return result && !error
-                                    ? {
-                                        ...flip,
-                                        ...decodeFlip({hash, ...result}),
-                                        fetched: true,
-                                        missing: false,
-                                      }
-                                    : flip
-                                } catch (err) {
-                                  global.logger.error(err)
-                                  return flip
-                                }
-                              })
-
-                              const fetchedFlips = await Promise.all(promises)
-
-                              for (const flip of fetchedFlips) {
-                                if (!missingFlip(flip) && flip.decoded)
-                                  cb({type: 'FLIP', flip})
-                              }
-
-                              setTimeout(() => {
-                                fetchMissingFlips(
-                                  mergeFlipsByHash(flips, fetchedFlips)
-                                )
-                              }, 3000)
-                            } else cb('DONE')
-                          }
-
-                          fetchMissingFlips(longFlips)
-                        },
-                      },
+                    detectMissing: {
                       on: {
-                        DONE: 'done',
+                        '': [
+                          {target: 'fetchMissing', cond: 'hasMissingFlips'},
+                          {
+                            target: 'done',
+                          },
+                        ],
+                      },
+                    },
+                    fetchMissing: {
+                      initial: 'polling',
+                      entry: assign({
+                        retries: 0,
+                      }),
+                      states: {
+                        polling: {
+                          entry: log(
+                            ({longFlips}) => missingHashes(longFlips),
+                            'fetching missing hashes'
+                          ),
+                          invoke: {
+                            src: ({longFlips}) => cb =>
+                              fetchFlips(missingHashes(longFlips), cb),
+                            onDone: 'check',
+                          },
+                        },
+                        check: {
+                          on: {
+                            '': [
+                              {target: 'enqueue', cond: 'hasMissingFlips'},
+                              {
+                                target:
+                                  '#validation.longSession.fetch.flips.done',
+                              },
+                            ],
+                          },
+                        },
+                        enqueue: {
+                          // somehow `after` doesn't work here thus custom delay
+                          invoke: {
+                            src: ({retries}) =>
+                              wait(exponentialBackoff(retries) * 1000),
+                            onDone: {
+                              target: 'polling',
+                              actions: assign({
+                                retries: ({retries}) => retries + 1,
+                              }),
+                            },
+                          },
+                        },
                       },
                     },
                     done: {
@@ -533,7 +537,7 @@ export const createValidationMachine = ({
                       ],
                     },
                     REFETCH_FLIPS: {
-                      target: '#validation.longSession.fetch.flips.fetchFlips',
+                      target: '.fetchFlips',
                       actions: [
                         assign({
                           longFlips: ({longFlips}) =>
@@ -552,7 +556,6 @@ export const createValidationMachine = ({
                   initial: 'fetching',
                   states: {
                     fetching: {
-                      entry: log('Fetching words'),
                       invoke: {
                         src: ({longFlips}) =>
                           Promise.all(
@@ -579,7 +582,6 @@ export const createValidationMachine = ({
                       },
                     },
                     success: {
-                      entry: log(),
                       after: {
                         10000: [
                           {
@@ -908,6 +910,7 @@ export const createValidationMachine = ({
             )
           )
         },
+        hasMissingFlips: ({longFlips}) => missingHashes(longFlips).length > 0,
       },
     }
   )
