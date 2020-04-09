@@ -4,6 +4,7 @@ import {FaBullhorn} from 'react-icons/fa'
 import {FiMoreVertical} from 'react-icons/fi'
 import {margin} from 'polished'
 import dayjs from 'dayjs'
+import NextLink from 'next/link'
 import {
   AdList,
   AdEntry,
@@ -24,11 +25,11 @@ import {
 import {useAds} from '../../screens/ads/machine'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {add} from '../../shared/utils/math'
-import {IconButton} from '../../shared/components/button'
+// import {IconButton} from '../../shared/components/button'
 import {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../screens/app/components'
-import {SecondaryButton} from '../../shared/components'
+import {SecondaryButton, IconButton} from '../../shared/components'
 
 export default function MyAds() {
   const [ads] = useAds()
@@ -58,17 +59,14 @@ export default function MyAds() {
             </Figure>
           </FigureGroup>
           <ToolbarButton ml="auto">
-            <IconButton
-              disabled={!hasPendingChanges}
-              icon={<FaBullhorn size={rem(18)} />}
-            >
+            <IconButton disabled={!hasPendingChanges} icon="publish">
               Publish
             </IconButton>
           </ToolbarButton>
           <ToolbarButton>
-            <IconButton icon={<i className="icon icon--add_btn" />}>
-              New banner
-            </IconButton>
+            <NextLink href="/ads/new">
+              <IconButton icon="plus-solid">New banner</IconButton>
+            </NextLink>
           </ToolbarButton>
         </Toolbar>
         <AdList spacing={4}>
