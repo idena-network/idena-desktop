@@ -1,5 +1,17 @@
 /* eslint-disable react/prop-types */
 import React, {useState} from 'react'
+import {
+  Box,
+  Divider,
+  Flex,
+  Image,
+  Text,
+  Stack,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatGroup,
+} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
   padding,
@@ -9,78 +21,48 @@ import {
   position,
   backgrounds,
 } from 'polished'
-// import {MenuItem} from '@reach/menu-button'
 import {
-  Table,
   TableRow,
   TableCol,
   TableHeaderCol,
-  Box,
-  PageTitle,
-  SubHeading,
-  Text,
   Absolute,
 } from '../../shared/components'
 import theme, {rem} from '../../shared/theme'
-import Flex from '../../shared/components/flex'
-import Layout from '../../shared/components/layout'
-import Divider from '../../shared/components/divider'
-
-export function Page({title, ...props}) {
-  return (
-    <Layout>
-      <Box
-        css={{
-          ...padding(rem(24), rem(80)),
-        }}
-      >
-        <PageTitle
-          style={{
-            ...padding(rem(theme.spacings.small8), 0),
-            ...margin(0),
-          }}
-        >
-          {title}
-        </PageTitle>
-        <Box
-          css={{
-            ...margin(rem(theme.spacings.medium16), 0, 0),
-          }}
-          {...props}
-        />
-      </Box>
-    </Layout>
-  )
-}
 
 export function Toolbar(props) {
-  return <Flex align="top" justify="space-between" {...props} />
+  return <Flex mb={8} {...props} />
 }
 
-export function ToolbarGroup(props) {
-  return <Flex {...props} />
-}
-
-export function ToolbarItem(props) {
-  return <Box {...props} />
+export function FigureGroup(props) {
+  return <StatGroup {...props} />
 }
 
 export function Figure(props) {
-  return <Box {...props} />
+  return <Stat {...props} />
 }
 
 export function FigureLabel(props) {
-  return <Text color={theme.colors.muted} {...props} />
+  return (
+    <StatLabel color="muted" fontSize={rem(13)} fontWeight={400} {...props} />
+  )
 }
 
 export function FigureNumber(props) {
   return (
-    <SubHeading
-      fontSize={rem(theme.fontSizes.large18)}
-      fontWeight={theme.fontWeights.medium}
+    <StatNumber
+      fontSize={rem(18)}
+      fontWeight={500}
+      minW={rem(116)}
       {...props}
     />
   )
+}
+export function SmallFigureLabel(props) {
+  return <FigureLabel fontSize={rem(11)} {...props} />
+}
+
+export function SmallFigureNumber(props) {
+  return <FigureNumber fontSize={rem(11)} {...props} />
 }
 
 export function ToolbarButton(props) {
@@ -91,16 +73,8 @@ export function TooltipDivider(props) {
   return <Divider vertical {...props} />
 }
 
-export function AdTable(props) {
-  return (
-    <Box
-      css={{
-        ...margin(rem(theme.spacings.medium32), 0, 0),
-      }}
-    >
-      <Table {...props} />
-    </Box>
-  )
+export function AdList(props) {
+  return <Stack {...props} />
 }
 
 export function AdHeader(props) {
@@ -119,29 +93,20 @@ export function AdTableBody(props) {
   return <tbody {...props} />
 }
 
-export function AdRow(props) {
-  return <TableRow {...props} />
+export function AdEntry(props) {
+  return <Box {...props} />
 }
 
 export function AdCell(props) {
   return <TableCol style={{border: 'none'}} {...props} />
 }
 
-export function AdImage({size = 32, css, style, ...props}) {
-  return (
-    // eslint-disable-next-line jsx-a11y/alt-text
-    <img
-      style={{
-        borderRadius: rem(theme.spacings.small8),
-        border: `solid 1px ${transparentize(0.84, theme.colors.primary2)}`,
-        height: rem(size),
-        width: rem(size),
-        ...css,
-        ...style,
-      }}
-      {...props}
-    />
-  )
+export function AdImage(props) {
+  return <Image rounded="lg" size="60px" {...props} />
+}
+
+export function AdEntryDivider(props) {
+  return <Divider border="px" borderColor="gray.100" mb={0} {...props} />
 }
 
 export function AdRating(props) {
@@ -171,9 +136,13 @@ export function AdScore(props) {
   )
 }
 
+export function AdTargeting(props) {
+  return <Flex bg="gray.50" px={4} py={3} my={4} rounded="md" {...props}></Flex>
+}
+
 export function AdDetails({children, css, style, ...props}) {
   return (
-    <AdRow>
+    <AdEntry>
       <AdCell colspan={6} style={{border: 'none'}}>
         <Flex
           align="center"
@@ -200,7 +169,7 @@ export function AdDetails({children, css, style, ...props}) {
           {children}
         </Flex>
       </AdCell>
-    </AdRow>
+    </AdEntry>
   )
 }
 
@@ -219,15 +188,12 @@ export function AdStatus(props) {
 
 export function TargetCondition({name, value, ...props}) {
   return (
-    <Figure
-      css={{
-        ...margin(0, rem(theme.spacings.large64), 0, 0),
-      }}
-      {...props}
-    >
-      <FigureLabel fontSize={rem(11)}>{name}</FigureLabel>
+    <Flex {...props}>
+      <FigureLabel fontSize={rem(11)} mr={2}>
+        {name}
+      </FigureLabel>
       <FigureNumber fontSize={rem(11)}>{value}</FigureNumber>
-    </Figure>
+    </Flex>
   )
 }
 
