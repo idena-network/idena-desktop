@@ -20,6 +20,7 @@ import {useNotificationDispatch} from '../../shared/providers/notification-conte
 import {useChainState} from '../../shared/providers/chain-context'
 import DeleteFlipForm from '../../screens/flips/components/delete-flip-form'
 import {useIdentityState} from '../../shared/providers/identity-context'
+import {capitalize} from '../../shared/utils/string'
 
 function Flips() {
   const {t} = useTranslation('error')
@@ -98,7 +99,7 @@ function Flips() {
                   onClick={() => setFilter(type)}
                   isCurrent={filter === type}
                 >
-                  {type}
+                  {t(`translation:${capitalize(type)}`)}
                 </FlipToolbarItem>
               ))}
           </Flex>

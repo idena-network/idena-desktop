@@ -5,6 +5,8 @@
 Backed by [Electron](https://www.electronjs.org), [React](https://reactjs.org) and [Next.js](https://nextjs.org/).
 
 [![Build Status](https://travis-ci.com/idena-network/idena-desktop.svg?branch=master)](https://travis-ci.com/idena-network/idena-desktop)
+[![dependencies Status](https://img.shields.io/david/idena-network/idena-desktop.svg)](https://david-dm.org/idena-network/idena-desktop)
+[![devDependency Status](https://img.shields.io/david/dev/idena-network/idena-desktop.svg)](https://david-dm.org/idena-network/idena-desktop?type=dev)
 
 ## Getting started
 

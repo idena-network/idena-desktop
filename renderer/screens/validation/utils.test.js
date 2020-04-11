@@ -1,4 +1,4 @@
-import {hasEnoughAnswers} from './utils'
+import {hasEnoughAnswers, exponentialBackoff} from './utils'
 
 describe('hasEnoughAnswers', () => {
   it('falsy when no answers', () => {
@@ -101,5 +101,15 @@ describe('hasEnoughAnswers', () => {
         {decoded: true, extra: true},
       ])
     ).toBeFalsy()
+  })
+})
+
+describe('exponentialBackoff', () => {
+  it('works!', () => {
+    ;[0, 1, 2, 3].forEach(n => {
+      expect(exponentialBackoff(n)).toBeLessThan(2 ** n + 1)
+      expect(exponentialBackoff(n)).toBeGreaterThan(2 ** n)
+    })
+    expect(exponentialBackoff(10)).toBe(32)
   })
 })

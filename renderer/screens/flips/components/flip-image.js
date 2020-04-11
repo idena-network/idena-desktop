@@ -12,6 +12,7 @@ function FlipImage({src, size = 150, gradient = false, ...props}) {
               : ''}
             url(${src}) center center no-repeat;
           background-size: cover;
+          border-radius: ${rem(8)};
           width: ${rem(size)};
           height: ${rem(size)};
         }

@@ -1,4 +1,7 @@
 import React from 'react'
+import {useInterval} from '../hooks/use-interval'
+
+export const NOTIFICATION_DELAY = 3000
 
 export const NotificationType = {
   Info: 'info',
@@ -8,21 +11,16 @@ export const NotificationType = {
 const NotificationStateContext = React.createContext()
 const NotificationDispatchContext = React.createContext()
 
-// eslint-disable-next-line react/prop-types
-function NotificationProvider({children}) {
+export function NotificationProvider(props) {
   const [notifications, setNotifications] = React.useState([])
   const [alerts, setAlerts] = React.useState([])
 
-  React.useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (notifications.length) {
-        setNotifications(notifications.slice(1))
-      }
-    }, 3000)
-    return () => {
-      clearTimeout(timeoutId)
-    }
-  }, [notifications])
+  useInterval(
+    () => {
+      setNotifications(notifications.slice(1))
+    },
+    notifications.length > 0 ? NOTIFICATION_DELAY : null
+  )
 
   const addNotificationWithAction = React.useCallback(
     ({title, body, type = NotificationType.Info, action, actionName}) => {
@@ -50,14 +48,13 @@ function NotificationProvider({children}) {
     <NotificationStateContext.Provider value={{notifications, alerts}}>
       <NotificationDispatchContext.Provider
         value={{addNotification, addError, addAlert, addNotificationWithAction}}
-      >
-        {children}
-      </NotificationDispatchContext.Provider>
+        {...props}
+      />
     </NotificationStateContext.Provider>
   )
 }
 
-function useNotificationState() {
+export function useNotificationState() {
   const context = React.useContext(NotificationStateContext)
   if (context === undefined) {
     throw new Error(
@@ -67,7 +64,7 @@ function useNotificationState() {
   return context
 }
 
-function useNotificationDispatch() {
+export function useNotificationDispatch() {
   const context = React.useContext(NotificationDispatchContext)
   if (context === undefined) {
     throw new Error(
@@ -76,5 +73,3 @@ function useNotificationDispatch() {
   }
   return context
 }
-
-export {NotificationProvider, useNotificationState, useNotificationDispatch}
