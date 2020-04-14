@@ -19,20 +19,51 @@ import {
   AlertIcon,
   InputGroup,
   InputRightAddon,
-  InputRightElement,
   NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
+  Image,
+  Icon,
 } from '@chakra-ui/core'
+import {useMachine} from '@xstate/react'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 import {AVAILABLE_LANGS} from '../../i18n'
+import {adsMachine, adMachine} from '../../screens/ads/machine'
+import {PrimaryButton, IconButton} from '../../shared/components'
+import {persistState} from '../../shared/utils/persist'
+import {loadAds, validImageType} from '../../screens/ads/utils'
 
 export default function NewAd() {
+  const [current, send] = useMachine(
+    adsMachine.withConfig(
+      {
+        actions: {
+          persist: ({ads}) => persistState('ads', ads),
+        },
+      },
+      {
+        newAd: {},
+        ads: loadAds(),
+      }
+    )
+  )
+
+  const {newAd} = current.context
+
+  const handleChangeCover = ({
+    target: {
+      files: [file],
+    },
+  }) => {
+    if (file && validImageType(file)) {
+      send('NEW_AD.CHANGE', {
+        cover: URL.createObjectURL(file),
+      })
+    }
+  }
+
   return (
     <Layout>
-      <Page>
+      <Page minH="100vh" position="relative">
         <PageTitle>New ad</PageTitle>
         <Tabs variant="unstyled">
           <TabList>
@@ -56,13 +87,48 @@ export default function NewAd() {
               <Stack spacing={6} w="480px">
                 <FormSection>
                   <FormSectionTitle>Parameters</FormSectionTitle>
-                  <Stack spacing={4} shouldWrapChildren>
-                    <AdFormControl label="Text" id="text">
-                      <Textarea />
-                    </AdFormControl>
-                    <AdFormControl label="Link" id="link">
-                      <Input />
-                    </AdFormControl>
+                  <Stack isInline spacing={10}>
+                    <Stack spacing={4} shouldWrapChildren>
+                      <AdFormControl label="Text" id="text">
+                        <Textarea
+                          onChange={e =>
+                            send('NEW_AD.CHANGE', {title: e.target.value})
+                          }
+                        />
+                      </AdFormControl>
+                      <AdFormControl label="Link" id="link">
+                        <Input
+                          onChange={e =>
+                            send('NEW_AD.CHANGE', {url: e.target.value})
+                          }
+                        />
+                      </AdFormControl>
+                    </Stack>
+                    <Stack spacing={4} alignItems="flex-start">
+                      {newAd.cover ? (
+                        <Image src={newAd.cover} size={20} rounded="lg" />
+                      ) : (
+                        <Box bg="gray.50" borderWidth="1px" p={5} rounded="lg">
+                          <Icon name="pic" size={10} color="#d2d4d9" />
+                        </Box>
+                      )}
+                      <IconButton
+                        as={FormLabel}
+                        htmlFor="cover"
+                        type="file"
+                        icon="laptop"
+                      >
+                        Upload cover
+                      </IconButton>
+                      <Input
+                        id="cover"
+                        type="file"
+                        accept="image/*"
+                        opacity={0}
+                        zIndex={-1}
+                        onChange={handleChangeCover}
+                      />
+                    </Stack>
                   </Stack>
                 </FormSection>
                 <FormSection>
@@ -71,14 +137,14 @@ export default function NewAd() {
                     <AdFormControl label="Location" id="location">
                       <Select>
                         {['US', 'Canada', 'UK'].map(c => (
-                          <option>{c}</option>
+                          <option key={c}>{c}</option>
                         ))}
                       </Select>
                     </AdFormControl>
                     <AdFormControl label="Language" id="lang">
                       <Select>
                         {AVAILABLE_LANGS.map(l => (
-                          <option>{l}</option>
+                          <option key={l}>{l}</option>
                         ))}
                       </Select>
                     </AdFormControl>
@@ -116,6 +182,11 @@ export default function NewAd() {
             </TabPanel>
           </TabPanels>
         </Tabs>
+        <AdFooter>
+          <PrimaryButton onClick={() => send('NEW_AD.COMMIT')}>
+            Save
+          </PrimaryButton>
+        </AdFooter>
       </Page>
     </Layout>
   )
@@ -180,12 +251,25 @@ function AdNumberInput({addon, ...props}) {
           flex={1}
           roundedRight={0}
         />
-        <NumberInputStepper>
-          <NumberIncrementStepper />
-          <NumberDecrementStepper />
-        </NumberInputStepper>
       </NumberInput>
-      <InputRightAddon>{addon}</InputRightAddon>
+      <InputRightAddon bg="gray.50">{addon}</InputRightAddon>
     </InputGroup>
+  )
+}
+
+function AdFooter(props) {
+  return (
+    <Box
+      borderTop="1px"
+      borderTopColor="gray.300"
+      position="absolute"
+      bottom={0}
+      left={0}
+      right={0}
+      px={4}
+      py={3}
+    >
+      <Stack isInline spacing={2} justify="flex-end" {...props} />
+    </Box>
   )
 }
