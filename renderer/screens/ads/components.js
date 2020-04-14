@@ -11,16 +11,15 @@ import {
   StatLabel,
   StatNumber,
   StatGroup,
+  Menu,
+  MenuButton,
+  Icon,
+  MenuList,
+  PseudoBox,
+  MenuItem,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {
-  padding,
-  margin,
-  transparentize,
-  triangle,
-  position,
-  backgrounds,
-} from 'polished'
+import {padding, margin, triangle, position, backgrounds} from 'polished'
 import {
   TableRow,
   TableCol,
@@ -282,4 +281,50 @@ export function Triangle({size, color, bg}) {
       />
     </Absolute>
   )
+}
+
+export function AdMenu(props) {
+  return (
+    <Menu autoSelect={false}>
+      <MenuButton
+        rounded="md"
+        py={1}
+        _hover={{bg: 'gray.50'}}
+        _expanded={{bg: 'gray.50'}}
+        _focus={{outline: 0}}
+      >
+        <Icon name="more" size={5} />
+      </MenuButton>
+      <MenuList
+        placement="bottom-end"
+        border="none"
+        shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
+        rounded="lg"
+        py={2}
+        minWidth="145px"
+        {...props}
+      />
+    </Menu>
+  )
+}
+
+export function AdMenuItem(props) {
+  return (
+    <PseudoBox
+      as={MenuItem}
+      fontWeight={500}
+      lineHeight={rem(20)}
+      px={3}
+      py={rem(6)}
+      _hover={{bg: 'gray.50'}}
+      _focus={{bg: 'gray.50'}}
+      _selected={{bg: 'gray.50'}}
+      _active={{bg: 'gray.50'}}
+      {...props}
+    ></PseudoBox>
+  )
+}
+
+export function AdMenuItemIcon(props) {
+  return <Icon size={5} mr={3} color="brandBlue.500" {...props} />
 }
