@@ -23,7 +23,8 @@ import {
   Image,
   Icon,
 } from '@chakra-ui/core'
-import {useMachine} from '@xstate/react'
+import {useMachine, useService} from '@xstate/react'
+import {useRouter} from 'next/router'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 import {AVAILABLE_LANGS} from '../../i18n'
@@ -32,7 +33,11 @@ import {PrimaryButton, IconButton} from '../../shared/components'
 import {persistState} from '../../shared/utils/persist'
 import {loadAds, validImageType} from '../../screens/ads/utils'
 
-export default function NewAd() {
+export default function EditAd() {
+  const {
+    query: {id},
+  } = useRouter()
+
   const [current, send] = useMachine(
     adsMachine.withConfig(
       {
@@ -41,21 +46,21 @@ export default function NewAd() {
         },
       },
       {
-        newAd: {},
         ads: loadAds(),
       }
     )
   )
 
-  const {newAd} = current.context
+  const {ads} = current.context
+  const adRef = ads.find(ad => ad.id === id)
 
-  const handleChangeCover = ({
-    target: {
-      files: [file],
-    },
-  }) => {
+  const [currentAd, sendAd] = useService(adRef.ref)
+  const {title, cover, url, location, lang, age, os} = currentAd.context
+
+  const handleChangeCover = ({target: {files}}) => {
+    const [file] = files
     if (file && validImageType(file)) {
-      send('NEW_AD.CHANGE', {
+      sendAd('CHANGE', {
         cover: URL.createObjectURL(file),
       })
     }
@@ -64,7 +69,7 @@ export default function NewAd() {
   return (
     <Layout>
       <Page minH="100vh" position="relative">
-        <PageTitle>New ad</PageTitle>
+        <PageTitle>Edit ad</PageTitle>
         <Tabs variant="unstyled">
           <TabList>
             <AdFormTab>Parameters</AdFormTab>
@@ -80,7 +85,7 @@ export default function NewAd() {
             rounded="md"
           >
             <AlertIcon size="20px" name="info" />
-            You must publish this banner after editing.
+            You must re-publish this banner after editing.
           </Alert>
           <TabPanels>
             <TabPanel>
@@ -91,22 +96,22 @@ export default function NewAd() {
                     <Stack spacing={4} shouldWrapChildren>
                       <AdFormControl label="Text" id="text">
                         <Textarea
+                          value={title}
                           onChange={e =>
-                            send('NEW_AD.CHANGE', {title: e.target.value})
+                            send('CHANGE', {title: e.target.value})
                           }
                         />
                       </AdFormControl>
                       <AdFormControl label="Link" id="link">
                         <Input
-                          onChange={e =>
-                            send('NEW_AD.CHANGE', {url: e.target.value})
-                          }
+                          value={url}
+                          onChange={e => send('CHANGE', {url: e.target.value})}
                         />
                       </AdFormControl>
                     </Stack>
                     <Stack spacing={4} alignItems="flex-start">
-                      {newAd.cover ? (
-                        <Image src={newAd.cover} size={20} rounded="lg" />
+                      {cover ? (
+                        <Image src={cover} size={20} rounded="lg" />
                       ) : (
                         <Box bg="gray.50" borderWidth="1px" p={5} rounded="lg">
                           <Icon name="pic" size={10} color="#d2d4d9" />
@@ -136,8 +141,9 @@ export default function NewAd() {
                   <Stack spacing={4} shouldWrapChildren>
                     <AdFormControl label="Location" id="location">
                       <Select
+                        value={location}
                         onChange={e =>
-                          send('NEW_AD.CHANGE', {location: e.target.value})
+                          send('CHANGE', {location: e.target.value})
                         }
                       >
                         {['US', 'Canada', 'UK'].map(c => (
@@ -147,9 +153,8 @@ export default function NewAd() {
                     </AdFormControl>
                     <AdFormControl label="Language" id="lang">
                       <Select
-                        onChange={e =>
-                          send('NEW_AD.CHANGE', {lang: e.target.value})
-                        }
+                        value={lang}
+                        onChange={e => send('CHANGE', {lang: e.target.value})}
                       >
                         {AVAILABLE_LANGS.map(l => (
                           <option key={l}>{l}</option>
@@ -158,14 +163,14 @@ export default function NewAd() {
                     </AdFormControl>
                     <AdFormControl label="Age" id="age">
                       <NumberInput
-                        onChange={value => send('NEW_AD.CHANGE', {age: value})}
+                        value={age}
+                        onChange={value => send('CHANGE', {age: value})}
                       />
                     </AdFormControl>
                     <AdFormControl label="OS" id="os">
                       <Select
-                        onChange={e =>
-                          send('NEW_AD.CHANGE', {os: e.target.value})
-                        }
+                        value={os}
+                        onChange={e => send('CHANGE', {os: e.target.value})}
                       >
                         <option>macOS</option>
                         <option>Windows</option>

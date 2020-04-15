@@ -28,19 +28,20 @@ import {
   AdList,
   AdEntry,
   Toolbar,
-  ToolbarButton,
   Figure,
   FigureLabel,
   FigureNumber,
   AdImage,
   FigureGroup,
   AdEntryDivider,
-  AdTargeting,
+  AdTarget,
   SmallFigureLabel,
   SmallFigureNumber,
   AdMenu,
   AdMenuItem,
   AdMenuItemIcon,
+  AdBanner,
+  NoAds,
 } from '../../screens/ads/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {add} from '../../shared/utils/math'
@@ -76,15 +77,17 @@ export default function MyAds() {
       }
     )
   )
-  const {balance} = useIdentityState()
 
-  const hasPendingChanges = ads.some(({burnt}) => burnt <= 0)
+  const {balance} = useIdentityState()
 
   const {isOpen, onOpen, onClose} = useDisclosure()
 
+  const {address} = useIdentityState()
+
   return (
     <Layout>
-      <Page>
+      <AdBanner {...ads[0]} owner={address} />
+      <Page as={Flex} flexDirection="column" h="calc(100vh - 56px)">
         <PageTitle>My Ads</PageTitle>
         <Toolbar>
           <FigureGroup>
@@ -103,32 +106,34 @@ export default function MyAds() {
               </FigureNumber>
             </Figure>
           </FigureGroup>
-          <ToolbarButton ml="auto">
-            <IconButton disabled={!hasPendingChanges} icon="publish">
-              Publish
+          <NextLink href="/ads/new">
+            <IconButton icon="plus-solid" ml="auto">
+              New banner
             </IconButton>
-          </ToolbarButton>
-          <ToolbarButton>
-            <NextLink href="/ads/new">
-              <IconButton icon="plus-solid">New banner</IconButton>
-            </NextLink>
-          </ToolbarButton>
+          </NextLink>
         </Toolbar>
         <AdList spacing={4}>
           {ads.map(
             ({
+              id,
               cover: adCover,
               title,
+              location,
+              lang,
+              age,
+              os,
+              stake,
               burnt: spent = 0,
               lastTx = dayjs(),
               status = AdStatus.Idle,
             }) => (
-              <AdEntry key={title}>
+              <AdEntry key={id}>
                 <Flex>
                   <Box w={rem(60)}>
                     <Box mb={3} position="relative">
                       <AdImage
-                        src={adCover || '//placekitten.com/60/60'}
+                        src={adCover}
+                        fallbackSrc="//placekitten.com/60/60"
                         alt={title}
                       ></AdImage>
                       {status !== AdStatus.Idle && (
@@ -162,16 +167,12 @@ export default function MyAds() {
                       <Stack isInline align="center" spacing={4} ml="auto">
                         <Box>
                           <AdMenu>
-                            <NextLink href="/ads/edit?id=1">
+                            <NextLink href={`/ads/edit?id=${id}`}>
                               <AdMenuItem>
                                 <AdMenuItemIcon name="edit" />
                                 Edit
                               </AdMenuItem>
                             </NextLink>
-                            {/* <AdMenuItem>
-                              <AdMenuItemIcon as={FiPause} />
-                              Disable
-                            </AdMenuItem> */}
                             <MenuDivider color="gray.100" my={2} />
                             <AdMenuItem color="red.500">
                               <AdMenuItemIcon name="delete" color="red.500" />
@@ -182,7 +183,7 @@ export default function MyAds() {
                         <SecondaryButton onClick={onOpen}>Pay</SecondaryButton>
                       </Stack>
                     </Flex>
-                    <Stack isInline spacing={rem(58)}>
+                    <Stack isInline spacing={rem(58)} mt="px">
                       <Figure>
                         <FigureLabel>Spent, 4hrs</FigureLabel>
                         <FigureNumber fontSize={rem(13)}>
@@ -202,7 +203,7 @@ export default function MyAds() {
                         </FigureNumber>
                       </Figure>
                     </Stack>
-                    <AdTargeting>
+                    <AdTarget>
                       <Stack isInline spacing={2}>
                         <Stack spacing={1}>
                           <SmallFigureLabel>Location</SmallFigureLabel>
@@ -210,9 +211,9 @@ export default function MyAds() {
                           <SmallFigureLabel>Stake</SmallFigureLabel>
                         </Stack>
                         <Stack spacing={1}>
-                          <SmallFigureNumber>USA</SmallFigureNumber>
-                          <SmallFigureNumber>en</SmallFigureNumber>
-                          <SmallFigureNumber>>1000</SmallFigureNumber>
+                          <SmallFigureNumber>{location}</SmallFigureNumber>
+                          <SmallFigureNumber>{lang}</SmallFigureNumber>
+                          <SmallFigureNumber>{stake}</SmallFigureNumber>
                         </Stack>
                       </Stack>
                       <Stack isInline spacing={2}>
@@ -221,8 +222,8 @@ export default function MyAds() {
                           <SmallFigureLabel>OS</SmallFigureLabel>
                         </Stack>
                         <Stack spacing={1}>
-                          <SmallFigureNumber>>10</SmallFigureNumber>
-                          <SmallFigureNumber>macOS</SmallFigureNumber>
+                          <SmallFigureNumber>{age}</SmallFigureNumber>
+                          <SmallFigureNumber>{os}</SmallFigureNumber>
                         </Stack>
                       </Stack>
                       <Divider
@@ -247,7 +248,7 @@ export default function MyAds() {
                           </Stack>
                         </Stack>
                       </Box>
-                    </AdTargeting>
+                    </AdTarget>
                   </Box>
                 </Flex>
                 <AdEntryDivider />
@@ -255,6 +256,9 @@ export default function MyAds() {
             )
           )}
         </AdList>
+
+        {ads.length === 0 && <NoAds />}
+
         <Drawer isOpen={isOpen} onClose={onClose} size={rem(360)}>
           <DrawerOverlay />
           <DrawerContent px={8} py={10} size={rem(360)}>

@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 import {Machine, assign, spawn, sendParent} from 'xstate'
 import {log} from 'xstate/lib/actions'
+import nanoid from 'nanoid'
 
 export const adsMachine = Machine({
   id: 'ads',
@@ -42,7 +43,11 @@ export const adsMachine = Machine({
         assign({
           newAd: {},
           ads: ({newAd, ads}) =>
-            ads.concat({...newAd, ref: spawn(adMachine.withContext(newAd))}),
+            ads.concat({
+              ...newAd,
+              id: nanoid(),
+              ref: spawn(adMachine.withContext(newAd)),
+            }),
         }),
         log(),
         'persist',
@@ -68,10 +73,12 @@ export const adMachine = Machine({
   id: 'ads',
   context: {
     title: '',
+    cover: '',
     url: '',
+    location: '',
     lang: '',
+    age: 0,
     os: '',
-    country: '',
   },
   initial: 'editing',
   states: {
