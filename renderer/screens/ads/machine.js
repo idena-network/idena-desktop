@@ -7,6 +7,7 @@ export const adsMachine = Machine({
   id: 'ads',
   context: {
     newAd: null,
+    selected: {},
     ads: [],
   },
   initial: 'init',
@@ -66,6 +67,13 @@ export const adsMachine = Machine({
       ],
       cond: (_, {ad}) => ad && ad.title,
     },
+    SELECT: {
+      actions: [
+        assign({
+          selected: ({ads}, {id}) => ads.find(a => a.id === id),
+        }),
+      ],
+    },
   },
 })
 
@@ -94,7 +102,7 @@ export const adMachine = Machine({
         },
         SAVE: {
           target: 'idle',
-          actions: [sendParent(ctx => ({type: 'AD.COMMIT', ad: ctx}))],
+          actions: [sendParent(ctx => ({type: 'AD.COMMIT', ad: ctx})), log()],
         },
       },
     },

@@ -60,8 +60,9 @@ import {persistState} from '../../shared/utils/persist'
 export default function MyAds() {
   const [
     {
-      context: {ads},
+      context: {ads, selected},
     },
+    send,
   ] = useMachine(
     adsMachine.withConfig(
       {
@@ -73,16 +74,15 @@ export default function MyAds() {
         },
       },
       {
+        selected: {},
         ads: loadAds(),
       }
     )
   )
 
-  const {balance} = useIdentityState()
+  const {address, balance} = useIdentityState()
 
   const {isOpen, onOpen, onClose} = useDisclosure()
-
-  const {address} = useIdentityState()
 
   return (
     <Layout>
@@ -180,7 +180,14 @@ export default function MyAds() {
                             </AdMenuItem>
                           </AdMenu>
                         </Box>
-                        <SecondaryButton onClick={onOpen}>Pay</SecondaryButton>
+                        <SecondaryButton
+                          onClick={() => {
+                            send('SELECT', {id})
+                            onOpen()
+                          }}
+                        >
+                          Pay
+                        </SecondaryButton>
                       </Stack>
                     </Flex>
                     <Stack isInline spacing={rem(58)} mt="px">
@@ -285,10 +292,8 @@ export default function MyAds() {
               </Text>
               <Box bg="gray.50" p={6} my={6} rounded="lg">
                 <Stack isInline spacing={rem(10)} mb={6}>
-                  <AdImage src="//placekitten.com/60" size={rem(60)}></AdImage>
-                  <Text fontWeight={500}>
-                    A new ICO is running. DNA is accepted
-                  </Text>
+                  <AdImage src={selected.cover} size={rem(60)}></AdImage>
+                  <Text fontWeight={500}>{selected.title}</Text>
                 </Stack>
                 <Divider />
                 <Stack isInline spacing={6} my={rem(10)}>
@@ -301,7 +306,7 @@ export default function MyAds() {
                       1
                     </FigureNumber>
                     <FigureNumber fontSize={rem(13)} fontWeight={500}>
-                      0.000000000123 DNA
+                      {toDna(0.000000000123)} DNA
                     </FigureNumber>
                   </Stack>
                 </Stack>
@@ -315,11 +320,13 @@ export default function MyAds() {
                     <SmallFigureLabel>OS</SmallFigureLabel>
                   </Stack>
                   <Stack spacing={1}>
-                    <SmallFigureNumber>USA</SmallFigureNumber>
-                    <SmallFigureNumber>en</SmallFigureNumber>
-                    <SmallFigureNumber>>1000</SmallFigureNumber>
-                    <SmallFigureNumber>22</SmallFigureNumber>
-                    <SmallFigureNumber>macOS</SmallFigureNumber>
+                    <SmallFigureNumber>{selected.location}</SmallFigureNumber>
+                    <SmallFigureNumber>{selected.lang}</SmallFigureNumber>
+                    <SmallFigureNumber>
+                      {selected.stake || '--'}
+                    </SmallFigureNumber>
+                    <SmallFigureNumber>{selected.age}</SmallFigureNumber>
+                    <SmallFigureNumber>{selected.os}</SmallFigureNumber>
                   </Stack>
                 </Stack>
               </Box>

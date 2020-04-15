@@ -42,6 +42,7 @@ export default function EditAd() {
     adsMachine.withConfig(
       {
         actions: {
+          // eslint-disable-next-line no-shadow
           persist: ({ads}) => persistState('ads', ads),
         },
       },
@@ -98,14 +99,16 @@ export default function EditAd() {
                         <Textarea
                           value={title}
                           onChange={e =>
-                            send('CHANGE', {title: e.target.value})
+                            sendAd('CHANGE', {title: e.target.value})
                           }
                         />
                       </AdFormControl>
                       <AdFormControl label="Link" id="link">
                         <Input
                           value={url}
-                          onChange={e => send('CHANGE', {url: e.target.value})}
+                          onChange={e =>
+                            sendAd('CHANGE', {url: e.target.value})
+                          }
                         />
                       </AdFormControl>
                     </Stack>
@@ -143,7 +146,7 @@ export default function EditAd() {
                       <Select
                         value={location}
                         onChange={e =>
-                          send('CHANGE', {location: e.target.value})
+                          sendAd('CHANGE', {location: e.target.value})
                         }
                       >
                         {['US', 'Canada', 'UK'].map(c => (
@@ -154,7 +157,7 @@ export default function EditAd() {
                     <AdFormControl label="Language" id="lang">
                       <Select
                         value={lang}
-                        onChange={e => send('CHANGE', {lang: e.target.value})}
+                        onChange={e => sendAd('CHANGE', {lang: e.target.value})}
                       >
                         {AVAILABLE_LANGS.map(l => (
                           <option key={l}>{l}</option>
@@ -164,13 +167,13 @@ export default function EditAd() {
                     <AdFormControl label="Age" id="age">
                       <NumberInput
                         value={age}
-                        onChange={value => send('CHANGE', {age: value})}
+                        onChange={value => sendAd('CHANGE', {age: value})}
                       />
                     </AdFormControl>
                     <AdFormControl label="OS" id="os">
                       <Select
                         value={os}
-                        onChange={e => send('CHANGE', {os: e.target.value})}
+                        onChange={e => sendAd('CHANGE', {os: e.target.value})}
                       >
                         <option>macOS</option>
                         <option>Windows</option>
@@ -202,9 +205,7 @@ export default function EditAd() {
           </TabPanels>
         </Tabs>
         <AdFooter>
-          <PrimaryButton onClick={() => send('NEW_AD.COMMIT')}>
-            Save
-          </PrimaryButton>
+          <PrimaryButton onClick={() => sendAd('SAVE')}>Save</PrimaryButton>
         </AdFooter>
       </Page>
     </Layout>
