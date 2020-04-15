@@ -13,19 +13,22 @@ export const adsMachine = Machine({
   initial: 'init',
   states: {
     init: {
-      entry: assign({
-        // eslint-disable-next-line no-shadow
-        ads: ({ads}) =>
-          ads.map(ad => ({
-            ...ad,
-            ref: spawn(adMachine.withContext(ad)),
-          })),
-      }),
+      entry: [
+        assign({
+          // eslint-disable-next-line no-shadow
+          ads: ({ads}) =>
+            ads.map(ad => ({
+              ...ad,
+              ref: spawn(adMachine.withContext(ad)),
+            })),
+        }),
+        log(),
+      ],
       on: {
-        '': 'all',
+        '': 'ready',
       },
     },
-    all: {
+    ready: {
       entry: log(),
     },
   },
@@ -33,7 +36,7 @@ export const adsMachine = Machine({
     'NEW_AD.CHANGE': {
       actions: [
         assign({
-          newAd: ({newAd}, e) => ({...newAd, ...e}),
+          newAd: ({newAd}, {type, ...ad}) => ({...newAd, ...ad}),
         }),
         log(),
       ],
@@ -94,15 +97,15 @@ export const adMachine = Machine({
       on: {
         CHANGE: {
           actions: [
-            assign((ctx, e) => ({
+            assign((ctx, {type, ...ad}) => ({
               ...ctx,
-              ...e,
+              ...ad,
             })),
           ],
         },
         SAVE: {
           target: 'idle',
-          actions: [sendParent(ctx => ({type: 'AD.COMMIT', ad: ctx})), log()],
+          actions: [sendParent(ad => ({type: 'AD.COMMIT', ad})), log()],
         },
       },
     },

@@ -1,25 +1,18 @@
-import React, {forwardRef} from 'react'
+import React, {useMemo} from 'react'
 import {
-  FormControl,
   FormLabel,
   Input,
   Stack,
-  Heading,
   Box,
   Textarea,
   Select,
   NumberInput,
-  Flex,
   TabList,
-  Tab,
   Tabs,
   TabPanels,
   TabPanel,
   Alert,
   AlertIcon,
-  InputGroup,
-  InputRightAddon,
-  NumberInputField,
   Image,
   Icon,
 } from '@chakra-ui/core'
@@ -28,41 +21,69 @@ import {useRouter} from 'next/router'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 import {AVAILABLE_LANGS} from '../../i18n'
-import {adsMachine, adMachine} from '../../screens/ads/machine'
+import {adsMachine} from '../../screens/ads/machine'
 import {PrimaryButton, IconButton} from '../../shared/components'
 import {persistState} from '../../shared/utils/persist'
-import {loadAds, validImageType} from '../../screens/ads/utils'
+import {
+  loadAds,
+  validImageType,
+  COUNTRY_CODES,
+  toDataURL,
+} from '../../screens/ads/utils'
+import {
+  AdFooter,
+  AdNumberInput,
+  AdFormControl,
+  FormSection,
+  FormSectionTitle,
+  AdFormTab,
+} from '../../screens/ads/components'
+import {rem} from '../../shared/theme'
 
 export default function EditAd() {
   const {
     query: {id},
+    push,
   } = useRouter()
 
-  const [current, send] = useMachine(
-    adsMachine.withConfig(
+  const memoConfig = useMemo(
+    () => [
       {
         actions: {
           // eslint-disable-next-line no-shadow
-          persist: ({ads}) => persistState('ads', ads),
+          persist: ({ads}) =>
+            persistState(
+              'ads',
+              ads.map(({ref, ...ad}) => ({...ad}))
+            ),
         },
       },
       {
         ads: loadAds(),
-      }
-    )
+      },
+    ],
+    []
   )
 
-  const {ads} = current.context
+  const [
+    {
+      context: {ads},
+    },
+  ] = useMachine(adsMachine.withConfig(...memoConfig))
+
   const adRef = ads.find(ad => ad.id === id)
 
-  const [currentAd, sendAd] = useService(adRef.ref)
-  const {title, cover, url, location, lang, age, os} = currentAd.context
+  const [current, send] = useService(adRef.ref)
+  const {title, cover, url, location, lang, age, os} = current.context
 
-  const handleChangeCover = ({target: {files}}) => {
-    const [file] = files
+  const handleChangeCover = async ({
+    target: {
+      files: [file],
+    },
+  }) => {
     if (file && validImageType(file)) {
-      sendAd('CHANGE', {
-        cover: URL.createObjectURL(file),
+      send('CHANGE', {
+        cover: await toDataURL(file),
       })
     }
   }
@@ -99,25 +120,28 @@ export default function EditAd() {
                         <Textarea
                           value={title}
                           onChange={e =>
-                            sendAd('CHANGE', {title: e.target.value})
+                            send('CHANGE', {title: e.target.value})
                           }
                         />
                       </AdFormControl>
                       <AdFormControl label="Link" id="link">
                         <Input
                           value={url}
-                          onChange={e =>
-                            sendAd('CHANGE', {url: e.target.value})
-                          }
+                          onChange={e => send('CHANGE', {url: e.target.value})}
                         />
                       </AdFormControl>
                     </Stack>
                     <Stack spacing={4} alignItems="flex-start">
                       {cover ? (
-                        <Image src={cover} size={20} rounded="lg" />
+                        <Image src={cover} size={rem(80)} rounded="lg" />
                       ) : (
-                        <Box bg="gray.50" borderWidth="1px" p={5} rounded="lg">
-                          <Icon name="pic" size={10} color="#d2d4d9" />
+                        <Box
+                          bg="gray.50"
+                          borderWidth="1px"
+                          p={rem(19)}
+                          rounded="lg"
+                        >
+                          <Icon name="pic" size={rem(40)} color="#d2d4d9" />
                         </Box>
                       )}
                       <IconButton
@@ -146,10 +170,11 @@ export default function EditAd() {
                       <Select
                         value={location}
                         onChange={e =>
-                          sendAd('CHANGE', {location: e.target.value})
+                          send('CHANGE', {location: e.target.value})
                         }
                       >
-                        {['US', 'Canada', 'UK'].map(c => (
+                        <option></option>
+                        {Object.values(COUNTRY_CODES).map(c => (
                           <option key={c}>{c}</option>
                         ))}
                       </Select>
@@ -157,8 +182,9 @@ export default function EditAd() {
                     <AdFormControl label="Language" id="lang">
                       <Select
                         value={lang}
-                        onChange={e => sendAd('CHANGE', {lang: e.target.value})}
+                        onChange={e => send('CHANGE', {lang: e.target.value})}
                       >
+                        <option></option>
                         {AVAILABLE_LANGS.map(l => (
                           <option key={l}>{l}</option>
                         ))}
@@ -167,14 +193,15 @@ export default function EditAd() {
                     <AdFormControl label="Age" id="age">
                       <NumberInput
                         value={age}
-                        onChange={value => sendAd('CHANGE', {age: value})}
+                        onChange={value => send('CHANGE', {age: value})}
                       />
                     </AdFormControl>
                     <AdFormControl label="OS" id="os">
                       <Select
                         value={os}
-                        onChange={e => sendAd('CHANGE', {os: e.target.value})}
+                        onChange={e => send('CHANGE', {os: e.target.value})}
                       >
+                        <option></option>
                         <option>macOS</option>
                         <option>Windows</option>
                         <option>Linux</option>
@@ -205,91 +232,16 @@ export default function EditAd() {
           </TabPanels>
         </Tabs>
         <AdFooter>
-          <PrimaryButton onClick={() => sendAd('SAVE')}>Save</PrimaryButton>
+          <PrimaryButton
+            onClick={() => {
+              send('SAVE')
+              push('/ads/list')
+            }}
+          >
+            Save
+          </PrimaryButton>
         </AdFooter>
       </Page>
     </Layout>
-  )
-}
-
-// eslint-disable-next-line react/display-name
-const AdFormTab = forwardRef((props, ref) => (
-  <Tab
-    ref={ref}
-    // eslint-disable-next-line react/prop-types
-    isSelected={props.isSelected}
-    color="muted"
-    fontWeight={500}
-    py={2}
-    px={4}
-    rounded="md"
-    _selected={{bg: 'brandBlue.50', color: 'brandBlue.500'}}
-    {...props}
-  />
-))
-
-// eslint-disable-next-line react/prop-types
-function FormSection(props) {
-  return <Box {...props} />
-}
-
-function FormSectionTitle(props) {
-  return (
-    <Heading
-      as="h3"
-      py="10px"
-      mb={2}
-      fontSize="14px"
-      fontWeight={500}
-      {...props}
-    />
-  )
-}
-
-// eslint-disable-next-line react/prop-types
-export function AdFormControl({label, id, children}) {
-  return (
-    <FormControl>
-      <Flex align="center">
-        <FormLabel htmlFor={id} color="muted" w="120px">
-          {label}
-        </FormLabel>
-        <Box width="360px">{React.cloneElement(children, {id})}</Box>
-      </Flex>
-    </FormControl>
-  )
-}
-
-// eslint-disable-next-line react/prop-types
-function AdNumberInput({addon, ...props}) {
-  return (
-    <InputGroup>
-      <NumberInput flex={1} {...props}>
-        <NumberInputField
-          inputMode="numeric"
-          pattern="[0-9]*"
-          flex={1}
-          roundedRight={0}
-        />
-      </NumberInput>
-      <InputRightAddon bg="gray.50">{addon}</InputRightAddon>
-    </InputGroup>
-  )
-}
-
-function AdFooter(props) {
-  return (
-    <Box
-      borderTop="1px"
-      borderTopColor="gray.300"
-      position="absolute"
-      bottom={0}
-      left={0}
-      right={0}
-      px={4}
-      py={3}
-    >
-      <Stack isInline spacing={2} justify="flex-end" {...props} />
-    </Box>
   )
 }

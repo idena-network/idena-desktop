@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, {forwardRef} from 'react'
 import {
   Box,
   Divider,
@@ -17,6 +17,14 @@ import {
   MenuList,
   PseudoBox,
   MenuItem,
+  InputGroup,
+  NumberInput,
+  NumberInputField,
+  InputRightAddon,
+  FormControl,
+  FormLabel,
+  Heading,
+  Tab,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import theme, {rem} from '../../shared/theme'
@@ -55,6 +63,14 @@ export function SmallFigureLabel(props) {
 
 export function SmallFigureNumber(props) {
   return <FigureNumber fontSize={rem(11)} {...props} />
+}
+
+export function SmallTargetFigure({children = 'Any', ...props}) {
+  return (
+    <FigureNumber fontSize={rem(11)} {...props}>
+      {children}
+    </FigureNumber>
+  )
 }
 
 export function AdList(props) {
@@ -196,5 +212,86 @@ export function AdBanner({cover, title, owner, url}) {
         </AdMenu>
       </Box>
     </Flex>
+  )
+}
+
+// eslint-disable-next-line react/display-name
+export const AdFormTab = forwardRef(({isSelected, ...props}, ref) => (
+  <Tab
+    ref={ref}
+    isSelected={isSelected}
+    color="muted"
+    fontWeight={500}
+    py={2}
+    px={4}
+    rounded="md"
+    _selected={{bg: 'brandBlue.50', color: 'brandBlue.500'}}
+    {...props}
+  />
+))
+
+// eslint-disable-next-line react/prop-types
+export function FormSection(props) {
+  return <Box {...props} />
+}
+
+export function FormSectionTitle(props) {
+  return (
+    <Heading
+      as="h3"
+      py="10px"
+      mb={2}
+      fontSize="14px"
+      fontWeight={500}
+      {...props}
+    />
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+export function AdFormControl({label, id, children}) {
+  return (
+    <FormControl>
+      <Flex align="center">
+        <FormLabel htmlFor={id} color="muted" w="120px">
+          {label}
+        </FormLabel>
+        <Box width="360px">{React.cloneElement(children, {id})}</Box>
+      </Flex>
+    </FormControl>
+  )
+}
+
+// eslint-disable-next-line react/prop-types
+export function AdNumberInput({addon, ...props}) {
+  return (
+    <InputGroup>
+      <NumberInput flex={1} {...props}>
+        <NumberInputField
+          inputMode="numeric"
+          pattern="[0-9]*"
+          flex={1}
+          roundedRight={0}
+        />
+      </NumberInput>
+      <InputRightAddon bg="gray.50">{addon}</InputRightAddon>
+    </InputGroup>
+  )
+}
+
+export function AdFooter(props) {
+  return (
+    <Box
+      borderTop="1px"
+      borderTopColor="gray.300"
+      position="absolute"
+      bottom={0}
+      left={0}
+      right={0}
+      px={4}
+      py={3}
+    >
+      <Stack isInline spacing={2} justify="flex-end" {...props} />
+    </Box>
   )
 }

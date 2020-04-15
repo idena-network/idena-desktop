@@ -42,6 +42,7 @@ import {
   AdMenuItemIcon,
   AdBanner,
   NoAds,
+  SmallTargetFigure,
 } from '../../screens/ads/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {add} from '../../shared/utils/math'
@@ -58,12 +59,7 @@ import {loadAds, AdStatus, adStatusColor, toDna} from '../../screens/ads/utils'
 import {persistState} from '../../shared/utils/persist'
 
 export default function MyAds() {
-  const [
-    {
-      context: {ads, selected},
-    },
-    send,
-  ] = useMachine(
+  const [current, send] = useMachine(
     adsMachine.withConfig(
       {
         actions: {
@@ -79,6 +75,7 @@ export default function MyAds() {
       }
     )
   )
+  const {ads, selected} = current.context
 
   const {address, balance} = useIdentityState()
 
@@ -218,9 +215,9 @@ export default function MyAds() {
                           <SmallFigureLabel>Stake</SmallFigureLabel>
                         </Stack>
                         <Stack spacing={1}>
-                          <SmallFigureNumber>{location}</SmallFigureNumber>
-                          <SmallFigureNumber>{lang}</SmallFigureNumber>
-                          <SmallFigureNumber>{stake}</SmallFigureNumber>
+                          <SmallTargetFigure>{location}</SmallTargetFigure>
+                          <SmallTargetFigure>{lang}</SmallTargetFigure>
+                          <SmallTargetFigure>{stake}</SmallTargetFigure>
                         </Stack>
                       </Stack>
                       <Stack isInline spacing={2}>
@@ -229,8 +226,8 @@ export default function MyAds() {
                           <SmallFigureLabel>OS</SmallFigureLabel>
                         </Stack>
                         <Stack spacing={1}>
-                          <SmallFigureNumber>{age}</SmallFigureNumber>
-                          <SmallFigureNumber>{os}</SmallFigureNumber>
+                          <SmallTargetFigure>{age}</SmallTargetFigure>
+                          <SmallTargetFigure>{os}</SmallTargetFigure>
                         </Stack>
                       </Stack>
                       <Divider
@@ -264,7 +261,7 @@ export default function MyAds() {
           )}
         </AdList>
 
-        {ads.length === 0 && <NoAds />}
+        {current.matches('ready') && ads.length === 0 && <NoAds />}
 
         <Drawer isOpen={isOpen} onClose={onClose} size={rem(360)}>
           <DrawerOverlay />
@@ -320,13 +317,11 @@ export default function MyAds() {
                     <SmallFigureLabel>OS</SmallFigureLabel>
                   </Stack>
                   <Stack spacing={1}>
-                    <SmallFigureNumber>{selected.location}</SmallFigureNumber>
-                    <SmallFigureNumber>{selected.lang}</SmallFigureNumber>
-                    <SmallFigureNumber>
-                      {selected.stake || '--'}
-                    </SmallFigureNumber>
-                    <SmallFigureNumber>{selected.age}</SmallFigureNumber>
-                    <SmallFigureNumber>{selected.os}</SmallFigureNumber>
+                    <SmallTargetFigure>{selected.location}</SmallTargetFigure>
+                    <SmallTargetFigure>{selected.lang}</SmallTargetFigure>
+                    <SmallTargetFigure>{selected.stake}</SmallTargetFigure>
+                    <SmallTargetFigure>{selected.age}</SmallTargetFigure>
+                    <SmallTargetFigure>{selected.os}</SmallTargetFigure>
                   </Stack>
                 </Stack>
               </Box>
