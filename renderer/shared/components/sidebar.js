@@ -246,6 +246,7 @@ function ActionPanel() {
   const {syncing} = useChainState()
   const identity = useIdentityState()
   const epoch = useEpochState()
+  const {t} = useTranslation()
 
   if (syncing || !epoch) {
     return null
@@ -263,13 +264,13 @@ function ActionPanel() {
       }}
     >
       {currentPeriod !== EpochPeriod.None && (
-        <Block title="Current period">{currentPeriod}</Block>
+        <Block title={t('Current period')}>{currentPeriod}</Block>
       )}
-      <Block title="My current task">
+      <Block title={t('My current task')}>
         <CurrentTask period={currentPeriod} identity={identity} />
       </Block>
       {currentPeriod === EpochPeriod.None && (
-        <Block title="Next validation">
+        <Block title={t('Next validation')}>
           {new Date(nextValidation).toLocaleString()}
         </Block>
       )}

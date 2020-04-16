@@ -11,6 +11,6 @@
   "Can not submit flip during the validation session": "无法在验证会话期间提交翻转",
   "Error while sending transaction": "发送交易时出错",
   "Transaction sent": "已提交的交易",
-  "Error while deleting flip": "Error while deleting flip",
-  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
+  "Error while deleting flip": "删除翻转时出错",
+  "It's not allowed to submit flips with your identity status": "不允许提交带有你身份信息的翻转"
 }
