@@ -19,6 +19,7 @@ import {
   NumberInput,
   FormLabel,
   FormControl,
+  Link,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import NextLink from 'next/link'
@@ -81,9 +82,9 @@ export default function MyAds() {
   const {isOpen, onOpen, onClose} = useDisclosure()
 
   return (
-    <Layout>
+    <Layout style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
       <AdBanner {...ads[0]} owner={address} />
-      <Page as={Flex} flexDirection="column" h="calc(100vh - 56px)">
+      <Page as={Flex} flexDirection="column">
         <PageTitle>My Ads</PageTitle>
         <Toolbar>
           <FigureGroup>
@@ -157,9 +158,15 @@ export default function MyAds() {
                   </Box>
                   <Box ml={5} flex={1}>
                     <Flex>
-                      <Text fontSize={rem(14)} fontWeight={500}>
-                        {title}
-                      </Text>
+                      <NextLink href={`/ads/edit?id=${id}`} passHref>
+                        <Link
+                          fontSize={rem(14)}
+                          fontWeight={500}
+                          _hover={{color: 'muted'}}
+                        >
+                          {title}
+                        </Link>
+                      </NextLink>
                       <Stack isInline align="center" spacing={4} ml="auto">
                         <Box>
                           <AdMenu>
@@ -186,7 +193,7 @@ export default function MyAds() {
                             onOpen()
                           }}
                         >
-                          Pay
+                          Publish
                         </SecondaryButton>
                       </Stack>
                     </Flex>

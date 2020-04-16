@@ -17,12 +17,11 @@ import {updateAd, loadAds} from '../../screens/ads/utils'
 import {
   AdFooter,
   AdNumberInput,
-  AdFormControl,
+  AdFormField,
   AdFormTab,
   AdForm,
 } from '../../screens/ads/components'
 import {editAdMachine} from '../../screens/ads/machines'
-import {rem} from '../../shared/theme'
 
 export default function EditAd() {
   const router = useRouter()
@@ -43,8 +42,8 @@ export default function EditAd() {
   })
 
   return (
-    <Layout>
-      <Page height={`calc(100vh - ${rem(56)})`} pb={0} overflowY="auto">
+    <Layout style={{flex: 1, display: 'flex'}}>
+      <Page mb={12}>
         <PageTitle>Edit ad</PageTitle>
         <Tabs variant="unstyled">
           <TabList>
@@ -70,32 +69,32 @@ export default function EditAd() {
             <TabPanel>
               <Stack spacing={6} w="480px">
                 <Stack spacing={4} shouldWrapChildren>
-                  <AdFormControl label="Max burn rate" id="maxBurnRate">
-                    <AdNumberInput addon="DNA" />
-                  </AdFormControl>
-                  <AdFormControl label="Max burn rate" id="minBurnRate">
-                    <AdNumberInput addon="DNA" />
-                  </AdFormControl>
-                  <AdFormControl label="Total banner budget" id="totalBudget">
-                    <AdNumberInput addon="DNA" />
-                  </AdFormControl>
-                  <AdFormControl label="Total burnt" id="totalBurnt">
-                    <AdNumberInput addon="DNA" isDisabled />
-                  </AdFormControl>
+                  <AdFormField label="Max burn rate" id="maxBurnRate">
+                    <AdNumberInput />
+                  </AdFormField>
+                  <AdFormField label="Max burn rate" id="minBurnRate">
+                    <AdNumberInput />
+                  </AdFormField>
+                  <AdFormField label="Total banner budget" id="totalBudget">
+                    <AdNumberInput />
+                  </AdFormField>
+                  <AdFormField label="Total burnt" id="totalBurnt">
+                    <AdNumberInput isDisabled />
+                  </AdFormField>
                 </Stack>
               </Stack>
             </TabPanel>
           </TabPanels>
         </Tabs>
+        <AdFooter>
+          <PrimaryButton
+            onClick={() => send('SUBMIT')}
+            isLoading={current.matches('submitting')}
+          >
+            Save
+          </PrimaryButton>
+        </AdFooter>
       </Page>
-      <AdFooter>
-        <PrimaryButton
-          onClick={() => send('SUBMIT')}
-          isLoading={current.matches('submitting')}
-        >
-          Save
-        </PrimaryButton>
-      </AdFooter>
     </Layout>
   )
 }

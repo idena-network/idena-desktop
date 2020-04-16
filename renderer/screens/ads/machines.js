@@ -126,6 +126,7 @@ export const editAdMachine = Machine({
         },
         SUBMIT: 'submitting',
       },
+      initial: 'idle',
       states: {
         idle: {},
         invalid: {},
@@ -180,10 +181,11 @@ export const adFormMachine = Machine({
               ...ctx,
               ...value,
             })),
-            'update',
+            'change',
           ],
         },
       },
+      initial: 'idle',
       states: {
         idle: {},
         invalid: {},

@@ -186,7 +186,7 @@ export function AdForm({onChange, ...ad}) {
       ...ad,
     },
     actions: {
-      update: ctx => onChange(ctx),
+      change: ctx => onChange(ctx),
     },
   })
 
@@ -198,18 +198,18 @@ export function AdForm({onChange, ...ad}) {
         <FormSectionTitle>Parameters</FormSectionTitle>
         <Stack isInline spacing={10}>
           <Stack spacing={4} shouldWrapChildren>
-            <AdFormControl label="Text" id="text">
-              <Textarea
-                value={title}
-                onChange={e => send('CHANGE', {title: e.target.value})}
+            <AdFormField label="Text" id="text" align="flex-start">
+              <AdTextarea
+                defaultValue={title}
+                onBlur={e => send('CHANGE', {title: e.target.value})}
               />
-            </AdFormControl>
-            <AdFormControl label="Link" id="link">
-              <Input
-                value={url}
-                onChange={e => send('CHANGE', {url: e.target.value})}
+            </AdFormField>
+            <AdFormField label="Link" id="link">
+              <AdInput
+                defaultValue={url}
+                onBlur={e => send('CHANGE', {url: e.target.value})}
               />
-            </AdFormControl>
+            </AdFormField>
           </Stack>
           <Stack spacing={4} alignItems="flex-start">
             {cover ? (
@@ -251,7 +251,7 @@ export function AdForm({onChange, ...ad}) {
       <FormSection>
         <FormSectionTitle>Targeting conditions</FormSectionTitle>
         <Stack spacing={4} shouldWrapChildren>
-          <AdFormControl label="Location" id="location">
+          <AdFormField label="Location" id="location">
             <Select
               value={location}
               onChange={e => send('CHANGE', {location: e.target.value})}
@@ -261,8 +261,8 @@ export function AdForm({onChange, ...ad}) {
                 <option key={c}>{c}</option>
               ))}
             </Select>
-          </AdFormControl>
-          <AdFormControl label="Language" id="lang">
+          </AdFormField>
+          <AdFormField label="Language" id="lang">
             <Select
               value={lang}
               onChange={e => send('CHANGE', {lang: e.target.value})}
@@ -272,20 +272,22 @@ export function AdForm({onChange, ...ad}) {
                 <option key={l}>{l}</option>
               ))}
             </Select>
-          </AdFormControl>
-          <AdFormControl label="Age" id="age">
-            <NumberInput
-              value={age}
-              onChange={value => send('CHANGE', {age: value})}
+          </AdFormField>
+          <AdFormField label="Age" id="age">
+            <AdNumberInput
+              defaulValue={age}
+              onBlur={({target: {value}}) => send('CHANGE', {age: value})}
             />
-          </AdFormControl>
-          <AdFormControl label="Stake" id="stake">
-            <NumberInput
-              value={stake}
-              onChange={value => send('CHANGE', {stake: value})}
-            />
-          </AdFormControl>
-          <AdFormControl label="OS" id="os">
+          </AdFormField>
+          <AdFormField label="Stake" id="stake">
+            <NumberInput>
+              <AdNumberInput
+                defaultValue={stake}
+                onBlur={({target: {value}}) => send('CHANGE', {stake: value})}
+              />
+            </NumberInput>
+          </AdFormField>
+          <AdFormField label="OS" id="os">
             <Select
               value={os}
               onChange={e => send('CHANGE', {os: e.target.value})}
@@ -295,7 +297,7 @@ export function AdForm({onChange, ...ad}) {
               <option>Windows</option>
               <option>Linux</option>
             </Select>
-          </AdFormControl>
+          </AdFormField>
         </Stack>
       </FormSection>
     </Stack>
@@ -321,33 +323,36 @@ export function FormSectionTitle(props) {
 }
 
 // eslint-disable-next-line react/prop-types
-export function AdFormControl({label, id, children}) {
+export function AdFormField({label, id, children}) {
   return (
-    <FormControl>
-      <Flex align="center">
-        <FormLabel htmlFor={id} color="muted" w="120px">
-          {label}
-        </FormLabel>
-        <Box width="360px">{React.cloneElement(children, {id})}</Box>
-      </Flex>
+    <FormControl as={Flex}>
+      <FormLabel htmlFor={id} color="muted" w={rem(120)} pt={2}>
+        {label}
+      </FormLabel>
+      <Box w={rem(360)}>
+        {React.cloneElement(children, {
+          id,
+          fontWeight: 500,
+        })}
+      </Box>
     </FormControl>
   )
 }
 
+export function AdInput(props) {
+  return <Input px={3} py={2} {...props} />
+}
+
+export function AdTextarea(props) {
+  return <Textarea px={3} py={2} {...props} />
+}
+
 // eslint-disable-next-line react/prop-types
-export function AdNumberInput({addon, ...props}) {
+export function AdNumberInput(props) {
   return (
-    <InputGroup>
-      <NumberInput flex={1} {...props}>
-        <NumberInputField
-          inputMode="numeric"
-          pattern="[0-9]*"
-          flex={1}
-          roundedRight={0}
-        />
-      </NumberInput>
-      <InputRightAddon bg="gray.50">{addon}</InputRightAddon>
-    </InputGroup>
+    <NumberInput w="100%" {...props}>
+      <NumberInputField inputMode="numeric" pattern="[0-9]*" px={3} py={2} />
+    </NumberInput>
   )
 }
 
@@ -356,7 +361,7 @@ export function AdFooter(props) {
     <Box
       bg="white"
       borderTop="1px"
-      borderTopColor="gray.300"
+      borderTopColor="gray.100"
       position="absolute"
       bottom={0}
       left={0}
@@ -374,11 +379,15 @@ export function AdBanner({cover, title, owner, url}) {
     <Flex
       align="center"
       justify="space-between"
+      bg="white"
       borderBottom="1px"
       borderBottomColor="gray.100"
       color="brandGray.500"
       px={4}
       py={2}
+      position="sticky"
+      top={0}
+      zIndex="banner"
     >
       <Stack
         isInline
