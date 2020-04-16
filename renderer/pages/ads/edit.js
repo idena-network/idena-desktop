@@ -1,96 +1,50 @@
 import React, {useMemo} from 'react'
 import {
-  FormLabel,
-  Input,
   Stack,
-  Box,
-  Textarea,
-  Select,
-  NumberInput,
   TabList,
   Tabs,
   TabPanels,
   TabPanel,
   Alert,
   AlertIcon,
-  Image,
-  Icon,
 } from '@chakra-ui/core'
-import {useMachine, useService} from '@xstate/react'
+import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
-import {AVAILABLE_LANGS} from '../../i18n'
-import {adsMachine} from '../../screens/ads/machine'
-import {PrimaryButton, IconButton} from '../../shared/components'
-import {persistState} from '../../shared/utils/persist'
-import {
-  loadAds,
-  validImageType,
-  COUNTRY_CODES,
-  toDataURL,
-} from '../../screens/ads/utils'
+import {PrimaryButton} from '../../shared/components'
+import {updateAd, loadAds} from '../../screens/ads/utils'
 import {
   AdFooter,
   AdNumberInput,
   AdFormControl,
-  FormSection,
-  FormSectionTitle,
   AdFormTab,
+  AdForm,
 } from '../../screens/ads/components'
+import {editAdMachine} from '../../screens/ads/machines'
 import {rem} from '../../shared/theme'
 
 export default function EditAd() {
-  const {
-    query: {id},
-    push,
-  } = useRouter()
+  const router = useRouter()
+  const {id} = router.query
 
-  const memoConfig = useMemo(
-    () => [
-      {
-        actions: {
-          // eslint-disable-next-line no-shadow
-          persist: ({ads}) =>
-            persistState(
-              'ads',
-              ads.map(({ref, ...ad}) => ({...ad}))
-            ),
-        },
-      },
-      {
-        ads: loadAds(),
-      },
-    ],
-    []
-  )
+  const editedAd = useMemo(() => loadAds().find(a => a.id === id), [id])
 
-  const [
-    {
-      context: {ads},
+  const [current, send] = useMachine(editAdMachine, {
+    actions: {
+      onSuccess: () => router.push('/ads/list'),
     },
-  ] = useMachine(adsMachine.withConfig(...memoConfig))
-
-  const adRef = ads.find(ad => ad.id === id)
-
-  const [current, send] = useService(adRef.ref)
-  const {title, cover, url, location, lang, age, os} = current.context
-
-  const handleChangeCover = async ({
-    target: {
-      files: [file],
+    services: {
+      submit: async ctx => {
+        updateAd(ctx)
+        return Promise.resolve()
+      },
     },
-  }) => {
-    if (file && validImageType(file)) {
-      send('CHANGE', {
-        cover: await toDataURL(file),
-      })
-    }
-  }
+  })
 
   return (
     <Layout>
-      <Page minH="100vh" position="relative">
+      <Page height={`calc(100vh - ${rem(56)})`} pb={0} overflowY="auto">
         <PageTitle>Edit ad</PageTitle>
         <Tabs variant="unstyled">
           <TabList>
@@ -111,105 +65,7 @@ export default function EditAd() {
           </Alert>
           <TabPanels>
             <TabPanel>
-              <Stack spacing={6} w="480px">
-                <FormSection>
-                  <FormSectionTitle>Parameters</FormSectionTitle>
-                  <Stack isInline spacing={10}>
-                    <Stack spacing={4} shouldWrapChildren>
-                      <AdFormControl label="Text" id="text">
-                        <Textarea
-                          value={title}
-                          onChange={e =>
-                            send('CHANGE', {title: e.target.value})
-                          }
-                        />
-                      </AdFormControl>
-                      <AdFormControl label="Link" id="link">
-                        <Input
-                          value={url}
-                          onChange={e => send('CHANGE', {url: e.target.value})}
-                        />
-                      </AdFormControl>
-                    </Stack>
-                    <Stack spacing={4} alignItems="flex-start">
-                      {cover ? (
-                        <Image src={cover} size={rem(80)} rounded="lg" />
-                      ) : (
-                        <Box
-                          bg="gray.50"
-                          borderWidth="1px"
-                          p={rem(19)}
-                          rounded="lg"
-                        >
-                          <Icon name="pic" size={rem(40)} color="#d2d4d9" />
-                        </Box>
-                      )}
-                      <IconButton
-                        as={FormLabel}
-                        htmlFor="cover"
-                        type="file"
-                        icon="laptop"
-                      >
-                        Upload cover
-                      </IconButton>
-                      <Input
-                        id="cover"
-                        type="file"
-                        accept="image/*"
-                        opacity={0}
-                        zIndex={-1}
-                        onChange={handleChangeCover}
-                      />
-                    </Stack>
-                  </Stack>
-                </FormSection>
-                <FormSection>
-                  <FormSectionTitle>Targeting conditions</FormSectionTitle>
-                  <Stack spacing={4} shouldWrapChildren>
-                    <AdFormControl label="Location" id="location">
-                      <Select
-                        value={location}
-                        onChange={e =>
-                          send('CHANGE', {location: e.target.value})
-                        }
-                      >
-                        <option></option>
-                        {Object.values(COUNTRY_CODES).map(c => (
-                          <option key={c}>{c}</option>
-                        ))}
-                      </Select>
-                    </AdFormControl>
-                    <AdFormControl label="Language" id="lang">
-                      <Select
-                        value={lang}
-                        onChange={e => send('CHANGE', {lang: e.target.value})}
-                      >
-                        <option></option>
-                        {AVAILABLE_LANGS.map(l => (
-                          <option key={l}>{l}</option>
-                        ))}
-                      </Select>
-                    </AdFormControl>
-                    <AdFormControl label="Age" id="age">
-                      <NumberInput
-                        value={age}
-                        onChange={value => send('CHANGE', {age: value})}
-                      />
-                    </AdFormControl>
-                    <AdFormControl label="OS" id="os">
-                      <Select
-                        value={os}
-                        onChange={e => send('CHANGE', {os: e.target.value})}
-                      >
-                        <option></option>
-                        <option>macOS</option>
-                        <option>Windows</option>
-                        <option>Linux</option>
-                      </Select>
-                    </AdFormControl>
-                  </Stack>
-                </FormSection>
-              </Stack>
+              <AdForm {...editedAd} onChange={ad => send('UPDATE', {ad})} />
             </TabPanel>
             <TabPanel>
               <Stack spacing={6} w="480px">
@@ -231,17 +87,15 @@ export default function EditAd() {
             </TabPanel>
           </TabPanels>
         </Tabs>
-        <AdFooter>
-          <PrimaryButton
-            onClick={() => {
-              send('SAVE')
-              push('/ads/list')
-            }}
-          >
-            Save
-          </PrimaryButton>
-        </AdFooter>
       </Page>
+      <AdFooter>
+        <PrimaryButton
+          onClick={() => send('SUBMIT')}
+          isLoading={current.matches('submitting')}
+        >
+          Save
+        </PrimaryButton>
+      </AdFooter>
     </Layout>
   )
 }

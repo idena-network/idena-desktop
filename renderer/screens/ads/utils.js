@@ -1,8 +1,8 @@
 import {encode, decode} from 'rlp'
 import {rgb} from 'polished'
-import dayjs from 'dayjs'
+import {global} from 'styled-jsx/css'
 import theme from '../../shared/theme'
-import {loadPersistentState} from '../../shared/utils/persist'
+import {loadPersistentState, persistState} from '../../shared/utils/persist'
 
 export const COUNTRY_CODES = {
   AF: 'Afghanistan',
@@ -306,53 +306,22 @@ export function loadAds() {
   try {
     return loadPersistentState('ads') || []
   } catch (e) {
-    return [
-      {
-        key: 1,
-        title: 'New ICO is running. DNA is accepted',
-        owner: '0xSF12FEJ320DWF3FFa0xaDWF3FFa0',
-        limit: 58,
-        burnt: 58,
-        relevance: AdRelevance.Top,
-        score: 28,
-        lastTx: dayjs(),
-        status: AdStatus.PartiallyShowing,
-      },
-      {
-        key: 2,
-        title: 'New iPhone selling',
-        owner: '0x5A3abB61A9c5475B8243',
-        limit: 46,
-        burnt: 46,
-        relevance: AdRelevance.Top,
-        score: 26,
-        lastTx: dayjs(),
-        status: AdStatus.Showing,
-      },
-      {
-        key: 3,
-        title: 'New Samsung selling',
-        owner: 'Oxe67DE87789987998878888',
-        limit: 34,
-        burnt: 34,
-        relevance: AdRelevance.Top,
-        score: -2,
-        lastTx: dayjs(),
-        status: AdStatus.NotShowing,
-      },
-      {
-        key: 4,
-        title: 'New Samsung selling',
-        owner: 'Oxe67DE87789987998878888',
-        limit: 10,
-        burnt: 10,
-        relevance: AdRelevance.Top,
-        score: -2,
-        lastTx: dayjs(),
-        status: AdStatus.Disabled,
-      },
-    ]
+    global.logger.error('Error retrieving ads state')
   }
+}
+
+export function saveAd(ad) {
+  persistState('ads', loadAds().concat(ad))
+}
+
+export function updateAd(ad) {
+  const prevAds = loadAds()
+  const idx = prevAds.findIndex(({id}) => id === ad.id)
+  persistState('ads', [
+    ...prevAds.slice(0, idx),
+    {...prevAds[idx], ...ad},
+    ...prevAds.slice(idx + 1),
+  ])
 }
 
 export function toDna(num) {

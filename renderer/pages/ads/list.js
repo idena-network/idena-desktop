@@ -36,7 +36,6 @@ import {
   AdEntryDivider,
   AdTarget,
   SmallFigureLabel,
-  SmallFigureNumber,
   AdMenu,
   AdMenuItem,
   AdMenuItemIcon,
@@ -54,7 +53,7 @@ import {
   IconButton,
   PrimaryButton,
 } from '../../shared/components'
-import {adsMachine} from '../../screens/ads/machine'
+import {adsMachine} from '../../screens/ads/machines'
 import {loadAds, AdStatus, adStatusColor, toDna} from '../../screens/ads/utils'
 import {persistState} from '../../shared/utils/persist'
 
@@ -170,7 +169,11 @@ export default function MyAds() {
                                 Edit
                               </AdMenuItem>
                             </NextLink>
-                            <MenuDivider color="gray.100" my={2} />
+                            <MenuDivider
+                              borderColor="gray.100"
+                              borderWidth="1px"
+                              my={2}
+                            />
                             <AdMenuItem color="red.500">
                               <AdMenuItemIcon name="delete" color="red.500" />
                               Delete

@@ -113,3 +113,81 @@ export const adMachine = Machine({
     idle: {},
   },
 })
+
+export const editAdMachine = Machine({
+  id: 'editAd',
+  context: {},
+  initial: 'editing',
+  states: {
+    editing: {
+      on: {
+        UPDATE: {
+          actions: [assign((ctx, {ad}) => ({...ctx, ...ad})), log()],
+        },
+        SUBMIT: 'submitting',
+      },
+      states: {
+        idle: {},
+        invalid: {},
+      },
+    },
+    validating: {
+      invoke: {
+        src: ({title, cover}) => title && cover,
+        onDone: 'submitting',
+        onError: 'editing.invalid',
+      },
+    },
+    submitting: {
+      invoke: {
+        src: 'submit',
+        onDone: 'success',
+        onError: 'failure',
+      },
+    },
+    failure: {
+      on: {
+        RETRY: 'submitting',
+      },
+    },
+    success: {
+      entry: 'onSuccess',
+      type: 'final',
+    },
+  },
+})
+
+export const adFormMachine = Machine({
+  id: 'adForm',
+  context: {
+    title: '',
+    cover: '',
+    url: '',
+    location: '',
+    lang: '',
+    age: 0,
+    os: '',
+    stake: 0,
+  },
+  initial: 'editing',
+  states: {
+    editing: {
+      on: {
+        CHANGE: {
+          target: '.idle',
+          actions: [
+            assign((ctx, {type, ...value}) => ({
+              ...ctx,
+              ...value,
+            })),
+            'update',
+          ],
+        },
+      },
+      states: {
+        idle: {},
+        invalid: {},
+      },
+    },
+  },
+})
