@@ -190,9 +190,7 @@ function FlipPics({
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             onClick={() => {
-                              if (isChanging < 0) {
-                                setSelectedIndex(idx)
-                              }
+                              setSelectedIndex(idx)
                             }}
                           >
                             <Image
