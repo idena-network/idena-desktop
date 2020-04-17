@@ -162,7 +162,10 @@ function FlipPics({
                     if (isCurrent) {
                       style = {
                         ...style,
-                        border: `solid 2px ${theme.colors.primary}`,
+                        borderBottom: `solid 2px ${theme.colors.primary}`,
+                        borderTop: `solid 2px ${theme.colors.primary}`,
+                        borderLeft: `solid 2px ${theme.colors.primary}`,
+                        borderRight: `solid 2px ${theme.colors.primary}`,
                         boxShadow: '0 0 4px 4px rgba(87, 143, 255, 0.25)',
                       }
                     } else {

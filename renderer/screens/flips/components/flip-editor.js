@@ -859,7 +859,9 @@ function ArrowHint({hint, leftHanded, visible}) {
                     left: '-5px',
                     width: 0,
                     height: 0,
-                    border: `6px solid transparent`,
+                    borderTop: `6px solid transparent`,
+                    borderLeft: `6px solid transparent`,
+                    borderRight: `6px solid transparent`,
                     borderBottom: 0,
                     borderTopColor: `${theme.colors.primary}`,
                   }}
@@ -896,7 +898,9 @@ function ArrowHint({hint, leftHanded, visible}) {
                     width: 0,
                     height: 0,
                     marginLeft: '0px',
-                    border: `6px solid transparent`,
+                    borderLeft: `6px solid transparent`,
+                    borderRight: `6px solid transparent`,
+                    borderTop: `6px solid transparent`,
                     borderBottom: 0,
                     borderTopColor: `${theme.colors.primary}`,
                   }}
