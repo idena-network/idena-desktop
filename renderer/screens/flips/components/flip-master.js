@@ -62,6 +62,7 @@ function FlipMaster({id, onClose}) {
   const [submitResult, setSubmitResult] = useState()
 
   const [isFlipsLoaded, setIsFlipsLoaded] = useState(false)
+  const [isChanging, setIsChanging] = useState(false)
 
   useEffect(() => {
     // init hint on the first page when [flips] updated
@@ -190,6 +191,10 @@ function FlipMaster({id, onClose}) {
               compressedPics,
               editorIndexes,
             })
+            setIsChanging(false)
+          }}
+          onChanging={() => {
+            setIsChanging(true)
           }}
         />
       ),
@@ -266,6 +271,7 @@ function FlipMaster({id, onClose}) {
       {
         steps.map(({title, desc, children}) => (
           <FlipStep
+            disabled={isChanging}
             key={title}
             title={title}
             desc={desc}

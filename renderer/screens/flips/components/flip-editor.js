@@ -4,6 +4,7 @@ import {rem, position, wordWrap} from 'polished'
 import {
   FaGoogle,
   FaCircle,
+  FaCopy,
   FaPaste,
   FaRegFolder,
   FaPencilAlt,
@@ -25,7 +26,10 @@ import Divider from '../../../shared/components/divider'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {resizing, imageResize} from '../../../shared/utils/img'
-import {getImageURLFromClipboard} from '../../../shared/utils/clipboard'
+import {
+  getImageURLFromClipboard,
+  writeImageURLToClipboard,
+} from '../../../shared/utils/clipboard'
 
 import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
 
@@ -53,12 +57,15 @@ const BLANK_IMAGE =
     .resize({width: IMAGE_WIDTH, height: IMAGE_HEIGHT})
     .toDataURL()
 
-function FlipEditor({idx = 0, src, visible, onChange}) {
+function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   const {t} = useTranslation()
 
   // Button menu
   const [isInsertImageMenuOpen, setInsertImageMenuOpen] = useState(false)
   const insertMenuRef = [useRef(), useRef(), useRef(), useRef()]
+  // Context menu
+  const [showContextMenu, setShowContextMenu] = useState(false)
+  const [contextMenuCursor, setContextMenuCursor] = useState({x: 0, y: 0})
 
   useClickOutside(insertMenuRef[idx], () => {
     setInsertImageMenuOpen(false)
@@ -90,22 +97,30 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
   // Postponed onChange() triggering
   const NOCHANGES = 0
   const NEWCHANGES = 1
+  const CHANGED = 5
+
   const [changesCnt, setChangesCnt] = useState(NOCHANGES)
   const handleOnChanging = useCallback(() => {
     if (changesCnt === -1) return
+    onChanging(idx)
     if (!changesCnt) setChangesCnt(1)
-  }, [changesCnt])
+  }, [changesCnt, idx, onChanging])
+
+  const handleOnChanged = useCallback(() => {
+    setChangesCnt(CHANGED)
+  }, [])
+
   useInterval(() => {
     if (changesCnt >= NEWCHANGES) {
       setShowArrowHint(false)
       setChangesCnt(changesCnt + 1)
     }
-    if (changesCnt >= 3) {
+    if (changesCnt >= CHANGED) {
       setChangesCnt(NOCHANGES)
       const url = editors[idx].toDataURL()
       onChange(url)
     }
-  }, 50)
+  }, 200)
 
   const [insertImageMode, setInsertImageMode] = useState(0)
 
@@ -125,7 +140,10 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
       }
 
       if (nextInsertMode === INSERT_OBJECT_IMAGE) {
-        editor.addImageObject(url).then(handleOnChanging())
+        editor.addImageObject(url).then(() => {
+          setChangesCnt(NOCHANGES)
+          handleOnChanged()
+        })
       }
 
       if (nextInsertMode === INSERT_BACKGROUND_IMAGE) {
@@ -163,9 +181,9 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
                   height: newHeight,
                 })
                 editor.loadImageFromURL(editor.toDataURL(), 'Bkgd').then(() => {
-                  handleOnChanging()
                   editor.clearUndoStack()
                   editor.clearRedoStack()
+                  handleOnChanged()
                 })
               })
             })
@@ -173,7 +191,7 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
         })
       }
     },
-    [editors, handleOnChanging, idx, insertImageMode, onChange]
+    [editors, handleOnChanged, idx, insertImageMode, onChange]
   )
 
   // File upload handling
@@ -219,9 +237,27 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
     }
   }
 
+  const handleOnCopy = () => {
+    const url = editors[idx] && editors[idx].toDataURL()
+    if (url) {
+      writeImageURLToClipboard(url)
+    }
+  }
+
+  const handleOnPaste = () => {
+    handleImageFromClipboard(INSERT_BACKGROUND_IMAGE)
+  }
+
   if (visible) {
     mousetrap.bind(['command+v', 'ctrl+v'], function() {
-      handleImageFromClipboard(INSERT_BACKGROUND_IMAGE)
+      handleOnPaste()
+      return false
+    })
+  }
+
+  if (visible) {
+    mousetrap.bind(['command+c', 'ctrl+c'], function() {
+      handleOnCopy()
       return false
     })
   }
@@ -237,9 +273,12 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
   // init editor
   useEffect(() => {
     const updateEvents = e => {
+      if (!e) return
       e.on({
-        mouseDown() {
-          setShowArrowHint(false)
+        mousedown() {
+          if (e.getDrawingMode() === 'FREE_DRAWING') {
+            setChangesCnt(NOCHANGES)
+          }
         },
       })
 
@@ -259,21 +298,6 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
         },
       })
       e.on({
-        redoStackChanged() {
-          handleOnChanging()
-        },
-      })
-      e.on({
-        undoStackChanged() {
-          handleOnChanging()
-        },
-      })
-      e.on({
-        objectActivated() {
-          handleOnChanging()
-        },
-      })
-      e.on({
         undoStackChanged() {
           handleOnChanging()
         },
@@ -288,10 +312,21 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
     const contaiterEl = document.querySelectorAll(
       '.tui-image-editor-canvas-container'
     )[idx]
+
     const contaiterCanvas = document.querySelectorAll('.lower-canvas')[idx]
 
-    if (contaiterEl) contaiterEl.parentElement.style.height = '330px'
-    if (contaiterCanvas) contaiterCanvas.style.borderRadius = rem(12)
+    if (contaiterEl) {
+      contaiterEl.parentElement.style.height = '330px'
+      contaiterEl.addEventListener('contextmenu', e => {
+        setContextMenuCursor({x: e.layerX, y: e.layerY})
+        setShowContextMenu(true)
+        e.preventDefault()
+      })
+    }
+
+    if (contaiterCanvas) {
+      contaiterCanvas.style.borderRadius = rem(12)
+    }
 
     const newEditor =
       editorRefs.current[idx] &&
@@ -329,6 +364,22 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
     >
       <Flex>
         <Box>
+          {showContextMenu && (
+            <EditorContextMenu
+              x={contextMenuCursor.x}
+              y={contextMenuCursor.y}
+              onClose={() => {
+                setShowContextMenu(false)
+              }}
+              onCopy={() => {
+                handleOnCopy()
+              }}
+              onPaste={() => {
+                handleOnPaste()
+              }}
+            />
+          )}
+
           <div
             style={{
               paddingTop: '0.5px',
@@ -397,16 +448,6 @@ function FlipEditor({idx = 0, src, visible, onChange}) {
                 onClick={() => {
                   setInsertImageMode(INSERT_BACKGROUND_IMAGE)
                   uploaderRef.current.click()
-                }}
-              ></IconButton>
-
-              <IconButton
-                tooltip={t('Paste image')}
-                icon={
-                  <FaPaste color={theme.colors.primary2} fontSize={rem(20)} />
-                }
-                onClick={() => {
-                  handleImageFromClipboard(INSERT_BACKGROUND_IMAGE)
                 }}
               ></IconButton>
 
@@ -696,6 +737,7 @@ FlipEditor.propTypes = {
   src: PropTypes.string,
   visible: PropTypes.bool,
   onChange: PropTypes.func,
+  onChanging: PropTypes.func,
 }
 
 export default FlipEditor
@@ -886,4 +928,57 @@ ArrowHint.propTypes = {
   hint: PropTypes.string,
   leftHanded: PropTypes.bool,
   visible: PropTypes.bool,
+}
+
+EditorContextMenu.propTypes = {
+  x: PropTypes.number,
+  y: PropTypes.number,
+  onClose: PropTypes.func.isRequired,
+  onCopy: PropTypes.func,
+  onPaste: PropTypes.func,
+}
+
+function EditorContextMenu({x, y, onClose, onCopy, onPaste}) {
+  const {t} = useTranslation()
+
+  const contextMenuRef = useRef()
+  useClickOutside(contextMenuRef, () => {
+    onClose()
+  })
+
+  return (
+    <Box>
+      <Flex>
+        <Box css={position('relative')}>
+          <Box ref={contextMenuRef}>
+            <Absolute top={y} left={x} zIndex={100}>
+              <Menu>
+                <MenuItem
+                  disabled={!onCopy}
+                  onClick={() => {
+                    onCopy()
+                    onClose()
+                  }}
+                  icon={<FaCopy fontSize={rem(20)} />}
+                >
+                  {`${t('Copy')} (${global.isMac ? 'Cmd+C' : 'Ctrl+C'})`}
+                </MenuItem>
+
+                <MenuItem
+                  disabled={!onPaste}
+                  onClick={() => {
+                    onPaste()
+                    onClose()
+                  }}
+                  icon={<FaPaste fontSize={rem(20)} />}
+                >
+                  {`${t('Paste image')} (${global.isMac ? 'Cmd+V' : 'Ctrl+V'})`}
+                </MenuItem>
+              </Menu>
+            </Absolute>
+          </Box>
+        </Box>
+      </Flex>
+    </Box>
+  )
 }
