@@ -215,11 +215,12 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   useEffect(() => {
     // eslint-disable-next-line no-shadow
     const handleImageSearchPick = (_, data) => {
-      const [{url}] = data.docs[0].thumbnails
-      setImageUrl({url})
+      if (visible) {
+        const [{url}] = data.docs[0].thumbnails
+        setImageUrl({url})
+      }
       setInsertImageMode(0)
     }
-
     global.ipcRenderer.on(IMAGE_SEARCH_PICK, handleImageSearchPick)
     return () => {
       global.ipcRenderer.removeListener(
@@ -227,7 +228,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
         handleImageSearchPick
       )
     }
-  }, [setImageUrl, insertImageMode])
+  }, [setImageUrl, insertImageMode, visible])
 
   // Clipbiard handling
   const handleImageFromClipboard = insertMode => {

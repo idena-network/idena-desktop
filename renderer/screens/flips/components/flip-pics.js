@@ -189,11 +189,15 @@ function FlipPics({
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            onClick={() => setSelectedIndex(idx)}
+                            onClick={() => {
+                              if (isChanging < 0) {
+                                setSelectedIndex(idx)
+                              }
+                            }}
                           >
                             <Image
                               key={idx}
-                              disabled={isChanging === idx}
+                              disabled={isChanging === editorIndexes[idx]}
                               src={src}
                               style={style}
                             />
