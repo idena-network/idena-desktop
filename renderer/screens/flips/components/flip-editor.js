@@ -249,15 +249,17 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   }
 
   if (visible) {
-    mousetrap.bind(['command+v', 'ctrl+v'], function() {
+    mousetrap.bind(['command+v', 'ctrl+v'], function(e) {
       handleOnPaste()
+      e.stopImmediatePropagation()
       return false
     })
   }
 
   if (visible) {
-    mousetrap.bind(['command+c', 'ctrl+c'], function() {
+    mousetrap.bind(['command+c', 'ctrl+c'], function(e) {
       handleOnCopy()
+      e.stopImmediatePropagation()
       return false
     })
   }
@@ -791,7 +793,7 @@ function ColorPicker({visible, color, onChange}) {
       }}
     >
       <Box css={position('relative')} ref={colorPickerRef}>
-        <Absolute top={-rem(24)} right={rem(40)} zIndex={100}>
+        <Absolute top={0} right={rem(40)} zIndex={100}>
           <Menu>
             {colors.map((row, i) => (
               <Flex key={i} css={{marginLeft: rem(10), marginRight: rem(10)}}>
