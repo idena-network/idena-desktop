@@ -248,30 +248,49 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     handleImageFromClipboard(INSERT_BACKGROUND_IMAGE)
   }
 
+  const handleUndo = () => {
+    if (editors[idx]) {
+      editors[idx].undo().then(() => {
+        setChangesCnt(NOCHANGES)
+        handleOnChanged()
+      })
+    }
+  }
+
+  const handleRedo = () => {
+    if (editors[idx]) {
+      editors[idx].redo().then(() => {
+        setChangesCnt(NOCHANGES)
+        handleOnChanged()
+      })
+    }
+  }
+
   if (visible) {
     mousetrap.bind(['command+v', 'ctrl+v'], function(e) {
       handleOnPaste()
       e.stopImmediatePropagation()
       return false
     })
-  }
 
-  if (visible) {
     mousetrap.bind(['command+c', 'ctrl+c'], function(e) {
       handleOnCopy()
       e.stopImmediatePropagation()
       return false
     })
-  }
 
-  mousetrap.bind(
-    ['command+z', 'ctrl+z', 'shift+ctrl+z', 'shift+command+z'],
-    function(e) {
+    mousetrap.bind(['command+z', 'ctrl+z'], function(e) {
+      handleUndo()
       e.stopImmediatePropagation()
       return false
-    }
-  )
+    })
 
+    mousetrap.bind(['shift+ctrl+z', 'shift+command+z'], function(e) {
+      handleRedo()
+      e.stopImmediatePropagation()
+      return false
+    })
+  }
   // init editor
   useEffect(() => {
     const updateEvents = e => {
@@ -471,7 +490,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
               <Divider vertical />
 
               <IconButton
-                tooltip={t('Undo')}
+                tooltip={`${t('Undo')} (${global.isMac ? 'Cmd+Z' : 'Ctrl+Z'})`}
                 disabled={editors[idx] && editors[idx].isEmptyUndoStack()}
                 icon={
                   <MdUndo
@@ -480,12 +499,14 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   />
                 }
                 onClick={() => {
-                  editors[idx].undo()
+                  handleUndo()
                 }}
               ></IconButton>
 
               <IconButton
-                tooltip={t('Redo')}
+                tooltip={`${t('Redo')} (${
+                  global.isMac ? 'Cmd+Shift+Z' : 'Ctrl+Shift+Z'
+                })`}
                 disabled={editors[idx] && editors[idx].isEmptyRedoStack()}
                 icon={
                   <MdRedo
@@ -494,7 +515,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   />
                 }
                 onClick={() => {
-                  editors[idx].redo()
+                  handleRedo()
                 }}
               ></IconButton>
 
@@ -604,7 +625,6 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   onClick={() => {
                     setBottomMenuPanel(BOTTOM_MENU_MAIN)
                     if (editors[idx]) {
-                      console.log(editors[idx].getCropzoneRect())
                       const {width, height} = editors[idx].getCropzoneRect()
                       if (width < 1 || height < 1) {
                         editors[idx].stopDrawingMode()
