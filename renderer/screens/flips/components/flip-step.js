@@ -17,6 +17,7 @@ function FlipStep({
   isFirst,
   isLast,
   allowSubmit,
+  disabled,
 }) {
   const {t} = useTranslation()
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -42,13 +43,17 @@ function FlipStep({
       >
         <Button
           variant="secondary"
-          disabled={isFirst}
+          disabled={isFirst || disabled}
           css={margin(0, rem(theme.spacings.small8), 0)}
           onClick={onPrev}
         >
           {t('Previous step')}
         </Button>
-        {shouldNext && <Button onClick={onNext}>{t('Next step')}</Button>}
+        {shouldNext && (
+          <Button disabled={disabled} onClick={onNext}>
+            {t('Next step')}
+          </Button>
+        )}
         {shouldClose && <Button onClick={onClose}>{t('Close')}</Button>}
         {shouldSubmit && (
           <Button
@@ -78,6 +83,7 @@ FlipStep.propTypes = {
   isLast: PropTypes.bool,
   children: PropTypes.node,
   allowSubmit: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool,
 }
 
 export default FlipStep

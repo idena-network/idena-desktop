@@ -9,3 +9,8 @@ export function getImageURLFromClipboard(
 
   return imageResize(img, maxWidth, maxHeight)
 }
+
+export function writeImageURLToClipboard(url) {
+  const img = global.nativeImage.createFromDataURL(url)
+  global.clipboard.writeImage(img)
+}
