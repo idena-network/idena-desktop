@@ -96,7 +96,7 @@ function InviteDetails({dbkey, onClose, onSelect}) {
           {!inviteIsExpired && !activated && (
             <WideField
               label={t('Invitation code')}
-              defaultValue={key}
+              value={key}
               disabled
               allowCopy={!activated}
             />
