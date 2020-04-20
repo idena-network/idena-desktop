@@ -267,7 +267,11 @@ function ActionPanel() {
         <Block title={t('Current period')}>{currentPeriod}</Block>
       )}
       <Block title={t('My current task')}>
-        <CurrentTask period={currentPeriod} identity={identity} />
+        <CurrentTask
+          key={epoch.epoch}
+          period={currentPeriod}
+          identity={identity}
+        />
       </Block>
       {currentPeriod === EpochPeriod.None && (
         <Block title={t('Next validation')}>
