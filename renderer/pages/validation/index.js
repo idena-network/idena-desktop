@@ -34,7 +34,7 @@ import {
   ValidationFailedDialog,
   ValidationSucceededDialog,
   SubmitFailedDialog,
-  FailedFlipLabel,
+  FailedFlipAnnotation,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {IconClose, Button, Tooltip, Box, Text} from '../../shared/components'
@@ -143,11 +143,11 @@ function ValidationSession({
         <FlipChallenge>
           {((currentFlip.fetched && !currentFlip.decoded) ||
             currentFlip.failed) && (
-            <FailedFlipLabel>
+            <FailedFlipAnnotation>
               {t('No data available: please skip the flip.', {
                 nsSeparator: Math.random(),
               })}
-            </FailedFlipLabel>
+            </FailedFlipAnnotation>
           )}
           <Flip
             {...currentFlip}

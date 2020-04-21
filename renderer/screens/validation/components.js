@@ -253,7 +253,7 @@ function FailedFlip() {
   )
 }
 
-export function FailedFlipLabel(props) {
+export function FailedFlipAnnotation(props) {
   return (
     <Box
       style={{
