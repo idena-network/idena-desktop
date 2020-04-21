@@ -5,6 +5,7 @@ import {useMemo, useEffect, useState} from 'react'
 import {useRouter} from 'next/router'
 import {padding, margin} from 'polished'
 import {FiCheck, FiThumbsDown} from 'react-icons/fi'
+import {useTranslation} from 'react-i18next'
 import {
   createValidationMachine,
   RelevanceType,
@@ -33,6 +34,7 @@ import {
   ValidationFailedDialog,
   ValidationSucceededDialog,
   SubmitFailedDialog,
+  FailedFlipLabel,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {IconClose, Button, Tooltip, Box, Text} from '../../shared/components'
@@ -104,6 +106,10 @@ function ValidationSession({
     persistValidationState(state)
   }, [state])
 
+  const currentFlip = sessionFlips(state)[currentIndex]
+
+  const {t} = useTranslation()
+
   return (
     <Scene bg={isShortSession(state) ? theme.colors.black : theme.colors.white}>
       <Header>
@@ -135,8 +141,16 @@ function ValidationSession({
       </Header>
       <CurrentStep>
         <FlipChallenge>
+          {((currentFlip.fetched && !currentFlip.decoded) ||
+            currentFlip.failed) && (
+            <FailedFlipLabel>
+              {t('No data available: please skip the flip.', {
+                nsSeparator: Math.random(),
+              })}
+            </FailedFlipLabel>
+          )}
           <Flip
-            {...currentFlip(state)}
+            {...currentFlip}
             variant={AnswerType.Left}
             onChoose={hash =>
               send({
@@ -147,7 +161,7 @@ function ValidationSession({
             }
           />
           <Flip
-            {...currentFlip(state)}
+            {...currentFlip}
             variant={AnswerType.Right}
             onChoose={hash =>
               send({
@@ -160,11 +174,11 @@ function ValidationSession({
           />
           {(isLongSessionKeywords(state) ||
             state.matches('validationSucceeded')) &&
-            currentFlip(state) && (
-              <FlipWords currentFlip={currentFlip(state)}>
+            currentFlip && (
+              <FlipWords currentFlip={currentFlip}>
                 <QualificationActions>
                   <QualificationButton
-                    flip={currentFlip(state)}
+                    flip={currentFlip}
                     variant={RelevanceType.Relevant}
                     onVote={hash =>
                       send({
@@ -174,8 +188,7 @@ function ValidationSession({
                       })
                     }
                   >
-                    {currentFlip(state).relevance ===
-                      RelevanceType.Relevant && (
+                    {currentFlip.relevance === RelevanceType.Relevant && (
                       <FiCheck
                         size={rem(20)}
                         fontSize={rem(13)}
@@ -232,7 +245,7 @@ function ValidationSession({
                     }
                   >
                     <QualificationButton
-                      flip={currentFlip(state)}
+                      flip={currentFlip}
                       variant={RelevanceType.Irrelevant}
                       onVote={hash =>
                         send({
@@ -445,13 +458,6 @@ function sessionFlips(state) {
   return isShortSession(state)
     ? rearrangeFlips(filterRegularFlips(shortFlips))
     : rearrangeFlips(longFlips)
-}
-
-function currentFlip(state) {
-  const {
-    context: {currentIndex},
-  } = state
-  return sessionFlips(state)[currentIndex]
 }
 
 function hasAllAnswers(state) {

@@ -92,7 +92,14 @@ export function CurrentStep(props) {
 }
 
 export function FlipChallenge(props) {
-  return <Flex justify="center" align="center" css={{zIndex: 1}} {...props} />
+  return (
+    <Flex
+      justify="center"
+      align="center"
+      css={{zIndex: 1, position: 'relative'}}
+      {...props}
+    />
+  )
 }
 
 export function Flip({
@@ -186,7 +193,7 @@ function FlipHolder({css, ...props}) {
         ...padding(rem(4)),
         position: 'relative',
         minWidth: rem(147),
-        minHeight: '100%',
+        minHeight: rem(4 * 110),
         transitionProperty: 'opacity, transform',
         willChange: 'opacity, transform',
         ...css,
@@ -207,10 +214,13 @@ function LoadingFlip() {
 }
 
 const defaultOrder = [1, 2, 3, 4]
+
 function FailedFlip() {
   return (
     <FlipHolder
       css={{
+        border: 'none',
+        boxShadow: 'none',
         cursor: 'not-allowed',
       }}
     >
@@ -221,8 +231,9 @@ function FailedFlip() {
           align="center"
           css={{
             background: theme.colors.gray5,
+            border: 'solid 1px rgba(210, 212, 217, 0.16)',
             borderBottom:
-              idx === defaultOrder.length - 1
+              idx !== defaultOrder.length - 1
                 ? 'none'
                 : 'solid 1px rgba(210, 212, 217, 0.16)',
             ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
@@ -239,6 +250,27 @@ function FailedFlip() {
         </Flex>
       ))}
     </FlipHolder>
+  )
+}
+
+export function FailedFlipLabel(props) {
+  return (
+    <Box
+      style={{
+        background: transparentize(0.17, theme.colors.black),
+        ...padding(rem(42), rem(16)),
+        color: theme.colors.white,
+        fontWeight: 500,
+        textAlign: 'center',
+        position: 'absolute',
+        top: '50%',
+        left: rem(14),
+        right: rem(14),
+        transform: 'translateY(-50%)',
+        zIndex: 2,
+      }}
+      {...props}
+    ></Box>
   )
 }
 
