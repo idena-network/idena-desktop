@@ -144,9 +144,7 @@ function ValidationSession({
           {((currentFlip.fetched && !currentFlip.decoded) ||
             currentFlip.failed) && (
             <FailedFlipAnnotation>
-              {t('No data available: please skip the flip.', {
-                nsSeparator: Math.random(),
-              })}
+              {t('No data available. Please skip the flip.')}
             </FailedFlipAnnotation>
           )}
           <Flip
