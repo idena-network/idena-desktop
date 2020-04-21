@@ -5,6 +5,7 @@ import {useMemo, useEffect, useState} from 'react'
 import {useRouter} from 'next/router'
 import {padding, margin} from 'polished'
 import {FiCheck, FiThumbsDown} from 'react-icons/fi'
+import {useTranslation} from 'react-i18next'
 import {
   createValidationMachine,
   RelevanceType,
@@ -33,6 +34,7 @@ import {
   ValidationFailedDialog,
   ValidationSucceededDialog,
   SubmitFailedDialog,
+  FailedFlipAnnotation,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {IconClose, Button, Tooltip, Box, Text} from '../../shared/components'
@@ -46,6 +48,7 @@ import {
   rearrangeFlips,
 } from '../../screens/validation/utils'
 import {addWheelHandler} from '../../shared/utils/mouse'
+import Flex from '../../shared/components/flex'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -104,6 +107,10 @@ function ValidationSession({
     persistValidationState(state)
   }, [state])
 
+  const currentFlip = sessionFlips(state)[currentIndex]
+
+  const {t} = useTranslation()
+
   return (
     <Scene bg={isShortSession(state) ? theme.colors.black : theme.colors.white}>
       <Header>
@@ -135,36 +142,45 @@ function ValidationSession({
       </Header>
       <CurrentStep>
         <FlipChallenge>
-          <Flip
-            {...currentFlip(state)}
-            variant={AnswerType.Left}
-            onChoose={hash =>
-              send({
-                type: 'ANSWER',
-                hash,
-                option: AnswerType.Left,
-              })
-            }
-          />
-          <Flip
-            {...currentFlip(state)}
-            variant={AnswerType.Right}
-            onChoose={hash =>
-              send({
-                type: 'ANSWER',
-                hash,
-                option: AnswerType.Right,
-              })
-            }
-            onImageFail={() => send('REFETCH_FLIPS')}
-          />
+          <Flex justify="center" align="center" css={{position: 'relative'}}>
+            {currentFlip &&
+              ((currentFlip.fetched && !currentFlip.decoded) ||
+                currentFlip.failed) && (
+                <FailedFlipAnnotation>
+                  {t('No data available. Please skip the flip.')}
+                </FailedFlipAnnotation>
+              )}
+            <Flip
+              {...currentFlip}
+              variant={AnswerType.Left}
+              onChoose={hash =>
+                send({
+                  type: 'ANSWER',
+                  hash,
+                  option: AnswerType.Left,
+                })
+              }
+            />
+            <Flip
+              {...currentFlip}
+              variant={AnswerType.Right}
+              onChoose={hash =>
+                send({
+                  type: 'ANSWER',
+                  hash,
+                  option: AnswerType.Right,
+                })
+              }
+              onImageFail={() => send('REFETCH_FLIPS')}
+            />
+          </Flex>
           {(isLongSessionKeywords(state) ||
             state.matches('validationSucceeded')) &&
-            currentFlip(state) && (
-              <FlipWords currentFlip={currentFlip(state)}>
+            currentFlip && (
+              <FlipWords currentFlip={currentFlip}>
                 <QualificationActions>
                   <QualificationButton
-                    flip={currentFlip(state)}
+                    flip={currentFlip}
                     variant={RelevanceType.Relevant}
                     onVote={hash =>
                       send({
@@ -174,8 +190,7 @@ function ValidationSession({
                       })
                     }
                   >
-                    {currentFlip(state).relevance ===
-                      RelevanceType.Relevant && (
+                    {currentFlip.relevance === RelevanceType.Relevant && (
                       <FiCheck
                         size={rem(20)}
                         fontSize={rem(13)}
@@ -232,7 +247,7 @@ function ValidationSession({
                     }
                   >
                     <QualificationButton
-                      flip={currentFlip(state)}
+                      flip={currentFlip}
                       variant={RelevanceType.Irrelevant}
                       onVote={hash =>
                         send({
@@ -445,13 +460,6 @@ function sessionFlips(state) {
   return isShortSession(state)
     ? rearrangeFlips(filterRegularFlips(shortFlips))
     : rearrangeFlips(longFlips)
-}
-
-function currentFlip(state) {
-  const {
-    context: {currentIndex},
-  } = state
-  return sessionFlips(state)[currentIndex]
 }
 
 function hasAllAnswers(state) {

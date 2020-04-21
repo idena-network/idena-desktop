@@ -15,9 +15,9 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiClock,
-  FiImage,
 } from 'react-icons/fi'
 import {useMachine} from '@xstate/react'
+import {useTranslation} from 'react-i18next'
 import {
   Box,
   Fill,
@@ -186,7 +186,7 @@ function FlipHolder({css, ...props}) {
         ...padding(rem(4)),
         position: 'relative',
         minWidth: rem(147),
-        minHeight: '100%',
+        minHeight: rem(4 * 110),
         transitionProperty: 'opacity, transform',
         willChange: 'opacity, transform',
         ...css,
@@ -207,10 +207,14 @@ function LoadingFlip() {
 }
 
 const defaultOrder = [1, 2, 3, 4]
+
 function FailedFlip() {
+  const {t} = useTranslation()
   return (
     <FlipHolder
       css={{
+        border: 'none',
+        boxShadow: 'none',
         cursor: 'not-allowed',
       }}
     >
@@ -220,9 +224,10 @@ function FailedFlip() {
           justify="center"
           align="center"
           css={{
-            background: theme.colors.gray5,
+            background: transparentize(0.16, theme.colors.gray5),
+            border: 'solid 1px rgba(210, 212, 217, 0.16)',
             borderBottom:
-              idx === defaultOrder.length - 1
+              idx !== defaultOrder.length - 1
                 ? 'none'
                 : 'solid 1px rgba(210, 212, 217, 0.16)',
             ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
@@ -235,10 +240,39 @@ function FailedFlip() {
             overflow: 'hidden',
           }}
         >
-          <FiImage size={rem(40)} color={theme.colors.white} opacity={0.3} />
+          <img
+            alt={t('Failed flip')}
+            src="/static/body-medium-pic-icn.svg"
+            style={{
+              height: rem(40),
+              width: rem(40),
+              opacity: 0.3,
+            }}
+          />
         </Flex>
       ))}
     </FlipHolder>
+  )
+}
+
+export function FailedFlipAnnotation(props) {
+  return (
+    <Box
+      style={{
+        background: transparentize(0.17, theme.colors.black),
+        ...padding(rem(16), rem(42)),
+        color: theme.colors.white,
+        fontWeight: 500,
+        textAlign: 'center',
+        position: 'absolute',
+        top: '50%',
+        left: rem(14),
+        right: rem(14),
+        transform: 'translateY(-50%)',
+        zIndex: 2,
+      }}
+      {...props}
+    ></Box>
   )
 }
 

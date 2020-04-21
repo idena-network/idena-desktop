@@ -208,5 +208,7 @@
   "Explorer": "Explorer",
   "Current period": "Current period",
   "My current task": "My current task",
-  "Next validation": "Next validation"
+  "Next validation": "Next validation",
+  "No data available. Please skip the flip.": "No data available. Please skip the flip.",
+  "Failed flip": "Failed flip"
 }
