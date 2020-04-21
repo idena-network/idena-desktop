@@ -141,12 +141,13 @@ function ValidationSession({
       </Header>
       <CurrentStep>
         <FlipChallenge>
-          {((currentFlip.fetched && !currentFlip.decoded) ||
-            currentFlip.failed) && (
-            <FailedFlipAnnotation>
-              {t('No data available. Please skip the flip.')}
-            </FailedFlipAnnotation>
-          )}
+          {currentFlip &&
+            ((currentFlip.fetched && !currentFlip.decoded) ||
+              currentFlip.failed) && (
+              <FailedFlipAnnotation>
+                {t('No data available. Please skip the flip.')}
+              </FailedFlipAnnotation>
+            )}
           <Flip
             {...currentFlip}
             variant={AnswerType.Left}
