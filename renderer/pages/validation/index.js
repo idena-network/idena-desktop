@@ -48,6 +48,7 @@ import {
   rearrangeFlips,
 } from '../../screens/validation/utils'
 import {addWheelHandler} from '../../shared/utils/mouse'
+import Flex from '../../shared/components/flex'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -141,36 +142,38 @@ function ValidationSession({
       </Header>
       <CurrentStep>
         <FlipChallenge>
-          {currentFlip &&
-            ((currentFlip.fetched && !currentFlip.decoded) ||
-              currentFlip.failed) && (
-              <FailedFlipAnnotation>
-                {t('No data available. Please skip the flip.')}
-              </FailedFlipAnnotation>
-            )}
-          <Flip
-            {...currentFlip}
-            variant={AnswerType.Left}
-            onChoose={hash =>
-              send({
-                type: 'ANSWER',
-                hash,
-                option: AnswerType.Left,
-              })
-            }
-          />
-          <Flip
-            {...currentFlip}
-            variant={AnswerType.Right}
-            onChoose={hash =>
-              send({
-                type: 'ANSWER',
-                hash,
-                option: AnswerType.Right,
-              })
-            }
-            onImageFail={() => send('REFETCH_FLIPS')}
-          />
+          <Flex justify="center" align="center" css={{position: 'relative'}}>
+            {currentFlip &&
+              ((currentFlip.fetched && !currentFlip.decoded) ||
+                currentFlip.failed) && (
+                <FailedFlipAnnotation>
+                  {t('No data available. Please skip the flip.')}
+                </FailedFlipAnnotation>
+              )}
+            <Flip
+              {...currentFlip}
+              variant={AnswerType.Left}
+              onChoose={hash =>
+                send({
+                  type: 'ANSWER',
+                  hash,
+                  option: AnswerType.Left,
+                })
+              }
+            />
+            <Flip
+              {...currentFlip}
+              variant={AnswerType.Right}
+              onChoose={hash =>
+                send({
+                  type: 'ANSWER',
+                  hash,
+                  option: AnswerType.Right,
+                })
+              }
+              onImageFail={() => send('REFETCH_FLIPS')}
+            />
+          </Flex>
           {(isLongSessionKeywords(state) ||
             state.matches('validationSucceeded')) &&
             currentFlip && (
