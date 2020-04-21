@@ -20,7 +20,7 @@ import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
 import {pluralize} from '../utils/string'
-import useFlips, {FlipType} from '../utils/useFlips'
+import {FlipType, useLastFlips} from '../utils/useFlips'
 
 function Sidebar() {
   return (
@@ -318,7 +318,7 @@ function CurrentTask({period, identity}) {
     longAnswers,
   } = useValidationState()
 
-  const {flips: persistedFlips} = useFlips()
+  const [persistedFlips] = useLastFlips()
 
   if (!period || !identity || !identity.state) {
     return null

@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import {encode} from 'rlp'
 import * as api from '../api/dna'
 import {useInterval} from '../hooks/use-interval'
@@ -288,6 +288,12 @@ function useFlips() {
     })
   }, [])
 
+  const [, setLastFlips] = useLastFlips()
+
+  useEffect(() => {
+    setLastFlips(flips)
+  }, [flips, setLastFlips])
+
   return {
     flips,
     getDraft,
@@ -314,6 +320,17 @@ function checkFlipType(flip, tx) {
       : flip.type
   }
   return flip.type
+}
+
+const LastFlipsContext = React.createContext()
+
+export function LastFlipsProvider(props) {
+  const [state, setState] = React.useState([])
+  return <LastFlipsContext.Provider value={[state, setState]} {...props} />
+}
+
+export function useLastFlips() {
+  return React.useContext(LastFlipsContext)
 }
 
 export default useFlips

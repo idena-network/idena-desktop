@@ -17,6 +17,7 @@ import {AutoUpdateProvider} from '../shared/providers/update-context'
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tui-image-editor/dist/tui-image-editor.css'
+import {LastFlipsProvider} from '../shared/utils/useFlips'
 
 export default class MyApp extends App {
   render() {
@@ -44,11 +45,13 @@ function AppProviders(props) {
           <ChainProvider>
             <TimingProvider>
               <EpochProvider>
-                <IdentityProvider>
-                  <ValidationProvider>
-                    <NotificationProvider {...props} />
-                  </ValidationProvider>
-                </IdentityProvider>
+                <LastFlipsProvider>
+                  <IdentityProvider>
+                    <ValidationProvider>
+                      <NotificationProvider {...props} />
+                    </ValidationProvider>
+                  </IdentityProvider>
+                </LastFlipsProvider>
               </EpochProvider>
             </TimingProvider>
           </ChainProvider>
