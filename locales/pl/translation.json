@@ -206,5 +206,6 @@
   "My current task": "Moje bieżące zadanie",
   "Next validation": "Następna walidacja",
   "Solve more than 12 flips": "Solve more than 12 flips",
-  "No data available. Please skip the flip.": "No data available. Please skip the flip."
+  "No data available. Please skip the flip.": "No data available. Please skip the flip.",
+  "Failed flip": "Failed flip"
 }

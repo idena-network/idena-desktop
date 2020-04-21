@@ -209,5 +209,6 @@
   "Current period": "Période actuelle",
   "My current task": "Mes tâches",
   "Next validation": "Prochaine validation",
-  "No data available. Please skip the flip.": "No data available. Please skip the flip."
+  "No data available. Please skip the flip.": "No data available. Please skip the flip.",
+  "Failed flip": "Failed flip"
 }
