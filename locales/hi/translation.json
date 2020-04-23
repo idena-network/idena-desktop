@@ -206,9 +206,9 @@
   "Help": "मदद",
   "Website": "वेबसाइट",
   "Explorer": "एक्स्प्लोरर",
-  "Current period": "Current period",
-  "My current task": "My current task",
-  "Next validation": "Next validation",
-  "No data available. Please skip the flip.": "No data available. Please skip the flip.",
-  "Failed flip": "Failed flip"
+  "Current period": "वर्तमान अवधि",
+  "My current task": "मेरा वर्तमान कार्य",
+  "Next validation": "अगला वेलिडेशन",
+  "No data available. Please skip the flip.": "कोई डेटा उपलब्ध नहीं। फ्लिप छोड़ दें।",
+  "Failed flip": "फेल्ड फ्लिप"
 }
