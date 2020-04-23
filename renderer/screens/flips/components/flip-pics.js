@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 
 import PropTypes from 'prop-types'
 import {rem, borderRadius, margin} from 'polished'
@@ -23,10 +23,18 @@ const reorder = (list, startIndex, endIndex) => {
   return result
 }
 
-function FlipPics({pics, compressedPics, editorIndexes, onUpdateFlip}) {
+function FlipPics({
+  pics,
+  compressedPics,
+  editorIndexes,
+  onUpdateFlip,
+  onChanging,
+}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [pickedUrl, setPickedUrl] = useState('')
   const [imageClipboard, setImageClipboard] = useState(null)
+
+  const [isChanging, setIsChanging] = useState(-1)
 
   const updatePic = (idx, url) => {
     const editorIndex = editorIndexes.indexOf(idx)
@@ -41,6 +49,7 @@ function FlipPics({pics, compressedPics, editorIndexes, onUpdateFlip}) {
         ],
         editorIndexes
       )
+      setIsChanging(-1)
     } else {
       Jimp.read(url).then(image => {
         image
@@ -61,6 +70,7 @@ function FlipPics({pics, compressedPics, editorIndexes, onUpdateFlip}) {
               ],
               editorIndexes
             )
+            setIsChanging(-1)
           })
       })
     }
@@ -127,58 +137,73 @@ function FlipPics({pics, compressedPics, editorIndexes, onUpdateFlip}) {
           <Droppable droppableId="flip">
             {provided => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                {compressedPics.map((src, idx) => {
-                  const isCurrent = idx === selectedIndex
+                {compressedPics &&
+                  compressedPics.map((src, idx) => {
+                    const isCurrent = idx === selectedIndex
 
-                  let style = {
-                    position: 'relative',
-                  }
+                    let style = {
+                      position: 'relative',
+                    }
 
-                  if (idx === 0) {
-                    style = {
-                      ...style,
-                      ...borderRadius('top', rem(8)),
+                    if (idx === 0) {
+                      style = {
+                        ...style,
+                        ...borderRadius('top', rem(8)),
+                      }
                     }
-                  }
-                  if (idx === pics.length - 1) {
-                    style = {
-                      ...style,
-                      ...borderRadius('bottom', rem(8)),
-                      borderBottom: 'solid 1px rgba(83, 86, 92, 0.16)',
+                    if (idx === pics.length - 1) {
+                      style = {
+                        ...style,
+                        ...borderRadius('bottom', rem(8)),
+                        borderBottom: 'solid 1px rgba(83, 86, 92, 0.16)',
+                      }
                     }
-                  }
 
-                  if (isCurrent) {
-                    style = {
-                      ...style,
-                      border: `solid 2px ${theme.colors.primary}`,
-                      boxShadow: '0 0 4px 4px rgba(87, 143, 255, 0.25)',
+                    if (isCurrent) {
+                      style = {
+                        ...style,
+                        borderBottom: `solid 2px ${theme.colors.primary}`,
+                        borderTop: `solid 2px ${theme.colors.primary}`,
+                        borderLeft: `solid 2px ${theme.colors.primary}`,
+                        borderRight: `solid 2px ${theme.colors.primary}`,
+                        boxShadow: '0 0 4px 4px rgba(87, 143, 255, 0.25)',
+                      }
+                    } else {
+                      style = {
+                        ...style,
+                        borderTop: 'solid 1px rgba(83, 86, 92, 0.16)',
+                        borderRight: 'solid 1px rgba(83, 86, 92, 0.16)',
+                        borderLeft: 'solid 1px rgba(83, 86, 92, 0.16)',
+                      }
                     }
-                  } else {
-                    style = {
-                      ...style,
-                      borderTop: 'solid 1px rgba(83, 86, 92, 0.16)',
-                      borderRight: 'solid 1px rgba(83, 86, 92, 0.16)',
-                      borderLeft: 'solid 1px rgba(83, 86, 92, 0.16)',
-                    }
-                  }
 
-                  return (
-                    <Draggable key={idx} draggableId={`pic${idx}`} index={idx}>
-                      {/* eslint-disable-next-line no-shadow */}
-                      {provided => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          onClick={() => setSelectedIndex(idx)}
-                        >
-                          <Image key={idx} src={src} style={style} />
-                        </div>
-                      )}
-                    </Draggable>
-                  )
-                })}
+                    return (
+                      <Draggable
+                        key={idx}
+                        draggableId={`pic${idx}`}
+                        index={idx}
+                      >
+                        {/* eslint-disable-next-line no-shadow */}
+                        {provided => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            onClick={() => {
+                              setSelectedIndex(idx)
+                            }}
+                          >
+                            <Image
+                              key={idx}
+                              disabled={isChanging === editorIndexes[idx]}
+                              src={src}
+                              style={style}
+                            />
+                          </div>
+                        )}
+                      </Draggable>
+                    )
+                  })}
               </div>
             )}
           </Droppable>
@@ -196,6 +221,10 @@ function FlipPics({pics, compressedPics, editorIndexes, onUpdateFlip}) {
               onChange={url => {
                 updatePic(editorIndexes[idx], url)
               }}
+              onChanging={() => {
+                setIsChanging(idx)
+                onChanging()
+              }}
             />
           ))}
       </Box>
@@ -209,10 +238,11 @@ FlipPics.propTypes = {
   editorIndexes: PropTypes.arrayOf(PropTypes.number),
   hint: PropTypes.any,
   onUpdateFlip: PropTypes.func.isRequired,
+  onChanging: PropTypes.func.isRequired,
 }
 
 // eslint-disable-next-line react/prop-types
-function Image({src, style, children}) {
+function Image({src, disabled, style, children}) {
   if (src) {
     const imgBoxStyle = {
       ...{
@@ -222,7 +252,10 @@ function Image({src, style, children}) {
         paddingTop: '1px',
       },
     }
-    const imgStyle = {...style, ...{width: rem(147), height: rem(110)}}
+    const imgStyle = {
+      ...style,
+      ...{width: rem(147), height: rem(110), opacity: `${disabled ? 0.5 : 1}`},
+    }
     return (
       <Box style={imgBoxStyle}>
         <img alt="flip" src={src} style={imgStyle} />

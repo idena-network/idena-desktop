@@ -17,9 +17,9 @@ function ContactProvider({children}) {
       const identities = await api.fetchIdentities()
       // eslint-disable-next-line no-use-before-define
       const enrichedContacts = savedContacts.map(contact => {
-        const identity = identities.find(
-          ({address}) => address === contact.address
-        )
+        const identity =
+          identities &&
+          identities.find(({address}) => address === contact.address)
         return {...contact, ...identity}
       })
 
