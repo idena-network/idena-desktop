@@ -15,7 +15,7 @@ import {loadPersistentStateValue, persistItem} from '../utils/persist'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
-const AVAILABLE_TIMEOUT = 1000 * 5
+const AVAILABLE_TIMEOUT = global.isDev ? 0 : 1000 * 5
 
 export default function Layout({loading, syncing, offline, ...props}) {
   const debouncedSyncing = useDebounce(syncing, AVAILABLE_TIMEOUT)

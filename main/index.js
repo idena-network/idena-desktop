@@ -82,11 +82,7 @@ if (isFirstInstance) {
       deeplinkingUrl = argv.slice(1)
     }
 
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.show()
-      mainWindow.focus()
-    }
+    restoreWindow(mainWindow)
   })
 } else {
   app.quit()
@@ -110,10 +106,9 @@ const createMainWindow = () => {
   if (process.platform === 'win32') {
     // Keep only command line / deep linked arguments
     deeplinkingUrl = process.argv.slice(1)
+    if (deeplinkingUrl) loadRoute(mainWindow, 'wallets')
+    else loadRoute(mainWindow, 'dashboard')
   }
-
-  if (deeplinkingUrl) loadRoute(mainWindow, 'wallets')
-  else loadRoute(mainWindow, 'dashboard')
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -136,6 +131,14 @@ const showMainWindow = () => {
   if (mainWindow) {
     mainWindow.show()
     mainWindow.focus()
+  }
+}
+
+function restoreWindow(window = mainWindow) {
+  if (window) {
+    if (window.isMinimized()) window.restore()
+    window.show()
+    window.focus()
   }
 }
 
@@ -303,7 +306,7 @@ app.on('ready', async () => {
 
   i18next.init(i18nConfig, function(err) {
     if (err) {
-      console.log(err)
+      logger.error(err)
     }
 
     createMainWindow()
@@ -330,7 +333,10 @@ app.on('will-finish-launching', function() {
   app.on('open-url', function(event, url) {
     event.preventDefault()
     deeplinkingUrl = url
-    if (deeplinkingUrl) loadRoute(mainWindow, 'wallets')
+    if (deeplinkingUrl && mainWindow) {
+      loadRoute(mainWindow, 'wallets')
+      restoreWindow(mainWindow)
+    }
   })
 })
 
