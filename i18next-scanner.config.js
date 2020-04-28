@@ -44,7 +44,7 @@ module.exports = {
       savePath: 'locales/{{lng}}/{{ns}}.json',
       jsonIndent: 2,
     },
-    nsSeparator: ':',
+    nsSeparator: false,
     keySeparator: false,
   },
 }

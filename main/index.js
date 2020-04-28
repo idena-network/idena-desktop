@@ -68,7 +68,6 @@ let expressPort = 3051
 const nodeUpdater = new NodeUpdater(logger)
 
 let dnaUrl
-let dnaLinkHandled
 
 const isFirstInstance = app.requestSingleInstanceLock()
 
@@ -103,17 +102,14 @@ const createMainWindow = () => {
 
   loadRoute(mainWindow, 'dashboard')
 
+  // Protocol handler for win32
+  // eslint-disable-next-line no-cond-assign
+  if (process.platform === 'win32') {
+    dnaUrl = process.argv.slice(1)
+  }
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
-
-    // Protocol handler for win32
-    // eslint-disable-next-line no-cond-assign
-    if (
-      (process.platform === 'win32' && (dnaUrl = process.argv.slice(1))) ||
-      !dnaLinkHandled
-    ) {
-      handleDnaLink(dnaUrl)
-    }
   })
 
   mainWindow.on('close', e => {
@@ -147,7 +143,6 @@ function restoreWindow(window = mainWindow) {
 function handleDnaLink(url) {
   if (!url) return
   sendMainWindowMsg('DNA_LINK', url)
-  dnaLinkHandled = true
 }
 
 const createMenu = () => {
@@ -363,7 +358,9 @@ app.on('window-all-closed', () => {
   }
 })
 
-ipcMain.on(NODE_COMMAND, async (event, command, data) => {
+ipcMain.handleOnce('CHECK_DNA_LINK', () => dnaUrl)
+
+ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
   logger.info(`new node command`, command, data)
 
   switch (command) {

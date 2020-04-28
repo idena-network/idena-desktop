@@ -10,13 +10,11 @@ import {Figure} from './utils'
 import {useIdentityState} from '../providers/identity-context'
 import Flex from './flex'
 import Button from './button'
-import apiClient from '../api/api-client'
+import {sign, composeCallbackUrl, extractQueryParams} from '../utils/dna-link'
 
 export function DnaLinkDialog({url, onHide, ...props}) {
   const {t} = useTranslation()
   const {address} = useIdentityState()
-
-  if (!url) return null
 
   const {callback_url: callbackUrl, token} = extractQueryParams(url)
 
@@ -30,8 +28,10 @@ export function DnaLinkDialog({url, onHide, ...props}) {
             ...margin(rem(16), 0),
           }}
         >
-          Please confirm that you want to use your public address for the
-          website login:
+          {t(
+            'Please confirm that you want to use your public address for the website login'
+          )}
+          :
         </Text>
         <Box
           bg={theme.colors.gray}
@@ -55,7 +55,8 @@ export function DnaLinkDialog({url, onHide, ...props}) {
         <Box px="4px">
           <Button
             onClick={async () => {
-              global.openExternal((await composeCallbackUrl(url)).toString())
+              const signature = await sign(token)
+              global.openExternal(composeCallbackUrl(url, signature).toString())
               onHide()
             }}
           >
@@ -65,44 +66,4 @@ export function DnaLinkDialog({url, onHide, ...props}) {
       </Flex>
     </Modal>
   )
-}
-
-function extractQueryParams(url) {
-  const extractedQueryParams = {
-    callback_url: null,
-    token: null,
-    nonce: null,
-  }
-
-  const {searchParams} = new URL(decodeURIComponent(url))
-  for (const key of Object.keys(extractedQueryParams)) {
-    extractedQueryParams[key] = searchParams.get(key)
-  }
-
-  return extractedQueryParams
-}
-
-async function composeCallbackUrl(inputUrl) {
-  // eslint-disable-next-line camelcase
-  const {callback_url, token} =
-    typeof inputUrl === 'object' ? inputUrl : extractQueryParams(inputUrl)
-
-  const url = new URL(callback_url)
-
-  url.searchParams.set('token', token)
-  url.searchParams.set('sign', await sign(token))
-
-  return url
-}
-
-async function sign(token) {
-  const {
-    data: {result, error},
-  } = await apiClient().post('/', {
-    method: 'dna_sign',
-    params: [token],
-    id: 1,
-  })
-  if (error) throw new Error(error)
-  return result
 }

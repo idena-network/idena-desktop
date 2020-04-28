@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
+import {useTranslation} from 'react-i18next'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
@@ -13,6 +14,8 @@ import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {DnaLinkDialog} from './dna-link'
+import {useNotificationDispatch} from '../providers/notification-context'
+import {DNA_LINK_PREFIX, validDnaUrl} from '../utils/dna-link'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -33,16 +36,43 @@ export default function Layout({loading, syncing, offline, ...props}) {
     }
   }, [zoomLevel])
 
+  const {t} = useTranslation()
+
+  const {addError} = useNotificationDispatch()
+
+  const onInvalidDnaUrl = React.useCallback(
+    () =>
+      addError({
+        title: t('Invalid DNA link'),
+        body: t(
+          `You must provide valid dna:// url with the token param starting with {{token}}`,
+          {token: DNA_LINK_PREFIX}
+        ),
+      }),
+    [addError, t]
+  )
+
   const [dnaUrl, setDnaUrl] = React.useState()
 
-  const handleDnaLink = (_, event) => setDnaUrl(event)
+  React.useEffect(() => {
+    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(url => {
+      if (validDnaUrl(url)) setDnaUrl(url)
+      else if (url) onInvalidDnaUrl()
+    })
+  }, [onInvalidDnaUrl])
 
   React.useEffect(() => {
+    const handleDnaLink = (_, event) => {
+      if (validDnaUrl(event)) setDnaUrl(event)
+      else onInvalidDnaUrl()
+    }
+
     global.ipcRenderer.on('DNA_LINK', handleDnaLink)
+
     return () => {
       global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
     }
-  })
+  }, [onInvalidDnaUrl])
 
   return (
     <main>
@@ -53,7 +83,9 @@ export default function Layout({loading, syncing, offline, ...props}) {
       {!loading && !debouncedOffline && !debouncedSyncing && (
         <NormalApp {...props} />
       )}
-      <DnaLinkDialog url={dnaUrl} onHide={() => setDnaUrl(null)} />
+      {validDnaUrl(dnaUrl) && (
+        <DnaLinkDialog url={dnaUrl} onHide={() => setDnaUrl(null)} />
+      )}
       <style jsx>{`
         main {
           display: flex;
