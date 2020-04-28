@@ -1,5 +1,5 @@
 {
-  "Can not submit flip": "Невозможно предложить флип",
+  "Can not submit flip": "Невозможно загрузить флип в сеть",
   "Keywords are not specified": "Ключевые слова не указаны",
   "Error while uploading flip": "Ошибка во время загрузки флипа",
   "Something went wrong": "Что-то пошло не так",
@@ -11,6 +11,6 @@
   "Can not submit flip during the validation session": "Нельзя предлагать флипы непосредственно во время валидации",
   "Error while sending transaction": "Ошибка при отправке транзакции",
   "Transaction sent": "Транзакция отправлена",
-  "Error while deleting flip": "Error while deleting flip",
-  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status"
+  "Error while deleting flip": "Ошибка во время удаления флипа",
+  "It's not allowed to submit flips with your identity status": "С Вашим статусом нельзя загружать флипы в сеть"
 }
