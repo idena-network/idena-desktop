@@ -53,7 +53,7 @@ export default function Layout({loading, syncing, offline, ...props}) {
       {!loading && !debouncedOffline && !debouncedSyncing && (
         <NormalApp {...props} />
       )}
-      <DnaLinkDialog url={dnaUrl} />
+      <DnaLinkDialog url={dnaUrl} onHide={() => setDnaUrl(null)} />
       <style jsx>{`
         main {
           display: flex;

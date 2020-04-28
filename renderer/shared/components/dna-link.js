@@ -10,6 +10,7 @@ import {Figure} from './utils'
 import {useIdentityState} from '../providers/identity-context'
 import Flex from './flex'
 import Button from './button'
+import apiClient from '../api/api-client'
 
 export function DnaLinkDialog({url, onHide, ...props}) {
   const {t} = useTranslation()
@@ -54,12 +55,12 @@ export function DnaLinkDialog({url, onHide, ...props}) {
         </Box>
         <Box px="4px">
           <Button
-            onClick={() => {
-              global.openExternal(composeCallbackUrl(url).toString())
+            onClick={async () => {
+              global.openExternal((await composeCallbackUrl(url)).toString())
               onHide()
             }}
           >
-            Proceed to {composeCallbackUrl(url).hostname}
+            Proceed to {new URL(callbackUrl).hostname}
           </Button>
         </Box>
       </Flex>
@@ -82,16 +83,27 @@ function extractQueryParams(url) {
   return extractedQueryParams
 }
 
-function composeCallbackUrl(inputUrl) {
+async function composeCallbackUrl(inputUrl) {
   // eslint-disable-next-line camelcase
-  const {callback_url, ...respondQueryParams} =
+  const {callback_url, state} =
     typeof inputUrl === 'object' ? inputUrl : extractQueryParams(inputUrl)
 
   const url = new URL(callback_url)
 
-  for (const key of Object.keys(respondQueryParams)) {
-    url.searchParams.set(key, respondQueryParams[key])
-  }
+  url.searchParams.set('state', state)
+  url.searchParams.set('sign', await sign(state))
 
   return url
+}
+
+async function sign(input) {
+  const {
+    data: {result, error},
+  } = await apiClient().post('/', {
+    method: 'dna_sign',
+    params: [input],
+    id: 1,
+  })
+  if (error) throw new Error(error)
+  return result
 }
