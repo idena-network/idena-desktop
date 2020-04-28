@@ -4,9 +4,8 @@ export const DNA_LINK_PREFIX = 'signintoken_'
 
 export function validDnaUrl(url) {
   try {
-    // eslint-disable-next-line no-new
-    new URL(url)
-    return url.startsWith(DNA_LINK_PREFIX)
+    const {token} = extractQueryParams(url)
+    return token.startsWith(DNA_LINK_PREFIX)
   } catch {
     return false
   }

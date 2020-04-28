@@ -45,8 +45,10 @@ export default function Layout({loading, syncing, offline, ...props}) {
       addError({
         title: t('Invalid DNA link'),
         body: t(
-          `You must provide valid dna:// url with the token param starting with {{token}}`,
-          {token: DNA_LINK_PREFIX}
+          `You must provide valid URL and token starting with {{token}}`,
+          {
+            token: DNA_LINK_PREFIX,
+          }
         ),
       }),
     [addError, t]
