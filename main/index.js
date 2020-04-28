@@ -68,13 +68,12 @@ let expressPort = 3051
 const nodeUpdater = new NodeUpdater(logger)
 
 let dnaUrl
+let dnaLinkHandled
 
 const isFirstInstance = app.requestSingleInstanceLock()
 
 if (isFirstInstance) {
   app.on('second-instance', (e, argv) => {
-    // Someone tried to run a second instance, we should focus our window.
-
     // Protocol handler for win32
     // argv: An array of the second instance’s (command line / deep linked) arguments
     if (process.platform === 'win32') {
@@ -104,14 +103,17 @@ const createMainWindow = () => {
 
   loadRoute(mainWindow, 'dashboard')
 
-  // Protocol handler for win32
-  // eslint-disable-next-line no-cond-assign
-  if (process.platform === 'win32' && (dnaUrl = process.argv.slice(1))) {
-    handleDnaLink(dnaUrl)
-  }
-
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
+
+    // Protocol handler for win32
+    // eslint-disable-next-line no-cond-assign
+    if (
+      (process.platform === 'win32' && (dnaUrl = process.argv.slice(1))) ||
+      !dnaLinkHandled
+    ) {
+      handleDnaLink(dnaUrl)
+    }
   })
 
   mainWindow.on('close', e => {
@@ -145,6 +147,7 @@ function restoreWindow(window = mainWindow) {
 function handleDnaLink(url) {
   if (!url) return
   sendMainWindowMsg('DNA_LINK', url)
+  dnaLinkHandled = true
 }
 
 const createMenu = () => {

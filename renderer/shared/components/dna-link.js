@@ -18,7 +18,7 @@ export function DnaLinkDialog({url, onHide, ...props}) {
 
   if (!url) return null
 
-  const {callback_url: callbackUrl, state, nonce} = extractQueryParams(url)
+  const {callback_url: callbackUrl, token} = extractQueryParams(url)
 
   return (
     <Modal show={Boolean(callbackUrl)} width="360px" onHide={onHide} {...props}>
@@ -43,8 +43,7 @@ export function DnaLinkDialog({url, onHide, ...props}) {
         >
           <Figure label={t('Website')} value={callbackUrl} />
           <Figure label={t('Address')} value={address} />
-          <Figure label={t('State')} value={state} />
-          <Figure label={t('Nonce')} value={nonce} />
+          <Figure label={t('Token')} value={token} />
         </Box>
       </Box>
       <Flex align="center" justify="flex-end">
@@ -71,7 +70,7 @@ export function DnaLinkDialog({url, onHide, ...props}) {
 function extractQueryParams(url) {
   const extractedQueryParams = {
     callback_url: null,
-    state: null,
+    token: null,
     nonce: null,
   }
 
@@ -85,23 +84,23 @@ function extractQueryParams(url) {
 
 async function composeCallbackUrl(inputUrl) {
   // eslint-disable-next-line camelcase
-  const {callback_url, state} =
+  const {callback_url, token} =
     typeof inputUrl === 'object' ? inputUrl : extractQueryParams(inputUrl)
 
   const url = new URL(callback_url)
 
-  url.searchParams.set('state', state)
-  url.searchParams.set('sign', await sign(state))
+  url.searchParams.set('token', token)
+  url.searchParams.set('sign', await sign(token))
 
   return url
 }
 
-async function sign(input) {
+async function sign(token) {
   const {
     data: {result, error},
   } = await apiClient().post('/', {
     method: 'dna_sign',
-    params: [input],
+    params: [token],
     id: 1,
   })
   if (error) throw new Error(error)
