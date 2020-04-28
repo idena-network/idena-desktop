@@ -12,6 +12,7 @@ import {shouldStartValidation} from '../../screens/validation/machine'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
+import {DnaLinkDialog} from './dna-link'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -32,6 +33,17 @@ export default function Layout({loading, syncing, offline, ...props}) {
     }
   }, [zoomLevel])
 
+  const [dnaUrl, setDnaUrl] = React.useState()
+
+  const handleDnaLink = (_, event) => setDnaUrl(event)
+
+  React.useEffect(() => {
+    global.ipcRenderer.on('DNA_LINK', handleDnaLink)
+    return () => {
+      global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
+    }
+  })
+
   return (
     <main>
       <Sidebar />
@@ -41,6 +53,7 @@ export default function Layout({loading, syncing, offline, ...props}) {
       {!loading && !debouncedOffline && !debouncedSyncing && (
         <NormalApp {...props} />
       )}
+      <DnaLinkDialog url={dnaUrl} />
       <style jsx>{`
         main {
           display: flex;
@@ -77,17 +90,14 @@ function NormalApp(props) {
   }, [epoch, identity, router])
 
   return (
-    <section>
+    <section style={{flex: 1, overflowY: 'auto'}}>
       {!pathname.startsWith('/validation') && <ValidationBanner />}
+
       <div {...props} />
+
       <Notifications />
+
       <GlobalModals />
-      <style jsx>{`
-        section {
-          flex: 1;
-          overflow-y: auto;
-        }
-      `}</style>
     </section>
   )
 }

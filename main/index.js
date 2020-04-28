@@ -67,7 +67,7 @@ let expressPort = 3051
 
 const nodeUpdater = new NodeUpdater(logger)
 
-let deeplinkingUrl
+let dnaUrl
 
 const isFirstInstance = app.requestSingleInstanceLock()
 
@@ -79,7 +79,7 @@ if (isFirstInstance) {
     // argv: An array of the second instance’s (command line / deep linked) arguments
     if (process.platform === 'win32') {
       // Keep only command line / deep linked arguments
-      deeplinkingUrl = argv.slice(1)
+      dnaUrl = argv.slice(1)
     }
 
     restoreWindow(mainWindow)
@@ -102,12 +102,12 @@ const createMainWindow = () => {
     show: false,
   })
 
+  loadRoute(mainWindow, 'dashboard')
+
   // Protocol handler for win32
-  if (process.platform === 'win32') {
-    // Keep only command line / deep linked arguments
-    deeplinkingUrl = process.argv.slice(1)
-    if (deeplinkingUrl) loadRoute(mainWindow, 'wallets')
-    else loadRoute(mainWindow, 'dashboard')
+  // eslint-disable-next-line no-cond-assign
+  if (process.platform === 'win32' && (dnaUrl = process.argv.slice(1))) {
+    handleDnaLink(dnaUrl)
   }
 
   mainWindow.once('ready-to-show', () => {
@@ -140,6 +140,11 @@ function restoreWindow(window = mainWindow) {
     window.show()
     window.focus()
   }
+}
+
+function handleDnaLink(url) {
+  if (!url) return
+  sendMainWindowMsg('DNA_LINK', url)
 }
 
 const createMenu = () => {
@@ -332,9 +337,9 @@ app.on('will-finish-launching', function() {
   // Protocol handler for osx
   app.on('open-url', function(event, url) {
     event.preventDefault()
-    deeplinkingUrl = url
-    if (deeplinkingUrl && mainWindow) {
-      loadRoute(mainWindow, 'wallets')
+    dnaUrl = url
+    if (dnaUrl && mainWindow) {
+      handleDnaLink(dnaUrl)
       restoreWindow(mainWindow)
     }
   })
