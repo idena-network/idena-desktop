@@ -71,13 +71,15 @@ let dnaUrl
 
 const isFirstInstance = app.requestSingleInstanceLock()
 
+const extractDnaUrl = argv => argv.find(item => item.startsWith('dna://'))
+
 if (isFirstInstance) {
   app.on('second-instance', (e, argv) => {
     // Protocol handler for win32
     // argv: An array of the second instance’s (command line / deep linked) arguments
     if (process.platform === 'win32') {
       // Keep only command line / deep linked arguments
-      dnaUrl = argv.slice(1)
+      handleDnaLink(extractDnaUrl(argv))
     }
 
     restoreWindow(mainWindow)
@@ -105,7 +107,7 @@ const createMainWindow = () => {
   // Protocol handler for win32
   // eslint-disable-next-line no-cond-assign
   if (process.platform === 'win32') {
-    dnaUrl = process.argv.slice(1)
+    dnaUrl = extractDnaUrl(process.argv)
   }
 
   mainWindow.once('ready-to-show', () => {
