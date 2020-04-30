@@ -15,7 +15,7 @@ import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {DnaLinkDialog} from './dna-link'
 import {useNotificationDispatch} from '../providers/notification-context'
-import {DNA_LINK_PREFIX, validDnaUrl} from '../utils/dna-link'
+import {DNA_NONCE_PREFIX, validDnaUrl} from '../utils/dna-link'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -38,43 +38,35 @@ export default function Layout({loading, syncing, offline, ...props}) {
 
   const {t} = useTranslation()
 
+  const [dnaUrl, setDnaUrl] = React.useState()
+
   const {addError} = useNotificationDispatch()
 
-  const onInvalidDnaUrl = React.useCallback(
-    () =>
-      addError({
-        title: t('Invalid DNA link'),
-        body: t(
-          `You must provide valid URL and token starting with {{token}}`,
-          {
-            token: DNA_LINK_PREFIX,
-          }
-        ),
-      }),
+  const handleDnaLink = React.useCallback(
+    url => {
+      if (validDnaUrl(url)) setDnaUrl(url)
+      else if (url)
+        addError({
+          title: t('Invalid DNA link'),
+          body: t(`You must provide valid URL with version`),
+        })
+    },
     [addError, t]
   )
 
-  const [dnaUrl, setDnaUrl] = React.useState()
+  React.useEffect(() => {
+    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(handleDnaLink)
+  }, [handleDnaLink])
 
   React.useEffect(() => {
-    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(url => {
-      if (validDnaUrl(url)) setDnaUrl(url)
-      else if (url) onInvalidDnaUrl()
-    })
-  }, [onInvalidDnaUrl])
+    const onDnaLink = (_, e) => handleDnaLink(e)
 
-  React.useEffect(() => {
-    const handleDnaLink = (_, event) => {
-      if (validDnaUrl(event)) setDnaUrl(event)
-      else onInvalidDnaUrl()
-    }
-
-    global.ipcRenderer.on('DNA_LINK', handleDnaLink)
+    global.ipcRenderer.on('DNA_LINK', onDnaLink)
 
     return () => {
-      global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
+      global.ipcRenderer.removeListener('DNA_LINK', onDnaLink)
     }
-  }, [onInvalidDnaUrl])
+  }, [handleDnaLink])
 
   return (
     <main>
@@ -86,7 +78,15 @@ export default function Layout({loading, syncing, offline, ...props}) {
         <NormalApp {...props} />
       )}
       {validDnaUrl(dnaUrl) && (
-        <DnaLinkDialog url={dnaUrl} onHide={() => setDnaUrl(null)} />
+        <DnaLinkDialog
+          url={dnaUrl}
+          onHide={() => setDnaUrl(null)}
+          onSigninError={error =>
+            addError({
+              title: error,
+            })
+          }
+        />
       )}
       <style jsx>{`
         main {

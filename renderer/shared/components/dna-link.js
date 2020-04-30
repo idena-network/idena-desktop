@@ -10,16 +10,26 @@ import {Figure} from './utils'
 import {useIdentityState} from '../providers/identity-context'
 import Flex from './flex'
 import Button from './button'
-import {sign, composeCallbackUrl, extractQueryParams} from '../utils/dna-link'
+import {
+  extractQuery,
+  startSession,
+  authenticate,
+  signNonce,
+} from '../utils/dna-link'
 
-export function DnaLinkDialog({url, onHide, ...props}) {
+export function DnaLinkDialog({url, onHide, onSigninError, ...props}) {
   const {t} = useTranslation()
   const {address} = useIdentityState()
 
-  const {callback_url: callbackUrl, token} = extractQueryParams(url)
+  const {
+    callback_url: callbackUrl,
+    token,
+    nonce_endpoint: nonceEndpoint,
+    authentication_endpoint: authenticationEndpoint,
+  } = extractQuery(url)
 
   return (
-    <Modal show={Boolean(callbackUrl)} width="360px" onHide={onHide} {...props}>
+    <Modal show={Boolean(url)} width="360px" onHide={onHide} {...props}>
       <Box m="0 0 18px">
         <SubHeading>Login confirmation</SubHeading>
         <Text
@@ -55,9 +65,25 @@ export function DnaLinkDialog({url, onHide, ...props}) {
         <Box px="4px">
           <Button
             onClick={async () => {
-              const signature = await sign(token)
-              global.openExternal(composeCallbackUrl(url, signature).toString())
-              onHide()
+              startSession(nonceEndpoint, {
+                token,
+                address,
+              })
+                .then(signNonce)
+                .then(signature =>
+                  authenticate(authenticationEndpoint, {
+                    token,
+                    signature,
+                  })
+                )
+                .then(() => {
+                  global.openExternal(callbackUrl)
+                })
+                .catch(({message}) => {
+                  global.logger.error(message)
+                  if (onSigninError) onSigninError(message)
+                })
+                .finally(onHide)
             }}
           >
             Proceed to {new URL(callbackUrl).hostname}
