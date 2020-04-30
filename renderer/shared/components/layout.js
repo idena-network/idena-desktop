@@ -42,31 +42,25 @@ export default function Layout({loading, syncing, offline, ...props}) {
 
   const {addError} = useNotificationDispatch()
 
-  const handleDnaLink = React.useCallback(
-    url => {
-      if (validDnaUrl(url)) setDnaUrl(url)
-      else if (url)
-        addError({
-          title: t('Invalid DNA link'),
-          body: t(`You must provide valid URL with version`),
-        })
-    },
-    [addError, t]
-  )
+  React.useEffect(() => {
+    if (dnaUrl && !validDnaUrl(dnaUrl))
+      addError({
+        title: t('Invalid DNA link'),
+        body: t(`You must provide valid URL with version`),
+      })
+  }, [addError, dnaUrl, t])
 
   React.useEffect(() => {
-    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(handleDnaLink)
-  }, [handleDnaLink])
+    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(setDnaUrl)
+  }, [])
 
   React.useEffect(() => {
-    const onDnaLink = (_, e) => handleDnaLink(e)
-
-    global.ipcRenderer.on('DNA_LINK', onDnaLink)
-
+    const handleDnaLink = (_, e) => setDnaUrl(e)
+    global.ipcRenderer.on('DNA_LINK', handleDnaLink)
     return () => {
-      global.ipcRenderer.removeListener('DNA_LINK', onDnaLink)
+      global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
     }
-  }, [handleDnaLink])
+  }, [])
 
   return (
     <main>
