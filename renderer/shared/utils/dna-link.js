@@ -4,6 +4,18 @@ import apiClient from '../api/api-client'
 export const DNA_LINK_VERSION = `v1`
 export const DNA_NONCE_PREFIX = 'signin-'
 
+export function isValidUrl(string) {
+  try {
+    // eslint-disable-next-line no-new
+    new URL(string)
+  } catch (_) {
+    global.logger.error('Invalid URL', string)
+    return false
+  }
+
+  return true
+}
+
 export function validDnaUrl(url) {
   try {
     const parsedUrl = new URL(url)

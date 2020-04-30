@@ -15,6 +15,7 @@ import {
   startSession,
   authenticate,
   signNonce,
+  isValidUrl,
 } from '../utils/dna-link'
 
 export function DnaLinkDialog({url, onHide, onSigninError, ...props}) {
@@ -77,7 +78,8 @@ export function DnaLinkDialog({url, onHide, onSigninError, ...props}) {
                   })
                 )
                 .then(() => {
-                  global.openExternal(callbackUrl)
+                  if (isValidUrl(callbackUrl)) global.openExternal(callbackUrl)
+                  else onSigninError('Invalid callback URL')
                 })
                 .catch(({message}) => {
                   global.logger.error(message)
@@ -86,7 +88,10 @@ export function DnaLinkDialog({url, onHide, onSigninError, ...props}) {
                 .finally(onHide)
             }}
           >
-            Proceed to {new URL(callbackUrl).hostname}
+            Proceed to{' '}
+            {isValidUrl(callbackUrl)
+              ? new URL(callbackUrl).hostname
+              : callbackUrl}
           </Button>
         </Box>
       </Flex>
