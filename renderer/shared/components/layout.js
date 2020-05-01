@@ -13,9 +13,9 @@ import {shouldStartValidation} from '../../screens/validation/machine'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
-import {DnaLinkDialog} from './dna-link'
+import {DnaSignInDialog, DnaSendDialog} from './dna-link'
 import {useNotificationDispatch} from '../providers/notification-context'
-import {DNA_NONCE_PREFIX, validDnaUrl} from '../utils/dna-link'
+import {validDnaUrl} from '../utils/dna-link'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -40,13 +40,13 @@ export default function Layout({loading, syncing, offline, ...props}) {
 
   const [dnaUrl, setDnaUrl] = React.useState()
 
-  const {addError} = useNotificationDispatch()
+  const {addNotification, addError} = useNotificationDispatch()
 
   React.useEffect(() => {
     if (dnaUrl && !validDnaUrl(dnaUrl))
       addError({
         title: t('Invalid DNA link'),
-        body: t(`You must provide valid URL with version`),
+        body: t(`You must provide valid URL including protocol version`),
       })
   }, [addError, dnaUrl, t])
 
@@ -71,16 +71,38 @@ export default function Layout({loading, syncing, offline, ...props}) {
       {!loading && !debouncedOffline && !debouncedSyncing && (
         <NormalApp {...props} />
       )}
+      {/* eslint-disable-next-line no-nested-ternary */}
       {validDnaUrl(dnaUrl) && (
-        <DnaLinkDialog
-          url={dnaUrl}
-          onHide={() => setDnaUrl(null)}
-          onSigninError={error =>
-            addError({
-              title: error,
-            })
-          }
-        />
+        <>
+          {new URL(dnaUrl).pathname.includes('signin') && (
+            <DnaSignInDialog
+              url={dnaUrl}
+              onHide={() => setDnaUrl(null)}
+              onSigninError={error =>
+                addError({
+                  title: error,
+                })
+              }
+            />
+          )}
+          {new URL(dnaUrl).pathname.includes('send') && (
+            <DnaSendDialog
+              url={dnaUrl}
+              onHide={() => setDnaUrl(null)}
+              onDepositSuccess={hash =>
+                addNotification({
+                  title: t('Transaction sent'),
+                  body: hash,
+                })
+              }
+              onDepositError={error =>
+                addError({
+                  title: error,
+                })
+              }
+            />
+          )}
+        </>
       )}
       <style jsx>{`
         main {

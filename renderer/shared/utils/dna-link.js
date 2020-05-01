@@ -1,8 +1,15 @@
 import axios from 'axios'
+import {margin} from 'polished'
 import apiClient from '../api/api-client'
+import {sendTransaction} from '../api'
+import {bufferToHex} from './string'
+import {Box} from '../components'
+import theme, {rem} from '../theme'
 
 export const DNA_LINK_VERSION = `v1`
 export const DNA_NONCE_PREFIX = 'signin-'
+
+export const DNA_SEND_CONFIRM_TRESHOLD = 0.05
 
 export function isValidUrl(string) {
   try {
@@ -26,34 +33,14 @@ export function validDnaUrl(url) {
   }
 }
 
-export function extractQuery(url) {
-  const query = {
-    callback_url: null,
-    token: null,
-    nonce_endpoint: null,
-    authentication_endpoint: null,
-  }
-
+export function parseQuery(url) {
   const {searchParams} =
     typeof url === 'string' ? new URL(decodeURIComponent(url)) : url
 
-  Object.keys(query).forEach(key => {
-    query[key] = searchParams.get(key)
-  })
-
-  return query
-}
-
-export function composeCallbackUrl(inputUrl, signature) {
-  const {callback_url: callbackUrl, token} =
-    typeof inputUrl === 'object' ? inputUrl : extractQuery(inputUrl)
-
-  const url = new URL(callbackUrl)
-
-  url.searchParams.set('token', token)
-  url.searchParams.set('sign', signature)
-
-  return url
+  return Array.from(searchParams.entries()).reduce(
+    (acc, [k, v]) => ({...acc, [k]: v}),
+    {}
+  )
 }
 
 export async function startSession(nonceEndpoint, {token, address}) {
@@ -83,7 +70,7 @@ export async function signNonce(nonce) {
     params: [nonce],
     id: 1,
   })
-  if (error) throw new Error(error)
+  if (error) throw new Error(error.message)
   return result
 }
 
@@ -104,4 +91,33 @@ export async function authenticate(authenticationEndpoint, {token, signature}) {
   if (authenticated) return true
 
   throw new Error('Error authenticating identity')
+}
+
+export async function sendDna({from, to, amount, comment}) {
+  const {result, error} = await sendTransaction(
+    from,
+    to,
+    amount,
+    bufferToHex(new TextEncoder().encode(comment))
+  )
+
+  if (error) throw new Error(error.message)
+
+  return result
+}
+
+// eslint-disable-next-line react/prop-types
+export function AlertText({textAlign = 'initial', ...props}) {
+  return (
+    <Box
+      color={theme.colors.danger}
+      style={{
+        fontWeight: theme.fontWeights.medium,
+        fontSize: rem(11),
+        ...margin(rem(12), 0, 0),
+        textAlign,
+      }}
+      {...props}
+    />
+  )
 }

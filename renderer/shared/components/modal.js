@@ -89,7 +89,7 @@ function Modal({show, showCloseIcon = true, width = 360, onHide, ...props}) {
           left: 50%;
           top: 50%;
           width: ${rem(width)};
-          padding: ${rem(25)} ${rem(32)};
+          padding: ${rem(25)} ${rem(32)} ${rem(32)};
           border-radius: 6px;
           background-color: ${theme.colors.white};
           transform: translate(-50%, -50%);

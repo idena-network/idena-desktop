@@ -221,7 +221,7 @@ export async function becomeOffline() {
   return data
 }
 
-export async function sendTransaction(from, to, amount) {
+export async function sendTransaction(from, to, amount, payload = null) {
   const {data} = await api().post('/', {
     method: 'dna_sendTransaction',
     params: [
@@ -229,6 +229,7 @@ export async function sendTransaction(from, to, amount) {
         from,
         to,
         amount,
+        payload,
       }),
     ],
     id: 1,
