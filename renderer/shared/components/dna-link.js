@@ -44,7 +44,7 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
       <DnaDialogBody>
         <DnaDialogDetails>
           <DnaDialogPanel>
-            <Flex align="center" justify="space-between">
+            <PanelRow>
               <Box>
                 <DnaDialogPanelLabel>{t('Website')}</DnaDialogPanelLabel>
                 <DnaDialogPanelValue>{callbackUrl}</DnaDialogPanelValue>
@@ -59,17 +59,17 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
                   ...margin(0, 0, 0, rem(16)),
                 }}
               />
-            </Flex>
+            </PanelRow>
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
           <DnaDialogPanel>
-            <Flex align="center" justify="space-between">
+            <PanelRow>
               <Box>
                 <DnaDialogPanelLabel>{t('Address')}</DnaDialogPanelLabel>
                 <DnaDialogPanelValue>{address}</DnaDialogPanelValue>
               </Box>
               <Address address={address} />
-            </Flex>
+            </PanelRow>
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
           <DnaDialogPanel label={t('Token')} value={token} />
