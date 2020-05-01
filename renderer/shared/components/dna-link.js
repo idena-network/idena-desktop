@@ -1,12 +1,11 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {margin, padding} from 'polished'
+import {margin, padding, backgrounds, borderRadius, border} from 'polished'
 import {useTranslation} from 'react-i18next'
 import Modal from './modal'
 import Box from './box'
 import {SubHeading, Text} from './typo'
 import theme, {rem} from '../theme'
-import {Figure} from './utils'
 import {useIdentityState} from '../providers/identity-context'
 import Flex from './flex'
 import Button from './button'
@@ -21,6 +20,7 @@ import {
   AlertText,
 } from '../utils/dna-link'
 import {Input, FormGroup, Label} from './form'
+import Avatar from './avatar'
 
 export function DnaSignInDialog({url, onHide, onSigninError}) {
   const {t} = useTranslation()
@@ -43,9 +43,36 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
       </DnaDialogSubtitle>
       <DnaDialogBody>
         <DnaDialogDetails>
-          <Figure label={t('Website')} value={callbackUrl} />
-          <Figure label={t('Address')} value={address} />
-          <Figure label={t('Token')} value={token} />
+          <DnaDialogPanel>
+            <Flex align="center" justify="space-between">
+              <Box>
+                <DnaDialogPanelLabel>{t('Website')}</DnaDialogPanelLabel>
+                <DnaDialogPanelValue>{callbackUrl}</DnaDialogPanelValue>
+              </Box>
+              <img
+                src={`${callbackUrl}/favicon.ico`}
+                alt={`${callbackUrl} favicon`}
+                style={{
+                  borderRadius: rem(6),
+                  height: rem(40),
+                  width: rem(40),
+                  ...margin(0, 0, 0, rem(16)),
+                }}
+              />
+            </Flex>
+          </DnaDialogPanel>
+          <DnaDialogPanelDivider />
+          <DnaDialogPanel>
+            <Flex align="center" justify="space-between">
+              <Box>
+                <DnaDialogPanelLabel>{t('Address')}</DnaDialogPanelLabel>
+                <DnaDialogPanelValue>{address}</DnaDialogPanelValue>
+              </Box>
+              <Address address={address} />
+            </Flex>
+          </DnaDialogPanel>
+          <DnaDialogPanelDivider />
+          <DnaDialogPanel label={t('Token')} value={token} />
         </DnaDialogDetails>
       </DnaDialogBody>
       <DnaDialogFooter>
@@ -103,7 +130,6 @@ export function DnaSendDialog({
   const [confirmAmount, setConfirmAmount] = React.useState()
 
   const areSameAmounts = +confirmAmount === +amount
-  console.log(confirmAmount, Number.isFinite(+confirmAmount), areSameAmounts)
 
   return (
     <DnaDialog show={Boolean(url)} onHide={onHide} {...props}>
@@ -115,9 +141,19 @@ export function DnaSendDialog({
       </DnaDialogSubtitle>
       <DnaDialogBody>
         <DnaDialogDetails>
-          <Figure label={t('To')} value={to} />
-          <Figure label={t('Amount')} value={amount} />
-          <Figure label={t('Comment')} value={comment} />
+          <DnaDialogPanel>
+            <PanelRow>
+              <Box>
+                <DnaDialogPanelLabel>{t('To')}</DnaDialogPanelLabel>
+                <DnaDialogPanelValue>{to}</DnaDialogPanelValue>
+              </Box>
+              <Address address={to} />
+            </PanelRow>
+          </DnaDialogPanel>
+          <DnaDialogPanelDivider />
+          <DnaDialogPanel label={t('Amount')} value={amount} />
+          <DnaDialogPanelDivider />
+          <DnaDialogPanel label={t('Comment')} value={comment} />
         </DnaDialogDetails>
         {shouldConfirmTx && (
           <FormGroup style={{...margin(rem(16), 0, 0)}}>
@@ -142,10 +178,10 @@ export function DnaSendDialog({
             new Promise((resolve, reject) => {
               if (shouldConfirmTx) {
                 return areSameAmounts
-                  ? reject(
+                  ? resolve()
+                  : reject(
                       new Error('Entered amount do not match target amount')
                     )
-                  : resolve()
               }
               return resolve()
             })
@@ -198,9 +234,68 @@ function DnaDialogDetails(props) {
       bg={theme.colors.gray}
       css={{
         borderRadius: rem(8),
-        ...padding(rem(16), rem(20)),
+        ...padding(0, rem(20)),
       }}
       {...props}
+    />
+  )
+}
+
+// eslint-disable-next-line no-unused-vars
+function DnaDialogPanel({label, value, children, ...props}) {
+  return (
+    <Box
+      css={{
+        ...padding(rem(16), 0),
+        ...margin(0, 0, '1px'),
+      }}
+      {...props}
+    >
+      {label && <DnaDialogPanelLabel>{label}</DnaDialogPanelLabel>}
+      {value && <DnaDialogPanelValue>{value}</DnaDialogPanelValue>}
+      {children}
+    </Box>
+  )
+}
+
+function DnaDialogPanelLabel(props) {
+  return (
+    <Text color={theme.colors.muted} css={{lineHeight: rem(18)}} {...props} />
+  )
+}
+
+function DnaDialogPanelValue(props) {
+  return <Box css={{lineHeight: rem(18), wordBreak: 'break-all'}} {...props} />
+}
+
+function DnaDialogPanelDivider() {
+  return (
+    <hr
+      style={{
+        border: 'none',
+        ...border('top', '1px', 'solid', theme.colors.white),
+        ...margin(0, rem(-20)),
+      }}
+    />
+  )
+}
+
+function PanelRow(props) {
+  return <Flex align="center" justify="space-between" {...props} />
+}
+
+function Address({address}) {
+  return (
+    <Avatar
+      username={address}
+      size={40}
+      style={{
+        ...backgrounds(theme.colors.white),
+        ...borderRadius('top', rem(6)),
+        ...borderRadius('bottom', rem(6)),
+        border: `solid 1px ${theme.colors.gray2}`,
+        ...margin(0, 0, 0, rem(16)),
+      }}
     />
   )
 }
