@@ -2,6 +2,7 @@
 import React from 'react'
 import {margin, padding, backgrounds, borderRadius, border} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {FiInfo} from 'react-icons/fi'
 import Modal from './modal'
 import Box from './box'
 import {SubHeading, Text} from './typo'
@@ -140,6 +141,22 @@ export function DnaSendDialog({
         )}
       </DnaDialogSubtitle>
       <DnaDialogBody>
+        <Flex
+          align="center"
+          css={{
+            ...backgrounds(theme.colors.danger02),
+            ...border('1px', 'solid', theme.colors.danger),
+            ...borderRadius('top', rem(6)),
+            ...borderRadius('bottom', rem(6)),
+            ...padding(rem(8), rem(12)),
+            ...margin(0, 0, rem(20), 0),
+          }}
+        >
+          <FiInfo size={rem(16)} color={theme.colors.danger} fontWeight={500} />
+          <Text fontWeight={500} css={{...margin(0, 0, 0, rem(8))}}>
+            Attention! This is irreversible operation
+          </Text>
+        </Flex>
         <DnaDialogDetails>
           <DnaDialogPanel>
             <PanelRow>
@@ -151,7 +168,7 @@ export function DnaSendDialog({
             </PanelRow>
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
-          <DnaDialogPanel label={t('Amount')} value={amount} />
+          <DnaDialogPanel label={`${t('Amount')}, DNA`} value={amount} />
           <DnaDialogPanelDivider />
           <DnaDialogPanel label={t('Comment')} value={comment} />
         </DnaDialogDetails>
@@ -197,9 +214,6 @@ export function DnaSendDialog({
           Confirm
         </Button>
       </DnaDialogFooter>
-      <AlertText textAlign="right">
-        Attention! This is irreversible operation
-      </AlertText>
     </DnaDialog>
   )
 }
@@ -265,7 +279,7 @@ function DnaDialogPanelLabel(props) {
 }
 
 function DnaDialogPanelValue(props) {
-  return <Box css={{lineHeight: rem(18), wordBreak: 'break-all'}} {...props} />
+  return <Box css={{lineHeight: rem(20), wordBreak: 'break-all'}} {...props} />
 }
 
 function DnaDialogPanelDivider() {
