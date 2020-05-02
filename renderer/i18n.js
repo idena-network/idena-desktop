@@ -81,7 +81,6 @@ i18n.use(initReactI18next).init({
   },
   lng: loadPersistentStateValue('settings', 'lng'),
   fallbackLng: 'en',
-  nsSeparator: false,
   keySeparator: false,
   interpolation: {
     escapeValue: false,
