@@ -96,7 +96,7 @@
   "Stake": "Stake",
   "In order to withdraw the&#10;stake you have to&#10;terminate your identity": "Aby wypłacić z portfela Stake, musisz zakończyć swoją tożsamość.",
   "Mining penalty": "Kara wydobycia",
-  "Your node was offline more than 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins.": "Twój Node był wyłączony dłużej niż godzinę. Kara zostanie naliczona automatycznie. Po jej pełnym opłaceniu będziesz nadal wydobywać monety.",
+  "Your node was offline more than 1 hour.&#10;The penalty will be charged automaically.&#10;Once it's fully paid you'll continue to mine coins.": "Twój Node był wyłączony dłużej niż godzinę. Kara zostanie rozliczona automatycznie. Po jej opłaceniu będziesz nadal wydobywać monety.",
   "Total score": "Całkowity wynik",
   "Total score for&#10;all validations": "Całkowity wynik dla&#10;wszystkich walidacji",
   "Submit flip": "Wyślij flip",
