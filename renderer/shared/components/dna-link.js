@@ -1,8 +1,15 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {margin, padding, backgrounds, borderRadius, border} from 'polished'
+import {
+  margin,
+  padding,
+  backgrounds,
+  borderRadius,
+  border,
+  wordWrap,
+} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {FiInfo, FiAlertCircle} from 'react-icons/fi'
+import {FiInfo, FiAlertCircle, FiGlobe} from 'react-icons/fi'
 import Modal from './modal'
 import Box from './box'
 import {SubHeading, Text} from './typo'
@@ -33,7 +40,26 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
     token,
     nonce_endpoint: nonceEndpoint,
     authentication_endpoint: authenticationEndpoint,
+    favicon_url: faviconUrl,
   } = parseQuery(url)
+
+  let callbackHostname = callbackUrl
+  let callbackFaviconUrl
+
+  if (isValidUrl(callbackUrl)) {
+    const parsedCallbackUrl = new URL(callbackUrl)
+    callbackHostname = parsedCallbackUrl.hostname || callbackUrl
+    try {
+      callbackFaviconUrl =
+        faviconUrl || new URL('favicon.ico', parsedCallbackUrl.origin)
+    } catch {
+      global.logger.error(
+        'Failed to construct favicon url from callback url',
+        callbackUrl,
+        parsedCallbackUrl
+      )
+    }
+  }
 
   return (
     <DnaDialog show={Boolean(url)} onHide={onHide}>
@@ -49,18 +75,23 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
             <PanelRow>
               <Box>
                 <DnaDialogPanelLabel>{t('Website')}</DnaDialogPanelLabel>
-                <DnaDialogPanelValue>{callbackUrl}</DnaDialogPanelValue>
+                <DnaDialogPanelValue>{callbackHostname}</DnaDialogPanelValue>
               </Box>
-              <img
-                src={`${callbackUrl}/favicon.ico`}
-                alt={`${callbackUrl} favicon`}
-                style={{
-                  borderRadius: rem(6),
-                  height: rem(40),
-                  width: rem(40),
-                  ...margin(0, 0, 0, rem(16)),
-                }}
-              />
+              <PanelMediaCell>
+                {callbackFaviconUrl ? (
+                  <img
+                    src={callbackFaviconUrl}
+                    alt={`${callbackHostname} favicon`}
+                    style={{
+                      borderRadius: rem(6),
+                      height: rem(40),
+                      width: rem(40),
+                    }}
+                  />
+                ) : (
+                  <FiGlobe color={theme.colors.primary} size={rem(40)} />
+                )}
+              </PanelMediaCell>
             </PanelRow>
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
@@ -70,7 +101,9 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
                 <DnaDialogPanelLabel>{t('Address')}</DnaDialogPanelLabel>
                 <DnaDialogPanelValue>{address}</DnaDialogPanelValue>
               </Box>
-              <Address address={address} />
+              <PanelMediaCell>
+                <Address address={address} />
+              </PanelMediaCell>
             </PanelRow>
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
@@ -82,6 +115,12 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
           Cancel
         </Button>
         <Button
+          css={{
+            maxWidth: rem(200),
+            maxHeight: rem(32),
+            overflow: 'hidden',
+            ...wordWrap('break-all'),
+          }}
           onClick={async () => {
             startSession(nonceEndpoint, {
               token,
@@ -105,10 +144,7 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
               .finally(onHide)
           }}
         >
-          Proceed to{' '}
-          {isValidUrl(callbackUrl)
-            ? new URL(callbackUrl).hostname
-            : callbackUrl}
+          Proceed to {callbackHostname}
         </Button>
       </DnaDialogFooter>
     </DnaDialog>
@@ -143,22 +179,9 @@ export function DnaSendDialog({
         )}
       </DnaDialogSubtitle>
       <DnaDialogBody>
-        <Flex
-          align="center"
-          css={{
-            ...backgrounds(theme.colors.danger02),
-            ...border('1px', 'solid', theme.colors.danger),
-            ...borderRadius('top', rem(6)),
-            ...borderRadius('bottom', rem(6)),
-            ...padding(rem(8), rem(12)),
-            ...margin(0, 0, rem(20), 0),
-          }}
-        >
-          <FiInfo size={rem(16)} color={theme.colors.danger} fontWeight={500} />
-          <Text fontWeight={500} css={{...margin(0, 0, 0, rem(8))}}>
-            Attention! This is irreversible operation
-          </Text>
-        </Flex>
+        <DnaDialogAlert>
+          {t(`Attention! This is irreversible operation`)}
+        </DnaDialogAlert>
         <DnaDialogDetails>
           <DnaDialogPanel>
             <PanelRow>
@@ -166,7 +189,9 @@ export function DnaSendDialog({
                 <DnaDialogPanelLabel>{t('To')}</DnaDialogPanelLabel>
                 <DnaDialogPanelValue>{to}</DnaDialogPanelValue>
               </Box>
-              <Address address={to} />
+              <PanelMediaCell>
+                <Address address={to} />
+              </PanelMediaCell>
             </PanelRow>
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
@@ -280,6 +305,25 @@ function DnaDialogSubtitle(props) {
   )
 }
 
+function DnaDialogAlert(props) {
+  return (
+    <Flex
+      align="center"
+      css={{
+        ...backgrounds(theme.colors.danger02),
+        ...border('1px', 'solid', theme.colors.danger),
+        ...borderRadius('top', rem(6)),
+        ...borderRadius('bottom', rem(6)),
+        ...padding(rem(8), rem(12)),
+        ...margin(0, 0, rem(20), 0),
+      }}
+    >
+      <FiInfo size={rem(16)} color={theme.colors.danger} fontWeight={500} />
+      <Text fontWeight={500} css={{...margin(0, 0, 0, rem(8))}} {...props} />
+    </Flex>
+  )
+}
+
 function DnaDialogBody(props) {
   return <Box style={{...margin(0, 0, rem(24))}} {...props} />
 }
@@ -327,7 +371,8 @@ function DnaDialogPanelValue(props) {
         color: theme.colors.text,
         fontWeight: 500,
         lineHeight: rem(20),
-        wordBreak: 'break-all',
+        ...wordWrap('break-all'),
+        minWidth: rem(40),
       }}
       {...props}
     />
@@ -350,6 +395,18 @@ function PanelRow(props) {
   return <Flex align="center" justify="space-between" {...props} />
 }
 
+function PanelMediaCell(props) {
+  return (
+    <Box
+      style={{
+        minWidth: rem(40),
+        ...margin(0, 0, 0, rem(16)),
+      }}
+      {...props}
+    />
+  )
+}
+
 function Address({address}) {
   return (
     <Avatar
@@ -360,7 +417,7 @@ function Address({address}) {
         ...borderRadius('top', rem(6)),
         ...borderRadius('bottom', rem(6)),
         border: `solid 1px ${theme.colors.gray2}`,
-        ...margin(0, 0, 0, rem(16)),
+        ...margin(0),
       }}
     />
   )
