@@ -201,7 +201,7 @@
   "Available balance": "Available balance",
   "Comment": "Comment",
   "Enter amount to confirm transfer": "Enter amount to confirm transfer",
-  "Entered amount do not match target amount": "Entered amount do not match target amount",
+  "Entered amount does not match target amount": "Entered amount does not match target amount",
   "Confirm": "Confirm",
   "Invalid DNA link": "Invalid DNA link",
   "You must provide valid URL including protocol version": "You must provide valid URL including protocol version"
