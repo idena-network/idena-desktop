@@ -29,6 +29,12 @@
       "!renderer",
       "renderer/out"
     ],
+    "protocols": {
+      "name": "idena",
+      "schemes": [
+        "dna"
+      ]
+    },
     "win": {
       "publish": [
         "github"

@@ -1,9 +1,9 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
 import {FiX} from 'react-icons/fi'
-import {rem, transparentize} from 'polished'
+import {transparentize, cover, backgrounds} from 'polished'
 import Router from 'next/router'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 import useClickOutside from '../hooks/use-click-outside'
 import {
   useAutoUpdateState,
@@ -13,7 +13,7 @@ import {SubHeading, Text} from './typo'
 import Flex from './flex'
 import Button, {FlatButton} from './button'
 import Box from './box'
-import {Fill, Absolute} from './position'
+import {Absolute} from './position'
 
 export function GlobalModals() {
   const {showExternalUpdateModal} = useAutoUpdateState()
@@ -72,7 +72,14 @@ function Modal({show, showCloseIcon = true, width = 360, onHide, ...props}) {
   })
 
   return show ? (
-    <Fill bg={transparentize(0.2, theme.colors.black)} zIndex={1}>
+    <Box
+      style={{
+        ...backgrounds(transparentize(0.2, theme.colors.black)),
+        ...cover(),
+        position: 'fixed',
+        zIndex: 1300,
+      }}
+    >
       <div>
         <Box ref={ref} {...props} />
       </div>
@@ -82,7 +89,7 @@ function Modal({show, showCloseIcon = true, width = 360, onHide, ...props}) {
           left: 50%;
           top: 50%;
           width: ${rem(width)};
-          padding: ${rem(25)} ${rem(32)};
+          padding: ${rem(25)} ${rem(32)} ${rem(32)};
           border-radius: 6px;
           background-color: ${theme.colors.white};
           transform: translate(-50%, -50%);
@@ -99,7 +106,7 @@ function Modal({show, showCloseIcon = true, width = 360, onHide, ...props}) {
           />
         </Absolute>
       )}
-    </Fill>
+    </Box>
   ) : null
 }
 
