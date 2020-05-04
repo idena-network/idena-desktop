@@ -219,7 +219,7 @@ export function DnaSendDialog({
             />
             {Number.isFinite(+confirmAmount) && !areSameAmounts && (
               <AlertText>
-                {t('Entered amount do not match target amount')}
+                {t('Entered amount does not match target amount')}
               </AlertText>
             )}
           </FormGroup>
@@ -237,7 +237,9 @@ export function DnaSendDialog({
                 return areSameAmounts
                   ? resolve()
                   : reject(
-                      new Error(t('Entered amount do not match target amount'))
+                      new Error(
+                        t('Entered amount does not match target amount')
+                      )
                     )
               }
               return resolve()
