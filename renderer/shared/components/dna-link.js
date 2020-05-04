@@ -2,7 +2,7 @@
 import React from 'react'
 import {margin, padding, backgrounds, borderRadius, border} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {FiInfo} from 'react-icons/fi'
+import {FiInfo, FiAlertCircle} from 'react-icons/fi'
 import Modal from './modal'
 import Box from './box'
 import {SubHeading, Text} from './typo'
@@ -22,6 +22,7 @@ import {
 } from '../utils/dna-link'
 import {Input, FormGroup, Label} from './form'
 import Avatar from './avatar'
+import {Tooltip} from './tooltip'
 
 export function DnaSignInDialog({url, onHide, onSigninError}) {
   const {t} = useTranslation()
@@ -131,6 +132,7 @@ export function DnaSendDialog({
   const [confirmAmount, setConfirmAmount] = React.useState()
 
   const areSameAmounts = +confirmAmount === +amount
+  const isExceededBalance = +amount > balance
 
   return (
     <DnaDialog show={Boolean(url)} onHide={onHide} {...props}>
@@ -168,36 +170,74 @@ export function DnaSendDialog({
             </PanelRow>
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
-          <DnaDialogPanel label={`${t('Amount')}, DNA`} value={amount} />
+          <DnaDialogPanel>
+            <DnaDialogPanelLabel>{t('Amount')}, DNA</DnaDialogPanelLabel>
+            <DnaDialogPanelValue
+              color={
+                isExceededBalance ? theme.colors.danger : theme.colors.text
+              }
+            >
+              <PanelRow justify="flex-start">
+                <Box style={{...margin(0, rem(4), 0, 0)}}>{amount}</Box>
+                <Box
+                  style={{
+                    lineHeight: rem(theme.fontSizes.base),
+                    ...margin(rem(2), 0, 0),
+                  }}
+                >
+                  {isExceededBalance && (
+                    <Tooltip
+                      content={t('The amount is larger than your balance')}
+                    >
+                      <FiAlertCircle
+                        size={rem(16)}
+                        color={theme.colors.danger}
+                      />
+                    </Tooltip>
+                  )}
+                </Box>
+              </PanelRow>
+            </DnaDialogPanelValue>
+          </DnaDialogPanel>
+          <DnaDialogPanelDivider />
+          <DnaDialogPanel
+            label={`${t('Available balance')}, DNA`}
+            value={balance}
+          />
           <DnaDialogPanelDivider />
           <DnaDialogPanel label={t('Comment')} value={comment} />
         </DnaDialogDetails>
         {shouldConfirmTx && (
-          <FormGroup style={{...margin(rem(16), 0, 0)}}>
-            <Label>{t('Enter amount to confirm transfer')}</Label>
+          <FormGroup style={{...margin(rem(20), 0, rem(20))}}>
+            <Label style={{fontWeight: 500}}>
+              {t('Enter amount to confirm transfer')}
+            </Label>
             <Input
+              disabled={isExceededBalance}
               value={confirmAmount}
               onChange={e => setConfirmAmount(e.target.value)}
             />
             {Number.isFinite(+confirmAmount) && !areSameAmounts && (
-              <AlertText>Entered amount do not match target amount</AlertText>
+              <AlertText>
+                {t('Entered amount do not match target amount')}
+              </AlertText>
             )}
           </FormGroup>
         )}
       </DnaDialogBody>
       <DnaDialogFooter>
         <Button variant="secondary" onClick={onHide}>
-          Cancel
+          {t('Cancel')}
         </Button>
         <Button
-          disabled={shouldConfirmTx && !areSameAmounts}
+          disabled={isExceededBalance || (shouldConfirmTx && !areSameAmounts)}
           onClick={async () => {
             new Promise((resolve, reject) => {
               if (shouldConfirmTx) {
                 return areSameAmounts
                   ? resolve()
                   : reject(
-                      new Error('Entered amount do not match target amount')
+                      new Error(t('Entered amount do not match target amount'))
                     )
               }
               return resolve()
@@ -211,7 +251,7 @@ export function DnaSendDialog({
               .finally(onHide)
           }}
         >
-          Confirm
+          {t('Confirm')}
         </Button>
       </DnaDialogFooter>
     </DnaDialog>
@@ -279,7 +319,17 @@ function DnaDialogPanelLabel(props) {
 }
 
 function DnaDialogPanelValue(props) {
-  return <Box css={{lineHeight: rem(20), wordBreak: 'break-all'}} {...props} />
+  return (
+    <Box
+      css={{
+        color: theme.colors.text,
+        fontWeight: 500,
+        lineHeight: rem(20),
+        wordBreak: 'break-all',
+      }}
+      {...props}
+    />
+  )
 }
 
 function DnaDialogPanelDivider() {
