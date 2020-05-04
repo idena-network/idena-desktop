@@ -210,5 +210,16 @@
   "My current task": "My current task",
   "Next validation": "Next validation",
   "No data available. Please skip the flip.": "No data available. Please skip the flip.",
-  "Failed flip": "Failed flip"
+  "Failed flip": "Failed flip",
+  "Please confirm that you want to use your public address for the website login": "Please confirm that you want to use your public address for the website login",
+  "Token": "Token",
+  "You’re about to send DNA from your wallet to the following address": "You’re about to send DNA from your wallet to the following address",
+  "The amount is larger than your balance": "The amount is larger than your balance",
+  "Available balance": "Available balance",
+  "Comment": "Comment",
+  "Enter amount to confirm transfer": "Enter amount to confirm transfer",
+  "Entered amount do not match target amount": "Entered amount do not match target amount",
+  "Confirm": "Confirm",
+  "Invalid DNA link": "Invalid DNA link",
+  "You must provide valid URL including protocol version": "You must provide valid URL including protocol version"
 }

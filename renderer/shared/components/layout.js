@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
+import {useTranslation} from 'react-i18next'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
@@ -12,10 +13,13 @@ import {shouldStartValidation} from '../../screens/validation/machine'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
+import {DnaSignInDialog, DnaSendDialog} from './dna-link'
+import {useNotificationDispatch} from '../providers/notification-context'
+import {validDnaUrl} from '../utils/dna-link'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
-const AVAILABLE_TIMEOUT = 1000 * 5
+const AVAILABLE_TIMEOUT = global.isDev ? 0 : 1000 * 5
 
 export default function Layout({loading, syncing, offline, ...props}) {
   const debouncedSyncing = useDebounce(syncing, AVAILABLE_TIMEOUT)
@@ -32,6 +36,32 @@ export default function Layout({loading, syncing, offline, ...props}) {
     }
   }, [zoomLevel])
 
+  const {t} = useTranslation()
+
+  const [dnaUrl, setDnaUrl] = React.useState()
+
+  const {addNotification, addError} = useNotificationDispatch()
+
+  React.useEffect(() => {
+    if (dnaUrl && !validDnaUrl(dnaUrl))
+      addError({
+        title: t('Invalid DNA link'),
+        body: t(`You must provide valid URL including protocol version`),
+      })
+  }, [addError, dnaUrl, t])
+
+  React.useEffect(() => {
+    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(setDnaUrl)
+  }, [])
+
+  React.useEffect(() => {
+    const handleDnaLink = (_, e) => setDnaUrl(e)
+    global.ipcRenderer.on('DNA_LINK', handleDnaLink)
+    return () => {
+      global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
+    }
+  }, [])
+
   return (
     <main>
       <Sidebar />
@@ -40,6 +70,39 @@ export default function Layout({loading, syncing, offline, ...props}) {
       {!loading && debouncedOffline && !debouncedSyncing && <OfflineApp />}
       {!loading && !debouncedOffline && !debouncedSyncing && (
         <NormalApp {...props} />
+      )}
+      {/* eslint-disable-next-line no-nested-ternary */}
+      {validDnaUrl(dnaUrl) && (
+        <>
+          {new URL(dnaUrl).pathname.includes('signin') && (
+            <DnaSignInDialog
+              url={dnaUrl}
+              onHide={() => setDnaUrl(null)}
+              onSigninError={error =>
+                addError({
+                  title: error,
+                })
+              }
+            />
+          )}
+          {new URL(dnaUrl).pathname.includes('send') && (
+            <DnaSendDialog
+              url={dnaUrl}
+              onHide={() => setDnaUrl(null)}
+              onDepositSuccess={hash =>
+                addNotification({
+                  title: t('Transaction sent'),
+                  body: hash,
+                })
+              }
+              onDepositError={error =>
+                addError({
+                  title: error,
+                })
+              }
+            />
+          )}
+        </>
       )}
       <style jsx>{`
         main {
@@ -77,17 +140,14 @@ function NormalApp(props) {
   }, [epoch, identity, router])
 
   return (
-    <section>
+    <section style={{flex: 1, overflowY: 'auto'}}>
       {!pathname.startsWith('/validation') && <ValidationBanner />}
+
       <div {...props} />
+
       <Notifications />
+
       <GlobalModals />
-      <style jsx>{`
-        section {
-          flex: 1;
-          overflow-y: auto;
-        }
-      `}</style>
     </section>
   )
 }

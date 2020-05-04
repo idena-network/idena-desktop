@@ -67,17 +67,24 @@ let expressPort = 3051
 
 const nodeUpdater = new NodeUpdater(logger)
 
-app.on('second-instance', () => {
-  // Someone tried to run a second instance, we should focus our window.
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) mainWindow.restore()
-    mainWindow.show()
-    mainWindow.focus()
-  }
-})
+let dnaUrl
+
 const isFirstInstance = app.requestSingleInstanceLock()
 
-if (!isFirstInstance) {
+const extractDnaUrl = argv => argv.find(item => item.startsWith('dna://'))
+
+if (isFirstInstance) {
+  app.on('second-instance', (e, argv) => {
+    // Protocol handler for win32
+    // argv: An array of the second instance’s (command line / deep linked) arguments
+    if (process.platform === 'win32') {
+      // Keep only command line / deep linked arguments
+      handleDnaLink(extractDnaUrl(argv))
+    }
+
+    restoreWindow(mainWindow)
+  })
+} else {
   app.quit()
   return
 }
@@ -96,6 +103,12 @@ const createMainWindow = () => {
   })
 
   loadRoute(mainWindow, 'dashboard')
+
+  // Protocol handler for win32
+  // eslint-disable-next-line no-cond-assign
+  if (process.platform === 'win32') {
+    dnaUrl = extractDnaUrl(process.argv)
+  }
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -119,6 +132,19 @@ const showMainWindow = () => {
     mainWindow.show()
     mainWindow.focus()
   }
+}
+
+function restoreWindow(window = mainWindow) {
+  if (window) {
+    if (window.isMinimized()) window.restore()
+    window.show()
+    window.focus()
+  }
+}
+
+function handleDnaLink(url) {
+  if (!url) return
+  sendMainWindowMsg('DNA_LINK', url)
 }
 
 const createMenu = () => {
@@ -285,7 +311,7 @@ app.on('ready', async () => {
 
   i18next.init(i18nConfig, function(err) {
     if (err) {
-      console.log(err)
+      logger.error(err)
     }
 
     createMainWindow()
@@ -298,6 +324,23 @@ app.on('ready', async () => {
 
     if (isWin) {
       checkForUpdates()
+    }
+  })
+})
+
+if (!app.isDefaultProtocolClient('dna')) {
+  // Define custom protocol handler. Deep linking works on packaged versions of the application!
+  app.setAsDefaultProtocolClient('dna')
+}
+
+app.on('will-finish-launching', function() {
+  // Protocol handler for osx
+  app.on('open-url', function(event, url) {
+    event.preventDefault()
+    dnaUrl = url
+    if (dnaUrl && mainWindow) {
+      handleDnaLink(dnaUrl)
+      restoreWindow(mainWindow)
     }
   })
 })
@@ -317,7 +360,9 @@ app.on('window-all-closed', () => {
   }
 })
 
-ipcMain.on(NODE_COMMAND, async (event, command, data) => {
+ipcMain.handleOnce('CHECK_DNA_LINK', () => dnaUrl)
+
+ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
   logger.info(`new node command`, command, data)
 
   switch (command) {

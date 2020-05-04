@@ -3,7 +3,8 @@ import PropTypes from 'prop-types'
 import {margin, rem, backgrounds, borderRadius} from 'polished'
 import theme from '../theme'
 
-function Avatar({username, size = 80}) {
+// eslint-disable-next-line react/prop-types
+function Avatar({username, size = 80, style}) {
   const src = username
     ? `https://robohash.org/${username}`
     : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
@@ -18,6 +19,7 @@ function Avatar({username, size = 80}) {
         ...backgrounds(theme.colors.gray),
         ...borderRadius('top', 10),
         ...borderRadius('bottom', 10),
+        ...style,
       }}
     />
   )

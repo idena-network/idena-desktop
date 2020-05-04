@@ -67,9 +67,9 @@ export function Notification({
               marginRight: rem(12),
             }}
           />
-          <Box style={{lineHeight: rem(20)}}>
+          <Box style={{lineHeight: rem(20), ...wordWrap('break-all')}}>
             <Box style={{fontWeight: theme.fontWeights.medium}}>{title}</Box>
-            {body && <Text style={wordWrap('break-word')}>{body}</Text>}
+            {body && <Text>{body}</Text>}
           </Box>
           <Box
             css={{
