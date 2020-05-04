@@ -85,7 +85,7 @@
   "Online mining status": "Status wydobycia",
   "Activate mining status": "Aktywuj status wydobycia",
   "Deactivate mining status": "Dezaktywuj status wydobycia",
-  "Submit the form to start mining. Your node has to be online\n                unless you deactivate your status. Otherwise penalties might be\n                charged after being offline more than 1 hour.": "Wyślij formularz, aby rozpocząć wydobycie. Node musi pozostać włączony dopóki nie dezaktywujesz statusu wydobycia. W przeciwnym wypadku mogą być naliczane kary jeśli Node będzie wyłączony dłużej niż godzinę.",
+  "Submit the form to start mining. Your node has to be online\n                unless you deactivate your status. Otherwise penalties might be\n                charged after being offline more than 1 hour.": "Wyślij formularz, aby rozpocząć wydobycie. Node musi pozostać włączony dopóki nie dezaktywujesz statusu wydobycia. W przeciwnym wypadku mogą być naliczane kary, jeśli Node będzie wyłączony dłużej niż godzinę.",
   "You can deactivate your online status at any time.": "Możesz dezaktywować status wydobycia w dowolnym momencie.",
   "Submit the form to deactivate your mining status.": "Prześlij formularz, aby dezaktywować status wydobycia.",
   "Cancel": "Anuluj",
