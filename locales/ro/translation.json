@@ -202,5 +202,6 @@
   "Entered amount does not match target amount": "Suma introdusă nu se potrivește cu suma țintă",
   "Confirm": "Confirmă",
   "Invalid DNA link": "Legătură DNA nevalidă",
-  "You must provide valid URL including protocol version": "Trebuie să furnizați o adresă URL validă, incluzand versiunea de protocol"
+  "You must provide valid URL including protocol version": "Trebuie să furnizați o adresă URL validă, incluzand versiunea de protocol",
+  "Attention! This is irreversible operation": "Attention! This is irreversible operation"
 }

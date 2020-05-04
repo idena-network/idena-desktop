@@ -221,5 +221,6 @@
   "Entered amount does not match target amount": "Entered amount does not match target amount",
   "Confirm": "Confirm",
   "Invalid DNA link": "Invalid DNA link",
-  "You must provide valid URL including protocol version": "You must provide valid URL including protocol version"
+  "You must provide valid URL including protocol version": "You must provide valid URL including protocol version",
+  "Attention! This is irreversible operation": "Attention! This is irreversible operation"
 }
