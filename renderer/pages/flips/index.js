@@ -36,11 +36,21 @@ function Flips() {
     FlipType.Published
   )
 
-  const filteredFlips = flips.filter(({type}) =>
+  let filteredFlips = flips.filter(({type}) =>
     filter === FlipType.Published
       ? [FlipType.Publishing, FlipType.Deleting, filter].includes(type)
       : type === filter
   )
+
+  if (filter === FlipType.Published) {
+    const byType = target => ({type}) => type === target
+
+    filteredFlips = [
+      ...filteredFlips.filter(byType(FlipType.Publishing)),
+      ...filteredFlips.filter(byType(FlipType.Deleting)),
+      ...filteredFlips.filter(byType(FlipType.Published)),
+    ]
+  }
 
   const {
     availableFlips,
