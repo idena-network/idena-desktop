@@ -202,5 +202,6 @@
   "Entered amount does not match target amount": "Введенная сумма не совпадает с необходимой",
   "Confirm": "Подтвердить",
   "Invalid DNA link": "Неправильная DNA-ссылка",
-  "You must provide valid URL including protocol version": "Вы должны предоставить рабочий URL включая версию протокола"
+  "You must provide valid URL including protocol version": "Вы должны предоставить рабочий URL включая версию протокола",
+  "Attention! This is irreversible operation": "Attention! This is irreversible operation"
 }

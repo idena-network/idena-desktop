@@ -221,5 +221,6 @@
   "Entered amount does not match target amount": "एंटर किया हुआ अमाउंट टारगेट से मैच नहीं करता है",
   "Confirm": "पक्का करे",
   "Invalid DNA link": "डीएनए लिंक गलत है",
-  "You must provide valid URL including protocol version": "आपको प्रोटोकॉल संस्करण सहित मान्य URL प्रदान करना होगा"
+  "You must provide valid URL including protocol version": "आपको प्रोटोकॉल संस्करण सहित मान्य URL प्रदान करना होगा",
+  "Attention! This is irreversible operation": "Attention! This is irreversible operation"
 }
