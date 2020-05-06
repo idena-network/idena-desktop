@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
-
 import {useTranslation} from 'react-i18next'
 import {Box, List, Link, Text} from '.'
 import Flex from './flex'
@@ -20,7 +19,6 @@ import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
 import {pluralize} from '../utils/string'
-import {FlipType, useLastFlips} from '../utils/useFlips'
 
 function Sidebar() {
   return (
@@ -318,16 +316,14 @@ function CurrentTask({period, identity}) {
     longAnswers,
   } = useValidationState()
 
-  const [persistedFlips] = useLastFlips()
-
   if (!period || !identity || !identity.state) {
     return null
   }
 
   const {
-    requiredFlips,
     flips,
-    availableFlips,
+    requiredFlips: requiredFlipsNumber,
+    availableFlips: availableFlipsNumber,
     state,
     canActivateInvite,
   } = identity
@@ -348,21 +344,12 @@ function CurrentTask({period, identity}) {
     ].includes(state)
   ) {
     if (period === EpochPeriod.None) {
-      const publishedFlips = (flips || []).concat(
-        persistedFlips.filter(
-          ({type, hash}) =>
-            !(flips || []).includes(hash) &&
-            [
-              FlipType.Publishing,
-              FlipType.Published,
-              FlipType.Deleting,
-            ].includes(type)
-        )
-      )
-      const publishedFlipsNumber = publishedFlips.length
-      const remainingRequiredFlipsNumber = requiredFlips - publishedFlipsNumber
+      const publishedFlipsNumber = (flips || []).length
+      const remainingRequiredFlipsNumber =
+        requiredFlipsNumber - publishedFlipsNumber
       const optionalFlipsNumber =
-        availableFlips - Math.max(requiredFlips, publishedFlipsNumber)
+        availableFlipsNumber -
+        Math.max(requiredFlipsNumber, publishedFlipsNumber)
 
       const shouldSendFlips = remainingRequiredFlipsNumber > 0
 

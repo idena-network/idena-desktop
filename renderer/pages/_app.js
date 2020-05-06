@@ -3,7 +3,6 @@ import App from 'next/app'
 import Router from 'next/router'
 import NProgress from 'nprogress'
 import '../i18n'
-
 import GlobalStyle from '../shared/components/global-style'
 import {EpochProvider} from '../shared/providers/epoch-context'
 import {IdentityProvider} from '../shared/providers/identity-context'
@@ -17,7 +16,6 @@ import {AutoUpdateProvider} from '../shared/providers/update-context'
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tui-image-editor/dist/tui-image-editor.css'
-import {LastFlipsProvider} from '../shared/utils/useFlips'
 
 export default class MyApp extends App {
   render() {
@@ -45,13 +43,11 @@ function AppProviders(props) {
           <ChainProvider>
             <TimingProvider>
               <EpochProvider>
-                <LastFlipsProvider>
-                  <IdentityProvider>
-                    <ValidationProvider>
-                      <NotificationProvider {...props} />
-                    </ValidationProvider>
-                  </IdentityProvider>
-                </LastFlipsProvider>
+                <IdentityProvider>
+                  <ValidationProvider>
+                    <NotificationProvider {...props} />
+                  </ValidationProvider>
+                </IdentityProvider>
               </EpochProvider>
             </TimingProvider>
           </ChainProvider>
