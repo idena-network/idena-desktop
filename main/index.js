@@ -22,6 +22,7 @@ const {getI18nConfig} = require('./language')
 
 const isWin = process.platform === 'win32'
 const isMac = process.platform === 'darwin'
+const isLinux = process.platform === 'linux'
 
 app.allowRendererProcessReuse = true
 
@@ -75,9 +76,9 @@ const extractDnaUrl = argv => argv.find(item => item.startsWith('dna://'))
 
 if (isFirstInstance) {
   app.on('second-instance', (e, argv) => {
-    // Protocol handler for win32
+    // Protocol handler for win32 and linux
     // argv: An array of the second instance’s (command line / deep linked) arguments
-    if (process.platform === 'win32') {
+    if (isWin || isLinux) {
       // Keep only command line / deep linked arguments
       handleDnaLink(extractDnaUrl(argv))
     }
@@ -104,9 +105,9 @@ const createMainWindow = () => {
 
   loadRoute(mainWindow, 'dashboard')
 
-  // Protocol handler for win32
+  // Protocol handler for win32 and linux
   // eslint-disable-next-line no-cond-assign
-  if (process.platform === 'win32') {
+  if (isWin || isLinux) {
     dnaUrl = extractDnaUrl(process.argv)
   }
 
@@ -355,7 +356,7 @@ app.on('before-quit', () => {
 app.on('activate', showMainWindow)
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  if (!isMac) {
     app.quit()
   }
 })
