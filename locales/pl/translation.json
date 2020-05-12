@@ -222,5 +222,7 @@
   "Confirm": "Potwierdź",
   "Invalid DNA link": "Nieprawidłowy link DNA",
   "You must provide valid URL including protocol version": "Musisz podać prawidłowy adres URL zawierający wersję protokołu",
-  "Attention! This is irreversible operation": "Uwaga! To operacja nieodwracalna"
+  "Attention! This is irreversible operation": "Uwaga! To operacja nieodwracalna",
+  "Idena validation will start soon": "Idena validation will start soon",
+  "Keep your app opened": "Keep your app opened"
 }

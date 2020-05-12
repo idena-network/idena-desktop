@@ -203,5 +203,7 @@
   "Confirm": "Confirmă",
   "Invalid DNA link": "Legătură DNA nevalidă",
   "You must provide valid URL including protocol version": "Trebuie să furnizați o adresă URL validă, incluzand versiunea de protocol",
-  "Attention! This is irreversible operation": "Atenţie! Aceasta operațiune este ireversibilă."
+  "Attention! This is irreversible operation": "Atenţie! Aceasta operațiune este ireversibilă.",
+  "Idena validation will start soon": "Idena validation will start soon",
+  "Keep your app opened": "Keep your app opened"
 }
