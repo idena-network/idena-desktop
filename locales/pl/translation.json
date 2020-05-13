@@ -210,5 +210,17 @@
   "My current task": "Obecne zadanie",
   "Next validation": "Następna walidacja",
   "No data available. Please skip the flip.": "Brak dostępnych danych. Pomiń flip.",
-  "Failed flip": "Błędny flip"
+  "Failed flip": "Błędny flip",
+  "Please confirm that you want to use your public address for the website login": "Potwierdź, że chcesz użyć swojego adresu publicznego, aby się zalogować",
+  "Token": "Token",
+  "You’re about to send DNA from your wallet to the following address": "Za chwilę wyślesz DNA ze swojego portfela na następujący adres",
+  "The amount is larger than your balance": "Kwota jest większa niż saldo",
+  "Available balance": "Dostępne saldo",
+  "Comment": "Komentarz",
+  "Enter amount to confirm transfer": "Wprowadź kwotę, aby potwierdzić transfer",
+  "Entered amount does not match target amount": "Wprowadzona kwota nie pasuje do kwoty docelowej",
+  "Confirm": "Potwierdź",
+  "Invalid DNA link": "Nieprawidłowy link DNA",
+  "You must provide valid URL including protocol version": "Musisz podać prawidłowy adres URL zawierający wersję protokołu",
+  "Attention! This is irreversible operation": "Uwaga! To operacja nieodwracalna"
 }
