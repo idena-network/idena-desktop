@@ -184,7 +184,7 @@
   "Save": "Salvați",
   "Use default": "Utilizați implicit",
   "Node api key": "Cheia nodului api",
-  "Built-in node log": "urnalul de nodului încorporat",
+  "Built-in node log": "Jurnalul de nodului încorporat",
   "Copy": "Copie",
   "Current period": "Perioada curentă",
   "My current task": "Sarcina mea actuală",
@@ -203,5 +203,5 @@
   "Confirm": "Confirmă",
   "Invalid DNA link": "Legătură DNA nevalidă",
   "You must provide valid URL including protocol version": "Trebuie să furnizați o adresă URL validă, incluzand versiunea de protocol",
-  "Attention! This is irreversible operation": "Attention! This is irreversible operation"
+  "Attention! This is irreversible operation": "Atenţie! Aceasta operațiune este ireversibilă."
 }
