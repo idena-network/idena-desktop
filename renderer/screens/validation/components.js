@@ -140,58 +140,37 @@ export function Flip({
       }
     >
       {reorderList(images, orders[variant - 1]).map((src, idx) => (
-        <div>
-          <Box
-            key={idx}
-            css={{
-              height: '100%',
-              width: '100%',
-              position: 'relative',
-              overflow: 'hidden',
+        <Box
+          key={idx}
+          css={{
+            height: 'calc((100vh - 260px) / 4)',
+            width: 'calc((100vh - 260px) / 3)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+          onClick={() => onChoose(hash)}
+        >
+          <FlipBlur src={src} />
+          <FlipImage
+            src={src}
+            alt="current-flip"
+            height="100%"
+            width="100%"
+            style={{
+              ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
+              ...borderRadius(
+                'bottom',
+                idx === images.length - 1 ? rem(8) : 'none'
+              ),
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 1,
             }}
-            onClick={() => onChoose(hash)}
-          >
-            <FlipBlur src={src} />
-            <FlipImage
-              src={src}
-              alt="current-flip"
-              height="100%"
-              width="100%"
-              style={{
-                ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
-                ...borderRadius(
-                  'bottom',
-                  idx === images.length - 1 ? rem(8) : 'none'
-                ),
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 1,
-              }}
-              onError={onImageFail}
-            />
-          </Box>
-          <style jsx>{`
-            div {
-              background: #333;
-              min-width: 147px;
-              flex: 1;
-            }
-
-            div:before {
-              content: '';
-              padding-top: 75%;
-              float: left;
-            }
-
-            div:after {
-              content: '';
-              display: block;
-              clear: both;
-            }
-          `}</style>
-        </div>
+            onError={onImageFail}
+          />
+        </Box>
       ))}
     </FlipHolder>
   )
@@ -217,8 +196,6 @@ function FlipHolder({css, ...props}) {
         ...margin(0, rem(10)),
         ...padding(rem(4)),
         position: 'relative',
-        // minWidth: rem(147),
-        // minHeight: rem(4 * 110),
         transitionProperty: 'opacity, transform',
         willChange: 'opacity, transform',
         ...css,
@@ -267,8 +244,8 @@ function FailedFlip() {
               'bottom',
               idx === defaultOrder.length - 1 ? rem(8) : 'none'
             ),
-            height: rem(110),
-            width: rem(147),
+            height: 'calc((100vh - 260px) / 4)',
+            width: 'calc((100vh - 260px) / 3)',
             overflow: 'hidden',
           }}
         >
