@@ -126,8 +126,10 @@ export function Flip({
               }
             : {
                 opacity: 0.3,
-                transform: 'scale(0.97)',
+                transform: 'scale(0.95)',
                 transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
+                transitionProperty: 'opacity, transform',
+                willChange: 'opacity, transform',
               }
           : {}
       }
@@ -155,10 +157,7 @@ export function Flip({
                 'bottom',
                 idx === images.length - 1 ? rem(8) : 'none'
               ),
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
+              position: 'relative',
               zIndex: 1,
             }}
             onError={onImageFail}
