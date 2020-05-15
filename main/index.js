@@ -634,6 +634,10 @@ ipcMain.on('reload', () => {
   loadRoute(mainWindow, 'dashboard')
 })
 
+ipcMain.on('showMainWindow', () => {
+  showMainWindow()
+})
+
 function sendMainWindowMsg(channel, message, data) {
   if (!mainWindow || !mainWindow.webContents || mainWindow.forceClose) {
     return
