@@ -92,14 +92,7 @@ export function CurrentStep(props) {
 }
 
 export function FlipChallenge(props) {
-  return (
-    <Flex
-      justify="center"
-      align="center"
-      css={{flexDirection: 'column', zIndex: 1}}
-      {...props}
-    />
-  )
+  return <Flex justify="center" align="center" css={{zIndex: 1}} {...props} />
 }
 
 export function Flip({
@@ -182,8 +175,6 @@ function FlipHolder({css, ...props}) {
       justify="center"
       direction="column"
       css={{
-        alignSelf: 'stretch',
-        flex: 1,
         borderRadius: rem(8),
         border: `solid ${rem(2)} ${transparentize(
           0.95,
@@ -207,7 +198,13 @@ function FlipHolder({css, ...props}) {
 
 function LoadingFlip() {
   return (
-    <FlipHolder css={{cursor: 'not-allowed'}}>
+    <FlipHolder
+      css={{
+        cursor: 'not-allowed',
+        height: 'calc(100vh - 260px)',
+        width: 'calc((100vh - 260px) / 3)',
+      }}
+    >
       <Fill>
         <Spinner />
       </Fill>

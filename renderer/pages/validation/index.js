@@ -142,11 +142,7 @@ function ValidationSession({
       </Header>
       <CurrentStep>
         <FlipChallenge>
-          <Flex
-            justify="center"
-            align="center"
-            css={{position: 'relative', flex: 1}}
-          >
+          <Flex justify="center" align="center" css={{position: 'relative'}}>
             {currentFlip &&
               ((currentFlip.fetched && !currentFlip.decoded) ||
                 currentFlip.failed) && (
