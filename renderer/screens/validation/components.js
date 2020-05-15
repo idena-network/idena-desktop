@@ -139,7 +139,6 @@ export function Flip({
           key={idx}
           css={{
             height: 'calc((100vh - 260px) / 4)',
-            width: 'calc((100vh - 260px) / 3)',
             position: 'relative',
             overflow: 'hidden',
           }}
@@ -188,6 +187,8 @@ function FlipHolder({css, ...props}) {
         position: 'relative',
         transitionProperty: 'opacity, transform',
         willChange: 'opacity, transform',
+        height: 'calc(100vh - 260px)',
+        width: 'calc((100vh - 240px) / 3)',
         ...css,
       }}
       {...props}
@@ -197,13 +198,7 @@ function FlipHolder({css, ...props}) {
 
 function LoadingFlip() {
   return (
-    <FlipHolder
-      css={{
-        cursor: 'not-allowed',
-        height: 'calc(100vh - 260px)',
-        width: 'calc((100vh - 260px) / 3)',
-      }}
-    >
+    <FlipHolder css={{cursor: 'not-allowed'}}>
       <Fill>
         <Spinner />
       </Fill>
@@ -241,7 +236,6 @@ function FailedFlip() {
               idx === defaultOrder.length - 1 ? rem(8) : 'none'
             ),
             height: 'calc((100vh - 260px) / 4)',
-            width: 'calc((100vh - 260px) / 3)',
             overflow: 'hidden',
           }}
         >
