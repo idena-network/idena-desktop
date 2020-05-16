@@ -34,11 +34,10 @@ export function validDnaUrl(url) {
 }
 
 export function parseQuery(url) {
-  const {searchParams} =
-    typeof url === 'string' ? new URL(decodeURIComponent(url)) : url
+  const {searchParams} = typeof url === 'string' ? new URL(url) : url
 
   return Array.from(searchParams.entries()).reduce(
-    (acc, [k, v]) => ({...acc, [k]: v}),
+    (acc, [k, v]) => ({...acc, [k]: decodeURIComponent(v)}),
     {}
   )
 }
