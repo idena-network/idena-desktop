@@ -126,8 +126,10 @@ export function Flip({
               }
             : {
                 opacity: 0.3,
-                transform: 'scale(0.97)',
+                transform: 'scale(0.95)',
                 transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
+                transitionProperty: 'opacity, transform',
+                willChange: 'opacity, transform',
               }
           : {}
       }
@@ -136,8 +138,7 @@ export function Flip({
         <Box
           key={idx}
           css={{
-            height: rem(110),
-            width: rem(147),
+            height: 'calc((100vh - 260px) / 4)',
             position: 'relative',
             overflow: 'hidden',
           }}
@@ -147,16 +148,15 @@ export function Flip({
           <FlipImage
             src={src}
             alt="current-flip"
+            height="100%"
+            width="100%"
             style={{
               ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
               ...borderRadius(
                 'bottom',
                 idx === images.length - 1 ? rem(8) : 'none'
               ),
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
+              position: 'relative',
               zIndex: 1,
             }}
             onError={onImageFail}
@@ -185,10 +185,10 @@ function FlipHolder({css, ...props}) {
         ...margin(0, rem(10)),
         ...padding(rem(4)),
         position: 'relative',
-        minWidth: rem(147),
-        minHeight: rem(4 * 110),
         transitionProperty: 'opacity, transform',
         willChange: 'opacity, transform',
+        height: 'calc(100vh - 260px)',
+        width: 'calc((100vh - 240px) / 3)',
         ...css,
       }}
       {...props}
@@ -235,8 +235,7 @@ function FailedFlip() {
               'bottom',
               idx === defaultOrder.length - 1 ? rem(8) : 'none'
             ),
-            height: rem(110),
-            width: rem(147),
+            height: 'calc((100vh - 260px) / 4)',
             overflow: 'hidden',
           }}
         >
@@ -296,12 +295,14 @@ function FlipImage({
   style,
   ...props
 }) {
+  const normalize = value =>
+    value.toString().endsWith('%') ? value : rem(height)
   return (
     // eslint-disable-next-line jsx-a11y/alt-text
     <img
       style={{
-        height: rem(height),
-        width: rem(width),
+        height: normalize(height),
+        width: normalize(width),
         objectFit: fit,
         objectPosition: 'center',
         textAlign: 'center',
