@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
@@ -12,15 +12,10 @@ import {EpochPeriod, useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/machine'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
-import {
-  loadPersistentState,
-  loadPersistentStateValue,
-  persistItem,
-} from '../utils/persist'
+import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {DnaSignInDialog, DnaSendDialog} from './dna-link'
 import {useNotificationDispatch} from '../providers/notification-context'
 import {validDnaUrl} from '../utils/dna-link'
-import {usePersistence} from '../hooks/use-persistent-state'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
