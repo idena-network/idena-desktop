@@ -184,7 +184,7 @@
   "Save": "Salvați",
   "Use default": "Utilizați implicit",
   "Node api key": "Cheia nodului api",
-  "Built-in node log": "Jurnalul de nodului încorporat",
+  "Built-in node log": "Jurnalul nodului încorporat",
   "Copy": "Copie",
   "Current period": "Perioada curentă",
   "My current task": "Sarcina mea actuală",
@@ -204,6 +204,6 @@
   "Invalid DNA link": "Legătură DNA nevalidă",
   "You must provide valid URL including protocol version": "Trebuie să furnizați o adresă URL validă, incluzand versiunea de protocol",
   "Attention! This is irreversible operation": "Atenţie! Aceasta operațiune este ireversibilă.",
-  "Idena validation will start soon": "Idena validation will start soon",
-  "Keep your app opened": "Keep your app opened"
+  "Idena validation will start soon": "Validarea Idena va începe curând",
+  "Keep your app opened": "Mențineți aplicația deschisă"
 }
