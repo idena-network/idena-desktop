@@ -46,16 +46,23 @@ function Timer({type, color = theme.colors.danger, useIcon = true}) {
         w={rem(37, theme.fontSizes.base)}
         style={{fontVariantNumeric: 'tabular-nums'}}
       >
-        <Text color={color} fontWeight={600}>
-          {formatSeconds(
+        <Countdown
+          color={color}
+          fontWeight={600}
+          seconds={
             type === SessionType.Short && !shortAnswersSubmitted
               ? shortSeconds
               : longSeconds
-          )}
-        </Text>
+          }
+        />
       </Box>
     </Flex>
   )
+}
+
+// eslint-disable-next-line react/prop-types
+export function Countdown({seconds, ...props}) {
+  return <Text {...props}>{formatSeconds(seconds)}</Text>
 }
 
 Timer.propTypes = {

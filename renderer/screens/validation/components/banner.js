@@ -1,6 +1,8 @@
 import React from 'react'
 import {padding, rem, backgrounds} from 'polished'
 
+import {useMachine} from '@xstate/react'
+import dayjs from 'dayjs'
 import {Box, Text, Fill, Link} from '../../../shared/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
@@ -15,8 +17,8 @@ import {
 } from '../../../shared/providers/epoch-context'
 import {useValidationTimer} from '../../../shared/hooks/use-validation-timer'
 import {useIdentityState} from '../../../shared/providers/identity-context'
-import Timer from './timer'
-import {shouldStartValidation} from '../machine'
+import Timer, {Countdown} from './timer'
+import {shouldStartValidation, createTimerMachine} from '../machine'
 
 function Banner() {
   const epoch = useEpochState()
@@ -41,12 +43,56 @@ function Banner() {
 
 function ValidationSoon() {
   return (
-    <Box
-      bg={theme.colors.danger}
-      p={rem(theme.spacings.medium16)}
-      css={{minHeight: rem(56)}}
+    <Flex
+      align="center"
+      css={{
+        ...backgrounds(theme.colors.danger),
+        minHeight: rem(56),
+      }}
     >
-      <Text color={theme.colors.white}>Idena validation will start soon</Text>
+      <ValidationSoonTimer />
+      <Text
+        color={theme.colors.white}
+        fontWeight={500}
+        css={{
+          ...padding(rem(16), rem(28), rem(24)),
+        }}
+      >
+        Idena validation will start soon
+      </Text>
+    </Flex>
+  )
+}
+
+function ValidationSoonTimer() {
+  const {nextValidation} = useEpochState()
+
+  console.log(nextValidation, dayjs(nextValidation).diff(dayjs(), 's'))
+  const timerMachine = React.useMemo(
+    () => createTimerMachine(dayjs(nextValidation).diff(dayjs(), 's')),
+    [nextValidation]
+  )
+  const [current] = useMachine(timerMachine)
+  const {
+    context: {duration, elapsed},
+  } = current
+
+  return (
+    <Box
+      width={rem(120)}
+      style={{
+        fontVariantNumeric: 'tabular-nums',
+        ...padding(rem(16), rem(28), rem(24)),
+        position: 'relative',
+        zIndex: 0,
+      }}
+    >
+      <Countdown
+        seconds={Math.ceil(Math.max(duration - elapsed, 0))}
+        color={theme.colors.white}
+        fontWeight={500}
+      />
+      <Fill bg="rgba(0,0,0,0.1)" zIndex={-1} />
     </Box>
   )
 }
