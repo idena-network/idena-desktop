@@ -1,0 +1,16 @@
+{
+  "Can not submit flip": "Flip gönderilemiyor",
+  "Keywords are not specified": "Anahtar kelimeler belirtilmedi",
+  "Error while uploading flip": "Flip karşıya yükleme hatası",
+  "Something went wrong": "Bir şeyler ters gitti",
+  "Maximum image size exceeded": "Resim boyutu en yüksek boyutu geçiyor",
+  "Error while importing key": "Anahtar içe aktarılırken bir hata oluştu",
+  "Internal node is not available, try again in a few seconds": "Yerleşik node bulunamadı, daha sonra tekrar dene",
+  "You can not submit flips having 'Candidate' status": "'Aday' seviyesinde flip gönderemezsin",
+  "You cannot submit more flips until the next validation": "Bir sonraki oturuma kadar daha fazla flip gönderemezsin",
+  "Can not submit flip during the validation session": "Onay oturumu süresince flip gönderilemez",
+  "Error while sending transaction": "İşlem gönderilirken bir hata oluştu",
+  "Transaction sent": "İşlem gönderildi",
+  "Error while deleting flip": "Flip silinirken bir hata oluştu",
+  "It's not allowed to submit flips with your identity status": "Şu andaki seviyende flip göndermek için yetkin bulunmuyor"
+}
