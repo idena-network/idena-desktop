@@ -150,17 +150,19 @@ function NormalApp(props) {
 
   const [waitingForValidationEnd, setWaitingForValidationEnd] = React.useState()
   React.useEffect(() => {
-    if (
-      epoch &&
-      [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
-        epoch.currentPeriod
-      )
-    ) {
-      const validationStateDefinition = loadValidationState()
-      if (validationStateDefinition) {
-        const {done} = State.create(validationStateDefinition)
-        setWaitingForValidationEnd(done)
-      }
+    if (epoch) {
+      const isValidationRunning = [
+        EpochPeriod.ShortSession,
+        EpochPeriod.LongSession,
+      ].includes(epoch.currentPeriod)
+
+      if (isValidationRunning) {
+        const validationStateDefinition = loadValidationState()
+        if (validationStateDefinition) {
+          const {done} = State.create(validationStateDefinition)
+          setWaitingForValidationEnd(done)
+        }
+      } else setWaitingForValidationEnd(false)
     }
   }, [epoch])
 
