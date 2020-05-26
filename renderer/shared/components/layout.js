@@ -2,20 +2,29 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
+import {State} from 'xstate'
 import Sidebar from './sidebar'
-import Notifications from './notifications'
+import Notifications, {Notification} from './notifications'
 import ValidationBanner from '../../screens/validation/components/banner'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {GlobalModals} from './modal'
 import {useDebounce} from '../hooks/use-debounce'
 import {EpochPeriod, useEpochState} from '../providers/epoch-context'
-import {shouldStartValidation} from '../../screens/validation/machine'
+import {
+  shouldStartValidation,
+  loadValidationState,
+} from '../../screens/validation/machine'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {DnaSignInDialog, DnaSendDialog} from './dna-link'
-import {useNotificationDispatch} from '../providers/notification-context'
+import {
+  useNotificationDispatch,
+  NotificationType,
+} from '../providers/notification-context'
 import {validDnaUrl} from '../utils/dna-link'
+import {Absolute} from './position'
+import theme from '../theme'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -139,6 +148,22 @@ function NormalApp(props) {
     if (shouldStartValidation(epoch, identity)) router.push('/validation')
   }, [epoch, identity, router])
 
+  const [waitingForValidationEnd, setWaitingForValidationEnd] = React.useState()
+  React.useEffect(() => {
+    if (
+      epoch &&
+      [EpochPeriod.ShortSession, EpochPeriod.LongSession].includes(
+        epoch.currentPeriod
+      )
+    ) {
+      const validationStateDefinition = loadValidationState()
+      if (validationStateDefinition) {
+        const {done} = State.create(validationStateDefinition)
+        setWaitingForValidationEnd(done)
+      }
+    }
+  }, [epoch])
+
   const {t} = useTranslation()
   const [
     validationNotificationEpoch,
@@ -174,6 +199,17 @@ function NormalApp(props) {
 
       <div {...props} />
 
+      {waitingForValidationEnd && (
+        <Absolute bottom={0} left={0} right={0}>
+          <Notification
+            bg={theme.colors.primary}
+            color={theme.colors.white}
+            pinned
+            type={NotificationType.Info}
+            title="Waiting for the end of the long session"
+          />
+        </Absolute>
+      )}
       <Notifications />
 
       <GlobalModals />

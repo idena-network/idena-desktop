@@ -1,5 +1,5 @@
+/* eslint-disable react/prop-types */
 import React, {useState} from 'react'
-import PropTypes from 'prop-types'
 import {wordWrap, padding, margin, borderRadius} from 'polished'
 import {Absolute, Box} from '.'
 import Flex from './flex'
@@ -32,6 +32,9 @@ export function Notification({
   action = null,
   actionName = '',
   pinned,
+  bg = theme.colors.white,
+  color = theme.colors.text,
+  iconColor = theme.colors.primary,
 }) {
   const [hidden, setHidden] = useState(false)
 
@@ -45,10 +48,10 @@ export function Notification({
         <Flex
           align="center"
           css={{
-            background: theme.colors.white,
+            background: bg,
             borderRadius: rem(8),
             boxShadow: `0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)`,
-            color: theme.colors.text,
+            color,
             ...margin(0, 'auto'),
             ...padding(rem(6), rem(8), rem(6), rem(16)),
             position: 'relative',
@@ -62,7 +65,7 @@ export function Notification({
               color:
                 type === NotificationType.Error
                   ? theme.colors.danger
-                  : theme.colors.primary,
+                  : color || iconColor,
               fontSize: rem(20),
               marginRight: rem(12),
             }}
@@ -124,15 +127,6 @@ export function Notification({
       </div>
     )
   )
-}
-
-Notification.propTypes = {
-  title: PropTypes.string.isRequired,
-  body: PropTypes.string,
-  type: PropTypes.oneOf(Object.values(NotificationType)),
-  action: PropTypes.func,
-  actionName: PropTypes.string,
-  pinned: PropTypes.bool,
 }
 
 export default Notifications
