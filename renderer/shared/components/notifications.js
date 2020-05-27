@@ -72,7 +72,7 @@ export function Notification({
           />
           <Box style={{lineHeight: rem(20), ...wordWrap('break-all')}}>
             <Box style={{fontWeight: theme.fontWeights.medium}}>{title}</Box>
-            {body && <Text>{body}</Text>}
+            {body && <Text color={color}>{body}</Text>}
           </Box>
           <Box
             css={{
@@ -86,7 +86,7 @@ export function Notification({
                   color:
                     type === NotificationType.Error
                       ? theme.colors.danger
-                      : theme.colors.primary,
+                      : color,
                   lineHeight: rem(20),
                   ...padding(0),
                 }}

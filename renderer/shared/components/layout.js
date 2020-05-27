@@ -2,29 +2,20 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {State} from 'xstate'
 import Sidebar from './sidebar'
-import Notifications, {Notification} from './notifications'
-import ValidationBanner from '../../screens/validation/components/banner'
+import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {GlobalModals} from './modal'
 import {useDebounce} from '../hooks/use-debounce'
 import {EpochPeriod, useEpochState} from '../providers/epoch-context'
-import {
-  shouldStartValidation,
-  loadValidationState,
-} from '../../screens/validation/machine'
+import {shouldStartValidation} from '../../screens/validation/machine'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {DnaSignInDialog, DnaSendDialog} from './dna-link'
-import {
-  useNotificationDispatch,
-  NotificationType,
-} from '../providers/notification-context'
+import {useNotificationDispatch} from '../providers/notification-context'
 import {validDnaUrl} from '../utils/dna-link'
-import {Absolute} from './position'
-import theme from '../theme'
+import {ValidationToast} from '../../screens/validation/components'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -139,7 +130,6 @@ Layout.propTypes = {
 
 function NormalApp(props) {
   const router = useRouter()
-  const {pathname} = router
 
   const epoch = useEpochState()
   const identity = useIdentityState()
@@ -147,24 +137,6 @@ function NormalApp(props) {
   React.useEffect(() => {
     if (shouldStartValidation(epoch, identity)) router.push('/validation')
   }, [epoch, identity, router])
-
-  const [waitingForValidationEnd, setWaitingForValidationEnd] = React.useState()
-  React.useEffect(() => {
-    if (epoch) {
-      const isValidationRunning = [
-        EpochPeriod.ShortSession,
-        EpochPeriod.LongSession,
-      ].includes(epoch.currentPeriod)
-
-      if (isValidationRunning) {
-        const validationStateDefinition = loadValidationState()
-        if (validationStateDefinition) {
-          const {done} = State.create(validationStateDefinition)
-          setWaitingForValidationEnd(done)
-        }
-      } else setWaitingForValidationEnd(false)
-    }
-  }, [epoch])
 
   const {t} = useTranslation()
   const [
@@ -197,22 +169,10 @@ function NormalApp(props) {
 
   return (
     <section style={{flex: 1, overflowY: 'auto'}}>
-      {!pathname.startsWith('/validation') && <ValidationBanner />}
-
       <div {...props} />
 
-      {waitingForValidationEnd && (
-        <Absolute bottom={0} left={0} right={0}>
-          <Notification
-            bg={theme.colors.primary}
-            color={theme.colors.white}
-            iconColor={theme.colors.white}
-            pinned
-            type={NotificationType.Info}
-            title={t('Waiting for the end of long session')}
-          />
-        </Absolute>
-      )}
+      {epoch && <ValidationToast epoch={epoch} identity={identity} />}
+
       <Notifications />
 
       <GlobalModals />

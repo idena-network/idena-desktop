@@ -18,6 +18,9 @@ import {
 } from 'react-icons/fi'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
+import dayjs from 'dayjs'
+import {useRouter} from 'next/router'
+import {State} from 'xstate'
 import {
   Box,
   Fill,
@@ -33,7 +36,17 @@ import {reorderList} from '../../shared/utils/arr'
 import Spinner from './components/spinner'
 import theme, {rem} from '../../shared/theme'
 import {TranslateWords} from '../../shared/components/translate-button'
-import {RelevanceType, createTimerMachine, adjustDuration} from './machine'
+import {
+  RelevanceType,
+  createTimerMachine,
+  adjustDuration,
+  loadValidationState,
+} from './machine'
+import {Notification} from '../../shared/components/notifications'
+import {NotificationType} from '../../shared/providers/notification-context'
+import {EpochPeriod} from '../../shared/providers/epoch-context'
+import {Countdown} from './components/timer'
+import {useTimingState} from '../../shared/providers/timing-context'
 
 export function Scene({bg: background = theme.colors.black, ...props}) {
   return (
@@ -827,5 +840,139 @@ export function ValidationFailedDialog({isOpen, onSubmit}) {
         </Box>
       </Flex>
     </Modal>
+  )
+}
+
+export function ValidationToast({epoch: {currentPeriod, nextValidation}}) {
+  switch (currentPeriod) {
+    case EpochPeriod.FlipLottery:
+      return <ValidationSoonToast validationStart={nextValidation} />
+    case EpochPeriod.ShortSession:
+    case EpochPeriod.LongSession:
+      return (
+        <ValidationRunningToast
+          currentPeriod={currentPeriod}
+          validationStart={nextValidation}
+        />
+      )
+    case EpochPeriod.AfterLongSession:
+      return <AfterLongSessionToast />
+    default:
+      return null
+  }
+}
+
+export function ValidationSoonToast({validationStart}) {
+  const timerMachine = React.useMemo(
+    () => createTimerMachine(dayjs(validationStart).diff(dayjs(), 's')),
+    [validationStart]
+  )
+
+  const [
+    {
+      context: {duration, elapsed},
+    },
+  ] = useMachine(timerMachine)
+
+  const {t} = useTranslation()
+
+  return (
+    <Absolute bottom={0} left={0} right={0}>
+      <Notification
+        bg={theme.colors.danger}
+        color={theme.colors.white}
+        iconColor={theme.colors.white}
+        pinned
+        type={NotificationType.Info}
+        title={
+          <>
+            <Countdown
+              seconds={Math.ceil(Math.max(duration - elapsed, 0))}
+              color={theme.colors.white}
+              fontWeight={500}
+            />{' '}
+            min left
+          </>
+        }
+        body={t('Idena validation will start soon')}
+      />
+    </Absolute>
+  )
+}
+
+export function ValidationRunningToast({currentPeriod, validationStart}) {
+  const {shortSession, longSession} = useTimingState()
+  const sessionDuration =
+    currentPeriod === EpochPeriod.ShortSession ? shortSession : longSession
+
+  const validationStateDefinition = loadValidationState()
+  const done = validationStateDefinition
+    ? State.create(validationStateDefinition).done
+    : false
+
+  const router = useRouter()
+
+  const {t} = useTranslation()
+
+  const timerMachine = React.useMemo(
+    () =>
+      createTimerMachine(
+        dayjs(validationStart)
+          .add(sessionDuration, 's')
+          .diff(dayjs(), 's')
+      ),
+    [validationStart, sessionDuration]
+  )
+  const [
+    {
+      context: {duration, elapsed},
+    },
+  ] = useMachine(timerMachine)
+
+  return (
+    <Absolute bottom={0} left={0} right={0}>
+      <Notification
+        bg={done ? theme.colors.success : theme.colors.primary}
+        color={theme.colors.white}
+        iconColor={theme.colors.white}
+        pinned
+        type={NotificationType.Info}
+        title={
+          <>
+            <Countdown
+              seconds={Math.ceil(Math.max(duration - elapsed, 0))}
+              color={theme.colors.white}
+              fontWeight={500}
+            />{' '}
+            min left
+          </>
+        }
+        body={
+          done
+            ? `Waiting for the end of ${currentPeriod}`
+            : `Idena validation is in progress`
+        }
+        action={done ? null : () => router.push('/validation')}
+        actionName={t('Validate')}
+      />
+    </Absolute>
+  )
+}
+
+export function AfterLongSessionToast() {
+  const {t} = useTranslation()
+  return (
+    <Absolute bottom={0} left={0} right={0}>
+      <Notification
+        bg={theme.colors.success}
+        color={theme.colors.white}
+        iconColor={theme.colors.white}
+        pinned
+        type={NotificationType.Info}
+        title={t(
+          'Please wait. The network is reaching consensus about validated identities'
+        )}
+      />
+    </Absolute>
   )
 }
