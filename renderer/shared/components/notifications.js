@@ -65,7 +65,7 @@ export function Notification({
               color:
                 type === NotificationType.Error
                   ? theme.colors.danger
-                  : color || iconColor,
+                  : iconColor,
               fontSize: rem(20),
               marginRight: rem(12),
             }}

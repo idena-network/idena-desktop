@@ -206,9 +206,10 @@ function NormalApp(props) {
           <Notification
             bg={theme.colors.primary}
             color={theme.colors.white}
+            iconColor={theme.colors.white}
             pinned
             type={NotificationType.Info}
-            title="Waiting for the end of the long session"
+            title={t('Waiting for the end of long session')}
           />
         </Absolute>
       )}
