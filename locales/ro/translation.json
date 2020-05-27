@@ -205,5 +205,6 @@
   "You must provide valid URL including protocol version": "Trebuie să furnizați o adresă URL validă, incluzand versiunea de protocol",
   "Attention! This is irreversible operation": "Atenţie! Aceasta operațiune este ireversibilă.",
   "Idena validation will start soon": "Validarea Idena va începe curând",
-  "Keep your app opened": "Mențineți aplicația deschisă"
+  "Keep your app opened": "Mențineți aplicația deschisă",
+  "Waiting for the end of long session": "Waiting for the end of long session"
 }

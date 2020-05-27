@@ -207,5 +207,6 @@
   "You must provide valid URL including protocol version": "You must provide valid URL including protocol version",
   "Attention! This is irreversible operation": "Attention! This is irreversible operation",
   "Idena validation will start soon": "Idena validation will start soon",
-  "Keep your app opened": "Keep your app opened"
+  "Keep your app opened": "Keep your app opened",
+  "Waiting for the end of long session": "Waiting for the end of long session"
 }

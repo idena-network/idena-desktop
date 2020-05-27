@@ -224,5 +224,6 @@
   "You must provide valid URL including protocol version": "Musisz podać prawidłowy adres URL zawierający wersję protokołu",
   "Attention! This is irreversible operation": "Uwaga! To operacja nieodwracalna",
   "Idena validation will start soon": "Wkrótce rozpocznie się walidacja",
-  "Keep your app opened": "Pozostaw aplikację otwartą"
+  "Keep your app opened": "Pozostaw aplikację otwartą",
+  "Waiting for the end of long session": "Waiting for the end of long session"
 }
