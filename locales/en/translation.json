@@ -225,5 +225,7 @@
   "Attention! This is irreversible operation": "Attention! This is irreversible operation",
   "Idena validation will start soon": "Idena validation will start soon",
   "Keep your app opened": "Keep your app opened",
-  "Waiting for the end of long session": "Waiting for the end of long session"
+  "Waiting for the end of long session": "Waiting for the end of long session",
+  "Validate": "Validate",
+  "Please wait. The network is reaching consensus about validated identities": "Please wait. The network is reaching consensus about validated identities"
 }
