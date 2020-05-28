@@ -209,6 +209,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       setInsertImageMode(0)
     })
     reader.readAsDataURL(file)
+    e.target.value = ''
   }
 
   // Google search handling
