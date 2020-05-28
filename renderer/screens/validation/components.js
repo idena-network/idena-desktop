@@ -877,7 +877,7 @@ export function ValidationSoonToast({validationStart}) {
   const {t} = useTranslation()
 
   return (
-    <Absolute bottom={0} left={0} right={0}>
+    <ValidationToastHolder>
       <Notification
         bg={theme.colors.danger}
         color={theme.colors.white}
@@ -896,7 +896,7 @@ export function ValidationSoonToast({validationStart}) {
         }
         body={t('Idena validation will start soon')}
       />
-    </Absolute>
+    </ValidationToastHolder>
   )
 }
 
@@ -930,7 +930,7 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
   ] = useMachine(timerMachine)
 
   return (
-    <Absolute bottom={0} left={0} right={0}>
+    <ValidationToastHolder>
       <Notification
         bg={done ? theme.colors.success : theme.colors.primary}
         color={theme.colors.white}
@@ -955,14 +955,14 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
         action={done ? null : () => router.push('/validation')}
         actionName={t('Validate')}
       />
-    </Absolute>
+    </ValidationToastHolder>
   )
 }
 
 export function AfterLongSessionToast() {
   const {t} = useTranslation()
   return (
-    <Absolute bottom={0} left={0} right={0}>
+    <ValidationToastHolder>
       <Notification
         bg={theme.colors.success}
         color={theme.colors.white}
@@ -973,6 +973,10 @@ export function AfterLongSessionToast() {
           'Please wait. The network is reaching consensus about validated identities'
         )}
       />
-    </Absolute>
+    </ValidationToastHolder>
   )
+}
+
+function ValidationToastHolder(props) {
+  return <Absolute bottom={0} left={0} right={0} {...props} />
 }
