@@ -169,6 +169,7 @@ function shouldSeeValidationResults(currentEpoch, evidence) {
         validationStart,
         shortSessionDuration,
         longSessionDuration,
+        afterLongSessionDuration,
       },
     } = State.create(validationStateDefinition)
     return done &&
@@ -176,7 +177,8 @@ function shouldSeeValidationResults(currentEpoch, evidence) {
       dayjs().diff(
         dayjs(validationStart)
           .add(shortSessionDuration, 's')
-          .add(longSessionDuration, 's'),
+          .add(longSessionDuration, 's')
+          .add(afterLongSessionDuration, 's'),
         'm'
       ) >= 1
       ? !evidence[currentEpoch]

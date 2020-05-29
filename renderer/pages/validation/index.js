@@ -70,6 +70,7 @@ export default function ValidationPage() {
         validationStart={new Date(epoch.nextValidation).getTime()}
         shortSessionDuration={timing.shortSession}
         longSessionDuration={timing.longSession}
+        afterLongSessionDuration={timing.afterLongSession}
       />
     )
 
@@ -81,6 +82,7 @@ function ValidationSession({
   validationStart,
   shortSessionDuration,
   longSessionDuration,
+  afterLongSessionDuration,
 }) {
   const validationMachine = useMemo(
     () =>
@@ -89,8 +91,15 @@ function ValidationSession({
         validationStart,
         shortSessionDuration,
         longSessionDuration,
+        afterLongSessionDuration,
       }),
-    [epoch, longSessionDuration, shortSessionDuration, validationStart]
+    [
+      afterLongSessionDuration,
+      epoch,
+      longSessionDuration,
+      shortSessionDuration,
+      validationStart,
+    ]
   )
   const [state, send] = useMachine(validationMachine, {
     state: loadValidationState(),
