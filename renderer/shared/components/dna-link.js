@@ -26,10 +26,45 @@ import {
   sendDna,
   DNA_SEND_CONFIRM_TRESHOLD,
   AlertText,
+  validDnaUrl,
 } from '../utils/dna-link'
 import {Input, FormGroup, Label} from './form'
 import Avatar from './avatar'
 import {Tooltip} from './tooltip'
+import {useNotificationDispatch} from '../providers/notification-context'
+
+export function DnaLinkHandler({children}) {
+  const [dnaUrl, setDnaUrl] = React.useState()
+
+  const {addError} = useNotificationDispatch()
+
+  const {t} = useTranslation()
+
+  React.useEffect(() => {
+    if (dnaUrl && !validDnaUrl(dnaUrl))
+      addError({
+        title: t('Invalid DNA link'),
+        body: t(`You must provide valid URL including protocol version`),
+      })
+  }, [addError, dnaUrl, t])
+
+  React.useEffect(() => {
+    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(setDnaUrl)
+  }, [])
+
+  React.useEffect(() => {
+    const handleDnaLink = (_, e) => setDnaUrl(e)
+    global.ipcRenderer.on('DNA_LINK', handleDnaLink)
+    return () => {
+      global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
+    }
+  }, [])
+
+  return validDnaUrl(dnaUrl) &&
+    React.Children.only(children).props.isOpen(dnaUrl)
+    ? React.cloneElement(children, {url: dnaUrl, onHide: () => setDnaUrl(null)})
+    : null
+}
 
 export function DnaSignInDialog({url, onHide, onSigninError}) {
   const {t} = useTranslation()
