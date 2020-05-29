@@ -851,6 +851,7 @@ export function ValidationToast({epoch: {currentPeriod, nextValidation}}) {
     case EpochPeriod.LongSession:
       return (
         <ValidationRunningToast
+          key={currentPeriod}
           currentPeriod={currentPeriod}
           validationStart={nextValidation}
         />
@@ -877,7 +878,7 @@ export function ValidationSoonToast({validationStart}) {
   const {t} = useTranslation()
 
   return (
-    <ValidationToastHolder>
+    <ValidationSnackbar>
       <Notification
         bg={theme.colors.danger}
         color={theme.colors.white}
@@ -885,25 +886,24 @@ export function ValidationSoonToast({validationStart}) {
         pinned
         type={NotificationType.Info}
         title={
-          <>
-            <Countdown
-              seconds={Math.ceil(Math.max(duration - elapsed, 0))}
-              color={theme.colors.white}
-              fontWeight={500}
-            />{' '}
-            min left
-          </>
+          <Countdown
+            seconds={Math.ceil(Math.max(duration - elapsed, 0))}
+            color={theme.colors.white}
+            fontWeight={500}
+          />
         }
         body={t('Idena validation will start soon')}
       />
-    </ValidationToastHolder>
+    </ValidationSnackbar>
   )
 }
 
 export function ValidationRunningToast({currentPeriod, validationStart}) {
   const {shortSession, longSession} = useTimingState()
   const sessionDuration =
-    currentPeriod === EpochPeriod.ShortSession ? shortSession : longSession
+    currentPeriod === EpochPeriod.ShortSession
+      ? shortSession
+      : shortSession + longSession
 
   const validationStateDefinition = loadValidationState()
   const done = validationStateDefinition
@@ -923,6 +923,7 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
       ),
     [validationStart, sessionDuration]
   )
+
   const [
     {
       context: {duration, elapsed},
@@ -930,22 +931,20 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
   ] = useMachine(timerMachine)
 
   return (
-    <ValidationToastHolder>
+    <ValidationSnackbar>
       <Notification
         bg={done ? theme.colors.success : theme.colors.primary}
         color={theme.colors.white}
         iconColor={theme.colors.white}
+        actionColor={theme.colors.white}
         pinned
         type={NotificationType.Info}
         title={
-          <>
-            <Countdown
-              seconds={Math.ceil(Math.max(duration - elapsed, 0))}
-              color={theme.colors.white}
-              fontWeight={500}
-            />{' '}
-            min left
-          </>
+          <Countdown
+            seconds={Math.ceil(Math.max(duration - elapsed, 0))}
+            color={theme.colors.white}
+            fontWeight={500}
+          />
         }
         body={
           done
@@ -955,14 +954,14 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
         action={done ? null : () => router.push('/validation')}
         actionName={t('Validate')}
       />
-    </ValidationToastHolder>
+    </ValidationSnackbar>
   )
 }
 
 export function AfterLongSessionToast() {
   const {t} = useTranslation()
   return (
-    <ValidationToastHolder>
+    <ValidationSnackbar>
       <Notification
         bg={theme.colors.success}
         color={theme.colors.white}
@@ -973,10 +972,10 @@ export function AfterLongSessionToast() {
           'Please wait. The network is reaching consensus about validated identities'
         )}
       />
-    </ValidationToastHolder>
+    </ValidationSnackbar>
   )
 }
 
-function ValidationToastHolder(props) {
+function ValidationSnackbar(props) {
   return <Absolute bottom={0} left={0} right={0} {...props} />
 }

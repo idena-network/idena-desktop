@@ -35,6 +35,7 @@ export function Notification({
   bg = theme.colors.white,
   color = theme.colors.text,
   iconColor = theme.colors.primary,
+  actionColor = theme.colors.primary,
 }) {
   const [hidden, setHidden] = useState(false)
 
@@ -86,7 +87,7 @@ export function Notification({
                   color:
                     type === NotificationType.Error
                       ? theme.colors.danger
-                      : color,
+                      : actionColor,
                   lineHeight: rem(20),
                   ...padding(0),
                 }}
