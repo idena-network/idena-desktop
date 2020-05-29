@@ -1,4 +1,4 @@
-﻿{
+{
   "Something went wrong": "Nešto nije u redu",
   "An error occurred on client": "Dogodila se greška na klijentu",
   "Go to My Idena": "Idi na stranu Moja Idena",
@@ -203,5 +203,8 @@
   "Confirm": "Confirm",
   "Invalid DNA link": "Invalid DNA link",
   "You must provide valid URL including protocol version": "You must provide valid URL including protocol version",
-  "Attention! This is irreversible operation": "Attention! This is irreversible operation"
+  "Attention! This is irreversible operation": "Attention! This is irreversible operation",
+  "Idena validation will start soon": "Idena validation will start soon",
+  "Keep your app opened": "Keep your app opened",
+  "Waiting for the end of long session": "Waiting for the end of long session"
 }

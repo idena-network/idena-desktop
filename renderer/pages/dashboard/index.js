@@ -3,6 +3,7 @@ import {useRouter} from 'next/router'
 import {rem} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {State} from 'xstate'
+import dayjs from 'dayjs'
 import Layout from '../../shared/components/layout'
 import {Drawer, Box, PageTitle, Absolute} from '../../shared/components'
 import SendInviteForm from '../../screens/contacts/components/send-invite-form'
@@ -163,9 +164,23 @@ function shouldSeeValidationResults(currentEpoch, evidence) {
   if (validationStateDefinition) {
     const {
       done,
-      context: {epoch},
+      context: {
+        epoch,
+        validationStart,
+        shortSessionDuration,
+        longSessionDuration,
+      },
     } = State.create(validationStateDefinition)
-    return done && currentEpoch - epoch === 1 ? !evidence[currentEpoch] : false
+    return done &&
+      currentEpoch - epoch === 1 &&
+      dayjs().diff(
+        dayjs(validationStart)
+          .add(shortSessionDuration, 's')
+          .add(longSessionDuration, 's'),
+        'm'
+      ) >= 1
+      ? !evidence[currentEpoch]
+      : false
   }
   return false
 }
