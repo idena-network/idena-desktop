@@ -62,7 +62,11 @@ function Timer({type, color = theme.colors.danger, useIcon = true}) {
 
 // eslint-disable-next-line react/prop-types
 export function Countdown({seconds, ...props}) {
-  return <Text {...props}>{formatSeconds(seconds)}</Text>
+  return (
+    <Text css={{fontVariantNumeric: 'tabular-nums'}} {...props}>
+      {formatSeconds(seconds)}
+    </Text>
+  )
 }
 
 Timer.propTypes = {

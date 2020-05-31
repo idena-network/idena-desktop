@@ -1,5 +1,5 @@
 language: node_js
-node_js: '10'
+node_js: "10"
 
 addons:
   apt:
@@ -26,7 +26,7 @@ matrix:
       os: windows
       env: PATH=/c/Python27:/c/Python27/Scripts:$PATH
       before_install:
-        - choco install -y python2 gtk-runtime microsoft-build-tools libjpeg-turbo
+        - choco install -y python2 gtk-runtime microsoft-build-tools libjpeg-turbo --allow-empty-checksums
         - curl -LO http://ftp.gnome.org/pub/GNOME/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip
         - 7z x gtk+-bundle_2.22.1-20101229_win64.zip -y -o/c/GTK
       script:

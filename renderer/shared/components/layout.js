@@ -4,7 +4,6 @@ import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
-import ValidationBanner from '../../screens/validation/components/banner'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {GlobalModals} from './modal'
 import {useDebounce} from '../hooks/use-debounce'
@@ -13,9 +12,9 @@ import {shouldStartValidation} from '../../screens/validation/machine'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
-import {DnaSignInDialog, DnaSendDialog} from './dna-link'
+import {DnaSignInDialog, DnaSendDialog, DnaLinkHandler} from './dna-link'
 import {useNotificationDispatch} from '../providers/notification-context'
-import {validDnaUrl} from '../utils/dna-link'
+import {ValidationToast} from '../../screens/validation/components'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -36,31 +35,7 @@ export default function Layout({loading, syncing, offline, ...props}) {
     }
   }, [zoomLevel])
 
-  const {t} = useTranslation()
-
-  const [dnaUrl, setDnaUrl] = React.useState()
-
-  const {addNotification, addError} = useNotificationDispatch()
-
-  React.useEffect(() => {
-    if (dnaUrl && !validDnaUrl(dnaUrl))
-      addError({
-        title: t('Invalid DNA link'),
-        body: t(`You must provide valid URL including protocol version`),
-      })
-  }, [addError, dnaUrl, t])
-
-  React.useEffect(() => {
-    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(setDnaUrl)
-  }, [])
-
-  React.useEffect(() => {
-    const handleDnaLink = (_, e) => setDnaUrl(e)
-    global.ipcRenderer.on('DNA_LINK', handleDnaLink)
-    return () => {
-      global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
-    }
-  }, [])
+  const {addError} = useNotificationDispatch()
 
   return (
     <main>
@@ -71,39 +46,20 @@ export default function Layout({loading, syncing, offline, ...props}) {
       {!loading && !debouncedOffline && !debouncedSyncing && (
         <NormalApp {...props} />
       )}
-      {/* eslint-disable-next-line no-nested-ternary */}
-      {validDnaUrl(dnaUrl) && (
-        <>
-          {new URL(dnaUrl).pathname.includes('signin') && (
-            <DnaSignInDialog
-              url={dnaUrl}
-              onHide={() => setDnaUrl(null)}
-              onSigninError={error =>
-                addError({
-                  title: error,
-                })
-              }
-            />
-          )}
-          {new URL(dnaUrl).pathname.includes('send') && (
-            <DnaSendDialog
-              url={dnaUrl}
-              onHide={() => setDnaUrl(null)}
-              onDepositSuccess={hash =>
-                addNotification({
-                  title: t('Transaction sent'),
-                  body: hash,
-                })
-              }
-              onDepositError={error =>
-                addError({
-                  title: error,
-                })
-              }
-            />
-          )}
-        </>
+
+      {!debouncedOffline && !loading && (
+        <DnaLinkHandler>
+          <DnaSignInDialog
+            isOpen={url => new URL(url).pathname.includes('signin')}
+            onSigninError={error =>
+              addError({
+                title: error,
+              })
+            }
+          />
+        </DnaLinkHandler>
       )}
+
       <style jsx>{`
         main {
           display: flex;
@@ -130,7 +86,6 @@ Layout.propTypes = {
 
 function NormalApp(props) {
   const router = useRouter()
-  const {pathname} = router
 
   const epoch = useEpochState()
   const identity = useIdentityState()
@@ -140,6 +95,7 @@ function NormalApp(props) {
   }, [epoch, identity, router])
 
   const {t} = useTranslation()
+
   const [
     validationNotificationEpoch,
     setValidationNotificationEpoch,
@@ -168,15 +124,34 @@ function NormalApp(props) {
     persistItem('validationNotification', 'epoch', newEpoch)
   }, [epoch, validationNotificationEpoch, setValidationNotificationEpoch, t])
 
+  const {addNotification, addError} = useNotificationDispatch()
+
   return (
     <section style={{flex: 1, overflowY: 'auto'}}>
-      {!pathname.startsWith('/validation') && <ValidationBanner />}
-
       <div {...props} />
+
+      {epoch && <ValidationToast epoch={epoch} identity={identity} />}
 
       <Notifications />
 
       <GlobalModals />
+
+      <DnaLinkHandler>
+        <DnaSendDialog
+          isOpen={url => new URL(url).pathname.includes('send')}
+          onDepositSuccess={hash =>
+            addNotification({
+              title: t('Transaction sent'),
+              body: hash,
+            })
+          }
+          onDepositError={error =>
+            addError({
+              title: error,
+            })
+          }
+        />
+      </DnaLinkHandler>
     </section>
   )
 }
