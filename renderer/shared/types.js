@@ -18,3 +18,11 @@ export const SessionType = {
   Long: 'long',
   Qualification: 'qualification',
 }
+
+export const FlipType = {
+  Publishing: 'publishing',
+  Published: 'published',
+  Draft: 'draft',
+  Archived: 'archived',
+  Deleting: 'deleting',
+}

@@ -4,7 +4,7 @@ import {useTranslation} from 'react-i18next'
 
 import theme from '../../../shared/theme'
 import {Box} from '../../../shared/components'
-import {Figure} from '../../../shared/components/utils'
+import {Figure} from '../../../shared/components/stat'
 import {
   useIdentityState,
   mapToFriendlyStatus,

@@ -12,7 +12,7 @@ import {
 import {mapToFriendlyStatus} from '../../../shared/providers/identity-context'
 import ContactInfo from './contact-info'
 import ContactToolbar from './contact-toolbar'
-import {Figure} from '../../../shared/components/utils'
+import {Figure} from '../../../shared/components/stat'
 import RenameInvite from './invite-form'
 import KillInvite from './kill-invite-form'
 

@@ -1,27 +1,5 @@
 import {useEffect, useRef} from 'react'
 
-// TODO: just to make it clear that this useInterval uses interval. Yep!
-export function useIntervalInterval(callback, delay, useImmediately = false) {
-  const savedCallback = useRef()
-
-  useEffect(() => {
-    savedCallback.current = callback
-  }, [callback])
-
-  useEffect(() => {
-    function tick() {
-      savedCallback.current()
-    }
-    if (delay !== null) {
-      if (useImmediately) {
-        tick()
-      }
-      const id = setTimeout(tick, delay)
-      return () => clearTimeout(id)
-    }
-  }, [delay, useImmediately])
-}
-
 export function useInterval(callback, delay, useImmediately = false) {
   const savedCallback = useRef()
 

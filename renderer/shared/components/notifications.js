@@ -9,17 +9,15 @@ import {
   NotificationType,
   NOTIFICATION_DELAY,
 } from '../providers/notification-context'
-import useId from '../hooks/use-id'
 import {IconButton} from './button'
 import {Text} from './typo'
 
 function Notifications() {
   const {notifications} = useNotificationState()
-  const id = useId()
   return (
     <Snackbar>
       {notifications.map((notification, idx) => (
-        <Notification key={`notification-${id}-${idx}`} {...notification} />
+        <Notification key={`notification-${idx}`} {...notification} />
       ))}
     </Snackbar>
   )

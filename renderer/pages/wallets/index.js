@@ -16,10 +16,10 @@ import WalletActions from '../../screens/wallets/components/wallet-actions'
 import TransferForm from '../../screens/wallets/components/transfer-form'
 import ReceiveForm from '../../screens/wallets/components/receive-form'
 import KillForm from '../../screens/wallets/components/kill-form'
-import Loading from '../../shared/components/loading'
 import {useWallets} from '../../shared/hooks/use-wallets'
 import {useChainState} from '../../shared/providers/chain-context'
 import {FlatButton} from '../../shared/components/button'
+import {Spinner} from '../../shared/components/spinner'
 
 export default function Index() {
   const {t} = useTranslation()
@@ -48,7 +48,13 @@ export default function Index() {
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <PageTitle>{t('Wallets')}</PageTitle>
         <Box>
-          {status === 'fetching' && <Loading color={theme.colors.text} />}
+          {status === 'fetching' && (
+            <Flex>
+              <Box style={{transform: 'scale(0.35) translateX(24px)'}}>
+                <Spinner color={theme.colors.primary} />
+              </Box>
+            </Flex>
+          )}
           {['success', 'polling'].includes(status) && (
             <>
               <Flex css={{justifyContent: 'space-between', marginBottom: 24}}>

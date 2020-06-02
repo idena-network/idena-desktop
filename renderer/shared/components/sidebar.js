@@ -3,10 +3,9 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {Box, List, Link, Text} from '.'
+import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
-import Loading from './loading'
 import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
@@ -147,7 +146,14 @@ function Nav() {
   const {nickname} = useIdentityState()
   return (
     <nav>
-      <List m={0}>
+      <ul
+        style={{
+          listStyleType: 'none',
+          ...padding(0),
+          ...margin(0),
+          textAlign: 'left',
+        }}
+      >
         <NavItem
           href="/dashboard"
           active
@@ -173,7 +179,7 @@ function Nav() {
         <NavItem href="/settings" icon={<i className="icon icon--settings" />}>
           {t('Settings')}
         </NavItem>
-      </List>
+      </ul>
       <style jsx>{`
         nav {
           align-self: stretch;
@@ -280,7 +286,7 @@ function ActionPanel() {
   )
 }
 
-function Block({title, children, fallback = <Loading />}) {
+function Block({title, children}) {
   return (
     <Box
       css={{
@@ -301,7 +307,7 @@ function Block({title, children, fallback = <Loading />}) {
         fontWeight={500}
         css={{display: 'block', lineHeight: rem(20)}}
       >
-        {children || fallback}
+        {children}
       </Text>
     </Box>
   )
@@ -309,7 +315,6 @@ function Block({title, children, fallback = <Loading />}) {
 
 Block.propTypes = {
   title: PropTypes.string,
-  fallback: PropTypes.node,
   children: PropTypes.node,
 }
 

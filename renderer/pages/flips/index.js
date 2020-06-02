@@ -1,14 +1,13 @@
 import React from 'react'
 import {margin} from 'polished'
 import {useTranslation} from 'react-i18next'
-import useLocalStorage from '../../shared/hooks/use-local-storage'
 import Layout from '../../shared/components/layout'
 import {Box, Drawer, PageTitle} from '../../shared/components'
 import theme, {rem} from '../../shared/theme'
 import FlipToolbar, {
   FlipToolbarItem,
 } from '../../screens/flips/components/toolbar'
-import useFlips, {FlipType} from '../../shared/utils/useFlips'
+import useFlips from '../../shared/hooks/use-flips'
 import Flex from '../../shared/components/flex'
 import IconLink from '../../shared/components/icon-link'
 import FlipCover, {
@@ -21,6 +20,9 @@ import {useChainState} from '../../shared/providers/chain-context'
 import DeleteFlipForm from '../../screens/flips/components/delete-flip-form'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {capitalize} from '../../shared/utils/string'
+import {loadPersistentState} from '../../shared/utils/persist'
+import {usePersistence} from '../../shared/hooks/use-persistent-state'
+import {FlipType} from '../../shared/types'
 
 function Flips() {
   const {t} = useTranslation('error')
@@ -31,9 +33,13 @@ function Flips() {
   const handleCloseDeleteFlipForm = () => setIsDeleteFlipFormOpen(false)
   const [flipToDelete, setFlipToDelete] = React.useState(false)
 
-  const [filter, setFilter] = useLocalStorage(
-    'flips/filter',
-    FlipType.Published
+  const [filter, setFilter] = usePersistence(
+    React.useReducer(
+      // eslint-disable-next-line no-unused-vars
+      (_state, nextFilter) => nextFilter,
+      loadPersistentState('flipFilter') || FlipType.Published
+    ),
+    'flipFilter'
   )
 
   let filteredFlips = flips.filter(({type}) =>

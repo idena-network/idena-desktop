@@ -1,7 +1,9 @@
 import {useState, useReducer, useEffect} from 'react'
 import useRpc from './use-rpc'
-import {HASH_IN_MEMPOOL} from '../utils/tx'
 import {useInterval} from './use-interval'
+
+export const HASH_IN_MEMPOOL =
+  '0x0000000000000000000000000000000000000000000000000000000000000000'
 
 /**
  * @typedef {Object} Tx

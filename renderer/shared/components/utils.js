@@ -44,16 +44,6 @@ Figure.propTypes = {
   postfix: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 }
 
-export function If({condition, fallback = null, children}) {
-  return <>{condition ? children : fallback}</>
-}
-
-If.propTypes = {
-  condition: PropTypes.bool,
-  fallback: PropTypes.node,
-  children: PropTypes.node,
-}
-
 export function Debug(props) {
   return (
     <Absolute bottom={10} left={10} zIndex={9}>
