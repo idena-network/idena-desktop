@@ -17,6 +17,7 @@ import {
 import Button from './button'
 import Link from './link'
 import {BlockText} from './typo'
+import {Spinner} from './spinner'
 
 export default function SyncingApp() {
   return (
@@ -25,7 +26,7 @@ export default function SyncingApp() {
       <section>
         <div>
           <div>
-            <Spinner size={24} />
+            <Spinner />
           </div>
           <div>Synchronizing...</div>
         </div>
@@ -57,7 +58,7 @@ export default function SyncingApp() {
             align-items: center;
             justify-content: center;
             margin-right: ${rem(18, 13)};
-            transform: scale(0.35);
+            transform: scale(0.35) translateY(-8px);
           }
           section > div:nth-child(2) {
             display: flex;
@@ -163,98 +164,6 @@ function SyncingIdentity() {
         }
       `}</style>
     </section>
-  )
-}
-
-function Spinner() {
-  return (
-    <>
-      <div className="loader-inner line-spin-fade-loader">
-        {Array.from({length: 8}, (_, i) => i).map(x => (
-          <div key={`spinner-item-${x}`} />
-        ))}
-      </div>
-      <style jsx>{`
-        @keyframes line-spin-fade-loader {
-          50% {
-            opacity: 0.3;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-
-        .line-spin-fade-loader {
-          position: relative;
-          top: -10px;
-          left: -4px;
-        }
-        .line-spin-fade-loader > div:nth-child(1) {
-          top: 20px;
-          left: 0;
-          animation: line-spin-fade-loader 1.2s -0.84s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(2) {
-          top: 13.63636px;
-          left: 13.63636px;
-          -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-          animation: line-spin-fade-loader 1.2s -0.72s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(3) {
-          top: 0;
-          left: 20px;
-          -webkit-transform: rotate(90deg);
-          transform: rotate(90deg);
-          animation: line-spin-fade-loader 1.2s -0.6s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(4) {
-          top: -13.63636px;
-          left: 13.63636px;
-          -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
-          animation: line-spin-fade-loader 1.2s -0.48s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(5) {
-          top: -20px;
-          left: 0;
-          animation: line-spin-fade-loader 1.2s -0.36s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(6) {
-          top: -13.63636px;
-          left: -13.63636px;
-          -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-          animation: line-spin-fade-loader 1.2s -0.24s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(7) {
-          top: 0;
-          left: -20px;
-          -webkit-transform: rotate(90deg);
-          transform: rotate(90deg);
-          animation: line-spin-fade-loader 1.2s -0.12s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(8) {
-          top: 13.63636px;
-          left: -13.63636px;
-          -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
-          animation: line-spin-fade-loader 1.2s 0s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div {
-          background-color: #fff;
-          width: 4px;
-          height: 35px;
-          border-radius: 2px;
-          margin: 2px;
-          -webkit-animation-fill-mode: both;
-          animation-fill-mode: both;
-          position: absolute;
-          width: 5px;
-          height: 15px;
-        }
-      `}</style>
-    </>
   )
 }
 

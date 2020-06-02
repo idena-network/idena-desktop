@@ -10,7 +10,7 @@ import {
   AnswerType,
   hasAnswer,
 } from '../../../shared/providers/validation-context'
-import Spinner from './spinner'
+import ValidationSpinner from './spinner'
 
 const borderWidth = 2
 const margin = 4
@@ -143,7 +143,7 @@ function Thumb({
             }}
           />
         ) : (
-          <Spinner size={24} />
+          <ValidationSpinner size={24} />
         )}
       </Box>
     </Flex>
