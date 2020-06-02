@@ -1,10 +1,12 @@
-import {useState, useEffect, useCallback} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import {encode} from 'rlp'
 import * as api from '../api/dna'
+import {useEpochState} from '../providers/epoch-context'
 import {useInterval} from '../hooks/use-interval'
 import {fetchTx} from '../api'
 import {HASH_IN_MEMPOOL} from './tx'
 import {areSame, areEual} from './arr'
+import {didValidate} from '../../screens/validation/utils'
 
 const {
   getFlips: getFlipsFromStore,
@@ -287,6 +289,14 @@ function useFlips() {
       return nextFlips
     })
   }, [])
+
+  const epoch = useEpochState()
+
+  React.useEffect(() => {
+    if (epoch && didValidate(epoch.epoch)) {
+      archiveFlips()
+    }
+  }, [archiveFlips, epoch])
 
   return {
     flips,

@@ -7,7 +7,7 @@ import {
   submitShortAnswers,
   submitLongAnswers,
 } from '../../shared/api/validation'
-import {SessionType} from '../../shared/providers/validation-context'
+import {SessionType} from '../../shared/types'
 import {fetchFlip} from '../../shared/api'
 import apiClient from '../../shared/api/api-client'
 import {

@@ -33,15 +33,13 @@ import {
 } from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
-import ValidationSpinner from './components/spinner'
 import theme, {rem} from '../../shared/theme'
 import {TranslateWords} from '../../shared/components/translate-button'
 import {RelevanceType, adjustDuration} from './machine'
 import {loadValidationState} from './utils'
 import {Notification, Snackbar} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
-import {EpochPeriod} from '../../shared/providers/epoch-context'
-import {Countdown} from './components/timer'
+import {EpochPeriod} from '../../shared/types'
 import {useTimingState} from '../../shared/providers/timing-context'
 import {createTimerMachine} from '../../shared/machines'
 
@@ -764,8 +762,8 @@ export function TimerClock({duration, color}) {
   const remaining = duration - elapsed
 
   return (
-    <Box w={rem(37)} style={{fontVariantNumeric: 'tabular-nums'}}>
-      <Text color={color} fontWeight={600}>
+    <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: rem(37)}}>
+      <Text color={color} fontWeight={500}>
         {state.matches('stopped') && '00:00'}
         {state.matches('running') &&
           [Math.floor(remaining / 60), remaining % 60]
@@ -882,13 +880,7 @@ export function ValidationSoonToast({validationStart}) {
         iconColor={theme.colors.white}
         pinned
         type={NotificationType.Info}
-        title={
-          <Countdown
-            seconds={Math.ceil(Math.max(duration - elapsed, 0))}
-            color={theme.colors.white}
-            fontWeight={500}
-          />
-        }
+        title={<TimerClock duration={duration} color={theme.colors.white} />}
         body={t('Idena validation will start soon')}
       />
     </Snackbar>
@@ -936,13 +928,7 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
         actionColor={theme.colors.white}
         pinned
         type={NotificationType.Info}
-        title={
-          <Countdown
-            seconds={Math.ceil(Math.max(duration - elapsed, 0))}
-            color={theme.colors.white}
-            fontWeight={500}
-          />
-        }
+        title={<TimerClock duration={duration} color={theme.colors.white} />}
         body={
           done
             ? `Waiting for the end of ${currentPeriod}`
@@ -970,5 +956,37 @@ export function AfterLongSessionToast() {
         )}
       />
     </Snackbar>
+  )
+}
+
+function ValidationSpinner({size = 30}) {
+  return (
+    <div>
+      <style jsx>{`
+        @keyframes donut-spin {
+          0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+          }
+          100% {
+            transform: translate(-50%, -50%) rotate(360deg);
+          }
+        }
+        div {
+          display: inline-block;
+          border: 4px solid rgba(0, 0, 0, 0.1);
+          border-left-color: ${theme.colors.primary};
+          border-radius: 50%;
+          width: ${rem(size)};
+          height: ${rem(size)};
+          animation: donut-spin 1.2s linear infinite;
+
+          left: 50%;
+          position: absolute;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          text-align: center;
+        }
+      `}</style>
+    </div>
   )
 }
