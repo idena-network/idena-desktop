@@ -208,5 +208,18 @@
   "Keep your app opened": "Keep your app opened",
   "Waiting for the end of long session": "Waiting for the end of long session",
   "Validate": "Validate",
-  "Please wait. The network is reaching consensus about validated identities": "Please wait. The network is reaching consensus about validated identities"
+  "Please wait. The network is reaching consensus about validated identities": "Please wait. The network is reaching consensus about validated identities",
+  "Please wait for the validation report": "Please wait for the validation report",
+  "Your node version is outdated, please update": "Your node version is outdated, please update",
+  "Update Node Version": "Update Node Version",
+  "Cannot update remote node": "Cannot update remote node",
+  "Otherwise, please update your remote node manually.": "Otherwise, please update your remote node manually.",
+  "Okay, got it": "Okay, got it",
+  "Wait for validation": "Wait for validation",
+  "Can not start validation session because you did not activate invite": "Can not start validation session because you did not activate invite",
+  "Wait for validation end": "Wait for validation end",
+  "Can not start validation session because you did not submit flips.": "Can not start validation session because you did not submit flips.",
+  "Shuffling flips...": "Shuffling flips...",
+  "Synchronizing blocks": "Synchronizing blocks",
+  "Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers.": "Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers."
 }
