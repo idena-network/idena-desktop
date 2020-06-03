@@ -23,6 +23,7 @@ const colors = {
   success04: 'rgb(39, 217, 128, 0.4)',
   black: 'rgb(17,17,17)',
   black0: 'rgb(0,0,0)',
+  darkGraphite: 'rgb(69 72 77)',
 }
 
 const fontSizes = {

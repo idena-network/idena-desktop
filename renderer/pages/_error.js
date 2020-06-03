@@ -42,7 +42,7 @@ function MyError({statusCode, hasGetInitialPropsRun, err}) {
         </div>
         <style jsx>{`
           article {
-            background: rgb(69, 72, 77);
+            background: ${theme.colors.darkGraphite};
             color: white;
             display: flex;
             flex-direction: column;

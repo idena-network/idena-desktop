@@ -1,4 +1,5 @@
 import {margin} from 'polished'
+import {useTranslation} from 'react-i18next'
 import theme, {rem} from '../theme'
 import {useChainState} from '../providers/chain-context'
 import {useIdentityState} from '../providers/identity-context'
@@ -35,7 +36,7 @@ export default function SyncingApp() {
         </div>
         <style jsx>{`
           section {
-            background: rgb(69, 72, 77);
+            background: ${theme.colors.darkGraphite};
             color: white;
             display: flex;
             flex-direction: column;
@@ -76,6 +77,9 @@ function SyncingIdentity() {
   const {currentBlock, highestBlock, wrongTime} = useChainState()
   const {address} = useIdentityState()
   const [{result: peers}] = usePoll(useRpc('net_peers'), 1000)
+
+  const {t} = useTranslation()
+
   return (
     <section>
       <section>
@@ -90,21 +94,22 @@ function SyncingIdentity() {
         </div>
       </section>
       <section>
-        <h2>Synchronizing blocks</h2>
+        <h2>{t('Synchronizing blocks')}</h2>
         <div>
           <h3>
             {currentBlock} out of {highestBlock}
           </h3>
           <div>
-            <span>Peers connected:</span> {(peers || []).length}
+            <span>{t('Peers connected:')}</span> {(peers || []).length}
           </div>
         </div>
         <progress value={currentBlock} max={highestBlock} />
       </section>
       {wrongTime && (
         <section>
-          Please check you local clock. The time must be synchronized with
-          internet time in order to have connections with other peers.
+          {t(
+            'Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers.'
+          )}
         </section>
       )}
       <style jsx>{`
@@ -177,7 +182,7 @@ export function LoadingApp() {
         </div>
         <style jsx>{`
           section {
-            background: rgb(69, 72, 77);
+            background: ${theme.colors.darkGraphite};
             color: white;
             display: flex;
             flex-direction: column;
@@ -204,6 +209,7 @@ export function OfflineApp() {
   const {useExternalNode, runInternalNode} = useSettingsState()
   const {nodeProgress} = useAutoUpdateState()
   const {toggleRunInternalNode, toggleUseExternalNode} = useSettingsDispatch()
+
   return (
     <>
       <GlobalModals />
@@ -310,7 +316,7 @@ export function OfflineApp() {
         </div>
         <style jsx>{`
           section {
-            background: rgb(69, 72, 77);
+            background: ${theme.colors.darkGraphite};
             color: white;
             display: flex;
             flex-direction: column;
