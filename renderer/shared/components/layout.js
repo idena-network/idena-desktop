@@ -217,7 +217,7 @@ export function HardForkScreen({version, onUpdate}) {
           fontSize={rem(18)}
           css={{...margin(0, 0, rem(20))}}
         >
-          {t('Your node version is outdated, please update')}
+          {t('Your node is outdated because of the hard fork, please update')}
         </BlockText>
         <Button variant="primary" onClick={onUpdate}>
           {t('Update Node Version')} {version}

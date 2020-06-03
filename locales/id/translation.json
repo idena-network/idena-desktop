@@ -212,7 +212,7 @@
   "Validate": "Validate",
   "Please wait. The network is reaching consensus about validated identities": "Please wait. The network is reaching consensus about validated identities",
   "Please wait for the validation report": "Please wait for the validation report",
-  "Your node version is outdated, please update": "Your node version is outdated, please update",
+  "Your node is outdated because of the hard fork, please update": "Your node is outdated because of the hard fork, please update",
   "Update Node Version": "Update Node Version",
   "Cannot update remote node": "Cannot update remote node",
   "Otherwise, please update your remote node manually.": "Otherwise, please update your remote node manually.",
