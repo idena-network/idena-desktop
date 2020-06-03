@@ -1,5 +1,5 @@
-import {rem} from 'polished'
-import theme from '../theme'
+import {margin} from 'polished'
+import theme, {rem} from '../theme'
 import {useChainState} from '../providers/chain-context'
 import {useIdentityState} from '../providers/identity-context'
 import useRpc from '../hooks/use-rpc'
@@ -16,7 +16,7 @@ import {
 } from '../providers/settings-context'
 import Button from './button'
 import Link from './link'
-import {BlockText} from './typo'
+import {BlockText, SubHeading} from './typo'
 import {Spinner} from './spinner'
 
 export default function SyncingApp() {
@@ -247,10 +247,18 @@ export function OfflineApp() {
               </>
             )}
           {(useExternalNode || !runInternalNode) && (
-            <>
-              <h2>Your {useExternalNode ? 'external' : ''} node is offline</h2>
-              <br />
-              <Box>
+            <Flex direction="column" css={{}}>
+              <SubHeading
+                color={theme.colors.white}
+                fontSize={rem(18)}
+                fontWeight={500}
+                css={{
+                  ...margin(0, 0, rem(20)),
+                }}
+              >
+                Your {useExternalNode ? 'external' : ''} node is offline
+              </SubHeading>
+              <Box style={{...margin(0, 0, rem(16))}}>
                 <Button
                   variant="primary"
                   onClick={() => {
@@ -264,14 +272,16 @@ export function OfflineApp() {
                   Run the built-in node
                 </Button>
               </Box>
-              <br />
-              <BlockText color="white">
+              <BlockText
+                color={theme.colors.white05}
+                css={{lineHeight: rem(20)}}
+              >
                 If you have already node running, please check your connection{' '}
                 <Link color={theme.colors.primary} href="/settings/node">
                   settings
                 </Link>
               </BlockText>
-            </>
+            </Flex>
           )}
           {!useExternalNode &&
             runInternalNode &&

@@ -60,7 +60,7 @@ const NodeStateContext = React.createContext()
 const NodeDispatchContext = React.createContext()
 
 // eslint-disable-next-line react/prop-types
-function NodeProvider({children}) {
+export function NodeProvider({children}) {
   const settings = useSettingsState()
 
   const [state, dispatch] = useLogger(
@@ -161,7 +161,7 @@ function NodeProvider({children}) {
   )
 }
 
-function useNodeState() {
+export function useNodeState() {
   const context = React.useContext(NodeStateContext)
   if (context === undefined) {
     throw new Error('useNodeState must be used within a NodeStateProvider')
@@ -169,12 +169,10 @@ function useNodeState() {
   return context
 }
 
-function useNodeDispatch() {
+export function useNodeDispatch() {
   const context = React.useContext(NodeDispatchContext)
   if (context === undefined) {
     throw new Error('useNodeState must be used within a NodeDispatchProvider')
   }
   return context
 }
-
-export {NodeProvider, useNodeState, useNodeDispatch}
