@@ -13,7 +13,6 @@ const {
 const isDev = require('electron-is-dev')
 
 const flips = require('./stores/flips')
-const validation = require('./stores/validation')
 const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
 const logger = require('./logger')
@@ -25,7 +24,6 @@ process.once('loaded', () => {
   global.openExternal = shell.openExternal
 
   global.flipStore = flips
-  global.validationDb = validation
   global.invitesDb = invites
   global.contactsDb = contacts
 
