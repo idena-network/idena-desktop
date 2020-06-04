@@ -49,7 +49,7 @@ export function DnaLinkHandler({children}) {
   }, [addError, dnaUrl, t])
 
   React.useEffect(() => {
-    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(setDnaUrl)
+    // global.ipcRenderer.invoke('CHECK_DNA_LINK').then(setDnaUrl)
   }, [])
 
   React.useEffect(() => {

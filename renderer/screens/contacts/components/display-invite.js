@@ -1,17 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {
-  wordWrap,
-  margin,
-  rem,
-  padding,
-  borderRadius,
-  backgrounds,
-} from 'polished'
+import {wordWrap, margin, padding, borderRadius, backgrounds} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {Box, SubHeading, Text, Field, Hint} from '../../../shared/components'
 import Avatar from '../../../shared/components/avatar'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import useFullName from '../../../shared/hooks/use-full-name'
 

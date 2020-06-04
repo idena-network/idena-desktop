@@ -1,11 +1,10 @@
 import React from 'react'
 import {useRouter} from 'next/router'
-import {rem} from 'polished'
 import {useTranslation} from 'react-i18next'
 import Layout from '../../shared/components/layout'
 import {Drawer, Box, PageTitle} from '../../shared/components'
 import SendInviteForm from '../../screens/contacts/components/send-invite-form'
-import theme from '../../shared/theme'
+import theme, {rem} from '../../shared/theme'
 import {InviteProvider} from '../../shared/providers/invite-context'
 import Actions from '../../shared/components/actions'
 import MinerStatusSwitcher from '../../screens/dashboard/components/miner-status-switcher'
@@ -64,7 +63,7 @@ function Dashboard() {
         <Box
           px={theme.spacings.xxxlarge}
           py={theme.spacings.large}
-          w={rem(700, theme.fontSizes.base)}
+          w={rem(700)}
         >
           <PageTitle>{t('Profile')}</PageTitle>
           <Actions>

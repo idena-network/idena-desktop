@@ -1,8 +1,8 @@
 import React from 'react'
-import {rem, rgba} from 'polished'
+import {rgba} from 'polished'
 import {FiShare} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 
 export default function Actions() {
   const {t} = useTranslation()

@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {ellipsis, rgba, rem} from 'polished'
+import {ellipsis, rgba} from 'polished'
 import {useTranslation} from 'react-i18next'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import Avatar from '../../../shared/components/avatar'
 import Flex from '../../../shared/components/flex'
 import {

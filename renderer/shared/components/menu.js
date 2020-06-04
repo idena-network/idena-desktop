@@ -1,10 +1,10 @@
 import React, {forwardRef} from 'react'
 import PropTypes from 'prop-types'
-import {borderRadius, rem} from 'polished'
+import {borderRadius} from 'polished'
 
 import {Box, Link} from '.'
 import Flex from './flex'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 import {FlatButton} from './button'
 
 import useHover from '../hooks/use-hover'

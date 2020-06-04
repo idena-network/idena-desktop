@@ -1,9 +1,8 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {rem} from 'polished'
 import Flex from './flex'
 import Divider from './divider'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 
 function Actions({children}) {
   return (
