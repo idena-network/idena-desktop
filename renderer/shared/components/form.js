@@ -3,9 +3,9 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {margin, rem, transparentize} from 'polished'
+import {margin, transparentize} from 'polished'
 import {FiChevronDown} from 'react-icons/fi'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 import Box from './box'
 import Flex from './flex'
 import {Text} from './typo'

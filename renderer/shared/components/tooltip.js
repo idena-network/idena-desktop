@@ -1,8 +1,8 @@
 import React from 'react'
+import {Tooltip as ChakraTooltip} from '@chakra-ui/core'
 import PropTypes from 'prop-types'
-import {rem} from 'polished'
 import Box from './box'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 
 export function Tooltip({children, content, placement, pinned, ...props}) {
   const bg = theme.colors.black
@@ -147,4 +147,18 @@ export function TooltipControl({children}) {
 
 TooltipControl.propTypes = {
   children: PropTypes.node,
+}
+
+export function NextTooltip(props) {
+  return (
+    <ChakraTooltip
+      bg="brandGray.500"
+      fontSize="sm"
+      px={2}
+      py={1}
+      rounded="md"
+      hasArrow
+      {...props}
+    />
+  )
 }

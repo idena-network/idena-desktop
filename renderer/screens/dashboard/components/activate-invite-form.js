@@ -1,9 +1,9 @@
 import React, {useRef} from 'react'
-import {margin, rem} from 'polished'
+import {margin} from 'polished'
 import {useTranslation} from 'react-i18next'
 
 import {Box, FormGroup, Label, Input, Button} from '../../../shared/components'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {
   useInviteState,

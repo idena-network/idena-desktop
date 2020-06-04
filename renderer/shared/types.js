@@ -1,3 +1,15 @@
+export const IdentityStatus = {
+  Undefined: 'Undefined',
+  Invite: 'Invite',
+  Candidate: 'Candidate',
+  Newbie: 'Newbie',
+  Verified: 'Verified',
+  Suspended: 'Suspended',
+  Zombie: 'Zombie',
+  Terminating: 'Terminating',
+  Human: 'Human',
+}
+
 export const EpochPeriod = {
   FlipLottery: 'FlipLottery',
   ShortSession: 'ShortSession',

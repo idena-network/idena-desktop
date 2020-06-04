@@ -2,7 +2,8 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {backgrounds, margin} from 'polished'
+import {margin} from 'polished'
+import {Flex} from '@chakra-ui/core'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
@@ -21,9 +22,9 @@ import {
   useAutoUpdateDispatch,
 } from '../providers/update-context'
 import Button from './button'
-import Flex from './flex'
 import {BlockText} from './typo'
 import theme, {rem} from '../theme'
+import {LayoutContainer} from '../../screens/app/components'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -56,7 +57,7 @@ export default function Layout({
   const {updateNode} = useAutoUpdateDispatch()
 
   return (
-    <main>
+    <LayoutContainer>
       <Sidebar />
       {loading && <LoadingApp />}
       {!loading && !skipHardForkScreen && mustUpdateNode ? (
@@ -86,25 +87,11 @@ export default function Layout({
           )}
         </>
       )}
-
-      <style jsx>{`
-        main {
-          display: flex;
-          padding: 0;
-          margin: 0;
-          max-height: 100vh;
-          overflow: hidden;
-        }
-        section {
-          flex: 1;
-          overflow-y: auto;
-        }
-      `}</style>
-    </main>
+    </LayoutContainer>
   )
 }
 
-function NormalApp(props) {
+function NormalApp({children}) {
   const router = useRouter()
 
   const epoch = useEpochState()
@@ -147,8 +134,8 @@ function NormalApp(props) {
   const {addNotification, addError} = useNotificationDispatch()
 
   return (
-    <section style={{flex: 1, overflowY: 'auto'}}>
-      <div {...props} />
+    <Flex as="section" direction="column" flex={1} overflowY="auto">
+      {children}
 
       {epoch && <ValidationToast epoch={epoch} identity={identity} />}
 
@@ -172,7 +159,7 @@ function NormalApp(props) {
           }
         />
       </DnaLinkHandler>
-    </section>
+    </Flex>
   )
 }
 
@@ -202,15 +189,8 @@ export function HardForkScreen({version, onUpdate}) {
   const {t} = useTranslation()
 
   return (
-    <Flex
-      align="center"
-      justify="center"
-      flex={1}
-      css={{
-        ...backgrounds(theme.colors.darkGraphite),
-      }}
-    >
-      <Flex direction="column" align="flex-start">
+    <Flex align="center" justify="center" flex={1} background="graphite.500">
+      <Flex direction="column">
         <BlockText
           color={theme.colors.white}
           fontWeight={500}

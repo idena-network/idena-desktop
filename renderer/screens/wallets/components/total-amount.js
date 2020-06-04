@@ -1,9 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {Box, Text} from '../../../shared/components'
-import theme from '../../../shared/theme'
+import {Box, Text, SubHeading} from '../../../shared/components'
+import theme, {rem} from '../../../shared/theme'
 
 function TotalAmount({amount, percentChanges, amountChanges}) {
   const {t} = useTranslation()
@@ -13,7 +12,7 @@ function TotalAmount({amount, percentChanges, amountChanges}) {
         <Text color={theme.colors.muted}>{t('Total amount')}</Text>
       </Box>
       <Box>
-        <Text fontSize={rem(24)}>
+        <SubHeading>
           <div className="value">{amount} DNA</div>
           {false && ( // TODO: show wallet changes
             <div className="changes">
@@ -27,7 +26,6 @@ function TotalAmount({amount, percentChanges, amountChanges}) {
             }
             .changes {
               font-weight: 500;
-              font-size: ${rem(18)};
               color: ${percentChanges < 0 ? theme.colors.danger : 'inherit'};
             }
             .changes span {
@@ -36,7 +34,7 @@ function TotalAmount({amount, percentChanges, amountChanges}) {
               font-weight: normal;
             }
           `}</style>
-        </Text>
+        </SubHeading>
       </Box>
     </Box>
   )

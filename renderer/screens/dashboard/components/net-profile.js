@@ -1,8 +1,8 @@
 import React from 'react'
-import {margin, rem} from 'polished'
+import {margin} from 'polished'
 import {useTranslation} from 'react-i18next'
 
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import {Box} from '../../../shared/components'
 import {Figure} from '../../../shared/components/stat'
 import {

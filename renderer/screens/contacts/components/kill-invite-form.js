@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {wordWrap, margin, rem, padding} from 'polished'
+import {wordWrap, margin, padding} from 'polished'
 import {
   Box,
   Button,
@@ -9,7 +9,7 @@ import {
   Field,
 } from '../../../shared/components'
 import Avatar from '../../../shared/components/avatar'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import useFullName from '../../../shared/hooks/use-full-name'
 import useUsername from '../../../shared/hooks/use-username'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
