@@ -19,6 +19,9 @@ import {
   FlipKeywordName,
   FlipKeywordDescription,
   FlipPageTitle,
+  FlipEditorStep,
+  FlipShuffleStep,
+  FlipSubmitStep,
 } from '../../screens/flips/components'
 import {Step} from '../../screens/flips/types'
 import {
@@ -39,29 +42,12 @@ import {FlipType, IdentityStatus, EpochPeriod} from '../../shared/types'
 import {hasDataUrl, getNextKeyWordsHint} from '../../screens/flips/utils/flip'
 
 export default function NewFlipPage() {
-  const {t} = useTranslation()
-
   const {syncing} = useChainState()
-
-  const router = useRouter()
-  const {addNotification} = useNotificationDispatch()
-
-  const [id] = React.useState(nanoid())
-
-  const handleClose = () => {
-    addNotification({
-      title: t('Flip has been saved to drafts'),
-    })
-    router.push('/flips')
-  }
-
-  const not = () => false // Math.random() > 0.5
-  const is = () => true // Math.random() > 0.5
 
   const {
     canSubmitFlip,
     flipKeyWordPairs,
-    state: identityState,
+    state: identityStatus,
   } = useIdentityState()
 
   const epoch = useEpochState()
@@ -74,17 +60,18 @@ export default function NewFlipPage() {
     pics: [null, null, null, null],
     compressedPics: [null, null, null, null],
     editorIndexes: [0, 1, 2, 3],
-    nonSensePic: `https://placehold.it/480?text=5`,
-    nonSenseOrder: -1,
     order: Array.from({length: 4}, (_, i) => i),
     hint: getNextKeyWordsHint(flipKeyWordPairs, publishingFlips),
   })
 
+  const [id] = React.useState(() => nanoid())
+
   const [step, setStep] = React.useState(0)
-  const [submitResult, setSubmitResult] = React.useState()
 
   const [isFlipsLoaded, setIsFlipsLoaded] = React.useState(false)
-  const [isChanging, setIsChanging] = React.useState(false)
+
+  // TODO: handle image onChange
+  // const [isChanging, setIsChanging] = React.useState(false)
 
   React.useEffect(() => {
     // init hint on the first page when [flips] updated
@@ -112,11 +99,24 @@ export default function NewFlipPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
+  const router = useRouter()
+
+  const {addNotification, addError} = useNotificationDispatch()
+
+  const {t} = useTranslation(['translation', 'error'])
+
   React.useEffect(() => {
     if (flip.pics.some(hasDataUrl)) {
       saveDraft({id, ...flip})
     }
   }, [flip, id, saveDraft])
+
+  const handleClose = () => {
+    addNotification({
+      title: t('Flip has been saved to drafts'),
+    })
+    router.push('/flips')
+  }
 
   const handleSubmitFlip = async () => {
     try {
@@ -133,32 +133,37 @@ export default function NewFlipPage() {
             IdentityStatus.Candidate,
             IdentityStatus.Suspended,
             IdentityStatus.Zombie,
-          ].includes(identityState)
+          ].includes(identityStatus)
         ) {
           message = t(
-            `error:It's not allowed to submit flips with your identity status`
+            `It's not allowed to submit flips with your identity status`
           )
         } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
-          message = t(`error:Can not submit flip during the validation session`)
+          message = t(`Can not submit flip during the validation session`)
         } else {
           // eslint-disable-next-line prefer-destructuring
           message = error.message
         }
       }
 
-      addNotification({
-        title: error
-          ? t('error:Error while uploading flip')
-          : t('translation:Flip saved!'),
-        body: error ? message : `Hash ${result.hash}`,
-        type: error ? NotificationType.Error : NotificationType.Info,
-      })
+      if (error) {
+        addError({
+          title: t('Error while uploading flip'),
+          body: message,
+        })
+      } else {
+        addNotification({
+          title: t('Flip saved!'),
+          body: `Hash ${result.hash}`,
+          type: NotificationType.Info,
+        })
+      }
       router.push('/flips')
-    } catch ({response: {status}}) {
-      setSubmitResult(
-        status === 413
-          ? t('error:Maximum image size exceeded')
-          : t('error:Something went wrong')
+    } catch (error) {
+      global.logger.error(
+        error.response && error.response.status === 413
+          ? 'Maximum image size exceeded'
+          : 'Something went wrong'
       )
     }
   }
@@ -173,52 +178,57 @@ export default function NewFlipPage() {
 
   return (
     <Layout syncing={syncing}>
-      <NextHead></NextHead>
       <Page p={0} maxH="100vh" overflowY="hidden">
-        <Flex direction="column" px={20} overflowY="auto">
+        <Flex
+          direction="column"
+          flex={1}
+          alignSelf="stretch"
+          px={20}
+          overflowY="auto"
+        >
           <FlipPageTitle onClose={handleClose}>New flip</FlipPageTitle>
           <FlipMaster>
             <FlipMasterNavbar>
               <FlipMasterNavbarItem
-                step={true ? Step.Active : Step.Completed}
-                onClick={() => {}}
+                step={step === 0 ? Step.Active : Step.Completed}
+                onClick={() => setStep(0)}
               >
                 Think up a story
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={
                   // eslint-disable-next-line no-nested-ternary
-                  Math.random() > 0.5
+                  step === 1
                     ? Step.Active
-                    : Math.random() > 0.5
+                    : step < 1
                     ? Step.Next
                     : Step.Completed
                 }
-                onClick={() => {}}
+                onClick={() => setStep(1)}
               >
                 Select images
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={
                   // eslint-disable-next-line no-nested-ternary
-                  Math.random() > 0.5
+                  step === 2
                     ? Step.Active
-                    : Math.random() > 0.5
+                    : step < 2
                     ? Step.Next
                     : Step.Completed
                 }
-                onClick={() => {}}
+                onClick={() => setStep(2)}
               >
                 Shuffle images
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
-                step={Math.random() > 0.5 ? Step.Active : Step.Next}
-                onClick={() => {}}
+                step={step === 3 ? Step.Active : Step.Next}
+                onClick={() => setStep(3)}
               >
                 Submit flip
               </FlipMasterNavbarItem>
             </FlipMasterNavbar>
-            {true && (
+            {step === 0 && (
               <FlipStoryStep>
                 <FlipStepBody minH="180px">
                   <FlipKeywordPanel>
@@ -255,35 +265,35 @@ export default function NewFlipPage() {
                 </FlipStepBody>
               </FlipStoryStep>
             )}
-            {/* {current.matches({editing: 'editor'}) && (
-          <FlipEditorStep
-            keywords={keywords}
-            images={images}
-            onChangeImage={(image, currentIndex) =>
-              send('CHANGE.IMAGES', {image, currentIndex})
-            }
-          />
-        )}
-        {current.matches({editing: 'shuffle'}) && (
-          <FlipShuffleStep images={images} />
-        )}
-        {current.matches({editing: 'submit'}) && (
-          <FlipSubmitStep images={images} />
-        )} */}
+            {step === 1 && (
+              <FlipEditorStep
+                keywords={keywords}
+                images={flip.pics}
+                onChangeImage={(image, currentIndex) => {
+                  // send('CHANGE.IMAGES', {image, currentIndex})
+                }}
+              />
+            )}
+            {step === 2 && <FlipShuffleStep images={flip.pics} />}
+            {step === 3 && <FlipSubmitStep images={flip.pics} />}
           </FlipMaster>
           <Box position="absolute" left={6} bottom={6}>
             <Code>{JSON.stringify({})}</Code>
           </Box>
         </Flex>
         <FlipMasterFooter>
-          {not('keywords') && (
-            <SecondaryButton onClick={() => {}}>Prev step</SecondaryButton>
+          {step !== 0 && (
+            <SecondaryButton onClick={() => setStep(step - 1)}>
+              Prev step
+            </SecondaryButton>
           )}
-          {not('submit') && (
-            <PrimaryButton onClick={() => {}}>Next step</PrimaryButton>
+          {step !== 3 && (
+            <PrimaryButton onClick={() => setStep(step - 1)}>
+              Next step
+            </PrimaryButton>
           )}
-          {is('submit') && (
-            <PrimaryButton onClick={() => {}}>Submit</PrimaryButton>
+          {step === 3 && (
+            <PrimaryButton onClick={handleSubmitFlip}>Submit</PrimaryButton>
           )}
         </FlipMasterFooter>
       </Page>
