@@ -290,22 +290,18 @@ function FlipMasterNavbarItemIcon({step, ...props}) {
       }
       border="2px"
       borderColor={step === Step.Next ? '#d2d4d9' : 'brandBlue.500'}
+      color="white"
       rounded="full"
       w={4}
       h={4}
-      transition="all 0.3s ease-in-out"
-      _groupHover={{
-        bg: 'brandBlue.10',
-        borderColor: 'brandBlue.500',
-      }}
+      transition="all 0.2s ease"
       {...props}
     >
       <Icon
         name="ok"
-        color="white"
         size={3}
         opacity={step === Step.Completed ? 1 : 0}
-        transition="all 0.3s ease"
+        transition="all 0.2s ease"
       />
     </PseudoBox>
   )
