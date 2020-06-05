@@ -17,7 +17,7 @@ export default function useLogger([state, dispatch]) {
     const action = actionRef.current
 
     if (action && !EXPLICIT_REDACTIONS.includes(action.type)) {
-      const plainAction = {...action}
+      const plainAction = typeof action === 'string' ? action : {...action}
       const plainState = {...state}
 
       console.group('DISPATCH')

@@ -198,7 +198,7 @@ export function IconButton2({icon, children, ...props}) {
       justifyContent="flex-start"
       {...props}
     >
-      <Icon name={icon} size={4} mr={2} />
+      <Icon name={icon} size={5} mr={2} />
       {children}
     </ChakraButton>
   )

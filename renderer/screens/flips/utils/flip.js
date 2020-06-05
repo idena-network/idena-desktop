@@ -75,7 +75,7 @@ export function getNextKeyWordsHint(
 ) {
   if (!flipKeyWordPairs || !flipKeyWordPairs.length) return getRandomHint()
 
-  const nexIdx =
+  const nextIdx =
     currId < 0
       ? 0
       : flipKeyWordPairs.indexOf(
@@ -83,9 +83,9 @@ export function getNextKeyWordsHint(
         ) + 1
 
   const nextKeyWordPair =
-    nexIdx >= flipKeyWordPairs.length
+    nextIdx >= flipKeyWordPairs.length
       ? flipKeyWordPairs[0]
-      : flipKeyWordPairs[nexIdx]
+      : flipKeyWordPairs[nextIdx]
 
   const isUsed =
     (nextKeyWordPair && nextKeyWordPair.used) ||

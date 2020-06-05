@@ -1,10 +1,9 @@
 import React from 'react'
 import {useRouter} from 'next/router'
-import NextHead from 'next/head'
-import {Box, Code, Skeleton, CloseButton, Flex} from '@chakra-ui/core'
+import {Box, Code, Flex, Stack, Divider} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import nanoid from 'nanoid'
-import {Page, PageTitle} from '../../screens/app/components'
+import {useMachine} from '@xstate/react'
+import {Page} from '../../screens/app/components'
 import {
   FlipMaster,
   FlipMasterNavbar,
@@ -22,6 +21,7 @@ import {
   FlipEditorStep,
   FlipShuffleStep,
   FlipSubmitStep,
+  CommunityTranslations,
 } from '../../screens/flips/components'
 import {Step} from '../../screens/flips/types'
 import {
@@ -31,154 +31,65 @@ import {
 } from '../../shared/components/button'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
-import {
-  useNotificationDispatch,
-  NotificationType,
-} from '../../shared/providers/notification-context'
+import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import useFlips from '../../shared/hooks/use-flips'
-import {FlipType, IdentityStatus, EpochPeriod} from '../../shared/types'
-import {hasDataUrl, getNextKeyWordsHint} from '../../screens/flips/utils/flip'
+import {FlipType} from '../../shared/types'
+import {flipMasterMachine} from '../../screens/flips/machines'
+import {rem} from '../../shared/theme'
 
 export default function NewFlipPage() {
-  const {syncing} = useChainState()
-
-  const {
-    canSubmitFlip,
-    flipKeyWordPairs,
-    state: identityStatus,
-  } = useIdentityState()
-
-  const epoch = useEpochState()
-
-  const {flips, getDraft, saveDraft, submitFlip} = useFlips()
-
-  const publishingFlips = flips.filter(({type}) => type === FlipType.Publishing)
-
-  const [flip, setFlip] = React.useState({
-    pics: [null, null, null, null],
-    compressedPics: [null, null, null, null],
-    editorIndexes: [0, 1, 2, 3],
-    order: Array.from({length: 4}, (_, i) => i),
-    hint: getNextKeyWordsHint(flipKeyWordPairs, publishingFlips),
-  })
-
-  const [id] = React.useState(() => nanoid())
-
-  const [step, setStep] = React.useState(0)
-
-  const [isFlipsLoaded, setIsFlipsLoaded] = React.useState(false)
-
-  // TODO: handle image onChange
-  // const [isChanging, setIsChanging] = React.useState(false)
-
-  React.useEffect(() => {
-    // init hint on the first page when [flips] updated
-    if (step === 0 && !isFlipsLoaded) {
-      setFlip({
-        ...flip,
-        hint: getNextKeyWordsHint(flipKeyWordPairs, publishingFlips),
-      })
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flips])
-
-  React.useEffect(() => {
-    const draft = getDraft(id)
-    if (draft) {
-      setIsFlipsLoaded(true)
-      setFlip({
-        compressedPics: [null, null, null, null],
-        ...draft,
-
-        editorIndexes: [0, 1, 2, 3],
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
-
   const router = useRouter()
 
-  const {addNotification, addError} = useNotificationDispatch()
+  const {syncing} = useChainState()
 
-  const {t} = useTranslation(['translation', 'error'])
+  const {flipKeyWordPairs: availableKeywords} = useIdentityState()
 
-  React.useEffect(() => {
-    if (flip.pics.some(hasDataUrl)) {
-      saveDraft({id, ...flip})
-    }
-  }, [flip, id, saveDraft])
+  const {flips} = useFlips()
 
-  const handleClose = () => {
-    addNotification({
-      title: t('Flip has been saved to drafts'),
-    })
-    router.push('/flips')
-  }
+  const [{id: keywordPairId}] =
+    availableKeywords && availableKeywords.length
+      ? availableKeywords.filter(({used}) => !used)
+      : [
+          {
+            id: -1,
+          },
+        ]
 
-  const handleSubmitFlip = async () => {
-    try {
-      const {result, error} = await submitFlip({
-        id,
-        ...flip,
-      })
+  const [current, send] = useMachine(flipMasterMachine, {
+    context: {
+      ...flipMasterMachine.context,
+      availableKeywords,
+      keywordPairId,
+      images: Array.from({length: 4}),
+    },
+    actions: {
+      onSubmitted: ({prevImages}) => {
+        router.push('/flips')
+      },
+    },
+    services: {
+      submitFlip: async ({images, keywords, keywordPairId}) => {
+        console.log(images, keywords, keywordPairId)
 
-      let message = ''
-      if (error) {
-        if (
-          [
-            IdentityStatus.None,
-            IdentityStatus.Candidate,
-            IdentityStatus.Suspended,
-            IdentityStatus.Zombie,
-          ].includes(identityStatus)
-        ) {
-          message = t(
-            `It's not allowed to submit flips with your identity status`
-          )
-        } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
-          message = t(`Can not submit flip during the validation session`)
-        } else {
-          // eslint-disable-next-line prefer-destructuring
-          message = error.message
+        return {
+          // ...flip,
+          images,
         }
-      }
+      },
+    },
+  })
 
-      if (error) {
-        addError({
-          title: t('Error while uploading flip'),
-          body: message,
-        })
-      } else {
-        addNotification({
-          title: t('Flip saved!'),
-          body: `Hash ${result.hash}`,
-          type: NotificationType.Info,
-        })
-      }
-      router.push('/flips')
-    } catch (error) {
-      global.logger.error(
-        error.response && error.response.status === 413
-          ? 'Maximum image size exceeded'
-          : 'Something went wrong'
-      )
-    }
-  }
+  const {context} = current
+  const {keywords, images} = context
 
-  const canPublish =
-    flip.pics.every(hasDataUrl) &&
-    canSubmitFlip &&
-    (flip.nonSenseOrder < 0 ||
-      (flip.nonSenseOrder >= 0 && hasDataUrl(flip.nonSensePic)))
-
-  const keywords = flip.hint.words.map(({name, desc}) => ({name, desc}))
+  const not = state => !current.matches({editing: state})
+  const is = state => current.matches({editing: state})
 
   return (
     <Layout syncing={syncing}>
-      <Page p={0} maxH="100vh" overflowY="hidden">
+      <Page p={0}>
         <Flex
           direction="column"
           flex={1}
@@ -186,116 +97,178 @@ export default function NewFlipPage() {
           px={20}
           overflowY="auto"
         >
-          <FlipPageTitle onClose={handleClose}>New flip</FlipPageTitle>
+          <FlipPageTitle onClose={() => router.push('/flips')}>
+            New flip
+          </FlipPageTitle>
           <FlipMaster>
             <FlipMasterNavbar>
               <FlipMasterNavbarItem
-                step={step === 0 ? Step.Active : Step.Completed}
-                onClick={() => setStep(0)}
+                step={is('keywords') ? Step.Active : Step.Completed}
+                onClick={() => send('PICK_KEYWORDS')}
               >
                 Think up a story
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={
                   // eslint-disable-next-line no-nested-ternary
-                  step === 1
+                  is('images')
                     ? Step.Active
-                    : step < 1
+                    : is('keywords')
                     ? Step.Next
                     : Step.Completed
                 }
-                onClick={() => setStep(1)}
+                onClick={() => send('PICK_IMAGES')}
               >
                 Select images
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={
                   // eslint-disable-next-line no-nested-ternary
-                  step === 2
+                  is('shuffle')
                     ? Step.Active
-                    : step < 2
+                    : not('submit')
                     ? Step.Next
                     : Step.Completed
                 }
-                onClick={() => setStep(2)}
+                onClick={() => send('PICK_SHUFFLE')}
               >
                 Shuffle images
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
-                step={step === 3 ? Step.Active : Step.Next}
-                onClick={() => setStep(3)}
+                step={is('submit') ? Step.Active : Step.Next}
+                onClick={() => send('PICK_SUBMIT')}
               >
                 Submit flip
               </FlipMasterNavbarItem>
             </FlipMasterNavbar>
-            {step === 0 && (
+            {is('keywords') && (
               <FlipStoryStep>
                 <FlipStepBody minH="180px">
                   <FlipKeywordPanel>
-                    <FlipKeywordPair>
-                      {Math.random() > 0.5 &&
-                        // eslint-disable-next-line no-shadow
-                        keywords.map(({id, name, desc}) => (
-                          <FlipKeyword key={id}>
-                            <FlipKeywordName>{name}</FlipKeywordName>
-                            <FlipKeywordDescription>
-                              {desc}
-                            </FlipKeywordDescription>
-                          </FlipKeyword>
-                        ))}
-                      {false &&
-                        Math.random() > 0.5 &&
-                        [...'0x'].map(() => (
-                          <FlipKeyword>
-                            <Skeleton h={5} w={20} />
-                            <Skeleton h={5} w={40} />
-                            <Skeleton h={5} w={40} />
-                          </FlipKeyword>
-                        ))}
-                    </FlipKeywordPair>
+                    {is('keywords.done.origin') && (
+                      <Stack spacing="30px">
+                        <FlipKeywordPair>
+                          {keywords.words.map(({id, name, desc}) => (
+                            <FlipKeyword key={id}>
+                              <FlipKeywordName>{name}</FlipKeywordName>
+                              <FlipKeywordDescription>
+                                {desc}
+                              </FlipKeywordDescription>
+                            </FlipKeyword>
+                          ))}
+                        </FlipKeywordPair>
+                        <Stack isInline spacing={1} align="center">
+                          <IconButton2
+                            icon="undo"
+                            _hover={{background: 'transparent'}}
+                            onClick={() => send('SWITCH_LOCALE')}
+                          >
+                            {global.locale.toUpperCase()}
+                          </IconButton2>
+                          <Divider
+                            orientation="vertical"
+                            borderColor="gray.300"
+                            m={0}
+                            h={rem(24)}
+                          />
+                          <IconButton2
+                            icon="gtranslate"
+                            _hover={{background: 'transparent'}}
+                            onClick={() => {
+                              global.openExternal(
+                                `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
+                                  global.locale
+                                }&text=${encodeURIComponent(
+                                  keywords.words
+                                    .map(({name, desc}) => `${name}\n${desc}`)
+                                    .join('\n')
+                                )}`
+                              )
+                            }}
+                          >
+                            Google Translate
+                          </IconButton2>
+                        </Stack>
+                      </Stack>
+                    )}
+                    {is('keywords.done.translated') && (
+                      <>
+                        <Stack spacing="30px">
+                          <FlipKeywordPair>
+                            {keywords.translations.map(([{id, name, desc}]) => (
+                              <FlipKeyword key={id}>
+                                <FlipKeywordName>{name}</FlipKeywordName>
+                                <FlipKeywordDescription>
+                                  {desc}
+                                </FlipKeywordDescription>
+                              </FlipKeyword>
+                            ))}
+                          </FlipKeywordPair>
+                          <Box>
+                            <IconButton2
+                              icon="undo"
+                              _hover={{background: 'transparent'}}
+                              onClick={() => send('SWITCH_LOCALE')}
+                            >
+                              EN
+                            </IconButton2>
+                          </Box>
+                        </Stack>
+                        <Divider borderColor="gray.300" mx={-10} my={4} />
+                        <CommunityTranslations
+                          keywords={keywords}
+                          onSuggest={console.log}
+                          onUpvote={console.log}
+                          onDownvote={console.log}
+                        />
+                      </>
+                    )}
                   </FlipKeywordPanel>
                   <FlipStoryAside>
-                    <IconButton2 icon="refresh" onClick={() => {}}>
+                    <IconButton2
+                      icon="refresh"
+                      onClick={() => send('CHANGE_KEYWORDS')}
+                    >
                       Change words
-                    </IconButton2>
-                    <IconButton2 icon="gtranslate">
-                      Google Translate
                     </IconButton2>
                   </FlipStoryAside>
                 </FlipStepBody>
               </FlipStoryStep>
             )}
-            {step === 1 && (
+            {is('images') && (
               <FlipEditorStep
                 keywords={keywords}
-                images={flip.pics}
-                onChangeImage={(image, currentIndex) => {
+                images={images}
+                onChangeImage={() => {
                   // send('CHANGE.IMAGES', {image, currentIndex})
                 }}
               />
             )}
-            {step === 2 && <FlipShuffleStep images={flip.pics} />}
-            {step === 3 && <FlipSubmitStep images={flip.pics} />}
+            {is('shuffle') && <FlipShuffleStep images={images} />}
+            {is('submit') && <FlipSubmitStep images={images} />}
           </FlipMaster>
           <Box position="absolute" left={6} bottom={6}>
             <Code>{JSON.stringify({})}</Code>
           </Box>
         </Flex>
         <FlipMasterFooter>
-          {step !== 0 && (
-            <SecondaryButton onClick={() => setStep(step - 1)}>
+          {not('keywords') && (
+            <SecondaryButton onClick={() => send('PREV')}>
               Prev step
             </SecondaryButton>
           )}
-          {step !== 3 && (
-            <PrimaryButton onClick={() => setStep(step - 1)}>
+          {not('submit') && (
+            <PrimaryButton onClick={() => send('NEXT')}>
               Next step
             </PrimaryButton>
           )}
-          {step === 3 && (
-            <PrimaryButton onClick={handleSubmitFlip}>Submit</PrimaryButton>
+          {is('submit') && (
+            <PrimaryButton onClick={() => send('SUBMIT')}>Submit</PrimaryButton>
           )}
         </FlipMasterFooter>
+        <Box position="absolute" left={6} bottom={6} zIndex="modal">
+          <Code>{JSON.stringify(current.value)}</Code>
+        </Box>
       </Page>
     </Layout>
   )

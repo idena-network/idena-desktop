@@ -21,9 +21,11 @@ export function Page(props) {
       align="flex-start"
       flexBasis={0}
       flexGrow={999}
+      maxH="100vh"
       minW="50%"
       px={20}
       py={6}
+      overflowY="hidden"
       {...props}
     />
   )
