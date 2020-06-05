@@ -9,9 +9,14 @@ import {useTranslation} from 'react-i18next'
 import {
   createValidationMachine,
   RelevanceType,
+} from '../../screens/validation/machine'
+import {
   persistValidationState,
   loadValidationState,
-} from '../../screens/validation/machine'
+  filterRegularFlips,
+  filterSolvableFlips,
+  rearrangeFlips,
+} from '../../screens/validation/utils'
 import {
   Scene,
   ActionBar,
@@ -42,11 +47,7 @@ import {AnswerType} from '../../shared/providers/validation-context'
 import {Debug} from '../../shared/components/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'
-import {
-  filterRegularFlips,
-  filterSolvableFlips,
-  rearrangeFlips,
-} from '../../screens/validation/utils'
+
 import {addWheelHandler} from '../../shared/utils/mouse'
 import Flex from '../../shared/components/flex'
 

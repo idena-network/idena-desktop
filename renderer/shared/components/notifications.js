@@ -17,11 +17,11 @@ function Notifications() {
   const {notifications} = useNotificationState()
   const id = useId()
   return (
-    <Absolute bottom={0} left={0} right={0}>
+    <Snackbar>
       {notifications.map((notification, idx) => (
         <Notification key={`notification-${id}-${idx}`} {...notification} />
       ))}
-    </Absolute>
+    </Snackbar>
   )
 }
 
@@ -36,6 +36,7 @@ export function Notification({
   color = theme.colors.text,
   iconColor = theme.colors.primary,
   actionColor = theme.colors.primary,
+  icon,
 }) {
   const [hidden, setHidden] = useState(false)
 
@@ -60,17 +61,19 @@ export function Notification({
             zIndex: 9,
           }}
         >
-          <i
-            className="icon icon--Info"
-            style={{
-              color:
-                type === NotificationType.Error
-                  ? theme.colors.danger
-                  : iconColor,
-              fontSize: rem(20),
-              marginRight: rem(12),
-            }}
-          />
+          {icon || (
+            <i
+              className="icon icon--Info"
+              style={{
+                color:
+                  type === NotificationType.Error
+                    ? theme.colors.danger
+                    : iconColor,
+                fontSize: rem(20),
+                marginRight: rem(12),
+              }}
+            />
+          )}
           <Box style={{lineHeight: rem(20), ...wordWrap('break-all')}}>
             <Box style={{fontWeight: theme.fontWeights.medium}}>{title}</Box>
             {body && <Text color={color}>{body}</Text>}
@@ -128,6 +131,10 @@ export function Notification({
       </div>
     )
   )
+}
+
+export function Snackbar(props) {
+  return <Absolute bottom={0} left={0} right={0} {...props} />
 }
 
 export default Notifications

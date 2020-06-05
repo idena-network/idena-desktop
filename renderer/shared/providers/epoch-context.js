@@ -15,7 +15,7 @@ const EpochStateContext = React.createContext()
 const EpochDispatchContext = React.createContext()
 
 // eslint-disable-next-line react/prop-types
-function EpochProvider({children}) {
+export function EpochProvider({children}) {
   const [epoch, setEpoch] = React.useState(null)
   const [interval, setInterval] = React.useState(1000 * 3)
 
@@ -67,7 +67,7 @@ function EpochProvider({children}) {
   )
 }
 
-function useEpochState() {
+export function useEpochState() {
   const context = React.useContext(EpochStateContext)
   if (context === undefined) {
     throw new Error('EpochState must be used within a EpochProvider')
@@ -75,12 +75,10 @@ function useEpochState() {
   return context
 }
 
-function useEpochDispatch() {
+export function useEpochDispatch() {
   const context = React.useContext(EpochDispatchContext)
   if (context === undefined) {
     throw new Error('EpochDispatch must be used within a EpochProvider')
   }
   return context
 }
-
-export {EpochProvider, useEpochState, useEpochDispatch}

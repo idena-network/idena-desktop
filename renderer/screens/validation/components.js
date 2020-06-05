@@ -33,20 +33,17 @@ import {
 } from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
-import Spinner from './components/spinner'
+import ValidationSpinner from './components/spinner'
 import theme, {rem} from '../../shared/theme'
 import {TranslateWords} from '../../shared/components/translate-button'
-import {
-  RelevanceType,
-  createTimerMachine,
-  adjustDuration,
-  loadValidationState,
-} from './machine'
-import {Notification} from '../../shared/components/notifications'
+import {RelevanceType, adjustDuration} from './machine'
+import {loadValidationState} from './utils'
+import {Notification, Snackbar} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
 import {EpochPeriod} from '../../shared/providers/epoch-context'
 import {Countdown} from './components/timer'
 import {useTimingState} from '../../shared/providers/timing-context'
+import {createTimerMachine} from '../../shared/machines'
 
 export function Scene({bg: background = theme.colors.black, ...props}) {
   return (
@@ -213,7 +210,7 @@ function LoadingFlip() {
   return (
     <FlipHolder css={{cursor: 'not-allowed'}}>
       <Fill>
-        <Spinner />
+        <ValidationSpinner />
       </Fill>
     </FlipHolder>
   )
@@ -450,7 +447,7 @@ function ThumbnailHolder({isCurrent, css, children, ...props}) {
 }
 
 function LoadingThumbnail() {
-  return <Spinner size={24} />
+  return <ValidationSpinner size={24} />
 }
 
 function FailedThumbnail() {
@@ -878,7 +875,7 @@ export function ValidationSoonToast({validationStart}) {
   const {t} = useTranslation()
 
   return (
-    <ValidationSnackbar>
+    <Snackbar>
       <Notification
         bg={theme.colors.danger}
         color={theme.colors.white}
@@ -894,7 +891,7 @@ export function ValidationSoonToast({validationStart}) {
         }
         body={t('Idena validation will start soon')}
       />
-    </ValidationSnackbar>
+    </Snackbar>
   )
 }
 
@@ -931,7 +928,7 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
   ] = useMachine(timerMachine)
 
   return (
-    <ValidationSnackbar>
+    <Snackbar>
       <Notification
         bg={done ? theme.colors.success : theme.colors.primary}
         color={theme.colors.white}
@@ -954,14 +951,14 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
         action={done ? null : () => router.push('/validation')}
         actionName={t('Validate')}
       />
-    </ValidationSnackbar>
+    </Snackbar>
   )
 }
 
 export function AfterLongSessionToast() {
   const {t} = useTranslation()
   return (
-    <ValidationSnackbar>
+    <Snackbar>
       <Notification
         bg={theme.colors.success}
         color={theme.colors.white}
@@ -972,10 +969,6 @@ export function AfterLongSessionToast() {
           'Please wait. The network is reaching consensus about validated identities'
         )}
       />
-    </ValidationSnackbar>
+    </Snackbar>
   )
-}
-
-function ValidationSnackbar(props) {
-  return <Absolute bottom={0} left={0} right={0} {...props} />
 }

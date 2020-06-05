@@ -32,7 +32,7 @@ import {
   WORDS_FETCHED,
   QUALIFICATION_STARTED,
 } from '../../shared/providers/validation-context'
-import Spinner from '../../screens/validation/components/spinner'
+import ValidationSpinner from '../../screens/validation/components/spinner'
 import Modal from '../../shared/components/modal'
 import useRpc from '../../shared/hooks/use-rpc'
 import {useInterval} from '../../shared/hooks/use-interval'
@@ -130,7 +130,9 @@ export default function LongValidation() {
           flex={1}
           css={position('relative')}
         >
-          {(state.longAnswersSubmitted || state.loading) && <Spinner />}
+          {(state.longAnswersSubmitted || state.loading) && (
+            <ValidationSpinner />
+          )}
           {!state.longAnswersSubmitted && state.flips[state.currentIndex] && (
             <ValidationScene
               flip={state.flips[state.currentIndex]}
