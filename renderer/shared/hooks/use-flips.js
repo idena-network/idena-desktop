@@ -8,6 +8,10 @@ import {HASH_IN_MEMPOOL} from './use-tx'
 import {areSame, areEual} from '../utils/arr'
 import {didValidate} from '../../screens/validation/utils'
 import {FlipType} from '../types'
+import {
+  didArchiveFlips,
+  markFlipsArchived,
+} from '../../screens/flips/utils/flip'
 
 const {
   getFlips: getFlipsFromStore,
@@ -272,7 +276,8 @@ function useFlips() {
     [getDraft]
   )
 
-  const archiveFlips = useCallback(() => {
+  // eslint-disable-next-line no-shadow
+  const archiveFlips = useCallback(epoch => {
     setFlips(prevFlips => {
       const nextFlips = prevFlips.map(flip => ({
         ...flip,
@@ -281,13 +286,14 @@ function useFlips() {
       saveFlips(nextFlips)
       return nextFlips
     })
+    markFlipsArchived(epoch)
   }, [])
 
   const epoch = useEpochState()
 
   React.useEffect(() => {
-    if (epoch && didValidate(epoch.epoch)) {
-      archiveFlips()
+    if (epoch && didValidate(epoch.epoch) && !didArchiveFlips(epoch.epoch)) {
+      archiveFlips(epoch.epoch)
     }
   }, [archiveFlips, epoch])
 
