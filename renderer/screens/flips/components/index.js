@@ -22,11 +22,20 @@ import {
   VisuallyHidden,
   FormLabel,
   CloseButton,
+  IconButton,
+  FormControl,
+  Input,
+  Textarea,
+  Collapse,
+  useDisclosure,
 } from '@chakra-ui/core'
 import {Step} from '../types'
 import {formatKeywords} from '../utils'
 import {hasImageType} from '../../../shared/utils/img'
 import {PageTitle} from '../../app/components'
+import {PrimaryButton, IconButton2} from '../../../shared/components/button'
+import {rem} from '../../../shared/theme'
+import {capitalize} from '../../../shared/utils/string'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -352,14 +361,7 @@ export function FlipStoryStep({children}) {
 
 export function FlipKeywordPanel(props) {
   return (
-    <Stack
-      bg="gray.50"
-      px={10}
-      py={8}
-      rounded="lg"
-      w="480px"
-      {...props}
-    ></Stack>
+    <Box bg="gray.50" px={10} py={8} rounded="lg" w="480px" {...props}></Box>
   )
 }
 
@@ -616,5 +618,157 @@ export function EmptyFlipImage(props) {
     <Flex align="center" justify="center" px={10} py={6} {...props}>
       <Icon name="pic" size={10} color="gray.100" />
     </Flex>
+  )
+}
+
+export function CommunityTranslations({
+  keywords,
+  onUpvote,
+  onDownvote,
+  onSuggest,
+}) {
+  const [wordIndex, setWordIndex] = React.useState(0)
+  const {isOpen, onToggle} = useDisclosure()
+
+  return (
+    <Stack spacing={8}>
+      <IconButton2
+        icon="community"
+        color="brandFray.500"
+        px={0}
+        _hover={{background: 'transparent'}}
+        onClick={onToggle}
+      >
+        Community translation
+        <Icon size={5} name="chevron-down" color="muted" ml={2}></Icon>
+      </IconButton2>
+      <Collapse isOpen={isOpen}>
+        <Stack spacing={8}>
+          <RadioButtonGroup isInline value={wordIndex} onChange={setWordIndex}>
+            {keywords.words.map(({id, name}, i) => (
+              <FlipKeywordRadio key={id} value={i}>
+                {capitalize(name)}
+              </FlipKeywordRadio>
+            ))}
+          </RadioButtonGroup>
+          {keywords.translations[wordIndex].map(({id, name, desc, ups}) => (
+            <Flex key={id} justify="space-between">
+              <FlipKeyword>
+                <FlipKeywordName>{name}</FlipKeywordName>
+                <FlipKeywordDescription>{desc}</FlipKeywordDescription>
+              </FlipKeyword>
+              <Stack isInline spacing={2} align="center">
+                <VoteButton
+                  icon="upvote"
+                  onClick={() => onUpvote({wordIndex, id})}
+                />
+                <Box
+                  bg="green.010"
+                  color="green.500"
+                  fontWeight={500}
+                  rounded="md"
+                  px={4}
+                  py={2}
+                >
+                  {ups}
+                </Box>
+                <VoteButton
+                  icon="upvote"
+                  color="muted"
+                  transform="rotate(180deg)"
+                  onClick={() => onDownvote({wordIndex, id})}
+                />
+              </Stack>
+            </Flex>
+          ))}
+          <Divider borderColor="gray.300" />
+          <Box>
+            <Text fontWeight={500} mb={3}>
+              Suggest translation
+            </Text>
+            <form
+              onSubmit={e => {
+                e.preventDefault()
+                const {
+                  nameInput: {value: name},
+                  descInput: {value: desc},
+                } = e.target.elements
+                onSuggest({wordIndex, name, desc: desc.trim()})
+              }}
+            >
+              <FormControl>
+                <Input
+                  id="nameInput"
+                  placeholder={capitalize(keywords.words[0].name)}
+                  px={3}
+                  pt="3/2"
+                  pb={2}
+                  borderColor="gray.300"
+                  mb={2}
+                  _placeholder={{
+                    color: 'muted',
+                  }}
+                />
+                <Textarea
+                  id="descInput"
+                  placeholder={capitalize(keywords.words[0].desc)}
+                  borderColor="gray.300"
+                  px={3}
+                  pt="3/2"
+                  pb={2}
+                  mb={6}
+                  _placeholder={{
+                    color: 'muted',
+                  }}
+                />
+              </FormControl>
+              <PrimaryButton type="submit" display="flex" ml="auto">
+                Send
+              </PrimaryButton>
+            </form>
+          </Box>
+        </Stack>
+      </Collapse>
+    </Stack>
+  )
+}
+
+export const FlipKeywordRadio = React.forwardRef(
+  ({isChecked, ...props}, ref) => {
+    const stateProps = {
+      bg: isChecked ? 'brandBlue.500' : 'transparent',
+      color: isChecked ? 'white' : 'brandGray.500',
+    }
+
+    return (
+      <PrimaryButton
+        ref={ref}
+        aria-checked={isChecked}
+        role="radio"
+        {...stateProps}
+        _hover={{
+          ...stateProps,
+        }}
+        _active={{
+          ...stateProps,
+        }}
+        {...props}
+      />
+    )
+  }
+)
+FlipKeywordRadio.displayName = 'FlipKeywordRadio'
+
+export function VoteButton(props) {
+  return (
+    <IconButton
+      bg="transparent"
+      color="brandGray.500"
+      fontSize={rem(20)}
+      h={5}
+      w={5}
+      _hover={{bg: 'transparent'}}
+      {...props}
+    />
   )
 }
