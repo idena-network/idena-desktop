@@ -12,7 +12,6 @@ export const IdentityStatus = {
   Verified: 'Verified',
   Suspended: 'Suspended',
   Zombie: 'Zombie',
-  Killed: 'Killed',
   Terminating: 'Terminating',
   Human: 'Human',
 }
@@ -92,11 +91,9 @@ function IdentityProvider({children}) {
     true
   )
 
-  const canActivateInvite = [
-    IdentityStatus.Undefined,
-    IdentityStatus.Killed,
-    IdentityStatus.Invite,
-  ].includes(identity && identity.state)
+  const canActivateInvite =
+    identity &&
+    [IdentityStatus.Undefined, IdentityStatus.Invite].includes(identity.state)
 
   const canSubmitFlip =
     identity &&

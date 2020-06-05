@@ -1,26 +1,41 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
-import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
+import {backgrounds, margin} from 'polished'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {GlobalModals} from './modal'
 import {useDebounce} from '../hooks/use-debounce'
 import {EpochPeriod, useEpochState} from '../providers/epoch-context'
-import {shouldStartValidation} from '../../screens/validation/machine'
+import {shouldStartValidation} from '../../screens/validation/utils'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {DnaSignInDialog, DnaSendDialog, DnaLinkHandler} from './dna-link'
 import {useNotificationDispatch} from '../providers/notification-context'
 import {ValidationToast} from '../../screens/validation/components'
+import {
+  useAutoUpdateState,
+  useAutoUpdateDispatch,
+} from '../providers/update-context'
+import Button from './button'
+import Flex from './flex'
+import {BlockText} from './typo'
+import theme, {rem} from '../theme'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
 const AVAILABLE_TIMEOUT = global.isDev ? 0 : 1000 * 5
 
-export default function Layout({loading, syncing, offline, ...props}) {
+export default function Layout({
+  loading,
+  syncing,
+  offline,
+  skipHardForkScreen = false,
+  ...props
+}) {
   const debouncedSyncing = useDebounce(syncing, AVAILABLE_TIMEOUT)
   const debouncedOffline = useDebounce(offline, AVAILABLE_TIMEOUT)
 
@@ -37,27 +52,39 @@ export default function Layout({loading, syncing, offline, ...props}) {
 
   const {addError} = useNotificationDispatch()
 
+  const {nodeRemoteVersion, mustUpdateNode} = useAutoUpdateState()
+  const {updateNode} = useAutoUpdateDispatch()
+
   return (
     <main>
       <Sidebar />
       {loading && <LoadingApp />}
-      {!loading && debouncedSyncing && !debouncedOffline && <SyncingApp />}
-      {!loading && debouncedOffline && !debouncedSyncing && <OfflineApp />}
-      {!loading && !debouncedOffline && !debouncedSyncing && (
-        <NormalApp {...props} />
-      )}
+      {!skipHardForkScreen && mustUpdateNode ? (
+        <>
+          <HardForkScreen version={nodeRemoteVersion} onUpdate={updateNode} />
+          <GlobalModals />
+        </>
+      ) : (
+        <>
+          {!loading && debouncedSyncing && !debouncedOffline && <SyncingApp />}
+          {!loading && debouncedOffline && !debouncedSyncing && <OfflineApp />}
+          {!loading && !debouncedOffline && !debouncedSyncing && (
+            <NormalApp {...props} />
+          )}
 
-      {!debouncedOffline && !loading && (
-        <DnaLinkHandler>
-          <DnaSignInDialog
-            isOpen={url => new URL(url).pathname.includes('signin')}
-            onSigninError={error =>
-              addError({
-                title: error,
-              })
-            }
-          />
-        </DnaLinkHandler>
+          {!debouncedOffline && !loading && (
+            <DnaLinkHandler>
+              <DnaSignInDialog
+                isOpen={url => new URL(url).pathname.includes('signin')}
+                onSigninError={error =>
+                  addError({
+                    title: error,
+                  })
+                }
+              />
+            </DnaLinkHandler>
+          )}
+        </>
       )}
 
       <style jsx>{`
@@ -75,13 +102,6 @@ export default function Layout({loading, syncing, offline, ...props}) {
       `}</style>
     </main>
   )
-}
-
-Layout.propTypes = {
-  loading: PropTypes.bool,
-  syncing: PropTypes.bool,
-  offline: PropTypes.bool,
-  children: PropTypes.node,
 }
 
 function NormalApp(props) {
@@ -175,4 +195,34 @@ function showWindowNotification(title, notificationBody, onclick) {
   })
   notification.onclick = onclick
   return true
+}
+
+// eslint-disable-next-line react/prop-types
+export function HardForkScreen({version, onUpdate}) {
+  const {t} = useTranslation()
+
+  return (
+    <Flex
+      align="center"
+      justify="center"
+      flex={1}
+      css={{
+        ...backgrounds(theme.colors.darkGraphite),
+      }}
+    >
+      <Flex direction="column">
+        <BlockText
+          color={theme.colors.white}
+          fontWeight={500}
+          fontSize={rem(18)}
+          css={{...margin(0, 0, rem(20))}}
+        >
+          {t('Your node is outdated because of the hard fork, please update')}
+        </BlockText>
+        <Button variant="primary" onClick={onUpdate}>
+          {t('Update Node Version')} {version}
+        </Button>
+      </Flex>
+    </Flex>
+  )
 }

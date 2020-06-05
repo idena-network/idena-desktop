@@ -100,7 +100,6 @@ export async function fetchEpoch() {
     "FlipLotteryDuration": 60,
     "ShortSessionDuration": 60,
     "LongSessionDuration": 60,
-    "AfterLongSessionDuration": 30
   }
  */
 export async function fetchCeremonyIntervals() {

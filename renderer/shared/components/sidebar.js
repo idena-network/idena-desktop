@@ -3,14 +3,12 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {Box, List, Link, Text} from '.'
+import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
-import Loading from './loading'
 import {useIdentityState, IdentityStatus} from '../providers/identity-context'
 import {useEpochState, EpochPeriod} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
-import {useValidationState} from '../providers/validation-context'
 import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
@@ -19,6 +17,7 @@ import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
 import {pluralize} from '../utils/string'
+import {parsePersistedValidationState} from '../../screens/validation/utils'
 
 function Sidebar() {
   return (
@@ -147,7 +146,14 @@ function Nav() {
   const {nickname} = useIdentityState()
   return (
     <nav>
-      <List m={0}>
+      <ul
+        style={{
+          listStyleType: 'none',
+          ...padding(0),
+          ...margin(0),
+          textAlign: 'left',
+        }}
+      >
         <NavItem
           href="/dashboard"
           active
@@ -173,7 +179,7 @@ function Nav() {
         <NavItem href="/settings" icon={<i className="icon icon--settings" />}>
           {t('Settings')}
         </NavItem>
-      </List>
+      </ul>
       <style jsx>{`
         nav {
           align-self: stretch;
@@ -265,7 +271,11 @@ function ActionPanel() {
         <Block title={t('Current period')}>{currentPeriod}</Block>
       )}
       <Block title={t('My current task')}>
-        <CurrentTask period={currentPeriod} identity={identity} />
+        <CurrentTask
+          epoch={epoch.epoch}
+          period={currentPeriod}
+          identity={identity}
+        />
       </Block>
       {currentPeriod === EpochPeriod.None && (
         <Block title={t('Next validation')}>
@@ -276,7 +286,7 @@ function ActionPanel() {
   )
 }
 
-function Block({title, children, fallback = <Loading />}) {
+function Block({title, children}) {
   return (
     <Box
       css={{
@@ -297,7 +307,7 @@ function Block({title, children, fallback = <Loading />}) {
         fontWeight={500}
         css={{display: 'block', lineHeight: rem(20)}}
       >
-        {children || fallback}
+        {children}
       </Text>
     </Box>
   )
@@ -305,132 +315,142 @@ function Block({title, children, fallback = <Loading />}) {
 
 Block.propTypes = {
   title: PropTypes.string,
-  fallback: PropTypes.node,
   children: PropTypes.node,
 }
 
-function CurrentTask({period, identity}) {
-  const {
-    running: validationRunning = false,
-    shortAnswers,
-    longAnswers,
-  } = useValidationState()
+function CurrentTask({epoch, period, identity}) {
+  const {t} = useTranslation()
 
-  if (!period || !identity || !identity.state) {
-    return null
-  }
+  if (!period || !identity.state) return null
 
-  const {
-    flips,
-    requiredFlips: requiredFlipsNumber,
-    availableFlips: availableFlipsNumber,
-    state,
-    canActivateInvite,
-  } = identity
+  switch (period) {
+    case EpochPeriod.None: {
+      const {
+        flips,
+        requiredFlips: requiredFlipsNumber,
+        availableFlips: availableFlipsNumber,
+        state: status,
+        canActivateInvite,
+      } = identity
 
-  if (canActivateInvite && period === EpochPeriod.None) {
-    return (
-      <Link href="/dashboard" color={theme.colors.white}>
-        Activate invite
-      </Link>
-    )
-  }
+      switch (true) {
+        case canActivateInvite:
+          return (
+            <Link href="/dashboard" color={theme.colors.white}>
+              {t('Activate invite')}
+            </Link>
+          )
 
-  if (
-    [
-      IdentityStatus.Human,
-      IdentityStatus.Verified,
-      IdentityStatus.Newbie,
-    ].includes(state)
-  ) {
-    if (period === EpochPeriod.None) {
-      const publishedFlipsNumber = (flips || []).length
-      const remainingRequiredFlipsNumber =
-        requiredFlipsNumber - publishedFlipsNumber
-      const optionalFlipsNumber =
-        availableFlipsNumber -
-        Math.max(requiredFlipsNumber, publishedFlipsNumber)
+        case [
+          IdentityStatus.Human,
+          IdentityStatus.Verified,
+          IdentityStatus.Newbie,
+        ].includes(status): {
+          const publishedFlipsNumber = (flips || []).length
+          const remainingRequiredFlipsNumber =
+            requiredFlipsNumber - publishedFlipsNumber
+          const optionalFlipsNumber =
+            availableFlipsNumber -
+            Math.max(requiredFlipsNumber, publishedFlipsNumber)
 
-      const shouldSendFlips = remainingRequiredFlipsNumber > 0
+          const shouldSendFlips = remainingRequiredFlipsNumber > 0
 
-      return shouldSendFlips ? (
-        <Link href="/flips" color={theme.colors.white}>
-          Create {remainingRequiredFlipsNumber} required{' '}
-          {pluralize('flip', remainingRequiredFlipsNumber)}
-        </Link>
-      ) : (
-        `Wait for validation${
-          optionalFlipsNumber > 0
-            ? ` or create ${optionalFlipsNumber} optional ${pluralize(
-                'flip',
-                optionalFlipsNumber
-              )}`
-            : ''
-        }`
-      )
-    }
-    if (validationRunning) {
-      if (
-        (period === EpochPeriod.ShortSession && shortAnswers.length) ||
-        (period === EpochPeriod.LongSession && longAnswers.length)
-      ) {
-        return `Wait for ${period} end`
+          return shouldSendFlips ? (
+            <Link href="/flips" color={theme.colors.white}>
+              Create {remainingRequiredFlipsNumber} required{' '}
+              {pluralize('flip', remainingRequiredFlipsNumber)}
+            </Link>
+          ) : (
+            `Wait for validation${
+              optionalFlipsNumber > 0
+                ? ` or create ${optionalFlipsNumber} optional ${pluralize(
+                    'flip',
+                    optionalFlipsNumber
+                  )}`
+                : ''
+            }`
+          )
+        }
+
+        case [
+          IdentityStatus.Candidate,
+          IdentityStatus.Suspended,
+          IdentityStatus.Zombie,
+        ].includes(status):
+          return t('Wait for validation')
+
+        default:
+          break
       }
-      const href = `/validation/${
-        period === EpochPeriod.ShortSession ? 'short' : 'long'
-      }`
-      return (
-        <Link href={href} color={theme.colors.white}>
-          Solve flips now!
-        </Link>
-      )
+      break
     }
-  }
 
-  if (
-    [
-      IdentityStatus.Candidate,
-      IdentityStatus.Suspended,
-      IdentityStatus.Zombie,
-    ].includes(state)
-  ) {
-    if (period === EpochPeriod.None) {
-      return 'Wait for validation'
-    }
-    if (validationRunning) {
-      if (shortAnswers.length && longAnswers.length) {
-        return 'Wait for validation end'
+    case EpochPeriod.ShortSession:
+    case EpochPeriod.LongSession: {
+      const validationState = parsePersistedValidationState()
+
+      switch (true) {
+        case [IdentityStatus.Undefined, IdentityStatus.Invite].includes(
+          identity.state
+        ):
+          return t(
+            'Can not start validation session because you did not activate invite'
+          )
+
+        case [
+          IdentityStatus.Candidate,
+          IdentityStatus.Suspended,
+          IdentityStatus.Zombie,
+          IdentityStatus.Newbie,
+          IdentityStatus.Verified,
+          IdentityStatus.Human,
+        ].includes(identity.state): {
+          if (validationState) {
+            const {
+              done,
+              context: {epoch: lastValidationEpoch},
+            } = validationState
+
+            const isValidated = [
+              IdentityStatus.Newbie,
+              IdentityStatus.Verified,
+              IdentityStatus.Human,
+            ].includes(identity.state)
+
+            if (lastValidationEpoch === epoch)
+              return done ? (
+                t(`Wait for validation end`)
+              ) : (
+                <Link href="/validation" color={theme.colors.white}>
+                  {t('Validate')}
+                </Link>
+              )
+
+            return isValidated
+              ? t(
+                  'Can not start validation session because you did not submit flips.'
+                )
+              : 'Starting your validation session...' // this is not normal thus not localized
+          }
+          return '...'
+        }
+
+        default:
+          break
       }
-      const href = `/validation/${
-        period === EpochPeriod.ShortSession ? 'short' : 'long'
-      }`
-      return (
-        <Link href={href} color={theme.colors.white}>
-          Solve flips now!
-        </Link>
-      )
+
+      return '...'
     }
+
+    case EpochPeriod.FlipLottery:
+      return t('Shuffling flips...')
+
+    case EpochPeriod.AfterLongSession:
+      return t(`Wait for validation end`)
+
+    default:
+      return '...'
   }
-
-  if (period === EpochPeriod.FlipLottery) {
-    return 'Shuffling flips...'
-  }
-
-  if (period === EpochPeriod.AfterLongSession) {
-    return 'Wait for validation end'
-  }
-
-  return '...'
-}
-
-CurrentTask.propTypes = {
-  period: PropTypes.oneOf(Object.values(EpochPeriod)),
-  identity: PropTypes.shape({
-    requiredFlips: PropTypes.number,
-    flips: PropTypes.array,
-    state: PropTypes.string,
-    canActivateInvite: PropTypes.bool,
-  }).isRequired,
 }
 
 function UpdateButton({text, version, ...props}) {
@@ -476,7 +496,7 @@ UpdateButton.propTypes = {
 
 export function Version() {
   const autoUpdate = useAutoUpdateState()
-  const {uiUpdate, nodeUpdate} = useAutoUpdateDispatch()
+  const {updateClient, updateNode} = useAutoUpdateDispatch()
 
   return (
     <>
@@ -515,21 +535,21 @@ export function Version() {
             Updating Node...
           </Text>
         )}
-        {autoUpdate.uiCanUpdate ? (
+        {autoUpdate.canUpdateClient ? (
           <UpdateButton
             text="Update Client Version"
             version={autoUpdate.uiRemoteVersion}
-            onClick={uiUpdate}
+            onClick={updateClient}
           />
         ) : null}
-        {!autoUpdate.uiCanUpdate &&
-        autoUpdate.nodeCanUpdate &&
+        {!autoUpdate.canUpdateClient &&
+        autoUpdate.canUpdateNode &&
         (!autoUpdate.nodeProgress ||
           autoUpdate.nodeProgress.percentage === 100) ? (
           <UpdateButton
             text="Update Node Version"
             version={autoUpdate.nodeRemoteVersion}
-            onClick={nodeUpdate}
+            onClick={updateNode}
           />
         ) : null}
       </Box>

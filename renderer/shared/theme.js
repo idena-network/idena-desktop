@@ -1,5 +1,4 @@
-import {rem as remp, rgb} from 'polished'
-import {margin} from './components/system/spacings'
+import {rem as remp, rgb, margin} from 'polished'
 
 const colors = {
   primary: 'rgb(87, 143, 255)',
@@ -24,13 +23,13 @@ const colors = {
   success04: 'rgb(39, 217, 128, 0.4)',
   black: 'rgb(17,17,17)',
   black0: 'rgb(0,0,0)',
+  darkGraphite: 'rgb(69 72 77)',
 }
 
 const fontSizes = {
   base: 13,
   heading: '2rem',
   subHeading: '1.4em',
-  blockHeading: '1rem',
   normal: '1rem',
   small: '0.72rem',
   medium: '1.2rem',
@@ -84,12 +83,6 @@ export default {
     color: colors.text,
     fontSize: fontSizes.subHeading,
     fontWeight: fontWeights.semi,
-    ...margin(0),
-  },
-  BlockHeading: {
-    color: colors.text,
-    fontSize: fontSizes.blockHeading,
-    fontWeight: fontWeights.medium,
     ...margin(0),
   },
   Text: {

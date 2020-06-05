@@ -3,7 +3,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {rem, padding, border, margin, ellipsis, backgrounds} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {Box, Group, Text, Input, Button} from '../../../shared/components'
+import {Box, Text, Input, Button} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
@@ -334,9 +334,19 @@ function Search(props) {
 
 function SidebarHeading({children, title, onNewInvite}) {
   return (
-    <Group
-      title={title}
-      addon={
+    <Box>
+      <Text
+        color={theme.colors.muted}
+        css={{
+          position: 'relative',
+          paddingTop: rem(7),
+          paddingLeft: rem(theme.spacings.medium16),
+          paddingBottom: rem(7),
+          paddingRight: rem(28),
+          width: '100%',
+        }}
+      >
+        {title}
         <Button
           disabled={onNewInvite === null}
           onClick={onNewInvite}
@@ -358,18 +368,9 @@ function SidebarHeading({children, title, onNewInvite}) {
         >
           <i className="icon icon--add_btn" />
         </Button>
-      }
-      css={{
-        position: 'relative',
-        paddingTop: rem(7),
-        paddingLeft: rem(theme.spacings.medium16),
-        paddingBottom: rem(7),
-        paddingRight: rem(28),
-        width: '100%',
-      }}
-    >
-      {children}
-    </Group>
+      </Text>
+      <Box>{children}</Box>
+    </Box>
   )
 }
 
