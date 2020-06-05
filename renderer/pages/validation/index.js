@@ -43,7 +43,7 @@ import {
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {IconClose, Button, Tooltip, Box, Text} from '../../shared/components'
-import {AnswerType} from '../../shared/providers/validation-context'
+import {AnswerType} from '../../shared/types'
 import {Debug} from '../../shared/components/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'

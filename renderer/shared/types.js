@@ -5,3 +5,24 @@ export const EpochPeriod = {
   AfterLongSession: 'AfterLongSession',
   None: 'None',
 }
+
+export const AnswerType = {
+  None: 0,
+  Left: 1,
+  Right: 2,
+  Inappropriate: 3,
+}
+
+export const SessionType = {
+  Short: 'short',
+  Long: 'long',
+  Qualification: 'qualification',
+}
+
+export const FlipType = {
+  Publishing: 'publishing',
+  Published: 'published',
+  Draft: 'draft',
+  Archived: 'archived',
+  Deleting: 'deleting',
+}

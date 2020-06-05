@@ -1,7 +1,7 @@
 import {useEffect, useCallback, useReducer} from 'react'
 import * as api from '../api/dna'
 import {useInterval} from './use-interval'
-import {HASH_IN_MEMPOOL} from '../utils/tx'
+import {HASH_IN_MEMPOOL} from './use-tx'
 import {useIdentityState} from '../providers/identity-context'
 import {
   fetchAccountList,

@@ -20,9 +20,9 @@ import Divider from '../../../shared/components/divider'
 import {useIdentityState} from '../../../shared/providers/identity-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import useHover from '../../../shared/hooks/use-hover'
-import {FlipType} from '../../../shared/utils/useFlips'
 import {useChainState} from '../../../shared/providers/chain-context'
 import IconLink from '../../../shared/components/icon-link'
+import {FlipType} from '../../../shared/types'
 
 // eslint-disable-next-line react/display-name
 const FlipMenu = forwardRef((props, ref) => (

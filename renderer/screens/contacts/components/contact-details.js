@@ -4,7 +4,7 @@ import {useTranslation} from 'react-i18next'
 import UserInfo from '../../dashboard/components/user-info'
 import ContactToolbar from './contact-toolbar'
 import theme from '../../../shared/theme'
-import {Figure} from '../../../shared/components/utils'
+import {Figure} from '../../../shared/components/stat'
 import {
   mapToFriendlyStatus,
   useIdentityState,

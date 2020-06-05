@@ -89,6 +89,11 @@ export function loadValidationState() {
   return loadPersistentState('validation2')
 }
 
+export function parsePersistedValidationState() {
+  const stateDef = loadValidationState()
+  return stateDef && State.create(stateDef)
+}
+
 export function clearValidationState() {
   persistState('validation2', null)
 }
@@ -150,6 +155,17 @@ export function shouldStartValidation(epoch, identity) {
       return true
     }
   } else return false
+}
+
+export function didValidate(currentEpoch) {
+  const validationStateDefinition = loadValidationState()
+
+  if (validationStateDefinition) {
+    const {epoch} = State.create(validationStateDefinition).context
+    return currentEpoch > epoch
+  }
+
+  return false
 }
 
 export function shouldExpectValidationResults(epoch) {

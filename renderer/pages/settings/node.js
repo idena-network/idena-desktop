@@ -242,7 +242,7 @@ function NodeSettings() {
             </FlatButton>
           </Flex>
           <Flex align="center" css={{marginTop: 10}}>
-            <Label htmlFor="url" style={{width: 120}}>
+            <Label htmlFor="key" style={{width: 120}}>
               {`${t('Node api key')} `}
             </Label>
             <Box style={{position: 'relative'}}>

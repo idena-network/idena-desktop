@@ -1,10 +1,13 @@
-import {useState, useEffect, useCallback} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import {encode} from 'rlp'
 import * as api from '../api/dna'
-import {useInterval} from '../hooks/use-interval'
+import {useEpochState} from '../providers/epoch-context'
+import {useInterval} from './use-interval'
 import {fetchTx} from '../api'
-import {HASH_IN_MEMPOOL} from './tx'
-import {areSame, areEual} from './arr'
+import {HASH_IN_MEMPOOL} from './use-tx'
+import {areSame, areEual} from '../utils/arr'
+import {didValidate} from '../../screens/validation/utils'
+import {FlipType} from '../types'
 
 const {
   getFlips: getFlipsFromStore,
@@ -12,14 +15,6 @@ const {
   saveFlips,
   deleteDraft: deleteFromStore,
 } = global.flipStore || {}
-
-export const FlipType = {
-  Publishing: 'publishing',
-  Published: 'published',
-  Draft: 'draft',
-  Archived: 'archived',
-  Deleting: 'deleting',
-}
 
 const FLIP_MAX_SIZE = 1024 * 1024 // 1 mb
 const DEFAULT_ORDER = [0, 1, 2, 3]
@@ -287,6 +282,14 @@ function useFlips() {
       return nextFlips
     })
   }, [])
+
+  const epoch = useEpochState()
+
+  React.useEffect(() => {
+    if (epoch && didValidate(epoch.epoch)) {
+      archiveFlips()
+    }
+  }, [archiveFlips, epoch])
 
   return {
     flips,
