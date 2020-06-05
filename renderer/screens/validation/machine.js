@@ -30,7 +30,6 @@ export const createValidationMachine = ({
   validationStart,
   shortSessionDuration,
   longSessionDuration,
-  afterLongSessionDuration,
 }) =>
   Machine(
     {
@@ -44,7 +43,6 @@ export const createValidationMachine = ({
         validationStart,
         shortSessionDuration,
         longSessionDuration,
-        afterLongSessionDuration,
         errorMessage: null,
         retries: 0,
       },

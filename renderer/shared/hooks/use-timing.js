@@ -7,7 +7,6 @@ const initialTiming = {
   flipLottery: null,
   shortSession: null,
   longSession: null,
-  afterLongSession: null,
   none: null,
 }
 
@@ -23,7 +22,6 @@ function useTiming() {
           FlipLotteryDuration: flipLottery,
           ShortSessionDuration: shortSession,
           LongSessionDuration: longSession,
-          AfterLongSessionDuration: afterLongSession,
         } = await fetchCeremonyIntervals()
 
         setTiming({
@@ -31,7 +29,6 @@ function useTiming() {
           flipLottery,
           shortSession,
           longSession,
-          afterLongSession,
         })
         setInterval(1000 * 60 * 1)
       } catch (error) {
