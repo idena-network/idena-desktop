@@ -15,7 +15,7 @@ function SettingsLayout({children}) {
   const {t} = useTranslation()
 
   return (
-    <Layout>
+    <Layout skipHardForkScreen>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Box>
           <PageTitle>{t('Settings')}</PageTitle>

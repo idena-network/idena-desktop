@@ -496,7 +496,7 @@ UpdateButton.propTypes = {
 
 export function Version() {
   const autoUpdate = useAutoUpdateState()
-  const {uiUpdate, nodeUpdate} = useAutoUpdateDispatch()
+  const {updateClient, updateNode} = useAutoUpdateDispatch()
 
   return (
     <>
@@ -535,21 +535,21 @@ export function Version() {
             Updating Node...
           </Text>
         )}
-        {autoUpdate.uiCanUpdate ? (
+        {autoUpdate.canUpdateClient ? (
           <UpdateButton
             text="Update Client Version"
             version={autoUpdate.uiRemoteVersion}
-            onClick={uiUpdate}
+            onClick={updateClient}
           />
         ) : null}
-        {!autoUpdate.uiCanUpdate &&
-        autoUpdate.nodeCanUpdate &&
+        {!autoUpdate.canUpdateClient &&
+        autoUpdate.canUpdateNode &&
         (!autoUpdate.nodeProgress ||
           autoUpdate.nodeProgress.percentage === 100) ? (
           <UpdateButton
             text="Update Node Version"
             version={autoUpdate.nodeRemoteVersion}
-            onClick={nodeUpdate}
+            onClick={updateNode}
           />
         ) : null}
       </Box>
