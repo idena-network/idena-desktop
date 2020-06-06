@@ -100,7 +100,7 @@ function SyncingIdentity() {
             {currentBlock} out of {highestBlock}
           </h3>
           <div>
-            <span>{t('Peers connected:')}</span> {(peers || []).length}
+            <span>{t('Peers connected')}:</span> {(peers || []).length}
           </div>
         </div>
         <progress value={currentBlock} max={highestBlock} />
