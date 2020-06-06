@@ -210,7 +210,7 @@ export function HardForkScreen({version, onUpdate}) {
         ...backgrounds(theme.colors.darkGraphite),
       }}
     >
-      <Flex direction="column">
+      <Flex direction="column" align="flex-start">
         <BlockText
           color={theme.colors.white}
           fontWeight={500}
