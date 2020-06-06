@@ -61,7 +61,10 @@ export function ValidationResultToast({epoch}) {
     isValidationSucceeded ? 'reward' : 'answers'
   }?epoch=${epoch}&identity=${address}`
 
-  const notSeen = state[epoch] && !state[epoch].seen
+  const notSeen =
+    typeof state[epoch] === 'boolean'
+      ? !state[epoch]
+      : state[epoch] && !state[epoch].seen
 
   return notSeen ? (
     <Snackbar>
