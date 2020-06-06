@@ -59,7 +59,7 @@ export default function Layout({
     <main>
       <Sidebar />
       {loading && <LoadingApp />}
-      {!skipHardForkScreen && mustUpdateNode ? (
+      {!loading && !skipHardForkScreen && mustUpdateNode ? (
         <>
           <HardForkScreen version={nodeRemoteVersion} onUpdate={updateNode} />
           <GlobalModals />
