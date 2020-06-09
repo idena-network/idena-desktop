@@ -612,5 +612,15 @@ export const uiTheme = {
       ),
       viewBox: '0 0 20 20',
     },
+    cycle: {
+      path: (
+        <path
+          fill="currentColor"
+          fillRule="evenodd"
+          d="M14 8l3 4-2 .001V13a5 5 0 0 1-9.9 1h2.07a3.001 3.001 0 0 0 5.825-.824L13 13v-1h-2l3-4zm-4-6a5.002 5.002 0 0 1 4.9 4h-2.07a3.001 3.001 0 0 0-5.825.824L7 7v1h2l-3 4-3-4 2-.001V7a5 5 0 0 1 5-5z"
+        />
+      ),
+      viewBox: '0 0 20 20',
+    },
   },
 }
