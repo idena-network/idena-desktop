@@ -3,6 +3,7 @@ import {useRouter} from 'next/router'
 import {Box, Code, Flex, Stack, Divider} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
+import nanoid from 'nanoid'
 import {Page} from '../../screens/app/components'
 import {
   FlipMaster,
@@ -22,6 +23,8 @@ import {
   FlipShuffleStep,
   FlipSubmitStep,
   CommunityTranslations,
+  FlipImageList,
+  FlipImageListItem,
 } from '../../screens/flips/components'
 import {Step} from '../../screens/flips/types'
 import {
@@ -34,10 +37,11 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import useFlips from '../../shared/hooks/use-flips'
+import useFlips, {toHex} from '../../shared/hooks/use-flips'
 import {FlipType} from '../../shared/types'
 import {flipMasterMachine} from '../../screens/flips/machines'
 import {rem} from '../../shared/theme'
+import {submitFlip} from '../../shared/api'
 
 export default function NewFlipPage() {
   const router = useRouter()
@@ -65,18 +69,97 @@ export default function NewFlipPage() {
       images: Array.from({length: 4}),
     },
     actions: {
-      onSubmitted: ({prevImages}) => {
-        router.push('/flips')
-      },
+      onSubmitted: () => router.push('/flips'),
     },
     services: {
-      submitFlip: async ({images, keywords, keywordPairId}) => {
-        console.log(images, keywords, keywordPairId)
+      submitFlip: async ({
+        // eslint-disable-next-line no-shadow
+        images,
+        // eslint-disable-next-line no-shadow
+        keywordPairId,
+        order = [0, 2, 3, 1],
+      }) => {
+        // Guard.flip(flip)
 
-        return {
-          // ...flip,
-          images,
+        // if (
+        //   flips.filter(
+        //     f =>
+        //       f.type === FlipType.Published &&
+        //       f.compressedPics &&
+        //       areSame(f.compressedPics, compressedPics)
+        //   ).length > 0
+        // ) {
+        //   return {
+        //     error: {message: 'You already submitted this flip'},
+        //   }
+        // }
+        // if (areEual(order, DEFAULT_ORDER)) {
+        //   return {
+        //     error: {message: 'You must shuffle flip before submit'},
+        //   }
+        // }
+        // if (!hint) {
+        //   return {
+        //     error: {message: 'Keywords for flip are not specified'},
+        //   }
+        // }
+
+        if (keywordPairId < 0) {
+          return {
+            error: {message: 'Keywords for flip are not allowed'},
+          }
         }
+
+        const [publicHex, privateHex] = toHex(images, order)
+        if (publicHex.length + privateHex.length > 2 * 1024 * 1024) {
+          return {
+            error: {message: 'Flip is too large'},
+          }
+        }
+
+        const resp = await submitFlip(publicHex, privateHex, keywordPairId)
+        const {result} = resp
+
+        global.flipStore.saveFlips(
+          flips.concat({
+            id: nanoid(),
+            images,
+            order,
+            ...result,
+            type: FlipType.Publishing,
+            modifiedAt: Date.now(),
+          })
+        )
+        return resp
+
+        // let message = ''
+        // if (error) {
+        //   if (
+        //     [
+        //       IdentityStatus.None,
+        //       IdentityStatus.Candidate,
+        //       IdentityStatus.Suspended,
+        //       IdentityStatus.Zombie,
+        //     ].includes(identityState)
+        //   ) {
+        //     message = t(
+        //       `error:It's not allowed to submit flips with your identity status`
+        //     )
+        //   } else if (epoch && epoch.currentPeriod !== EpochPeriod.None) {
+        //     message = t(`error:Can not submit flip during the validation session`)
+        //   } else {
+        //     // eslint-disable-next-line prefer-destructuring
+        //     message = error.message
+        //   }
+        // }
+
+        // addNotification({
+        //   title: error
+        //     ? t('error:Error while uploading flip')
+        //     : t('translation:Flip saved!'),
+        //   body: error ? message : `Hash ${result.hash}`,
+        //   type: error ? NotificationType.Error : NotificationType.Info,
+        // })
       },
     },
   })
@@ -159,7 +242,7 @@ export default function NewFlipPage() {
                         </FlipKeywordPair>
                         <Stack isInline spacing={1} align="center">
                           <IconButton2
-                            icon="undo"
+                            icon="switch"
                             _hover={{background: 'transparent'}}
                             onClick={() => send('SWITCH_LOCALE')}
                           >
@@ -206,7 +289,7 @@ export default function NewFlipPage() {
                           </FlipKeywordPair>
                           <Box>
                             <IconButton2
-                              icon="undo"
+                              icon="switch"
                               _hover={{background: 'transparent'}}
                               onClick={() => send('SWITCH_LOCALE')}
                             >
@@ -237,15 +320,109 @@ export default function NewFlipPage() {
             )}
             {is('images') && (
               <FlipEditorStep
-                keywords={keywords}
+                keywords={keywords.words}
                 images={images}
-                onChangeImage={() => {
-                  // send('CHANGE.IMAGES', {image, currentIndex})
-                }}
+                onChangeImage={(image, currentIndex) =>
+                  send('CHANGE_IMAGES', {image, currentIndex})
+                }
               />
             )}
             {is('shuffle') && <FlipShuffleStep images={images} />}
-            {is('submit') && <FlipSubmitStep images={images} />}
+            {is('submit') && (
+              <FlipSubmitStep>
+                <FlipStepBody minH="180px">
+                  <Stack isInline spacing={10}>
+                    <FlipKeywordPanel w={rem(320)}>
+                      {keywords.translations.length === 0 && (
+                        <Stack spacing="30px">
+                          <FlipKeywordPair>
+                            {keywords.words.map(({id, name, desc}) => (
+                              <FlipKeyword key={id}>
+                                <FlipKeywordName>{name}</FlipKeywordName>
+                                <FlipKeywordDescription>
+                                  {desc}
+                                </FlipKeywordDescription>
+                              </FlipKeyword>
+                            ))}
+                          </FlipKeywordPair>
+                          <Stack isInline spacing={1} align="center">
+                            <IconButton2
+                              icon="switch"
+                              _hover={{background: 'transparent'}}
+                              onClick={() => send('SWITCH_LOCALE')}
+                            >
+                              {global.locale.toUpperCase()}
+                            </IconButton2>
+                            <Divider
+                              orientation="vertical"
+                              borderColor="gray.300"
+                              m={0}
+                              h={6}
+                            />
+                            <IconButton2
+                              icon="gtranslate"
+                              _hover={{background: 'transparent'}}
+                              onClick={() => {
+                                global.openExternal(
+                                  `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
+                                    global.locale
+                                  }&text=${encodeURIComponent(
+                                    keywords.words
+                                      .map(({name, desc}) => `${name}\n${desc}`)
+                                      .join('\n')
+                                  )}`
+                                )
+                              }}
+                            >
+                              Google Translate
+                            </IconButton2>
+                          </Stack>
+                        </Stack>
+                      )}
+                      {keywords.translations.length > 0 && (
+                        <>
+                          <Stack spacing="30px">
+                            <FlipKeywordPair>
+                              {keywords.translations.map(
+                                ([{id, name, desc}]) => (
+                                  <FlipKeyword key={id}>
+                                    <FlipKeywordName>{name}</FlipKeywordName>
+                                    <FlipKeywordDescription>
+                                      {desc}
+                                    </FlipKeywordDescription>
+                                  </FlipKeyword>
+                                )
+                              )}
+                            </FlipKeywordPair>
+                            <Box>
+                              <IconButton2
+                                icon="switch"
+                                _hover={{background: 'transparent'}}
+                                onClick={() => send('SWITCH_LOCALE')}
+                              >
+                                EN
+                              </IconButton2>
+                            </Box>
+                          </Stack>
+                        </>
+                      )}
+                    </FlipKeywordPanel>
+                    <Stack isInline spacing={10} justify="center">
+                      <FlipImageList>
+                        {images.map(src => (
+                          <FlipImageListItem key={src} src={src} />
+                        ))}
+                      </FlipImageList>
+                      <FlipImageList>
+                        {images.map(src => (
+                          <FlipImageListItem key={src} src={src} />
+                        ))}
+                      </FlipImageList>
+                    </Stack>
+                  </Stack>
+                </FlipStepBody>
+              </FlipSubmitStep>
+            )}
           </FlipMaster>
           <Box position="absolute" left={6} bottom={6}>
             <Code>{JSON.stringify({})}</Code>
