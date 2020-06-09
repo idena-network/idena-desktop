@@ -29,6 +29,7 @@ import {
   Collapse,
   useDisclosure,
 } from '@chakra-ui/core'
+import FlipEditor from './flip-editor'
 import {Step} from '../types'
 import {formatKeywords} from '../utils'
 import {hasImageType} from '../../../shared/utils/img'
@@ -392,11 +393,8 @@ export function FlipEditorStep({keywords, images, onChangeImage}) {
         <FlipStepTitle>Select 4 images to tell your story</FlipStepTitle>
         <FlipStepSubtitle>
           Use keywords for the story{' '}
-          <Text as="mark">{formatKeywords(keywords)}</Text> and template{' '}
-          <Text as="strong" fontWeight={500}>
-            Before ➡️ Something happens ➡️ After
-          </Text>
-          .
+          <Text as="mark">{formatKeywords(keywords)}</Text> and template "Before
+          – Something happens – After".
         </FlipStepSubtitle>
       </FlipStepHeader>
       <Stack isInline spacing={10}>
@@ -411,41 +409,61 @@ export function FlipEditorStep({keywords, images, onChangeImage}) {
           ))}
         </FlipImageList>
         <Box>
-          <FlipImage src={images[currentIndex]} width={400} rounded="md" />
-          <Stack isInline align="center" spacing={3} mt={6}>
-            <Box>
-              <FlipEditorIcon name="google" />
-            </Box>
-            <Box>
-              <FormLabel htmlFor="file" p={0}>
-                <FlipEditorIcon name="folder" />
-              </FormLabel>
-              <VisuallyHidden>
-                <input
-                  id="file"
-                  type="file"
-                  onChange={async e => {
-                    const {files} = e.target
-                    if (files.length) {
-                      const [file] = files
-                      if (hasImageType(file)) {
-                        onChangeImage(URL.createObjectURL(file), currentIndex)
+          {/* <FlipImage src={images[currentIndex]} width={400} rounded="md" /> */}
+          {images.map((src, idx) => (
+            <FlipEditor
+              idx={idx}
+              visible={currentIndex === idx}
+              src={src}
+              onChange={url => onChangeImage(url, idx)}
+              onChanging={() => {
+                console.log()
+                // onChangingImage(idx)
+              }}
+            />
+          ))}
+          {false && (
+            <Stack isInline align="center" spacing={3} mt={6}>
+              <Box>
+                <FlipEditorIcon name="google" />
+              </Box>
+              <Box>
+                <FormLabel htmlFor="file" p={0}>
+                  <FlipEditorIcon name="folder" />
+                </FormLabel>
+                <VisuallyHidden>
+                  <input
+                    id="file"
+                    type="file"
+                    onChange={async e => {
+                      const {files} = e.target
+                      if (files.length) {
+                        const [file] = files
+                        if (hasImageType(file)) {
+                          onChangeImage(URL.createObjectURL(file), currentIndex)
+                        }
                       }
-                    }
-                  }}
-                />
-              </VisuallyHidden>
-            </Box>
-            <Divider borderColor="gray.300" orientation="vertical" mx={0} />
-            <FlipEditorIcon name="add-image" />
-          </Stack>
+                    }}
+                  />
+                </VisuallyHidden>
+              </Box>
+              <Divider
+                borderColor="gray.300"
+                borderWidth="px"
+                orientation="vertical"
+                mx={0}
+                h={6}
+              />
+              <FlipEditorIcon name="add-image" />
+            </Stack>
+          )}
         </Box>
       </Stack>
     </FlipStep>
   )
 }
 
-function FlipEditorIcon(props) {
+export function FlipEditorIcon(props) {
   return (
     <PseudoBox
       as={Icon}
@@ -481,7 +499,7 @@ export function FlipShuffleStep({images}) {
   )
 }
 
-export function FlipSubmitStep({images}) {
+export function FlipSubmitStep({children}) {
   return (
     <FlipStep alignSelf="stretch">
       <FlipStepHeader>
@@ -490,18 +508,7 @@ export function FlipSubmitStep({images}) {
           Submit flip to publish it to the Idena network
         </FlipStepSubtitle>
       </FlipStepHeader>
-      <Stack isInline spacing={10} justify="center">
-        <FlipImageList>
-          {images.map(src => (
-            <FlipImageListItem key={src} src={src} />
-          ))}
-        </FlipImageList>
-        <FlipImageList>
-          {images.map(src => (
-            <FlipImageListItem key={src} src={src} />
-          ))}
-        </FlipImageList>
-      </Stack>
+      {children}
     </FlipStep>
   )
 }
@@ -541,7 +548,7 @@ export function FlipMasterFooter(props) {
   )
 }
 
-function FlipImageList({children, ...props}) {
+export function FlipImageList({children, ...props}) {
   return (
     <Stack spacing={0} {...props}>
       {React.Children.map(children, (child, idx) =>
@@ -579,7 +586,7 @@ function SelectableFlipImageListItem({isActive, isFirst, isLast, ...props}) {
   )
 }
 
-function FlipImageListItem({isFirst, isLast, ...props}) {
+export function FlipImageListItem({isFirst, isLast, ...props}) {
   return (
     <FlipImage
       roundedTop={isFirst ? 'md' : 0}
@@ -604,7 +611,7 @@ export function FlipImage({src, ...props}) {
         <Image
           src={src}
           objectFit="scale-down"
-          fallbackSrc="/flips-cant-icn.svg"
+          fallbackSrc="/static/flips-cant-icn.svg"
         />
       ) : (
         <EmptyFlipImage />

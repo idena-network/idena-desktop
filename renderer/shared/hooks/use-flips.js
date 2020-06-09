@@ -61,7 +61,7 @@ function shufflePics(pics, shuffledOrder, seed) {
   }
 }
 
-function toHex(pics, order) {
+export function toHex(pics, order) {
   const seed = perm(FLIP_LENGTH)
   const shuffled = shufflePics(pics, order, seed)
 

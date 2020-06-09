@@ -149,10 +149,10 @@ TooltipControl.propTypes = {
   children: PropTypes.node,
 }
 
-export function NextTooltip(props) {
+export function TooltipX(props) {
   return (
     <ChakraTooltip
-      bg="brandGray.500"
+      bg="black"
       fontSize="sm"
       px={2}
       py={1}

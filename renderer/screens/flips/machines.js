@@ -58,7 +58,7 @@ export const flipMasterMachine = Machine(
                   },
                 }),
               },
-              NEXT: 'editor',
+              NEXT: 'images',
             },
             initial: 'fetching',
             states: {
@@ -104,7 +104,7 @@ export const flipMasterMachine = Machine(
               },
             },
           },
-          editor: {
+          images: {
             on: {
               CHANGE_IMAGES: {
                 actions: [
@@ -125,7 +125,7 @@ export const flipMasterMachine = Machine(
           shuffle: {
             on: {
               NEXT: 'submit',
-              PREV: 'editor',
+              PREV: 'images',
             },
           },
           submit: {
@@ -162,7 +162,7 @@ export const flipMasterMachine = Machine(
           },
         },
         on: {
-          PICK_IMAGES: '.editor',
+          PICK_IMAGES: '.images',
           PICK_KEYWORDS: '.keywords',
           PICK_SHUFFLE: '.shuffle',
           PICK_SUBMIT: '.submit',
