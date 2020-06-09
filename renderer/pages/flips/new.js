@@ -77,7 +77,8 @@ export default function NewFlipPage() {
         images,
         // eslint-disable-next-line no-shadow
         keywordPairId,
-        order = [0, 2, 3, 1],
+        // eslint-disable-next-line no-shadow
+        order,
       }) => {
         // Guard.flip(flip)
 
@@ -165,7 +166,7 @@ export default function NewFlipPage() {
   })
 
   const {context} = current
-  const {keywords, images} = context
+  const {keywords, images, order} = context
 
   const not = state => !current.matches({editing: state})
   const is = state => current.matches({editing: state})
@@ -327,7 +328,14 @@ export default function NewFlipPage() {
                 }
               />
             )}
-            {is('shuffle') && <FlipShuffleStep images={images} />}
+            {is('shuffle') && (
+              <FlipShuffleStep
+                images={images}
+                order={order}
+                onShuffle={() => send('SHUFFLE')}
+                onReset={() => send('RESET_SHUFFLE')}
+              />
+            )}
             {is('submit') && (
               <FlipSubmitStep>
                 <FlipStepBody minH="180px">
@@ -414,8 +422,8 @@ export default function NewFlipPage() {
                         ))}
                       </FlipImageList>
                       <FlipImageList>
-                        {images.map(src => (
-                          <FlipImageListItem key={src} src={src} />
+                        {order.map(idx => (
+                          <FlipImageListItem key={idx} src={images[idx]} />
                         ))}
                       </FlipImageList>
                     </Stack>

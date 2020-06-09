@@ -1,6 +1,7 @@
 import {Machine, assign} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import {fetchKeywordTranslations} from './utils'
+import {shuffle} from '../../shared/utils/arr'
 
 export const flipEditMachine = Machine({
   id: 'flipEdit',
@@ -35,6 +36,7 @@ export const flipMasterMachine = Machine(
     id: 'flipMaster',
     context: {
       keywordPairId: 0,
+      order: [0, 1, 2, 3],
     },
     initial: 'editing',
     states: {
@@ -126,6 +128,16 @@ export const flipMasterMachine = Machine(
             on: {
               NEXT: 'submit',
               PREV: 'images',
+              SHUFFLE: {
+                actions: assign({
+                  order: ({order}) => shuffle(order),
+                }),
+              },
+              RESET_SHUFFLE: {
+                actions: assign({
+                  order: [0, 1, 2, 3],
+                }),
+              },
             },
           },
           submit: {

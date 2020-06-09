@@ -474,7 +474,7 @@ export function FlipEditorIcon(props) {
   )
 }
 
-export function FlipShuffleStep({images}) {
+export function FlipShuffleStep({images, order, onShuffle, onReset}) {
   return (
     <FlipStep alignSelf="stretch">
       <FlipStepHeader>
@@ -483,17 +483,27 @@ export function FlipShuffleStep({images}) {
           Shuffle images in a way to make a nonsense sequence of images
         </FlipStepSubtitle>
       </FlipStepHeader>
-      <Stack isInline spacing={10} justify="center">
-        <FlipImageList>
-          {images.map(src => (
-            <FlipImageListItem key={src} src={src} />
-          ))}
-        </FlipImageList>
-        <FlipImageList>
-          {images.map(src => (
-            <FlipImageListItem key={src} src={src} />
-          ))}
-        </FlipImageList>
+      <Stack isInline spacing={10} align="center" justify="flex-end">
+        <Stack isInline spacing={10} justify="center">
+          <FlipImageList>
+            {images.map(src => (
+              <FlipImageListItem key={src} src={src} opacity={0.3} />
+            ))}
+          </FlipImageList>
+          <FlipImageList>
+            {order.map(idx => (
+              <FlipImageListItem key={idx} src={images[idx]} />
+            ))}
+          </FlipImageList>
+        </Stack>
+        <Stack spacing={0} minW={rem(200)} align="flex-start">
+          <IconButton2 icon="cycle" onClick={onShuffle}>
+            Shuffle images
+          </IconButton2>
+          <IconButton2 icon="undo" onClick={onReset}>
+            Reset to default
+          </IconButton2>
+        </Stack>
       </Stack>
     </FlipStep>
   )
