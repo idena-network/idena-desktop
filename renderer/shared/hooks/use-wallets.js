@@ -24,7 +24,7 @@ function transactionType(tx) {
   if (type === 'kill') return 'Identity terminated'
   if (type === 'submitFlip') return 'Flip submitted'
   if (type === 'online')
-    return `Mining status ${payload === '0xc101' ? 'On' : 'Off'}`
+    return `Mining status ${payload === '0x' ? 'Off' : 'On'}`
   return ''
 }
 
