@@ -25,7 +25,7 @@ export function Page(props) {
       minW="50%"
       px={20}
       py={6}
-      overflowY="hidden"
+      overflowY="auto"
       {...props}
     />
   )

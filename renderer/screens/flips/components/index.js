@@ -57,7 +57,7 @@ export function FlipCardImage(props) {
       objectFit="cover"
       borderWidth="1px"
       borderColor="brandGray.016"
-      // boxShadow={`0 0 0 1px ${colors.brandGray["016"]}`}
+      // boxShadow={`0 0 0 1px ${colors.brandGray['016']}`}
       rounded="lg"
       height="full"
       {...props}
@@ -119,7 +119,7 @@ export function FlipCardMenuItem(props) {
       _selected={{bg: 'gray.50'}}
       _active={{bg: 'gray.50'}}
       {...props}
-    ></PseudoBox>
+    />
   )
 }
 
@@ -638,13 +638,8 @@ export function EmptyFlipImage(props) {
   )
 }
 
-export function CommunityTranslations({
-  keywords,
-  onUpvote,
-  onDownvote,
-  onSuggest,
-}) {
-  const [wordIndex, setWordIndex] = React.useState(0)
+export function CommunityTranslations({keywords, onVote, onSuggest}) {
+  const [wordIdx, setWordIdx] = React.useState(0)
   const {isOpen, onToggle} = useDisclosure()
 
   return (
@@ -661,14 +656,14 @@ export function CommunityTranslations({
       </IconButton2>
       <Collapse isOpen={isOpen}>
         <Stack spacing={8}>
-          <RadioButtonGroup isInline value={wordIndex} onChange={setWordIndex}>
+          <RadioButtonGroup isInline value={wordIdx} onChange={setWordIdx}>
             {keywords.words.map(({id, name}, i) => (
               <FlipKeywordRadio key={id} value={i}>
                 {capitalize(name)}
               </FlipKeywordRadio>
             ))}
           </RadioButtonGroup>
-          {keywords.translations[wordIndex].map(({id, name, desc, ups}) => (
+          {keywords.translations[wordIdx].map(({id, name, desc, ups}) => (
             <Flex key={id} justify="space-between">
               <FlipKeyword>
                 <FlipKeywordName>{name}</FlipKeywordName>
@@ -677,23 +672,26 @@ export function CommunityTranslations({
               <Stack isInline spacing={2} align="center">
                 <VoteButton
                   icon="upvote"
-                  onClick={() => onUpvote({wordIndex, id})}
+                  onClick={() => onVote({id, up: true})}
                 />
-                <Box
+                <Flex
+                  align="center"
+                  justify="center"
                   bg="green.010"
                   color="green.500"
                   fontWeight={500}
                   rounded="md"
-                  px={4}
-                  py={2}
+                  minW={12}
+                  minH={8}
+                  style={{fontVariantNumeric: 'tabular-nums'}}
                 >
                   {ups}
-                </Box>
+                </Flex>
                 <VoteButton
                   icon="upvote"
                   color="muted"
                   transform="rotate(180deg)"
-                  onClick={() => onDownvote({wordIndex, id})}
+                  onClick={() => onVote({id, up: false})}
                 />
               </Stack>
             </Flex>
@@ -710,13 +708,13 @@ export function CommunityTranslations({
                   nameInput: {value: name},
                   descInput: {value: desc},
                 } = e.target.elements
-                onSuggest({wordIndex, name, desc: desc.trim()})
+                onSuggest({wordIdx, name, desc: desc.trim()})
               }}
             >
               <FormControl>
                 <Input
                   id="nameInput"
-                  placeholder={capitalize(keywords.words[0].name)}
+                  placeholder={capitalize(keywords.words[wordIdx].name)}
                   px={3}
                   pt="3/2"
                   pb={2}
@@ -728,7 +726,7 @@ export function CommunityTranslations({
                 />
                 <Textarea
                   id="descInput"
-                  placeholder={capitalize(keywords.words[0].desc)}
+                  placeholder={capitalize(keywords.words[wordIdx].desc)}
                   borderColor="gray.300"
                   px={3}
                   pt="3/2"

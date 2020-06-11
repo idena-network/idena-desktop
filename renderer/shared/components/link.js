@@ -2,6 +2,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import NextLink from 'next/link'
+import {Icon, Link as ChakraLink} from '@chakra-ui/core'
 import theme from '../theme'
 
 function Link({
@@ -52,6 +53,30 @@ Link.propTypes = {
   width: PropTypes.string,
   height: PropTypes.string,
   children: PropTypes.node,
+}
+
+// eslint-disable-next-line react/prop-types
+export function IconLink({href, icon, children, ...props}) {
+  return (
+    <NextLink href={href} passHref>
+      <ChakraLink
+        href={href}
+        color="brandBlue.500"
+        rounded="md"
+        fontWeight={500}
+        h={8}
+        px={2}
+        py="3/2"
+        _hover={{
+          bg: 'blue.50',
+        }}
+        {...props}
+      >
+        <Icon name={icon} size={4} mr={2} />
+        {children}
+      </ChakraLink>
+    </NextLink>
+  )
 }
 
 export default Link

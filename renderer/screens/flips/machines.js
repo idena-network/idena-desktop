@@ -1,7 +1,240 @@
-import {Machine, assign} from 'xstate'
+import {Machine, assign, spawn, sendParent} from 'xstate'
 import {log} from 'xstate/lib/actions'
-import {fetchKeywordTranslations} from './utils'
+import {
+  fetchKeywordTranslations,
+  voteForKeywordTranslation,
+  suggestKeywordTranslation,
+} from './utils'
 import {shuffle} from '../../shared/utils/arr'
+import {FlipType} from '../../shared/types'
+import {submitFlip} from '../../shared/api'
+import {toHex} from '../../shared/hooks/use-flips'
+import words from './utils/words'
+
+export const flipsMachine = Machine({
+  id: 'flips',
+  context: {
+    flips: null,
+    epoch: null,
+    knownFlips: [],
+    availableKeywords: [],
+  },
+  on: {
+    EPOCH: {
+      actions: [
+        assign({
+          flips: [],
+        }),
+        // ({epoch}) => epochDb('flips', epoch).clear(),
+      ],
+    },
+  },
+  initial: 'initializing',
+  states: {
+    initializing: {
+      invoke: {
+        src: async ({epoch, knownFlips, availableKeywords}) => {
+          const flipDb = global.flipStore
+
+          const persistedFlips = flipDb
+            .getFlips()
+            .map(({pics, hint, images, keywords, ...flip}) => ({
+              ...flip,
+              images: images || pics,
+              keywords: keywords || hint || [],
+              pics,
+              hint,
+            }))
+
+          // persistedFlips = persistedFlips.map(({images, ...flip}) => ({
+          //   ...flip,
+          //   images: images.map(buffer => buffer && bufferToImage(buffer)),
+          // }))
+
+          let missingFlips = knownFlips.filter(
+            hash => !persistedFlips.includes(hash)
+          )
+
+          if (missingFlips.length) {
+            const keywords = availableKeywords
+              .filter(({id}) =>
+                persistedFlips.some(({keywordPairId}) => keywordPairId !== id)
+              )
+              .map(({words}) => words.map(w => ({name: `word${w}`})))
+
+            missingFlips = missingFlips.map((hash, idx) => ({
+              hash,
+              keywords: keywords[idx],
+              images: Array.from({length: 4}),
+            }))
+          }
+
+          return {persistedFlips, missingFlips}
+        },
+        onDone: {
+          target: 'ready.dirty',
+          actions: [
+            assign({
+              flips: (_, {data: {persistedFlips, missingFlips}}) =>
+                persistedFlips
+                  .map(flip => ({
+                    ...flip,
+                    ref: spawn(
+                      // eslint-disable-next-line no-use-before-define
+                      flipMachine.withContext(flip),
+                      `flip-${flip.id}`
+                    ),
+                  }))
+                  .concat(missingFlips),
+            }),
+            log(),
+          ],
+        },
+        onError: [
+          {
+            target: 'ready.pristine',
+            actions: [
+              assign({
+                flips: [],
+              }),
+              log(),
+            ],
+            cond: (_, {data: error}) => error.notFound,
+          },
+          {
+            target: 'failure',
+            actions: [
+              assign({
+                flips: [],
+              }),
+              log(),
+            ],
+          },
+        ],
+      },
+    },
+    ready: {
+      on: {
+        FLIP_ADDED: {
+          target: '.dirty.hist',
+          actions: [
+            assign({
+              flips: ({flips}, {data}) =>
+                flips.concat({
+                  ...data,
+                  // eslint-disable-next-line no-use-before-define
+                  ref: spawn(flipMachine.withContext(data), `flip-${data.id}`),
+                }),
+            }),
+            log(),
+          ],
+        },
+      },
+      initial: 'pristine',
+      states: {
+        pristine: {},
+        dirty: {
+          on: {
+            FILTER_ACTIVE: '.active',
+            FILTER_DRAFTS: '.drafts',
+            FILTER_ARCHIVE: '.archive',
+            SUBMITTED: {
+              actions: [
+                assign({
+                  flips: ({flips}, {flip}) =>
+                    flips.map(currentFlip =>
+                      currentFlip.id === flip.id
+                        ? {...currentFlip, ...flip, ref: currentFlip.ref}
+                        : flip
+                    ),
+                }),
+                log(),
+              ],
+            },
+          },
+          initial: 'active',
+          states: {
+            active: {},
+            drafts: {},
+            archive: {},
+            hist: {
+              type: 'history',
+            },
+          },
+        },
+      },
+    },
+    failure: {
+      entry: log(),
+    },
+  },
+})
+
+export const flipMachine = Machine({
+  id: 'flip',
+  context: {
+    images: [],
+  },
+  initial: 'idle',
+  states: {
+    idle: {
+      on: {
+        SUBMIT: {
+          target: 'publishing',
+          actions: [log()],
+        },
+        DELETE: {
+          actions: [
+            assign({
+              flips: ({flips}, {id}) => {
+                //   // callRpc("flip_delete", hash)
+                //   deletePersistedFlip(id)
+                const idx = flips.findIndex(f => f.id === id)
+                return [
+                  ...flips.slice(0, idx),
+                  {
+                    ...flips[idx],
+                    type: FlipType.Deleting,
+                  },
+                  ...flips.slice(idx + 1),
+                ]
+              },
+            }),
+          ],
+        },
+      },
+    },
+    publishing: {
+      initial: 'submitting',
+      states: {
+        submitting: {
+          invoke: {
+            src: ({images, order, keywordPairId}) =>
+              submitFlip(...toHex(images, order), keywordPairId),
+            onDone: {
+              target: '#flip.mining',
+              actions: [
+                assign((flip, {hash}) => ({
+                  ...flip,
+                  type: FlipType.Publishing,
+                  hash,
+                })),
+                flip => sendParent('SUBMITTED', {flip}),
+                log(),
+              ],
+            },
+            onError: {target: 'failure', actions: [log()]},
+          },
+        },
+        failure: {},
+      },
+    },
+    mining: {},
+    published: {},
+    deleting: {},
+    deleted: {},
+  },
+})
 
 export const flipEditMachine = Machine({
   id: 'flipEdit',
@@ -101,9 +334,93 @@ export const flipMasterMachine = Machine(
                     on: {
                       SWITCH_LOCALE: 'origin',
                     },
+                    initial: 'idle',
+                    states: {
+                      idle: {
+                        on: {
+                          VOTE: 'voting',
+                          SUGGEST: 'suggesting',
+                        },
+                      },
+                      voting: {
+                        invoke: {
+                          src: 'voteForKeywordTranslation',
+                          onDone: {
+                            target: 'idle',
+                            actions: [
+                              assign({
+                                keywords: (
+                                  // eslint-disable-next-line no-shadow
+                                  {keywords: {words, translations}},
+                                  {data: {id, up}}
+                                ) => ({
+                                  words,
+                                  translations: translations.map(
+                                    wordTranslations =>
+                                      wordTranslations.map(translation =>
+                                        translation.id === id
+                                          ? {
+                                              ...translation,
+                                              ups:
+                                                translation.ups + (up ? 1 : -1),
+                                            }
+                                          : translation
+                                      )
+                                  ),
+                                }),
+                              }),
+                              log(),
+                            ],
+                          },
+                          onError: 'failure',
+                        },
+                      },
+                      suggesting: {
+                        invoke: {
+                          src: 'suggestKeywordTranslation',
+                          onDone: {
+                            target: 'idle',
+                            actions: [
+                              assign({
+                                keywords: (
+                                  // eslint-disable-next-line no-shadow
+                                  {keywords: {words, translations}},
+                                  {data: {wordId, id, name, desc}}
+                                ) => {
+                                  const wordIdx = words.findIndex(
+                                    word => word.id === wordId
+                                  )
+                                  return {
+                                    words,
+                                    translations: translations.map(
+                                      (wordTranslations, idx) =>
+                                        idx === wordIdx
+                                          ? wordTranslations.concat({
+                                              wordId,
+                                              id,
+                                              name,
+                                              desc,
+                                              ups: 0,
+                                            })
+                                          : wordTranslations
+                                    ),
+                                  }
+                                },
+                              }),
+                              log(),
+                            ],
+                          },
+                          onError: 'failure',
+                        },
+                      },
+                      failure: {
+                        entry: log(),
+                      },
+                    },
                   },
                 },
               },
+              failure: {},
             },
           },
           images: {
@@ -197,17 +514,28 @@ export const flipMasterMachine = Machine(
   {
     services: {
       loadKeywords: async ({availableKeywords, keywordPairId}) => {
+        // eslint-disable-next-line no-shadow
         const {words} = availableKeywords.find(({id}) => id === keywordPairId)
         return {
           words: words.map(id => ({id, ...global.loadKeyword(id)})),
           translations: await fetchKeywordTranslations(words),
         }
       },
+      voteForKeywordTranslation: async (_, e) => voteForKeywordTranslation(e),
+      suggestKeywordTranslation: async (
+        // eslint-disable-next-line no-shadow
+        {keywords: {words}},
+        {name, desc, wordIdx}
+      ) =>
+        suggestKeywordTranslation({
+          wordId: words[wordIdx].id,
+          name,
+          desc,
+        }),
     },
     guards: {
       hasApprovedTranslation: ({keywords}) =>
-        global.locale !== 'EN' &&
-        keywords.translations.some(t => true || t.confirmed),
+        global.locale !== 'EN' && keywords.translations.some(t => t.confirmed),
     },
   }
 )

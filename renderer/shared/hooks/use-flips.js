@@ -65,13 +65,6 @@ export function toHex(pics, order) {
   const seed = perm(FLIP_LENGTH)
   const shuffled = shufflePics(pics, order, seed)
 
-  const rlp = encode([
-    shuffled.pics.map(src =>
-      Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
-    ),
-    shuffled.orders,
-  ])
-
   const publicRlp = encode([
     shuffled.pics
       .slice(0, 2)
@@ -88,7 +81,7 @@ export function toHex(pics, order) {
       ),
     shuffled.orders,
   ])
-  return [rlp, publicRlp, privateRlp].map(x => `0x${x.toString('hex')}`)
+  return [publicRlp, privateRlp].map(x => `0x${x.toString('hex')}`)
 }
 
 function useFlips() {

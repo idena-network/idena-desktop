@@ -80,7 +80,8 @@ FlipMenuItem.propTypes = {
 function FlipCover({
   id,
   hint,
-  pics,
+  // eslint-disable-next-line react/prop-types
+  images: pics,
   type,
   createdAt,
   modifiedAt,
