@@ -46,6 +46,8 @@ import {submitFlip} from '../../shared/api'
 export default function NewFlipPage() {
   const router = useRouter()
 
+  const {t, i18n} = useTranslation()
+
   const {syncing} = useChainState()
 
   const {flipKeyWordPairs: availableKeywords} = useIdentityState()
@@ -57,7 +59,7 @@ export default function NewFlipPage() {
       ? availableKeywords.filter(({used}) => !used)
       : [
           {
-            id: -1,
+            id: 0,
           },
         ]
 
@@ -69,7 +71,7 @@ export default function NewFlipPage() {
       images: Array.from({length: 4}),
     },
     actions: {
-      onSubmitted: () => router.push('/flips'),
+      onSubmitted: () => router.push('/flips/list'),
     },
     services: {
       submitFlip: async ({
@@ -128,7 +130,7 @@ export default function NewFlipPage() {
             order,
             ...result,
             type: FlipType.Publishing,
-            modifiedAt: Date.now(),
+            createdAt: Date.now(),
           })
         )
         return resp
@@ -247,7 +249,7 @@ export default function NewFlipPage() {
                             _hover={{background: 'transparent'}}
                             onClick={() => send('SWITCH_LOCALE')}
                           >
-                            {global.locale.toUpperCase()}
+                            {i18n.language.toUpperCase()}
                           </IconButton2>
                           <Divider
                             orientation="vertical"
@@ -301,9 +303,8 @@ export default function NewFlipPage() {
                         <Divider borderColor="gray.300" mx={-10} my={4} />
                         <CommunityTranslations
                           keywords={keywords}
-                          onSuggest={console.log}
-                          onUpvote={console.log}
-                          onDownvote={console.log}
+                          onVote={e => send('VOTE', e)}
+                          onSuggest={e => send('SUGGEST', e)}
                         />
                       </>
                     )}
@@ -321,7 +322,7 @@ export default function NewFlipPage() {
             )}
             {is('images') && (
               <FlipEditorStep
-                keywords={keywords.words}
+                keywords={keywords ? keywords.words : []}
                 images={images}
                 onChangeImage={(image, currentIndex) =>
                   send('CHANGE_IMAGES', {image, currentIndex})
@@ -341,7 +342,7 @@ export default function NewFlipPage() {
                 <FlipStepBody minH="180px">
                   <Stack isInline spacing={10}>
                     <FlipKeywordPanel w={rem(320)}>
-                      {keywords.translations.length === 0 && (
+                      {keywords && keywords.translations.length === 0 && (
                         <Stack spacing="30px">
                           <FlipKeywordPair>
                             {keywords.words.map(({id, name, desc}) => (
@@ -359,7 +360,7 @@ export default function NewFlipPage() {
                               _hover={{background: 'transparent'}}
                               onClick={() => send('SWITCH_LOCALE')}
                             >
-                              {global.locale.toUpperCase()}
+                              {i18n.language.toUpperCase()}
                             </IconButton2>
                             <Divider
                               orientation="vertical"
@@ -387,7 +388,7 @@ export default function NewFlipPage() {
                           </Stack>
                         </Stack>
                       )}
-                      {keywords.translations.length > 0 && (
+                      {keywords && keywords.translations.length > 0 && (
                         <>
                           <Stack spacing="30px">
                             <FlipKeywordPair>

@@ -167,7 +167,10 @@ function Nav() {
         >
           {t('Wallets')}
         </NavItem>
-        <NavItem href="/flips" icon={<i className="icon icon--menu_gallery" />}>
+        <NavItem
+          href="/flips/list"
+          icon={<i className="icon icon--menu_gallery" />}
+        >
           {t('Flips')}
         </NavItem>
         <NavItem
