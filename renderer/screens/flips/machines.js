@@ -1,5 +1,6 @@
 import {Machine, assign, spawn, sendParent} from 'xstate'
-import {log} from 'xstate/lib/actions'
+import {log, send, forwardTo} from 'xstate/lib/actions'
+import nanoid from 'nanoid'
 import {
   fetchKeywordTranslations,
   voteForKeywordTranslation,
@@ -10,6 +11,7 @@ import {FlipType} from '../../shared/types'
 import {submitFlip} from '../../shared/api'
 import {toHex} from '../../shared/hooks/use-flips'
 import words from './utils/words'
+
 
 export const flipsMachine = Machine({
   id: 'flips',
@@ -274,7 +276,6 @@ export const flipMasterMachine = Machine(
     initial: 'editing',
     states: {
       editing: {
-        entry: assign({prevImages: ({images}) => images}),
         initial: 'keywords',
         states: {
           keywords: {
@@ -426,6 +427,7 @@ export const flipMasterMachine = Machine(
           images: {
             on: {
               CHANGE_IMAGES: {
+                target: '.persisting',
                 actions: [
                   assign({
                     images: ({images}, {image, currentIndex}) => [
@@ -439,6 +441,25 @@ export const flipMasterMachine = Machine(
               },
               NEXT: 'shuffle',
               PREV: 'keywords',
+            },
+            initial: 'idle',
+            states: {
+              idle: {},
+              persisting: {
+                invoke: {
+                  id: 'persistFlip',
+                  src: 'persistFlip',
+                },
+                on: {
+                  PERSISTED: {
+                    target: 'idle',
+                    actions: [
+                      assign((context, {flip}) => ({...context, ...flip})),
+                      log(),
+                    ],
+                  },
+                },
+              },
             },
           },
           shuffle: {
@@ -502,10 +523,7 @@ export const flipMasterMachine = Machine(
             },
           ],
           CANCEL: {
-            actions: [
-              'onCancel',
-              assign({images: ({prevImages}) => prevImages}),
-            ],
+            actions: ['onCancel'],
           },
         },
       },
@@ -519,6 +537,45 @@ export const flipMasterMachine = Machine(
         return {
           words: words.map(id => ({id, ...global.loadKeyword(id)})),
           translations: await fetchKeywordTranslations(words),
+        }
+      },
+      persistFlip: (
+        {id, keywordPairId, order, images, keywords, type, createdAt},
+        event
+      ) => cb => {
+        let nextFlip = {keywordPairId, order, images, keywords}
+
+        nextFlip = id
+          ? {
+              ...nextFlip,
+              id,
+              type,
+              createdAt,
+              modifiedAt: new Date().toISOString(),
+            }
+          : {
+              ...nextFlip,
+              id: nanoid(),
+              createdAt: new Date().toISOString(),
+              type: FlipType.Draft,
+            }
+
+        if (event.type === 'CHANGE_IMAGES') {
+          const {image, currentIndex} = event
+
+          nextFlip = {
+            ...nextFlip,
+            images: [
+              ...images.slice(0, currentIndex),
+              image,
+              ...images.slice(currentIndex + 1),
+            ],
+          }
+
+          if (id) global.flipStore.updateDraft(nextFlip)
+          else global.flipStore.addDraft(nextFlip)
+
+          cb({type: 'PERSISTED', flip: nextFlip})
         }
       },
       voteForKeywordTranslation: async (_, e) => voteForKeywordTranslation(e),
