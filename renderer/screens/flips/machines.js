@@ -8,9 +8,10 @@ import {
 } from './utils'
 import {shuffle} from '../../shared/utils/arr'
 import {FlipType} from '../../shared/types'
-import {submitFlip} from '../../shared/api'
+import {submitFlip, fetchTx, deleteFlip} from '../../shared/api'
 import {toHex} from '../../shared/hooks/use-flips'
-import words from './utils/words'
+// import words from './utils/words'
+import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 
 export const flipsMachine = Machine({
   id: 'flips',
@@ -61,7 +62,7 @@ export const flipsMachine = Machine({
               .filter(({id}) =>
                 persistedFlips.some(({keywordPairId}) => keywordPairId !== id)
               )
-              .map(({words}) => words.map(w => ({name: `word${w}`})))
+              .map(({words}) => words.map(global.loadKeyword))
 
             missingFlips = missingFlips.map((hash, idx) => ({
               hash,
@@ -139,18 +140,47 @@ export const flipsMachine = Machine({
             FILTER_ACTIVE: '.active',
             FILTER_DRAFTS: '.drafts',
             FILTER_ARCHIVE: '.archive',
-            SUBMITTED: {
+            PUBLISHING: {
               actions: [
                 assign({
-                  flips: ({flips}, {flip}) =>
-                    flips.map(currentFlip =>
-                      currentFlip.id === flip.id
-                        ? {...currentFlip, ...flip, ref: currentFlip.ref}
-                        : flip
-                    ),
+                  flips: ({flips}, {id}) =>
+                    updateFlipType(flips, {id, type: FlipType.Publishing}),
                 }),
                 log(),
               ],
+            },
+            PUBLISHED: {
+              actions: [
+                assign({
+                  flips: ({flips}, {id}) =>
+                    updateFlipType(flips, {id, type: FlipType.Published}),
+                }),
+                log(),
+              ],
+            },
+            PUBLISH_FAILED: {
+              actions: ['onError'],
+            },
+            DELETING: {
+              actions: [
+                assign({
+                  flips: ({flips}, {id}) =>
+                    updateFlipType(flips, {id, type: FlipType.Deleting}),
+                }),
+                log(),
+              ],
+            },
+            DELETED: {
+              actions: [
+                assign({
+                  flips: ({flips}, {id}) =>
+                    updateFlipType(flips, {id, type: FlipType.Archived}),
+                }),
+                log(),
+              ],
+            },
+            DELETE_FAILED: {
+              actions: ['onError'],
             },
           },
           initial: 'active',
@@ -171,71 +201,140 @@ export const flipsMachine = Machine({
   },
 })
 
-export const flipMachine = Machine({
-  id: 'flip',
-  context: {
-    images: [],
-  },
-  initial: 'idle',
-  states: {
-    idle: {
-      on: {
-        SUBMIT: {
-          target: 'publishing',
-          actions: [log()],
-        },
-        DELETE: {
-          actions: [
-            assign({
-              flips: ({flips}, {id}) => {
-                //   // callRpc("flip_delete", hash)
-                //   deletePersistedFlip(id)
-                const idx = flips.findIndex(f => f.id === id)
-                return [
-                  ...flips.slice(0, idx),
-                  {
-                    ...flips[idx],
-                    type: FlipType.Deleting,
-                  },
-                  ...flips.slice(idx + 1),
-                ]
-              },
-            }),
-          ],
+export const flipMachine = Machine(
+  {
+    id: 'flip',
+    context: {
+      images: [],
+    },
+    initial: 'idle',
+    states: {
+      idle: {
+        on: {
+          PUBLISH: 'publishing',
+          DELETE: 'deleting',
         },
       },
-    },
-    publishing: {
-      initial: 'submitting',
-      states: {
-        submitting: {
-          invoke: {
-            src: ({images, order, keywordPairId}) =>
-              submitFlip(...toHex(images, order), keywordPairId),
-            onDone: {
-              target: '#flip.mining',
-              actions: [
-                assign((flip, {hash}) => ({
-                  ...flip,
-                  type: FlipType.Publishing,
-                  hash,
-                })),
-                flip => sendParent('SUBMITTED', {flip}),
-                log(),
-              ],
+      publishing: {
+        initial: 'submitting',
+        states: {
+          submitting: {
+            invoke: {
+              src: 'submitFlip',
+              onDone: {
+                target: 'mining',
+                actions: [
+                  assign((context, {data: {result}}) => ({
+                    ...context,
+                    ...result,
+                    type: FlipType.Publishing,
+                  })),
+                  sendParent(({id}) => ({
+                    type: 'PUBLISHING',
+                    id,
+                  })),
+                  log(),
+                ],
+              },
+              onError: {
+                target: 'failure',
+                actions: [
+                  assign({
+                    error: (_, {data: {message}}) => message,
+                  }),
+                  'onPublishFailed',
+                  log(),
+                ],
+              },
             },
-            onError: {target: 'failure', actions: [log()]},
+          },
+          mining: {
+            invoke: {
+              src: 'pollStatus',
+            },
+          },
+          failure: {
+            entry: sendParent(({error}) => ({type: 'PUBLISH_FAILED', error})),
           },
         },
-        failure: {},
+        on: {
+          MINED: 'published',
+        },
+      },
+      published: {
+        entry: [
+          assign({type: FlipType.Published}),
+          sendParent(({id}) => ({
+            type: 'PUBLISHED',
+            id,
+          })),
+          log(),
+        ],
+      },
+      deleting: {
+        states: {
+          submitting: {
+            invoke: {
+              src: ({hash}) => deleteFlip(hash),
+              onDone: {
+                target: 'mining',
+                actions: sendParent(({id}) => ({
+                  type: 'DELETING',
+                  id,
+                })),
+              },
+            },
+          },
+          mining: {
+            invoke: {
+              src: 'pollStatus',
+            },
+          },
+          failure: {
+            entry: sendParent(({error}) => ({type: 'DELETE_FAILED', error})),
+          },
+        },
+        on: {
+          MINED: 'deleted',
+        },
+      },
+      deleted: {
+        entry: [
+          assign({type: FlipType.Archived}),
+          sendParent(({id}) => ({
+            type: 'DELETED',
+            id,
+          })),
+        ],
       },
     },
-    mining: {},
-    published: {},
-    deleting: {},
-    deleted: {},
   },
-})
+  {
+    services: {
+      submitFlip: async ({images, order, keywordPairId}) => {
+        const {result, error} = await submitFlip(
+          ...toHex(images, order),
+          keywordPairId
+        )
+        if (error) throw new Error(error.message)
+        return result
+      },
+      pollStatus: ({hash}) => cb => {
+        const fetchStatus = async () => {
+          const {blockHash} = await fetchTx(hash)
+          if (blockHash !== HASH_IN_MEMPOOL) cb('MINED')
+          else return setTimeout(fetchStatus, 10 * 1000)
+        }
+
+        const timeoutId = fetchStatus(hash)
+
+        return () => {
+          clearTimeout(timeoutId)
+        }
+      },
+    },
+  }
+)
 
 export const flipEditMachine = Machine({
   id: 'flipEdit',
@@ -609,3 +708,15 @@ export const flipMasterMachine = Machine(
     },
   }
 )
+
+function updateFlipType(flips, {id, type}) {
+  return flips.map(flip =>
+    flip.id === id
+      ? {
+          ...flip,
+          type,
+          ref: flip.ref,
+        }
+      : flip
+  )
+}

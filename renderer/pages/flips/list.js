@@ -10,6 +10,7 @@ import {
   Image,
   MenuDivider,
   useTheme,
+  useToast,
 } from '@chakra-ui/core'
 import {transparentize} from 'polished'
 import {Page, PageTitle} from '../../screens/app/components'
@@ -41,6 +42,8 @@ import {flipsMachine} from '../../screens/flips/machines'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
+import {Notification} from '../../shared/components/notifications'
+import {NotificationType} from '../../shared/providers/notification-context'
 
 function FlipListPage({
   identity: {
@@ -66,10 +69,27 @@ function FlipListPage({
   //   },
   // ] = useAppMachine()
 
+  const toast = useToast()
+
   const [current, send] = useMachine(flipsMachine, {
     context: {
       knownFlips: knownFlips || [],
       availableKeywords: availableKeywords || [],
+    },
+    actions: {
+      onError: (_, {error}) =>
+        toast({
+          title: error,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          // eslint-disable-next-line react/display-name
+          render: () => (
+            <Box fontSize="md">
+              <Notification title={error} type={NotificationType.Error} />
+            </Box>
+          ),
+        }),
     },
   })
   const {flips} = current.context
@@ -101,7 +121,7 @@ function FlipListPage({
     .slice(0, missingFlipsNumber)
     .map(({id, words}) => ({
       id,
-      words: words.map(w => ({name: `word${w}`})),
+      words: words.map(global.loadKeyword),
     }))
 
   return (
@@ -215,6 +235,8 @@ function FlipCard({flip}) {
 
   const {colors} = useTheme()
 
+  const isDraft = type === FlipType.Draft
+
   return (
     <Box position="relative">
       <FlipCardImageBox>
@@ -257,19 +279,23 @@ function FlipCard({flip}) {
           </FlipCardSubtitle>
         </Box>
         <FlipCardMenu>
-          <FlipCardMenuItem onClick={() => send('SUBMIT', {id})}>
-            <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
-            Submit flip
-          </FlipCardMenuItem>
-          <FlipCardMenuItem>
-            <NextLink href={`/flips/edit?id=${id}`}>
-              <Flex>
-                <FlipCardMenuItemIcon name="edit" size={5} mr={2} />
-                Edit flip
-              </Flex>
-            </NextLink>
-          </FlipCardMenuItem>
-          <MenuDivider color="rgb(232, 234, 237)" my={2} width="145px" />
+          {isDraft && (
+            <>
+              <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
+                <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
+                Submit flip
+              </FlipCardMenuItem>
+              <FlipCardMenuItem>
+                <NextLink href={`/flips/edit?id=${id}`}>
+                  <Flex>
+                    <FlipCardMenuItemIcon name="edit" size={5} mr={2} />
+                    Edit flip
+                  </Flex>
+                </NextLink>
+              </FlipCardMenuItem>
+              <MenuDivider color="rgb(232, 234, 237)" my={2} width="145px" />
+            </>
+          )}
           <FlipCardMenuItem onClick={() => send('DELETE', {id})}>
             <FlipCardMenuItemIcon
               name="delete"
