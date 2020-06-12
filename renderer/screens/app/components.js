@@ -33,6 +33,6 @@ export function Page(props) {
 
 export function PageTitle(props) {
   return (
-    <Heading as="h1" fontSize="3xl" fontWeight={500} py={2} mb={4} {...props} />
+    <Heading as="h1" fontSize="xl" fontWeight={500} py={2} mb={4} {...props} />
   )
 }
