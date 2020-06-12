@@ -26,6 +26,7 @@ import {
   useSettingsDispatch,
 } from '../../shared/providers/settings-context'
 import {AVAILABLE_LANGS} from '../../i18n'
+import {useEpochState} from '../../shared/providers/epoch-context'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -33,6 +34,7 @@ const inviteDb = global.invitesDb || {}
 function Settings() {
   const {t} = useTranslation()
   const {archiveFlips} = useFlips()
+  const epoch = useEpochState()
   const {addNotification} = useNotificationDispatch()
   const {runInternalNode, useExternalNode} = useSettingsState()
   return (
@@ -53,8 +55,10 @@ function Settings() {
             <Box my={theme.spacings.small}>
               <Button
                 onClick={() => {
-                  archiveFlips()
-                  addNotification({title: t('Flips archived')})
+                  if (epoch) {
+                    archiveFlips(epoch.epoch)
+                    addNotification({title: t('Flips archived')})
+                  }
                 }}
               >
                 {t('Archive flips')}
