@@ -1,6 +1,6 @@
 import React from 'react'
 import {useRouter} from 'next/router'
-import {Box, Code, Flex, Stack, Divider} from '@chakra-ui/core'
+import {Box, Code, Flex, Stack, Divider, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page} from '../../screens/app/components'
@@ -33,14 +33,12 @@ import {
 } from '../../shared/components/button'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
-import {useNotificationDispatch} from '../../shared/providers/notification-context'
+import {NotificationType} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {useEpochState} from '../../shared/providers/epoch-context'
-import useFlips, {toHex} from '../../shared/hooks/use-flips'
-import {FlipType} from '../../shared/types'
 import {flipMasterMachine, flipEditMachine} from '../../screens/flips/machines'
 import {rem} from '../../shared/theme'
-import {submitFlip} from '../../shared/api'
+import {publishFlip} from '../../screens/flips/utils/flip'
+import {Notification} from '../../shared/components/notifications'
 
 export default function EditFlipPage() {
   const router = useRouter()
@@ -55,21 +53,24 @@ export default function EditFlipPage() {
     },
   })
 
-  if (!currentEdit.matches('loaded') || !availableKeywords) return null
+  if (currentEdit.matches('loaded') && availableKeywords !== undefined)
+    return (
+      <FlipEditMaster
+        availableKeywords={availableKeywords}
+        {...currentEdit.context}
+      />
+    )
 
-  return (
-    <FlipEditMaster
-      availableKeywords={availableKeywords}
-      {...currentEdit.context}
-    />
-  )
+  return null
 }
 
 // eslint-disable-next-line react/prop-types
 function FlipEditMaster({availableKeywords, ...flipContext}) {
-  const {t, i18n} = useTranslation()
+  const {i18n} = useTranslation()
 
   const router = useRouter()
+
+  const toast = useToast()
 
   const {syncing} = useChainState()
 
@@ -81,34 +82,22 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
     },
     actions: {
       onSubmitted: () => router.push('/flips/list'),
+      onError: (_, {error}) =>
+        toast({
+          title: error,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          // eslint-disable-next-line react/display-name
+          render: () => (
+            <Box fontSize="md">
+              <Notification title={error} type={NotificationType.Error} />
+            </Box>
+          ),
+        }),
     },
     services: {
-      submitFlip: async ({keywordPairId, ...context}) => {
-        if (keywordPairId < 0) {
-          return {
-            error: {message: 'Keywords for flip are not allowed'},
-          }
-        }
-
-        // eslint-disable-next-line no-shadow
-        const {images, order} = context
-        const [publicHex, privateHex] = toHex(images, order)
-        if (publicHex.length + privateHex.length > 2 * 1024 * 1024) {
-          return {
-            error: {message: 'Flip is too large'},
-          }
-        }
-
-        const resp = await submitFlip(publicHex, privateHex, keywordPairId)
-        const {result} = resp
-
-        global.flipStore.updateDraft({
-          ...context,
-          ...result,
-          type: FlipType.Publishing,
-        })
-        return resp
-      },
+      submitFlip: async flip => publishFlip(flip),
     },
   })
 
@@ -397,7 +386,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
             <PrimaryButton onClick={() => send('SUBMIT')}>Submit</PrimaryButton>
           )}
         </FlipMasterFooter>
-        <Box position="absolute" left={6} bottom={6} zIndex="modal">
+        <Box position="absolute" left={6} bottom={6} zIndex="popover">
           <Code>{JSON.stringify(current.value)}</Code>
         </Box>
       </Page>

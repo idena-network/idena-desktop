@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
+import NextLink from 'next/link'
 import {
   SimpleGrid,
   Image,
@@ -28,6 +29,7 @@ import {
   Textarea,
   Collapse,
   useDisclosure,
+  Link,
 } from '@chakra-ui/core'
 import FlipEditor from './flip-editor'
 import {Step} from '../types'
@@ -127,12 +129,16 @@ export function FlipCardMenuItemIcon(props) {
   return <Icon size={5} mr={3} color="brand.blue" {...props} />
 }
 
-export function RequiredFlip({title}) {
+export function RequiredFlipPlaceholder({title}) {
   return (
-    <Box>
-      <EmptyFlipBox>
-        <FlipPlaceholder />
-      </EmptyFlipBox>
+    <Box cursor="pointer">
+      <NextLink href="/flips/new" passHref>
+        <Link display="inline-block" _hover={null}>
+          <EmptyFlipBox>
+            <FlipPlaceholder />
+          </EmptyFlipBox>
+        </Link>
+      </NextLink>
       <Box mt={4}>
         <FlipCardTitle>{title}</FlipCardTitle>
         <FlipCardSubtitle>Required</FlipCardSubtitle>
@@ -141,12 +147,25 @@ export function RequiredFlip({title}) {
   )
 }
 
-export function OptionalFlip({title}) {
+export function OptionalFlipPlaceholder({title, isDisabled}) {
   return (
-    <Box opacity={0.5}>
-      <EmptyFlipBox>
-        <FlipPlaceholder />
-      </EmptyFlipBox>
+    <Box
+      cursor={isDisabled ? 'pointer' : 'auto'}
+      opacity={isDisabled ? 0.5 : 1}
+    >
+      {isDisabled ? (
+        <EmptyFlipBox>
+          <FlipPlaceholder />
+        </EmptyFlipBox>
+      ) : (
+        <NextLink href="/flips/new" passHref>
+          <Link display="inline-block" _hover={null}>
+            <EmptyFlipBox>
+              <FlipPlaceholder />
+            </EmptyFlipBox>
+          </Link>
+        </NextLink>
+      )}
       <Box mt={4}>
         <FlipCardTitle>{title}</FlipCardTitle>
         <FlipCardSubtitle>Optional</FlipCardSubtitle>
