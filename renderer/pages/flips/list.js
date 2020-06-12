@@ -83,7 +83,7 @@ function FlipListPage({
       )
     : // eslint-disable-next-line no-nested-ternary
     current.matches(readyState('drafts'))
-    ? flips.filter(({type}) => [FlipType.Drafted].includes(type))
+    ? flips.filter(({type}) => [FlipType.Draft].includes(type))
     : current.matches(readyState('archive'))
     ? flips.filter(({type}) => [FlipType.Archived].includes(type))
     : []
@@ -166,7 +166,7 @@ function FlipListPage({
             {filteredFlips.map(({id, ref}) => (
               <FlipCard key={id} flip={ref} />
             ))}
-            {current.matches('ready.dirty.published') && (
+            {current.matches('ready.dirty.active') && (
               <>
                 {Array.from({length: missingFlipsNumber}, (_, idx) => (
                   <Box>
