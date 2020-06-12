@@ -1,3 +1,4 @@
+import {encode} from 'rlp'
 import dict from './words'
 import {capitalize} from '../../../shared/utils/string'
 import {
@@ -6,8 +7,11 @@ import {
 } from '../../../shared/utils/persist'
 import {FlipType} from '../../../shared/types'
 import {areSame, areEual} from '../../../shared/utils/arr'
-import {toHex} from '../../../shared/hooks/use-flips'
 import {submitFlip} from '../../../shared/api'
+
+export const DEFAULT_ORDER = [0, 1, 2, 3]
+
+export const FLIP_LENGTH = DEFAULT_ORDER.length
 
 /**
  * Composes hint for the flip
@@ -126,6 +130,65 @@ export function markFlipsArchived(epoch) {
   })
 }
 
+function perm(maxValue) {
+  const permArray = new Array(maxValue)
+  for (let i = 0; i < maxValue; i += 1) {
+    permArray[i] = i
+  }
+  for (let i = maxValue - 1; i >= 0; i -= 1) {
+    const randPos = Math.floor(i * Math.random())
+    const tmpStore = permArray[i]
+    permArray[i] = permArray[randPos]
+    permArray[randPos] = tmpStore
+  }
+  return permArray
+}
+
+function shufflePics(pics, shuffledOrder, seed) {
+  const newPics = []
+  const cache = {}
+  const firstOrder = new Array(FLIP_LENGTH)
+
+  seed.forEach((value, idx) => {
+    newPics.push(pics[value])
+    if (value < FLIP_LENGTH) firstOrder[value] = idx
+    cache[value] = newPics.length - 1
+  })
+
+  const secondOrder = shuffledOrder.map(value => cache[value])
+
+  return {
+    pics: newPics,
+    orders:
+      Math.random() < 0.5
+        ? [firstOrder, secondOrder]
+        : [secondOrder, firstOrder],
+  }
+}
+
+export function flipToHex(pics, order) {
+  const seed = perm(FLIP_LENGTH)
+  const shuffled = shufflePics(pics, order, seed)
+
+  const publicRlp = encode([
+    shuffled.pics
+      .slice(0, 2)
+      .map(src =>
+        Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
+      ),
+  ])
+
+  const privateRlp = encode([
+    shuffled.pics
+      .slice(2)
+      .map(src =>
+        Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
+      ),
+    shuffled.orders,
+  ])
+  return [publicRlp, privateRlp].map(x => `0x${x.toString('hex')}`)
+}
+
 export async function publishFlip({keywordPairId, images, order}) {
   const flips = global.flipStore.getFlips()
 
@@ -144,7 +207,7 @@ export async function publishFlip({keywordPairId, images, order}) {
   )
     throw new Error('You must shuffle flip before submit')
 
-  const [publicHex, privateHex] = toHex(images, order)
+  const [publicHex, privateHex] = flipToHex(images, order)
 
   if (publicHex.length + privateHex.length > 2 * 1024 * 1024)
     throw new Error('Flip is too large')
