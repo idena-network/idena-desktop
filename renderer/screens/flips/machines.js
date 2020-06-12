@@ -12,7 +12,6 @@ import {submitFlip} from '../../shared/api'
 import {toHex} from '../../shared/hooks/use-flips'
 import words from './utils/words'
 
-
 export const flipsMachine = Machine({
   id: 'flips',
   context: {
@@ -467,14 +466,35 @@ export const flipMasterMachine = Machine(
               NEXT: 'submit',
               PREV: 'images',
               SHUFFLE: {
+                target: '.persisting',
                 actions: assign({
                   order: ({order}) => shuffle(order),
                 }),
               },
               RESET_SHUFFLE: {
+                target: '.persisting',
                 actions: assign({
                   order: [0, 1, 2, 3],
                 }),
+              },
+            },
+            initial: 'idle',
+            states: {
+              idle: {},
+              persisting: {
+                invoke: {
+                  id: 'persistFlip',
+                  src: 'persistFlip',
+                },
+                on: {
+                  PERSISTED: {
+                    target: 'idle',
+                    actions: [
+                      assign((context, {flip}) => ({...context, ...flip})),
+                      log(),
+                    ],
+                  },
+                },
               },
             },
           },
@@ -543,34 +563,29 @@ export const flipMasterMachine = Machine(
         {id, keywordPairId, order, images, keywords, type, createdAt},
         event
       ) => cb => {
-        let nextFlip = {keywordPairId, order, images, keywords}
+        const persistingEventTypes = [
+          'CHANGE_IMAGES',
+          'SHUFFLE',
+          'RESET_SHUFFLE',
+        ]
 
-        nextFlip = id
-          ? {
-              ...nextFlip,
-              id,
-              type,
-              createdAt,
-              modifiedAt: new Date().toISOString(),
-            }
-          : {
-              ...nextFlip,
-              id: nanoid(),
-              createdAt: new Date().toISOString(),
-              type: FlipType.Draft,
-            }
+        if (persistingEventTypes.includes(event.type)) {
+          let nextFlip = {keywordPairId, order, images, keywords}
 
-        if (event.type === 'CHANGE_IMAGES') {
-          const {image, currentIndex} = event
-
-          nextFlip = {
-            ...nextFlip,
-            images: [
-              ...images.slice(0, currentIndex),
-              image,
-              ...images.slice(currentIndex + 1),
-            ],
-          }
+          nextFlip = id
+            ? {
+                ...nextFlip,
+                id,
+                type,
+                createdAt,
+                modifiedAt: new Date().toISOString(),
+              }
+            : {
+                ...nextFlip,
+                id: nanoid(),
+                createdAt: new Date().toISOString(),
+                type: FlipType.Draft,
+              }
 
           if (id) global.flipStore.updateDraft(nextFlip)
           else global.flipStore.addDraft(nextFlip)
