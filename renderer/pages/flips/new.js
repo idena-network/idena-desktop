@@ -74,14 +74,7 @@ export default function NewFlipPage() {
       onSubmitted: () => router.push('/flips/list'),
     },
     services: {
-      submitFlip: async ({
-        // eslint-disable-next-line no-shadow
-        images,
-        // eslint-disable-next-line no-shadow
-        keywordPairId,
-        // eslint-disable-next-line no-shadow
-        order,
-      }) => {
+      submitFlip: async context => {
         // Guard.flip(flip)
 
         // if (
@@ -113,6 +106,8 @@ export default function NewFlipPage() {
           }
         }
 
+        // eslint-disable-next-line no-shadow
+        const {images, order} = context
         const [publicHex, privateHex] = toHex(images, order)
         if (publicHex.length + privateHex.length > 2 * 1024 * 1024) {
           return {
@@ -123,16 +118,11 @@ export default function NewFlipPage() {
         const resp = await submitFlip(publicHex, privateHex, keywordPairId)
         const {result} = resp
 
-        global.flipStore.saveFlips(
-          flips.concat({
-            id: nanoid(),
-            images,
-            order,
-            ...result,
-            type: FlipType.Publishing,
-            createdAt: Date.now(),
-          })
-        )
+        global.flipStore.updateDraft({
+          ...context,
+          ...result,
+          type: FlipType.Publishing,
+        })
         return resp
 
         // let message = ''
