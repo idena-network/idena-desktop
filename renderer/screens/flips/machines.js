@@ -239,9 +239,6 @@ export const flipMachine = Machine({
 
 export const flipEditMachine = Machine({
   id: 'flipEdit',
-  context: {
-    id: null,
-  },
   initial: 'loading',
   states: {
     loading: {
@@ -252,6 +249,7 @@ export const flipEditMachine = Machine({
           actions: [
             assign((_, {data: {images, ...flip}}) => ({
               ...flip,
+              images,
               // images: images.map(buffer => buffer && bufferToImage(buffer)),
             })),
             log(),
