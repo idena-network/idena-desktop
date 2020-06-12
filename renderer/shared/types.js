@@ -37,4 +37,5 @@ export const FlipType = {
   Draft: 'draft',
   Archived: 'archived',
   Deleting: 'deleting',
+  Invalid: 'invalid',
 }

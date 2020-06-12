@@ -13,6 +13,7 @@ import {
   useToast,
 } from '@chakra-ui/core'
 import {transparentize} from 'polished'
+import dayjs from 'dayjs'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
   FlipCardImage,
@@ -20,8 +21,8 @@ import {
   FlipCardSubtitle,
   FlipFilter,
   FlipFilterOption,
-  RequiredFlip,
-  OptionalFlip,
+  RequiredFlipPlaceholder,
+  OptionalFlipPlaceholder,
   FlipCardList,
   FlipCardMenu,
   FlipCardMenuItem,
@@ -35,7 +36,6 @@ import {
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
 import {IconLink} from '../../shared/components/link'
-// import {useAppMachine} from '../../screens/app/machines'
 import {FlipType} from '../../shared/types'
 import {Debug} from '../../shared/components/components'
 import {flipsMachine} from '../../screens/flips/machines'
@@ -50,25 +50,10 @@ function FlipListPage({
     flips: knownFlips,
     requiredFlips: requiredFlipsNumber,
     availableFlips: availableFlipsNumber,
-    flipKeyWordPairs,
     flipKeyWordPairs: availableKeywords,
   },
   chainState: {syncing, offline, loading},
 }) {
-  // const [
-  //   {
-  //     context: {
-  //       identity: {
-  //         flips: knownFlips,
-  //         requiredFlips: requiredFlipsNumber,
-  //         availableFlips: availableFlipsNumber,
-  //         flipKeyWordPairs,
-  //       },
-  //       flipsRef,
-  //     },
-  //   },
-  // ] = useAppMachine()
-
   const toast = useToast()
 
   const [current, send] = useMachine(flipsMachine, {
@@ -92,7 +77,7 @@ function FlipListPage({
         }),
     },
   })
-  const {flips} = current.context
+  const {flips, missingFlips} = current.context
 
   const readyState = state => ({ready: {dirty: state}})
 
@@ -113,16 +98,6 @@ function FlipListPage({
   const remainingRequiredFlips = requiredFlipsNumber - madeFlipsNumber
   const remainingOptionalFlips =
     availableFlipsNumber - Math.max(requiredFlipsNumber, madeFlipsNumber)
-
-  const missingFlipsNumber = madeFlipsNumber - filteredFlips.length
-
-  const usedWords = (flipKeyWordPairs || [])
-    .filter(({used}) => used)
-    .slice(0, missingFlipsNumber)
-    .map(({id, words}) => ({
-      id,
-      words: words.map(global.loadKeyword),
-    }))
 
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
@@ -177,7 +152,7 @@ function FlipListPage({
             justifyContent="center"
             alignSelf="stretch"
           >
-            <Image src="/flips-cant-icn.svg" />
+            <Image src="/static/flips-cant-icn.svg" />
           </Flex>
         )}
 
@@ -188,28 +163,30 @@ function FlipListPage({
             ))}
             {current.matches('ready.dirty.active') && (
               <>
-                {Array.from({length: missingFlipsNumber}, (_, idx) => (
-                  <Box>
+                {missingFlips.map(({keywords}, idx) => (
+                  <Box key={idx}>
                     <EmptyFlipBox>
-                      <Image src="/flips-cant-icn.svg" />
+                      <Image src="/static/flips-cant-icn.svg" />
                     </EmptyFlipBox>
                     <Box mt={4}>
                       <FlipCardTitle>
-                        {formatKeywords(usedWords[idx].words)}
+                        {keywords
+                          ? formatKeywords(keywords.words)
+                          : 'Missing keywords'}
                       </FlipCardTitle>
                       <FlipCardSubtitle>Missing on client</FlipCardSubtitle>
                     </Box>
                   </Box>
                 ))}
                 {Array.from({length: remainingRequiredFlips}, (flip, idx) => (
-                  <RequiredFlip
+                  <RequiredFlipPlaceholder
                     key={idx}
                     title={`Flip #${idx + 1}`}
                     {...flip}
                   />
                 ))}
                 {Array.from({length: remainingOptionalFlips}, (flip, idx) => (
-                  <OptionalFlip
+                  <OptionalFlipPlaceholder
                     key={idx}
                     title={`Flip #${remainingRequiredFlips + idx}`}
                     {...flip}
@@ -220,9 +197,11 @@ function FlipListPage({
           </FlipCardList>
         )}
 
-        <Box position="absolute" left={6} bottom={6}>
-          <Debug>{current.value}</Debug>
-        </Box>
+        {global.isDev && (
+          <Box position="absolute" left={6} bottom={6} zIndex="popover">
+            <Debug>{current.value}</Debug>
+          </Box>
+        )}
       </Page>
     </Layout>
   )
@@ -275,7 +254,7 @@ function FlipCard({flip}) {
               : 'Missing keywords'}
           </FlipCardTitle>
           <FlipCardSubtitle>
-            {new Date(createdAt).toLocaleDateString()}
+            {dayjs(createdAt).format('d.MM.YYYY, H:mm')}
           </FlipCardSubtitle>
         </Box>
         <FlipCardMenu>

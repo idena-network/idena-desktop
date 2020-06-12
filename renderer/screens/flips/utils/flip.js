@@ -4,6 +4,10 @@ import {
   loadPersistentStateValue,
   persistItem,
 } from '../../../shared/utils/persist'
+import {FlipType} from '../../../shared/types'
+import {areSame, areEual} from '../../../shared/utils/arr'
+import {toHex} from '../../../shared/hooks/use-flips'
+import {submitFlip} from '../../../shared/api'
 
 /**
  * Composes hint for the flip
@@ -120,4 +124,44 @@ export function markFlipsArchived(epoch) {
     archived: true,
     archivedAt: new Date().toISOString(),
   })
+}
+
+export async function publishFlip({keywordPairId, images, order}) {
+  const flips = global.flipStore.getFlips()
+
+  if (
+    flips.some(
+      flip => flip.type === FlipType.Published && areSame(flip.images, images)
+    )
+  )
+    throw new Error('You already submitted this flip')
+
+  if (
+    areEual(
+      order,
+      Array.from({length: 4}, (_, idx) => idx)
+    )
+  )
+    throw new Error('You must shuffle flip before submit')
+
+  const [publicHex, privateHex] = toHex(images, order)
+
+  if (publicHex.length + privateHex.length > 2 * 1024 * 1024)
+    throw new Error('Flip is too large')
+
+  const {result, error} = await submitFlip(publicHex, privateHex, keywordPairId)
+
+  if (error) {
+    let {message} = error
+
+    if (message.includes('candidate'))
+      message = `It's not allowed to submit flips with your identity status`
+
+    if (message.includes('ceremony'))
+      message = `Can not submit flip during the validation session`
+
+    throw new Error(message)
+  }
+
+  return result
 }

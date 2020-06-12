@@ -1,5 +1,5 @@
 import {Machine, assign, spawn, sendParent} from 'xstate'
-import {log, send, forwardTo} from 'xstate/lib/actions'
+import {log} from 'xstate/lib/actions'
 import nanoid from 'nanoid'
 import {
   fetchKeywordTranslations,
@@ -8,10 +8,9 @@ import {
 } from './utils'
 import {shuffle} from '../../shared/utils/arr'
 import {FlipType} from '../../shared/types'
-import {submitFlip, fetchTx, deleteFlip} from '../../shared/api'
-import {toHex} from '../../shared/hooks/use-flips'
-// import words from './utils/words'
+import {fetchTx, deleteFlip} from '../../shared/api'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
+import {publishFlip} from './utils/flip'
 
 export const flipsMachine = Machine({
   id: 'flips',
@@ -27,7 +26,6 @@ export const flipsMachine = Machine({
         assign({
           flips: [],
         }),
-        // ({epoch}) => epochDb('flips', epoch).clear(),
       ],
     },
   },
@@ -35,7 +33,7 @@ export const flipsMachine = Machine({
   states: {
     initializing: {
       invoke: {
-        src: async ({epoch, knownFlips, availableKeywords}) => {
+        src: async ({knownFlips, availableKeywords}) => {
           const flipDb = global.flipStore
 
           const persistedFlips = flipDb
@@ -48,13 +46,8 @@ export const flipsMachine = Machine({
               hint,
             }))
 
-          // persistedFlips = persistedFlips.map(({images, ...flip}) => ({
-          //   ...flip,
-          //   images: images.map(buffer => buffer && bufferToImage(buffer)),
-          // }))
-
-          let missingFlips = knownFlips.filter(
-            hash => !persistedFlips.includes(hash)
+          let missingFlips = knownFlips.filter(hash =>
+            persistedFlips.some(flip => flip.hash !== hash)
           )
 
           if (missingFlips.length) {
@@ -62,7 +55,10 @@ export const flipsMachine = Machine({
               .filter(({id}) =>
                 persistedFlips.some(({keywordPairId}) => keywordPairId !== id)
               )
-              .map(({words}) => words.map(global.loadKeyword))
+              .map(({id, words}) => ({
+                id,
+                words: words.map(global.loadKeyword),
+              }))
 
             missingFlips = missingFlips.map((hash, idx) => ({
               hash,
@@ -73,25 +69,32 @@ export const flipsMachine = Machine({
 
           return {persistedFlips, missingFlips}
         },
-        onDone: {
-          target: 'ready.dirty',
-          actions: [
-            assign({
-              flips: (_, {data: {persistedFlips, missingFlips}}) =>
-                persistedFlips
-                  .map(flip => ({
+        onDone: [
+          {
+            target: 'ready.pristine',
+            actions: log(),
+            cond: (_, {data: {persistedFlips, missingFlips}}) =>
+              persistedFlips.concat(missingFlips).length === 0,
+          },
+          {
+            target: 'ready.dirty',
+            actions: [
+              assign({
+                flips: (_, {data: {persistedFlips}}) =>
+                  persistedFlips.map(flip => ({
                     ...flip,
                     ref: spawn(
                       // eslint-disable-next-line no-use-before-define
                       flipMachine.withContext(flip),
                       `flip-${flip.id}`
                     ),
-                  }))
-                  .concat(missingFlips),
-            }),
-            log(),
-          ],
-        },
+                  })),
+                missingFlips: (_, {data: {missingFlips}}) => missingFlips,
+              }),
+              log(),
+            ],
+          },
+        ],
         onError: [
           {
             target: 'ready.pristine',
@@ -116,22 +119,6 @@ export const flipsMachine = Machine({
       },
     },
     ready: {
-      on: {
-        FLIP_ADDED: {
-          target: '.dirty.hist',
-          actions: [
-            assign({
-              flips: ({flips}, {data}) =>
-                flips.concat({
-                  ...data,
-                  // eslint-disable-next-line no-use-before-define
-                  ref: spawn(flipMachine.withContext(data), `flip-${data.id}`),
-                }),
-            }),
-            log(),
-          ],
-        },
-      },
       initial: 'pristine',
       states: {
         pristine: {},
@@ -204,11 +191,23 @@ export const flipsMachine = Machine({
 export const flipMachine = Machine(
   {
     id: 'flip',
-    context: {
-      images: [],
-    },
-    initial: 'idle',
+    initial: 'checkType',
     states: {
+      checkType: {
+        on: {
+          '': [
+            {
+              target: 'publishing.mining',
+              cond: ({type}) => type === FlipType.Publishing,
+            },
+            {
+              target: 'deleting.mining',
+              cond: ({type}) => type === FlipType.Deleting,
+            },
+            {target: 'idle'},
+          ],
+        },
+      },
       idle: {
         on: {
           PUBLISH: 'publishing',
@@ -220,19 +219,21 @@ export const flipMachine = Machine(
         states: {
           submitting: {
             invoke: {
-              src: 'submitFlip',
+              src: 'publishFlip',
               onDone: {
                 target: 'mining',
                 actions: [
-                  assign((context, {data: {result}}) => ({
+                  assign((context, {data: {txHash, hash}}) => ({
                     ...context,
-                    ...result,
+                    txHash,
+                    hash,
                     type: FlipType.Publishing,
                   })),
                   sendParent(({id}) => ({
                     type: 'PUBLISHING',
                     id,
                   })),
+                  'persistFlip',
                   log(),
                 ],
               },
@@ -240,9 +241,11 @@ export const flipMachine = Machine(
                 target: 'failure',
                 actions: [
                   assign({
+                    type: FlipType.Invalid,
                     error: (_, {data: {message}}) => message,
                   }),
-                  'onPublishFailed',
+                  sendParent(({error}) => ({type: 'PUBLISH_FAILED', error})),
+                  'persistFlip',
                   log(),
                 ],
               },
@@ -253,35 +256,66 @@ export const flipMachine = Machine(
               src: 'pollStatus',
             },
           },
-          failure: {
-            entry: sendParent(({error}) => ({type: 'PUBLISH_FAILED', error})),
-          },
+          failure: {},
         },
         on: {
-          MINED: 'published',
+          MINED: {
+            target: 'published',
+            actions: [
+              assign({type: FlipType.Published}),
+              sendParent(({id}) => ({
+                type: 'PUBLISHED',
+                id,
+              })),
+              'persistFlip',
+              log(),
+            ],
+          },
+          TX_NULL: {
+            target: 'invalid',
+            actions: [
+              assign({
+                error: 'Publish tx is missing',
+                type: FlipType.Invalid,
+              }),
+              'persistFlip',
+            ],
+          },
         },
       },
-      published: {
-        entry: [
-          assign({type: FlipType.Published}),
-          sendParent(({id}) => ({
-            type: 'PUBLISHED',
-            id,
-          })),
-          log(),
-        ],
-      },
+      published: {},
       deleting: {
         states: {
           submitting: {
             invoke: {
-              src: ({hash}) => deleteFlip(hash),
+              src: 'deleteFlip',
               onDone: {
                 target: 'mining',
-                actions: sendParent(({id}) => ({
-                  type: 'DELETING',
-                  id,
-                })),
+                actions: [
+                  assign((context, {data: {result}}) => ({
+                    ...context,
+                    txHash: result,
+                    type: FlipType.Deleting,
+                  })),
+                  sendParent(({id}) => ({
+                    type: 'DELETING',
+                    id,
+                  })),
+                  'persistFlip',
+                  log(),
+                ],
+              },
+              onError: {
+                target: 'failure',
+                actions: [
+                  assign({
+                    type: FlipType.Invalid,
+                    error: (_, {data: {message}}) => message,
+                  }),
+                  sendParent(({error}) => ({type: 'DELETE_FAILED', error})),
+                  'persistFlip',
+                  log(),
+                ],
               },
             },
           },
@@ -290,47 +324,64 @@ export const flipMachine = Machine(
               src: 'pollStatus',
             },
           },
-          failure: {
-            entry: sendParent(({error}) => ({type: 'DELETE_FAILED', error})),
-          },
+          failure: {},
         },
         on: {
-          MINED: 'deleted',
+          MINED: {
+            target: 'deleted',
+            actions: [
+              assign({type: FlipType.Archived}),
+              sendParent(({id}) => ({
+                type: 'DELETED',
+                id,
+              })),
+              'persistFlip',
+            ],
+          },
+          TX_NULL: {
+            target: 'invalid',
+            actions: [
+              assign({
+                type: FlipType.Invalid,
+                error: 'Delete tx is missing',
+              }),
+              'persistFlip',
+            ],
+          },
         },
       },
-      deleted: {
-        entry: [
-          assign({type: FlipType.Archived}),
-          sendParent(({id}) => ({
-            type: 'DELETED',
-            id,
-          })),
-        ],
-      },
+      deleted: {},
+      invalid: {},
     },
   },
   {
     services: {
-      submitFlip: async ({images, order, keywordPairId}) => {
-        const {result, error} = await submitFlip(
-          ...toHex(images, order),
-          keywordPairId
-        )
-        if (error) throw new Error(error.message)
-        return result
-      },
-      pollStatus: ({hash}) => cb => {
+      publishFlip: context => publishFlip(context),
+      deleteFlip: ({hash}) => deleteFlip(hash),
+      pollStatus: ({txHash}) => cb => {
+        let timeoutId
+
         const fetchStatus = async () => {
-          const {blockHash} = await fetchTx(hash)
-          if (blockHash !== HASH_IN_MEMPOOL) cb('MINED')
-          else return setTimeout(fetchStatus, 10 * 1000)
+          const {result} = await fetchTx(txHash)
+
+          if (result === null) cb('TX_NULL')
+
+          if (result.blockHash !== HASH_IN_MEMPOOL) cb('MINED')
+          else {
+            timeoutId = setTimeout(fetchStatus, 10 * 1000)
+          }
         }
 
-        const timeoutId = fetchStatus(hash)
+        timeoutId = setTimeout(fetchStatus, 10 * 1000)
 
         return () => {
           clearTimeout(timeoutId)
         }
+      },
+    },
+    actions: {
+      persistFlip: context => {
+        global.flipStore.updateDraft(context)
       },
     },
   }
@@ -609,19 +660,22 @@ export const flipMasterMachine = Machine(
                   onDone: {
                     target: 'done',
                     actions: [
-                      assign((context, {data}) => ({
+                      assign((context, {data: {txHash, hash}}) => ({
                         ...context,
-                        ...data,
+                        txHash,
+                        hash,
+                        type: FlipType.Publishing,
                       })),
+                      'persistFlip',
                     ],
                   },
                   onError: {target: 'failure', actions: [log()]},
                 },
               },
-              failure: {},
               done: {
                 entry: ['onSubmitted', log()],
               },
+              failure: {},
             },
           },
           hist: {
@@ -633,15 +687,6 @@ export const flipMasterMachine = Machine(
           PICK_KEYWORDS: '.keywords',
           PICK_SHUFFLE: '.shuffle',
           PICK_SUBMIT: '.submit',
-          COMMIT: [
-            {
-              actions: 'persist',
-              cond: ctx => ctx.title.trim().length > 0,
-            },
-          ],
-          CANCEL: {
-            actions: ['onCancel'],
-          },
         },
       },
     },
@@ -701,6 +746,11 @@ export const flipMasterMachine = Machine(
           name,
           desc,
         }),
+    },
+    actions: {
+      persistFlip: context => {
+        global.flipStore.updateDraft(context)
+      },
     },
     guards: {
       hasApprovedTranslation: ({keywords}) =>
