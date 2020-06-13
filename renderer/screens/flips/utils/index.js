@@ -1,7 +1,6 @@
 import axios from 'axios'
 import nanoid from 'nanoid'
 import {signNonce} from '../../../shared/utils/dna-link'
-import {callRpc} from '../../../shared/utils/utils'
 
 export function formatKeywords(keywords) {
   return keywords
@@ -44,10 +43,6 @@ export async function fetchKeywordTranslations(ids, locale) {
 export async function voteForKeywordTranslation({id, up}) {
   const timestamp = new Date().toISOString()
   const signature = await signNonce(id.concat(up).concat(timestamp))
-  // const signature = await callRpc(
-  //   `http://localhost:9910/`,
-  //   'hYxF6eB(6CNWfrfzH3KhU}HTv8YscTMy'
-  // )('dna_sign', id.concat(up).concat(timestamp))
 
   const {
     data: {resCode, error},
@@ -79,18 +74,6 @@ export async function suggestKeywordTranslation({
       .concat(desc)
       .concat(timestamp)
   )
-  // const signature = await callRpc(
-  //   `http://localhost:9910/`,
-  //   'hYxF6eB(6CNWfrfzH3KhU}HTv8YscTMy'
-  // )(
-  //   'dna_sign',
-  //   wordId
-  //     .toString()
-  //     .concat(locale)
-  //     .concat(name)
-  //     .concat(desc)
-  //     .concat(timestamp)
-  // )
 
   const {
     data: {resCode, error},
