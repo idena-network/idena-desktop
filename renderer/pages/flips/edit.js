@@ -79,10 +79,11 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
       ...flipMasterMachine.context,
       ...flipContext,
       availableKeywords,
+      locale: i18n.language,
     },
     actions: {
       onSubmitted: () => router.push('/flips/list'),
-      onError: (_, {error}) =>
+      onError: (_, {data, error = data.message}) =>
         toast({
           title: error,
           status: 'error',
@@ -91,7 +92,11 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
           // eslint-disable-next-line react/display-name
           render: () => (
             <Box fontSize="md">
-              <Notification title={error} type={NotificationType.Error} />
+              <Notification
+                title={error}
+                type={NotificationType.Error}
+                delay={5000}
+              />
             </Box>
           ),
         }),
@@ -238,9 +243,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                         <CommunityTranslations
                           keywords={keywords}
                           onVote={e => send('VOTE', e)}
-                          onSuggest={e =>
-                            send('SUGGEST', {...e, locale: i18n.language})
-                          }
+                          onSuggest={e => send('SUGGEST', e)}
                         />
                       </>
                     )}

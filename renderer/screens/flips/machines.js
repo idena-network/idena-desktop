@@ -522,7 +522,10 @@ export const flipMasterMachine = Machine(
                               log(),
                             ],
                           },
-                          onError: 'failure',
+                          onError: {
+                            target: 'idle',
+                            actions: ['onError', log()],
+                          },
                         },
                       },
                       suggesting: {
@@ -560,11 +563,11 @@ export const flipMasterMachine = Machine(
                               log(),
                             ],
                           },
-                          onError: 'failure',
+                          onError: {
+                            target: 'idle',
+                            actions: ['onError', log()],
+                          },
                         },
-                      },
-                      failure: {
-                        entry: log(),
                       },
                     },
                   },
@@ -726,12 +729,12 @@ export const flipMasterMachine = Machine(
   },
   {
     services: {
-      loadKeywords: async ({availableKeywords, keywordPairId}) => {
+      loadKeywords: async ({availableKeywords, keywordPairId, locale}) => {
         // eslint-disable-next-line no-shadow
         const {words} = availableKeywords.find(({id}) => id === keywordPairId)
         return {
           words: words.map(id => ({id, ...global.loadKeyword(id)})),
-          translations: await fetchKeywordTranslations(words),
+          translations: await fetchKeywordTranslations(words, locale),
         }
       },
       persistFlip: (
@@ -772,8 +775,8 @@ export const flipMasterMachine = Machine(
       voteForKeywordTranslation: async (_, e) => voteForKeywordTranslation(e),
       suggestKeywordTranslation: async (
         // eslint-disable-next-line no-shadow
-        {keywords: {words}},
-        {name, desc, wordIdx, locale}
+        {keywords: {words}, locale},
+        {name, desc, wordIdx}
       ) =>
         suggestKeywordTranslation({
           wordId: words[wordIdx].id,
