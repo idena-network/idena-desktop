@@ -621,6 +621,12 @@ export const flipMasterMachine = Machine(
                   order: ({order}) => shuffle(order),
                 }),
               },
+              MANUAL_SHUFFLE: {
+                target: '.persisting',
+                actions: assign({
+                  order: (_, {order}) => order,
+                }),
+              },
               RESET_SHUFFLE: {
                 target: '.persisting',
                 actions: assign({
@@ -735,6 +741,7 @@ export const flipMasterMachine = Machine(
         const persistingEventTypes = [
           'CHANGE_IMAGES',
           'SHUFFLE',
+          'MANUAL_SHUFFLE',
           'RESET_SHUFFLE',
         ]
 

@@ -31,6 +31,7 @@ import {
   useDisclosure,
   Link,
 } from '@chakra-ui/core'
+import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import FlipEditor from './flip-editor'
 import {Step} from '../types'
 import {formatKeywords} from '../utils'
@@ -39,6 +40,7 @@ import {PageTitle} from '../../app/components'
 import {PrimaryButton, IconButton2} from '../../../shared/components/button'
 import {rem} from '../../../shared/theme'
 import {capitalize} from '../../../shared/utils/string'
+import {reorder} from '../../../shared/utils/arr'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -493,7 +495,13 @@ export function FlipEditorIcon(props) {
   )
 }
 
-export function FlipShuffleStep({images, order, onShuffle, onReset}) {
+export function FlipShuffleStep({
+  images,
+  order,
+  onShuffle,
+  onManualShuffle,
+  onReset,
+}) {
   return (
     <FlipStep alignSelf="stretch">
       <FlipStepHeader>
@@ -505,15 +513,57 @@ export function FlipShuffleStep({images, order, onShuffle, onReset}) {
       <Stack isInline spacing={10} align="center" justify="flex-end">
         <Stack isInline spacing={10} justify="center">
           <FlipImageList>
-            {images.map(src => (
-              <FlipImageListItem key={src} src={src} opacity={0.3} />
+            {images.map((src, idx) => (
+              <FlipImageListItem key={idx} src={src} opacity={0.3} />
             ))}
           </FlipImageList>
-          <FlipImageList>
-            {order.map(idx => (
-              <FlipImageListItem key={idx} src={images[idx]} />
-            ))}
-          </FlipImageList>
+          <DragDropContext
+            onDragEnd={result => {
+              if (!result.destination) {
+                return
+              }
+
+              if (result.destination.index === result.source.index) {
+                return
+              }
+
+              const nextOrder = reorder(
+                order,
+                result.source.index,
+                result.destination.index
+              )
+
+              onManualShuffle(nextOrder)
+            }}
+          >
+            <Droppable droppableId="flip">
+              {provided => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                  <FlipImageList>
+                    {order.map((num, idx) => (
+                      <Draggable
+                        key={num}
+                        draggableId={`pic-${num}`}
+                        index={idx}
+                      >
+                        {/* eslint-disable-next-line no-shadow */}
+                        {provided => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                          >
+                            <FlipImageListItem key={num} src={images[num]} />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                  </FlipImageList>
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </Stack>
         <Stack spacing={0} minW={rem(200)} align="flex-start">
           <IconButton2 icon="cycle" onClick={onShuffle}>
