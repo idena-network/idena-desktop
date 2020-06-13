@@ -1,6 +1,7 @@
 import axios from 'axios'
 import nanoid from 'nanoid'
 import {signNonce} from '../../../shared/utils/dna-link'
+import {callRpc} from '../../../shared/utils/utils'
 
 export function formatKeywords(keywords) {
   return keywords
@@ -8,7 +9,7 @@ export function formatKeywords(keywords) {
     .join(' / ')
 }
 
-export async function fetchKeywordTranslations(ids, locale = 'zh') {
+export async function fetchKeywordTranslations(ids, locale) {
   return (
     await Promise.all(
       ids.map(async id =>
@@ -43,12 +44,22 @@ export async function fetchKeywordTranslations(ids, locale = 'zh') {
 export async function voteForKeywordTranslation({id, up}) {
   const timestamp = new Date().toISOString()
   const signature = await signNonce(id.concat(up).concat(timestamp))
-  // return await axios.post(`http://api.idena.io/translation/vote`, {
-  //   signature,
-  //   timestamp,
-  //   translationId: id,
-  //   up,
-  // })
+  // const signature = await callRpc(
+  //   `http://localhost:9910/`,
+  //   'hYxF6eB(6CNWfrfzH3KhU}HTv8YscTMy'
+  // )('dna_sign', id.concat(up).concat(timestamp))
+
+  const {
+    data: {resCode, error},
+  } = await axios.post(`https://api.idena.io/translation/vote`, {
+    signature,
+    timestamp,
+    translationId: id,
+    up,
+  })
+
+  if (resCode > 0 && error) throw new Error(error)
+
   return {id, up}
 }
 
@@ -59,25 +70,45 @@ export async function suggestKeywordTranslation({
   locale = global.locale,
 }) {
   const timestamp = new Date().toISOString()
+
   const signature = await signNonce(
     wordId
       .toString()
+      .concat(locale)
       .concat(name)
       .concat(desc)
-      .concat(locale)
+      .concat(timestamp)
   )
+  // const signature = await callRpc(
+  //   `http://localhost:9910/`,
+  //   'hYxF6eB(6CNWfrfzH3KhU}HTv8YscTMy'
+  // )(
+  //   'dna_sign',
+  //   wordId
+  //     .toString()
+  //     .concat(locale)
+  //     .concat(name)
+  //     .concat(desc)
+  //     .concat(timestamp)
+  // )
+
+  const {
+    data: {resCode, error},
+  } = await axios.post(`https://api.idena.io/translation/translation`, {
+    word: wordId,
+    name,
+    description: desc,
+    language: locale,
+    signature,
+    timestamp,
+  })
+
+  if (resCode > 0 && error) throw new Error(error)
+
   return {
     id: nanoid(),
     wordId,
     name,
     desc,
   }
-  // return axios.post(`http://api.idena.io/translation`, {
-  //   word: wordId,
-  //   name,
-  //   description: desc,
-  //   language: locale,
-  //   signature,
-  //   timestamp,
-  // })
 }
