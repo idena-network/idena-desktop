@@ -270,6 +270,9 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                 images={images}
                 order={order}
                 onShuffle={() => send('SHUFFLE')}
+                onManualShuffle={nextOrder =>
+                  send('MANUAL_SHUFFLE', {order: nextOrder})
+                }
                 onReset={() => send('RESET_SHUFFLE')}
               />
             )}
