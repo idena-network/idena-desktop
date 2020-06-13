@@ -15,7 +15,7 @@ import {
 } from '../../shared/components'
 import theme, {rem} from '../../shared/theme'
 import Flex from '../../shared/components/flex'
-import useFlips from '../../shared/utils/useFlips'
+import useFlips from '../../shared/hooks/use-flips'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import useRpc from '../../shared/hooks/use-rpc'
 import SettingsLayout from './layout'
@@ -96,10 +96,15 @@ function Section({title, children}) {
 
 function ExportPK() {
   const {t} = useTranslation()
+
   const [{result: pk}, callRpc] = useRpc()
+
   const [password, setPassword] = React.useState()
+
   const [showDialog, setShowDialog] = React.useState()
+
   React.useEffect(() => setShowDialog(!!pk), [pk])
+
   return (
     <Section title={t('Export private key')}>
       <Text css={{marginBottom: 10}}>
@@ -111,9 +116,10 @@ function ExportPK() {
           callRpc('dna_exportKey', password)
         }}
       >
-        <Label>{t('New password')}</Label>
+        <Label htmlFor="pasword">{t('New password')}</Label>
         <Flex align="center">
           <Input
+            id="pasword"
             value={password}
             type="password"
             style={{

@@ -1,5 +1,9 @@
 import dict from './words'
 import {capitalize} from '../../../shared/utils/string'
+import {
+  loadPersistentStateValue,
+  persistItem,
+} from '../../../shared/utils/persist'
 
 /**
  * Composes hint for the flip
@@ -101,4 +105,19 @@ export function getNextKeyWordsHint(
     )
   }
   return getKeyWordsHint(flipKeyWordPairs, nextKeyWordPair.id)
+}
+
+export function didArchiveFlips(epoch) {
+  const persistedState = loadPersistentStateValue('flipArchive', epoch)
+  if (persistedState) return persistedState.archived
+  return false
+}
+
+export function markFlipsArchived(epoch) {
+  const persistedState = loadPersistentStateValue('flipArchive', epoch)
+  if (persistedState && persistedState.archived) return
+  persistItem('flipArchive', epoch, {
+    archived: true,
+    archivedAt: new Date().toISOString(),
+  })
 }

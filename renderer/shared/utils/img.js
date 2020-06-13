@@ -1,5 +1,3 @@
-import PropTypes from 'prop-types'
-
 export function imageResize(
   img,
   maxWidth = 400,
@@ -43,19 +41,4 @@ export function resizing(
     return {newWidth, newHeight}
   }
   return {width, height}
-}
-
-imageResize.propTypes = {
-  img: PropTypes.object,
-  maxWidth: PropTypes.number,
-  maxHeight: PropTypes.number,
-  softResize: PropTypes.bool,
-}
-
-resizing.propTypes = {
-  width: PropTypes.number,
-  height: PropTypes.number,
-  maxWidth: PropTypes.number,
-  maxHeight: PropTypes.number,
-  softResize: PropTypes.bool,
 }

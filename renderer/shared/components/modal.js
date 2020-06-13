@@ -1,8 +1,9 @@
 import React, {useRef} from 'react'
 import PropTypes from 'prop-types'
 import {FiX} from 'react-icons/fi'
-import {transparentize, cover, backgrounds} from 'polished'
+import {transparentize, cover, backgrounds, margin} from 'polished'
 import Router from 'next/router'
+import {useTranslation} from 'react-i18next'
 import theme, {rem} from '../theme'
 import useClickOutside from '../hooks/use-click-outside'
 import {
@@ -19,6 +20,8 @@ export function GlobalModals() {
   const {showExternalUpdateModal} = useAutoUpdateState()
   const {hideExternalNodeUpdateModal} = useAutoUpdateDispatch()
 
+  const {t} = useTranslation()
+
   return (
     <>
       <Modal
@@ -27,9 +30,17 @@ export function GlobalModals() {
           hideExternalNodeUpdateModal()
         }}
       >
-        <Box m="0 0 18px">
-          <SubHeading>Cannot update remote node</SubHeading>
-          <Text>
+        <Box style={{...margin(0, 0, rem(25))}}>
+          <SubHeading
+            fontWeight={500}
+            css={{
+              lineHeight: rem(32),
+              ...margin(0, 0, rem(12)),
+            }}
+          >
+            {t('Cannot update remote node')}
+          </SubHeading>
+          <Text css={{...margin(0, 0, rem(20))}}>
             Please, run built-in at the{' '}
             <FlatButton
               color={theme.colors.primary}
@@ -42,8 +53,8 @@ export function GlobalModals() {
             </FlatButton>{' '}
             page to enjoy automatic updates.
           </Text>
-          <Text css={{marginTop: 10}}>
-            Otherwise, please update your remote node manually.
+          <Text>
+            {t('Otherwise, please update your remote node manually.')}
           </Text>
         </Box>
         <Flex align="center" justify="flex-end">
@@ -53,7 +64,7 @@ export function GlobalModals() {
                 hideExternalNodeUpdateModal()
               }}
             >
-              Okay, got it
+              {t('Okay, got it')}
             </Button>
           </Box>
         </Flex>

@@ -18,7 +18,6 @@ export function loadPersistentStateValue(dbName, key) {
 }
 
 export function persistItem(dbName, key, value) {
-  // if we have something to save
   try {
     loadDb(dbName)
       .set(key, value)

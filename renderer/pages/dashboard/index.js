@@ -1,11 +1,9 @@
-import React, {useReducer} from 'react'
+import React from 'react'
 import {useRouter} from 'next/router'
 import {rem} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {State} from 'xstate'
-import dayjs from 'dayjs'
 import Layout from '../../shared/components/layout'
-import {Drawer, Box, PageTitle, Absolute} from '../../shared/components'
+import {Drawer, Box, PageTitle} from '../../shared/components'
 import SendInviteForm from '../../screens/contacts/components/send-invite-form'
 import theme from '../../shared/theme'
 import {InviteProvider} from '../../shared/providers/invite-context'
@@ -17,16 +15,14 @@ import UserInfo from '../../screens/dashboard/components/user-info'
 import {NetProfile} from '../../screens/dashboard/components/net-profile'
 import {useChainState} from '../../shared/providers/chain-context'
 import KillForm from '../../screens/wallets/components/kill-form'
-import {
-  useIdentityState,
-  IdentityStatus,
-} from '../../shared/providers/identity-context'
-import {Notification} from '../../shared/components/notifications'
-import {NotificationType} from '../../shared/providers/notification-context'
-import {usePersistence} from '../../shared/hooks/use-persistent-state'
+import {useIdentityState} from '../../shared/providers/identity-context'
+import {ValidationResultToast} from '../../screens/dashboard/components/validation-results'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {loadPersistentState} from '../../shared/utils/persist'
-import {loadValidationState} from '../../screens/validation/machine'
+import {
+  shouldExpectValidationResults,
+  hasPersistedValidationResults,
+} from '../../screens/validation/utils'
+import {persistItem} from '../../shared/utils/persist'
 
 function Dashboard() {
   const router = useRouter()
@@ -40,30 +36,27 @@ function Dashboard() {
   )
   const handleCloseWithdrawStakeForm = () => setIsWithdrawStakeFormOpen(false)
 
-  const {
-    address,
-    state,
-    canTerminate,
-    invites: invitesCount,
-  } = useIdentityState()
-  const isValidationSucceeded = [
-    IdentityStatus.Newbie,
-    IdentityStatus.Verified,
-    IdentityStatus.Human,
-  ].includes(state)
+  const {canTerminate, invites: invitesCount} = useIdentityState()
 
   const {t} = useTranslation()
 
-  const [validationResultsEvidence, dispatchEvidence] = usePersistence(
-    useReducer(
-      // eslint-disable-next-line no-shadow
-      (state, action) => ({...state, ...action}),
-      loadPersistentState('validationResults') || {}
-    ),
-    'validationResults'
-  )
-
   const epoch = useEpochState()
+
+  const [showValidationResults, setShowValidationResults] = React.useState()
+
+  React.useEffect(() => {
+    if (epoch && shouldExpectValidationResults(epoch.epoch)) {
+      const {epoch: epochNumber} = epoch
+      if (hasPersistedValidationResults(epochNumber)) {
+        setShowValidationResults(true)
+      } else {
+        persistItem('validationResults', epochNumber, {
+          epochStart: new Date().toISOString(),
+        })
+        setShowValidationResults(hasPersistedValidationResults(epochNumber))
+      }
+    }
+  }, [epoch])
 
   return (
     <InviteProvider>
@@ -124,65 +117,10 @@ function Dashboard() {
           />
         </Drawer>
 
-        {epoch &&
-          shouldSeeValidationResults(
-            epoch.epoch,
-            validationResultsEvidence
-          ) && (
-            <Absolute bottom={0} left={0} right={0}>
-              <Notification
-                pinned
-                type={NotificationType.Info}
-                title={
-                  isValidationSucceeded
-                    ? t(
-                        'See your validation rewards in the blockchain explorer'
-                      )
-                    : t(
-                        'See your validation results in the blockchain explorer'
-                      )
-                }
-                action={() => {
-                  dispatchEvidence({[epoch.epoch]: true})
-                  global.openExternal(
-                    `https://scan.idena.io/${
-                      isValidationSucceeded ? 'reward' : 'answers'
-                    }?epoch=${epoch.epoch}&identity=${address}`
-                  )
-                }}
-                actionName={t('Open')}
-              ></Notification>
-            </Absolute>
-          )}
+        {showValidationResults && <ValidationResultToast epoch={epoch.epoch} />}
       </Layout>
     </InviteProvider>
   )
-}
-
-function shouldSeeValidationResults(currentEpoch, evidence) {
-  const validationStateDefinition = loadValidationState()
-  if (validationStateDefinition) {
-    const {
-      done,
-      context: {
-        epoch,
-        validationStart,
-        shortSessionDuration,
-        longSessionDuration,
-      },
-    } = State.create(validationStateDefinition)
-    return done &&
-      currentEpoch - epoch === 1 &&
-      dayjs().diff(
-        dayjs(validationStart)
-          .add(shortSessionDuration, 's')
-          .add(longSessionDuration, 's'),
-        'm'
-      ) >= 1
-      ? !evidence[currentEpoch]
-      : false
-  }
-  return false
 }
 
 export default Dashboard

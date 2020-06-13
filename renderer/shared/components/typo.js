@@ -81,36 +81,6 @@ SubHeading.propTypes = {
   children: PropTypes.node,
 }
 
-export function BlockHeading({color, fontSize, fontWeight, css, children}) {
-  return (
-    <h3 style={css}>
-      {children}
-      <style jsx>{`
-        h3 {
-          display: inline-block;
-          color: ${color};
-          font-size: ${fontSize};
-          font-weight: ${fontWeight};
-          margin: 0 0 0.7rem;
-          width: 100%;
-        }
-      `}</style>
-    </h3>
-  )
-}
-
-BlockHeading.defaultProps = {
-  ...theme.BlockHeading,
-}
-
-BlockHeading.propTypes = {
-  color: PropTypes.string,
-  fontSize: PropTypes.string,
-  fontWeight: PropTypes.number,
-  css: PropTypes.object,
-  children: PropTypes.node,
-}
-
 export function Text({color, fontSize, fontWeight, css, ...props}) {
   return (
     <>

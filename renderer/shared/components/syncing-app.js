@@ -1,5 +1,6 @@
-import {rem} from 'polished'
-import theme from '../theme'
+import {margin} from 'polished'
+import {useTranslation} from 'react-i18next'
+import theme, {rem} from '../theme'
 import {useChainState} from '../providers/chain-context'
 import {useIdentityState} from '../providers/identity-context'
 import useRpc from '../hooks/use-rpc'
@@ -16,7 +17,8 @@ import {
 } from '../providers/settings-context'
 import Button from './button'
 import Link from './link'
-import {BlockText} from './typo'
+import {BlockText, SubHeading} from './typo'
+import {Spinner} from './spinner'
 
 export default function SyncingApp() {
   return (
@@ -25,7 +27,7 @@ export default function SyncingApp() {
       <section>
         <div>
           <div>
-            <Spinner size={24} />
+            <Spinner />
           </div>
           <div>Synchronizing...</div>
         </div>
@@ -34,7 +36,7 @@ export default function SyncingApp() {
         </div>
         <style jsx>{`
           section {
-            background: rgb(69, 72, 77);
+            background: ${theme.colors.darkGraphite};
             color: white;
             display: flex;
             flex-direction: column;
@@ -57,7 +59,7 @@ export default function SyncingApp() {
             align-items: center;
             justify-content: center;
             margin-right: ${rem(18, 13)};
-            transform: scale(0.35);
+            transform: scale(0.35) translateY(-8px);
           }
           section > div:nth-child(2) {
             display: flex;
@@ -75,6 +77,9 @@ function SyncingIdentity() {
   const {currentBlock, highestBlock, wrongTime} = useChainState()
   const {address} = useIdentityState()
   const [{result: peers}] = usePoll(useRpc('net_peers'), 1000)
+
+  const {t} = useTranslation()
+
   return (
     <section>
       <section>
@@ -89,21 +94,22 @@ function SyncingIdentity() {
         </div>
       </section>
       <section>
-        <h2>Synchronizing blocks</h2>
+        <h2>{t('Synchronizing blocks')}</h2>
         <div>
           <h3>
             {currentBlock} out of {highestBlock}
           </h3>
           <div>
-            <span>Peers connected:</span> {(peers || []).length}
+            <span>{t('Peers connected')}:</span> {(peers || []).length}
           </div>
         </div>
         <progress value={currentBlock} max={highestBlock} />
       </section>
       {wrongTime && (
         <section>
-          Please check you local clock. The time must be synchronized with
-          internet time in order to have connections with other peers.
+          {t(
+            'Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers.'
+          )}
         </section>
       )}
       <style jsx>{`
@@ -166,98 +172,6 @@ function SyncingIdentity() {
   )
 }
 
-function Spinner() {
-  return (
-    <>
-      <div className="loader-inner line-spin-fade-loader">
-        {Array.from({length: 8}, (_, i) => i).map(x => (
-          <div key={`spinner-item-${x}`} />
-        ))}
-      </div>
-      <style jsx>{`
-        @keyframes line-spin-fade-loader {
-          50% {
-            opacity: 0.3;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-
-        .line-spin-fade-loader {
-          position: relative;
-          top: -10px;
-          left: -4px;
-        }
-        .line-spin-fade-loader > div:nth-child(1) {
-          top: 20px;
-          left: 0;
-          animation: line-spin-fade-loader 1.2s -0.84s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(2) {
-          top: 13.63636px;
-          left: 13.63636px;
-          -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-          animation: line-spin-fade-loader 1.2s -0.72s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(3) {
-          top: 0;
-          left: 20px;
-          -webkit-transform: rotate(90deg);
-          transform: rotate(90deg);
-          animation: line-spin-fade-loader 1.2s -0.6s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(4) {
-          top: -13.63636px;
-          left: 13.63636px;
-          -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
-          animation: line-spin-fade-loader 1.2s -0.48s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(5) {
-          top: -20px;
-          left: 0;
-          animation: line-spin-fade-loader 1.2s -0.36s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(6) {
-          top: -13.63636px;
-          left: -13.63636px;
-          -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
-          animation: line-spin-fade-loader 1.2s -0.24s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(7) {
-          top: 0;
-          left: -20px;
-          -webkit-transform: rotate(90deg);
-          transform: rotate(90deg);
-          animation: line-spin-fade-loader 1.2s -0.12s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div:nth-child(8) {
-          top: 13.63636px;
-          left: -13.63636px;
-          -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
-          animation: line-spin-fade-loader 1.2s 0s infinite ease-in-out;
-        }
-        .line-spin-fade-loader > div {
-          background-color: #fff;
-          width: 4px;
-          height: 35px;
-          border-radius: 2px;
-          margin: 2px;
-          -webkit-animation-fill-mode: both;
-          animation-fill-mode: both;
-          position: absolute;
-          width: 5px;
-          height: 15px;
-        }
-      `}</style>
-    </>
-  )
-}
-
 export function LoadingApp() {
   return (
     <>
@@ -268,7 +182,7 @@ export function LoadingApp() {
         </div>
         <style jsx>{`
           section {
-            background: rgb(69, 72, 77);
+            background: ${theme.colors.darkGraphite};
             color: white;
             display: flex;
             flex-direction: column;
@@ -295,6 +209,7 @@ export function OfflineApp() {
   const {useExternalNode, runInternalNode} = useSettingsState()
   const {nodeProgress} = useAutoUpdateState()
   const {toggleRunInternalNode, toggleUseExternalNode} = useSettingsDispatch()
+
   return (
     <>
       <GlobalModals />
@@ -338,10 +253,18 @@ export function OfflineApp() {
               </>
             )}
           {(useExternalNode || !runInternalNode) && (
-            <>
-              <h2>Your {useExternalNode ? 'external' : ''} node is offline</h2>
-              <br />
-              <Box>
+            <Flex direction="column" css={{}}>
+              <SubHeading
+                color={theme.colors.white}
+                fontSize={rem(18)}
+                fontWeight={500}
+                css={{
+                  ...margin(0, 0, rem(20)),
+                }}
+              >
+                Your {useExternalNode ? 'external' : ''} node is offline
+              </SubHeading>
+              <Box style={{...margin(0, 0, rem(16))}}>
                 <Button
                   variant="primary"
                   onClick={() => {
@@ -355,14 +278,16 @@ export function OfflineApp() {
                   Run the built-in node
                 </Button>
               </Box>
-              <br />
-              <BlockText color="white">
+              <BlockText
+                color={theme.colors.white05}
+                css={{lineHeight: rem(20)}}
+              >
                 If you have already node running, please check your connection{' '}
                 <Link color={theme.colors.primary} href="/settings/node">
                   settings
                 </Link>
               </BlockText>
-            </>
+            </Flex>
           )}
           {!useExternalNode &&
             runInternalNode &&
@@ -391,7 +316,7 @@ export function OfflineApp() {
         </div>
         <style jsx>{`
           section {
-            background: rgb(69, 72, 77);
+            background: ${theme.colors.darkGraphite};
             color: white;
             display: flex;
             flex-direction: column;

@@ -5,6 +5,7 @@ import {AUTO_UPDATE_EVENT, AUTO_UPDATE_COMMAND} from '../../../main/channels'
 import {useSettingsState} from './settings-context'
 import {useInterval} from '../hooks/use-interval'
 import {fetchNodeVersion} from '../api'
+import {isHardFork} from '../utils/node'
 
 export const TOGGLE_NODE_SWITCHER = 'TOGGLE_NODE_SWITCHER'
 export const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
@@ -26,7 +27,7 @@ const initialState = {
   showExternalUpdateModal: false,
 }
 
-function settingsReducer(state, action) {
+function updateReducer(state, action) {
   switch (action.type) {
     case NEW_NODE_VERSION: {
       return {
@@ -102,10 +103,10 @@ const AutoUpdateStateContext = React.createContext()
 const AutoUpdateDispatchContext = React.createContext()
 
 // eslint-disable-next-line react/prop-types
-function AutoUpdateProvider({children}) {
+export function AutoUpdateProvider({children}) {
   const settings = useSettingsState()
 
-  const [state, dispatch] = React.useReducer(settingsReducer, initialState)
+  const [state, dispatch] = React.useReducer(updateReducer, initialState)
 
   useEffect(() => {
     const onEvent = (_sender, event, data) => {
@@ -160,31 +161,35 @@ function AutoUpdateProvider({children}) {
     async () => {
       try {
         const version = await fetchNodeVersion()
-
         if (version && state.nodeCurrentVersion !== version) {
           dispatch({type: NEW_NODE_VERSION, data: version})
         }
-        // eslint-disable-next-line no-empty
-      } catch (e) {}
+      } catch (error) {
+        global.logger.error('Error fetching node version', error, state)
+      }
     },
     10000,
     true
   )
 
-  const uiCanUpdate = state.uiUpdateReady
+  const canUpdateClient = state.uiUpdateReady
 
-  const nodeCanUpdate =
+  const canUpdateNode =
     !state.nodeUpdating &&
     ((!settings.useExternalNode &&
       state.nodeUpdateReady &&
       state.nodeRemoteVersion !== state.nodeCurrentVersion) ||
       (settings.useExternalNode && state.nodeUpdateAvailable))
 
-  const uiUpdate = () => {
+  const mustUpdateNode =
+    canUpdateNode &&
+    isHardFork(state.nodeCurrentVersion, state.nodeRemoteVersion)
+
+  const updateClient = () => {
     global.ipcRenderer.send(AUTO_UPDATE_COMMAND, 'update-ui')
   }
 
-  const nodeUpdate = () => {
+  const updateNode = () => {
     if (settings.useExternalNode) {
       dispatch({type: SHOW_EXTERNAL_UPDATE_MODAL})
     } else {
@@ -199,10 +204,19 @@ function AutoUpdateProvider({children}) {
 
   return (
     <AutoUpdateStateContext.Provider
-      value={{...state, uiCanUpdate, nodeCanUpdate}}
+      value={{
+        ...state,
+        canUpdateClient,
+        canUpdateNode,
+        mustUpdateNode,
+      }}
     >
       <AutoUpdateDispatchContext.Provider
-        value={{uiUpdate, nodeUpdate, hideExternalNodeUpdateModal}}
+        value={{
+          updateClient,
+          updateNode,
+          hideExternalNodeUpdateModal,
+        }}
       >
         {children}
       </AutoUpdateDispatchContext.Provider>
@@ -210,7 +224,7 @@ function AutoUpdateProvider({children}) {
   )
 }
 
-function useAutoUpdateState() {
+export function useAutoUpdateState() {
   const context = React.useContext(AutoUpdateStateContext)
   if (context === undefined) {
     throw new Error(
@@ -220,7 +234,7 @@ function useAutoUpdateState() {
   return context
 }
 
-function useAutoUpdateDispatch() {
+export function useAutoUpdateDispatch() {
   const context = React.useContext(AutoUpdateDispatchContext)
   if (context === undefined) {
     throw new Error(
@@ -229,5 +243,3 @@ function useAutoUpdateDispatch() {
   }
   return context
 }
-
-export {AutoUpdateProvider, useAutoUpdateState, useAutoUpdateDispatch}

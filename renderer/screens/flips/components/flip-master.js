@@ -13,7 +13,7 @@ import FlipShuffle from './flip-shuffle'
 import FlipHint from './flip-hint'
 import SubmitFlip from './submit-flip'
 
-import useFlips, {FlipType} from '../../../shared/utils/useFlips'
+import useFlips from '../../../shared/hooks/use-flips'
 import {
   useIdentityState,
   IdentityStatus,
@@ -31,6 +31,7 @@ import {
   EpochPeriod,
 } from '../../../shared/providers/epoch-context'
 import {useChainState} from '../../../shared/providers/chain-context'
+import {FlipType} from '../../../shared/types'
 
 function FlipMaster({id, onClose}) {
   const {t} = useTranslation(['flips', 'error'])

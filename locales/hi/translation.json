@@ -225,7 +225,20 @@
   "Attention! This is irreversible operation": "ध्यान दें! यह अपरिवर्तनीय ऑपरेशन है",
   "Idena validation will start soon": "इडेना का वेलिडेशन जल्द ही शुरू होगा",
   "Keep your app opened": "अपना ऐप खोल कर रखें",
-  "Waiting for the end of long session": "Waiting for the end of long session",
-  "Validate": "Validate",
-  "Please wait. The network is reaching consensus about validated identities": "Please wait. The network is reaching consensus about validated identities"
+  "Waiting for the end of long session": "लंबे सत्र की समाप्ति की प्रतीक्षा है",
+  "Validate": "वेलिडेट",
+  "Please wait. The network is reaching consensus about validated identities": "कृपया प्रतीक्षा कीजिये। नेटवर्क मान्य पहचान के बारे में आम सहमति तक पहुंच रहा है",
+  "Please wait for the validation report": "कृपया वेलिडेशन रिपोर्ट की प्रतीक्षा करें",
+  "Your node is outdated because of the hard fork, please update": "हार्ड फोर्क के कारण आपका नोड आउटडेटिड है, कृपया अपडेट करें",
+  "Update Node Version": "अपडेट नोड वर्शन",
+  "Cannot update remote node": "रिमोट नोड को अपडेट नहीं किया जा सकता",
+  "Otherwise, please update your remote node manually.": "अन्यथा, कृपया अपने रिमोट नोड को मैन्युअल रूप से अपडेट करें.",
+  "Okay, got it": "ठीक है समझ आ गया",
+  "Wait for validation": "वेलिडेशन की प्रतीक्षा करें",
+  "Can not start validation session because you did not activate invite": "वेलिडेशन सत्र शुरू नहीं कर सकते क्योंकि आपने आमंत्रण को सक्रिय नहीं किया था",
+  "Wait for validation end": "वेलिडेशन समाप्ति की प्रतीक्षा करें",
+  "Can not start validation session because you did not submit flips.": "वेलिडेशन सत्र शुरू नहीं कर सकते क्योंकि आपने फ़्लिप प्रस्तुत नहीं किया था।",
+  "Shuffling flips...": "फ़्लिप्स शफल हो रहे हैं",
+  "Synchronizing blocks": "सिंक्रोनीज़िंग ब्लॉक्स",
+  "Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers.": "कृपया अपनी स्थानीय घड़ी देखें। अन्य पीअर्स के साथ संबंध रखने के लिए समय को इंटरनेट समय के साथ सिंक्रनाइज़ किया जाना चाहिए।"
 }
