@@ -1,5 +1,4 @@
 import axios from 'axios'
-import nanoid from 'nanoid'
 import {signNonce} from '../../../shared/utils/dna-link'
 
 export function formatKeywords(keywords) {
@@ -76,7 +75,7 @@ export async function suggestKeywordTranslation({
   )
 
   const {
-    data: {resCode, error},
+    data: {resCode, translationId, error},
   } = await axios.post(`https://api.idena.io/translation/translation`, {
     word: wordId,
     name,
@@ -89,7 +88,7 @@ export async function suggestKeywordTranslation({
   if (resCode > 0 && error) throw new Error(error)
 
   return {
-    id: nanoid(),
+    id: translationId,
     wordId,
     name,
     desc,

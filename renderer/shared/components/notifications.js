@@ -40,6 +40,7 @@ export function Notification({
   actionColor = theme.colors.primary,
   icon,
   wrap = 'break-word',
+  delay = NOTIFICATION_DELAY,
 }) {
   const [hidden, setHidden] = useState(false)
 
@@ -116,7 +117,7 @@ export function Notification({
                 bottom: 0,
                 left: 0,
                 right: 0,
-                animation: `escape ${NOTIFICATION_DELAY}ms linear forwards`,
+                animation: `escape ${delay}ms linear forwards`,
               }}
             />
           )}
