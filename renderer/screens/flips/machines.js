@@ -46,8 +46,10 @@ export const flipsMachine = Machine({
               hint,
             }))
 
-          let missingFlips = knownFlips.filter(hash =>
-            persistedFlips.some(flip => flip.hash !== hash)
+          const persistedHashes = persistedFlips.map(flip => flip.hash)
+
+          let missingFlips = knownFlips.filter(
+            hash => !persistedHashes.includes(hash)
           )
 
           if (missingFlips.length) {
@@ -653,7 +655,32 @@ export const flipMasterMachine = Machine(
             },
             initial: 'idle',
             states: {
-              idle: {},
+              idle: {
+                initial: 'checkTranslation',
+                states: {
+                  checkTranslation: {
+                    on: {
+                      '': [
+                        {
+                          target: 'translated',
+                          cond: 'hasApprovedTranslation',
+                        },
+                        'origin',
+                      ],
+                    },
+                  },
+                  origin: {
+                    on: {
+                      SWITCH_LOCALE: 'translated',
+                    },
+                  },
+                  translated: {
+                    on: {
+                      SWITCH_LOCALE: 'origin',
+                    },
+                  },
+                },
+              },
               submitting: {
                 invoke: {
                   src: 'submitFlip',
@@ -739,12 +766,13 @@ export const flipMasterMachine = Machine(
       suggestKeywordTranslation: async (
         // eslint-disable-next-line no-shadow
         {keywords: {words}},
-        {name, desc, wordIdx}
+        {name, desc, wordIdx, locale}
       ) =>
         suggestKeywordTranslation({
           wordId: words[wordIdx].id,
           name,
           desc,
+          locale,
         }),
     },
     actions: {
