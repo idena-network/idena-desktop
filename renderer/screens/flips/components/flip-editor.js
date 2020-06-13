@@ -237,8 +237,8 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   editors[idx]._graphics.renderAll()
                 }
 
-                //editor.loadImageFromURL(editor.toDataURL(), 'Bkgd').then(() => {
-                //})
+                // editor.loadImageFromURL(editor.toDataURL(), 'Bkgd').then(() => {
+                // })
               })
             })
           })

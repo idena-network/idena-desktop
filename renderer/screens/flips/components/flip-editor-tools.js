@@ -1,28 +1,15 @@
 import React, {useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position, wordWrap} from 'polished'
-import {
-  FaGoogle,
-  FaCircle,
-  FaCopy,
-  FaPaste,
-  FaRegFolder,
-  FaPencilAlt,
-  FaEraser,
-  FaRegTrashAlt,
-} from 'react-icons/fa'
+import {FaCircle, FaCopy, FaPaste, FaRegTrashAlt} from 'react-icons/fa'
 import {FiCircle} from 'react-icons/fi'
-
-import {MdAddToPhotos, MdCrop, MdUndo, MdRedo} from 'react-icons/md'
-
-import {useInterval} from '../../../shared/hooks/use-interval'
 
 import {useTranslation} from 'react-i18next'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
 
 import {IconButton} from '../../../shared/components/button'
-import {Box, Absolute, Input} from '../../../shared/components'
+import {Box, Absolute} from '../../../shared/components'
 import Divider from '../../../shared/components/divider'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
@@ -332,17 +319,18 @@ export function ImageEraseEditor({
   onChanging,
   isDone,
 }) {
+  const canvasRef = useRef()
+  const [isMouseDown, setIsMouseDown] = useState(false)
+  const [prevMousePoint, setPrevMousePoint] = useState()
+
   useEffect(() => {
-    if (isDone) {
+    if (isDone && onDone) {
       if (canvasRef.current) {
         onDone(canvasRef.current.toDataURL())
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDone])
-
-  const canvasRef = useRef()
-  const [isMouseDown, setIsMouseDown] = useState(false)
-  const [prevMousePoint, setPrevMousePoint] = useState()
 
   const handleMouseMove = useCallback(
     e => {
@@ -410,16 +398,15 @@ export function ImageEraseEditor({
     return () => {
       ignore = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasRef])
 
-  console.log(imageObjectProps)
-
-  const x =
+  const left =
     imageObjectProps &&
     imageObjectProps.x -
       (imageObjectProps.width * imageObjectProps.scaleX) / 2 +
       1
-  const y =
+  const top =
     imageObjectProps &&
     imageObjectProps.y -
       (imageObjectProps.height * imageObjectProps.scaleY) / 2 +
@@ -455,8 +442,8 @@ export function ImageEraseEditor({
             style={{
               background: 'transparent',
               position: 'absolute',
-              left: `${x}px`,
-              top: `${y}px`,
+              left: `${left}px`,
+              top: `${top}px`,
               transform: `rotate(${angle}deg)`,
             }}
             ref={canvasRef}
@@ -467,10 +454,13 @@ export function ImageEraseEditor({
     </Box>
   )
 }
-
 ImageEraseEditor.propTypes = {
   url: PropTypes.string,
+  brushWidth: PropTypes.number,
+  imageObjectProps: PropTypes.object,
+  onDone: PropTypes.func,
   onChange: PropTypes.func,
+  isDone: PropTypes.bool,
 }
 
 export function ApplyChangesBottomPanel({label, onDone, onCancel}) {
