@@ -227,5 +227,7 @@
   "Keep your app opened": "Keep your app opened",
   "Waiting for the end of long session": "Waiting for the end of long session",
   "Validate": "Validate",
-  "Please wait. The network is reaching consensus about validated identities": "Please wait. The network is reaching consensus about validated identities"
+  "Please wait. The network is reaching consensus about validated identities": "Please wait. The network is reaching consensus about validated identities",
+  "Select image to erase": "Select image to erase",
+  "Erase": "Erase"
 }

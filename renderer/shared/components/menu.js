@@ -64,12 +64,13 @@ export function MenuItem({
             {...props}
           >
             <Box w={rem(35)}>
-              {React.cloneElement(icon, {
-                style: {
-                  color: danger ? theme.colors.danger : theme.colors.primary,
-                  opacity: disabled ? 0.5 : 1,
-                },
-              })}
+              {icon &&
+                React.cloneElement(icon, {
+                  style: {
+                    color: danger ? theme.colors.danger : theme.colors.primary,
+                    opacity: disabled ? 0.5 : 1,
+                  },
+                })}
             </Box>
             <Box
               style={{
