@@ -238,7 +238,9 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                         <CommunityTranslations
                           keywords={keywords}
                           onVote={e => send('VOTE', e)}
-                          onSuggest={e => send('SUGGEST', e)}
+                          onSuggest={e =>
+                            send('SUGGEST', {...e, locale: i18n.language})
+                          }
                         />
                       </>
                     )}
@@ -276,7 +278,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                 <FlipStepBody minH="180px">
                   <Stack isInline spacing={10}>
                     <FlipKeywordPanel w={rem(320)}>
-                      {keywords && keywords.translations.length === 0 && (
+                      {is('submit.idle.origin') && (
                         <Stack spacing="30px">
                           <FlipKeywordPair>
                             {keywords.words.map(({id, name, desc}) => (
@@ -322,7 +324,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                           </Stack>
                         </Stack>
                       )}
-                      {keywords && keywords.translations.length > 0 && (
+                      {is('submit.idle.translated') && (
                         <>
                           <Stack spacing="30px">
                             <FlipKeywordPair>
