@@ -1,4 +1,4 @@
-export function callRpc(url = 'http://localhost:9009') {
+export function callRpc(url = 'http://localhost:9009', key) {
   return async function(method, ...params) {
     const {result, error} = await (
       await fetch(url, {
@@ -11,7 +11,7 @@ export function callRpc(url = 'http://localhost:9009') {
           method,
           params,
           id: 1,
-          key: '7129ba6d0b162a4c5fa5a020aff9cac5',
+          key,
         }),
       })
     ).json()
