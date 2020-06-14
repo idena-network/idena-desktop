@@ -226,6 +226,10 @@ export default function NewFlipPage() {
                             </IconButton2>
                           </Box>
                         </Stack>
+                      </>
+                    )}
+                    {is('keywords.done') && (
+                      <>
                         <Divider borderColor="gray.300" mx={-10} my={4} />
                         <CommunityTranslations
                           keywords={keywords}
