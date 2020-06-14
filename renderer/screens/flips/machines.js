@@ -591,7 +591,7 @@ export const flipMasterMachine = Machine(
                 actions: [
                   assign({
                     originalOrder: (_, {order}) => order,
-                    // order: (_, {order}) => order,
+                    order: (_, {order}) => order,
                   }),
                   log(),
                 ],
@@ -629,7 +629,7 @@ export const flipMasterMachine = Machine(
                 target: '.persisting',
                 actions: [
                   assign({
-                    order: ({order}) => shuffle(order),
+                    order: ({order}) => shuffle(order.slice()),
                   }),
                   log(),
                 ],
