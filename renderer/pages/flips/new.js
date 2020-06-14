@@ -94,7 +94,7 @@ export default function NewFlipPage() {
   })
 
   const {context} = current
-  const {keywords, images, originalOrder, order} = context
+  const {keywords, images, originalOrder, order, showTranslation} = context
 
   const not = state => !current.matches({editing: state})
   const is = state => current.matches({editing: state})
@@ -157,57 +157,11 @@ export default function NewFlipPage() {
               <FlipStoryStep>
                 <FlipStepBody minH="180px">
                   <FlipKeywordPanel>
-                    {is('keywords.done.origin') && (
+                    {is('keywords.done') && (
                       <Stack spacing="30px">
                         <FlipKeywordPair>
-                          {keywords.words.map(({id, name, desc}) => (
-                            <FlipKeyword key={id}>
-                              <FlipKeywordName>{name}</FlipKeywordName>
-                              <FlipKeywordDescription>
-                                {desc}
-                              </FlipKeywordDescription>
-                            </FlipKeyword>
-                          ))}
-                        </FlipKeywordPair>
-                        <Stack isInline spacing={1} align="center">
-                          <IconButton2
-                            icon="switch"
-                            _hover={{background: 'transparent'}}
-                            onClick={() => send('SWITCH_LOCALE')}
-                          >
-                            {i18n.language.toUpperCase()}
-                          </IconButton2>
-                          <Divider
-                            orientation="vertical"
-                            borderColor="gray.300"
-                            m={0}
-                            h={rem(24)}
-                          />
-                          <IconButton2
-                            icon="gtranslate"
-                            _hover={{background: 'transparent'}}
-                            onClick={() => {
-                              global.openExternal(
-                                `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
-                                  global.locale
-                                }&text=${encodeURIComponent(
-                                  keywords.words
-                                    .map(({name, desc}) => `${name}\n${desc}`)
-                                    .join('\n')
-                                )}`
-                              )
-                            }}
-                          >
-                            Google Translate
-                          </IconButton2>
-                        </Stack>
-                      </Stack>
-                    )}
-                    {is('keywords.done.translated') && (
-                      <>
-                        <Stack spacing="30px">
-                          <FlipKeywordPair>
-                            {keywords.translations.map(([{id, name, desc}]) => (
+                          {showTranslation &&
+                            keywords.translations.map(([{id, name, desc}]) => (
                               <FlipKeyword key={id}>
                                 <FlipKeywordName>{name}</FlipKeywordName>
                                 <FlipKeywordDescription>
@@ -215,28 +169,63 @@ export default function NewFlipPage() {
                                 </FlipKeywordDescription>
                               </FlipKeyword>
                             ))}
-                          </FlipKeywordPair>
-                          <Box>
-                            <IconButton2
-                              icon="switch"
-                              _hover={{background: 'transparent'}}
-                              onClick={() => send('SWITCH_LOCALE')}
-                            >
-                              EN
-                            </IconButton2>
-                          </Box>
+                          {showTranslation ||
+                            keywords.words.map(({id, name, desc}) => (
+                              <FlipKeyword key={id}>
+                                <FlipKeywordName>{name}</FlipKeywordName>
+                                <FlipKeywordDescription>
+                                  {desc}
+                                </FlipKeywordDescription>
+                              </FlipKeyword>
+                            ))}
+                        </FlipKeywordPair>
+                        <Stack isInline spacing={1} align="center">
+                          <IconButton2
+                            icon="switch"
+                            _hover={{background: 'transparent'}}
+                            onClick={() => send('SWITCH_LOCALE')}
+                          >
+                            {showTranslation
+                              ? 'EN'
+                              : i18n.language.toUpperCase()}
+                          </IconButton2>
+                          {showTranslation || (
+                            <>
+                              <Divider
+                                orientation="vertical"
+                                borderColor="gray.300"
+                                m={0}
+                                h={rem(24)}
+                              />
+                              <IconButton2
+                                icon="gtranslate"
+                                _hover={{background: 'transparent'}}
+                                onClick={() => {
+                                  global.openExternal(
+                                    `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
+                                      global.locale
+                                    }&text=${encodeURIComponent(
+                                      keywords.words
+                                        .map(
+                                          ({name, desc}) => `${name}\n${desc}`
+                                        )
+                                        .join('\n')
+                                    )}`
+                                  )
+                                }}
+                              >
+                                Google Translate
+                              </IconButton2>
+                            </>
+                          )}
                         </Stack>
-                      </>
-                    )}
-                    {is('keywords.done') && (
-                      <>
                         <Divider borderColor="gray.300" mx={-10} my={4} />
                         <CommunityTranslations
                           keywords={keywords}
                           onVote={e => send('VOTE', e)}
                           onSuggest={e => send('SUGGEST', e)}
                         />
-                      </>
+                      </Stack>
                     )}
                   </FlipKeywordPanel>
                   <FlipStoryAside>
@@ -282,57 +271,11 @@ export default function NewFlipPage() {
                 <FlipStepBody minH="180px">
                   <Stack isInline spacing={10}>
                     <FlipKeywordPanel w={rem(320)}>
-                      {is('submit.idle.origin') && (
+                      {is('submit.idle') && (
                         <Stack spacing="30px">
                           <FlipKeywordPair>
-                            {keywords.words.map(({id, name, desc}) => (
-                              <FlipKeyword key={id}>
-                                <FlipKeywordName>{name}</FlipKeywordName>
-                                <FlipKeywordDescription>
-                                  {desc}
-                                </FlipKeywordDescription>
-                              </FlipKeyword>
-                            ))}
-                          </FlipKeywordPair>
-                          <Stack isInline spacing={1} align="center">
-                            <IconButton2
-                              icon="switch"
-                              _hover={{background: 'transparent'}}
-                              onClick={() => send('SWITCH_LOCALE')}
-                            >
-                              {i18n.language.toUpperCase()}
-                            </IconButton2>
-                            <Divider
-                              orientation="vertical"
-                              borderColor="gray.300"
-                              m={0}
-                              h={6}
-                            />
-                            <IconButton2
-                              icon="gtranslate"
-                              _hover={{background: 'transparent'}}
-                              onClick={() => {
-                                global.openExternal(
-                                  `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
-                                    global.locale
-                                  }&text=${encodeURIComponent(
-                                    keywords.words
-                                      .map(({name, desc}) => `${name}\n${desc}`)
-                                      .join('\n')
-                                  )}`
-                                )
-                              }}
-                            >
-                              Google Translate
-                            </IconButton2>
-                          </Stack>
-                        </Stack>
-                      )}
-                      {is('submit.idle.translated') && (
-                        <>
-                          <Stack spacing="30px">
-                            <FlipKeywordPair>
-                              {keywords.translations.map(
+                            {showTranslation &&
+                              keywords.translations.map(
                                 ([{id, name, desc}]) => (
                                   <FlipKeyword key={id}>
                                     <FlipKeywordName>{name}</FlipKeywordName>
@@ -342,18 +285,57 @@ export default function NewFlipPage() {
                                   </FlipKeyword>
                                 )
                               )}
-                            </FlipKeywordPair>
-                            <Box>
-                              <IconButton2
-                                icon="switch"
-                                _hover={{background: 'transparent'}}
-                                onClick={() => send('SWITCH_LOCALE')}
-                              >
-                                EN
-                              </IconButton2>
-                            </Box>
+                            {showTranslation ||
+                              keywords.words.map(({id, name, desc}) => (
+                                <FlipKeyword key={id}>
+                                  <FlipKeywordName>{name}</FlipKeywordName>
+                                  <FlipKeywordDescription>
+                                    {desc}
+                                  </FlipKeywordDescription>
+                                </FlipKeyword>
+                              ))}
+                          </FlipKeywordPair>
+                          <Stack isInline spacing={1} align="center">
+                            <IconButton2
+                              icon="switch"
+                              _hover={{background: 'transparent'}}
+                              onClick={() => send('SWITCH_LOCALE')}
+                            >
+                              {showTranslation
+                                ? 'EN'
+                                : i18n.language.toUpperCase()}
+                            </IconButton2>
+                            {showTranslation || (
+                              <>
+                                <Divider
+                                  orientation="vertical"
+                                  borderColor="gray.300"
+                                  m={0}
+                                  h={rem(24)}
+                                />
+                                <IconButton2
+                                  icon="gtranslate"
+                                  _hover={{background: 'transparent'}}
+                                  onClick={() => {
+                                    global.openExternal(
+                                      `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
+                                        global.locale
+                                      }&text=${encodeURIComponent(
+                                        keywords.words
+                                          .map(
+                                            ({name, desc}) => `${name}\n${desc}`
+                                          )
+                                          .join('\n')
+                                      )}`
+                                    )
+                                  }}
+                                >
+                                  Google Translate
+                                </IconButton2>
+                              </>
+                            )}
                           </Stack>
-                        </>
+                        </Stack>
                       )}
                     </FlipKeywordPanel>
                     <Stack isInline spacing={10} justify="center">

@@ -416,7 +416,15 @@ export const flipMasterMachine = Machine(
       originalOrder: DEFAULT_FLIP_ORDER,
       order: DEFAULT_FLIP_ORDER,
     },
-    entry: [log()],
+    on: {
+      SWITCH_LOCALE: {
+        actions: [
+          assign({
+            showTranslation: ({showTranslation}) => !showTranslation,
+          }),
+        ],
+      },
+    },
     initial: 'editing',
     states: {
       editing: {
@@ -450,6 +458,9 @@ export const flipMasterMachine = Machine(
                     actions: [
                       assign({
                         keywords: (_, {data}) => data,
+                        showTranslation: ({locale}, {data}) =>
+                          locale.toLowerCase() !== 'en' &&
+                          data.translations.some(t => t.confirmed),
                       }),
                       log(),
                     ],
@@ -457,112 +468,86 @@ export const flipMasterMachine = Machine(
                 },
               },
               done: {
-                initial: 'checkTranslation',
+                initial: 'idle',
                 states: {
-                  checkTranslation: {
+                  idle: {
                     on: {
-                      '': [
-                        {
-                          target: 'translated',
-                          cond: 'hasApprovedTranslation',
-                        },
-                        'origin',
-                      ],
+                      VOTE: 'voting',
+                      SUGGEST: 'suggesting',
                     },
                   },
-                  origin: {
-                    on: {
-                      SWITCH_LOCALE: 'translated',
+                  voting: {
+                    invoke: {
+                      src: 'voteForKeywordTranslation',
+                      onDone: {
+                        target: 'idle',
+                        actions: [
+                          assign({
+                            keywords: (
+                              // eslint-disable-next-line no-shadow
+                              {keywords: {words, translations}},
+                              {data: {id, up}}
+                            ) => ({
+                              words,
+                              translations: translations.map(wordTranslations =>
+                                wordTranslations.map(translation =>
+                                  translation.id === id
+                                    ? {
+                                        ...translation,
+                                        ups: translation.ups + (up ? 1 : -1),
+                                      }
+                                    : translation
+                                )
+                              ),
+                            }),
+                          }),
+                          log(),
+                        ],
+                      },
+                      onError: {
+                        target: 'idle',
+                        actions: ['onError', log()],
+                      },
                     },
                   },
-                  translated: {
-                    on: {
-                      SWITCH_LOCALE: 'origin',
-                    },
-                    initial: 'idle',
-                    states: {
-                      idle: {
-                        on: {
-                          VOTE: 'voting',
-                          SUGGEST: 'suggesting',
-                        },
+                  suggesting: {
+                    invoke: {
+                      src: 'suggestKeywordTranslation',
+                      onDone: {
+                        target: 'idle',
+                        actions: [
+                          assign({
+                            keywords: (
+                              // eslint-disable-next-line no-shadow
+                              {keywords: {words, translations}},
+                              {data: {wordId, id, name, desc}}
+                            ) => {
+                              const wordIdx = words.findIndex(
+                                word => word.id === wordId
+                              )
+                              return {
+                                words,
+                                translations: translations.map(
+                                  (wordTranslations, idx) =>
+                                    idx === wordIdx
+                                      ? wordTranslations.concat({
+                                          wordId,
+                                          id,
+                                          name,
+                                          desc,
+                                          ups: 0,
+                                        })
+                                      : wordTranslations
+                                ),
+                              }
+                            },
+                          }),
+                          log(),
+                        ],
                       },
-                      voting: {
-                        invoke: {
-                          src: 'voteForKeywordTranslation',
-                          onDone: {
-                            target: 'idle',
-                            actions: [
-                              assign({
-                                keywords: (
-                                  // eslint-disable-next-line no-shadow
-                                  {keywords: {words, translations}},
-                                  {data: {id, up}}
-                                ) => ({
-                                  words,
-                                  translations: translations.map(
-                                    wordTranslations =>
-                                      wordTranslations.map(translation =>
-                                        translation.id === id
-                                          ? {
-                                              ...translation,
-                                              ups:
-                                                translation.ups + (up ? 1 : -1),
-                                            }
-                                          : translation
-                                      )
-                                  ),
-                                }),
-                              }),
-                              log(),
-                            ],
-                          },
-                          onError: {
-                            target: 'idle',
-                            actions: ['onError', log()],
-                          },
-                        },
-                      },
-                      suggesting: {
-                        invoke: {
-                          src: 'suggestKeywordTranslation',
-                          onDone: {
-                            target: 'idle',
-                            actions: [
-                              assign({
-                                keywords: (
-                                  // eslint-disable-next-line no-shadow
-                                  {keywords: {words, translations}},
-                                  {data: {wordId, id, name, desc}}
-                                ) => {
-                                  const wordIdx = words.findIndex(
-                                    word => word.id === wordId
-                                  )
-                                  return {
-                                    words,
-                                    translations: translations.map(
-                                      (wordTranslations, idx) =>
-                                        idx === wordIdx
-                                          ? wordTranslations.concat({
-                                              wordId,
-                                              id,
-                                              name,
-                                              desc,
-                                              ups: 0,
-                                            })
-                                          : wordTranslations
-                                    ),
-                                  }
-                                },
-                              }),
-                              log(),
-                            ],
-                          },
-                          onError: {
-                            target: 'idle',
-                            actions: ['onError', log()],
-                          },
-                        },
+                      onError: {
+                        target: 'idle',
+                        actions: ['onError', log()],
                       },
                     },
                   },
@@ -674,32 +659,7 @@ export const flipMasterMachine = Machine(
             },
             initial: 'idle',
             states: {
-              idle: {
-                initial: 'checkTranslation',
-                states: {
-                  checkTranslation: {
-                    on: {
-                      '': [
-                        {
-                          target: 'translated',
-                          cond: 'hasApprovedTranslation',
-                        },
-                        'origin',
-                      ],
-                    },
-                  },
-                  origin: {
-                    on: {
-                      SWITCH_LOCALE: 'translated',
-                    },
-                  },
-                  translated: {
-                    on: {
-                      SWITCH_LOCALE: 'origin',
-                    },
-                  },
-                },
-              },
+              idle: {},
               submitting: {
                 invoke: {
                   src: 'submitFlip',
@@ -809,10 +769,6 @@ export const flipMasterMachine = Machine(
       persistFlip: context => {
         global.flipStore.updateDraft(context)
       },
-    },
-    guards: {
-      hasApprovedTranslation: ({keywords}) =>
-        global.locale !== 'EN' && keywords.translations.some(t => t.confirmed),
     },
   }
 )
