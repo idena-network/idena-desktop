@@ -427,20 +427,19 @@ export function FlipEditorStep({
           <DragDropContext
             onDragEnd={result => {
               if (
-                !result.destination ||
-                result.destination.index === result.source.index
-              )
-                return
+                result.destination &&
+                result.destination.index !== result.source.index
+              ) {
+                setCurrentIdx(result.destination.index)
 
-              setCurrentIdx(result.destination.index)
-
-              const nextOrder = reorder(
-                originalOrder,
-                result.source.index,
-                result.destination.index
-              )
-
-              onChangeOriginalOrder(nextOrder)
+                onChangeOriginalOrder(
+                  reorder(
+                    originalOrder,
+                    result.source.index,
+                    result.destination.index
+                  )
+                )
+              }
             }}
           >
             <Droppable droppableId="flip-editor">
@@ -527,18 +526,17 @@ export function FlipShuffleStep({
             <DragDropContext
               onDragEnd={result => {
                 if (
-                  !result.destination ||
-                  result.destination.index === result.source.index
-                )
-                  return
-
-                const nextOrder = reorder(
-                  order,
-                  result.source.index,
-                  result.destination.index
-                )
-
-                onManualShuffle(nextOrder)
+                  result.destination &&
+                  result.destination.index !== result.source.index
+                ) {
+                  onManualShuffle(
+                    reorder(
+                      order,
+                      result.source.index,
+                      result.destination.index
+                    )
+                  )
+                }
               }}
             >
               <Droppable droppableId="flip-shuffle">
