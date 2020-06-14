@@ -139,16 +139,12 @@ function FlipListPage({
                   mr={3}
                 ></AlertIcon>
                 {remainingRequiredFlips
-                  ? t(
-                      `Please submit {{remainingRequiredFlips}} required flips.`,
-                      {remainingRequiredFlips}
-                    )
+                  ? t(`Please submit required flips.`, {remainingRequiredFlips})
                   : null}{' '}
                 {remainingOptionalFlips
-                  ? t(
-                      `You can also submit {{remainingOptionalFlips}} optional flips if you want.`,
-                      {remainingOptionalFlips}
-                    )
+                  ? t(`You can also submit optional flips if you want.`, {
+                      remainingOptionalFlips,
+                    })
                   : null}
               </Alert>
             </Box>

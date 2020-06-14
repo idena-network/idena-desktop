@@ -110,7 +110,7 @@ export default function NewFlipPage() {
           overflowY="auto"
         >
           <FlipPageTitle onClose={() => router.push('/flips/list')}>
-            New flip
+            {t('New flip')}
           </FlipPageTitle>
           <FlipMaster>
             <FlipMasterNavbar>

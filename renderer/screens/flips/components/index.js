@@ -372,9 +372,9 @@ export function FlipStoryStep({children}) {
       <FlipStepHeader mb={8}>
         <FlipStepTitle>{t('Think up a story')}</FlipStepTitle>
         <FlipStepSubtitle>
-          {t(`Think up a short story about someone/something related to the two key
-          words below according to the template: “Before — Something happens —
-          After"`)}
+          {t(
+            `Think up a short story about someone/something related to the two key words below according to the template "Before — Something happens — After"`
+          )}
         </FlipStepSubtitle>
       </FlipStepHeader>
       {children}
@@ -424,9 +424,7 @@ export function FlipEditorStep({
       <FlipStepHeader>
         <FlipStepTitle>{t('Select 4 images to tell your story')}</FlipStepTitle>
         <FlipStepSubtitle>
-          {t(
-            'Think up a short story about someone/something related to the keywords'
-          )}{' '}
+          {t(`Use key words for the story`)}{' '}
           <Text as="mark">{formatKeywords(keywords)}</Text>{' '}
           {t(`and template "Before
           – Something happens – After"`)}
