@@ -10,7 +10,7 @@ import {shuffle} from '../../shared/utils/arr'
 import {FlipType} from '../../shared/types'
 import {fetchTx, deleteFlip} from '../../shared/api'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
-import {publishFlip} from './utils/flip'
+import {publishFlip, DEFAULT_FLIP_ORDER} from './utils/flip'
 
 export const flipsMachine = Machine({
   id: 'flips',
@@ -398,20 +398,13 @@ export const flipEditMachine = Machine({
         src: 'loadFlip',
         onDone: {
           target: 'loaded',
-          actions: [
-            assign((_, {data: {images, ...flip}}) => ({
-              ...flip,
-              images,
-              // images: images.map(buffer => buffer && bufferToImage(buffer)),
-            })),
-            log(),
-          ],
+          actions: [assign((_, {data}) => data), log()],
         },
-        onError: 'failure',
+        onError: {target: 'failure', actions: [log()]},
       },
     },
     loaded: {},
-    failure: {entry: log()},
+    failure: {},
   },
 })
 
@@ -420,8 +413,10 @@ export const flipMasterMachine = Machine(
     id: 'flipMaster',
     context: {
       keywordPairId: 0,
-      order: [0, 1, 2, 3],
+      originalOrder: DEFAULT_FLIP_ORDER,
+      order: DEFAULT_FLIP_ORDER,
     },
+    entry: [log()],
     initial: 'editing',
     states: {
       editing: {
@@ -591,12 +586,24 @@ export const flipMasterMachine = Machine(
                   log(),
                 ],
               },
+              CHANGE_ORIGINAL_ORDER: {
+                target: '.persisting',
+                actions: [
+                  assign({
+                    originalOrder: (_, {order}) => order,
+                    // order: (_, {order}) => order,
+                  }),
+                  log(),
+                ],
+              },
+              PAINTING: '.painting',
               NEXT: 'shuffle',
               PREV: 'keywords',
             },
             initial: 'idle',
             states: {
               idle: {},
+              painting: {},
               persisting: {
                 invoke: {
                   id: 'persistFlip',
@@ -620,9 +627,12 @@ export const flipMasterMachine = Machine(
               PREV: 'images',
               SHUFFLE: {
                 target: '.persisting',
-                actions: assign({
-                  order: ({order}) => shuffle(order),
-                }),
+                actions: [
+                  assign({
+                    order: ({order}) => shuffle(order),
+                  }),
+                  log(),
+                ],
               },
               MANUAL_SHUFFLE: {
                 target: '.persisting',
@@ -633,7 +643,7 @@ export const flipMasterMachine = Machine(
               RESET_SHUFFLE: {
                 target: '.persisting',
                 actions: assign({
-                  order: [0, 1, 2, 3],
+                  order: ({originalOrder}) => originalOrder,
                 }),
               },
             },
@@ -738,18 +748,28 @@ export const flipMasterMachine = Machine(
         }
       },
       persistFlip: (
-        {id, keywordPairId, order, images, keywords, type, createdAt},
+        {
+          id,
+          keywordPairId,
+          originalOrder,
+          order,
+          images,
+          keywords,
+          type,
+          createdAt,
+        },
         event
       ) => cb => {
         const persistingEventTypes = [
           'CHANGE_IMAGES',
+          'CHANGE_ORIGINAL_ORDER',
           'SHUFFLE',
           'MANUAL_SHUFFLE',
           'RESET_SHUFFLE',
         ]
 
         if (persistingEventTypes.includes(event.type)) {
-          let nextFlip = {keywordPairId, order, images, keywords}
+          let nextFlip = {keywordPairId, originalOrder, order, images, keywords}
 
           nextFlip = id
             ? {

@@ -94,7 +94,7 @@ export default function NewFlipPage() {
   })
 
   const {context} = current
-  const {keywords, images, order} = context
+  const {keywords, images, originalOrder, order} = context
 
   const not = state => !current.matches({editing: state})
   const is = state => current.matches({editing: state})
@@ -249,15 +249,22 @@ export default function NewFlipPage() {
             {is('images') && (
               <FlipEditorStep
                 keywords={keywords ? keywords.words : []}
+                originalOrder={originalOrder}
                 images={images}
                 onChangeImage={(image, currentIndex) =>
                   send('CHANGE_IMAGES', {image, currentIndex})
                 }
+                // eslint-disable-next-line no-shadow
+                onChangeOriginalOrder={order =>
+                  send('CHANGE_ORIGINAL_ORDER', {order})
+                }
+                onPainting={() => send('PAINTING')}
               />
             )}
             {is('shuffle') && (
               <FlipShuffleStep
                 images={images}
+                originalOrder={originalOrder}
                 order={order}
                 onShuffle={() => send('SHUFFLE')}
                 onManualShuffle={nextOrder =>
@@ -347,8 +354,8 @@ export default function NewFlipPage() {
                     </FlipKeywordPanel>
                     <Stack isInline spacing={10} justify="center">
                       <FlipImageList>
-                        {images.map(src => (
-                          <FlipImageListItem key={src} src={src} />
+                        {originalOrder.map(num => (
+                          <FlipImageListItem key={num} src={images[num]} />
                         ))}
                       </FlipImageList>
                       <FlipImageList>
@@ -373,7 +380,10 @@ export default function NewFlipPage() {
             </SecondaryButton>
           )}
           {not('submit') && (
-            <PrimaryButton onClick={() => send('NEXT')}>
+            <PrimaryButton
+              isDisabled={is('images.painting')}
+              onClick={() => send('NEXT')}
+            >
               Next step
             </PrimaryButton>
           )}

@@ -20,8 +20,6 @@ import {
   Heading,
   AspectRatioBox,
   Divider,
-  VisuallyHidden,
-  FormLabel,
   CloseButton,
   IconButton,
   FormControl,
@@ -35,7 +33,6 @@ import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import FlipEditor from './flip-editor'
 import {Step} from '../types'
 import {formatKeywords} from '../utils'
-import {hasImageType} from '../../../shared/utils/img'
 import {PageTitle} from '../../app/components'
 import {PrimaryButton, IconButton2} from '../../../shared/components/button'
 import {rem} from '../../../shared/theme'
@@ -406,7 +403,14 @@ export function FlipStoryAside(props) {
   return <Stack spacing={1} {...props}></Stack>
 }
 
-export function FlipEditorStep({keywords, images, onChangeImage}) {
+export function FlipEditorStep({
+  keywords,
+  originalOrder,
+  images,
+  onChangeImage,
+  onChangeOriginalOrder,
+  onPainting,
+}) {
   const [currentIndex, setCurrentIdx] = React.useState(0)
   return (
     <FlipStep>
@@ -420,64 +424,65 @@ export function FlipEditorStep({keywords, images, onChangeImage}) {
       </FlipStepHeader>
       <Stack isInline spacing={10}>
         <FlipImageList>
-          {images.map((src, idx) => (
-            <SelectableFlipImageListItem
-              key={src}
-              src={src}
-              isActive={idx === currentIndex}
-              onClick={() => setCurrentIdx(idx)}
-            />
-          ))}
+          <DragDropContext
+            onDragEnd={result => {
+              if (
+                !result.destination ||
+                result.destination.index === result.source.index
+              )
+                return
+
+              setCurrentIdx(result.destination.index)
+
+              const nextOrder = reorder(
+                originalOrder,
+                result.source.index,
+                result.destination.index
+              )
+
+              onChangeOriginalOrder(nextOrder)
+            }}
+          >
+            <Droppable droppableId="flip-editor">
+              {provided => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                  {originalOrder.map((num, idx) => (
+                    <DraggableItem
+                      key={num}
+                      draggableId={`image-${num}`}
+                      index={idx}
+                    >
+                      <SelectableItem
+                        isActive={idx === currentIndex}
+                        isFirst={idx === 0}
+                        isLast={idx === images.length - 1}
+                        onClick={() => setCurrentIdx(idx)}
+                      >
+                        <FlipImageListItem
+                          isFirst={idx === 0}
+                          isLast={idx === images.length - 1}
+                          src={images[num]}
+                        />
+                      </SelectableItem>
+                    </DraggableItem>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </FlipImageList>
         <Box>
-          {/* <FlipImage src={images[currentIndex]} width={400} rounded="md" /> */}
-          {images.map((src, idx) => (
+          {originalOrder.map((num, idx) => (
             <FlipEditor
-              idx={idx}
+              key={num}
+              idx={num}
               visible={currentIndex === idx}
-              src={src}
+              src={images[num]}
               onChange={url => onChangeImage(url, idx)}
-              onChanging={() => {
-                console.log()
-                // onChangingImage(idx)
-              }}
+              onChanging={onPainting}
             />
           ))}
-          {false && (
-            <Stack isInline align="center" spacing={3} mt={6}>
-              <Box>
-                <FlipEditorIcon name="google" />
-              </Box>
-              <Box>
-                <FormLabel htmlFor="file" p={0}>
-                  <FlipEditorIcon name="folder" />
-                </FormLabel>
-                <VisuallyHidden>
-                  <input
-                    id="file"
-                    type="file"
-                    onChange={async e => {
-                      const {files} = e.target
-                      if (files.length) {
-                        const [file] = files
-                        if (hasImageType(file)) {
-                          onChangeImage(URL.createObjectURL(file), currentIndex)
-                        }
-                      }
-                    }}
-                  />
-                </VisuallyHidden>
-              </Box>
-              <Divider
-                borderColor="gray.300"
-                borderWidth="px"
-                orientation="vertical"
-                mx={0}
-                h={6}
-              />
-              <FlipEditorIcon name="add-image" />
-            </Stack>
-          )}
         </Box>
       </Stack>
     </FlipStep>
@@ -497,6 +502,7 @@ export function FlipEditorIcon(props) {
 
 export function FlipShuffleStep({
   images,
+  originalOrder,
   order,
   onShuffle,
   onManualShuffle,
@@ -513,57 +519,50 @@ export function FlipShuffleStep({
       <Stack isInline spacing={10} align="center" justify="flex-end">
         <Stack isInline spacing={10} justify="center">
           <FlipImageList>
-            {images.map((src, idx) => (
-              <FlipImageListItem key={idx} src={src} opacity={0.3} />
+            {originalOrder.map(num => (
+              <FlipImageListItem key={num} src={images[num]} opacity={0.3} />
             ))}
           </FlipImageList>
-          <DragDropContext
-            onDragEnd={result => {
-              if (!result.destination) {
-                return
-              }
+          <FlipImageList>
+            <DragDropContext
+              onDragEnd={result => {
+                if (
+                  !result.destination ||
+                  result.destination.index === result.source.index
+                )
+                  return
 
-              if (result.destination.index === result.source.index) {
-                return
-              }
+                const nextOrder = reorder(
+                  order,
+                  result.source.index,
+                  result.destination.index
+                )
 
-              const nextOrder = reorder(
-                order,
-                result.source.index,
-                result.destination.index
-              )
-
-              onManualShuffle(nextOrder)
-            }}
-          >
-            <Droppable droppableId="flip">
-              {provided => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  <FlipImageList>
+                onManualShuffle(nextOrder)
+              }}
+            >
+              <Droppable droppableId="flip-shuffle">
+                {provided => (
+                  <div ref={provided.innerRef} {...provided.droppableProps}>
                     {order.map((num, idx) => (
-                      <Draggable
+                      <DraggableItem
                         key={num}
                         draggableId={`pic-${num}`}
                         index={idx}
                       >
-                        {/* eslint-disable-next-line no-shadow */}
-                        {provided => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <FlipImageListItem key={num} src={images[num]} />
-                          </div>
-                        )}
-                      </Draggable>
+                        <FlipImageListItem
+                          isFirst={idx === 0}
+                          isLast={idx === images.length - 1}
+                          src={images[num]}
+                        />
+                      </DraggableItem>
                     ))}
-                  </FlipImageList>
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </FlipImageList>
         </Stack>
         <Stack spacing={0} minW={rem(200)} align="flex-start">
           <IconButton2 icon="cycle" onClick={onShuffle}>
@@ -627,20 +626,11 @@ export function FlipMasterFooter(props) {
   )
 }
 
-export function FlipImageList({children, ...props}) {
-  return (
-    <Stack spacing={0} {...props}>
-      {React.Children.map(children, (child, idx) =>
-        React.cloneElement(child, {
-          isFirst: idx === 0,
-          isLast: idx === React.Children.count(children) - 1,
-        })
-      )}
-    </Stack>
-  )
+export function FlipImageList(props) {
+  return <Stack spacing={0} {...props} />
 }
 
-function SelectableFlipImageListItem({isActive, isFirst, isLast, ...props}) {
+function SelectableItem({isActive, isFirst, isLast, ...props}) {
   const {colors} = useTheme()
   return (
     <PseudoBox
@@ -659,9 +649,23 @@ function SelectableFlipImageListItem({isActive, isFirst, isLast, ...props}) {
         right: 0,
         zIndex: isActive ? 'docked' : 'base',
       }}
-    >
-      <FlipImageListItem isFirst={isFirst} isLast={isLast} {...props} />
-    </PseudoBox>
+      {...props}
+    />
+  )
+}
+
+function DraggableItem({draggableId, index, ...props}) {
+  return (
+    <Draggable draggableId={draggableId} index={index}>
+      {provided => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          {...props}
+        />
+      )}
+    </Draggable>
   )
 }
 

@@ -75,7 +75,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   const [brush, setBrush] = useState(20)
   const [brushColor, setBrushColor] = useState('ff6666dd')
   const [showColorPicker, setShowColorPicker] = useState(false)
-  const [showArrowHint, setShowArrowHint] = useState(src === null && idx === 0)
+  const [showArrowHint, setShowArrowHint] = useState(!src && idx === 0)
 
   // Editors
   const editorRefs = useRef([
@@ -346,7 +346,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     }
 
     if (containerCanvas) {
-      containerCanvas.style.borderRadius = rem(12)
+      containerCanvas.style.borderRadius = rem(8)
     }
 
     const newEditor =
