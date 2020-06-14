@@ -210,7 +210,7 @@ function FlipListPage({
 // eslint-disable-next-line react/prop-types
 function FlipCard({flip}) {
   const [current, send] = useService(flip)
-  const {id, keywords, images, type, createdAt} = current.context
+  const {id, keywords, originalOrder, images, type, createdAt} = current.context
 
   const {colors} = useTheme()
 
@@ -244,7 +244,7 @@ function FlipCard({flip}) {
             </FlipOverlayStatus>
           </FlipOverlay>
         )}
-        <FlipCardImage src={images[0]} />
+        <FlipCardImage src={images[originalOrder ? originalOrder[0] : 0]} />
       </FlipCardImageBox>
       <Flex justifyContent="space-between" alignItems="flex-start" mt={4}>
         <Box>

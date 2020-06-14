@@ -9,9 +9,8 @@ import {FlipType} from '../../../shared/types'
 import {areSame, areEual} from '../../../shared/utils/arr'
 import {submitFlip} from '../../../shared/api'
 
-export const DEFAULT_ORDER = [0, 1, 2, 3]
-
-export const FLIP_LENGTH = DEFAULT_ORDER.length
+export const FLIP_LENGTH = 4
+export const DEFAULT_FLIP_ORDER = [0, 1, 2, 3]
 
 /**
  * Composes hint for the flip
