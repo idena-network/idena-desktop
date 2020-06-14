@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/core'
 import {transparentize} from 'polished'
 import dayjs from 'dayjs'
+import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
   FlipCardImage,
@@ -54,6 +55,8 @@ function FlipListPage({
   },
   chainState: {syncing, offline, loading},
 }) {
+  const {t} = useTranslation()
+
   const toast = useToast()
 
   const [current, send] = useMachine(flipsMachine, {
@@ -102,18 +105,18 @@ function FlipListPage({
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
       <Page>
-        <PageTitle>My Flips</PageTitle>
+        <PageTitle>{t('My Flips')}</PageTitle>
         <Flex justify="space-between" align="center" alignSelf="stretch" mb={8}>
           <FlipFilter
             defaultValue="Active"
             onChange={value => send(`FILTER_${value.toUpperCase()}`)}
           >
-            <FlipFilterOption value="Active">Active</FlipFilterOption>
-            <FlipFilterOption value="Drafts">Drafts</FlipFilterOption>
-            <FlipFilterOption value="Archive">Archived</FlipFilterOption>
+            <FlipFilterOption value="Active">{t('Active')}</FlipFilterOption>
+            <FlipFilterOption value="Drafts">{t('Drafts')}</FlipFilterOption>
+            <FlipFilterOption value="Archive">{t('Archived')}</FlipFilterOption>
           </FlipFilter>
           <IconLink href="/flips/new" icon="plus-solid">
-            Add flip
+            {t('Add flip')}
           </IconLink>
         </Flex>
         {current.matches('ready.dirty.active') &&
@@ -136,10 +139,16 @@ function FlipListPage({
                   mr={3}
                 ></AlertIcon>
                 {remainingRequiredFlips
-                  ? `Please submit ${remainingRequiredFlips} required flips.`
+                  ? t(
+                      `Please submit {{remainingRequiredFlips}} required flips.`,
+                      {remainingRequiredFlips}
+                    )
                   : null}{' '}
                 {remainingOptionalFlips
-                  ? `You can also submit ${remainingOptionalFlips} optional flips if you want.`
+                  ? t(
+                      `You can also submit {{remainingOptionalFlips}} optional flips if you want.`,
+                      {remainingOptionalFlips}
+                    )
                   : null}
               </Alert>
             </Box>
@@ -172,9 +181,11 @@ function FlipListPage({
                       <FlipCardTitle>
                         {keywords
                           ? formatKeywords(keywords.words)
-                          : 'Missing keywords'}
+                          : t('Missing keywords')}
                       </FlipCardTitle>
-                      <FlipCardSubtitle>Missing on client</FlipCardSubtitle>
+                      <FlipCardSubtitle>
+                        {t('Missing on client')}
+                      </FlipCardSubtitle>
                     </Box>
                   </Box>
                 ))}
@@ -209,6 +220,8 @@ function FlipListPage({
 
 // eslint-disable-next-line react/prop-types
 function FlipCard({flip}) {
+  const {t} = useTranslation()
+
   const [current, send] = useService(flip)
   const {id, keywords, originalOrder, images, type, createdAt} = current.context
 
@@ -230,7 +243,7 @@ function FlipCard({flip}) {
                 : type === FlipType.Failed
                 ? `linear-gradient(to top, ${colors.red[500]}, ${transparentize(
                     100,
-                    colors.red['0']
+                    colors.red[500]
                   )})`
                 : ''
             }
@@ -238,8 +251,8 @@ function FlipCard({flip}) {
             <FlipOverlayStatus>
               <FlipOverlayIcon name="info-solid" />
               <FlipOverlayText>
-                {type === FlipType.Publishing && 'Mining...'}
-                {type === FlipType.Failed && 'Mining error'}
+                {type === FlipType.Publishing && t('Mining...')}
+                {type === FlipType.Invalid && t('Mining error')}
               </FlipOverlayText>
             </FlipOverlayStatus>
           </FlipOverlay>
@@ -251,7 +264,7 @@ function FlipCard({flip}) {
           <FlipCardTitle>
             {keywords.words
               ? formatKeywords(keywords.words)
-              : 'Missing keywords'}
+              : t('Missing keywords')}
           </FlipCardTitle>
           <FlipCardSubtitle>
             {dayjs(createdAt).format('d.MM.YYYY, H:mm')}
@@ -262,13 +275,13 @@ function FlipCard({flip}) {
             <>
               <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
                 <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
-                Submit flip
+                {t('Submit flip')}
               </FlipCardMenuItem>
               <FlipCardMenuItem>
                 <NextLink href={`/flips/edit?id=${id}`}>
                   <Flex>
                     <FlipCardMenuItemIcon name="edit" size={5} mr={2} />
-                    Edit flip
+                    {t('Edit flip')}
                   </Flex>
                 </NextLink>
               </FlipCardMenuItem>
@@ -282,7 +295,7 @@ function FlipCard({flip}) {
               mr={2}
               color="red.500"
             />
-            Delete flip
+            {t('Delete flip')}
           </FlipCardMenuItem>
         </FlipCardMenu>
       </Flex>
