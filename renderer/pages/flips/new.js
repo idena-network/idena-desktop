@@ -41,7 +41,7 @@ import {publishFlip} from '../../screens/flips/utils/flip'
 import {Notification} from '../../shared/components/notifications'
 
 export default function NewFlipPage() {
-  const {i18n} = useTranslation()
+  const {t, i18n} = useTranslation()
 
   const router = useRouter()
 
@@ -118,7 +118,7 @@ export default function NewFlipPage() {
                 step={is('keywords') ? Step.Active : Step.Completed}
                 onClick={() => send('PICK_KEYWORDS')}
               >
-                Think up a story
+                {t('Think up a story')}
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={
@@ -131,7 +131,7 @@ export default function NewFlipPage() {
                 }
                 onClick={() => send('PICK_IMAGES')}
               >
-                Select images
+                {t('Select images')}
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={
@@ -144,13 +144,13 @@ export default function NewFlipPage() {
                 }
                 onClick={() => send('PICK_SHUFFLE')}
               >
-                Shuffle images
+                {t('Shuffle images')}
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={is('submit') ? Step.Active : Step.Next}
                 onClick={() => send('PICK_SUBMIT')}
               >
-                Submit flip
+                {t('Submit flip')}
               </FlipMasterNavbarItem>
             </FlipMasterNavbar>
             {is('keywords') && (
@@ -233,7 +233,7 @@ export default function NewFlipPage() {
                       icon="refresh"
                       onClick={() => send('CHANGE_KEYWORDS')}
                     >
-                      Change words
+                      {t('Change words')}
                     </IconButton2>
                   </FlipStoryAside>
                 </FlipStepBody>
@@ -355,14 +355,11 @@ export default function NewFlipPage() {
               </FlipSubmitStep>
             )}
           </FlipMaster>
-          <Box position="absolute" left={6} bottom={6}>
-            <Code>{JSON.stringify({})}</Code>
-          </Box>
         </Flex>
         <FlipMasterFooter>
           {not('keywords') && (
             <SecondaryButton onClick={() => send('PREV')}>
-              Prev step
+              {t('Prev step')}
             </SecondaryButton>
           )}
           {not('submit') && (
@@ -370,17 +367,21 @@ export default function NewFlipPage() {
               isDisabled={is('images.painting')}
               onClick={() => send('NEXT')}
             >
-              Next step
+              {t('Next step')}
             </PrimaryButton>
           )}
           {is('submit') && (
-            <PrimaryButton onClick={() => send('SUBMIT')}>Submit</PrimaryButton>
+            <PrimaryButton onClick={() => send('SUBMIT')}>
+              {t('Submit')}
+            </PrimaryButton>
           )}
         </FlipMasterFooter>
+      </Page>
+      {global.isDev && (
         <Box position="absolute" left={6} bottom={6} zIndex="modal">
           <Code>{JSON.stringify(current.value)}</Code>
         </Box>
-      </Page>
+      )}
     </Layout>
   )
 }

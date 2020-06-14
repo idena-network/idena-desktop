@@ -66,7 +66,7 @@ export default function EditFlipPage() {
 
 // eslint-disable-next-line react/prop-types
 function FlipEditMaster({availableKeywords, ...flipContext}) {
-  const {i18n} = useTranslation()
+  const {t, i18n} = useTranslation()
 
   const router = useRouter()
 
@@ -123,7 +123,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
           overflowY="auto"
         >
           <FlipPageTitle onClose={() => router.push('/flips/list')}>
-            Edit flip
+            {t('Edit flip')}
           </FlipPageTitle>
           <FlipMaster>
             <FlipMasterNavbar>
@@ -131,7 +131,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                 step={is('keywords') ? Step.Active : Step.Completed}
                 onClick={() => send('PICK_KEYWORDS')}
               >
-                Think up a story
+                {t('Think up a story')}
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={
@@ -144,7 +144,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                 }
                 onClick={() => send('PICK_IMAGES')}
               >
-                Select images
+                {t('Select images')}
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={
@@ -157,13 +157,13 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                 }
                 onClick={() => send('PICK_SHUFFLE')}
               >
-                Shuffle images
+                {t('Shuffle images')}
               </FlipMasterNavbarItem>
               <FlipMasterNavbarItem
                 step={is('submit') ? Step.Active : Step.Next}
                 onClick={() => send('PICK_SUBMIT')}
               >
-                Submit flip
+                {t('Submit flip')}
               </FlipMasterNavbarItem>
             </FlipMasterNavbar>
             {is('keywords') && (
@@ -246,7 +246,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                       icon="refresh"
                       onClick={() => send('CHANGE_KEYWORDS')}
                     >
-                      Change words
+                      {t('Change words')}
                     </IconButton2>
                   </FlipStoryAside>
                 </FlipStepBody>
@@ -377,7 +377,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
         <FlipMasterFooter>
           {not('keywords') && (
             <SecondaryButton onClick={() => send('PREV')}>
-              Prev step
+              {t('Previous step')}
             </SecondaryButton>
           )}
           {not('submit') && (
@@ -385,17 +385,21 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
               isDisabled={is('images.painting')}
               onClick={() => send('NEXT')}
             >
-              Next step
+              {t('Next step')}
             </PrimaryButton>
           )}
           {is('submit') && (
-            <PrimaryButton onClick={() => send('SUBMIT')}>Submit</PrimaryButton>
+            <PrimaryButton onClick={() => send('SUBMIT')}>
+              {t('Submit')}
+            </PrimaryButton>
           )}
         </FlipMasterFooter>
+      </Page>
+      {global.isDev && (
         <Box position="absolute" left={6} bottom={6} zIndex="popover">
           <Code>{JSON.stringify(current.value)}</Code>
         </Box>
-      </Page>
+      )}
     </Layout>
   )
 }

@@ -30,6 +30,7 @@ import {
   Link,
 } from '@chakra-ui/core'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
+import {useTranslation} from 'react-i18next'
 import FlipEditor from './flip-editor'
 import {Step} from '../types'
 import {formatKeywords} from '../utils'
@@ -129,6 +130,7 @@ export function FlipCardMenuItemIcon(props) {
 }
 
 export function RequiredFlipPlaceholder({title}) {
+  const {t} = useTranslation()
   return (
     <Box cursor="pointer">
       <NextLink href="/flips/new" passHref>
@@ -140,13 +142,14 @@ export function RequiredFlipPlaceholder({title}) {
       </NextLink>
       <Box mt={4}>
         <FlipCardTitle>{title}</FlipCardTitle>
-        <FlipCardSubtitle>Required</FlipCardSubtitle>
+        <FlipCardSubtitle>{t('Required')}</FlipCardSubtitle>
       </Box>
     </Box>
   )
 }
 
 export function OptionalFlipPlaceholder({title, isDisabled}) {
+  const {t} = useTranslation()
   return (
     <Box
       cursor={isDisabled ? 'pointer' : 'auto'}
@@ -167,7 +170,7 @@ export function OptionalFlipPlaceholder({title, isDisabled}) {
       )}
       <Box mt={4}>
         <FlipCardTitle>{title}</FlipCardTitle>
-        <FlipCardSubtitle>Optional</FlipCardSubtitle>
+        <FlipCardSubtitle>{t('Optional')}</FlipCardSubtitle>
       </Box>
     </Box>
   )
@@ -363,14 +366,15 @@ export function FlipMasterNavbarItemText({step, ...props}) {
 }
 
 export function FlipStoryStep({children}) {
+  const {t} = useTranslation()
   return (
     <FlipStep>
       <FlipStepHeader mb={8}>
-        <FlipStepTitle>Think up a story</FlipStepTitle>
+        <FlipStepTitle>{t('Think up a story')}</FlipStepTitle>
         <FlipStepSubtitle>
-          Think up a short story about someone/something related to the two key
+          {t(`Think up a short story about someone/something related to the two key
           words below according to the template: “Before — Something happens —
-          After"
+          After"`)}
         </FlipStepSubtitle>
       </FlipStepHeader>
       {children}
@@ -411,15 +415,22 @@ export function FlipEditorStep({
   onChangeOriginalOrder,
   onPainting,
 }) {
+  const {t} = useTranslation()
+
   const [currentIndex, setCurrentIdx] = React.useState(0)
+
   return (
     <FlipStep>
       <FlipStepHeader>
-        <FlipStepTitle>Select 4 images to tell your story</FlipStepTitle>
+        <FlipStepTitle>{t('Select 4 images to tell your story')}</FlipStepTitle>
         <FlipStepSubtitle>
-          Use keywords for the story{' '}
-          <Text as="mark">{formatKeywords(keywords)}</Text> and template "Before
-          – Something happens – After".
+          {t(
+            'Think up a short story about someone/something related to the keywords'
+          )}{' '}
+          <Text as="mark">{formatKeywords(keywords)}</Text>{' '}
+          {t(`and template "Before
+          – Something happens – After"`)}
+          .
         </FlipStepSubtitle>
       </FlipStepHeader>
       <Stack isInline spacing={10}>
@@ -507,12 +518,13 @@ export function FlipShuffleStep({
   onManualShuffle,
   onReset,
 }) {
+  const {t} = useTranslation()
   return (
     <FlipStep alignSelf="stretch">
       <FlipStepHeader>
-        <FlipStepTitle>Shuffle images</FlipStepTitle>
+        <FlipStepTitle>{t('Shuffle images')}</FlipStepTitle>
         <FlipStepSubtitle>
-          Shuffle images in a way to make a nonsense sequence of images
+          {t('Shuffle images in order to make a nonsense sequence of images')}
         </FlipStepSubtitle>
       </FlipStepHeader>
       <Stack isInline spacing={10} align="center" justify="flex-end">
@@ -564,10 +576,10 @@ export function FlipShuffleStep({
         </Stack>
         <Stack spacing={0} minW={rem(200)} align="flex-start">
           <IconButton2 icon="cycle" onClick={onShuffle}>
-            Shuffle images
+            {t('Shuffle images')}
           </IconButton2>
           <IconButton2 icon="undo" onClick={onReset}>
-            Reset to default
+            {t('Reset to default')}
           </IconButton2>
         </Stack>
       </Stack>
@@ -576,12 +588,15 @@ export function FlipShuffleStep({
 }
 
 export function FlipSubmitStep({children}) {
+  const {t} = useTranslation()
   return (
     <FlipStep alignSelf="stretch">
       <FlipStepHeader>
-        <FlipStepTitle>Submit flip</FlipStepTitle>
+        <FlipStepTitle>{t('Submit flip')}</FlipStepTitle>
         <FlipStepSubtitle>
-          Submit flip to publish it to the Idena network
+          {t(
+            'Make sure it is not possible to read the shuffled images as a meaningful story'
+          )}
         </FlipStepSubtitle>
       </FlipStepHeader>
       {children}
@@ -710,8 +725,11 @@ export function EmptyFlipImage(props) {
 }
 
 export function CommunityTranslations({keywords, onVote, onSuggest}) {
-  const [wordIdx, setWordIdx] = React.useState(0)
+  const {t} = useTranslation()
+
   const {isOpen, onToggle} = useDisclosure()
+
+  const [wordIdx, setWordIdx] = React.useState(0)
 
   return (
     <Stack spacing={8}>
@@ -722,7 +740,7 @@ export function CommunityTranslations({keywords, onVote, onSuggest}) {
         _hover={{background: 'transparent'}}
         onClick={onToggle}
       >
-        Community translation
+        {t('Community translation')}
         <Icon size={5} name="chevron-down" color="muted" ml={2}></Icon>
       </IconButton2>
       <Collapse isOpen={isOpen}>
@@ -770,7 +788,7 @@ export function CommunityTranslations({keywords, onVote, onSuggest}) {
           <Divider borderColor="gray.300" />
           <Box>
             <Text fontWeight={500} mb={3}>
-              Suggest translation
+              {t('Suggest translation')}
             </Text>
             <form
               onSubmit={e => {
@@ -809,7 +827,7 @@ export function CommunityTranslations({keywords, onVote, onSuggest}) {
                 />
               </FormControl>
               <PrimaryButton type="submit" display="flex" ml="auto">
-                Send
+                {t('Send')}
               </PrimaryButton>
             </form>
           </Box>
