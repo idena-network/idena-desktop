@@ -711,7 +711,6 @@ export const flipMasterMachine = Machine(
     services: {
       loadKeywords: async ({availableKeywords, keywordPairId, locale}) => {
         const {words} = availableKeywords.find(({id}) => id === keywordPairId)
-
         return {
           words: words.map(id => ({id, ...global.loadKeyword(id)})),
           translations: await fetchKeywordTranslations(words, locale),

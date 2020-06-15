@@ -19,7 +19,7 @@ export async function fetchKeywordTranslations(ids, locale) {
       )
     )
   ).map(({translations}) =>
-    translations.map(
+    (translations || []).map(
       ({
         id,
         name,

@@ -243,7 +243,7 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                     {is('keywords.failure') && (
                       <FlipKeyword>
                         <FlipKeywordName>
-                          {t('Keywords are not specified')}
+                          {t('Missing keywords')}
                         </FlipKeywordName>
                       </FlipKeyword>
                     )}
