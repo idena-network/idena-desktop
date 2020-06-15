@@ -51,20 +51,13 @@ export default function NewFlipPage() {
 
   const {flipKeyWordPairs: availableKeywords} = useIdentityState()
 
-  const [{id: keywordPairId}] =
-    availableKeywords && availableKeywords.length
-      ? availableKeywords.filter(({used}) => !used)
-      : [
-          {
-            id: 0,
-          },
-        ]
-
   const [current, send] = useMachine(flipMasterMachine, {
     context: {
       ...flipMasterMachine.context,
-      availableKeywords,
-      keywordPairId,
+      availableKeywords: availableKeywords || [],
+      keywordPairId: availableKeywords
+        ? availableKeywords.filter(({used}) => !used).id
+        : 0,
       images: Array.from({length: 4}),
       locale: i18n.language,
     },
@@ -226,6 +219,13 @@ export default function NewFlipPage() {
                           onSuggest={e => send('SUGGEST', e)}
                         />
                       </Stack>
+                    )}
+                    {is('keywords.failure') && (
+                      <FlipKeyword>
+                        <FlipKeywordName>
+                          {t('Keywords are not specified')}
+                        </FlipKeywordName>
+                      </FlipKeyword>
                     )}
                   </FlipKeywordPanel>
                   <FlipStoryAside>

@@ -366,7 +366,10 @@ export const flipMachine = Machine(
         const fetchStatus = async () => {
           const {result} = await fetchTx(txHash)
 
-          if (result === null) cb('TX_NULL')
+          if (result === null) {
+            cb('TX_NULL')
+            return
+          }
 
           if (result.blockHash !== HASH_IN_MEMPOOL) cb('MINED')
           else {
@@ -413,6 +416,10 @@ export const flipMasterMachine = Machine(
     id: 'flipMaster',
     context: {
       keywordPairId: 0,
+      keywords: {
+        words: [],
+        translations: [],
+      },
       originalOrder: DEFAULT_FLIP_ORDER,
       order: DEFAULT_FLIP_ORDER,
     },
@@ -465,6 +472,7 @@ export const flipMasterMachine = Machine(
                       log(),
                     ],
                   },
+                  onError: 'failure',
                 },
               },
               done: {
@@ -700,8 +708,8 @@ export const flipMasterMachine = Machine(
   {
     services: {
       loadKeywords: async ({availableKeywords, keywordPairId, locale}) => {
-        // eslint-disable-next-line no-shadow
         const {words} = availableKeywords.find(({id}) => id === keywordPairId)
+
         return {
           words: words.map(id => ({id, ...global.loadKeyword(id)})),
           translations: await fetchKeywordTranslations(words, locale),

@@ -46,18 +46,19 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {Notification} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
 
-function FlipListPage({
-  identity: {
+export default function FlipListPage() {
+  const {t} = useTranslation()
+
+  const toast = useToast()
+
+  const {syncing, offline, loading} = useChainState()
+
+  const {
     flips: knownFlips,
     requiredFlips: requiredFlipsNumber,
     availableFlips: availableFlipsNumber,
     flipKeyWordPairs: availableKeywords,
-  },
-  chainState: {syncing, offline, loading},
-}) {
-  const {t} = useTranslation()
-
-  const toast = useToast()
+  } = useIdentityState()
 
   const [current, send] = useMachine(flipsMachine, {
     context: {
@@ -87,7 +88,9 @@ function FlipListPage({
   // eslint-disable-next-line no-nested-ternary
   const filteredFlips = current.matches(readyState('active'))
     ? flips.filter(({type}) =>
-        [FlipType.Publishing, FlipType.Published].includes(type)
+        [FlipType.Publishing, FlipType.Published, FlipType.Invalid].includes(
+          type
+        )
       )
     : // eslint-disable-next-line no-nested-ternary
     current.matches(readyState('drafts'))
@@ -228,7 +231,7 @@ function FlipCard({flip}) {
   return (
     <Box position="relative">
       <FlipCardImageBox>
-        {[FlipType.Publishing, FlipType.Failed].includes(type) && (
+        {[FlipType.Publishing, FlipType.Invalid].includes(type) && (
           <FlipOverlay
             backgroundImage={
               // eslint-disable-next-line no-nested-ternary
@@ -236,7 +239,7 @@ function FlipCard({flip}) {
                 ? `linear-gradient(to top, ${
                     colors.warning[500]
                   }, ${transparentize(100, colors.warning[500])})`
-                : type === FlipType.Failed
+                : type === FlipType.Invalid
                 ? `linear-gradient(to top, ${colors.red[500]}, ${transparentize(
                     100,
                     colors.red[500]
@@ -297,16 +300,4 @@ function FlipCard({flip}) {
       </Flex>
     </Box>
   )
-}
-
-export default function EnrichedFlipListPage() {
-  const chainState = useChainState()
-
-  const identity = useIdentityState()
-
-  if (chainState && identity.address) {
-    return <FlipListPage identity={identity} chainState={chainState} />
-  }
-
-  return null
 }

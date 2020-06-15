@@ -44,7 +44,7 @@ export default function EditFlipPage() {
   const router = useRouter()
   const {id: flipId} = router.query
 
-  const {flipKeyWordPairs: availableKeywords} = useIdentityState()
+  const {address, flipKeyWordPairs: availableKeywords} = useIdentityState()
 
   const [currentEdit] = useMachine(flipEditMachine, {
     context: {id: flipId},
@@ -53,7 +53,7 @@ export default function EditFlipPage() {
     },
   })
 
-  if (currentEdit.matches('loaded') && availableKeywords !== undefined)
+  if (currentEdit.matches('loaded') && address)
     return (
       <FlipEditMaster
         availableKeywords={availableKeywords}
@@ -239,6 +239,13 @@ function FlipEditMaster({availableKeywords, ...flipContext}) {
                           onSuggest={e => send('SUGGEST', e)}
                         />
                       </Stack>
+                    )}
+                    {is('keywords.failure') && (
+                      <FlipKeyword>
+                        <FlipKeywordName>
+                          {t('Keywords are not specified')}
+                        </FlipKeywordName>
+                      </FlipKeyword>
                     )}
                   </FlipKeywordPanel>
                   <FlipStoryAside>
