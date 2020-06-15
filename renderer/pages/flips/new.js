@@ -49,15 +49,16 @@ export default function NewFlipPage() {
 
   const {syncing} = useChainState()
 
-  const {flipKeyWordPairs: availableKeywords} = useIdentityState()
+  let {flipKeyWordPairs: availableKeywords} = useIdentityState()
+  availableKeywords = availableKeywords || [{id: 0}]
+
+  const [{id: keywordPairId}] = availableKeywords
 
   const [current, send] = useMachine(flipMasterMachine, {
     context: {
       ...flipMasterMachine.context,
-      availableKeywords: availableKeywords || [],
-      keywordPairId: availableKeywords
-        ? availableKeywords.filter(({used}) => !used).id
-        : 0,
+      availableKeywords,
+      keywordPairId,
       images: Array.from({length: 4}),
       locale: i18n.language,
     },
