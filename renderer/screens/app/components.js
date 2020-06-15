@@ -6,9 +6,9 @@ export function LayoutContainer(props) {
     <Flex
       align="stretch"
       flexWrap="wrap"
-      minH="100vh"
       color="brand.gray"
       fontSize="md"
+      minH="100vh"
       {...props}
     />
   )

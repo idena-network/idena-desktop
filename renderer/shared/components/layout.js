@@ -134,7 +134,7 @@ function NormalApp({children}) {
   const {addNotification, addError} = useNotificationDispatch()
 
   return (
-    <Flex as="section" direction="column" flex={1} overflowY="auto">
+    <Flex as="section" direction="column" flex={1} h="100vh" overflowY="auto">
       {children}
 
       {epoch && <ValidationToast epoch={epoch} identity={identity} />}
