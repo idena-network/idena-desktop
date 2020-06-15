@@ -50,7 +50,7 @@ export default function NewFlipPage() {
   const {syncing} = useChainState()
 
   let {flipKeyWordPairs: availableKeywords} = useIdentityState()
-  availableKeywords = availableKeywords || [{id: 0}]
+  availableKeywords = availableKeywords.filter(({used}) => !used) || [{id: 0}]
 
   const [{id: keywordPairId}] = availableKeywords
 

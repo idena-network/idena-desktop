@@ -39,6 +39,7 @@ function Sidebar() {
           flex-direction: column;
           justify-content: space-between;
           height: 100vh;
+          overflow: hidden;
           padding: ${rem(8)} ${rem(16)};
           width: ${rem(200)};
           position: relative;
