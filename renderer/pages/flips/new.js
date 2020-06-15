@@ -224,7 +224,7 @@ export default function NewFlipPage() {
                     {is('keywords.failure') && (
                       <FlipKeyword>
                         <FlipKeywordName>
-                          {t('Keywords are not specified')}
+                          {t('Missing keywords')}
                         </FlipKeywordName>
                       </FlipKeyword>
                     )}
@@ -270,7 +270,7 @@ export default function NewFlipPage() {
             {is('submit') && (
               <FlipSubmitStep>
                 <FlipStepBody minH="180px">
-                  <Stack isInline spacing={10}>
+                  <Stack isInline spacing={10} align="flex-start">
                     <FlipKeywordPanel w={rem(320)}>
                       {is('submit.idle') && (
                         <Stack spacing="30px">
@@ -341,13 +341,23 @@ export default function NewFlipPage() {
                     </FlipKeywordPanel>
                     <Stack isInline spacing={10} justify="center">
                       <FlipImageList>
-                        {originalOrder.map(num => (
-                          <FlipImageListItem key={num} src={images[num]} />
+                        {originalOrder.map((num, idx) => (
+                          <FlipImageListItem
+                            key={num}
+                            src={images[num]}
+                            isFirst={idx === 0}
+                            isLast={idx === images.length - 1}
+                          />
                         ))}
                       </FlipImageList>
                       <FlipImageList>
                         {order.map(idx => (
-                          <FlipImageListItem key={idx} src={images[idx]} />
+                          <FlipImageListItem
+                            key={idx}
+                            src={images[idx]}
+                            isFirst={idx === 0}
+                            isLast={idx === images.length - 1}
+                          />
                         ))}
                       </FlipImageList>
                     </Stack>

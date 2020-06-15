@@ -853,7 +853,7 @@ function ArrowHint({hint, leftHanded, visible}) {
                 <div
                   style={{
                     position: 'absolute',
-                    left: '12px',
+                    left: rem(16),
                     width: 0,
                     height: 0,
                     marginLeft: '0px',
