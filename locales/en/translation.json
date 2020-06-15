@@ -230,6 +230,7 @@
   "Please wait. The network is reaching consensus about validated identities": "Please wait. The network is reaching consensus about validated identities",
   "Select image to erase": "Select image to erase",
   "Erase": "Erase",
+  "Copied": "Copied",
   "Please wait for the validation report": "Please wait for the validation report",
   "Your node is outdated because of the hard fork, please update": "Your node is outdated because of the hard fork, please update",
   "Update Node Version": "Update Node Version",

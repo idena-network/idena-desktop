@@ -16,6 +16,7 @@ import {MdAddToPhotos, MdCrop, MdUndo, MdRedo} from 'react-icons/md'
 
 import {useTranslation} from 'react-i18next'
 import mousetrap from 'mousetrap'
+import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
 
@@ -167,7 +168,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           replaceObjectProps = editors[
             idx
           ].getObjectProperties(data.replaceObjectId, ['left', 'top', 'angle'])
-          editors[idx].removeObject(data.replaceObjectId)
+          editors[idx].execute('removeObject', data.replaceObjectId)
         }
         Jimp.read(url).then(image => {
           image.getBase64Async('image/png').then(nextUrl => {
@@ -221,24 +222,22 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
               editor.addImageObject(url).then(objectProps2 => {
                 const {id: id2} = objectProps2
 
-                editor.setObjectProperties(id2, {
+                editor.setObjectPropertiesQuietly(id2, {
                   left: IMAGE_WIDTH / 2,
                   top: IMAGE_HEIGHT / 2,
                   scaleX: newWidth / width,
                   scaleY: newHeight / height,
                 })
+                editor.loadImageFromURL(editor.toDataURL(), 'Bkgd').then(() => {
+                  editor.clearUndoStack()
+                  editor.clearRedoStack()
+                  handleOnChanged()
+                  if (onDone) onDone()
 
-                editor.clearUndoStack()
-                editor.clearRedoStack()
-                handleOnChanged()
-                if (onDone) onDone()
-
-                if (editors[idx]._graphics) {
-                  editors[idx]._graphics.renderAll()
-                }
-
-                // editor.loadImageFromURL(editor.toDataURL(), 'Bkgd').then(() => {
-                // })
+                  if (editors[idx]._graphics) {
+                    editors[idx]._graphics.renderAll()
+                  }
+                })
               })
             })
           })
@@ -307,13 +306,15 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     }
   }
 
-  const handleOnCopy = () => {
-    const url = activeObjectId
-      ? activeObjectUrl
-      : editors[idx] && editors[idx].toDataURL()
+  const {addNotification} = useNotificationDispatch()
 
+  const handleOnCopy = () => {
+    const url = activeObjectUrl || (editors[idx] && editors[idx].toDataURL())
     if (url) {
       writeImageURLToClipboard(url)
+      addNotification({
+        title: t('Copied'),
+      })
     }
   }
 

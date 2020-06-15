@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, {useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position, wordWrap} from 'polished'
@@ -321,7 +322,6 @@ export function ImageEraseEditor({
 }) {
   const canvasRef = useRef()
   const [isMouseDown, setIsMouseDown] = useState(false)
-  const [prevMousePoint, setPrevMousePoint] = useState()
 
   useEffect(() => {
     if (isDone && onDone) {
@@ -345,20 +345,10 @@ export function ImageEraseEditor({
         ctx.beginPath()
         ctx.arc(x, y, brushWidth / 2, 0, 2 * Math.PI)
         ctx.fill()
-
-        /*
-        if (prevMousePoint) {
-          ctx.lineWidth = 20
-          ctx.beginPath()
-          ctx.moveTo(prevMousePoint.x, prevMousePoint.y)
-          ctx.lineTo(x, y)
-          ctx.stroke()
-        }
-        */
       }
-      setPrevMousePoint({x, y})
     },
-    [canvasRef, isMouseDown, prevMousePoint]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [canvasRef, isMouseDown]
   )
 
   const handleMouseDown = () => {
@@ -420,7 +410,7 @@ export function ImageEraseEditor({
         top={0}
         left={0}
         zIndex={100}
-        width={'442px'}
+        width="442px"
         css={{
           height: '333px',
           paddingTop: '0.5px',
@@ -459,7 +449,7 @@ ImageEraseEditor.propTypes = {
   brushWidth: PropTypes.number,
   imageObjectProps: PropTypes.object,
   onDone: PropTypes.func,
-  onChange: PropTypes.func,
+  onChanging: PropTypes.func,
   isDone: PropTypes.bool,
 }
 
