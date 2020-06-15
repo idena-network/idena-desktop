@@ -561,7 +561,9 @@ export const flipMasterMachine = Machine(
                   },
                 },
               },
-              failure: {},
+              failure: {
+                entry: [log()],
+              },
             },
           },
           images: {
