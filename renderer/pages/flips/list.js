@@ -205,9 +205,9 @@ export default function FlipListPage() {
                   ) {
                     setSelectedFlip(flip)
                     openDeleteForm()
-                  }
-                  if (flip.type === FlipType.Draft) flip.ref.send('ARCHIVE')
-                  if (flip.type === FlipType.Archived) flip.ref.send('REMOVE')
+                  } else if (flip.type === FlipType.Archived)
+                    flip.ref.send('REMOVE')
+                  else flip.ref.send('ARCHIVE')
                 }}
               />
             ))}
@@ -356,6 +356,7 @@ function FlipCard({flipService, onDelete}) {
   const {colors} = useTheme()
 
   const isDraft = type === FlipType.Draft
+  const isPending = [FlipType.Publishing, FlipType.Deleting].includes(type)
 
   return (
     <Box position="relative">
@@ -399,34 +400,37 @@ function FlipCard({flipService, onDelete}) {
             {dayjs(createdAt).format('d.MM.YYYY, H:mm')}
           </FlipCardSubtitle>
         </Box>
-        <FlipCardMenu>
-          {isDraft && (
-            <>
-              <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
-                <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
-                {t('Submit flip')}
-              </FlipCardMenuItem>
-              <FlipCardMenuItem>
-                <NextLink href={`/flips/edit?id=${id}`}>
-                  <Flex>
-                    <FlipCardMenuItemIcon name="edit" size={5} mr={2} />
-                    {t('Edit flip')}
-                  </Flex>
-                </NextLink>
-              </FlipCardMenuItem>
-              <MenuDivider color="rgb(232, 234, 237)" my={2} width="145px" />
-            </>
-          )}
-          <FlipCardMenuItem onClick={onDelete}>
-            <FlipCardMenuItemIcon
-              name="delete"
-              size={5}
-              mr={2}
-              color="red.500"
-            />
-            {t('Delete flip')}
-          </FlipCardMenuItem>
-        </FlipCardMenu>
+        {!isPending && (
+          <FlipCardMenu>
+            {isDraft && (
+              <>
+                <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
+                  <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
+                  {t('Submit flip')}
+                </FlipCardMenuItem>
+                <FlipCardMenuItem>
+                  <NextLink href={`/flips/edit?id=${id}`}>
+                    <Flex>
+                      <FlipCardMenuItemIcon name="edit" size={5} mr={2} />
+                      {t('Edit flip')}
+                    </Flex>
+                  </NextLink>
+                </FlipCardMenuItem>
+                <MenuDivider color="rgb(232, 234, 237)" my={2} width="145px" />
+              </>
+            )}
+
+            <FlipCardMenuItem onClick={onDelete}>
+              <FlipCardMenuItemIcon
+                name="delete"
+                size={5}
+                mr={2}
+                color="red.500"
+              />
+              {t('Delete flip')}
+            </FlipCardMenuItem>
+          </FlipCardMenu>
+        )}
       </Flex>
     </Box>
   )

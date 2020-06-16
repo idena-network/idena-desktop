@@ -37,7 +37,7 @@ import {NotificationType} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine, flipEditMachine} from '../../screens/flips/machines'
 import {rem} from '../../shared/theme'
-import {publishFlip} from '../../screens/flips/utils/flip'
+import {publishFlip, isPendingKeywordPair} from '../../screens/flips/utils/flip'
 import {Notification} from '../../shared/components/notifications'
 
 export default function EditFlipPage() {
@@ -56,7 +56,9 @@ export default function EditFlipPage() {
   if (currentEdit.matches('loaded') && address)
     return (
       <FlipEditMaster
-        availableKeywords={availableKeywords}
+        availableKeywords={availableKeywords.filter(
+          ({id, used}) => !used && !isPendingKeywordPair(id)
+        )}
         {...currentEdit.context}
       />
     )
