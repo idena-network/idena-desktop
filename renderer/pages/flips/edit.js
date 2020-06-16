@@ -49,7 +49,16 @@ export default function EditFlipPage() {
   const [currentEdit] = useMachine(flipEditMachine, {
     context: {id: flipId},
     services: {
-      loadFlip: async ({id}) => global.flipStore.getFlip(id),
+      loadFlip: async ({id}) => {
+        const {
+          pics,
+          images = pics,
+          hint,
+          flipKeywordId = Math.max(hint.id, 0),
+          ...flip
+        } = global.flipStore.getFlip(id)
+        return {...flip, images, flipKeywordId}
+      },
     },
   })
 
