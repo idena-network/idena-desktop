@@ -11,8 +11,21 @@ import {
   MenuDivider,
   useTheme,
   useToast,
+  Drawer,
+  DrawerHeader,
+  DrawerBody,
+  DrawerContent,
+  Input,
+  DrawerCloseButton,
+  DrawerOverlay,
+  useDisclosure,
+  Icon,
+  Heading,
+  Text,
+  FormControl,
+  FormLabel,
 } from '@chakra-ui/core'
-import {transparentize} from 'polished'
+import {transparentize, rem} from 'polished'
 import dayjs from 'dayjs'
 import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
@@ -34,6 +47,7 @@ import {
   FlipOverlayIcon,
   FlipOverlayText,
   FlipCardImageBox,
+  FlipImage,
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
 import {IconLink} from '../../shared/components/link'
@@ -45,11 +59,18 @@ import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {Notification} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
+import {PrimaryButton} from '../../shared/components/button'
 
 export default function FlipListPage() {
   const {t} = useTranslation()
 
   const toast = useToast()
+
+  const {
+    isOpen: isOpenDeleteForm,
+    onOpen: openDeleteForm,
+    onClose: onCloseDeleteForm,
+  } = useDisclosure()
 
   const {syncing, offline, loading} = useChainState()
 
@@ -59,6 +80,8 @@ export default function FlipListPage() {
     availableFlips: availableFlipsNumber,
     flipKeyWordPairs: availableKeywords,
   } = useIdentityState()
+
+  const [selectedFlip, setSelectedFlip] = React.useState()
 
   const [current, send] = useMachine(flipsMachine, {
     context: {
@@ -88,15 +111,20 @@ export default function FlipListPage() {
   // eslint-disable-next-line no-nested-ternary
   const filteredFlips = current.matches(readyState('active'))
     ? flips.filter(({type}) =>
-        [FlipType.Publishing, FlipType.Published, FlipType.Invalid].includes(
-          type
-        )
+        [
+          FlipType.Publishing,
+          FlipType.Published,
+          FlipType.Deleting,
+          FlipType.Invalid,
+        ].includes(type)
       )
     : // eslint-disable-next-line no-nested-ternary
     current.matches(readyState('drafts'))
     ? flips.filter(({type}) => [FlipType.Draft].includes(type))
     : current.matches(readyState('archive'))
-    ? flips.filter(({type}) => [FlipType.Archived].includes(type))
+    ? flips.filter(({type}) =>
+        [FlipType.Archived, FlipType.Deleted].includes(type)
+      )
     : []
 
   const madeFlipsNumber = (knownFlips || []).length
@@ -166,8 +194,22 @@ export default function FlipListPage() {
 
         {current.matches('ready.dirty') && (
           <FlipCardList>
-            {filteredFlips.map(({id, ref}) => (
-              <FlipCard key={id} flip={ref} />
+            {filteredFlips.map(flip => (
+              <FlipCard
+                key={flip.id}
+                flipService={flip.ref}
+                onDelete={() => {
+                  if (
+                    flip.type === FlipType.Published &&
+                    (knownFlips || []).includes(flip.hash)
+                  ) {
+                    setSelectedFlip(flip)
+                    openDeleteForm()
+                  }
+                  if (flip.type === FlipType.Draft) flip.ref.send('ARCHIVE')
+                  if (flip.type === FlipType.Archived) flip.ref.send('REMOVE')
+                }}
+              />
             ))}
             {current.matches('ready.dirty.active') && (
               <>
@@ -207,6 +249,93 @@ export default function FlipListPage() {
           </FlipCardList>
         )}
 
+        <Drawer isOpen={isOpenDeleteForm} onClose={onCloseDeleteForm}>
+          <DrawerOverlay bg="xblack.080" />
+          <DrawerContent px={8} py={10} w={rem(360)}>
+            <DrawerCloseButton />
+            <DrawerHeader p={0} mb={3}>
+              <Flex
+                align="center"
+                justify="center"
+                bg="red.012"
+                h={12}
+                w={12}
+                rounded="xl"
+              >
+                <Icon name="delete" size={6} color="red.500" />
+              </Flex>
+              <Heading
+                fontSize="lg"
+                fontWeight={500}
+                color="brandGray.500"
+                mt={4}
+              >
+                {t('Delete flip')}
+              </Heading>
+            </DrawerHeader>
+            <DrawerBody p={0}>
+              <Text color="brandGray.500" fontSize="md">
+                {t('Deleted flip will be moved to the drafts.')}
+              </Text>
+              {selectedFlip && (
+                <>
+                  <FlipImage
+                    src={selectedFlip.images[selectedFlip.originalOrder[0]]}
+                    size={160}
+                    objectFit="cover"
+                    mx="auto"
+                    mt={8}
+                    mb={38}
+                    rounded="lg"
+                  />
+                  <FormControl mb={6}>
+                    <FormLabel
+                      htmlFor="hashInput"
+                      color="brandGray.500"
+                      fontSize="md"
+                      fontWeight={500}
+                      mb={2}
+                    >
+                      {t('Flip hash')}
+                    </FormLabel>
+                    <Input
+                      id="hashInput"
+                      h={8}
+                      borderColor="gray.300"
+                      lineHeight={rem(18)}
+                      px={3}
+                      pt="3/2"
+                      pb={2}
+                      mb={2}
+                      value={selectedFlip.hash}
+                      isReadOnly
+                      _readOnly={{
+                        bg: 'gray.50',
+                        borderColor: 'gray.300',
+                        color: 'muted',
+                      }}
+                    />
+                  </FormControl>
+                  <PrimaryButton
+                    variantColor="red"
+                    display="flex"
+                    ml="auto"
+                    _hover={{
+                      bg: 'rgb(227 60 60)',
+                    }}
+                    onClick={() => {
+                      selectedFlip.ref.send('DELETE')
+                      onCloseDeleteForm()
+                    }}
+                  >
+                    Delete
+                  </PrimaryButton>
+                </>
+              )}
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
+
         {global.isDev && (
           <Box position="absolute" left={6} bottom={6} zIndex="popover">
             <Debug>{current.value}</Debug>
@@ -218,10 +347,10 @@ export default function FlipListPage() {
 }
 
 // eslint-disable-next-line react/prop-types
-function FlipCard({flip}) {
+function FlipCard({flipService, onDelete}) {
   const {t} = useTranslation()
 
-  const [current, send] = useService(flip)
+  const [current, send] = useService(flipService)
   const {id, keywords, originalOrder, images, type, createdAt} = current.context
 
   const {colors} = useTheme()
@@ -235,7 +364,7 @@ function FlipCard({flip}) {
           <FlipOverlay
             backgroundImage={
               // eslint-disable-next-line no-nested-ternary
-              type === FlipType.Publishing
+              [FlipType.Publishing, FlipType.Deleting].some(x => x === type)
                 ? `linear-gradient(to top, ${
                     colors.warning[500]
                   }, ${transparentize(100, colors.warning[500])})`
@@ -251,6 +380,7 @@ function FlipCard({flip}) {
               <FlipOverlayIcon name="info-solid" />
               <FlipOverlayText>
                 {type === FlipType.Publishing && t('Mining...')}
+                {type === FlipType.Deleting && t('Deleting...')}
                 {type === FlipType.Invalid && t('Mining error')}
               </FlipOverlayText>
             </FlipOverlayStatus>
@@ -261,7 +391,7 @@ function FlipCard({flip}) {
       <Flex justifyContent="space-between" alignItems="flex-start" mt={4}>
         <Box>
           <FlipCardTitle>
-            {keywords.words
+            {keywords.words && keywords.words.length
               ? formatKeywords(keywords.words)
               : t('Missing keywords')}
           </FlipCardTitle>
@@ -287,7 +417,7 @@ function FlipCard({flip}) {
               <MenuDivider color="rgb(232, 234, 237)" my={2} width="145px" />
             </>
           )}
-          <FlipCardMenuItem onClick={() => send('DELETE', {id})}>
+          <FlipCardMenuItem onClick={onDelete}>
             <FlipCardMenuItemIcon
               name="delete"
               size={5}
