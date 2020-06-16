@@ -69,6 +69,7 @@ branches:
   only:
     - master
     - /v\d+\.\d+\.\d+/
+    - introduce-keyword-translations
 
 cache:
   directories:
