@@ -148,7 +148,7 @@ export default function FlipListPage() {
             <FlipFilterOption value="Drafts">{t('Drafts')}</FlipFilterOption>
             <FlipFilterOption value="Archive">{t('Archived')}</FlipFilterOption>
           </FlipFilter>
-          {canSubmitFlip && (
+          {(global.isDev || canSubmitFlip) && (
             <IconLink href="/flips/new" icon="plus-solid">
               {t('Add flip')}
             </IconLink>
