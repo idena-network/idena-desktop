@@ -692,7 +692,7 @@ export function FlipImageListItem({isFirst, isLast, ...props}) {
   )
 }
 
-export function FlipImage({src, ...props}) {
+export function FlipImage({src, objectFit = 'scale-down', ...props}) {
   return (
     <AspectRatioBox
       ratio={4 / 3}
@@ -704,7 +704,7 @@ export function FlipImage({src, ...props}) {
       {src ? (
         <Image
           src={src}
-          objectFit="scale-down"
+          objectFit={objectFit}
           fallbackSrc="/static/flips-cant-icn.svg"
         />
       ) : (
@@ -783,7 +783,9 @@ export function CommunityTranslations({keywords, onVote, onSuggest}) {
               </Stack>
             </Flex>
           ))}
-          <Divider borderColor="gray.300" />
+          {keywords.translations[wordIdx].length && (
+            <Divider borderColor="gray.300" />
+          )}
           <Box>
             <Text fontWeight={500} mb={3}>
               {t('Suggest translation')}

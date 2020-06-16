@@ -54,7 +54,7 @@ const spacings = {
   small12: 12,
   normal: '1em',
   medium16: 16,
-  medium24: 24, // TODO: rename it more meaningful from design system perspective
+  medium24: 24,
   medium32: 32,
   large: 80,
   large48: 48,
@@ -137,6 +137,7 @@ export const uiTheme = {
     },
     red: {
       ...chakraTheme.colors.red,
+      '012': 'rgb(255 102 102 /0.12)',
       '020': 'rgb(255 102 102 /0.2)',
       500: 'rgb(255, 102, 102)',
     },
@@ -180,7 +181,8 @@ export const uiTheme = {
       700: '#447ceb',
     },
     xblack: {
-      '016': 'rgba(0, 0, 0, 0.16)',
+      '016': 'rgb(0 0 0 /0.2)',
+      '080': 'rgb(0 0 0 /0.8)',
     },
     xwhite: {
       '050': 'rgba(255, 255, 255, 0.5)',

@@ -163,13 +163,31 @@ export const flipsMachine = Machine({
               actions: [
                 assign({
                   flips: ({flips}, {id}) =>
-                    updateFlipType(flips, {id, type: FlipType.Archived}),
+                    updateFlipType(flips, {id, type: FlipType.Draft}),
                 }),
                 log(),
               ],
             },
             DELETE_FAILED: {
               actions: ['onError'],
+            },
+            ARCHIVED: {
+              actions: [
+                assign({
+                  flips: ({flips}, {id}) =>
+                    updateFlipType(flips, {id, type: FlipType.Archived}),
+                }),
+                log(),
+              ],
+            },
+            REMOVED: {
+              actions: [
+                assign({
+                  flips: ({flips}, {id}) =>
+                    flips.filter(flip => flip.id !== id),
+                }),
+                log(),
+              ],
             },
           },
           initial: 'active',
@@ -214,6 +232,29 @@ export const flipMachine = Machine(
         on: {
           PUBLISH: 'publishing',
           DELETE: 'deleting',
+          ARCHIVE: {
+            actions: [
+              assign({
+                type: FlipType.Archived,
+              }),
+              sendParent(({id}) => ({
+                type: 'ARCHIVED',
+                id,
+              })),
+              'persistFlip',
+            ],
+          },
+          REMOVE: {
+            target: 'removed',
+            actions: [
+              'removeFlip',
+              sendParent(({id}) => ({
+                type: 'REMOVED',
+                id,
+              })),
+              log(),
+            ],
+          },
         },
       },
       publishing: {
@@ -287,6 +328,7 @@ export const flipMachine = Machine(
       },
       published: {},
       deleting: {
+        initial: 'submitting',
         states: {
           submitting: {
             invoke: {
@@ -294,9 +336,9 @@ export const flipMachine = Machine(
               onDone: {
                 target: 'mining',
                 actions: [
-                  assign((context, {data: {result}}) => ({
+                  assign((context, {data}) => ({
                     ...context,
-                    txHash: result,
+                    txHash: data,
                     type: FlipType.Deleting,
                   })),
                   sendParent(({id}) => ({
@@ -311,11 +353,9 @@ export const flipMachine = Machine(
                 target: 'failure',
                 actions: [
                   assign({
-                    type: FlipType.Invalid,
                     error: (_, {data: {message}}) => message,
                   }),
                   sendParent(({error}) => ({type: 'DELETE_FAILED', error})),
-                  'persistFlip',
                   log(),
                 ],
               },
@@ -326,13 +366,17 @@ export const flipMachine = Machine(
               src: 'pollStatus',
             },
           },
-          failure: {},
+          failure: {
+            on: {
+              DELETE: 'submitting',
+            },
+          },
         },
         on: {
           MINED: {
             target: 'deleted',
             actions: [
-              assign({type: FlipType.Archived}),
+              assign({type: FlipType.Draft}),
               sendParent(({id}) => ({
                 type: 'DELETED',
                 id,
@@ -354,27 +398,30 @@ export const flipMachine = Machine(
       },
       deleted: {},
       invalid: {},
+      removed: {
+        type: 'final',
+      },
     },
   },
   {
     services: {
       publishFlip: context => publishFlip(context),
-      deleteFlip: ({hash}) => deleteFlip(hash),
+      deleteFlip: async ({hash}) => {
+        const {result, error} = await deleteFlip(hash)
+        if (error) throw new Error(error.message)
+        return result
+      },
       pollStatus: ({txHash}) => cb => {
         let timeoutId
 
         const fetchStatus = async () => {
           const {result} = await fetchTx(txHash)
-
-          if (result === null) {
-            cb('TX_NULL')
-            return
-          }
-
-          if (result.blockHash !== HASH_IN_MEMPOOL) cb('MINED')
-          else {
-            timeoutId = setTimeout(fetchStatus, 10 * 1000)
-          }
+          if (result) {
+            if (result.blockHash !== HASH_IN_MEMPOOL) cb('MINED')
+            else {
+              timeoutId = setTimeout(fetchStatus, 10 * 1000)
+            }
+          } else cb('TX_NULL')
         }
 
         timeoutId = setTimeout(fetchStatus, 10 * 1000)
@@ -387,6 +434,9 @@ export const flipMachine = Machine(
     actions: {
       persistFlip: context => {
         global.flipStore.updateDraft(context)
+      },
+      removeFlip: ({id}) => {
+        global.flipStore.deleteDraft(id)
       },
     },
   }
