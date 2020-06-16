@@ -9,7 +9,6 @@ import '../i18n'
 
 import {uiTheme} from '../shared/theme'
 
-import GlobalStyle from '../shared/components/global-style'
 import {EpochProvider} from '../shared/providers/epoch-context'
 import {IdentityProvider} from '../shared/providers/identity-context'
 import {NotificationProvider} from '../shared/providers/notification-context'
