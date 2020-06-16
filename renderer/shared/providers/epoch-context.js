@@ -2,6 +2,17 @@ import React from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
 import {fetchEpoch} from '../api'
+import {
+  didValidate,
+  shouldExpectValidationResults,
+  hasPersistedValidationResults,
+} from '../../screens/validation/utils'
+import {
+  didArchiveFlips,
+  markFlipsArchived,
+} from '../../screens/flips/utils/flip'
+import {FlipType} from '../types'
+import {persistItem} from '../utils/persist'
 
 export const EpochPeriod = {
   FlipLottery: 'FlipLottery',
@@ -57,6 +68,32 @@ export function EpochProvider({children}) {
       )
     }
   }, interval)
+
+  React.useEffect(() => {
+    if (epoch && didValidate(epoch.epoch) && !didArchiveFlips(epoch.epoch)) {
+      const {getFlips, saveFlips} = global.flipStore
+      saveFlips(
+        getFlips().map(flip =>
+          [FlipType.Draft, FlipType.Archived].includes(flip.type)
+            ? flip
+            : {...flip, type: FlipType.Archived}
+        )
+      )
+      markFlipsArchived(epoch)
+    }
+  }, [epoch])
+
+  React.useEffect(() => {
+    if (
+      epoch &&
+      shouldExpectValidationResults(epoch.epoch) &&
+      !hasPersistedValidationResults(epoch.epoch)
+    ) {
+      persistItem('validationResults', epoch.epoch, {
+        epochStart: new Date().toISOString(),
+      })
+    }
+  }, [epoch])
 
   return (
     <EpochStateContext.Provider value={epoch || null}>

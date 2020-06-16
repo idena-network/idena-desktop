@@ -51,7 +51,7 @@ import {
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
 import {IconLink} from '../../shared/components/link'
-import {FlipType} from '../../shared/types'
+import {FlipType, IdentityStatus} from '../../shared/types'
 import {Debug} from '../../shared/components/components'
 import {flipsMachine} from '../../screens/flips/machines'
 import {useIdentityState} from '../../shared/providers/identity-context'
@@ -79,6 +79,8 @@ export default function FlipListPage() {
     requiredFlips: requiredFlipsNumber,
     availableFlips: availableFlipsNumber,
     flipKeyWordPairs: availableKeywords,
+    state: status,
+    canSubmitFlip,
   } = useIdentityState()
 
   const [selectedFlip, setSelectedFlip] = React.useState()
@@ -146,9 +148,11 @@ export default function FlipListPage() {
             <FlipFilterOption value="Drafts">{t('Drafts')}</FlipFilterOption>
             <FlipFilterOption value="Archive">{t('Archived')}</FlipFilterOption>
           </FlipFilter>
-          <IconLink href="/flips/new" icon="plus-solid">
-            {t('Add flip')}
-          </IconLink>
+          {canSubmitFlip && (
+            <IconLink href="/flips/new" icon="plus-solid">
+              {t('Add flip')}
+            </IconLink>
+          )}
         </Flex>
         {current.matches('ready.dirty.active') &&
           (remainingRequiredFlips > 0 || remainingOptionalFlips > 0) && (
@@ -181,6 +185,36 @@ export default function FlipListPage() {
             </Box>
           )}
 
+        {current.matches('ready.pristine') &&
+          [
+            IdentityStatus.Undefined,
+            IdentityStatus.Invite,
+            IdentityStatus.Candidate,
+          ].includes(status) && (
+            <Box alignSelf="stretch" mb={8}>
+              <Alert
+                status="error"
+                bg="red.010"
+                borderWidth="1px"
+                borderColor="red.050"
+                fontWeight={500}
+                rounded="md"
+                px={3}
+                py={2}
+              >
+                <AlertIcon
+                  name="info"
+                  color="red.500"
+                  size={5}
+                  mr={3}
+                ></AlertIcon>
+                {t(
+                  'You can not submit flips yet. Please get validated first. '
+                )}
+              </Alert>
+            </Box>
+          )}
+
         {current.matches('ready.pristine') && (
           <Flex
             flex={1}
@@ -205,9 +239,7 @@ export default function FlipListPage() {
                   ) {
                     setSelectedFlip(flip)
                     openDeleteForm()
-                  } else if (flip.type === FlipType.Archived)
-                    flip.ref.send('REMOVE')
-                  else flip.ref.send('ARCHIVE')
+                  } else flip.ref.send('ARCHIVE')
                 }}
               />
             ))}
