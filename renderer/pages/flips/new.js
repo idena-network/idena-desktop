@@ -37,7 +37,7 @@ import {NotificationType} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine} from '../../screens/flips/machines'
 import {rem} from '../../shared/theme'
-import {publishFlip} from '../../screens/flips/utils/flip'
+import {publishFlip, isPendingKeywordPair} from '../../screens/flips/utils/flip'
 import {Notification} from '../../shared/components/notifications'
 
 export default function NewFlipPage() {
@@ -52,7 +52,9 @@ export default function NewFlipPage() {
   let {flipKeyWordPairs: availableKeywords} = useIdentityState()
   availableKeywords =
     availableKeywords && availableKeywords.some(({used}) => !used)
-      ? availableKeywords.filter(({used}) => !used)
+      ? availableKeywords.filter(
+          ({id, used}) => !used && !isPendingKeywordPair(id)
+        )
       : [{id: 0}]
 
   const [{id: keywordPairId}] = availableKeywords
