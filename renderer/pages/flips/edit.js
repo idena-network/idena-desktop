@@ -54,7 +54,7 @@ export default function EditFlipPage() {
           pics,
           images = pics,
           hint,
-          flipKeywordId = Math.max(hint.id, 0),
+          flipKeywordId = hint ? Math.max(hint.id, 0) : 0,
           ...flip
         } = global.flipStore.getFlip(id)
         return {...flip, images, flipKeywordId}
@@ -65,7 +65,7 @@ export default function EditFlipPage() {
   if (currentEdit.matches('loaded') && address)
     return (
       <FlipEditMaster
-        availableKeywords={availableKeywords.filter(
+        availableKeywords={(availableKeywords || []).filter(
           ({id, used}) => !used && !isPendingKeywordPair(id)
         )}
         {...currentEdit.context}

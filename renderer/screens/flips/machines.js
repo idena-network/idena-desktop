@@ -741,7 +741,7 @@ export const flipMasterMachine = Machine(
               done: {
                 entry: ['onSubmitted', log()],
               },
-              failure: {},
+              failure: {entry: ['onError']},
             },
           },
           hist: {
