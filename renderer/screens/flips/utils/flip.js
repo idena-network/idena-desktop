@@ -188,7 +188,13 @@ export function flipToHex(pics, order) {
   return [publicRlp, privateRlp].map(x => `0x${x.toString('hex')}`)
 }
 
-export async function publishFlip({keywordPairId, images, order}) {
+export async function publishFlip({
+  keywordPairId,
+  pics,
+  images = pics,
+  originalOrder,
+  order,
+}) {
   const flips = global.flipStore.getFlips()
 
   if (
@@ -206,7 +212,10 @@ export async function publishFlip({keywordPairId, images, order}) {
   )
     throw new Error('You must shuffle flip before submit')
 
-  const [publicHex, privateHex] = flipToHex(images, order)
+  const [publicHex, privateHex] = flipToHex(
+    originalOrder.map(num => images[num]),
+    order
+  )
 
   if (publicHex.length + privateHex.length > 2 * 1024 * 1024)
     throw new Error('Flip is too large')
