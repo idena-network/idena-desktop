@@ -1,21 +1,22 @@
 import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
-import {rem, position, wordWrap} from 'polished'
+import {rem, position} from 'polished'
 import {
   FaGoogle,
   FaCircle,
-  FaCopy,
   FaPaste,
   FaRegFolder,
   FaPencilAlt,
+  FaEraser,
   FaRegTrashAlt,
 } from 'react-icons/fa'
-import {FiCircle} from 'react-icons/fi'
+import Jimp from 'jimp'
 
 import {MdAddToPhotos, MdCrop, MdUndo, MdRedo} from 'react-icons/md'
 
 import {useTranslation} from 'react-i18next'
 import mousetrap from 'mousetrap'
+import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
 
@@ -33,16 +34,31 @@ import {
 
 import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
 
+import {
+  Brushes,
+  ColorPicker,
+  ArrowHint,
+  EditorContextMenu,
+  ImageEraseEditor,
+  ApplyChangesBottomPanel,
+} from './flip-editor-tools'
+
 const ImageEditor =
   typeof window !== 'undefined'
     ? require('@toast-ui/react-image-editor').default
     : null
 
-const BOTTOM_MENU_MAIN = 0
-const BOTTOM_MENU_CROP = 1
+const BottomMenu = {
+  Main: 0,
+  Crop: 1,
+  Erase: 2,
+}
 
-const RIGHT_MENU_NONE = 0
-const RIGHT_MENU_FREEDRAWING = 1
+const RightMenu = {
+  None: 0,
+  FreeDrawing: 1,
+  Erase: 2,
+}
 
 const IMAGE_WIDTH = 440
 const IMAGE_HEIGHT = 330
@@ -71,8 +87,8 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     setInsertImageMenuOpen(false)
   })
 
-  const [bottomMenuPanel, setBottomMenuPanel] = useState(BOTTOM_MENU_MAIN)
-  const [rightMenuPanel, setRightMenuPanel] = useState(RIGHT_MENU_NONE)
+  const [bottomMenuPanel, setBottomMenuPanel] = useState(BottomMenu.Main)
+  const [rightMenuPanel, setRightMenuPanel] = useState(RightMenu.None)
 
   const [brush, setBrush] = useState(20)
   const [brushColor, setBrushColor] = useState('ff6666dd')
@@ -93,6 +109,10 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       setEditors([...editors.slice(0, k), e, ...editors.slice(k + 1)])
     }
   }
+
+  const [isSelectionCreated, SetIsSelectionCreated] = useState(null)
+  const [activeObjectUrl, setActiveObjectUrl] = useState(null)
+  const [activeObjectId, setActiveObjectId] = useState(null)
 
   // Postponed onChange() triggering
   const NOCHANGES = 0
@@ -125,10 +145,11 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   const [insertImageMode, setInsertImageMode] = useState(0)
 
   const setImageUrl = useCallback(
-    data => {
+    (data, onDone = null) => {
       const {url, insertMode, customEditor} = data
       const nextInsertMode = insertMode || insertImageMode
       const editor = customEditor || editors[idx]
+
       if (!editor) return
 
       if (!url) {
@@ -140,9 +161,36 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       }
 
       if (nextInsertMode === INSERT_OBJECT_IMAGE) {
-        editor.addImageObject(url).then(() => {
-          setChangesCnt(NOCHANGES)
-          handleOnChanged()
+        setChangesCnt(NOCHANGES)
+
+        let replaceObjectProps
+        if (data.replaceObjectId) {
+          replaceObjectProps = editors[
+            idx
+          ].getObjectProperties(data.replaceObjectId, ['left', 'top', 'angle'])
+          editors[idx].execute('removeObject', data.replaceObjectId)
+        }
+        Jimp.read(url).then(image => {
+          image.getBase64Async('image/png').then(nextUrl => {
+            editor.addImageObject(nextUrl).then(objectProps => {
+              if (data.replaceObjectId) {
+                editors[idx].setObjectPropertiesQuietly(
+                  objectProps.id,
+                  replaceObjectProps
+                )
+              }
+
+              handleOnChanged()
+              setActiveObjectId(objectProps.id)
+              setActiveObjectUrl(nextUrl)
+
+              if (onDone) onDone()
+
+              if (editors[idx]._graphics) {
+                editors[idx]._graphics.renderAll()
+              }
+            })
+          })
         })
       }
 
@@ -177,13 +225,18 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                 editor.setObjectPropertiesQuietly(id2, {
                   left: IMAGE_WIDTH / 2,
                   top: IMAGE_HEIGHT / 2,
-                  width: newWidth,
-                  height: newHeight,
+                  scaleX: newWidth / width,
+                  scaleY: newHeight / height,
                 })
                 editor.loadImageFromURL(editor.toDataURL(), 'Bkgd').then(() => {
                   editor.clearUndoStack()
                   editor.clearRedoStack()
                   handleOnChanged()
+                  if (onDone) onDone()
+
+                  if (editors[idx]._graphics) {
+                    editors[idx]._graphics.renderAll()
+                  }
                 })
               })
             })
@@ -231,23 +284,42 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     }
   }, [setImageUrl, insertImageMode, visible])
 
-  // Clipbiard handling
-  const handleImageFromClipboard = insertMode => {
+  // Clipboard handling
+  const handleImageFromClipboard = (insertMode = null) => {
     const url = getImageURLFromClipboard(IMAGE_WIDTH, IMAGE_HEIGHT)
     if (url) {
-      setImageUrl({url, insertMode})
+      if (insertMode) {
+        setImageUrl({url, insertMode})
+      } else {
+        // Auto detect insert mode by image size
+        let img = new Image()
+        img.src = url
+        img.onload = function() {
+          if (img.width === IMAGE_WIDTH && img.height === IMAGE_HEIGHT) {
+            setImageUrl({url, insertMode: INSERT_BACKGROUND_IMAGE})
+          } else {
+            setImageUrl({url, insertMode: INSERT_OBJECT_IMAGE})
+          }
+          img = null
+        }
+      }
     }
   }
 
+  const {addNotification} = useNotificationDispatch()
+
   const handleOnCopy = () => {
-    const url = editors[idx] && editors[idx].toDataURL()
+    const url = activeObjectUrl || (editors[idx] && editors[idx].toDataURL())
     if (url) {
       writeImageURLToClipboard(url)
+      addNotification({
+        title: t('Copied'),
+      })
     }
   }
 
   const handleOnPaste = () => {
-    handleImageFromClipboard(INSERT_BACKGROUND_IMAGE)
+    handleImageFromClipboard()
   }
 
   const handleUndo = () => {
@@ -268,7 +340,28 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     }
   }
 
+  const handleOnDelete = () => {
+    if (editors[idx]) {
+      editors[idx].removeActiveObject()
+      setChangesCnt(NOCHANGES)
+      handleOnChanged()
+    }
+  }
+
+  const handleOnClear = () => {
+    if (rightMenuPanel === RightMenu.Erase) {
+      setRightMenuPanel(RightMenu.None)
+    }
+    setImageUrl({url: null})
+  }
+
   if (visible) {
+    mousetrap.bind(['del'], function(e) {
+      handleOnDelete()
+      e.stopImmediatePropagation()
+      return false
+    })
+
     mousetrap.bind(['command+v', 'ctrl+v'], function(e) {
       handleOnPaste()
       e.stopImmediatePropagation()
@@ -293,12 +386,65 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       return false
     })
   }
+
+  function getEditorInstance() {
+    const editor =
+      editorRefs.current[idx] &&
+      editorRefs.current[idx].current &&
+      editorRefs.current[idx].current.getInstance()
+    return editor
+  }
+
+  function getEditorActiveObjecId(editor) {
+    const objId =
+      editor &&
+      editor._graphics &&
+      editor._graphics._canvas &&
+      editor._graphics._canvas._activeObject &&
+      editor._graphics._canvas._activeObject.__fe_id
+    return objId
+  }
+
+  function getEditorObjecUrl(editor, objId) {
+    const obj =
+      objId && editor && editor._graphics && editor._graphics._objects[objId]
+    const url = obj && obj._element && obj._element.src
+
+    return url
+  }
+
+  function getEditorObjecProps(editor, objId) {
+    const obj =
+      objId && editor && editor._graphics && editor._graphics._objects[objId]
+    if (obj) {
+      return {
+        x: obj.translateX,
+        y: obj.translateY,
+        width: obj.width,
+        height: obj.height,
+        angle: obj.angle,
+        scaleX: obj.scaleX,
+        scaleY: obj.scaleY,
+      }
+    }
+    return null
+  }
+
   // init editor
   useEffect(() => {
     const updateEvents = e => {
       if (!e) return
       e.on({
         mousedown() {
+          setShowContextMenu(false)
+
+          const editor = getEditorInstance()
+          const objId = getEditorActiveObjecId(editor)
+          const url = getEditorObjecUrl(editor, objId)
+
+          setActiveObjectId(objId)
+          setActiveObjectUrl(url)
+
           if (e.getDrawingMode() === 'FREE_DRAWING') {
             setChangesCnt(NOCHANGES)
           }
@@ -322,12 +468,43 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       })
       e.on({
         undoStackChanged() {
+          const editor = getEditorInstance()
+          const objId = getEditorActiveObjecId(editor)
+          const url = getEditorObjecUrl(editor, objId)
+
+          setActiveObjectId(objId)
+          setActiveObjectUrl(url)
+
           handleOnChanging()
         },
       })
       e.on({
         redoStackChanged() {
+          const editor = getEditorInstance()
+          const objId = getEditorActiveObjecId(editor)
+          const url = getEditorObjecUrl(editor, objId)
+
+          setActiveObjectId(objId)
+          setActiveObjectUrl(url)
+
           handleOnChanging()
+        },
+      })
+      e.on({
+        objectActivated() {
+          //
+        },
+      })
+
+      e.on({
+        selectionCreated() {
+          SetIsSelectionCreated(true)
+        },
+      })
+
+      e.on({
+        selectionCleared() {
+          SetIsSelectionCreated(false)
         },
       })
     }
@@ -343,6 +520,10 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       contaiterEl.addEventListener('contextmenu', e => {
         setContextMenuCursor({x: e.layerX, y: e.layerY})
         setShowContextMenu(true)
+        setRightMenuPanel(RightMenu.None)
+        if (editors[idx]) {
+          editors[idx].stopDrawingMode()
+        }
         e.preventDefault()
       })
     }
@@ -387,6 +568,48 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     >
       <Flex>
         <Box>
+          {(bottomMenuPanel === BottomMenu.Erase ||
+            rightMenuPanel === RightMenu.Erase) && (
+            <ImageEraseEditor
+              url={activeObjectUrl}
+              isDone={bottomMenuPanel !== BottomMenu.Erase}
+              brushWidth={brush}
+              imageObjectProps={getEditorObjecProps(
+                editors[idx],
+                activeObjectId
+              )}
+              onChanging={() => {
+                if (editors[idx] && activeObjectId) {
+                  setChangesCnt(NOCHANGES)
+                  editors[idx].setObjectPropertiesQuietly(activeObjectId, {
+                    opacity: 0,
+                  })
+                }
+              }}
+              onDone={url => {
+                if (url) {
+                  if (editors[idx] && activeObjectId) {
+                    setChangesCnt(NOCHANGES)
+                    editors[idx].setObjectPropertiesQuietly(activeObjectId, {
+                      opacity: 1,
+                    })
+                  }
+
+                  setImageUrl(
+                    {
+                      url,
+                      insertMode: INSERT_OBJECT_IMAGE,
+                      replaceObjectId: activeObjectId,
+                    },
+                    () => {
+                      setRightMenuPanel(RightMenu.None)
+                    }
+                  )
+                }
+              }}
+            />
+          )}
+
           {showContextMenu && (
             <EditorContextMenu
               x={contextMenuCursor.x}
@@ -400,6 +623,9 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
               onPaste={() => {
                 handleOnPaste()
               }}
+              onDelete={
+                activeObjectId || isSelectionCreated ? handleOnDelete : null
+              }
             />
           )}
 
@@ -431,7 +657,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
             />
           </div>
 
-          {bottomMenuPanel === BOTTOM_MENU_MAIN && (
+          {bottomMenuPanel === BottomMenu.Main && (
             <Flex
               // justify="space-between"
               align="center"
@@ -446,6 +672,9 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   />
                 }
                 onClick={() => {
+                  if (rightMenuPanel === RightMenu.Erase) {
+                    setRightMenuPanel(RightMenu.None)
+                  }
                   setInsertImageMode(INSERT_BACKGROUND_IMAGE)
                   global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
                     on: true,
@@ -469,6 +698,9 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   />
                 }
                 onClick={() => {
+                  if (rightMenuPanel === RightMenu.Erase) {
+                    setRightMenuPanel(RightMenu.None)
+                  }
                   setInsertImageMode(INSERT_BACKGROUND_IMAGE)
                   uploaderRef.current.click()
                 }}
@@ -483,7 +715,9 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   />
                 }
                 onClick={() => {
-                  setRightMenuPanel(RIGHT_MENU_NONE)
+                  if (rightMenuPanel === RightMenu.Erase) {
+                    setRightMenuPanel(RightMenu.None)
+                  }
                   editors[idx].stopDrawingMode()
                   setInsertImageMenuOpen(!isInsertImageMenuOpen)
                 }}
@@ -501,6 +735,9 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   />
                 }
                 onClick={() => {
+                  if (rightMenuPanel === RightMenu.Erase) {
+                    setRightMenuPanel(RightMenu.None)
+                  }
                   handleUndo()
                 }}
               ></IconButton>
@@ -517,6 +754,9 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   />
                 }
                 onClick={() => {
+                  if (rightMenuPanel === RightMenu.Erase) {
+                    setRightMenuPanel(RightMenu.None)
+                  }
                   handleRedo()
                 }}
               ></IconButton>
@@ -534,7 +774,10 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                 }
                 onClick={() => {
                   editors[idx].startDrawingMode('CROPPER')
-                  setBottomMenuPanel(BOTTOM_MENU_CROP)
+                  if (rightMenuPanel === RightMenu.Erase) {
+                    setRightMenuPanel(RightMenu.None)
+                  }
+                  setBottomMenuPanel(BottomMenu.Crop)
                 }}
               ></IconButton>
 
@@ -542,11 +785,11 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
 
               <IconButton
                 tooltip={t('Draw')}
-                active={rightMenuPanel === RIGHT_MENU_FREEDRAWING}
+                active={rightMenuPanel === RightMenu.FreeDrawing}
                 icon={
                   <FaPencilAlt
                     color={
-                      rightMenuPanel === RIGHT_MENU_FREEDRAWING
+                      rightMenuPanel === RightMenu.FreeDrawing
                         ? null
                         : theme.colors.primary2
                     }
@@ -557,11 +800,37 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   setShowArrowHint(false)
                   const editor = editors[idx]
                   if (editor.getDrawingMode() === 'FREE_DRAWING') {
-                    setRightMenuPanel(RIGHT_MENU_NONE)
+                    setRightMenuPanel(RightMenu.None)
                     editor.stopDrawingMode()
                   } else {
-                    setRightMenuPanel(RIGHT_MENU_FREEDRAWING)
+                    setRightMenuPanel(RightMenu.FreeDrawing)
                     editor.startDrawingMode('FREE_DRAWING')
+                  }
+                }}
+              ></IconButton>
+
+              <IconButton
+                disabled={!activeObjectUrl}
+                tooltip={
+                  activeObjectUrl ? t('Erase') : t('Select image to erase')
+                }
+                icon={
+                  <FaEraser
+                    fontSize={theme.fontSizes.medium}
+                    color={
+                      rightMenuPanel === RightMenu.Erase
+                        ? null
+                        : theme.colors.primary2
+                    }
+                  />
+                }
+                onClick={() => {
+                  if (rightMenuPanel === RightMenu.Erase) {
+                    setRightMenuPanel(RightMenu.None)
+                    setBottomMenuPanel(BottomMenu.Main)
+                  } else {
+                    setRightMenuPanel(RightMenu.Erase)
+                    setBottomMenuPanel(BottomMenu.Erase)
                   }
                 }}
               ></IconButton>
@@ -575,7 +844,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   />
                 }
                 onClick={() => {
-                  setImageUrl({url: null})
+                  handleOnClear()
                 }}
               ></IconButton>
 
@@ -596,60 +865,58 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
             </Flex>
           )}
 
-          {bottomMenuPanel === BOTTOM_MENU_CROP && (
-            <Flex
-              justify="space-between"
-              align="center"
-              css={{
-                marginTop: rem(10),
-                paddingLeft: rem(20),
-                paddingRight: rem(20),
+          {bottomMenuPanel === BottomMenu.Crop && (
+            <ApplyChangesBottomPanel
+              label={t('Crop image')}
+              onCancel={() => {
+                setBottomMenuPanel(BottomMenu.Main)
+                setRightMenuPanel(RightMenu.None)
+                if (editors[idx]) {
+                  editors[idx].stopDrawingMode()
+                }
               }}
-            >
-              {t('Crop image')}
-              <Flex align="center">
-                <IconButton
-                  onClick={() => {
-                    setBottomMenuPanel(BOTTOM_MENU_MAIN)
-                    setRightMenuPanel(RIGHT_MENU_NONE)
-                    if (editors[idx]) {
-                      editors[idx].stopDrawingMode()
-                    }
-                  }}
-                >
-                  {t('Cancel')}
-                </IconButton>
-
-                <Divider vertical />
-
-                <IconButton
-                  style={{fontWeight: theme.fontWeights.bold}}
-                  onClick={() => {
-                    setBottomMenuPanel(BOTTOM_MENU_MAIN)
-                    if (editors[idx]) {
-                      const {width, height} = editors[idx].getCropzoneRect()
-                      if (width < 1 || height < 1) {
+              onDone={() => {
+                setBottomMenuPanel(BottomMenu.Main)
+                if (editors[idx]) {
+                  const {width, height} = editors[idx].getCropzoneRect()
+                  if (width < 1 || height < 1) {
+                    editors[idx].stopDrawingMode()
+                  } else {
+                    editors[idx]
+                      .crop(editors[idx].getCropzoneRect())
+                      .then(() => {
                         editors[idx].stopDrawingMode()
-                      } else {
-                        editors[idx]
-                          .crop(editors[idx].getCropzoneRect())
-                          .then(() => {
-                            editors[idx].stopDrawingMode()
-                            setRightMenuPanel(RIGHT_MENU_NONE)
-                            setImageUrl({
-                              url: editors[idx].toDataURL(),
-                              insertMode: INSERT_BACKGROUND_IMAGE,
-                              customEditor: editors[idx],
-                            })
-                          })
-                      }
-                    }
-                  }}
-                >
-                  {t('Done')}
-                </IconButton>
-              </Flex>
-            </Flex>
+                        setRightMenuPanel(RightMenu.None)
+                        setImageUrl({
+                          url: editors[idx].toDataURL(),
+                          insertMode: INSERT_BACKGROUND_IMAGE,
+                          customEditor: editors[idx],
+                        })
+                      })
+                  }
+                }
+              }}
+            />
+          )}
+
+          {bottomMenuPanel === BottomMenu.Erase && (
+            <ApplyChangesBottomPanel
+              label={t('Erase')}
+              onCancel={() => {
+                if (editors[idx] && activeObjectId) {
+                  setChangesCnt(NOCHANGES)
+                  editors[idx].setObjectPropertiesQuietly(activeObjectId, {
+                    opacity: 1,
+                  })
+                }
+
+                setBottomMenuPanel(BottomMenu.Main)
+                setRightMenuPanel(RightMenu.None)
+              }}
+              onDone={() => {
+                setBottomMenuPanel(BottomMenu.Main)
+              }}
+            />
           )}
 
           <Box>
@@ -709,7 +976,8 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           </Box>
         </Box>
 
-        {rightMenuPanel === RIGHT_MENU_FREEDRAWING && (
+        {(rightMenuPanel === RightMenu.FreeDrawing ||
+          rightMenuPanel === RightMenu.Erase) && (
           <Box css={{marginTop: rem(10), marginLeft: rem(10)}}>
             <ColorPicker
               color={brushColor}
@@ -722,24 +990,28 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                 editors[idx].setBrush({width: brush, color: nextColor})
               }}
             />
-            <IconButton
-              icon={
-                <FaCircle
-                  color={`#${brushColor}`}
-                  style={{
-                    fontSize: theme.fontSizes.medium,
-                    padding: rem(0),
-                    border: '1px solid #d2d4d9',
-                    borderRadius: '50%',
-                  }}
-                />
-              }
-              onClick={() => {
-                setShowColorPicker(!showColorPicker)
-              }}
-            ></IconButton>
 
-            <Divider />
+            {rightMenuPanel === RightMenu.FreeDrawing && (
+              <>
+                <IconButton
+                  icon={
+                    <FaCircle
+                      color={`#${brushColor}`}
+                      style={{
+                        fontSize: theme.fontSizes.medium,
+                        padding: rem(0),
+                        border: '1px solid #d2d4d9',
+                        borderRadius: '50%',
+                      }}
+                    />
+                  }
+                  onClick={() => {
+                    setShowColorPicker(!showColorPicker)
+                  }}
+                ></IconButton>
+                <Divider />
+              </>
+            )}
 
             <Brushes
               brush={brush}
@@ -765,248 +1037,3 @@ FlipEditor.propTypes = {
 }
 
 export default FlipEditor
-
-function Brushes({brush, onChange}) {
-  const brushes = [4, 12, 20, 28, 36]
-  return (
-    <div>
-      {brushes.map((b, i) => (
-        <IconButton
-          key={i}
-          active={brush === b}
-          icon={
-            <FaCircle
-              color={brush === b ? null : theme.colors.primary2}
-              style={{padding: rem(6 - i * 1.5)}}
-            />
-          }
-          onClick={() => {
-            if (onChange) {
-              onChange(b)
-            }
-          }}
-        ></IconButton>
-      ))}
-    </div>
-  )
-}
-
-Brushes.propTypes = {
-  brush: PropTypes.number,
-  onChange: PropTypes.func,
-}
-
-function ColorPicker({visible, color, onChange}) {
-  const colorPickerRef = useRef()
-  const colors = [
-    ['ffffff', 'd2d4d9e0', '96999edd', '53565cdd'],
-    ['ff6666dd', 'ff60e7dd', 'a066ffdd', '578fffdd'],
-    ['0cbdd0dd', '27d980dd', 'ffd763dd', 'ffa366dd'],
-  ]
-
-  useClickOutside(colorPickerRef, () => {
-    onChange(color)
-  })
-
-  return (
-    <div
-      style={{
-        display: `${visible ? '' : 'none'}`,
-      }}
-    >
-      <Box css={position('relative')} ref={colorPickerRef}>
-        <Absolute top={0} right={rem(40)} zIndex={100}>
-          <Menu>
-            {colors.map((row, i) => (
-              <Flex key={i} css={{marginLeft: rem(10), marginRight: rem(10)}}>
-                {row.map((c, j) => {
-                  const showColor = c === 'ffffff' ? '#d2d4d9' : `#${c}`
-                  const circleStyle = {
-                    padding: rem(1),
-                    border: `${color === c ? '1px' : '0px'} solid ${showColor}`,
-                    borderRadius: '50%',
-                    fontSize: theme.fontSizes.large,
-                  }
-                  return (
-                    <IconButton
-                      key={`${j}${j}`}
-                      icon={
-                        c === 'ffffff' ? (
-                          <FiCircle color={showColor} style={circleStyle} />
-                        ) : (
-                          <FaCircle color={showColor} style={circleStyle} />
-                        )
-                      }
-                      onClick={() => {
-                        if (onChange) {
-                          onChange(c)
-                        }
-                      }}
-                    ></IconButton>
-                  )
-                })}
-              </Flex>
-            ))}
-          </Menu>
-        </Absolute>
-      </Box>
-    </div>
-  )
-}
-
-ColorPicker.propTypes = {
-  visible: PropTypes.bool,
-  color: PropTypes.string,
-  onChange: PropTypes.func,
-}
-
-function ArrowHint({hint, leftHanded, visible}) {
-  //
-  return (
-    visible && (
-      <div>
-        <Box css={position('relative')}>
-          <Absolute top={rem(-105)} left={rem(0)} zIndex={90}>
-            {leftHanded && (
-              <div>
-                <div
-                  style={{
-                    minWidth: rem(24),
-                    minHeight: rem(40),
-                    borderLeft: `2px solid ${theme.colors.primary}`,
-                    borderTop: `2px solid ${theme.colors.primary}`,
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: '-5px',
-                    width: 0,
-                    height: 0,
-                    borderTop: `6px solid transparent`,
-                    borderLeft: `6px solid transparent`,
-                    borderRight: `6px solid transparent`,
-                    borderBottom: 0,
-                    borderTopColor: `${theme.colors.primary}`,
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: '30px',
-                    top: '-25px',
-                    minWidth: '70px',
-                    color: `${theme.colors.muted}`,
-                    fontWeight: `${theme.fontWeights.normal}`,
-                  }}
-                >
-                  {hint}
-                </div>
-              </div>
-            )}
-
-            {!leftHanded && (
-              <div>
-                <div
-                  style={{
-                    minWidth: rem(24),
-                    minHeight: rem(40),
-                    borderRight: `2px solid ${theme.colors.primary}`,
-                    borderTop: `2px solid ${theme.colors.primary}`,
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: '12px',
-                    width: 0,
-                    height: 0,
-                    marginLeft: '0px',
-                    borderLeft: `6px solid transparent`,
-                    borderRight: `6px solid transparent`,
-                    borderTop: `6px solid transparent`,
-                    borderBottom: 0,
-                    borderTopColor: `${theme.colors.primary}`,
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: '-56px',
-                    top: '-25px',
-                    minWidth: rem(50, theme.fontSizes.base),
-                    width: rem(50, theme.fontSizes.base),
-                    color: `${theme.colors.muted}`,
-                    fontWeight: `${theme.fontWeights.normal}`,
-                    ...wordWrap('break-all'),
-                  }}
-                >
-                  {hint}
-                </div>
-              </div>
-            )}
-          </Absolute>
-        </Box>
-      </div>
-    )
-  )
-}
-
-ArrowHint.propTypes = {
-  hint: PropTypes.string,
-  leftHanded: PropTypes.bool,
-  visible: PropTypes.bool,
-}
-
-EditorContextMenu.propTypes = {
-  x: PropTypes.number,
-  y: PropTypes.number,
-  onClose: PropTypes.func.isRequired,
-  onCopy: PropTypes.func,
-  onPaste: PropTypes.func,
-}
-
-function EditorContextMenu({x, y, onClose, onCopy, onPaste}) {
-  const {t} = useTranslation()
-
-  const contextMenuRef = useRef()
-  useClickOutside(contextMenuRef, () => {
-    onClose()
-  })
-
-  return (
-    <Box>
-      <Flex>
-        <Box css={position('relative')}>
-          <Box ref={contextMenuRef}>
-            <Absolute top={y} left={x} zIndex={100}>
-              <Menu>
-                <MenuItem
-                  disabled={!onCopy}
-                  onClick={() => {
-                    onCopy()
-                    onClose()
-                  }}
-                  icon={<FaCopy fontSize={rem(20)} />}
-                >
-                  {`${t('Copy')} (${global.isMac ? 'Cmd+C' : 'Ctrl+C'})`}
-                </MenuItem>
-
-                <MenuItem
-                  disabled={!onPaste}
-                  onClick={() => {
-                    onPaste()
-                    onClose()
-                  }}
-                  icon={<FaPaste fontSize={rem(20)} />}
-                >
-                  {`${t('Paste image')} (${global.isMac ? 'Cmd+V' : 'Ctrl+V'})`}
-                </MenuItem>
-              </Menu>
-            </Absolute>
-          </Box>
-        </Box>
-      </Flex>
-    </Box>
-  )
-}
