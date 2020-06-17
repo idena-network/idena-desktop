@@ -203,6 +203,7 @@ export async function publishFlip({
   images = pics,
   originalOrder,
   order,
+  orderPermutations,
 }) {
   const flips = global.flipStore.getFlips()
 
@@ -223,7 +224,7 @@ export async function publishFlip({
 
   const [publicHex, privateHex] = flipToHex(
     originalOrder.map(num => images[num]),
-    order
+    orderPermutations
   )
 
   if (publicHex.length + privateHex.length > 2 * 1024 * 1024)
