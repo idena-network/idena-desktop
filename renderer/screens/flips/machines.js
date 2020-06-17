@@ -1,5 +1,5 @@
 import {Machine, assign, spawn, sendParent} from 'xstate'
-import {log} from 'xstate/lib/actions'
+import {log, send} from 'xstate/lib/actions'
 import nanoid from 'nanoid'
 import {
   fetchKeywordTranslations,
@@ -195,9 +195,6 @@ export const flipsMachine = Machine({
             active: {},
             drafts: {},
             archive: {},
-            hist: {
-              type: 'history',
-            },
           },
         },
       },
@@ -472,6 +469,7 @@ export const flipMasterMachine = Machine(
       },
       originalOrder: DEFAULT_FLIP_ORDER,
       order: DEFAULT_FLIP_ORDER,
+      orderPermutations: DEFAULT_FLIP_ORDER,
     },
     on: {
       SWITCH_LOCALE: {
@@ -668,29 +666,33 @@ export const flipMasterMachine = Machine(
           },
           shuffle: {
             on: {
-              NEXT: 'submit',
-              PREV: 'images',
               SHUFFLE: {
-                target: '.persisting',
                 actions: [
-                  assign({
-                    order: ({order}) => shuffle(order.slice()),
-                  }),
+                  send(({order}) => ({
+                    type: 'CHANGE_ORDER',
+                    order: shuffle(order.slice()),
+                  })),
                   log(),
                 ],
               },
               MANUAL_SHUFFLE: {
-                target: '.persisting',
-                actions: assign({
-                  order: (_, {order}) => order,
-                }),
+                actions: [send('CHANGE_ORDER'), log()],
               },
               RESET_SHUFFLE: {
-                target: '.persisting',
-                actions: assign({
-                  order: ({originalOrder}) => originalOrder,
-                }),
+                actions: [
+                  send(({originalOrder}) => ({
+                    type: 'CHANGE_ORDER',
+                    order: originalOrder,
+                  })),
+                  log(),
+                ],
               },
+              CHANGE_ORDER: {
+                target: '.persisting',
+                actions: ['changeOrder', log()],
+              },
+              NEXT: 'submit',
+              PREV: 'images',
             },
             initial: 'idle',
             states: {
@@ -744,9 +746,6 @@ export const flipMasterMachine = Machine(
               failure: {entry: ['onError']},
             },
           },
-          hist: {
-            type: 'history',
-          },
         },
         on: {
           PICK_IMAGES: '.images',
@@ -782,9 +781,7 @@ export const flipMasterMachine = Machine(
         const persistingEventTypes = [
           'CHANGE_IMAGES',
           'CHANGE_ORIGINAL_ORDER',
-          'SHUFFLE',
-          'MANUAL_SHUFFLE',
-          'RESET_SHUFFLE',
+          'CHANGE_ORDER',
         ]
 
         if (persistingEventTypes.includes(event.type)) {
@@ -825,6 +822,11 @@ export const flipMasterMachine = Machine(
         }),
     },
     actions: {
+      changeOrder: assign({
+        order: (_, {order}) => order,
+        orderPermutations: ({originalOrder}, {order}) =>
+          order.map(n => originalOrder.findIndex(o => o === n)),
+      }),
       persistFlip: context => {
         global.flipStore.updateDraft(context)
       },
