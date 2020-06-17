@@ -114,13 +114,11 @@ export function getNextKeyWordsHint(
   return getKeyWordsHint(flipKeyWordPairs, nextKeyWordPair.id)
 }
 
-export function isPendingKeywordPair(id) {
-  return global.flipStore
-    ?.getFlips()
-    .find(
-      ({type, keywordPairId}) =>
-        type === FlipType.Publishing && keywordPairId === id
-    )
+export function isPendingKeywordPair(flips, id) {
+  return flips.find(
+    ({type, keywordPairId}) =>
+      type === FlipType.Publishing && keywordPairId === id
+  )
 }
 
 export function didArchiveFlips(epoch) {
