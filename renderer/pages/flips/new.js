@@ -50,10 +50,13 @@ export default function NewFlipPage() {
   const {syncing} = useChainState()
 
   let {flipKeyWordPairs: availableKeywords} = useIdentityState()
+
+  const persistedFlips = React.useMemo(() => global.flipStore?.getFlips(), [])
+
   availableKeywords =
     availableKeywords && availableKeywords.some(({used}) => !used)
       ? availableKeywords.filter(
-          ({id, used}) => !used && !isPendingKeywordPair(id)
+          ({id, used}) => !used && !isPendingKeywordPair(persistedFlips, id)
         )
       : [{id: 0}]
 
