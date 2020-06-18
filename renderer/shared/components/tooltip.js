@@ -153,6 +153,7 @@ export function TooltipX(props) {
   return (
     <ChakraTooltip
       bg="black"
+      color="white"
       fontSize="sm"
       px={2}
       py={1}

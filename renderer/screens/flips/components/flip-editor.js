@@ -1,13 +1,7 @@
 import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position} from 'polished'
-import {
-  FaGoogle,
-  FaPaste,
-  FaRegFolder,
-  FaEraser,
-  FaRegTrashAlt,
-} from 'react-icons/fa'
+import {FaEraser, FaRegTrashAlt} from 'react-icons/fa'
 import Jimp from 'jimp'
 
 import {useTranslation} from 'react-i18next'
@@ -18,6 +12,7 @@ import {
   VisuallyHidden,
   IconButton as ChakraIconButton,
   Divider,
+  Icon,
 } from '@chakra-ui/core'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
@@ -701,8 +696,6 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                 />
               </VisuallyHidden>
 
-              <FlipEditorToolbarDivider />
-
               <FlipEditorIcon
                 tooltip={t('Add image')}
                 icon="add-image"
@@ -748,8 +741,6 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
               />
 
               <ArrowHint visible={showArrowHint} hint={t('Or start drawing')} />
-
-              <FlipEditorToolbarDivider />
 
               <FlipEditorIcon
                 tooltip={t('Draw')}
@@ -895,12 +886,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                             })
                           }}
                           disabled={false}
-                          icon={
-                            <FaGoogle
-                              fontSize={theme.fontSizes.medium16}
-                              style={{marginTop: rem(3)}}
-                            />
-                          }
+                          icon={<Icon size={5} name="google" />}
                         >
                           {t('Search on Google')}
                         </MenuItem>
@@ -911,7 +897,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                             uploaderRef.current.click()
                           }}
                           disabled={false}
-                          icon={<FaRegFolder fontSize={rem(20)} />}
+                          icon={<Icon size={5} name="folder" />}
                         >
                           {t('Select file')}
                         </MenuItem>
@@ -922,7 +908,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                           }}
                           disabled={false}
                           danger={false}
-                          icon={<FaPaste fontSize={rem(20)} />}
+                          icon={<Icon size={5} name="clipboard" />}
                         >
                           {t('Paste image')}
                         </MenuItem>
