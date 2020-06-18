@@ -491,6 +491,8 @@ export const flipMasterMachine = Machine(
                 target: '.loading',
                 actions: assign({
                   keywordPairId: ({keywordPairId, availableKeywords}) => {
+                    if (availableKeywords.length === 0) return 0
+
                     const currentIdx = availableKeywords.findIndex(
                       // eslint-disable-next-line no-shadow
                       ({id}) => id === keywordPairId

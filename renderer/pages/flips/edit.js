@@ -68,6 +68,7 @@ export default function EditFlipPage() {
           ...flip
         } = persistedFlips.find(({id: flipId}) => flipId === id)
 
+        // eslint-disable-next-line no-shadow
         const availableKeywords = (flipKeyWordPairs || []).filter(
           pair => !pair.used && !isPendingKeywordPair(persistedFlips, pair.id)
         )
@@ -99,6 +100,7 @@ export default function EditFlipPage() {
   })
 
   const {
+    availableKeywords,
     keywords,
     images,
     originalOrder,
@@ -205,6 +207,7 @@ export default function EditFlipPage() {
                     <FlipStoryAside>
                       <IconButton2
                         icon="refresh"
+                        isDisabled={availableKeywords.length === 0}
                         onClick={() => send('CHANGE_KEYWORDS')}
                       >
                         {t('Change words')}
