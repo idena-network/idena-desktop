@@ -812,6 +812,7 @@ export const flipMasterMachine = Machine(
           keywordPairId,
           originalOrder,
           order,
+          orderPermutations,
           images,
           keywords,
           type,
@@ -826,7 +827,14 @@ export const flipMasterMachine = Machine(
         ]
 
         if (persistingEventTypes.includes(event.type)) {
-          let nextFlip = {keywordPairId, originalOrder, order, images, keywords}
+          let nextFlip = {
+            keywordPairId,
+            originalOrder,
+            order,
+            orderPermutations,
+            images,
+            keywords,
+          }
 
           nextFlip = id
             ? {
