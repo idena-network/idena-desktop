@@ -44,7 +44,7 @@ export async function voteForKeywordTranslation({id, up}) {
   const signature = await signNonce(id.concat(up).concat(timestamp))
 
   const {
-    data: {resCode, error},
+    data: {resCode, upVotes, downVotes, error},
   } = await axios.post(`https://api.idena.io/translation/vote`, {
     signature,
     timestamp,
@@ -54,7 +54,7 @@ export async function voteForKeywordTranslation({id, up}) {
 
   if (resCode > 0 && error) throw new Error(error)
 
-  return {id, up}
+  return {id, ups: upVotes - downVotes}
 }
 
 export async function suggestKeywordTranslation({

@@ -58,8 +58,8 @@ const RightMenu = {
   Erase: 2,
 }
 
-const IMAGE_WIDTH = 400
-const IMAGE_HEIGHT = 300
+const IMAGE_WIDTH = 440
+const IMAGE_HEIGHT = 330
 const INSERT_OBJECT_IMAGE = 1
 const INSERT_BACKGROUND_IMAGE = 2
 const BLANK_IMAGE_DATAURL =
@@ -514,7 +514,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     const containerCanvas = document.querySelectorAll('.lower-canvas')[idx]
 
     if (containerEl) {
-      containerEl.parentElement.style.height = rem(298)
+      containerEl.parentElement.style.height = rem(328)
       containerEl.addEventListener('contextmenu', e => {
         setContextMenuCursor({x: e.layerX, y: e.layerY})
         setShowContextMenu(true)
@@ -628,8 +628,8 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           )}
 
           <ChakraBox
-            h={rem(300)}
-            w={rem(400)}
+            h={rem(IMAGE_HEIGHT)}
+            w={rem(IMAGE_WIDTH)}
             border="1px"
             borderColor="brandGray.016"
             rounded="lg"

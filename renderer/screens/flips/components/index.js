@@ -780,12 +780,18 @@ export function FlipSubmitStep({
       <FlipStepBody minH="180px">
         <Stack isInline spacing={10}>
           <FlipKeywordPanel w={rem(320)}>
-            <FlipKeywordTranslationSwitch
-              keywords={keywords}
-              showTranslation={showTranslation}
-              locale={locale}
-              onSwitchLocale={onSwitchLocale}
-            />
+            {keywords.words.length ? (
+              <FlipKeywordTranslationSwitch
+                keywords={keywords}
+                showTranslation={showTranslation}
+                locale={locale}
+                onSwitchLocale={onSwitchLocale}
+              />
+            ) : (
+              <FlipKeyword>
+                <FlipKeywordName>{t('Missing keywords')}</FlipKeywordName>
+              </FlipKeyword>
+            )}
           </FlipKeywordPanel>
           <Stack isInline spacing={10} justify="center">
             <FlipImageList>
@@ -981,7 +987,7 @@ export function CommunityTranslations({
                 <Flex
                   align="center"
                   justify="center"
-                  bg="green.010"
+                  bg={ups < 0 ? 'red.010' : 'green.010'}
                   color="green.500"
                   fontWeight={500}
                   rounded="md"

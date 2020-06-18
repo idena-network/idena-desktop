@@ -281,11 +281,9 @@ export const flipMachine = Machine(
                 target: 'failure',
                 actions: [
                   assign({
-                    type: FlipType.Invalid,
                     error: (_, {data: {message}}) => message,
                   }),
                   sendParent(({error}) => ({type: 'PUBLISH_FAILED', error})),
-                  'persistFlip',
                   log(),
                 ],
               },
@@ -296,7 +294,11 @@ export const flipMachine = Machine(
               src: 'pollStatus',
             },
           },
-          failure: {},
+          failure: {
+            on: {
+              PUBLISH: 'submitting',
+            },
+          },
         },
         on: {
           MINED: {
@@ -559,6 +561,9 @@ export const flipMasterMachine = Machine(
                     },
                   },
                   fetchedTranslations: {
+                    on: {
+                      REFETCH: 'fetchingTranslations',
+                    },
                     initial: 'idle',
                     states: {
                       idle: {
@@ -577,7 +582,7 @@ export const flipMasterMachine = Machine(
                                 keywords: (
                                   // eslint-disable-next-line no-shadow
                                   {keywords: {words, translations}},
-                                  {data: {id, up}}
+                                  {data: {id, ups}}
                                 ) => ({
                                   words,
                                   translations: translations.map(
@@ -586,8 +591,7 @@ export const flipMasterMachine = Machine(
                                         translation.id === id
                                           ? {
                                               ...translation,
-                                              ups:
-                                                translation.ups + (up ? 1 : -1),
+                                              ups,
                                             }
                                           : translation
                                       )
@@ -608,35 +612,7 @@ export const flipMasterMachine = Machine(
                           src: 'suggestKeywordTranslation',
                           onDone: {
                             target: 'idle',
-                            actions: [
-                              assign({
-                                keywords: (
-                                  // eslint-disable-next-line no-shadow
-                                  {keywords: {words, translations}},
-                                  {data: {wordId, id, name, desc}}
-                                ) => {
-                                  const wordIdx = words.findIndex(
-                                    word => word.id === wordId
-                                  )
-                                  return {
-                                    words,
-                                    translations: translations.map(
-                                      (wordTranslations, idx) =>
-                                        idx === wordIdx
-                                          ? wordTranslations.concat({
-                                              wordId,
-                                              id,
-                                              name,
-                                              desc,
-                                              ups: 0,
-                                            })
-                                          : wordTranslations
-                                    ),
-                                  }
-                                },
-                              }),
-                              log(),
-                            ],
+                            actions: [send('REFETCH'), log()],
                           },
                           onError: {
                             target: 'idle',

@@ -66,6 +66,7 @@ export default function NewFlipPage() {
           ({id, used}) => !used && !isPendingKeywordPair(persistedFlips, id)
         )
 
+        // eslint-disable-next-line no-shadow
         const [{id: keywordPairId}] = availableKeywords
 
         return {keywordPairId, availableKeywords}
@@ -96,6 +97,7 @@ export default function NewFlipPage() {
 
   const {
     availableKeywords,
+    keywordPairId,
     keywords,
     images,
     originalOrder,
@@ -205,7 +207,10 @@ export default function NewFlipPage() {
                         isDisabled={availableKeywords.length === 0}
                         onClick={() => send('CHANGE_KEYWORDS')}
                       >
-                        {t('Change words')}
+                        {t('Change words')}{' '}
+                        {availableKeywords.length > 0
+                          ? `(#${keywordPairId + 1})`
+                          : null}
                       </IconButton2>
                     </FlipStoryAside>
                   </FlipStepBody>
