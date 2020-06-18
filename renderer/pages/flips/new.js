@@ -1,44 +1,40 @@
 import React from 'react'
 import {useRouter} from 'next/router'
-import {Box, Code, Flex, Stack, Divider, useToast} from '@chakra-ui/core'
+import {Box, Flex, useToast, Code, Divider} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page} from '../../screens/app/components'
 import {
+  FlipMasterFooter,
+  FlipPageTitle,
   FlipMaster,
   FlipMasterNavbar,
   FlipMasterNavbarItem,
   FlipStoryStep,
-  FlipMasterFooter,
   FlipStepBody,
-  FlipKeywordPair,
-  FlipKeyword,
-  FlipStoryAside,
   FlipKeywordPanel,
+  FlipKeywordTranslationSwitch,
+  CommunityTranslations,
+  FlipKeyword,
   FlipKeywordName,
-  FlipKeywordDescription,
-  FlipPageTitle,
+  FlipStoryAside,
   FlipEditorStep,
   FlipShuffleStep,
   FlipSubmitStep,
-  CommunityTranslations,
-  FlipImageList,
-  FlipImageListItem,
 } from '../../screens/flips/components'
-import {Step} from '../../screens/flips/types'
-import {
-  SecondaryButton,
-  PrimaryButton,
-  IconButton2,
-} from '../../shared/components/button'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {NotificationType} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine} from '../../screens/flips/machines'
-import {rem} from '../../shared/theme'
 import {publishFlip, isPendingKeywordPair} from '../../screens/flips/utils/flip'
 import {Notification} from '../../shared/components/notifications'
+import {Step} from '../../screens/flips/types'
+import {
+  IconButton2,
+  SecondaryButton,
+  PrimaryButton,
+} from '../../shared/components/button'
 
 export default function NewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -49,26 +45,31 @@ export default function NewFlipPage() {
 
   const {syncing} = useChainState()
 
-  let {flipKeyWordPairs: availableKeywords} = useIdentityState()
-
-  const persistedFlips = React.useMemo(() => global.flipStore?.getFlips(), [])
-
-  availableKeywords =
-    availableKeywords && availableKeywords.some(({used}) => !used)
-      ? availableKeywords.filter(
-          ({id, used}) => !used && !isPendingKeywordPair(persistedFlips, id)
-        )
-      : [{id: 0}]
-
-  const [{id: keywordPairId}] = availableKeywords
+  const {flipKeyWordPairs} = useIdentityState()
 
   const [current, send] = useMachine(flipMasterMachine, {
     context: {
-      ...flipMasterMachine.context,
-      availableKeywords,
-      keywordPairId,
-      images: Array.from({length: 4}),
       locale: i18n.language,
+    },
+    services: {
+      prepareFlip: async () => {
+        if (
+          flipKeyWordPairs === null ||
+          flipKeyWordPairs.every(({used}) => used)
+        )
+          return {keywordPairId: 0, availableKeywords: []}
+
+        const persistedFlips = global.flipStore?.getFlips()
+
+        const availableKeywords = flipKeyWordPairs.filter(
+          ({id, used}) => !used && !isPendingKeywordPair(persistedFlips, id)
+        )
+
+        const [{id: keywordPairId}] = availableKeywords
+
+        return {keywordPairId, availableKeywords}
+      },
+      submitFlip: async flip => publishFlip(flip),
     },
     actions: {
       onSubmitted: () => router.push('/flips/list'),
@@ -90,13 +91,16 @@ export default function NewFlipPage() {
           ),
         }),
     },
-    services: {
-      submitFlip: async flip => publishFlip(flip),
-    },
   })
 
-  const {context} = current
-  const {keywords, images, originalOrder, order, showTranslation} = context
+  const {
+    keywords,
+    images,
+    originalOrder,
+    order,
+    showTranslation,
+    isCommunityTranslationsExpanded,
+  } = current.context
 
   const not = state => !current.matches({editing: state})
   const is = state => current.matches({editing: state})
@@ -114,283 +118,141 @@ export default function NewFlipPage() {
           <FlipPageTitle onClose={() => router.push('/flips/list')}>
             {t('New flip')}
           </FlipPageTitle>
-          <FlipMaster>
-            <FlipMasterNavbar>
-              <FlipMasterNavbarItem
-                step={is('keywords') ? Step.Active : Step.Completed}
-                onClick={() => send('PICK_KEYWORDS')}
-              >
-                {t('Think up a story')}
-              </FlipMasterNavbarItem>
-              <FlipMasterNavbarItem
-                step={
-                  // eslint-disable-next-line no-nested-ternary
-                  is('images')
-                    ? Step.Active
-                    : is('keywords')
-                    ? Step.Next
-                    : Step.Completed
-                }
-                onClick={() => send('PICK_IMAGES')}
-              >
-                {t('Select images')}
-              </FlipMasterNavbarItem>
-              <FlipMasterNavbarItem
-                step={
-                  // eslint-disable-next-line no-nested-ternary
-                  is('shuffle')
-                    ? Step.Active
-                    : not('submit')
-                    ? Step.Next
-                    : Step.Completed
-                }
-                onClick={() => send('PICK_SHUFFLE')}
-              >
-                {t('Shuffle images')}
-              </FlipMasterNavbarItem>
-              <FlipMasterNavbarItem
-                step={is('submit') ? Step.Active : Step.Next}
-                onClick={() => send('PICK_SUBMIT')}
-              >
-                {t('Submit flip')}
-              </FlipMasterNavbarItem>
-            </FlipMasterNavbar>
-            {is('keywords') && (
-              <FlipStoryStep>
-                <FlipStepBody minH="180px">
-                  <FlipKeywordPanel>
-                    {is('keywords.done') && (
-                      <>
-                        <Stack spacing="30px">
-                          <FlipKeywordPair>
-                            {showTranslation &&
-                              keywords.translations.map(
-                                ([{id, name, desc}]) => (
-                                  <FlipKeyword key={id}>
-                                    <FlipKeywordName>{name}</FlipKeywordName>
-                                    <FlipKeywordDescription>
-                                      {desc}
-                                    </FlipKeywordDescription>
-                                  </FlipKeyword>
-                                )
-                              )}
-                            {showTranslation ||
-                              keywords.words.map(({id, name, desc}) => (
-                                <FlipKeyword key={id}>
-                                  <FlipKeywordName>{name}</FlipKeywordName>
-                                  <FlipKeywordDescription>
-                                    {desc}
-                                  </FlipKeywordDescription>
-                                </FlipKeyword>
-                              ))}
-                          </FlipKeywordPair>
-                          <Stack isInline spacing={1} align="center">
-                            <IconButton2
-                              icon="switch"
-                              _hover={{background: 'transparent'}}
-                              onClick={() => send('SWITCH_LOCALE')}
-                            >
-                              {showTranslation
-                                ? 'EN'
-                                : i18n.language.toUpperCase()}
-                            </IconButton2>
-                            {showTranslation || (
-                              <>
-                                <Divider
-                                  orientation="vertical"
-                                  borderColor="gray.300"
-                                  m={0}
-                                  h={rem(24)}
-                                />
-                                <IconButton2
-                                  icon="gtranslate"
-                                  _hover={{background: 'transparent'}}
-                                  onClick={() => {
-                                    global.openExternal(
-                                      `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
-                                        global.locale
-                                      }&text=${encodeURIComponent(
-                                        keywords.words
-                                          .map(
-                                            ({name, desc}) => `${name}\n${desc}`
-                                          )
-                                          .join('\n')
-                                      )}`
-                                    )
-                                  }}
-                                >
-                                  Google Translate
-                                </IconButton2>
-                              </>
-                            )}
-                          </Stack>
-                        </Stack>
-                        <Divider
-                          borderColor="gray.300"
-                          mx={-10}
-                          mt={4}
-                          mb={6}
-                        />
-                        <CommunityTranslations
-                          keywords={keywords}
-                          onVote={e => send('VOTE', e)}
-                          onSuggest={e => send('SUGGEST', e)}
-                        />
-                      </>
-                    )}
-                    {is('keywords.failure') && (
-                      <FlipKeyword>
-                        <FlipKeywordName>
-                          {t('Missing keywords')}
-                        </FlipKeywordName>
-                      </FlipKeyword>
-                    )}
-                  </FlipKeywordPanel>
-                  <FlipStoryAside>
-                    <IconButton2
-                      icon="refresh"
-                      onClick={() => send('CHANGE_KEYWORDS')}
-                    >
-                      {t('Change words')}
-                    </IconButton2>
-                  </FlipStoryAside>
-                </FlipStepBody>
-              </FlipStoryStep>
-            )}
-            {is('images') && (
-              <FlipEditorStep
-                keywords={keywords ? keywords.words : []}
-                originalOrder={originalOrder}
-                images={images}
-                onChangeImage={(image, currentIndex) =>
-                  send('CHANGE_IMAGES', {image, currentIndex})
-                }
-                // eslint-disable-next-line no-shadow
-                onChangeOriginalOrder={order =>
-                  send('CHANGE_ORIGINAL_ORDER', {order})
-                }
-                onPainting={() => send('PAINTING')}
-              />
-            )}
-            {is('shuffle') && (
-              <FlipShuffleStep
-                images={images}
-                originalOrder={originalOrder}
-                order={order}
-                onShuffle={() => send('SHUFFLE')}
-                onManualShuffle={nextOrder =>
-                  send('MANUAL_SHUFFLE', {order: nextOrder})
-                }
-                onReset={() => send('RESET_SHUFFLE')}
-              />
-            )}
-            {is('submit') && (
-              <FlipSubmitStep>
-                <FlipStepBody minH="180px">
-                  <Stack isInline spacing={10} align="flex-start">
-                    <FlipKeywordPanel w={rem(320)}>
-                      <Stack spacing="30px">
-                        <FlipKeywordPair>
-                          {keywords.words.length === 0 && (
-                            <FlipKeyword>
-                              <FlipKeywordName>
-                                {t('Missing keywords')}
-                              </FlipKeywordName>
-                            </FlipKeyword>
-                          )}
-                          {showTranslation &&
-                            keywords.translations.map(([{id, name, desc}]) => (
-                              <FlipKeyword key={id}>
-                                <FlipKeywordName>{name}</FlipKeywordName>
-                                <FlipKeywordDescription>
-                                  {desc}
-                                </FlipKeywordDescription>
-                              </FlipKeyword>
-                            ))}
-                          {showTranslation ||
-                            keywords.words.map(({id, name, desc}) => (
-                              <FlipKeyword key={id}>
-                                <FlipKeywordName>{name}</FlipKeywordName>
-                                <FlipKeywordDescription>
-                                  {desc}
-                                </FlipKeywordDescription>
-                              </FlipKeyword>
-                            ))}
-                        </FlipKeywordPair>
-                        <Stack isInline spacing={1} align="center">
-                          <IconButton2
-                            icon="switch"
-                            _hover={{background: 'transparent'}}
-                            onClick={() => send('SWITCH_LOCALE')}
-                          >
-                            {showTranslation
-                              ? 'EN'
-                              : i18n.language.toUpperCase()}
-                          </IconButton2>
-                          {showTranslation || (
-                            <>
-                              <Divider
-                                orientation="vertical"
-                                borderColor="gray.300"
-                                m={0}
-                                h={rem(24)}
-                              />
-                              <IconButton2
-                                icon="gtranslate"
-                                _hover={{background: 'transparent'}}
-                                onClick={() => {
-                                  global.openExternal(
-                                    `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
-                                      global.locale
-                                    }&text=${encodeURIComponent(
-                                      keywords.words
-                                        .map(
-                                          ({name, desc}) => `${name}\n${desc}`
-                                        )
-                                        .join('\n')
-                                    )}`
-                                  )
-                                }}
-                              >
-                                Google Translate
-                              </IconButton2>
-                            </>
-                          )}
-                        </Stack>
-                      </Stack>
+          {current.matches('editing') && (
+            <FlipMaster>
+              <FlipMasterNavbar>
+                <FlipMasterNavbarItem
+                  step={is('keywords') ? Step.Active : Step.Completed}
+                  onClick={() => send('PICK_KEYWORDS')}
+                >
+                  {t('Think up a story')}
+                </FlipMasterNavbarItem>
+                <FlipMasterNavbarItem
+                  step={
+                    // eslint-disable-next-line no-nested-ternary
+                    is('images')
+                      ? Step.Active
+                      : is('keywords')
+                      ? Step.Next
+                      : Step.Completed
+                  }
+                  onClick={() => send('PICK_IMAGES')}
+                >
+                  {t('Select images')}
+                </FlipMasterNavbarItem>
+                <FlipMasterNavbarItem
+                  step={
+                    // eslint-disable-next-line no-nested-ternary
+                    is('shuffle')
+                      ? Step.Active
+                      : not('submit')
+                      ? Step.Next
+                      : Step.Completed
+                  }
+                  onClick={() => send('PICK_SHUFFLE')}
+                >
+                  {t('Shuffle images')}
+                </FlipMasterNavbarItem>
+                <FlipMasterNavbarItem
+                  step={is('submit') ? Step.Active : Step.Next}
+                  onClick={() => send('PICK_SUBMIT')}
+                >
+                  {t('Submit flip')}
+                </FlipMasterNavbarItem>
+              </FlipMasterNavbar>
+              {is('keywords') && (
+                <FlipStoryStep>
+                  <FlipStepBody minH="180px">
+                    <FlipKeywordPanel>
+                      {is('keywords.loaded') && (
+                        <>
+                          <FlipKeywordTranslationSwitch
+                            keywords={keywords}
+                            showTranslation={showTranslation}
+                            locale={i18n.language}
+                            onSwitchLocale={() => send('SWITCH_LOCALE')}
+                          />
+                          <Divider
+                            borderColor="gray.300"
+                            mx={-10}
+                            mt={4}
+                            mb={6}
+                          />
+                          <CommunityTranslations
+                            keywords={keywords}
+                            onVote={e => send('VOTE', e)}
+                            onSuggest={e => send('SUGGEST', e)}
+                            isOpen={isCommunityTranslationsExpanded}
+                            onToggle={() =>
+                              send('TOGGLE_COMMUNITY_TRANSLATIONS')
+                            }
+                          />
+                        </>
+                      )}
+                      {is('keywords.failure') && (
+                        <FlipKeyword>
+                          <FlipKeywordName>
+                            {t('Missing keywords')}
+                          </FlipKeywordName>
+                        </FlipKeyword>
+                      )}
                     </FlipKeywordPanel>
-                    <Stack isInline spacing={10} justify="center">
-                      <FlipImageList>
-                        {originalOrder.map((num, idx) => (
-                          <FlipImageListItem
-                            key={num}
-                            src={images[num]}
-                            isFirst={idx === 0}
-                            isLast={idx === images.length - 1}
-                          />
-                        ))}
-                      </FlipImageList>
-                      <FlipImageList>
-                        {order.map(idx => (
-                          <FlipImageListItem
-                            key={idx}
-                            src={images[idx]}
-                            isFirst={idx === 0}
-                            isLast={idx === images.length - 1}
-                          />
-                        ))}
-                      </FlipImageList>
-                    </Stack>
-                  </Stack>
-                </FlipStepBody>
-              </FlipSubmitStep>
-            )}
-          </FlipMaster>
+                    <FlipStoryAside>
+                      <IconButton2
+                        icon="refresh"
+                        onClick={() => send('CHANGE_KEYWORDS')}
+                      >
+                        {t('Change words')}
+                      </IconButton2>
+                    </FlipStoryAside>
+                  </FlipStepBody>
+                </FlipStoryStep>
+              )}
+              {is('images') && (
+                <FlipEditorStep
+                  keywords={keywords ? keywords.words : []}
+                  originalOrder={originalOrder}
+                  images={images}
+                  onChangeImage={(image, currentIndex) =>
+                    send('CHANGE_IMAGES', {image, currentIndex})
+                  }
+                  // eslint-disable-next-line no-shadow
+                  onChangeOriginalOrder={order =>
+                    send('CHANGE_ORIGINAL_ORDER', {order})
+                  }
+                  onPainting={() => send('PAINTING')}
+                />
+              )}
+              {is('shuffle') && (
+                <FlipShuffleStep
+                  images={images}
+                  originalOrder={originalOrder}
+                  order={order}
+                  onShuffle={() => send('SHUFFLE')}
+                  onManualShuffle={nextOrder =>
+                    send('MANUAL_SHUFFLE', {order: nextOrder})
+                  }
+                  onReset={() => send('RESET_SHUFFLE')}
+                />
+              )}
+              {is('submit') && (
+                <FlipSubmitStep
+                  keywords={keywords}
+                  showTranslation={showTranslation}
+                  locale={i18n.language}
+                  onSwitchLocale={() => send('SWITCH_LOCALE')}
+                  originalOrder={originalOrder}
+                  order={order}
+                  images={images}
+                />
+              )}
+            </FlipMaster>
+          )}
         </Flex>
         <FlipMasterFooter>
           {not('keywords') && (
             <SecondaryButton onClick={() => send('PREV')}>
-              {t('Prev step')}
+              {t('Previous step')}
             </SecondaryButton>
           )}
           {not('submit') && (

@@ -142,22 +142,23 @@ IconButtonRef.propTypes = {
   danger: PropTypes.bool,
 }
 
-function BaseButton(props) {
-  return (
-    <ChakraButton
-      fontWeight={500}
-      h={8}
-      px={4}
-      py="3/2"
-      rounded="md"
-      {...props}
-    />
-  )
-}
+const BaseButton = React.forwardRef((props, ref) => (
+  <ChakraButton
+    ref={ref}
+    fontWeight={500}
+    h={8}
+    px={4}
+    py="3/2"
+    rounded="md"
+    {...props}
+  />
+))
+BaseButton.displayName = 'BaseButton'
 
-export function PrimaryButton(props) {
-  return <BaseButton variantColor="brandBlue" color="white" {...props} />
-}
+export const PrimaryButton = React.forwardRef((props, ref) => (
+  <BaseButton ref={ref} variantColor="brandBlue" color="white" {...props} />
+))
+PrimaryButton.displayName = 'PrimaryButton'
 
 export function SecondaryButton(props) {
   return (

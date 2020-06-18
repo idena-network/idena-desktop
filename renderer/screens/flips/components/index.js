@@ -26,11 +26,14 @@ import {
   Input,
   Textarea,
   Collapse,
-  useDisclosure,
   Link,
+  MenuDivider,
 } from '@chakra-ui/core'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
+import dayjs from 'dayjs'
+import {transparentize} from 'polished'
+import {useService} from '@xstate/react'
 import FlipEditor from './flip-editor'
 import {Step} from '../types'
 import {formatKeywords} from '../utils'
@@ -39,6 +42,7 @@ import {PrimaryButton, IconButton2} from '../../../shared/components/button'
 import {rem} from '../../../shared/theme'
 import {capitalize} from '../../../shared/utils/string'
 import {reorder} from '../../../shared/utils/arr'
+import {FlipType} from '../../../shared/types'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -51,6 +55,95 @@ export function FlipPageTitle({onClose, ...props}) {
 
 export function FlipCardList(props) {
   return <SimpleGrid columns={4} spacing={10} {...props} />
+}
+
+export function FlipCard({flipService, onDelete}) {
+  const {t} = useTranslation()
+
+  const [current, send] = useService(flipService)
+  const {id, keywords, originalOrder, images, type, createdAt} = current.context
+
+  const {colors} = useTheme()
+
+  const isDraft = type === FlipType.Draft
+  const isPending = [FlipType.Publishing, FlipType.Deleting].includes(type)
+
+  return (
+    <Box position="relative">
+      <FlipCardImageBox>
+        {[FlipType.Publishing, FlipType.Invalid].includes(type) && (
+          <FlipOverlay
+            backgroundImage={
+              // eslint-disable-next-line no-nested-ternary
+              [FlipType.Publishing, FlipType.Deleting].some(x => x === type)
+                ? `linear-gradient(to top, ${
+                    colors.warning[500]
+                  }, ${transparentize(100, colors.warning[500])})`
+                : type === FlipType.Invalid
+                ? `linear-gradient(to top, ${colors.red[500]}, ${transparentize(
+                    100,
+                    colors.red[500]
+                  )})`
+                : ''
+            }
+          >
+            <FlipOverlayStatus>
+              <FlipOverlayIcon name="info-solid" />
+              <FlipOverlayText>
+                {type === FlipType.Publishing && t('Mining...')}
+                {type === FlipType.Deleting && t('Deleting...')}
+                {type === FlipType.Invalid && t('Mining error')}
+              </FlipOverlayText>
+            </FlipOverlayStatus>
+          </FlipOverlay>
+        )}
+        <FlipCardImage src={images[originalOrder ? originalOrder[0] : 0]} />
+      </FlipCardImageBox>
+      <Flex justifyContent="space-between" alignItems="flex-start" mt={4}>
+        <Box>
+          <FlipCardTitle>
+            {keywords.words && keywords.words.length
+              ? formatKeywords(keywords.words)
+              : t('Missing keywords')}
+          </FlipCardTitle>
+          <FlipCardSubtitle>
+            {dayjs(createdAt).format('d.MM.YYYY, H:mm')}
+          </FlipCardSubtitle>
+        </Box>
+        {!isPending && (
+          <FlipCardMenu>
+            {isDraft && (
+              <>
+                <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
+                  <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
+                  {t('Submit flip')}
+                </FlipCardMenuItem>
+                <FlipCardMenuItem>
+                  <NextLink href={`/flips/edit?id=${id}`}>
+                    <Flex>
+                      <FlipCardMenuItemIcon name="edit" size={5} mr={2} />
+                      {t('Edit flip')}
+                    </Flex>
+                  </NextLink>
+                </FlipCardMenuItem>
+                <MenuDivider color="rgb(232, 234, 237)" my={2} width="145px" />
+              </>
+            )}
+
+            <FlipCardMenuItem onClick={onDelete}>
+              <FlipCardMenuItemIcon
+                name="delete"
+                size={5}
+                mr={2}
+                color="red.500"
+              />
+              {t('Delete flip')}
+            </FlipCardMenuItem>
+          </FlipCardMenu>
+        )}
+      </Flex>
+    </Box>
+  )
 }
 
 export function FlipCardImage(props) {
@@ -266,9 +359,8 @@ export const FlipFilterOption = React.forwardRef(
 )
 FlipFilterOption.displayName = 'FlipFilterOption'
 
-// Entering flip master land
-export function FlipMaster(props) {
-  return props.children
+export function FlipMaster({children}) {
+  return children
 }
 
 export function FlipMasterNavbar(props) {
@@ -379,6 +471,80 @@ export function FlipStoryStep({children}) {
       </FlipStepHeader>
       {children}
     </FlipStep>
+  )
+}
+
+export function FlipKeywordTranslationSwitch({
+  keywords,
+  showTranslation,
+  locale,
+  onSwitchLocale,
+}) {
+  const hasTranslations = keywords.translations.reduce(
+    (acc, {length}) => acc + length,
+    0
+  )
+  return (
+    <Stack spacing="30px">
+      <FlipKeywordPair>
+        {hasTranslations &&
+          showTranslation &&
+          keywords.translations.map(([{id, name, desc}]) => (
+            <FlipKeyword key={id}>
+              <FlipKeywordName>{name}</FlipKeywordName>
+              <FlipKeywordDescription>{desc}</FlipKeywordDescription>
+            </FlipKeyword>
+          ))}
+        {showTranslation ||
+          keywords.words.map(({id, name, desc}) => (
+            <FlipKeyword key={id}>
+              <FlipKeywordName>{name}</FlipKeywordName>
+              <FlipKeywordDescription>{desc}</FlipKeywordDescription>
+            </FlipKeyword>
+          ))}
+      </FlipKeywordPair>
+
+      <Stack isInline spacing={1} align="center">
+        {hasTranslations && (
+          <IconButton2
+            icon="switch"
+            _hover={{background: 'transparent'}}
+            onClick={onSwitchLocale}
+          >
+            {showTranslation ? 'EN' : locale.toUpperCase()}
+          </IconButton2>
+        )}
+        {showTranslation || (
+          <>
+            {hasTranslations ? (
+              <Divider
+                orientation="vertical"
+                borderColor="gray.300"
+                m={0}
+                h={rem(24)}
+              />
+            ) : null}
+            <IconButton2
+              icon="gtranslate"
+              _hover={{background: 'transparent'}}
+              onClick={() => {
+                global.openExternal(
+                  `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
+                    global.locale
+                  }&text=${encodeURIComponent(
+                    keywords.words
+                      .map(({name, desc}) => `${name}\n${desc}`)
+                      .join('\n')
+                  )}`
+                )
+              }}
+            >
+              Google Translate
+            </IconButton2>
+          </>
+        )}
+      </Stack>
+    </Stack>
   )
 }
 
@@ -528,8 +694,14 @@ export function FlipShuffleStep({
       <Stack isInline spacing={10} align="center" justify="flex-end">
         <Stack isInline spacing={10} justify="center">
           <FlipImageList>
-            {originalOrder.map(num => (
-              <FlipImageListItem key={num} src={images[num]} opacity={0.3} />
+            {originalOrder.map((num, idx) => (
+              <FlipImageListItem
+                key={num}
+                src={images[num]}
+                isFirst={idx === 0}
+                isLast={idx === images.length - 1}
+                opacity={0.3}
+              />
             ))}
           </FlipImageList>
           <FlipImageList>
@@ -585,7 +757,15 @@ export function FlipShuffleStep({
   )
 }
 
-export function FlipSubmitStep({children}) {
+export function FlipSubmitStep({
+  keywords,
+  showTranslation,
+  locale,
+  onSwitchLocale,
+  originalOrder,
+  order,
+  images,
+}) {
   const {t} = useTranslation()
   return (
     <FlipStep alignSelf="stretch">
@@ -597,7 +777,40 @@ export function FlipSubmitStep({children}) {
           )}
         </FlipStepSubtitle>
       </FlipStepHeader>
-      {children}
+      <FlipStepBody minH="180px">
+        <Stack isInline spacing={10}>
+          <FlipKeywordPanel w={rem(320)}>
+            <FlipKeywordTranslationSwitch
+              keywords={keywords}
+              showTranslation={showTranslation}
+              locale={locale}
+              onSwitchLocale={onSwitchLocale}
+            />
+          </FlipKeywordPanel>
+          <Stack isInline spacing={10} justify="center">
+            <FlipImageList>
+              {originalOrder.map((num, idx) => (
+                <FlipImageListItem
+                  key={num}
+                  src={images[num]}
+                  isFirst={idx === 0}
+                  isLast={idx === images.length - 1}
+                />
+              ))}
+            </FlipImageList>
+            <FlipImageList>
+              {order.map((num, idx) => (
+                <FlipImageListItem
+                  key={num}
+                  src={images[num]}
+                  isFirst={idx === 0}
+                  isLast={idx === images.length - 1}
+                />
+              ))}
+            </FlipImageList>
+          </Stack>
+        </Stack>
+      </FlipStepBody>
     </FlipStep>
   )
 }
@@ -722,10 +935,14 @@ export function EmptyFlipImage(props) {
   )
 }
 
-export function CommunityTranslations({keywords, onVote, onSuggest}) {
+export function CommunityTranslations({
+  keywords,
+  onVote,
+  onSuggest,
+  onToggle,
+  isOpen,
+}) {
   const {t} = useTranslation()
-
-  const {isOpen, onToggle} = useDisclosure()
 
   const [wordIdx, setWordIdx] = React.useState(0)
 
@@ -803,7 +1020,11 @@ export function CommunityTranslations({keywords, onVote, onSuggest}) {
               <FormControl>
                 <Input
                   id="nameInput"
-                  placeholder={capitalize(keywords.words[wordIdx].name)}
+                  placeholder={
+                    keywords.words[wordIdx].name
+                      ? capitalize(keywords.words[wordIdx].name)
+                      : 'Name'
+                  }
                   px={3}
                   pt="3/2"
                   pb={2}
@@ -815,7 +1036,11 @@ export function CommunityTranslations({keywords, onVote, onSuggest}) {
                 />
                 <Textarea
                   id="descInput"
-                  placeholder={capitalize(keywords.words[wordIdx].desc)}
+                  placeholder={
+                    keywords.words[wordIdx].desc
+                      ? capitalize(keywords.words[wordIdx].desc)
+                      : 'Description'
+                  }
                   borderColor="gray.300"
                   px={3}
                   pt="3/2"

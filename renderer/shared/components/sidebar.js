@@ -115,7 +115,7 @@ function NodeStatus() {
             </Box>
           )}
 
-          <Text color={color} fontWeight={500} css={{lineHeight: rem(18)}}>
+          <Text color={color} fontWeight={500} lineHeight={rem(18)}>
             {text}
           </Text>
         </Flex>

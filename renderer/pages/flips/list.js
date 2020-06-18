@@ -1,15 +1,12 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import NextLink from 'next/link'
-import {useService, useMachine} from '@xstate/react'
+import {useMachine} from '@xstate/react'
 import {
   Flex,
   Box,
   Alert,
   AlertIcon,
   Image,
-  MenuDivider,
-  useTheme,
   useToast,
   Drawer,
   DrawerHeader,
@@ -25,12 +22,10 @@ import {
   FormControl,
   FormLabel,
 } from '@chakra-ui/core'
-import {transparentize, rem} from 'polished'
-import dayjs from 'dayjs'
+import {rem} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
-  FlipCardImage,
   FlipCardTitle,
   FlipCardSubtitle,
   FlipFilter,
@@ -38,16 +33,9 @@ import {
   RequiredFlipPlaceholder,
   OptionalFlipPlaceholder,
   FlipCardList,
-  FlipCardMenu,
-  FlipCardMenuItem,
-  FlipCardMenuItemIcon,
   EmptyFlipBox,
-  FlipOverlay,
-  FlipOverlayStatus,
-  FlipOverlayIcon,
-  FlipOverlayText,
-  FlipCardImageBox,
   FlipImage,
+  FlipCard,
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
 import {IconLink} from '../../shared/components/link'
@@ -375,95 +363,5 @@ export default function FlipListPage() {
         )}
       </Page>
     </Layout>
-  )
-}
-
-// eslint-disable-next-line react/prop-types
-function FlipCard({flipService, onDelete}) {
-  const {t} = useTranslation()
-
-  const [current, send] = useService(flipService)
-  const {id, keywords, originalOrder, images, type, createdAt} = current.context
-
-  const {colors} = useTheme()
-
-  const isDraft = type === FlipType.Draft
-  const isPending = [FlipType.Publishing, FlipType.Deleting].includes(type)
-
-  return (
-    <Box position="relative">
-      <FlipCardImageBox>
-        {[FlipType.Publishing, FlipType.Invalid].includes(type) && (
-          <FlipOverlay
-            backgroundImage={
-              // eslint-disable-next-line no-nested-ternary
-              [FlipType.Publishing, FlipType.Deleting].some(x => x === type)
-                ? `linear-gradient(to top, ${
-                    colors.warning[500]
-                  }, ${transparentize(100, colors.warning[500])})`
-                : type === FlipType.Invalid
-                ? `linear-gradient(to top, ${colors.red[500]}, ${transparentize(
-                    100,
-                    colors.red[500]
-                  )})`
-                : ''
-            }
-          >
-            <FlipOverlayStatus>
-              <FlipOverlayIcon name="info-solid" />
-              <FlipOverlayText>
-                {type === FlipType.Publishing && t('Mining...')}
-                {type === FlipType.Deleting && t('Deleting...')}
-                {type === FlipType.Invalid && t('Mining error')}
-              </FlipOverlayText>
-            </FlipOverlayStatus>
-          </FlipOverlay>
-        )}
-        <FlipCardImage src={images[originalOrder ? originalOrder[0] : 0]} />
-      </FlipCardImageBox>
-      <Flex justifyContent="space-between" alignItems="flex-start" mt={4}>
-        <Box>
-          <FlipCardTitle>
-            {keywords.words && keywords.words.length
-              ? formatKeywords(keywords.words)
-              : t('Missing keywords')}
-          </FlipCardTitle>
-          <FlipCardSubtitle>
-            {dayjs(createdAt).format('d.MM.YYYY, H:mm')}
-          </FlipCardSubtitle>
-        </Box>
-        {!isPending && (
-          <FlipCardMenu>
-            {isDraft && (
-              <>
-                <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
-                  <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
-                  {t('Submit flip')}
-                </FlipCardMenuItem>
-                <FlipCardMenuItem>
-                  <NextLink href={`/flips/edit?id=${id}`}>
-                    <Flex>
-                      <FlipCardMenuItemIcon name="edit" size={5} mr={2} />
-                      {t('Edit flip')}
-                    </Flex>
-                  </NextLink>
-                </FlipCardMenuItem>
-                <MenuDivider color="rgb(232, 234, 237)" my={2} width="145px" />
-              </>
-            )}
-
-            <FlipCardMenuItem onClick={onDelete}>
-              <FlipCardMenuItemIcon
-                name="delete"
-                size={5}
-                mr={2}
-                color="red.500"
-              />
-              {t('Delete flip')}
-            </FlipCardMenuItem>
-          </FlipCardMenu>
-        )}
-      </Flex>
-    </Box>
   )
 }
