@@ -746,11 +746,6 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                 tooltip={t('Draw')}
                 isActive={rightMenuPanel === RightMenu.FreeDrawing}
                 icon="draw"
-                color={
-                  rightMenuPanel === RightMenu.FreeDrawing
-                    ? null
-                    : theme.colors.primary2
-                }
                 onClick={() => {
                   setShowArrowHint(false)
                   const editor = editors[idx]
@@ -764,21 +759,13 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                 }}
               />
 
-              <IconButton
-                disabled={!activeObjectUrl}
+              <FlipEditorIcon
+                isDisabled={!activeObjectUrl}
                 tooltip={
                   activeObjectUrl ? t('Erase') : t('Select image to erase')
                 }
-                icon={
-                  <FaEraser
-                    fontSize={theme.fontSizes.medium}
-                    color={
-                      rightMenuPanel === RightMenu.Erase
-                        ? null
-                        : theme.colors.primary2
-                    }
-                  />
-                }
+                isActive={rightMenuPanel === RightMenu.Erase}
+                icon="eraser"
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
                     setRightMenuPanel(RightMenu.None)
@@ -788,20 +775,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                     setBottomMenuPanel(BottomMenu.Erase)
                   }
                 }}
-              ></IconButton>
-
-              <IconButton
-                tooltip={t('Clear')}
-                icon={
-                  <FaRegTrashAlt
-                    color={theme.colors.danger}
-                    fontSize={theme.fontSizes.medium}
-                  />
-                }
-                onClick={() => {
-                  handleOnClear()
-                }}
-              ></IconButton>
+              />
 
               <FlipEditorToolbarDivider />
 
@@ -810,7 +784,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                 icon="flip-editor-delete"
                 color="red.500"
                 _hover={{color: 'red.500'}}
-                onClick={() => setImageUrl({url: null})}
+                onClick={handleOnClear}
               />
             </Stack>
           )}
@@ -976,19 +950,20 @@ FlipEditor.propTypes = {
 }
 
 // eslint-disable-next-line react/prop-types
-function FlipEditorIcon({tooltip, isActive, ...props}) {
+function FlipEditorIcon({tooltip, isActive, isDisabled, ...props}) {
   return (
     <ChakraBox>
-      <TooltipX label={tooltip}>
+      <TooltipX label={tooltip} shouldWrapChildren={isDisabled}>
         <ChakraIconButton
           aria-label={tooltip}
+          isDisabled={isDisabled}
           bg={isActive ? 'gray.50' : 'unset'}
           color={isActive ? 'brandBlue.500' : 'unset'}
           fontSize={rem(20)}
           size={6}
           rounded="md"
           p="1/2"
-          _hover={{color: 'brandBlue.500'}}
+          _hover={{color: isDisabled ? 'inherit' : 'brandBlue.500'}}
           _active={{bg: 'transparent'}}
           {...props}
         />

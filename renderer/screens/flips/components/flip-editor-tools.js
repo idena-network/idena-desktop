@@ -2,10 +2,16 @@
 import React, {useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position, wordWrap} from 'polished'
-import {FaCircle, FaCopy, FaPaste, FaRegTrashAlt} from 'react-icons/fa'
+import {FaCircle, FaRegTrashAlt} from 'react-icons/fa'
 import {FiCircle} from 'react-icons/fi'
 
 import {useTranslation} from 'react-i18next'
+import {
+  Stack,
+  Flex as ChakraFlex,
+  Box as ChakraBox,
+  Icon,
+} from '@chakra-ui/core'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
 
@@ -18,25 +24,26 @@ import Flex from '../../../shared/components/flex'
 export function Brushes({brush, onChange}) {
   const brushes = [4, 12, 20, 28, 36]
   return (
-    <div>
+    <Stack spacing={2} align="center">
       {brushes.map((b, i) => (
-        <IconButton
-          key={i}
-          active={brush === b}
-          icon={
-            <FaCircle
-              color={brush === b ? null : theme.colors.primary2}
-              style={{padding: rem(6 - i * 1.5)}}
-            />
-          }
-          onClick={() => {
-            if (onChange) {
-              onChange(b)
-            }
-          }}
-        ></IconButton>
+        <ChakraFlex
+          key={b}
+          align="center"
+          justify="center"
+          bg={brush === b ? 'gray.50' : 'unset'}
+          rounded="md"
+          size={6}
+          onClick={() => onChange(b)}
+        >
+          <ChakraBox
+            key={b}
+            bg="brandGray.500"
+            rounded="full"
+            size={rem((i + 1) * 2)}
+          />
+        </ChakraFlex>
       ))}
-    </div>
+    </Stack>
   )
 }
 
@@ -166,7 +173,7 @@ export function ArrowHint({hint, leftHanded, visible}) {
                 <div
                   style={{
                     position: 'absolute',
-                    left: '12px',
+                    left: rem(16),
                     width: 0,
                     height: 0,
                     marginLeft: '0px',
@@ -247,7 +254,7 @@ export function EditorContextMenu({
                     onCopy()
                     onClose()
                   }}
-                  icon={<FaCopy fontSize={rem(20)} />}
+                  icon={<Icon name="copy" size={5} />}
                 >
                   {`${t('Copy')} (${global.isMac ? 'Cmd+C' : 'Ctrl+C'})`}
                 </MenuItem>
@@ -258,7 +265,7 @@ export function EditorContextMenu({
                     onPaste()
                     onClose()
                   }}
-                  icon={<FaPaste fontSize={rem(20)} />}
+                  icon={<Icon name="clipboard" size={5} />}
                 >
                   {`${t('Paste image')} (${global.isMac ? 'Cmd+V' : 'Ctrl+V'})`}
                 </MenuItem>
