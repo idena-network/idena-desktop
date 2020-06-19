@@ -6,6 +6,7 @@ import {
   voteForKeywordTranslation,
   suggestKeywordTranslation,
   publishFlip,
+  updateFlipType,
   DEFAULT_FLIP_ORDER,
 } from './utils'
 import {shuffle} from '../../shared/utils/arr'
@@ -845,14 +846,33 @@ export const flipMasterMachine = Machine(
   }
 )
 
-function updateFlipType(flips, {id, type}) {
-  return flips.map(flip =>
-    flip.id === id
-      ? {
-          ...flip,
-          type,
-          ref: flip.ref,
-        }
-      : flip
-  )
-}
+export const createViewFlipMachine = id =>
+  Machine({
+    context: {
+      id,
+      keywords: {
+        words: [],
+        translations: [],
+      },
+      order: [],
+      originalOrder: [],
+      voted: [],
+    },
+    initial: 'loading',
+    states: {
+      loading: {
+        invoke: {
+          // eslint-disable-next-line no-shadow
+          src: async ({id}) => global.flipStore.getFlip(id),
+          onDone: {
+            target: 'loaded',
+            actions: [
+              assign((context, {data}) => ({...context, ...data})),
+              log(),
+            ],
+          },
+        },
+      },
+      loaded: {},
+    },
+  })

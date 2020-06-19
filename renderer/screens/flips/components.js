@@ -74,6 +74,7 @@ export function FlipCard({flipService, onDelete}) {
     FlipType.Invalid,
   ].includes(type)
   const isSubmittable = [FlipType.Draft, FlipType.Invalid].includes(type)
+  const isViewable = [FlipType.Published].includes(type)
   const isEditable = [FlipType.Draft, FlipType.Invalid].includes(type)
   const isDeletable = [FlipType.Published, FlipType.Draft].includes(type)
 
@@ -125,6 +126,16 @@ export function FlipCard({flipService, onDelete}) {
               <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
                 <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
                 {t('Submit flip')}
+              </FlipCardMenuItem>
+            )}
+            {isViewable && (
+              <FlipCardMenuItem>
+                <NextLink href={`/flips/view?id=${id}`}>
+                  <Flex>
+                    <FlipCardMenuItemIcon name="view" size={5} mr={2} />
+                    {t('View flip')}
+                  </Flex>
+                </NextLink>
               </FlipCardMenuItem>
             )}
             {isEditable && (

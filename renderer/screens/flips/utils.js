@@ -114,6 +114,18 @@ export function flipToHex(pics, order) {
   return [publicRlp, privateRlp].map(x => `0x${x.toString('hex')}`)
 }
 
+export function updateFlipType(flips, {id, type}) {
+  return flips.map(flip =>
+    flip.id === id
+      ? {
+          ...flip,
+          type,
+          ref: flip.ref,
+        }
+      : flip
+  )
+}
+
 export async function publishFlip({
   keywordPairId,
   pics,
