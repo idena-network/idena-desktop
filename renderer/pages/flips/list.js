@@ -173,35 +173,32 @@ export default function FlipListPage() {
             </Box>
           )}
 
-        {current.matches('ready.pristine') &&
-          [
-            IdentityStatus.Undefined,
-            IdentityStatus.Invite,
-            IdentityStatus.Candidate,
-          ].includes(status) && (
-            <Box alignSelf="stretch" mb={8}>
-              <Alert
-                status="error"
-                bg="red.010"
-                borderWidth="1px"
-                borderColor="red.050"
-                fontWeight={500}
-                rounded="md"
-                px={3}
-                py={2}
-              >
-                <AlertIcon
-                  name="info"
-                  color="red.500"
-                  size={5}
-                  mr={3}
-                ></AlertIcon>
-                {t(
-                  'You can not submit flips yet. Please get validated first. '
-                )}
-              </Alert>
-            </Box>
-          )}
+        {![
+          IdentityStatus.Verified,
+          IdentityStatus.Human,
+          IdentityStatus.Newbie,
+        ].includes(status) && (
+          <Box alignSelf="stretch" mb={8}>
+            <Alert
+              status="error"
+              bg="red.010"
+              borderWidth="1px"
+              borderColor="red.050"
+              fontWeight={500}
+              rounded="md"
+              px={3}
+              py={2}
+            >
+              <AlertIcon
+                name="info"
+                color="red.500"
+                size={5}
+                mr={3}
+              ></AlertIcon>
+              {t('You can not submit flips yet. Please get validated first. ')}
+            </Alert>
+          </Box>
+        )}
 
         {current.matches('ready.pristine') && (
           <Flex
