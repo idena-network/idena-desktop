@@ -917,8 +917,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   border="1px"
                   borderColor="brandGray.016"
                   rounded="full"
-                  h={rem(26)}
-                  w={rem(26)}
+                  size={4}
                   onClick={() => setShowColorPicker(!showColorPicker)}
                 />
 

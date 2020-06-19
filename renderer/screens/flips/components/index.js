@@ -65,8 +65,14 @@ export function FlipCard({flipService, onDelete}) {
 
   const {colors} = useTheme()
 
-  const isDraft = type === FlipType.Draft
-  const isPending = [FlipType.Publishing, FlipType.Deleting].includes(type)
+  const isActionable = [
+    FlipType.Published,
+    FlipType.Draft,
+    FlipType.Invalid,
+  ].includes(type)
+  const isSubmittable = [FlipType.Draft, FlipType.Invalid].includes(type)
+  const isEditable = [FlipType.Draft, FlipType.Invalid].includes(type)
+  const isDeletable = [FlipType.Published, FlipType.Draft].includes(type)
 
   return (
     <Box position="relative">
@@ -110,35 +116,39 @@ export function FlipCard({flipService, onDelete}) {
             {dayjs(createdAt).format('d.MM.YYYY, H:mm')}
           </FlipCardSubtitle>
         </Box>
-        {!isPending && (
+        {isActionable && (
           <FlipCardMenu>
-            {isDraft && (
-              <>
-                <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
-                  <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
-                  {t('Submit flip')}
-                </FlipCardMenuItem>
-                <FlipCardMenuItem>
-                  <NextLink href={`/flips/edit?id=${id}`}>
-                    <Flex>
-                      <FlipCardMenuItemIcon name="edit" size={5} mr={2} />
-                      {t('Edit flip')}
-                    </Flex>
-                  </NextLink>
-                </FlipCardMenuItem>
-                <MenuDivider color="rgb(232, 234, 237)" my={2} width="145px" />
-              </>
+            {isSubmittable && (
+              <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
+                <FlipCardMenuItemIcon name="upload" size={5} mr={2} />
+                {t('Submit flip')}
+              </FlipCardMenuItem>
+            )}
+            {isEditable && (
+              <FlipCardMenuItem>
+                <NextLink href={`/flips/edit?id=${id}`}>
+                  <Flex>
+                    <FlipCardMenuItemIcon name="edit" size={5} mr={2} />
+                    {t('Edit flip')}
+                  </Flex>
+                </NextLink>
+              </FlipCardMenuItem>
+            )}
+            {(isSubmittable || isEditable) && isDeletable && (
+              <MenuDivider color="gray.300" my={2} width={rem(145)} />
             )}
 
-            <FlipCardMenuItem onClick={onDelete}>
-              <FlipCardMenuItemIcon
-                name="delete"
-                size={5}
-                mr={2}
-                color="red.500"
-              />
-              {t('Delete flip')}
-            </FlipCardMenuItem>
+            {isDeletable && (
+              <FlipCardMenuItem onClick={onDelete}>
+                <FlipCardMenuItemIcon
+                  name="delete"
+                  size={5}
+                  mr={2}
+                  color="red.500"
+                />
+                {t('Delete flip')}
+              </FlipCardMenuItem>
+            )}
           </FlipCardMenu>
         )}
       </Flex>
