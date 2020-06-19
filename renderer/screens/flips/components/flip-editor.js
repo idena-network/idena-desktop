@@ -1,7 +1,6 @@
 import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position} from 'polished'
-import {FaEraser, FaRegTrashAlt} from 'react-icons/fa'
 import Jimp from 'jimp'
 
 import {useTranslation} from 'react-i18next'
@@ -19,7 +18,6 @@ import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
 
 import {useInterval} from '../../../shared/hooks/use-interval'
-import {IconButton} from '../../../shared/components/button'
 import {Box, Absolute} from '../../../shared/components'
 import {TooltipX} from '../../../shared/components/tooltip'
 import theme from '../../../shared/theme'
