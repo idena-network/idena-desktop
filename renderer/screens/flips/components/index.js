@@ -740,11 +740,26 @@ export function FlipShuffleStep({
                         draggableId={`pic-${num}`}
                         index={idx}
                       >
-                        <FlipImageListItem
-                          isFirst={idx === 0}
-                          isLast={idx === images.length - 1}
-                          src={images[num]}
-                        />
+                        <Box position="relative">
+                          <Flex
+                            align="center"
+                            justify="center"
+                            bg="brandGray.080"
+                            size={8}
+                            rounded="md"
+                            position="absolute"
+                            top={1}
+                            right={1}
+                            zIndex={1}
+                          >
+                            <Icon name="move" size={5} color="white" />
+                          </Flex>
+                          <FlipImageListItem
+                            isFirst={idx === 0}
+                            isLast={idx === images.length - 1}
+                            src={images[num]}
+                          />
+                        </Box>
                       </DraggableItem>
                     ))}
                     {provided.placeholder}

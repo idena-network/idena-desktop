@@ -692,7 +692,13 @@ export const flipMasterMachine = Machine(
                 ],
               },
               MANUAL_SHUFFLE: {
-                actions: [send('CHANGE_ORDER'), log()],
+                actions: [
+                  send((_, {order}) => ({
+                    type: 'CHANGE_ORDER',
+                    order,
+                  })),
+                  log(),
+                ],
               },
               RESET_SHUFFLE: {
                 actions: [

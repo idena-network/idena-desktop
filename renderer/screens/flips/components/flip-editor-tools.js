@@ -288,7 +288,14 @@ export function EditorContextMenu({
                       onDelete()
                       onClose()
                     }}
-                    icon={<i className="icon icon--delete" />}
+                    danger
+                    icon={
+                      <Icon
+                        name="flip-editor-delete"
+                        size={5}
+                        color="red.500"
+                      />
+                    }
                   >
                     {`${t('Delete')} `}
                   </MenuItem>
