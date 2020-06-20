@@ -195,7 +195,7 @@ export default function FlipListPage() {
                 size={5}
                 mr={3}
               ></AlertIcon>
-              {t('You can not submit flips yet. Please get validated first. ')}
+              {t('You can not submit flips. Please get validated first. ')}
             </Alert>
           </Box>
         )}

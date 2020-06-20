@@ -40,6 +40,18 @@ export function hasDataUrl(src) {
 
 const randomIndex = currentIndex => Math.floor(Math.random() * currentIndex)
 
+export function getRandomKeywordPair() {
+  function getRandomInt(min, max) {
+    // eslint-disable-next-line no-param-reassign
+    min = Math.ceil(min)
+    // eslint-disable-next-line no-param-reassign
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min)) + min
+  }
+
+  return {id: 0, words: [getRandomInt(0, 3407), getRandomInt(0, 3407)]}
+}
+
 export function getRandomHint() {
   const nextIndex = randomIndex(dict.length)
 

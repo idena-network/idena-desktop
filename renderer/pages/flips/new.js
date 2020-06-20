@@ -27,7 +27,11 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {NotificationType} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine} from '../../screens/flips/machines'
-import {publishFlip, isPendingKeywordPair} from '../../screens/flips/utils/flip'
+import {
+  publishFlip,
+  isPendingKeywordPair,
+  getRandomKeywordPair,
+} from '../../screens/flips/utils/flip'
 import {Notification} from '../../shared/components/notifications'
 import {Step} from '../../screens/flips/types'
 import {
@@ -57,7 +61,10 @@ export default function NewFlipPage() {
           flipKeyWordPairs === null ||
           flipKeyWordPairs.every(({used}) => used)
         )
-          return {keywordPairId: 0, availableKeywords: []}
+          return {
+            keywordPairId: 0,
+            availableKeywords: [getRandomKeywordPair()],
+          }
 
         const persistedFlips = global.flipStore?.getFlips()
 
@@ -204,11 +211,11 @@ export default function NewFlipPage() {
                     <FlipStoryAside>
                       <IconButton2
                         icon="refresh"
-                        isDisabled={availableKeywords.length === 0}
+                        isDisabled={availableKeywords.length < 2}
                         onClick={() => send('CHANGE_KEYWORDS')}
                       >
                         {t('Change words')}{' '}
-                        {availableKeywords.length > 0
+                        {availableKeywords.length > 1
                           ? `(#${keywordPairId + 1})`
                           : null}
                       </IconButton2>

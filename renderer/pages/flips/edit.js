@@ -69,9 +69,12 @@ export default function EditFlipPage() {
         } = persistedFlips.find(({id: flipId}) => flipId === id)
 
         // eslint-disable-next-line no-shadow
-        const availableKeywords = (flipKeyWordPairs || []).filter(
-          pair => !pair.used && !isPendingKeywordPair(persistedFlips, pair.id)
-        )
+        const availableKeywords = Array.isArray(flipKeyWordPairs)
+          ? flipKeyWordPairs.filter(
+              pair =>
+                !pair.used && !isPendingKeywordPair(persistedFlips, pair.id)
+            )
+          : [{id: 0, words: flip.keywords.words.map(w => w.id)}]
 
         return {...flip, images, keywordPairId, availableKeywords}
       },
