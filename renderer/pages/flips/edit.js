@@ -61,8 +61,9 @@ export default function EditFlipPage() {
 
         const {
           pics,
+          compressedPics,
           // eslint-disable-next-line no-shadow
-          images = pics,
+          images = compressedPics || pics,
           hint,
           keywordPairId = hint ? Math.max(hint.id, 0) : 0,
           ...flip

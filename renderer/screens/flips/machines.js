@@ -38,11 +38,12 @@ export const flipsMachine = Machine({
 
           const persistedFlips = flipDb
             .getFlips()
-            .map(({pics, hint, images, keywords, ...flip}) => ({
+            .map(({pics, compressedPics, hint, images, keywords, ...flip}) => ({
               ...flip,
-              images: images || pics,
+              images: images || compressedPics || pics,
               keywords: keywords || hint || [],
               pics,
+              compressedPics,
               hint,
             }))
 

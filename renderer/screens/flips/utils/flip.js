@@ -210,7 +210,8 @@ export function flipToHex(pics, order) {
 export async function publishFlip({
   keywordPairId,
   pics,
-  images = pics,
+  compressedPics,
+  images = compressedPics || pics,
   originalOrder,
   order,
   orderPermutations,
