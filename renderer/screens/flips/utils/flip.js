@@ -215,6 +215,7 @@ export async function publishFlip({
   originalOrder,
   order,
   orderPermutations,
+  hint,
 }) {
   const flips = global.flipStore.getFlips()
 
@@ -234,8 +235,8 @@ export async function publishFlip({
     throw new Error('You must shuffle flip before submit')
 
   const [publicHex, privateHex] = flipToHex(
-    originalOrder ? originalOrder.map(num => images[num]) : images,
-    orderPermutations || order
+    hint ? images : originalOrder.map(num => images[num]),
+    hint ? order : orderPermutations
   )
 
   if (publicHex.length + privateHex.length > 2 * 1024 * 1024)

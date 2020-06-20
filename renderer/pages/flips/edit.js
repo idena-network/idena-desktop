@@ -77,7 +77,7 @@ export default function EditFlipPage() {
             )
           : [{id: 0, words: flip.keywords.words.map(w => w.id)}]
 
-        return {...flip, images, keywordPairId, availableKeywords}
+        return {...flip, images, keywordPairId, availableKeywords, hint}
       },
       submitFlip: async flip => publishFlip(flip),
     },
