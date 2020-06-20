@@ -5,10 +5,7 @@ import {useTranslation} from 'react-i18next'
 import Layout from '../../shared/components/layout'
 import {Box, PageTitle} from '../../shared/components'
 import theme from '../../shared/theme'
-import Flex from '../../shared/components/flex'
-import FlipToolbar, {
-  FlipToolbarItem,
-} from '../../screens/flips/components/toolbar'
+import {FlipFilter, FlipFilterOption} from '../../screens/flips/components'
 
 function SettingsLayout({children}) {
   const router = useRouter()
@@ -19,28 +16,15 @@ function SettingsLayout({children}) {
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Box>
           <PageTitle>{t('Settings')}</PageTitle>
-          <FlipToolbar>
-            <Flex>
-              <FlipToolbarItem
-                key="privateKey"
-                onClick={() => {
-                  router.push('/settings')
-                }}
-                isCurrent={router.pathname === '/settings'}
-              >
-                {t('General')}
-              </FlipToolbarItem>
-              <FlipToolbarItem
-                key="node"
-                onClick={() => {
-                  router.push('/settings/node')
-                }}
-                isCurrent={router.pathname === '/settings/node'}
-              >
-                {t('Node')}
-              </FlipToolbarItem>
-            </Flex>
-          </FlipToolbar>
+          {/* TODO: make it shared <Pill /> or <Tab /> component */}
+          <FlipFilter value={router.pathname} onChange={router.push}>
+            <FlipFilterOption value="/settings">
+              {t('General')}
+            </FlipFilterOption>
+            <FlipFilterOption value="/settings/node">
+              {t('Node')}
+            </FlipFilterOption>
+          </FlipFilter>
         </Box>
         {children}
       </Box>
