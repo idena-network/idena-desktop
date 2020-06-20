@@ -5,12 +5,13 @@ import {
   fetchKeywordTranslations,
   voteForKeywordTranslation,
   suggestKeywordTranslation,
+  publishFlip,
+  DEFAULT_FLIP_ORDER,
 } from './utils'
 import {shuffle} from '../../shared/utils/arr'
 import {FlipType} from '../../shared/types'
 import {fetchTx, deleteFlip} from '../../shared/api'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
-import {publishFlip, DEFAULT_FLIP_ORDER} from './utils/flip'
 
 export const flipsMachine = Machine({
   id: 'flips',

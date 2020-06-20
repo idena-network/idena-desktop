@@ -32,7 +32,7 @@ import {
   publishFlip,
   isPendingKeywordPair,
   getRandomKeywordPair,
-} from '../../screens/flips/utils/flip'
+} from '../../screens/flips/utils'
 import {Notification} from '../../shared/components/notifications'
 import {Step} from '../../screens/flips/types'
 import {

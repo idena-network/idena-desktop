@@ -28,7 +28,7 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {NotificationType} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine} from '../../screens/flips/machines'
-import {publishFlip, isPendingKeywordPair} from '../../screens/flips/utils/flip'
+import {publishFlip, isPendingKeywordPair} from '../../screens/flips/utils'
 import {Notification} from '../../shared/components/notifications'
 import {Step} from '../../screens/flips/types'
 import {
