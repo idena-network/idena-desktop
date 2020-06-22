@@ -237,5 +237,11 @@
   "Reset to default": "Reset to default",
   "Community translation": "Community translation",
   "Suggest translation": "Suggest translation",
-  "Peers connected": "Peers connected"
+  "Peers connected": "Peers connected",
+  "You can not submit flips. Please get validated first. ": "You can not submit flips. Please get validated first. ",
+  "Bring on top": "Bring on top",
+  "Copied": "Copied",
+  "Erase": "Erase",
+  "Select image to erase": "Select image to erase",
+  "Use keywords for the story": "Use keywords for the story"
 }
