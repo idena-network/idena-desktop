@@ -82,7 +82,10 @@ export default function NewFlipPage() {
     },
     actions: {
       onSubmitted: () => router.push('/flips/list'),
-      onError: (_, {data, error = data.message}) =>
+      onError: (
+        _,
+        {data, error = data.response?.data?.error ?? data.message}
+      ) =>
         toast({
           title: error,
           status: 'error',
@@ -195,6 +198,9 @@ export default function NewFlipPage() {
                             onVote={e => send('VOTE', e)}
                             onSuggest={e => send('SUGGEST', e)}
                             isOpen={isCommunityTranslationsExpanded}
+                            isPending={is(
+                              'keywords.loaded.fetchedTranslations.suggesting'
+                            )}
                             onToggle={() =>
                               send('TOGGLE_COMMUNITY_TRANSLATIONS')
                             }

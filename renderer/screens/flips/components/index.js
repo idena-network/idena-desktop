@@ -981,14 +981,22 @@ export function EmptyFlipImage(props) {
 
 export function CommunityTranslations({
   keywords,
+  isOpen,
+  isPending,
   onVote,
   onSuggest,
   onToggle,
-  isOpen,
 }) {
   const {t} = useTranslation()
 
   const [wordIdx, setWordIdx] = React.useState(0)
+
+  const translations = keywords.translations[wordIdx]
+
+  const lastTranslationId =
+    translations && translations.length
+      ? translations[translations.length - 1].id
+      : wordIdx
 
   return (
     <Stack spacing={8}>
@@ -1011,7 +1019,7 @@ export function CommunityTranslations({
               </FlipKeywordRadio>
             ))}
           </RadioButtonGroup>
-          {keywords.translations[wordIdx].map(({id, name, desc, ups}) => (
+          {translations.map(({id, name, desc, ups}) => (
             <Flex key={id} justify="space-between">
               <FlipKeyword>
                 <FlipKeywordName>{name}</FlipKeywordName>
@@ -1044,14 +1052,15 @@ export function CommunityTranslations({
               </Stack>
             </Flex>
           ))}
-          {keywords.translations[wordIdx].length && (
-            <Divider borderColor="gray.300" />
-          )}
+
+          {translations.length && <Divider borderColor="gray.300" />}
+
           <Box>
             <Text fontWeight={500} mb={3}>
               {t('Suggest translation')}
             </Text>
             <form
+              key={lastTranslationId}
               onSubmit={e => {
                 e.preventDefault()
                 const {
@@ -1095,7 +1104,12 @@ export function CommunityTranslations({
                   }}
                 />
               </FormControl>
-              <PrimaryButton type="submit" display="flex" ml="auto">
+              <PrimaryButton
+                type="submit"
+                display="flex"
+                ml="auto"
+                isLoading={isPending}
+              >
                 {t('Send')}
               </PrimaryButton>
             </form>
