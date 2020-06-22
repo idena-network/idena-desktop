@@ -700,7 +700,7 @@ export function FlipShuffleStep({
           {t('Shuffle images in order to make a nonsense sequence of images')}
         </FlipStepSubtitle>
       </FlipStepHeader>
-      <Stack isInline spacing={10} align="center" justify="flex-end">
+      <Stack isInline spacing={10} align="center" mx="auto">
         <Stack isInline spacing={10} justify="center">
           <FlipImageList>
             {originalOrder.map((num, idx) => (
@@ -768,7 +768,7 @@ export function FlipShuffleStep({
             </DragDropContext>
           </FlipImageList>
         </Stack>
-        <Stack spacing={0} minW={rem(200)} align="flex-start">
+        <Stack spacing={0}>
           <IconButton2 icon="cycle" onClick={onShuffle}>
             {t('Shuffle images')}
           </IconButton2>
