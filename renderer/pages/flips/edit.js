@@ -124,6 +124,7 @@ export default function EditFlipPage() {
           flex={1}
           alignSelf="stretch"
           px={20}
+          pb="36px"
           overflowY="auto"
         >
           <FlipPageTitle onClose={() => router.push('/flips/list')}>

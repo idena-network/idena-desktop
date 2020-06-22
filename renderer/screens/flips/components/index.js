@@ -502,14 +502,14 @@ export function FlipKeywordTranslationSwitch({
           keywords.translations.map(([{id, name, desc}]) => (
             <FlipKeyword key={id}>
               <FlipKeywordName>{name}</FlipKeywordName>
-              <FlipKeywordDescription>{desc}</FlipKeywordDescription>
+              <FlipKeywordDescription minH={10}>{desc}</FlipKeywordDescription>
             </FlipKeyword>
           ))}
         {showTranslation ||
           keywords.words.map(({id, name, desc}) => (
             <FlipKeyword key={id}>
               <FlipKeywordName>{name}</FlipKeywordName>
-              <FlipKeywordDescription>{desc}</FlipKeywordDescription>
+              <FlipKeywordDescription minH={10}>{desc}</FlipKeywordDescription>
             </FlipKeyword>
           ))}
       </FlipKeywordPair>
@@ -572,11 +572,23 @@ export function FlipKeyword(props) {
   return <Stack spacing="1/2" flex={1} {...props}></Stack>
 }
 
-export function FlipKeywordName(props) {
-  return <Text fontWeight={500} {...props} />
+export function FlipKeywordName({children, ...props}) {
+  return (
+    <Text fontWeight={500} {...props}>
+      {children && typeof children === 'string'
+        ? capitalize(children)
+        : children}
+    </Text>
+  )
 }
-export function FlipKeywordDescription(props) {
-  return <Text color="muted" {...props} />
+export function FlipKeywordDescription({children, ...props}) {
+  return (
+    <Text color="muted" {...props}>
+      {children && typeof children === 'string'
+        ? capitalize(children)
+        : children}
+    </Text>
+  )
 }
 
 export function FlipStoryAside(props) {
