@@ -600,7 +600,7 @@ export function FlipEditorStep({
       <FlipStepHeader>
         <FlipStepTitle>{t('Select 4 images to tell your story')}</FlipStepTitle>
         <FlipStepSubtitle>
-          {t(`Use key words for the story`)}{' '}
+          {t(`Use keywords for the story`)}{' '}
           <Text as="mark">{formatKeywords(keywords)}</Text>{' '}
           {t(`and template "Before
           – Something happens – After"`)}

@@ -19,7 +19,7 @@ import {Menu, MenuItem} from '../../../shared/components/menu'
 
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {Box, Absolute} from '../../../shared/components'
-import {TooltipX} from '../../../shared/components/tooltip'
+import {TooltipX, Tooltip} from '../../../shared/components/tooltip'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {resizing, imageResize} from '../../../shared/utils/img'
@@ -951,24 +951,29 @@ FlipEditor.propTypes = {
 }
 
 // eslint-disable-next-line react/prop-types
-function FlipEditorIcon({tooltip, isActive, isDisabled, ...props}) {
+function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
+  const icon = (
+    <ChakraIconButton
+      aria-label={tooltip}
+      isDisabled={isDisabled}
+      bg={isActive ? 'gray.50' : 'unset'}
+      color={isActive ? 'brandBlue.500' : 'unset'}
+      fontSize={rem(20)}
+      size={6}
+      rounded="md"
+      p="1/2"
+      _hover={{color: isDisabled ? 'inherit' : 'brandBlue.500'}}
+      _active={{bg: 'transparent'}}
+      {...props}
+    />
+  )
   return (
-    <ChakraBox>
-      <TooltipX label={tooltip} shouldWrapChildren={isDisabled}>
-        <ChakraIconButton
-          aria-label={tooltip}
-          isDisabled={isDisabled}
-          bg={isActive ? 'gray.50' : 'unset'}
-          color={isActive ? 'brandBlue.500' : 'unset'}
-          fontSize={rem(20)}
-          size={6}
-          rounded="md"
-          p="1/2"
-          _hover={{color: isDisabled ? 'inherit' : 'brandBlue.500'}}
-          _active={{bg: 'transparent'}}
-          {...props}
-        />
-      </TooltipX>
+    <ChakraBox mr={mr}>
+      {isDisabled ? (
+        <Tooltip content={tooltip}>{icon}</Tooltip>
+      ) : (
+        <TooltipX label={tooltip}>{icon}</TooltipX>
+      )}
     </ChakraBox>
   )
 }

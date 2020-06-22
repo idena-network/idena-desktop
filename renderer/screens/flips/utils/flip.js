@@ -217,6 +217,8 @@ export async function publishFlip({
   orderPermutations,
   hint,
 }) {
+  if (images.some(x => !x)) throw new Error('You must use 4 images for a flip')
+
   const flips = global.flipStore.getFlips()
 
   if (
