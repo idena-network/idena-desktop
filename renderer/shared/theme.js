@@ -184,7 +184,7 @@ export const uiTheme = {
       700: '#447ceb',
     },
     xblack: {
-      '016': 'rgb(0 0 0 /0.2)',
+      '016': 'rgb(0 0 0 /0.16)',
       '080': 'rgb(0 0 0 /0.8)',
     },
     xwhite: {
