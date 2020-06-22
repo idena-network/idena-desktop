@@ -999,10 +999,10 @@ export function CommunityTranslations({
       : wordIdx
 
   return (
-    <Stack spacing={8}>
+    <Stack spacing={isOpen ? 8 : 0}>
       <IconButton2
         icon="community"
-        color="brandFray.500"
+        color="brandGray.500"
         px={0}
         _hover={{background: 'transparent'}}
         onClick={onToggle}
