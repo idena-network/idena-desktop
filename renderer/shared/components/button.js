@@ -150,6 +150,10 @@ const BaseButton = React.forwardRef((props, ref) => (
     px={4}
     py="3/2"
     rounded="md"
+    _disabled={{
+      bg: 'gray.300',
+      color: 'rgb(150 153 158)',
+    }}
     {...props}
   />
 ))
@@ -182,6 +186,12 @@ export function SecondaryButton(props) {
         boxShadow:
           '0 0 1px 2px rgba(88, 144, 255, .75), 0 1px 1px rgba(0, 0, 0, .15)',
       }}
+      _disabled={{
+        bg: 'gray.50',
+        color: 'rgb(150 153 158)',
+      }}
+      // eslint-disable-next-line react/destructuring-assignment
+      disabled={props.isDisabled}
       {...props}
     />
   )

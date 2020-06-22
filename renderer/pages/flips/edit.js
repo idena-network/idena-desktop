@@ -263,7 +263,10 @@ export default function EditFlipPage() {
         </Flex>
         <FlipMasterFooter>
           {not('keywords') && (
-            <SecondaryButton onClick={() => send('PREV')}>
+            <SecondaryButton
+              isDisabled={is('images.painting')}
+              onClick={() => send('PREV')}
+            >
               {t('Previous step')}
             </SecondaryButton>
           )}

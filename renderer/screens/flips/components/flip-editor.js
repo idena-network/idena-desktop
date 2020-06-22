@@ -553,6 +553,10 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
         }
       }
     }
+
+    return () => {
+      mousetrap.reset()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorRefs, src, idx])
 
