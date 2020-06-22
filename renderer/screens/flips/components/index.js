@@ -490,14 +490,13 @@ export function FlipKeywordTranslationSwitch({
   locale,
   onSwitchLocale,
 }) {
-  const hasTranslations = keywords.translations.reduce(
-    (acc, {length}) => acc + length,
-    0
-  )
+  const hasBothTranslations =
+    keywords.translations.reduce((acc, {length}) => acc + length, 0) > 1
+
   return (
     <Stack spacing="30px">
       <FlipKeywordPair>
-        {hasTranslations &&
+        {hasBothTranslations &&
           showTranslation &&
           keywords.translations.map(([{id, name, desc}]) => (
             <FlipKeyword key={id}>
@@ -515,7 +514,7 @@ export function FlipKeywordTranslationSwitch({
       </FlipKeywordPair>
 
       <Stack isInline spacing={1} align="center">
-        {hasTranslations && (
+        {hasBothTranslations && (
           <IconButton2
             icon="switch"
             _hover={{background: 'transparent'}}
@@ -526,7 +525,7 @@ export function FlipKeywordTranslationSwitch({
         )}
         {showTranslation || (
           <>
-            {hasTranslations ? (
+            {hasBothTranslations ? (
               <Divider
                 orientation="vertical"
                 borderColor="gray.300"
