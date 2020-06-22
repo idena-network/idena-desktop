@@ -489,13 +489,14 @@ export function FlipKeywordTranslationSwitch({
   showTranslation,
   locale,
   onSwitchLocale,
+  isInline = true,
 }) {
   const hasBothTranslations =
     keywords.translations.reduce((acc, {length}) => acc + length, 0) > 1
 
   return (
-    <Stack spacing="30px">
-      <FlipKeywordPair>
+    <Stack spacing={rem(30)}>
+      <FlipKeywordPair isInline={isInline} spacing={isInline ? 10 : rem(15)}>
         {hasBothTranslations &&
           showTranslation &&
           keywords.translations.map(([{id, name, desc}]) => (
@@ -810,6 +811,7 @@ export function FlipSubmitStep({
                 showTranslation={showTranslation}
                 locale={locale}
                 onSwitchLocale={onSwitchLocale}
+                isInline={false}
               />
             ) : (
               <FlipKeyword>
@@ -1012,7 +1014,7 @@ export function CommunityTranslations({
                   align="center"
                   justify="center"
                   bg={ups < 0 ? 'red.010' : 'green.010'}
-                  color="green.500"
+                  color={ups < 0 ? 'red.500' : 'green.500'}
                   fontWeight={500}
                   rounded="md"
                   minW={12}
