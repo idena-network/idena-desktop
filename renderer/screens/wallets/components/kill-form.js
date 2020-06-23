@@ -1,10 +1,10 @@
 import React from 'react'
-import {rem, margin, padding} from 'polished'
+import {margin, padding} from 'polished'
 import PropTypes from 'prop-types'
 import {FiLoader} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
 
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import {
   Box,
   Text,

@@ -1,29 +1,25 @@
 import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position} from 'polished'
-import {
-  FaGoogle,
-  FaCircle,
-  FaPaste,
-  FaRegFolder,
-  FaPencilAlt,
-  FaEraser,
-  FaRegTrashAlt,
-} from 'react-icons/fa'
 import Jimp from 'jimp'
-
-import {MdAddToPhotos, MdCrop, MdUndo, MdRedo} from 'react-icons/md'
 
 import {useTranslation} from 'react-i18next'
 import mousetrap from 'mousetrap'
+import {
+  Box as ChakraBox,
+  Stack,
+  VisuallyHidden,
+  IconButton as ChakraIconButton,
+  Divider,
+  Icon,
+} from '@chakra-ui/core'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
 
 import {useInterval} from '../../../shared/hooks/use-interval'
-import {IconButton} from '../../../shared/components/button'
-import {Box, Absolute, Input} from '../../../shared/components'
-import Divider from '../../../shared/components/divider'
+import {Box, Absolute} from '../../../shared/components'
+import {TooltipX, Tooltip} from '../../../shared/components/tooltip'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {resizing, imageResize} from '../../../shared/utils/img'
@@ -93,7 +89,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   const [brush, setBrush] = useState(20)
   const [brushColor, setBrushColor] = useState('ff6666dd')
   const [showColorPicker, setShowColorPicker] = useState(false)
-  const [showArrowHint, setShowArrowHint] = useState(src === null && idx === 0)
+  const [showArrowHint, setShowArrowHint] = useState(!src && idx === 0)
 
   // Editors
   const editorRefs = useRef([
@@ -509,15 +505,15 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       })
     }
 
-    const contaiterEl = document.querySelectorAll(
+    const containerEl = document.querySelectorAll(
       '.tui-image-editor-canvas-container'
     )[idx]
 
-    const contaiterCanvas = document.querySelectorAll('.lower-canvas')[idx]
+    const containerCanvas = document.querySelectorAll('.lower-canvas')[idx]
 
-    if (contaiterEl) {
-      contaiterEl.parentElement.style.height = '330px'
-      contaiterEl.addEventListener('contextmenu', e => {
+    if (containerEl) {
+      containerEl.parentElement.style.height = rem(328)
+      containerEl.addEventListener('contextmenu', e => {
         setContextMenuCursor({x: e.layerX, y: e.layerY})
         setShowContextMenu(true)
         setRightMenuPanel(RightMenu.None)
@@ -528,8 +524,8 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       })
     }
 
-    if (contaiterCanvas) {
-      contaiterCanvas.style.borderRadius = rem(12)
+    if (containerCanvas) {
+      containerCanvas.style.borderRadius = rem(8)
     }
 
     const newEditor =
@@ -556,6 +552,10 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           })
         }
       }
+    }
+
+    return () => {
+      mousetrap.reset()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorRefs, src, idx])
@@ -629,15 +629,12 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
             />
           )}
 
-          <div
-            style={{
-              paddingTop: '0.5px',
-              paddingLeft: '0.5px',
-              width: '442px',
-              height: '333px',
-              border: 'solid 1px rgba(83, 86, 92, 0.16)',
-              borderRadius: rem(12),
-            }}
+          <ChakraBox
+            h={rem(IMAGE_HEIGHT)}
+            w={rem(IMAGE_WIDTH)}
+            border="1px"
+            borderColor="brandGray.016"
+            rounded="lg"
           >
             <ImageEditor
               key={idx}
@@ -645,32 +642,23 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
               cssMaxHeight={IMAGE_HEIGHT}
               cssMaxWidth={IMAGE_WIDTH}
               selectionStyle={{
-                cornerSize: 10,
+                cornerSize: 8,
                 rotatingPointOffset: 20,
                 lineWidth: '1',
-                cornerColor: '#ffffff',
-                cornerStrokeColor: '#000000',
+                cornerColor: theme.colors.white,
+                cornerStrokeColor: theme.colors.primary,
                 transparentCorners: false,
-                borderColor: `${theme.colors.primary}`,
+                borderColor: theme.colors.primary,
               }}
               usageStatistics={false}
             />
-          </div>
+          </ChakraBox>
 
           {bottomMenuPanel === BottomMenu.Main && (
-            <Flex
-              // justify="space-between"
-              align="center"
-              css={{marginTop: rem(10)}}
-            >
-              <IconButton
+            <Stack isInline align="center" spacing={3} mt={6}>
+              <FlipEditorIcon
                 tooltip={t('Search on Google')}
-                icon={
-                  <FaGoogle
-                    color={theme.colors.primary2}
-                    fontSize={theme.fontSizes.medium16}
-                  />
-                }
+                icon="google"
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
                     setRightMenuPanel(RightMenu.None)
@@ -681,7 +669,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                     id: `google-search-img`,
                   })
                 }}
-              ></IconButton>
+              />
 
               <ArrowHint
                 visible={showArrowHint}
@@ -689,14 +677,9 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                 leftHanded
               />
 
-              <IconButton
+              <FlipEditorIcon
                 tooltip={t('Select file')}
-                icon={
-                  <FaRegFolder
-                    color={theme.colors.primary2}
-                    fontSize={rem(20)}
-                  />
-                }
+                icon="folder"
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
                     setRightMenuPanel(RightMenu.None)
@@ -704,16 +687,20 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   setInsertImageMode(INSERT_BACKGROUND_IMAGE)
                   uploaderRef.current.click()
                 }}
-              ></IconButton>
+              />
+              <VisuallyHidden>
+                <input
+                  id="file"
+                  type="file"
+                  accept="image/*"
+                  ref={uploaderRef}
+                  onChange={handleUpload}
+                />
+              </VisuallyHidden>
 
-              <IconButton
+              <FlipEditorIcon
                 tooltip={t('Add image')}
-                icon={
-                  <MdAddToPhotos
-                    color={theme.colors.primary2}
-                    fontSize={theme.fontSizes.large}
-                  />
-                }
+                icon="add-image"
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
                     setRightMenuPanel(RightMenu.None)
@@ -721,57 +708,31 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   editors[idx].stopDrawingMode()
                   setInsertImageMenuOpen(!isInsertImageMenuOpen)
                 }}
-              ></IconButton>
+              />
 
-              <Divider vertical />
+              <FlipEditorToolbarDivider />
 
-              <IconButton
+              <FlipEditorIcon
+                icon="undo"
                 tooltip={`${t('Undo')} (${global.isMac ? 'Cmd+Z' : 'Ctrl+Z'})`}
-                disabled={editors[idx] && editors[idx].isEmptyUndoStack()}
-                icon={
-                  <MdUndo
-                    color={theme.colors.primary2}
-                    fontSize={theme.fontSizes.medium}
-                  />
-                }
-                onClick={() => {
-                  if (rightMenuPanel === RightMenu.Erase) {
-                    setRightMenuPanel(RightMenu.None)
-                  }
-                  handleUndo()
-                }}
-              ></IconButton>
-
-              <IconButton
+                isDisabled={editors[idx] && editors[idx].isEmptyUndoStack()}
+                onClick={handleUndo}
+              />
+              <FlipEditorIcon
+                icon="redo"
                 tooltip={`${t('Redo')} (${
                   global.isMac ? 'Cmd+Shift+Z' : 'Ctrl+Shift+Z'
                 })`}
-                disabled={editors[idx] && editors[idx].isEmptyRedoStack()}
-                icon={
-                  <MdRedo
-                    color={theme.colors.primary2}
-                    fontSize={theme.fontSizes.medium}
-                  />
-                }
-                onClick={() => {
-                  if (rightMenuPanel === RightMenu.Erase) {
-                    setRightMenuPanel(RightMenu.None)
-                  }
-                  handleRedo()
-                }}
-              ></IconButton>
+                isDisabled={editors[idx] && editors[idx].isEmptyUndoStack()}
+                onClick={handleRedo}
+              />
 
-              <Divider vertical />
+              <FlipEditorToolbarDivider />
 
-              <IconButton
-                disabled={src === null}
+              <FlipEditorIcon
                 tooltip={t('Crop image')}
-                icon={
-                  <MdCrop
-                    color={theme.colors.primary2}
-                    fontSize={theme.fontSizes.large}
-                  />
-                }
+                icon="crop"
+                isDisabled={src === null}
                 onClick={() => {
                   editors[idx].startDrawingMode('CROPPER')
                   if (rightMenuPanel === RightMenu.Erase) {
@@ -779,23 +740,14 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   }
                   setBottomMenuPanel(BottomMenu.Crop)
                 }}
-              ></IconButton>
+              />
 
               <ArrowHint visible={showArrowHint} hint={t('Or start drawing')} />
 
-              <IconButton
+              <FlipEditorIcon
                 tooltip={t('Draw')}
-                active={rightMenuPanel === RightMenu.FreeDrawing}
-                icon={
-                  <FaPencilAlt
-                    color={
-                      rightMenuPanel === RightMenu.FreeDrawing
-                        ? null
-                        : theme.colors.primary2
-                    }
-                    fontSize={theme.fontSizes.medium}
-                  />
-                }
+                isActive={rightMenuPanel === RightMenu.FreeDrawing}
+                icon="draw"
                 onClick={() => {
                   setShowArrowHint(false)
                   const editor = editors[idx]
@@ -807,23 +759,15 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                     editor.startDrawingMode('FREE_DRAWING')
                   }
                 }}
-              ></IconButton>
+              />
 
-              <IconButton
-                disabled={!activeObjectUrl}
+              <FlipEditorIcon
+                isDisabled={!activeObjectUrl}
                 tooltip={
                   activeObjectUrl ? t('Erase') : t('Select image to erase')
                 }
-                icon={
-                  <FaEraser
-                    fontSize={theme.fontSizes.medium}
-                    color={
-                      rightMenuPanel === RightMenu.Erase
-                        ? null
-                        : theme.colors.primary2
-                    }
-                  />
-                }
+                isActive={rightMenuPanel === RightMenu.Erase}
+                icon="eraser"
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
                     setRightMenuPanel(RightMenu.None)
@@ -833,36 +777,18 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                     setBottomMenuPanel(BottomMenu.Erase)
                   }
                 }}
-              ></IconButton>
+              />
 
-              <IconButton
+              <FlipEditorToolbarDivider />
+
+              <FlipEditorIcon
                 tooltip={t('Clear')}
-                icon={
-                  <FaRegTrashAlt
-                    color={theme.colors.danger}
-                    fontSize={theme.fontSizes.medium}
-                  />
-                }
-                onClick={() => {
-                  handleOnClear()
-                }}
-              ></IconButton>
-
-              <Box>
-                <Input
-                  ref={uploaderRef}
-                  type="file"
-                  accept="image/*"
-                  style={{
-                    display: 'none',
-                    border: 'none',
-                    paddingRight: 0,
-                    width: rem(230),
-                  }}
-                  onChange={handleUpload}
-                />
-              </Box>
-            </Flex>
+                icon="flip-editor-delete"
+                color="red.500"
+                _hover={{color: 'red.500'}}
+                onClick={handleOnClear}
+              />
+            </Stack>
           )}
 
           {bottomMenuPanel === BottomMenu.Crop && (
@@ -936,12 +862,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                             })
                           }}
                           disabled={false}
-                          icon={
-                            <FaGoogle
-                              fontSize={theme.fontSizes.medium16}
-                              style={{marginTop: rem(3)}}
-                            />
-                          }
+                          icon={<Icon size={5} name="google" />}
                         >
                           {t('Search on Google')}
                         </MenuItem>
@@ -952,7 +873,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                             uploaderRef.current.click()
                           }}
                           disabled={false}
-                          icon={<FaRegFolder fontSize={rem(20)} />}
+                          icon={<Icon size={5} name="folder" />}
                         >
                           {t('Select file')}
                         </MenuItem>
@@ -963,7 +884,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                           }}
                           disabled={false}
                           danger={false}
-                          icon={<FaPaste fontSize={rem(20)} />}
+                          icon={<Icon size={5} name="clipboard" />}
                         >
                           {t('Paste image')}
                         </MenuItem>
@@ -978,7 +899,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
 
         {(rightMenuPanel === RightMenu.FreeDrawing ||
           rightMenuPanel === RightMenu.Erase) && (
-          <Box css={{marginTop: rem(10), marginLeft: rem(10)}}>
+          <Stack align="center" ml={6}>
             <ColorPicker
               color={brushColor}
               visible={showColorPicker}
@@ -993,23 +914,16 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
 
             {rightMenuPanel === RightMenu.FreeDrawing && (
               <>
-                <IconButton
-                  icon={
-                    <FaCircle
-                      color={`#${brushColor}`}
-                      style={{
-                        fontSize: theme.fontSizes.medium,
-                        padding: rem(0),
-                        border: '1px solid #d2d4d9',
-                        borderRadius: '50%',
-                      }}
-                    />
-                  }
-                  onClick={() => {
-                    setShowColorPicker(!showColorPicker)
-                  }}
-                ></IconButton>
-                <Divider />
+                <ChakraBox
+                  bg={`#${brushColor}`}
+                  border="1px"
+                  borderColor="brandGray.016"
+                  rounded="full"
+                  size={4}
+                  onClick={() => setShowColorPicker(!showColorPicker)}
+                />
+
+                <Divider borderColor="gray.300" w={6} />
               </>
             )}
 
@@ -1021,7 +935,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                 editors[idx].setBrush({width: b, color: brushColor})
               }}
             ></Brushes>
-          </Box>
+          </Stack>
         )}
       </Flex>
     </div>
@@ -1034,6 +948,46 @@ FlipEditor.propTypes = {
   visible: PropTypes.bool,
   onChange: PropTypes.func,
   onChanging: PropTypes.func,
+}
+
+// eslint-disable-next-line react/prop-types
+function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
+  const icon = (
+    <ChakraIconButton
+      aria-label={tooltip}
+      isDisabled={isDisabled}
+      bg={isActive ? 'gray.50' : 'unset'}
+      color={isActive ? 'brandBlue.500' : 'unset'}
+      fontSize={rem(20)}
+      size={6}
+      rounded="md"
+      p="1/2"
+      _hover={{color: isDisabled ? 'inherit' : 'brandBlue.500'}}
+      _active={{bg: 'transparent'}}
+      {...props}
+    />
+  )
+  return (
+    <ChakraBox mr={mr}>
+      {isDisabled ? (
+        <Tooltip content={tooltip}>{icon}</Tooltip>
+      ) : (
+        <TooltipX label={tooltip}>{icon}</TooltipX>
+      )}
+    </ChakraBox>
+  )
+}
+
+function FlipEditorToolbarDivider(props) {
+  return (
+    <Divider
+      orientation="vertical"
+      borderColor="gray.300"
+      h={5}
+      mx={0}
+      {...props}
+    />
+  )
 }
 
 export default FlipEditor

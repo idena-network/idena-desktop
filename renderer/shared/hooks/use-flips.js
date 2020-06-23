@@ -1,5 +1,4 @@
 import React, {useState, useEffect, useCallback} from 'react'
-import {encode} from 'rlp'
 import * as api from '../api/dna'
 import {useEpochState} from '../providers/epoch-context'
 import {useInterval} from './use-interval'
@@ -11,6 +10,7 @@ import {FlipType} from '../types'
 import {
   didArchiveFlips,
   markFlipsArchived,
+  flipToHex,
 } from '../../screens/flips/utils/flip'
 
 const {
@@ -23,73 +23,7 @@ const {
 const FLIP_MAX_SIZE = 1024 * 1024 // 1 mb
 const DEFAULT_ORDER = [0, 1, 2, 3]
 
-const FLIP_LENGTH = DEFAULT_ORDER.length
-
-function perm(maxValue) {
-  const permArray = new Array(maxValue)
-  for (let i = 0; i < maxValue; i += 1) {
-    permArray[i] = i
-  }
-  for (let i = maxValue - 1; i >= 0; i -= 1) {
-    const randPos = Math.floor(i * Math.random())
-    const tmpStore = permArray[i]
-    permArray[i] = permArray[randPos]
-    permArray[randPos] = tmpStore
-  }
-  return permArray
-}
-
-function shufflePics(pics, shuffledOrder, seed) {
-  const newPics = []
-  const cache = {}
-  const firstOrder = new Array(FLIP_LENGTH)
-
-  seed.forEach((value, idx) => {
-    newPics.push(pics[value])
-    if (value < FLIP_LENGTH) firstOrder[value] = idx
-    cache[value] = newPics.length - 1
-  })
-
-  const secondOrder = shuffledOrder.map(value => cache[value])
-
-  return {
-    pics: newPics,
-    orders:
-      Math.random() < 0.5
-        ? [firstOrder, secondOrder]
-        : [secondOrder, firstOrder],
-  }
-}
-
-function toHex(pics, order) {
-  const seed = perm(FLIP_LENGTH)
-  const shuffled = shufflePics(pics, order, seed)
-
-  const rlp = encode([
-    shuffled.pics.map(src =>
-      Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
-    ),
-    shuffled.orders,
-  ])
-
-  const publicRlp = encode([
-    shuffled.pics
-      .slice(0, 2)
-      .map(src =>
-        Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
-      ),
-  ])
-
-  const privateRlp = encode([
-    shuffled.pics
-      .slice(2)
-      .map(src =>
-        Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
-      ),
-    shuffled.orders,
-  ])
-  return [rlp, publicRlp, privateRlp].map(x => `0x${x.toString('hex')}`)
-}
+export const FLIP_LENGTH = DEFAULT_ORDER.length
 
 function useFlips() {
   const [flips, setFlips] = useState([])
@@ -202,7 +136,7 @@ function useFlips() {
         }
       }
 
-      const [hex, publicHex, privateHex] = toHex(compressedPics, order)
+      const [hex, publicHex, privateHex] = flipToHex(compressedPics, order)
       if (publicHex.length + privateHex.length > 2 * FLIP_MAX_SIZE) {
         return {
           error: {message: 'Flip is too large'},

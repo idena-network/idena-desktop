@@ -1,10 +1,10 @@
 import React from 'react'
 import Error from 'next/error'
-import {rem, margin} from 'polished'
+import {margin} from 'polished'
 import {useTranslation} from 'react-i18next'
 import Layout from '../shared/components/layout'
 import {Button} from '../shared/components'
-import theme from '../shared/theme'
+import theme, {rem} from '../shared/theme'
 
 // make ssr happy
 global.logger = global.logger || {
@@ -66,20 +66,19 @@ function MyError({statusCode, hasGetInitialPropsRun, err}) {
             flex: 1;
           }
           h2 {
-            font-size: ${rem(18, theme.fontSizes.base)};
+            font-size: ${rem(18)};
             font-weight: 500;
-            margin: ${margin(0, 0, rem(40, theme.fontSizes.base))};
+            margin: ${margin(0, 0, rem(40))};
             word-break: break-all;
           }
           section > div:nth-child(2) > section {
             background: rgb(255, 102, 102);
-            border-radius: ${rem(9, theme.fontSizes.base)};
+            border-radius: ${rem(9)};
             font-size: ${rem(14, 13)};
             line-height: ${rem(20, 13)};
-            margin-top: ${rem(40, theme.fontSizes.base)};
-            padding: ${rem(18, theme.fontSizes.base)}
-              ${rem(24, theme.fontSizes.base)};
-            max-width: ${rem(480, theme.fontSizes.base)};
+            margin-top: ${rem(40)};
+            padding: ${rem(18)} ${rem(24)};
+            max-width: ${rem(480)};
           }
         `}</style>
       </article>

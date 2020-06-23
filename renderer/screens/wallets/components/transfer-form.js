@@ -1,9 +1,9 @@
 import React, {useEffect} from 'react'
-import {rem, margin, padding, wordWrap} from 'polished'
+import {margin, padding, wordWrap} from 'polished'
 import PropTypes from 'prop-types'
 import {FiLoader} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import {
   Box,
   SubHeading,

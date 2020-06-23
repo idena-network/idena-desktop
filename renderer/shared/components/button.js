@@ -1,6 +1,8 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {transparentize, darken} from 'polished'
+import {Button as ChakraButton, PseudoBox, Icon} from '@chakra-ui/core'
 import theme, {rem} from '../theme'
 import {Tooltip} from './tooltip'
 
@@ -21,7 +23,7 @@ function Button({size, disabled, danger, variant = 'primary', css, ...props}) {
           border-radius: 6px;
           color: ${color};
           cursor: pointer;
-          font-size: ${rem(size)};
+          font-size: ${size};
           padding: ${rem(6)} ${rem(16)};
           outline: none;
           transition: all 0.3s ease;
@@ -63,7 +65,7 @@ function FlatButton({size, color, disabled, css, ...props}) {
           border-radius: 6px;
           color: ${color};
           cursor: ${disabled ? 'not-allowed' : 'pointer'};
-          font-size: ${rem(size)};
+          font-size: ${size};
           padding: 0;
           outline: none;
           ${disabled && `opacity: 0.5`};
@@ -138,6 +140,79 @@ IconButtonRef.propTypes = {
   disabled: PropTypes.bool,
   tooltip: PropTypes.node,
   danger: PropTypes.bool,
+}
+
+const BaseButton = React.forwardRef((props, ref) => (
+  <ChakraButton
+    ref={ref}
+    fontWeight={500}
+    h={8}
+    px={4}
+    py="3/2"
+    rounded="md"
+    _disabled={{
+      bg: 'gray.300',
+      color: 'rgb(150 153 158)',
+    }}
+    {...props}
+  />
+))
+BaseButton.displayName = 'BaseButton'
+
+export const PrimaryButton = React.forwardRef((props, ref) => (
+  <BaseButton ref={ref} variantColor="brandBlue" color="white" {...props} />
+))
+PrimaryButton.displayName = 'PrimaryButton'
+
+export function SecondaryButton(props) {
+  return (
+    <PseudoBox
+      as="button"
+      height={8}
+      transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+      fontWeight={500}
+      h={8}
+      px={4}
+      py="3/2"
+      rounded="md"
+      bg="brandBlue.10"
+      color="brandBlue.500"
+      _hover={{bg: 'brandBlue.20'}}
+      _active={{
+        bg: 'brandBlue.50',
+        transform: 'scale(0.98)',
+      }}
+      _focus={{
+        boxShadow:
+          '0 0 1px 2px rgba(88, 144, 255, .75), 0 1px 1px rgba(0, 0, 0, .15)',
+      }}
+      _disabled={{
+        bg: 'gray.50',
+        color: 'rgb(150 153 158)',
+      }}
+      // eslint-disable-next-line react/destructuring-assignment
+      disabled={props.isDisabled}
+      {...props}
+    />
+  )
+}
+
+export function IconButton2({icon, children, ...props}) {
+  return (
+    <ChakraButton
+      variant="ghost"
+      variantColor="blue"
+      fontWeight={500}
+      h={8}
+      px={2}
+      py="3/2"
+      justifyContent="flex-start"
+      {...props}
+    >
+      <Icon name={icon} size={5} mr={2} />
+      {children}
+    </ChakraButton>
+  )
 }
 
 export {FlatButton, IconButtonRef as IconButton}

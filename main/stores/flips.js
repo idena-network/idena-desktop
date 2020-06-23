@@ -42,19 +42,13 @@ function updateDraft(draft) {
 
 function deleteDraft(id) {
   const drafts = store.get(keyName, [])
-  const deletingIdx = store
-    .get(keyName, [])
-    .findIndex(({id: currId}) => currId === id)
-
-  if (deletingIdx > -1) {
-    const nextDrafts = [
-      ...drafts.slice(0, deletingIdx),
-      ...drafts.slice(deletingIdx + 1),
-    ]
-    store.set(keyName, nextDrafts)
-    return nextDrafts
-  }
-  return drafts
+  store.set(
+    keyName,
+    drafts.map(flip =>
+      flip.id === id ? flip : {...flip, type: 'Removed', images: null}
+    )
+  )
+  return id
 }
 
 function clear() {

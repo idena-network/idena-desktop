@@ -2,6 +2,11 @@
 import React from 'react'
 import theme, {rem} from '../theme'
 
+// font-size: 13px;
+// font-family: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+//   Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Helvetica,
+//   Arial, sans-serif;
+
 // eslint-disable-next-line react/display-name
 export default () => (
   <style jsx global>{`
@@ -9,10 +14,6 @@ export default () => (
     @import url('/static/fonts/inter.css');
     html {
       box-sizing: border-box;
-      font-size: 13px;
-      font-family: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-        Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Helvetica,
-        Arial, sans-serif;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -24,7 +25,7 @@ export default () => (
     }
     body {
       box-sizing: border-box;
-      font-size: 1rem;
+      font-size: ${rem(13)};
       margin: 0;
       padding: 0;
       min-height: 100vh;
@@ -34,7 +35,7 @@ export default () => (
     *::after {
       box-sizing: inherit;
     }
-    body > div,
+    body > div:first-child,
     main {
       min-height: 100vh;
     }

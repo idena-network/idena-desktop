@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {padding, rem, margin, wordWrap} from 'polished'
+import {padding, margin, wordWrap} from 'polished'
 import {FiLoader} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
 import {
@@ -12,7 +12,7 @@ import {
   Button,
 } from '../../../shared/components'
 import Avatar from '../../../shared/components/avatar'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'

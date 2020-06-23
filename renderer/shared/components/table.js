@@ -1,8 +1,7 @@
 /* eslint-disable react/jsx-curly-brace-presence */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem} from 'polished'
-import theme from '../theme'
+import theme, {rem} from '../theme'
 
 export function Table({children, ...props}) {
   return (

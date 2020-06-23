@@ -39,6 +39,7 @@ function Sidebar() {
           flex-direction: column;
           justify-content: space-between;
           height: 100vh;
+          overflow: hidden;
           padding: ${rem(8)} ${rem(16)};
           width: ${rem(200)};
           position: relative;
@@ -114,7 +115,7 @@ function NodeStatus() {
             </Box>
           )}
 
-          <Text color={color} fontWeight={500} css={{lineHeight: rem(18)}}>
+          <Text color={color} fontWeight={500} lineHeight={rem(18)}>
             {text}
           </Text>
         </Flex>
@@ -167,7 +168,10 @@ function Nav() {
         >
           {t('Wallets')}
         </NavItem>
-        <NavItem href="/flips" icon={<i className="icon icon--menu_gallery" />}>
+        <NavItem
+          href="/flips/list"
+          icon={<i className="icon icon--menu_gallery" />}
+        >
           {t('Flips')}
         </NavItem>
         <NavItem

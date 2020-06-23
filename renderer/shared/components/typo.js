@@ -81,7 +81,7 @@ SubHeading.propTypes = {
   children: PropTypes.node,
 }
 
-export function Text({color, fontSize, fontWeight, css, ...props}) {
+export function Text({color, fontSize, fontWeight, lineHeight, css, ...props}) {
   return (
     <>
       <span {...props} style={css} />
@@ -91,6 +91,7 @@ export function Text({color, fontSize, fontWeight, css, ...props}) {
           color: ${color};
           font-size: ${fontSize};
           font-weight: ${fontWeight};
+          line-height: ${lineHeight};
         }
       `}</style>
     </>
@@ -105,6 +106,7 @@ Text.propTypes = {
   color: PropTypes.string,
   fontSize: PropTypes.string,
   fontWeight: PropTypes.number,
+  lineHeight: PropTypes.string,
   // eslint-disable-next-line react/forbid-prop-types
   css: PropTypes.object,
 }

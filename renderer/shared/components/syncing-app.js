@@ -1,5 +1,6 @@
 import {margin} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {Progress} from '@chakra-ui/core'
 import theme, {rem} from '../theme'
 import {useChainState} from '../providers/chain-context'
 import {useIdentityState} from '../providers/identity-context'
@@ -103,7 +104,15 @@ function SyncingIdentity() {
             <span>{t('Peers connected')}:</span> {(peers || []).length}
           </div>
         </div>
-        <progress value={currentBlock} max={highestBlock} />
+        <Progress
+          value={currentBlock}
+          max={highestBlock}
+          rounded="2px"
+          bg="xblack.016"
+          color="brandBlue"
+          h={1}
+          mt="11px"
+        />
       </section>
       {wrongTime && (
         <section>

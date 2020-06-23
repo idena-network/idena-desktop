@@ -42,3 +42,21 @@ export function resizing(
   }
   return {width, height}
 }
+
+// https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
+const imageTypes = [
+  'image/apng',
+  'image/bmp',
+  'image/gif',
+  'image/jpeg',
+  'image/pjpeg',
+  'image/png',
+  'image/svg+xml',
+  'image/tiff',
+  'image/webp',
+  'image/x-icon',
+]
+
+export function hasImageType(file) {
+  return imageTypes.includes(file.type)
+}

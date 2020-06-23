@@ -1,11 +1,10 @@
 import React, {useEffect} from 'react'
-import {rem} from 'polished'
 import {FiChevronRight} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
 
-import theme from '../../shared/theme'
+import theme, {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
-import {Box, Drawer, PageTitle} from '../../shared/components'
+import {Box, Drawer, PageTitle, SubHeading} from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import Actions from '../../shared/components/actions'
 import IconLink from '../../shared/components/icon-link'
@@ -98,18 +97,8 @@ export default function Index() {
                   onWithdrawStake={() => setIsWithdrawStakeFormOpen(true)}
                 />
               </div>
-              <h3
-                style={{
-                  fontWeight: 500,
-                  fontSize: rem(24),
-                  letterSpacing: 0,
-                  marginBottom: 0,
-                  marginTop: 0,
-                  color: theme.colors.primary2,
-                }}
-              >
-                {t('Recent transactions')}
-              </h3>
+
+              <SubHeading>{t('Recent transactions')}</SubHeading>
 
               <FlatButton
                 color={theme.colors.primary}

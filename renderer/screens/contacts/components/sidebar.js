@@ -1,11 +1,11 @@
 /* eslint-disable no-nested-ternary */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem, padding, border, margin, ellipsis, backgrounds} from 'polished'
+import {padding, border, margin, ellipsis, backgrounds} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {Box, Text, Input, Button} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
-import theme from '../../../shared/theme'
+import theme, {rem} from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import Avatar from '../../../shared/components/avatar'
 import {useInviteState} from '../../../shared/providers/invite-context'
@@ -164,15 +164,11 @@ function InviteCard({
         }
         .card__title {
           color: ${theme.colors.text};
-          font-size: ${rem(15)};
-          line-height: ${rem(15)};
           font-weight: ${theme.fontWeights.medium};
           display: block;
         }
         .card__hint {
           color: ${theme.colors.muted};
-          font-size: ${rem(13)};
-          line-height: ${rem(10)};
           font-weight: ${theme.fontWeights.medium};
         }
       `}</style>

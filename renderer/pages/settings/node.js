@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, {useEffect, useReducer, useRef, useState} from 'react'
-import {margin, rem, padding, borderRadius} from 'polished'
+import {margin, padding, borderRadius} from 'polished'
 import {useTranslation} from 'react-i18next'
 import Ansi from 'ansi-to-react'
 import {FiEye, FiEyeOff} from 'react-icons/fi'
@@ -14,7 +14,7 @@ import {
   Text,
   SubHeading,
 } from '../../shared/components'
-import theme from '../../shared/theme'
+import theme, {rem} from '../../shared/theme'
 import {FlatButton} from '../../shared/components/button'
 import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'
@@ -140,12 +140,7 @@ function NodeSettings() {
           </Box>
           <div
             style={{
-              ...margin(
-                0,
-                0,
-                0,
-                rem(theme.spacings.small12, theme.fontSizes.base)
-              ),
+              ...margin(0, 0, 0, rem(theme.spacings.small12)),
             }}
           >
             <strong>{t('Run built-in node')}</strong>
@@ -154,12 +149,7 @@ function NodeSettings() {
           {settings.runInternalNode && nodeFailed && (
             <div
               style={{
-                ...margin(
-                  0,
-                  0,
-                  0,
-                  rem(theme.spacings.small12, theme.fontSizes.base)
-                ),
+                ...margin(0, 0, 0, rem(theme.spacings.small12)),
               }}
             >
               <Text css={{color: theme.colors.warning}}>
@@ -189,12 +179,7 @@ function NodeSettings() {
           </Box>
           <div
             style={{
-              ...margin(
-                0,
-                0,
-                0,
-                rem(theme.spacings.small12, theme.fontSizes.base)
-              ),
+              ...margin(0, 0, 0, rem(theme.spacings.small12)),
             }}
           >
             <strong>{t('Connect to remote node')}</strong>

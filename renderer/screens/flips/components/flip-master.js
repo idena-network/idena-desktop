@@ -52,8 +52,6 @@ function FlipMaster({id, onClose}) {
     pics: [null, null, null, null],
     compressedPics: [null, null, null, null],
     editorIndexes: [0, 1, 2, 3],
-    nonSensePic: `https://placehold.it/480?text=5`,
-    nonSenseOrder: -1,
     order: Array.from({length: 4}, (_, i) => i),
     hint: getNextKeyWordsHint(flipKeyWordPairs, publishingFlips),
   })

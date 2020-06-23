@@ -866,7 +866,7 @@ export function ValidationSoonToast({validationStart}) {
 
   const [
     {
-      context: {duration, elapsed},
+      context: {duration},
     },
   ] = useMachine(timerMachine)
 
@@ -915,7 +915,7 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
 
   const [
     {
-      context: {duration, elapsed},
+      context: {duration},
     },
   ] = useMachine(timerMachine)
 

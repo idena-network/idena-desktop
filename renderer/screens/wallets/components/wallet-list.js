@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {rem} from 'polished'
+import {rem} from '../../../shared/theme'
 import WalletCard from './wallet-card'
 import Flex from '../../../shared/components/flex'
 

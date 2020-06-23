@@ -5,13 +5,7 @@ import {FaImage} from 'react-icons/fa'
 import {Box} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 
-function SubmitFlip({
-  compressedPics,
-  order,
-  nonSensePic,
-  nonSenseOrder,
-  submitFlipResult,
-}) {
+function SubmitFlip({compressedPics, order, submitFlipResult}) {
   return (
     <>
       <Box>
@@ -73,9 +67,7 @@ function SubmitFlip({
                 <Image
                   key={idx}
                   alt={`flip-${idx}`}
-                  src={
-                    idx === nonSenseOrder ? nonSensePic : compressedPics[idx]
-                  }
+                  src={idx === compressedPics[idx]}
                   style={style}
                 ></Image>
               )
@@ -143,8 +135,6 @@ function Image({src, style, children}) {
 SubmitFlip.propTypes = {
   compressedPics: PropTypes.arrayOf(PropTypes.string),
   order: PropTypes.arrayOf(PropTypes.number),
-  nonSensePic: PropTypes.string,
-  nonSenseOrder: PropTypes.number,
   submitFlipResult: PropTypes.string,
 }
 

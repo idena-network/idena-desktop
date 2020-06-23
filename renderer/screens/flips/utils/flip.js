@@ -1,9 +1,16 @@
+import {encode} from 'rlp'
 import dict from './words'
 import {capitalize} from '../../../shared/utils/string'
 import {
   loadPersistentStateValue,
   persistItem,
 } from '../../../shared/utils/persist'
+import {FlipType} from '../../../shared/types'
+import {areSame, areEual} from '../../../shared/utils/arr'
+import {submitFlip} from '../../../shared/api'
+
+export const FLIP_LENGTH = 4
+export const DEFAULT_FLIP_ORDER = [0, 1, 2, 3]
 
 /**
  * Composes hint for the flip
@@ -32,6 +39,18 @@ export function hasDataUrl(src) {
 }
 
 const randomIndex = currentIndex => Math.floor(Math.random() * currentIndex)
+
+export function getRandomKeywordPair() {
+  function getRandomInt(min, max) {
+    // eslint-disable-next-line no-param-reassign
+    min = Math.ceil(min)
+    // eslint-disable-next-line no-param-reassign
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min)) + min
+  }
+
+  return {id: 0, words: [getRandomInt(0, 3407), getRandomInt(0, 3407)]}
+}
 
 export function getRandomHint() {
   const nextIndex = randomIndex(dict.length)
@@ -75,7 +94,7 @@ export function getNextKeyWordsHint(
 ) {
   if (!flipKeyWordPairs || !flipKeyWordPairs.length) return getRandomHint()
 
-  const nexIdx =
+  const nextIdx =
     currId < 0
       ? 0
       : flipKeyWordPairs.indexOf(
@@ -83,9 +102,9 @@ export function getNextKeyWordsHint(
         ) + 1
 
   const nextKeyWordPair =
-    nexIdx >= flipKeyWordPairs.length
+    nextIdx >= flipKeyWordPairs.length
       ? flipKeyWordPairs[0]
-      : flipKeyWordPairs[nexIdx]
+      : flipKeyWordPairs[nextIdx]
 
   const isUsed =
     (nextKeyWordPair && nextKeyWordPair.used) ||
@@ -107,6 +126,13 @@ export function getNextKeyWordsHint(
   return getKeyWordsHint(flipKeyWordPairs, nextKeyWordPair.id)
 }
 
+export function isPendingKeywordPair(flips, id) {
+  return flips.find(
+    ({type, keywordPairId}) =>
+      type === FlipType.Publishing && keywordPairId === id
+  )
+}
+
 export function didArchiveFlips(epoch) {
   const persistedState = loadPersistentStateValue('flipArchive', epoch)
   if (persistedState) return persistedState.archived
@@ -120,4 +146,117 @@ export function markFlipsArchived(epoch) {
     archived: true,
     archivedAt: new Date().toISOString(),
   })
+}
+
+function perm(maxValue) {
+  const permArray = new Array(maxValue)
+  for (let i = 0; i < maxValue; i += 1) {
+    permArray[i] = i
+  }
+  for (let i = maxValue - 1; i >= 0; i -= 1) {
+    const randPos = Math.floor(i * Math.random())
+    const tmpStore = permArray[i]
+    permArray[i] = permArray[randPos]
+    permArray[randPos] = tmpStore
+  }
+  return permArray
+}
+
+function shufflePics(pics, shuffledOrder, seed) {
+  const newPics = []
+  const cache = {}
+  const firstOrder = new Array(FLIP_LENGTH)
+
+  seed.forEach((value, idx) => {
+    newPics.push(pics[value])
+    if (value < FLIP_LENGTH) firstOrder[value] = idx
+    cache[value] = newPics.length - 1
+  })
+
+  const secondOrder = shuffledOrder.map(value => cache[value])
+
+  return {
+    pics: newPics,
+    orders:
+      Math.random() < 0.5
+        ? [firstOrder, secondOrder]
+        : [secondOrder, firstOrder],
+  }
+}
+
+export function flipToHex(pics, order) {
+  const seed = perm(FLIP_LENGTH)
+  const shuffled = shufflePics(pics, order, seed)
+
+  const publicRlp = encode([
+    shuffled.pics
+      .slice(0, 2)
+      .map(src =>
+        Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
+      ),
+  ])
+
+  const privateRlp = encode([
+    shuffled.pics
+      .slice(2)
+      .map(src =>
+        Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0))
+      ),
+    shuffled.orders,
+  ])
+  return [publicRlp, privateRlp].map(x => `0x${x.toString('hex')}`)
+}
+
+export async function publishFlip({
+  keywordPairId,
+  pics,
+  compressedPics,
+  images = compressedPics || pics,
+  originalOrder,
+  order,
+  orderPermutations,
+  hint,
+}) {
+  if (images.some(x => !x)) throw new Error('You must use 4 images for a flip')
+
+  const flips = global.flipStore.getFlips()
+
+  if (
+    flips.some(
+      flip => flip.type === FlipType.Published && areSame(flip.images, images)
+    )
+  )
+    throw new Error('You already submitted this flip')
+
+  if (
+    areEual(
+      order,
+      Array.from({length: 4}, (_, idx) => idx)
+    )
+  )
+    throw new Error('You must shuffle flip before submit')
+
+  const [publicHex, privateHex] = flipToHex(
+    hint ? images : originalOrder.map(num => images[num]),
+    hint ? order : orderPermutations
+  )
+
+  if (publicHex.length + privateHex.length > 2 * 1024 * 1024)
+    throw new Error('Flip is too large')
+
+  const {result, error} = await submitFlip(publicHex, privateHex, keywordPairId)
+
+  if (error) {
+    let {message} = error
+
+    if (message.includes('candidate'))
+      message = `It's not allowed to submit flips with your identity status`
+
+    if (message.includes('ceremony'))
+      message = `Can not submit flip during the validation session`
+
+    throw new Error(message)
+  }
+
+  return result
 }
