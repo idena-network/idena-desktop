@@ -28,6 +28,8 @@ import {
   Collapse,
   Link,
   MenuDivider,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/core'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
@@ -1142,5 +1144,26 @@ export function VoteButton(props) {
       _hover={{bg: 'transparent'}}
       {...props}
     />
+  )
+}
+
+export function CommunityTranslationUnavailable() {
+  const {t} = useTranslation()
+  return (
+    <Box mt={4}>
+      <Alert
+        status="error"
+        bg="red.010"
+        borderWidth="1px"
+        borderColor="red.050"
+        fontWeight={500}
+        rounded="md"
+        px={3}
+        py={2}
+      >
+        <AlertIcon name="info" color="red.500" size={5} mr={3} />
+        {t('Community translation is not available')}
+      </Alert>
+    </Box>
   )
 }

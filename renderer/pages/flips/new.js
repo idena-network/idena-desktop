@@ -21,6 +21,7 @@ import {
   FlipEditorStep,
   FlipShuffleStep,
   FlipSubmitStep,
+  CommunityTranslationUnavailable,
 } from '../../screens/flips/components'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
@@ -119,6 +120,8 @@ export default function NewFlipPage() {
   const not = state => !current.matches({editing: state})
   const is = state => current.matches({editing: state})
 
+  const isOffline = is('keywords.loaded.fetchTranslationsFailed')
+
   return (
     <Layout syncing={syncing}>
       <Page p={0}>
@@ -174,47 +177,51 @@ export default function NewFlipPage() {
               {is('keywords') && (
                 <FlipStoryStep>
                   <FlipStepBody minH="180px">
-                    <FlipKeywordPanel>
-                      {is('keywords.loaded') && (
-                        <>
-                          <FlipKeywordTranslationSwitch
-                            keywords={keywords}
-                            showTranslation={showTranslation}
-                            locale={i18n.language}
-                            onSwitchLocale={() => send('SWITCH_LOCALE')}
-                          />
-                          {i18n.language.toUpperCase() !== 'EN' && (
-                            <>
-                              <Divider
-                                borderColor="gray.300"
-                                mx={-10}
-                                mt={4}
-                                mb={6}
-                              />
-                              <CommunityTranslations
-                                keywords={keywords}
-                                onVote={e => send('VOTE', e)}
-                                onSuggest={e => send('SUGGEST', e)}
-                                isOpen={isCommunityTranslationsExpanded}
-                                isPending={is(
-                                  'keywords.loaded.fetchedTranslations.suggesting'
-                                )}
-                                onToggle={() =>
-                                  send('TOGGLE_COMMUNITY_TRANSLATIONS')
-                                }
-                              />
-                            </>
-                          )}
-                        </>
-                      )}
-                      {is('keywords.failure') && (
-                        <FlipKeyword>
-                          <FlipKeywordName>
-                            {t('Missing keywords')}
-                          </FlipKeywordName>
-                        </FlipKeyword>
-                      )}
-                    </FlipKeywordPanel>
+                    <Box>
+                      <FlipKeywordPanel>
+                        {is('keywords.loaded') && (
+                          <>
+                            <FlipKeywordTranslationSwitch
+                              keywords={keywords}
+                              showTranslation={showTranslation}
+                              locale={i18n.language}
+                              onSwitchLocale={() => send('SWITCH_LOCALE')}
+                            />
+                            {i18n.language.toUpperCase() !== 'EN' &&
+                              !isOffline && (
+                                <>
+                                  <Divider
+                                    borderColor="gray.300"
+                                    mx={-10}
+                                    mt={4}
+                                    mb={6}
+                                  />
+                                  <CommunityTranslations
+                                    keywords={keywords}
+                                    onVote={e => send('VOTE', e)}
+                                    onSuggest={e => send('SUGGEST', e)}
+                                    isOpen={isCommunityTranslationsExpanded}
+                                    isPending={is(
+                                      'keywords.loaded.fetchedTranslations.suggesting'
+                                    )}
+                                    onToggle={() =>
+                                      send('TOGGLE_COMMUNITY_TRANSLATIONS')
+                                    }
+                                  />
+                                </>
+                              )}
+                          </>
+                        )}
+                        {is('keywords.failure') && (
+                          <FlipKeyword>
+                            <FlipKeywordName>
+                              {t('Missing keywords')}
+                            </FlipKeywordName>
+                          </FlipKeyword>
+                        )}
+                      </FlipKeywordPanel>
+                      {isOffline && <CommunityTranslationUnavailable />}
+                    </Box>
                     <FlipStoryAside>
                       <IconButton2
                         icon="refresh"
