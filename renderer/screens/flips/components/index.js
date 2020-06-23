@@ -768,7 +768,7 @@ export function FlipShuffleStep({
             </DragDropContext>
           </FlipImageList>
         </Stack>
-        <Stack spacing={0}>
+        <Stack spacing={1}>
           <IconButton2 icon="cycle" onClick={onShuffle}>
             {t('Shuffle images')}
           </IconButton2>
