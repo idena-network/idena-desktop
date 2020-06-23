@@ -281,25 +281,17 @@ export function EditorContextMenu({
                   </MenuItem>
                 )}
 
-                {true && (
-                  <MenuItem
-                    disabled={!onDelete}
-                    onClick={() => {
-                      onDelete()
-                      onClose()
-                    }}
-                    danger
-                    icon={
-                      <Icon
-                        name="flip-editor-delete"
-                        size={5}
-                        color="red.500"
-                      />
-                    }
-                  >
-                    {`${t('Delete')} `}
-                  </MenuItem>
-                )}
+                <MenuItem
+                  disabled={!onDelete}
+                  onClick={() => {
+                    onDelete()
+                    onClose()
+                  }}
+                  danger
+                  icon={<Icon name="delete" size={5} color="red.500" />}
+                >
+                  {`${t('Delete')} `}
+                </MenuItem>
 
                 {onClear && (
                   <MenuItem
@@ -308,9 +300,10 @@ export function EditorContextMenu({
                       onClose()
                     }}
                     icon={
-                      <FaRegTrashAlt
-                        color={theme.colors.danger}
-                        fontSize={rem(20)}
+                      <Icon
+                        name="flip-editor-delete"
+                        size={5}
+                        color="red.500"
                       />
                     }
                   >
