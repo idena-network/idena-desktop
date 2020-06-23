@@ -250,14 +250,17 @@ export default function FlipListPage() {
                 {Array.from({length: remainingRequiredFlips}, (flip, idx) => (
                   <RequiredFlipPlaceholder
                     key={idx}
-                    title={`Flip #${idx + 1}`}
+                    title={`Flip #${madeFlipsNumber + idx + 1}`}
                     {...flip}
                   />
                 ))}
                 {Array.from({length: remainingOptionalFlips}, (flip, idx) => (
                   <OptionalFlipPlaceholder
                     key={idx}
-                    title={`Flip #${remainingRequiredFlips + idx}`}
+                    title={`Flip #${madeFlipsNumber +
+                      remainingRequiredFlips +
+                      idx +
+                      1}`}
                     {...flip}
                   />
                 ))}
