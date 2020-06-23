@@ -286,7 +286,7 @@ function Switcher({
           user-select: none;
         }
         span {
-          font-size: 1rem;
+          font-size: ${rem(13)};
           line-height: 16px;
           font-weight: 500;
           color: ${bgOff};

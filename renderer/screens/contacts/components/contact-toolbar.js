@@ -12,7 +12,7 @@ export default function ContactToolbar({onRename, onDelete, onKill}) {
   return (
     <Box
       py={theme.spacings.large}
-      w={rem(700)}
+      w={rem(480)}
       css={{
         ...padding(rem(theme.spacings.small8), 0),
         ...margin(rem(theme.spacings.medium16), 0),

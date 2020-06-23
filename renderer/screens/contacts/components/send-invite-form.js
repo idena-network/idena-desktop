@@ -33,8 +33,12 @@ function SendInviteForm({onSuccess, onFail}) {
     <Box
       css={padding(rem(theme.spacings.large48), rem(theme.spacings.medium32))}
     >
-      <Box css={{textAlign: 'center'}}>
-        <Avatar username={address || `0x${'2'.repeat(64)}`} size={80} />
+      <Box>
+        <Avatar
+          username={address || `0x${'2'.repeat(64)}`}
+          size={80}
+          style={{...margin(0, 'auto')}}
+        />
       </Box>
       <Box
         css={{
