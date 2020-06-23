@@ -138,7 +138,6 @@ export default function NewFlipPage() {
               <FlipMasterNavbar>
                 <FlipMasterNavbarItem
                   step={is('keywords') ? Step.Active : Step.Completed}
-                  onClick={() => send('PICK_KEYWORDS')}
                 >
                   {t('Think up a story')}
                 </FlipMasterNavbarItem>
@@ -151,7 +150,6 @@ export default function NewFlipPage() {
                       ? Step.Next
                       : Step.Completed
                   }
-                  onClick={() => send('PICK_IMAGES')}
                 >
                   {t('Select images')}
                 </FlipMasterNavbarItem>
@@ -164,13 +162,11 @@ export default function NewFlipPage() {
                       ? Step.Next
                       : Step.Completed
                   }
-                  onClick={() => send('PICK_SHUFFLE')}
                 >
                   {t('Shuffle images')}
                 </FlipMasterNavbarItem>
                 <FlipMasterNavbarItem
                   step={is('submit') ? Step.Active : Step.Next}
-                  onClick={() => send('PICK_SUBMIT')}
                 >
                   {t('Submit flip')}
                 </FlipMasterNavbarItem>
@@ -187,24 +183,28 @@ export default function NewFlipPage() {
                             locale={i18n.language}
                             onSwitchLocale={() => send('SWITCH_LOCALE')}
                           />
-                          <Divider
-                            borderColor="gray.300"
-                            mx={-10}
-                            mt={4}
-                            mb={6}
-                          />
-                          <CommunityTranslations
-                            keywords={keywords}
-                            onVote={e => send('VOTE', e)}
-                            onSuggest={e => send('SUGGEST', e)}
-                            isOpen={isCommunityTranslationsExpanded}
-                            isPending={is(
-                              'keywords.loaded.fetchedTranslations.suggesting'
-                            )}
-                            onToggle={() =>
-                              send('TOGGLE_COMMUNITY_TRANSLATIONS')
-                            }
-                          />
+                          {i18n.language.toUpperCase() !== 'EN' && (
+                            <>
+                              <Divider
+                                borderColor="gray.300"
+                                mx={-10}
+                                mt={4}
+                                mb={6}
+                              />
+                              <CommunityTranslations
+                                keywords={keywords}
+                                onVote={e => send('VOTE', e)}
+                                onSuggest={e => send('SUGGEST', e)}
+                                isOpen={isCommunityTranslationsExpanded}
+                                isPending={is(
+                                  'keywords.loaded.fetchedTranslations.suggesting'
+                                )}
+                                onToggle={() =>
+                                  send('TOGGLE_COMMUNITY_TRANSLATIONS')
+                                }
+                              />
+                            </>
+                          )}
                         </>
                       )}
                       {is('keywords.failure') && (

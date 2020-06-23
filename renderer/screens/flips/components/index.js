@@ -393,14 +393,7 @@ export function FlipMasterNavbar(props) {
 
 export function FlipMasterNavbarItem({step, ...props}) {
   return (
-    <Stack
-      role="group"
-      isInline
-      spacing={2}
-      align="center"
-      cursor="default"
-      {...props}
-    >
+    <Stack role="group" isInline spacing={2} align="center" {...props}>
       <FlipMasterNavbarItemIcon step={step} />
       <FlipMasterNavbarItemText step={step} {...props} />
     </Stack>
@@ -455,15 +448,7 @@ export function FlipMasterNavbarItemText({step, ...props}) {
   }
 
   return (
-    <PseudoBox
-      as={Text}
-      color={color}
-      transition="all 0.3s ease"
-      _groupHover={{
-        color: 'brand.gray',
-      }}
-      {...props}
-    />
+    <PseudoBox as={Text} color={color} transition="all 0.3s ease" {...props} />
   )
 }
 
