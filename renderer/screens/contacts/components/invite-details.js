@@ -58,7 +58,7 @@ function InviteDetails({dbkey, onClose, onSelect}) {
     : identity && mapToFriendlyStatus(identity.state)
 
   return (
-    <div style={{minWidth: rem('700px')}}>
+    <div>
       <section>
         <ContactInfo {...invite} address={receiver} showMining={mining} />
 
@@ -120,7 +120,6 @@ function InviteDetails({dbkey, onClose, onSelect}) {
           setShowKillInviteForm(false)
         }}
       >
-        }
         <KillInvite
           {...invite}
           state={state}

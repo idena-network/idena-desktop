@@ -32,6 +32,7 @@ function Sidebar({onSelectContact, onSelectInvite, onNewInvite}) {
       style={{
         ...border('right', '1px', 'solid', theme.colors.gray2),
         width: rem(270),
+        minWidth: rem(270),
         height: '91vh',
         overflowY: 'auto',
       }}

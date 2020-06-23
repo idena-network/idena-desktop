@@ -41,8 +41,8 @@ function KillForm({onSuccess, onFail}) {
           ...margin(theme.spacings.medium16, 0, theme.spacings.medium32),
         }}
       >
-        <Box css={{textAlign: 'center'}}>
-          <Avatar username={address} size={80} />
+        <Box>
+          <Avatar username={address} size={80} style={{...margin(0, 'auto')}} />
         </Box>
         <Box
           css={{

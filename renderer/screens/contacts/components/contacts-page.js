@@ -45,7 +45,6 @@ function ContactsPage({showNewInviteForm = false}) {
             css={{
               flexBasis: 0,
               flexGrow: 1,
-              maxWidth: '100%',
             }}
           >
             {showInvite && (

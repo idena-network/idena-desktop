@@ -29,7 +29,7 @@ function ReceiveForm({address}) {
             textAlign: 'center',
           }}
         >
-          <QRCode value={address} />
+          <QRCode value={address} style={{...margin(0, 'auto')}} />
         </Box>
 
         <FormGroup>
