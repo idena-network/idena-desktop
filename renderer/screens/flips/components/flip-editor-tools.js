@@ -150,7 +150,7 @@ export function ArrowHint({hint, leftHanded, visible}) {
                     position: 'absolute',
                     left: '30px',
                     top: '-25px',
-                    minWidth: '70px',
+                    minWidth: '75px',
                     color: `${theme.colors.muted}`,
                     fontWeight: `${theme.fontWeights.normal}`,
                   }}
@@ -187,13 +187,12 @@ export function ArrowHint({hint, leftHanded, visible}) {
                 <div
                   style={{
                     position: 'absolute',
-                    left: '-56px',
+                    left: '-58px',
                     top: '-25px',
-                    minWidth: rem(50, theme.fontSizes.base),
-                    width: rem(50, theme.fontSizes.base),
+                    minWidth: rem(52, theme.fontSizes.base),
+                    width: rem(52, theme.fontSizes.base),
                     color: `${theme.colors.muted}`,
                     fontWeight: `${theme.fontWeights.normal}`,
-                    ...wordWrap('break-all'),
                   }}
                 >
                   {hint}
