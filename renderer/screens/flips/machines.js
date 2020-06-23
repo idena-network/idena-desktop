@@ -553,7 +553,7 @@ export const flipMasterMachine = Machine(
                             }),
                             showTranslation: ({locale}, {data}) =>
                               locale.toLowerCase() !== 'en' &&
-                              data.some(t => t.confirmed),
+                              data?.every(w => w?.some(t => t?.confirmed)),
                           }),
                           log(),
                         ],
@@ -578,29 +578,7 @@ export const flipMasterMachine = Machine(
                           src: 'voteForKeywordTranslation',
                           onDone: {
                             target: 'idle',
-                            actions: [
-                              assign({
-                                keywords: (
-                                  // eslint-disable-next-line no-shadow
-                                  {keywords: {words, translations}},
-                                  {data: {id, ups}}
-                                ) => ({
-                                  words,
-                                  translations: translations.map(
-                                    wordTranslations =>
-                                      wordTranslations.map(translation =>
-                                        translation.id === id
-                                          ? {
-                                              ...translation,
-                                              ups,
-                                            }
-                                          : translation
-                                      )
-                                  ),
-                                }),
-                              }),
-                              log(),
-                            ],
+                            actions: [send('REFETCH'), log()],
                           },
                           onError: {
                             target: 'idle',

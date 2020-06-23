@@ -1006,7 +1006,7 @@ export function CommunityTranslations({
               </FlipKeywordRadio>
             ))}
           </RadioButtonGroup>
-          {translations.map(({id, name, desc, ups}) => (
+          {translations.map(({id, name, desc, score}) => (
             <Flex key={id} justify="space-between">
               <FlipKeyword>
                 <FlipKeywordName>{name}</FlipKeywordName>
@@ -1020,15 +1020,15 @@ export function CommunityTranslations({
                 <Flex
                   align="center"
                   justify="center"
-                  bg={ups < 0 ? 'red.010' : 'green.010'}
-                  color={ups < 0 ? 'red.500' : 'green.500'}
+                  bg={score < 0 ? 'red.010' : 'green.010'}
+                  color={score < 0 ? 'red.500' : 'green.500'}
                   fontWeight={500}
                   rounded="md"
                   minW={12}
                   minH={8}
                   style={{fontVariantNumeric: 'tabular-nums'}}
                 >
-                  {ups}
+                  {score}
                 </Flex>
                 <VoteButton
                   icon="upvote"

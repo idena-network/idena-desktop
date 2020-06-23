@@ -34,6 +34,7 @@ export async function fetchKeywordTranslations(ids, locale) {
         confirmed,
         ups,
         downs,
+        score: ups - downs,
       })
     )
   )
@@ -54,7 +55,7 @@ export async function voteForKeywordTranslation({id, up}) {
 
   if (resCode > 0 && error) throw new Error(error)
 
-  return {id, ups: upVotes - downVotes}
+  return {id, score: upVotes - downVotes}
 }
 
 export async function suggestKeywordTranslation({
