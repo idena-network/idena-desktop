@@ -1,4 +1,5 @@
 import {encode} from 'rlp'
+import Jimp from 'jimp'
 import dict from './words'
 import {capitalize} from '../../../shared/utils/string'
 import {
@@ -236,8 +237,19 @@ export async function publishFlip({
   )
     throw new Error('You must shuffle flip before submit')
 
+  const compressedImages = await Promise.all(
+    images.map(image =>
+      Jimp.read(image).then(raw =>
+        raw
+          .resize(240, 180)
+          .quality(60) // jpeg quality
+          .getBase64Async('image/jpeg')
+      )
+    )
+  )
+
   const [publicHex, privateHex] = flipToHex(
-    hint ? images : originalOrder.map(num => images[num]),
+    hint ? images : originalOrder.map(num => compressedImages[num]),
     hint ? order : orderPermutations
   )
 
