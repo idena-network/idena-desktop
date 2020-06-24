@@ -936,13 +936,21 @@ export function FlipImageListItem({isFirst, isLast, ...props}) {
   )
 }
 
-export function FlipImage({src, objectFit = 'scale-down', ...props}) {
+export function FlipImage({
+  src,
+  objectFit = 'scale-down',
+  roundedTop,
+  roundedBottom,
+  ...props
+}) {
   return (
     <AspectRatioBox
       ratio={4 / 3}
       bg="gray.50"
       border="1px"
       borderColor="brandGray.016"
+      roundedTop={roundedTop}
+      roundedBottom={roundedBottom}
       {...props}
     >
       {src ? (
@@ -950,6 +958,8 @@ export function FlipImage({src, objectFit = 'scale-down', ...props}) {
           src={src}
           objectFit={objectFit}
           fallbackSrc="/static/flips-cant-icn.svg"
+          roundedTop={roundedTop}
+          roundedBottom={roundedBottom}
         />
       ) : (
         <EmptyFlipImage />
