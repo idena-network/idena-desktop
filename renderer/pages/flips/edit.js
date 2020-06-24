@@ -228,7 +228,8 @@ export default function EditFlipPage() {
               )}
               {is('images') && (
                 <FlipEditorStep
-                  keywords={keywords ? keywords.words : []}
+                  keywords={keywords}
+                  showTranslation={showTranslation}
                   originalOrder={originalOrder}
                   images={images}
                   onChangeImage={(image, currentIndex) =>
