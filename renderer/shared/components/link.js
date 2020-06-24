@@ -2,7 +2,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import NextLink from 'next/link'
-import {Icon, Link as ChakraLink} from '@chakra-ui/core'
+import {Icon, Link as ChakraLink, Stack, Text} from '@chakra-ui/core'
 import theme from '../theme'
 
 function Link({
@@ -72,8 +72,10 @@ export function IconLink({href, icon, children, ...props}) {
         }}
         {...props}
       >
-        <Icon name={icon} size={4} mr={2} />
-        {children}
+        <Stack spacing={2} isInline align="center">
+          {typeof icon === 'string' ? <Icon name={icon} size={4} /> : icon}
+          <Text as="span">{children}</Text>
+        </Stack>
       </ChakraLink>
     </NextLink>
   )
