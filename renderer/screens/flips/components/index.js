@@ -584,6 +584,7 @@ export function FlipStoryAside(props) {
 
 export function FlipEditorStep({
   keywords,
+  showTranslation,
   originalOrder,
   images,
   onChangeImage,
@@ -594,13 +595,27 @@ export function FlipEditorStep({
 
   const [currentIndex, setCurrentIdx] = React.useState(0)
 
+  const {words, translations} = keywords
+
+  const hasBothTranslations =
+    translations.reduce((acc, {length}) => acc + length, 0) > 1
+
   return (
     <FlipStep>
       <FlipStepHeader>
         <FlipStepTitle>{t('Select 4 images to tell your story')}</FlipStepTitle>
         <FlipStepSubtitle>
           {t(`Use keywords for the story`)}{' '}
-          <Text as="mark">{formatKeywords(keywords)}</Text>{' '}
+          <Text as="mark">
+            {formatKeywords(
+              hasBothTranslations && showTranslation
+                ? translations.map(([{name, desc}]) => ({
+                    name,
+                    desc,
+                  }))
+                : words
+            )}
+          </Text>{' '}
           {t(`and template "Before
           – Something happens – After"`)}
           .
