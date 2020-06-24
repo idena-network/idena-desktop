@@ -224,7 +224,10 @@ export async function publishFlip({
 
   if (
     flips.some(
-      flip => flip.type === FlipType.Published && areSame(flip.images, images)
+      flip =>
+        flip.type === FlipType.Published &&
+        flip.images &&
+        areSame(flip.images, images)
     )
   )
     throw new Error('You already submitted this flip')
