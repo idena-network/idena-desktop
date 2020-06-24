@@ -84,7 +84,10 @@ export default function EditFlipPage() {
     },
     actions: {
       onSubmitted: () => router.push('/flips/list'),
-      onError: (_, {data, error = data.message}) =>
+      onError: (
+        _,
+        {data, error = data.response?.data?.error ?? data.message}
+      ) =>
         toast({
           title: error,
           status: 'error',
@@ -138,7 +141,6 @@ export default function EditFlipPage() {
               <FlipMasterNavbar>
                 <FlipMasterNavbarItem
                   step={is('keywords') ? Step.Active : Step.Completed}
-                  onClick={() => send('PICK_KEYWORDS')}
                 >
                   {t('Think up a story')}
                 </FlipMasterNavbarItem>
@@ -151,7 +153,6 @@ export default function EditFlipPage() {
                       ? Step.Next
                       : Step.Completed
                   }
-                  onClick={() => send('PICK_IMAGES')}
                 >
                   {t('Select images')}
                 </FlipMasterNavbarItem>
@@ -164,13 +165,11 @@ export default function EditFlipPage() {
                       ? Step.Next
                       : Step.Completed
                   }
-                  onClick={() => send('PICK_SHUFFLE')}
                 >
                   {t('Shuffle images')}
                 </FlipMasterNavbarItem>
                 <FlipMasterNavbarItem
                   step={is('submit') ? Step.Active : Step.Next}
-                  onClick={() => send('PICK_SUBMIT')}
                 >
                   {t('Submit flip')}
                 </FlipMasterNavbarItem>
