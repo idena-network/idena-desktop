@@ -1,33 +1,22 @@
 /* eslint-disable react/prop-types */
 import {
   Stack,
-  Image,
   Heading,
   Stat,
   StatLabel,
   StatNumber,
+  useTheme,
 } from '@chakra-ui/core'
 import {TooltipX} from '../../shared/components'
+import {Avatar} from '../../shared/components/components'
+import {rem} from '../../shared/theme'
 
-export function UserPanel({address, state}) {
+export function UserCard({address, state}) {
   return (
-    <Stack isInline spacing={6} align="center" mb={6} width="480px">
-      <Image
-        size={80}
-        src={`https://robohash.org/${address}`}
-        bg="gray.50"
-        marginRight={6}
-        my={2}
-        rounded="lg"
-      />
+    <Stack isInline spacing={6} align="center" mb={6} width={rem(480)}>
+      <Avatar address={address} />
       <Stack spacing={1}>
-        <Heading
-          as="h2"
-          fontSize="lg"
-          fontWeight="semibold"
-          lineHeight="25px"
-          wordBreak="break-all"
-        >
+        <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
           {state}
         </Heading>
         <Heading
@@ -35,7 +24,7 @@ export function UserPanel({address, state}) {
           fontSize="mdx"
           fontWeight="normal"
           color="muted"
-          lineHeight="20px"
+          lineHeight="shorter"
         >
           {address}
         </Heading>
@@ -44,26 +33,62 @@ export function UserPanel({address, state}) {
   )
 }
 
-export function Figure({label, value, measure, tooltip}) {
+export function UserStatList(props) {
   return (
-    <Stat py={2}>
-      <FigureLabel cursor={tooltip ? 'help' : 'auto'}>
-        {tooltip ? (
-          <TooltipX label={tooltip} placement="top" zIndex="tooltip">
-            {label}
-          </TooltipX>
-        ) : (
-          label
-        )}
-      </FigureLabel>
-      {/* <FigureLabel>{label}</FigureLabel> */}
-      <StatNumber fontSize="md" fontWeight={500} lineHeight="20px">
-        {value} {measure}
-      </StatNumber>
-    </Stat>
+    <Stack spacing={4} bg="gray.50" px={10} py={8} rounded="lg" {...props} />
   )
 }
 
-function FigureLabel(props) {
-  return <StatLabel color="muted" fontSize="md" lineHeight="18px" {...props} />
+export function SimpleUserStat({label, value, ...props}) {
+  return (
+    <UserStat {...props}>
+      <UserStatLabel>{label}</UserStatLabel>
+      <UserStatValue>{value}</UserStatValue>
+    </UserStat>
+  )
+}
+
+export function AnnotatedUserStat({
+  annotation,
+  label,
+  value,
+  children,
+  ...props
+}) {
+  const {colors} = useTheme()
+  return (
+    <UserStat {...props}>
+      <UserStatLabel borderBottom={`dotted 1px ${colors.muted}`} cursor="help">
+        <UserStatLabelTooltip label={annotation}>{label}</UserStatLabelTooltip>
+      </UserStatLabel>
+      {value && <UserStatValue>{value}</UserStatValue>}
+      {children}
+    </UserStat>
+  )
+}
+
+export function UserStat(props) {
+  return <Stat as={Stack} spacing="2px" {...props} />
+}
+
+export function UserStatLabel(props) {
+  return (
+    <StatLabel
+      color="muted"
+      alignSelf="flex-start"
+      fontSize="md"
+      lineHeight="short"
+      {...props}
+    />
+  )
+}
+
+export function UserStatValue(props) {
+  return (
+    <StatNumber fontSize="md" fontWeight={500} lineHeight="base" {...props} />
+  )
+}
+
+export function UserStatLabelTooltip(props) {
+  return <TooltipX placement="top" zIndex="tooltip" {...props} />
 }

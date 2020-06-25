@@ -10,13 +10,15 @@ import {
   DrawerBody as ChakraDrawerBody,
   Input as ChakraInput,
   FormLabel as ChakraFormLabel,
+  Image,
 } from '@chakra-ui/core'
+import {rem} from '../theme'
 
 export function Drawer({children, ...props}) {
   return (
     <ChakraDrawer {...props}>
       <DrawerOverlay bg="xblack.080" />
-      <DrawerContent px={8} py={10} w={360}>
+      <DrawerContent px={8} py={12} maxW={360}>
         <DrawerCloseButton />
         {children}
       </DrawerContent>
@@ -48,6 +50,19 @@ export function Input(props) {
       _placeholder={{
         color: 'muted',
       }}
+      {...props}
+    />
+  )
+}
+
+export function Avatar({address, ...props}) {
+  return (
+    <Image
+      size={rem(80)}
+      src={`https://robohash.org/${address}`}
+      bg="gray.50"
+      rounded="lg"
+      ignoreFallback
       {...props}
     />
   )

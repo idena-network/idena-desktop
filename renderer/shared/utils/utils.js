@@ -19,3 +19,17 @@ export function callRpc(url = 'http://localhost:9009', key) {
     return result
   }
 }
+
+export function toPercent(value) {
+  return value.toLocaleString(undefined, {
+    style: 'percent',
+    maximumSignificantDigits: 4,
+  })
+}
+
+export function toDna(value) {
+  return `${value.toLocaleString(undefined, {
+    style: 'decimal',
+    maximumFractionDigits: 16,
+  })} DNA`
+}

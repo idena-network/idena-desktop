@@ -13,10 +13,19 @@ import {
   useToast,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
+import dayjs from 'dayjs'
 import {useIdentityState} from '../shared/providers/identity-context'
 import {useEpochState} from '../shared/providers/epoch-context'
 import {Page, PageTitle} from '../screens/app/components'
-import {UserPanel, Figure} from '../screens/profile/components'
+import {
+  UserCard,
+  SimpleUserStat,
+  UserStatList,
+  UserStat,
+  UserStatLabel,
+  UserStatValue,
+  AnnotatedUserStat,
+} from '../screens/profile/components'
 import {IconButton2, PrimaryButton} from '../shared/components/button'
 import {IconLink} from '../shared/components/link'
 import Layout from '../shared/components/layout'
@@ -30,9 +39,13 @@ import {
 } from '../shared/components/components'
 import {sendInvite} from '../shared/api'
 import {Notification} from '../shared/components/notifications'
+import {useChainState} from '../shared/providers/chain-context'
+import {toPercent, toDna} from '../shared/utils/utils'
 
 export default function ProfilePage() {
   const {t} = useTranslation()
+
+  const {syncing, offline} = useChainState()
 
   const {
     address,
@@ -56,80 +69,75 @@ export default function ProfilePage() {
   const toast = useToast()
 
   return (
-    <Layout>
+    <Layout syncing={syncing} offline={offline}>
       <Page>
-        <PageTitle mb={8}>Profile</PageTitle>
+        <PageTitle mb={8}>{t('Profile')}</PageTitle>
         <Stack isInline spacing={10}>
           <Box>
-            <UserPanel address={address} state={state} />
-            <Box bg="gray.50" rounded="lg" px={10} py={6}>
-              <Figure label="Address" value={address} />
-              <Figure label="Balance" value={balance} measure="DNA" />
-
-              {stake > 0 && state !== IdentityStatus.Newbie && (
-                <Figure
-                  label={t('Stake')}
-                  value={stake}
-                  postfix="DNA"
-                  tooltip={t(
-                    'In order to withdraw the stake you have to terminate your identity'
-                  )}
-                />
-              )}
-
+            <UserCard address={address} state={state} />
+            <UserStatList>
+              <SimpleUserStat label="Address" value={address} />
+              <UserStat>
+                <UserStatLabel>{t('Balance')}</UserStatLabel>
+                <UserStatValue>{balance} DNA</UserStatValue>
+              </UserStat>
               {stake > 0 && state === IdentityStatus.Newbie && (
                 <>
-                  <Figure
-                    label={t('Stake')}
-                    value={stake * 0.25}
-                    postfix="DNA"
-                    tooltip={t(
+                  <AnnotatedUserStat
+                    annotation={t(
                       'You need to get Verified status to be able to terminate your identity and withdraw the stake'
                     )}
+                    label={t('Stake')}
+                    value={toDna(stake * 0.25)}
                   />
-                  <Figure
-                    label={t('Locked')}
-                    value={stake * 0.75}
-                    postfix="DNA"
-                    tooltip={t(
+                  <AnnotatedUserStat
+                    annotation={t(
                       'You need to get Verified status to get the locked funds into the normal wallet'
                     )}
+                    label={t('Locked')}
+                    value={toDna(stake * 0.75)}
                   />
                 </>
+              )}
+
+              {stake > 0 && state !== IdentityStatus.Newbie && (
+                <AnnotatedUserStat
+                  annotation={t(
+                    'In order to withdraw the stake you have to terminate your identity'
+                  )}
+                  label={t('Stake')}
+                  value={toDna(stake)}
+                />
               )}
 
               {penalty > 0 && (
-                <Figure
-                  label={t('Mining penalty')}
-                  value={penalty}
-                  postfix="DNA"
-                  tooltip={t(
+                <AnnotatedUserStat
+                  annotation={t(
                     "Your node was offline more than 1 hour. The penalty will be charged automaically. Once it's fully paid you'll continue to mine coins."
                   )}
+                  label={t('Mining penalty')}
+                  value={toDna(penalty)}
                 />
               )}
-
-              <Figure label="Age" value={age} />
-
+              {age > 0 && <SimpleUserStat label="Age" value={age} />}
               {epoch && (
-                <Figure
+                <SimpleUserStat
                   label="Next validation"
-                  value={new Date(epoch.nextValidation).toLocaleString()}
+                  value={dayjs(epoch.nextValidation).toString()}
                 />
               )}
-
               {totalQualifiedFlips > 0 && (
-                <>
-                  <Figure
-                    label={t('Total score')}
-                    value={`${totalShortFlipPoints} out of ${totalQualifiedFlips} (${Math.round(
-                      (totalShortFlipPoints / totalQualifiedFlips) * 10000
-                    ) / 100}%) `}
-                    tooltip={t('Total score for all validations')}
-                  />
-                </>
+                <AnnotatedUserStat
+                  annotation={t('Total score for all validations')}
+                  label={t('Total score')}
+                >
+                  <UserStatValue>
+                    {totalShortFlipPoints} out of {totalQualifiedFlips} (
+                    {toPercent(totalShortFlipPoints / totalQualifiedFlips)})
+                  </UserStatValue>
+                </AnnotatedUserStat>
               )}
-            </Box>
+            </UserStatList>
           </Box>
           <Box w={200}>
             <Text fontWeight={500} mt={5} mb={2}>
@@ -166,7 +174,7 @@ export default function ProfilePage() {
           <DrawerHeader>
             <Image
               size={20}
-              src={`https://robohash.org/${address}`}
+              src={`https://robohash.org/0x${'2'.repeat(64)}`}
               bg="gray.50"
               mx="auto"
               rounded="lg"
@@ -205,7 +213,10 @@ export default function ProfilePage() {
                       // eslint-disable-next-line react/display-name
                       render: () => (
                         <Box fontSize="md">
-                          <Notification title={t('Invitation code created')} />
+                          <Notification
+                            title={t('Invitation code created')}
+                            description={result}
+                          />
                         </Box>
                       ),
                     })
