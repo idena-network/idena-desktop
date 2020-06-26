@@ -7,9 +7,6 @@ import {
   Text,
   Icon,
   useDisclosure,
-  Heading,
-  Image,
-  FormControl,
   useToast,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
@@ -26,21 +23,17 @@ import {
   UserStatValue,
   AnnotatedUserStat,
 } from '../screens/profile/components'
-import {IconButton2, PrimaryButton} from '../shared/components/button'
+import {IconButton2} from '../shared/components/button'
 import {IconLink} from '../shared/components/link'
 import Layout from '../shared/components/layout'
 import {IdentityStatus} from '../shared/types'
-import {
-  DrawerBody,
-  DrawerHeader,
-  Drawer,
-  Input,
-  FormLabel,
-} from '../shared/components/components'
+import {SendInviteDrawer, SendInviteForm} from '../shared/components/components'
 import {sendInvite} from '../shared/api'
 import {Notification} from '../shared/components/notifications'
 import {useChainState} from '../shared/providers/chain-context'
 import {toPercent, toDna} from '../shared/utils/utils'
+import {useInviteDispatch} from '../shared/providers/invite-context'
+import {NotificationType} from '../shared/providers/notification-context'
 
 export default function ProfilePage() {
   const {t} = useTranslation()
@@ -170,72 +163,62 @@ export default function ProfilePage() {
           </Box>
         </Stack>
 
-        <Drawer isOpen={isOpenInviteForm} onClose={onCloseInviteForm}>
-          <DrawerHeader>
-            <Image
-              size={20}
-              src={`https://robohash.org/0x${'2'.repeat(64)}`}
-              bg="gray.50"
-              mx="auto"
-              rounded="lg"
-            />
-            <Heading
-              fontSize="lg"
-              fontWeight={500}
-              color="brandGray.500"
-              mt={4}
-              textAlign="center"
-            >
-              {t('Invite new person')}
-            </Heading>
-          </DrawerHeader>
-          <DrawerBody>
-            <Stack spacing={6} mt={6}>
-              <Stack isInline spacing={4}>
-                <FormControl>
-                  <FormLabel htmlFor="firstName">{t('First name')}</FormLabel>
-                  <Input id="firstName" py={2} />
-                </FormControl>
-                <FormControl>
-                  <FormLabel htmlFor="lastName">{t('Last name')}</FormLabel>
-                  <Input id="lastName" />
-                </FormControl>
-              </Stack>
-              <PrimaryButton
-                isDisabled={false}
-                ml="auto"
-                onClick={async () => {
-                  try {
-                    const {result} = await sendInvite({to: null})
-                    toast({
-                      status: 'success',
-                      duration: 5000,
-                      // eslint-disable-next-line react/display-name
-                      render: () => (
-                        <Box fontSize="md">
-                          <Notification
-                            title={t('Invitation code created')}
-                            description={result}
-                          />
-                        </Box>
-                      ),
-                    })
-                    onCloseInviteForm()
-                  } catch (error) {
-                    toast({
-                      title: error.message,
-                      status: 'error',
-                      duration: 9000,
-                      isClosable: true,
-                    })
-                  }
-                }}
-              >
-                {t('Create invitation')}
-              </PrimaryButton>
-            </Stack>
-          </DrawerBody>
-        </Drawer>
+        <SendInviteDrawer isOpen={isOpenInviteForm} onClose={onCloseInviteForm}>
+          <SendInviteForm
+            onSendingInvite={async ({address: to, firstName, lastName}) => {
+              try {
+                const {result, error} = await sendInvite({
+                  to,
+                  amount: null,
+                })
+
+                if (error) throw new Error(error.message)
+
+                global.invitesDb.addInvite({
+                  amount: null,
+                  firstName,
+                  lastName,
+                  activated: false,
+                  canKill: true,
+                  mining: true,
+                  ...result,
+                })
+
+                toast({
+                  status: 'success',
+                  duration: 5000,
+                  // eslint-disable-next-line react/display-name
+                  render: () => (
+                    <Box fontSize="md" textAlign="left">
+                      <Notification
+                        title={t('Invitation code created')}
+                        body={result.hash}
+                      />
+                    </Box>
+                  ),
+                })
+              } catch (error) {
+                global.logger.error(error)
+                toast({
+                  status: 'error',
+                  duration: 5000,
+                  // eslint-disable-next-line react/display-name
+                  render: () => (
+                    <Box fontSize="md">
+                      <Notification
+                        title={error.message}
+                        description={error.message}
+                        type={NotificationType.Error}
+                      />
+                    </Box>
+                  ),
+                })
+              } finally {
+                onCloseInviteForm()
+              }
+            }}
+          />
+        </SendInviteDrawer>
       </Page>
     </Layout>
   )
