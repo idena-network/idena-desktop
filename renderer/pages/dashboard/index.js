@@ -68,7 +68,7 @@ function Dashboard() {
           <PageTitle>{t('Profile')}</PageTitle>
           <Actions>
             <IconLink
-              disabled={invitesCount === 0}
+              isDisabled={invitesCount === 0}
               href="/contacts/new-invite"
               icon={<i className="icon icon--add_contact" />}
             >

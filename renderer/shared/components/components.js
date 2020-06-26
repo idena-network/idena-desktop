@@ -11,8 +11,13 @@ import {
   Input as ChakraInput,
   FormLabel as ChakraFormLabel,
   Image,
+  Stack,
+  FormControl,
+  Heading,
 } from '@chakra-ui/core'
+import {useTranslation} from 'react-i18next'
 import {rem} from '../theme'
+import {PrimaryButton} from './button'
 
 export function Drawer({children, ...props}) {
   return (
@@ -40,13 +45,12 @@ export function FormLabel(props) {
 export function Input(props) {
   return (
     <ChakraInput
+      alignItems="center"
       borderColor="gray.300"
       fontSize="md"
-      lineHeight="18px"
+      lineHeight="short"
       px={3}
-      pt="3/2"
-      pb={2}
-      h="auto"
+      h={8}
       _placeholder={{
         color: 'muted',
       }}
@@ -65,6 +69,68 @@ export function Avatar({address, ...props}) {
       ignoreFallback
       {...props}
     />
+  )
+}
+
+export function SendInviteDrawer({children, ...props}) {
+  const {t} = useTranslation()
+  return (
+    <Drawer {...props}>
+      <DrawerHeader mb={6}>
+        <Avatar address={`0x${'2'.repeat(64)}`} mx="auto" />
+        <Heading
+          fontSize="lg"
+          fontWeight={500}
+          color="brandGray.500"
+          mt={4}
+          mb={0}
+          textAlign="center"
+        >
+          {t('Invite new person')}
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>{children}</DrawerBody>
+    </Drawer>
+  )
+}
+
+export function SendInviteForm({onSendingInvite}) {
+  const {t} = useTranslation()
+  return (
+    <Stack
+      as="form"
+      spacing={6}
+      onSubmit={e => {
+        const {
+          address: {value: address},
+          firstName: {value: firstName},
+          lastName: {value: lastName},
+        } = e.target.elements
+        onSendingInvite({address, firstName, lastName})
+        e.preventDefault()
+      }}
+    >
+      <FormControl>
+        <FormLabel htmlFor="address">{t('Address')}</FormLabel>
+        <Input
+          id="address"
+          placeholder="Send directly to given address, or skip"
+        />
+      </FormControl>
+      <Stack isInline spacing={4}>
+        <FormControl>
+          <FormLabel htmlFor="firstName">{t('First name')}</FormLabel>
+          <Input id="firstName" />
+        </FormControl>
+        <FormControl>
+          <FormLabel htmlFor="lastName">{t('Last name')}</FormLabel>
+          <Input id="lastName" />
+        </FormControl>
+      </Stack>
+      <PrimaryButton ml="auto" type="submit">
+        {t('Create invitation')}
+      </PrimaryButton>
+    </Stack>
   )
 }
 
