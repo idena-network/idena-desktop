@@ -148,18 +148,3 @@ export function TooltipControl({children}) {
 TooltipControl.propTypes = {
   children: PropTypes.node,
 }
-
-export function TooltipX(props) {
-  return (
-    <ChakraTooltip
-      bg="black"
-      color="white"
-      fontSize="sm"
-      px={2}
-      py={1}
-      rounded="md"
-      hasArrow
-      {...props}
-    />
-  )
-}

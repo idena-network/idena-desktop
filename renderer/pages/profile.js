@@ -13,7 +13,12 @@ import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useIdentityState} from '../shared/providers/identity-context'
 import {useEpochState} from '../shared/providers/epoch-context'
-import {Page, PageTitle} from '../screens/app/components'
+import {
+  Page,
+  PageTitle,
+  SendInviteDrawer,
+  SendInviteForm,
+} from '../screens/app/components'
 import {
   UserCard,
   SimpleUserStat,
@@ -27,16 +32,18 @@ import {IconButton2} from '../shared/components/button'
 import {IconLink} from '../shared/components/link'
 import Layout from '../shared/components/layout'
 import {IdentityStatus} from '../shared/types'
-import {SendInviteDrawer, SendInviteForm} from '../shared/components/components'
 import {sendInvite} from '../shared/api'
 import {Notification} from '../shared/components/notifications'
 import {useChainState} from '../shared/providers/chain-context'
-import {toPercent, toDna} from '../shared/utils/utils'
-import {useInviteDispatch} from '../shared/providers/invite-context'
+import {toPercent, toLocaleDna} from '../shared/utils/utils'
 import {NotificationType} from '../shared/providers/notification-context'
+import {Toast} from '../shared/components/components'
 
 export default function ProfilePage() {
-  const {t} = useTranslation()
+  const {
+    t,
+    i18n: {language},
+  } = useTranslation()
 
   const {syncing, offline} = useChainState()
 
@@ -61,6 +68,8 @@ export default function ProfilePage() {
 
   const toast = useToast()
 
+  const toDna = toLocaleDna(language)
+
   return (
     <Layout syncing={syncing} offline={offline}>
       <Page>
@@ -72,7 +81,7 @@ export default function ProfilePage() {
               <SimpleUserStat label="Address" value={address} />
               <UserStat>
                 <UserStatLabel>{t('Balance')}</UserStatLabel>
-                <UserStatValue>{balance} DNA</UserStatValue>
+                <UserStatValue>{toDna(balance)}</UserStatValue>
               </UserStat>
               {stake > 0 && state === IdentityStatus.Newbie && (
                 <>
@@ -186,15 +195,13 @@ export default function ProfilePage() {
 
                 toast({
                   status: 'success',
-                  duration: 5000,
                   // eslint-disable-next-line react/display-name
                   render: () => (
-                    <Box fontSize="md" textAlign="left">
-                      <Notification
-                        title={t('Invitation code created')}
-                        body={result.hash}
-                      />
-                    </Box>
+                    <Toast
+                      icon="info"
+                      title={t('Invitation code created')}
+                      description={result.hash}
+                    />
                   ),
                 })
               } catch (error) {

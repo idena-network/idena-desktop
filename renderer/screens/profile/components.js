@@ -7,8 +7,7 @@ import {
   StatNumber,
   useTheme,
 } from '@chakra-ui/core'
-import {TooltipX} from '../../shared/components'
-import {Avatar} from '../../shared/components/components'
+import {Avatar, Tooltip} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 
 export function UserCard({address, state}) {
@@ -90,5 +89,5 @@ export function UserStatValue(props) {
 }
 
 export function UserStatLabelTooltip(props) {
-  return <TooltipX placement="top" zIndex="tooltip" {...props} />
+  return <Tooltip placement="top" zIndex="tooltip" {...props} />
 }
