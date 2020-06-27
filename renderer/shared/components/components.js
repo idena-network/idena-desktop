@@ -11,13 +11,18 @@ import {
   Input as ChakraInput,
   FormLabel as ChakraFormLabel,
   Image,
-  Stack,
-  FormControl,
-  Heading,
+  Tooltip as ChakraTooltip,
+  Flex,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  AlertIcon,
 } from '@chakra-ui/core'
-import {useTranslation} from 'react-i18next'
 import {rem} from '../theme'
-import {PrimaryButton} from './button'
+
+export function Debug({children}) {
+  return <Code>{JSON.stringify(children, null, 2)}</Code>
+}
 
 export function Drawer({children, ...props}) {
   return (
@@ -72,68 +77,52 @@ export function Avatar({address, ...props}) {
   )
 }
 
-export function SendInviteDrawer({children, ...props}) {
-  const {t} = useTranslation()
+export function Tooltip(props) {
   return (
-    <Drawer {...props}>
-      <DrawerHeader mb={6}>
-        <Avatar address={`0x${'2'.repeat(64)}`} mx="auto" />
-        <Heading
-          fontSize="lg"
-          fontWeight={500}
-          color="brandGray.500"
-          mt={4}
-          mb={0}
-          textAlign="center"
-        >
-          {t('Invite new person')}
-        </Heading>
-      </DrawerHeader>
-      <DrawerBody>{children}</DrawerBody>
-    </Drawer>
+    <ChakraTooltip
+      bg="black"
+      color="white"
+      fontSize="sm"
+      px={2}
+      py={1}
+      rounded="md"
+      hasArrow
+      {...props}
+    />
   )
 }
 
-export function SendInviteForm({onSendingInvite}) {
-  const {t} = useTranslation()
+export function Toast({
+  title,
+  description,
+  icon = 'info',
+  status = 'info',
+  ...props
+}) {
   return (
-    <Stack
-      as="form"
-      spacing={6}
-      onSubmit={e => {
-        const {
-          address: {value: address},
-          firstName: {value: firstName},
-          lastName: {value: lastName},
-        } = e.target.elements
-        onSendingInvite({address, firstName, lastName})
-        e.preventDefault()
-      }}
+    <Alert
+      status={status}
+      bg="white"
+      boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
+      fontSize="md"
+      pl={4}
+      pr={5}
+      pt={rem(10)}
+      pb={3}
+      mb={5}
+      minH={rem(44)}
+      rounded="lg"
+      {...props}
     >
-      <FormControl>
-        <FormLabel htmlFor="address">{t('Address')}</FormLabel>
-        <Input
-          id="address"
-          placeholder="Send directly to given address, or skip"
-        />
-      </FormControl>
-      <Stack isInline spacing={4}>
-        <FormControl>
-          <FormLabel htmlFor="firstName">{t('First name')}</FormLabel>
-          <Input id="firstName" />
-        </FormControl>
-        <FormControl>
-          <FormLabel htmlFor="lastName">{t('Last name')}</FormLabel>
-          <Input id="lastName" />
-        </FormControl>
-      </Stack>
-      <PrimaryButton ml="auto" type="submit">
-        {t('Create invitation')}
-      </PrimaryButton>
-    </Stack>
+      <AlertIcon name={icon} size={5} color="brandBlue.500" />
+      <Flex direction="column" align="flex-start">
+        <AlertTitle fontWeight={500} lineHeight="base">
+          {title}
+        </AlertTitle>
+        <AlertDescription color="muted" lineHeight="base">
+          {description}
+        </AlertDescription>
+      </Flex>
+    </Alert>
   )
-}
-
-export function Debug({children}) {
-  return <Code>{JSON.stringify(children, null, 2)}</Code>
 }
