@@ -1,23 +1,23 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {useRouter} from 'next/router'
-import {margin, borderRadius, darken, transparentize, padding} from 'polished'
-import {useTranslation} from 'react-i18next'
-import {Box, Link, Text} from '.'
+import { useRouter } from 'next/router'
+import { margin, borderRadius, darken, transparentize, padding } from 'polished'
+import { useTranslation } from 'react-i18next'
+import { Box, Link, Text } from '.'
 import Flex from './flex'
-import theme, {rem} from '../theme'
-import {useIdentityState, IdentityStatus} from '../providers/identity-context'
-import {useEpochState, EpochPeriod} from '../providers/epoch-context'
-import {useChainState} from '../providers/chain-context'
+import theme, { rem } from '../theme'
+import { useIdentityState, IdentityStatus } from '../providers/identity-context'
+import { useEpochState, EpochPeriod } from '../providers/epoch-context'
+import { useChainState } from '../providers/chain-context'
 import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
 } from '../providers/update-context'
 import useRpc from '../hooks/use-rpc'
-import {usePoll} from '../hooks/use-interval'
-import {Tooltip} from './tooltip'
-import {pluralize} from '../utils/string'
-import {parsePersistedValidationState} from '../../screens/validation/utils'
+import { usePoll } from '../hooks/use-interval'
+import { Tooltip } from './tooltip'
+import { pluralize } from '../utils/string'
+import { parsePersistedValidationState } from '../../screens/validation/utils'
 
 function Sidebar() {
   return (
@@ -59,7 +59,7 @@ function NodeStatus() {
     highestBlock,
   } = useChainState()
 
-  const [{result: peers}] = usePoll(useRpc('net_peers'), 3000)
+  const [{ result: peers }] = usePoll(useRpc('net_peers'), 3000)
 
   let bg = theme.colors.white01
   let color = theme.colors.muted
@@ -88,29 +88,29 @@ function NodeStatus() {
     >
       <Tooltip
         content={
-          <div style={{minWidth: rem(90)}}>
+          <div style={{ minWidth: rem(90) }}>
             {offline
               ? null
               : [
-                  !offline ? `Peers: ${(peers || []).length}` : '',
-                  syncing
-                    ? `Blocks: ${currentBlock} out of ${highestBlock}`
-                    : `Current block: ${currentBlock}`,
-                ].map((t, idx) => (
-                  <div
-                    key={idx}
-                    style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
-                  >
-                    {t}
-                  </div>
-                ))}
+                !offline ? `Peers: ${(peers || []).length}` : '',
+                syncing
+                  ? `Blocks: ${currentBlock} out of ${highestBlock}`
+                  : `Current block: ${currentBlock}`,
+              ].map((t, idx) => (
+                <div
+                  key={idx}
+                  style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                >
+                  {t}
+                </div>
+              ))}
           </div>
         }
         placement="bottom"
       >
         <Flex align="baseline">
           {!offline && (
-            <Box css={{...margin(0, rem(4), 0, 0)}}>
+            <Box css={{ ...margin(0, rem(4), 0, 0) }}>
               <Bandwidth strength={(peers || []).length} syncing={syncing} />
             </Box>
           )}
@@ -143,8 +143,8 @@ export function Logo() {
 }
 
 function Nav() {
-  const {t} = useTranslation()
-  const {nickname} = useIdentityState()
+  const { t } = useTranslation()
+  const { nickname } = useIdentityState()
   return (
     <nav>
       <ul
@@ -201,7 +201,7 @@ function Nav() {
 }
 
 // eslint-disable-next-line react/prop-types
-function NavItem({href, icon, children}) {
+function NavItem({ href, icon, children }) {
   const router = useRouter()
   const active = router.pathname.startsWith(href)
   const bg = active ? transparentize(0.84, theme.colors.black0) : ''
@@ -251,16 +251,16 @@ function NavItem({href, icon, children}) {
 }
 
 function ActionPanel() {
-  const {syncing} = useChainState()
+  const { syncing } = useChainState()
   const identity = useIdentityState()
   const epoch = useEpochState()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   if (syncing || !epoch) {
     return null
   }
 
-  const {currentPeriod, nextValidation} = epoch
+  const { currentPeriod, nextValidation } = epoch
   return (
     <Box
       bg={theme.colors.white01}
@@ -290,7 +290,7 @@ function ActionPanel() {
   )
 }
 
-function Block({title, children}) {
+function Block({ title, children }) {
   return (
     <Box
       css={{
@@ -302,14 +302,14 @@ function Block({title, children}) {
       <Text
         color={theme.colors.white05}
         fontWeight={500}
-        css={{lineHeight: rem(19)}}
+        css={{ lineHeight: rem(19) }}
       >
         {title}
       </Text>
       <Text
         color={theme.colors.white}
         fontWeight={500}
-        css={{display: 'block', lineHeight: rem(20)}}
+        css={{ display: 'block', lineHeight: rem(20) }}
       >
         {children}
       </Text>
@@ -322,8 +322,8 @@ Block.propTypes = {
   children: PropTypes.node,
 }
 
-function CurrentTask({epoch, period, identity}) {
-  const {t} = useTranslation()
+function CurrentTask({ epoch, period, identity }) {
+  const { t } = useTranslation()
 
   if (!period || !identity.state) return null
 
@@ -350,31 +350,31 @@ function CurrentTask({epoch, period, identity}) {
           IdentityStatus.Verified,
           IdentityStatus.Newbie,
         ].includes(status): {
-          const publishedFlipsNumber = (flips || []).length
-          const remainingRequiredFlipsNumber =
-            requiredFlipsNumber - publishedFlipsNumber
-          const optionalFlipsNumber =
-            availableFlipsNumber -
-            Math.max(requiredFlipsNumber, publishedFlipsNumber)
+            const publishedFlipsNumber = (flips || []).length
+            const remainingRequiredFlipsNumber =
+              requiredFlipsNumber - publishedFlipsNumber
+            const optionalFlipsNumber =
+              availableFlipsNumber -
+              Math.max(requiredFlipsNumber, publishedFlipsNumber)
 
-          const shouldSendFlips = remainingRequiredFlipsNumber > 0
+            const shouldSendFlips = remainingRequiredFlipsNumber > 0
 
-          return shouldSendFlips ? (
-            <Link href="/flips" color={theme.colors.white}>
-              Create {remainingRequiredFlipsNumber} required{' '}
-              {pluralize('flip', remainingRequiredFlipsNumber)}
-            </Link>
-          ) : (
-            `Wait for validation${
-              optionalFlipsNumber > 0
-                ? ` or create ${optionalFlipsNumber} optional ${pluralize(
+            return shouldSendFlips ? (
+              <Link href="/flips" color={theme.colors.white}>
+                Create {remainingRequiredFlipsNumber} required{' '}
+                {pluralize('flip', remainingRequiredFlipsNumber)}
+              </Link>
+            ) : (
+                `Wait for validation${
+                optionalFlipsNumber > 0
+                  ? ` or create ${optionalFlipsNumber} optional ${pluralize(
                     'flip',
                     optionalFlipsNumber
                   )}`
-                : ''
-            }`
-          )
-        }
+                  : ''
+                }`
+              )
+          }
 
         case [
           IdentityStatus.Candidate,
@@ -409,35 +409,35 @@ function CurrentTask({epoch, period, identity}) {
           IdentityStatus.Verified,
           IdentityStatus.Human,
         ].includes(identity.state): {
-          if (validationState) {
-            const {
-              done,
-              context: {epoch: lastValidationEpoch},
-            } = validationState
+            if (validationState) {
+              const {
+                done,
+                context: { epoch: lastValidationEpoch },
+              } = validationState
 
-            const isValidated = [
-              IdentityStatus.Newbie,
-              IdentityStatus.Verified,
-              IdentityStatus.Human,
-            ].includes(identity.state)
+              const isValidated = [
+                IdentityStatus.Newbie,
+                IdentityStatus.Verified,
+                IdentityStatus.Human,
+              ].includes(identity.state)
 
-            if (lastValidationEpoch === epoch)
-              return done ? (
-                t(`Wait for validation end`)
-              ) : (
-                <Link href="/validation" color={theme.colors.white}>
-                  {t('Validate')}
-                </Link>
-              )
+              if (lastValidationEpoch === epoch)
+                return done ? (
+                  t(`Wait for validation end`)
+                ) : (
+                    <Link href="/validation" color={theme.colors.white}>
+                      {t('Validate')}
+                    </Link>
+                  )
 
-            return isValidated
-              ? t(
+              return isValidated
+                ? t(
                   'Can not start validation session because you did not submit flips.'
                 )
-              : 'Starting your validation session...' // this is not normal thus not localized
+                : 'Starting your validation session...' // this is not normal thus not localized
+            }
+            return '...'
           }
-          return '...'
-        }
 
         default:
           break
@@ -457,7 +457,7 @@ function CurrentTask({epoch, period, identity}) {
   }
 }
 
-function UpdateButton({text, version, ...props}) {
+function UpdateButton({ text, version, ...props }) {
   return (
     <>
       <button type="button" {...props}>
@@ -500,7 +500,7 @@ UpdateButton.propTypes = {
 
 export function Version() {
   const autoUpdate = useAutoUpdateState()
-  const {updateClient, updateNode} = useAutoUpdateDispatch()
+  const { updateClient, updateNode } = useAutoUpdateDispatch()
 
   return (
     <>
@@ -513,14 +513,14 @@ export function Version() {
           <Text
             color={theme.colors.white05}
             fontWeight={500}
-            css={{lineHeight: rem(20)}}
+            css={{ lineHeight: rem(20) }}
           >
             Client version: {global.appVersion}
           </Text>
           <Text
             color={theme.colors.white05}
             fontWeight={500}
-            css={{lineHeight: rem(20)}}
+            css={{ lineHeight: rem(20) }}
           >
             Node version: {autoUpdate.nodeCurrentVersion}
           </Text>
@@ -534,7 +534,7 @@ export function Version() {
         {autoUpdate.nodeUpdating && (
           <Text
             color={theme.colors.white05}
-            css={{...margin(0, rem(theme.spacings.small8), 0)}}
+            css={{ ...margin(0, rem(theme.spacings.small8), 0) }}
           >
             Updating Node...
           </Text>
@@ -547,26 +547,26 @@ export function Version() {
           />
         ) : null}
         {!autoUpdate.canUpdateClient &&
-        autoUpdate.canUpdateNode &&
-        (!autoUpdate.nodeProgress ||
-          autoUpdate.nodeProgress.percentage === 100) ? (
-          <UpdateButton
-            text="Update Node Version"
-            version={autoUpdate.nodeRemoteVersion}
-            onClick={updateNode}
-          />
-        ) : null}
+          autoUpdate.canUpdateNode &&
+          (!autoUpdate.nodeProgress ||
+            autoUpdate.nodeProgress.percentage === 100) ? (
+            <UpdateButton
+              text="Update Node Version"
+              version={autoUpdate.nodeRemoteVersion}
+              onClick={updateNode}
+            />
+          ) : null}
       </Box>
     </>
   )
 }
 
 // eslint-disable-next-line react/prop-types
-function Bandwidth({strength, syncing}) {
+function Bandwidth({ strength, syncing }) {
   return (
     <div>
       <div>
-        {Array.from({length: 4}).map((_, idx) => (
+        {Array.from({ length: 4 }).map((_, idx) => (
           <BandwidthItem
             key={`bw-${idx}`}
             active={idx < strength}
@@ -594,7 +594,7 @@ function Bandwidth({strength, syncing}) {
 }
 
 // eslint-disable-next-line react/prop-types
-function BandwidthItem({active, variant, height}) {
+function BandwidthItem({ active, variant, height }) {
   return (
     <div>
       <style jsx>{`

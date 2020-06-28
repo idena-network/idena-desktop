@@ -1,7 +1,7 @@
 import React from 'react'
-import {margin} from 'polished'
+import { margin } from 'polished'
 import QRCode from 'qrcode.react'
-import {useTranslation} from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   SubHeading,
@@ -13,81 +13,39 @@ import {
   Field,
   Select,
 } from '../../shared/components'
-import theme, {rem} from '../../shared/theme'
+import theme, { rem } from '../../shared/theme'
 import Flex from '../../shared/components/flex'
 import useFlips from '../../shared/hooks/use-flips'
-import {useNotificationDispatch} from '../../shared/providers/notification-context'
+import { useNotificationDispatch } from '../../shared/providers/notification-context'
 import useRpc from '../../shared/hooks/use-rpc'
 import SettingsLayout from './layout'
-import {importKey} from '../../shared/api'
-import {useNodeDispatch} from '../../shared/providers/node-context'
+import { importKey } from '../../shared/api'
+import { useNodeDispatch } from '../../shared/providers/node-context'
 import {
   useSettingsState,
   useSettingsDispatch,
 } from '../../shared/providers/settings-context'
-import {AVAILABLE_LANGS} from '../../i18n'
-import {useEpochState} from '../../shared/providers/epoch-context'
+import { AVAILABLE_LANGS } from '../../i18n'
+import { useEpochState } from '../../shared/providers/epoch-context'
 
-const {clear: clearFlips} = global.flipStore || {}
+const { clear: clearFlips } = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
 
 function Settings() {
-  const {t} = useTranslation()
-  const {archiveFlips} = useFlips()
+  const { t } = useTranslation()
+  const { archiveFlips } = useFlips()
   const epoch = useEpochState()
-  const {addNotification} = useNotificationDispatch()
-  const {runInternalNode, useExternalNode} = useSettingsState()
+  const { addNotification } = useNotificationDispatch()
+  const { runInternalNode, useExternalNode } = useSettingsState()
   return (
     <SettingsLayout>
-      {global.isDev && (
-        <>
-          <Section title={t('Flips')}>
-            <Box>
-              <Button
-                onClick={() => {
-                  clearFlips()
-                  addNotification({title: t('Flips deleted')})
-                }}
-              >
-                {t('Clear flips')}
-              </Button>
-            </Box>
-            <Box my={theme.spacings.small}>
-              <Button
-                onClick={() => {
-                  if (epoch) {
-                    archiveFlips(epoch.epoch)
-                    addNotification({title: t('Flips archived')})
-                  }
-                }}
-              >
-                {t('Archive flips')}
-              </Button>
-            </Box>
-          </Section>
-          <Section title={t('Invites')}>
-            <Box my={theme.spacings.small}>
-              <Button
-                onClick={() => {
-                  inviteDb.clearInvites()
-                  addNotification({title: t('Invites removed')})
-                }}
-              >
-                {t('Clear invites')}
-              </Button>
-            </Box>
-          </Section>
-        </>
-      )}
-      <ExportPK />
-      {runInternalNode && !useExternalNode && <ImportPK />}
       <LocaleSwitcher />
     </SettingsLayout>
   )
 }
 
 // eslint-disable-next-line react/prop-types
-function Section({title, children}) {
+function Section({ title, children }) {
   return (
     <Box my={rem(theme.spacings.medium32)}>
       <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
@@ -99,9 +57,9 @@ function Section({title, children}) {
 }
 
 function ExportPK() {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
-  const [{result: pk}, callRpc] = useRpc()
+  const [{ result: pk }, callRpc] = useRpc()
 
   const [password, setPassword] = React.useState()
 
@@ -110,68 +68,22 @@ function ExportPK() {
   React.useEffect(() => setShowDialog(!!pk), [pk])
 
   return (
-    <Section title={t('Export private key')}>
-      <Text css={{marginBottom: 10}}>
-        {t('Create a new password to export your private key')}
-      </Text>
-      <form
-        onSubmit={e => {
-          e.preventDefault()
-          callRpc('dna_exportKey', password)
-        }}
-      >
-        <Label htmlFor="pasword">{t('New password')}</Label>
-        <Flex align="center">
-          <Input
-            id="pasword"
-            value={password}
-            type="password"
-            style={{
-              ...margin(0, theme.spacings.normal, 0, 0),
-              width: rem(300),
-            }}
-            disabled={showDialog}
-            onChange={e => setPassword(e.target.value)}
-          />
-          <Button type="submit" disabled={!password}>
-            {t('Export')}
-          </Button>
-        </Flex>
-      </form>
-      <PkDialog show={showDialog} onHide={() => setShowDialog(false)}>
-        <Box
-          css={{
-            ...margin(rem(theme.spacings.medium24)),
-            textAlign: 'center',
-          }}
-        >
-          <QRCode value={pk} />
-        </Box>
-        <Box>
-          <Field
-            id="pk"
-            label={t('Encrypted private key')}
-            defaultValue={pk}
-            readonly
-            disabled
-            allowCopy
-          />
-        </Box>
-      </PkDialog>
+    <Section>
+
     </Section>
   )
 }
 
 function ImportPK() {
-  const {t} = useTranslation('error')
+  const { t } = useTranslation('error')
   const [password, setPassword] = React.useState()
   const [key, setKey] = React.useState()
-  const {addError, addNotification} = useNotificationDispatch()
-  const {importNodeKey} = useNodeDispatch()
+  const { addError, addNotification } = useNotificationDispatch()
+  const { importNodeKey } = useNodeDispatch()
 
   const submit = async () => {
     try {
-      const {error} = await importKey(key, password)
+      const { error } = await importKey(key, password)
       if (error) {
         addError({
           title: t('error:Error while importing key'),
@@ -235,8 +147,8 @@ function ImportPK() {
 }
 
 // eslint-disable-next-line react/prop-types
-function PkDialog({children, onHide, ...props}) {
-  const {t} = useTranslation()
+function PkDialog({ children, onHide, ...props }) {
+  const { t } = useTranslation()
   return (
     <Modal onHide={onHide} {...props}>
       <Box m="0 0 18px">
@@ -258,8 +170,8 @@ function PkDialog({children, onHide, ...props}) {
 }
 
 function LocaleSwitcher() {
-  const {t, i18n} = useTranslation()
-  const {changeLanguage} = useSettingsDispatch()
+  const { t, i18n } = useTranslation()
+  const { changeLanguage } = useSettingsDispatch()
   return (
     <Section title={t('Language')}>
       <Box w={rem(300)}>

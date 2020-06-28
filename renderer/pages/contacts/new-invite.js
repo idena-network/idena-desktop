@@ -1,7 +1,7 @@
 import React from 'react'
-import {withRouter} from 'next/router'
+import { withRouter } from 'next/router'
 import ContactsPage from '../../screens/contacts/components/contacts-page'
-import {InviteProvider} from '../../shared/providers/invite-context'
+import { InviteProvider } from '../../shared/providers/invite-context'
 
 // eslint-disable-next-line react/prop-types
 function NewInvite() {

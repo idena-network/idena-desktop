@@ -22,7 +22,7 @@ addons:
 
 matrix:
   include:
-    - if: branch =~ /v\d+\.\d+\.\d+/
+    - if: branch =~ /rv\d+\.\d+\.\d+/
       os: windows
       env: PATH=/c/Python27:/c/Python27/Scripts:$PATH
       before_install:
@@ -31,12 +31,12 @@ matrix:
         - 7z x gtk+-bundle_2.22.1-20101229_win64.zip -y -o/c/GTK
       script:
         - npm run dist:win
-    - if: branch =~ /v\d+\.\d+\.\d+/
+    - if: branch =~ /rv\d+\.\d+\.\d+/
       os: osx
       osx_image: xcode11.3
       script:
         - npm run dist:mac
-    - if: branch =~ /v\d+\.\d+\.\d+/
+    - if: branch =~ /rv\d+\.\d+\.\d+/
       os: linux
       script:
         - npm run dist:linux
@@ -59,7 +59,7 @@ env:
 branches:
   only:
     - master
-    - /v\d+\.\d+\.\d+/
+    - /rv\d+\.\d+\.\d+/
 
 cache:
   directories:
