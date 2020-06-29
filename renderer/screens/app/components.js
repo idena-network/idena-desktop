@@ -46,7 +46,7 @@ export function PageTitle(props) {
   )
 }
 
-export function SendInviteDrawer({children, ...props}) {
+export function IssueInviteDrawer({children, ...props}) {
   const {t} = useTranslation()
   return (
     <Drawer {...props}>
@@ -68,7 +68,7 @@ export function SendInviteDrawer({children, ...props}) {
   )
 }
 
-export function SendInviteForm({onSendingInvite}) {
+export function IssueInviteForm({onIssueInvite}) {
   const {t} = useTranslation()
   return (
     <Stack
@@ -80,7 +80,7 @@ export function SendInviteForm({onSendingInvite}) {
           firstName: {value: firstName},
           lastName: {value: lastName},
         } = e.target.elements
-        onSendingInvite({address, firstName, lastName})
+        onIssueInvite({address, firstName, lastName})
         e.preventDefault()
       }}
     >

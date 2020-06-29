@@ -11,13 +11,14 @@ import {
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
+import {useMachine} from '@xstate/react'
 import {useIdentityState} from '../shared/providers/identity-context'
 import {useEpochState} from '../shared/providers/epoch-context'
 import {
   Page,
   PageTitle,
-  SendInviteDrawer,
-  SendInviteForm,
+  IssueInviteDrawer,
+  IssueInviteForm,
 } from '../screens/app/components'
 import {
   UserCard,
@@ -31,19 +32,27 @@ import {
 import {IconButton2} from '../shared/components/button'
 import {IconLink} from '../shared/components/link'
 import Layout from '../shared/components/layout'
-import {IdentityStatus} from '../shared/types'
-import {sendInvite} from '../shared/api'
-import {Notification} from '../shared/components/notifications'
+import {IdentityStatus, InviteStatus} from '../shared/types'
 import {useChainState} from '../shared/providers/chain-context'
 import {toPercent, toLocaleDna} from '../shared/utils/utils'
-import {NotificationType} from '../shared/providers/notification-context'
-import {Toast} from '../shared/components/components'
+import {Toast, Debug} from '../shared/components/components'
+import {invitesMachine} from '../shared/machines'
 
 export default function ProfilePage() {
   const {
     t,
     i18n: {language},
   } = useTranslation()
+
+  const toDna = toLocaleDna(language)
+
+  const {
+    isOpen: isOpenInviteForm,
+    onOpen: onOpenInviteForm,
+    onClose: onCloseInviteForm,
+  } = useDisclosure()
+
+  const toast = useToast()
 
   const {syncing, offline} = useChainState()
 
@@ -56,19 +65,47 @@ export default function ProfilePage() {
     age,
     totalShortFlipPoints,
     totalQualifiedFlips,
+    invites: knownInvitationsNumber,
   } = useIdentityState()
 
   const epoch = useEpochState()
 
-  const {
-    isOpen: isOpenInviteForm,
-    onOpen: onOpenInviteForm,
-    onClose: onCloseInviteForm,
-  } = useDisclosure()
+  const [current, send] = useMachine(invitesMachine, {
+    context: {
+      epoch: epoch?.epoch,
+    },
+    actions: {
+      onInviteSubmitted: (_, {hash}) => {
+        toast({
+          // eslint-disable-next-line react/display-name
+          render: () => (
+            <Toast title={t('Invitation code created')} description={hash} />
+          ),
+        })
+        onCloseInviteForm()
+      },
+      onSubmitInviteFailed: (_, {error}) =>
+        toast({
+          // eslint-disable-next-line react/display-name
+          render: () => (
+            <Toast
+              title={error?.message ?? t('Something went wrong')}
+              status="error"
+            />
+          ),
+        }),
+    },
+  })
 
-  const toast = useToast()
+  const {invites} = current.context
+  const issuingInvites = invites.filter(
+    ({status}) => status === InviteStatus.Issuing
+  )
 
-  const toDna = toLocaleDna(language)
+  const availableInvitationsNumber =
+    knownInvitationsNumber - issuingInvites.length
+
+  const isExceededInvitationsNumber = availableInvitationsNumber < 1
 
   return (
     <Layout syncing={syncing} offline={offline}>
@@ -159,73 +196,33 @@ export default function ProfilePage() {
               <Switch>Off</Switch>
             </Flex>
             <Stack spacing={1} align="flex-start">
-              <IconButton2 icon="add-user" onClick={onOpenInviteForm}>
-                {t('Invite')}
+              <IconButton2
+                isDisabled={isExceededInvitationsNumber}
+                icon="add-user"
+                onClick={onOpenInviteForm}
+              >
+                {t('Invite')} {`(${availableInvitationsNumber} available)`}
               </IconButton2>
               <IconLink href="/flips/new" icon={<Icon name="photo" size={5} />}>
                 {t('New flip')}
               </IconLink>
               <IconButton2 icon="delete" variantColor="red">
-                {t('Terminate')}
+                {t('Terminate identity')}
               </IconButton2>
             </Stack>
           </Box>
         </Stack>
 
-        <SendInviteDrawer isOpen={isOpenInviteForm} onClose={onCloseInviteForm}>
-          <SendInviteForm
-            onSendingInvite={async ({address: to, firstName, lastName}) => {
-              try {
-                const {result, error} = await sendInvite({
-                  to,
-                  amount: null,
-                })
-
-                if (error) throw new Error(error.message)
-
-                global.invitesDb.addInvite({
-                  amount: null,
-                  firstName,
-                  lastName,
-                  activated: false,
-                  canKill: true,
-                  mining: true,
-                  ...result,
-                })
-
-                toast({
-                  status: 'success',
-                  // eslint-disable-next-line react/display-name
-                  render: () => (
-                    <Toast
-                      icon="info"
-                      title={t('Invitation code created')}
-                      description={result.hash}
-                    />
-                  ),
-                })
-              } catch (error) {
-                global.logger.error(error)
-                toast({
-                  status: 'error',
-                  duration: 5000,
-                  // eslint-disable-next-line react/display-name
-                  render: () => (
-                    <Box fontSize="md">
-                      <Notification
-                        title={error.message}
-                        description={error.message}
-                        type={NotificationType.Error}
-                      />
-                    </Box>
-                  ),
-                })
-              } finally {
-                onCloseInviteForm()
-              }
-            }}
+        <IssueInviteDrawer
+          isOpen={isOpenInviteForm}
+          onClose={onCloseInviteForm}
+        >
+          <IssueInviteForm
+            onIssueInvite={async invite => send('ISSUE_INVITE', {invite})}
           />
-        </SendInviteDrawer>
+        </IssueInviteDrawer>
+
+        <Debug>{{value: current.value, context: current.context}}</Debug>
       </Page>
     </Layout>
   )

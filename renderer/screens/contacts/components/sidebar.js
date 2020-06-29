@@ -58,7 +58,7 @@ function InviteSection({onNewInvite, children}) {
   return (
     <SidebarHeading
       onNewInvite={invitesCount ? onNewInvite : null}
-      title={t(`Invites (${invitesCount} left)`)}
+      title={t('Invites left', {number: invitesCount})}
     >
       {children}
     </SidebarHeading>
@@ -77,7 +77,7 @@ function InviteList({filter, onSelectInvite}) {
       // eslint-disable-next-line no-shadow
       const nextInvite = invites.filter(({firstName, lastName, receiver}) =>
         [firstName, lastName, receiver].some(x =>
-          x.toLowerCase().includes(filter.toLowerCase())
+          x?.toLowerCase().includes(filter.toLowerCase())
         )
       )
       setFilteredInvites(nextInvite)

@@ -39,3 +39,12 @@ export const FlipType = {
   Deleting: 'deleting',
   Invalid: 'invalid',
 }
+
+export const InviteStatus = {
+  Issuing: 'issuing',
+  Issued: 'issued',
+  Activating: 'activating',
+  Activated: 'activated',
+  Terminating: 'terminating',
+  Terminated: 'terminated',
+}
