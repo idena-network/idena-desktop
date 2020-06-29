@@ -243,5 +243,9 @@
   "Copied": "Copied",
   "Erase": "Erase",
   "Select image to erase": "Select image to erase",
-  "Use keywords for the story": "Use keywords for the story"
+  "Use keywords for the story": "Use keywords for the story",
+  "Your node was offline more than 1 hour. The penalty will be charged automaically. Once it's fully paid you'll continue to mine coins.": "Your node was offline more than 1 hour. The penalty will be charged automaically. Once it's fully paid you'll continue to mine coins.",
+  "Total score for all validations": "Total score for all validations",
+  "Community translation is not available": "Community translation is not available",
+  "Invites left": "Invites ({{number}} left)"
 }
