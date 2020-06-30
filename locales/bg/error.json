@@ -1,0 +1,16 @@
+{
+  "Can not submit flip": "Флипът не може да бъде изпратен",
+  "Keywords are not specified": "Ключовите думи не са изброени",
+  "Error while uploading flip": "Грешка при качване на флип",
+  "Something went wrong": "Нещо се обърка",
+  "Maximum image size exceeded": "Превишихте максималния разбер на изображение",
+  "Error while importing key": "Грешка при импортиране на ключа",
+  "Internal node is not available, try again in a few seconds": "Вътрешният ноуд не е наличен, моля опитайте отново след няколко секунди",
+  "You can not submit flips having 'Candidate' status": "Не може да изпращате флипове, докато сте със статус Кандидат",
+  "You cannot submit more flips until the next validation": "Не може да изпращате повече флипове до следващата валидация",
+  "Can not submit flip during the validation session": "Не може да изпращате флипове по време на валидацията",
+  "Error while sending transaction": "Грешка при извършване на транзакцията",
+  "Transaction sent": "Транзакция извършена",
+  "Error while deleting flip": "Грешка при изтриване на флип",
+  "It's not allowed to submit flips with your identity status": "Не може да изпращате флипове със сегашния Ви статус"
+}
