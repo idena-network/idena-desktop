@@ -245,5 +245,14 @@
   "Copied": "Copied",
   "Erase": "Erase",
   "Select image to erase": "Select image to erase",
-  "Use keywords for the story": "Use keywords for the story"
+  "Use keywords for the story": "Use keywords for the story",
+  "Your node was offline more than 1 hour. The penalty will be charged automaically. Once it's fully paid you'll continue to mine coins.": "Your node was offline more than 1 hour. The penalty will be charged automaically. Once it's fully paid you'll continue to mine coins.",
+  "Total score for all validations": "Total score for all validations",
+  "Spoil invite": "Spoil invite",
+  "Invitation is successfully spoiled": "Invitation is successfully spoiled",
+  "Invitation is missing": "Invitation is missing",
+  "Community translation is not available": "Community translation is not available",
+  "Spoil invitation code": "Spoil invitation code",
+  "Since invitation codes are supposed to be provided privately feel free\n          to spoil those invitations that are shared publicly. This will prevent\n          bots from collecting invitation codes. When you click Spoil the\n          invitation will be activated by a random address": "Since invitation codes are supposed to be provided privately feel free\n          to spoil those invitations that are shared publicly. This will prevent\n          bots from collecting invitation codes. When you click Spoil the\n          invitation will be activated by a random address",
+  "Invitation code to spoil": "Invitation code to spoil"
 }
