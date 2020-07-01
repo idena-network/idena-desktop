@@ -10,7 +10,7 @@ import {
 import {Avatar, Tooltip} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 
-export function UserCard({address, state}) {
+export function UserInlineCard({address, state}) {
   return (
     <Stack isInline spacing={6} align="center" mb={6} width={rem(480)}>
       <Avatar address={address} />

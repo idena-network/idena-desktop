@@ -64,39 +64,77 @@ export const createTimerMachine = duration =>
     },
   })
 
-export const invitesMachine = Machine({
-  context: {
-    invites: [],
-  },
-  initial: 'idle',
-  states: {
-    idle: {
-      on: {
-        ISSUE_INVITE: {
-          actions: [
-            assign({
-              invites: ({epoch, invites}, {invite}) =>
-                invites.concat({
-                  ...invite,
-                  status: InviteStatus.Issuing,
-                  ref: spawn(
-                    // eslint-disable-next-line no-use-before-define
-                    inviteMachine.withContext({
-                      epoch,
-                      status: InviteStatus.Issuing,
-                      ...invite,
-                    })
-                  ),
-                }),
-            }),
-          ],
+export const invitesMachine = Machine(
+  {
+    context: {
+      epoch: null,
+      invites: [],
+    },
+    initial: 'idle',
+    states: {
+      idle: {
+        on: {
+          '': [{target: 'loading', cond: ({epoch}) => Number.isInteger(epoch)}],
+          EPOCH: {
+            target: 'loading',
+            actions: [
+              assign({
+                epoch: (_, {epoch}) => epoch,
+              }),
+            ],
+          },
         },
-        INVITE_SUBMITTED: {actions: ['onInviteSubmitted']},
-        SUBMIT_INVITE_FAILED: {actions: ['onSubmitInviteFailed']},
+      },
+      loading: {
+        invoke: {
+          src: 'loadInvites',
+          onDone: {
+            target: 'ready',
+            actions: [
+              assign({
+                invites: (_, {data}) => data,
+              }),
+              log(),
+            ],
+          },
+          onError: {
+            actions: log(),
+          },
+        },
+      },
+      ready: {
+        on: {
+          ISSUE_INVITE: {
+            actions: [
+              assign({
+                invites: ({epoch, invites}, {invite}) =>
+                  invites.concat({
+                    ...invite,
+                    status: InviteStatus.Issuing,
+                    ref: spawn(
+                      // eslint-disable-next-line no-use-before-define
+                      inviteMachine.withContext({
+                        epoch,
+                        status: InviteStatus.Issuing,
+                        ...invite,
+                      })
+                    ),
+                  }),
+              }),
+            ],
+          },
+          INVITE_SUBMITTED: {actions: ['onInviteSubmitted']},
+          SUBMIT_INVITE_FAILED: {actions: ['onSubmitInviteFailed']},
+        },
       },
     },
   },
-})
+  {
+    services: {
+      loadInvites: ({epoch}) => epochDb(epoch).invites.toArray(),
+    },
+  }
+)
 
 export const inviteMachine = Machine(
   {

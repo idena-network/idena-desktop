@@ -21,7 +21,7 @@ import {
   IssueInviteForm,
 } from '../screens/app/components'
 import {
-  UserCard,
+  UserInlineCard,
   SimpleUserStat,
   UserStatList,
   UserStat,
@@ -70,7 +70,7 @@ export default function ProfilePage() {
 
   const epoch = useEpochState()
 
-  const [current, send] = useMachine(invitesMachine, {
+  const [currentInvites, sendInvites] = useMachine(invitesMachine, {
     context: {
       epoch: epoch?.epoch,
     },
@@ -97,7 +97,12 @@ export default function ProfilePage() {
     },
   })
 
-  const {invites} = current.context
+  React.useEffect(() => {
+    if (epoch && currentInvites.matches('idle'))
+      sendInvites('EPOCH', {epoch: epoch.epoch})
+  }, [currentInvites, epoch, sendInvites])
+
+  const {invites} = currentInvites.context
   const issuingInvites = invites.filter(
     ({status}) => status === InviteStatus.Issuing
   )
@@ -113,7 +118,7 @@ export default function ProfilePage() {
         <PageTitle mb={8}>{t('Profile')}</PageTitle>
         <Stack isInline spacing={10}>
           <Box>
-            <UserCard address={address} state={state} />
+            <UserInlineCard address={address} state={state} />
             <UserStatList>
               <SimpleUserStat label="Address" value={address} />
               <UserStat>
@@ -201,7 +206,8 @@ export default function ProfilePage() {
                 icon="add-user"
                 onClick={onOpenInviteForm}
               >
-                {t('Invite')} {`(${availableInvitationsNumber} available)`}
+                {t('Invite')}{' '}
+                {`(${Math.max(availableInvitationsNumber, 0)} available)`}
               </IconButton2>
               <IconLink href="/flips/new" icon={<Icon name="photo" size={5} />}>
                 {t('New flip')}
@@ -218,11 +224,15 @@ export default function ProfilePage() {
           onClose={onCloseInviteForm}
         >
           <IssueInviteForm
-            onIssueInvite={async invite => send('ISSUE_INVITE', {invite})}
+            onIssueInvite={async invite =>
+              sendInvites('ISSUE_INVITE', {invite})
+            }
           />
         </IssueInviteDrawer>
 
-        <Debug>{{value: current.value, context: current.context}}</Debug>
+        <Debug>
+          {{value: currentInvites.value, context: currentInvites.context}}
+        </Debug>
       </Page>
     </Layout>
   )

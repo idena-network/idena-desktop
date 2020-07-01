@@ -36,7 +36,7 @@ function ContactsPage() {
 
   const toast = useToast()
 
-  const [, send] = useMachine(invitesMachine, {
+  const [currentInvites, sendInvites] = useMachine(invitesMachine, {
     context: {
       epoch: epoch?.epoch,
     },
@@ -62,6 +62,11 @@ function ContactsPage() {
         }),
     },
   })
+
+  React.useEffect(() => {
+    if (epoch && currentInvites.matches('idle'))
+      sendInvites('EPOCH', {epoch: epoch.epoch})
+  }, [currentInvites, epoch, sendInvites])
 
   return (
     <ContactProvider>
@@ -115,7 +120,9 @@ function ContactsPage() {
             onClose={onCloseInviteForm}
           >
             <IssueInviteForm
-              onIssueInvite={async invite => send('ISSUE_INVITE', {invite})}
+              onIssueInvite={async invite =>
+                sendInvites('ISSUE_INVITE', {invite})
+              }
             />
           </IssueInviteDrawer>
         </Flex>
