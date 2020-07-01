@@ -1,7 +1,19 @@
 /* eslint-disable no-unused-vars */
 import React from 'react'
 import {useTranslation} from 'react-i18next'
-import {Stack, Heading, FormControl, FormLabel, useToast} from '@chakra-ui/core'
+import {
+  Stack,
+  Heading,
+  FormControl,
+  FormLabel,
+  useToast,
+  Collapse,
+  Box,
+  Button,
+  useDisclosure,
+  Icon,
+  Text,
+} from '@chakra-ui/core'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
 import {
   Drawer,
@@ -11,7 +23,7 @@ import {
   Input,
   Toast,
 } from '../../../shared/components/components'
-import {PrimaryButton} from '../../../shared/components/button'
+import {PrimaryButton, IconButton2} from '../../../shared/components/button'
 
 // eslint-disable-next-line react/prop-types
 export function SendInviteDrawer({children, ...props}) {
@@ -31,7 +43,14 @@ export function SendInviteDrawer({children, ...props}) {
           {t('Invite new person')}
         </Heading>
       </DrawerHeader>
-      <DrawerBody>{children}</DrawerBody>
+      <DrawerBody>
+        <Text fontSize="md" mb={6}>
+          {t(
+            `You can issue the invitation to the specific identity address in Advanced section`
+          )}
+        </Text>
+        {children}
+      </DrawerBody>
     </Drawer>
   )
 }
@@ -41,6 +60,11 @@ export function SendInviteForm({onSuccess, onFail}) {
   const {t} = useTranslation()
 
   const toast = useToast()
+
+  const {
+    isOpen: isOpenAdvancedOptions,
+    onToggle: onToggleAdvancedOptions,
+  } = useDisclosure()
 
   const {addInvite} = useInviteDispatch()
 
@@ -92,13 +116,6 @@ export function SendInviteForm({onSuccess, onFail}) {
         }
       }}
     >
-      <FormControl>
-        <FormLabel htmlFor="address">{t('Address')}</FormLabel>
-        <Input
-          id="address"
-          placeholder="Send directly to given address, or skip"
-        />
-      </FormControl>
       <Stack isInline spacing={4}>
         <FormControl>
           <FormLabel htmlFor="firstName">{t('First name')}</FormLabel>
@@ -109,6 +126,33 @@ export function SendInviteForm({onSuccess, onFail}) {
           <Input id="lastName" />
         </FormControl>
       </Stack>
+      <Box>
+        <Button
+          background="transparent"
+          color="brandGray.500"
+          px={0}
+          _hover={{background: 'transparent'}}
+          _active={{background: 'transparent'}}
+          _focus={{outline: 'none'}}
+          onClick={onToggleAdvancedOptions}
+        >
+          {t('Advanced')}
+          <Icon
+            size={5}
+            name="chevron-down"
+            color="muted"
+            ml={2}
+            transform={isOpenAdvancedOptions ? 'rotate(180deg)' : ''}
+            transition="all 0.2s ease-in-out"
+          />
+        </Button>
+        <Collapse isOpen={isOpenAdvancedOptions} mt={4}>
+          <FormControl>
+            <FormLabel htmlFor="address">{t('Address')}</FormLabel>
+            <Input id="address" placeholder="Invitee address" />
+          </FormControl>
+        </Collapse>
+      </Box>
       <PrimaryButton ml="auto" type="submit" isLoading={isSubmitting}>
         {t('Create invitation')}
       </PrimaryButton>

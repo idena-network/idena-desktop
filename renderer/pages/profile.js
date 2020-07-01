@@ -169,7 +169,7 @@ export default function ProfilePage() {
             <Box w={rem(200)}>
               {canMine && (
                 <Text fontWeight={500} mt={4} mb={2}>
-                  Status
+                  {t('Online mining status')}
                 </Text>
               )}
               <MinerStatusSwitcher />

@@ -108,7 +108,7 @@ function MinerStatusSwitcher() {
               htmlFor="switcher"
               style={{margin: 0, cursor: 'pointer', maxWidth: rem(110)}}
             >
-              {'Miner' || t('Online mining status')}
+              {t('Mining')}
             </Label>
             <Box pointerEvents="none">
               {state.online !== null && state.online !== undefined && (

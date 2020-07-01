@@ -50,6 +50,10 @@ function ActivateInviteForm() {
           <Input
             id="code"
             isDisabled={mining || status === IdentityStatus.Invite}
+            placeholder={
+              status === IdentityStatus.Invite &&
+              'Click the button to activate invitation'
+            }
             _disabled={{
               bg: 'gray.50',
             }}
