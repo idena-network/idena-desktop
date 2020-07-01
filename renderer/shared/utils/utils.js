@@ -1,4 +1,6 @@
-export function callRpc(url = 'http://localhost:9009', key) {
+import {getRpcParams} from '../api/api-client'
+
+export function createRpcCaller({url, key}) {
   return async function(method, ...params) {
     const {result, error} = await (
       await fetch(url, {
@@ -18,6 +20,10 @@ export function callRpc(url = 'http://localhost:9009', key) {
     if (error) throw new Error(error.message)
     return result
   }
+}
+
+export function callRpc(method, ...params) {
+  return createRpcCaller(getRpcParams())(method, ...params)
 }
 
 export function toPercent(value) {

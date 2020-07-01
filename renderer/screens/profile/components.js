@@ -6,9 +6,21 @@ import {
   StatLabel,
   StatNumber,
   useTheme,
+  FormControl,
+  Text,
 } from '@chakra-ui/core'
-import {Avatar, Tooltip} from '../../shared/components/components'
+import {useTranslation} from 'react-i18next'
+import {
+  Avatar,
+  Tooltip,
+  FormLabel,
+  Input,
+  Drawer,
+  DrawerHeader,
+  DrawerBody,
+} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
+import {PrimaryButton} from '../../shared/components/button'
 
 export function UserCard({address, state}) {
   return (
@@ -90,4 +102,56 @@ export function UserStatValue(props) {
 
 export function UserStatLabelTooltip(props) {
   return <Tooltip placement="top" zIndex="tooltip" {...props} />
+}
+
+export function SpoilInviteDrawer({children, ...props}) {
+  const {t} = useTranslation()
+  return (
+    <Drawer {...props}>
+      <DrawerHeader mb={6}>
+        <Avatar address={`0x${'2'.repeat(64)}`} mx="auto" />
+        <Heading
+          fontSize="lg"
+          fontWeight={500}
+          color="brandGray.500"
+          mt={4}
+          mb={0}
+          textAlign="center"
+        >
+          {t('Spoil invitation code')}
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>
+        <Text fontSize="md" mb={6}>
+          {t(`Since invitation codes are supposed to be provided privately feel free
+          to spoil those invitations that are shared publicly. This will prevent
+          bots from collecting invitation codes. When you click Spoil the
+          invitation will be activated by a random address`)}
+        </Text>
+        {children}
+      </DrawerBody>
+    </Drawer>
+  )
+}
+
+export function SpoilInviteForm({onSpoil}) {
+  const {t} = useTranslation()
+  return (
+    <Stack
+      as="form"
+      spacing={6}
+      onSubmit={e => {
+        e.preventDefault()
+        onSpoil(e.target.elements.key.value)
+      }}
+    >
+      <FormControl>
+        <FormLabel htmlFor="key">Invitation code</FormLabel>
+        <Input id="key" placeholder={t('Invitation code to spoil')} />
+      </FormControl>
+      <PrimaryButton ml="auto" type="submit">
+        {t('Spoil invite')}
+      </PrimaryButton>
+    </Stack>
+  )
 }

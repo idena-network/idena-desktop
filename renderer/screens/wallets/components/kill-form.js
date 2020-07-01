@@ -1,130 +1,131 @@
 import React from 'react'
-import {margin, padding} from 'polished'
-import PropTypes from 'prop-types'
-import {FiLoader} from 'react-icons/fi'
+import {FormControl, Heading, Stack, useToast, Text} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-
-import theme, {rem} from '../../../shared/theme'
+import {PrimaryButton} from '../../../shared/components/button'
 import {
-  Box,
-  Text,
-  SubHeading,
-  FormGroup,
-  Field,
-  Button,
-} from '../../../shared/components'
-
-import {useNotificationDispatch} from '../../../shared/providers/notification-context'
-import Avatar from '../../../shared/components/avatar'
+  Avatar,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  FormLabel,
+  Input,
+  Toast,
+} from '../../../shared/components/components'
 import {
-  useIdentityState,
   useIdentityDispatch,
+  useIdentityState,
 } from '../../../shared/providers/identity-context'
 
-function KillForm({onSuccess, onFail}) {
-  const {t} = useTranslation(['walets', 'error'])
-  const {address, stake} = useIdentityState()
-  const {killMe} = useIdentityDispatch()
-
-  const [to, setTo] = React.useState()
-
-  const [submitting, setSubmitting] = React.useState(false)
-
-  const {addNotification, addError} = useNotificationDispatch()
-
+// eslint-disable-next-line react/prop-types
+export function KillIdentityDrawer({address, children, ...props}) {
+  const {t} = useTranslation()
   return (
-    <Box
-      css={padding(rem(theme.spacings.large48), rem(theme.spacings.medium32))}
-    >
-      <Box
-        css={{
-          ...margin(theme.spacings.medium16, 0, theme.spacings.medium32),
-        }}
-      >
-        <Box>
-          <Avatar username={address} size={80} style={{...margin(0, 'auto')}} />
-        </Box>
-        <Box
-          css={{
-            ...margin(theme.spacings.medium16, 0, theme.spacings.medium32),
-            textAlign: 'center',
-          }}
+    <Drawer {...props}>
+      <DrawerHeader mb={6}>
+        <Avatar address={address} mx="auto" />
+        <Heading
+          fontSize="lg"
+          fontWeight={500}
+          color="brandGray.500"
+          mt={4}
+          mb={0}
+          textAlign="center"
         >
-          <SubHeading css={{...margin(0, 0, theme.spacings.small8)}}>
-            {t('translation:Terminate identity')}
-          </SubHeading>
-          <Text>
-            {t(`translation:Terminate your identity and withdraw the stake. Your identity status
+          {t('Terminate identity')}
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>
+        <Text fontSize="md" mb={6}>
+          {t(`Terminate your identity and withdraw the stake. Your identity status
             will be reset to 'Not validated'.`)}
-          </Text>
-        </Box>
-
-        <FormGroup>
-          <Field
-            disabled
-            label={t('translation:Withraw stake, DNA')}
-            value={stake}
-            type="number"
-          />
-        </FormGroup>
-
-        <FormGroup>
-          <Field
-            label={t('translation:To address')}
-            value={to}
-            onChange={e => setTo(e.target.value)}
-          />
-        </FormGroup>
-
-        <FormGroup
-          css={margin(rem(theme.spacings.medium24), 0, 0)}
-          className="text-right"
-        >
-          <Button
-            disabled={submitting || !to}
-            danger
-            onClick={async () => {
-              try {
-                setSubmitting(true)
-
-                const {result, error} = await killMe({to})
-                setSubmitting(false)
-
-                if (error) {
-                  addError({
-                    title: t('error:Error while sending transaction'),
-                    body: error.message,
-                  })
-                } else {
-                  addNotification({
-                    title: t('error:Transaction sent'),
-                    body: result,
-                  })
-                  if (onSuccess) onSuccess(result)
-                }
-              } catch (error) {
-                setSubmitting(false)
-                if (onFail) {
-                  addError({
-                    title: t('error:Something went wrong'),
-                    body: error.message,
-                  })
-                  onFail(error)
-                }
-              }
-            }}
-          >
-            {submitting ? <FiLoader /> : t('translation:Terminate')}
-          </Button>
-        </FormGroup>
-      </Box>
-    </Box>
+        </Text>
+        {children}
+      </DrawerBody>
+    </Drawer>
   )
 }
 
-KillForm.propTypes = {
-  onSuccess: PropTypes.func,
-  onFail: PropTypes.func,
+// eslint-disable-next-line react/prop-types
+function KillForm({onSuccess, onFail}) {
+  const {t} = useTranslation()
+
+  const toast = useToast()
+
+  const {stake} = useIdentityState()
+  const {killMe} = useIdentityDispatch()
+
+  const [submitting, setSubmitting] = React.useState(false)
+
+  return (
+    <Stack
+      as="form"
+      spacing={6}
+      onSubmit={async e => {
+        e.preventDefault()
+        try {
+          setSubmitting(true)
+
+          const {result, error} = await killMe({to: e.target.elements.to.value})
+
+          setSubmitting(false)
+
+          if (error) {
+            toast({
+              // eslint-disable-next-line react/display-name
+              render: () => (
+                <Toast
+                  title={t('error:Error while sending transaction')}
+                  description={error.message}
+                  status="error"
+                />
+              ),
+            })
+          } else {
+            toast({
+              status: 'success',
+              // eslint-disable-next-line react/display-name
+              render: () => <Toast title={t('Transaction sent')} />,
+            })
+            if (onSuccess) onSuccess(result)
+          }
+        } catch (error) {
+          setSubmitting(false)
+          toast({
+            // eslint-disable-next-line react/display-name
+            render: () => (
+              <Toast
+                title={t('error:Something went wrong')}
+                description={error.message}
+                status="error"
+              />
+            ),
+          })
+          if (onFail) onFail(error)
+        }
+      }}
+    >
+      <FormControl>
+        <FormLabel htmlFor="stake">{t('Withraw stake, DNA')}</FormLabel>
+        <Input
+          id="stake"
+          value={stake}
+          isDisabled
+          _disabled={{
+            bg: 'gray.50',
+          }}
+        />
+      </FormControl>
+
+      <FormControl>
+        <FormLabel htmlFor="to">{t('To address')}</FormLabel>
+        <Input id="to" placeholder={t('To address')} />
+      </FormControl>
+
+      <PrimaryButton ml="auto" type="submit" isLoading={submitting}>
+        {t('Terminate')}
+      </PrimaryButton>
+    </Stack>
+  )
 }
 
 export default KillForm

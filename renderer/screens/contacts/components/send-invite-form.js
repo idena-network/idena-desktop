@@ -1,111 +1,119 @@
 /* eslint-disable no-unused-vars */
 import React from 'react'
-import PropTypes from 'prop-types'
-import {padding, margin, wordWrap} from 'polished'
-import {FiLoader} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
-import {
-  Box,
-  SubHeading,
-  FormGroup,
-  Field,
-  Button,
-} from '../../../shared/components'
-import Avatar from '../../../shared/components/avatar'
-import theme, {rem} from '../../../shared/theme'
-import Flex from '../../../shared/components/flex'
+import {Stack, Heading, FormControl, FormLabel, useToast} from '@chakra-ui/core'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
-import {useNotificationDispatch} from '../../../shared/providers/notification-context'
+import {
+  Drawer,
+  DrawerHeader,
+  Avatar,
+  DrawerBody,
+  Input,
+  Toast,
+} from '../../../shared/components/components'
+import {PrimaryButton} from '../../../shared/components/button'
 
-function SendInviteForm({onSuccess, onFail}) {
+// eslint-disable-next-line react/prop-types
+export function SendInviteDrawer({children, ...props}) {
   const {t} = useTranslation()
-
-  const [firstName, setFirstName] = React.useState()
-  const [lastName, setLastName] = React.useState()
-  const [address] = React.useState()
-  const [amount] = React.useState()
-  const [submitting, setSubmitting] = React.useState(false)
-
-  const {addInvite} = useInviteDispatch()
-  const {addNotification, addError} = useNotificationDispatch()
-
   return (
-    <Box
-      css={padding(rem(theme.spacings.large48), rem(theme.spacings.medium32))}
-    >
-      <Box>
-        <Avatar
-          username={address || `0x${'2'.repeat(64)}`}
-          size={80}
-          style={{...margin(0, 'auto')}}
-        />
-      </Box>
-      <Box
-        css={{
-          ...margin(theme.spacings.medium16, 0, theme.spacings.medium32),
-          textAlign: 'center',
-        }}
-      >
-        <SubHeading
-          css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
+    <Drawer {...props}>
+      <DrawerHeader mb={6}>
+        <Avatar address={`0x${'2'.repeat(64)}`} mx="auto" />
+        <Heading
+          fontSize="lg"
+          fontWeight={500}
+          color="brandGray.500"
+          mt={4}
+          mb={0}
+          textAlign="center"
         >
           {t('Invite new person')}
-        </SubHeading>
-      </Box>
-      <Flex justify="space-between">
-        <NameField
-          label={t('First name')}
-          value={firstName}
-          onChange={e => setFirstName(e.target.value)}
-        />
-        <NameField
-          label={t('Last name')}
-          value={lastName}
-          onChange={e => setLastName(e.target.value)}
-        />
-      </Flex>
-      <FormGroup css={margin(rem(theme.spacings.medium24), 0, 0)}>
-        <Button
-          disabled={submitting}
-          onClick={async () => {
-            try {
-              setSubmitting(true)
-              const invite = await addInvite(
-                address,
-                amount,
-                firstName,
-                lastName
-              )
-              setSubmitting(false)
-              if (onSuccess) {
-                addNotification({
-                  title: t('Invitation code created'),
-                })
-                onSuccess(invite)
-              }
-            } catch (error) {
-              setSubmitting(false)
-              if (onFail) {
-                addError({
-                  title: error.message,
-                })
-                onFail(error)
-              }
-            }
-          }}
-        >
-          {submitting ? <FiLoader /> : t('Create invitation')}
-        </Button>
-      </FormGroup>
-    </Box>
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>{children}</DrawerBody>
+    </Drawer>
   )
 }
 
-SendInviteForm.propTypes = {
-  onSuccess: PropTypes.func,
-  onFail: PropTypes.func,
-}
+// eslint-disable-next-line react/prop-types
+export function SendInviteForm({onSuccess, onFail}) {
+  const {t} = useTranslation()
 
-const NameField = props => <Field {...props} style={{width: rem(140)}} />
+  const toast = useToast()
+
+  const {addInvite} = useInviteDispatch()
+
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+
+  return (
+    <Stack
+      as="form"
+      spacing={6}
+      onSubmit={async e => {
+        e.preventDefault()
+
+        const {
+          address: {value: address},
+          firstName: {value: firstName},
+          lastName: {value: lastName},
+        } = e.target.elements
+
+        try {
+          setIsSubmitting(true)
+
+          const invite = await addInvite(address, null, firstName, lastName)
+
+          setIsSubmitting(false)
+
+          toast({
+            // eslint-disable-next-line react/display-name
+            render: () => (
+              <Toast
+                title={t('Invitation code created')}
+                description={invite.hash}
+              />
+            ),
+          })
+
+          if (onSuccess) onSuccess(invite)
+        } catch (error) {
+          setIsSubmitting(false)
+          toast({
+            // eslint-disable-next-line react/display-name
+            render: () => (
+              <Toast
+                title={error?.message ?? t('Something went wrong')}
+                status="error"
+              />
+            ),
+          })
+          if (onFail) onFail(error)
+        }
+      }}
+    >
+      <FormControl>
+        <FormLabel htmlFor="address">{t('Address')}</FormLabel>
+        <Input
+          id="address"
+          placeholder="Send directly to given address, or skip"
+        />
+      </FormControl>
+      <Stack isInline spacing={4}>
+        <FormControl>
+          <FormLabel htmlFor="firstName">{t('First name')}</FormLabel>
+          <Input id="firstName" />
+        </FormControl>
+        <FormControl>
+          <FormLabel htmlFor="lastName">{t('Last name')}</FormLabel>
+          <Input id="lastName" />
+        </FormControl>
+      </Stack>
+      <PrimaryButton ml="auto" type="submit" isLoading={isSubmitting}>
+        {t('Create invitation')}
+      </PrimaryButton>
+    </Stack>
+  )
+}
 
 export default SendInviteForm

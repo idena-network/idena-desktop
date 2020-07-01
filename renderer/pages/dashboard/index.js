@@ -1,9 +1,7 @@
 import React from 'react'
-import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
 import Layout from '../../shared/components/layout'
 import {Drawer, Box, PageTitle} from '../../shared/components'
-import SendInviteForm from '../../screens/contacts/components/send-invite-form'
 import theme, {rem} from '../../shared/theme'
 import {InviteProvider} from '../../shared/providers/invite-context'
 import Actions from '../../shared/components/actions'
@@ -24,11 +22,7 @@ import {
 import {persistItem} from '../../shared/utils/persist'
 
 function Dashboard() {
-  const router = useRouter()
   const {syncing, offline, loading} = useChainState()
-
-  const [isSendInviteOpen, setIsSendInviteOpen] = React.useState(false)
-  const handleCloseSendInvite = () => setIsSendInviteOpen(false)
 
   const [isWithdrawStakeFormOpen, setIsWithdrawStakeFormOpen] = React.useState(
     false
@@ -95,16 +89,6 @@ function Dashboard() {
           <NetProfile />
           <ActivateInviteForm />
         </Box>
-
-        <Drawer show={isSendInviteOpen} onHide={handleCloseSendInvite}>
-          <SendInviteForm
-            onSuccess={() => {
-              handleCloseSendInvite()
-              router.push('/contacts')
-            }}
-            onFail={handleCloseSendInvite}
-          />
-        </Drawer>
 
         <Drawer
           show={isWithdrawStakeFormOpen}

@@ -1,22 +1,21 @@
 import React, {useEffect, useReducer} from 'react'
 import {useTranslation} from 'react-i18next'
-
 import {
   Box,
+  Button,
   FormGroup,
   Label,
-  Switcher,
   Modal,
-  Button,
   SubHeading,
+  Switcher,
   Text,
 } from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
-import theme from '../../../shared/theme'
-import useTx from '../../../shared/hooks/use-tx'
 import useRpc from '../../../shared/hooks/use-rpc'
+import useTx from '../../../shared/hooks/use-tx'
 import {useIdentityState} from '../../../shared/providers/identity-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
+import theme, {rem} from '../../../shared/theme'
 
 const defaultState = {
   online: null,
@@ -105,7 +104,10 @@ function MinerStatusSwitcher() {
       <FormGroup onClick={() => dispatch(['open'])}>
         <div className="form-control">
           <Flex align="center" justify="space-between">
-            <Label htmlFor="switcher" style={{margin: 0, cursor: 'pointer'}}>
+            <Label
+              htmlFor="switcher"
+              style={{margin: 0, cursor: 'pointer', maxWidth: rem(110)}}
+            >
               {t('Online mining status')}
             </Label>
             <Box style={{pointerEvents: 'none'}}>
