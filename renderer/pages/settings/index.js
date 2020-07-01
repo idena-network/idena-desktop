@@ -15,7 +15,6 @@ import {
 } from '../../shared/components'
 import theme, {rem} from '../../shared/theme'
 import Flex from '../../shared/components/flex'
-import useFlips from '../../shared/hooks/use-flips'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import useRpc from '../../shared/hooks/use-rpc'
 import SettingsLayout from './layout'
@@ -26,15 +25,13 @@ import {
   useSettingsDispatch,
 } from '../../shared/providers/settings-context'
 import {AVAILABLE_LANGS} from '../../i18n'
-import {useEpochState} from '../../shared/providers/epoch-context'
+import {archiveFlips} from '../../screens/flips/utils'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
 
 function Settings() {
   const {t} = useTranslation()
-  const {archiveFlips} = useFlips()
-  const epoch = useEpochState()
   const {addNotification} = useNotificationDispatch()
   const {runInternalNode, useExternalNode} = useSettingsState()
   return (
@@ -55,10 +52,8 @@ function Settings() {
             <Box my={theme.spacings.small}>
               <Button
                 onClick={() => {
-                  if (epoch) {
-                    archiveFlips(epoch.epoch)
-                    addNotification({title: t('Flips archived')})
-                  }
+                  archiveFlips()
+                  addNotification({title: t('Flips archived')})
                 }}
               >
                 {t('Archive flips')}

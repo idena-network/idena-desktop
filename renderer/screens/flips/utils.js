@@ -1,45 +1,14 @@
 import {encode} from 'rlp'
+import axios from 'axios'
 import Jimp from 'jimp'
-import dict from './words'
-import {capitalize} from '../../../shared/utils/string'
-import {
-  loadPersistentStateValue,
-  persistItem,
-} from '../../../shared/utils/persist'
-import {FlipType} from '../../../shared/types'
-import {areSame, areEual} from '../../../shared/utils/arr'
-import {submitFlip} from '../../../shared/api'
+import {loadPersistentStateValue, persistItem} from '../../shared/utils/persist'
+import {FlipType} from '../../shared/types'
+import {areSame, areEual} from '../../shared/utils/arr'
+import {submitFlip} from '../../shared/api'
+import {signNonce} from '../../shared/utils/dna-link'
 
 export const FLIP_LENGTH = 4
 export const DEFAULT_FLIP_ORDER = [0, 1, 2, 3]
-
-/**
- * Composes hint for the flip
- * @param {object[]} words List of two words
- */
-export function composeHint(hint) {
-  if (!hint || !hint.words) {
-    return ''
-  }
-  return hint.words
-    .map(w => (typeof w === 'string' ? w : w.name))
-    .map(capitalize)
-    .join(' / ')
-}
-
-/**
- * Decomposes flip hint into two words
- * @param {string} hint Flip hint
- */
-export function decomposeHint(words) {
-  return words.split('/')
-}
-
-export function hasDataUrl(src) {
-  return src && src.startsWith('data:')
-}
-
-const randomIndex = currentIndex => Math.floor(Math.random() * currentIndex)
 
 export function getRandomKeywordPair() {
   function getRandomInt(min, max) {
@@ -53,80 +22,6 @@ export function getRandomKeywordPair() {
   return {id: 0, words: [getRandomInt(0, 3407), getRandomInt(0, 3407)]}
 }
 
-export function getRandomHint() {
-  const nextIndex = randomIndex(dict.length)
-
-  const firstWord = dict[nextIndex]
-  const secondWord = dict[randomIndex(nextIndex)]
-
-  const wordsPair = [firstWord, secondWord].map(({name, desc}) => ({
-    name,
-    desc: desc || name,
-  }))
-
-  return {id: -1, words: wordsPair}
-}
-
-export function getKeyWordsHint(flipKeyWordPairs, id) {
-  if (!flipKeyWordPairs || !flipKeyWordPairs.length) return getRandomHint()
-
-  const pairId = id && id >= 0 && id < flipKeyWordPairs.length ? id : 0
-
-  const hint = flipKeyWordPairs[pairId]
-
-  const nextIndex1 = hint.words[0]
-  const nextIndex2 = hint.words[1]
-  const firstWord = dict[nextIndex1] || {name: 'Error', descr: 'No word found'}
-  const secondWord = dict[nextIndex2] || {name: 'Error', descr: 'No word found'}
-
-  const wordsPair = [firstWord, secondWord].map(({name, desc}) => ({
-    name,
-    desc: desc || name,
-  }))
-
-  return {id, words: wordsPair}
-}
-
-export function getNextKeyWordsHint(
-  flipKeyWordPairs,
-  publishingFlips,
-  currId = -1,
-  i = 50
-) {
-  if (!flipKeyWordPairs || !flipKeyWordPairs.length) return getRandomHint()
-
-  const nextIdx =
-    currId < 0
-      ? 0
-      : flipKeyWordPairs.indexOf(
-          flipKeyWordPairs.find(({id}) => id === currId)
-        ) + 1
-
-  const nextKeyWordPair =
-    nextIdx >= flipKeyWordPairs.length
-      ? flipKeyWordPairs[0]
-      : flipKeyWordPairs[nextIdx]
-
-  const isUsed =
-    (nextKeyWordPair && nextKeyWordPair.used) ||
-    (nextKeyWordPair &&
-      publishingFlips.find(({hint}) => hint.id === nextKeyWordPair.id))
-
-  if (isUsed) {
-    // get next free pair
-
-    if (i < 0) return getRandomHint() // no more free words
-
-    return getNextKeyWordsHint(
-      flipKeyWordPairs,
-      publishingFlips,
-      nextKeyWordPair.id,
-      i - 1
-    )
-  }
-  return getKeyWordsHint(flipKeyWordPairs, nextKeyWordPair.id)
-}
-
 export function isPendingKeywordPair(flips, id) {
   return flips.find(
     ({type, keywordPairId}) =>
@@ -138,6 +33,17 @@ export function didArchiveFlips(epoch) {
   const persistedState = loadPersistentStateValue('flipArchive', epoch)
   if (persistedState) return persistedState.archived
   return false
+}
+
+export function archiveFlips() {
+  const {getFlips, saveFlips} = global.flipStore
+  saveFlips(
+    getFlips().map(flip =>
+      [FlipType.Draft, FlipType.Archived].includes(flip.type)
+        ? flip
+        : {...flip, type: FlipType.Archived}
+    )
+  )
 }
 
 export function markFlipsArchived(epoch) {
@@ -274,4 +180,98 @@ export async function publishFlip({
   }
 
   return result
+}
+
+export function formatKeywords(keywords) {
+  return keywords
+    .map(({name: [f, ...rest]}) => f.toUpperCase() + rest.join(''))
+    .join(' / ')
+}
+
+export async function fetchKeywordTranslations(ids, locale) {
+  return (
+    await Promise.all(
+      ids.map(async id =>
+        (
+          await fetch(
+            `http://api.idena.io/translation/word/${id}/language/${locale}/translations`
+          )
+        ).json()
+      )
+    )
+  ).map(({translations}) =>
+    (translations || []).map(
+      ({
+        id,
+        name,
+        description: desc,
+        confirmed,
+        upVotes: ups,
+        downVotes: downs,
+      }) => ({
+        id,
+        name,
+        desc,
+        confirmed,
+        ups,
+        downs,
+      })
+    )
+  )
+}
+
+export async function voteForKeywordTranslation({id, up}) {
+  const timestamp = new Date().toISOString()
+  const signature = await signNonce(id.concat(up).concat(timestamp))
+
+  const {
+    data: {resCode, upVotes, downVotes, error},
+  } = await axios.post(`https://api.idena.io/translation/vote`, {
+    signature,
+    timestamp,
+    translationId: id,
+    up,
+  })
+
+  if (resCode > 0 && error) throw new Error(error)
+
+  return {id, ups: upVotes - downVotes}
+}
+
+export async function suggestKeywordTranslation({
+  wordId,
+  name,
+  desc,
+  locale = global.locale,
+}) {
+  const timestamp = new Date().toISOString()
+
+  const signature = await signNonce(
+    wordId
+      .toString()
+      .concat(locale)
+      .concat(name)
+      .concat(desc)
+      .concat(timestamp)
+  )
+
+  const {
+    data: {resCode, translationId, error},
+  } = await axios.post(`https://api.idena.io/translation/translation`, {
+    word: wordId,
+    name,
+    description: desc,
+    language: locale,
+    signature,
+    timestamp,
+  })
+
+  if (resCode > 0 && error) throw new Error(error)
+
+  return {
+    id: translationId,
+    wordId,
+    name,
+    desc,
+  }
 }

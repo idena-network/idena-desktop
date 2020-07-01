@@ -10,7 +10,8 @@ import {
 import {
   didArchiveFlips,
   markFlipsArchived,
-} from '../../screens/flips/utils/flip'
+  archiveFlips,
+} from '../../screens/flips/utils'
 import {FlipType} from '../types'
 import {persistItem} from '../utils/persist'
 
@@ -71,14 +72,7 @@ export function EpochProvider({children}) {
 
   React.useEffect(() => {
     if (epoch && didValidate(epoch.epoch) && !didArchiveFlips(epoch.epoch)) {
-      const {getFlips, saveFlips} = global.flipStore
-      saveFlips(
-        getFlips().map(flip =>
-          [FlipType.Draft, FlipType.Archived].includes(flip.type)
-            ? flip
-            : {...flip, type: FlipType.Archived}
-        )
-      )
+      archiveFlips()
       markFlipsArchived(epoch)
     }
   }, [epoch])

@@ -36,15 +36,16 @@ import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {transparentize} from 'polished'
 import {useService} from '@xstate/react'
-import FlipEditor from './flip-editor'
-import {Step} from '../types'
-import {formatKeywords} from '../utils'
-import {PageTitle} from '../../app/components'
-import {PrimaryButton, IconButton2} from '../../../shared/components/button'
-import {rem} from '../../../shared/theme'
-import {capitalize} from '../../../shared/utils/string'
-import {reorder} from '../../../shared/utils/arr'
-import {FlipType} from '../../../shared/types'
+import FlipEditor from './components/flip-editor'
+import {Step} from './types'
+import {formatKeywords} from './utils'
+import {PageTitle} from '../app/components'
+import {PrimaryButton, IconButton2} from '../../shared/components/button'
+import {rem} from '../../shared/theme'
+import {capitalize} from '../../shared/utils/string'
+import {reorder} from '../../shared/utils/arr'
+import {FlipType} from '../../shared/types'
+import {TooltipX} from '../../shared/components'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -262,7 +263,13 @@ export function OptionalFlipPlaceholder({title, isDisabled}) {
     >
       {isDisabled ? (
         <EmptyFlipBox>
-          <FlipPlaceholder />
+          <TooltipX
+            label={t('Create required flips first')}
+            shouldWrapChildren
+            placement="bottom"
+          >
+            <FlipPlaceholder />
+          </TooltipX>
         </EmptyFlipBox>
       ) : (
         <NextLink href="/flips/new" passHref>

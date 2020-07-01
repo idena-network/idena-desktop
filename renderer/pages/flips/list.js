@@ -262,6 +262,7 @@ export default function FlipListPage() {
                       idx +
                       1}`}
                     {...flip}
+                    isDisabled={remainingRequiredFlips > 0}
                   />
                 ))}
               </>
