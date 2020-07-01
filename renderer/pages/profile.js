@@ -168,7 +168,7 @@ export default function ProfilePage() {
             </Stack>
             <Box w={rem(200)}>
               {canMine && (
-                <Text fontWeight={500} mt={5} mb={2}>
+                <Text fontWeight={500} mt={4} mb={2}>
                   Status
                 </Text>
               )}
