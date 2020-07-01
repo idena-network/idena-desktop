@@ -187,7 +187,7 @@ export default function NewFlipPage() {
                               locale={i18n.language}
                               onSwitchLocale={() => send('SWITCH_LOCALE')}
                             />
-                            {i18n.language.toUpperCase() !== 'EN' &&
+                            {(i18n.language || 'en').toUpperCase() !== 'EN' &&
                               !isOffline && (
                                 <>
                                   <Divider

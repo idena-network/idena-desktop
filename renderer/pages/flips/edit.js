@@ -179,7 +179,7 @@ export default function EditFlipPage() {
                   <FlipStepBody minH="180px">
                     <Box>
                       <FlipKeywordPanel>
-                        {is('keywords.loaded') && !isOffline && (
+                        {is('keywords.loaded') && (
                           <>
                             <FlipKeywordTranslationSwitch
                               keywords={keywords}
@@ -187,21 +187,26 @@ export default function EditFlipPage() {
                               locale={i18n.language}
                               onSwitchLocale={() => send('SWITCH_LOCALE')}
                             />
-                            <Divider
-                              borderColor="gray.300"
-                              mx={-10}
-                              mt={4}
-                              mb={6}
-                            />
-                            <CommunityTranslations
-                              keywords={keywords}
-                              onVote={e => send('VOTE', e)}
-                              onSuggest={e => send('SUGGEST', e)}
-                              isOpen={isCommunityTranslationsExpanded}
-                              onToggle={() =>
-                                send('TOGGLE_COMMUNITY_TRANSLATIONS')
-                              }
-                            />
+                            {(i18n.language || 'en').toUpperCase() !== 'EN' &&
+                              !isOffline && (
+                                <>
+                                  <Divider
+                                    borderColor="gray.300"
+                                    mx={-10}
+                                    mt={4}
+                                    mb={6}
+                                  />
+                                  <CommunityTranslations
+                                    keywords={keywords}
+                                    onVote={e => send('VOTE', e)}
+                                    onSuggest={e => send('SUGGEST', e)}
+                                    isOpen={isCommunityTranslationsExpanded}
+                                    onToggle={() =>
+                                      send('TOGGLE_COMMUNITY_TRANSLATIONS')
+                                    }
+                                  />
+                                </>
+                              )}
                           </>
                         )}
                         {is('keywords.failure') && (
