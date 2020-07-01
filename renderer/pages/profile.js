@@ -194,7 +194,6 @@ export default function ProfilePage() {
                   isDisabled={!canTerminate}
                   icon="delete"
                   onClick={onOpenKillForm}
-                  variantColor="red"
                 >
                   {t('Terminate')}
                 </IconButton2>
