@@ -515,7 +515,7 @@ export function FlipKeywordTranslationSwitch({
             _hover={{background: 'transparent'}}
             onClick={onSwitchLocale}
           >
-            {showTranslation ? 'EN' : locale.toUpperCase()}
+            {showTranslation ? 'EN' : (locale || '').toUpperCase()}
           </IconButton2>
         )}
         {showTranslation || (
@@ -1034,7 +1034,7 @@ export function CommunityTranslations({
           <RadioButtonGroup isInline value={wordIdx} onChange={setWordIdx}>
             {keywords.words.map(({id, name}, i) => (
               <FlipKeywordRadio key={id} value={i}>
-                {capitalize(name)}
+                {name && capitalize(name)}
               </FlipKeywordRadio>
             ))}
           </RadioButtonGroup>

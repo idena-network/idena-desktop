@@ -123,6 +123,12 @@ export default function FlipListPage() {
   const remainingOptionalFlips =
     availableFlipsNumber - Math.max(requiredFlipsNumber, madeFlipsNumber)
 
+  const canSubmitFlips = [
+    IdentityStatus.Verified,
+    IdentityStatus.Human,
+    IdentityStatus.Newbie,
+  ].includes(status)
+
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
       <Page>
@@ -143,6 +149,7 @@ export default function FlipListPage() {
           )}
         </Flex>
         {current.matches('ready.dirty.active') &&
+          canSubmitFlips &&
           (remainingRequiredFlips > 0 || remainingOptionalFlips > 0) && (
             <Box alignSelf="stretch" mb={8}>
               <Alert
@@ -173,11 +180,7 @@ export default function FlipListPage() {
             </Box>
           )}
 
-        {![
-          IdentityStatus.Verified,
-          IdentityStatus.Human,
-          IdentityStatus.Newbie,
-        ].includes(status) && (
+        {!canSubmitFlips && (
           <Box alignSelf="stretch" mb={8}>
             <Alert
               status="error"
