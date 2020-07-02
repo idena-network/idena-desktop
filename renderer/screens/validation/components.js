@@ -16,6 +16,7 @@ import {
   FiChevronRight,
   FiClock,
 } from 'react-icons/fi'
+import {Box as ChakraBox, Stack} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -34,7 +35,6 @@ import {
 import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
 import theme, {rem} from '../../shared/theme'
-import {TranslateWords} from '../../shared/components/translate-button'
 import {RelevanceType, adjustDuration} from './machine'
 import {loadValidationState} from './utils'
 import {Notification, Snackbar} from '../../shared/components/notifications'
@@ -45,11 +45,12 @@ import {createTimerMachine} from '../../shared/machines'
 import {
   FlipKeywordPanel,
   FlipKeywordTranslationSwitch,
-  FlipKeyword,
-  FlipKeywordName,
 } from '../flips/components'
 
-export function Scene({bg: background = theme.colors.black, ...props}) {
+export function ValidationScene({
+  bg: background = theme.colors.black,
+  ...props
+}) {
   return (
     <Flex
       direction="column"
@@ -494,76 +495,41 @@ function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
   )
 }
 
-export function FlipWords({currentFlip: {words = []}, children}) {
+export function FlipWords({
+  currentFlip: {words = []},
+  translations = {},
+  children,
+}) {
   const {t, i18n} = useTranslation()
+
+  const wordTranslations = words.map(({id}) => translations[id])
+
+  const [showTranslation, setShowTranslation] = React.useState(() =>
+    wordTranslations.reduce((acc, curr) => !!curr && acc, true)
+  )
+
   return (
-    <Box
-      css={{
-        fontSize: rem(13),
-        ...margin(0, 0, 0, rem(36)),
-        width: rem(280),
-      }}
-    >
+    <ChakraBox fontSize="md" color="brandGray.500" ml={rem(36)} w={rem(280)}>
       <FlipKeywordPanel w={rem(320)} mb={5}>
         <Heading
           fontSize={rem(16)}
           fontWeight={500}
           style={{...margin(0, 0, rem(24))}}
         >
-          Are both keywords relevant to the flip?
+          {t(`Are both keywords relevant to the flip?`)}
         </Heading>
-        {/* <Box> */}
-        {/* <Box
-          style={{
-            background: theme.colors.gray,
-            borderRadius: rem(8),
-            ...margin(rem(32), 0),
-            ...padding(rem(33), rem(40), rem(39)),
-          }}
-        > */}
         {words.length ? (
           <FlipKeywordTranslationSwitch
             keywords={{
-              words: [
-                {name: 'name', desc: 'desc'},
-                {name: 'name', desc: 'desc'},
-              ],
-              translations: [],
+              words,
+              translations: wordTranslations.map(x => (x ? [x] : [])),
             }}
-            showTranslation={false}
-            locale={i18n.locale}
-            onSwitchLocale={() => {
-              console.log('switching')
-            }}
+            showTranslation={showTranslation}
+            locale={i18n.language}
+            onSwitchLocale={() => setShowTranslation(!showTranslation)}
             isInline={false}
           />
         ) : (
-          // <Box>
-          //   {words.map(({name, desc}, idx) => (
-          //     <React.Fragment key={`name-${idx}`}>
-          //       <Box
-          //         style={{
-          //           color: theme.colors.primary2,
-          //           fontWeight: 500,
-          //           lineHeight: rem(20),
-          //           textTransform: 'capitalize',
-          //         }}
-          //       >
-          //         {name}
-          //       </Box>
-          //       <Box
-          //         style={{
-          //           color: theme.colors.muted,
-          //           lineHeight: rem(20),
-          //           ...margin(0, 0, rem(theme.spacings.medium24)),
-          //         }}
-          //       >
-          //         {desc}
-          //       </Box>
-          //     </React.Fragment>
-          //   ))}
-          //   <TranslateWords words={words} />
-          // </Box>
           <>
             <Box
               style={{
@@ -572,10 +538,12 @@ export function FlipWords({currentFlip: {words = []}, children}) {
                 lineHeight: rem(20),
               }}
             >
-              Getting flip keywords...
+              {t(`Getting flip keywords...`)}
             </Box>
             {[
-              'Can not load the flip keywords to moderate the story. Please wait or skip this flip.',
+              t(
+                'Can not load the flip keywords to moderate the story. Please wait or skip this flip.'
+              ),
             ].map((word, idx) => (
               <Box
                 key={`desc-${idx}`}
@@ -591,11 +559,8 @@ export function FlipWords({currentFlip: {words = []}, children}) {
           </>
         )}
       </FlipKeywordPanel>
-
-      {/* </Box> */}
       {children}
-      {/* </Box> */}
-    </Box>
+    </ChakraBox>
   )
 }
 
@@ -635,8 +600,8 @@ export function QualificationButton({
       variant={buttonVariant}
       style={{
         fontWeight: 500,
-        width: rem(136),
         minWidth: rem(136),
+        minHeight: rem(32),
         transition: 'none',
         whiteSpace: 'nowrap',
         zIndex: 1,
@@ -645,14 +610,11 @@ export function QualificationButton({
       onClick={() => onVote(hash)}
       {...props}
     >
-      <span
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-        }}
-      >
-        {children}
-      </span>
+      <Stack isInline spacing={2} align="center" justify="center">
+        {React.Children.map(children, child => (
+          <ChakraBox>{child}</ChakraBox>
+        ))}
+      </Stack>
     </Button>
   )
 }

@@ -194,7 +194,7 @@ export async function fetchKeywordTranslations(ids, locale) {
       ids.map(async id =>
         (
           await fetch(
-            `http://api.idena.io/translation/word/${id}/language/${locale}/translations`
+            `https://translation.idena.io/word/${id}/language/${locale}/translations`
           )
         ).json()
       )
@@ -220,13 +220,27 @@ export async function fetchKeywordTranslations(ids, locale) {
   )
 }
 
+export async function fetchConfirmedKeywordTranslations(ids, locale) {
+  return (
+    await Promise.all(
+      ids.map(async id =>
+        (
+          await fetch(
+            `https://translation.idena.io/word/${id}/language/${locale}/confirmed-translation`
+          )
+        ).json()
+      )
+    )
+  ).map(({translation}) => translation)
+}
+
 export async function voteForKeywordTranslation({id, up}) {
   const timestamp = new Date().toISOString()
   const signature = await signNonce(id.concat(up).concat(timestamp))
 
   const {
     data: {resCode, upVotes, downVotes, error},
-  } = await axios.post(`https://api.idena.io/translation/vote`, {
+  } = await axios.post(`https://translation.idena.io/vote`, {
     signature,
     timestamp,
     translationId: id,
@@ -257,7 +271,7 @@ export async function suggestKeywordTranslation({
 
   const {
     data: {resCode, translationId, error},
-  } = await axios.post(`https://api.idena.io/translation/translation`, {
+  } = await axios.post(`https://translation.idena.io/translation`, {
     word: wordId,
     name,
     description: desc,

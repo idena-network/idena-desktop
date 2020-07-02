@@ -1,4 +1,4 @@
-import {hasEnoughAnswers, exponentialBackoff} from './utils'
+import {hasEnoughAnswers, exponentialBackoff, shouldTranslate} from './utils'
 
 describe('hasEnoughAnswers', () => {
   it('falsy when no answers', () => {
@@ -111,5 +111,129 @@ describe('exponentialBackoff', () => {
       expect(exponentialBackoff(n)).toBeGreaterThan(2 ** n)
     })
     expect(exponentialBackoff(10)).toBe(32)
+  })
+})
+
+describe('shouldTranslate', () => {
+  it('should not translate if both words have been translated already', () => {
+    expect(
+      shouldTranslate({
+        translations: {
+          1: [{id: 10001, name: 't10001'}],
+          2: [{id: 10001, name: 't10001'}],
+        },
+        longFlips: [
+          {
+            words: [
+              {id: 1, name: '1'},
+              {id: 2, name: '2'},
+            ],
+          },
+        ],
+        currentIndex: 0,
+      })
+    ).toBeFalsy()
+  })
+
+  it('should not translate if words are nullish', () => {
+    ;[
+      [
+        {
+          words: {},
+        },
+      ],
+      [
+        {
+          words: [],
+        },
+      ],
+      [
+        {
+          words: null,
+        },
+      ],
+      [
+        {
+          words: undefined,
+        },
+      ],
+    ].forEach(flips =>
+      expect(
+        shouldTranslate({
+          translations: null,
+          longFlips: flips,
+          currentIndex: 0,
+        })
+      ).toBeFalsy()
+    )
+  })
+
+  it('should translate if some word has missing translation, or both', () => {
+    expect(
+      shouldTranslate({
+        translations: {
+          1: [{id: 10001, name: 't10001'}],
+        },
+        longFlips: [
+          {
+            words: [
+              {id: 1, name: '1'},
+              {id: 2, name: '2'},
+            ],
+          },
+        ],
+        currentIndex: 0,
+      })
+    ).toBeTruthy()
+
+    expect(
+      shouldTranslate({
+        translations: {},
+        longFlips: [
+          {
+            words: [
+              {id: 1, name: '1'},
+              {id: 2, name: '2'},
+            ],
+          },
+        ],
+        currentIndex: 0,
+      })
+    ).toBeTruthy()
+
+    expect(
+      shouldTranslate({
+        translations: {
+          1: null,
+        },
+        longFlips: [
+          {
+            words: [
+              {id: 1, name: '1'},
+              {id: 2, name: '2'},
+            ],
+          },
+        ],
+        currentIndex: 0,
+      })
+    ).toBeTruthy()
+
+    expect(
+      shouldTranslate({
+        translations: {
+          1: null,
+          2: undefined,
+        },
+        longFlips: [
+          {
+            words: [
+              {id: 1, name: '1'},
+              {id: 2, name: '2'},
+            ],
+          },
+        ],
+        currentIndex: 0,
+      })
+    ).toBeTruthy()
   })
 })

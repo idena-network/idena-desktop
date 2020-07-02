@@ -604,8 +604,10 @@ export function FlipEditorStep({
 
   const {words, translations} = keywords
 
-  const hasBothTranslations =
-    translations.reduce((acc, {length}) => acc + length, 0) > 1
+  const hasBothTranslations = translations.reduce(
+    (acc, {length}) => !!length && acc,
+    true
+  )
 
   return (
     <FlipStep>
