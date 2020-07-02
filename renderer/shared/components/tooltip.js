@@ -1,5 +1,4 @@
 import React from 'react'
-import {Tooltip as ChakraTooltip} from '@chakra-ui/core'
 import PropTypes from 'prop-types'
 import Box from './box'
 import theme, {rem} from '../theme'

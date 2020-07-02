@@ -12,7 +12,6 @@ import {
   markFlipsArchived,
   archiveFlips,
 } from '../../screens/flips/utils'
-import {FlipType} from '../types'
 import {persistItem} from '../utils/persist'
 
 export const EpochPeriod = {

@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, {useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
-import {rem, position, wordWrap} from 'polished'
-import {FaCircle, FaRegTrashAlt} from 'react-icons/fa'
+import {rem, position} from 'polished'
+import {FaCircle} from 'react-icons/fa'
 import {FiCircle} from 'react-icons/fi'
 
 import {useTranslation} from 'react-i18next'
