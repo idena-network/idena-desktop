@@ -42,6 +42,12 @@ import {NotificationType} from '../../shared/providers/notification-context'
 import {EpochPeriod} from '../../shared/types'
 import {useTimingState} from '../../shared/providers/timing-context'
 import {createTimerMachine} from '../../shared/machines'
+import {
+  FlipKeywordPanel,
+  FlipKeywordTranslationSwitch,
+  FlipKeyword,
+  FlipKeywordName,
+} from '../flips/components'
 
 export function Scene({bg: background = theme.colors.black, ...props}) {
   return (
@@ -269,6 +275,7 @@ export function FailedFlipAnnotation(props) {
         background: transparentize(0.17, theme.colors.black),
         ...padding(rem(16), rem(42)),
         color: theme.colors.white,
+        fontSize: rem(13),
         fontWeight: 500,
         textAlign: 'center',
         position: 'absolute',
@@ -488,82 +495,106 @@ function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
 }
 
 export function FlipWords({currentFlip: {words = []}, children}) {
+  const {t, i18n} = useTranslation()
   return (
     <Box
       css={{
+        fontSize: rem(13),
         ...margin(0, 0, 0, rem(36)),
         width: rem(280),
       }}
     >
-      <Heading fontSize={rem(18)} fontWeight={500}>
-        Are both keywords relevant to the flip?
-      </Heading>
-      <Box>
-        <Box
+      <FlipKeywordPanel w={rem(320)} mb={5}>
+        <Heading
+          fontSize={rem(16)}
+          fontWeight={500}
+          style={{...margin(0, 0, rem(24))}}
+        >
+          Are both keywords relevant to the flip?
+        </Heading>
+        {/* <Box> */}
+        {/* <Box
           style={{
             background: theme.colors.gray,
             borderRadius: rem(8),
             ...margin(rem(32), 0),
             ...padding(rem(33), rem(40), rem(39)),
           }}
-        >
-          {words.length ? (
-            <Box>
-              {words.map(({name, desc}, idx) => (
-                <React.Fragment key={`name-${idx}`}>
-                  <Box
-                    style={{
-                      color: theme.colors.primary2,
-                      fontWeight: 500,
-                      lineHeight: rem(20),
-                      textTransform: 'capitalize',
-                    }}
-                  >
-                    {name}
-                  </Box>
-                  <Box
-                    style={{
-                      color: theme.colors.muted,
-                      lineHeight: rem(20),
-                      ...margin(0, 0, rem(theme.spacings.medium24)),
-                    }}
-                  >
-                    {desc}
-                  </Box>
-                </React.Fragment>
-              ))}
-              <TranslateWords words={words} />
+        > */}
+        {words.length ? (
+          <FlipKeywordTranslationSwitch
+            keywords={{
+              words: [
+                {name: 'name', desc: 'desc'},
+                {name: 'name', desc: 'desc'},
+              ],
+              translations: [],
+            }}
+            showTranslation={false}
+            locale={i18n.locale}
+            onSwitchLocale={() => {
+              console.log('switching')
+            }}
+            isInline={false}
+          />
+        ) : (
+          // <Box>
+          //   {words.map(({name, desc}, idx) => (
+          //     <React.Fragment key={`name-${idx}`}>
+          //       <Box
+          //         style={{
+          //           color: theme.colors.primary2,
+          //           fontWeight: 500,
+          //           lineHeight: rem(20),
+          //           textTransform: 'capitalize',
+          //         }}
+          //       >
+          //         {name}
+          //       </Box>
+          //       <Box
+          //         style={{
+          //           color: theme.colors.muted,
+          //           lineHeight: rem(20),
+          //           ...margin(0, 0, rem(theme.spacings.medium24)),
+          //         }}
+          //       >
+          //         {desc}
+          //       </Box>
+          //     </React.Fragment>
+          //   ))}
+          //   <TranslateWords words={words} />
+          // </Box>
+          <>
+            <Box
+              style={{
+                color: theme.colors.primary2,
+                fontWeight: 500,
+                lineHeight: rem(20),
+              }}
+            >
+              Getting flip keywords...
             </Box>
-          ) : (
-            <>
+            {[
+              'Can not load the flip keywords to moderate the story. Please wait or skip this flip.',
+            ].map((word, idx) => (
               <Box
+                key={`desc-${idx}`}
                 style={{
-                  color: theme.colors.primary2,
-                  fontWeight: 500,
+                  color: theme.colors.muted,
                   lineHeight: rem(20),
+                  ...margin(rem(theme.spacings.small8), 0, 0),
                 }}
               >
-                Getting flip keywords...
+                {word}
               </Box>
-              {[
-                'Can not load the flip keywords to moderate the story. Please wait or skip this flip.',
-              ].map((word, idx) => (
-                <Box
-                  key={`desc-${idx}`}
-                  style={{
-                    color: theme.colors.muted,
-                    lineHeight: rem(20),
-                    ...margin(rem(theme.spacings.small8), 0, 0),
-                  }}
-                >
-                  {word}
-                </Box>
-              ))}
-            </>
-          )}
-        </Box>
-        {children}
-      </Box>
+            ))}
+          </>
+        )}
+      </FlipKeywordPanel>
+
+      {/* </Box> */}
+      {children}
+      {/* </Box> */}
     </Box>
   )
 }
