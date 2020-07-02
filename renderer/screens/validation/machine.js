@@ -942,7 +942,8 @@ export const createValidationMachine = ({
           )
         },
         hasMissingFlips: ({longFlips}) => missingHashes(longFlips).length > 0,
-        shouldTranslate,
+        shouldTranslate: ({translations, longFlips, currentIndex}) =>
+          shouldTranslate(translations, longFlips[currentIndex]),
       },
     }
   )

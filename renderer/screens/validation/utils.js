@@ -186,10 +186,10 @@ export function hasPersistedValidationResults(epoch) {
   return !!loadPersistentStateValue('validationResults', epoch)
 }
 
-export function shouldTranslate({translations, longFlips, currentIndex}) {
-  if (!longFlips || !longFlips[currentIndex]) return false
+export function shouldTranslate(translations, flip) {
+  if (!flip) return false
 
-  const {words} = longFlips[currentIndex]
+  const {words} = flip
 
   return !!(
     words &&
