@@ -252,5 +252,11 @@
   "Community translation is not available": "Community translation is not available",
   "Spoil invitation code": "Spoil invitation code",
   "Since invitation codes are supposed to be provided privately feel free\n          to spoil those invitations that are shared publicly. This will prevent\n          bots from collecting invitation codes. When you click Spoil the\n          invitation will be activated by a random address": "Since invitation codes are supposed to be provided privately feel free\n          to spoil those invitations that are shared publicly. This will prevent\n          bots from collecting invitation codes. When you click Spoil the\n          invitation will be activated by a random address",
-  "Invitation code to spoil": "Invitation code to spoil"
+  "Invitation code to spoil": "Invitation code to spoil",
+  "You can issue the invitation to the specific identity address in Advanced section": "You can issue the invitation to the specific identity address in Advanced section",
+  "Advanced": "Advanced",
+  "Mining": "Mining",
+  "Are both keywords relevant to the flip?": "Are both keywords relevant to the flip?",
+  "Getting flip keywords...": "Getting flip keywords...",
+  "Can not load the flip keywords to moderate the story. Please wait or skip this flip.": "Can not load the flip keywords to moderate the story. Please wait or skip this flip."
 }
