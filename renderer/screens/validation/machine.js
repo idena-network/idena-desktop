@@ -22,14 +22,17 @@ import {
   hasEnoughAnswers,
   missingHashes,
   exponentialBackoff,
+  shouldTranslate,
 } from './utils'
 import {forEachAsync, wait} from '../../shared/utils/fn'
+import {fetchConfirmedKeywordTranslations} from '../flips/utils'
 
 export const createValidationMachine = ({
   epoch,
   validationStart,
   shortSessionDuration,
   longSessionDuration,
+  locale,
 }) =>
   Machine(
     {
@@ -45,6 +48,8 @@ export const createValidationMachine = ({
         longSessionDuration,
         errorMessage: null,
         retries: 0,
+        locale,
+        translations: {},
       },
       states: {
         shortSession: {
@@ -544,7 +549,7 @@ export const createValidationMachine = ({
                               decoded: false,
                             })),
                         }),
-                        log('Re-fetching long flips after rebooting app'),
+                        log('Re-fetch long flips after rebooting the app'),
                       ],
                     },
                   },
@@ -571,7 +576,10 @@ export const createValidationMachine = ({
                                 longFlips,
                                 data.map(({hash, words = []}) => ({
                                   hash,
-                                  words: words.map(global.loadKeyword),
+                                  words: words.map(id => ({
+                                    id,
+                                    ...global.loadKeyword(id),
+                                  })),
                                 }))
                               ),
                           }),
@@ -608,9 +616,12 @@ export const createValidationMachine = ({
                 nav: {
                   initial: 'firstFlip',
                   states: {
-                    firstFlip: {},
-                    normal: {},
-                    lastFlip: {},
+                    // eslint-disable-next-line no-use-before-define
+                    firstFlip: stepStates,
+                    // eslint-disable-next-line no-use-before-define
+                    normal: stepStates,
+                    // eslint-disable-next-line no-use-before-define
+                    lastFlip: stepStates,
                   },
                   on: {
                     PREV: [
@@ -861,6 +872,12 @@ export const createValidationMachine = ({
             longFlips.map(({hash}) => hash),
             cb
           ),
+        // eslint-disable-next-line no-shadow
+        fetchTranslations: ({longFlips, currentIndex, locale}) =>
+          fetchConfirmedKeywordTranslations(
+            longFlips[currentIndex].words.map(({id}) => id),
+            locale
+          ),
       },
       delays: {
         // eslint-disable-next-line no-shadow
@@ -896,6 +913,23 @@ export const createValidationMachine = ({
             images.forEach(URL.revokeObjectURL)
           )
         },
+        applyTranslations: assign({
+          translations: ({translations, longFlips, currentIndex}, {data}) =>
+            data.reduce((acc, curr, wordIdx) => {
+              const currentFlip = longFlips[currentIndex]
+              if (currentFlip && currentFlip.words) {
+                const {words} = currentFlip
+                const word = words[wordIdx]
+                return word
+                  ? {
+                      ...acc,
+                      [word.id]: curr,
+                    }
+                  : acc
+              }
+              return translations
+            }, translations),
+        }),
       },
       guards: {
         didFetchShortFlips: ({shortFlips}) => {
@@ -908,6 +942,8 @@ export const createValidationMachine = ({
           )
         },
         hasMissingFlips: ({longFlips}) => missingHashes(longFlips).length > 0,
+        shouldTranslate: ({translations, longFlips, currentIndex}) =>
+          shouldTranslate(translations, longFlips[currentIndex]),
       },
     }
   )
@@ -970,6 +1006,36 @@ function decodeFlip({hash, hex, publicHex, privateHex}) {
       decoded: false,
     }
   }
+}
+
+const stepStates = {
+  initial: 'unknown',
+  states: {
+    unknown: {
+      on: {
+        '': [
+          {
+            target: 'fetching',
+            cond: 'shouldTranslate',
+          },
+          {target: 'idle'},
+        ],
+      },
+    },
+    idle: {},
+    fetching: {
+      invoke: {
+        src: 'fetchTranslations',
+        onDone: {
+          target: 'idle',
+          actions: ['applyTranslations', log()],
+        },
+        onError: {
+          actions: [log()],
+        },
+      },
+    },
+  },
 }
 
 function mergeFlipsByHash(flips, anotherFlips) {

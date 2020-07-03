@@ -1,4 +1,4 @@
-import {hasEnoughAnswers, exponentialBackoff} from './utils'
+import {hasEnoughAnswers, exponentialBackoff, shouldTranslate} from './utils'
 
 describe('hasEnoughAnswers', () => {
   it('falsy when no answers', () => {
@@ -111,5 +111,64 @@ describe('exponentialBackoff', () => {
       expect(exponentialBackoff(n)).toBeGreaterThan(2 ** n)
     })
     expect(exponentialBackoff(10)).toBe(32)
+  })
+})
+
+describe('shouldTranslate', () => {
+  it('should not translate if both words have been translated already', () => {
+    expect(
+      shouldTranslate(
+        {
+          1: [{id: 10001, name: 't10001'}],
+          2: [{id: 10001, name: 't10001'}],
+        },
+        {
+          words: [
+            {id: 1, name: '1'},
+            {id: 2, name: '2'},
+          ],
+        }
+      )
+    ).toBeFalsy()
+  })
+
+  it('should not translate if words are nullish', () => {
+    ;[
+      {words: {}},
+      {words: []},
+      {words: null},
+      {words: undefined},
+    ].forEach(flip => expect(shouldTranslate(null, flip)).toBeFalsy())
+  })
+
+  it('should translate if some word has missing translation, or both', () => {
+    const flip = {
+      words: [
+        {id: 1, name: '1'},
+        {id: 2, name: '2'},
+      ],
+    }
+    expect(
+      shouldTranslate(
+        {
+          1: [{id: 10001, name: 't10001'}],
+        },
+        flip
+      )
+    ).toBeTruthy()
+
+    expect(shouldTranslate({}, flip)).toBeTruthy()
+
+    expect(shouldTranslate({1: null}, flip)).toBeTruthy()
+
+    expect(
+      shouldTranslate(
+        {
+          1: null,
+          2: undefined,
+        },
+        flip
+      )
+    ).toBeTruthy()
   })
 })

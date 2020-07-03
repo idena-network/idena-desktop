@@ -18,7 +18,7 @@ import {
   rearrangeFlips,
 } from '../../screens/validation/utils'
 import {
-  Scene,
+  ValidationScene,
   ActionBar,
   Thumbnails,
   Header,
@@ -55,9 +55,7 @@ export default function ValidationPage() {
   const epoch = useEpochState()
   const timing = useTimingState()
 
-  // the reason why it's not wrapped with the Layout is lack of this layout for the validatio things
-  // we're just painting on a blank canvas here, but 👇
-  // TODO: move it to the Page component, allowing for Layout prop equals `null` in our case
+  // TODO: move zoom handler to the Page component, which allows for setting layout as a static Page prop
   const [zoomLevel, setZoomLevel] = useState(0)
   useEffect(() => addWheelHandler(setZoomLevel), [])
   useEffect(() => {
@@ -83,6 +81,7 @@ function ValidationSession({
   shortSessionDuration,
   longSessionDuration,
 }) {
+  const {i18n} = useTranslation()
   const validationMachine = useMemo(
     () =>
       createValidationMachine({
@@ -90,8 +89,15 @@ function ValidationSession({
         validationStart,
         shortSessionDuration,
         longSessionDuration,
+        locale: i18n.language || 'en',
       }),
-    [epoch, longSessionDuration, shortSessionDuration, validationStart]
+    [
+      epoch,
+      i18n.language,
+      longSessionDuration,
+      shortSessionDuration,
+      validationStart,
+    ]
   )
   const [state, send] = useMachine(validationMachine, {
     state: loadValidationState(),
@@ -100,7 +106,7 @@ function ValidationSession({
       : (...args) => global.logger.debug(...args),
   })
 
-  const {currentIndex} = state.context
+  const {currentIndex, translations} = state.context
 
   const router = useRouter()
 
@@ -113,7 +119,9 @@ function ValidationSession({
   const {t} = useTranslation()
 
   return (
-    <Scene bg={isShortSession(state) ? theme.colors.black : theme.colors.white}>
+    <ValidationScene
+      bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
+    >
       <Header>
         {!isLongSessionKeywords(state) &&
         !state.matches('validationSucceeded') ? (
@@ -178,7 +186,11 @@ function ValidationSession({
           {(isLongSessionKeywords(state) ||
             state.matches('validationSucceeded')) &&
             currentFlip && (
-              <FlipWords currentFlip={currentFlip}>
+              <FlipWords
+                key={currentFlip.hash}
+                currentFlip={currentFlip}
+                translations={translations}
+              >
                 <QualificationActions>
                   <QualificationButton
                     flip={currentFlip}
@@ -192,14 +204,7 @@ function ValidationSession({
                     }
                   >
                     {currentFlip.relevance === RelevanceType.Relevant && (
-                      <FiCheck
-                        size={rem(20)}
-                        fontSize={rem(13)}
-                        style={{
-                          ...margin(0, rem(4), 0, 0),
-                          verticalAlign: 'middle',
-                        }}
-                      />
+                      <FiCheck size={rem(16)} fontSize={rem(13)} />
                     )}
                     Both relevant
                   </QualificationButton>
@@ -258,14 +263,7 @@ function ValidationSession({
                         })
                       }
                     >
-                      <FiThumbsDown
-                        size={rem(20)}
-                        fontSize={rem(13)}
-                        style={{
-                          ...margin(0, rem(4), 0, 0),
-                          verticalAlign: 'middle',
-                        }}
-                      />
+                      <FiThumbsDown size={rem(16)} fontSize={rem(13)} />
                       Report
                     </QualificationButton>
                   </Tooltip>
@@ -387,7 +385,7 @@ function ValidationSession({
       )}
 
       {global.isDev && <Debug>{JSON.stringify(state.value, null, 2)}</Debug>}
-    </Scene>
+    </ValidationScene>
   )
 }
 

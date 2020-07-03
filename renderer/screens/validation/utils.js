@@ -185,3 +185,17 @@ export function shouldExpectValidationResults(epoch) {
 export function hasPersistedValidationResults(epoch) {
   return !!loadPersistentStateValue('validationResults', epoch)
 }
+
+export function shouldTranslate(translations, flip) {
+  if (!flip) return false
+
+  const {words} = flip
+
+  return !!(
+    words &&
+    words.length &&
+    !words
+      .map(({id}) => translations[id])
+      .reduce((acc, curr) => !!curr && acc, true)
+  )
+}
