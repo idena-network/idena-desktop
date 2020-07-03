@@ -227,6 +227,7 @@ export async function fetchKeywordTranslations(ids, locale) {
         confirmed,
         ups,
         downs,
+        score: ups - downs,
       })
     )
   )
