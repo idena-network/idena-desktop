@@ -45,7 +45,13 @@ import {rem} from '../../shared/theme'
 import {capitalize} from '../../shared/utils/string'
 import {reorder} from '../../shared/utils/arr'
 import {FlipType} from '../../shared/types'
-import {Tooltip} from '../../shared/components/components'
+import {
+  Tooltip,
+  Drawer,
+  DrawerHeader,
+  DrawerBody,
+  FormLabel,
+} from '../../shared/components/components'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -1210,5 +1216,75 @@ export function CommunityTranslationUnavailable() {
         {t('Community translation is not available')}
       </Alert>
     </Box>
+  )
+}
+
+export function DeleteFlipDrawer({hash, cover, onDelete, ...props}) {
+  const {t} = useTranslation()
+  return (
+    <Drawer {...props}>
+      <DrawerHeader>
+        <Flex
+          align="center"
+          justify="center"
+          bg="red.012"
+          h={12}
+          w={12}
+          rounded="xl"
+        >
+          <Icon name="delete" size={6} color="red.500" />
+        </Flex>
+        <Heading fontSize="lg" fontWeight={500} color="brandGray.500" mt={4}>
+          {t('Delete flip')}
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>
+        <Text color="brandGray.500" fontSize="md">
+          {t('Deleted flip will be moved to the drafts.')}
+        </Text>
+        <FlipImage
+          src={cover}
+          size={160}
+          objectFit="cover"
+          mx="auto"
+          mt={8}
+          mb={38}
+          rounded="lg"
+        />
+        <FormControl mb={6}>
+          <FormLabel htmlFor="hashInput" mb={2}>
+            {t('Flip hash')}
+          </FormLabel>
+          <Input
+            id="hashInput"
+            h={8}
+            borderColor="gray.300"
+            lineHeight={rem(18)}
+            px={3}
+            pt="3/2"
+            pb={2}
+            mb={2}
+            value={hash}
+            isReadOnly
+            _readOnly={{
+              bg: 'gray.50',
+              borderColor: 'gray.300',
+              color: 'muted',
+            }}
+          />
+        </FormControl>
+        <PrimaryButton
+          variantColor="red"
+          display="flex"
+          ml="auto"
+          _hover={{
+            bg: 'rgb(227 60 60)',
+          }}
+          onClick={onDelete}
+        >
+          Delete
+        </PrimaryButton>
+      </DrawerBody>
+    </Drawer>
   )
 }
