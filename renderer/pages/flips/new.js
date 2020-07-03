@@ -40,6 +40,7 @@ import {
   SecondaryButton,
   PrimaryButton,
 } from '../../shared/components/button'
+import {Toast} from '../../shared/components/components'
 
 export default function NewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -133,7 +134,19 @@ export default function NewFlipPage() {
           pb="36px"
           overflowY="auto"
         >
-          <FlipPageTitle onClose={() => router.push('/flips/list')}>
+          <FlipPageTitle
+            onClose={() => {
+              if (images.some(x => x))
+                toast({
+                  status: 'success',
+                  // eslint-disable-next-line react/display-name
+                  render: () => (
+                    <Toast title={t('Flip has been saved to drafts')} />
+                  ),
+                })
+              router.push('/flips/list')
+            }}
+          >
             {t('New flip')}
           </FlipPageTitle>
           {current.matches('editing') && (
