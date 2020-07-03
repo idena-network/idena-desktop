@@ -142,7 +142,7 @@ function ValidationSession({
           </Title>
         )}
         {state.matches('longSession') && (
-          <Link href="/dashboard">
+          <Link href="/profile">
             <a>
               <IconClose color={theme.colors.black} size={rem(20)} />
             </a>
@@ -373,14 +373,14 @@ function ValidationSession({
       {state.matches('validationSucceeded') && (
         <ValidationSucceededDialog
           isOpen
-          onSubmit={() => router.push('/dashboard')}
+          onSubmit={() => router.push('/profile')}
         />
       )}
 
       {state.matches('validationFailed') && (
         <ValidationFailedDialog
           isOpen
-          onSubmit={() => router.push('/dashboard')}
+          onSubmit={() => router.push('/profile')}
         />
       )}
 

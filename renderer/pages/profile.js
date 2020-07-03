@@ -108,7 +108,7 @@ export default function ProfilePage() {
                   <UserStatValue>{toDna(balance)}</UserStatValue>
                 </UserStat>
                 {stake > 0 && state === IdentityStatus.Newbie && (
-                  <>
+                  <Stack spacing={4}>
                     <AnnotatedUserStat
                       annotation={t(
                         'You need to get Verified status to be able to terminate your identity and withdraw the stake'
@@ -123,7 +123,7 @@ export default function ProfilePage() {
                       label={t('Locked')}
                       value={toDna(stake * 0.75)}
                     />
-                  </>
+                  </Stack>
                 )}
 
                 {stake > 0 && state !== IdentityStatus.Newbie && (
@@ -145,13 +145,16 @@ export default function ProfilePage() {
                     value={toDna(penalty)}
                   />
                 )}
+
                 {age > 0 && <SimpleUserStat label="Age" value={age} />}
+
                 {epoch && (
                   <SimpleUserStat
                     label="Next validation"
                     value={dayjs(epoch.nextValidation).toString()}
                   />
                 )}
+
                 {totalQualifiedFlips > 0 && (
                   <AnnotatedUserStat
                     annotation={t('Total score for all validations')}

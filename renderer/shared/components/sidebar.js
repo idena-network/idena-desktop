@@ -340,7 +340,7 @@ function CurrentTask({epoch, period, identity}) {
       switch (true) {
         case canActivateInvite:
           return (
-            <Link href="/dashboard" color={theme.colors.white}>
+            <Link href="/profile" color={theme.colors.white}>
               {t('Activate invite')}
             </Link>
           )
@@ -360,7 +360,7 @@ function CurrentTask({epoch, period, identity}) {
           const shouldSendFlips = remainingRequiredFlipsNumber > 0
 
           return shouldSendFlips ? (
-            <Link href="/flips" color={theme.colors.white}>
+            <Link href="/flips/new" color={theme.colors.white}>
               Create {remainingRequiredFlipsNumber} required{' '}
               {pluralize('flip', remainingRequiredFlipsNumber)}
             </Link>
