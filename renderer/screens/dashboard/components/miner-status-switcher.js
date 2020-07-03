@@ -1,22 +1,21 @@
 import React, {useEffect, useReducer} from 'react'
 import {useTranslation} from 'react-i18next'
-
+import {Box, Stack} from '@chakra-ui/core'
 import {
-  Box,
   FormGroup,
   Label,
-  Switcher,
   Modal,
-  Button,
   SubHeading,
+  Switcher,
   Text,
 } from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
-import theme from '../../../shared/theme'
-import useTx from '../../../shared/hooks/use-tx'
 import useRpc from '../../../shared/hooks/use-rpc'
+import useTx from '../../../shared/hooks/use-tx'
 import {useIdentityState} from '../../../shared/providers/identity-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
+import theme, {rem} from '../../../shared/theme'
+import {SecondaryButton, PrimaryButton} from '../../../shared/components/button'
 
 const defaultState = {
   online: null,
@@ -101,14 +100,17 @@ function MinerStatusSwitcher() {
   }
 
   return (
-    <Box m="0 0 24px 0">
+    <Box mb={6}>
       <FormGroup onClick={() => dispatch(['open'])}>
         <div className="form-control">
           <Flex align="center" justify="space-between">
-            <Label htmlFor="switcher" style={{margin: 0, cursor: 'pointer'}}>
-              {t('Online mining status')}
+            <Label
+              htmlFor="switcher"
+              style={{margin: 0, cursor: 'pointer', maxWidth: rem(110)}}
+            >
+              {t('Mining')}
             </Label>
-            <Box style={{pointerEvents: 'none'}}>
+            <Box pointerEvents="none">
               {state.online !== null && state.online !== undefined && (
                 <Switcher
                   withStatusHint
@@ -134,7 +136,7 @@ function MinerStatusSwitcher() {
         `}</style>
       </FormGroup>
       <Modal show={state.showModal} onHide={() => dispatch(['close'])}>
-        <Box m="0 0 18px">
+        <Box mb={4}>
           <SubHeading>
             {!state.online
               ? t('Activate mining status')
@@ -160,27 +162,23 @@ function MinerStatusSwitcher() {
             )}
           </Text>
         </Box>
-        <Flex align="center" justify="flex-end">
-          <Box px="4px">
-            <Button variant="secondary" onClick={() => dispatch(['close'])}>
-              {t('Cancel')}
-            </Button>
-          </Box>
-          <Box px="4px">
-            <Button
-              onClick={() => {
-                dispatch(['toggle'])
-                callRpc(
-                  state.online ? 'dna_becomeOffline' : 'dna_becomeOnline',
-                  {}
-                )
-              }}
-              disabled={state.isMining}
-            >
-              {state.isMining ? t('Waiting...') : t('Submit')}
-            </Button>
-          </Box>
-        </Flex>
+        <Stack isInline spacing={2} justify="flex-end">
+          <SecondaryButton onClick={() => dispatch(['close'])}>
+            {t('Cancel')}
+          </SecondaryButton>
+          <PrimaryButton
+            onClick={() => {
+              dispatch(['toggle'])
+              callRpc(
+                state.online ? 'dna_becomeOffline' : 'dna_becomeOnline',
+                {}
+              )
+            }}
+            isDisabled={state.isMining}
+          >
+            {state.isMining ? t('Waiting...') : t('Submit')}
+          </PrimaryButton>
+        </Stack>
       </Modal>
     </Box>
   )

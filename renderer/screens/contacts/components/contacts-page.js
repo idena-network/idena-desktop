@@ -2,15 +2,15 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {FiUsers} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
-import {Box, Drawer, Placeholder} from '../../../shared/components'
+import {Box, Placeholder} from '../../../shared/components'
 import Layout from '../../../shared/components/layout'
 import Flex from '../../../shared/components/flex'
 import ContactDetails from './contact-details'
 import {ContactProvider} from '../../../shared/providers/contact-context'
 import Sidebar from './sidebar'
-import SendInviteForm from './send-invite-form'
 import InviteDetails from './invite-details'
 import {useChainState} from '../../../shared/providers/chain-context'
+import {SendInviteDrawer, SendInviteForm} from './send-invite-form'
 
 function ContactsPage({showNewInviteForm = false}) {
   const {t} = useTranslation()
@@ -76,7 +76,10 @@ function ContactsPage({showNewInviteForm = false}) {
             )}
           </Box>
 
-          <Drawer show={isSendInviteOpen} onHide={handleCloseSendInvite}>
+          <SendInviteDrawer
+            isOpen={isSendInviteOpen}
+            onClose={handleCloseSendInvite}
+          >
             <SendInviteForm
               onSuccess={invite => {
                 handleCloseSendInvite()
@@ -85,7 +88,7 @@ function ContactsPage({showNewInviteForm = false}) {
               }}
               onFail={handleCloseSendInvite}
             />
-          </Drawer>
+          </SendInviteDrawer>
         </Flex>
       </Layout>
     </ContactProvider>

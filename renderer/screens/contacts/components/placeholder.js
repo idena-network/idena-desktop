@@ -32,15 +32,17 @@ export function Placeholder({children, icon, text, ...props}) {
       </Flex>
       <style jsx>{`
         .icon {
-          font-size ${rem(80)};
-          line-height ${rem(80)};
+          font-size ${rem(64)};
+          line-height ${rem(64)};
           color: ${theme.colors.gray2};
+          display: inline-block;
+          margin: 0 auto;
           margin-bottom: ${rem(18)};
         }
         .text {
           color: ${theme.colors.muted};
-          font-size: ${rem(16)};
-          line-height: ${rem(22)};
+          font-size: ${rem(13)};
+          line-height: ${rem(18)};
         }
       `}</style>
     </Box>

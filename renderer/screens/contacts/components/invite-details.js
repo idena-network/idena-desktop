@@ -3,7 +3,7 @@ import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import {useTranslation} from 'react-i18next'
 import {Drawer, Field} from '../../../shared/components'
-import theme, {rem} from '../../../shared/theme'
+import theme from '../../../shared/theme'
 import {
   useInviteDispatch,
   useInviteState,

@@ -45,7 +45,7 @@ import {rem} from '../../shared/theme'
 import {capitalize} from '../../shared/utils/string'
 import {reorder} from '../../shared/utils/arr'
 import {FlipType} from '../../shared/types'
-import {TooltipX} from '../../shared/components'
+import {Tooltip} from '../../shared/components/components'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -263,13 +263,13 @@ export function OptionalFlipPlaceholder({title, isDisabled}) {
     >
       {isDisabled ? (
         <EmptyFlipBox>
-          <TooltipX
+          <Tooltip
             label={t('Create required flips first')}
             shouldWrapChildren
             placement="bottom"
           >
             <FlipPlaceholder />
-          </TooltipX>
+          </Tooltip>
         </EmptyFlipBox>
       ) : (
         <NextLink href="/flips/new" passHref>

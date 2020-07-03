@@ -120,7 +120,6 @@ function IdentityProvider({children}) {
   const canTerminate =
     identity &&
     [
-      IdentityStatus.Candidate,
       IdentityStatus.Verified,
       IdentityStatus.Suspended,
       IdentityStatus.Zombie,

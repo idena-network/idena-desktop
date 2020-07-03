@@ -156,7 +156,7 @@ function Nav() {
         }}
       >
         <NavItem
-          href="/dashboard"
+          href="/profile"
           active
           icon={<i className="icon icon--user" />}
         >

@@ -1,27 +1,24 @@
-import React, {useRef} from 'react'
-import {margin} from 'polished'
+import React from 'react'
+import {Box, FormControl, Stack} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-
-import {Box, FormGroup, Label, Input, Button} from '../../../shared/components'
-import theme, {rem} from '../../../shared/theme'
-import Flex from '../../../shared/components/flex'
+import {PrimaryButton} from '../../../shared/components/button'
+import {FormLabel, Input} from '../../../shared/components/components'
 import {
-  useInviteState,
-  useInviteDispatch,
-} from '../../../shared/providers/invite-context'
-import {
-  useIdentityState,
   IdentityStatus,
+  useIdentityState,
 } from '../../../shared/providers/identity-context'
+import {
+  useInviteDispatch,
+  useInviteState,
+} from '../../../shared/providers/invite-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 
 function ActivateInviteForm() {
   const {t} = useTranslation()
-  const keyRef = useRef()
 
   const {addError} = useNotificationDispatch()
 
-  const {activationTx, activationCode} = useInviteState()
+  const {activationTx} = useInviteState()
   const {activateInvite} = useInviteDispatch()
 
   const {canActivateInvite, state: status} = useIdentityState()
@@ -33,36 +30,39 @@ function ActivateInviteForm() {
   const mining = !!activationTx
 
   return (
-    <Box py={theme.spacings.normal}>
-      <FormGroup>
-        <Label htmlFor="activateInviteKey">{t('Invitation code')}</Label>
-        <Flex align="center">
+    <Box
+      as="form"
+      onSubmit={async e => {
+        e.preventDefault()
+
+        try {
+          await activateInvite(e.target.elements.code.value)
+        } catch ({message}) {
+          addError({
+            title: message,
+          })
+        }
+      }}
+    >
+      <Stack isInline spacing={2} align="flex-end">
+        <FormControl justifySelf="stretch" flex={1}>
+          <FormLabel htmlFor="code">{t('Invitation code')}</FormLabel>
           <Input
-            ref={keyRef}
-            id="activateInviteKey"
-            disabled={mining || status === IdentityStatus.Invite}
-            style={{
-              ...margin(0, theme.spacings.normal, 0, 0),
-              width: rem(400),
+            id="code"
+            isDisabled={mining || status === IdentityStatus.Invite}
+            placeholder={
+              status === IdentityStatus.Invite &&
+              'Click the button to activate invitation'
+            }
+            _disabled={{
+              bg: 'gray.50',
             }}
-            defaultValue={activationCode}
           />
-          <Button
-            disabled={mining}
-            onClick={async () => {
-              try {
-                await activateInvite(keyRef.current.value)
-              } catch ({message}) {
-                addError({
-                  title: message,
-                })
-              }
-            }}
-          >
-            {mining ? t('Mining...') : t('Activate invite')}
-          </Button>
-        </Flex>
-      </FormGroup>
+        </FormControl>
+        <PrimaryButton isDisabled={mining} type="submit">
+          {mining ? t('Mining...') : t('Activate invite')}
+        </PrimaryButton>
+      </Stack>
     </Box>
   )
 }

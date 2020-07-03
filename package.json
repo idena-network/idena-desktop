@@ -12,7 +12,7 @@
     "dist:mac": "npm run build && electron-builder --mac --publish onTag",
     "dist:linux": "npm run build && electron-builder --linux --publish onTag",
     "pack": "npm run build && electron-builder --dir",
-    "clean": "rm -rf renderer/out dist",
+    "clean": "rm -rf renderer/out renderer/.next dist",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "jest",

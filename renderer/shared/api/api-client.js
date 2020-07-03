@@ -4,7 +4,7 @@ import {loadPersistentState} from '../utils/persist'
 export const BASE_INTERNAL_API_PORT = 9119
 export const BASE_API_URL = 'http://localhost:9009'
 
-function getParams() {
+export function getRpcParams() {
   const state = loadPersistentState('settings')
   if (!state) {
     return {
@@ -25,7 +25,7 @@ function getParams() {
 }
 
 export default () => {
-  const params = getParams()
+  const params = getRpcParams()
   const instance = axios.create({
     baseURL: params.url,
   })
