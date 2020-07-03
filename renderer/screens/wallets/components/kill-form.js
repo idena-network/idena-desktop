@@ -121,7 +121,21 @@ function KillForm({onSuccess, onFail}) {
         <Input id="to" placeholder={t('To address')} />
       </FormControl>
 
-      <PrimaryButton ml="auto" type="submit" isLoading={submitting}>
+      <PrimaryButton
+        ml="auto"
+        type="submit"
+        isLoading={submitting}
+        variantColor="red"
+        _hover={{
+          bg: 'rgb(227 60 60)',
+        }}
+        _active={{
+          bg: 'rgb(227 60 60)',
+        }}
+        _focus={{
+          boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
+        }}
+      >
         {t('Terminate')}
       </PrimaryButton>
     </Stack>
