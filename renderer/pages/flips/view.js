@@ -56,7 +56,7 @@ export default function ViewFlipPage() {
 
   const [current, send] = useMachine(viewMachine, {
     actions: {
-      onDeleteSubmitted: () => router.push('/flips/list'),
+      onDeleted: () => router.push('/flips/list'),
       onDeleteFailed: ({error}) =>
         toast({
           // eslint-disable-next-line react/display-name

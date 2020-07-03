@@ -869,6 +869,7 @@ export const createViewFlipMachine = id =>
                 assign({
                   type: FlipType.Archived,
                 }),
+                'onDeleted',
                 'persistFlip',
               ],
             },
@@ -889,12 +890,8 @@ export const createViewFlipMachine = id =>
                           txHash: data,
                           type: FlipType.Deleting,
                         })),
-                        sendParent(({id}) => ({
-                          type: 'DELETING',
-                          id,
-                        })),
                         'persistFlip',
-                        'onDeleteSubmitted',
+                        'onDeleted',
                         log(),
                       ],
                     },
