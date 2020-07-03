@@ -39,3 +39,9 @@ export const FlipType = {
   Deleting: 'deleting',
   Invalid: 'invalid',
 }
+
+export const FlipFilter = {
+  Active: 'active',
+  Draft: 'draft',
+  Archived: 'archived',
+}

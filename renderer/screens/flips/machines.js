@@ -11,203 +11,238 @@ import {
 } from './utils'
 import {callRpc} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
-import {FlipType} from '../../shared/types'
+import {FlipType, FlipFilter} from '../../shared/types'
 import {fetchTx, deleteFlip} from '../../shared/api'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
+import {persistState} from '../../shared/utils/persist'
 
-export const flipsMachine = Machine({
-  id: 'flips',
-  context: {
-    flips: null,
-    epoch: null,
-    knownFlips: [],
-    availableKeywords: [],
-  },
-  on: {
-    EPOCH: {
-      actions: [
-        assign({
-          flips: [],
-        }),
-      ],
+export const flipsMachine = Machine(
+  {
+    id: 'flips',
+    context: {
+      flips: null,
+      epoch: null,
+      knownFlips: [],
+      availableKeywords: [],
     },
-  },
-  initial: 'initializing',
-  states: {
-    initializing: {
-      invoke: {
-        src: async ({knownFlips, availableKeywords}) => {
-          const flipDb = global.flipStore
+    on: {
+      EPOCH: {
+        actions: [
+          assign({
+            flips: [],
+          }),
+        ],
+      },
+    },
+    initial: 'initializing',
+    states: {
+      initializing: {
+        invoke: {
+          src: async ({knownFlips, availableKeywords}) => {
+            const flipDb = global.flipStore
 
-          const persistedFlips = flipDb
-            .getFlips()
-            .map(({pics, compressedPics, hint, images, keywords, ...flip}) => ({
-              ...flip,
-              images: images || compressedPics || pics,
-              keywords: keywords || hint || [],
-              pics,
-              compressedPics,
-              hint,
-            }))
-
-          const persistedHashes = persistedFlips.map(flip => flip.hash)
-
-          let missingFlips = knownFlips.filter(
-            hash => !persistedHashes.includes(hash)
-          )
-
-          if (missingFlips.length) {
-            const keywords = availableKeywords
-              .filter(({id}) =>
-                persistedFlips.some(({keywordPairId}) => keywordPairId !== id)
+            const persistedFlips = flipDb
+              .getFlips()
+              .map(
+                ({pics, compressedPics, hint, images, keywords, ...flip}) => ({
+                  ...flip,
+                  images: images || compressedPics || pics,
+                  keywords: keywords || hint || [],
+                  pics,
+                  compressedPics,
+                  hint,
+                })
               )
-              .map(({id, words}) => ({
-                id,
-                words: words.map(global.loadKeyword),
+
+            const persistedHashes = persistedFlips.map(flip => flip.hash)
+
+            let missingFlips = knownFlips.filter(
+              hash => !persistedHashes.includes(hash)
+            )
+
+            if (missingFlips.length) {
+              const keywords = availableKeywords
+                .filter(({id}) =>
+                  persistedFlips.some(({keywordPairId}) => keywordPairId !== id)
+                )
+                .map(({id, words}) => ({
+                  id,
+                  words: words.map(global.loadKeyword),
+                }))
+
+              missingFlips = missingFlips.map((hash, idx) => ({
+                hash,
+                keywords: keywords[idx],
+                images: Array.from({length: 4}),
               }))
+            }
 
-            missingFlips = missingFlips.map((hash, idx) => ({
-              hash,
-              keywords: keywords[idx],
-              images: Array.from({length: 4}),
-            }))
-          }
-
-          return {persistedFlips, missingFlips}
-        },
-        onDone: [
-          {
-            target: 'ready.pristine',
-            actions: log(),
-            cond: (_, {data: {persistedFlips, missingFlips}}) =>
-              persistedFlips.concat(missingFlips).length === 0,
+            return {persistedFlips, missingFlips}
           },
-          {
-            target: 'ready.dirty',
-            actions: [
-              assign({
-                flips: (_, {data: {persistedFlips}}) =>
-                  persistedFlips.map(flip => ({
-                    ...flip,
-                    ref: spawn(
-                      // eslint-disable-next-line no-use-before-define
-                      flipMachine.withContext(flip),
-                      `flip-${flip.id}`
-                    ),
-                  })),
-                missingFlips: (_, {data: {missingFlips}}) => missingFlips,
-              }),
-              log(),
-            ],
-          },
-        ],
-        onError: [
-          {
-            target: 'ready.pristine',
-            actions: [
-              assign({
-                flips: [],
-              }),
-              log(),
-            ],
-            cond: (_, {data: error}) => error.notFound,
-          },
-          {
-            target: 'failure',
-            actions: [
-              assign({
-                flips: [],
-              }),
-              log(),
-            ],
-          },
-        ],
-      },
-    },
-    ready: {
-      initial: 'pristine',
-      states: {
-        pristine: {},
-        dirty: {
-          on: {
-            FILTER_ACTIVE: '.active',
-            FILTER_DRAFTS: '.drafts',
-            FILTER_ARCHIVE: '.archive',
-            PUBLISHING: {
+          onDone: [
+            {
+              target: 'ready.pristine',
+              actions: log(),
+              cond: (_, {data: {persistedFlips, missingFlips}}) =>
+                persistedFlips.concat(missingFlips).length === 0,
+            },
+            {
+              target: 'ready.dirty',
               actions: [
                 assign({
-                  flips: ({flips}, {id}) =>
-                    updateFlipType(flips, {id, type: FlipType.Publishing}),
+                  flips: (_, {data: {persistedFlips}}) =>
+                    persistedFlips.map(flip => ({
+                      ...flip,
+                      ref: spawn(
+                        // eslint-disable-next-line no-use-before-define
+                        flipMachine.withContext(flip),
+                        `flip-${flip.id}`
+                      ),
+                    })),
+                  missingFlips: (_, {data: {missingFlips}}) => missingFlips,
                 }),
                 log(),
               ],
             },
-            PUBLISHED: {
+          ],
+          onError: [
+            {
+              target: 'ready.pristine',
               actions: [
                 assign({
-                  flips: ({flips}, {id}) =>
-                    updateFlipType(flips, {id, type: FlipType.Published}),
+                  flips: [],
+                }),
+                log(),
+              ],
+              cond: (_, {data: error}) => error.notFound,
+            },
+            {
+              target: 'failure',
+              actions: [
+                assign({
+                  flips: [],
                 }),
                 log(),
               ],
             },
-            PUBLISH_FAILED: {
-              actions: ['onError'],
-            },
-            DELETING: {
-              actions: [
-                assign({
-                  flips: ({flips}, {id}) =>
-                    updateFlipType(flips, {id, type: FlipType.Deleting}),
-                }),
-                log(),
-              ],
-            },
-            DELETED: {
-              actions: [
-                assign({
-                  flips: ({flips}, {id}) =>
-                    updateFlipType(flips, {id, type: FlipType.Draft}),
-                }),
-                log(),
-              ],
-            },
-            DELETE_FAILED: {
-              actions: ['onError'],
-            },
-            ARCHIVED: {
-              actions: [
-                assign({
-                  flips: ({flips}, {id}) =>
-                    updateFlipType(flips, {id, type: FlipType.Archived}),
-                }),
-                log(),
-              ],
-            },
-            REMOVED: {
-              actions: [
-                assign({
-                  flips: ({flips}, {id}) =>
-                    flips.filter(flip => flip.id !== id),
-                }),
-                log(),
-              ],
-            },
-          },
-          initial: 'active',
-          states: {
-            active: {},
-            drafts: {},
-            archive: {},
-          },
+          ],
         },
       },
-    },
-    failure: {
-      entry: log(),
+      ready: {
+        initial: 'pristine',
+        states: {
+          pristine: {},
+          dirty: {
+            on: {
+              FILTER: {
+                target: '.unknown',
+                actions: [
+                  assign({
+                    filter: (_, {filter}) => filter,
+                  }),
+                  'persistFilter',
+                  log(),
+                ],
+              },
+              PUBLISHING: {
+                actions: [
+                  assign({
+                    flips: ({flips}, {id}) =>
+                      updateFlipType(flips, {id, type: FlipType.Publishing}),
+                  }),
+                  log(),
+                ],
+              },
+              PUBLISHED: {
+                actions: [
+                  assign({
+                    flips: ({flips}, {id}) =>
+                      updateFlipType(flips, {id, type: FlipType.Published}),
+                  }),
+                  log(),
+                ],
+              },
+              PUBLISH_FAILED: {
+                actions: ['onError'],
+              },
+              DELETING: {
+                actions: [
+                  assign({
+                    flips: ({flips}, {id}) =>
+                      updateFlipType(flips, {id, type: FlipType.Deleting}),
+                  }),
+                  log(),
+                ],
+              },
+              DELETED: {
+                actions: [
+                  assign({
+                    flips: ({flips}, {id}) =>
+                      updateFlipType(flips, {id, type: FlipType.Draft}),
+                  }),
+                  log(),
+                ],
+              },
+              DELETE_FAILED: {
+                actions: ['onError'],
+              },
+              ARCHIVED: {
+                actions: [
+                  assign({
+                    flips: ({flips}, {id}) =>
+                      updateFlipType(flips, {id, type: FlipType.Archived}),
+                  }),
+                  log(),
+                ],
+              },
+              REMOVED: {
+                actions: [
+                  assign({
+                    flips: ({flips}, {id}) =>
+                      flips.filter(flip => flip.id !== id),
+                  }),
+                  log(),
+                ],
+              },
+            },
+            initial: 'unknown',
+            states: {
+              unknown: {
+                on: {
+                  '': [
+                    {
+                      target: 'active',
+                      cond: ({filter}) => filter === FlipFilter.Active,
+                    },
+                    {
+                      target: 'draft',
+                      cond: ({filter}) => filter === FlipFilter.Draft,
+                    },
+                    {
+                      target: 'archived',
+                      cond: ({filter}) => filter === FlipFilter.Archived,
+                    },
+                  ],
+                },
+              },
+              active: {},
+              draft: {},
+              archived: {},
+            },
+          },
+        },
+      },
+      failure: {
+        entry: log(),
+      },
     },
   },
-})
+  {
+    actions: {
+      persistFilter: ({filter}) => persistState('flipFilter', filter),
+    },
+  }
+)
 
 export const flipMachine = Machine(
   {

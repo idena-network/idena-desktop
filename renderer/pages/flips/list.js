@@ -26,7 +26,11 @@ import {
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
 import {IconLink} from '../../shared/components/link'
-import {FlipType, IdentityStatus} from '../../shared/types'
+import {
+  FlipType,
+  IdentityStatus,
+  FlipFilter as FlipFilterType,
+} from '../../shared/types'
 import {Debug} from '../../shared/components/components'
 import {flipsMachine} from '../../screens/flips/machines'
 import {useIdentityState} from '../../shared/providers/identity-context'
@@ -34,6 +38,7 @@ import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {Notification} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
+import {loadPersistentState} from '../../shared/utils/persist'
 
 export default function FlipListPage() {
   const {t} = useTranslation()
@@ -62,6 +67,7 @@ export default function FlipListPage() {
     context: {
       knownFlips: knownFlips || [],
       availableKeywords: availableKeywords || [],
+      filter: loadPersistentState('flipFilter'),
     },
     actions: {
       onError: (_, {error}) =>
@@ -79,28 +85,30 @@ export default function FlipListPage() {
         }),
     },
   })
-  const {flips, missingFlips} = current.context
 
-  const readyState = state => ({ready: {dirty: state}})
+  const {flips, missingFlips, filter} = current.context
 
-  // eslint-disable-next-line no-nested-ternary
-  const filteredFlips = current.matches(readyState('active'))
-    ? flips.filter(({type}) =>
-        [
-          FlipType.Publishing,
-          FlipType.Published,
-          FlipType.Deleting,
-          FlipType.Invalid,
-        ].includes(type)
-      )
-    : // eslint-disable-next-line no-nested-ternary
-    current.matches(readyState('drafts'))
-    ? flips.filter(({type}) => [FlipType.Draft].includes(type))
-    : current.matches(readyState('archive'))
-    ? flips.filter(({type}) =>
-        [FlipType.Archived, FlipType.Deleted].includes(type)
-      )
-    : []
+  const filterFlips = () => {
+    switch (filter) {
+      case FlipFilterType.Active:
+        return flips.filter(({type}) =>
+          [
+            FlipType.Publishing,
+            FlipType.Published,
+            FlipType.Deleting,
+            FlipType.Invalid,
+          ].includes(type)
+        )
+      case FlipType.Draft:
+        return flips.filter(({type}) => type === FlipType.Draft)
+      case FlipType.Archived:
+        return flips.filter(({type}) =>
+          [FlipType.Archived, FlipType.Deleted].includes(type)
+        )
+      default:
+        return []
+    }
+  }
 
   const madeFlipsNumber = (knownFlips || []).length
 
@@ -120,12 +128,18 @@ export default function FlipListPage() {
         <PageTitle>{t('My Flips')}</PageTitle>
         <Flex justify="space-between" align="center" alignSelf="stretch" mb={8}>
           <FlipFilter
-            defaultValue="Active"
-            onChange={value => send(`FILTER_${value.toUpperCase()}`)}
+            value={filter}
+            onChange={value => send('FILTER', {filter: value})}
           >
-            <FlipFilterOption value="Active">{t('Active')}</FlipFilterOption>
-            <FlipFilterOption value="Drafts">{t('Drafts')}</FlipFilterOption>
-            <FlipFilterOption value="Archive">{t('Archived')}</FlipFilterOption>
+            <FlipFilterOption value={FlipFilterType.Active}>
+              {t('Active')}
+            </FlipFilterOption>
+            <FlipFilterOption value={FlipFilterType.Draft}>
+              {t('Drafts')}
+            </FlipFilterOption>
+            <FlipFilterOption value={FlipFilterType.Archived}>
+              {t('Archived')}
+            </FlipFilterOption>
           </FlipFilter>
           <IconLink href="/flips/new" icon="plus-solid">
             {t('Add flip')}
@@ -145,12 +159,7 @@ export default function FlipListPage() {
                 px={3}
                 py={2}
               >
-                <AlertIcon
-                  name="info"
-                  color="green.500"
-                  size={5}
-                  mr={3}
-                ></AlertIcon>
+                <AlertIcon name="info" color="green.500" size={5} mr={3} />
                 {remainingRequiredFlips
                   ? t(`Please submit required flips.`, {remainingRequiredFlips})
                   : null}{' '}
@@ -199,7 +208,7 @@ export default function FlipListPage() {
 
         {current.matches('ready.dirty') && (
           <FlipCardList>
-            {filteredFlips.map(flip => (
+            {filterFlips().map(flip => (
               <FlipCard
                 key={flip.id}
                 flipService={flip.ref}
