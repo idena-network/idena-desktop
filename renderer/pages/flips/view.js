@@ -33,6 +33,7 @@ import {createViewFlipMachine} from '../../screens/flips/machines'
 import {rem} from '../../shared/theme'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {Toast} from '../../shared/components/components'
+import {FlipType} from '../../shared/types'
 
 export default function ViewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -72,6 +73,7 @@ export default function ViewFlipPage() {
     originalOrder,
     order,
     showTranslation,
+    type,
   } = current.context
 
   if (!id) return null
@@ -147,24 +149,26 @@ export default function ViewFlipPage() {
             </FlipMaster>
           )}
         </Flex>
-        <FlipMasterFooter>
-          <FlipCardMenu>
-            <FlipCardMenuItem
-              onClick={() => {
-                if ((knownFlips || []).includes(hash)) openDeleteForm()
-                else send('ARCHIVE')
-              }}
-            >
-              <FlipCardMenuItemIcon
-                name="delete"
-                size={5}
-                mr={2}
-                color="red.500"
-              />
-              {t('Delete flip')}
-            </FlipCardMenuItem>
-          </FlipCardMenu>
-        </FlipMasterFooter>
+        {type !== FlipType.Archived && (
+          <FlipMasterFooter>
+            <FlipCardMenu>
+              <FlipCardMenuItem
+                onClick={() => {
+                  if ((knownFlips || []).includes(hash)) openDeleteForm()
+                  else send('ARCHIVE')
+                }}
+              >
+                <FlipCardMenuItemIcon
+                  name="delete"
+                  size={5}
+                  mr={2}
+                  color="red.500"
+                />
+                {t('Delete flip')}
+              </FlipCardMenuItem>
+            </FlipCardMenu>
+          </FlipMasterFooter>
+        )}
 
         <DeleteFlipDrawer
           isOpen={isOpenDeleteForm}

@@ -77,10 +77,11 @@ export function FlipCard({flipService, onDelete}) {
   const isActionable = [
     FlipType.Published,
     FlipType.Draft,
+    FlipType.Archived,
     FlipType.Invalid,
   ].includes(type)
   const isSubmittable = [FlipType.Draft, FlipType.Invalid].includes(type)
-  const isViewable = [FlipType.Published].includes(type)
+  const isViewable = [FlipType.Published, FlipType.Archived].includes(type)
   const isEditable = [FlipType.Draft, FlipType.Invalid].includes(type)
   const isDeletable = [FlipType.Published, FlipType.Draft].includes(type)
 
