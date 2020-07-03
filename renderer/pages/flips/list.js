@@ -8,21 +8,8 @@ import {
   AlertIcon,
   Image,
   useToast,
-  Drawer,
-  DrawerHeader,
-  DrawerBody,
-  DrawerContent,
-  Input,
-  DrawerCloseButton,
-  DrawerOverlay,
   useDisclosure,
-  Icon,
-  Heading,
-  Text,
-  FormControl,
-  FormLabel,
 } from '@chakra-ui/core'
-import {rem} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
@@ -34,8 +21,8 @@ import {
   OptionalFlipPlaceholder,
   FlipCardList,
   EmptyFlipBox,
-  FlipImage,
   FlipCard,
+  DeleteFlipDrawer,
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
 import {IconLink} from '../../shared/components/link'
@@ -47,7 +34,6 @@ import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {Notification} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
-import {PrimaryButton} from '../../shared/components/button'
 
 export default function FlipListPage() {
   const {t} = useTranslation()
@@ -68,7 +54,6 @@ export default function FlipListPage() {
     availableFlips: availableFlipsNumber,
     flipKeyWordPairs: availableKeywords,
     state: status,
-    canSubmitFlip,
   } = useIdentityState()
 
   const [selectedFlip, setSelectedFlip] = React.useState()
@@ -142,11 +127,9 @@ export default function FlipListPage() {
             <FlipFilterOption value="Drafts">{t('Drafts')}</FlipFilterOption>
             <FlipFilterOption value="Archive">{t('Archived')}</FlipFilterOption>
           </FlipFilter>
-          {(global.isDev || canSubmitFlip) && (
-            <IconLink href="/flips/new" icon="plus-solid">
-              {t('Add flip')}
-            </IconLink>
-          )}
+          <IconLink href="/flips/new" icon="plus-solid">
+            {t('Add flip')}
+          </IconLink>
         </Flex>
         {current.matches('ready.dirty.active') &&
           canSubmitFlips &&
@@ -273,92 +256,16 @@ export default function FlipListPage() {
           </FlipCardList>
         )}
 
-        <Drawer isOpen={isOpenDeleteForm} onClose={onCloseDeleteForm}>
-          <DrawerOverlay bg="xblack.080" />
-          <DrawerContent px={8} py={10} w={rem(360)}>
-            <DrawerCloseButton />
-            <DrawerHeader p={0} mb={3}>
-              <Flex
-                align="center"
-                justify="center"
-                bg="red.012"
-                h={12}
-                w={12}
-                rounded="xl"
-              >
-                <Icon name="delete" size={6} color="red.500" />
-              </Flex>
-              <Heading
-                fontSize="lg"
-                fontWeight={500}
-                color="brandGray.500"
-                mt={4}
-              >
-                {t('Delete flip')}
-              </Heading>
-            </DrawerHeader>
-            <DrawerBody p={0}>
-              <Text color="brandGray.500" fontSize="md">
-                {t('Deleted flip will be moved to the drafts.')}
-              </Text>
-              {selectedFlip && (
-                <>
-                  <FlipImage
-                    src={selectedFlip.images[selectedFlip.originalOrder[0]]}
-                    size={160}
-                    objectFit="cover"
-                    mx="auto"
-                    mt={8}
-                    mb={38}
-                    rounded="lg"
-                  />
-                  <FormControl mb={6}>
-                    <FormLabel
-                      htmlFor="hashInput"
-                      color="brandGray.500"
-                      fontSize="md"
-                      fontWeight={500}
-                      mb={2}
-                    >
-                      {t('Flip hash')}
-                    </FormLabel>
-                    <Input
-                      id="hashInput"
-                      h={8}
-                      borderColor="gray.300"
-                      lineHeight={rem(18)}
-                      px={3}
-                      pt="3/2"
-                      pb={2}
-                      mb={2}
-                      value={selectedFlip.hash}
-                      isReadOnly
-                      _readOnly={{
-                        bg: 'gray.50',
-                        borderColor: 'gray.300',
-                        color: 'muted',
-                      }}
-                    />
-                  </FormControl>
-                  <PrimaryButton
-                    variantColor="red"
-                    display="flex"
-                    ml="auto"
-                    _hover={{
-                      bg: 'rgb(227 60 60)',
-                    }}
-                    onClick={() => {
-                      selectedFlip.ref.send('DELETE')
-                      onCloseDeleteForm()
-                    }}
-                  >
-                    Delete
-                  </PrimaryButton>
-                </>
-              )}
-            </DrawerBody>
-          </DrawerContent>
-        </Drawer>
+        <DeleteFlipDrawer
+          hash={selectedFlip?.hash}
+          cover={selectedFlip?.images[selectedFlip.originalOrder[0]]}
+          isOpen={isOpenDeleteForm}
+          onClose={onCloseDeleteForm}
+          onDelete={() => {
+            selectedFlip.ref.send('DELETE')
+            onCloseDeleteForm()
+          }}
+        />
 
         {global.isDev && (
           <Box position="absolute" left={6} bottom={6} zIndex="popover">

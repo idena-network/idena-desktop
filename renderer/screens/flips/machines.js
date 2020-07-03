@@ -6,8 +6,10 @@ import {
   voteForKeywordTranslation,
   suggestKeywordTranslation,
   publishFlip,
+  updateFlipType,
   DEFAULT_FLIP_ORDER,
 } from './utils'
+import {callRpc} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
 import {FlipType} from '../../shared/types'
 import {fetchTx, deleteFlip} from '../../shared/api'
@@ -243,17 +245,6 @@ export const flipMachine = Machine(
               'persistFlip',
             ],
           },
-          REMOVE: {
-            target: 'removed',
-            actions: [
-              'removeFlip',
-              sendParent(({id}) => ({
-                type: 'REMOVED',
-                id,
-              })),
-              log(),
-            ],
-          },
         },
       },
       publishing: {
@@ -435,9 +426,6 @@ export const flipMachine = Machine(
     actions: {
       persistFlip: context => {
         global.flipStore.updateDraft(context)
-      },
-      removeFlip: ({id}) => {
-        global.flipStore.deleteDraft(id)
       },
     },
   }
@@ -845,14 +833,99 @@ export const flipMasterMachine = Machine(
   }
 )
 
-function updateFlipType(flips, {id, type}) {
-  return flips.map(flip =>
-    flip.id === id
-      ? {
-          ...flip,
-          type,
-          ref: flip.ref,
-        }
-      : flip
+export const createViewFlipMachine = id =>
+  Machine(
+    {
+      context: {
+        id,
+        keywords: {
+          words: [],
+          translations: [],
+        },
+        order: [],
+        originalOrder: [],
+        voted: [],
+      },
+      initial: 'loading',
+      states: {
+        loading: {
+          invoke: {
+            // eslint-disable-next-line no-shadow
+            src: async ({id}) => global.flipStore.getFlip(id),
+            onDone: {
+              target: 'loaded',
+              actions: [
+                assign((context, {data}) => ({...context, ...data})),
+                log(),
+              ],
+            },
+          },
+        },
+        loaded: {
+          on: {
+            DELETE: '.deleting',
+            ARCHIVE: {
+              actions: [
+                assign({
+                  type: FlipType.Archived,
+                }),
+                'onDeleted',
+                'persistFlip',
+              ],
+            },
+          },
+          initial: 'idle',
+          states: {
+            idle: {},
+            deleting: {
+              initial: 'submitting',
+              states: {
+                submitting: {
+                  invoke: {
+                    src: 'deleteFlip',
+                    onDone: {
+                      actions: [
+                        assign((context, {data}) => ({
+                          ...context,
+                          txHash: data,
+                          type: FlipType.Deleting,
+                        })),
+                        'persistFlip',
+                        'onDeleted',
+                        log(),
+                      ],
+                    },
+                    onError: {
+                      target: 'failure',
+                      actions: [
+                        assign({
+                          error: (_, {data: {message}}) => message,
+                        }),
+                        'onDeleteFailed',
+                        log(),
+                      ],
+                    },
+                  },
+                },
+                failure: {
+                  on: {
+                    DELETE: 'submitting',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      services: {
+        deleteFlip: async ({hash}) => callRpc('flip_delete', hash),
+      },
+      actions: {
+        persistFlip: context => {
+          global.flipStore.updateDraft(context)
+        },
+      },
+    }
   )
-}

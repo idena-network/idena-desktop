@@ -216,14 +216,7 @@ export default function ProfilePage() {
             <SpoilInviteForm
               onSpoil={async key => {
                 try {
-                  const {
-                    result,
-                    error,
-                  } = await callRpc('dna_activateInviteToRandAddr', {key})
-
-                  console.log(result, error)
-
-                  if (error) throw new Error(error.message)
+                  await callRpc('dna_activateInviteToRandAddr', {key})
 
                   toast({
                     status: 'success',
