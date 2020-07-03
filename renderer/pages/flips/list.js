@@ -67,7 +67,7 @@ export default function FlipListPage() {
     context: {
       knownFlips: knownFlips || [],
       availableKeywords: availableKeywords || [],
-      filter: loadPersistentState('flipFilter'),
+      filter: loadPersistentState('flipFilter') || FlipFilterType.Active,
     },
     actions: {
       onError: (_, {error}) =>
