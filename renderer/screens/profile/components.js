@@ -124,10 +124,9 @@ export function SpoilInviteDrawer({children, ...props}) {
       </DrawerHeader>
       <DrawerBody>
         <Text fontSize="md" mb={6}>
-          {t(`Since invitation codes are supposed to be provided privately feel free
-          to spoil those invitations that are shared publicly. This will prevent
-          bots from collecting invitation codes. When you click Spoil the
-          invitation will be activated by a random address`)}
+          {t(
+            `Spoil invitations that are shared publicly. This will encourage people to share invitations privately and prevent bots from collecting invitation codes.`
+          )}
         </Text>
         {children}
       </DrawerBody>
@@ -150,6 +149,11 @@ export function SpoilInviteForm({onSpoil}) {
         <FormLabel htmlFor="key">Invitation code</FormLabel>
         <Input id="key" placeholder={t('Invitation code to spoil')} />
       </FormControl>
+      <Text fontSize="md">
+        {t(
+          `When you click 'Spoil' the invitation code will be activated by a random address and wasted.`
+        )}
+      </Text>
       <PrimaryButton ml="auto" type="submit">
         {t('Spoil invite')}
       </PrimaryButton>
