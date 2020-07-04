@@ -879,14 +879,12 @@ export const createViewFlipMachine = id =>
         },
         order: [],
         originalOrder: [],
-        voted: [],
       },
       initial: 'loading',
       states: {
         loading: {
           invoke: {
-            // eslint-disable-next-line no-shadow
-            src: async ({id}) => global.flipStore.getFlip(id),
+            src: 'loadFlip',
             onDone: {
               target: 'loaded',
               actions: [

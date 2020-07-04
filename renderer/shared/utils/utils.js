@@ -35,7 +35,7 @@ export function toPercent(value) {
 
 export const toLocaleDna = locale => {
   const formatter = new Intl.NumberFormat(locale, {
-    maximumFractionDigits: 16,
+    maximumFractionDigits: 18,
   })
   return value => `${formatter.format(value)} DNA`
 }

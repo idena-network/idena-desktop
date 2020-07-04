@@ -21,6 +21,7 @@ import {
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {PrimaryButton} from '../../shared/components/button'
+import {mapToFriendlyStatus} from '../../shared/providers/identity-context'
 
 export function UserCard({address, state}) {
   return (
@@ -28,7 +29,7 @@ export function UserCard({address, state}) {
       <Avatar address={address} />
       <Stack spacing={1}>
         <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
-          {state}
+          {mapToFriendlyStatus(state)}
         </Heading>
         <Heading
           as="h3"

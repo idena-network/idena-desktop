@@ -56,6 +56,39 @@ export default function ViewFlipPage() {
   const viewMachine = React.useMemo(() => createViewFlipMachine(id), [id])
 
   const [current, send] = useMachine(viewMachine, {
+    services: {
+      // eslint-disable-next-line no-shadow
+      loadFlip: async ({id, keywords}) => {
+        const {
+          hint,
+          // eslint-disable-next-line no-shadow
+          keywords: persistedKeywords,
+          keywordPairId = hint ? Math.max(hint.id, 0) : 0,
+          pics,
+          compressedPics,
+          // eslint-disable-next-line no-shadow
+          images = compressedPics || pics,
+          editorIndexes,
+          // eslint-disable-next-line no-shadow
+          originalOrder,
+          ...flip
+        } = global.flipStore?.getFlip(id)
+
+        return {
+          ...flip,
+          keywordPairId,
+          keywords: {
+            ...keywords,
+            ...(persistedKeywords || {
+              words: hint.words,
+              translations: [],
+            }),
+          },
+          images,
+          originalOrder: originalOrder || editorIndexes,
+        }
+      },
+    },
     actions: {
       onDeleted: () => router.push('/flips/list'),
       onDeleteFailed: ({error}) =>
