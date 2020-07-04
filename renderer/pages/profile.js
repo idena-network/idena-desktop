@@ -2,7 +2,10 @@ import React from 'react'
 import {Stack, Box, Text, Icon, useDisclosure, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
-import {useIdentityState} from '../shared/providers/identity-context'
+import {
+  useIdentityState,
+  mapToFriendlyStatus,
+} from '../shared/providers/identity-context'
 import {useEpochState} from '../shared/providers/epoch-context'
 import {Page, PageTitle} from '../screens/app/components'
 import {
@@ -102,7 +105,21 @@ export default function ProfilePage() {
             <Stack spacing={6}>
               <UserCard address={address} state={state} />
               <UserStatList>
-                <SimpleUserStat label="Address" value={address} />
+                <SimpleUserStat label={t('Address')} value={address} />
+                {state === IdentityStatus.Newbie ? (
+                  <AnnotatedUserStat
+                    annotation={t(
+                      'Solve more than 12 flips to become Verified'
+                    )}
+                    label={t('Status')}
+                    value={mapToFriendlyStatus(state)}
+                  />
+                ) : (
+                  <SimpleUserStat
+                    label={t('Status')}
+                    value={mapToFriendlyStatus(state)}
+                  />
+                )}
                 <UserStat>
                   <UserStatLabel>{t('Balance')}</UserStatLabel>
                   <UserStatValue>{toDna(balance)}</UserStatValue>
@@ -150,7 +167,7 @@ export default function ProfilePage() {
 
                 {epoch && (
                   <SimpleUserStat
-                    label="Next validation"
+                    label={t('Next validation')}
                     value={dayjs(epoch.nextValidation).toString()}
                   />
                 )}

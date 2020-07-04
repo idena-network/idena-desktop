@@ -384,9 +384,8 @@ function CurrentTask({epoch, period, identity}) {
           return t('Wait for validation')
 
         default:
-          break
+          return '...'
       }
-      break
     }
 
     case EpochPeriod.ShortSession:
@@ -440,10 +439,8 @@ function CurrentTask({epoch, period, identity}) {
         }
 
         default:
-          break
+          return '...'
       }
-
-      return '...'
     }
 
     case EpochPeriod.FlipLottery:
