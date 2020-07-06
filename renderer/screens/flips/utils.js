@@ -150,13 +150,7 @@ export async function publishFlip({
   )
     throw new Error('You already submitted this flip')
 
-  if (
-    areEual(
-      ...(hint
-        ? [order, DEFAULT_FLIP_ORDER]
-        : [orderPermutations, originalOrder])
-    )
-  )
+  if (areEual(order, hint ? DEFAULT_FLIP_ORDER : originalOrder))
     throw new Error('You must shuffle flip before submit')
 
   const compressedImages = await Promise.all(
