@@ -1030,6 +1030,11 @@ export function CommunityTranslations({
 
   const [wordIdx, setWordIdx] = React.useState(0)
 
+  const [
+    descriptionCharactersCount,
+    setDescriptionCharactersCount,
+  ] = React.useState(150)
+
   const translations = keywords.translations[wordIdx]
 
   const lastTranslationId =
@@ -1126,6 +1131,8 @@ export function CommunityTranslations({
                     color: 'muted',
                   }}
                 />
+              </FormControl>
+              <FormControl position="relative">
                 <Textarea
                   id="descInput"
                   placeholder={
@@ -1141,7 +1148,20 @@ export function CommunityTranslations({
                   _placeholder={{
                     color: 'muted',
                   }}
+                  onChange={e =>
+                    setDescriptionCharactersCount(150 - e.target.value.length)
+                  }
                 />
+                <Box
+                  color={descriptionCharactersCount < 0 ? 'red.500' : 'muted'}
+                  fontSize="sm"
+                  position="absolute"
+                  right={2}
+                  bottom={2}
+                  zIndex="docked"
+                >
+                  {descriptionCharactersCount}
+                </Box>
               </FormControl>
               <PrimaryButton
                 type="submit"
