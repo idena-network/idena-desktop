@@ -160,10 +160,10 @@ export default function FlipListPage() {
                 py={2}
               >
                 <AlertIcon name="info" color="green.500" size={5} mr={3} />
-                {remainingRequiredFlips
+                {remainingRequiredFlips > 0
                   ? t(`Please submit required flips.`, {remainingRequiredFlips})
                   : null}{' '}
-                {remainingOptionalFlips
+                {remainingOptionalFlips > 0
                   ? t(`You can also submit optional flips if you want.`, {
                       remainingOptionalFlips,
                     })
