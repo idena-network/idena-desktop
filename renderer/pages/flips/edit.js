@@ -304,7 +304,12 @@ export default function EditFlipPage() {
             </PrimaryButton>
           )}
           {is('submit') && (
-            <PrimaryButton onClick={() => send('SUBMIT')}>
+            <PrimaryButton
+              isDisabled={is('submit.submitting')}
+              isLoading={is('submit.submitting')}
+              loadingText={t('Publishing')}
+              onClick={() => send('SUBMIT')}
+            >
               {t('Submit')}
             </PrimaryButton>
           )}

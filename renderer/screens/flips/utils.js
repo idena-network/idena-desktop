@@ -152,8 +152,9 @@ export async function publishFlip({
 
   if (
     areEual(
-      order,
-      Array.from({length: 4}, (_, idx) => idx)
+      ...(hint
+        ? [order, DEFAULT_FLIP_ORDER]
+        : [orderPermutations, originalOrder])
     )
   )
     throw new Error('You must shuffle flip before submit')
