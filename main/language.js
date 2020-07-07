@@ -39,6 +39,8 @@ const trTranslation = require('../locales/tr/translation.json')
 const trError = require('../locales/tr/error.json')
 const bgTranslation = require('../locales/bg/translation.json')
 const bgError = require('../locales/bg/error.json')
+const svTranslation = require('../locales/sv/translation.json')
+const svError = require('../locales/sv/error.json')
 
 const getCurrentLang = () => {
   const local = app.getLocale()
@@ -72,6 +74,7 @@ const getI18nConfig = isDev => ({
     sl: {translation: slTranslation, error: slError},
     tr: {translation: trTranslation, error: trError},
     bg: {translation: bgTranslation, error: bgError},
+    sv: {translation: svTranslation, error: svError},
   },
   lng: getCurrentLang(),
   fallbackLng: 'en',

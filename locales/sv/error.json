@@ -1,0 +1,16 @@
+{
+  "Can not submit flip": "Kan inte skicka in flip",
+  "Keywords are not specified": "Inga nyckelord är angivna",
+  "Error while uploading flip": "Fel vid uppladdning av flip",
+  "Something went wrong": "Något gick fel",
+  "Maximum image size exceeded": "Maximal bildstorlek överskriden",
+  "Error while importing key": "Fel vid import av nyckel",
+  "Internal node is not available, try again in a few seconds": "Den interna noden är inte tillgänglig, försök igen om några sekunder",
+  "You can not submit flips having 'Candidate' status": "Du kan inte skicka in flippar med status som 'Candidate'",
+  "You cannot submit more flips until the next validation": "Du kan inte skicka in fler flippar förrän nästa validering",
+  "Can not submit flip during the validation session": "Kan inte skicka in flip under validering sessionen",
+  "Error while sending transaction": "Fel vid överföring av transaktionen",
+  "Transaction sent": "Transaktion skickad",
+  "Error while deleting flip": "Fel vid radering av flip",
+  "It's not allowed to submit flips with your identity status": "Det är inte tillåtet att skicka in flippar med din identitetsstatus"
+}
