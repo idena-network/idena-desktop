@@ -179,7 +179,7 @@ export const uiTheme = {
       200: '#578fff',
       300: '#447ceb',
       400: '#447ceb',
-      500: 'rgb(87 143 255)',
+      500: 'rgb(87, 143, 255)',
       600: '#447ceb',
       700: '#447ceb',
     },
@@ -212,6 +212,10 @@ export const uiTheme = {
     ...chakraTheme.space,
     '1/2': '2px',
     '3/2': '6px',
+  },
+  sizes: {
+    ...chakraTheme.sizes,
+    sm: rem(360),
   },
   radii: {
     ...chakraTheme.radii,

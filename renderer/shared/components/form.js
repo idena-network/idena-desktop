@@ -202,7 +202,7 @@ function Field({label, id, allowCopy, children, textarea, select, ...props}) {
             </Text>
             <FlatButton
               color={theme.colors.primary}
-              css={{lineHeight: 1}}
+              css={{fontWeight: 500, lineHeight: 1}}
               onClick={() => copyToClipboard(inputRef.current.value)}
             >
               Copy

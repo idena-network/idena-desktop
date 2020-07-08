@@ -10,13 +10,12 @@ import {
 } from 'polished'
 import {useTranslation} from 'react-i18next'
 import {FiInfo, FiAlertCircle, FiGlobe} from 'react-icons/fi'
-import Modal from './modal'
 import Box from './box'
-import {SubHeading, Text} from './typo'
+import {Text} from './typo'
 import theme, {rem} from '../theme'
 import {useIdentityState} from '../providers/identity-context'
 import Flex from './flex'
-import Button from './button'
+import {SecondaryButton, PrimaryButton} from './button'
 import {
   startSession,
   authenticate,
@@ -32,6 +31,7 @@ import {Input, FormGroup, Label} from './form'
 import Avatar from './avatar'
 import {Tooltip} from './tooltip'
 import {useNotificationDispatch} from '../providers/notification-context'
+import {Dialog, DialogBody, DialogFooter} from './components'
 
 export function DnaLinkHandler({children}) {
   const [dnaUrl, setDnaUrl] = React.useState()
@@ -69,6 +69,9 @@ export function DnaLinkHandler({children}) {
 
 export function DnaSignInDialog({url, onHide, onSigninError}) {
   const {t} = useTranslation()
+
+  const initialRef = React.useRef()
+
   const {address} = useIdentityState()
 
   const {
@@ -98,14 +101,18 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
   }
 
   return (
-    <DnaDialog show={Boolean(url)} onHide={onHide}>
-      <DnaDialogTitle>Login confirmation</DnaDialogTitle>
-      <DnaDialogSubtitle>
-        {t(
-          'Please confirm that you want to use your public address for the website login'
-        )}
-      </DnaDialogSubtitle>
+    <DnaDialog
+      isOpen={url}
+      onClose={onHide}
+      initialFocusRef={initialRef}
+      title={t('Login confirmation')}
+    >
       <DnaDialogBody>
+        <DnaDialogSubtitle>
+          {t(
+            'Please confirm that you want to use your public address for the website login'
+          )}
+        </DnaDialogSubtitle>
         <DnaDialogDetails>
           <DnaDialogPanel>
             <PanelRow>
@@ -147,16 +154,13 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
         </DnaDialogDetails>
       </DnaDialogBody>
       <DnaDialogFooter>
-        <Button variant="secondary" onClick={onHide}>
-          Cancel
-        </Button>
-        <Button
-          css={{
-            maxWidth: rem(200),
-            maxHeight: rem(32),
-            overflow: 'hidden',
-            ...wordWrap('break-all'),
-          }}
+        <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
+        <PrimaryButton
+          maxH={8}
+          maxW={48}
+          overflow="hidden"
+          wordBreak="break-all"
+          ref={initialRef}
           onClick={async () => {
             startSession(nonceEndpoint, {
               token,
@@ -180,8 +184,8 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
               .finally(onHide)
           }}
         >
-          Proceed to {callbackHostname}
-        </Button>
+          {t('Proceed to {{callbackHostname}}', {callbackHostname})}
+        </PrimaryButton>
       </DnaDialogFooter>
     </DnaDialog>
   )
@@ -195,6 +199,7 @@ export function DnaSendDialog({
   ...props
 }) {
   const {t} = useTranslation()
+
   const {address: from, balance} = useIdentityState()
 
   const {address: to, amount, comment} = parseQuery(url)
@@ -207,14 +212,19 @@ export function DnaSendDialog({
   const isExceededBalance = +amount > balance
 
   return (
-    <DnaDialog show={Boolean(url)} onHide={onHide} {...props}>
-      <DnaDialogTitle>Confirm transfer</DnaDialogTitle>
-      <DnaDialogSubtitle>
-        {t(
-          `You’re about to send DNA from your wallet to the following address`
-        )}
-      </DnaDialogSubtitle>
+    <DnaDialog
+      isOpen={url}
+      onClose={onHide}
+      m={0}
+      title={t('Confirm transfer')}
+      {...props}
+    >
       <DnaDialogBody>
+        <DnaDialogSubtitle>
+          {t(
+            `You’re about to send DNA from your wallet to the following address`
+          )}
+        </DnaDialogSubtitle>
         <DnaDialogAlert>
           {t(`Attention! This is irreversible operation`)}
         </DnaDialogAlert>
@@ -269,7 +279,7 @@ export function DnaSendDialog({
           <DnaDialogPanel label={t('Comment')} value={comment} />
         </DnaDialogDetails>
         {shouldConfirmTx && (
-          <FormGroup style={{...margin(rem(20), 0, rem(20))}}>
+          <FormGroup style={{...margin(rem(20), 0, 0)}}>
             <Label style={{fontWeight: 500}}>
               {t('Enter amount to confirm transfer')}
             </Label>
@@ -287,11 +297,9 @@ export function DnaSendDialog({
         )}
       </DnaDialogBody>
       <DnaDialogFooter>
-        <Button variant="secondary" onClick={onHide}>
-          {t('Cancel')}
-        </Button>
-        <Button
-          disabled={isExceededBalance || (shouldConfirmTx && !areSameAmounts)}
+        <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
+        <PrimaryButton
+          isDisabled={isExceededBalance || (shouldConfirmTx && !areSameAmounts)}
           onClick={async () => {
             new Promise((resolve, reject) => {
               if (shouldConfirmTx) {
@@ -315,18 +323,14 @@ export function DnaSendDialog({
           }}
         >
           {t('Confirm')}
-        </Button>
+        </PrimaryButton>
       </DnaDialogFooter>
     </DnaDialog>
   )
 }
 
 function DnaDialog(props) {
-  return <Modal width={360} {...props}></Modal>
-}
-
-function DnaDialogTitle(props) {
-  return <SubHeading css={{...margin(0, 0, rem(8))}} {...props} />
+  return <Dialog {...props} />
 }
 
 function DnaDialogSubtitle(props) {
@@ -361,7 +365,7 @@ function DnaDialogAlert(props) {
 }
 
 function DnaDialogBody(props) {
-  return <Box style={{...margin(0, 0, rem(24))}} {...props} />
+  return <DialogBody {...props} />
 }
 
 function DnaDialogDetails(props) {
@@ -443,6 +447,10 @@ function PanelMediaCell(props) {
   )
 }
 
+function DnaDialogFooter(props) {
+  return <DialogFooter {...props} />
+}
+
 function Address({address}) {
   return (
     <Avatar
@@ -456,19 +464,5 @@ function Address({address}) {
         ...margin(0),
       }}
     />
-  )
-}
-
-function DnaDialogFooter({children, ...props}) {
-  return (
-    <Flex align="center" justify="flex-end" {...props}>
-      {React.Children.map(children, (child, idx) =>
-        idx === React.Children.count(children) - 1
-          ? child
-          : React.cloneElement(child, {
-              style: {...child.props.style, marginRight: rem(8)},
-            })
-      )}
-    </Flex>
   )
 }

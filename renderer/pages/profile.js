@@ -18,6 +18,9 @@ import {
   AnnotatedUserStat,
   SpoilInviteDrawer,
   SpoilInviteForm,
+  MinerStatusSwitcher,
+  ActivateInviteForm,
+  ValidationResultToast,
 } from '../screens/profile/components'
 import {IconButton2} from '../shared/components/button'
 import {IconLink} from '../shared/components/link'
@@ -25,7 +28,6 @@ import Layout from '../shared/components/layout'
 import {IdentityStatus} from '../shared/types'
 import {useChainState} from '../shared/providers/chain-context'
 import {toPercent, toLocaleDna, callRpc} from '../shared/utils/utils'
-import MinerStatusSwitcher from '../screens/dashboard/components/miner-status-switcher'
 import {Toast} from '../shared/components/components'
 import KillForm, {
   KillIdentityDrawer,
@@ -35,8 +37,6 @@ import {
   hasPersistedValidationResults,
 } from '../screens/validation/utils'
 import {persistItem} from '../shared/utils/persist'
-import {ValidationResultToast} from '../screens/dashboard/components/validation-results'
-import ActivateInviteForm from '../screens/dashboard/components/activate-invite-form'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {rem} from '../shared/theme'
 
