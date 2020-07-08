@@ -150,6 +150,7 @@ export function Dialog({
         fontSize="md"
         p={8}
         pt={6}
+        my={0}
         rounded="lg"
       >
         {title && <DialogHeader>{title}</DialogHeader>}

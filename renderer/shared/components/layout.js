@@ -7,7 +7,6 @@ import {Flex} from '@chakra-ui/core'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
-import {GlobalModals} from './modal'
 import {useDebounce} from '../hooks/use-debounce'
 import {EpochPeriod, useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/utils'
@@ -61,10 +60,7 @@ export default function Layout({
       <Sidebar />
       {loading && <LoadingApp />}
       {!loading && !skipHardForkScreen && mustUpdateNode ? (
-        <>
-          <HardForkScreen version={nodeRemoteVersion} onUpdate={updateNode} />
-          <GlobalModals />
-        </>
+        <HardForkScreen version={nodeRemoteVersion} onUpdate={updateNode} />
       ) : (
         <>
           {!loading && debouncedSyncing && !debouncedOffline && <SyncingApp />}
@@ -141,8 +137,6 @@ function NormalApp({children}) {
 
       <Notifications />
 
-      <GlobalModals />
-
       <DnaLinkHandler>
         <DnaSendDialog
           isOpen={url => new URL(url).pathname.includes('send')}
@@ -184,8 +178,7 @@ function showWindowNotification(title, notificationBody, onclick) {
   return true
 }
 
-// eslint-disable-next-line react/prop-types
-export function HardForkScreen({version, onUpdate}) {
+function HardForkScreen({version, onUpdate}) {
   const {t} = useTranslation()
 
   return (

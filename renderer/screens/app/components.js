@@ -1,5 +1,18 @@
 /* eslint-disable react/prop-types */
-import {Flex, Heading} from '@chakra-ui/core'
+import {Flex, Heading, Text} from '@chakra-ui/core'
+import {useTranslation} from 'react-i18next'
+import {
+  Dialog,
+  DialogFooter,
+  DialogHeader,
+  DialogBody,
+} from '../../shared/components/components'
+import {Link} from '../../shared/components'
+import {PrimaryButton} from '../../shared/components/button'
+import {
+  useAutoUpdateState,
+  useAutoUpdateDispatch,
+} from '../../shared/providers/update-context'
 
 export function LayoutContainer(props) {
   return (
@@ -34,5 +47,36 @@ export function Page(props) {
 export function PageTitle(props) {
   return (
     <Heading as="h1" fontSize="xl" fontWeight={500} py={2} mb={4} {...props} />
+  )
+}
+
+export function UpdateExternalNodeDialog() {
+  const {showExternalUpdateModal} = useAutoUpdateState()
+  const {hideExternalNodeUpdateModal} = useAutoUpdateDispatch()
+
+  const {t} = useTranslation()
+
+  return (
+    <Dialog
+      isOpen={showExternalUpdateModal}
+      onClose={hideExternalNodeUpdateModal}
+    >
+      <DialogHeader>{t('Cannot update remote node')}</DialogHeader>
+      <DialogBody>
+        <Text>
+          Please, run built-in at the{' '}
+          <Link href="/settings/node" onClick={hideExternalNodeUpdateModal}>
+            settings
+          </Link>{' '}
+          page to enjoy automatic updates.
+        </Text>
+        <Text>{t('Otherwise, please update your remote node manually.')}</Text>
+      </DialogBody>
+      <DialogFooter>
+        <PrimaryButton onClick={hideExternalNodeUpdateModal}>
+          {t('Okay, got it')}
+        </PrimaryButton>
+      </DialogFooter>
+    </Dialog>
   )
 }

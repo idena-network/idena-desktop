@@ -16,22 +16,13 @@ import {
   FiChevronRight,
   FiClock,
 } from 'react-icons/fi'
-import {Box as ChakraBox, Stack} from '@chakra-ui/core'
+import {Box as ChakraBox, Stack, Text} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
 import {State} from 'xstate'
-import {
-  Box,
-  Fill,
-  Heading,
-  Button,
-  Absolute,
-  Modal,
-  SubHeading,
-  Text,
-} from '../../shared/components'
+import {Box, Fill, Heading, Button, Absolute} from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
 import theme, {rem} from '../../shared/theme'
@@ -46,6 +37,11 @@ import {
   FlipKeywordPanel,
   FlipKeywordTranslationSwitch,
 } from '../flips/components'
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+} from '../../shared/components/components'
 
 export function ValidationScene({
   bg: background = theme.colors.black,
@@ -619,25 +615,27 @@ export function QualificationButton({
   )
 }
 
-export function WelcomeQualificationDialog({isOpen, onSubmit}) {
+export function WelcomeQualificationDialog(props) {
+  const {t} = useTranslation()
   return (
-    <Modal show={isOpen} showCloseIcon={false}>
-      <Box css={{...margin(0, 0, rem(18))}}>
-        <SubHeading>Welcome to qualification session</SubHeading>
-        <Text css={{...margin(0, 0, rem(10))}}>
-          Your answers for the validation session have been submitted
-          successfully!
+    <ValidationDialog
+      title={t('Welcome to qualification session')}
+      submitText={t('Okay, let’s start')}
+      {...props}
+    >
+      <ValidationDialogBody>
+        <Text>
+          {t(
+            `Your answers for the validation session have been submitted successfully!`
+          )}
         </Text>
         <Text>
-          Now solve bunch of flips to check its quality. The flip is qualified
-          if the majority, equals more than 2/3 participants, gives the same
-          answer.
+          {t(`Now solve bunch of flips to check its quality. The flip is qualified
+            if the majority, equals more than 2/3 participants, gives the same
+            answer.`)}
         </Text>
-      </Box>
-      <Flex align="center" justify="flex-end">
-        <Button onClick={onSubmit}>Okay, let’s start</Button>
-      </Flex>
-    </Modal>
+      </ValidationDialogBody>
+    </ValidationDialog>
   )
 }
 
@@ -692,24 +690,23 @@ export function NavButton({type, bg, color, ...props}) {
   )
 }
 
-export function WelcomeKeywordsQualificationDialog({isOpen, onSubmit}) {
+export function WelcomeKeywordsQualificationDialog(props) {
+  const {t} = useTranslation()
   return (
-    <Modal show={isOpen} showCloseIcon={false}>
-      <Box css={{...margin(0, 0, rem(18))}}>
-        <SubHeading css={margin(0, 0, rem(10))}>
-          Your answers are not yet submitted
-        </SubHeading>
-        <Text css={margin(0, 0, rem(10))}>
-          Please qualify the keywords relevance and submit the answers.
+    <ValidationDialog
+      title={t('Your answers are not yet submitted')}
+      submitText={t('Ok, I understand')}
+      {...props}
+    >
+      <ValidationDialogBody>
+        <Text>
+          {t('Please qualify the keywords relevance and submit the answers.')}
         </Text>
-        <Text>The flips with irrelevant keywords will be penalized.</Text>
-      </Box>
-      <Flex align="center" justify="flex-end">
-        <Box px="4px">
-          <Button onClick={onSubmit}>Ok, I understand</Button>
-        </Box>
-      </Flex>
-    </Modal>
+        <Text>
+          {t('The flips with irrelevant keywords will be penalized.')}
+        </Text>
+      </ValidationDialogBody>
+    </ValidationDialog>
   )
 }
 
@@ -767,67 +764,87 @@ export function TimerClock({duration, color}) {
   )
 }
 
-export function SubmitFailedDialog({isOpen, onSubmit}) {
+export function SubmitFailedDialog(props) {
+  const {t} = useTranslation()
   return (
-    <Modal show={isOpen} showCloseIcon={false}>
-      <Box css={{...margin(0, 0, rem(18))}}>
-        <SubHeading css={margin(0, 0, rem(10))}>Submit failed</SubHeading>
-        <Text css={margin(0, 0, rem(10))}>
-          An error occured while submitting your answers.
-        </Text>
-      </Box>
-      <Flex align="center" justify="flex-end">
-        <Box px="4px">
-          <Button onClick={onSubmit}>Retry</Button>
-        </Box>
-      </Flex>
-    </Modal>
+    <ValidationDialog
+      title={t('Submit failed')}
+      submitText={t('Retry')}
+      {...props}
+    >
+      <DialogBody>
+        <Text>{t('An error occured while submitting your answers.')}</Text>
+      </DialogBody>
+    </ValidationDialog>
   )
 }
 
-export function ValidationSucceededDialog({isOpen, onSubmit}) {
+export function ValidationSucceededDialog(props) {
+  const {t} = useTranslation()
   return (
-    <Modal show={isOpen} showCloseIcon={false}>
-      <Box css={{...margin(0, 0, rem(24))}}>
-        <SubHeading css={margin(0, 0, rem(10))}>
-          Wait for validation results
-        </SubHeading>
-        <Text css={margin(0, 0, rem(10))}>
-          Your answers for the qualification session have been submited
-          successfully!
+    <ValidationDialog
+      title={t('Wait for validation results')}
+      submitText={t('Go to My Idena')}
+      {...props}
+    >
+      <ValidationDialogBody>
+        <Text>
+          {t(`Your answers for the qualification session have been submited
+          successfully!`)}
         </Text>
         <Text>
-          Please wait for the validation results. It will take some time for
+          {t(`Please wait for the validation results. It will take some time for
           network to reach consensus about the list of validated accounts. You
-          can find the validation end time on the left panel.
+          can find the validation end time on the left panel.`)}
         </Text>
-      </Box>
-      <Flex align="center" justify="flex-end">
-        <Box px="4px">
-          <Button onClick={onSubmit}>Go to My Idena</Button>
-        </Box>
-      </Flex>
-    </Modal>
+      </ValidationDialogBody>
+    </ValidationDialog>
   )
 }
 
-export function ValidationFailedDialog({isOpen, onSubmit}) {
+export function ValidationFailedDialog(props) {
+  const {t} = useTranslation()
   return (
-    <Modal show={isOpen} showCloseIcon={false}>
-      <Box css={{...margin(0, 0, rem(18))}}>
-        <SubHeading css={margin(0, 0, rem(10))}>Validation failed</SubHeading>
-        <Text css={margin(0, 0, rem(10))}>
-          Sorry your answers won’t be submitted since the validation session is
-          over.
+    <ValidationDialog
+      title={t('Validation failed')}
+      submitText={t('Go to My Idena')}
+      {...props}
+    >
+      <ValidationDialogBody>
+        <Text>
+          {t(`Sorry your answers won’t be submitted since the validation session is
+          over.`)}
         </Text>
-        <Text>Come back soon!</Text>
-      </Box>
-      <Flex align="center" justify="flex-end">
-        <Box px="4px">
-          <Button onClick={onSubmit}>Go to My Idena</Button>
-        </Box>
-      </Flex>
-    </Modal>
+        <Text>{t('Come back soon!')}</Text>
+      </ValidationDialogBody>
+    </ValidationDialog>
+  )
+}
+
+function ValidationDialog({submitText, onSubmit, children, ...props}) {
+  return (
+    <Dialog closeOnOverlayClick={false} closeOnEsc={false} {...props}>
+      {children}
+      {onSubmit && (
+        <ValidationDialogFooter submitText={submitText} onSubmit={onSubmit} />
+      )}
+    </Dialog>
+  )
+}
+
+function ValidationDialogBody(props) {
+  return (
+    <DialogBody>
+      <Stack spacing={2} {...props} />
+    </DialogBody>
+  )
+}
+
+function ValidationDialogFooter({submitText, onSubmit, props}) {
+  return (
+    <DialogFooter {...props}>
+      <Button onClick={onSubmit}>{submitText}</Button>
+    </DialogFooter>
   )
 }
 
