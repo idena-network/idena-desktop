@@ -23,7 +23,10 @@ import {
 import Button from './button'
 import {BlockText} from './typo'
 import theme, {rem} from '../theme'
-import {LayoutContainer} from '../../screens/app/components'
+import {
+  LayoutContainer,
+  UpdateExternalNodeDialog,
+} from '../../screens/app/components'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -83,6 +86,8 @@ export default function Layout({
           )}
         </>
       )}
+
+      <UpdateExternalNodeDialog />
     </LayoutContainer>
   )
 }

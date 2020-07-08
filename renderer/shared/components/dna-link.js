@@ -34,9 +34,7 @@ import {useNotificationDispatch} from '../providers/notification-context'
 import {Dialog, DialogBody, DialogFooter} from './components'
 
 export function DnaLinkHandler({children}) {
-  const [dnaUrl, setDnaUrl] = React.useState(
-    `dna://send/v1?address=0x477E32166cd16C1b4909BE783347e705Aef3d5db&amount=12388768768&comment=mycomment`
-  )
+  const [dnaUrl, setDnaUrl] = React.useState()
 
   const {addError} = useNotificationDispatch()
 
