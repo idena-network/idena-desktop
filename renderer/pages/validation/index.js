@@ -1,11 +1,11 @@
 /* eslint-disable react/prop-types */
 import {useMachine} from '@xstate/react'
-import Link from 'next/link'
 import {useMemo, useEffect, useState} from 'react'
 import {useRouter} from 'next/router'
 import {padding, margin} from 'polished'
 import {FiCheck, FiThumbsDown} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
+import {CloseButton} from '@chakra-ui/core'
 import {
   createValidationMachine,
   RelevanceType,
@@ -42,7 +42,7 @@ import {
   FailedFlipAnnotation,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
-import {IconClose, Button, Tooltip, Box, Text} from '../../shared/components'
+import {Button, Tooltip, Box, Text} from '../../shared/components'
 import {AnswerType} from '../../shared/types'
 import {Debug} from '../../shared/components/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -142,11 +142,7 @@ function ValidationSession({
           </Title>
         )}
         {state.matches('longSession') && (
-          <Link href="/profile">
-            <a>
-              <IconClose color={theme.colors.black} size={rem(20)} />
-            </a>
-          </Link>
+          <CloseButton onClick={() => router.push('/profile')} />
         )}
       </Header>
       <CurrentStep>
