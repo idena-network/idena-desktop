@@ -17,6 +17,14 @@ import {
   AlertTitle,
   AlertDescription,
   AlertIcon,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Stack,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 
@@ -124,5 +132,48 @@ export function Toast({
         </AlertDescription>
       </Flex>
     </Alert>
+  )
+}
+
+export function Dialog({
+  title,
+  children,
+  shouldShowCloseButton = false,
+  ...props
+}) {
+  return (
+    <Modal isCentered size="sm" {...props}>
+      <ModalOverlay bg="xblack.080" />
+      <ModalContent
+        bg="white"
+        color="brandGray.500"
+        fontSize="md"
+        p={8}
+        pt={6}
+        rounded="lg"
+      >
+        {title && <DialogHeader>{title}</DialogHeader>}
+        {shouldShowCloseButton && <ModalCloseButton />}
+        {children}
+      </ModalContent>
+    </Modal>
+  )
+}
+
+export function DialogHeader(props) {
+  return <ModalHeader p={0} mb={2} fontSize="lg" fontWeight={500} {...props} />
+}
+
+export function DialogBody(props) {
+  return <ModalBody p={0} mb={6} {...props} />
+}
+
+export function DialogFooter({children, ...props}) {
+  return (
+    <ModalFooter p={0} {...props}>
+      <Stack isInline spacing={2} justify="flex-end">
+        {children}
+      </Stack>
+    </ModalFooter>
   )
 }

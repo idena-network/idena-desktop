@@ -213,6 +213,10 @@ export const uiTheme = {
     '1/2': '2px',
     '3/2': '6px',
   },
+  sizes: {
+    ...chakraTheme.sizes,
+    sm: rem(360),
+  },
   radii: {
     ...chakraTheme.radii,
     md: rem(6),

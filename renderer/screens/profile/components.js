@@ -23,6 +23,9 @@ import {
   Drawer,
   DrawerHeader,
   DrawerBody,
+  Dialog,
+  DialogBody,
+  DialogFooter,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
@@ -249,62 +252,69 @@ export function SpoilInviteForm({onSpoil}) {
   )
 }
 
-const miningSwitcherDefaultState = {
-  online: null,
-  showModal: false,
-  isMining: false,
-}
-
 export function MinerStatusSwitcher() {
+  const {t} = useTranslation()
+
+  const {colors} = useTheme()
+
+  const initialRef = React.useRef()
+
   const identity = useIdentityState()
   const {addError} = useNotificationDispatch()
 
   const [{result: hash, error}, callRpc] = useRpc()
   const [{mined}, setHash] = useTx()
 
-  const [state, dispatch] = React.useReducer(function miningReducer(
-    // eslint-disable-next-line no-shadow
-    state,
-    [action, {online} = miningSwitcherDefaultState]
-  ) {
-    switch (action) {
-      case 'init':
-        return {
-          ...state,
-          online,
-        }
-      case 'open':
-        return {
-          ...state,
-          showModal: true,
-        }
-      case 'close':
-        return {
-          ...state,
-          showModal: false,
-        }
+  const [state, dispatch] = React.useReducer(
+    function miningReducer(
+      // eslint-disable-next-line no-shadow
+      state,
+      [action, payload]
+    ) {
+      switch (action) {
+        case 'init':
+          return {
+            ...state,
+            online: payload.online,
+          }
+        case 'open':
+          return {
+            ...state,
+            showModal: true,
+          }
+        case 'close':
+          return {
+            ...state,
+            showModal: false,
+          }
 
-      case 'toggle':
-        return {
-          ...state,
-          isMining: true,
-        }
-      case 'mined':
-        return {
-          ...state,
-          isMining: false,
-          showModal: false,
-        }
-      case 'error':
-        return {
-          ...state,
-          showModal: false,
-          isMining: false,
-        }
-      default:
-        return state
+        case 'toggle':
+          return {
+            ...state,
+            isMining: true,
+          }
+        case 'mined':
+          return {
+            ...state,
+            isMining: false,
+            showModal: false,
+          }
+        case 'error':
+          return {
+            ...state,
+            showModal: false,
+            isMining: false,
+          }
+        default:
+          return state
+      }
+    },
+    {
+      online: null,
+      showModal: false,
+      isMining: false,
     }
-  }, miningSwitcherDefaultState)
+  )
 
   React.useEffect(() => {
     if (!state.showModal) {
@@ -326,10 +336,6 @@ export function MinerStatusSwitcher() {
       dispatch(['mined'])
     }
   }, [mined])
-
-  const {t} = useTranslation()
-
-  const {colors} = useTheme()
 
   if (!identity.canMine) {
     return null
@@ -371,38 +377,38 @@ export function MinerStatusSwitcher() {
           }
         `}</style>
       </FormGroup>
-      <Modal show={state.showModal} onHide={() => dispatch(['close'])}>
-        <Box mb={4}>
-          <SubHeading>
-            {!state.online
-              ? t('Activate mining status')
-              : t('Deactivate mining status')}
-          </SubHeading>
-          <Text>
-            {!state.online ? (
-              <span>
-                {t(`Submit the form to start mining. Your node has to be online
-                unless you deactivate your status. Otherwise penalties might be
-                charged after being offline more than 1 hour.`)}
-                <br />
-                <br />
-                {t('You can deactivate your online status at any time.')}
-              </span>
-            ) : (
-              <span>
-                {t('Submit the form to deactivate your mining status.')}
-                <br />
-                <br />
-                {t('You can activate it again afterwards.')}
-              </span>
-            )}
-          </Text>
-        </Box>
-        <Stack isInline spacing={2} justify="flex-end">
+      <Dialog
+        title={
+          !state.online
+            ? t('Activate mining status')
+            : t('Deactivate mining status')
+        }
+        isOpen={state.showModal}
+        initialFocusRef={state.online ? null : initialRef}
+        onClose={() => dispatch(['close'])}
+      >
+        <DialogBody>
+          <Stack spacing={1}>
+            <Text>
+              {state.online
+                ? t('Submit the form to deactivate your mining status.')
+                : t(`Submit the form to start mining. Your node has to be online
+              unless you deactivate your status. Otherwise penalties might be
+              charged after being offline more than 1 hour.`)}
+            </Text>
+            <Text>
+              {state.online
+                ? t('You can activate it again afterwards.')
+                : t('You can deactivate your online status at any time.')}
+            </Text>
+          </Stack>
+        </DialogBody>
+        <DialogFooter>
           <SecondaryButton onClick={() => dispatch(['close'])}>
             {t('Cancel')}
           </SecondaryButton>
           <PrimaryButton
+            ref={initialRef}
             onClick={() => {
               dispatch(['toggle'])
               callRpc(
@@ -414,8 +420,8 @@ export function MinerStatusSwitcher() {
           >
             {state.isMining ? t('Waiting...') : t('Submit')}
           </PrimaryButton>
-        </Stack>
-      </Modal>
+        </DialogFooter>
+      </Dialog>
     </Box>
   )
 }
