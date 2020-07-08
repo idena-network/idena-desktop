@@ -753,7 +753,7 @@ export function TimerClock({duration, color}) {
 
   return (
     <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: rem(37)}}>
-      <Text color={color} fontWeight={500}>
+      <Text color={color} fontSize={rem(13)} fontWeight={500}>
         {state.matches('stopped') && '00:00'}
         {state.matches('running') &&
           [Math.floor(remaining / 60), remaining % 60]

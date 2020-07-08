@@ -463,11 +463,32 @@ export const createValidationMachine = ({
                       invoke: {
                         src: 'fetchLongFlips',
                         onDone: {
-                          target: 'detectMissing',
+                          target: 'detectNotReady',
                           actions: assign({
                             retries: ({retries}) => retries + 1,
                           }),
                         },
+                      },
+                    },
+                    detectNotReady: {
+                      on: {
+                        '': [
+                          {
+                            after: {
+                              [10 * 10000]: 'fetchHashes',
+                            },
+                            // eslint-disable-next-line no-shadow
+                            cond: ({longFlips, validationStart}) =>
+                              longFlips.some(({ready}) => !ready) &&
+                              adjustDuration(
+                                validationStart,
+                                shortSessionDuration - 10 + 2 * 60
+                              ) > 0,
+                          },
+                          {
+                            target: 'detectMissing',
+                          },
+                        ],
                       },
                     },
                     detectMissing: {
