@@ -1,6 +1,6 @@
 import {Machine, assign} from 'xstate'
 import {decode} from 'rlp'
-import {log} from 'xstate/lib/actions'
+import {log, send} from 'xstate/lib/actions'
 import dayjs from 'dayjs'
 import {
   fetchFlipHashes,
@@ -18,7 +18,6 @@ import {
   readyNotFetchedFlip,
   availableExtraFlip,
   failedFlip,
-  readyFlip,
   hasEnoughAnswers,
   missingHashes,
   exponentialBackoff,
@@ -440,13 +439,12 @@ export const createValidationMachine = ({
                           invoke: {
                             src: 'fetchLongHashes',
                             onDone: {
-                              target:
-                                '#validation.longSession.fetch.flips.fetchFlips',
+                              target: 'done',
                               actions: [
                                 assign({
-                                  longFlips: (_, {data}) =>
-                                    data.filter(readyFlip),
+                                  longFlips: (_, {data}) => data,
                                 }),
+                                send('FETCHED'),
                                 log(),
                               ],
                             },
@@ -456,34 +454,39 @@ export const createValidationMachine = ({
                             },
                           },
                         },
+                        done: {},
                         fail: {},
+                      },
+                      on: {
+                        FETCHED: 'fetchFlips',
                       },
                     },
                     fetchFlips: {
                       invoke: {
                         src: 'fetchLongFlips',
                         onDone: {
-                          target: 'detectNotReady',
-                          actions: assign({
-                            retries: ({retries}) => retries + 1,
-                          }),
+                          target: 'checkNotReady',
+                          actions: [
+                            assign({
+                              retries: ({retries}) => retries + 1,
+                            }),
+                          ],
                         },
                       },
                     },
-                    detectNotReady: {
+                    checkNotReady: {
                       on: {
                         '': [
                           {
-                            after: {
-                              [10 * 10000]: 'fetchHashes',
-                            },
+                            target: 'fetchHashes',
                             // eslint-disable-next-line no-shadow
                             cond: ({longFlips, validationStart}) =>
                               longFlips.some(({ready}) => !ready) &&
-                              adjustDuration(
-                                validationStart,
-                                shortSessionDuration - 10 + 2 * 60
-                              ) > 0,
+                              dayjs().isBefore(
+                                dayjs(validationStart)
+                                  .add(shortSessionDuration, 'second')
+                                  .add(2, 'minute')
+                              ),
                           },
                           {
                             target: 'detectMissing',
@@ -890,7 +893,7 @@ export const createValidationMachine = ({
         fetchLongHashes: () => fetchFlipHashes(SessionType.Long),
         fetchLongFlips: ({longFlips}) => cb =>
           fetchFlips(
-            longFlips.map(({hash}) => hash),
+            longFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
             cb
           ),
         // eslint-disable-next-line no-shadow
