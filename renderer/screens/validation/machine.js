@@ -432,53 +432,40 @@ export const createValidationMachine = ({
                   entry: log('Start fetching long flips'),
                   states: {
                     fetchHashes: {
-                      initial: 'fetching',
-                      states: {
-                        fetching: {
-                          entry: log('Fetching long hashes'),
-                          invoke: {
-                            src: 'fetchLongHashes',
-                            onDone: {
-                              target: 'done',
-                              actions: [
-                                assign({
-                                  longFlips: (_, {data}) => data,
-                                }),
-                                send('FETCHED'),
-                                log(),
-                              ],
-                            },
-                            onError: {
-                              target: 'fail',
-                              actions: log(),
-                            },
-                          },
+                      entry: log('Fetching long hashes'),
+                      invoke: {
+                        src: 'fetchLongHashes',
+                        onDone: {
+                          target: 'fetchFlips',
+                          actions: [
+                            assign({
+                              longFlips: ({longFlips}, {data}) =>
+                                mergeFlipsByHash(
+                                  ...(longFlips.length
+                                    ? [longFlips, data]
+                                    : [data, longFlips])
+                                ),
+                            }),
+                            log(),
+                          ],
                         },
-                        done: {},
-                        fail: {},
-                      },
-                      on: {
-                        FETCHED: 'fetchFlips',
+                        onError: {
+                          target: 'fetchFlips',
+                          actions: log(),
+                        },
                       },
                     },
                     fetchFlips: {
                       invoke: {
                         src: 'fetchLongFlips',
-                        onDone: {
-                          target: 'checkNotReady',
-                          actions: [
-                            assign({
-                              retries: ({retries}) => retries + 1,
-                            }),
-                          ],
-                        },
-                      },
-                    },
-                    checkNotReady: {
-                      on: {
-                        '': [
+                        onDone: [
                           {
                             target: 'fetchHashes',
+                            actions: [
+                              assign({
+                                retries: ({retries}) => retries + 1,
+                              }),
+                            ],
                             // eslint-disable-next-line no-shadow
                             cond: ({longFlips, validationStart}) =>
                               longFlips.some(({ready}) => !ready) &&
