@@ -192,8 +192,6 @@ export default function ViewFlipPage() {
         )}
 
         <DeleteFlipDrawer
-          hash={flip.hash}
-          cover={flip.cover}
           isOpen={isOpenDeleteForm}
           onClose={onCloseDeleteForm}
           onDelete={() => {
