@@ -27,7 +27,7 @@ import {
 
 global.getZoomLevel = global.getZoomLevel || {}
 
-const AVAILABLE_TIMEOUT = global.isDev ? 0 : 1000 * 5
+const AVAILABLE_TIMEOUT = global.isDev || global.isTest ? 0 : 1000 * 5
 
 export default function Layout({
   loading,

@@ -48,6 +48,7 @@ import {
   DialogBody,
   DialogFooter,
 } from '../../shared/components/components'
+import {PrimaryButton} from '../../shared/components/button'
 
 export function ValidationScene(props) {
   return (
@@ -839,7 +840,7 @@ function ValidationDialogBody(props) {
 function ValidationDialogFooter({submitText, onSubmit, props}) {
   return (
     <DialogFooter {...props}>
-      <Button onClick={onSubmit}>{submitText}</Button>
+      <PrimaryButton onClick={onSubmit}>{submitText}</PrimaryButton>
     </DialogFooter>
   )
 }

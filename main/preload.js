@@ -32,6 +32,8 @@ process.once('loaded', () => {
   global.logger = logger
 
   global.isDev = isDev
+  global.isTest = process.env.NODE_ENV === 'e2e'
+
   global.prepareDb = prepareDb
   global.isMac = process.platform === 'darwin'
 
