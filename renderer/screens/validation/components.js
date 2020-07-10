@@ -502,7 +502,7 @@ export function FlipWords({
   )
 
   return (
-    <ChakraBox fontSize="md" color="brandGray.500" ml={rem(36)} w={rem(280)}>
+    <ChakraBox fontSize="md" color="brandGray.500" ml={rem(32)} w={rem(320)}>
       <FlipKeywordPanel w={rem(320)} mb={5}>
         <Heading
           fontSize={rem(16)}
@@ -593,7 +593,7 @@ export function QualificationButton({
       variant={buttonVariant}
       style={{
         fontWeight: 500,
-        minWidth: rem(136),
+        minWidth: rem(156),
         minHeight: rem(32),
         transition: 'none',
         whiteSpace: 'nowrap',
