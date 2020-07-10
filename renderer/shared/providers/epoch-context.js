@@ -72,7 +72,7 @@ export function EpochProvider({children}) {
   React.useEffect(() => {
     if (epoch && didValidate(epoch.epoch) && !didArchiveFlips(epoch.epoch)) {
       archiveFlips()
-      markFlipsArchived(epoch)
+      markFlipsArchived(epoch.epoch)
     }
   }, [epoch])
 
