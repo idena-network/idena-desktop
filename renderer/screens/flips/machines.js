@@ -353,7 +353,11 @@ export const flipMachine = Machine(
           },
         },
       },
-      published: {},
+      published: {
+        on: {
+          DELETE: 'deleting',
+        },
+      },
       deleting: {
         initial: 'submitting',
         states: {
@@ -423,7 +427,11 @@ export const flipMachine = Machine(
           },
         },
       },
-      deleted: {},
+      deleted: {
+        on: {
+          PUBLISH: 'publishing',
+        },
+      },
       invalid: {},
       removed: {
         type: 'final',
