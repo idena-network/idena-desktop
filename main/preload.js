@@ -51,6 +51,11 @@ process.once('loaded', () => {
     FINALIZE_FLIPS: process.env.FINALIZE_FLIPS,
   }
 
+  global.toggleFullScreen = () => {
+    const currentWindow = electron.remote.getCurrentWindow()
+    currentWindow.setFullScreen(!currentWindow.isFullScreen())
+  }
+
   if (isDev) {
     global.require = require
     // eslint-disable-next-line no-underscore-dangle

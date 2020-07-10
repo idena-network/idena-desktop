@@ -25,11 +25,24 @@ import {
   ModalBody,
   ModalFooter,
   Stack,
+  Box,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 
+export function FloatDebug({children, ...props}) {
+  return (
+    <Box position="absolute" left={6} bottom={6} zIndex="popover" {...props}>
+      <Debug>{children}</Debug>
+    </Box>
+  )
+}
+
 export function Debug({children}) {
-  return <Code>{JSON.stringify(children, null, 2)}</Code>
+  return (
+    <Code whiteSpace="pre" bg="brandGray.016" borderRadius="md" p={2}>
+      {JSON.stringify(children, null, 2)}
+    </Code>
+  )
 }
 
 export function Drawer({children, ...props}) {

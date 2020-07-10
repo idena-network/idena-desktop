@@ -16,13 +16,19 @@ import {
   FiChevronRight,
   FiClock,
 } from 'react-icons/fi'
-import {Box as ChakraBox, Stack, Text} from '@chakra-ui/core'
+import {
+  Box as ChakraBox,
+  Flex as ChakraFlex,
+  Stack,
+  Text,
+  Heading,
+} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
 import {State} from 'xstate'
-import {Box, Fill, Heading, Button, Absolute} from '../../shared/components'
+import {Box, Fill, Button, Absolute} from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
 import theme, {rem} from '../../shared/theme'
@@ -43,24 +49,17 @@ import {
   DialogFooter,
 } from '../../shared/components/components'
 
-export function ValidationScene({
-  bg: background = theme.colors.black,
-  ...props
-}) {
+export function ValidationScene(props) {
   return (
-    <Flex
+    <ChakraFlex
       direction="column"
-      css={{
-        background,
-        height: '100vh',
-        ...padding(
-          rem(theme.spacings.medium24),
-          rem(theme.spacings.large),
-          rem(theme.spacings.medium16)
-        ),
-        overflow: 'hidden',
-        maxWidth: '100%',
-      }}
+      h="100vh"
+      maxW="full"
+      pt={6}
+      pb={3}
+      pl={10}
+      pr={6}
+      overflow="hidden"
       {...props}
     />
   )
@@ -68,26 +67,23 @@ export function ValidationScene({
 
 export function Header(props) {
   return (
-    <Flex
+    <ChakraFlex
       justify="space-between"
       align="center"
-      css={{...margin(0, 0, rem(32))}}
+      mb={rem(55)}
       {...props}
     />
   )
 }
 
-export function Title({color = theme.colors.white, ...props}) {
+export function Title(props) {
   return (
-    <Heading fontSize={rem(28)} fontWeight={500} color={color} {...props} />
-  )
-}
-
-export function SessionTitle({current, total, color}) {
-  return (
-    <Title color={color}>
-      Select meaningful story: left or right ({current} out of {total})
-    </Title>
+    <Heading
+      fontSize={rem(24)}
+      lineHeight="short"
+      fontWeight={500}
+      {...props}
+    />
   )
 }
 
