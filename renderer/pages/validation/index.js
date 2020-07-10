@@ -10,6 +10,7 @@ import {
   Text as ChakraText,
   IconButton,
 } from '@chakra-ui/core'
+import dayjs from 'dayjs'
 import {
   createValidationMachine,
   RelevanceType,
@@ -133,15 +134,22 @@ function ValidationSession({
             : t('Check flips quality')}
         </Title>
         <ChakraFlex align="center">
-          <Title
-            color={isShortSession(state) ? 'white' : 'brandGray.500'}
-            mr={6}
-          >
-            {currentIndex + 1}{' '}
-            <ChakraText as="span" color="muted">
-              out of {sessionFlips(state).length}
-            </ChakraText>
-          </Title>
+          {(isShortSession(state) ||
+            dayjs().isAfter(
+              dayjs(validationStart)
+                .add(shortSessionDuration, 'second')
+                .add(2, 'minute')
+            )) && (
+            <Title
+              color={isShortSession(state) ? 'white' : 'brandGray.500'}
+              mr={6}
+            >
+              {currentIndex + 1}{' '}
+              <ChakraText as="span" color="muted">
+                out of {sessionFlips(state).length}
+              </ChakraText>
+            </Title>
+          )}
           <IconButton
             icon="fullscreen"
             bg={isShortSession(state) ? 'brandGray.060' : 'gray.300'}
