@@ -39,7 +39,7 @@ export function FloatDebug({children, ...props}) {
 
 export function Debug({children}) {
   return (
-    <Code whiteSpace="pre" bg="brandGray.016" borderRadius="md" p={2}>
+    <Code whiteSpace="pre" borderRadius="md" p={2}>
       {JSON.stringify(children, null, 2)}
     </Code>
   )
