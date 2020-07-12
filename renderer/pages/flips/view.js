@@ -191,14 +191,18 @@ export default function ViewFlipPage() {
           </FlipMasterFooter>
         )}
 
-        <DeleteFlipDrawer
-          isOpen={isOpenDeleteForm}
-          onClose={onCloseDeleteForm}
-          onDelete={() => {
-            send('DELETE')
-            onCloseDeleteForm()
-          }}
-        />
+        {current.matches('loaded') && (
+          <DeleteFlipDrawer
+            hash={hash}
+            cover={images[originalOrder[0]]}
+            isOpen={isOpenDeleteForm}
+            onClose={onCloseDeleteForm}
+            onDelete={() => {
+              send('DELETE')
+              onCloseDeleteForm()
+            }}
+          />
+        )}
       </Page>
       {global.isDev && (
         <Box position="absolute" left={6} bottom={6} zIndex="popover">

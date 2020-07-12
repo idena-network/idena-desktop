@@ -39,7 +39,7 @@ export function archiveFlips() {
   const {getFlips, saveFlips} = global.flipStore
   saveFlips(
     getFlips().map(flip =>
-      [FlipType.Draft, FlipType.Archived].includes(flip.type)
+      flip.type === FlipType.Archived
         ? flip
         : {...flip, type: FlipType.Archived}
     )

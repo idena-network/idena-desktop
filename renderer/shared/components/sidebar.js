@@ -360,7 +360,7 @@ function CurrentTask({epoch, period, identity}) {
           const shouldSendFlips = remainingRequiredFlipsNumber > 0
 
           return shouldSendFlips ? (
-            <Link href="/flips/new" color={theme.colors.white}>
+            <Link href="/flips/list" color={theme.colors.white}>
               Create {remainingRequiredFlipsNumber} required{' '}
               {pluralize('flip', remainingRequiredFlipsNumber)}
             </Link>
