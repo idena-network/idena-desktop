@@ -461,7 +461,7 @@ export const createValidationMachine = ({
                         src: 'fetchLongFlips',
                         onDone: [
                           {
-                            target: 'fetchHashes',
+                            target: 'enqueueNextFetch',
                             actions: [
                               assign({
                                 retries: ({retries}) => retries + 1,
@@ -478,6 +478,11 @@ export const createValidationMachine = ({
                             target: 'detectMissing',
                           },
                         ],
+                      },
+                    },
+                    enqueueNextFetch: {
+                      after: {
+                        5000: 'fetchHashes',
                       },
                     },
                     detectMissing: {
