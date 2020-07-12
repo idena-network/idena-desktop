@@ -9,7 +9,7 @@ import {
 import {useEpochState} from '../shared/providers/epoch-context'
 import {Page, PageTitle} from '../screens/app/components'
 import {
-  UserCard,
+  UserInlineCard,
   SimpleUserStat,
   UserStatList,
   UserStat,
@@ -71,8 +71,8 @@ export default function ProfilePage() {
     age,
     totalShortFlipPoints,
     totalQualifiedFlips,
-    canTerminate,
     invites: invitesCount,
+    canTerminate,
     canMine,
   } = useIdentityState()
 
@@ -103,7 +103,7 @@ export default function ProfilePage() {
           <PageTitle mb={8}>{t('Profile')}</PageTitle>
           <Stack isInline spacing={10}>
             <Stack spacing={6}>
-              <UserCard address={address} state={state} />
+              <UserInlineCard address={address} state={state} />
               <UserStatList>
                 <SimpleUserStat label={t('Address')} value={address} />
                 {state === IdentityStatus.Newbie ? (

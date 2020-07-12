@@ -44,13 +44,7 @@ import {
 } from '../../shared/providers/invite-context'
 import useRpc from '../../shared/hooks/use-rpc'
 import useTx from '../../shared/hooks/use-tx'
-import {
-  FormGroup,
-  Label,
-  Switcher,
-  SubHeading,
-  Modal,
-} from '../../shared/components'
+import {FormGroup, Label, Switcher} from '../../shared/components'
 import {Notification, Snackbar} from '../../shared/components/notifications'
 import {Spinner} from '../../shared/components/spinner'
 import {
@@ -60,7 +54,7 @@ import {
 import {createTimerMachine} from '../../shared/machines'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 
-export function UserCard({address, state}) {
+export function UserInlineCard({address, state}) {
   return (
     <Stack isInline spacing={6} align="center" mb={6} width={rem(480)}>
       <Avatar address={address} />

@@ -16,13 +16,19 @@ import {
   FiChevronRight,
   FiClock,
 } from 'react-icons/fi'
-import {Box as ChakraBox, Stack, Text} from '@chakra-ui/core'
+import {
+  Box as ChakraBox,
+  Flex as ChakraFlex,
+  Stack,
+  Text,
+  Heading,
+} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
 import {State} from 'xstate'
-import {Box, Fill, Heading, Button, Absolute} from '../../shared/components'
+import {Box, Fill, Button, Absolute} from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
 import theme, {rem} from '../../shared/theme'
@@ -42,25 +48,19 @@ import {
   DialogBody,
   DialogFooter,
 } from '../../shared/components/components'
+import {PrimaryButton} from '../../shared/components/button'
 
-export function ValidationScene({
-  bg: background = theme.colors.black,
-  ...props
-}) {
+export function ValidationScene(props) {
   return (
-    <Flex
+    <ChakraFlex
       direction="column"
-      css={{
-        background,
-        height: '100vh',
-        ...padding(
-          rem(theme.spacings.medium24),
-          rem(theme.spacings.large),
-          rem(theme.spacings.medium16)
-        ),
-        overflow: 'hidden',
-        maxWidth: '100%',
-      }}
+      h="100vh"
+      maxW="full"
+      pt={6}
+      pb={3}
+      pl={10}
+      pr={6}
+      overflow="hidden"
       {...props}
     />
   )
@@ -68,26 +68,23 @@ export function ValidationScene({
 
 export function Header(props) {
   return (
-    <Flex
+    <ChakraFlex
       justify="space-between"
       align="center"
-      css={{...margin(0, 0, rem(32))}}
+      mb={rem(55)}
       {...props}
     />
   )
 }
 
-export function Title({color = theme.colors.white, ...props}) {
+export function Title(props) {
   return (
-    <Heading fontSize={rem(28)} fontWeight={500} color={color} {...props} />
-  )
-}
-
-export function SessionTitle({current, total, color}) {
-  return (
-    <Title color={color}>
-      Select meaningful story: left or right ({current} out of {total})
-    </Title>
+    <Heading
+      fontSize={rem(24)}
+      lineHeight="short"
+      fontWeight={500}
+      {...props}
+    />
   )
 }
 
@@ -499,13 +496,17 @@ export function FlipWords({
   const {t, i18n} = useTranslation()
 
   const wordTranslations = words.map(({id}) => translations[id])
-
-  const [showTranslation, setShowTranslation] = React.useState(() =>
-    wordTranslations.reduce((acc, curr) => !!curr && acc, true)
+  const hasApprovedTranslation = wordTranslations.reduce(
+    (acc, curr) => !!curr && acc,
+    true
   )
 
+  const [showTranslation, setShowTranslation] = React.useState()
+
+  const shouldShowTranslation = showTranslation && hasApprovedTranslation
+
   return (
-    <ChakraBox fontSize="md" color="brandGray.500" ml={rem(36)} w={rem(280)}>
+    <ChakraBox fontSize="md" color="brandGray.500" ml={rem(32)} w={rem(320)}>
       <FlipKeywordPanel w={rem(320)} mb={5}>
         <Heading
           fontSize={rem(16)}
@@ -520,7 +521,7 @@ export function FlipWords({
               words,
               translations: wordTranslations.map(x => (x ? [x] : [])),
             }}
-            showTranslation={showTranslation}
+            showTranslation={shouldShowTranslation}
             locale={i18n.language}
             onSwitchLocale={() => setShowTranslation(!showTranslation)}
             isInline={false}
@@ -596,7 +597,7 @@ export function QualificationButton({
       variant={buttonVariant}
       style={{
         fontWeight: 500,
-        minWidth: rem(136),
+        minWidth: rem(156),
         minHeight: rem(32),
         transition: 'none',
         whiteSpace: 'nowrap',
@@ -753,7 +754,7 @@ export function TimerClock({duration, color}) {
 
   return (
     <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: rem(37)}}>
-      <Text color={color} fontWeight={500}>
+      <Text color={color} fontSize={rem(13)} fontWeight={500}>
         {state.matches('stopped') && '00:00'}
         {state.matches('running') &&
           [Math.floor(remaining / 60), remaining % 60]
@@ -843,7 +844,7 @@ function ValidationDialogBody(props) {
 function ValidationDialogFooter({submitText, onSubmit, props}) {
   return (
     <DialogFooter {...props}>
-      <Button onClick={onSubmit}>{submitText}</Button>
+      <PrimaryButton onClick={onSubmit}>{submitText}</PrimaryButton>
     </DialogFooter>
   )
 }

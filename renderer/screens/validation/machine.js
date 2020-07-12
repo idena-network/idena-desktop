@@ -18,11 +18,11 @@ import {
   readyNotFetchedFlip,
   availableExtraFlip,
   failedFlip,
-  readyFlip,
   hasEnoughAnswers,
   missingHashes,
   exponentialBackoff,
   shouldTranslate,
+  shouldPollLongFlips,
 } from './utils'
 import {forEachAsync, wait} from '../../shared/utils/fn'
 import {fetchConfirmedKeywordTranslations} from '../flips/utils'
@@ -433,41 +433,56 @@ export const createValidationMachine = ({
                   entry: log('Start fetching long flips'),
                   states: {
                     fetchHashes: {
-                      initial: 'fetching',
-                      states: {
-                        fetching: {
-                          entry: log('Fetching long hashes'),
-                          invoke: {
-                            src: 'fetchLongHashes',
-                            onDone: {
-                              target:
-                                '#validation.longSession.fetch.flips.fetchFlips',
-                              actions: [
-                                assign({
-                                  longFlips: (_, {data}) =>
-                                    data.filter(readyFlip),
-                                }),
-                                log(),
-                              ],
-                            },
-                            onError: {
-                              target: 'fail',
-                              actions: log(),
-                            },
-                          },
+                      entry: log('Fetching long hashes'),
+                      invoke: {
+                        src: 'fetchLongHashes',
+                        onDone: {
+                          target: 'fetchFlips',
+                          actions: [
+                            assign({
+                              longFlips: ({longFlips}, {data}) =>
+                                mergeFlipsByHash(
+                                  ...(longFlips.length
+                                    ? [longFlips, data]
+                                    : [data, longFlips])
+                                ),
+                            }),
+                            log(),
+                          ],
                         },
-                        fail: {},
+                        onError: {
+                          target: 'fetchFlips',
+                          actions: log(),
+                        },
                       },
                     },
                     fetchFlips: {
                       invoke: {
                         src: 'fetchLongFlips',
-                        onDone: {
-                          target: 'detectMissing',
-                          actions: assign({
-                            retries: ({retries}) => retries + 1,
-                          }),
-                        },
+                        onDone: [
+                          {
+                            target: 'enqueueNextFetch',
+                            actions: [
+                              assign({
+                                retries: ({retries}) => retries + 1,
+                              }),
+                            ],
+                            // eslint-disable-next-line no-shadow
+                            cond: ({longFlips, validationStart}) =>
+                              shouldPollLongFlips(longFlips, {
+                                validationStart,
+                                shortSessionDuration,
+                              }),
+                          },
+                          {
+                            target: 'detectMissing',
+                          },
+                        ],
+                      },
+                    },
+                    enqueueNextFetch: {
+                      after: {
+                        5000: 'fetchHashes',
                       },
                     },
                     detectMissing: {
@@ -869,7 +884,7 @@ export const createValidationMachine = ({
         fetchLongHashes: () => fetchFlipHashes(SessionType.Long),
         fetchLongFlips: ({longFlips}) => cb =>
           fetchFlips(
-            longFlips.map(({hash}) => hash),
+            longFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
             cb
           ),
         // eslint-disable-next-line no-shadow

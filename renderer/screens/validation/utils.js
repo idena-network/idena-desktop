@@ -1,4 +1,5 @@
 import {State} from 'xstate'
+import dayjs, {isDayjs} from 'dayjs'
 import {
   persistState,
   loadPersistentState,
@@ -197,5 +198,19 @@ export function shouldTranslate(translations, flip) {
     !words
       .map(({id}) => translations[id])
       .reduce((acc, curr) => !!curr && acc, true)
+  )
+}
+
+export function shouldPollLongFlips(
+  flips,
+  {validationStart, shortSessionDuration}
+) {
+  return (
+    flips.some(({ready}) => !ready) &&
+    dayjs().isBefore(
+      (isDayjs(validationStart) ? validationStart : dayjs(validationStart))
+        .add(shortSessionDuration, 's')
+        .add(2, 'minute')
+    )
   )
 }

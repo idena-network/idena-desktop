@@ -2,8 +2,7 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {margin} from 'polished'
-import {Flex} from '@chakra-ui/core'
+import {Flex, Text} from '@chakra-ui/core'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
@@ -20,9 +19,7 @@ import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
 } from '../providers/update-context'
-import Button from './button'
-import {BlockText} from './typo'
-import theme, {rem} from '../theme'
+import {PrimaryButton} from './button'
 import {
   LayoutContainer,
   UpdateExternalNodeDialog,
@@ -30,7 +27,7 @@ import {
 
 global.getZoomLevel = global.getZoomLevel || {}
 
-const AVAILABLE_TIMEOUT = global.isDev ? 0 : 1000 * 5
+const AVAILABLE_TIMEOUT = global.isDev || global.isTest ? 0 : 1000 * 5
 
 export default function Layout({
   loading,
@@ -187,19 +184,14 @@ function HardForkScreen({version, onUpdate}) {
   const {t} = useTranslation()
 
   return (
-    <Flex align="center" justify="center" flex={1} background="graphite.500">
+    <Flex align="center" justify="center" flex={1} background="brandGray.500">
       <Flex direction="column">
-        <BlockText
-          color={theme.colors.white}
-          fontWeight={500}
-          fontSize={rem(18)}
-          css={{...margin(0, 0, rem(20))}}
-        >
+        <Text color="white" fontSize="md" fontWeight={500} mb={5}>
           {t('Your node is outdated because of the hard fork, please update')}
-        </BlockText>
-        <Button variant="primary" onClick={onUpdate}>
+        </Text>
+        <PrimaryButton onClick={onUpdate}>
           {t('Update Node Version')} {version}
-        </Button>
+        </PrimaryButton>
       </Flex>
     </Flex>
   )

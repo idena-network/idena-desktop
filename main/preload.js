@@ -32,6 +32,8 @@ process.once('loaded', () => {
   global.logger = logger
 
   global.isDev = isDev
+  global.isTest = process.env.NODE_ENV === 'e2e'
+
   global.prepareDb = prepareDb
   global.isMac = process.platform === 'darwin'
 
@@ -49,6 +51,11 @@ process.once('loaded', () => {
     NODE_MOCK: process.env.NODE_MOCK,
     BUMP_EXTRA_FLIPS: process.env.BUMP_EXTRA_FLIPS,
     FINALIZE_FLIPS: process.env.FINALIZE_FLIPS,
+  }
+
+  global.toggleFullScreen = () => {
+    const currentWindow = electron.remote.getCurrentWindow()
+    currentWindow.setFullScreen(!currentWindow.isFullScreen())
   }
 
   if (isDev) {
