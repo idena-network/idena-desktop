@@ -88,7 +88,9 @@ export function FlipCard({flipService, onDelete}) {
   return (
     <Box position="relative">
       <FlipCardImageBox>
-        {[FlipType.Publishing, FlipType.Invalid].includes(type) && (
+        {[FlipType.Publishing, FlipType.Deleting, FlipType.Invalid].some(
+          x => x === type
+        ) && (
           <FlipOverlay
             backgroundImage={
               // eslint-disable-next-line no-nested-ternary
