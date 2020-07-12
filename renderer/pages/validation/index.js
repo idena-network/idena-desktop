@@ -10,7 +10,6 @@ import {
   Text as ChakraText,
   IconButton,
 } from '@chakra-ui/core'
-import dayjs from 'dayjs'
 import {
   createValidationMachine,
   RelevanceType,
@@ -21,6 +20,7 @@ import {
   filterRegularFlips,
   filterSolvableFlips,
   rearrangeFlips,
+  shouldPollLongFlips,
 } from '../../screens/validation/utils'
 import {
   ValidationScene,
@@ -135,11 +135,10 @@ function ValidationSession({
         </Title>
         <ChakraFlex align="center">
           {(isShortSession(state) ||
-            dayjs().isAfter(
-              dayjs(validationStart)
-                .add(shortSessionDuration, 'second')
-                .add(2, 'minute')
-            )) && (
+            !shouldPollLongFlips(sessionFlips(state), {
+              validationStart,
+              shortSessionDuration,
+            })) && (
             <Title
               color={isShortSession(state) ? 'white' : 'brandGray.500'}
               mr={6}

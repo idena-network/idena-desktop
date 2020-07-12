@@ -496,10 +496,14 @@ export function FlipWords({
   const {t, i18n} = useTranslation()
 
   const wordTranslations = words.map(({id}) => translations[id])
-
-  const [showTranslation, setShowTranslation] = React.useState(() =>
-    wordTranslations.reduce((acc, curr) => !!curr && acc, true)
+  const hasApprovedTranslation = wordTranslations.reduce(
+    (acc, curr) => !!curr && acc,
+    true
   )
+
+  const [showTranslation, setShowTranslation] = React.useState()
+
+  const shouldShowTranslation = showTranslation && hasApprovedTranslation
 
   return (
     <ChakraBox fontSize="md" color="brandGray.500" ml={rem(32)} w={rem(320)}>
@@ -517,7 +521,7 @@ export function FlipWords({
               words,
               translations: wordTranslations.map(x => (x ? [x] : [])),
             }}
-            showTranslation={showTranslation}
+            showTranslation={shouldShowTranslation}
             locale={i18n.language}
             onSwitchLocale={() => setShowTranslation(!showTranslation)}
             isInline={false}

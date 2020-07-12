@@ -1,6 +1,6 @@
 import {Machine, assign} from 'xstate'
 import {decode} from 'rlp'
-import {log, send} from 'xstate/lib/actions'
+import {log} from 'xstate/lib/actions'
 import dayjs from 'dayjs'
 import {
   fetchFlipHashes,
@@ -22,6 +22,7 @@ import {
   missingHashes,
   exponentialBackoff,
   shouldTranslate,
+  shouldPollLongFlips,
 } from './utils'
 import {forEachAsync, wait} from '../../shared/utils/fn'
 import {fetchConfirmedKeywordTranslations} from '../flips/utils'
@@ -468,12 +469,10 @@ export const createValidationMachine = ({
                             ],
                             // eslint-disable-next-line no-shadow
                             cond: ({longFlips, validationStart}) =>
-                              longFlips.some(({ready}) => !ready) &&
-                              dayjs().isBefore(
-                                dayjs(validationStart)
-                                  .add(shortSessionDuration, 'second')
-                                  .add(2, 'minute')
-                              ),
+                              shouldPollLongFlips(longFlips, {
+                                validationStart,
+                                shortSessionDuration,
+                              }),
                           },
                           {
                             target: 'detectMissing',
