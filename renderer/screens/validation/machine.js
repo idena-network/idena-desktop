@@ -568,6 +568,24 @@ export const createValidationMachine = ({
                       ],
                     },
                   },
+                  after: {
+                    FINALIZE_LONG_FLIPS: {
+                      target: '.done',
+                      actions: [
+                        assign({
+                          longFlips: ({longFlips}) =>
+                            mergeFlipsByHash(
+                              longFlips,
+                              longFlips.filter(failedFlip).map(flip => ({
+                                ...flip,
+                                failed: true,
+                              }))
+                            ),
+                        }),
+                        log(),
+                      ],
+                    },
+                  },
                 },
                 keywords: {
                   initial: 'fetching',
@@ -915,6 +933,15 @@ export const createValidationMachine = ({
           adjustDuration(
             validationStart,
             shortSessionDuration - 10 + longSessionDuration
+          ) * 1000,
+        // eslint-disable-next-line no-shadow
+        FINALIZE_LONG_FLIPS: ({validationStart, shortSessionDuration}) =>
+          Math.max(
+            adjustDuration(
+              validationStart,
+              shortSessionDuration + (global.env.FINALIZE_LONG_FLIPS || 120)
+            ),
+            5
           ) * 1000,
       },
       actions: {
