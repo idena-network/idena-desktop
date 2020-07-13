@@ -134,7 +134,7 @@ export function Flip({
               }
             : {
                 opacity: 0.3,
-                transform: 'scale(0.95)',
+                transform: 'scale(0.98)',
                 transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
                 transitionProperty: 'opacity, transform',
                 willChange: 'opacity, transform',

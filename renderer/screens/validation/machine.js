@@ -23,6 +23,7 @@ import {
   exponentialBackoff,
   shouldTranslate,
   shouldPollLongFlips,
+  readyFlip,
 } from './utils'
 import {forEachAsync, wait} from '../../shared/utils/fn'
 import {fetchConfirmedKeywordTranslations} from '../flips/utils'
@@ -691,7 +692,8 @@ export const createValidationMachine = ({
                       {
                         target: '.lastFlip',
                         cond: ({longFlips, currentIndex}) =>
-                          currentIndex === longFlips.length - 2,
+                          currentIndex ===
+                          longFlips.filter(readyFlip).length - 2,
                         actions: [
                           assign({
                             currentIndex: ({currentIndex}) => currentIndex + 1,
@@ -725,7 +727,7 @@ export const createValidationMachine = ({
                       {
                         target: '.lastFlip',
                         cond: ({longFlips}, {index}) =>
-                          index === longFlips.length - 1,
+                          index === longFlips.filter(readyFlip).length - 1,
                         actions: [
                           assign({
                             currentIndex: (_, {index}) => index,

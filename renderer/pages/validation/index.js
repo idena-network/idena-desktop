@@ -20,7 +20,7 @@ import {
   filterRegularFlips,
   filterSolvableFlips,
   rearrangeFlips,
-  shouldPollLongFlips,
+  readyFlip,
 } from '../../screens/validation/utils'
 import {
   ValidationScene,
@@ -134,21 +134,16 @@ function ValidationSession({
             : t('Check flips quality')}
         </Title>
         <ChakraFlex align="center">
-          {(isShortSession(state) ||
-            !shouldPollLongFlips(sessionFlips(state), {
-              validationStart,
-              shortSessionDuration,
-            })) && (
-            <Title
-              color={isShortSession(state) ? 'white' : 'brandGray.500'}
-              mr={6}
-            >
-              {currentIndex + 1}{' '}
-              <ChakraText as="span" color="muted">
-                out of {sessionFlips(state).length}
-              </ChakraText>
-            </Title>
-          )}
+          <Title
+            color={isShortSession(state) ? 'white' : 'brandGray.500'}
+            mr={6}
+          >
+            {currentIndex + 1}{' '}
+            <ChakraText as="span" color="muted">
+              out of {sessionFlips(state).length}
+            </ChakraText>
+          </Title>
+
           <IconButton
             icon="fullscreen"
             bg={isShortSession(state) ? 'brandGray.060' : 'gray.300'}
@@ -473,7 +468,7 @@ function sessionFlips(state) {
   } = state
   return isShortSession(state)
     ? rearrangeFlips(filterRegularFlips(shortFlips))
-    : rearrangeFlips(longFlips)
+    : rearrangeFlips(longFlips.filter(readyFlip))
 }
 
 function hasAllAnswers(state) {
