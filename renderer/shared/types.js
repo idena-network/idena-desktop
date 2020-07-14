@@ -45,3 +45,25 @@ export const FlipFilter = {
   Draft: 'draft',
   Archived: 'archived',
 }
+
+export const VotingStatus = {
+  Pending: 'pending',
+  Open: 'open',
+  Voted: 'voted',
+  Counting: 'counting',
+  Archived: 'archive',
+  Terminated: 'terminated',
+  Deploying: 'deploying',
+  Funding: 'funding',
+  Starting: 'starting',
+  Voting: 'voting',
+  Finishing: 'finishing',
+  Prolonging: 'prolonging',
+  Terminating: 'terminating',
+  Invalid: 'invalid',
+}
+
+export const VoteOption = {
+  Confirm: 'confirm',
+  Reject: 'reject',
+}

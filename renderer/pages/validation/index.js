@@ -56,7 +56,7 @@ import theme, {rem} from '../../shared/theme'
 import {AnswerType} from '../../shared/types'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'
-import {PrimaryButton} from '../../shared/components/button'
+import {InfoButton, PrimaryButton} from '../../shared/components/button'
 import {
   Dialog,
   DialogBody,
@@ -237,25 +237,7 @@ function ValidationSession({
                     <Heading fontSize="base" fontWeight={500}>
                       {t(`Is the flip correct?`)}
                     </Heading>
-                    <IconButton
-                      icon="info"
-                      color="brandBlue.500"
-                      bg="unset"
-                      fontSize={rem(20)}
-                      minW={5}
-                      w={5}
-                      h={5}
-                      _active={{
-                        bg: 'unset',
-                      }}
-                      _hover={{
-                        bg: 'unset',
-                      }}
-                      _focus={{
-                        outline: 'none',
-                      }}
-                      onClick={onOpenReportDialog}
-                    />
+                    <InfoButton onClick={onOpenReportDialog} />
                   </Stack>
                   <QualificationActions>
                     <QualificationButton

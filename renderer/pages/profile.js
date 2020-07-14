@@ -1,13 +1,5 @@
 import React from 'react'
-import {
-  Stack,
-  Box,
-  Text,
-  Icon,
-  useDisclosure,
-  useToast,
-  Button,
-} from '@chakra-ui/core'
+import {Stack, Text, Icon, useDisclosure, useToast, Flex} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
   useIdentityState,
@@ -19,8 +11,6 @@ import {
   UserInlineCard,
   SimpleUserStat,
   UserStatList,
-  UserStat,
-  UserStatLabel,
   UserStatValue,
   AnnotatedUserStat,
   SpoilInviteDrawer,
@@ -28,14 +18,15 @@ import {
   MinerStatusSwitcher,
   ActivateInviteForm,
   ValidationResultToast,
+  UserStat,
+  UserStatLabel,
 } from '../screens/profile/components'
 import {IconButton2} from '../shared/components/button'
-import {IconLink} from '../shared/components/link'
 import Layout from '../shared/components/layout'
+import {IconLink} from '../shared/components/link'
 import {IdentityStatus} from '../shared/types'
-import {useChainState} from '../shared/providers/chain-context'
 import {toPercent, toLocaleDna, callRpc} from '../shared/utils/utils'
-import {Toast} from '../shared/components/components'
+import {ExternalLink, Toast} from '../shared/components/components'
 import KillForm, {
   KillIdentityDrawer,
 } from '../screens/wallets/components/kill-form'
@@ -46,6 +37,7 @@ import {
 import {persistItem} from '../shared/utils/persist'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {rem} from '../shared/theme'
+import {useChainState} from '../shared/providers/chain-context'
 
 export default function ProfilePage() {
   const {
@@ -71,7 +63,7 @@ export default function ProfilePage() {
 
   const {
     address,
-    state,
+    state: status,
     balance,
     stake,
     penalty,
@@ -109,55 +101,37 @@ export default function ProfilePage() {
         <Page>
           <PageTitle mb={8}>{t('Profile')}</PageTitle>
           <Stack isInline spacing={10}>
-            <Stack spacing={6}>
-              <UserInlineCard address={address} state={state} />
+            <Stack spacing={6} w="md">
+              <UserInlineCard address={address} status={status} h={24} />
               <UserStatList>
                 <UserStat>
                   <UserStatLabel>{t('Address')}</UserStatLabel>
                   <UserStatValue>{address}</UserStatValue>
-                  <Button
-                    variant="link"
-                    variantColor="brandBlue"
-                    fontWeight={500}
-                    alignSelf="flex-start"
-                    _hover={{background: 'transparent'}}
-                    _focus={{
-                      outline: 'none',
-                    }}
-                    onClick={() => {
-                      global.openExternal(
-                        `https://scan.idena.io/address/${address}`
-                      )
-                    }}
+                  <ExternalLink
+                    href={`https://scan.idena.io/address/${address}`}
                   >
-                    <Text as="span" lineHeight="short" mt="-2px">
-                      {t('Open in blockchain explorer')}
-                    </Text>
-                    <Icon
-                      name="chevron-down"
-                      size={4}
-                      transform="rotate(-90deg)"
-                    />
-                  </Button>
+                    {t('Open in blockhain explorer')}
+                  </ExternalLink>
                 </UserStat>
 
-                {state === IdentityStatus.Newbie ? (
+                {status === IdentityStatus.Newbie ? (
                   <AnnotatedUserStat
                     annotation={t(
                       'Solve more than 12 flips to become Verified'
                     )}
                     label={t('Status')}
-                    value={mapToFriendlyStatus(state)}
+                    value={mapToFriendlyStatus(status)}
                   />
                 ) : (
                   <SimpleUserStat
                     label={t('Status')}
-                    value={mapToFriendlyStatus(state)}
+                    value={mapToFriendlyStatus(status)}
                   />
                 )}
 
                 <SimpleUserStat label={t('Balance')} value={toDna(balance)} />
-                {stake > 0 && state === IdentityStatus.Newbie && (
+
+                {stake > 0 && status === IdentityStatus.Newbie && (
                   <Stack spacing={4}>
                     <AnnotatedUserStat
                       annotation={t(
@@ -176,7 +150,7 @@ export default function ProfilePage() {
                   </Stack>
                 )}
 
-                {stake > 0 && state !== IdentityStatus.Newbie && (
+                {stake > 0 && status !== IdentityStatus.Newbie && (
                   <AnnotatedUserStat
                     annotation={t(
                       'In order to withdraw the stake you have to terminate your identity'
@@ -223,26 +197,34 @@ export default function ProfilePage() {
               </UserStatList>
               <ActivateInviteForm />
             </Stack>
-            <Box w={rem(200)}>
-              {canMine && (
-                <Text fontWeight={500} mt={4} mb={2}>
-                  {t('Online mining status')}
-                </Text>
-              )}
-              <MinerStatusSwitcher />
-              <Stack mt={canMine ? 0 : rem(104)} spacing={1} align="flex-start">
+            <Stack spacing={6} w={rem(200)}>
+              <Flex h={24}>
+                {canMine && (
+                  <Stack spacing={2} justify="center" flex={1}>
+                    <Text fontWeight={500}>{t('Online mining status')}</Text>
+                    <MinerStatusSwitcher />
+                  </Stack>
+                )}
+              </Flex>
+              <Stack spacing={1} align="flex-start">
                 <IconLink
-                  href="/contacts/new-invite"
-                  isDisabled={invitesCount === 0}
-                  icon={<Icon name="add-user" size={5} />}
+                  href="/oracles/new"
+                  icon={<Icon name="oracle" size={5} />}
                 >
-                  {t('Invite')}
+                  {t('New voting')}
                 </IconLink>
                 <IconLink
                   href="/flips/new"
                   icon={<Icon name="photo" size={5} />}
                 >
                   {t('New flip')}
+                </IconLink>
+                <IconLink
+                  href="/contacts/new-invite"
+                  isDisabled={invitesCount === 0}
+                  icon={<Icon name="add-user" size={5} />}
+                >
+                  {t('Invite')}
                 </IconLink>
                 <IconButton2 icon="poo" onClick={onOpenSpoilForm}>
                   {t('Spoil invite')}
@@ -255,7 +237,7 @@ export default function ProfilePage() {
                   {t('Terminate')}
                 </IconButton2>
               </Stack>
-            </Box>
+            </Stack>
           </Stack>
 
           <KillIdentityDrawer

@@ -27,8 +27,17 @@ import {
   Stack,
   Box,
   Button,
+  NumberInput as ChakraNumberInput,
+  Textarea as ChakraTextarea,
+  Checkbox as ChakraCheckbox,
+  Divider,
+  Text,
+  Icon,
+  InputGroup,
+  InputRightAddon,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
+import {IconButton2} from './button'
 
 export function FloatDebug({children, ...props}) {
   return (
@@ -40,18 +49,18 @@ export function FloatDebug({children, ...props}) {
 
 export function Debug({children}) {
   return (
-    <Code whiteSpace="pre" borderRadius="md" p={2}>
+    <Code whiteSpace="pre-wrap" borderRadius="md" p={2}>
       {JSON.stringify(children, null, 2)}
     </Code>
   )
 }
 
-export function Drawer({children, ...props}) {
+export function Drawer({isCloseable = true, children, ...props}) {
   return (
     <ChakraDrawer {...props}>
       <DrawerOverlay bg="xblack.080" />
       <DrawerContent px={8} py={12} maxW={360}>
-        <DrawerCloseButton />
+        {isCloseable && <DrawerCloseButton />}
         {children}
       </DrawerContent>
     </ChakraDrawer>
@@ -69,18 +78,104 @@ export function FormLabel(props) {
   return <ChakraFormLabel fontWeight={500} color="brandGray.500" {...props} />
 }
 
-export function Input(props) {
+// eslint-disable-next-line react/display-name
+export const Input = React.forwardRef((props, ref) => (
+  <ChakraInput
+    ref={ref}
+    alignItems="center"
+    borderColor="gray.300"
+    color="brandGray.500"
+    fontSize="md"
+    lineHeight="short"
+    px={3}
+    h={8}
+    _disabled={{
+      bg: 'gray.50',
+      color: 'muted',
+    }}
+    _placeholder={{
+      color: 'muted',
+    }}
+    {...props}
+  />
+))
+
+export function NumberInput(props) {
   return (
-    <ChakraInput
-      alignItems="center"
+    <ChakraNumberInput
       borderColor="gray.300"
+      color="brandGray.500"
       fontSize="md"
       lineHeight="short"
-      px={3}
       h={8}
+      {...props}
+    />
+  )
+}
+
+export function Checkbox(props) {
+  return <ChakraCheckbox borderColor="gray.100" {...props} />
+}
+
+export function Textarea(props) {
+  return (
+    <ChakraTextarea
+      borderColor="gray.300"
+      p={3}
+      pt={2}
+      pr={rem(18)}
       _placeholder={{
         color: 'muted',
       }}
+      {...props}
+    />
+  )
+}
+
+export function ChainedInputGroup({addon, children, ...props}) {
+  const {isDisabled} = props
+
+  return (
+    <InputGroup flex={1} {...props}>
+      {addon ? (
+        <>
+          <ChainedInput {...props} />
+          <ChainedInputAddon isDisabled={isDisabled}>%</ChainedInputAddon>
+        </>
+      ) : (
+        children
+      )}
+    </InputGroup>
+  )
+}
+
+export function ChainedInput(props) {
+  const {isDisabled, bg, _hover} = props
+
+  const borderRightColor = isDisabled ? 'gray.50' : bg
+
+  return (
+    <Input
+      borderRightColor={borderRightColor}
+      borderTopRightRadius={0}
+      borderBottomRightRadius={0}
+      _hover={{
+        borderRightColor,
+        ..._hover,
+      }}
+      {...props}
+    />
+  )
+}
+
+export function ChainedInputAddon({isDisabled, bg = 'white', ...props}) {
+  return (
+    <InputRightAddon
+      bg={isDisabled ? 'gray.50' : bg}
+      borderColor="gray.300"
+      color="muted"
+      h={8}
+      px={3}
       {...props}
     />
   )
@@ -90,7 +185,7 @@ export function Avatar({address, ...props}) {
   return (
     <Image
       size={rem(80)}
-      src={`https://robohash.idena.io/${address}`}
+      src={`https://robohash.idena.io/${address?.toLowerCase()}`}
       bg="gray.50"
       rounded="lg"
       ignoreFallback
@@ -209,5 +304,88 @@ export function DialogFooter({children, ...props}) {
         {children}
       </Stack>
     </ModalFooter>
+  )
+}
+
+export function SuccessAlert({children, ...props}) {
+  return (
+    <Alert
+      status="success"
+      bg="green.010"
+      borderWidth="1px"
+      borderColor="green.050"
+      fontWeight={500}
+      rounded="md"
+      px={3}
+      py={2}
+      {...props}
+    >
+      <AlertIcon name="info" color="green.500" size={5} mr={3} />
+      {children}
+    </Alert>
+  )
+}
+
+export const VDivider = React.forwardRef((props, ref) => (
+  <Divider
+    ref={ref}
+    orientation="vertical"
+    borderColor="gray.300"
+    h={6}
+    mx={0}
+    {...props}
+  />
+))
+VDivider.displayName = 'VDivider'
+
+export const HDivider = React.forwardRef((props, ref) => (
+  <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
+))
+HDivider.displayName = 'HDivider'
+
+export function ExternalLink({href, children, ...props}) {
+  return (
+    <Button
+      variant="link"
+      variantColor="brandBlue"
+      fontWeight={500}
+      alignSelf="flex-start"
+      _hover={{background: 'transparent'}}
+      _focus={{
+        outline: 'none',
+      }}
+      onClick={() => {
+        global.openExternal(href)
+      }}
+      {...props}
+    >
+      <Text as="span" lineHeight="short" mt="-2px">
+        {children || href}
+      </Text>
+      <Icon name="chevron-down" size={4} transform="rotate(-90deg)" />
+    </Button>
+  )
+}
+
+export function GoogleTranslateButton({
+  phrases = [],
+  text = encodeURIComponent(phrases.join('\n\n')),
+  locale = global.locale,
+  children,
+  ...props
+}) {
+  return (
+    <IconButton2
+      icon="gtranslate"
+      _hover={{background: 'transparent'}}
+      onClick={() => {
+        global.openExternal(
+          `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${locale}&text=${text}`
+        )
+      }}
+      {...props}
+    >
+      {children || 'Google Translate'}
+    </IconButton2>
   )
 }

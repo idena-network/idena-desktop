@@ -1,39 +1,31 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import Layout from '../../shared/components/layout'
-import {Box, PageTitle} from '../../shared/components'
-import theme from '../../shared/theme'
 import {FlipFilter, FlipFilterOption} from '../../screens/flips/components'
+import {Page, PageTitle} from '../../screens/app/components'
+import Layout from '../../shared/components/layout'
 
+// eslint-disable-next-line react/prop-types
 function SettingsLayout({children}) {
   const router = useRouter()
   const {t} = useTranslation()
 
   return (
     <Layout skipHardForkScreen>
-      <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
-        <Box>
-          <PageTitle>{t('Settings')}</PageTitle>
-          {/* TODO: make it shared <Pill /> or <Tab /> component */}
-          <FlipFilter value={router.pathname} onChange={router.push}>
-            <FlipFilterOption value="/settings">
-              {t('General')}
-            </FlipFilterOption>
-            <FlipFilterOption value="/settings/node">
-              {t('Node')}
-            </FlipFilterOption>
-          </FlipFilter>
-        </Box>
+      <Page>
+        <PageTitle>{t('Settings')}</PageTitle>
+        <FlipFilter value={router.pathname} onChange={router.push}>
+          <FlipFilterOption value="/settings/general">
+            {t('General')}
+          </FlipFilterOption>
+          <FlipFilterOption value="/settings/node">
+            {t('Node')}
+          </FlipFilterOption>
+        </FlipFilter>
         {children}
-      </Box>
+      </Page>
     </Layout>
   )
-}
-
-SettingsLayout.propTypes = {
-  children: PropTypes.node,
 }
 
 export default SettingsLayout

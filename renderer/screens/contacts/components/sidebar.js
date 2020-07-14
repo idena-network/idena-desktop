@@ -1,8 +1,9 @@
 /* eslint-disable no-nested-ternary */
 import React from 'react'
 import PropTypes from 'prop-types'
-import {padding, border, margin, ellipsis, backgrounds} from 'polished'
+import {padding, margin, ellipsis, backgrounds} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {Flex as ChakraFlex} from '@chakra-ui/core'
 import {Box, Text, Input, Button} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme, {rem} from '../../../shared/theme'
@@ -28,20 +29,22 @@ function Sidebar({onSelectContact, onSelectInvite, onNewInvite}) {
   }, [contacts, onSelectContact])
 
   return (
-    <Box
-      style={{
-        ...border('right', '1px', 'solid', theme.colors.gray2),
-        width: rem(270),
-        minWidth: rem(270),
-        height: '91vh',
-        overflowY: 'auto',
-      }}
+    <ChakraFlex
+      direction="column"
+      flex={1}
+      borderColor="gray.300"
+      borderRightWidth="1px"
+      w="2xs"
+      maxW="2xs"
+      h="100vh"
+      overflow="hidden"
+      overflowY="auto"
     >
       <Search onChange={e => setTerm(e.target.value)} />
       <InviteSection onNewInvite={onNewInvite}>
         <InviteList filter={term} onSelectInvite={onSelectInvite} />
       </InviteSection>
-    </Box>
+    </ChakraFlex>
   )
 }
 

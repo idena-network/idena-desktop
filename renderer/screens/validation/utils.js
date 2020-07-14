@@ -90,12 +90,12 @@ export function persistValidationState(state) {
   persistState('validation2', state)
 }
 
-export function loadValidationState() {
+export function loadValidationStateDefinition() {
   return loadPersistentState('validation2')
 }
 
-export function parsePersistedValidationState() {
-  const stateDef = loadValidationState()
+export function loadValidationState() {
+  const stateDef = loadValidationStateDefinition()
   return stateDef && State.create(stateDef)
 }
 
@@ -122,7 +122,7 @@ export function shouldStartValidation(epoch, identity) {
 
   if (isValidationRunning && canValidate(identity)) {
     // Hooray! We're in but still need to check against persisted validation state and epoch
-    const validationStateDefinition = loadValidationState()
+    const validationStateDefinition = loadValidationStateDefinition()
     if (validationStateDefinition) {
       const persistedValidationState = State.create(validationStateDefinition)
       const isDone = persistedValidationState.done // is it DONE? any positive or negative, validation-wise
@@ -163,7 +163,7 @@ export function shouldStartValidation(epoch, identity) {
 }
 
 export function didValidate(currentEpoch) {
-  const validationStateDefinition = loadValidationState()
+  const validationStateDefinition = loadValidationStateDefinition()
 
   if (validationStateDefinition) {
     const {epoch} = State.create(validationStateDefinition).context
@@ -174,7 +174,7 @@ export function didValidate(currentEpoch) {
 }
 
 export function shouldExpectValidationResults(epoch) {
-  const validationStateDefinition = loadValidationState()
+  const validationStateDefinition = loadValidationStateDefinition()
 
   if (validationStateDefinition) {
     const {

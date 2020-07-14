@@ -3,11 +3,12 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {Icon} from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
-import {useIdentityState, IdentityStatus} from '../providers/identity-context'
-import {useEpochState, EpochPeriod} from '../providers/epoch-context'
+import {useIdentityState} from '../providers/identity-context'
+import {useEpochState} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
 import {
   useAutoUpdateState,
@@ -16,8 +17,9 @@ import {
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
-import {pluralize} from '../utils/string'
-import {parsePersistedValidationState} from '../../screens/validation/utils'
+import {loadValidationState} from '../../screens/validation/utils'
+import {IdentityStatus, EpochPeriod} from '../types'
+import {Logo} from '../../screens/app/components'
 
 function Sidebar() {
   return (
@@ -124,24 +126,6 @@ function NodeStatus() {
   )
 }
 
-export function Logo() {
-  return (
-    <Box
-      css={{
-        alignSelf: 'center',
-        ...margin(rem(32), 0),
-      }}
-    >
-      <img src="/static/logo.svg" alt="Idena logo" />
-      <style jsx>{`
-        img {
-          width: ${rem(56)};
-        }
-      `}</style>
-    </Box>
-  )
-}
-
 function Nav() {
   const {t} = useTranslation()
   const {nickname} = useIdentityState()
@@ -155,32 +139,25 @@ function Nav() {
           textAlign: 'left',
         }}
       >
-        <NavItem
-          href="/profile"
-          active
-          icon={<i className="icon icon--user" />}
-        >
+        <NavItem href="/profile" active icon={<Icon name="profile" size={5} />}>
           {t('My Idena') || nickname}
         </NavItem>
-        <NavItem
-          href="/wallets"
-          icon={<i className="icon icon--menu_wallets" />}
-        >
+        <NavItem href="/wallets" icon={<Icon name="wallet" size={5} />}>
           {t('Wallets')}
         </NavItem>
-        <NavItem
-          href="/flips/list"
-          icon={<i className="icon icon--menu_gallery" />}
-        >
+        <NavItem href="/flips/list" icon={<Icon name="gallery" size={5} />}>
           {t('Flips')}
         </NavItem>
-        <NavItem
-          href="/contacts"
-          icon={<i className="icon icon--menu_contacts" />}
-        >
+        <NavItem href="/contacts" icon={<Icon name="contacts" size={5} />}>
           {t('Contacts')}
         </NavItem>
-        <NavItem href="/settings" icon={<i className="icon icon--settings" />}>
+        <NavItem href="/oracles/list" icon={<Icon name="oracle" w={5} h={5} />}>
+          {t('Oracle voting')}
+        </NavItem>
+        <NavItem
+          href="/settings/general"
+          icon={<Icon name="settings" size={5} />}
+        >
           {t('Settings')}
         </NavItem>
       </ul>
@@ -389,7 +366,7 @@ function CurrentTask({epoch, period, identity}) {
 
     case EpochPeriod.ShortSession:
     case EpochPeriod.LongSession: {
-      const validationState = parsePersistedValidationState()
+      const validationState = loadValidationState()
 
       switch (true) {
         case [IdentityStatus.Undefined, IdentityStatus.Invite].includes(
