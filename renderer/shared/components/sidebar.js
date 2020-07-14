@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {Icon} from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
@@ -179,6 +180,12 @@ function Nav() {
           icon={<i className="icon icon--menu_contacts" />}
         >
           {t('Contacts')}
+        </NavItem>
+        <NavItem
+          href="/oracles/list"
+          icon={<Icon name="oracle" w={5} h={5} ml={-1} />}
+        >
+          {t('Oracles')}
         </NavItem>
         <NavItem href="/settings" icon={<i className="icon icon--settings" />}>
           {t('Settings')}
