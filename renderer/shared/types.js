@@ -45,3 +45,11 @@ export const FlipFilter = {
   Draft: 'draft',
   Archived: 'archived',
 }
+
+export const VotingType = {
+  All: 'all',
+  Open: 'open',
+  Voted: 'voted',
+  Counting: 'counting',
+  Archive: 'archive',
+}
