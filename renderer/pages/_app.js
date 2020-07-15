@@ -2,7 +2,7 @@ import React from 'react'
 import App from 'next/app'
 import Router from 'next/router'
 import Head from 'next/head'
-import {ThemeProvider, CSSReset} from '@chakra-ui/core'
+import {ThemeProvider, CSSReset, ColorModeProvider} from '@chakra-ui/core'
 import NProgress from 'nprogress'
 import GoogleFonts from 'next-google-fonts'
 
@@ -31,14 +31,16 @@ export default class MyApp extends App {
 
     return (
       <ThemeProvider theme={uiTheme}>
-        <GoogleFonts href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
-        <Head>
-          <link href="/static/fonts/icons.css" rel="stylesheet" />
-        </Head>
-        <CSSReset />
-        <AppProviders>
-          <Component {...{...pageProps, err}} />
-        </AppProviders>
+        <ColorModeProvider>
+          <GoogleFonts href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+          <Head>
+            <link href="/static/fonts/icons.css" rel="stylesheet" />
+          </Head>
+          <CSSReset />
+          <AppProviders>
+            <Component {...{...pageProps, err}} />
+          </AppProviders>
+        </ColorModeProvider>
       </ThemeProvider>
     )
   }

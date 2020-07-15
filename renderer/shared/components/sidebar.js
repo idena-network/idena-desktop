@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {IconButton, useColorMode} from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
@@ -61,6 +62,8 @@ function NodeStatus() {
 
   const [{result: peers}] = usePoll(useRpc('net_peers'), 3000)
 
+  const {colorMode, toggleColorMode} = useColorMode()
+
   let bg = theme.colors.white01
   let color = theme.colors.muted
   let text = 'Getting node status...'
@@ -78,49 +81,60 @@ function NodeStatus() {
   }
 
   return (
-    <Box
-      bg={bg}
-      css={{
-        borderRadius: rem(12),
-        ...margin(0, 0, 0, rem(-8)),
-        ...padding(rem(2), rem(12), rem(4), rem(8)),
-      }}
-    >
-      <Tooltip
-        content={
-          <div style={{minWidth: rem(90)}}>
-            {offline
-              ? null
-              : [
-                  !offline ? `Peers: ${(peers || []).length}` : '',
-                  syncing
-                    ? `Blocks: ${currentBlock} out of ${highestBlock}`
-                    : `Current block: ${currentBlock}`,
-                ].map((t, idx) => (
-                  <div
-                    key={idx}
-                    style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
-                  >
-                    {t}
-                  </div>
-                ))}
-          </div>
-        }
-        placement="bottom"
+    <Flex align="center" justify="space-between" flex={1}>
+      <Box
+        bg={bg}
+        css={{
+          borderRadius: rem(12),
+          ...margin(0, 0, 0, rem(-8)),
+          ...padding(rem(2), rem(12), rem(4), rem(8)),
+        }}
       >
-        <Flex align="baseline">
-          {!offline && (
-            <Box css={{...margin(0, rem(4), 0, 0)}}>
-              <Bandwidth strength={(peers || []).length} syncing={syncing} />
-            </Box>
-          )}
+        <Tooltip
+          content={
+            <div style={{minWidth: rem(90)}}>
+              {offline
+                ? null
+                : [
+                    !offline ? `Peers: ${(peers || []).length}` : '',
+                    syncing
+                      ? `Blocks: ${currentBlock} out of ${highestBlock}`
+                      : `Current block: ${currentBlock}`,
+                  ].map((t, idx) => (
+                    <div
+                      key={idx}
+                      style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
+                    >
+                      {t}
+                    </div>
+                  ))}
+            </div>
+          }
+          placement="bottom"
+        >
+          <Flex align="baseline">
+            {!offline && (
+              <Box css={{...margin(0, rem(4), 0, 0)}}>
+                <Bandwidth strength={(peers || []).length} syncing={syncing} />
+              </Box>
+            )}
 
-          <Text color={color} fontWeight={500} lineHeight={rem(18)}>
-            {text}
-          </Text>
-        </Flex>
-      </Tooltip>
-    </Box>
+            <Text color={color} fontWeight={500} lineHeight={rem(18)}>
+              {text}
+            </Text>
+          </Flex>
+        </Tooltip>
+      </Box>
+      <Box style={{marginLeft: '8px'}}>
+        <IconButton
+          icon={colorMode === 'light' ? 'moon' : 'sun'}
+          onClick={toggleColorMode}
+          size={5}
+          bg="xblack.016"
+          p={2}
+        />
+      </Box>
+    </Flex>
   )
 }
 
