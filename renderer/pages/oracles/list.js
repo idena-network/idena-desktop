@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  Skeleton,
   Stack,
   RadioGroup,
   Radio,
@@ -15,6 +14,7 @@ import {
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
+import {useRouter} from 'next/router'
 import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../screens/app/components'
 import {IconLink} from '../../shared/components/link'
@@ -24,8 +24,10 @@ import {rem} from '../../shared/theme'
 import {toLocaleDna} from '../../shared/utils/utils'
 import {SecondaryButton, PrimaryButton} from '../../shared/components/button'
 
-export default function OracleList() {
+export default function VotingListPage() {
   const {t, i18n} = useTranslation()
+
+  const router = useRouter()
 
   const toDna = toLocaleDna(i18n.language)
 
@@ -83,7 +85,9 @@ export default function OracleList() {
                 </Stack>
                 <Flex justify="space-between" align="center">
                   <Stack isInline spacing={2}>
-                    <PrimaryButton>{t('Change')}</PrimaryButton>
+                    <PrimaryButton onClick={() => router.push('/oracles/vote')}>
+                      {t('Change')}
+                    </PrimaryButton>
                     <SecondaryButton>{t('Add fund')}</SecondaryButton>
                   </Stack>
                   <Stack isInline spacing={3}>
