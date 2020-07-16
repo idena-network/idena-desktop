@@ -12,18 +12,50 @@ import {
   Stat,
   StatNumber,
   StatLabel,
+  FormControl,
+  useDisclosure,
+  StatHelpText,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import Layout from '../../shared/components/layout'
 import {Page} from '../../screens/app/components'
-import {Avatar} from '../../shared/components/components'
+import {
+  Avatar,
+  Drawer,
+  DrawerHeader,
+  DrawerBody,
+  Input,
+  FormLabel,
+} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
-import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
+import {
+  PrimaryButton,
+  SecondaryButton,
+  IconButton2,
+} from '../../shared/components/button'
 import {toLocaleDna} from '../../shared/utils/utils'
 
 export default function VotePage() {
   const {t, i18n} = useTranslation()
+
+  const {
+    isOpen: isOpenConfirm,
+    onOpen: onOpenConfirm,
+    onClose: onCloseConfirm,
+  } = useDisclosure()
+
+  const {
+    isOpen: isOpenReject,
+    onOpen: onOpenReject,
+    onClose: onCloseReject,
+  } = useDisclosure()
+
+  const {
+    isOpen: isOpenFund,
+    onOpen: onOpenFund,
+    onClose: onCloseFund,
+  } = useDisclosure()
 
   const toDna = toLocaleDna(i18n.language)
 
@@ -47,7 +79,6 @@ export default function VotePage() {
               <Badge
                 bg="gray.300"
                 borderRadius="xl"
-                // fontSize="sm"
                 textTransform="initial"
                 color="muted"
                 px={3}
@@ -93,7 +124,9 @@ export default function VotePage() {
                     px={3}
                     py={2}
                   >
-                    <Radio borderColor="gray.100">Confirm</Radio>
+                    <Radio borderColor="gray.100" onClick={onOpenConfirm}>
+                      Confirm
+                    </Radio>
                     <Text color="muted" fontSize="sm">
                       70% min. votes required
                     </Text>
@@ -106,7 +139,9 @@ export default function VotePage() {
                     px={3}
                     py={2}
                   >
-                    <Radio borderColor="gray.100">Reject</Radio>
+                    <Radio borderColor="gray.100" onClick={onOpenReject}>
+                      Reject
+                    </Radio>
                     <Text color="muted" fontSize="sm">
                       70% min. votes required
                     </Text>
@@ -145,6 +180,11 @@ export default function VotePage() {
               <StatNumber fontSize="lg" fontWeight={500}>
                 {toDna(100000)}
               </StatNumber>
+              <StatHelpText>
+                <IconButton2 icon="add-fund" onClick={onOpenFund}>
+                  Add fund
+                </IconButton2>
+              </StatHelpText>
             </Stat>
             <Stack spacing={6}>
               <Stat>
@@ -183,6 +223,105 @@ export default function VotePage() {
           </Box>
         </Stack>
       </Page>
+
+      <Drawer isOpen={isOpenConfirm} onClose={onCloseConfirm}>
+        <DrawerHeader>
+          <Flex
+            align="center"
+            justify="center"
+            bg="brandBlue.025"
+            h={12}
+            w={12}
+            rounded="xl"
+          >
+            <Icon name="send-out" size={6} color="blue.500" />
+          </Flex>
+          <Heading fontSize="lg" fontWeight={500} color="brandGray.500" mt={4}>
+            {t('Voting: confirm', {nsSeparator: '!'})}
+          </Heading>
+        </DrawerHeader>
+        <DrawerBody>
+          <FormControl>
+            <FormLabel>Transfer from</FormLabel>
+            <Input mb={2} />
+          </FormControl>
+          <FormControl>
+            <FormLabel>To address</FormLabel>
+            <Input mb={2} />
+          </FormControl>
+          <FormControl>
+            <FormLabel>Deposit, DNA</FormLabel>
+            <Input mb={2} />
+          </FormControl>
+          <PrimaryButton>{t('Send')}</PrimaryButton>
+        </DrawerBody>
+      </Drawer>
+
+      <Drawer isOpen={isOpenReject} onClose={onCloseReject}>
+        <DrawerHeader>
+          <Flex
+            align="center"
+            justify="center"
+            bg="red.012"
+            h={12}
+            w={12}
+            rounded="xl"
+          >
+            <Icon name="send-out" size={6} color="red.500" />
+          </Flex>
+          <Heading fontSize="lg" fontWeight={500} color="brandGray.500" mt={4}>
+            {t('Voting: reject', {nsSeparator: '!'})}
+          </Heading>
+        </DrawerHeader>
+        <DrawerBody>
+          <FormControl>
+            <FormLabel>Transfer from</FormLabel>
+            <Input />
+          </FormControl>
+          <FormControl>
+            <FormLabel>To address</FormLabel>
+            <Input />
+          </FormControl>
+          <FormControl>
+            <FormLabel>Deposit, DNA</FormLabel>
+            <Input />
+          </FormControl>
+          <PrimaryButton>{t('Send')}</PrimaryButton>
+        </DrawerBody>
+      </Drawer>
+
+      <Drawer isOpen={isOpenFund} onClose={onCloseFund}>
+        <DrawerHeader>
+          <Flex
+            align="center"
+            justify="center"
+            bg="blue.030"
+            h={12}
+            w={12}
+            rounded="xl"
+          >
+            <Icon name="send-out" size={6} color="blue.500" />
+          </Flex>
+          <Heading fontSize="lg" fontWeight={500} color="brandGray.500" mt={4}>
+            {t('Add fund', {nsSeparator: '!'})}
+          </Heading>
+        </DrawerHeader>
+        <DrawerBody>
+          <FormControl>
+            <FormLabel>Transfer from</FormLabel>
+            <Input />
+          </FormControl>
+          <FormControl>
+            <FormLabel>To address</FormLabel>
+            <Input />
+          </FormControl>
+          <FormControl>
+            <FormLabel>Deposit, DNA</FormLabel>
+            <Input />
+          </FormControl>
+          <PrimaryButton>{t('Send')}</PrimaryButton>
+        </DrawerBody>
+      </Drawer>
     </Layout>
   )
 }
