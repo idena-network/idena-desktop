@@ -36,6 +36,12 @@ import {
   IconButton2,
 } from '../../shared/components/button'
 import {toLocaleDna} from '../../shared/utils/utils'
+import {
+  OracleDrawerHeader,
+  OracleDrawerBody,
+  OracleFormHelper,
+  OracleFormControl,
+} from '../../screens/oracles/components'
 
 export default function VotePage() {
   const {t, i18n} = useTranslation()
@@ -178,10 +184,10 @@ export default function VotePage() {
                   <Text fontWeight={500}>Total prize</Text>
                 </Stack>
               </StatLabel>
-              <StatNumber fontSize="lg" fontWeight={500}>
+              <StatNumber fontSize={rem(16)} fontWeight={500}>
                 {toDna(100000)}
               </StatNumber>
-              <StatHelpText>
+              <StatHelpText mt={1}>
                 <IconButton2 icon="add-fund" onClick={onOpenFund}>
                   Add fund
                 </IconButton2>
@@ -192,7 +198,7 @@ export default function VotePage() {
                 <StatLabel color="muted" fontSize="md">
                   Deposit
                 </StatLabel>
-                <StatNumber fontSize="lg" fontWeight={500}>
+                <StatNumber fontSize={rem(16)} fontWeight={500}>
                   {toDna(240)}
                 </StatNumber>
               </Stat>
@@ -200,7 +206,7 @@ export default function VotePage() {
                 <StatLabel color="muted" fontSize="md">
                   Your reward
                 </StatLabel>
-                <StatNumber fontSize="lg" fontWeight={500}>
+                <StatNumber fontSize={rem(16)} fontWeight={500}>
                   {toDna(5000)}
                 </StatNumber>
               </Stat>
@@ -208,7 +214,7 @@ export default function VotePage() {
                 <StatLabel color="muted" fontSize="md">
                   Quorum required
                 </StatLabel>
-                <StatNumber fontSize="lg" fontWeight={500}>
+                <StatNumber fontSize={rem(16)} fontWeight={500}>
                   20 votes
                 </StatNumber>
               </Stat>
@@ -216,7 +222,7 @@ export default function VotePage() {
                 <StatLabel color="muted" fontSize="md">
                   Deadline
                 </StatLabel>
-                <StatNumber fontSize="lg" fontWeight={500}>
+                <StatNumber fontSize={rem(16)} fontWeight={500}>
                   {dayjs().format('D.MM.YYYY')}
                 </StatNumber>
               </Stat>
@@ -226,136 +232,71 @@ export default function VotePage() {
       </Page>
 
       <Drawer isOpen={isOpenConfirm} onClose={onCloseConfirm}>
-        <DrawerHeader mb={8}>
-          <Flex
-            align="center"
-            justify="center"
-            bg="blue.012"
-            h={12}
-            w={12}
-            rounded="xl"
-          >
-            <Icon name="send-out" w={6} h={6} color="blue.500" />
-          </Flex>
-          <Heading
-            color="brandGray.500"
-            fontSize="lg"
-            fontWeight={500}
-            lineHeight="base"
-            mt={4}
-          >
-            {t('Voting: confirm', {nsSeparator: '!'})}
-          </Heading>
-        </DrawerHeader>
-        <DrawerBody>
-          <Stack spacing={5}>
-            <FormControl>
-              <FormLabel mb={2}>Transfer from</FormLabel>
-              <Input />
-              <Flex justify="space-between">
-                <FormHelperText color="muted" fontSize="md">
-                  Available
-                </FormHelperText>
-                <FormHelperText color="muted" fontSize="md">
-                  {toDna(80200)}
-                </FormHelperText>
-              </Flex>
-            </FormControl>
-            <FormControl>
-              <FormLabel mb={2}>To address</FormLabel>
-              <Input isDisabled value="0x5A3abB61A9c5475B8243B61A9c5475B82" />
-            </FormControl>
-            <FormControl>
-              <FormLabel mb={2}>Deposit, DNA</FormLabel>
-              <Input isDisabled value={240} />
-              <Flex justify="space-between">
-                <FormHelperText color="muted" fontSize="md">
-                  Fee
-                </FormHelperText>
-                <FormHelperText color="muted" fontSize="md">
-                  {toDna(0.01)}
-                </FormHelperText>
-              </Flex>
-              <Flex justify="space-between">
-                <FormHelperText color="muted" fontSize="md">
-                  Total amount
-                </FormHelperText>
-                <FormHelperText color="muted" fontSize="md">
-                  {toDna(240.01)}
-                </FormHelperText>
-              </Flex>
-            </FormControl>
-            <PrimaryButton mt={3} ml="auto">
-              {t('Send')}
-            </PrimaryButton>
-          </Stack>
-        </DrawerBody>
+        <OracleDrawerHeader icon="send-out">
+          {t('Voting: confirm', {nsSeparator: '!'})}
+        </OracleDrawerHeader>
+        <OracleDrawerBody>
+          <OracleFormControl label={t('Transfer from')}>
+            <Input />
+            <OracleFormHelper label={t('Available')} value={toDna(80200)} />
+          </OracleFormControl>
+          <OracleFormControl label="To address">
+            <Input isDisabled value="0x5A3abB61A9c5475B8243B61A9c5475B82" />
+          </OracleFormControl>
+          <OracleFormControl label={t('Deposit, DNA')}>
+            <Input isDisabled value={240} />
+            <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
+            <OracleFormHelper label={t('Total amount')} value={toDna(240.01)} />
+          </OracleFormControl>
+          <PrimaryButton mt={3} ml="auto">
+            {t('Send')}
+          </PrimaryButton>
+        </OracleDrawerBody>
       </Drawer>
 
       <Drawer isOpen={isOpenReject} onClose={onCloseReject}>
-        <DrawerHeader>
-          <Flex
-            align="center"
-            justify="center"
-            bg="red.012"
-            h={12}
-            w={12}
-            rounded="xl"
-          >
-            <Icon name="send-out" size={6} color="red.500" />
-          </Flex>
-          <Heading fontSize="lg" fontWeight={500} color="brandGray.500" mt={4}>
-            {t('Voting: reject', {nsSeparator: '!'})}
-          </Heading>
-        </DrawerHeader>
-        <DrawerBody>
-          <FormControl>
-            <FormLabel>Transfer from</FormLabel>
+        <OracleDrawerHeader icon="send-out" variantColor="red">
+          {t('Voting: reject', {nsSeparator: '!'})}
+        </OracleDrawerHeader>
+        <OracleDrawerBody>
+          <OracleFormControl label={t('Transfer from')}>
             <Input />
-          </FormControl>
-          <FormControl>
-            <FormLabel>To address</FormLabel>
-            <Input />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Deposit, DNA</FormLabel>
-            <Input />
-          </FormControl>
-          <PrimaryButton>{t('Send')}</PrimaryButton>
-        </DrawerBody>
+          </OracleFormControl>
+          <OracleFormControl label="To address">
+            <Input isDisabled value="0x5A3abB61A9c5475B8243B61A9c5475B82" />
+          </OracleFormControl>
+          <OracleFormControl label={t('Deposit, DNA')}>
+            <Input isDisabled value={240} />
+            <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
+            <OracleFormHelper label={t('Total amount')} value={toDna(240.01)} />
+          </OracleFormControl>
+          <PrimaryButton mt={3} ml="auto">
+            {t('Send')}
+          </PrimaryButton>
+        </OracleDrawerBody>
       </Drawer>
 
       <Drawer isOpen={isOpenFund} onClose={onCloseFund}>
-        <DrawerHeader>
-          <Flex
-            align="center"
-            justify="center"
-            bg="blue.030"
-            h={12}
-            w={12}
-            rounded="xl"
-          >
-            <Icon name="send-out" size={6} color="blue.500" />
-          </Flex>
-          <Heading fontSize="lg" fontWeight={500} color="brandGray.500" mt={4}>
-            {t('Add fund', {nsSeparator: '!'})}
-          </Heading>
-        </DrawerHeader>
-        <DrawerBody>
-          <FormControl>
-            <FormLabel>Transfer from</FormLabel>
+        <OracleDrawerHeader icon="add-fund">
+          {t('Add fund', {nsSeparator: '!'})}
+        </OracleDrawerHeader>
+        <OracleDrawerBody>
+          <OracleFormControl label={t('Transfer from')}>
             <Input />
-          </FormControl>
-          <FormControl>
-            <FormLabel>To address</FormLabel>
-            <Input />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Deposit, DNA</FormLabel>
-            <Input />
-          </FormControl>
-          <PrimaryButton>{t('Send')}</PrimaryButton>
-        </DrawerBody>
+            <OracleFormHelper label={t('Available')} value={toDna(80200)} />
+          </OracleFormControl>
+          <OracleFormControl label="To address">
+            <Input isDisabled value="0x5A3abB61A9c5475B8243B61A9c5475B82" />
+          </OracleFormControl>
+          <OracleFormControl label={t('Deposit, DNA')}>
+            <Input isDisabled value={240} />
+            <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
+            <OracleFormHelper label={t('Total amount')} value={toDna(240.01)} />
+          </OracleFormControl>
+          <PrimaryButton mt={3} ml="auto">
+            {t('Send')}
+          </PrimaryButton>
+        </OracleDrawerBody>
       </Drawer>
     </Layout>
   )
