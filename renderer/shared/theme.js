@@ -122,6 +122,7 @@ export const uiTheme = {
     black: '#16161D',
     blue: {
       ...chakraTheme.colors.blue,
+      '012': 'rgb(87 143 255 /0.12)',
       '030': 'rgb(87 143 255 /0.3)',
       200: '#578fff',
       300: 'rgba(87, 143, 255, .12)',
