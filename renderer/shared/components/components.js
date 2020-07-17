@@ -77,6 +77,9 @@ export function Input(props) {
       lineHeight="short"
       px={3}
       h={8}
+      _disabled={{
+        bg: 'gray.50',
+      }}
       _placeholder={{
         color: 'muted',
       }}

@@ -15,6 +15,7 @@ import {
   FormControl,
   useDisclosure,
   StatHelpText,
+  FormHelperText,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -225,35 +226,69 @@ export default function VotePage() {
       </Page>
 
       <Drawer isOpen={isOpenConfirm} onClose={onCloseConfirm}>
-        <DrawerHeader>
+        <DrawerHeader mb={8}>
           <Flex
             align="center"
             justify="center"
-            bg="brandBlue.025"
+            bg="blue.012"
             h={12}
             w={12}
             rounded="xl"
           >
-            <Icon name="send-out" size={6} color="blue.500" />
+            <Icon name="send-out" w={6} h={6} color="blue.500" />
           </Flex>
-          <Heading fontSize="lg" fontWeight={500} color="brandGray.500" mt={4}>
+          <Heading
+            color="brandGray.500"
+            fontSize="lg"
+            fontWeight={500}
+            lineHeight="base"
+            mt={4}
+          >
             {t('Voting: confirm', {nsSeparator: '!'})}
           </Heading>
         </DrawerHeader>
         <DrawerBody>
-          <FormControl>
-            <FormLabel>Transfer from</FormLabel>
-            <Input mb={2} />
-          </FormControl>
-          <FormControl>
-            <FormLabel>To address</FormLabel>
-            <Input mb={2} />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Deposit, DNA</FormLabel>
-            <Input mb={2} />
-          </FormControl>
-          <PrimaryButton>{t('Send')}</PrimaryButton>
+          <Stack spacing={5}>
+            <FormControl>
+              <FormLabel mb={2}>Transfer from</FormLabel>
+              <Input />
+              <Flex justify="space-between">
+                <FormHelperText color="muted" fontSize="md">
+                  Available
+                </FormHelperText>
+                <FormHelperText color="muted" fontSize="md">
+                  {toDna(80200)}
+                </FormHelperText>
+              </Flex>
+            </FormControl>
+            <FormControl>
+              <FormLabel mb={2}>To address</FormLabel>
+              <Input isDisabled value="0x5A3abB61A9c5475B8243B61A9c5475B82" />
+            </FormControl>
+            <FormControl>
+              <FormLabel mb={2}>Deposit, DNA</FormLabel>
+              <Input isDisabled value={240} />
+              <Flex justify="space-between">
+                <FormHelperText color="muted" fontSize="md">
+                  Fee
+                </FormHelperText>
+                <FormHelperText color="muted" fontSize="md">
+                  {toDna(0.01)}
+                </FormHelperText>
+              </Flex>
+              <Flex justify="space-between">
+                <FormHelperText color="muted" fontSize="md">
+                  Total amount
+                </FormHelperText>
+                <FormHelperText color="muted" fontSize="md">
+                  {toDna(240.01)}
+                </FormHelperText>
+              </Flex>
+            </FormControl>
+            <PrimaryButton mt={3} ml="auto">
+              {t('Send')}
+            </PrimaryButton>
+          </Stack>
         </DrawerBody>
       </Drawer>
 
