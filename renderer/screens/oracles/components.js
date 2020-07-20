@@ -9,11 +9,7 @@ import {
   FormLabel,
   FormHelperText,
 } from '@chakra-ui/core'
-import {
-  DrawerHeader,
-  DrawerBody,
-  Input,
-} from '../../shared/components/components'
+import {DrawerHeader, DrawerBody} from '../../shared/components/components'
 
 export function OracleDrawerHeader({
   icon,

@@ -12,23 +12,14 @@ import {
   Stat,
   StatNumber,
   StatLabel,
-  FormControl,
   useDisclosure,
   StatHelpText,
-  FormHelperText,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import Layout from '../../shared/components/layout'
 import {Page} from '../../screens/app/components'
-import {
-  Avatar,
-  Drawer,
-  DrawerHeader,
-  DrawerBody,
-  Input,
-  FormLabel,
-} from '../../shared/components/components'
+import {Avatar, Drawer, Input} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
   PrimaryButton,
@@ -75,7 +66,6 @@ export default function VotePage() {
               <Badge
                 bg="green.020"
                 borderRadius="xl"
-                // fontSize="sm"
                 textTransform="initial"
                 color="green.500"
                 px={3}
