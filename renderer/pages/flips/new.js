@@ -1,6 +1,6 @@
 import React from 'react'
 import {useRouter} from 'next/router'
-import {Box, Flex, useToast, Code, Divider} from '@chakra-ui/core'
+import {Box, Flex, useToast, Divider} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page} from '../../screens/app/components'
@@ -40,7 +40,8 @@ import {
   SecondaryButton,
   PrimaryButton,
 } from '../../shared/components/button'
-import {Toast} from '../../shared/components/components'
+import {Toast, FloatDebug} from '../../shared/components/components'
+import {rem} from '../../shared/theme'
 
 export default function NewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -131,7 +132,7 @@ export default function NewFlipPage() {
           flex={1}
           alignSelf="stretch"
           px={20}
-          pb="36px"
+          pb={rem(36)}
           overflowY="auto"
         >
           <FlipPageTitle
@@ -321,11 +322,7 @@ export default function NewFlipPage() {
           )}
         </FlipMasterFooter>
       </Page>
-      {global.isDev && (
-        <Box position="absolute" left={6} bottom={6} zIndex="modal">
-          <Code>{JSON.stringify(current.value)}</Code>
-        </Box>
-      )}
+      {global.isDev && <FloatDebug>{JSON.stringify(current.value)}</FloatDebug>}
     </Layout>
   )
 }
