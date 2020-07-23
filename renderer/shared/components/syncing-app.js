@@ -72,11 +72,13 @@ export default function SyncingApp() {
 }
 
 function SyncingIdentity() {
-  const {currentBlock, highestBlock, wrongTime} = useChainState()
+  const {currentBlock, highestBlock, genesisBlock, wrongTime} = useChainState()
   const {address} = useIdentityState()
   const [{result: peers}] = usePoll(useRpc('net_peers'), 1000)
 
   const {t} = useTranslation()
+
+  const startingBlock = genesisBlock || 0
 
   return (
     <section>
@@ -91,10 +93,15 @@ function SyncingIdentity() {
         <h2>{t('Synchronizing blocks')}</h2>
         <div>
           <h3>
+            {t('{{numBlocks}} blocks left', {
+              numBlocks: highestBlock - currentBlock,
+            })}{' '}
+            (
             {t('{{currentBlock}} out of {{highestBlock}}', {
               currentBlock,
               highestBlock: highestBlock || '...',
             })}
+            )
           </h3>
           <div>
             <span>{t('Peers connected')}:</span> {(peers || []).length}
@@ -102,7 +109,7 @@ function SyncingIdentity() {
         </div>
         <Progress
           value={currentBlock}
-          min={0}
+          min={startingBlock}
           max={highestBlock}
           rounded="2px"
           bg="xblack.016"
