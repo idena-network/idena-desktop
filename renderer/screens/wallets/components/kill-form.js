@@ -67,7 +67,7 @@ function KillForm({onSuccess, onFail}) {
           const to = e.target.elements.to.value
 
           if (to !== address)
-            throw new Error(t('Identity address must be specified'))
+            throw new Error(t('You must specify your own identity address'))
 
           setSubmitting(true)
 
@@ -121,9 +121,14 @@ function KillForm({onSuccess, onFail}) {
         />
       </FormControl>
 
+      <Text fontSize="md" mb={6}>
+        {t(
+          'Please enter your identity address to confirm termination. Stake will be transferred to the identity address.'
+        )}
+      </Text>
       <FormControl>
-        <FormLabel htmlFor="to">{t('To address')}</FormLabel>
-        <Input id="to" placeholder={t('To address')} />
+        <FormLabel htmlFor="to">{t('Address')}</FormLabel>
+        <Input id="to" placeholder={t('Your identity address')} />
       </FormControl>
 
       <PrimaryButton
