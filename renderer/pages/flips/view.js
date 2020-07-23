@@ -132,6 +132,7 @@ export default function ViewFlipPage() {
                         showTranslation={showTranslation}
                         locale={i18n.language}
                         isInline={false}
+                        onSwitchLocale={() => send('SWITCH_LOCALE')}
                       />
                     ) : (
                       <FlipKeyword>
