@@ -51,7 +51,7 @@ function KillForm({onSuccess, onFail}) {
 
   const toast = useToast()
 
-  const {stake} = useIdentityState()
+  const {address, stake} = useIdentityState()
   const {killMe} = useIdentityDispatch()
 
   const [submitting, setSubmitting] = React.useState(false)
@@ -62,10 +62,16 @@ function KillForm({onSuccess, onFail}) {
       spacing={6}
       onSubmit={async e => {
         e.preventDefault()
+
         try {
+          const to = e.target.elements.to.value
+
+          if (to !== address)
+            throw new Error(t('Identity address must be specified'))
+
           setSubmitting(true)
 
-          const {result, error} = await killMe({to: e.target.elements.to.value})
+          const {result, error} = await killMe({to})
 
           setSubmitting(false)
 
@@ -94,8 +100,7 @@ function KillForm({onSuccess, onFail}) {
             // eslint-disable-next-line react/display-name
             render: () => (
               <Toast
-                title={t('error:Something went wrong')}
-                description={error.message}
+                title={error?.message ?? t('error:Something went wrong')}
                 status="error"
               />
             ),
