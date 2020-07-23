@@ -1,7 +1,6 @@
 import React from 'react'
 import {Stack, Box, Text, Icon, useDisclosure, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import dayjs from 'dayjs'
 import {
   useIdentityState,
   mapToFriendlyStatus,
@@ -168,9 +167,7 @@ export default function ProfilePage() {
                 {epoch && (
                   <SimpleUserStat
                     label={t('Next validation')}
-                    value={dayjs(epoch.nextValidation).format(
-                      'DD.MM.YYYY, HH:mm'
-                    )}
+                    value={new Date(epoch.nextValidation).toLocaleString()}
                   />
                 )}
 
