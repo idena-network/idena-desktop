@@ -93,7 +93,7 @@ function SyncingIdentity() {
           <h3>
             {t('{{currentBlock}} out of {{highestBlock}}', {
               currentBlock,
-              highestBlock,
+              highestBlock: highestBlock || '...',
             })}
           </h3>
           <div>
@@ -102,6 +102,7 @@ function SyncingIdentity() {
         </div>
         <Progress
           value={currentBlock}
+          min={0}
           max={highestBlock}
           rounded="2px"
           bg="xblack.016"
