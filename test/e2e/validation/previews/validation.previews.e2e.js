@@ -61,15 +61,10 @@ test('check preview states changing', async t => {
 
   // all flips should be shown
   const longThumbnails = ReactSelector('Thumbnails Thumbnail')
-  await t.expect(longThumbnails.count).eql(10)
+  await t.expect(longThumbnails.count).eql(7)
 
   for (let i = 0; i < 7; i += 1) {
     const thumb = longThumbnails.nth(i)
     await t.expect(thumb.findReact('FlipImage').exists).ok()
-  }
-
-  for (let i = 8; i < 11; i += 1) {
-    const thumb = longThumbnails.nth(i)
-    await t.expect(thumb.findReact('FlipImage').exists).notOk()
   }
 })
