@@ -33,7 +33,6 @@ import {
 } from '@chakra-ui/core'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
-import dayjs from 'dayjs'
 import {transparentize} from 'polished'
 import {useService} from '@xstate/react'
 import FlipEditor from './components/flip-editor'
@@ -126,7 +125,7 @@ export function FlipCard({flipService, onDelete}) {
               : t('Missing keywords')}
           </FlipCardTitle>
           <FlipCardSubtitle>
-            {dayjs(createdAt).format('D.MM.YYYY, H:mm')}
+            {new Date(createdAt).toLocaleString()}
           </FlipCardSubtitle>
         </Box>
         {isActionable && (
