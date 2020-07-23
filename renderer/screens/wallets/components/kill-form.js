@@ -51,7 +51,7 @@ function KillForm({onSuccess, onFail}) {
 
   const toast = useToast()
 
-  const {stake} = useIdentityState()
+  const {address, stake} = useIdentityState()
   const {killMe} = useIdentityDispatch()
 
   const [submitting, setSubmitting] = React.useState(false)
@@ -62,10 +62,16 @@ function KillForm({onSuccess, onFail}) {
       spacing={6}
       onSubmit={async e => {
         e.preventDefault()
+
         try {
+          const to = e.target.elements.to.value
+
+          if (to !== address)
+            throw new Error(t('You must specify your own identity address'))
+
           setSubmitting(true)
 
-          const {result, error} = await killMe({to: e.target.elements.to.value})
+          const {result, error} = await killMe({to})
 
           setSubmitting(false)
 
@@ -94,8 +100,7 @@ function KillForm({onSuccess, onFail}) {
             // eslint-disable-next-line react/display-name
             render: () => (
               <Toast
-                title={t('error:Something went wrong')}
-                description={error.message}
+                title={error?.message ?? t('error:Something went wrong')}
                 status="error"
               />
             ),
@@ -116,9 +121,14 @@ function KillForm({onSuccess, onFail}) {
         />
       </FormControl>
 
+      <Text fontSize="md" mb={6}>
+        {t(
+          'Please enter your identity address to confirm termination. Stake will be transferred to the identity address.'
+        )}
+      </Text>
       <FormControl>
-        <FormLabel htmlFor="to">{t('To address')}</FormLabel>
-        <Input id="to" placeholder={t('To address')} />
+        <FormLabel htmlFor="to">{t('Address')}</FormLabel>
+        <Input id="to" placeholder={t('Your identity address')} />
       </FormControl>
 
       <PrimaryButton
