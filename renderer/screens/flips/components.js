@@ -126,7 +126,7 @@ export function FlipCard({flipService, onDelete}) {
               : t('Missing keywords')}
           </FlipCardTitle>
           <FlipCardSubtitle>
-            {dayjs(createdAt).format('D.MM.YYYY, H:mm')}
+            {dayjs(createdAt).format('DD.MM.YYYY, HH:mm')}
           </FlipCardSubtitle>
         </Box>
         {isActionable && (

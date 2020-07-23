@@ -168,7 +168,9 @@ export default function ProfilePage() {
                 {epoch && (
                   <SimpleUserStat
                     label={t('Next validation')}
-                    value={dayjs(epoch.nextValidation).toString()}
+                    value={dayjs(epoch.nextValidation).format(
+                      'DD.MM.YYYY, HH:mm'
+                    )}
                   />
                 )}
 

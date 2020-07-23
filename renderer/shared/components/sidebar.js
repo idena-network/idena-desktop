@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 import {useTranslation} from 'react-i18next'
+import dayjs from 'dayjs'
 import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
@@ -283,7 +284,7 @@ function ActionPanel() {
       </Block>
       {currentPeriod === EpochPeriod.None && (
         <Block title={t('Next validation')}>
-          {new Date(nextValidation).toLocaleString()}
+          {dayjs(nextValidation).format('DD.MM.YYYY, HH:mm')}
         </Block>
       )}
     </Box>
