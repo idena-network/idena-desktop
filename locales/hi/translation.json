@@ -319,5 +319,8 @@
   "Run the built-in node": "Run the built-in node",
   "Idena Node is starting...": "Idena Node is starting...",
   "Your built-in node is failed": "Your built-in node is failed",
-  "Restart built-in node": "Restart built-in node"
+  "Restart built-in node": "Restart built-in node",
+  "You must specify your own identity address": "You must specify your own identity address",
+  "Please enter your identity address to confirm termination. Stake will be transferred to the identity address.": "Please enter your identity address to confirm termination. Stake will be transferred to the identity address.",
+  "Your identity address": "Your identity address"
 }
