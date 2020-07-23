@@ -11,6 +11,8 @@ import {
   Text,
   Box,
   Flex,
+  Textarea,
+  Button,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -146,6 +148,8 @@ export function ActivateInviteForm() {
 
   const {canActivateInvite, state: status} = useIdentityState()
 
+  const [code, setCode] = React.useState()
+
   if (!canActivateInvite) {
     return null
   }
@@ -157,9 +161,8 @@ export function ActivateInviteForm() {
       as="form"
       onSubmit={async e => {
         e.preventDefault()
-
         try {
-          await activateInvite(e.target.elements.code.value)
+          await activateInvite(code)
         } catch ({message}) {
           addError({
             title: message,
@@ -167,23 +170,58 @@ export function ActivateInviteForm() {
         }
       }}
     >
-      <Stack isInline spacing={2} align="flex-end">
-        <FormControl justifySelf="stretch" flex={1}>
-          <FormLabel htmlFor="code">{t('Invitation code')}</FormLabel>
-          <Input
-            id="code"
-            isDisabled={mining || status === IdentityStatus.Invite}
-            placeholder={
-              status === IdentityStatus.Invite &&
-              'Click the button to activate invitation'
-            }
-            _disabled={{
-              bg: 'gray.50',
-            }}
-          />
+      <Stack spacing={6}>
+        <FormControl>
+          <Stack spacing={2}>
+            <Flex justify="space-between" align="center">
+              <FormLabel htmlFor="code" color="muted">
+                {t('Invitation code')}
+              </FormLabel>
+              <Button
+                variant="ghost"
+                isDisabled={mining || status === IdentityStatus.Invite}
+                bg="unset"
+                color="muted"
+                h="unset"
+                p={0}
+                _hover={{bg: 'unset'}}
+                _active={{bg: 'unset'}}
+                _focus={{boxShadow: 'none'}}
+                onClick={() => setCode(global.clipboard.readText())}
+              >
+                {t('Paste')}
+              </Button>
+            </Flex>
+            <Textarea
+              id="code"
+              value={code}
+              borderColor="gray.300"
+              px={3}
+              pt="3/2"
+              pb={2}
+              isDisabled={mining || status === IdentityStatus.Invite}
+              minH={rem(50)}
+              placeholder={
+                status === IdentityStatus.Invite &&
+                'Click the button to activate invitation'
+              }
+              _disabled={{
+                bg: 'gray.50',
+              }}
+              _placeholder={{
+                color: 'muted',
+              }}
+              onChange={e => setCode(e.target.value)}
+            />
+          </Stack>
         </FormControl>
-        <PrimaryButton isDisabled={mining} type="submit">
-          {mining ? t('Mining...') : t('Activate invite')}
+        <PrimaryButton
+          isLoading={mining}
+          loadingText={t('Mining...')}
+          type="submit"
+          ml="auto"
+        >
+          {t('Activate invite')}
         </PrimaryButton>
       </Stack>
     </Box>
