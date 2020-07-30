@@ -4,10 +4,12 @@ import PropTypes from 'prop-types'
 import QRCode from 'qrcode.react'
 import {useTranslation} from 'react-i18next'
 import theme, {rem} from '../../../shared/theme'
+import {useColorMode} from '@chakra-ui/core'
 import {Box, SubHeading, FormGroup, Field} from '../../../shared/components'
 
 function ReceiveForm({address}) {
   const {t} = useTranslation()
+  const {colorMode} = useColorMode()
   return (
     <Box
       css={padding(rem(theme.spacings.large48), rem(theme.spacings.medium32))}
@@ -19,6 +21,7 @@ function ReceiveForm({address}) {
       >
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
+          color={theme.colors[colorMode].text}
         >
           {t(`Receive DNA’s`)}
         </SubHeading>

@@ -11,6 +11,7 @@ import {
   Text,
   Box,
   Flex,
+  useColorMode,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -77,8 +78,9 @@ export function UserInlineCard({address, state}) {
 }
 
 export function UserStatList(props) {
+  const {colorMode} = useColorMode();
   return (
-    <Stack spacing={4} bg="gray.50" px={10} py={8} rounded="lg" {...props} />
+      <Stack spacing={4} bg={colorMode === "light" ? "gray.50" : "gray.800"} px={10} py={8} rounded="lg" {...props} />
   )
 }
 
@@ -192,6 +194,7 @@ export function ActivateInviteForm() {
 
 export function SpoilInviteDrawer({children, ...props}) {
   const {t} = useTranslation()
+  const {colorMode} = useColorMode()
   return (
     <Drawer {...props}>
       <DrawerHeader mb={6}>
@@ -199,7 +202,7 @@ export function SpoilInviteDrawer({children, ...props}) {
         <Heading
           fontSize="lg"
           fontWeight={500}
-          color="brandGray.500"
+          color={'brand.' + colorMode + '.gray'}
           mt={4}
           mb={0}
           textAlign="center"
@@ -250,6 +253,7 @@ export function MinerStatusSwitcher() {
   const {t} = useTranslation()
 
   const {colors} = useTheme()
+  const {colorMode} = useColorMode()
 
   const initialRef = React.useRef()
 
@@ -361,9 +365,9 @@ export function MinerStatusSwitcher() {
         </div>
         <style jsx>{`
           .form-control {
-            border: solid 1px ${colors.gray[300]};
+            border: solid 1px ${colorMode === "light" ? colors.gray[300] : colors.gray[600]};
             color: ${colors.brandGray[500]};
-            background: ${colors.white};
+            background: ${colorMode === "light" ? colors.white : colors.black};
             border-radius: 6px;
             font-size: 1em;
             padding: 0.5em 1em 0.65em;

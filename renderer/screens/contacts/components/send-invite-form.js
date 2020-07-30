@@ -13,6 +13,7 @@ import {
   useDisclosure,
   Icon,
   Text,
+  useColorMode,
 } from '@chakra-ui/core'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
 import {
@@ -35,7 +36,6 @@ export function SendInviteDrawer({children, ...props}) {
         <Heading
           fontSize="lg"
           fontWeight={500}
-          color="brandGray.500"
           mt={4}
           mb={0}
           textAlign="center"
@@ -94,6 +94,8 @@ export function SendInviteForm({onSuccess, onFail}) {
             // eslint-disable-next-line react/display-name
             render: () => (
               <Toast
+                bg={colorMode === "light" ? "white" : "black"}
+                color={"brand." + colorMode + ".gray"}
                 title={t('Invitation code created')}
                 description={invite.hash}
               />
@@ -107,6 +109,8 @@ export function SendInviteForm({onSuccess, onFail}) {
             // eslint-disable-next-line react/display-name
             render: () => (
               <Toast
+                bg={colorMode === "light" ? "white" : "black"}
+                color={"brand." + colorMode + ".gray"}
                 title={error?.message ?? t('Something went wrong')}
                 status="error"
               />
@@ -129,7 +133,6 @@ export function SendInviteForm({onSuccess, onFail}) {
       <Box>
         <Button
           background="transparent"
-          color="brandGray.500"
           px={0}
           _hover={{background: 'transparent'}}
           _active={{background: 'transparent'}}

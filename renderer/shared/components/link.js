@@ -68,7 +68,7 @@ export function IconLink({href, icon, children, ...props}) {
         px={2}
         py="3/2"
         _hover={{
-          bg: 'blue.50',
+          bg: 'blue.300',
         }}
         {...props}
       >

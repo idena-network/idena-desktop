@@ -2,7 +2,7 @@ import React from 'react'
 import {margin} from 'polished'
 import QRCode from 'qrcode.react'
 import {useTranslation} from 'react-i18next'
-import {Flex as ChakraFlex, Text} from '@chakra-ui/core'
+import {Flex as ChakraFlex, Text, useColorMode} from '@chakra-ui/core'
 import {
   Box,
   SubHeading,
@@ -40,6 +40,7 @@ function Settings() {
   const {t} = useTranslation()
   const {addNotification} = useNotificationDispatch()
   const {runInternalNode, useExternalNode} = useSettingsState()
+  const {colorMode} = useColorMode()
   return (
     <SettingsLayout>
       {global.isDev && (
@@ -89,9 +90,10 @@ function Settings() {
 
 // eslint-disable-next-line react/prop-types
 function Section({title, children}) {
+  const {colorMode} = useColorMode()
   return (
     <Box my={rem(theme.spacings.medium32)}>
-      <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
+      <SubHeading color={theme.colors[colorMode].text} css={margin(0, 0, theme.spacings.small, 0)}>
         {title}
       </SubHeading>
       <Box my={rem(theme.spacings.small8)}>{children}</Box>

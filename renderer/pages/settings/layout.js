@@ -5,17 +5,19 @@ import {useTranslation} from 'react-i18next'
 import Layout from '../../shared/components/layout'
 import {Box, PageTitle} from '../../shared/components'
 import theme from '../../shared/theme'
+import {useColorMode} from '@chakra-ui/core'
 import {FlipFilter, FlipFilterOption} from '../../screens/flips/components'
 
 function SettingsLayout({children}) {
   const router = useRouter()
   const {t} = useTranslation()
+  const {colorMode} = useColorMode()
 
   return (
     <Layout skipHardForkScreen>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
         <Box>
-          <PageTitle>{t('Settings')}</PageTitle>
+          <PageTitle color={theme.colors[colorMode].text}>{t('Settings')}</PageTitle>
           {/* TODO: make it shared <Pill /> or <Tab /> component */}
           <FlipFilter value={router.pathname} onChange={router.push}>
             <FlipFilterOption value="/settings">

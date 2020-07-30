@@ -3,9 +3,11 @@ import PropTypes from 'prop-types'
 import {useTranslation} from 'react-i18next'
 import {Box, Text, SubHeading} from '../../../shared/components'
 import theme, {rem} from '../../../shared/theme'
+import {useColorMode} from '@chakra-ui/core'
 
 function TotalAmount({amount, percentChanges, amountChanges}) {
   const {t} = useTranslation()
+  const {colorMode} = useColorMode()
   return (
     <Box>
       <Box>
@@ -23,6 +25,7 @@ function TotalAmount({amount, percentChanges, amountChanges}) {
             .value {
               font-weight: 500;
               line-height: 1.4;
+              color: ${theme.colors[colorMode].text};
             }
             .changes {
               font-weight: 500;

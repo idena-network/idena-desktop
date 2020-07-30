@@ -12,6 +12,7 @@ import {
   IconButton as ChakraIconButton,
   Divider,
   Icon,
+  useColorMode,
 } from '@chakra-ui/core'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
@@ -72,6 +73,7 @@ const BLANK_IMAGE =
 
 function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   const {t} = useTranslation()
+  const {colorMode} = useColorMode()
 
   // Button menu
   const [isInsertImageMenuOpen, setInsertImageMenuOpen] = useState(false)
@@ -924,7 +926,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   onClick={() => setShowColorPicker(!showColorPicker)}
                 />
 
-                <Divider borderColor="gray.300" w={6} />
+                <Divider borderColor={colorMode === "light" ? "gray.300" : "gray.700"} w={6} />
               </>
             )}
 
@@ -953,11 +955,12 @@ FlipEditor.propTypes = {
 
 // eslint-disable-next-line react/prop-types
 function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
+  const {colorMode} = useColorMode()
   const icon = (
     <ChakraIconButton
       aria-label={tooltip}
       isDisabled={isDisabled}
-      bg={isActive ? 'gray.50' : 'unset'}
+      bg={isActive ? colorMode === "light" ? 'gray.50' : 'gray.800' : 'unset'}
       color={isActive ? 'brandBlue.500' : 'unset'}
       fontSize={rem(20)}
       size={6}

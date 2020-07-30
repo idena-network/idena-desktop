@@ -12,6 +12,8 @@ const colors = {
   gray3: 'rgba(83, 86, 92, 0.3)',
   gray4: 'rgb(210, 212, 217)',
   gray5: rgb(64, 64, 64),
+  gray6: 'rgb(74, 85, 104)',
+  gray7: 'rgb(26, 32, 44)',
   white: 'rgb(255, 255, 255)',
   white05: 'rgba(255, 255, 255, 0.5)',
   white01: 'rgba(255, 255, 255, 0.1)',
@@ -26,6 +28,20 @@ const colors = {
   black: 'rgb(17,17,17)',
   black0: 'rgb(0,0,0)',
   darkGraphite: 'rgb(69 72 77)',
+  dark: {
+    text: 'rgb(226, 232, 240)',
+    primary2: 'rgb(33, 36, 42)',
+    gray: 'rgb(26, 32, 44)',
+    gray2: 'rgb(45, 55, 72)',
+    gray4: 'rgb(45, 55, 72)',
+  },
+  light: {
+    text: 'rgb(83, 86, 92)',
+    primary2: 'rgb(83, 86, 92)',
+    gray: 'rgb(245, 246, 247)',
+    gray2: 'rgb(232, 234, 237)',
+    gray4: 'rgb(210, 212, 217)',
+  }
 }
 
 const baseFontSize = 16
@@ -162,7 +178,12 @@ export const uiTheme = {
     },
     muted: 'rgb(150, 153, 158)',
     brand: {
-      gray: 'rgb(83, 86, 92)',
+      light: {
+        gray: 'rgb(83, 86, 92)',
+      },
+      dark: {
+        gray: 'rgb(226, 232, 240)',
+      },
       blue: 'rgb(87, 143, 255)',
     },
     brandGray: {
@@ -459,17 +480,10 @@ export const uiTheme = {
       path: (
         <g fill="none" fillRule="evenodd">
           <path
-            fill="#FFF"
-            d="M0 0H1080V700H0z"
-            transform="translate(-626 -570)"
+            fill="currentColor"
+            transform="translate(-626 -570) translate(626 570)"
+            d="M11 2v2H4.5c-.276 0-.5.224-.5.5v8.944l6.99-3.883c.625-.347 1.387-.334 2.001.033L16 11.4V9h2v6.5c0 1.378-1.122 2.5-2.5 2.5h-11C3.122 18 2 16.878 2 15.5v-11C2 3.122 3.122 2 4.5 2H11zM7 5.5c.829 0 1.5.671 1.5 1.5S7.829 8.5 7 8.5 5.5 7.829 5.5 7 6.171 5.5 7 5.5zM17 1v2h2v2h-2v2h-2V5h-2V3h2V1h2z"
           />
-          <g>
-            <path
-              fill="currentColor"
-              d="M11 2v2H4.5c-.276 0-.5.224-.5.5v8.944l6.99-3.883c.625-.347 1.387-.334 2.001.033L16 11.4V9h2v6.5c0 1.378-1.122 2.5-2.5 2.5h-11C3.122 18 2 16.878 2 15.5v-11C2 3.122 3.122 2 4.5 2H11zM7 5.5c.829 0 1.5.671 1.5 1.5S7.829 8.5 7 8.5 5.5 7.829 5.5 7 6.171 5.5 7 5.5zM17 1v2h2v2h-2v2h-2V5h-2V3h2V1h2z"
-              transform="translate(-626 -570) translate(626 570)"
-            />
-          </g>
         </g>
       ),
       viewBox: '0 0 20 20',

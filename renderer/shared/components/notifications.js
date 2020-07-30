@@ -4,6 +4,7 @@ import {wordWrap, padding, margin, borderRadius} from 'polished'
 import {Absolute, Box} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
+import {useColorMode} from '@chakra-ui/core'
 import {
   useNotificationState,
   NotificationType,
@@ -34,7 +35,6 @@ export function Notification({
   action = null,
   actionName = '',
   pinned,
-  bg = theme.colors.white,
   color = theme.colors.text,
   iconColor = theme.colors.primary,
   actionColor = theme.colors.primary,
@@ -43,6 +43,7 @@ export function Notification({
   delay = NOTIFICATION_DELAY,
 }) {
   const [hidden, setHidden] = useState(false)
+  const {colorMode} = useColorMode()
 
   return (
     !hidden && (
@@ -54,10 +55,9 @@ export function Notification({
         <Flex
           align="center"
           css={{
-            background: bg,
+            background: colorMode === "light" ? theme.colors.white : theme.colors.black,
             borderRadius: rem(8),
             boxShadow: `0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)`,
-            color,
             ...margin(0, 'auto'),
             ...padding(rem(6), rem(8), rem(6), rem(16)),
             position: 'relative',
@@ -66,7 +66,8 @@ export function Notification({
           }}
         >
           {icon || (
-            <i
+            <
+i
               className="icon icon--Info"
               style={{
                 color:
@@ -110,7 +111,7 @@ export function Notification({
           {!pinned && (
             <Box
               style={{
-                background: theme.colors.gray2,
+                background: theme.colors[colorMode].gray2,
                 height: rem(3),
                 ...borderRadius('bottom', rem(8)),
                 position: 'absolute',

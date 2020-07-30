@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import {Flex, Heading, Text} from '@chakra-ui/core'
+import {Flex, Heading, Text, useColorMode} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
   Dialog,
@@ -15,11 +15,13 @@ import {
 } from '../../shared/providers/update-context'
 
 export function LayoutContainer(props) {
+  const {colorMode} = useColorMode()
   return (
     <Flex
       align="stretch"
       flexWrap="wrap"
-      color="brand.gray"
+      bg={colorMode === "light" ? "" : "gray.900"}
+      color={'brand.' + colorMode + '.gray'}
       fontSize="md"
       minH="100vh"
       {...props}

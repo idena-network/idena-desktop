@@ -9,7 +9,9 @@ import {
   Image,
   useToast,
   useDisclosure,
+  useColorMode,
 } from '@chakra-ui/core'
+import theme  from '../../shared/theme'
 import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
@@ -44,6 +46,8 @@ export default function FlipListPage() {
   const {t} = useTranslation()
 
   const toast = useToast()
+
+  const {colorMode} = useColorMode()
 
   const {
     isOpen: isOpenDeleteForm,
@@ -125,7 +129,7 @@ export default function FlipListPage() {
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
       <Page>
-        <PageTitle>{t('My Flips')}</PageTitle>
+        <PageTitle color={theme.colors[colorMode].text}>{t('My Flips')}</PageTitle>
         <Flex justify="space-between" align="center" alignSelf="stretch" mb={8}>
           <FlipFilter
             value={filter}
