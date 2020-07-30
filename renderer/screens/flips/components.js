@@ -220,7 +220,7 @@ export function FlipCardMenu(props) {
         py="3/2"
         px="2px"
         mt="-6px"
-        _expanded={{bg: 'gray.50'}}
+        _expanded={{bg: colorMode === "light" ? 'gray.50' : 'gray.800'}}
         _focus={{outline: 0}}
       >
         <Icon name="more" size={5} />

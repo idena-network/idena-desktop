@@ -1,5 +1,6 @@
 import React from 'react'
 import {FormControl, Heading, Stack, useToast, Text, useColorMode} from '@chakra-ui/core'
+import theme from '../../../shared/theme'
 import {useTranslation} from 'react-i18next'
 import {PrimaryButton} from '../../../shared/components/button'
 import {

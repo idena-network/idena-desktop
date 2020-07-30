@@ -15,6 +15,7 @@ import {
   Text,
   useColorMode,
 } from '@chakra-ui/core'
+import theme from '../../../shared/theme'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
 import {
   Drawer,

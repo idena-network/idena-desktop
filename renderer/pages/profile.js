@@ -1,5 +1,6 @@
 import React from 'react'
 import {Stack, Box, Text, Icon, useDisclosure, useToast, useColorMode} from '@chakra-ui/core'
+import theme from '../shared/theme'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {
