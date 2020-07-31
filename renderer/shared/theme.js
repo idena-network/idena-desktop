@@ -123,6 +123,7 @@ export const uiTheme = {
     blue: {
       ...chakraTheme.colors.blue,
       '012': 'rgb(87 143 255 /0.12)',
+      '020': 'rgb(87 143 255 /0.2)',
       '030': 'rgb(87 143 255 /0.3)',
       200: '#578fff',
       300: 'rgba(87, 143, 255, .12)',
@@ -135,7 +136,7 @@ export const uiTheme = {
       100: 'rgb(210, 212, 217)',
       200: '#53565c',
       300: 'rgb(232, 234, 237)',
-      500: 'rgba(255,255,255,0.5)',
+      500: 'rgb(232, 234, 237)',
     },
     red: {
       ...chakraTheme.colors.red,
@@ -151,6 +152,11 @@ export const uiTheme = {
       '020': 'rgb(39 217 128 /.2)',
       '050': 'rgb(39 217 128 /.5)',
       500: 'rgb(39 217 128)',
+    },
+    orange: {
+      ...chakraTheme.colors.orange,
+      '020': 'rgb(255 163 102 /0.2)',
+      500: 'rgb(255, 163, 102)',
     },
     warning: {
       '016': 'rgba(255, 163, 102, 0.16)',
