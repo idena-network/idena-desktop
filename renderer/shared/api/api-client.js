@@ -24,7 +24,7 @@ export function getRpcParams() {
   }
 }
 
-export default () => {
+export default function createApiClient() {
   const params = getRpcParams()
   const instance = axios.create({
     baseURL: params.url,
