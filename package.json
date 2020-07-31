@@ -110,7 +110,7 @@
     "lowdb": "^1.0.0",
     "mousetrap": "^1.6.3",
     "nanoid": "^2.0.1",
-    "next": "^9.4.4",
+    "next": "^9.5.1",
     "next-google-fonts": "^1.2.1",
     "nprogress": "^0.2.0",
     "pino": "^5.13.2",
