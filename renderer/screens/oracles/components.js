@@ -11,9 +11,10 @@ import {
   Badge,
   Radio,
   RadioGroup,
+  Text,
 } from '@chakra-ui/core'
 import {DrawerHeader, DrawerBody} from '../../shared/components/components'
-import {VotingStatus} from '../../shared/types'
+import {VotingStatus, FactAction} from '../../shared/types'
 
 export function OracleDrawerHeader({
   icon,
@@ -110,12 +111,13 @@ export function VotingStatusBadge({status, ...props}) {
   return (
     <Badge
       {...accentColors}
+      display="flex"
+      alignItems="center"
       borderRadius="xl"
       fontSize="sm"
       textTransform="capitalize"
+      h={6}
       px={3}
-      py={1}
-      lineHeight="base"
       {...props}
     />
   )
@@ -141,3 +143,22 @@ export const VotingFilter = React.forwardRef(function VotingFilterRef(
     </Radio>
   )
 })
+
+export function VotingResultBar({value, action, ...props}) {
+  return (
+    <Flex
+      align="center"
+      justify="space-between"
+      bg={action === FactAction.Confirm ? 'blue.012' : 'gray.50'}
+      borderRadius="md"
+      textTransform="capitalize"
+      px={2}
+      h={6}
+      w={`${value}%`}
+      {...props}
+    >
+      <Text>{action}</Text>
+      <Text fontWeight={500}>{`${value}%`}</Text>
+    </Flex>
+  )
+}

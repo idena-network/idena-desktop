@@ -54,3 +54,8 @@ export const VotingStatus = {
   Archive: 'archive',
   Mining: 'mining',
 }
+
+export const FactAction = {
+  Confirm: 'confirm',
+  Reject: 'reject',
+}

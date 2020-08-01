@@ -6,7 +6,6 @@ import {
   Switch,
   Flex,
   FormLabel,
-  Badge,
   Icon,
   Divider,
   Skeleton,
@@ -17,7 +16,7 @@ import {useMachine} from '@xstate/react'
 import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../screens/app/components'
 import {IconLink} from '../../shared/components/link'
-import {VotingStatus} from '../../shared/types'
+import {VotingStatus, FactAction} from '../../shared/types'
 import {Avatar, FloatDebug} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {toLocaleDna} from '../../shared/utils/utils'
@@ -27,6 +26,7 @@ import {
   VotingStatusBadge,
   VotingFilter,
   VotingFilterList,
+  VotingResultBar,
 } from '../../screens/oracles/components'
 
 export default function VotingListPage() {
@@ -65,24 +65,26 @@ export default function VotingListPage() {
                   votesCount,
                 }) => (
                   <Box>
-                    <Stack isInline spacing={2} mb={3}>
+                    <Stack isInline spacing={2} mb={3} align="center">
                       <VotingStatusBadge status={status}>
                         {t(status)}
                       </VotingStatusBadge>
-                      <Badge
+                      <Stack
+                        isInline
+                        spacing={1}
+                        align="center"
                         bg="gray.300"
                         borderRadius="xl"
-                        fontSize="sm"
-                        textTransform="initial"
                         color="muted"
-                        px={3}
-                        py={1}
+                        fontSize="sm"
+                        fontWeight={500}
+                        h={6}
+                        pl="1/2"
+                        pr={3}
                       >
-                        <Stack isInline spacing={1} align="center">
-                          <Avatar w={5} h={5} address={issuer} />
-                          <Text>{issuer}</Text>
-                        </Stack>
-                      </Badge>
+                        <Avatar w={5} h={5} address={issuer} />
+                        <Text>{issuer}</Text>
+                      </Stack>
                     </Stack>
                     <Text fontSize={rem(16)} fontWeight={500} mb={2}>
                       {title}
@@ -90,6 +92,23 @@ export default function VotingListPage() {
                     <Text color="muted" mb={4}>
                       {desc}
                     </Text>
+                    {[VotingStatus.Archive, VotingStatus.Counting].some(
+                      s => s === status
+                    ) && (
+                      <Stack spacing={2} mb={6}>
+                        <Text color="muted" fontSize="sm">
+                          {t('Results')}
+                        </Text>
+                        <VotingResultBar
+                          action={FactAction.Confirm}
+                          value={60}
+                        />
+                        <VotingResultBar
+                          action={FactAction.Reject}
+                          value={40}
+                        />
+                      </Stack>
+                    )}
                     <Stack isInline spacing={2} align="center" mb={6}>
                       <Icon name="star" size={4} color="white" />
                       <Text fontWeight={500}>
