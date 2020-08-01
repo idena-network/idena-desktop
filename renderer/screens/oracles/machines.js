@@ -1,11 +1,14 @@
 import {Machine, assign} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import {fetchVotings} from './utils'
+import {VotingStatus} from '../../shared/types'
 
 export const votingListMachine = Machine(
   {
     context: {
       votings: [],
+      filteredVotings: [],
+      filter: VotingStatus.All,
     },
     initial: 'loading',
     states: {
@@ -15,15 +18,33 @@ export const votingListMachine = Machine(
           onDone: {
             target: 'loaded',
             actions: [
+              assign((context, {data}) => ({
+                ...context,
+                votings: data,
+                filteredVotings: data,
+              })),
+              log(),
+            ],
+          },
+        },
+      },
+      loaded: {
+        on: {
+          FILTER: {
+            actions: [
               assign({
-                votings: ({votings}, {data}) => votings.concat(data),
+                filteredVotings: ({votings}, {filter}) =>
+                  votings.filter(
+                    ({status}) =>
+                      status === filter || filter === VotingStatus.All
+                  ),
+                filter: (_, {filter}) => filter,
               }),
               log(),
             ],
           },
         },
       },
-      loaded: {},
     },
   },
   {
