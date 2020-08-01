@@ -9,6 +9,8 @@ import {
   FormLabel,
   FormHelperText,
   Badge,
+  Radio,
+  RadioGroup,
 } from '@chakra-ui/core'
 import {DrawerHeader, DrawerBody} from '../../shared/components/components'
 import {VotingStatus} from '../../shared/types'
@@ -118,3 +120,24 @@ export function VotingStatusBadge({status, ...props}) {
     />
   )
 }
+
+export function VotingFilterList(props) {
+  return <RadioGroup variantColor="brandBlue" {...props} />
+}
+
+export const VotingFilter = React.forwardRef(function VotingFilterRef(
+  {value, ...props},
+  ref
+) {
+  return (
+    <Radio
+      borderColor="gray.100"
+      textTransform="capitalize"
+      value={value}
+      ref={ref}
+      {...props}
+    >
+      {value}
+    </Radio>
+  )
+})
