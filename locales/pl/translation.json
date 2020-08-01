@@ -319,5 +319,8 @@
   "Run the built-in node": "Odpal wbudowany Node",
   "Idena Node is starting...": "Node się odpala...",
   "Your built-in node is failed": "Awaria wbudowanego Node",
-  "Restart built-in node": "Restartuj wbudowany Node"
+  "Restart built-in node": "Restartuj wbudowany Node",
+  "You must specify your own identity address": "Musisz podać adres swojej tożsamości",
+  "Please enter your identity address to confirm termination. Stake will be transferred to the identity address.": "Podaj adres swojej tożsamości, aby potwierdzić likwidację. Saldo Stake zostanie przeniesione na podany adres.",
+  "Your identity address": "Adres twojej tożsamości"
 }
