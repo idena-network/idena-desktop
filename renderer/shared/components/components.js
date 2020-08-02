@@ -26,8 +26,9 @@ import {
   ModalFooter,
   Stack,
   Box,
+  useColorMode,
 } from '@chakra-ui/core'
-import {rem} from '../theme'
+import theme, {rem} from '../theme'
 
 export function FloatDebug({children, ...props}) {
   return (
@@ -65,14 +66,22 @@ export function DrawerBody(props) {
 }
 
 export function FormLabel(props) {
-  return <ChakraFormLabel fontWeight={500} color="brandGray.500" {...props} />
+  const {colorMode} = useColorMode()
+  return (
+    <ChakraFormLabel
+      fontWeight={500}
+      color={theme.colors[colorMode].text}
+      {...props}
+    />
+  )
 }
 
 export function Input(props) {
+  const {colorMode} = useColorMode()
   return (
     <ChakraInput
       alignItems="center"
-      borderColor="gray.300"
+      borderColor={colorMode === 'light' ? 'gray.300' : 'gray.600'}
       fontSize="md"
       lineHeight="short"
       px={3}
@@ -86,11 +95,12 @@ export function Input(props) {
 }
 
 export function Avatar({address, ...props}) {
+  const {colorMode} = useColorMode()
   return (
     <Image
       size={rem(80)}
       src={`https://robohash.org/${address}`}
-      bg="gray.50"
+      bg={colorMode === 'light' ? 'gray.50' : 'gray.800'}
       rounded="lg"
       ignoreFallback
       {...props}
@@ -155,12 +165,12 @@ export function Dialog({
   shouldShowCloseButton = false,
   ...props
 }) {
+  const {colorMode} = useColorMode()
   return (
     <Modal isCentered size="sm" {...props}>
       <ModalOverlay bg="xblack.080" />
       <ModalContent
-        bg="white"
-        color="brandGray.500"
+        bg={colorMode === 'light' ? 'white' : 'black'}
         fontSize="md"
         p={8}
         pt={6}

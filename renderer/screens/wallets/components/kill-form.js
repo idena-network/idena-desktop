@@ -1,6 +1,14 @@
 import React from 'react'
-import {FormControl, Heading, Stack, useToast, Text} from '@chakra-ui/core'
+import {
+  FormControl,
+  Heading,
+  Stack,
+  useToast,
+  Text,
+  useColorMode,
+} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
+import theme from '../../../shared/theme'
 import {PrimaryButton} from '../../../shared/components/button'
 import {
   Avatar,
@@ -19,6 +27,7 @@ import {
 // eslint-disable-next-line react/prop-types
 export function KillIdentityDrawer({address, children, ...props}) {
   const {t} = useTranslation()
+  const {colorMode} = useColorMode()
   return (
     <Drawer {...props}>
       <DrawerHeader mb={6}>
@@ -26,7 +35,7 @@ export function KillIdentityDrawer({address, children, ...props}) {
         <Heading
           fontSize="lg"
           fontWeight={500}
-          color="brandGray.500"
+          color={theme.colors[colorMode].text}
           mt={4}
           mb={0}
           textAlign="center"
@@ -56,6 +65,8 @@ function KillForm({onSuccess, onFail}) {
 
   const [submitting, setSubmitting] = React.useState(false)
 
+  const {colorMode} = useColorMode()
+
   return (
     <Stack
       as="form"
@@ -74,6 +85,8 @@ function KillForm({onSuccess, onFail}) {
               // eslint-disable-next-line react/display-name
               render: () => (
                 <Toast
+                  bg={colorMode === 'light' ? 'white' : 'black'}
+                  color={theme.colors[colorMode].text}
                   title={t('error:Error while sending transaction')}
                   description={error.message}
                   status="error"
@@ -84,7 +97,13 @@ function KillForm({onSuccess, onFail}) {
             toast({
               status: 'success',
               // eslint-disable-next-line react/display-name
-              render: () => <Toast title={t('Transaction sent')} />,
+              render: () => (
+                <Toast
+                  bg={colorMode === 'light' ? 'white' : 'black'}
+                  color={theme.colors[colorMode].text}
+                  title={t('Transaction sent')}
+                />
+              ),
             })
             if (onSuccess) onSuccess(result)
           }
@@ -94,6 +113,8 @@ function KillForm({onSuccess, onFail}) {
             // eslint-disable-next-line react/display-name
             render: () => (
               <Toast
+                bg={colorMode === 'light' ? 'white' : 'black'}
+                color={theme.colors[colorMode].text}
                 title={t('error:Something went wrong')}
                 description={error.message}
                 status="error"
@@ -111,7 +132,7 @@ function KillForm({onSuccess, onFail}) {
           value={stake}
           isDisabled
           _disabled={{
-            bg: 'gray.50',
+            bg: colorMode === 'light' ? 'gray.50' : 'gray.600',
           }}
         />
       </FormControl>
@@ -125,7 +146,7 @@ function KillForm({onSuccess, onFail}) {
         ml="auto"
         type="submit"
         isLoading={submitting}
-        variantColor="red"
+        bg={colorMode === 'dark' ? 'red.700' : 'red.500'}
         _hover={{
           bg: 'rgb(227 60 60)',
         }}

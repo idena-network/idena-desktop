@@ -186,7 +186,7 @@ function HardForkScreen({version, onUpdate}) {
   return (
     <Flex align="center" justify="center" flex={1} background="brandGray.500">
       <Flex direction="column">
-        <Text color="white" fontSize="md" fontWeight={500} mb={5}>
+        <Text fontSize="md" fontWeight={500} mb={5}>
           {t('Your node is outdated because of the hard fork, please update')}
         </Text>
         <PrimaryButton onClick={onUpdate}>

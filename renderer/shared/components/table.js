@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-curly-brace-presence */
 import React from 'react'
 import PropTypes from 'prop-types'
+import {useColorMode} from '@chakra-ui/core'
 import theme, {rem} from '../theme'
 
 export function Table({children, ...props}) {
@@ -35,6 +36,7 @@ TableRow.propTypes = {
 }
 
 export function TableCol({children, color, ...props}) {
+  const {colorMode} = useColorMode()
   return (
     <td {...props}>
       {children}
@@ -42,7 +44,7 @@ export function TableCol({children, color, ...props}) {
         td {
           padding: ${rem(8)} ${rem(12)};
           color: ${color || 'inherit'};
-          border-bottom: 1px solid ${theme.colors.gray2};
+          border-bottom: 1px solid ${theme.colors[colorMode].gray2};
         }
 
         td.text-right {
@@ -59,6 +61,7 @@ TableCol.propTypes = {
 }
 
 export function TableHeaderCol({children, ...props}) {
+  const {colorMode} = useColorMode()
   return (
     <th {...props}>
       {children}
@@ -66,7 +69,7 @@ export function TableHeaderCol({children, ...props}) {
         th {
           color: ${theme.colors.muted};
           font-weight: normal;
-          background-color: ${theme.colors.gray};
+          background-color: ${theme.colors[colorMode].gray};
           padding: ${rem(7)} ${rem(12)};
           text-align: left;
         }

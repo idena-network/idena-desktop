@@ -2,6 +2,7 @@ import React, {forwardRef} from 'react'
 import PropTypes from 'prop-types'
 import {borderRadius} from 'polished'
 
+import {useColorMode} from '@chakra-ui/core'
 import {Box, Link} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
@@ -15,9 +16,10 @@ export const Menu = forwardRef((props, ref) => (
 ))
 
 export function MenuItems({ref, ...props}) {
+  const {colorMode} = useColorMode()
   return (
     <Box
-      bg={theme.colors.white}
+      bg={colorMode === 'light' ? theme.colors.white : theme.colors.black}
       py={theme.spacings.small}
       css={{
         ...borderRadius('top', '10px'),
@@ -46,12 +48,13 @@ export function MenuItem({
   ...props
 }) {
   const [hoverRef, isHovered] = useHover()
+  const {colorMode} = useColorMode()
   return (
     <Box
       ref={hoverRef}
       px={theme.spacings.normal}
       py={theme.spacings.small}
-      bg={isHovered ? theme.colors.gray : ''}
+      bg={isHovered ? theme.colors[colorMode].gray : ''}
     >
       <Flex align="center" onClick={disabled ? null : onClick}>
         {href ? (
@@ -60,6 +63,7 @@ export function MenuItem({
           <FlatButton
             bg={isHovered ? theme.colors.gray : ''}
             disabled={disabled}
+            color={theme.colors[colorMode].text}
             style={{display: 'flex'}}
             {...props}
           >

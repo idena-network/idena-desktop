@@ -2,6 +2,7 @@ import React, {useEffect} from 'react'
 import {FiChevronRight} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
 
+import {useColorMode} from '@chakra-ui/core'
 import theme, {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {Box, Drawer, PageTitle, SubHeading} from '../../shared/components'
@@ -24,6 +25,8 @@ export default function Index() {
   const {t} = useTranslation()
   const {wallets, totalAmount, txs, status} = useWallets()
 
+  const {colorMode} = useColorMode()
+
   const [isReceiveFormOpen, setIsReceiveFormOpen] = React.useState(false)
   const [isTransferFormOpen, setIsTransferFormOpen] = React.useState(false)
   const [isWithdrawStakeFormOpen, setIsWithdrawStakeFormOpen] = React.useState(
@@ -45,7 +48,9 @@ export default function Index() {
   return (
     <Layout syncing={syncing} offline={offline}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
-        <PageTitle>{t('Wallets')}</PageTitle>
+        <PageTitle color={theme.colors[colorMode].text}>
+          {t('Wallets')}
+        </PageTitle>
         <Box>
           {status === 'fetching' && (
             <Flex>
@@ -98,7 +103,9 @@ export default function Index() {
                 />
               </div>
 
-              <SubHeading>{t('Recent transactions')}</SubHeading>
+              <SubHeading color={theme.colors[colorMode].text}>
+                {t('Recent transactions')}
+              </SubHeading>
 
               <FlatButton
                 color={theme.colors.primary}

@@ -11,6 +11,7 @@ import {
   Flex as ChakraFlex,
   Box as ChakraBox,
   Icon,
+  useColorMode,
 } from '@chakra-ui/core'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
@@ -23,6 +24,7 @@ import Flex from '../../../shared/components/flex'
 
 export function Brushes({brush, onChange}) {
   const brushes = [4, 12, 20, 28, 36]
+  const {colorMode} = useColorMode()
   return (
     <Stack spacing={2} align="center">
       {brushes.map((b, i) => (
@@ -30,14 +32,14 @@ export function Brushes({brush, onChange}) {
           key={b}
           align="center"
           justify="center"
-          bg={brush === b ? 'gray.50' : 'unset'}
+          bg={brush === b ? theme.colors[colorMode].gray : 'unset'}
           rounded="md"
           size={6}
           onClick={() => onChange(b)}
         >
           <ChakraBox
             key={b}
-            bg="brandGray.500"
+            bg={theme.colors[colorMode].text}
             rounded="full"
             size={rem((i + 1) * 2)}
           />
@@ -63,6 +65,7 @@ export function ColorPicker({visible, color, onChange}) {
   useClickOutside(colorPickerRef, () => {
     onChange(color)
   })
+  const {colorMode} = useColorMode()
 
   return (
     <div
@@ -88,7 +91,11 @@ export function ColorPicker({visible, color, onChange}) {
                       key={`${j}${j}`}
                       icon={
                         c === 'ffffff' ? (
-                          <FiCircle color={showColor} style={circleStyle} />
+                          colorMode === 'light' ? (
+                            <FiCircle color={showColor} style={circleStyle} />
+                          ) : (
+                            <FaCircle color="ffffff" style={circleStyle} />
+                          )
                         ) : (
                           <FaCircle color={showColor} style={circleStyle} />
                         )

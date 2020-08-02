@@ -1,7 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
-import {margin, borderRadius, darken, transparentize, padding} from 'polished'
+import {
+  margin,
+  borderRadius,
+  darken,
+  lighten,
+  transparentize,
+  padding,
+} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {IconButton, useColorMode} from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
@@ -21,6 +28,7 @@ import {pluralize} from '../utils/string'
 import {parsePersistedValidationState} from '../../screens/validation/utils'
 
 function Sidebar() {
+  const {colorMode} = useColorMode()
   return (
     <section>
       <Flex direction="column" align="flex-start">
@@ -34,7 +42,7 @@ function Sidebar() {
       </div>
       <style jsx>{`
         section {
-          background: ${theme.colors.primary2};
+          background: ${theme.colors[colorMode].primary2};
           color: ${theme.colors.white};
           display: flex;
           flex-direction: column;
@@ -469,6 +477,7 @@ function CurrentTask({epoch, period, identity}) {
 }
 
 function UpdateButton({text, version, ...props}) {
+  const {colorMode} = useColorMode()
   return (
     <>
       <button type="button" {...props}>
@@ -478,7 +487,9 @@ function UpdateButton({text, version, ...props}) {
       </button>
       <style jsx>{`
         button {
-          background: ${theme.colors.white};
+          background: ${colorMode === 'light'
+            ? theme.colors.white
+            : theme.colors.black};
           border: none;
           border-radius: 6px;
           color: ${theme.colors.muted};
@@ -490,10 +501,12 @@ function UpdateButton({text, version, ...props}) {
           margin-bottom: ${theme.spacings.medium16};
         }
         button span {
-          color: ${theme.colors.text};
+          color: ${theme.colors[colorMode].text};
         }
         button:hover {
-          background: ${darken(0.1, theme.colors.white)};
+          background: ${colorMode === 'light'
+            ? darken(0.1, theme.colors.white)
+            : lighten(0.1, theme.colors.black)};
         }
         button:disabled {
           cursor: not-allowed;

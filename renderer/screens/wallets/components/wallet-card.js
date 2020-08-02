@@ -4,6 +4,7 @@ import {MdMoreVert} from 'react-icons/md'
 
 import {margin, position, borderRadius} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {useColorMode} from '@chakra-ui/core'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Box, Link, Absolute} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
@@ -16,7 +17,6 @@ import useHover from '../../../shared/hooks/use-hover'
 // eslint-disable-next-line react/display-name
 const WalletMenu = forwardRef((props, ref) => (
   <Box
-    bg={theme.colors.white}
     py={theme.spacings.small}
     css={{
       ...borderRadius('top', '10px'),
@@ -32,12 +32,13 @@ const WalletMenu = forwardRef((props, ref) => (
 
 function WalletMenuItem({href, onClick, icon, danger, disabled, ...props}) {
   const [hoverRef, isHovered] = useHover()
+  const {colorMode} = useColorMode()
   return (
     <Box
       ref={hoverRef}
       px={theme.spacings.normal}
       py={theme.spacings.small}
-      bg={isHovered ? theme.colors.gray : ''}
+      bg={isHovered ? theme.colors[colorMode].gray : ''}
     >
       <Flex align="center" onClick={disabled ? null : onClick}>
         {React.cloneElement(icon, {
@@ -53,6 +54,7 @@ function WalletMenuItem({href, onClick, icon, danger, disabled, ...props}) {
           <FlatButton
             bg={isHovered ? theme.colors.gray : ''}
             disabled={disabled}
+            color={theme.colors[colorMode].text}
             {...props}
           />
         )}
@@ -82,10 +84,12 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
 
   const {t} = useTranslation()
 
+  const {colorMode} = useColorMode()
+
   return (
     <Box
-      bg={main ? theme.colors.primary : theme.colors.gray}
-      color={main ? theme.colors.white : theme.colors.primary2}
+      bg={main ? theme.colors.primary : theme.colors[colorMode].gray}
+      color={main ? theme.colors.white : theme.colors[colorMode].text}
       padding={rem(theme.spacings.medium16)}
       style={{
         borderRadius: rem(8),
@@ -118,7 +122,14 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
           <Box css={position('fixed')}>
             {isMenuOpen && (
               <Absolute top="-1.5em" right="-16em" zIndex={2}>
-                <WalletMenu ref={menuRef}>
+                <WalletMenu
+                  ref={menuRef}
+                  bg={
+                    colorMode === 'light'
+                      ? theme.colors.white
+                      : theme.colors.black
+                  }
+                >
                   <WalletMenuItem
                     onClick={async () => {
                       setIsMenuOpen(false)

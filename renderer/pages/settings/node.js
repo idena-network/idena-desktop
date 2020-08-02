@@ -5,6 +5,7 @@ import {margin, padding, borderRadius} from 'polished'
 import {useTranslation} from 'react-i18next'
 import Ansi from 'ansi-to-react'
 import {FiEye, FiEyeOff} from 'react-icons/fi'
+import {useColorMode} from '@chakra-ui/core'
 import {
   Box,
   Input,
@@ -125,6 +126,8 @@ function NodeSettings() {
 
   const [revealApiKey, setRevealApiKey] = useState(false)
 
+  const {colorMode} = useColorMode()
+
   return (
     <SettingsLayout>
       <Box py={theme.spacings.xlarge}>
@@ -136,6 +139,7 @@ function NodeSettings() {
                 toggleRunInternalNode(!settings.runInternalNode)
               }}
               bgOn={theme.colors.primary}
+              bgOff={theme.colors[colorMode].gray4}
             />
           </Box>
           <div
@@ -175,6 +179,7 @@ function NodeSettings() {
                 toggleUseExternalNode(!settings.useExternalNode)
               }}
               bgOn={theme.colors.primary}
+              bgOff={theme.colors[colorMode].gray4}
             />
           </Box>
           <div
@@ -245,7 +250,7 @@ function NodeSettings() {
               ></Input>
               <Box
                 style={{
-                  background: theme.colors.gray2,
+                  background: theme.colors[colorMode].gray2,
                   ...borderRadius('right', rem(6)),
                   cursor: 'pointer',
                   fontSize: rem(20),

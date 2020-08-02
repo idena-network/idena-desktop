@@ -22,6 +22,7 @@ import {
   Stack,
   Text,
   Heading,
+  useColorMode,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
@@ -883,10 +884,12 @@ export function ValidationSoonToast({validationStart}) {
 
   const {t} = useTranslation()
 
+  const {colorMode} = useColorMode()
+
   return (
     <Snackbar>
       <Notification
-        bg={theme.colors.danger}
+        bg={theme.colors[colorMode].danger}
         color={theme.colors.white}
         iconColor={theme.colors.white}
         pinned
@@ -954,10 +957,11 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
 
 export function AfterLongSessionToast() {
   const {t} = useTranslation()
+  const {colorMode} = useColorMode()
   return (
     <Snackbar>
       <Notification
-        bg={theme.colors.success}
+        bg={theme.colors[colorMode].success}
         color={theme.colors.white}
         iconColor={theme.colors.white}
         pinned

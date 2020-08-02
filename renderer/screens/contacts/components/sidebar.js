@@ -3,6 +3,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {padding, border, margin, ellipsis, backgrounds} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {useColorMode} from '@chakra-ui/core'
 import {Box, Text, Input, Button} from '../../../shared/components'
 import {useContactState} from '../../../shared/providers/contact-context'
 import theme, {rem} from '../../../shared/theme'
@@ -21,6 +22,8 @@ function Sidebar({onSelectContact, onSelectInvite, onNewInvite}) {
 
   const [term, setTerm] = React.useState()
 
+  const {colorMode} = useColorMode()
+
   React.useEffect(() => {
     if (contacts.length) {
       onSelectContact(contacts[0])
@@ -30,7 +33,7 @@ function Sidebar({onSelectContact, onSelectInvite, onNewInvite}) {
   return (
     <Box
       style={{
-        ...border('right', '1px', 'solid', theme.colors.gray2),
+        ...border('right', '1px', 'solid', theme.colors[colorMode].gray2),
         width: rem(270),
         minWidth: rem(270),
         height: '91vh',
@@ -311,13 +314,14 @@ ContactCard.propTypes = {
 
 function Search(props) {
   const {t} = useTranslation()
+  const {colorMode} = useColorMode()
   return (
     <Box p={rem(theme.spacings.medium16)}>
       <Input
         type="search"
         placeholder={t('Search')}
         style={{
-          ...backgrounds(theme.colors.gray),
+          ...backgrounds(theme.colors[colorMode].gray),
           border: 'none',
           textAlign: 'center',
           width: '100%',

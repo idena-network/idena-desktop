@@ -13,7 +13,9 @@ import {
   useDisclosure,
   Icon,
   Text,
+  useColorMode,
 } from '@chakra-ui/core'
+import theme from '../../../shared/theme'
 import {useInviteDispatch} from '../../../shared/providers/invite-context'
 import {
   Drawer,
@@ -35,7 +37,6 @@ export function SendInviteDrawer({children, ...props}) {
         <Heading
           fontSize="lg"
           fontWeight={500}
-          color="brandGray.500"
           mt={4}
           mb={0}
           textAlign="center"
@@ -70,6 +71,8 @@ export function SendInviteForm({onSuccess, onFail}) {
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
+  const {colorMode} = useColorMode()
+
   return (
     <Stack
       as="form"
@@ -94,6 +97,8 @@ export function SendInviteForm({onSuccess, onFail}) {
             // eslint-disable-next-line react/display-name
             render: () => (
               <Toast
+                bg={colorMode === 'light' ? 'white' : 'black'}
+                color={theme.colors[colorMode].text}
                 title={t('Invitation code created')}
                 description={invite.hash}
               />
@@ -107,6 +112,8 @@ export function SendInviteForm({onSuccess, onFail}) {
             // eslint-disable-next-line react/display-name
             render: () => (
               <Toast
+                bg={colorMode === 'light' ? 'white' : 'black'}
+                color={theme.colors[colorMode].text}
                 title={error?.message ?? t('Something went wrong')}
                 status="error"
               />
@@ -129,7 +136,6 @@ export function SendInviteForm({onSuccess, onFail}) {
       <Box>
         <Button
           background="transparent"
-          color="brandGray.500"
           px={0}
           _hover={{background: 'transparent'}}
           _active={{background: 'transparent'}}

@@ -30,6 +30,7 @@ import {
   MenuDivider,
   Alert,
   AlertIcon,
+  useColorMode,
 } from '@chakra-ui/core'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
@@ -73,6 +74,7 @@ export function FlipCard({flipService, onDelete}) {
   const {id, keywords, originalOrder, images, type, createdAt} = current.context
 
   const {colors} = useTheme()
+  const {colorMode} = useColorMode()
 
   const isActionable = [
     FlipType.Published,
@@ -158,7 +160,11 @@ export function FlipCard({flipService, onDelete}) {
               </FlipCardMenuItem>
             )}
             {(isSubmittable || isEditable) && isDeletable && (
-              <MenuDivider color="gray.300" my={2} width={rem(145)} />
+              <MenuDivider
+                color={colorMode === 'light' ? 'gray.300' : 'gray.700'}
+                my={2}
+                width={rem(145)}
+              />
             )}
 
             {isDeletable && (
@@ -210,6 +216,7 @@ export function FlipCardSubtitle(props) {
 }
 
 export function FlipCardMenu(props) {
+  const {colorMode} = useColorMode()
   return (
     <Menu autoSelect={false}>
       <MenuButton
@@ -217,7 +224,7 @@ export function FlipCardMenu(props) {
         py="3/2"
         px="2px"
         mt="-6px"
-        _expanded={{bg: 'gray.50'}}
+        _expanded={{bg: colorMode === 'light' ? 'gray.50' : 'gray.800'}}
         _focus={{outline: 0}}
       >
         <Icon name="more" size={5} />
@@ -225,6 +232,7 @@ export function FlipCardMenu(props) {
       <MenuList
         placement="bottom-end"
         border="none"
+        bg={colorMode === 'light' ? 'white' : 'black'}
         shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
         rounded="lg"
         py={2}
@@ -236,16 +244,17 @@ export function FlipCardMenu(props) {
 }
 
 export function FlipCardMenuItem(props) {
+  const {colorMode} = useColorMode()
   return (
     <PseudoBox
       as={MenuItem}
       fontWeight={500}
       px={3}
       py="3/2"
-      _hover={{bg: 'gray.50'}}
-      _focus={{bg: 'gray.50'}}
-      _selected={{bg: 'gray.50'}}
-      _active={{bg: 'gray.50'}}
+      _hover={{bg: colorMode === 'light' ? 'gray.50' : 'gray.800'}}
+      _focus={{bg: colorMode === 'light' ? 'gray.50' : 'gray.800'}}
+      _selected={{bg: colorMode === 'light' ? 'gray.50' : 'gray.800'}}
+      _active={{bg: colorMode === 'light' ? 'gray.50' : 'gray.800'}}
       {...props}
     />
   )
@@ -376,26 +385,34 @@ export function FlipFilter(props) {
   return <RadioButtonGroup isInline spacing={2} {...props} />
 }
 
-export const FlipFilterOption = React.forwardRef(
-  ({isChecked, ...props}, ref) => (
+export const FlipFilterOption = React.forwardRef(function(
+  {isChecked, ...props},
+  ref
+) {
+  const {colorMode} = useColorMode()
+  return (
     <Button
       ref={ref}
       isActive={isChecked}
       aria-checked={isChecked}
       role="radio"
-      bg="white"
       color="muted"
       fontWeight={500}
       size="sm"
       fontSize="md"
-      _active={{bg: 'gray.50', color: 'brand.blue'}}
-      _hover={{bg: 'gray.50', color: 'brand.blue'}}
+      _active={{
+        bg: colorMode === 'light' ? 'gray.50' : 'gray.800',
+        color: 'brand.blue',
+      }}
+      _hover={{
+        bg: colorMode === 'light' ? 'gray.50' : 'gray.800',
+        color: 'brand.blue',
+      }}
       {...props}
       variant="ghost"
-      variantColor="gray"
     />
   )
-)
+})
 FlipFilterOption.displayName = 'FlipFilterOption'
 
 export function FlipMaster({children}) {
@@ -403,13 +420,14 @@ export function FlipMaster({children}) {
 }
 
 export function FlipMasterNavbar(props) {
+  const {colorMode} = useColorMode()
   return (
     <Stack
       isInline
       align="center"
       alignSelf="stretch"
       spacing={8}
-      bg="gray.50"
+      bg={colorMode === 'light' ? 'gray.50' : 'gray.800'}
       minH={12}
       fontWeight={500}
       mx={-20}
@@ -573,8 +591,16 @@ export function FlipKeywordTranslationSwitch({
 }
 
 export function FlipKeywordPanel(props) {
+  const {colorMode} = useColorMode()
   return (
-    <Box bg="gray.50" px={10} py={8} rounded="lg" w="480px" {...props}></Box>
+    <Box
+      bg={colorMode === 'light' ? 'gray.50' : 'gray.800'}
+      px={10}
+      py={8}
+      rounded="lg"
+      w="480px"
+      {...props}
+    ></Box>
   )
 }
 
@@ -911,11 +937,12 @@ export function FlipStepBody(props) {
 }
 
 export function FlipMasterFooter(props) {
+  const {colorMode} = useColorMode()
   return (
     <Box
       alignSelf="stretch"
       borderTop="1px"
-      borderTopColor="gray.300"
+      borderTopColor={colorMode === 'light' ? 'gray.300' : 'gray.800'}
       mt="auto"
       px={4}
       py={3}
@@ -987,10 +1014,11 @@ export function FlipImage({
   roundedBottom,
   ...props
 }) {
+  const {colorMode} = useColorMode()
   return (
     <AspectRatioBox
       ratio={4 / 3}
-      bg="gray.50"
+      bg={colorMode === 'light' ? 'gray.50' : 'gray.800'}
       border="1px"
       borderColor="brandGray.016"
       roundedTop={roundedTop}
@@ -1013,9 +1041,14 @@ export function FlipImage({
 }
 
 export function EmptyFlipImage(props) {
+  const {colorMode} = useColorMode()
   return (
     <Flex align="center" justify="center" px={10} py={6} {...props}>
-      <Icon name="pic" size={10} color="gray.100" />
+      <Icon
+        name="pic"
+        size={10}
+        color={colorMode === 'light' ? 'gray.100' : 'gray.600'}
+      />
     </Flex>
   )
 }

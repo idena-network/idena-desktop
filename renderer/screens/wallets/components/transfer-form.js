@@ -3,6 +3,7 @@ import {margin, padding, wordWrap} from 'polished'
 import PropTypes from 'prop-types'
 import {FiLoader} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
+import {useColorMode} from '@chakra-ui/core'
 import theme, {rem} from '../../../shared/theme'
 import {
   Box,
@@ -41,6 +42,8 @@ function TransferForm({onSuccess, onFail}) {
 
   const {t} = useTranslation('error')
 
+  const {colorMode} = useColorMode()
+
   return (
     <Box
       css={padding(rem(theme.spacings.large48), rem(theme.spacings.medium32))}
@@ -52,6 +55,7 @@ function TransferForm({onSuccess, onFail}) {
       >
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
+          color={theme.colors[colorMode].text}
         >
           {t(`translation:Send DNA’s`)}
         </SubHeading>

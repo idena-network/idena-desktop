@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {ellipsis, rgba} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {useColorMode} from '@chakra-ui/core'
 import theme, {rem} from '../../../shared/theme'
 import Avatar from '../../../shared/components/avatar'
 import Flex from '../../../shared/components/flex'
@@ -77,6 +78,7 @@ RowStatus.propTypes = {
 // eslint-disable-next-line react/prop-types
 function WalletTransfer({transactions = []}) {
   const {t} = useTranslation(['translation', 'error'])
+  const {colorMode} = useColorMode()
   return (
     <div>
       <Table>
@@ -131,7 +133,7 @@ function WalletTransfer({transactions = []}) {
                     color:
                       tx.signAmount < 0
                         ? theme.colors.danger
-                        : theme.colors.text,
+                        : theme.colors[colorMode].text,
                   }}
                 >
                   {(tx.type === 'kill' && t('See in Explorer...')) ||

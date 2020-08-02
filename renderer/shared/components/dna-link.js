@@ -10,6 +10,7 @@ import {
 } from 'polished'
 import {useTranslation} from 'react-i18next'
 import {FiInfo, FiAlertCircle, FiGlobe} from 'react-icons/fi'
+import {useColorMode} from '@chakra-ui/core'
 import Box from './box'
 import {Text} from './typo'
 import theme, {rem} from '../theme'
@@ -369,9 +370,10 @@ function DnaDialogBody(props) {
 }
 
 function DnaDialogDetails(props) {
+  const {colorMode} = useColorMode()
   return (
     <Box
-      bg={theme.colors.gray}
+      bg={theme.colors[colorMode].gray}
       css={{
         borderRadius: rem(8),
         ...padding(0, rem(20)),
@@ -405,11 +407,12 @@ function DnaDialogPanelLabel(props) {
 }
 
 function DnaDialogPanelValue(props) {
+  const {colorMode} = useColorMode()
   return (
     <Box
       css={{
-        color: theme.colors.text,
-        fontWeight: 500,
+        color: theme.colors[colorMode].text,
+        Fontweight: 500,
         lineHeight: rem(20),
         ...wordWrap('break-all'),
         minWidth: rem(40),
@@ -420,11 +423,17 @@ function DnaDialogPanelValue(props) {
 }
 
 function DnaDialogPanelDivider() {
+  const {colorMode} = useColorMode()
   return (
     <hr
       style={{
         border: 'none',
-        ...border('top', '1px', 'solid', theme.colors.white),
+        ...border(
+          'top',
+          '1px',
+          'solid',
+          colorMode === 'light' ? theme.colors.white : theme.colors.black
+        ),
         ...margin(0, rem(-20)),
       }}
     />
@@ -452,15 +461,18 @@ function DnaDialogFooter(props) {
 }
 
 function Address({address}) {
+  const {colorMode} = useColorMode()
   return (
     <Avatar
       username={address}
       size={40}
       style={{
-        ...backgrounds(theme.colors.white),
+        ...backgrounds(
+          colorMode === 'light' ? theme.colors.white : theme.colors.black
+        ),
         ...borderRadius('top', rem(6)),
         ...borderRadius('bottom', rem(6)),
-        border: `solid 1px ${theme.colors.gray2}`,
+        border: `solid 1px ${theme.colors[colorMode].gray2}`,
         ...margin(0),
       }}
     />

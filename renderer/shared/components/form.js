@@ -5,6 +5,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {margin, transparentize} from 'polished'
 import {FiChevronDown} from 'react-icons/fi'
+import {useColorMode} from '@chakra-ui/core'
 import theme, {rem} from '../theme'
 import Box from './box'
 import Flex from './flex'
@@ -21,12 +22,13 @@ FormGroup.propTypes = {
 }
 
 function Label({htmlFor, ...otherProps}) {
+  const {colorMode} = useColorMode()
   return (
     <>
       <label htmlFor={htmlFor} {...otherProps} />
       <style jsx>{`
         label {
-          color: ${theme.colors.text};
+          color: ${theme.colors[colorMode].text};
           display: block;
           margin-bottom: ${rem(10)};
         }
@@ -41,6 +43,7 @@ Label.propTypes = {
 
 function Select({options, ...props}) {
   const {disabled} = props
+  const {colorMode} = useColorMode()
   return (
     <div>
       <select {...props}>
@@ -77,16 +80,18 @@ function Select({options, ...props}) {
             ${rem(theme.spacings.small8)} ${rem(theme.spacings.medium16)};
           appearance: none;
           border: 0;
-          background: none;
-          background: none;
+          background: ${colorMode === 'light'
+            ? 'none'
+            : theme.colors.dark.gray2};
           box-shadow: none;
           border-radius: 6px;
           font-size: 1em;
           width: 100%;
           cursor: pointer;
           width: 100%;
-          box-shadow: inset 0 0 0 1px ${theme.colors.gray2};
-          color: ${theme.colors.text};
+          box-shadow: inset 0 0 0 1px
+            ${colorMode === 'light' ? theme.colors.gray2 : theme.colors.gray6};
+          color: ${theme.colors[colorMode].text};
           ${disabled && `background: ${theme.colors.gray}`};
           ${disabled && 'cursor: not-allowed'};
         }
@@ -103,8 +108,12 @@ Select.propTypes = {
 }
 
 // eslint-disable-next-line react/display-name
-const Input = React.forwardRef(
-  ({type = 'text', disabled, border, ...otherProps}, ref) => (
+const Input = React.forwardRef(function(
+  {type = 'text', disabled, border, ...otherProps},
+  ref
+) {
+  const {colorMode} = useColorMode()
+  return (
     <>
       <input type={type} disabled={disabled} ref={ref} {...otherProps} />
       <style jsx>{`
@@ -117,9 +126,13 @@ const Input = React.forwardRef(
           font-size: 1em;
           padding: ${rem(theme.spacings.small8)} ${rem(theme.spacings.medium16)};
           width: 100%;
-          box-shadow: inset 0 0 0 1px ${theme.colors.gray2};
-          color: ${theme.colors.text};
-          ${disabled && `background: ${theme.colors.gray}`};
+          box-shadow: inset 0 0 0 1px
+            ${colorMode === 'light' ? theme.colors.gray2 : theme.colors.gray6};
+          color: ${theme.colors[colorMode].text};
+          ${disabled &&
+            `background: ${
+              colorMode === 'light' ? theme.colors.gray : theme.colors.gray6
+            }`};
           ${disabled && 'cursor: not-allowed'};
         }
         input:focus {
@@ -131,7 +144,7 @@ const Input = React.forwardRef(
       `}</style>
     </>
   )
-)
+})
 
 Input.propTypes = {
   type: PropTypes.string,
