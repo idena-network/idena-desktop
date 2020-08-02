@@ -13,6 +13,7 @@ import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
 } from '../../shared/providers/update-context'
+import theme from '../../shared/theme'
 
 export function LayoutContainer(props) {
   const {colorMode} = useColorMode()
@@ -20,8 +21,8 @@ export function LayoutContainer(props) {
     <Flex
       align="stretch"
       flexWrap="wrap"
-      bg={colorMode === "light" ? "" : "gray.900"}
-      color={'brand.' + colorMode + '.gray'}
+      bg={colorMode === 'light' ? '' : 'gray.900'}
+      color={theme.colors[colorMode].text}
       fontSize="md"
       minH="100vh"
       {...props}

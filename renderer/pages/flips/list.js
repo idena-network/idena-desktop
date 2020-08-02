@@ -11,8 +11,8 @@ import {
   useDisclosure,
   useColorMode,
 } from '@chakra-ui/core'
-import theme  from '../../shared/theme'
 import {useTranslation} from 'react-i18next'
+import theme from '../../shared/theme'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
   FlipCardTitle,
@@ -129,7 +129,9 @@ export default function FlipListPage() {
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
       <Page>
-        <PageTitle color={theme.colors[colorMode].text}>{t('My Flips')}</PageTitle>
+        <PageTitle color={theme.colors[colorMode].text}>
+          {t('My Flips')}
+        </PageTitle>
         <Flex justify="space-between" align="center" alignSelf="stretch" mb={8}>
           <FlipFilter
             value={filter}

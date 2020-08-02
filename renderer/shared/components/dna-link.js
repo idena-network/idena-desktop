@@ -10,10 +10,10 @@ import {
 } from 'polished'
 import {useTranslation} from 'react-i18next'
 import {FiInfo, FiAlertCircle, FiGlobe} from 'react-icons/fi'
+import {useColorMode} from '@chakra-ui/core'
 import Box from './box'
 import {Text} from './typo'
 import theme, {rem} from '../theme'
-import {useColorMode} from '@chakra-ui/core'
 import {useIdentityState} from '../providers/identity-context'
 import Flex from './flex'
 import {SecondaryButton, PrimaryButton} from './button'
@@ -373,7 +373,7 @@ function DnaDialogDetails(props) {
   const {colorMode} = useColorMode()
   return (
     <Box
-    bg={theme.colors[colorMode].gray}
+      bg={theme.colors[colorMode].gray}
       css={{
         borderRadius: rem(8),
         ...padding(0, rem(20)),
@@ -428,7 +428,12 @@ function DnaDialogPanelDivider() {
     <hr
       style={{
         border: 'none',
-        ...border('top', '1px', 'solid', colorMode === "light" ? theme.colors.white : theme.colors.black),
+        ...border(
+          'top',
+          '1px',
+          'solid',
+          colorMode === 'light' ? theme.colors.white : theme.colors.black
+        ),
         ...margin(0, rem(-20)),
       }}
     />
@@ -462,7 +467,9 @@ function Address({address}) {
       username={address}
       size={40}
       style={{
-        ...backgrounds(colorMode === "light" ? theme.colors.white : theme.colors.black),
+        ...backgrounds(
+          colorMode === 'light' ? theme.colors.white : theme.colors.black
+        ),
         ...borderRadius('top', rem(6)),
         ...borderRadius('bottom', rem(6)),
         border: `solid 1px ${theme.colors[colorMode].gray2}`,

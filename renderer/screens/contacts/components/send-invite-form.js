@@ -71,6 +71,8 @@ export function SendInviteForm({onSuccess, onFail}) {
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
+  const {colorMode} = useColorMode()
+
   return (
     <Stack
       as="form"
@@ -95,8 +97,8 @@ export function SendInviteForm({onSuccess, onFail}) {
             // eslint-disable-next-line react/display-name
             render: () => (
               <Toast
-                bg={colorMode === "light" ? "white" : "black"}
-                color={"brand." + colorMode + ".gray"}
+                bg={colorMode === 'light' ? 'white' : 'black'}
+                color={theme.colors[colorMode].text}
                 title={t('Invitation code created')}
                 description={invite.hash}
               />
@@ -110,8 +112,8 @@ export function SendInviteForm({onSuccess, onFail}) {
             // eslint-disable-next-line react/display-name
             render: () => (
               <Toast
-                bg={colorMode === "light" ? "white" : "black"}
-                color={"brand." + colorMode + ".gray"}
+                bg={colorMode === 'light' ? 'white' : 'black'}
+                color={theme.colors[colorMode].text}
                 title={error?.message ?? t('Something went wrong')}
                 status="error"
               />

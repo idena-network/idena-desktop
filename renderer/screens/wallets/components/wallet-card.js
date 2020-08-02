@@ -4,12 +4,12 @@ import {MdMoreVert} from 'react-icons/md'
 
 import {margin, position, borderRadius} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {useColorMode} from '@chakra-ui/core'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Box, Link, Absolute} from '../../../shared/components'
 import Flex from '../../../shared/components/flex'
 import theme, {rem} from '../../../shared/theme'
 import {FlatButton} from '../../../shared/components/button'
-import {useColorMode} from '@chakra-ui/core'
 
 import Divider from '../../../shared/components/divider'
 import useHover from '../../../shared/hooks/use-hover'
@@ -88,7 +88,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
 
   return (
     <Box
-    bg={main ? theme.colors.primary : theme.colors[colorMode].gray}
+      bg={main ? theme.colors.primary : theme.colors[colorMode].gray}
       color={main ? theme.colors.white : theme.colors[colorMode].text}
       padding={rem(theme.spacings.medium16)}
       style={{
@@ -122,7 +122,14 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
           <Box css={position('fixed')}>
             {isMenuOpen && (
               <Absolute top="-1.5em" right="-16em" zIndex={2}>
-                <WalletMenu ref={menuRef} bg={colorMode === "light" ? theme.colors.white : theme.colors.black}>
+                <WalletMenu
+                  ref={menuRef}
+                  bg={
+                    colorMode === 'light'
+                      ? theme.colors.white
+                      : theme.colors.black
+                  }
+                >
                   <WalletMenuItem
                     onClick={async () => {
                       setIsMenuOpen(false)

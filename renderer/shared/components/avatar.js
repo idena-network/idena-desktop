@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {margin, backgrounds, borderRadius} from 'polished'
-import theme, {rem} from '../theme'
 import {useColorMode} from '@chakra-ui/core'
+import theme, {rem} from '../theme'
 
 // eslint-disable-next-line react/prop-types
 function Avatar({username, size = 80, style}) {

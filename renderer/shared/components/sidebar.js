@@ -1,7 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
-import {margin, borderRadius, darken, lighten, transparentize, padding} from 'polished'
+import {
+  margin,
+  borderRadius,
+  darken,
+  lighten,
+  transparentize,
+  padding,
+} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {IconButton, useColorMode} from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
@@ -480,7 +487,9 @@ function UpdateButton({text, version, ...props}) {
       </button>
       <style jsx>{`
         button {
-          background: ${colorMode === "light" ? theme.colors.white : theme.colors.black};
+          background: ${colorMode === 'light'
+            ? theme.colors.white
+            : theme.colors.black};
           border: none;
           border-radius: 6px;
           color: ${theme.colors.muted};
@@ -495,7 +504,9 @@ function UpdateButton({text, version, ...props}) {
           color: ${theme.colors[colorMode].text};
         }
         button:hover {
-          background: ${colorMode === "light" ? darken(0.1, theme.colors.white) : lighten(0.1, theme.colors.black)};
+          background: ${colorMode === 'light'
+            ? darken(0.1, theme.colors.white)
+            : lighten(0.1, theme.colors.black)};
         }
         button:disabled {
           cursor: not-allowed;

@@ -3,8 +3,8 @@ import {margin, padding, wordWrap} from 'polished'
 import PropTypes from 'prop-types'
 import QRCode from 'qrcode.react'
 import {useTranslation} from 'react-i18next'
-import theme, {rem} from '../../../shared/theme'
 import {useColorMode} from '@chakra-ui/core'
+import theme, {rem} from '../../../shared/theme'
 import {Box, SubHeading, FormGroup, Field} from '../../../shared/components'
 
 function ReceiveForm({address}) {

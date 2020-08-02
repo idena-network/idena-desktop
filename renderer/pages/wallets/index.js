@@ -2,8 +2,8 @@ import React, {useEffect} from 'react'
 import {FiChevronRight} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
 
-import theme, {rem} from '../../shared/theme'
 import {useColorMode} from '@chakra-ui/core'
+import theme, {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {Box, Drawer, PageTitle, SubHeading} from '../../shared/components'
 import Flex from '../../shared/components/flex'
@@ -48,7 +48,9 @@ export default function Index() {
   return (
     <Layout syncing={syncing} offline={offline}>
       <Box px={theme.spacings.xxxlarge} py={theme.spacings.large}>
-        <PageTitle color={theme.colors[colorMode].text}>{t('Wallets')}</PageTitle>
+        <PageTitle color={theme.colors[colorMode].text}>
+          {t('Wallets')}
+        </PageTitle>
         <Box>
           {status === 'fetching' && (
             <Flex>
@@ -101,7 +103,9 @@ export default function Index() {
                 />
               </div>
 
-              <SubHeading color={theme.colors[colorMode].text}>{t('Recent transactions')}</SubHeading>
+              <SubHeading color={theme.colors[colorMode].text}>
+                {t('Recent transactions')}
+              </SubHeading>
 
               <FlatButton
                 color={theme.colors.primary}

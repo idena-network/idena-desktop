@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {useColorMode} from '@chakra-ui/core'
 import {Box} from '.'
 import theme from '../theme'
-import {useColorMode} from '@chakra-ui/core'
 
 function Divider({vertical, m = 0}) {
   const {colorMode} = useColorMode()
@@ -13,7 +13,12 @@ function Divider({vertical, m = 0}) {
       css={{width: '1px', height: '100%', minHeight: theme.fontSizes.large}}
     />
   ) : (
-    <Box bg={theme.colors[colorMode].gray2} my={m} w="100%" css={{height: '1px'}} />
+    <Box
+      bg={theme.colors[colorMode].gray2}
+      my={m}
+      w="100%"
+      css={{height: '1px'}}
+    />
   )
 }
 

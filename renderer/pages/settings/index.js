@@ -40,7 +40,6 @@ function Settings() {
   const {t} = useTranslation()
   const {addNotification} = useNotificationDispatch()
   const {runInternalNode, useExternalNode} = useSettingsState()
-  const {colorMode} = useColorMode()
   return (
     <SettingsLayout>
       {global.isDev && (
@@ -93,7 +92,10 @@ function Section({title, children}) {
   const {colorMode} = useColorMode()
   return (
     <Box my={rem(theme.spacings.medium32)}>
-      <SubHeading color={theme.colors[colorMode].text} css={margin(0, 0, theme.spacings.small, 0)}>
+      <SubHeading
+        color={theme.colors[colorMode].text}
+        css={margin(0, 0, theme.spacings.small, 0)}
+      >
         {title}
       </SubHeading>
       <Box my={rem(theme.spacings.small8)}>{children}</Box>

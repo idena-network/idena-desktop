@@ -113,7 +113,7 @@ function NormalApp({children}) {
       !shouldShowUpcomingValidationNotification(
         epoch,
         validationNotificationEpoch
-      )     
+      )
     ) {
       return
     }

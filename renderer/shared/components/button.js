@@ -2,7 +2,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {transparentize, darken} from 'polished'
-import {Button as ChakraButton, PseudoBox, Icon, useColorMode} from '@chakra-ui/core'
+import {
+  Button as ChakraButton,
+  PseudoBox,
+  Icon,
+  useColorMode,
+} from '@chakra-ui/core'
 import theme, {rem} from '../theme'
 import {Tooltip} from './tooltip'
 
@@ -142,26 +147,24 @@ IconButtonRef.propTypes = {
   danger: PropTypes.bool,
 }
 
-const BaseButton = React.forwardRef(
-  function (props, ref) {
-    const {colorMode} = useColorMode()
-    return(
-      <ChakraButton
-        ref={ref}
-        fontWeight={500}
-        h={8}
-        px={4}
-        py="3/2"
-        rounded="md"
-        _disabled={{
-          bg: colorMode === "light" ? 'gray.300' : 'gray.700',
-          color: 'rgb(150 153 158)',
-        }}
-        {...props}
-      />
-    )
-  }
-)
+const BaseButton = React.forwardRef(function(props, ref) {
+  const {colorMode} = useColorMode()
+  return (
+    <ChakraButton
+      ref={ref}
+      fontWeight={500}
+      h={8}
+      px={4}
+      py="3/2"
+      rounded="md"
+      _disabled={{
+        bg: colorMode === 'light' ? 'gray.300' : 'gray.700',
+        color: 'rgb(150 153 158)',
+      }}
+      {...props}
+    />
+  )
+})
 BaseButton.displayName = 'BaseButton'
 
 export const PrimaryButton = React.forwardRef((props, ref) => (
@@ -192,7 +195,7 @@ export function SecondaryButton(props) {
         outline: 'none',
       }}
       _disabled={{
-        bg: colorMode === "light" ? 'gray.50' : 'gray.800',
+        bg: colorMode === 'light' ? 'gray.50' : 'gray.800',
         color: 'rgb(150 153 158)',
       }}
       // eslint-disable-next-line react/destructuring-assignment

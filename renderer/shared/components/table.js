@@ -1,8 +1,8 @@
 /* eslint-disable react/jsx-curly-brace-presence */
 import React from 'react'
 import PropTypes from 'prop-types'
-import theme, {rem} from '../theme'
 import {useColorMode} from '@chakra-ui/core'
+import theme, {rem} from '../theme'
 
 export function Table({children, ...props}) {
   return (

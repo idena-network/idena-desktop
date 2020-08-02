@@ -34,6 +34,8 @@ const colors = {
     gray: 'rgb(26, 32, 44)',
     gray2: 'rgb(45, 55, 72)',
     gray4: 'rgb(45, 55, 72)',
+    danger: '(197, 48, 48)',
+    success: 'rgb(47, 133, 90)',
   },
   light: {
     text: 'rgb(83, 86, 92)',
@@ -41,7 +43,9 @@ const colors = {
     gray: 'rgb(245, 246, 247)',
     gray2: 'rgb(232, 234, 237)',
     gray4: 'rgb(210, 212, 217)',
-  }
+    danger: 'rgb(255, 102, 102)',
+    success: 'rgb(39, 217, 128)',
+  },
 }
 
 const baseFontSize = 16

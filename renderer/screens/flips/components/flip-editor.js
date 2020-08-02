@@ -926,7 +926,10 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   onClick={() => setShowColorPicker(!showColorPicker)}
                 />
 
-                <Divider borderColor={colorMode === "light" ? "gray.300" : "gray.700"} w={6} />
+                <Divider
+                  borderColor={colorMode === 'light' ? 'gray.300' : 'gray.700'}
+                  w={6}
+                />
               </>
             )}
 
@@ -960,7 +963,7 @@ function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
     <ChakraIconButton
       aria-label={tooltip}
       isDisabled={isDisabled}
-      bg={isActive ? colorMode === "light" ? 'gray.50' : 'gray.800' : 'unset'}
+      bg={isActive ? theme.colors[colorMode].gray : 'unset'}
       color={isActive ? 'brandBlue.500' : 'unset'}
       fontSize={rem(20)}
       size={6}

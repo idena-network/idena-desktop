@@ -5,6 +5,7 @@ import {margin, padding, borderRadius} from 'polished'
 import {useTranslation} from 'react-i18next'
 import Ansi from 'ansi-to-react'
 import {FiEye, FiEyeOff} from 'react-icons/fi'
+import {useColorMode} from '@chakra-ui/core'
 import {
   Box,
   Input,
@@ -15,7 +16,6 @@ import {
   SubHeading,
 } from '../../shared/components'
 import theme, {rem} from '../../shared/theme'
-import {useColorMode} from '@chakra-ui/core'
 import {FlatButton} from '../../shared/components/button'
 import Divider from '../../shared/components/divider'
 import Flex from '../../shared/components/flex'

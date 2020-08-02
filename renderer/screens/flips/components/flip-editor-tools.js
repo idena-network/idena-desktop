@@ -32,7 +32,7 @@ export function Brushes({brush, onChange}) {
           key={b}
           align="center"
           justify="center"
-          bg={brush === b ? colorMode === "light" ? 'gray.50' : 'gray.800' : 'unset'}
+          bg={brush === b ? theme.colors[colorMode].gray : 'unset'}
           rounded="md"
           size={6}
           onClick={() => onChange(b)}
@@ -91,7 +91,11 @@ export function ColorPicker({visible, color, onChange}) {
                       key={`${j}${j}`}
                       icon={
                         c === 'ffffff' ? (
-                          colorMode === "light" ? <FiCircle color={showColor} style={circleStyle} /> : <FaCircle color='ffffff' style={circleStyle} />
+                          colorMode === 'light' ? (
+                            <FiCircle color={showColor} style={circleStyle} />
+                          ) : (
+                            <FaCircle color="ffffff" style={circleStyle} />
+                          )
                         ) : (
                           <FaCircle color={showColor} style={circleStyle} />
                         )

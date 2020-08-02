@@ -2,10 +2,10 @@ import React, {forwardRef} from 'react'
 import PropTypes from 'prop-types'
 import {borderRadius} from 'polished'
 
+import {useColorMode} from '@chakra-ui/core'
 import {Box, Link} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
-import {useColorMode} from '@chakra-ui/core'
 import {FlatButton} from './button'
 
 import useHover from '../hooks/use-hover'
@@ -19,7 +19,7 @@ export function MenuItems({ref, ...props}) {
   const {colorMode} = useColorMode()
   return (
     <Box
-      bg={colorMode === "light" ? theme.colors.white : theme.colors.black}
+      bg={colorMode === 'light' ? theme.colors.white : theme.colors.black}
       py={theme.spacings.small}
       css={{
         ...borderRadius('top', '10px'),

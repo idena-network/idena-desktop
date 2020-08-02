@@ -1,9 +1,9 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {Box, Code, Flex, useToast, Divider, useColorMode} from '@chakra-ui/core'
-import theme from '../../shared/theme'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
+import theme from '../../shared/theme'
 import {Page} from '../../screens/app/components'
 import {
   FlipMaster,
@@ -144,7 +144,11 @@ export default function EditFlipPage() {
                   status: 'success',
                   // eslint-disable-next-line react/display-name
                   render: () => (
-                    <Toast bg={colorMode === "light" ? "white" : "black"} color={"brand." + colorMode + ".gray"} title={t('Flip has been saved to drafts')} />
+                    <Toast
+                      bg={colorMode === 'light' ? 'white' : 'black'}
+                      color={theme.colors[colorMode].text}
+                      title={t('Flip has been saved to drafts')}
+                    />
                   ),
                 })
               router.push('/flips/list')

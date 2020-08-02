@@ -28,7 +28,7 @@ import {
   DialogBody,
   DialogFooter,
 } from '../../shared/components/components'
-import {rem} from '../../shared/theme'
+import theme, {rem} from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
   mapToFriendlyStatus,
@@ -78,9 +78,16 @@ export function UserInlineCard({address, state}) {
 }
 
 export function UserStatList(props) {
-  const {colorMode} = useColorMode();
+  const {colorMode} = useColorMode()
   return (
-      <Stack spacing={4} bg={colorMode === "light" ? "gray.50" : "gray.800"} px={10} py={8} rounded="lg" {...props} />
+    <Stack
+      spacing={4}
+      bg={colorMode === 'light' ? 'gray.50' : 'gray.800'}
+      px={10}
+      py={8}
+      rounded="lg"
+      {...props}
+    />
   )
 }
 
@@ -202,7 +209,7 @@ export function SpoilInviteDrawer({children, ...props}) {
         <Heading
           fontSize="lg"
           fontWeight={500}
-          color={'brand.' + colorMode + '.gray'}
+          color={theme.colors[colorMode].text}
           mt={4}
           mb={0}
           textAlign="center"
@@ -365,9 +372,10 @@ export function MinerStatusSwitcher() {
         </div>
         <style jsx>{`
           .form-control {
-            border: solid 1px ${colorMode === "light" ? colors.gray[300] : colors.gray[600]};
+            border: solid 1px
+              ${colorMode === 'light' ? colors.gray[300] : colors.gray[600]};
             color: ${colors.brandGray[500]};
-            background: ${colorMode === "light" ? colors.white : colors.black};
+            background: ${colorMode === 'light' ? colors.white : colors.black};
             border-radius: 6px;
             font-size: 1em;
             padding: 0.5em 1em 0.65em;
