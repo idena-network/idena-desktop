@@ -182,12 +182,7 @@ export const uiTheme = {
     },
     muted: 'rgb(150, 153, 158)',
     brand: {
-      light: {
-        gray: 'rgb(83, 86, 92)',
-      },
-      dark: {
-        gray: 'rgb(226, 232, 240)',
-      },
+      gray: 'rgb(83, 86, 92)',
       blue: 'rgb(87, 143, 255)',
     },
     brandGray: {
