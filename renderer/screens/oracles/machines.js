@@ -53,3 +53,36 @@ export const votingListMachine = Machine(
     },
   }
 )
+
+export const createVotingMachine = () =>
+  Machine(
+    {
+      context: {},
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            CHANGE: {
+              target: 'dirty',
+              actions: ['onChange', log()],
+            },
+          },
+        },
+        dirty: {
+          on: {
+            CHANGE: {
+              actions: ['onChange', log()],
+            },
+          },
+        },
+      },
+    },
+    {
+      actions: {
+        onChange: assign((context, {name, value}) => ({
+          ...context,
+          [name]: value,
+        })),
+      },
+    }
+  )

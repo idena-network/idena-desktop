@@ -13,8 +13,13 @@ import {
   RadioGroup,
   Text,
 } from '@chakra-ui/core'
-import {DrawerHeader, DrawerBody} from '../../shared/components/components'
+import {
+  DrawerHeader,
+  DrawerBody,
+  Input,
+} from '../../shared/components/components'
 import {VotingStatus, FactAction} from '../../shared/types'
+import {rem} from '../../shared/theme'
 
 export function OracleDrawerHeader({
   icon,
@@ -160,5 +165,27 @@ export function VotingResultBar({value, action, ...props}) {
       <Text>{action}</Text>
       <Text fontWeight={500}>{`${value}%`}</Text>
     </Flex>
+  )
+}
+
+export function VotingInlineFormControl({label, children, ...props}) {
+  return (
+    <FormControl {...props}>
+      <Stack isInline spacing={5}>
+        <FormLabel w={rem(100)}>{label}</FormLabel>
+        {children}
+      </Stack>
+    </FormControl>
+  )
+}
+
+export function VotingOptionText({label, ...props}) {
+  return (
+    <FormControl {...props}>
+      <Flex align="center" justify="space-between">
+        <FormLabel color="muted">{label}</FormLabel>
+        <Input w="2xs" />
+      </Flex>
+    </FormControl>
   )
 }
