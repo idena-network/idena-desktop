@@ -222,7 +222,7 @@ export function DnaSendDialog({
       <DnaDialogBody>
         <DnaDialogSubtitle>
           {t(
-            `You’re about to send DNA from your wallet to the following address`
+            `You’re about to send iDNA from your wallet to the following address`
           )}
         </DnaDialogSubtitle>
         <DnaDialogAlert>
@@ -242,7 +242,7 @@ export function DnaSendDialog({
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
           <DnaDialogPanel>
-            <DnaDialogPanelLabel>{t('Amount')}, DNA</DnaDialogPanelLabel>
+            <DnaDialogPanelLabel>{t('Amount')}, iDNA</DnaDialogPanelLabel>
             <DnaDialogPanelValue
               color={
                 isExceededBalance ? theme.colors.danger : theme.colors.text
@@ -272,7 +272,7 @@ export function DnaSendDialog({
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
           <DnaDialogPanel
-            label={`${t('Available balance')}, DNA`}
+            label={`${t('Available balance')}, iDNA`}
             value={balance}
           />
           <DnaDialogPanelDivider />

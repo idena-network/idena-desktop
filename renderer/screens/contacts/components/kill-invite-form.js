@@ -73,7 +73,7 @@ function KillInvite({
       </FormGroup>
 
       <FormGroup>
-        <Field disabled label="Stake, DNA" value={stake} type="number" />
+        <Field disabled label="Stake, iDNA" value={stake} type="number" />
       </FormGroup>
 
       <FormGroup

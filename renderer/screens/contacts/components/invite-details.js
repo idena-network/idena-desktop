@@ -14,11 +14,14 @@ import ContactToolbar from './contact-toolbar'
 import {Figure} from '../../../shared/components/stat'
 import RenameInvite from './invite-form'
 import KillInvite from './kill-invite-form'
-
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
+import {toLocaleDna} from '../../../shared/utils/utils'
 
 function InviteDetails({dbkey, onClose, onSelect}) {
-  const {t} = useTranslation()
+  const {
+    t,
+    i18n: {language},
+  } = useTranslation()
   const [showRenameForm, setShowRenameForm] = useState(false)
   const [showKillInviteForm, setShowKillInviteForm] = useState(false)
   const {updateInvite, deleteInvite, recoverInvite} = useInviteDispatch()
@@ -57,6 +60,8 @@ function InviteDetails({dbkey, onClose, onSelect}) {
     ? t('Terminating...')
     : identity && mapToFriendlyStatus(identity.state)
 
+  const toDna = toLocaleDna(language)
+
   return (
     <div>
       <section>
@@ -90,7 +95,7 @@ function InviteDetails({dbkey, onClose, onSelect}) {
             !inviteIsExpired &&
             !mining && <Figure label={t('Address')} value={receiver} />}
 
-          {stake > 0 && <Figure label="Stake" value={`${stake} DNA`} />}
+          {stake > 0 && <Figure label="Stake" value={toDna(stake)} />}
 
           {!inviteIsExpired && !activated && (
             <WideField
