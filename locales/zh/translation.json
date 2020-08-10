@@ -305,5 +305,13 @@
   "Restart built-in node": "Restart built-in node",
   "You must specify your own identity address": "You must specify your own identity address",
   "Please enter your identity address to confirm termination. Stake will be transferred to the identity address.": "Please enter your identity address to confirm termination. Stake will be transferred to the identity address.",
-  "Your identity address": "Your identity address"
+  "Your identity address": "Your identity address",
+  "Paste": "Paste",
+  "Withraw stake, iDNA": "Withraw stake, iDNA",
+  "Receive iDNA’s": "Receive iDNA’s",
+  "Send iDNA’s": "Send iDNA’s",
+  "Amount, iDNA": "Amount, iDNA",
+  "Fee, iDNA": "Fee, iDNA",
+  "You’re about to send iDNA from your wallet to the following address": "You’re about to send iDNA from your wallet to the following address",
+  "{{numBlocks}} blocks left": "{{numBlocks}} blocks left"
 }
