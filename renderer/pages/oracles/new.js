@@ -21,7 +21,7 @@ import {
   IconButton2,
   SecondaryButton,
 } from '../../shared/components/button'
-import {createVotingMachine} from '../../screens/oracles/machines'
+import {newVotingMachine} from '../../screens/oracles/machines'
 import {
   VotingInlineFormControl,
   VotingOptionText,
@@ -32,7 +32,6 @@ export default function NewVoting() {
 
   const {isOpen: isOpenAdvanced, onToggle: onToggleAdvanced} = useDisclosure()
 
-  const newVotingMachine = React.useMemo(() => createVotingMachine(), [])
   const [current, send] = useMachine(newVotingMachine)
 
   return (
@@ -98,7 +97,7 @@ export default function NewVoting() {
                     send('CHANGE', {name, value})
                   }
                 >
-                  <Input type="date" name="votingStartDate" />
+                  <Input type="date" name="finishDate" />
                 </VotingInlineFormControl>
                 <IconButton2
                   icon="chevron-down"
