@@ -28,13 +28,20 @@ import {
   VotingFilterList,
   VotingResultBar,
 } from '../../screens/oracles/components'
+import {useEpochState} from '../../shared/providers/epoch-context'
 
 export default function VotingListPage() {
   const {t, i18n} = useTranslation()
 
   const router = useRouter()
 
-  const [current, send] = useMachine(votingListMachine)
+  const epoch = useEpochState()
+
+  const [current, send] = useMachine(votingListMachine, {
+    context: {
+      epoch: epoch?.epoch ?? 1,
+    },
+  })
   const {filteredVotings, filter} = current.context
 
   const toDna = toLocaleDna(i18n.language)
