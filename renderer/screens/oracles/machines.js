@@ -1,8 +1,9 @@
 import {Machine, assign} from 'xstate'
-import {log} from 'xstate/lib/actions'
+import {log, raise} from 'xstate/lib/actions'
 import {fetchVotings} from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
+import {epochDb} from '../../shared/utils/db'
 
 export const votingListMachine = Machine(
   {
@@ -50,20 +51,28 @@ export const votingListMachine = Machine(
   },
   {
     services: {
-      loadVotings: async () => fetchVotings(),
+      loadVotings: async ({epoch}) => {
+        console.log(await epochDb('votings', epoch).all())
+        return fetchVotings()
+      },
     },
   }
 )
 
 export const newVotingMachine = Machine(
   {
+    context: {
+      epoch: {
+        epoch: 1,
+      },
+    },
     initial: 'idle',
     states: {
       idle: {
         on: {
           CHANGE: {
             target: 'dirty',
-            actions: ['onChange', log()],
+            actions: [raise((_, e) => e)],
           },
         },
       },
@@ -79,22 +88,11 @@ export const newVotingMachine = Machine(
         },
       },
       publishing: {
-        initial: 'creatingVotingContent',
+        initial: 'deployingContract',
+        entry: ['onPublishing', log()],
         states: {
-          creatingVotingContent: {
-            invoke: {
-              src: 'createVotingContent',
-              onDone: {
-                target: 'deployingContract',
-                actions: [
-                  assign({
-                    cid: (_, cid) => cid,
-                  }),
-                ],
-              },
-            },
-          },
           deployingContract: {
+            initial: 'estimating',
             states: {
               estimating: {
                 invoke: {
@@ -124,6 +122,9 @@ export const newVotingMachine = Machine(
                       })),
                     ],
                   },
+                  onError: {
+                    actions: [log()],
+                  },
                 },
               },
             },
@@ -138,28 +139,40 @@ export const newVotingMachine = Machine(
         ...context,
         [name]: value,
       })),
+      onPublishing: ({epoch, ...voting}) => {
+        const db = epochDb('votings', epoch)
+        db.put(voting)
+      },
     },
     services: {
-      createVotingContent: ({title, desc}) =>
-        callRpc('ipfs_add', {title, desc}),
-      estimateDeployContract: ({cid, startDate}) =>
-        callRpc('dna_estimateDeployContract', {
+      estimateDeployContract: async ({epoch, ...voting}) => {
+        const db = epochDb('votings', epoch)
+        await db.put(voting)
+
+        const {cid, startDate} = voting
+        return callRpc('dna_estimateDeployContract', {
           codehash: '0x02',
           contractStake: 1000,
           args: [
             {index: 0, format: 'hex', value: cid},
             {index: 1, format: 'uint64', value: new Date(startDate).valueOf()},
           ],
-        }),
-      deployContract: ({cid, startDate}) =>
-        callRpc('dna_deployContract', {
+        })
+      },
+      deployContract: async ({epoch, ...voting}) => {
+        const db = epochDb('votings', epoch)
+        await db.put(voting)
+
+        const {cid, startDate} = voting
+        return callRpc('dna_deployContract', {
           codehash: '0x02',
           contractStake: 1000,
           args: [
             {index: 0, format: 'hex', value: cid},
             {index: 1, format: 'uint64', value: new Date(startDate).valueOf()},
           ],
-        }),
+        })
+      },
     },
   }
 )

@@ -26,13 +26,18 @@ import {
   VotingInlineFormControl,
   VotingOptionText,
 } from '../../screens/oracles/components'
+import {useEpochState} from '../../shared/providers/epoch-context'
 
 export default function NewVoting() {
   const {t} = useTranslation()
 
   const {isOpen: isOpenAdvanced, onToggle: onToggleAdvanced} = useDisclosure()
 
-  const [current, send] = useMachine(newVotingMachine)
+  const epoch = useEpochState()
+
+  const [current, send] = useMachine(newVotingMachine, {
+    context: {epoch: epoch.epoch},
+  })
 
   return (
     <Layout>
