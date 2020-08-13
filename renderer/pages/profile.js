@@ -1,6 +1,7 @@
 import React from 'react'
 import {Stack, Box, Text, Icon, useDisclosure, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
+import {useService} from '@xstate/react'
 import {
   useIdentityState,
   mapToFriendlyStatus,
@@ -39,7 +40,11 @@ import {persistItem} from '../shared/utils/persist'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {rem} from '../shared/theme'
 
-export default function ProfilePage() {
+// eslint-disable-next-line react/prop-types
+export default function ProfilePage({appService}) {
+  const [currentApp] = useService(appService)
+  console.log(currentApp?.context)
+
   const {
     t,
     i18n: {language},
