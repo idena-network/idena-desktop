@@ -1,6 +1,7 @@
 import {Machine, assign} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import {callRpc} from '../../shared/utils/utils'
+import {IdentityStatus} from '../../shared/types'
 
 const POLLING_INTERVAL = 1000 * 3
 
@@ -60,7 +61,7 @@ export const appMachine = Machine(
                   src: 'fetchChainState',
                   onDone: {
                     target: 'ready',
-                    actions: 'applyBlock',
+                    actions: ['applyBlock', log()],
                   },
                 },
               },
@@ -99,6 +100,26 @@ export const appMachine = Machine(
                         }),
                     ],
                   },
+                  TERMINATE_IDENTITY: {
+                    invoke: {
+                      src: async ({identity: {address: from}}, {to}) =>
+                        callRpc('dna_sendTransaction', {
+                          type: 3,
+                          from,
+                          to,
+                        }),
+                      onDone: {
+                        actions: [
+                          assign({
+                            identity: ({identity}) => ({
+                              ...identity,
+                              state: IdentityStatus.Terminating,
+                            }),
+                          }),
+                        ],
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -136,7 +157,14 @@ export const appMachine = Machine(
                 data: await Promise.all([
                   sync,
                   callRpc('dna_epoch'),
-                  callRpc('dna_identity'),
+                  (async () => {
+                    const identity = await callRpc('dna_identity')
+                    console.log(identity)
+                    return {
+                      ...identity,
+                      ...(await callRpc('dna_getBalance', identity.address)),
+                    }
+                  })(),
                   callRpc('dna_ceremonyIntervals'),
                 ]),
               })
@@ -154,7 +182,13 @@ export const appMachine = Machine(
         Promise.all([
           sync,
           callRpc('dna_epoch'),
-          callRpc('dna_identity'),
+          (async () => {
+            const identity = await callRpc('dna_identity')
+            return {
+              ...identity,
+              ...(await callRpc('dna_getBalance', identity.address)),
+            }
+          })(),
           callRpc('dna_ceremonyIntervals'),
         ]),
       fetchIdentity: () => callRpc('dna_identity'),
@@ -165,11 +199,61 @@ export const appMachine = Machine(
         sync: sync || data,
       })),
       applyBlock: assign(
-        (context, {data: [sync, epoch, identity, ceremonyIntervals]}) => ({
+        (
+          context,
+          {
+            data: [
+              sync,
+              epoch,
+              identity,
+              {
+                ValidationInterval: validation,
+                FlipLotteryDuration: flipLottery,
+                ShortSessionDuration: shortSession,
+                LongSessionDuration: longSession,
+              },
+            ],
+          }
+        ) => ({
           ...context,
           epoch,
-          identity,
-          ceremonyIntervals,
+          identity: {
+            ...identity,
+            state:
+              context.identity?.state === IdentityStatus.Terminating &&
+              identity.state !== IdentityStatus.Undefined
+                ? context.identity.state
+                : identity.state,
+            canActivateInvite: [
+              IdentityStatus.Undefined,
+              IdentityStatus.Invite,
+            ].includes(identity.state),
+            canSubmitFlip:
+              [
+                IdentityStatus.Newbie,
+                IdentityStatus.Verified,
+                IdentityStatus.Human,
+              ].includes(identity.state) &&
+              identity.requiredFlips > 0 &&
+              (identity.flips || []).length < identity.availableFlips,
+            canTerminate: [
+              IdentityStatus.Verified,
+              IdentityStatus.Suspended,
+              IdentityStatus.Zombie,
+              IdentityStatus.Human,
+            ].includes(identity.state),
+            canMine: [
+              IdentityStatus.Newbie,
+              IdentityStatus.Verified,
+              IdentityStatus.Human,
+            ].includes(identity.state),
+          },
+          ceremonyIntervals: {
+            validation,
+            flipLottery,
+            shortSession,
+            longSession,
+          },
           prevBlock: sync.highestBlock,
         })
       ),

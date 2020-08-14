@@ -7,7 +7,7 @@ import Sidebar from './sidebar'
 import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {useDebounce} from '../hooks/use-debounce'
-import {EpochPeriod, useEpochState} from '../providers/epoch-context'
+import {useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/utils'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
@@ -24,6 +24,7 @@ import {
   LayoutContainer,
   UpdateExternalNodeDialog,
 } from '../../screens/app/components'
+import {EpochPeriod} from '../types'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
