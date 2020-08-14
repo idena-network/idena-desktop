@@ -8,7 +8,7 @@ import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
 import {useIdentityState} from '../providers/identity-context'
-import {useEpochState, EpochPeriod} from '../providers/epoch-context'
+import {useEpochState} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
 import {
   useAutoUpdateState,
@@ -19,7 +19,7 @@ import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
 import {pluralize} from '../utils/string'
 import {parsePersistedValidationState} from '../../screens/validation/utils'
-import {IdentityStatus} from '../types'
+import {IdentityStatus, EpochPeriod} from '../types'
 
 function Sidebar() {
   return (
