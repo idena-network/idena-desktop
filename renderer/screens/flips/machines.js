@@ -31,6 +31,21 @@ export const flipsMachine = Machine(
           assign({
             flips: [],
           }),
+          ({epoch: {epoch}}) => {
+            console.log(epoch)
+            // if (didValidate(epoch) && !didArchiveFlips(epoch)) {
+            //   archiveFlips()
+            //   markFlipsArchived(epoch)
+            // }
+            // if (
+            //   shouldExpectValidationResults(epoch) &&
+            //   !hasPersistedValidationResults(epoch)
+            // ) {
+            //   persistItem('validationResults', epoch, {
+            //     epochStart: new Date().toISOString(),
+            //   })
+            // }
+          },
         ],
       },
     },
