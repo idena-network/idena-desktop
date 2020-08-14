@@ -13,6 +13,7 @@ import {
   archiveFlips,
 } from '../../screens/flips/utils'
 import {persistItem} from '../utils/persist'
+import {useAppMachine} from './app-context'
 
 export const EpochPeriod = {
   FlipLottery: 'FlipLottery',
@@ -98,11 +99,8 @@ export function EpochProvider({children}) {
 }
 
 export function useEpochState() {
-  const context = React.useContext(EpochStateContext)
-  if (context === undefined) {
-    throw new Error('EpochState must be used within a EpochProvider')
-  }
-  return context
+  const [{context}] = useAppMachine()
+  return context.epoch
 }
 
 export function useEpochDispatch() {

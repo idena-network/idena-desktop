@@ -56,13 +56,13 @@ import {
 import {createTimerMachine} from '../../shared/machines'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 
-export function UserInlineCard({address, state}) {
+export function UserInlineCard({address, status}) {
   return (
     <Stack isInline spacing={6} align="center" mb={6} width={rem(480)}>
       <Avatar address={address} />
       <Stack spacing={1}>
         <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
-          {mapToFriendlyStatus(state)}
+          {mapToFriendlyStatus(status)}
         </Heading>
         <Heading
           as="h3"
