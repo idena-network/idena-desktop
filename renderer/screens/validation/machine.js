@@ -18,11 +18,12 @@ import {
   readyNotFetchedFlip,
   availableExtraFlip,
   failedFlip,
-  readyFlip,
   hasEnoughAnswers,
   missingHashes,
   exponentialBackoff,
   shouldTranslate,
+  shouldPollLongFlips,
+  readyFlip,
 } from './utils'
 import {forEachAsync, wait} from '../../shared/utils/fn'
 import {fetchConfirmedKeywordTranslations} from '../flips/utils'
@@ -433,41 +434,56 @@ export const createValidationMachine = ({
                   entry: log('Start fetching long flips'),
                   states: {
                     fetchHashes: {
-                      initial: 'fetching',
-                      states: {
-                        fetching: {
-                          entry: log('Fetching long hashes'),
-                          invoke: {
-                            src: 'fetchLongHashes',
-                            onDone: {
-                              target:
-                                '#validation.longSession.fetch.flips.fetchFlips',
-                              actions: [
-                                assign({
-                                  longFlips: (_, {data}) =>
-                                    data.filter(readyFlip),
-                                }),
-                                log(),
-                              ],
-                            },
-                            onError: {
-                              target: 'fail',
-                              actions: log(),
-                            },
-                          },
+                      entry: log('Fetching long hashes'),
+                      invoke: {
+                        src: 'fetchLongHashes',
+                        onDone: {
+                          target: 'fetchFlips',
+                          actions: [
+                            assign({
+                              longFlips: ({longFlips}, {data}) =>
+                                mergeFlipsByHash(
+                                  ...(longFlips.length
+                                    ? [longFlips, data]
+                                    : [data, longFlips])
+                                ),
+                            }),
+                            log(),
+                          ],
                         },
-                        fail: {},
+                        onError: {
+                          target: 'fetchFlips',
+                          actions: log(),
+                        },
                       },
                     },
                     fetchFlips: {
                       invoke: {
                         src: 'fetchLongFlips',
-                        onDone: {
-                          target: 'detectMissing',
-                          actions: assign({
-                            retries: ({retries}) => retries + 1,
-                          }),
-                        },
+                        onDone: [
+                          {
+                            target: 'enqueueNextFetch',
+                            actions: [
+                              assign({
+                                retries: ({retries}) => retries + 1,
+                              }),
+                            ],
+                            // eslint-disable-next-line no-shadow
+                            cond: ({longFlips, validationStart}) =>
+                              shouldPollLongFlips(longFlips, {
+                                validationStart,
+                                shortSessionDuration,
+                              }),
+                          },
+                          {
+                            target: 'detectMissing',
+                          },
+                        ],
+                      },
+                    },
+                    enqueueNextFetch: {
+                      after: {
+                        5000: 'fetchHashes',
                       },
                     },
                     detectMissing: {
@@ -550,6 +566,24 @@ export const createValidationMachine = ({
                             })),
                         }),
                         log('Re-fetch long flips after rebooting the app'),
+                      ],
+                    },
+                  },
+                  after: {
+                    FINALIZE_LONG_FLIPS: {
+                      target: '.done',
+                      actions: [
+                        assign({
+                          longFlips: ({longFlips}) =>
+                            mergeFlipsByHash(
+                              longFlips,
+                              longFlips.filter(failedFlip).map(flip => ({
+                                ...flip,
+                                failed: true,
+                              }))
+                            ),
+                        }),
+                        log(),
                       ],
                     },
                   },
@@ -658,7 +692,8 @@ export const createValidationMachine = ({
                       {
                         target: '.lastFlip',
                         cond: ({longFlips, currentIndex}) =>
-                          currentIndex === longFlips.length - 2,
+                          currentIndex ===
+                          longFlips.filter(readyFlip).length - 2,
                         actions: [
                           assign({
                             currentIndex: ({currentIndex}) => currentIndex + 1,
@@ -692,7 +727,7 @@ export const createValidationMachine = ({
                       {
                         target: '.lastFlip',
                         cond: ({longFlips}, {index}) =>
-                          index === longFlips.length - 1,
+                          index === longFlips.filter(readyFlip).length - 1,
                         actions: [
                           assign({
                             currentIndex: (_, {index}) => index,
@@ -864,13 +899,15 @@ export const createValidationMachine = ({
         fetchShortFlips: ({shortFlips}) => cb =>
           fetchFlips(
             shortFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
-            cb
+            cb,
+            1000
           ),
         fetchLongHashes: () => fetchFlipHashes(SessionType.Long),
         fetchLongFlips: ({longFlips}) => cb =>
           fetchFlips(
-            longFlips.map(({hash}) => hash),
-            cb
+            longFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
+            cb,
+            3000
           ),
         // eslint-disable-next-line no-shadow
         fetchTranslations: ({longFlips, currentIndex, locale}) =>
@@ -900,6 +937,15 @@ export const createValidationMachine = ({
           adjustDuration(
             validationStart,
             shortSessionDuration - 10 + longSessionDuration
+          ) * 1000,
+        // eslint-disable-next-line no-shadow
+        FINALIZE_LONG_FLIPS: ({validationStart, shortSessionDuration}) =>
+          Math.max(
+            adjustDuration(
+              validationStart,
+              shortSessionDuration + (global.env.FINALIZE_LONG_FLIPS || 120)
+            ),
+            5
           ) * 1000,
       },
       actions: {
@@ -948,7 +994,7 @@ export const createValidationMachine = ({
     }
   )
 
-function fetchFlips(hashes, cb) {
+function fetchFlips(hashes, cb, delay = 1000) {
   global.logger.debug(`Calling flip_get rpc for hashes`, hashes)
   return forEachAsync(hashes, hash =>
     fetchFlip(hash)
@@ -964,6 +1010,7 @@ function fetchFlips(hashes, cb) {
           },
         })
       })
+      .then(() => wait(delay))
       .catch(() => {
         global.logger.debug(`Catch flip_get reject`, hash)
         cb({

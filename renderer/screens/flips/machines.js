@@ -353,7 +353,11 @@ export const flipMachine = Machine(
           },
         },
       },
-      published: {},
+      published: {
+        on: {
+          DELETE: 'deleting',
+        },
+      },
       deleting: {
         initial: 'submitting',
         states: {
@@ -423,7 +427,11 @@ export const flipMachine = Machine(
           },
         },
       },
-      deleted: {},
+      deleted: {
+        on: {
+          PUBLISH: 'publishing',
+        },
+      },
       invalid: {},
       removed: {
         type: 'final',
@@ -886,12 +894,34 @@ export const createViewFlipMachine = id =>
           invoke: {
             src: 'loadFlip',
             onDone: {
-              target: 'loaded',
+              target: 'fetchingTranslations',
               actions: [
                 assign((context, {data}) => ({...context, ...data})),
                 log(),
               ],
             },
+          },
+        },
+        fetchingTranslations: {
+          invoke: {
+            src: 'loadTranslations',
+            onDone: {
+              target: 'loaded',
+              actions: [
+                assign({
+                  keywords: ({keywords}, {data}) => ({
+                    ...keywords,
+                    translations: data,
+                  }),
+                  showTranslation: ({locale}, {data}) =>
+                    locale.toLowerCase() !== 'en' &&
+                    data?.every(w => w?.some(t => t?.confirmed)),
+                }),
+                send('LOADED'),
+                log(),
+              ],
+            },
+            onError: 'loaded',
           },
         },
         loaded: {
@@ -904,6 +934,13 @@ export const createViewFlipMachine = id =>
                 }),
                 'onDeleted',
                 'persistFlip',
+              ],
+            },
+            SWITCH_LOCALE: {
+              actions: [
+                assign({
+                  showTranslation: ({showTranslation}) => !showTranslation,
+                }),
               ],
             },
           },
@@ -954,6 +991,11 @@ export const createViewFlipMachine = id =>
     {
       services: {
         deleteFlip: async ({hash}) => callRpc('flip_delete', hash),
+        loadTranslations: async ({keywords, locale}) =>
+          fetchKeywordTranslations(
+            (keywords?.words ?? []).map(({id: wordId}) => wordId),
+            locale
+          ),
       },
       actions: {
         persistFlip: context => {

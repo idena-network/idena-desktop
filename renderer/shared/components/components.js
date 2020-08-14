@@ -17,11 +17,32 @@ import {
   AlertTitle,
   AlertDescription,
   AlertIcon,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Stack,
+  Box,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 
+export function FloatDebug({children, ...props}) {
+  return (
+    <Box position="absolute" left={6} bottom={6} zIndex="popover" {...props}>
+      <Debug>{children}</Debug>
+    </Box>
+  )
+}
+
 export function Debug({children}) {
-  return <Code>{JSON.stringify(children, null, 2)}</Code>
+  return (
+    <Code whiteSpace="pre" borderRadius="md" p={2}>
+      {JSON.stringify(children, null, 2)}
+    </Code>
+  )
 }
 
 export function Drawer({children, ...props}) {
@@ -104,6 +125,7 @@ export function Toast({
       status={status}
       bg="white"
       boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
+      color="brandGray.500"
       fontSize="md"
       pl={4}
       pr={5}
@@ -124,5 +146,49 @@ export function Toast({
         </AlertDescription>
       </Flex>
     </Alert>
+  )
+}
+
+export function Dialog({
+  title,
+  children,
+  shouldShowCloseButton = false,
+  ...props
+}) {
+  return (
+    <Modal isCentered size="sm" {...props}>
+      <ModalOverlay bg="xblack.080" />
+      <ModalContent
+        bg="white"
+        color="brandGray.500"
+        fontSize="md"
+        p={8}
+        pt={6}
+        my={0}
+        rounded="lg"
+      >
+        {title && <DialogHeader>{title}</DialogHeader>}
+        {shouldShowCloseButton && <ModalCloseButton />}
+        {children}
+      </ModalContent>
+    </Modal>
+  )
+}
+
+export function DialogHeader(props) {
+  return <ModalHeader p={0} mb={2} fontSize="lg" fontWeight={500} {...props} />
+}
+
+export function DialogBody(props) {
+  return <ModalBody p={0} mb={6} {...props} />
+}
+
+export function DialogFooter({children, ...props}) {
+  return (
+    <ModalFooter p={0} {...props}>
+      <Stack isInline spacing={2} justify="flex-end">
+        {children}
+      </Stack>
+    </ModalFooter>
   )
 }

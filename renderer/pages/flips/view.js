@@ -34,6 +34,7 @@ import {rem} from '../../shared/theme'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {Toast} from '../../shared/components/components'
 import {FlipType} from '../../shared/types'
+import {DEFAULT_FLIP_ORDER} from '../../screens/flips/utils'
 
 export default function ViewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -58,35 +59,22 @@ export default function ViewFlipPage() {
   const [current, send] = useMachine(viewMachine, {
     services: {
       // eslint-disable-next-line no-shadow
-      loadFlip: async ({id, keywords}) => {
-        const {
-          hint,
-          // eslint-disable-next-line no-shadow
-          keywords: persistedKeywords,
-          keywordPairId = hint ? Math.max(hint.id, 0) : 0,
-          pics,
-          compressedPics,
-          // eslint-disable-next-line no-shadow
-          images = compressedPics || pics,
-          editorIndexes,
-          // eslint-disable-next-line no-shadow
-          originalOrder,
-          ...flip
-        } = global.flipStore?.getFlip(id)
+      loadFlip: async ({id}) => {
+        const {hint, pics, compressedPics, ...flip} = global.flipStore?.getFlip(
+          id
+        )
 
-        return {
-          ...flip,
-          keywordPairId,
-          keywords: {
-            ...keywords,
-            ...(persistedKeywords || {
-              words: hint.words,
-              translations: [],
-            }),
-          },
-          images,
-          originalOrder: originalOrder || editorIndexes,
-        }
+        return hint
+          ? {
+              ...flip,
+              keywords: {
+                words: hint.words,
+                translations: [],
+              },
+              images: compressedPics || pics,
+              originalOrder: DEFAULT_FLIP_ORDER,
+            }
+          : flip
       },
     },
     actions: {
@@ -144,6 +132,7 @@ export default function ViewFlipPage() {
                         showTranslation={showTranslation}
                         locale={i18n.language}
                         isInline={false}
+                        onSwitchLocale={() => send('SWITCH_LOCALE')}
                       />
                     ) : (
                       <FlipKeyword>
@@ -203,14 +192,18 @@ export default function ViewFlipPage() {
           </FlipMasterFooter>
         )}
 
-        <DeleteFlipDrawer
-          isOpen={isOpenDeleteForm}
-          onClose={onCloseDeleteForm}
-          onDelete={() => {
-            send('DELETE')
-            onCloseDeleteForm()
-          }}
-        />
+        {current.matches('loaded') && (
+          <DeleteFlipDrawer
+            hash={hash}
+            cover={images[originalOrder[0]]}
+            isOpen={isOpenDeleteForm}
+            onClose={onCloseDeleteForm}
+            onDelete={() => {
+              send('DELETE')
+              onCloseDeleteForm()
+            }}
+          />
+        )}
       </Page>
       {global.isDev && (
         <Box position="absolute" left={6} bottom={6} zIndex="popover">

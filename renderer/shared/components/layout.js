@@ -2,12 +2,10 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {margin} from 'polished'
-import {Flex} from '@chakra-ui/core'
+import {Flex, Text} from '@chakra-ui/core'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
-import {GlobalModals} from './modal'
 import {useDebounce} from '../hooks/use-debounce'
 import {EpochPeriod, useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/utils'
@@ -21,14 +19,15 @@ import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
 } from '../providers/update-context'
-import Button from './button'
-import {BlockText} from './typo'
-import theme, {rem} from '../theme'
-import {LayoutContainer} from '../../screens/app/components'
+import {PrimaryButton} from './button'
+import {
+  LayoutContainer,
+  UpdateExternalNodeDialog,
+} from '../../screens/app/components'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
-const AVAILABLE_TIMEOUT = global.isDev ? 0 : 1000 * 5
+const AVAILABLE_TIMEOUT = global.isDev || global.isTest ? 0 : 1000 * 5
 
 export default function Layout({
   loading,
@@ -61,10 +60,7 @@ export default function Layout({
       <Sidebar />
       {loading && <LoadingApp />}
       {!loading && !skipHardForkScreen && mustUpdateNode ? (
-        <>
-          <HardForkScreen version={nodeRemoteVersion} onUpdate={updateNode} />
-          <GlobalModals />
-        </>
+        <HardForkScreen version={nodeRemoteVersion} onUpdate={updateNode} />
       ) : (
         <>
           {!loading && debouncedSyncing && !debouncedOffline && <SyncingApp />}
@@ -87,6 +83,8 @@ export default function Layout({
           )}
         </>
       )}
+
+      <UpdateExternalNodeDialog />
     </LayoutContainer>
   )
 }
@@ -141,8 +139,6 @@ function NormalApp({children}) {
 
       <Notifications />
 
-      <GlobalModals />
-
       <DnaLinkHandler>
         <DnaSendDialog
           isOpen={url => new URL(url).pathname.includes('send')}
@@ -184,24 +180,18 @@ function showWindowNotification(title, notificationBody, onclick) {
   return true
 }
 
-// eslint-disable-next-line react/prop-types
-export function HardForkScreen({version, onUpdate}) {
+function HardForkScreen({version, onUpdate}) {
   const {t} = useTranslation()
 
   return (
-    <Flex align="center" justify="center" flex={1} background="graphite.500">
+    <Flex align="center" justify="center" flex={1} background="brandGray.500">
       <Flex direction="column">
-        <BlockText
-          color={theme.colors.white}
-          fontWeight={500}
-          fontSize={rem(18)}
-          css={{...margin(0, 0, rem(20))}}
-        >
+        <Text color="white" fontSize="md" fontWeight={500} mb={5}>
           {t('Your node is outdated because of the hard fork, please update')}
-        </BlockText>
-        <Button variant="primary" onClick={onUpdate}>
+        </Text>
+        <PrimaryButton onClick={onUpdate}>
           {t('Update Node Version')} {version}
-        </Button>
+        </PrimaryButton>
       </Flex>
     </Flex>
   )

@@ -33,7 +33,6 @@ import {
 } from '@chakra-ui/core'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
-import dayjs from 'dayjs'
 import {transparentize} from 'polished'
 import {useService} from '@xstate/react'
 import FlipEditor from './components/flip-editor'
@@ -88,7 +87,9 @@ export function FlipCard({flipService, onDelete}) {
   return (
     <Box position="relative">
       <FlipCardImageBox>
-        {[FlipType.Publishing, FlipType.Invalid].includes(type) && (
+        {[FlipType.Publishing, FlipType.Deleting, FlipType.Invalid].some(
+          x => x === type
+        ) && (
           <FlipOverlay
             backgroundImage={
               // eslint-disable-next-line no-nested-ternary
@@ -124,7 +125,7 @@ export function FlipCard({flipService, onDelete}) {
               : t('Missing keywords')}
           </FlipCardTitle>
           <FlipCardSubtitle>
-            {dayjs(createdAt).format('D.MM.YYYY, H:mm')}
+            {new Date(createdAt).toLocaleString()}
           </FlipCardSubtitle>
         </Box>
         {isActionable && (
@@ -1030,6 +1031,11 @@ export function CommunityTranslations({
 
   const [wordIdx, setWordIdx] = React.useState(0)
 
+  const [
+    descriptionCharactersCount,
+    setDescriptionCharactersCount,
+  ] = React.useState(150)
+
   const translations = keywords.translations[wordIdx]
 
   const lastTranslationId =
@@ -1126,6 +1132,8 @@ export function CommunityTranslations({
                     color: 'muted',
                   }}
                 />
+              </FormControl>
+              <FormControl position="relative">
                 <Textarea
                   id="descInput"
                   placeholder={
@@ -1141,7 +1149,20 @@ export function CommunityTranslations({
                   _placeholder={{
                     color: 'muted',
                   }}
+                  onChange={e =>
+                    setDescriptionCharactersCount(150 - e.target.value.length)
+                  }
                 />
+                <Box
+                  color={descriptionCharactersCount < 0 ? 'red.500' : 'muted'}
+                  fontSize="sm"
+                  position="absolute"
+                  right={2}
+                  bottom={2}
+                  zIndex="docked"
+                >
+                  {descriptionCharactersCount}
+                </Box>
               </FormControl>
               <PrimaryButton
                 type="submit"

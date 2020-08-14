@@ -1,11 +1,15 @@
 /* eslint-disable react/prop-types */
 import {useMachine} from '@xstate/react'
-import Link from 'next/link'
 import {useMemo, useEffect, useState} from 'react'
 import {useRouter} from 'next/router'
 import {padding, margin} from 'polished'
 import {FiCheck, FiThumbsDown} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
+import {
+  Flex as ChakraFlex,
+  Text as ChakraText,
+  IconButton,
+} from '@chakra-ui/core'
 import {
   createValidationMachine,
   RelevanceType,
@@ -16,6 +20,7 @@ import {
   filterRegularFlips,
   filterSolvableFlips,
   rearrangeFlips,
+  readyFlip,
 } from '../../screens/validation/utils'
 import {
   ValidationScene,
@@ -23,7 +28,6 @@ import {
   Thumbnails,
   Header,
   Title,
-  SessionTitle,
   FlipChallenge,
   CurrentStep,
   Flip,
@@ -42,14 +46,14 @@ import {
   FailedFlipAnnotation,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
-import {IconClose, Button, Tooltip, Box, Text} from '../../shared/components'
+import {Tooltip, Box, Text} from '../../shared/components'
 import {AnswerType} from '../../shared/types'
-import {Debug} from '../../shared/components/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'
-
 import {addWheelHandler} from '../../shared/utils/mouse'
 import Flex from '../../shared/components/flex'
+import {PrimaryButton} from '../../shared/components/button'
+import {FloatDebug} from '../../shared/components/components'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -123,31 +127,37 @@ function ValidationSession({
       bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
     >
       <Header>
-        {!isLongSessionKeywords(state) &&
-        !state.matches('validationSucceeded') ? (
-          <SessionTitle
-            color={
-              isShortSession(state) ? theme.colors.white : theme.colors.text
-            }
-            current={currentIndex + 1}
-            total={sessionFlips(state).length}
-          />
-        ) : (
+        <Title color={isShortSession(state) ? 'white' : 'brandGray.500'}>
+          {['shortSession', 'longSession'].some(state.matches) &&
+          !isLongSessionKeywords(state)
+            ? t('Select meaningful story: left or right', {nsSeparator: '!'})
+            : t('Check flips quality')}
+        </Title>
+        <ChakraFlex align="center">
           <Title
-            color={
-              isShortSession(state) ? theme.colors.white : theme.colors.text
-            }
+            color={isShortSession(state) ? 'white' : 'brandGray.500'}
+            mr={6}
           >
-            Check flips quality
+            {currentIndex + 1}{' '}
+            <ChakraText as="span" color="muted">
+              out of {sessionFlips(state).length}
+            </ChakraText>
           </Title>
-        )}
-        {state.matches('longSession') && (
-          <Link href="/profile">
-            <a>
-              <IconClose color={theme.colors.black} size={rem(20)} />
-            </a>
-          </Link>
-        )}
+
+          <IconButton
+            icon="fullscreen"
+            bg={isShortSession(state) ? 'brandGray.060' : 'gray.300'}
+            color={isShortSession(state) ? 'white' : 'brandGray.500'}
+            borderRadius="lg"
+            fontSize={rem(20)}
+            w={10}
+            h={10}
+            _hover={{
+              bg: isShortSession(state) ? 'brandGray.060' : 'gray.300',
+            }}
+            onClick={global.toggleFullScreen}
+          />
+        </ChakraFlex>
       </Header>
       <CurrentStep>
         <FlipChallenge>
@@ -206,7 +216,7 @@ function ValidationSession({
                     {currentFlip.relevance === RelevanceType.Relevant && (
                       <FiCheck size={rem(16)} fontSize={rem(13)} />
                     )}
-                    Both relevant
+                    {t('Both relevant')}
                   </QualificationButton>
                   <Tooltip
                     content={
@@ -264,7 +274,7 @@ function ValidationSession({
                       }
                     >
                       <FiThumbsDown size={rem(16)} fontSize={rem(13)} />
-                      Report
+                      {t('Report')}
                     </QualificationButton>
                   </Tooltip>
                 </QualificationActions>
@@ -290,26 +300,26 @@ function ValidationSession({
               content={
                 hasAllRelevanceMarks(state) || isLastFlip(state)
                   ? null
-                  : 'Go to last flip'
+                  : t('Go to last flip')
               }
             >
-              <Button
-                disabled={!canSubmit(state)}
+              <PrimaryButton
+                isDisabled={!canSubmit(state)}
+                isLoading={isSubmitting(state)}
+                loadingText={t('Submitting answers...')}
                 onClick={() => send('SUBMIT')}
               >
-                {isSubmitting(state)
-                  ? 'Submitting answers...'
-                  : 'Submit answers'}
-              </Button>
+                {t('Submit answers')}
+              </PrimaryButton>
             </Tooltip>
           )}
           {isLongSessionFlips(state) && (
-            <Button
-              disabled={!canSubmit(state)}
+            <PrimaryButton
+              isDisabled={!canSubmit(state)}
               onClick={() => send('FINISH_FLIPS')}
             >
-              Start checking keywords
-            </Button>
+              {t('Start checking keywords')}
+            </PrimaryButton>
           )}
         </ActionBarItem>
       </ActionBar>
@@ -384,7 +394,7 @@ function ValidationSession({
         />
       )}
 
-      {global.isDev && <Debug>{JSON.stringify(state.value, null, 2)}</Debug>}
+      {global.isDev && <FloatDebug>{state.value}</FloatDebug>}
     </ValidationScene>
   )
 }
@@ -458,7 +468,7 @@ function sessionFlips(state) {
   } = state
   return isShortSession(state)
     ? rearrangeFlips(filterRegularFlips(shortFlips))
-    : rearrangeFlips(longFlips)
+    : rearrangeFlips(longFlips.filter(readyFlip))
 }
 
 function hasAllAnswers(state) {

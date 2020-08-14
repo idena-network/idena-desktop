@@ -2,14 +2,13 @@ import React from 'react'
 import {margin} from 'polished'
 import QRCode from 'qrcode.react'
 import {useTranslation} from 'react-i18next'
+import {Flex as ChakraFlex, Text} from '@chakra-ui/core'
 import {
   Box,
   SubHeading,
   Input,
   Label,
   Button,
-  Modal,
-  Text,
   Field,
   Select,
 } from '../../shared/components'
@@ -26,6 +25,13 @@ import {
 } from '../../shared/providers/settings-context'
 import {AVAILABLE_LANGS} from '../../i18n'
 import {archiveFlips} from '../../screens/flips/utils'
+import {
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+} from '../../shared/components/components'
+import {SecondaryButton} from '../../shared/components/button'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -106,7 +112,7 @@ function ExportPK() {
 
   return (
     <Section title={t('Export private key')}>
-      <Text css={{marginBottom: 10}}>
+      <Text mb={2}>
         {t('Create a new password to export your private key')}
       </Text>
       <form
@@ -133,21 +139,21 @@ function ExportPK() {
           </Button>
         </Flex>
       </form>
-      <PkDialog show={showDialog} onHide={() => setShowDialog(false)}>
-        <Box
-          css={{
-            ...margin(rem(theme.spacings.medium24)),
-            textAlign: 'center',
-          }}
-        >
+      <PkDialog isOpen={showDialog} onClose={() => setShowDialog(false)}>
+        <Text>
+          {t(
+            'Scan QR by your mobile phone or copy code below for export privatekey.'
+          )}
+        </Text>
+        <ChakraFlex justify="center" mx="auto" my={8}>
           <QRCode value={pk} />
-        </Box>
+        </ChakraFlex>
         <Box>
           <Field
             id="pk"
             label={t('Encrypted private key')}
             defaultValue={pk}
-            readonly
+            readOnly
             disabled
             allowCopy
           />
@@ -230,25 +236,16 @@ function ImportPK() {
 }
 
 // eslint-disable-next-line react/prop-types
-function PkDialog({children, onHide, ...props}) {
+function PkDialog({onClose, children, ...props}) {
   const {t} = useTranslation()
   return (
-    <Modal onHide={onHide} {...props}>
-      <Box m="0 0 18px">
-        <SubHeading>{t('Encrypted private key')}</SubHeading>
-        <Text>
-          {t(
-            'Scan QR by your mobile phone or copy code below for export privatekey.'
-          )}
-        </Text>
-        {children}
-      </Box>
-      <Flex align="center" justify="flex-end">
-        <Button variant="secondary" onClick={onHide}>
-          {t('Close')}
-        </Button>
-      </Flex>
-    </Modal>
+    <Dialog onClose={onClose} {...props}>
+      <DialogHeader>{t('Encrypted private key')}</DialogHeader>
+      <DialogBody>{children}</DialogBody>
+      <DialogFooter>
+        <SecondaryButton onClick={onClose}>{t('Close')}</SecondaryButton>
+      </DialogFooter>
+    </Dialog>
   )
 }
 

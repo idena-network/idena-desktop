@@ -18,7 +18,7 @@
     "test": "jest",
     "i18n": "npm run i18n:clean && npm run i18n:scan",
     "i18n:scan": "i18next-scanner",
-    "i18n:clean": "rm -rf locales/en locales/id locales/fr locales/de locales/es locales/ru locales/zh locales/ko locales/hr locales/hi locales/ro locales/uk locales/sr locales/it locales/pt locales/pl locales/si locales/tr locales/bg",
+    "i18n:clean": "rm -rf locales/en locales/id locales/fr locales/de locales/es locales/ru locales/zh locales/ko locales/hr locales/hi locales/ro locales/uk locales/sr locales/it locales/pt locales/pl locales/si locales/tr locales/bg locales/sv",
     "e2e": "dotenv -e .env.e2e testcafe electron"
   },
   "build": {
@@ -66,7 +66,7 @@
     "cors": "^2.8.5",
     "devtron": "^1.4.0",
     "dotenv-cli": "^3.1.0",
-    "electron": "^8.0.1",
+    "electron": "^8.2.4",
     "electron-builder": "^21.2.0",
     "eslint": "^5.14.1",
     "eslint-config-airbnb": "^17.1.0",
@@ -111,6 +111,7 @@
     "mousetrap": "^1.6.3",
     "nanoid": "^2.0.1",
     "next": "^9.4.4",
+    "next-google-fonts": "^1.2.1",
     "nprogress": "^0.2.0",
     "pino": "^5.13.2",
     "polished": "^3.3.0",

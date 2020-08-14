@@ -39,7 +39,7 @@ export function archiveFlips() {
   const {getFlips, saveFlips} = global.flipStore
   saveFlips(
     getFlips().map(flip =>
-      [FlipType.Draft, FlipType.Archived].includes(flip.type)
+      flip.type === FlipType.Archived
         ? flip
         : {...flip, type: FlipType.Archived}
     )
@@ -150,12 +150,7 @@ export async function publishFlip({
   )
     throw new Error('You already submitted this flip')
 
-  if (
-    areEual(
-      order,
-      Array.from({length: 4}, (_, idx) => idx)
-    )
-  )
+  if (areEual(order, hint ? DEFAULT_FLIP_ORDER : originalOrder))
     throw new Error('You must shuffle flip before submit')
 
   const compressedImages = await Promise.all(
