@@ -2,6 +2,7 @@ import React, {useEffect} from 'react'
 import {useInterval} from '../hooks/use-interval'
 import {fetchSync} from '../api'
 import {useSettingsState} from './settings-context'
+import {useAppMachine} from './app-context'
 
 const FETCH_SYNC_SUCCEEDED = 'FETCH_SYNC_SUCCEEDED'
 const FETCH_SYNC_FAILED = 'FETCH_SYNC_FAILED'
@@ -76,11 +77,8 @@ function ChainProvider({children}) {
 }
 
 function useChainState() {
-  const context = React.useContext(ChainStateContext)
-  if (context === undefined) {
-    throw new Error('useChainState must be used within a ChainProvider')
-  }
-  return context
+  const [{context}] = useAppMachine()
+  return context.sync
 }
 
 export {ChainProvider, useChainState}

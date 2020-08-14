@@ -7,11 +7,7 @@ import GoogleFonts from 'next-google-fonts'
 import '../i18n'
 import {useMachine} from '@xstate/react'
 import {uiTheme} from '../shared/theme'
-import {EpochProvider} from '../shared/providers/epoch-context'
-import {IdentityProvider} from '../shared/providers/identity-context'
 import {NotificationProvider} from '../shared/providers/notification-context'
-import {TimingProvider} from '../shared/providers/timing-context'
-import {ChainProvider} from '../shared/providers/chain-context'
 import {NodeProvider} from '../shared/providers/node-context'
 import {SettingsProvider} from '../shared/providers/settings-context'
 import {AutoUpdateProvider} from '../shared/providers/update-context'
@@ -19,12 +15,15 @@ import {AutoUpdateProvider} from '../shared/providers/update-context'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tui-image-editor/dist/tui-image-editor.css'
 import {appMachine} from '../screens/app/machines'
+import {Page} from '../screens/app/components'
+import {PrimaryButton} from '../shared/components/button'
+import {AppMachineProvider} from '../shared/providers/app-context'
 
 // eslint-disable-next-line react/prop-types
 export default function App({Component, err, ...pageProps}) {
   // err is a workaround for https://github.com/zeit/next.js/issues/8592
 
-  const [, , service] = useMachine(appMachine)
+  const [currentApp, sendApp, appService] = useMachine(appMachine)
 
   return (
     <ThemeProvider theme={uiTheme}>
@@ -33,9 +32,22 @@ export default function App({Component, err, ...pageProps}) {
         <link href="/static/fonts/icons.css" rel="stylesheet" />
       </Head>
       <CSSReset />
-      <AppProviders>
-        <Component err={err} {...pageProps} appService={service} />
-      </AppProviders>
+
+      {currentApp.matches('idle') && (
+        <Page>
+          <PrimaryButton onClick={() => sendApp('CONNECT')}>
+            Connect
+          </PrimaryButton>
+        </Page>
+      )}
+
+      {currentApp.matches('connected.synced.ready') && (
+        <AppProviders>
+          <AppMachineProvider value={appService}>
+            <Component err={err} {...pageProps} appService={appService} />
+          </AppMachineProvider>
+        </AppProviders>
+      )}
     </ThemeProvider>
   )
 }
@@ -45,15 +57,7 @@ function AppProviders(props) {
     <SettingsProvider>
       <AutoUpdateProvider>
         <NodeProvider>
-          <ChainProvider>
-            <TimingProvider>
-              <EpochProvider>
-                <IdentityProvider>
-                  <NotificationProvider {...props} />
-                </IdentityProvider>
-              </EpochProvider>
-            </TimingProvider>
-          </ChainProvider>
+          <NotificationProvider {...props} />
         </NodeProvider>
       </AutoUpdateProvider>
     </SettingsProvider>

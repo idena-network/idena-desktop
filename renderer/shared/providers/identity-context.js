@@ -2,19 +2,9 @@ import React, {useCallback} from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
 import {fetchIdentity, killIdentity} from '../api'
+import {IdentityStatus} from '../types'
 import useRpc from '../hooks/use-rpc'
-
-export const IdentityStatus = {
-  Undefined: 'Undefined',
-  Invite: 'Invite',
-  Candidate: 'Candidate',
-  Newbie: 'Newbie',
-  Verified: 'Verified',
-  Suspended: 'Suspended',
-  Zombie: 'Zombie',
-  Terminating: 'Terminating',
-  Human: 'Human',
-}
+import {useAppMachine} from './app-context'
 
 export function mapToFriendlyStatus(status) {
   switch (status) {
@@ -167,12 +157,9 @@ function IdentityProvider({children}) {
   )
 }
 
-function useIdentityState() {
-  const context = React.useContext(IdentityStateContext)
-  if (context === undefined) {
-    throw new Error('useIdentityState must be used within a IdentityProvider')
-  }
-  return context
+export function useIdentityState() {
+  const [{context}] = useAppMachine()
+  return context.identity
 }
 
 function useIdentityDispatch() {
@@ -210,4 +197,4 @@ export function canValidate(identity) {
   )
 }
 
-export {IdentityProvider, useIdentityState, useIdentityDispatch}
+export {IdentityProvider, useIdentityDispatch}

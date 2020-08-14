@@ -1,7 +1,6 @@
 import React from 'react'
 import {Stack, Box, Text, Icon, useDisclosure, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {useService} from '@xstate/react'
 import {
   useIdentityState,
   mapToFriendlyStatus,
@@ -40,11 +39,7 @@ import {persistItem} from '../shared/utils/persist'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {rem} from '../shared/theme'
 
-// eslint-disable-next-line react/prop-types
-export default function ProfilePage({appService}) {
-  const [currentApp] = useService(appService)
-  console.log(currentApp?.context)
-
+export default function ProfilePage() {
   const {
     t,
     i18n: {language},
@@ -68,7 +63,7 @@ export default function ProfilePage({appService}) {
 
   const {
     address,
-    state,
+    state: status,
     balance,
     stake,
     penalty,
@@ -107,28 +102,28 @@ export default function ProfilePage({appService}) {
           <PageTitle mb={8}>{t('Profile')}</PageTitle>
           <Stack isInline spacing={10}>
             <Stack spacing={6}>
-              <UserInlineCard address={address} state={state} />
+              <UserInlineCard address={address} status={status} />
               <UserStatList>
                 <SimpleUserStat label={t('Address')} value={address} />
-                {state === IdentityStatus.Newbie ? (
+                {status === IdentityStatus.Newbie ? (
                   <AnnotatedUserStat
                     annotation={t(
                       'Solve more than 12 flips to become Verified'
                     )}
                     label={t('Status')}
-                    value={mapToFriendlyStatus(state)}
+                    value={mapToFriendlyStatus(status)}
                   />
                 ) : (
                   <SimpleUserStat
                     label={t('Status')}
-                    value={mapToFriendlyStatus(state)}
+                    value={mapToFriendlyStatus(status)}
                   />
                 )}
                 <UserStat>
                   <UserStatLabel>{t('Balance')}</UserStatLabel>
                   <UserStatValue>{toDna(balance)}</UserStatValue>
                 </UserStat>
-                {stake > 0 && state === IdentityStatus.Newbie && (
+                {stake > 0 && status === IdentityStatus.Newbie && (
                   <Stack spacing={4}>
                     <AnnotatedUserStat
                       annotation={t(
@@ -147,7 +142,7 @@ export default function ProfilePage({appService}) {
                   </Stack>
                 )}
 
-                {stake > 0 && state !== IdentityStatus.Newbie && (
+                {stake > 0 && status !== IdentityStatus.Newbie && (
                   <AnnotatedUserStat
                     annotation={t(
                       'In order to withdraw the stake you have to terminate your identity'

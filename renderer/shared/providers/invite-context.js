@@ -4,7 +4,8 @@ import * as api from '../api'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL} from '../hooks/use-tx'
 import {useNotificationDispatch, NotificationType} from './notification-context'
-import {useIdentityState, IdentityStatus} from './identity-context'
+import {useIdentityState} from './identity-context'
+import {IdentityStatus} from '../types'
 
 const db = global.invitesDb || {}
 
