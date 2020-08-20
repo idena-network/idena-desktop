@@ -16,12 +16,15 @@ import {AutoUpdateProvider} from '../shared/providers/update-context'
 import 'tui-image-editor/dist/tui-image-editor.css'
 import {appMachine} from '../screens/app/machines'
 import {Page} from '../screens/app/components'
+import {getLayout as getAppLayout} from '../screens/app/layout'
 import {PrimaryButton} from '../shared/components/button'
 import {AppMachineProvider} from '../shared/providers/app-context'
 
+// err is a workaround for https://github.com/zeit/next.js/issues/8592
 // eslint-disable-next-line react/prop-types
 export default function App({Component, err, ...pageProps}) {
-  // err is a workaround for https://github.com/zeit/next.js/issues/8592
+  // eslint-disable-next-line react/prop-types
+  const getLayout = Component.getLayout || getAppLayout
 
   const [currentApp, sendApp, appService] = useMachine(appMachine)
 
@@ -44,7 +47,9 @@ export default function App({Component, err, ...pageProps}) {
       {currentApp.matches('connected.synced.ready') && (
         <AppProviders>
           <AppMachineProvider value={appService}>
-            <Component err={err} {...pageProps} appService={appService} />
+            {getLayout(
+              <Component err={err} {...pageProps} appService={appService} />
+            )}
           </AppMachineProvider>
         </AppProviders>
       )}

@@ -33,7 +33,7 @@ import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
 import theme, {rem} from '../../shared/theme'
 import {RelevanceType, adjustDuration} from './machine'
-import {loadValidationState} from './utils'
+import {loadValidationStateDefinition} from './utils'
 import {Notification, Snackbar} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
 import {EpochPeriod} from '../../shared/types'
@@ -905,7 +905,7 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
       ? shortSession
       : shortSession + longSession
 
-  const validationStateDefinition = loadValidationState()
+  const validationStateDefinition = loadValidationStateDefinition()
   const done = validationStateDefinition
     ? State.create(validationStateDefinition).done
     : false
