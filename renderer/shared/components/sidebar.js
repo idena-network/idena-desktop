@@ -18,7 +18,7 @@ import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
 import {pluralize} from '../utils/string'
-import {parsePersistedValidationState} from '../../screens/validation/utils'
+import {loadValidationState} from '../../screens/validation/utils'
 import {IdentityStatus, EpochPeriod} from '../types'
 
 function Sidebar() {
@@ -397,7 +397,7 @@ function CurrentTask({epoch, period, identity}) {
 
     case EpochPeriod.ShortSession:
     case EpochPeriod.LongSession: {
-      const validationState = parsePersistedValidationState()
+      const validationState = loadValidationState()
 
       switch (true) {
         case [IdentityStatus.Undefined, IdentityStatus.Invite].includes(
