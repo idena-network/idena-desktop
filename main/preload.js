@@ -73,3 +73,7 @@ process.once('loaded', () => {
     global.__devtron = {require, process}
   }
 })
+
+process.on('exit', () => {
+  db.close()
+})
