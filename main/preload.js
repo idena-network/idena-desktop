@@ -67,6 +67,9 @@ process.once('loaded', () => {
   global.db = db
   global.sub = sub
 
+  // eslint-disable-next-line global-require
+  global.Buffer = require('buffer').Buffer
+
   if (isDev) {
     global.require = require
     // eslint-disable-next-line no-underscore-dangle
