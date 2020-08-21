@@ -42,6 +42,9 @@ import {
 } from '../../shared/components/button'
 import {Toast} from '../../shared/components/components'
 
+// eslint-disable-next-line global-require
+const Buffer = require('buffer').Buffer
+
 export default function NewFlipPage() {
   const {t, i18n} = useTranslation()
 
@@ -122,6 +125,49 @@ export default function NewFlipPage() {
   const is = state => current.matches({editing: state})
 
   const isOffline = is('keywords.loaded.fetchTranslationsFailed')
+
+  const [flipSecurityRating, setFlipSecurityRating] = React.useState(0)
+
+  React.useEffect(() => {
+    async function f() {
+      const globalPhash = global.phash || {}
+      const globalDistance = global.distance || {}
+
+      const imageHashes = await Promise.all(
+        images.map(img => {
+          if (img) {
+            const uri = img.split(';base64,').pop()
+            const imgBuffer = Buffer.from(uri, 'base64')
+
+            return globalPhash(imgBuffer).then(h => {
+              return h
+            })
+          }
+          return null
+        })
+      )
+
+      console.log('ratingCount...')
+      let ratingCount = 0
+      const distances = imageHashes.map((hash1, i) => {
+        return imageHashes.map((hash2, j) => {
+          if (i === j || !hash1 || !hash2) return null
+
+          const d = globalDistance(hash1, hash2)
+          if (i > j && d > 0 && d <= 26) {
+            ratingCount = ratingCount + 1
+          }
+          return d
+        })
+      })
+      console.log('ratingCount:', ratingCount)
+
+      setFlipSecurityRating(ratingCount)
+
+      console.log(distances)
+    }
+    f()
+  }, [images])
 
   return (
     <Layout syncing={syncing}>
@@ -292,7 +338,7 @@ export default function NewFlipPage() {
             </FlipMaster>
           )}
         </Flex>
-        <FlipMasterFooter>
+        <FlipMasterFooter stars={flipSecurityRating}>
           {not('keywords') && (
             <SecondaryButton
               isDisabled={is('images.painting')}

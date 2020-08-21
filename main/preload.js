@@ -12,6 +12,9 @@ const {
 
 const isDev = require('electron-is-dev')
 
+const phash = require('sharp-phash')
+const distance = require('sharp-phash/distance')
+
 const flips = require('./stores/flips')
 const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
@@ -43,6 +46,9 @@ process.once('loaded', () => {
 
   global.getZoomLevel = () => webFrame.getZoomLevel()
   global.setZoomLevel = level => webFrame.setZoomLevel(level)
+
+  global.phash = phash
+  global.distance = distance
 
   global.appVersion = app.getVersion()
 

@@ -40,7 +40,7 @@ import {Step} from './types'
 import {formatKeywords} from './utils'
 import {PageTitle} from '../app/components'
 import {PrimaryButton, IconButton2} from '../../shared/components/button'
-import {rem} from '../../shared/theme'
+import theme, {rem} from '../../shared/theme'
 import {capitalize} from '../../shared/utils/string'
 import {reorder} from '../../shared/utils/arr'
 import {FlipType} from '../../shared/types'
@@ -51,6 +51,7 @@ import {
   DrawerBody,
   FormLabel,
 } from '../../shared/components/components'
+import {StarsRating, FlipRatingTooltip} from './components/tools'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -909,18 +910,50 @@ export function FlipStepBody(props) {
   return <Stack isInline spacing={10} {...props} />
 }
 
-export function FlipMasterFooter(props) {
+export function FlipMasterFooter({stars, ...props}) {
+  const [isFlipRatingHintOpen, setIsFlipRatingHintOpen] = React.useState(false)
+
   return (
-    <Box
-      alignSelf="stretch"
+    <Flex
       borderTop="1px"
       borderTopColor="gray.300"
-      mt="auto"
-      px={4}
-      py={3}
+      align="center"
+      alignSelf="stretch"
+      justify="space-between"
     >
-      <Stack isInline spacing={2} justify="flex-end" {...props} />
-    </Box>
+      <Flex isInline justify="flex-end" mt="auto" px={6} py={4}>
+        {isFlipRatingHintOpen && (
+          <FlipRatingTooltip
+            onClose={() => {
+              setIsFlipRatingHintOpen(false)
+            }}
+          />
+        )}
+
+        <Flex
+          isInline
+          style={{cursor: 'pointer'}}
+          onClick={() => {
+            setIsFlipRatingHintOpen(!isFlipRatingHintOpen)
+          }}
+        >
+          <Icon
+            name="info"
+            size={5}
+            color={theme.colors.primary}
+            marginLeft={rem(3)}
+            marginRight={rem(9)}
+          />
+          <Box paddingBottom={rem(3)} marginRight={rem(6)} fontWeight="500">
+            Flip security rating
+          </Box>
+          <StarsRating rating={stars + 1} />
+        </Flex>
+      </Flex>
+      <Box alignSelf="stretch" mt="auto" px={4} py={3}>
+        <Stack isInline spacing={2} justify="flex-end" {...props} />
+      </Box>
+    </Flex>
   )
 }
 
