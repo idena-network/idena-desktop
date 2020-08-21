@@ -4,6 +4,7 @@ import {fetchVotings} from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
 import {epochDb} from '../../shared/utils/db'
+import {bufferToHex} from '../../shared/utils/string'
 
 export const votingListMachine = Machine(
   {
@@ -28,6 +29,9 @@ export const votingListMachine = Machine(
               log(),
             ],
           },
+          onError: {
+            target: '',
+          },
         },
       },
       loaded: {
@@ -51,128 +55,204 @@ export const votingListMachine = Machine(
   },
   {
     services: {
-      loadVotings: async ({epoch}) => {
-        console.log(await epochDb('votings', epoch).all())
-        return fetchVotings()
+      loadVotings: async () => {
+        try {
+          return await fetchVotings()
+        } catch (error) {
+          if (error.notFound) return []
+          throw error
+        }
       },
     },
   }
 )
 
-export const newVotingMachine = Machine(
-  {
-    context: {
-      epoch: {
-        epoch: 1,
-      },
-    },
-    initial: 'idle',
-    states: {
-      idle: {
-        on: {
-          CHANGE: {
-            target: 'dirty',
-            actions: [raise((_, e) => e)],
-          },
+export const createNewVotingMachine = epoch =>
+  Machine(
+    {
+      context: {
+        epoch: {
+          epoch,
         },
       },
-      dirty: {
-        on: {
-          CHANGE: {
-            actions: ['onChange', log()],
-          },
-          PUBLISH: {
-            target: 'publishing',
-            actions: [log()],
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            CHANGE: {
+              target: 'dirty',
+              actions: [raise((_, e) => e)],
+            },
           },
         },
-      },
-      publishing: {
-        initial: 'deployingContract',
-        entry: ['onPublishing', log()],
-        states: {
-          deployingContract: {
-            initial: 'estimating',
-            states: {
-              estimating: {
-                invoke: {
-                  src: 'estimateDeployContract',
-                  onDone: {
-                    target: 'deploying',
-                    actions: [
-                      assign((context, {contract: contractHash, txHash}) => ({
-                        ...context,
-                        contractHash,
-                        txHash,
-                      })),
-                    ],
+        dirty: {
+          on: {
+            CHANGE: {
+              actions: ['onChange', log()],
+            },
+            PUBLISH: {
+              target: 'publishing',
+              actions: [log()],
+            },
+          },
+        },
+        publishing: {
+          initial: 'deployingContract',
+          entry: ['onPublishing', log()],
+          states: {
+            deployingContract: {
+              initial: 'estimating',
+              states: {
+                estimating: {
+                  invoke: {
+                    src: 'estimateDeployContract',
+                    onDone: {
+                      target: 'deploying',
+                      actions: [
+                        assign(
+                          (
+                            context,
+                            {contract: contractHash, txHash, gasCost, txFee}
+                          ) => ({
+                            ...context,
+                            contractHash,
+                            txHash,
+                            gasCost,
+                            txFee,
+                          })
+                        ),
+                      ],
+                    },
                   },
                 },
-              },
-              deploying: {
-                invoke: {
-                  src: 'deployContract',
-                  onDone: {
-                    target: 'deploying',
-                    actions: [
-                      assign((context, {contract: contractHash, txHash}) => ({
-                        ...context,
-                        contractHash,
-                        txHash,
-                      })),
-                    ],
-                  },
-                  onError: {
-                    actions: [log()],
+                deploying: {
+                  invoke: {
+                    src: 'deployContract',
+                    onDone: {
+                      target: 'deployed',
+                      actions: [
+                        assign({
+                          txHash: (_, event) => event,
+                        }),
+                      ],
+                    },
+                    onError: {
+                      actions: [log()],
+                    },
                   },
                 },
+                deployed: {},
               },
             },
           },
         },
       },
     },
-  },
-  {
-    actions: {
-      onChange: assign((context, {name, value}) => ({
-        ...context,
-        [name]: value,
-      })),
-      onPublishing: ({epoch, ...voting}) => {
-        const db = epochDb('votings', epoch)
-        db.put(voting)
+    {
+      actions: {
+        onChange: assign((context, {name, value}) => ({
+          ...context,
+          [name]: value,
+        })),
+        // eslint-disable-next-line no-shadow
+        onPublishing: ({epoch, ...voting}) => {
+          // const db = epochDb('votings', epoch)
+          // db.put(voting)
+        },
       },
-    },
-    services: {
-      estimateDeployContract: async ({epoch, ...voting}) => {
-        const db = epochDb('votings', epoch)
-        await db.put(voting)
+      services: {
+        estimateDeployContract: async ({
+          // eslint-disable-next-line no-shadow
+          epoch,
+          identity: {address: from},
+          ...voting
+        }) => {
+          // const db = epochDb('votings', epoch)
+          // await db.put(voting)
 
-        const {cid, startDate} = voting
-        return callRpc('dna_estimateDeployContract', {
-          codehash: '0x02',
-          contractStake: 1000,
-          args: [
-            {index: 0, format: 'hex', value: cid},
-            {index: 1, format: 'uint64', value: new Date(startDate).valueOf()},
-          ],
-        })
-      },
-      deployContract: async ({epoch, ...voting}) => {
-        const db = epochDb('votings', epoch)
-        await db.put(voting)
+          const {title, desc, startDate} = voting
 
-        const {cid, startDate} = voting
-        return callRpc('dna_deployContract', {
-          codehash: '0x02',
-          contractStake: 1000,
-          args: [
-            {index: 0, format: 'hex', value: cid},
-            {index: 1, format: 'uint64', value: new Date(startDate).valueOf()},
-          ],
-        })
+          const content = bufferToHex(
+            Buffer.from(
+              new TextEncoder().encode(
+                JSON.stringify({
+                  title,
+                  desc,
+                })
+              )
+            )
+          )
+
+          return callRpc('dna_estimateDeployContract', {
+            from,
+            codeHash: '0x02',
+            amount: 1,
+            args: [
+              {
+                index: 0,
+                format: 'hex',
+                value: content,
+              },
+              {
+                index: 1,
+                format: 'uint64',
+                value: new Date(startDate).valueOf().toString(),
+              },
+            ],
+          })
+        },
+        deployContract: async ({
+          // eslint-disable-next-line no-shadow
+          epoch,
+          identity: {address: from},
+          ...voting
+        }) => {
+          // const db = epochDb('votings', epoch)
+          // await db.put(voting)
+
+          const {title, desc, startDate, gasCost, txFee} = voting
+
+          const content = bufferToHex(
+            Buffer.from(
+              new TextEncoder().encode(
+                JSON.stringify({
+                  title,
+                  desc,
+                })
+              )
+            )
+          )
+
+          return callRpc('dna_deployContract', {
+            from,
+            codeHash: '0x02',
+            contractStake: 1000,
+            amount: 1,
+            maxFee: Math.ceil((gasCost + txFee) * 1.1),
+            args: [
+              {
+                index: 0,
+                format: 'hex',
+                value: content,
+              },
+              {
+                index: 1,
+                format: 'uint64',
+                value: new Date(startDate).valueOf().toString(),
+              },
+            ],
+            nonce: 10,
+          })
+        },
       },
-    },
-  }
-)
+    }
+  )
+
+//   result: {contract: "0xdf8235fd52132b4540755aecf78453b16cba903c", success: true, gasUsed: 436,…}
+// contract: "0xdf8235fd52132b4540755aecf78453b16cba903c"
+// success: true
+// gasUsed: 436
+// txHash: "0xc89f88e19b838558659189ce26dccc2a307bd9161b6f5af97a67c787c38f9a4a"
+// error: ""
+// gasCost: "8.72"
+// txFee: "3.4"

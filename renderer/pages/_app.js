@@ -71,7 +71,6 @@ function AppLayout(props) {
   const {t} = useTranslation()
 
   const [autoUpdate, {updateClient, updateNode}] = useAutoUpdate()
-
   const [current, send, appService] = useMachine(appMachine)
 
   return (
