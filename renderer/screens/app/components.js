@@ -9,6 +9,7 @@ import {
   Alert,
   AlertTitle,
   Link,
+  Button,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import NextLink from 'next/link'
@@ -305,7 +306,7 @@ export function ActionItem({title, value, children, ...props}) {
 }
 
 export function VersionPanel(props) {
-  return <Box mt="auto" mx="auto" {...props} />
+  return <Box mt="auto" ml={4} {...props} />
 }
 
 export function VersionText(props) {
@@ -376,5 +377,25 @@ export function OfflineApp({onRetry}) {
         </Text>
       </Stack>
     </Flex>
+  )
+}
+
+export function UpdateButton({version, children, ...props}) {
+  return (
+    <Button
+      bg="white"
+      color="brandGray.500"
+      flexDirection="column"
+      alignItems="center"
+      minH={12}
+      w="full"
+      _hover={null}
+      {...props}
+    >
+      <Text fontWeight={500}>{children}</Text>
+      <Text color="muted" fontWeight={400}>
+        {version}
+      </Text>
+    </Button>
   )
 }
