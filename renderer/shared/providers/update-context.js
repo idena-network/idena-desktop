@@ -243,3 +243,7 @@ export function useAutoUpdateDispatch() {
   }
   return context
 }
+
+export function useAutoUpdate() {
+  return [useAutoUpdateState(), useAutoUpdateDispatch()]
+}

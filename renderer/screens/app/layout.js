@@ -2,6 +2,7 @@
 import React from 'react'
 import {useTranslation} from 'react-i18next'
 import {Box, Text, Button} from '@chakra-ui/core'
+import {useService} from '@xstate/react'
 import {
   LayoutContainer,
   PageSidebar,
@@ -20,7 +21,6 @@ import {
   OfflineApp,
 } from './components'
 import {PrimaryButton} from '../../shared/components/button'
-import {useAppMachine} from '../../shared/providers/app-context'
 import {eitherState} from '../../shared/utils/utils'
 import {EpochPeriod} from '../../shared/types'
 import {
@@ -28,13 +28,13 @@ import {
   useAutoUpdateDispatch,
 } from '../../shared/providers/update-context'
 
-export default function AppLayout({children}) {
+export default function AppLayout({service, children}) {
   const {t} = useTranslation()
 
   const autoUpdate = useAutoUpdateState()
   const {updateClient, updateNode} = useAutoUpdateDispatch()
 
-  const [current, send] = useAppMachine()
+  const [current, send] = useService(service)
 
   return (
     <LayoutContainer>
@@ -109,7 +109,7 @@ export default function AppLayout({children}) {
                   roundedTop="lg"
                 />
               )}
-              <ActionItem title={t('Current task')} roundedBottom="lg">
+              <ActionItem title={t('Current task')} roundedTop="lg">
                 <CurrentTask {...current.context} />
               </ActionItem>
 
@@ -190,6 +190,6 @@ export default function AppLayout({children}) {
   )
 }
 
-export function getLayout(page) {
-  return <AppLayout>{page}</AppLayout>
+export function getLayout(page, service) {
+  return <AppLayout service={service}>{page}</AppLayout>
 }
