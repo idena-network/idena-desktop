@@ -38,40 +38,50 @@ import {
   UpdateButton,
 } from '../screens/app/components'
 import {PrimaryButton} from '../shared/components/button'
-import {AppMachineProvider} from '../shared/providers/app-context'
+import {
+  AppMachineProvider,
+  useAppMachine,
+} from '../shared/providers/app-context'
 import {eitherState} from '../shared/utils/utils'
 import {EpochPeriod} from '../shared/types'
 
 // err is a workaround for https://github.com/zeit/next.js/issues/8592
 export default function App({Component, err, ...pageProps}) {
+  const [currentApp, , appService] = useMachine(appMachine)
+
   return (
-    <ThemeProvider theme={uiTheme}>
+    <>
       <GoogleFonts href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
       <Head>
         <link href="/static/fonts/icons.css" rel="stylesheet" />
       </Head>
-      <CSSReset />
 
       <SettingsProvider>
         <AutoUpdateProvider>
           <NodeProvider>
             <NotificationProvider>
-              <AppLayout>
-                <Component err={err} {...pageProps} />
-              </AppLayout>
+              <ThemeProvider theme={uiTheme}>
+                <CSSReset />
+                <AppMachineProvider value={appService}>
+                  <AppLayout currentApp={currentApp}>
+                    <Component err={err} {...pageProps} />
+                  </AppLayout>
+                </AppMachineProvider>
+              </ThemeProvider>
             </NotificationProvider>
           </NodeProvider>
         </AutoUpdateProvider>
       </SettingsProvider>
-    </ThemeProvider>
+    </>
   )
 }
 
-function AppLayout(props) {
+function AppLayout({currentApp, children}) {
   const {t} = useTranslation()
 
+  const [current = currentApp, send] = useAppMachine()
+
   const [autoUpdate, {updateClient, updateNode}] = useAutoUpdate()
-  const [current, send, appService] = useMachine(appMachine)
 
   return (
     <LayoutContainer>
@@ -212,12 +222,7 @@ function AppLayout(props) {
         <OfflineApp onRetry={() => send('RETRY')} />
       )}
 
-      {current.matches('connected.synced.ready') && (
-        <AppMachineProvider value={appService}>
-          {/* eslint-disable-next-line react/destructuring-assignment */}
-          {props.children}
-        </AppMachineProvider>
-      )}
+      {current.matches('connected.synced.ready') && children}
     </LayoutContainer>
   )
 }
