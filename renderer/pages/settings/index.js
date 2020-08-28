@@ -32,6 +32,8 @@ import {
   DialogFooter,
 } from '../../shared/components/components'
 import {SecondaryButton} from '../../shared/components/button'
+import {getLayout} from '../../screens/app/layout'
+import {Page} from '../../screens/app/components'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -41,7 +43,7 @@ function Settings() {
   const {addNotification} = useNotificationDispatch()
   const {runInternalNode, useExternalNode} = useSettingsState()
   return (
-    <SettingsLayout>
+    <Page>
       {global.isDev && (
         <>
           <Section title={t('Flips')}>
@@ -83,7 +85,7 @@ function Settings() {
       <ExportPK />
       {runInternalNode && !useExternalNode && <ImportPK />}
       <LocaleSwitcher />
-    </SettingsLayout>
+    </Page>
   )
 }
 
@@ -268,6 +270,10 @@ function LocaleSwitcher() {
       </Box>
     </Section>
   )
+}
+
+Settings.getLayout = function getSettingsLayout(page, fallbackApp) {
+  return getLayout(<SettingsLayout>{page}</SettingsLayout>, fallbackApp)
 }
 
 export default Settings
