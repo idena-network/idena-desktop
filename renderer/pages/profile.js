@@ -36,7 +36,6 @@ import {
 import {persistItem} from '../shared/utils/persist'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {rem} from '../shared/theme'
-import {getLayout} from '../screens/app/layout'
 
 export default function ProfilePage() {
   const {
@@ -57,8 +56,6 @@ export default function ProfilePage() {
   } = useDisclosure()
 
   const toast = useToast()
-
-  // const {syncing, offline} = useChainState()
 
   const {
     address,
@@ -252,5 +249,3 @@ export default function ProfilePage() {
     </InviteProvider>
   )
 }
-
-ProfilePage.getLayout = getLayout
