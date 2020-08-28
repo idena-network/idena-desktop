@@ -30,6 +30,7 @@ import {
   useNodeDispatch,
 } from '../../shared/providers/node-context'
 import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
+import {getLayout} from '../../screens/app/layout'
 
 function NodeSettings() {
   const {addNotification} = useNotificationDispatch()
@@ -302,6 +303,10 @@ function NodeSettings() {
       )}
     </SettingsLayout>
   )
+}
+
+NodeSettings.getLayout = function getNodeSettingsLayout(page, fallbackApp) {
+  return getLayout(<SettingsLayout>{page}</SettingsLayout>, fallbackApp)
 }
 
 export default NodeSettings

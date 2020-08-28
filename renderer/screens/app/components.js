@@ -10,6 +10,7 @@ import {
   AlertTitle,
   Link,
   Button,
+  ButtonGroup,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import NextLink from 'next/link'
@@ -344,7 +345,7 @@ export function UpdateExternalNodeDialog() {
   )
 }
 
-export function OfflineApp({onRetry}) {
+export function OfflineApp({onStartingBuiltinNode, onReconnect}) {
   // also 👇
   // handle built-in node behaviour here: starting, downloading, all that stuff
   // tackle with built-in node starting
@@ -367,7 +368,12 @@ export function OfflineApp({onRetry}) {
           Your node is offline
         </Heading>
         <Box>
-          <PrimaryButton onClick={onRetry}>Run the built-in node</PrimaryButton>
+          <ButtonGroup>
+            <PrimaryButton onClick={onStartingBuiltinNode}>
+              Run the built-in node
+            </PrimaryButton>
+            <PrimaryButton onClick={onReconnect}>Retry</PrimaryButton>
+          </ButtonGroup>
         </Box>
         <Text color="white">
           If you have already node running, please check your connection{' '}
