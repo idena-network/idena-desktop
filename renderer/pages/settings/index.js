@@ -1,19 +1,11 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import {margin} from 'polished'
 import QRCode from 'qrcode.react'
 import {useTranslation} from 'react-i18next'
-import {Flex as ChakraFlex, Text} from '@chakra-ui/core'
-import {
-  Box,
-  SubHeading,
-  Input,
-  Label,
-  Button,
-  Field,
-  Select,
-} from '../../shared/components'
+import {Box, Text, Heading, Flex, Stack} from '@chakra-ui/core'
+import {Field, Select} from '../../shared/components'
 import theme, {rem} from '../../shared/theme'
-import Flex from '../../shared/components/flex'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import useRpc from '../../shared/hooks/use-rpc'
 import SettingsLayout from './layout'
@@ -30,10 +22,11 @@ import {
   DialogHeader,
   DialogBody,
   DialogFooter,
+  Input,
+  FormLabel,
 } from '../../shared/components/components'
-import {SecondaryButton} from '../../shared/components/button'
 import {getLayout} from '../../screens/app/layout'
-import {Page} from '../../screens/app/components'
+import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -43,41 +36,41 @@ function Settings() {
   const {addNotification} = useNotificationDispatch()
   const {runInternalNode, useExternalNode} = useSettingsState()
   return (
-    <Page>
+    <Box mt={8}>
       {global.isDev && (
         <>
           <Section title={t('Flips')}>
             <Box>
-              <Button
+              <PrimaryButton
                 onClick={() => {
                   clearFlips()
                   addNotification({title: t('Flips deleted')})
                 }}
               >
                 {t('Clear flips')}
-              </Button>
+              </PrimaryButton>
             </Box>
             <Box my={theme.spacings.small}>
-              <Button
+              <PrimaryButton
                 onClick={() => {
                   archiveFlips()
                   addNotification({title: t('Flips archived')})
                 }}
               >
                 {t('Archive flips')}
-              </Button>
+              </PrimaryButton>
             </Box>
           </Section>
           <Section title={t('Invites')}>
             <Box my={theme.spacings.small}>
-              <Button
+              <PrimaryButton
                 onClick={() => {
                   inviteDb.clearInvites()
                   addNotification({title: t('Invites removed')})
                 }}
               >
                 {t('Clear invites')}
-              </Button>
+              </PrimaryButton>
             </Box>
           </Section>
         </>
@@ -85,18 +78,6 @@ function Settings() {
       <ExportPK />
       {runInternalNode && !useExternalNode && <ImportPK />}
       <LocaleSwitcher />
-    </Page>
-  )
-}
-
-// eslint-disable-next-line react/prop-types
-function Section({title, children}) {
-  return (
-    <Box my={rem(theme.spacings.medium32)}>
-      <SubHeading css={margin(0, 0, theme.spacings.small, 0)}>
-        {title}
-      </SubHeading>
-      <Box my={rem(theme.spacings.small8)}>{children}</Box>
     </Box>
   )
 }
@@ -114,7 +95,7 @@ function ExportPK() {
 
   return (
     <Section title={t('Export private key')}>
-      <Text mb={2}>
+      <Text mb={4}>
         {t('Create a new password to export your private key')}
       </Text>
       <form
@@ -123,23 +104,19 @@ function ExportPK() {
           callRpc('dna_exportKey', password)
         }}
       >
-        <Label htmlFor="pasword">{t('New password')}</Label>
-        <Flex align="center">
+        <FormLabel htmlFor="pasword">{t('New password')}</FormLabel>
+        <Stack isInline spacing={2} align="center">
           <Input
             id="pasword"
             value={password}
             type="password"
-            style={{
-              ...margin(0, theme.spacings.normal, 0, 0),
-              width: rem(300),
-            }}
             disabled={showDialog}
             onChange={e => setPassword(e.target.value)}
           />
-          <Button type="submit" disabled={!password}>
+          <PrimaryButton type="submit" disabled={!password}>
             {t('Export')}
-          </Button>
-        </Flex>
+          </PrimaryButton>
+        </Stack>
       </form>
       <PkDialog isOpen={showDialog} onClose={() => setShowDialog(false)}>
         <Text>
@@ -147,9 +124,9 @@ function ExportPK() {
             'Scan QR by your mobile phone or copy code below for export privatekey.'
           )}
         </Text>
-        <ChakraFlex justify="center" mx="auto" my={8}>
+        <Flex justify="center" mx="auto" my={8}>
           <QRCode value={pk} />
-        </ChakraFlex>
+        </Flex>
         <Box>
           <Field
             id="pk"
@@ -209,7 +186,9 @@ function ImportPK() {
           await submit()
         }}
       >
-        <Label htmlFor="key">{t('translation:Encrypted private key')}</Label>
+        <FormLabel htmlFor="key">
+          {t('translation:Encrypted private key')}
+        </FormLabel>
         <Input
           value={key}
           type="text"
@@ -219,7 +198,7 @@ function ImportPK() {
           }}
           onChange={e => setKey(e.target.value)}
         />
-        <Label htmlFor="password">{t('translation:Password')}</Label>
+        <FormLabel htmlFor="password">{t('translation:Password')}</FormLabel>
         <Input
           value={password}
           type="password"
@@ -229,9 +208,9 @@ function ImportPK() {
           }}
           onChange={e => setPassword(e.target.value)}
         />
-        <Button type="submit" disabled={!password || !key}>
+        <PrimaryButton type="submit" disabled={!password || !key}>
           {t('translation:Import')}
-        </Button>
+        </PrimaryButton>
       </form>
     </Section>
   )
@@ -269,6 +248,17 @@ function LocaleSwitcher() {
         />
       </Box>
     </Section>
+  )
+}
+
+function Section({title, ...props}) {
+  return (
+    <Box mb={10}>
+      <Heading fontWeight={500} fontSize="lg" mb={4}>
+        {title}
+      </Heading>
+      <Box {...props} />
+    </Box>
   )
 }
 
