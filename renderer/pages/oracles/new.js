@@ -27,27 +27,24 @@ import {
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
 
-export default function NewVoting() {
+function NewVotingPage() {
   const {t} = useTranslation()
 
   const {isOpen: isOpenAdvanced, onToggle: onToggleAdvanced} = useDisclosure()
 
   const [
     {
-      context: {
-        epoch: {epoch: epochNumber},
-        identity,
-      },
+      context: {epoch, identity},
     },
   ] = useAppMachine()
 
   const newVotingMachine = React.useMemo(
-    () => createNewVotingMachine(epochNumber),
-    [epochNumber]
+    () => createNewVotingMachine(epoch.epoch),
+    [epoch.epoch]
   )
 
   const [current, send] = useMachine(newVotingMachine, {
-    context: {identity},
+    context: {identity, epoch},
   })
 
   return (
@@ -228,3 +225,5 @@ export default function NewVoting() {
     </Page>
   )
 }
+
+export default NewVotingPage

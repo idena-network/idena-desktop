@@ -29,7 +29,7 @@ import {
 } from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 
-export default function VotingListPage() {
+function VotingListPage() {
   const {t, i18n} = useTranslation()
 
   const router = useRouter()
@@ -37,9 +37,7 @@ export default function VotingListPage() {
   const epoch = useEpochState()
 
   const [current, send] = useMachine(votingListMachine, {
-    context: {
-      epoch: epoch?.epoch ?? 1,
-    },
+    context: {epoch},
   })
   const {filteredVotings, filter} = current.context
 
@@ -183,3 +181,5 @@ export default function VotingListPage() {
     </Page>
   )
 }
+
+export default VotingListPage
