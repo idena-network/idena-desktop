@@ -159,7 +159,6 @@ export const appMachine = Machine(
                   callRpc('dna_epoch'),
                   (async () => {
                     const identity = await callRpc('dna_identity')
-                    console.log(identity)
                     return {
                       ...identity,
                       ...(await callRpc('dna_getBalance', identity.address)),

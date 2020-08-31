@@ -367,14 +367,12 @@ export function OfflineApp({onStartingBuiltinNode, onReconnect}) {
         <Heading color="white" fontSize="lg" fontWeight={500}>
           Your node is offline
         </Heading>
-        <Box>
-          <ButtonGroup>
-            <PrimaryButton onClick={onStartingBuiltinNode}>
-              Run the built-in node
-            </PrimaryButton>
-            <PrimaryButton onClick={onReconnect}>Retry</PrimaryButton>
-          </ButtonGroup>
-        </Box>
+        <ButtonGroup spacing={2} variantColor="brandBlue">
+          <PrimaryButton onClick={onStartingBuiltinNode}>
+            Run the built-in node
+          </PrimaryButton>
+          <PrimaryButton onClick={onReconnect}>Retry</PrimaryButton>
+        </ButtonGroup>
         <Text color="white">
           If you have already node running, please check your connection{' '}
           <Link color="brandBlue.500" href="/settings/node">
