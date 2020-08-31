@@ -216,7 +216,6 @@ function ImportPK() {
   )
 }
 
-// eslint-disable-next-line react/prop-types
 function PkDialog({onClose, children, ...props}) {
   const {t} = useTranslation()
   return (

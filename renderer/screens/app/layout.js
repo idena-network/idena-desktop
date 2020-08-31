@@ -100,7 +100,7 @@ export function AppSidebar({fallbackApp}) {
                 roundedTop="lg"
               />
             )}
-            <ActionItem title={t('Current task')} roundedBottom="lg">
+            <ActionItem title={t('Current task')} roundedTop="lg">
               <CurrentTask {...current.context} />
             </ActionItem>
 
