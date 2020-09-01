@@ -112,10 +112,9 @@ export default function ProfilePage() {
                   value={mapToFriendlyStatus(status)}
                 />
               )}
-              <UserStat>
-                <UserStatLabel>{t('Balance')}</UserStatLabel>
-                <UserStatValue>{toDna(balance)}</UserStatValue>
-              </UserStat>
+
+              <SimpleUserStat label={t('Balance')} value={toDna(balance)} />
+
               {stake > 0 && status === IdentityStatus.Newbie && (
                 <Stack spacing={4}>
                   <AnnotatedUserStat
@@ -189,7 +188,7 @@ export default function ProfilePage() {
               <IconLink
                 href="/contacts/new-invite"
                 isDisabled={invitesCount === 0}
-                icon="add-user"
+                icon={<Icon name="add-user" size={5} />}
               >
                 {t('Invite')}
               </IconLink>
