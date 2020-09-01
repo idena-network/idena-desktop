@@ -245,7 +245,7 @@ export default function ProfilePage() {
               <IconLink
                 href="/contacts/new-invite"
                 isDisabled={invitesCount === 0}
-                icon="add-user"
+                icon={<Icon name="add-user" size={5} />}
               >
                 {t('Invite')}
               </IconLink>
