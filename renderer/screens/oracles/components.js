@@ -12,14 +12,22 @@ import {
   Radio,
   RadioGroup,
   Text,
+  Divider,
+  Box,
 } from '@chakra-ui/core'
+import {useService} from '@xstate/react'
+import {useTranslation} from 'react-i18next'
+import {useRouter} from 'next/router'
 import {
   DrawerHeader,
   DrawerBody,
   Input,
+  Avatar,
 } from '../../shared/components/components'
 import {VotingStatus, FactAction} from '../../shared/types'
 import {rem} from '../../shared/theme'
+import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
+import {toLocaleDna} from '../../shared/utils/utils'
 
 export function OracleDrawerHeader({
   icon,
@@ -187,5 +195,98 @@ export function VotingOptionText({label, ...props}) {
         <Input w="2xs" />
       </Flex>
     </FormControl>
+  )
+}
+
+export function VotingCardItem({votingRef}) {
+  const router = useRouter()
+  const {t, i18n} = useTranslation()
+
+  const [current] = useService(votingRef)
+
+  const {
+    id,
+    title,
+    desc,
+    issuer,
+    status,
+    finishDate,
+    totalPrize,
+    votesCount,
+  } = current.context
+
+  const toDna = toLocaleDna(i18n.language)
+
+  return (
+    <Box key={id}>
+      <Stack isInline spacing={2} mb={3} align="center">
+        <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
+        <Stack
+          isInline
+          spacing={1}
+          align="center"
+          bg="gray.300"
+          borderRadius="xl"
+          color="muted"
+          fontSize="sm"
+          fontWeight={500}
+          h={6}
+          pl="1/2"
+          pr={3}
+        >
+          <Avatar w={5} h={5} address={issuer} />
+          <Text>{issuer}</Text>
+        </Stack>
+      </Stack>
+      <Text fontSize={rem(16)} fontWeight={500} mb={2}>
+        {title}
+      </Text>
+      <Text color="muted" mb={4}>
+        {desc}
+      </Text>
+      {[VotingStatus.Archive, VotingStatus.Counting].some(
+        s => s === status
+      ) && (
+        <Stack spacing={2} mb={6}>
+          <Text color="muted" fontSize="sm">
+            {t('Results')}
+          </Text>
+          <VotingResultBar action={FactAction.Confirm} value={60} />
+          <VotingResultBar action={FactAction.Reject} value={40} />
+        </Stack>
+      )}
+      <Stack isInline spacing={2} align="center" mb={6}>
+        <Icon name="star" size={4} color="white" />
+        <Text fontWeight={500}>
+          {t('Total prize')}: {toDna(totalPrize || 0)}
+        </Text>
+      </Stack>
+      <Flex justify="space-between" align="center">
+        <Stack isInline spacing={2}>
+          <PrimaryButton onClick={() => router.push('/oracles/vote')}>
+            {t('Change')}
+          </PrimaryButton>
+          <SecondaryButton>{t('Add fund')}</SecondaryButton>
+        </Stack>
+        <Stack isInline spacing={3}>
+          <Text>
+            <Text as="span" color="muted">
+              {t('Deadline')}:
+            </Text>{' '}
+            <Text as="span">{new Date(finishDate).toLocaleDateString()}</Text>
+          </Text>
+          <Divider
+            orientation="vertical"
+            borderColor="gray.300"
+            borderLeft="1px"
+          />
+          <Stack isInline spacing={2} align="center">
+            <Icon name="user" w={4} h={4} />
+            <Text as="span">{votesCount || 0} votes</Text>
+          </Stack>
+        </Stack>
+      </Flex>
+      <Divider borderColor="gray.300" mt={rem(28)} />
+    </Box>
   )
 }

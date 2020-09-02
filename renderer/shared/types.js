@@ -53,6 +53,8 @@ export const VotingStatus = {
   Counting: 'counting',
   Archive: 'archive',
   Mining: 'mining',
+  Invalid: 'invalid',
+  Pending: 'pending',
 }
 
 export const FactAction = {
