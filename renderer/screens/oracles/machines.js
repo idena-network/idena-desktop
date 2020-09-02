@@ -1,10 +1,11 @@
-import {Machine, assign} from 'xstate'
-import {log, raise} from 'xstate/lib/actions'
-import {fetchVotings} from './utils'
+import {Machine, assign, spawn} from 'xstate'
+import {log, raise, sendParent} from 'xstate/lib/actions'
+import {fetchVotings, updateVotingList} from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
 import {epochDb} from '../../shared/utils/db'
 import {bufferToHex} from '../../shared/utils/string'
+import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 
 export const votingListMachine = Machine(
   {
@@ -21,11 +22,21 @@ export const votingListMachine = Machine(
           onDone: {
             target: 'loaded',
             actions: [
-              assign((context, {data}) => ({
-                ...context,
-                votings: data,
-                filteredVotings: data,
-              })),
+              assign((context, {data}) => {
+                const votings = data.map(voting => ({
+                  ...voting,
+                  ref: spawn(
+                    // eslint-disable-next-line no-use-before-define
+                    votingMachine.withContext(voting),
+                    `voting-${voting.id}`
+                  ),
+                }))
+                return {
+                  ...context,
+                  votings,
+                  filteredVotings: votings,
+                }
+              }),
               log(),
             ],
           },
@@ -49,6 +60,21 @@ export const votingListMachine = Machine(
               log(),
             ],
           },
+          MINED: {
+            actions: [
+              assign(({votings}, {id}) => {
+                const nextVotings = updateVotingList(votings, {
+                  id,
+                  type: VotingStatus.Pending,
+                })
+                return {
+                  votings: nextVotings,
+                  filteredVotings: nextVotings,
+                }
+              }),
+              log(),
+            ],
+          },
         },
       },
     },
@@ -60,7 +86,6 @@ export const votingListMachine = Machine(
         try {
           persistedVotings = await epochDb('votings', epoch).all()
         } catch (error) {
-          console.error(error, error.notFound)
           if (!error.notFound) throw new Error(error)
         }
 
@@ -71,6 +96,92 @@ export const votingListMachine = Machine(
           if (error.notFound) return []
           throw error
         }
+      },
+    },
+  }
+)
+
+export const votingMachine = Machine(
+  {
+    context: {},
+    initial: 'unknown',
+    states: {
+      unknown: {
+        on: {
+          '': [
+            {
+              target: 'mining',
+              cond: ({status, txHash}) =>
+                status === VotingStatus.Mining && Boolean(txHash),
+            },
+            {target: 'idle'},
+          ],
+        },
+      },
+      idle: {},
+      mining: {
+        invoke: {
+          src: 'pollStatus',
+        },
+        on: {
+          MINED: {
+            target: 'idle',
+            actions: [
+              assign({
+                status: VotingStatus.Pending,
+              }),
+              sendParent(({id}) => ({
+                type: 'MINED',
+                id,
+              })),
+              'persistVotings',
+              log(),
+            ],
+          },
+          TX_NULL: {
+            target: 'invalid',
+            actions: [
+              assign({
+                type: VotingStatus.Invalid,
+              }),
+              'persistVotings',
+              log(),
+            ],
+          },
+        },
+      },
+      invalid: {},
+    },
+  },
+  {
+    services: {
+      pollStatus: ({txHash}) => cb => {
+        let timeoutId
+
+        const fetchStatus = async () => {
+          try {
+            const result = await callRpc('bcn_transaction', txHash)
+            if (result.blockHash !== HASH_IN_MEMPOOL) {
+              cb('MINED')
+            } else {
+              timeoutId = setTimeout(fetchStatus, 10 * 1000)
+            }
+          } catch {
+            cb('TX_NULL')
+          }
+        }
+
+        timeoutId = setTimeout(fetchStatus, 10 * 1000)
+
+        return () => {
+          clearTimeout(timeoutId)
+        }
+      },
+    },
+    actions: {
+      persistVotings: ({epoch, ...context}) => {
+        // epochDb('votings', epoch).put(context)
+        console.log(epoch, context)
       },
     },
   }
@@ -172,11 +283,6 @@ export const createNewVotingMachine = epoch =>
           ...context,
           [name]: value,
         })),
-        // eslint-disable-next-line no-shadow
-        onPublishing: ({epoch, ...voting}) => {
-          // const db = epochDb('votings', epoch)
-          // db.put(voting)
-        },
       },
       services: {
         estimateDeployContract: async ({
@@ -255,7 +361,7 @@ export const createNewVotingMachine = epoch =>
           })
 
           const db = epochDb('votings', epoch)
-          await db.put({...voting, issuer: from})
+          await db.put({...voting, issuer: from, status: VotingStatus.Mining})
 
           return deployResult
         },
