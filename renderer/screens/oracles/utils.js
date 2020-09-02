@@ -41,3 +41,14 @@ export function fetchVotings() {
     }),
   ])
 }
+
+export function updateVotingList(votings, {id, ...restVoting}) {
+  return votings.map(voting =>
+    voting.id === id
+      ? {
+          ...voting,
+          ...restVoting,
+        }
+      : voting
+  )
+}
