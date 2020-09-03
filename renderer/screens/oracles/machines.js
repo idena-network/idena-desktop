@@ -27,7 +27,10 @@ export const votingListMachine = Machine(
                   ...voting,
                   ref: spawn(
                     // eslint-disable-next-line no-use-before-define
-                    votingMachine.withContext(voting),
+                    votingMachine.withContext({
+                      ...voting,
+                      epoch: context.epoch,
+                    }),
                     `voting-${voting.id}`
                   ),
                 }))
@@ -179,9 +182,8 @@ export const votingMachine = Machine(
       },
     },
     actions: {
-      persistVotings: ({epoch, ...context}) => {
-        // epochDb('votings', epoch).put(context)
-        console.log(epoch, context)
+      persistVotings: ({epoch: {epoch}, ...context}) => {
+        epochDb('votings', epoch).put(context)
       },
     },
   }
