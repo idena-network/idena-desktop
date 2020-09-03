@@ -1,5 +1,5 @@
 import React from 'react'
-import {Stack, Box, Text, Switch, FormLabel, Skeleton} from '@chakra-ui/core'
+import {Stack, Box, Text, Switch, FormLabel} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page, PageTitle} from '../../screens/app/components'
@@ -10,9 +10,10 @@ import {votingListMachine} from '../../screens/oracles/machines'
 import {
   VotingFilter,
   VotingFilterList,
-  VotingCardItem,
+  VotingCardSkeleton,
 } from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
+import {VotingCard} from '../../screens/oracles/containers'
 
 function VotingListPage() {
   const {t} = useTranslation()
@@ -30,16 +31,11 @@ function VotingListPage() {
       <Stack isInline spacing={20} w="full">
         <Stack spacing={6} w="md">
           {current.matches('loading') &&
-            [...Array(3)].map((_, i) => (
-              <Box key={i}>
-                <Skeleton h={12} mb={2} />
-                <Skeleton h={16} />
-              </Box>
-            ))}
+            [...Array(3)].map((_, i) => <VotingCardSkeleton key={i} />)}
 
           {current.matches('loaded') &&
             filteredVotings.map(({id, ref}) => (
-              <VotingCardItem key={id} votingRef={ref} />
+              <VotingCard key={id} votingRef={ref} />
             ))}
         </Stack>
         <Stack spacing={8} align="flex-start" maxW={40}>
