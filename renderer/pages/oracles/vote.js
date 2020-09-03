@@ -33,6 +33,7 @@ import {
   OracleFormHelper,
   OracleFormControl,
 } from '../../screens/oracles/components'
+import {AddFundDrawer} from '../../screens/oracles/containers'
 
 export default function VotePage() {
   const {t, i18n} = useTranslation()
@@ -50,9 +51,9 @@ export default function VotePage() {
   } = useDisclosure()
 
   const {
-    isOpen: isOpenFund,
-    onOpen: onOpenFund,
-    onClose: onCloseFund,
+    isOpen: isOpenAddFund,
+    onOpen: onOpenAddFund,
+    onClose: onCloseAddFund,
   } = useDisclosure()
 
   const toDna = toLocaleDna(i18n.language)
@@ -178,7 +179,7 @@ export default function VotePage() {
                 {toDna(100000)}
               </StatNumber>
               <StatHelpText mt={1}>
-                <IconButton2 icon="add-fund" onClick={onOpenFund}>
+                <IconButton2 icon="add-fund" onClick={onOpenAddFund}>
                   Add fund
                 </IconButton2>
               </StatHelpText>
@@ -266,28 +267,14 @@ export default function VotePage() {
         </OracleDrawerBody>
       </Drawer>
 
-      <Drawer isOpen={isOpenFund} onClose={onCloseFund}>
-        <OracleDrawerHeader icon="add-fund">
-          {t('Add fund', {nsSeparator: '!'})}
-        </OracleDrawerHeader>
-        <OracleDrawerBody>
-          <OracleFormControl label={t('Transfer from')}>
-            <Input />
-            <OracleFormHelper label={t('Available')} value={toDna(80200)} />
-          </OracleFormControl>
-          <OracleFormControl label="To address">
-            <Input isDisabled value="0x5A3abB61A9c5475B8243B61A9c5475B82" />
-          </OracleFormControl>
-          <OracleFormControl label={t('Deposit, DNA')}>
-            <Input isDisabled value={240} />
-            <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
-            <OracleFormHelper label={t('Total amount')} value={toDna(240.01)} />
-          </OracleFormControl>
-          <PrimaryButton mt={3} ml="auto">
-            {t('Send')}
-          </PrimaryButton>
-        </OracleDrawerBody>
-      </Drawer>
+      <AddFundDrawer
+        isOpen={isOpenAddFund}
+        onClose={onCloseAddFund}
+        onAddFund={amount => {
+          console.log(amount)
+          // send('ADD_FUND', amount)
+        }}
+      />
     </Layout>
   )
 }

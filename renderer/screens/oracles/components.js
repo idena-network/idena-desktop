@@ -12,22 +12,16 @@ import {
   Radio,
   RadioGroup,
   Text,
-  Divider,
   Box,
+  Skeleton,
 } from '@chakra-ui/core'
-import {useService} from '@xstate/react'
-import {useTranslation} from 'react-i18next'
-import {useRouter} from 'next/router'
 import {
   DrawerHeader,
   DrawerBody,
   Input,
-  Avatar,
 } from '../../shared/components/components'
-import {VotingStatus, FactAction} from '../../shared/types'
+import {FactAction} from '../../shared/types'
 import {rem} from '../../shared/theme'
-import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
-import {toLocaleDna} from '../../shared/utils/utils'
 
 export function OracleDrawerHeader({
   icon,
@@ -71,7 +65,9 @@ export function OracleDrawerBody(props) {
 export function OracleFormControl({label, children, ...props}) {
   return (
     <FormControl {...props}>
-      <FormLabel mb={2}>{label}</FormLabel>
+      <FormLabel color="brandGray.500" mb={2}>
+        {label}
+      </FormLabel>
       {children}
     </FormControl>
   )
@@ -89,45 +85,14 @@ export function OracleFormHelperText(props) {
   return <FormHelperText color="muted" fontSize="md" {...props} />
 }
 
-export function VotingStatusBadge({status, ...props}) {
-  const accentColors = (() => {
-    switch (status) {
-      case VotingStatus.Open:
-        return {
-          bg: 'green.020',
-          color: 'green.500',
-        }
-      case VotingStatus.Voted:
-        return {
-          bg: 'blue.020',
-          color: 'blue.500',
-        }
-      case VotingStatus.Mining:
-        return {
-          bg: 'orange.020',
-          color: 'orange.500',
-        }
-      case VotingStatus.Counting:
-        return {
-          bg: 'red.020',
-          color: 'red.500',
-        }
-      default:
-      case VotingStatus.Archive:
-        return {
-          bg: 'gray.300',
-          color: 'muted',
-        }
-    }
-  })()
-
+export function VotingBadge(props) {
   return (
     <Badge
-      {...accentColors}
       display="flex"
       alignItems="center"
       borderRadius="xl"
       fontSize="sm"
+      fontWeight={500}
       textTransform="capitalize"
       h={6}
       px={3}
@@ -198,95 +163,11 @@ export function VotingOptionText({label, ...props}) {
   )
 }
 
-export function VotingCardItem({votingRef}) {
-  const router = useRouter()
-  const {t, i18n} = useTranslation()
-
-  const [current] = useService(votingRef)
-
-  const {
-    id,
-    title,
-    desc,
-    issuer,
-    status,
-    finishDate,
-    totalPrize,
-    votesCount,
-  } = current.context
-
-  const toDna = toLocaleDna(i18n.language)
-
+export function VotingCardSkeleton(props) {
   return (
-    <Box key={id}>
-      <Stack isInline spacing={2} mb={3} align="center">
-        <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
-        <Stack
-          isInline
-          spacing={1}
-          align="center"
-          bg="gray.300"
-          borderRadius="xl"
-          color="muted"
-          fontSize="sm"
-          fontWeight={500}
-          h={6}
-          pl="1/2"
-          pr={3}
-        >
-          <Avatar w={5} h={5} address={issuer} />
-          <Text>{issuer}</Text>
-        </Stack>
-      </Stack>
-      <Text fontSize={rem(16)} fontWeight={500} mb={2}>
-        {title}
-      </Text>
-      <Text color="muted" mb={4}>
-        {desc}
-      </Text>
-      {[VotingStatus.Archive, VotingStatus.Counting].some(
-        s => s === status
-      ) && (
-        <Stack spacing={2} mb={6}>
-          <Text color="muted" fontSize="sm">
-            {t('Results')}
-          </Text>
-          <VotingResultBar action={FactAction.Confirm} value={60} />
-          <VotingResultBar action={FactAction.Reject} value={40} />
-        </Stack>
-      )}
-      <Stack isInline spacing={2} align="center" mb={6}>
-        <Icon name="star" size={4} color="white" />
-        <Text fontWeight={500}>
-          {t('Total prize')}: {toDna(totalPrize || 0)}
-        </Text>
-      </Stack>
-      <Flex justify="space-between" align="center">
-        <Stack isInline spacing={2}>
-          <PrimaryButton onClick={() => router.push('/oracles/vote')}>
-            {t('Change')}
-          </PrimaryButton>
-          <SecondaryButton>{t('Add fund')}</SecondaryButton>
-        </Stack>
-        <Stack isInline spacing={3}>
-          <Text>
-            <Text as="span" color="muted">
-              {t('Deadline')}:
-            </Text>{' '}
-            <Text as="span">{new Date(finishDate).toLocaleDateString()}</Text>
-          </Text>
-          <Divider
-            orientation="vertical"
-            borderColor="gray.300"
-            borderLeft="1px"
-          />
-          <Stack isInline spacing={2} align="center">
-            <Icon name="user" w={4} h={4} />
-            <Text as="span">{votesCount || 0} votes</Text>
-          </Stack>
-        </Stack>
-      </Flex>
-      <Divider borderColor="gray.300" mt={rem(28)} />
+    <Box {...props}>
+      <Skeleton h={12} mb={2} />
+      <Skeleton h={16} />
     </Box>
   )
 }
