@@ -121,7 +121,13 @@ export const votingMachine = Machine(
           ],
         },
       },
-      idle: {},
+      idle: {
+        on: {
+          ADD_FUND: {
+            actions: [log()],
+          },
+        },
+      },
       mining: {
         invoke: {
           src: 'pollStatus',
