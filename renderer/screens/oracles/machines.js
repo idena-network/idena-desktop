@@ -113,7 +113,7 @@ export const votingMachine = Machine(
         on: {
           '': [
             {
-              target: 'mining',
+              target: 'deploying',
               cond: ({status, txHash}) =>
                 status === VotingStatus.Mining && Boolean(txHash),
             },
@@ -124,11 +124,18 @@ export const votingMachine = Machine(
       idle: {
         on: {
           ADD_FUND: {
-            actions: [log()],
+            target: 'funding',
+            actions: [
+              assign({
+                fundingAmount: ({fundingAmount = 0}, {amount}) =>
+                  fundingAmount + amount,
+              }),
+              log(),
+            ],
           },
         },
       },
-      mining: {
+      deploying: {
         invoke: {
           src: 'pollStatus',
         },
@@ -143,7 +150,7 @@ export const votingMachine = Machine(
                 type: 'MINED',
                 id,
               })),
-              'persistVotings',
+              'persist',
               log(),
             ],
           },
@@ -153,8 +160,72 @@ export const votingMachine = Machine(
               assign({
                 type: VotingStatus.Invalid,
               }),
-              'persistVotings',
+              'persist',
               log(),
+            ],
+          },
+        },
+      },
+      funding: {
+        initial: 'submitting',
+        states: {
+          submitting: {
+            invoke: {
+              src: 'addFund',
+              onDone: {
+                target: 'mining',
+                actions: [
+                  assign((context, {data}) => ({
+                    ...context,
+                    txHash: data,
+                    status: VotingStatus.Mining,
+                  })),
+                  'persist',
+                  log(),
+                ],
+              },
+              onError: {
+                target: 'failure',
+                actions: [
+                  assign({
+                    error: (_, {data: {message}}) => message,
+                  }),
+                  'persist',
+                  log(),
+                ],
+              },
+            },
+          },
+          mining: {
+            invoke: {
+              src: 'pollStatus',
+            },
+          },
+          failure: {
+            on: {
+              PUBLISH: 'submitting',
+            },
+          },
+        },
+        on: {
+          MINED: {
+            target: 'idle',
+            actions: [
+              assign({
+                status: VotingStatus.Pending,
+              }),
+              'persist',
+              log(),
+            ],
+          },
+          TX_NULL: {
+            target: 'invalid',
+            actions: [
+              assign({
+                error: 'Funding tx is missing',
+                type: VotingStatus.Invalid,
+              }),
+              'persist',
             ],
           },
         },
@@ -186,9 +257,15 @@ export const votingMachine = Machine(
           clearTimeout(timeoutId)
         }
       },
+      addFund: ({issuer, contractHash, fundingAmount}) =>
+        callRpc('dna_sendTransaction', {
+          to: contractHash,
+          from: issuer,
+          amount: fundingAmount,
+        }),
     },
     actions: {
-      persistVotings: ({epoch: {epoch}, ...context}) => {
+      persist: ({epoch: {epoch}, ...context}) => {
         epochDb('votings', epoch).put(context)
       },
     },
