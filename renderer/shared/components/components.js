@@ -73,6 +73,7 @@ export function Input(props) {
     <ChakraInput
       alignItems="center"
       borderColor="gray.300"
+      color="brandGray.500"
       fontSize="md"
       lineHeight="short"
       px={3}

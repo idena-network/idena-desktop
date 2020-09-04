@@ -215,6 +215,7 @@ export const uiTheme = {
     sm: '11px',
     md: '13px',
     mdx: '14px',
+    base: '16px',
     lg: '18px',
     xl: '28px',
   },
