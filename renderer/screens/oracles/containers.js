@@ -45,7 +45,7 @@ export function VotingCard({votingRef, ...props}) {
     issuer,
     status,
     finishDate,
-    totalPrize,
+    fundingAmount = 0,
     votesCount,
     contractHash,
   } = current.context
@@ -64,7 +64,7 @@ export function VotingCard({votingRef, ...props}) {
             </Stack>
           </VotingBadge>
         </Stack>
-        <Text fontWeight={500} mb={2}>
+        <Text fontSize="base" fontWeight={500} mb={2}>
           {title}
         </Text>
         <Text color="muted" mb={4}>
@@ -84,7 +84,7 @@ export function VotingCard({votingRef, ...props}) {
         <Stack isInline spacing={2} align="center" mb={6}>
           <Icon name="star" size={4} color="white" />
           <Text fontWeight={500}>
-            {t('Total prize')}: {toDna(totalPrize || 0)}
+            {t('Total prize')}: {toDna(fundingAmount)}
           </Text>
         </Stack>
         <Flex justify="space-between" align="center">
