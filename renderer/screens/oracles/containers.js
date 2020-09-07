@@ -24,6 +24,7 @@ import {
   OracleFormHelper,
 } from './components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
+import {Link} from '../../shared/components'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -65,7 +66,7 @@ export function VotingCard({votingRef, ...props}) {
           </VotingBadge>
         </Stack>
         <Text fontSize="base" fontWeight={500} mb={2}>
-          {title}
+          <Link href={`/oracles/view?id=${id}`}>{title}</Link>
         </Text>
         <Text color="muted" mb={4}>
           {desc}
