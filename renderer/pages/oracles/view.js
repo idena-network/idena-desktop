@@ -46,6 +46,7 @@ import {
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
+import {FactAction} from '../../shared/types'
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
@@ -124,7 +125,7 @@ export default function ViewVotingPage() {
                   <Text color="muted" fontSize="sm" mb={3}>
                     {t('Choose an option to vote')}
                   </Text>
-                  <RadioGroup value="confirm">
+                  <RadioGroup>
                     <Flex
                       justify="space-between"
                       border="1px"
@@ -136,7 +137,6 @@ export default function ViewVotingPage() {
                       <Radio
                         borderColor="gray.100"
                         onClick={onOpenConfirm}
-                        value="confirm"
                         name="option"
                       >
                         {t('Confirm')}
@@ -156,7 +156,6 @@ export default function ViewVotingPage() {
                       <Radio
                         borderColor="gray.100"
                         variantColor="red"
-                        value="reject"
                         name="option"
                         onClick={onOpenReject}
                       >
@@ -269,7 +268,11 @@ export default function ViewVotingPage() {
               value={toDna(deposit * 1.01)}
             />
           </OracleFormControl>
-          <PrimaryButton mt={3} ml="auto">
+          <PrimaryButton
+            mt={3}
+            ml="auto"
+            onClick={() => send('VOTE', {option: FactAction.Confirm})}
+          >
             {t('Send')}
           </PrimaryButton>
         </OracleDrawerBody>
@@ -294,7 +297,11 @@ export default function ViewVotingPage() {
               value={toDna(deposit * 1.01)}
             />
           </OracleFormControl>
-          <PrimaryButton mt={3} ml="auto">
+          <PrimaryButton
+            mt={3}
+            ml="auto"
+            onClick={() => send('VOTE', {option: FactAction.Reject})}
+          >
             {t('Send')}
           </PrimaryButton>
         </OracleDrawerBody>

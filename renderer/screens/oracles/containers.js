@@ -12,7 +12,7 @@ import {
   Divider,
   useDisclosure,
 } from '@chakra-ui/core'
-import {toLocaleDna} from '../../shared/utils/utils'
+import {toLocaleDna, eitherState} from '../../shared/utils/utils'
 import {Avatar, Drawer, Input} from '../../shared/components/components'
 import {VotingStatus, FactAction} from '../../shared/types'
 import {
@@ -65,15 +65,15 @@ export function VotingCard({votingRef, ...props}) {
             </Stack>
           </VotingBadge>
         </Stack>
-        <Text fontSize="base" fontWeight={500} mb={2}>
-          <Link href={`/oracles/view?id=${id}`}>{title}</Link>
-        </Text>
+        <Link href={`/oracles/view?id=${id}`}>
+          <Text fontSize="base" fontWeight={500} mb={2}>
+            {title}
+          </Text>
+        </Link>
         <Text color="muted" mb={4}>
           {desc}
         </Text>
-        {[VotingStatus.Archive, VotingStatus.Counting].some(
-          s => s === status
-        ) && (
+        {eitherState(current, VotingStatus.Archived, VotingStatus.Counting) && (
           <Stack spacing={2} mb={6}>
             <Text color="muted" fontSize="sm">
               {t('Results')}
@@ -156,7 +156,7 @@ export function VotingStatusBadge({status, ...props}) {
           color: 'red.500',
         }
       default:
-      case VotingStatus.Archive:
+      case VotingStatus.Archived:
         return {
           bg: 'gray.300',
           color: 'muted',

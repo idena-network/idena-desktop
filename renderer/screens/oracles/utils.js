@@ -1,6 +1,8 @@
 import nanoid from 'nanoid'
 import dayjs from 'dayjs'
 import {VotingStatus} from '../../shared/types'
+import {callRpc} from '../../shared/utils/utils'
+import {strip as omit} from '../../shared/utils/obj'
 
 export function createVoting(voting) {
   return {
@@ -35,7 +37,7 @@ export function fetchVotings() {
       desc: `President Trump on Monday threatened to yank the Republican National Convention from Charlotte, N.C., where it is scheduled to be held in August, accusing the state’s Democratic governor of being...`,
       issuer: `0x5A3abB61A9c5475B8243B61A9c5475B8243`,
       totalPrize: 240,
-      status: VotingStatus.Archive,
+      status: VotingStatus.Archived,
       deadline: dayjs().add(Math.floor(Math.random() * 10 + 3), 'd'),
       votesCount: Math.floor(Math.random() * 100),
     }),
@@ -50,5 +52,18 @@ export function updateVotingList(votings, {id, ...restVoting}) {
           ...restVoting,
         }
       : voting
+  )
+}
+
+export function callContract({from, contract, method, amount, args}) {
+  return callRpc(
+    'dna_callContract',
+    omit({
+      from,
+      contract,
+      method,
+      amount,
+      args,
+    })
   )
 }
