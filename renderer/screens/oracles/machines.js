@@ -442,13 +442,164 @@ export const createNewVotingMachine = epoch =>
                 value: new Date(startDate).valueOf().toString(),
               },
             ],
-            nonce: 10,
           })
 
           const db = epochDb('votings', epoch)
           await db.put({...voting, issuer: from, status: VotingStatus.Mining})
 
           return deployResult
+        },
+      },
+    }
+  )
+
+export const createViewVotingMachine = (id, epoch) =>
+  Machine(
+    {
+      context: {
+        id,
+        epoch,
+      },
+      initial: 'loading',
+      states: {
+        loading: {
+          invoke: {
+            src: 'loadVoting',
+            onDone: {
+              target: 'idle',
+              actions: [
+                assign((context, {data}) => ({
+                  ...context,
+                  ...data,
+                })),
+                log(),
+              ],
+            },
+            onError: {target: 'invalid', actions: [log()]},
+          },
+        },
+        idle: {
+          on: {
+            ADD_FUND: {
+              target: 'funding',
+              actions: [
+                assign({
+                  fundingAmount: ({fundingAmount = 0}, {amount}) =>
+                    fundingAmount + amount,
+                }),
+                log(),
+              ],
+            },
+          },
+        },
+        funding: {
+          initial: 'submitting',
+          states: {
+            submitting: {
+              invoke: {
+                src: 'addFund',
+                onDone: {
+                  target: 'mining',
+                  actions: [
+                    assign((context, {data}) => ({
+                      ...context,
+                      txHash: data,
+                      status: VotingStatus.Mining,
+                    })),
+                    'persist',
+                    log(),
+                  ],
+                },
+                onError: {
+                  target: 'failure',
+                  actions: [
+                    assign({
+                      error: (_, {data: {message}}) => message,
+                    }),
+                    'persist',
+                    log(),
+                  ],
+                },
+              },
+            },
+            mining: {
+              invoke: {
+                src: 'pollStatus',
+              },
+            },
+            failure: {
+              on: {
+                PUBLISH: 'submitting',
+              },
+            },
+          },
+          on: {
+            MINED: {
+              target: 'idle',
+              actions: [
+                assign({
+                  status: VotingStatus.Pending,
+                }),
+                'persist',
+                log(),
+              ],
+            },
+            TX_NULL: {
+              target: 'invalid',
+              actions: [
+                assign({
+                  error: 'Funding tx is missing',
+                  type: VotingStatus.Invalid,
+                }),
+                'persist',
+              ],
+            },
+          },
+        },
+        invalid: {},
+      },
+    },
+    {
+      services: {
+        pollStatus: ({txHash}) => cb => {
+          let timeoutId
+
+          const fetchStatus = async () => {
+            try {
+              const result = await callRpc('bcn_transaction', txHash)
+              if (result.blockHash !== HASH_IN_MEMPOOL) {
+                cb('MINED')
+              } else {
+                timeoutId = setTimeout(fetchStatus, 10 * 1000)
+              }
+            } catch {
+              cb('TX_NULL')
+            }
+          }
+
+          timeoutId = setTimeout(fetchStatus, 10 * 1000)
+
+          return () => {
+            clearTimeout(timeoutId)
+          }
+        },
+        addFund: ({issuer, contractHash, fundingAmount}) =>
+          callRpc('dna_sendTransaction', {
+            to: contractHash,
+            from: issuer,
+            amount: fundingAmount,
+          }),
+        // eslint-disable-next-line no-shadow
+        loadVoting: async ({epoch, id}) => {
+          const db = epochDb('votings', epoch)
+          console.log(db.all())
+          return db.load(id)
+        },
+      },
+      actions: {
+        // eslint-disable-next-line no-shadow
+        persist: ({epoch, ...context}) => {
+          epochDb('votings', epoch).put(context)
         },
       },
     }
