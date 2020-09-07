@@ -496,9 +496,9 @@ export function ValidationResultToast({epoch}) {
 
   const {colors} = useTheme()
 
-  const url = `https://scan.idena.io/${
-    isValidationSucceeded ? 'reward' : 'answers'
-  }?epoch=${epoch}&identity=${address}`
+  const url = `https://scan.idena.io/identity/${address}/epoch/${epoch}/${
+    isValidationSucceeded ? 'rewards' : 'validation'
+  }`
 
   const notSeen =
     typeof state[epoch] === 'boolean'
