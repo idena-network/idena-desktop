@@ -56,7 +56,7 @@ function VotingListPage() {
             <VotingFilter value={VotingStatus.Open} />
             <VotingFilter value={VotingStatus.Voted} />
             <VotingFilter value={VotingStatus.Counting} />
-            <VotingFilter value={VotingStatus.Archive} />
+            <VotingFilter value={VotingStatus.Archived} />
           </VotingFilterList>
           <Box>
             <Text color="muted" mb={3}>

@@ -1,7 +1,7 @@
 import {Machine, assign, spawn} from 'xstate'
 import {log, raise, sendParent} from 'xstate/lib/actions'
-import {fetchVotings, updateVotingList} from './utils'
-import {VotingStatus} from '../../shared/types'
+import {fetchVotings, updateVotingList, callContract} from './utils'
+import {VotingStatus, FactAction} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
 import {epochDb} from '../../shared/utils/db'
 import {bufferToHex} from '../../shared/utils/string'
@@ -117,6 +117,14 @@ export const votingMachine = Machine(
               cond: ({status, txHash}) =>
                 status === VotingStatus.Mining && Boolean(txHash),
             },
+            {
+              target: 'counting',
+              cond: ({status}) => status === VotingStatus.Counting,
+            },
+            {
+              target: 'archived',
+              cond: ({status}) => status === VotingStatus.Archived,
+            },
             {target: 'idle'},
           ],
         },
@@ -230,6 +238,8 @@ export const votingMachine = Machine(
           },
         },
       },
+      [VotingStatus.Counting]: {},
+      [VotingStatus.Archived]: {},
       invalid: {},
     },
   },
@@ -490,6 +500,7 @@ export const createViewVotingMachine = (id, epoch) =>
                 log(),
               ],
             },
+            VOTE: 'voting',
           },
         },
         funding: {
@@ -556,6 +567,13 @@ export const createViewVotingMachine = (id, epoch) =>
             },
           },
         },
+        voting: {
+          invoke: {
+            src: 'vote',
+            onDone: 'idle',
+            onError: {target: 'invalid', actions: [log()]},
+          },
+        },
         invalid: {},
       },
     },
@@ -594,6 +612,27 @@ export const createViewVotingMachine = (id, epoch) =>
           const db = epochDb('votings', epoch)
           console.log(db.all())
           return db.load(id)
+        },
+        vote: async ({issuer, contractHash, deposit = 100}, {option}) => {
+          const resp = await callContract({
+            from: issuer,
+            contract: contractHash,
+            method: 'sendVote',
+            amount: deposit,
+            args: [
+              {
+                index: 0,
+                format: 'byte',
+                value: option === FactAction.Confirm ? '1' : '0',
+              },
+              {
+                index: 1,
+                format: 'hex',
+                value: '0x1',
+              },
+            ],
+          })
+          return resp
         },
       },
       actions: {
