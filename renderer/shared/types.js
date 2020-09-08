@@ -57,7 +57,7 @@ export const VotingStatus = {
   Pending: 'pending',
 }
 
-export const FactAction = {
+export const VoteOption = {
   Confirm: 'confirm',
   Reject: 'reject',
 }

@@ -20,12 +20,7 @@ import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import {Page} from '../../screens/app/components'
-import {
-  Avatar,
-  Drawer,
-  Input,
-  FloatDebug,
-} from '../../shared/components/components'
+import {Avatar, FloatDebug} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
   PrimaryButton,
@@ -33,20 +28,17 @@ import {
   IconButton2,
 } from '../../shared/components/button'
 import {toLocaleDna} from '../../shared/utils/utils'
-import {
-  OracleDrawerHeader,
-  OracleDrawerBody,
-  OracleFormHelper,
-  OracleFormControl,
-  VotingBadge,
-} from '../../screens/oracles/components'
+import {VotingBadge} from '../../screens/oracles/components'
 import {
   AddFundDrawer,
   VotingStatusBadge,
+  VoteDrawer,
+  AsideStat,
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {FactAction} from '../../shared/types'
+import {VoteOption} from '../../shared/types'
+import {useIdentityState} from '../../shared/providers/identity-context'
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
@@ -76,6 +68,8 @@ export default function ViewVotingPage() {
 
   const {epoch} = useEpochState()
 
+  const {address} = useIdentityState()
+
   const viewMachine = React.useMemo(() => createViewVotingMachine(id, epoch), [
     epoch,
     id,
@@ -94,7 +88,7 @@ export default function ViewVotingPage() {
     votesCount = 0,
     contractHash,
     quorum = 0,
-    deposit = 100,
+    deposit = 0,
   } = current.context
 
   return (
@@ -210,102 +204,41 @@ export default function ViewVotingPage() {
                 </StatHelpText>
               </Stat>
               <Stack spacing={6}>
-                <Stat>
-                  <StatLabel color="muted" fontSize="md">
-                    {t('Deposit')}
-                  </StatLabel>
-                  <StatNumber fontSize={rem(16)} fontWeight={500}>
-                    {toDna(deposit)}
-                  </StatNumber>
-                </Stat>
-                <Stat>
-                  <StatLabel color="muted" fontSize="md">
-                    {t('Your reward')}
-                  </StatLabel>
-                  <StatNumber fontSize={rem(16)} fontWeight={500}>
-                    {toDna(500000000)}
-                  </StatNumber>
-                </Stat>
-                <Stat>
-                  <StatLabel color="muted" fontSize="md">
-                    {t('Quorum required')}
-                  </StatLabel>
-                  <StatNumber fontSize={rem(16)} fontWeight={500}>
-                    {t('{{quorum}} votes', {quorum})}
-                  </StatNumber>
-                </Stat>
-                <Stat>
-                  <StatLabel color="muted" fontSize="md">
-                    {t('Deadline')}
-                  </StatLabel>
-                  <StatNumber fontSize={rem(16)} fontWeight={500}>
-                    {new Date(finishDate).toLocaleString()}
-                  </StatNumber>
-                </Stat>
+                <AsideStat label={t('Deposit')} value={toDna(deposit)} />
+                <AsideStat label={t('Your reward')} value={toDna(500000000)} />
+                <AsideStat
+                  label={t('Quorum required')}
+                  value={t('{{quorum}} votes', {quorum})}
+                />
+                <AsideStat
+                  label={t('Deadline')}
+                  value={new Date(finishDate).toLocaleDateString()}
+                />
               </Stack>
             </Box>
           </Stack>
         </Skeleton>
       </Page>
 
-      <Drawer isOpen={isOpenConfirm} onClose={onCloseConfirm}>
-        <OracleDrawerHeader icon="send-out">
-          {t('Voting: confirm', {nsSeparator: '!'})}
-        </OracleDrawerHeader>
-        <OracleDrawerBody>
-          <OracleFormControl label={t('Transfer from')}>
-            <Input defaultValue={issuer} />
-            <OracleFormHelper label={t('Available')} value={toDna(80200)} />
-          </OracleFormControl>
-          <OracleFormControl label="To address">
-            <Input isDisabled value={contractHash} />
-          </OracleFormControl>
-          <OracleFormControl label={t('Deposit, DNA')}>
-            <Input isDisabled value={deposit} />
-            <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
-            <OracleFormHelper
-              label={t('Total amount')}
-              value={toDna(deposit * 1.01)}
-            />
-          </OracleFormControl>
-          <PrimaryButton
-            mt={3}
-            ml="auto"
-            onClick={() => send('VOTE', {option: FactAction.Confirm})}
-          >
-            {t('Send')}
-          </PrimaryButton>
-        </OracleDrawerBody>
-      </Drawer>
+      <VoteDrawer
+        isOpen={isOpenConfirm}
+        onClose={onCloseConfirm}
+        option={VoteOption.Confirm}
+        from={address}
+        to={contractHash}
+        deposit={deposit}
+        onVote={() => send('VOTE', {option: VoteOption.Confirm})}
+      />
 
-      <Drawer isOpen={isOpenReject} onClose={onCloseReject}>
-        <OracleDrawerHeader icon="send-out" variantColor="red">
-          {t('Voting: reject', {nsSeparator: '!'})}
-        </OracleDrawerHeader>
-        <OracleDrawerBody>
-          <OracleFormControl label={t('Transfer from')}>
-            <Input defaultValue={issuer} />
-          </OracleFormControl>
-          <OracleFormControl label="To address">
-            <Input isDisabled value={contractHash} />
-          </OracleFormControl>
-          <OracleFormControl label={t('Deposit, DNA')}>
-            <Input isDisabled defaultValue={deposit} />
-            <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
-            <OracleFormHelper
-              label={t('Total amount')}
-              value={toDna(deposit * 1.01)}
-            />
-          </OracleFormControl>
-          <PrimaryButton
-            mt={3}
-            ml="auto"
-            onClick={() => send('VOTE', {option: FactAction.Reject})}
-          >
-            {t('Send')}
-          </PrimaryButton>
-        </OracleDrawerBody>
-      </Drawer>
+      <VoteDrawer
+        isOpen={isOpenReject}
+        onClose={onCloseReject}
+        option={VoteOption.Reject}
+        from={address}
+        to={contractHash}
+        deposit={deposit}
+        onVote={() => send('VOTE', {option: VoteOption.Reject})}
+      />
 
       <AddFundDrawer
         isOpen={isOpenAddFund}
