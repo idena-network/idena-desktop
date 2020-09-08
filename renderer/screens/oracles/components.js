@@ -20,7 +20,7 @@ import {
   DrawerBody,
   Input,
 } from '../../shared/components/components'
-import {FactAction} from '../../shared/types'
+import {VoteOption} from '../../shared/types'
 import {rem} from '../../shared/theme'
 
 export function OracleDrawerHeader({
@@ -127,7 +127,7 @@ export function VotingResultBar({value, action, ...props}) {
     <Flex
       align="center"
       justify="space-between"
-      bg={action === FactAction.Confirm ? 'blue.012' : 'gray.50'}
+      bg={action === VoteOption.Confirm ? 'blue.012' : 'gray.50'}
       borderRadius="md"
       textTransform="capitalize"
       px={2}
