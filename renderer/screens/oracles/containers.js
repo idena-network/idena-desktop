@@ -11,10 +11,13 @@ import {
   Flex,
   Divider,
   useDisclosure,
+  Stat,
+  StatLabel,
+  StatNumber,
 } from '@chakra-ui/core'
 import {toLocaleDna, eitherState} from '../../shared/utils/utils'
 import {Avatar, Drawer, Input} from '../../shared/components/components'
-import {VotingStatus, FactAction} from '../../shared/types'
+import {VotingStatus, VoteOption} from '../../shared/types'
 import {
   VotingResultBar,
   VotingBadge,
@@ -25,6 +28,7 @@ import {
 } from './components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {Link} from '../../shared/components'
+import {useIdentityState} from '../../shared/providers/identity-context'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -78,8 +82,8 @@ export function VotingCard({votingRef, ...props}) {
             <Text color="muted" fontSize="sm">
               {t('Results')}
             </Text>
-            <VotingResultBar action={FactAction.Confirm} value={60} />
-            <VotingResultBar action={FactAction.Reject} value={40} />
+            <VotingResultBar action={VoteOption.Confirm} value={60} />
+            <VotingResultBar action={VoteOption.Reject} value={40} />
           </Stack>
         )}
         <Stack isInline spacing={2} align="center" mb={6}>
@@ -206,5 +210,57 @@ export function AddFundDrawer({from, to, onAddFund, ...props}) {
         </OracleDrawerBody>
       </Box>
     </Drawer>
+  )
+}
+
+export function VoteDrawer({option, from, to, deposit = 0, onVote, ...props}) {
+  const {t, i18n} = useTranslation()
+
+  const {balance} = useIdentityState()
+
+  const toDna = toLocaleDna(i18n.language)
+
+  return (
+    <Drawer {...props}>
+      <OracleDrawerHeader
+        icon="send-out"
+        variantColor={option === VoteOption.Reject ? 'red' : 'blue'}
+      >
+        {t('Voting: {{option}}', {option, nsSeparator: '!'})}
+      </OracleDrawerHeader>
+      <OracleDrawerBody>
+        <OracleFormControl label={t('Transfer from')}>
+          <Input defaultValue={from} />
+          <OracleFormHelper label={t('Available')} value={toDna(balance)} />
+        </OracleFormControl>
+        <OracleFormControl label="To address">
+          <Input isDisabled value={to} />
+        </OracleFormControl>
+        <OracleFormControl label={t('Deposit, DNA')}>
+          <Input isDisabled value={deposit} />
+          <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
+          <OracleFormHelper
+            label={t('Total amount')}
+            value={toDna(deposit * 1.01)}
+          />
+        </OracleFormControl>
+        <PrimaryButton mt={3} ml="auto" onClick={onVote}>
+          {t('Send')}
+        </PrimaryButton>
+      </OracleDrawerBody>
+    </Drawer>
+  )
+}
+
+export function AsideStat({label, value, ...props}) {
+  return (
+    <Stat {...props}>
+      <StatLabel color="muted" fontSize="md">
+        {label}
+      </StatLabel>
+      <StatNumber fontSize="base" fontWeight={500}>
+        {value}
+      </StatNumber>
+    </Stat>
   )
 }

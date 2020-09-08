@@ -1,7 +1,7 @@
 import {Machine, assign, spawn} from 'xstate'
 import {log, raise, sendParent} from 'xstate/lib/actions'
 import {fetchVotings, updateVotingList, callContract} from './utils'
-import {VotingStatus, FactAction} from '../../shared/types'
+import {VotingStatus, VoteOption} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
 import {epochDb} from '../../shared/utils/db'
 import {bufferToHex} from '../../shared/utils/string'
@@ -623,7 +623,7 @@ export const createViewVotingMachine = (id, epoch) =>
               {
                 index: 0,
                 format: 'byte',
-                value: option === FactAction.Confirm ? '1' : '0',
+                value: option === VoteOption.Confirm ? '1' : '0',
               },
               {
                 index: 1,
