@@ -31,7 +31,9 @@ function VotingListPage() {
       <Stack isInline spacing={20} w="full">
         <Stack spacing={6} w="md">
           {current.matches('loading') &&
-            [...Array(3)].map((_, i) => <VotingCardSkeleton key={i} />)}
+            Array.from({length: 5}).map((_, idx) => (
+              <VotingCardSkeleton key={idx} />
+            ))}
 
           {current.matches('loaded') &&
             filteredVotings.map(({id, ref}) => (

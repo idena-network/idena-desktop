@@ -14,7 +14,6 @@ import {
   StatLabel,
   useDisclosure,
   StatHelpText,
-  Skeleton,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -28,7 +27,7 @@ import {
   IconButton2,
 } from '../../shared/components/button'
 import {toLocaleDna} from '../../shared/utils/utils'
-import {VotingBadge} from '../../screens/oracles/components'
+import {VotingBadge, VotingSkeleton} from '../../screens/oracles/components'
 import {
   AddFundDrawer,
   VotingStatusBadge,
@@ -91,12 +90,14 @@ export default function ViewVotingPage() {
     deposit = 0,
   } = current.context
 
+  const isLoaded = !current.matches('loading')
+
   return (
     <>
       <Page pt={8}>
-        <Skeleton isLoaded={!current.matches('loading')}>
-          <Stack isInline spacing={10} w="full">
-            <Box minWidth="lg" maxW="lg">
+        <Stack isInline spacing={10} w="full">
+          <Box minWidth="lg" maxW="lg">
+            <VotingSkeleton isLoaded={isLoaded}>
               <Stack isInline spacing={2} mb={10}>
                 <VotingStatusBadge status={status}>
                   {t(status)}
@@ -108,13 +109,23 @@ export default function ViewVotingPage() {
                   </Stack>
                 </VotingBadge>
               </Stack>
-              <Stack spacing={6}>
-                <Box borderRadius="md" bg="gray.50" py={8} px={10}>
-                  <Heading fontSize={rem(21)} fontWeight={500} mb={4}>
+            </VotingSkeleton>
+            <Stack spacing={6}>
+              <VotingSkeleton isLoaded={isLoaded}>
+                <Stack
+                  spacing={4}
+                  borderRadius="md"
+                  bg="gray.50"
+                  py={8}
+                  px={10}
+                >
+                  <Heading fontSize={rem(21)} fontWeight={500}>
                     {title}
                   </Heading>
                   <Text lineHeight="tall">{desc}</Text>
-                </Box>
+                </Stack>
+              </VotingSkeleton>
+              <VotingSkeleton isLoaded={isLoaded}>
                 <Box>
                   <Text color="muted" fontSize="sm" mb={3}>
                     {t('Choose an option to vote')}
@@ -161,6 +172,8 @@ export default function ViewVotingPage() {
                     </Flex>
                   </RadioGroup>
                 </Box>
+              </VotingSkeleton>
+              <VotingSkeleton isLoaded={isLoaded}>
                 <Flex justify="space-between" align="center">
                   <Stack isInline spacing={2}>
                     <PrimaryButton onClick={() => send('VOTE')}>
@@ -184,8 +197,10 @@ export default function ViewVotingPage() {
                     </Stack>
                   </Stack>
                 </Flex>
-              </Stack>
-            </Box>
+              </VotingSkeleton>
+            </Stack>
+          </Box>
+          <VotingSkeleton isLoaded={isLoaded} mt={isLoaded ? 0 : 16}>
             <Box mt={20}>
               <Stat mb={8}>
                 <StatLabel color="muted" fontSize="md">
@@ -216,8 +231,8 @@ export default function ViewVotingPage() {
                 />
               </Stack>
             </Box>
-          </Stack>
-        </Skeleton>
+          </VotingSkeleton>
+        </Stack>
       </Page>
 
       <VoteDrawer
