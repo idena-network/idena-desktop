@@ -2,7 +2,7 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {Flex, Text} from '@chakra-ui/core'
+import {Flex, Text, Stack} from '@chakra-ui/core'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
@@ -184,15 +184,15 @@ function HardForkScreen({version, onUpdate}) {
   const {t} = useTranslation()
 
   return (
-    <Flex align="center" justify="center" flex={1} background="brandGray.500">
-      <Flex direction="column">
-        <Text color="white" fontSize="md" fontWeight={500} mb={5}>
+    <Flex align="center" justify="center" flex={1} bg="graphite.500">
+      <Stack spacing={5} align="flex-start">
+        <Text color="white" fontSize="lg" fontWeight={500}>
           {t('Your node is outdated because of the hard fork, please update')}
         </Text>
         <PrimaryButton onClick={onUpdate}>
           {t('Update Node Version')} {version}
         </PrimaryButton>
-      </Flex>
+      </Stack>
     </Flex>
   )
 }
