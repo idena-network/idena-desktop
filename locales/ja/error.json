@@ -1,0 +1,16 @@
+{
+  "Can not submit flip": "フリップを提出できません",
+  "Keywords are not specified": "キーワードが指定されていません",
+  "Error while uploading flip": "アップロード中にエラーが発生しました",
+  "Something went wrong": "不具合が起きました",
+  "Maximum image size exceeded": "画像が大きすぎます",
+  "Error while importing key": "キーの取り込み中にエラーが発生しました",
+  "Internal node is not available, try again in a few seconds": "内部ノードがありません。しばらくしてからもう一度試してください",
+  "You can not submit flips having 'Candidate' status": "「候補者」の状態の時にフリップを提出する事はできません",
+  "You cannot submit more flips until the next validation": "次の検証までこれ以上のフリップを提出する事はできません",
+  "Can not submit flip during the validation session": "検証セッション中にフリップの提出はできません",
+  "Error while sending transaction": "送信中にエラーが発生しました",
+  "Transaction sent": "処理手続きを送信しました",
+  "Error while deleting flip": "フリップを消去中にエラーが発生しました",
+  "It's not allowed to submit flips with your identity status": "あなたの現在のアイデンティティー状態ではフリップを提出することができません"
+}

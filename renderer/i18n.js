@@ -43,6 +43,8 @@ import bg_translation from '../locales/bg/translation.json'
 import bg_error from '../locales/bg/error.json'
 import sv_translation from '../locales/sv/translation.json'
 import sv_error from '../locales/sv/error.json'
+import ja_translation from '../locales/ja/translation.json'
+import ja_error from '../locales/ja/error.json'
 
 export const AVAILABLE_LANGS = [
   'en',
@@ -65,6 +67,7 @@ export const AVAILABLE_LANGS = [
   'tr',
   'bg',
   'sv',
+  'ja',
 ]
 
 i18n.use(initReactI18next).init({
@@ -90,6 +93,7 @@ i18n.use(initReactI18next).init({
     tr: {translation: tr_translation, error: tr_error},
     bg: {translation: bg_translation, error: bg_error},
     sv: {translation: sv_translation, error: sv_error},
+    ja: {translation: ja_translation, error: ja_error},
   },
   lng: loadPersistentStateValue('settings', 'lng'),
   fallbackLng: 'en',
