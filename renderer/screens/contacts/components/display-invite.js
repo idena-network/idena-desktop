@@ -45,8 +45,8 @@ function DisplayInvite({
         <NameField label={t('Last name')} defaultValue={lastName} />
       </Flex>
       <WideField label={t('Amount')} defaultValue={amount} disabled={readonly}>
-        <Hint label={t('Fee')} value="0.999 DNA" />
-        <Hint label={t('Total amount')} value="1000.999 DNA" />
+        <Hint label={t('Fee')} value="0.999 iDNA" />
+        <Hint label={t('Total amount')} value="1000.999 iDNA" />
       </WideField>
       <WideField
         label={t('Invitation code')}

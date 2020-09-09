@@ -20,7 +20,7 @@ function ReceiveForm({address}) {
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          {t(`Receive DNA’s`)}
+          {t(`Receive iDNA’s`)}
         </SubHeading>
 
         <Box

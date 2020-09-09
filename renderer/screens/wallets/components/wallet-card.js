@@ -167,7 +167,7 @@ function WalletCard({wallet, main, onSend, onReceive, onWithdrawStake}) {
       >
         {t('Balance')}
       </div>
-      <div className="value">{balance} DNA</div>
+      <div className="value">{balance} iDNA</div>
       <style jsx>{`
         .title {
           margin-bottom: ${rem(17)};

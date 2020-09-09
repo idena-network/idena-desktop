@@ -110,7 +110,7 @@ function KillForm({onSuccess, onFail}) {
       }}
     >
       <FormControl>
-        <FormLabel htmlFor="stake">{t('Withraw stake, DNA')}</FormLabel>
+        <FormLabel htmlFor="stake">{t('Withraw stake, iDNA')}</FormLabel>
         <Input
           id="stake"
           value={stake}

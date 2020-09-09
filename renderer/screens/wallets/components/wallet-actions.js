@@ -85,10 +85,10 @@ function WalletTransfer({transactions = []}) {
             <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
             <TableHeaderCol>{t('Address')}</TableHeaderCol>
             <TableHeaderCol className="text-right">
-              {t('Amount, DNA')}
+              {t('Amount, iDNA')}
             </TableHeaderCol>
             <TableHeaderCol className="text-right">
-              {t('Fee, DNA')}
+              {t('Fee, iDNA')}
             </TableHeaderCol>
             <TableHeaderCol>{t('Date')}</TableHeaderCol>
             <TableHeaderCol>{t('Blockchain transaction ID')}</TableHeaderCol>

@@ -53,7 +53,7 @@ function TransferForm({onSuccess, onFail}) {
         <SubHeading
           css={{...margin(0, 0, theme.spacings.small8), ...wordWrap()}}
         >
-          {t(`translation:Send DNA’s`)}
+          {t(`translation:Send iDNA’s`)}
         </SubHeading>
 
         <FormGroup>
@@ -76,7 +76,7 @@ function TransferForm({onSuccess, onFail}) {
         </FormGroup>
         <FormGroup>
           <Field
-            label={t('translation:Amount, DNA')}
+            label={t('translation:Amount, iDNA')}
             type="number"
             onChange={e => setAmount(e.target.value)}
           />

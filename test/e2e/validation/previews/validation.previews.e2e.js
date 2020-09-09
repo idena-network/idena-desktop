@@ -59,6 +59,9 @@ test('check preview states changing', async t => {
   await t.click(ReactSelector('ValidationDialogFooter PrimaryButton'))
   await t.expect(modal.exists).notOk()
 
+  // consider flip fetching delay
+  await t.wait(15000)
+
   // all flips should be shown
   const longThumbnails = ReactSelector('Thumbnails Thumbnail')
   await t.expect(longThumbnails.count).eql(7)
