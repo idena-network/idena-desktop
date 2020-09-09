@@ -214,3 +214,9 @@ export function shouldPollLongFlips(
     )
   )
 }
+
+export function availableFlipReportsNumber(flips) {
+  return Math.ceil(
+    flips.filter(({decoded, words}) => decoded && words?.length > 0).length / 3
+  )
+}
