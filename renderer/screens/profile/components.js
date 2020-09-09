@@ -512,15 +512,7 @@ export function ValidationResultToast({epoch}) {
           pinned
           type={NotificationType.Info}
           icon={
-            <Flex
-              align="center"
-              justify="center"
-              css={{
-                height: rem(20),
-                width: rem(20),
-                marginRight: rem(12),
-              }}
-            >
+            <Flex align="center" justify="center" h={5} w={5} mr={3}>
               <Box style={{transform: 'scale(0.35) translateY(-10px)'}}>
                 <Spinner color={colors.brandBlue[500]} />
               </Box>
