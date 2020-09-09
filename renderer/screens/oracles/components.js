@@ -14,6 +14,8 @@ import {
   Text,
   Box,
   Skeleton,
+  useTheme,
+  Divider,
 } from '@chakra-ui/core'
 import {
   DrawerHeader,
@@ -145,7 +147,9 @@ export function VotingInlineFormControl({label, children, ...props}) {
   return (
     <FormControl {...props}>
       <Stack isInline spacing={5}>
-        <FormLabel w={rem(100)}>{label}</FormLabel>
+        <FormLabel color="muted" w={rem(100)}>
+          {label}
+        </FormLabel>
         {children}
       </Stack>
     </FormControl>
@@ -166,8 +170,42 @@ export function VotingOptionText({label, ...props}) {
 export function VotingCardSkeleton(props) {
   return (
     <Box {...props}>
-      <Skeleton h={12} mb={2} />
-      <Skeleton h={16} />
+      <Stack isInline spacing={2} align="center" mb={3}>
+        <VotingSkeleton h={6} w={16} />
+        <VotingSkeleton h={6} />
+      </Stack>
+      <Stack spacing={2} mb={4}>
+        <VotingSkeleton h={6} />
+        <VotingSkeleton h={16} />
+      </Stack>
+      <Stack isInline spacing={2} align="center" mb={6}>
+        <VotingSkeleton borderRadius="full" h={5} w={5} />
+        <VotingSkeleton h={5} />
+      </Stack>
+      <Flex justify="space-between" align="center">
+        <VotingSkeleton h={8} w={20} />
+        <VotingSkeleton h={8} w={64} />
+      </Flex>
+      <VotingListDivider />
     </Box>
   )
+}
+
+export function VotingSkeleton(props) {
+  const {colors} = useTheme()
+  return (
+    <FullSkeleton
+      colorStart={colors.gray[50]}
+      colorEnd={colors.gray[300]}
+      {...props}
+    />
+  )
+}
+
+function FullSkeleton(props) {
+  return <Skeleton w="full" {...props} />
+}
+
+export function VotingListDivider() {
+  return <Divider borderColor="gray.300" mt={6} mb={0} />
 }

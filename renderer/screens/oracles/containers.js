@@ -25,6 +25,7 @@ import {
   OracleDrawerBody,
   OracleFormControl,
   OracleFormHelper,
+  VotingListDivider,
 } from './components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {Link} from '../../shared/components'
@@ -119,7 +120,7 @@ export function VotingCard({votingRef, ...props}) {
             </Stack>
           </Stack>
         </Flex>
-        <Divider borderColor="gray.300" mt={6} mb={0} />
+        <VotingListDivider />
       </Box>
 
       <AddFundDrawer
