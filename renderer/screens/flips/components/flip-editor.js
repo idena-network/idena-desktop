@@ -707,6 +707,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                     setRightMenuPanel(RightMenu.None)
                   }
                   editors[idx].stopDrawingMode()
+                  setRightMenuPanel(RightMenu.None)
                   setInsertImageMenuOpen(!isInsertImageMenuOpen)
                 }}
               />
