@@ -19,10 +19,10 @@ import {
   persistValidationState,
   loadValidationState,
   filterRegularFlips,
-  filterSolvableFlips,
   rearrangeFlips,
   readyFlip,
   availableFlipReportsNumber,
+  decodedWithKeywords,
 } from '../../screens/validation/utils'
 import {
   ValidationScene,
@@ -520,6 +520,9 @@ function hasAllAnswers(state) {
 }
 
 function hasAllRelevanceMarks({context: {longFlips}}) {
-  const flips = filterSolvableFlips(longFlips)
-  return flips.length && flips.every(({relevance}) => relevance)
+  const flips = longFlips.filter(decodedWithKeywords)
+  return (
+    flips.length === 0 ||
+    (flips.length > 0 && flips.every(({relevance}) => relevance))
+  )
 }

@@ -215,8 +215,9 @@ export function shouldPollLongFlips(
   )
 }
 
+export const decodedWithKeywords = ({decoded, words}) =>
+  decoded && words?.length > 0
+
 export function availableFlipReportsNumber(flips) {
-  return Math.ceil(
-    flips.filter(({decoded, words}) => decoded && words?.length > 0).length / 3
-  )
+  return Math.ceil(flips.filter(decodedWithKeywords).length / 3)
 }
