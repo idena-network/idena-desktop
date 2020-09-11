@@ -48,10 +48,13 @@ export function rearrangeFlips(flips) {
   const loading = []
   const invalid = []
   const extras = []
+  const flippedFlips = []
   for (let i = 0; i < flips.length; i += 1) {
-    const {fetched, decoded, failed, extra} = flips[i]
+    const {fetched, decoded, failed, extra, flipped} = flips[i]
     if (extra) {
       extras.push(flips[i])
+    } else if (flipped) {
+      flippedFlips.push(flips[i])
     } else if (decoded) {
       solvable.push(flips[i])
     } else if (failed || fetched) {
@@ -61,7 +64,7 @@ export function rearrangeFlips(flips) {
     }
   }
   solvable.sort((a, b) => a.retries - b.retries)
-  return [...solvable, ...loading, ...invalid, ...extras]
+  return [...solvable, ...flippedFlips, ...loading, ...invalid, ...extras]
 }
 
 export function flipExtraFlip({extra, ...flip}) {
@@ -213,4 +216,11 @@ export function shouldPollLongFlips(
         .add(2, 'minute')
     )
   )
+}
+
+export const decodedWithKeywords = ({decoded, words}) =>
+  decoded && words?.length > 0
+
+export function availableFlipReportsNumber(flips) {
+  return Math.ceil(flips.filter(decodedWithKeywords).length / 3)
 }
