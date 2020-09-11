@@ -49,8 +49,8 @@ export function rearrangeFlips(flips) {
   const invalid = []
   const extras = []
   for (let i = 0; i < flips.length; i += 1) {
-    const {fetched, decoded, failed, extra} = flips[i]
-    if (extra) {
+    const {fetched, decoded, failed, extra, flipped} = flips[i]
+    if (extra || flipped) {
       extras.push(flips[i])
     } else if (decoded) {
       solvable.push(flips[i])
