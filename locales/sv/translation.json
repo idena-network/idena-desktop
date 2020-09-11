@@ -318,10 +318,10 @@
   "Your built-in node is failed": "Din inbyggda nod misslyckades",
   "Restart built-in node": "Starta om inbyggda noden",
   "Withraw stake, iDNA": "Ta ut stake, iDNA",
-  "Receive iDNA’s": "Ta emot iDNA’s",
-  "Send iDNA’s": "Skicka iDNA’s",
+  "Receive iDNA’s": "Ta emot iDNA",
+  "Send iDNA’s": "Skicka iDNA",
   "Amount, iDNA": "Belopp, iDNA",
   "Fee, iDNA": "Avgift, iDNA",
   "You’re about to send iDNA from your wallet to the following address": "Du håller på att skicka iDNA från din plånbok till följande adress",
-  "{{numBlocks}} blocks left": "{{numBlocks}} blocks left"
+  "{{numBlocks}} blocks left": "{{numBlocks}} block kvar"
 }
