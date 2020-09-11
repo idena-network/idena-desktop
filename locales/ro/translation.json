@@ -302,10 +302,10 @@
   "Your identity address": "Adresa dvs. de identitate",
   "Paste": "Paste",
   "Withraw stake, iDNA": "Retrage garanție, iDNA",
-  "Receive iDNA’s": "Primește iDNA’s",
-  "Send iDNA’s": "Trimite iDNA’s",
+  "Receive iDNA’s": "Primește iDNA",
+  "Send iDNA’s": "Trimite iDNA",
   "Amount, iDNA": "Sumă, iDNA",
   "Fee, iDNA": "Taxă, iDNA",
   "You’re about to send iDNA from your wallet to the following address": "Ești pe cale să trimiți iDNA-ul din portofel la următoarea adresă",
-  "{{numBlocks}} blocks left": "{{numBlocks}} blocks left"
+  "{{numBlocks}} blocks left": "{{numBlocks}} blocuri rămase"
 }
