@@ -12,8 +12,6 @@ import {
   Nav,
   NavItem,
   ActionPanel,
-  ActionItem,
-  CurrentTask,
   VersionPanel,
   VersionText,
   Page,
@@ -22,14 +20,13 @@ import {
 } from './components'
 import {PrimaryButton} from '../../shared/components/button'
 import {eitherState} from '../../shared/utils/utils'
-import {EpochPeriod} from '../../shared/types'
 import {useAutoUpdate} from '../../shared/providers/update-context'
 import {useAppMachine} from '../../shared/providers/app-context'
 
 export function AppSidebar({fallbackApp}) {
   const {t} = useTranslation()
 
-  const [current = fallbackApp] = useAppMachine()
+  const [current = fallbackApp, , appService] = useAppMachine()
 
   const [autoUpdate, {updateClient, updateNode}] = useAutoUpdate()
 
@@ -92,28 +89,8 @@ export function AppSidebar({fallbackApp}) {
 
       {current.matches('connected.synced.ready') && (
         <>
-          <ActionPanel>
-            {current.context.epoch.currentPeriod !== EpochPeriod.None && (
-              <ActionItem
-                title={t('Current period')}
-                value={current.context.epoch.currentPeriod}
-                roundedTop="lg"
-              />
-            )}
-            <ActionItem title={t('Current task')} roundedTop="lg">
-              <CurrentTask {...current.context} />
-            </ActionItem>
+          <ActionPanel appService={appService} />
 
-            {current.context.epoch.currentPeriod === EpochPeriod.None && (
-              <ActionItem
-                title={t('Next validation')}
-                value={new Date(
-                  current.context.epoch.nextValidation
-                ).toLocaleString()}
-                roundedBottom="lg"
-              />
-            )}
-          </ActionPanel>
           <VersionPanel>
             <VersionText>
               {t('Client version')}: {global.appVersion}
