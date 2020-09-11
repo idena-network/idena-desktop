@@ -15,6 +15,7 @@ import {
 import {useTranslation} from 'react-i18next'
 import NextLink from 'next/link'
 import {useRouter} from 'next/router'
+import {useService} from '@xstate/react'
 import {
   Dialog,
   DialogFooter,
@@ -293,8 +294,43 @@ export function CurrentTask({epoch: {epoch, currentPeriod: period}, identity}) {
   }
 }
 
-export function ActionPanel(props) {
-  return <Stack spacing="px" mt={6} {...props} />
+export function ActionPanel({appService}) {
+  const {t} = useTranslation()
+
+  const [current] = useService(appService)
+
+  const {currentPeriod, nextValidation} = current?.context?.epoch
+  const isValidating = currentPeriod !== EpochPeriod.None
+
+  return (
+    <Stack spacing="px" mt={6}>
+      {isValidating && (
+        <ActionItem
+          title={t('Current period')}
+          value={currentPeriod}
+          roundedTop="lg"
+        />
+      )}
+      <ActionItem
+        title={t('Current task')}
+        roundedBottom={isValidating ? 'lg' : 'none'}
+        roundedTop={!isValidating ? 'lg' : 'none'}
+      >
+        <CurrentTask
+          epoch={current?.context?.epoch}
+          identity={current?.context?.identity}
+        />
+      </ActionItem>
+
+      {!isValidating && (
+        <ActionItem
+          title={t('Next validation')}
+          value={new Date(nextValidation).toLocaleString()}
+          roundedBottom="lg"
+        />
+      )}
+    </Stack>
+  )
 }
 
 export function ActionItem({title, value, children, ...props}) {
