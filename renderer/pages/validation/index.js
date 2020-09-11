@@ -521,8 +521,5 @@ function hasAllAnswers(state) {
 
 function hasAllRelevanceMarks({context: {longFlips}}) {
   const flips = longFlips.filter(decodedWithKeywords)
-  return (
-    flips.length === 0 ||
-    (flips.length > 0 && flips.every(({relevance}) => relevance))
-  )
+  return flips.every(({relevance}) => relevance)
 }
