@@ -184,7 +184,7 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
               .finally(onHide)
           }}
         >
-          {t('Confirm')}
+          {t('Proceed to {{callbackHostname}}', {callbackHostname})}
         </PrimaryButton>
       </DnaDialogFooter>
     </DnaDialog>
