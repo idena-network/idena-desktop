@@ -41,3 +41,20 @@ export const toLocaleDna = locale => {
 }
 
 export const eitherState = (current, ...states) => states.some(current.matches)
+
+export const merge = predicate => (...lists) =>
+  lists.reduce(
+    (agg, curr) =>
+      agg.length
+        ? agg.map(item => ({
+            ...item,
+            ...curr.find(predicate(item)),
+          }))
+        : curr,
+    []
+  )
+
+export const byId = ({id: givenId}) => ({id: currentId}) =>
+  currentId === givenId
+
+export const mergeById = (...items) => merge(byId)(...items)
