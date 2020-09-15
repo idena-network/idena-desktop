@@ -2,7 +2,7 @@ import {Machine, assign, spawn} from 'xstate'
 import {log, raise, sendParent} from 'xstate/lib/actions'
 import {fetchVotings, updateVotingList, callContract} from './utils'
 import {VotingStatus, VoteOption} from '../../shared/types'
-import {callRpc} from '../../shared/utils/utils'
+import {callRpc, mergeById} from '../../shared/utils/utils'
 import {epochDb} from '../../shared/utils/db'
 import {bufferToHex} from '../../shared/utils/string'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
@@ -14,6 +14,9 @@ export const votingListMachine = Machine(
       filteredVotings: [],
       filter: VotingStatus.All,
     },
+    on: {
+      REFRESH: 'loading',
+    },
     initial: 'loading',
     states: {
       loading: {
@@ -21,30 +24,11 @@ export const votingListMachine = Machine(
           src: 'loadVotings',
           onDone: {
             target: 'loaded',
-            actions: [
-              assign((context, {data}) => {
-                const votings = data.map(voting => ({
-                  ...voting,
-                  ref: spawn(
-                    // eslint-disable-next-line no-use-before-define
-                    votingMachine.withContext({
-                      ...voting,
-                      epoch: context.epoch,
-                    }),
-                    `voting-${voting.id}`
-                  ),
-                }))
-                return {
-                  ...context,
-                  votings,
-                  filteredVotings: votings,
-                }
-              }),
-              log(),
-            ],
+            actions: ['applyLoadedVotings', log()],
           },
           onError: {
-            target: '',
+            target: 'loadingFailed',
+            actions: [log()],
           },
         },
       },
@@ -80,26 +64,31 @@ export const votingListMachine = Machine(
           },
         },
       },
+      loadingFailed: {},
     },
   },
   {
+    actions: {
+      applyLoadedVotings: assign({
+        votings: ({votings, epoch}, {data: {persistedVotings, knownVotings}}) =>
+          mergeById(votings, persistedVotings, knownVotings).map(voting => ({
+            ...voting,
+            ref: spawn(
+              // eslint-disable-next-line no-use-before-define
+              votingMachine.withContext({
+                ...voting,
+                epoch,
+              }),
+              `voting-${voting.id}`
+            ),
+          })),
+      }),
+    },
     services: {
-      loadVotings: async ({epoch: {epoch}}) => {
-        let persistedVotings = []
-        try {
-          persistedVotings = await epochDb('votings', epoch).all()
-        } catch (error) {
-          if (!error.notFound) throw new Error(error)
-        }
-
-        try {
-          const knownVotings = await fetchVotings()
-          return persistedVotings.concat(knownVotings)
-        } catch (error) {
-          if (error.notFound) return []
-          throw error
-        }
-      },
+      loadVotings: async ({epoch: {epoch}}) => ({
+        persistedVotings: await epochDb('votings', epoch).all(),
+        knownVotings: await fetchVotings(),
+      }),
     },
   }
 )

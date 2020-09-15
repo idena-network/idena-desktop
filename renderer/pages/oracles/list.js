@@ -23,7 +23,7 @@ function VotingListPage() {
   const [current, send] = useMachine(votingListMachine, {
     context: {epoch},
   })
-  const {filteredVotings, filter} = current.context
+  const {votings, filter} = current.context
 
   return (
     <Page>
@@ -36,9 +36,7 @@ function VotingListPage() {
             ))}
 
           {current.matches('loaded') &&
-            filteredVotings.map(({id, ref}) => (
-              <VotingCard key={id} votingRef={ref} />
-            ))}
+            votings.map(({id, ref}) => <VotingCard key={id} votingRef={ref} />)}
         </Stack>
         <Stack spacing={8} align="flex-start" maxW={40}>
           <IconLink

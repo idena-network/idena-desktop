@@ -22,8 +22,12 @@ export const epochDb = (db, epoch, options) => {
   }
 
   return {
-    all() {
-      return loadPersistedItems(targetDb)
+    async all() {
+      try {
+        return await loadPersistedItems(targetDb)
+      } catch (error) {
+        if (error.notFound) return []
+      }
     },
     load(id) {
       return targetDb.get(id)
