@@ -1,3 +1,4 @@
+import {byId, merge, mergeById} from '../../shared/utils/utils'
 import {hasEnoughAnswers, exponentialBackoff, shouldTranslate} from './utils'
 
 describe('hasEnoughAnswers', () => {
@@ -170,5 +171,92 @@ describe('shouldTranslate', () => {
         flip
       )
     ).toBeTruthy()
+  })
+})
+
+describe('merge', () => {
+  it('should merge multilple arrays consider predicate given', () => {
+    const a = [
+      {id: 1, name: 'a', foo: 'bar'},
+      {id: 2, name: 'b'},
+      {id: 3, name: 'c'},
+    ]
+    const b = [
+      {id: 1, name: 'aa'},
+      {id: 2, name: 'bb'},
+      {id: 3, name: 'cc'},
+    ]
+    const c = [
+      {id: 1, name: 'aaa'},
+      {id: 2, name: 'bbb', foobar: 'foobar'},
+      {id: 3, name: 'ccc'},
+    ]
+    const d = [
+      {id: 1, name: 'aaaa', bar: 'foo'},
+      {id: 2, name: 'bbbb'},
+      {id: 3, name: 'cccc'},
+    ]
+
+    const merged = merge(byId)(a, b, c, d)
+
+    expect(merged).toStrictEqual([
+      {id: 1, name: 'aaaa', foo: 'bar', bar: 'foo'},
+      {id: 2, name: 'bbbb', foobar: 'foobar'},
+      {id: 3, name: 'cccc'},
+    ])
+
+    expect(
+      merge(x => ({hash}) => hash === x.hash)(
+        [{hash: 'a', foo: 'foo'}, {hash: 'b'}, {hash: 'c'}],
+        [{hash: 'a', bar: 'bar'}, {hash: 'b'}, {hash: 'c'}],
+        [{hash: 'a', foobar: 'foobar'}, {hash: 'b'}, {hash: 'c'}]
+      )
+    ).toStrictEqual([
+      {hash: 'a', foo: 'foo', bar: 'bar', foobar: 'foobar'},
+      {hash: 'b'},
+      {hash: 'c'},
+    ])
+  })
+
+  test('should handle empty array', () => {
+    expect(
+      mergeById(
+        [],
+        [
+          {id: 1, name: 'a', foo: 'foo'},
+          {id: 2, name: 'b'},
+          {id: 3, name: 'c'},
+        ],
+        [
+          {id: 1, name: 'a', bar: 'bar'},
+          {id: 2, name: 'b'},
+          {id: 3, name: 'c'},
+        ]
+      )
+    ).toStrictEqual([
+      {id: 1, name: 'a', foo: 'foo', bar: 'bar'},
+      {id: 2, name: 'b'},
+      {id: 3, name: 'c'},
+    ])
+
+    expect(
+      mergeById(
+        [
+          {id: 1, name: 'a', foo: 'foo'},
+          {id: 2, name: 'b'},
+          {id: 3, name: 'c'},
+        ],
+        [],
+        [
+          {id: 1, name: 'a', bar: 'bar'},
+          {id: 2, name: 'b'},
+          {id: 3, name: 'c'},
+        ]
+      )
+    ).toStrictEqual([
+      {id: 1, name: 'a', foo: 'foo', bar: 'bar'},
+      {id: 2, name: 'b'},
+      {id: 3, name: 'c'},
+    ])
   })
 })
