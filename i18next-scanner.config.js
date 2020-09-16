@@ -19,6 +19,7 @@ const AVAILABLE_LANGS = [
   'tr',
   'bg',
   'sv',
+  'ja',
 ]
 
 module.exports = {
