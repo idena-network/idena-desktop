@@ -330,5 +330,6 @@
   "Token": "Token",
   "You’re about to send iDNA from your wallet to the following address": "You’re about to send iDNA from your wallet to the following address",
   "Create {{count}} required flips_0": "Create {{count}} required flips",
-  "{{numBlocks}} blocks left": "{{numBlocks}} blocks left"
+  "{{numBlocks}} blocks left": "{{numBlocks}} blocks left",
+  "Wait for validation or create {{count}} optional flips_0": "Wait for validation or create {{count}} optional flips"
 }

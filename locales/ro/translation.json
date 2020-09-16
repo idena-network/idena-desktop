@@ -310,5 +310,8 @@
   "{{numBlocks}} blocks left": "{{numBlocks}} blocuri rămase",
   "Create {{count}} required flips_0": "Create {{count}} required flips",
   "Create {{count}} required flips_1": "Create {{count}} required flips",
-  "Create {{count}} required flips_2": "Create {{count}} required flips"
+  "Create {{count}} required flips_2": "Create {{count}} required flips",
+  "Wait for validation or create {{count}} optional flips_0": "Wait for validation or create {{count}} optional flips",
+  "Wait for validation or create {{count}} optional flips_1": "Wait for validation or create {{count}} optional flips",
+  "Wait for validation or create {{count}} optional flips_2": "Wait for validation or create {{count}} optional flips"
 }
