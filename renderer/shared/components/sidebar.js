@@ -359,13 +359,6 @@ function CurrentTask({epoch, period, identity}) {
 
           const shouldSendFlips = remainingRequiredFlipsNumber > 0
 
-          const waitForValidationCopy =
-            optionalFlipsNumber > 0
-              ? t('Wait for validation or create {{count}} optional flips', {
-                  count: optionalFlipsNumber,
-                })
-              : t('Wait for validation')
-
           // eslint-disable-next-line no-nested-ternary
           return shouldSendFlips ? (
             <Link href="/flips/list" color={theme.colors.white}>
@@ -373,8 +366,12 @@ function CurrentTask({epoch, period, identity}) {
                 count: remainingRequiredFlipsNumber,
               })}
             </Link>
+          ) : optionalFlipsNumber > 0 ? (
+            t('Wait for validation or create {{count}} optional flips', {
+              count: optionalFlipsNumber,
+            })
           ) : (
-            waitForValidationCopy
+            t('Wait for validation')
           )
         }
 
