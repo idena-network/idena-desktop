@@ -323,5 +323,7 @@
   "Amount, iDNA": "Belopp, iDNA",
   "Fee, iDNA": "Avgift, iDNA",
   "You’re about to send iDNA from your wallet to the following address": "Du håller på att skicka iDNA från din plånbok till följande adress",
-  "{{numBlocks}} blocks left": "{{numBlocks}} block kvar"
+  "{{numBlocks}} blocks left": "{{numBlocks}} block kvar",
+  "Create {{count}} required flips": "Create {{count}} required flips",
+  "Create {{count}} required flips_plural": "Create {{count}} required flips"
 }

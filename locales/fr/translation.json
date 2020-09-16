@@ -329,5 +329,7 @@
   "Amount, iDNA": "Montant, iDNA",
   "Fee, iDNA": "Frais, iDNA",
   "You’re about to send iDNA from your wallet to the following address": "Vous êtes sur le point d'envoyer des iDNA depuis votre portefeuille à l'adresse suivante",
-  "{{numBlocks}} blocks left": "{{numBlocks}} bloc(s) restant(s)"
+  "{{numBlocks}} blocks left": "{{numBlocks}} bloc(s) restant(s)",
+  "Create {{count}} required flips": "Create {{count}} required flips",
+  "Create {{count}} required flips_plural": "Create {{count}} required flips"
 }

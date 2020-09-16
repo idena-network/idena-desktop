@@ -361,8 +361,9 @@ function CurrentTask({epoch, period, identity}) {
 
           return shouldSendFlips ? (
             <Link href="/flips/list" color={theme.colors.white}>
-              Create {remainingRequiredFlipsNumber} required{' '}
-              {pluralize('flip', remainingRequiredFlipsNumber)}
+              {t('Create {{count}} required flips', {
+                count: remainingRequiredFlipsNumber,
+              })}
             </Link>
           ) : (
             `Wait for validation${
