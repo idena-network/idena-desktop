@@ -3,7 +3,7 @@ import React from 'react'
 import {margin} from 'polished'
 import QRCode from 'qrcode.react'
 import {useTranslation} from 'react-i18next'
-import {Box, Text, Heading, Flex, Stack} from '@chakra-ui/core'
+import {Box, Text, Flex, Stack} from '@chakra-ui/core'
 import {Field, Select} from '../../shared/components'
 import theme, {rem} from '../../shared/theme'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
@@ -27,6 +27,7 @@ import {
 } from '../../shared/components/components'
 import {getLayout} from '../../screens/app/layout'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
+import {SettingsSection} from '../../screens/settings/components'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -39,7 +40,7 @@ function Settings() {
     <Box mt={8}>
       {global.isDev && (
         <>
-          <Section title={t('Flips')}>
+          <SettingsSection title={t('Flips')}>
             <Box>
               <PrimaryButton
                 onClick={() => {
@@ -60,8 +61,8 @@ function Settings() {
                 {t('Archive flips')}
               </PrimaryButton>
             </Box>
-          </Section>
-          <Section title={t('Invites')}>
+          </SettingsSection>
+          <SettingsSection title={t('Invites')}>
             <Box my={theme.spacings.small}>
               <PrimaryButton
                 onClick={() => {
@@ -72,11 +73,14 @@ function Settings() {
                 {t('Clear invites')}
               </PrimaryButton>
             </Box>
-          </Section>
+          </SettingsSection>
         </>
       )}
+
       <ExportPK />
+
       {runInternalNode && !useExternalNode && <ImportPK />}
+
       <LocaleSwitcher />
     </Box>
   )
@@ -94,7 +98,7 @@ function ExportPK() {
   React.useEffect(() => setShowDialog(!!pk), [pk])
 
   return (
-    <Section title={t('Export private key')}>
+    <SettingsSection title={t('Export private key')}>
       <Text mb={4}>
         {t('Create a new password to export your private key')}
       </Text>
@@ -138,7 +142,7 @@ function ExportPK() {
           />
         </Box>
       </PkDialog>
-    </Section>
+    </SettingsSection>
   )
 }
 
@@ -179,7 +183,7 @@ function ImportPK() {
   }
 
   return (
-    <Section title={t('translation:Import private key')}>
+    <SettingsSection title={t('translation:Import private key')}>
       <form
         onSubmit={async e => {
           e.preventDefault()
@@ -212,7 +216,7 @@ function ImportPK() {
           {t('translation:Import')}
         </PrimaryButton>
       </form>
-    </Section>
+    </SettingsSection>
   )
 }
 
@@ -233,7 +237,7 @@ function LocaleSwitcher() {
   const {t, i18n} = useTranslation()
   const {changeLanguage} = useSettingsDispatch()
   return (
-    <Section title={t('Language')}>
+    <SettingsSection title={t('Language')}>
       <Box w={rem(300)}>
         <Select
           name="lng"
@@ -246,18 +250,7 @@ function LocaleSwitcher() {
           }}
         />
       </Box>
-    </Section>
-  )
-}
-
-function Section({title, ...props}) {
-  return (
-    <Box mb={10}>
-      <Heading fontWeight={500} fontSize="lg" mb={4}>
-        {title}
-      </Heading>
-      <Box {...props} />
-    </Box>
+    </SettingsSection>
   )
 }
 
