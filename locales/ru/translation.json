@@ -307,5 +307,11 @@
   "Amount, iDNA": "Сумма, iDNA",
   "Fee, iDNA": "Комиссия, iDNA",
   "You’re about to send iDNA from your wallet to the following address": "Вы собираетесь послать iDNA из своего кошелька на следующий адрес",
-  "{{numBlocks}} blocks left": "{{numBlocks}} blocks left"
+  "{{numBlocks}} blocks left": "{{numBlocks}} blocks left",
+  "Create {{count}} required flips_0": "Create {{count}} required flips",
+  "Create {{count}} required flips_1": "Create {{count}} required flips",
+  "Create {{count}} required flips_2": "Create {{count}} required flips",
+  "Wait for validation or create {{count}} optional flips_0": "Wait for validation or create {{count}} optional flips",
+  "Wait for validation or create {{count}} optional flips_1": "Wait for validation or create {{count}} optional flips",
+  "Wait for validation or create {{count}} optional flips_2": "Wait for validation or create {{count}} optional flips"
 }

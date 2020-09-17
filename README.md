@@ -102,4 +102,6 @@ PRs are welcome! 👐
 
 ## Contributing
 
-TBD
+### Localization
+
+Please check your language plurals [here](https://jsfiddle.net/sm9wgLze).

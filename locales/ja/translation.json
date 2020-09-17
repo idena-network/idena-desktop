@@ -218,7 +218,6 @@
   "Comment": "コメント",
   "Enter amount to confirm transfer": "転送を確認するため値を入力して下さい",
   "Entered amount does not match target amount": "入力された値が一致しません",
-  
   "Confirm": "確認",
   "Invalid DNA link": "無効なDNAリンク",
   "You must provide valid URL including protocol version": "プロトコルバージョンを含む有効なURLが必要です",
@@ -290,7 +289,7 @@
   "Spoil invitations that are shared publicly. This will encourage people to share invitations privately and prevent bots from collecting invitation codes.": "公開されている招待コードは無効化して下さい。これにより、招待コードを公開せずに使うことを奨励し、またボットにより招待状コードが収集されないようになります。",
   "When you click 'Spoil' the invitation code will be activated by a random address and wasted.": "「無効化」をクリックすると招待コードにでたらめなアドレスが割り当てられ廃棄されます。",
   "Submit the form to start mining. Your node has to be online\n              unless you deactivate your status. Otherwise penalties might be\n              charged after being offline more than 1 hour.": "採掘を始めるためフォームを提出して下さい。不活性化しない限り\n              ノードをオンラインにしなければなりません。そうしなければ\n              １時間以上のオフラインでペナルティが発生します。",
-  "Welcome to qualification session": "資格認定セッションへようこそ", 
+  "Welcome to qualification session": "資格認定セッションへようこそ",
   "Okay, let’s start": "さあ始めましょう",
   "Your answers for the validation session have been submitted successfully!": "認証セッションの回答は提出されました",
   "Now solve bunch of flips to check its quality. The flip is qualified\n            if the majority, equals more than 2/3 participants, gives the same\n            answer.": "ここからたくさんのフリップの質をチェックします。\n  ２/３以上の参加者が同じ回答の判断をすることで\n            そのフリップは認定されることになります。",
@@ -322,5 +321,15 @@
   "Restart built-in node": "内蔵ノードを再起動",
   "You must specify your own identity address": "必ず自分のアイデンティティアドレスを指定して下さい",
   "Please enter your identity address to confirm termination. Stake will be transferred to the identity address.": "廃止処理の確認のため自分のアイデンティティアドレスを入力して下さい。 ステークはそのアイデンティティアドレスに転送されます。",
-  "Your identity address": "自分のアイデンティティアドレス"
+  "Your identity address": "自分のアイデンティティアドレス",
+  "Withraw stake, iDNA": "Withraw stake, iDNA",
+  "Receive iDNA’s": "Receive iDNA’s",
+  "Send iDNA’s": "Send iDNA’s",
+  "Amount, iDNA": "Amount, iDNA",
+  "Fee, iDNA": "Fee, iDNA",
+  "Token": "Token",
+  "You’re about to send iDNA from your wallet to the following address": "You’re about to send iDNA from your wallet to the following address",
+  "Create {{count}} required flips_0": "Create {{count}} required flips",
+  "{{numBlocks}} blocks left": "{{numBlocks}} blocks left",
+  "Wait for validation or create {{count}} optional flips_0": "Wait for validation or create {{count}} optional flips"
 }
