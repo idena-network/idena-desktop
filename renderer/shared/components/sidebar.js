@@ -188,7 +188,10 @@ function Nav() {
         >
           {t('Oracles')}
         </NavItem>
-        <NavItem href="/settings" icon={<i className="icon icon--settings" />}>
+        <NavItem
+          href="/settings/general"
+          icon={<i className="icon icon--settings" />}
+        >
           {t('Settings')}
         </NavItem>
       </ul>

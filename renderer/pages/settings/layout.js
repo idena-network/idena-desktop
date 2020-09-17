@@ -13,7 +13,9 @@ function SettingsLayout({children}) {
     <Page>
       <PageTitle>{t('Settings')}</PageTitle>
       <FlipFilter value={router.pathname} onChange={router.push}>
-        <FlipFilterOption value="/settings">{t('General')}</FlipFilterOption>
+        <FlipFilterOption value="/settings/general">
+          {t('General')}
+        </FlipFilterOption>
         <FlipFilterOption value="/settings/node">{t('Node')}</FlipFilterOption>
       </FlipFilter>
       {children}

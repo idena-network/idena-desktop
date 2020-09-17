@@ -9,10 +9,9 @@ import {AVAILABLE_LANGS} from '../../i18n'
 const SETTINGS_INITIALIZE = 'SETTINGS_INITIALIZE'
 const TOGGLE_USE_EXTERNAL_NODE = 'TOGGLE_USE_EXTERNAL_NODE'
 const TOGGLE_RUN_INTERNAL_NODE = 'TOGGLE_RUN_INTERNL_NODE'
-const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
 const UPDATE_UI_VERSION = 'UPDATE_UI_VERSION'
 const SET_INTERNAL_KEY = 'SET_INTERNAL_KEY'
-const SET_EXTERNAL_KEY = 'SET_EXTERNAL_KEY'
+const SET_CONNECTION_DETAILS = 'SET_CONNECTION_DETAILS'
 
 const randomKey = () =>
   Math.random()
@@ -58,8 +57,6 @@ function settingsReducer(state, action) {
       }
       return newState
     }
-    case SAVE_EXTERNAL_URL:
-      return {...state, url: action.data}
     case SETTINGS_INITIALIZE:
       return {
         ...initialState,
@@ -78,10 +75,12 @@ function settingsReducer(state, action) {
         internalApiKey: action.data,
       }
     }
-    case SET_EXTERNAL_KEY: {
+    case SET_CONNECTION_DETAILS: {
+      const {url, apiKey} = action
       return {
         ...state,
-        externalApiKey: action.data,
+        url,
+        externalApiKey: apiKey,
       }
     }
     case CHANGE_LANGUAGE: {
@@ -134,10 +133,6 @@ function SettingsProvider({children}) {
     }
   })
 
-  const saveExternalUrl = url => {
-    dispatch({type: SAVE_EXTERNAL_URL, data: url})
-  }
-
   const toggleUseExternalNode = enable => {
     dispatch({type: TOGGLE_USE_EXTERNAL_NODE, data: enable})
   }
@@ -146,21 +141,18 @@ function SettingsProvider({children}) {
     dispatch({type: TOGGLE_RUN_INTERNAL_NODE, data: run})
   }
 
-  const saveExternalApiKey = key => {
-    dispatch({type: SET_EXTERNAL_KEY, data: key})
-  }
-
   const changeLanguage = lng => dispatch({type: CHANGE_LANGUAGE, lng})
 
   return (
     <SettingsStateContext.Provider value={state}>
       <SettingsDispatchContext.Provider
         value={{
-          saveExternalUrl,
           toggleUseExternalNode,
           toggleRunInternalNode,
-          saveExternalApiKey,
           changeLanguage,
+          setConnectionDetails({url, apiKey}) {
+            dispatch({type: SET_CONNECTION_DETAILS, url, apiKey})
+          },
         }}
       >
         {children}

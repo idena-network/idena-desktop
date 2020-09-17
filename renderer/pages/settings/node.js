@@ -7,11 +7,9 @@ import {
   Text,
   Heading,
   Stack,
-  Divider,
   InputRightElement,
   InputGroup,
   IconButton,
-  Button,
   Flex,
   useToast,
 } from '@chakra-ui/core'
@@ -30,7 +28,13 @@ import {
 } from '../../shared/providers/node-context'
 import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
 import {getLayout} from '../../screens/app/layout'
-import {FormLabel, Input, Toast} from '../../shared/components/components'
+import {Toast} from '../../shared/components/components'
+import {
+  SettingsFormControl,
+  SettingsFormLabel,
+  SettingsInput,
+  SettingsSection,
+} from '../../screens/settings/components'
 
 function NodeSettings() {
   const {t} = useTranslation()
@@ -40,10 +44,9 @@ function NodeSettings() {
   const settings = useSettingsState()
 
   const {
-    saveExternalUrl,
     toggleUseExternalNode,
     toggleRunInternalNode,
-    saveExternalApiKey,
+    setConnectionDetails,
   } = useSettingsDispatch()
 
   const {nodeFailed} = useNodeState()
@@ -64,6 +67,12 @@ function NodeSettings() {
           return {
             ...prevState,
             apiKey: action.data,
+          }
+        }
+        case 'SET_CONNECTION_DETAILS': {
+          return {
+            ...prevState,
+            ...action,
           }
         }
         case 'NEW_LOG': {
@@ -183,75 +192,73 @@ function NodeSettings() {
           </Text>
         </Box>
       </Stack>
+
       {settings.useExternalNode && (
-        <Stack spacing={2}>
-          <Stack isInline spacing={2} align="center">
-            <FormLabel htmlFor="url" fontWeight={400} minW={24}>
-              {t('Node address')}
-            </FormLabel>
-            <Input
-              id="url"
-              value={state.url}
-              w="xs"
-              onChange={e => dispatch({type: 'SET_URL', data: e.target.value})}
-            />
-            <PrimaryButton
-              onClick={() => {
-                saveExternalUrl(state.url)
-                notify()
-              }}
-            >
-              {t('Save')}
-            </PrimaryButton>
-            <Divider orientation="vertical" />
-            <Button
-              variant="link"
-              variantColor="brandBlue"
-              fontWeight={500}
-              onClick={() => {
-                dispatch({type: 'SET_URL', data: BASE_API_URL})
-                saveExternalUrl(BASE_API_URL)
-                notify()
-              }}
-            >
-              {t('Use default')}
-            </Button>
-          </Stack>
-          <Stack isInline spacing={2} align="center">
-            <FormLabel htmlFor="key" fontWeight={400} minW={24}>
-              {t('Node api key')}
-            </FormLabel>
-            <InputGroup>
-              <Input
-                id="key"
-                value={state.apiKey}
-                type={revealApiKey ? 'text' : 'password'}
-                w="xs"
+        <SettingsSection title={t('Node settings')}>
+          <Stack
+            spacing={3}
+            as="form"
+            onSubmit={e => {
+              e.preventDefault()
+              setConnectionDetails(state)
+              notify()
+            }}
+          >
+            <SettingsFormControl>
+              <SettingsFormLabel htmlFor="url">
+                {t('Node address')}
+              </SettingsFormLabel>
+              <SettingsInput
+                id="url"
+                value={state.url}
                 onChange={e =>
-                  dispatch({type: 'SET_API_KEY', data: e.target.value})
+                  dispatch({type: 'SET_URL', data: e.target.value})
                 }
-              ></Input>
-              <InputRightElement h="full">
-                <IconButton
-                  size="xs"
-                  icon={revealApiKey ? FiEyeOff : FiEye}
-                  bg="white"
-                  _hover={null}
-                  onClick={() => setRevealApiKey(!revealApiKey)}
+              />
+            </SettingsFormControl>
+            <SettingsFormControl>
+              <SettingsFormLabel htmlFor="key">
+                {t('Node api key')}
+              </SettingsFormLabel>
+              <InputGroup>
+                <SettingsInput
+                  id="key"
+                  value={state.apiKey}
+                  type={revealApiKey ? 'text' : 'password'}
+                  onChange={e =>
+                    dispatch({type: 'SET_API_KEY', data: e.target.value})
+                  }
                 />
-              </InputRightElement>
-            </InputGroup>
-            <PrimaryButton
-              onClick={() => {
-                saveExternalApiKey(state.apiKey)
-                notify()
-              }}
-            >
-              {t('Save')}
-            </PrimaryButton>
+                <InputRightElement h="full">
+                  <IconButton
+                    icon={revealApiKey ? FiEyeOff : FiEye}
+                    size="xs"
+                    bg={revealApiKey ? 'gray.300' : 'white'}
+                    w={8}
+                    _hover={{
+                      bg: revealApiKey ? 'gray.300' : 'white',
+                    }}
+                    onClick={() => setRevealApiKey(!revealApiKey)}
+                  />
+                </InputRightElement>
+              </InputGroup>
+            </SettingsFormControl>
+
+            <SettingsFormControl mt={3}>
+              <SecondaryButton
+                ml="auto"
+                onClick={() => {
+                  dispatch({type: 'SET_URL', data: BASE_API_URL})
+                }}
+              >
+                {t('Use default')}
+              </SecondaryButton>
+              <PrimaryButton type="submit">{t('Save')}</PrimaryButton>
+            </SettingsFormControl>
           </Stack>
-        </Stack>
+        </SettingsSection>
       )}
+
       {!settings.useExternalNode && (
         <Box>
           <Heading fontWeight={500} fontSize="lg" mb={4}>
