@@ -1,256 +1,105 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {margin} from 'polished'
-import QRCode from 'qrcode.react'
 import {useTranslation} from 'react-i18next'
-import {Box, Text, Flex, Stack} from '@chakra-ui/core'
-import {Field, Select} from '../../shared/components'
-import theme, {rem} from '../../shared/theme'
-import {useNotificationDispatch} from '../../shared/providers/notification-context'
-import useRpc from '../../shared/hooks/use-rpc'
+import {Box, Stack, useToast} from '@chakra-ui/core'
 import SettingsLayout from './layout'
-import {importKey} from '../../shared/api'
-import {useNodeDispatch} from '../../shared/providers/node-context'
-import {
-  useSettingsState,
-  useSettingsDispatch,
-} from '../../shared/providers/settings-context'
-import {AVAILABLE_LANGS} from '../../i18n'
+import {useSettingsState} from '../../shared/providers/settings-context'
 import {archiveFlips} from '../../screens/flips/utils'
-import {
-  Dialog,
-  DialogHeader,
-  DialogBody,
-  DialogFooter,
-  Input,
-  FormLabel,
-} from '../../shared/components/components'
 import {getLayout} from '../../screens/app/layout'
-import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
-import {SettingsSection} from '../../screens/settings/components'
+import {PrimaryButton} from '../../shared/components/button'
+import {
+  ExportPK,
+  ImportPK,
+  LocaleSwitcher,
+  SettingsSection,
+  DevSettingsSection,
+} from '../../screens/settings/components'
+import {epochDb} from '../../shared/utils/db'
+import {useEpochState} from '../../shared/providers/epoch-context'
+import {Toast} from '../../shared/components/components'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
 
 function Settings() {
   const {t} = useTranslation()
-  const {addNotification} = useNotificationDispatch()
+
+  const toast = useToast()
+  const toastify = title =>
+    toast({
+      // eslint-disable-next-line react/display-name
+      render: () => <Toast title={title} />,
+    })
+
   const {runInternalNode, useExternalNode} = useSettingsState()
+
+  const {epoch} = useEpochState()
+
   return (
-    <Box mt={8}>
-      {global.isDev && (
-        <>
-          <SettingsSection title={t('Flips')}>
-            <Box>
-              <PrimaryButton
-                onClick={() => {
-                  clearFlips()
-                  addNotification({title: t('Flips deleted')})
-                }}
-              >
-                {t('Clear flips')}
-              </PrimaryButton>
-            </Box>
-            <Box my={theme.spacings.small}>
-              <PrimaryButton
-                onClick={() => {
-                  archiveFlips()
-                  addNotification({title: t('Flips archived')})
-                }}
-              >
-                {t('Archive flips')}
-              </PrimaryButton>
-            </Box>
-          </SettingsSection>
-          <SettingsSection title={t('Invites')}>
-            <Box my={theme.spacings.small}>
-              <PrimaryButton
-                onClick={() => {
-                  inviteDb.clearInvites()
-                  addNotification({title: t('Invites removed')})
-                }}
-              >
-                {t('Clear invites')}
-              </PrimaryButton>
-            </Box>
-          </SettingsSection>
-        </>
+    <Stack spacing={10} mt={8}>
+      <DevSettingsSection title={t('Flips')} as={Stack} spacing={2}>
+        <Box>
+          <PrimaryButton
+            onClick={() => {
+              clearFlips()
+              toastify(t('Flips deleted'))
+            }}
+          >
+            {t('Clear flips')}
+          </PrimaryButton>
+        </Box>
+        <Box>
+          <PrimaryButton
+            onClick={() => {
+              archiveFlips()
+              toastify(t('Flips archived'))
+            }}
+          >
+            {t('Archive flips')}
+          </PrimaryButton>
+        </Box>
+      </DevSettingsSection>
+
+      <DevSettingsSection title={t('Invites')}>
+        <Box my={4}>
+          <PrimaryButton
+            onClick={() => {
+              inviteDb.clearInvites()
+              toastify(t('Invites removed'))
+            }}
+          >
+            {t('Clear invites')}
+          </PrimaryButton>
+        </Box>
+      </DevSettingsSection>
+
+      <DevSettingsSection title={t('Oracles')}>
+        <Box my={4}>
+          <PrimaryButton
+            onClick={async () => {
+              await epochDb('votings', epoch).clear()
+              toastify(t('Votings removed'))
+            }}
+          >
+            {t('Clear votings')}
+          </PrimaryButton>
+        </Box>
+      </DevSettingsSection>
+
+      <SettingsSection title={t('Export private key')}>
+        <ExportPK />
+      </SettingsSection>
+
+      {runInternalNode && !useExternalNode && (
+        <SettingsSection title={t('Import private key')}>
+          <ImportPK />
+        </SettingsSection>
       )}
 
-      <ExportPK />
-
-      {runInternalNode && !useExternalNode && <ImportPK />}
-
-      <LocaleSwitcher />
-    </Box>
-  )
-}
-
-function ExportPK() {
-  const {t} = useTranslation()
-
-  const [{result: pk}, callRpc] = useRpc()
-
-  const [password, setPassword] = React.useState()
-
-  const [showDialog, setShowDialog] = React.useState()
-
-  React.useEffect(() => setShowDialog(!!pk), [pk])
-
-  return (
-    <SettingsSection title={t('Export private key')}>
-      <Text mb={4}>
-        {t('Create a new password to export your private key')}
-      </Text>
-      <form
-        onSubmit={e => {
-          e.preventDefault()
-          callRpc('dna_exportKey', password)
-        }}
-      >
-        <FormLabel htmlFor="pasword">{t('New password')}</FormLabel>
-        <Stack isInline spacing={2} align="center">
-          <Input
-            id="pasword"
-            value={password}
-            type="password"
-            disabled={showDialog}
-            onChange={e => setPassword(e.target.value)}
-          />
-          <PrimaryButton type="submit" disabled={!password}>
-            {t('Export')}
-          </PrimaryButton>
-        </Stack>
-      </form>
-      <PkDialog isOpen={showDialog} onClose={() => setShowDialog(false)}>
-        <Text>
-          {t(
-            'Scan QR by your mobile phone or copy code below for export privatekey.'
-          )}
-        </Text>
-        <Flex justify="center" mx="auto" my={8}>
-          <QRCode value={pk} />
-        </Flex>
-        <Box>
-          <Field
-            id="pk"
-            label={t('Encrypted private key')}
-            defaultValue={pk}
-            readOnly
-            disabled
-            allowCopy
-          />
-        </Box>
-      </PkDialog>
-    </SettingsSection>
-  )
-}
-
-function ImportPK() {
-  const {t} = useTranslation('error')
-  const [password, setPassword] = React.useState()
-  const [key, setKey] = React.useState()
-  const {addError, addNotification} = useNotificationDispatch()
-  const {importNodeKey} = useNodeDispatch()
-
-  const submit = async () => {
-    try {
-      const {error} = await importKey(key, password)
-      if (error) {
-        addError({
-          title: t('error:Error while importing key'),
-          body: error.message,
-        })
-      } else {
-        importNodeKey()
-        addNotification({
-          title: 'Success',
-          body: t(
-            'translation:Key was imported, please, wait, while node is restarting'
-          ),
-        })
-        setKey('')
-        setPassword('')
-      }
-    } catch (e) {
-      addError({
-        title: t('error:Error while importing key'),
-        body: t(
-          'error:Internal node is not available, try again in a few seconds'
-        ),
-      })
-    }
-  }
-
-  return (
-    <SettingsSection title={t('translation:Import private key')}>
-      <form
-        onSubmit={async e => {
-          e.preventDefault()
-          await submit()
-        }}
-      >
-        <FormLabel htmlFor="key">
-          {t('translation:Encrypted private key')}
-        </FormLabel>
-        <Input
-          value={key}
-          type="text"
-          style={{
-            ...margin(0, theme.spacings.normal, theme.spacings.normal, 0),
-            width: rem(300),
-          }}
-          onChange={e => setKey(e.target.value)}
-        />
-        <FormLabel htmlFor="password">{t('translation:Password')}</FormLabel>
-        <Input
-          value={password}
-          type="password"
-          style={{
-            ...margin(0, theme.spacings.normal, 0, 0),
-            width: rem(300),
-          }}
-          onChange={e => setPassword(e.target.value)}
-        />
-        <PrimaryButton type="submit" disabled={!password || !key}>
-          {t('translation:Import')}
-        </PrimaryButton>
-      </form>
-    </SettingsSection>
-  )
-}
-
-function PkDialog({onClose, children, ...props}) {
-  const {t} = useTranslation()
-  return (
-    <Dialog onClose={onClose} {...props}>
-      <DialogHeader>{t('Encrypted private key')}</DialogHeader>
-      <DialogBody>{children}</DialogBody>
-      <DialogFooter>
-        <SecondaryButton onClick={onClose}>{t('Close')}</SecondaryButton>
-      </DialogFooter>
-    </Dialog>
-  )
-}
-
-function LocaleSwitcher() {
-  const {t, i18n} = useTranslation()
-  const {changeLanguage} = useSettingsDispatch()
-  return (
-    <SettingsSection title={t('Language')}>
-      <Box w={rem(300)}>
-        <Select
-          name="lng"
-          id="lng"
-          options={AVAILABLE_LANGS}
-          value={i18n.language}
-          onChange={e => {
-            i18n.changeLanguage(e.target.value)
-            changeLanguage(e.target.value)
-          }}
-        />
-      </Box>
-    </SettingsSection>
+      <SettingsSection title={t('Language')}>
+        <LocaleSwitcher />
+      </SettingsSection>
+    </Stack>
   )
 }
 
