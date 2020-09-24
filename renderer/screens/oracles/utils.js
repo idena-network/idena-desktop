@@ -77,3 +77,45 @@ export function callContract({from, contract, method, amount, args}) {
     })
   )
 }
+
+export const createContractCaller = ({issuer, contractHash}) => (
+  method,
+  amount = 0,
+  args
+) =>
+  callRpc(
+    'dna_callContract',
+    omit({
+      from: issuer,
+      contract: contractHash,
+      method,
+      amount,
+      args,
+    })
+  )
+
+export const createEstimateContractCaller = ({issuer, contractHash}) => (
+  method,
+  amount = 0,
+  args
+) =>
+  callRpc(
+    'dna_estimateCallContract',
+    omit({
+      from: issuer,
+      contract: contractHash,
+      method,
+      amount,
+      args,
+    })
+  )
+
+export function objectToHex(obj) {
+  return Buffer.from(new TextEncoder().encode(JSON.stringify(obj))).toString(
+    'hex'
+  )
+}
+
+export function hexToObject(hex) {
+  return new TextDecoder().decode(Buffer.from(hex, 'hex'))
+}
