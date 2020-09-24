@@ -196,8 +196,19 @@ function NewVotingPage() {
                   {t('Number of options')}
                 </Text>
                 <Stack spacing={3}>
-                  <VotingOptionText label={t('Option 1')} />
-                  <VotingOptionText label={t('Option 2')} />
+                  <VotingOptionText
+                    onChange={({target: {value}}) => {
+                      console.log(value)
+                      send('SET_OPTIONS', {name: 'a', value})
+                    }}
+                    label={t('Option 1')}
+                  />
+                  <VotingOptionText
+                    onChange={({target: {value}}) =>
+                      send('SET_OPTIONS', {name: 'b', value})
+                    }
+                    label={t('Option 2')}
+                  />
                 </Stack>
               </Box>
             </Flex>

@@ -203,7 +203,7 @@ export default function ViewVotingPage() {
           <VotingSkeleton isLoaded={isLoaded} mt={isLoaded ? 0 : 16}>
             <Box mt={20}>
               <Stat mb={8}>
-                <StatLabel color="muted" fontSize="md">
+                <StatLabel as="div" color="muted" fontSize="md">
                   <Stack isInline spacing={2} align="center">
                     <Icon name="star" size={4} color="white" />
                     <Text fontWeight={500}>{t('Total prize')}</Text>

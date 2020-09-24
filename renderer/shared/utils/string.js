@@ -1,4 +1,4 @@
-export const bufferToHex = buffer => {
+export function bufferToHex(buffer) {
   let s = ''
   const h = '0123456789ABCDEF'
   new Uint8Array(buffer).forEach(v => {

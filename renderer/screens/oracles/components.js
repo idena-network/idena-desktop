@@ -156,12 +156,12 @@ export function VotingInlineFormControl({label, children, ...props}) {
   )
 }
 
-export function VotingOptionText({label, ...props}) {
+export function VotingOptionText({label, onChange, ...props}) {
   return (
     <FormControl {...props}>
       <Flex align="center" justify="space-between">
         <FormLabel color="muted">{label}</FormLabel>
-        <Input w="2xs" />
+        <Input w="2xs" onChange={onChange} />
       </Flex>
     </FormControl>
   )
