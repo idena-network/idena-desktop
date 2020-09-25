@@ -64,6 +64,7 @@ import {
   FloatDebug,
   Tooltip,
 } from '../../shared/components/components'
+import {Tooltip as TooltipLegacy} from '../../shared/components/tooltip'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -224,99 +225,92 @@ function ValidationSession({
                 currentFlip={currentFlip}
                 translations={translations}
               >
-                {currentFlip.words?.length > 0 ? (
-                  <Stack spacing={4}>
-                    <Stack isInline spacing={1} align="center">
-                      <Heading fontSize="base" fontWeight={500}>
-                        {t(`Is the flip correct?`)}
-                      </Heading>
-                      <IconButton
-                        icon="info"
-                        color="brandBlue.500"
-                        bg="unset"
-                        fontSize={rem(20)}
-                        minW={5}
-                        w={5}
-                        h={5}
-                        _active={{
-                          bg: 'unset',
-                        }}
-                        _hover={{
-                          bg: 'unset',
-                        }}
-                        _focus={{
-                          outline: 'none',
-                        }}
-                        onClick={onOpenReportDialog}
-                      />
-                    </Stack>
-                    <QualificationActions>
+                <Stack spacing={4}>
+                  <Stack isInline spacing={1} align="center">
+                    <Heading fontSize="base" fontWeight={500}>
+                      {t(`Is the flip correct?`)}
+                    </Heading>
+                    <IconButton
+                      icon="info"
+                      color="brandBlue.500"
+                      bg="unset"
+                      fontSize={rem(20)}
+                      minW={5}
+                      w={5}
+                      h={5}
+                      _active={{
+                        bg: 'unset',
+                      }}
+                      _hover={{
+                        bg: 'unset',
+                      }}
+                      _focus={{
+                        outline: 'none',
+                      }}
+                      onClick={onOpenReportDialog}
+                    />
+                  </Stack>
+                  <QualificationActions>
+                    <QualificationButton
+                      isSelected={
+                        currentFlip.relevance === RelevanceType.Relevant
+                      }
+                      onClick={() =>
+                        send({
+                          type: 'TOGGLE_WORDS',
+                          hash: currentFlip.hash,
+                          relevance: RelevanceType.Relevant,
+                        })
+                      }
+                    >
+                      {t('Both relevant')}
+                    </QualificationButton>
+
+                    <Tooltip
+                      label={t(
+                        'Please remove Report status from some other flips to continue'
+                      )}
+                      isOpen={isExceededTooltipOpen}
+                      placement="top"
+                      zIndex="tooltip"
+                    >
                       <QualificationButton
                         isSelected={
-                          currentFlip.relevance === RelevanceType.Relevant
+                          currentFlip.relevance === RelevanceType.Irrelevant
                         }
+                        bg={
+                          currentFlip.relevance === RelevanceType.Irrelevant
+                            ? 'red.500'
+                            : 'red.012'
+                        }
+                        color={
+                          currentFlip.relevance === RelevanceType.Irrelevant
+                            ? 'white'
+                            : 'red.500'
+                        }
+                        _hover={null}
+                        _active={null}
+                        _focus={{
+                          boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
+                          outline: 'none',
+                        }}
                         onClick={() =>
                           send({
                             type: 'TOGGLE_WORDS',
                             hash: currentFlip.hash,
-                            relevance: RelevanceType.Relevant,
+                            relevance: RelevanceType.Irrelevant,
                           })
                         }
                       >
-                        {t('Both relevant')}
+                        {t('Report')}{' '}
+                        {t('({{count}} left)', {
+                          count:
+                            availableReportsNumber(flips) - reportedFlipsCount,
+                        })}
                       </QualificationButton>
-
-                      <Tooltip
-                        label={t(
-                          'Please remove Report status from some other flips to continue'
-                        )}
-                        isOpen={isExceededTooltipOpen}
-                        hideDelay={3000}
-                        zIndex="tooltip"
-                      >
-                        <QualificationButton
-                          isSelected={
-                            currentFlip.relevance === RelevanceType.Irrelevant
-                          }
-                          bg={
-                            currentFlip.relevance === RelevanceType.Irrelevant
-                              ? 'red.500'
-                              : 'red.012'
-                          }
-                          color={
-                            currentFlip.relevance === RelevanceType.Irrelevant
-                              ? 'white'
-                              : 'red.500'
-                          }
-                          _hover={null}
-                          _active={null}
-                          _focus={{
-                            boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
-                            outline: 'none',
-                          }}
-                          onClick={() =>
-                            send({
-                              type: 'TOGGLE_WORDS',
-                              hash: currentFlip.hash,
-                              relevance: RelevanceType.Irrelevant,
-                            })
-                          }
-                        >
-                          {t('Report')}{' '}
-                          {t('({{count}} left)', {
-                            count:
-                              availableReportsNumber(flips) -
-                              reportedFlipsCount,
-                          })}
-                        </QualificationButton>
-                      </Tooltip>
-                    </QualificationActions>
-                  </Stack>
-                ) : (
-                  <Text color="red.500" fontWeight={500}>
-                    {t('Flip will be reported')}
-                  </Text>
-                )}
+                    </Tooltip>
+                  </QualificationActions>
+                </Stack>
               </FlipWords>
             )}
         </FlipChallenge>
@@ -335,8 +329,8 @@ function ValidationSession({
         </ActionBarItem>
         <ActionBarItem justify="flex-end">
           {(isShortSession(state) || isLongSessionKeywords(state)) && (
-            <Tooltip
-              label={
+            <TooltipLegacy
+              content={
                 hasAllRelevanceMarks(state) || isLastFlip(state)
                   ? null
                   : t('Go to last flip')
@@ -350,7 +344,7 @@ function ValidationSession({
               >
                 {t('Submit answers')}
               </PrimaryButton>
-            </Tooltip>
+            </TooltipLegacy>
           )}
           {isLongSessionFlips(state) && (
             <PrimaryButton
