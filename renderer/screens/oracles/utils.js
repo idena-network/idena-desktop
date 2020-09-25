@@ -42,16 +42,20 @@ export function createVoting(voting) {
   }
 }
 
-export async function fetchVotings({limit} = {limit: 10}) {
-  return (
-    (
-      await (
-        await fetch(
-          `https://api.idena.io/api/OracleVotingContracts?limit=${limit}`
-        )
-      ).json()
-    ).result || []
-  )
+export async function fetchVotings(params = {limit: 10}) {
+  const invokeUrl = new URL(`https://api.idena.io/api/OracleVotingContracts`)
+
+  Object.entries(params)
+    .filter(([, v]) => Boolean(v))
+    .forEach(([k, v]) => {
+      invokeUrl.searchParams.append(k, v)
+    })
+
+  const {result, error} = await (await fetch(invokeUrl)).json()
+
+  if (error) throw new Error(error.message)
+
+  return result || []
 }
 
 export function updateVotingList(votings, {id, ...restVoting}) {
@@ -118,4 +122,8 @@ export function objectToHex(obj) {
 
 export function hexToObject(hex) {
   return new TextDecoder().decode(Buffer.from(hex, 'hex'))
+}
+
+export function buildViewVotingHref(id) {
+  return `/oracles/view?id=${id}`
 }

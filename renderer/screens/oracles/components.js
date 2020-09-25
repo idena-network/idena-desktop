@@ -23,7 +23,6 @@ import {
   Input,
 } from '../../shared/components/components'
 import {VoteOption} from '../../shared/types'
-import {rem} from '../../shared/theme'
 
 export function OracleDrawerHeader({
   icon,
@@ -146,8 +145,8 @@ export function VotingResultBar({value, action, ...props}) {
 export function VotingInlineFormControl({label, children, ...props}) {
   return (
     <FormControl {...props}>
-      <Stack isInline spacing={5}>
-        <FormLabel color="muted" w={rem(100)}>
+      <Stack isInline>
+        <FormLabel color="muted" w={32}>
           {label}
         </FormLabel>
         {children}
@@ -161,10 +160,14 @@ export function VotingOptionText({label, onChange, ...props}) {
     <FormControl {...props}>
       <Flex align="center" justify="space-between">
         <FormLabel color="muted">{label}</FormLabel>
-        <Input w="2xs" onChange={onChange} />
+        <VotingInput w="2xs" onChange={onChange} />
       </Flex>
     </FormControl>
   )
+}
+
+export function VotingInput(props) {
+  return <Input w="md" {...props} />
 }
 
 export function VotingCardSkeleton(props) {

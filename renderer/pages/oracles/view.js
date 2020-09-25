@@ -88,6 +88,7 @@ export default function ViewVotingPage() {
     contractHash,
     quorum = 0,
     deposit = 0,
+    options = [],
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -130,7 +131,11 @@ export default function ViewVotingPage() {
                   <Text color="muted" fontSize="sm" mb={3}>
                     {t('Choose an option to vote')}
                   </Text>
-                  <RadioGroup>
+                  <RadioGroup
+                    onChange={e =>
+                      send('SELECT_OPTION', {option: e.target.value})
+                    }
+                  >
                     <Flex
                       justify="space-between"
                       border="1px"
@@ -141,13 +146,14 @@ export default function ViewVotingPage() {
                     >
                       <Radio
                         borderColor="gray.100"
-                        onClick={onOpenConfirm}
                         name="option"
+                        value={options[0]}
+                        onClick={onOpenConfirm}
                       >
-                        {t('Confirm')}
+                        {t(options[0])}
                       </Radio>
                       <Text color="muted" fontSize="sm">
-                        {t('{{quorum}} votes required', {quorum})}
+                        {t('{{count}} votes required', {count: quorum})}
                       </Text>
                     </Flex>
                     <Flex
@@ -162,12 +168,13 @@ export default function ViewVotingPage() {
                         borderColor="gray.100"
                         variantColor="red"
                         name="option"
+                        value={options[1]}
                         onClick={onOpenReject}
                       >
-                        {t('Reject')}
+                        {t(options[1])}
                       </Radio>
                       <Text color="muted" fontSize="sm">
-                        {t('{{quorum}} votes required', {quorum})}
+                        {t('{{count}} votes required', {count: quorum})}
                       </Text>
                     </Flex>
                   </RadioGroup>
@@ -176,7 +183,7 @@ export default function ViewVotingPage() {
               <VotingSkeleton isLoaded={isLoaded}>
                 <Flex justify="space-between" align="center">
                   <Stack isInline spacing={2}>
-                    <PrimaryButton onClick={() => send('VOTE')}>
+                    <PrimaryButton onClick={() => send('VOTE_SELECTED')}>
                       {t('Vote')}
                     </PrimaryButton>
                     <SecondaryButton onClick={() => redirect('/oracles/list')}>
@@ -192,7 +199,7 @@ export default function ViewVotingPage() {
                     <Stack isInline spacing={2} align="center">
                       <Icon name="user" w={4} h={4} />
                       <Text as="span">
-                        {t('{{votesCount}} votes', {votesCount})}
+                        {t('{{count}} votes', {count: votesCount})}
                       </Text>
                     </Stack>
                   </Stack>
@@ -223,7 +230,7 @@ export default function ViewVotingPage() {
                 <AsideStat label={t('Your reward')} value={toDna(500000000)} />
                 <AsideStat
                   label={t('Quorum required')}
-                  value={t('{{quorum}} votes', {quorum})}
+                  value={t('{{count}} votes', {count: quorum})}
                 />
                 <AsideStat
                   label={t('Deadline')}
@@ -242,7 +249,7 @@ export default function ViewVotingPage() {
         from={address}
         to={contractHash}
         deposit={deposit}
-        onVote={() => send('VOTE', {option: VoteOption.Confirm})}
+        onVote={() => send('VOTE', {option: 0})}
       />
 
       <VoteDrawer
@@ -252,7 +259,7 @@ export default function ViewVotingPage() {
         from={address}
         to={contractHash}
         deposit={deposit}
-        onVote={() => send('VOTE', {option: VoteOption.Reject})}
+        onVote={() => send('VOTE', {option: 1})}
       />
 
       <AddFundDrawer
