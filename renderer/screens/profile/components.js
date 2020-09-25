@@ -205,6 +205,7 @@ export function ActivateInviteForm() {
                 status === IdentityStatus.Invite &&
                 'Click the button to activate invitation'
               }
+              resize="none"
               _disabled={{
                 bg: 'gray.50',
               }}

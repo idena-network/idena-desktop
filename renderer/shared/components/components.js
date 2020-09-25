@@ -26,6 +26,7 @@ import {
   ModalFooter,
   Stack,
   Box,
+  Button,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 
@@ -118,6 +119,8 @@ export function Toast({
   description,
   icon = 'info',
   status = 'info',
+  actionContent,
+  onAction,
   ...props
 }) {
   return (
@@ -128,7 +131,7 @@ export function Toast({
       color="brandGray.500"
       fontSize="md"
       pl={4}
-      pr={5}
+      pr={actionContent ? 2 : 5}
       pt={rem(10)}
       pb={3}
       mb={5}
@@ -137,7 +140,7 @@ export function Toast({
       {...props}
     >
       <AlertIcon name={icon} size={5} />
-      <Flex direction="column" align="flex-start">
+      <Flex direction="column" align="flex-start" maxW="sm">
         <AlertTitle fontWeight={500} lineHeight="base">
           {title}
         </AlertTitle>
@@ -145,6 +148,22 @@ export function Toast({
           {description}
         </AlertDescription>
       </Flex>
+      {actionContent && (
+        <Button
+          variant="ghost"
+          color="brandBlue.500"
+          fontWeight={500}
+          lineHeight="base"
+          px={3}
+          py="3/2"
+          _hover={{bg: 'unset'}}
+          _active={{bg: 'unset'}}
+          _focus={{boxShadow: 'none'}}
+          onClick={onAction}
+        >
+          {actionContent}
+        </Button>
+      )}
     </Alert>
   )
 }

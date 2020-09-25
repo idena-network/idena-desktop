@@ -141,7 +141,7 @@ export const uiTheme = {
       '012': 'rgb(255 102 102 /0.12)',
       '020': 'rgb(255 102 102 /0.20)',
       '050': 'rgb(255 102 102 /0.50)',
-      500: 'rgb(255, 102, 102)',
+      500: 'rgb(255 102 102)',
     },
     green: {
       ...chakraTheme.colors.green,
@@ -205,6 +205,7 @@ export const uiTheme = {
     sm: '11px',
     md: '13px',
     mdx: '14px',
+    base: '16px',
     lg: '18px',
     xl: '28px',
   },
@@ -628,6 +629,17 @@ export const uiTheme = {
         />
       ),
       viewBox: '0 0 20 21',
+    },
+    tick: {
+      path: (
+        <g fill="currentColor" fillRule="evenodd">
+          <path
+            fillRule="nonzero"
+            d="M8.27 12.532L5.203 9.499 3.797 10.922 8.396 15.468 16.761 5.648 15.239 4.352z"
+          />
+        </g>
+      ),
+      viewBox: '0 0 20 20',
     },
   },
 }

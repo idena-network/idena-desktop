@@ -1,6 +1,6 @@
 import {Machine, assign} from 'xstate'
 import {decode} from 'rlp'
-import {log} from 'xstate/lib/actions'
+import {choose, log} from 'xstate/lib/actions'
 import dayjs from 'dayjs'
 import {
   fetchFlipHashes,
@@ -24,6 +24,7 @@ import {
   shouldTranslate,
   shouldPollLongFlips,
   readyFlip,
+  availableReportsNumber,
 } from './utils'
 import {forEachAsync, wait} from '../../shared/utils/fn'
 import {fetchConfirmedKeywordTranslations} from '../flips/utils'
@@ -51,6 +52,8 @@ export const createValidationMachine = ({
         retries: 0,
         locale,
         translations: {},
+        reportedFlipsCount: 0,
+        didReport: false,
       },
       states: {
         shortSession: {
@@ -793,15 +796,7 @@ export const createValidationMachine = ({
                           ],
                         },
                         TOGGLE_WORDS: {
-                          actions: [
-                            assign({
-                              longFlips: ({longFlips}, {hash, relevance}) =>
-                                mergeFlipsByHash(longFlips, [
-                                  {hash, relevance},
-                                ]),
-                            }),
-                            log(),
-                          ],
+                          actions: ['toggleKeywords', log()],
                         },
                         SUBMIT: {
                           target: 'submitLongSession',
@@ -949,6 +944,72 @@ export const createValidationMachine = ({
           ) * 1000,
       },
       actions: {
+        toggleKeywords: choose([
+          {
+            cond: ({longFlips}, {hash, relevance}) =>
+              // eslint-disable-next-line no-use-before-define
+              relevance === RelevanceType.Relevant &&
+              !longFlips.find(x => x.hash === hash)?.relevance,
+            actions: [
+              assign({
+                longFlips: ({longFlips}, {hash, relevance}) =>
+                  mergeFlipsByHash(longFlips, [{hash, relevance}]),
+              }),
+            ],
+          },
+          {
+            cond: ({longFlips}, {hash, relevance}) =>
+              // eslint-disable-next-line no-use-before-define
+              relevance === RelevanceType.Relevant &&
+              longFlips.find(x => x.hash === hash)?.relevance ===
+                // eslint-disable-next-line no-use-before-define
+                RelevanceType.Irrelevant,
+            actions: [
+              assign({
+                longFlips: ({longFlips}, {hash, relevance}) =>
+                  mergeFlipsByHash(longFlips, [{hash, relevance}]),
+                reportedFlipsCount: ({reportedFlipsCount}) =>
+                  reportedFlipsCount - 1,
+              }),
+            ],
+          },
+          {
+            cond: ({didReport}, {relevance}) =>
+              // eslint-disable-next-line no-use-before-define
+              relevance === RelevanceType.Irrelevant && !didReport,
+            actions: [
+              assign({
+                longFlips: ({longFlips}, {hash, relevance}) =>
+                  mergeFlipsByHash(longFlips, [{hash, relevance}]),
+                reportedFlipsCount: ({reportedFlipsCount}) =>
+                  reportedFlipsCount + 1,
+                didReport: true,
+              }),
+              'onFirstReport',
+            ],
+          },
+          {
+            cond: ({longFlips, reportedFlipsCount}, {relevance}) =>
+              // eslint-disable-next-line no-use-before-define
+              relevance === RelevanceType.Irrelevant &&
+              reportedFlipsCount < availableReportsNumber(longFlips),
+            actions: [
+              assign({
+                longFlips: ({longFlips}, {hash, relevance}) =>
+                  mergeFlipsByHash(longFlips, [{hash, relevance}]),
+                reportedFlipsCount: ({reportedFlipsCount}) =>
+                  reportedFlipsCount + 1,
+              }),
+            ],
+          },
+          {
+            cond: ({longFlips, reportedFlipsCount}, {relevance}) =>
+              // eslint-disable-next-line no-use-before-define
+              relevance === RelevanceType.Irrelevant &&
+              reportedFlipsCount >= availableReportsNumber(longFlips),
+            actions: ['onExceededReports'],
+          },
+        ]),
         cleanupShortFlips: ({shortFlips}) => {
           filterSolvableFlips(shortFlips).forEach(({images}) =>
             images.forEach(URL.revokeObjectURL)
