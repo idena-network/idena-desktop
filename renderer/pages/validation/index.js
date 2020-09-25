@@ -435,13 +435,16 @@ function ValidationSession({
 
       <Dialog isOpen={isReportDialogOpen} onClose={onCloseReportDialog}>
         <DialogHeader>
-          {t('Please also report the flip when you see one of the following:', {
+          {t('Please report the flip when you see one of the following:', {
             nsSeparator: '!',
           })}
         </DialogHeader>
         <DialogBody>
           <Stack spacing={4} mt={2}>
             <List as="ol" styleType="decimal" spacing={2}>
+              <ListItem>
+                {t('One of the keywords is not relevant to the flip')}
+              </ListItem>
               <ListItem>
                 {t('You need to read the text in the flip to solve it')}
               </ListItem>
