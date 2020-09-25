@@ -22,11 +22,6 @@ import {
   Stack,
   Text,
   Heading,
-  PopoverContent,
-  PopoverArrow,
-  PopoverBody,
-  List,
-  ListItem,
   Icon,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
@@ -513,14 +508,7 @@ export function FlipWords({
 
   return (
     <ChakraBox fontSize="md" color="brandGray.500" ml={rem(32)} w={rem(320)}>
-      <FlipKeywordPanel w={rem(320)} mb={5}>
-        <Heading
-          fontSize={rem(16)}
-          fontWeight={500}
-          style={{...margin(0, 0, rem(24))}}
-        >
-          {t(`Are both keywords relevant to the flip?`)}
-        </Heading>
+      <FlipKeywordPanel w={rem(320)} mb={8}>
         {words.length ? (
           <FlipKeywordTranslationSwitch
             keywords={{
@@ -585,39 +573,6 @@ export const QualificationButton = React.forwardRef(
     )
   }
 )
-
-export function ReportButtonPopoverContent() {
-  const {t} = useTranslation()
-  return (
-    <PopoverContent bg="graphite.500" color="white" fontWeight={500} maxW="md">
-      <PopoverArrow />
-      <PopoverBody>
-        <Stack spacing={3}>
-          <Text fontSize="base">
-            {t(
-              'Please also report the flip when you see one of the following:',
-              {nsSeparator: '!'}
-            )}
-          </Text>
-          <List as="ol" styleType="decimal">
-            <ListItem>
-              {t('You need to read the text in the flip to solve it')}
-            </ListItem>
-            <ListItem>{t('You see inappropriate content')}</ListItem>
-            <ListItem>
-              {t(
-                'You see numbers or letters or other labels on top of the images showing their order'
-              )}
-            </ListItem>
-          </List>
-          <Text color="muted">
-            {t('Skip the flip if the keywords are not loaded')}
-          </Text>
-        </Stack>
-      </PopoverBody>
-    </PopoverContent>
-  )
-}
 
 export function WelcomeQualificationDialog(props) {
   const {t} = useTranslation()

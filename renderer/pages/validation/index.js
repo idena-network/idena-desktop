@@ -1,15 +1,19 @@
 /* eslint-disable react/prop-types */
+import React, {useMemo, useEffect} from 'react'
 import {useMachine} from '@xstate/react'
-import {useMemo, useEffect} from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
 import {
   Flex,
   Text,
   IconButton,
-  useToast,
-  Popover,
-  PopoverTrigger,
+  Heading,
+  Stack,
+  useDisclosure,
+  List,
+  ListItem,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/core'
 import {
   createValidationMachine,
@@ -46,15 +50,20 @@ import {
   ValidationSucceededDialog,
   SubmitFailedDialog,
   FailedFlipAnnotation,
-  ReportButtonPopoverContent,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
-import {Tooltip} from '../../shared/components'
 import {AnswerType} from '../../shared/types'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'
 import {PrimaryButton} from '../../shared/components/button'
-import {FloatDebug, Toast} from '../../shared/components/components'
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  FloatDebug,
+  Tooltip,
+} from '../../shared/components/components'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -83,7 +92,16 @@ function ValidationSession({
 
   const {t, i18n} = useTranslation()
 
-  const toast = useToast()
+  const {
+    isOpen: isExceededTooltipOpen,
+    onOpen: onOpenExceededTooltip,
+    onClose: onCloseExceededTooltip,
+  } = useDisclosure()
+  const {
+    isOpen: isReportDialogOpen,
+    onOpen: onOpenReportDialog,
+    onClose: onCloseReportDialog,
+  } = useDisclosure()
 
   const validationMachine = useMemo(
     () =>
@@ -102,35 +120,15 @@ function ValidationSession({
       validationStart,
     ]
   )
+
   const [state, send] = useMachine(validationMachine, {
     actions: {
       onExceededReports: () => {
-        toast({
-          duration: null,
-          // eslint-disable-next-line react/display-name
-          render: ({onClose}) => (
-            <Toast
-              title={t(
-                'Please remove Report status from some other flips to continue'
-              )}
-              status="error"
-              actionContent={t('Okay')}
-              onAction={onClose}
-            />
-          ),
-        })
+        onOpenExceededTooltip(true)
+        setTimeout(() => {
+          onCloseExceededTooltip(false)
+        }, 3000)
       },
-      onFirstReport: () =>
-        toast({
-          // eslint-disable-next-line react/display-name
-          render: () => (
-            <Toast
-              title={t(
-                "You'll get a reward if the flip is reported by other participants"
-              )}
-            />
-          ),
-        }),
     },
     state: loadValidationState(),
     logger: global.isDev
@@ -227,64 +225,93 @@ function ValidationSession({
                 translations={translations}
               >
                 {currentFlip.words?.length > 0 ? (
-                  <QualificationActions>
-                    <QualificationButton
-                      isSelected={
-                        currentFlip.relevance === RelevanceType.Relevant
-                      }
-                      onClick={() =>
-                        send({
-                          type: 'TOGGLE_WORDS',
-                          hash: currentFlip.hash,
-                          relevance: RelevanceType.Relevant,
-                        })
-                      }
-                    >
-                      {t('Both relevant')}
-                    </QualificationButton>
-                    <Popover trigger="hover">
-                      <PopoverTrigger>
-                        <Flex flex={1}>
-                          <QualificationButton
-                            isSelected={
-                              currentFlip.relevance === RelevanceType.Irrelevant
-                            }
-                            bg={
-                              currentFlip.relevance === RelevanceType.Irrelevant
-                                ? 'red.500'
-                                : 'red.012'
-                            }
-                            color={
-                              currentFlip.relevance === RelevanceType.Irrelevant
-                                ? 'white'
-                                : 'red.500'
-                            }
-                            _hover={null}
-                            _active={null}
-                            _focus={{
-                              boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
-                              outline: 'none',
-                            }}
-                            onClick={() =>
-                              send({
-                                type: 'TOGGLE_WORDS',
-                                hash: currentFlip.hash,
-                                relevance: RelevanceType.Irrelevant,
-                              })
-                            }
-                          >
-                            {t('Report')}{' '}
-                            {t('({{count}} left)', {
-                              count:
-                                availableReportsNumber(flips) -
-                                reportedFlipsCount,
-                            })}
-                          </QualificationButton>
-                        </Flex>
-                      </PopoverTrigger>
-                      <ReportButtonPopoverContent />
-                    </Popover>
-                  </QualificationActions>
+                  <Stack spacing={4}>
+                    <Stack isInline spacing={1} align="center">
+                      <Heading fontSize="base" fontWeight={500}>
+                        {t(`Is the flip correct?`)}
+                      </Heading>
+                      <IconButton
+                        icon="info"
+                        color="brandBlue.500"
+                        bg="unset"
+                        fontSize={rem(20)}
+                        minW={5}
+                        w={5}
+                        h={5}
+                        _active={{
+                          bg: 'unset',
+                        }}
+                        _hover={{
+                          bg: 'unset',
+                        }}
+                        _focus={{
+                          outline: 'none',
+                        }}
+                        onClick={onOpenReportDialog}
+                      />
+                    </Stack>
+                    <QualificationActions>
+                      <QualificationButton
+                        isSelected={
+                          currentFlip.relevance === RelevanceType.Relevant
+                        }
+                        onClick={() =>
+                          send({
+                            type: 'TOGGLE_WORDS',
+                            hash: currentFlip.hash,
+                            relevance: RelevanceType.Relevant,
+                          })
+                        }
+                      >
+                        {t('Both relevant')}
+                      </QualificationButton>
+
+                      <Tooltip
+                        label={t(
+                          'Please remove Report status from some other flips to continue'
+                        )}
+                        isOpen={isExceededTooltipOpen}
+                        hideDelay={3000}
+                        zIndex="tooltip"
+                      >
+                        <QualificationButton
+                          isSelected={
+                            currentFlip.relevance === RelevanceType.Irrelevant
+                          }
+                          bg={
+                            currentFlip.relevance === RelevanceType.Irrelevant
+                              ? 'red.500'
+                              : 'red.012'
+                          }
+                          color={
+                            currentFlip.relevance === RelevanceType.Irrelevant
+                              ? 'white'
+                              : 'red.500'
+                          }
+                          _hover={null}
+                          _active={null}
+                          _focus={{
+                            boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
+                            outline: 'none',
+                          }}
+                          onClick={() =>
+                            send({
+                              type: 'TOGGLE_WORDS',
+                              hash: currentFlip.hash,
+                              relevance: RelevanceType.Irrelevant,
+                            })
+                          }
+                        >
+                          {t('Report')}{' '}
+                          {t('({{count}} left)', {
+                            count:
+                              availableReportsNumber(flips) -
+                              reportedFlipsCount,
+                          })}
+                        </QualificationButton>
+                      </Tooltip>
+                    </QualificationActions>
+                  </Stack>
                 ) : (
                   <Text color="red.500" fontWeight={500}>
                     {t('Flip will be reported')}
@@ -309,7 +336,7 @@ function ValidationSession({
         <ActionBarItem justify="flex-end">
           {(isShortSession(state) || isLongSessionKeywords(state)) && (
             <Tooltip
-              content={
+              label={
                 hasAllRelevanceMarks(state) || isLastFlip(state)
                   ? null
                   : t('Go to last flip')
@@ -405,6 +432,53 @@ function ValidationSession({
           onSubmit={() => router.push('/profile')}
         />
       )}
+
+      <Dialog isOpen={isReportDialogOpen} onClose={onCloseReportDialog}>
+        <DialogHeader>
+          {t('Please also report the flip when you see one of the following:', {
+            nsSeparator: '!',
+          })}
+        </DialogHeader>
+        <DialogBody>
+          <Stack spacing={4} mt={2}>
+            <List as="ol" styleType="decimal" spacing={2}>
+              <ListItem>
+                {t('You need to read the text in the flip to solve it')}
+              </ListItem>
+              <ListItem>{t('You see inappropriate content')}</ListItem>
+              <ListItem>
+                {t(
+                  'You see numbers or letters or other labels on top of the images showing their order'
+                )}
+              </ListItem>
+            </List>
+            <Text color="muted">
+              {t('Skip the flip if the keywords are not loaded')}
+            </Text>
+            <Alert
+              alignItems="flex-start"
+              status="success"
+              bg="green.010"
+              borderWidth="1px"
+              borderColor="green.050"
+              fontWeight={500}
+              rounded="md"
+              px={3}
+              py={2}
+            >
+              <AlertIcon name="info" color="green.500" size={5} mr={3} />
+              {t(
+                "You'll get a reward for the reported flip if the flip is also reported by other participants"
+              )}
+            </Alert>
+          </Stack>
+        </DialogBody>
+        <DialogFooter>
+          <PrimaryButton onClick={onCloseReportDialog}>
+            {t('Ok, I understand')}
+          </PrimaryButton>
+        </DialogFooter>
+      </Dialog>
 
       {global.isDev && <FloatDebug>{state.value}</FloatDebug>}
     </ValidationScene>

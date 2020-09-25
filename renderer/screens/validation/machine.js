@@ -985,7 +985,6 @@ export const createValidationMachine = ({
                   reportedFlipsCount + 1,
                 didReport: true,
               }),
-              'onFirstReport',
             ],
           },
           {
