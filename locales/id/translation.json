@@ -317,5 +317,16 @@
   "You’re about to send iDNA from your wallet to the following address": "You’re about to send iDNA from your wallet to the following address",
   "{{numBlocks}} blocks left": "{{numBlocks}} blocks left",
   "Create {{count}} required flips_0": "Create {{count}} required flips",
-  "Wait for validation or create {{count}} optional flips_0": "Wait for validation or create {{count}} optional flips"
+  "Wait for validation or create {{count}} optional flips_0": "Wait for validation or create {{count}} optional flips",
+  "Please remove Report status from some other flips to continue": "Please remove Report status from some other flips to continue",
+  "Okay": "Okay",
+  "You'll get a reward if the flip is reported by other participants": "You'll get a reward if the flip is reported by other participants",
+  "out of": "out of",
+  "({{count}} left)_0": "({{count}} left)",
+  "Flip will be reported": "Flip will be reported",
+  "Please also report the flip when you see one of the following:": "Please also report the flip when you see one of the following:",
+  "You need to read the text in the flip to solve it": "You need to read the text in the flip to solve it",
+  "You see inappropriate content": "You see inappropriate content",
+  "You see numbers or letters or other labels on top of the images showing their order": "You see numbers or letters or other labels on top of the images showing their order",
+  "Skip the flip if the keywords are not loaded": "Skip the flip if the keywords are not loaded"
 }
