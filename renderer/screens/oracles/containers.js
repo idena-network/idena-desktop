@@ -30,6 +30,7 @@ import {
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {Link} from '../../shared/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
+import {buildViewVotingHref} from './utils'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -58,6 +59,8 @@ export function VotingCard({votingRef, ...props}) {
 
   const toDna = toLocaleDna(i18n.language)
 
+  const viewVotingHref = buildViewVotingHref(id)
+
   return (
     <>
       <Box key={id} {...props}>
@@ -70,7 +73,7 @@ export function VotingCard({votingRef, ...props}) {
             </Stack>
           </VotingBadge>
         </Stack>
-        <Link href={`/oracles/view?id=${id}`}>
+        <Link href={viewVotingHref}>
           <Text fontSize="base" fontWeight={500} mb={2}>
             {title}
           </Text>
@@ -95,8 +98,8 @@ export function VotingCard({votingRef, ...props}) {
         </Stack>
         <Flex justify="space-between" align="center">
           <Stack isInline spacing={2}>
-            <PrimaryButton onClick={() => router.push('/oracles/vote')}>
-              {t('Change')}
+            <PrimaryButton onClick={() => router.push(viewVotingHref)}>
+              {t('Open')}
             </PrimaryButton>
             <SecondaryButton onClick={onOpenAddFund}>
               {t('Add fund')}
