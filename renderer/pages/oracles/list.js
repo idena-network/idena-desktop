@@ -1,5 +1,5 @@
 import React from 'react'
-import {Stack, Box, Text, Switch, FormLabel} from '@chakra-ui/core'
+import {Stack, Box, Text, Switch, FormLabel, Flex} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page, PageTitle} from '../../screens/app/components'
@@ -34,6 +34,10 @@ function VotingListPage() {
             Array.from({length: 5}).map((_, idx) => (
               <VotingCardSkeleton key={idx} />
             ))}
+
+          {current.matches('loaded') && votings.length === 0 && (
+            <Flex>Emptyish</Flex>
+          )}
 
           {current.matches('loaded') &&
             votings.map(({id, ref}) => <VotingCard key={id} votingRef={ref} />)}

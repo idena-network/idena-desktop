@@ -12,8 +12,9 @@ import {
   Text,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
+import {useRouter} from 'next/router'
 import {Page, PageTitle} from '../../screens/app/components'
-import {Input, FloatDebug} from '../../shared/components/components'
+import {FloatDebug} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
   PrimaryButton,
@@ -23,12 +24,15 @@ import {
 import {createNewVotingMachine} from '../../screens/oracles/machines'
 import {
   VotingInlineFormControl,
+  VotingInput,
   VotingOptionText,
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
 
 function NewVotingPage() {
   const {t} = useTranslation()
+
+  const router = useRouter()
 
   const {isOpen: isOpenAdvanced, onToggle: onToggleAdvanced} = useDisclosure()
 
@@ -45,6 +49,9 @@ function NewVotingPage() {
 
   const [current, send] = useMachine(newVotingMachine, {
     context: {identity, epoch},
+    actions: {
+      onDeployed: () => router.push('/oracles/list'),
+    },
   })
 
   return (
@@ -84,7 +91,7 @@ function NewVotingPage() {
                   send('CHANGE', {name, value})
                 }
               >
-                <Input name="title" />
+                <VotingInput name="title" />
               </VotingInlineFormControl>
               <VotingInlineFormControl
                 label={t('Description')}
@@ -101,6 +108,7 @@ function NewVotingPage() {
                   _placeholder={{
                     color: 'muted',
                   }}
+                  w="md"
                 />
               </VotingInlineFormControl>
               <VotingInlineFormControl
@@ -109,7 +117,7 @@ function NewVotingPage() {
                   send('CHANGE', {name, value})
                 }
               >
-                <Input type="date" name="finishDate" />
+                <VotingInput type="date" name="finishDate" />
               </VotingInlineFormControl>
               <IconButton2
                 icon="chevron-down"
@@ -129,7 +137,7 @@ function NewVotingPage() {
                       send('CHANGE', {name, value})
                     }
                   >
-                    <Input type="date" name="startDate" />
+                    <VotingInput type="date" name="startDate" />
                   </VotingInlineFormControl>
                   <VotingInlineFormControl
                     label={t('Finish of voting')}
@@ -137,7 +145,7 @@ function NewVotingPage() {
                       send('CHANGE', {name, value})
                     }
                   >
-                    <Input type="date" name="finishDate" />
+                    <VotingInput type="date" name="finishDate" />
                   </VotingInlineFormControl>
                   <VotingInlineFormControl
                     label={t('Duration of summing up')}
@@ -145,7 +153,7 @@ function NewVotingPage() {
                       send('CHANGE', {name, value})
                     }
                   >
-                    <Input name="duration" />
+                    <VotingInput name="duration" />
                   </VotingInlineFormControl>
                   <VotingInlineFormControl
                     label={t('Winner score')}
@@ -153,7 +161,7 @@ function NewVotingPage() {
                       send('CHANGE', {name, value})
                     }
                   >
-                    <Input name="threshold" />
+                    <VotingInput name="threshold" />
                   </VotingInlineFormControl>
                   <VotingInlineFormControl
                     label={t('Max committee size')}
@@ -161,7 +169,7 @@ function NewVotingPage() {
                       send('CHANGE', {name, value})
                     }
                   >
-                    <Input name="minCommitteeSize" />
+                    <VotingInput name="minCommitteeSize" />
                   </VotingInlineFormControl>
                   <VotingInlineFormControl
                     label={t('Min committee size')}
@@ -169,7 +177,7 @@ function NewVotingPage() {
                       send('CHANGE', {name, value})
                     }
                   >
-                    <Input name="maxCommitteeSize" />
+                    <VotingInput name="maxCommitteeSize" />
                   </VotingInlineFormControl>
                   <VotingInlineFormControl
                     label={t('Voting deposit')}
@@ -177,7 +185,7 @@ function NewVotingPage() {
                       send('CHANGE', {name, value})
                     }
                   >
-                    <Input name="deposit" />
+                    <VotingInput name="deposit" />
                   </VotingInlineFormControl>
                   <VotingInlineFormControl
                     label={t('Voting reward')}
@@ -185,27 +193,33 @@ function NewVotingPage() {
                       send('CHANGE', {name, value})
                     }
                   >
-                    <Input name="reward" />
+                    <VotingInput name="reward" />
                   </VotingInlineFormControl>
                 </Stack>
               </Collapse>
             </Stack>
-            <Flex ml={rem(100)} mb={rem(84)}>
-              <Box flex={1} bg="gray.50" borderRadius="lg" px={10} py={5}>
+            <Flex ml={32} mb={rem(84)}>
+              <Box
+                flex={1}
+                bg="gray.50"
+                borderRadius="lg"
+                px={10}
+                py={5}
+                w="md"
+              >
                 <Text py={rem(10)} mb={2}>
                   {t('Number of options')}
                 </Text>
                 <Stack spacing={3}>
                   <VotingOptionText
                     onChange={({target: {value}}) => {
-                      console.log(value)
-                      send('SET_OPTIONS', {name: 'a', value})
+                      send('SET_OPTIONS', {idx: 0, value})
                     }}
                     label={t('Option 1')}
                   />
                   <VotingOptionText
                     onChange={({target: {value}}) =>
-                      send('SET_OPTIONS', {name: 'b', value})
+                      send('SET_OPTIONS', {idx: 1, value})
                     }
                     label={t('Option 2')}
                   />

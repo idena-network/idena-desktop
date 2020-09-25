@@ -283,6 +283,7 @@ export const createNewVotingMachine = epoch =>
         epoch: {
           epoch,
         },
+        options: [],
       },
       initial: 'idle',
       states: {
@@ -366,7 +367,9 @@ export const createNewVotingMachine = epoch =>
                     },
                   },
                 },
-                deployed: {},
+                deployed: {
+                  entry: ['onDeployed'],
+                },
               },
             },
           },
@@ -379,12 +382,9 @@ export const createNewVotingMachine = epoch =>
           ...context,
           [name]: value,
         })),
-        setOptions: assign(({options, ...context}, {name, value}) => ({
+        setOptions: assign(({options, ...context}, {idx, value}) => ({
           ...context,
-          options: {
-            ...options,
-            [name]: value,
-          },
+          options: [...options.slice(0, idx), value, ...options.slice(idx + 1)],
         })),
       },
       services: {
@@ -503,7 +503,14 @@ export const createViewVotingMachine = (id, epoch) =>
                 log(),
               ],
             },
-            VOTE: 'voting',
+            SELECT_OPTION: {
+              actions: ['selectOption', log()],
+            },
+            VOTE_SELECTED: 'voting',
+            VOTE: {
+              target: 'voting',
+              actions: ['selectOption'],
+            },
             START_VOTING: 'startVoting',
           },
         },
@@ -638,7 +645,7 @@ export const createViewVotingMachine = (id, epoch) =>
           }),
         // eslint-disable-next-line no-shadow
         loadVoting: async ({epoch, id}) => epochDb('votings', epoch).load(id),
-        vote: async ({issuer, contractHash, deposit = 100}, {option}) => {
+        vote: async ({issuer, contractHash, deposit = 100, selectedOption}) => {
           const resp = await callContract({
             from: issuer,
             contract: contractHash,
@@ -648,7 +655,7 @@ export const createViewVotingMachine = (id, epoch) =>
               {
                 index: 0,
                 format: 'byte',
-                value: option === VoteOption.Confirm ? '1' : '0',
+                value: selectedOption.toString(),
               },
               {
                 index: 1,
@@ -665,6 +672,10 @@ export const createViewVotingMachine = (id, epoch) =>
         persist: ({epoch, ...context}) => {
           epochDb('votings', epoch).put(context)
         },
+        selectOption: assign({
+          selectedOption: ({options}, {option}) =>
+            options.findIndex(o => o === option),
+        }),
       },
     }
   )
