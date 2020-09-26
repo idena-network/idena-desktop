@@ -125,10 +125,8 @@ function ValidationSession({
   const [state, send] = useMachine(validationMachine, {
     actions: {
       onExceededReports: () => {
-        onOpenExceededTooltip(true)
-        setTimeout(() => {
-          onCloseExceededTooltip(false)
-        }, 3000)
+        onOpenExceededTooltip()
+        setTimeout(onCloseExceededTooltip, 3000)
       },
     },
     state: loadValidationState(),
@@ -137,7 +135,12 @@ function ValidationSession({
       : (...args) => global.logger.debug(...args),
   })
 
-  const {currentIndex, translations, reportedFlipsCount} = state.context
+  const {
+    currentIndex,
+    translations,
+    reportedFlipsCount,
+    longFlips,
+  } = state.context
 
   useEffect(() => {
     persistValidationState(state)
@@ -305,7 +308,8 @@ function ValidationSession({
                         {t('Report')}{' '}
                         {t('({{count}} left)', {
                           count:
-                            availableReportsNumber(flips) - reportedFlipsCount,
+                            availableReportsNumber(longFlips) -
+                            reportedFlipsCount,
                         })}
                       </QualificationButton>
                     </Tooltip>

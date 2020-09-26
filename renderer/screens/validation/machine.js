@@ -53,7 +53,6 @@ export const createValidationMachine = ({
         locale,
         translations: {},
         reportedFlipsCount: 0,
-        didReport: false,
       },
       states: {
         shortSession: {
@@ -971,20 +970,7 @@ export const createValidationMachine = ({
                 reportedFlipsCount: ({reportedFlipsCount}) =>
                   reportedFlipsCount - 1,
               }),
-            ],
-          },
-          {
-            cond: ({didReport}, {relevance}) =>
-              // eslint-disable-next-line no-use-before-define
-              relevance === RelevanceType.Irrelevant && !didReport,
-            actions: [
-              assign({
-                longFlips: ({longFlips}, {hash, relevance}) =>
-                  mergeFlipsByHash(longFlips, [{hash, relevance}]),
-                reportedFlipsCount: ({reportedFlipsCount}) =>
-                  reportedFlipsCount + 1,
-                didReport: true,
-              }),
+              log(),
             ],
           },
           {
@@ -996,9 +982,14 @@ export const createValidationMachine = ({
               assign({
                 longFlips: ({longFlips}, {hash, relevance}) =>
                   mergeFlipsByHash(longFlips, [{hash, relevance}]),
-                reportedFlipsCount: ({reportedFlipsCount}) =>
-                  reportedFlipsCount + 1,
+                reportedFlipsCount: ({longFlips, reportedFlipsCount}, {hash}) =>
+                  longFlips.find(x => x.hash === hash)?.relevance ===
+                  // eslint-disable-next-line no-use-before-define
+                  RelevanceType.Irrelevant
+                    ? reportedFlipsCount
+                    : reportedFlipsCount + 1,
               }),
+              log(),
             ],
           },
           {
@@ -1006,7 +997,7 @@ export const createValidationMachine = ({
               // eslint-disable-next-line no-use-before-define
               relevance === RelevanceType.Irrelevant &&
               reportedFlipsCount >= availableReportsNumber(longFlips),
-            actions: ['onExceededReports'],
+            actions: ['onExceededReports', log()],
           },
         ]),
         cleanupShortFlips: ({shortFlips}) => {
