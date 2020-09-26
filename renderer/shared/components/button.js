@@ -164,37 +164,37 @@ export const PrimaryButton = React.forwardRef((props, ref) => (
 ))
 PrimaryButton.displayName = 'PrimaryButton'
 
-export function SecondaryButton(props) {
-  return (
-    <PseudoBox
-      as="button"
-      bg="brandBlue.10"
-      color="brandBlue.500"
-      fontWeight={500}
-      h={8}
-      px={4}
-      py="3/2"
-      rounded="md"
-      transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-      _hover={{bg: 'brandBlue.20'}}
-      _active={{
-        bg: 'brandBlue.50',
-        transform: 'scale(0.98)',
-      }}
-      _focus={{
-        shadow: 'outline',
-        outline: 'none',
-      }}
-      _disabled={{
-        bg: 'gray.50',
-        color: 'rgb(150 153 158)',
-      }}
-      // eslint-disable-next-line react/destructuring-assignment
-      disabled={props.isDisabled}
-      {...props}
-    />
-  )
-}
+// eslint-disable-next-line react/display-name
+export const SecondaryButton = React.forwardRef((props, ref) => (
+  <PseudoBox
+    ref={ref}
+    as="button"
+    bg="brandBlue.10"
+    color="brandBlue.500"
+    fontWeight={500}
+    h={8}
+    px={4}
+    py="3/2"
+    rounded="md"
+    transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+    _hover={{bg: 'brandBlue.20'}}
+    _active={{
+      bg: 'brandBlue.50',
+      transform: 'scale(0.98)',
+    }}
+    _focus={{
+      shadow: 'outline',
+      outline: 'none',
+    }}
+    _disabled={{
+      bg: 'gray.50',
+      color: 'rgb(150 153 158)',
+    }}
+    // eslint-disable-next-line react/destructuring-assignment
+    disabled={props.isDisabled}
+    {...props}
+  />
+))
 
 export function IconButton2({icon, children, ...props}) {
   return (

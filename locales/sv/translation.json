@@ -327,5 +327,21 @@
   "Create {{count}} required flips": "Create {{count}} required flips",
   "Create {{count}} required flips_plural": "Create {{count}} required flips",
   "Wait for validation or create {{count}} optional flips": "Wait for validation or create {{count}} optional flips",
-  "Wait for validation or create {{count}} optional flips_plural": "Wait for validation or create {{count}} optional flips"
+  "Wait for validation or create {{count}} optional flips_plural": "Wait for validation or create {{count}} optional flips",
+  "Please remove Report status from some other flips to continue": "Please remove Report status from some other flips to continue",
+  "Okay": "Okay",
+  "You'll get a reward if the flip is reported by other participants": "You'll get a reward if the flip is reported by other participants",
+  "out of": "out of",
+  "({{count}} left)": "({{count}} left)",
+  "({{count}} left)_plural": "({{count}} left)",
+  "Flip will be reported": "Flip will be reported",
+  "Please also report the flip when you see one of the following:": "Please also report the flip when you see one of the following:",
+  "You need to read the text in the flip to solve it": "You need to read the text in the flip to solve it",
+  "You see inappropriate content": "You see inappropriate content",
+  "You see numbers or letters or other labels on top of the images showing their order": "You see numbers or letters or other labels on top of the images showing their order",
+  "Skip the flip if the keywords are not loaded": "Skip the flip if the keywords are not loaded",
+  "Is the flip correct?": "Is the flip correct?",
+  "Please report the flip when you see one of the following:": "Please report the flip when you see one of the following:",
+  "One of the keywords is not relevant to the flip": "One of the keywords is not relevant to the flip",
+  "You'll get a reward for the reported flip if the flip is also reported by other participants": "You'll get a reward for the reported flip if the flip is also reported by other participants"
 }

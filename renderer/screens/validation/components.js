@@ -22,13 +22,14 @@ import {
   Stack,
   Text,
   Heading,
+  Icon,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
 import {State} from 'xstate'
-import {Box, Fill, Button, Absolute} from '../../shared/components'
+import {Box, Fill, Absolute} from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
 import theme, {rem} from '../../shared/theme'
@@ -48,7 +49,7 @@ import {
   DialogBody,
   DialogFooter,
 } from '../../shared/components/components'
-import {PrimaryButton} from '../../shared/components/button'
+import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 
 export function ValidationScene(props) {
   return (
@@ -507,14 +508,7 @@ export function FlipWords({
 
   return (
     <ChakraBox fontSize="md" color="brandGray.500" ml={rem(32)} w={rem(320)}>
-      <FlipKeywordPanel w={rem(320)} mb={5}>
-        <Heading
-          fontSize={rem(16)}
-          fontWeight={500}
-          style={{...margin(0, 0, rem(24))}}
-        >
-          {t(`Are both keywords relevant to the flip?`)}
-        </Heading>
+      <FlipKeywordPanel w={rem(320)} mb={8}>
         {words.length ? (
           <FlipKeywordTranslationSwitch
             keywords={{
@@ -562,59 +556,23 @@ export function FlipWords({
 }
 
 export function QualificationActions(props) {
-  return <Flex align="center" justify="space-between" {...props} />
+  return <Stack isInline spacing={2} align="center" {...props} />
 }
 
-export function QualificationButton({
-  flip: {hash, relevance},
-  variant,
-  children,
-  onVote,
-  ...props
-}) {
-  const buttonVariant =
-    // eslint-disable-next-line no-nested-ternary
-    variant === RelevanceType.Relevant
-      ? relevance === variant
-        ? 'primary'
-        : 'secondary'
-      : null
-  const style =
-    // eslint-disable-next-line no-nested-ternary
-    variant === RelevanceType.Irrelevant
-      ? relevance === variant
-        ? {
-            backgroundColor: theme.colors.danger,
-            color: theme.colors.white,
-          }
-        : {
-            backgroundColor: theme.colors.danger02,
-            color: theme.colors.danger,
-          }
-      : null
-  return (
-    <Button
-      variant={buttonVariant}
-      style={{
-        fontWeight: 500,
-        minWidth: rem(156),
-        minHeight: rem(32),
-        transition: 'none',
-        whiteSpace: 'nowrap',
-        zIndex: 1,
-        ...style,
-      }}
-      onClick={() => onVote(hash)}
-      {...props}
-    >
-      <Stack isInline spacing={2} align="center" justify="center">
-        {React.Children.map(children, child => (
-          <ChakraBox>{child}</ChakraBox>
-        ))}
-      </Stack>
-    </Button>
-  )
-}
+// eslint-disable-next-line react/display-name
+export const QualificationButton = React.forwardRef(
+  ({isSelected, children, ...props}, ref) => {
+    const ButtonVariant = isSelected ? PrimaryButton : SecondaryButton
+    return (
+      <ButtonVariant ref={ref} flex={1} maxW={40} {...props}>
+        <Stack isInline spacing={2} align="center" justify="center">
+          {isSelected && <Icon name="tick" size={5} />}
+          <Text>{children}</Text>
+        </Stack>
+      </ButtonVariant>
+    )
+  }
+)
 
 export function WelcomeQualificationDialog(props) {
   const {t} = useTranslation()
@@ -642,6 +600,7 @@ export function WelcomeQualificationDialog(props) {
 
 export function NavButton({type, bg, color, ...props}) {
   const isPrev = type === 'prev'
+  // eslint-disable-next-line no-shadow
   const Icon = isPrev ? FiChevronLeft : FiChevronRight
   return (
     <Absolute

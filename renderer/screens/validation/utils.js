@@ -217,3 +217,10 @@ export function shouldPollLongFlips(
     )
   )
 }
+
+export const decodedWithKeywords = ({decoded, words}) =>
+  decoded && words?.length > 0
+
+export function availableReportsNumber(flips) {
+  return Math.floor(flips.length / 3)
+}
