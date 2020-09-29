@@ -215,6 +215,14 @@ const createMenu = () => {
     label: i18next.t('View'),
     submenu: [
       {
+        label: i18next.t('Toggle Full Screen'),
+        role: 'togglefullscreen',
+        accelerator: isWin ? 'F11' : 'Ctrl+Command+F',
+      },
+      {
+        type: 'separator',
+      },
+      {
         label: i18next.t('Zoom In'),
         accelerator: 'CmdOrCtrl+=',
         click: (_, window) => {
