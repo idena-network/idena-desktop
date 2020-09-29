@@ -330,5 +330,19 @@
   "Is the flip correct?": "Is the flip correct?",
   "Please report the flip when you see one of the following:": "Please report the flip when you see one of the following:",
   "One of the keywords is not relevant to the flip": "One of the keywords is not relevant to the flip",
-  "You'll get a reward for the reported flip if the flip is also reported by other participants": "You'll get a reward for the reported flip if the flip is also reported by other participants"
+  "You'll get a reward for the reported flip if the flip is also reported by other participants": "You'll get a reward for the reported flip if the flip is also reported by other participants",
+  "About Idena": "About Idena",
+  "Toggle Developer Tools": "Toggle Developer Tools",
+  "Quit": "Quit",
+  "Edit": "Edit",
+  "Cut": "Cut",
+  "Select All": "Select All",
+  "View": "View",
+  "Toggle Full Screen": "Toggle Full Screen",
+  "Zoom In": "Zoom In",
+  "Zoom Out": "Zoom Out",
+  "Actual Size": "Actual Size",
+  "Help": "Help",
+  "Explorer": "Explorer",
+  "Open Idena": "Open Idena"
 }

@@ -24,6 +24,7 @@ const AVAILABLE_LANGS = [
 
 module.exports = {
   input: [
+    'main/**/*.{js,jsx}',
     'renderer/**/*.{js,jsx}',
     '!**/renderer/out/**',
     '!**/renderer/.next/**',
