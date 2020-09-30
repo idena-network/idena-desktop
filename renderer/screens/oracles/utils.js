@@ -71,7 +71,7 @@ export function updateVotingList(votings, {id, ...restVoting}) {
 
 export function callContract({from, contract, method, amount, args}) {
   return callRpc(
-    'dna_callContract',
+    'contract_call',
     omit({
       from,
       contract,
@@ -88,7 +88,7 @@ export const createContractCaller = ({issuer, contractHash}) => (
   args
 ) =>
   callRpc(
-    'dna_callContract',
+    'contract_call',
     omit({
       from: issuer,
       contract: contractHash,
@@ -104,7 +104,7 @@ export const createEstimateContractCaller = ({issuer, contractHash}) => (
   args
 ) =>
   callRpc(
-    'dna_estimateCallContract',
+    'contract_estimateCall',
     omit({
       from: issuer,
       contract: contractHash,
@@ -126,4 +126,44 @@ export function hexToObject(hex) {
 
 export function buildViewVotingHref(id) {
   return `/oracles/view?id=${id}`
+}
+
+export const ContractRpcMode = {
+  Estimate: 'estimate',
+  Call: 'call',
+}
+
+export function contractDeploymentParams(
+  {title, desc, options, startDate, gasCost, txFee},
+  {address: from},
+  rpcMode = ContractRpcMode.Call
+) {
+  const deploymentParams = {
+    from,
+    codeHash: '0x02',
+    amount: 1,
+    args: [
+      {
+        index: 0,
+        format: 'hex',
+        value: objectToHex({
+          title,
+          desc,
+          options,
+        }),
+      },
+      {
+        index: 1,
+        format: 'uint64',
+        value: new Date(startDate).valueOf().toString(),
+      },
+    ],
+  }
+
+  return rpcMode === ContractRpcMode.Estimate
+    ? deploymentParams
+    : {
+        ...deploymentParams,
+        maxFee: Math.ceil((gasCost + txFee) * 1.1),
+      }
 }
