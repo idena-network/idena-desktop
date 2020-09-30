@@ -15,8 +15,8 @@ import {
   DevSettingsSection,
 } from '../../screens/settings/components'
 import {epochDb} from '../../shared/utils/db'
-import {useEpochState} from '../../shared/providers/epoch-context'
 import {Toast} from '../../shared/components/components'
+import {useAppMachine} from '../../shared/providers/app-context'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -33,31 +33,33 @@ function Settings() {
 
   const {runInternalNode, useExternalNode} = useSettingsState()
 
-  const {epoch} = useEpochState()
+  const [current] = useAppMachine()
 
   return (
     <Stack spacing={10} mt={8}>
-      <DevSettingsSection title={t('Flips')} as={Stack} spacing={2}>
-        <Box>
-          <PrimaryButton
-            onClick={() => {
-              clearFlips()
-              toastify(t('Flips deleted'))
-            }}
-          >
-            {t('Clear flips')}
-          </PrimaryButton>
-        </Box>
-        <Box>
-          <PrimaryButton
-            onClick={() => {
-              archiveFlips()
-              toastify(t('Flips archived'))
-            }}
-          >
-            {t('Archive flips')}
-          </PrimaryButton>
-        </Box>
+      <DevSettingsSection title={t('Flips')}>
+        <Stack spacing={2}>
+          <Box>
+            <PrimaryButton
+              onClick={() => {
+                clearFlips()
+                toastify(t('Flips deleted'))
+              }}
+            >
+              {t('Clear flips')}
+            </PrimaryButton>
+          </Box>
+          <Box>
+            <PrimaryButton
+              onClick={() => {
+                archiveFlips()
+                toastify(t('Flips archived'))
+              }}
+            >
+              {t('Archive flips')}
+            </PrimaryButton>
+          </Box>
+        </Stack>
       </DevSettingsSection>
 
       <DevSettingsSection title={t('Invites')}>
@@ -73,28 +75,32 @@ function Settings() {
         </Box>
       </DevSettingsSection>
 
-      <DevSettingsSection title={t('Oracles')}>
-        <Box my={4}>
-          <PrimaryButton
-            onClick={async () => {
-              await epochDb('votings', epoch).clear()
-              toastify(t('Votings removed'))
-            }}
-          >
-            {t('Clear votings')}
-          </PrimaryButton>
-        </Box>
-      </DevSettingsSection>
+      {current?.context?.epoch && (
+        <DevSettingsSection title={t('Oracles')}>
+          <Box my={4}>
+            <PrimaryButton
+              onClick={async () => {
+                await epochDb('votings', current?.context?.epoch?.epoch).clear()
+                toastify(t('Votings removed'))
+              }}
+            >
+              {t('Clear votings')}
+            </PrimaryButton>
+          </Box>
+        </DevSettingsSection>
+      )}
 
       <SettingsSection title={t('Export private key')}>
         <ExportPK />
       </SettingsSection>
 
-      {runInternalNode && !useExternalNode && (
-        <SettingsSection title={t('Import private key')}>
-          <ImportPK />
-        </SettingsSection>
-      )}
+      <Box>
+        {runInternalNode && !useExternalNode && (
+          <SettingsSection title={t('Import private key')}>
+            <ImportPK />
+          </SettingsSection>
+        )}
+      </Box>
 
       <SettingsSection title={t('Language')}>
         <LocaleSwitcher />

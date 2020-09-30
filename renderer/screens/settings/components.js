@@ -208,5 +208,5 @@ export function SettingsSection({title, children, ...props}) {
 }
 
 export function DevSettingsSection(props) {
-  return global.isDev && <SettingsSection {...props} />
+  return global.isDev ? <SettingsSection {...props} /> : null
 }

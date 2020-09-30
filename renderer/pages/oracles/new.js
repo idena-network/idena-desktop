@@ -16,15 +16,11 @@ import {useRouter} from 'next/router'
 import {Page, PageTitle} from '../../screens/app/components'
 import {FloatDebug} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
-import {
-  PrimaryButton,
-  IconButton2,
-  SecondaryButton,
-} from '../../shared/components/button'
+import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {createNewVotingMachine} from '../../screens/oracles/machines'
 import {
+  VotingFormAdvancedDivider,
   VotingInlineFormControl,
-  VotingInput,
   VotingOptionText,
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
@@ -53,6 +49,9 @@ function NewVotingPage() {
       onDeployed: () => router.push('/oracles/list'),
     },
   })
+
+  const handleChangeFormControl = ({target: {id, value}}) =>
+    send('CHANGE', {id, value})
 
   return (
     <Page p={0}>
@@ -83,118 +82,75 @@ function NewVotingPage() {
               )}
             </Alert>
           </Box>
-          <Stack maxW={rem(600)} spacing={5}>
+          <Stack maxW="xl" spacing={5}>
             <Stack as="form" spacing={3}>
               <VotingInlineFormControl
+                id="title"
                 label={t('Title')}
-                onChange={({target: {name, value}}) =>
-                  send('CHANGE', {name, value})
-                }
-              >
-                <VotingInput name="title" />
-              </VotingInlineFormControl>
+                onChange={handleChangeFormControl}
+              />
               <VotingInlineFormControl
                 label={t('Description')}
-                onChange={({target: {name, value}}) =>
-                  send('CHANGE', {name, value})
-                }
+                align="flex-start"
               >
                 <Textarea
-                  name="desc"
+                  id="desc"
                   borderColor="gray.300"
                   px={3}
                   pt="3/2"
                   pb={2}
+                  w="md"
                   _placeholder={{
                     color: 'muted',
                   }}
-                  w="md"
+                  onChange={handleChangeFormControl}
                 />
               </VotingInlineFormControl>
               <VotingInlineFormControl
-                label={t('Deadline')}
-                onChange={({target: {name, value}}) =>
-                  send('CHANGE', {name, value})
-                }
-              >
-                <VotingInput type="date" name="finishDate" />
-              </VotingInlineFormControl>
-              <IconButton2
-                icon="chevron-down"
-                onClick={onToggleAdvanced}
-                my={2}
-              >
-                <Flex flex={1} justify="space-between">
-                  <Text>{t('Part of the options is hidden')}</Text>
-                  <Text>{t('Show all')}</Text>
-                </Flex>
-              </IconButton2>
+                id="startDate"
+                type="date"
+                label={t('Start of voting')}
+                onChange={handleChangeFormControl}
+              />
+              <VotingFormAdvancedDivider onClick={onToggleAdvanced} />
               <Collapse mt={2} isOpen={isOpenAdvanced}>
                 <Stack spacing={3}>
                   <VotingInlineFormControl
-                    label={t('Start of voting')}
-                    onChange={({target: {name, value}}) =>
-                      send('CHANGE', {name, value})
-                    }
-                  >
-                    <VotingInput type="date" name="startDate" />
-                  </VotingInlineFormControl>
+                    id="finishDate"
+                    type="date"
+                    label={t('Deadline')}
+                    onChange={handleChangeFormControl}
+                  />
                   <VotingInlineFormControl
-                    label={t('Finish of voting')}
-                    onChange={({target: {name, value}}) =>
-                      send('CHANGE', {name, value})
-                    }
-                  >
-                    <VotingInput type="date" name="finishDate" />
-                  </VotingInlineFormControl>
-                  <VotingInlineFormControl
+                    id="duration"
                     label={t('Duration of summing up')}
-                    onChange={({target: {name, value}}) =>
-                      send('CHANGE', {name, value})
-                    }
-                  >
-                    <VotingInput name="duration" />
-                  </VotingInlineFormControl>
+                    onChange={handleChangeFormControl}
+                  />
                   <VotingInlineFormControl
+                    id="threshold"
                     label={t('Winner score')}
-                    onChange={({target: {name, value}}) =>
-                      send('CHANGE', {name, value})
-                    }
-                  >
-                    <VotingInput name="threshold" />
-                  </VotingInlineFormControl>
+                    onChange={handleChangeFormControl}
+                  />
                   <VotingInlineFormControl
+                    id="minCommitteeSize"
                     label={t('Max committee size')}
-                    onChange={({target: {name, value}}) =>
-                      send('CHANGE', {name, value})
-                    }
-                  >
-                    <VotingInput name="minCommitteeSize" />
-                  </VotingInlineFormControl>
+                    onChange={handleChangeFormControl}
+                  />
                   <VotingInlineFormControl
+                    id="maxCommitteeSize"
                     label={t('Min committee size')}
-                    onChange={({target: {name, value}}) =>
-                      send('CHANGE', {name, value})
-                    }
-                  >
-                    <VotingInput name="maxCommitteeSize" />
-                  </VotingInlineFormControl>
+                    onChange={handleChangeFormControl}
+                  />
                   <VotingInlineFormControl
+                    id="deposit"
                     label={t('Voting deposit')}
-                    onChange={({target: {name, value}}) =>
-                      send('CHANGE', {name, value})
-                    }
-                  >
-                    <VotingInput name="deposit" />
-                  </VotingInlineFormControl>
+                    onChange={handleChangeFormControl}
+                  />
                   <VotingInlineFormControl
+                    id="reward"
                     label={t('Voting reward')}
-                    onChange={({target: {name, value}}) =>
-                      send('CHANGE', {name, value})
-                    }
-                  >
-                    <VotingInput name="reward" />
-                  </VotingInlineFormControl>
+                    onChange={handleChangeFormControl}
+                  />
                 </Stack>
               </Collapse>
             </Stack>

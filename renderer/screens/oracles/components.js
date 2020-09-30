@@ -17,12 +17,14 @@ import {
   useTheme,
   Divider,
 } from '@chakra-ui/core'
+import {useTranslation} from 'react-i18next'
 import {
   DrawerHeader,
   DrawerBody,
   Input,
 } from '../../shared/components/components'
 import {VoteOption} from '../../shared/types'
+import {IconButton2} from '../../shared/components/button'
 
 export function OracleDrawerHeader({
   icon,
@@ -142,14 +144,21 @@ export function VotingResultBar({value, action, ...props}) {
   )
 }
 
-export function VotingInlineFormControl({label, children, ...props}) {
+export function VotingInlineFormControl({
+  id,
+  type = 'text',
+  label,
+  align = 'center',
+  children,
+  ...props
+}) {
   return (
     <FormControl {...props}>
-      <Stack isInline>
-        <FormLabel color="muted" w={32}>
+      <Stack isInline alignItems={align}>
+        <FormLabel htmlFor={id} color="muted" py={2} w={32}>
           {label}
         </FormLabel>
-        {children}
+        {children || <VotingInput id={id} type={type} />}
       </Stack>
     </FormControl>
   )
@@ -211,4 +220,16 @@ function FullSkeleton(props) {
 
 export function VotingListDivider() {
   return <Divider borderColor="gray.300" mt={6} mb={0} />
+}
+
+export function VotingFormAdvancedDivider(props) {
+  const {t} = useTranslation()
+  return (
+    <IconButton2 icon="chevron-down" my={2} {...props}>
+      <Flex flex={1} justify="space-between">
+        <Text>{t('Part of the options is hidden')}</Text>
+        <Text>{t('Show all')}</Text>
+      </Flex>
+    </IconButton2>
+  )
 }
