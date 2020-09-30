@@ -1,13 +1,14 @@
 import {Machine, assign, spawn} from 'xstate'
-import {log, raise, sendParent} from 'xstate/lib/actions'
+import {log, sendParent} from 'xstate/lib/actions'
 import {
   fetchVotings,
   updateVotingList,
   callContract,
   createEstimateContractCaller,
-  objectToHex,
+  contractDeploymentParams,
+  ContractRpcMode,
 } from './utils'
-import {VotingStatus, VoteOption} from '../../shared/types'
+import {VotingStatus} from '../../shared/types'
 import {callRpc, mergeById} from '../../shared/utils/utils'
 import {epochDb} from '../../shared/utils/db'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
@@ -285,24 +286,12 @@ export const createNewVotingMachine = epoch =>
         },
         options: [],
       },
-      initial: 'idle',
+      initial: 'editing',
       states: {
-        idle: {
+        editing: {
           on: {
             CHANGE: {
-              target: 'dirty',
-              actions: [raise((_, e) => e)],
-            },
-            SET_OPTIONS: {
-              target: 'dirty',
-              actions: [raise((_, e) => e)],
-            },
-          },
-        },
-        dirty: {
-          on: {
-            CHANGE: {
-              actions: ['changeContract', log()],
+              actions: ['setContractParams', log()],
             },
             SET_OPTIONS: {
               actions: ['setOptions', log()],
@@ -315,7 +304,6 @@ export const createNewVotingMachine = epoch =>
         },
         publishing: {
           initial: 'deployingContract',
-          entry: ['onPublishing', log()],
           states: {
             deployingContract: {
               initial: 'estimating',
@@ -325,28 +313,7 @@ export const createNewVotingMachine = epoch =>
                     src: 'estimateDeployContract',
                     onDone: {
                       target: 'deploying',
-                      actions: [
-                        assign(
-                          (
-                            context,
-                            {
-                              data: {
-                                contract: contractHash,
-                                txHash,
-                                gasCost,
-                                txFee,
-                              },
-                            }
-                          ) => ({
-                            ...context,
-                            contractHash,
-                            txHash,
-                            gasCost: Number(gasCost),
-                            txFee: Number(txFee),
-                          })
-                        ),
-                        log(),
-                      ],
+                      actions: ['applyDeployResult', log()],
                     },
                   },
                 },
@@ -355,12 +322,7 @@ export const createNewVotingMachine = epoch =>
                     src: 'deployContract',
                     onDone: {
                       target: 'deployed',
-                      actions: [
-                        assign({
-                          txHash: (_, {data}) => data,
-                        }),
-                        log(),
-                      ],
+                      actions: ['applyContractHash', log()],
                     },
                     onError: {
                       actions: [log()],
@@ -378,9 +340,24 @@ export const createNewVotingMachine = epoch =>
     },
     {
       actions: {
-        changeContract: assign((context, {name, value}) => ({
+        applyDeployResult: assign(
+          (
+            context,
+            {data: {contract: contractHash, txHash, gasCost, txFee}}
+          ) => ({
+            ...context,
+            contractHash,
+            txHash,
+            gasCost: Number(gasCost),
+            txFee: Number(txFee),
+          })
+        ),
+        applyContractHash: assign({
+          txHash: (_, {data}) => data,
+        }),
+        setContractParams: assign((context, {id, value}) => ({
           ...context,
-          [name]: value,
+          [id]: value,
         })),
         setOptions: assign(({options, ...context}, {idx, value}) => ({
           ...context,
@@ -388,75 +365,22 @@ export const createNewVotingMachine = epoch =>
         })),
       },
       services: {
-        estimateDeployContract: async ({
-          identity: {address: from},
-          ...voting
-        }) => {
-          const {title, desc, options, startDate} = voting
+        estimateDeployContract: async ({identity, ...voting}) =>
+          callRpc(
+            'contract_estimateDeploy',
+            contractDeploymentParams(voting, identity, ContractRpcMode.Estimate)
+          ),
+        // eslint-disable-next-line no-shadow
+        deployContract: async ({epoch: {epoch}, identity, ...voting}) => {
+          const deployResult = await callRpc(
+            'contract_deploy',
+            contractDeploymentParams(voting, identity)
+          )
 
-          const content = objectToHex({
-            title,
-            desc,
-            options,
-          })
-
-          return callRpc('dna_estimateDeployContract', {
-            from,
-            codeHash: '0x02',
-            amount: 1,
-            args: [
-              {
-                index: 0,
-                format: 'hex',
-                value: content,
-              },
-              {
-                index: 1,
-                format: 'uint64',
-                value: new Date(startDate).valueOf().toString(),
-              },
-            ],
-          })
-        },
-        deployContract: async ({
-          // eslint-disable-next-line no-shadow
-          epoch: {epoch},
-          identity: {address: from},
-          ...voting
-        }) => {
-          const {title, desc, options, startDate, gasCost, txFee} = voting
-
-          const content = objectToHex({
-            title,
-            desc,
-            options,
-          })
-
-          const deployResult = await callRpc('dna_deployContract', {
-            from,
-            codeHash: '0x02',
-            contractStake: 1000,
-            amount: 1,
-            maxFee: Math.ceil((gasCost + txFee) * 1.1),
-            args: [
-              {
-                index: 0,
-                format: 'hex',
-                value: content,
-              },
-              {
-                index: 1,
-                format: 'uint64',
-                value: new Date(startDate).valueOf().toString(),
-              },
-            ],
-          })
-
-          const db = epochDb('votings', epoch)
-          await db.put({
+          await epochDb('votings', epoch).put({
             ...voting,
             txHash: deployResult,
-            issuer: from,
+            issuer: identity.from,
             status: VotingStatus.Mining,
           })
 
