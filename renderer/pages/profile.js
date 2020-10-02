@@ -1,5 +1,13 @@
 import React from 'react'
-import {Stack, Box, Text, Icon, useDisclosure, useToast} from '@chakra-ui/core'
+import {
+  Stack,
+  Box,
+  Text,
+  Icon,
+  useDisclosure,
+  useToast,
+  Button,
+} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
   useIdentityState,
@@ -104,7 +112,35 @@ export default function ProfilePage() {
             <Stack spacing={6}>
               <UserInlineCard address={address} state={state} />
               <UserStatList>
-                <SimpleUserStat label={t('Address')} value={address} />
+                <UserStat>
+                  <UserStatLabel>{t('Address')}</UserStatLabel>
+                  <UserStatValue>{address}</UserStatValue>
+                  <Button
+                    variant="link"
+                    variantColor="brandBlue"
+                    fontWeight={500}
+                    alignSelf="flex-start"
+                    _hover={{background: 'transparent'}}
+                    _focus={{
+                      outline: 'none',
+                    }}
+                    onClick={() => {
+                      global.openExternal(
+                        `https://scan.idena.io/address/${address}`
+                      )
+                    }}
+                  >
+                    <Text as="span" lineHeight="short" mt="-2px">
+                      {t('Open in blockhain explorer')}
+                    </Text>
+                    <Icon
+                      name="chevron-down"
+                      size={4}
+                      transform="rotate(-90deg)"
+                    />
+                  </Button>
+                </UserStat>
+
                 {state === IdentityStatus.Newbie ? (
                   <AnnotatedUserStat
                     annotation={t(
@@ -119,10 +155,8 @@ export default function ProfilePage() {
                     value={mapToFriendlyStatus(state)}
                   />
                 )}
-                <UserStat>
-                  <UserStatLabel>{t('Balance')}</UserStatLabel>
-                  <UserStatValue>{toDna(balance)}</UserStatValue>
-                </UserStat>
+
+                <SimpleUserStat label={t('Balance')} value={toDna(balance)} />
                 {stake > 0 && state === IdentityStatus.Newbie && (
                   <Stack spacing={4}>
                     <AnnotatedUserStat
