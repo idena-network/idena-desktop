@@ -177,8 +177,12 @@ export default function ProfilePage() {
                     label={t('Total score')}
                   >
                     <UserStatValue>
-                      {totalShortFlipPoints} out of {totalQualifiedFlips} (
-                      {toPercent(totalShortFlipPoints / totalQualifiedFlips)})
+                      {Math.min(totalShortFlipPoints, totalQualifiedFlips)} out
+                      of {totalQualifiedFlips} (
+                      {toPercent(
+                        Math.min(totalShortFlipPoints / totalQualifiedFlips, 1)
+                      )}
+                      )
                     </UserStatValue>
                   </AnnotatedUserStat>
                 )}
