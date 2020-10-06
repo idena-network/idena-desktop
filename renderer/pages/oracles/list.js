@@ -14,16 +14,18 @@ import {
 } from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {VotingCard} from '../../screens/oracles/containers'
+import {useIdentityState} from '../../shared/providers/identity-context'
 
 function VotingListPage() {
   const {t} = useTranslation()
 
+  const identity = useIdentityState()
   const epoch = useEpochState()
 
   const [current, send] = useMachine(votingListMachine, {
-    context: {epoch},
+    context: {epoch, identity},
   })
-  const {votings, filter} = current.context
+  const {votings, filter, showAll} = current.context
 
   return (
     <Page>
@@ -34,6 +36,10 @@ function VotingListPage() {
             Array.from({length: 5}).map((_, idx) => (
               <VotingCardSkeleton key={idx} />
             ))}
+
+          {current.matches('failure') && (
+            <Flex>Failish {current.context.error}</Flex>
+          )}
 
           {current.matches('loaded') && votings.length === 0 && (
             <Flex>Emptyish</Flex>
@@ -57,7 +63,8 @@ function VotingListPage() {
             onChange={e => send('FILTER', {filter: e.target.value})}
           >
             <VotingFilter value={VotingStatus.All} />
-            <VotingFilter value={VotingStatus.Open} />
+            <VotingFilter value={VotingStatus.Pending} />
+            <VotingFilter value="Open" />
             <VotingFilter value={VotingStatus.Voted} />
             <VotingFilter value={VotingStatus.Counting} />
             <VotingFilter value={VotingStatus.Archived} />
@@ -67,7 +74,13 @@ function VotingListPage() {
               {t('There are hidden votings not available for me')}
             </Text>
             <Stack isInline spacing={3} align="center">
-              <Switch id="show-all"></Switch>
+              <Switch
+                id="show-all"
+                defaultIsChecked={showAll}
+                onChange={() => {
+                  send('TOGGLE_SHOW_ALL')
+                }}
+              ></Switch>
               <FormLabel htmlFor="show-all">{t('Show all')}</FormLabel>
             </Stack>
           </Box>

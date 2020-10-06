@@ -27,6 +27,8 @@ import {
   Stack,
   Box,
   Button,
+  NumberInput as ChakraNumberInput,
+  Textarea as ChakraTextarea,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 
@@ -69,19 +71,47 @@ export function FormLabel(props) {
   return <ChakraFormLabel fontWeight={500} color="brandGray.500" {...props} />
 }
 
-export function Input(props) {
+// eslint-disable-next-line react/display-name
+export const Input = React.forwardRef((props, ref) => (
+  <ChakraInput
+    ref={ref}
+    alignItems="center"
+    borderColor="gray.300"
+    color="brandGray.500"
+    fontSize="md"
+    lineHeight="short"
+    px={3}
+    h={8}
+    _disabled={{
+      bg: 'gray.50',
+    }}
+    _placeholder={{
+      color: 'muted',
+    }}
+    {...props}
+  />
+))
+
+export function NumberInput(props) {
   return (
-    <ChakraInput
-      alignItems="center"
+    <ChakraNumberInput
       borderColor="gray.300"
       color="brandGray.500"
       fontSize="md"
       lineHeight="short"
-      px={3}
       h={8}
-      _disabled={{
-        bg: 'gray.50',
-      }}
+      {...props}
+    />
+  )
+}
+
+export function Textarea(props) {
+  return (
+    <ChakraTextarea
+      borderColor="gray.300"
+      p={3}
+      pt={2}
+      pr={rem(18)}
       _placeholder={{
         color: 'muted',
       }}
@@ -213,5 +243,24 @@ export function DialogFooter({children, ...props}) {
         {children}
       </Stack>
     </ModalFooter>
+  )
+}
+
+export function SuccessAlert({children, ...props}) {
+  return (
+    <Alert
+      status="success"
+      bg="green.010"
+      borderWidth="1px"
+      borderColor="green.050"
+      fontWeight={500}
+      rounded="md"
+      px={3}
+      py={2}
+      {...props}
+    >
+      <AlertIcon name="info" color="green.500" size={5} mr={3} />
+      {children}
+    </Alert>
   )
 }
