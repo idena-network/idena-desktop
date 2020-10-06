@@ -4,31 +4,38 @@ import {
   Flex,
   Stack,
   Box,
-  Alert,
-  AlertIcon,
-  Textarea,
   Collapse,
   useDisclosure,
   Text,
+  useToast,
+  Checkbox,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import {Page, PageTitle} from '../../screens/app/components'
-import {FloatDebug} from '../../shared/components/components'
+import {
+  FloatDebug,
+  SuccessAlert,
+  Textarea,
+  Toast,
+} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
-import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
+import {PrimaryButton} from '../../shared/components/button'
 import {createNewVotingMachine} from '../../screens/oracles/machines'
 import {
-  VotingFormAdvancedDivider,
+  VotingFormAdvancedToggle,
   VotingInlineFormControl,
   VotingOptionText,
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
+import {BLOCK_TIME} from '../../screens/oracles/utils'
 
 function NewVotingPage() {
   const {t} = useTranslation()
 
   const router = useRouter()
+
+  const toast = useToast()
 
   const {isOpen: isOpenAdvanced, onToggle: onToggleAdvanced} = useDisclosure()
 
@@ -47,144 +54,136 @@ function NewVotingPage() {
     context: {identity, epoch},
     actions: {
       onDeployed: () => router.push('/oracles/list'),
+      onDeployFailed: (_, {data: {message}}) => {
+        toast({
+          // eslint-disable-next-line react/display-name
+          render: () => <Toast title={message} status="error" />,
+        })
+      },
     },
   })
 
-  const handleChangeFormControl = ({target: {id, value}}) =>
-    send('CHANGE', {id, value})
+  const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
 
   return (
     <Page p={0}>
-      <Flex
-        direction="column"
-        flex={1}
-        alignSelf="stretch"
-        px={20}
-        pb={rem(9)}
-        overflowY="auto"
-      >
-        <PageTitle mt={6}>{t('New voting')}</PageTitle>
-        <Box>
-          <Box alignSelf="stretch" mb={8}>
-            <Alert
-              status="success"
-              bg="green.010"
-              borderWidth="1px"
-              borderColor="green.050"
-              fontWeight={500}
-              rounded="md"
-              px={3}
-              py={2}
-            >
-              <AlertIcon name="info" color="green.500" size={5} mr={3} />
-              {t(
-                'After publishing or launching, you will not be able to edit the voting parameters.'
-              )}
-            </Alert>
-          </Box>
-          <Stack maxW="xl" spacing={5}>
-            <Stack as="form" spacing={3}>
-              <VotingInlineFormControl
-                id="title"
-                label={t('Title')}
-                onChange={handleChangeFormControl}
-              />
-              <VotingInlineFormControl
-                label={t('Description')}
-                align="flex-start"
+      <Box px={20} py={6} w="full" overflowY="auto">
+        <PageTitle>{t('New voting')}</PageTitle>
+        <SuccessAlert>
+          {t(
+            'After publishing or launching, you will not be able to edit the voting parameters.'
+          )}
+        </SuccessAlert>
+        <Stack maxW="xl" spacing={5} my={8}>
+          <Stack as="form" spacing={3}>
+            <VotingInlineFormControl
+              id="title"
+              label={t('Title')}
+              onChange={handleChange}
+            />
+            <VotingInlineFormControl label={t('Description')}>
+              <Textarea id="desc" w="md" h={32} onChange={handleChange} />
+            </VotingInlineFormControl>
+            <VotingInlineFormControl
+              id="votingMinPayment"
+              type="number"
+              label={t('Voting deposit')}
+              onChange={handleChange}
+            />
+            <VotingInlineFormControl
+              id="startDate"
+              type="date"
+              label={t('Start date')}
+              isDisabled={current.context.shouldStartImmediately}
+              onChange={handleChange}
+            />
+            <VotingInlineFormControl spacing={0}>
+              <Checkbox
+                id="shouldStartImmediately"
+                borderColor="gray.100"
+                onChange={({target: {id, checked}}) => {
+                  send('CHANGE', {id, value: checked})
+                }}
               >
-                <Textarea
-                  id="desc"
-                  borderColor="gray.300"
-                  px={3}
-                  pt="3/2"
-                  pb={2}
-                  w="md"
-                  _placeholder={{
-                    color: 'muted',
-                  }}
-                  onChange={handleChangeFormControl}
+                {t('Start now')}
+              </Checkbox>
+            </VotingInlineFormControl>
+
+            <VotingFormAdvancedToggle onClick={onToggleAdvanced} />
+
+            <Collapse mt={2} isOpen={isOpenAdvanced}>
+              <Stack spacing={3}>
+                <VotingInlineFormControl
+                  id="votingDuration"
+                  type="number"
+                  label={t('Duration of vote, blocks')}
+                  defaultValue={4320}
+                  helperText={`The average speed of the block is ${BLOCK_TIME} seconds`}
+                  onChange={handleChange}
                 />
-              </VotingInlineFormControl>
-              <VotingInlineFormControl
-                id="startDate"
-                type="date"
-                label={t('Start of voting')}
-                onChange={handleChangeFormControl}
-              />
-              <VotingFormAdvancedDivider onClick={onToggleAdvanced} />
-              <Collapse mt={2} isOpen={isOpenAdvanced}>
-                <Stack spacing={3}>
-                  <VotingInlineFormControl
-                    id="finishDate"
-                    type="date"
-                    label={t('Deadline')}
-                    onChange={handleChangeFormControl}
-                  />
-                  <VotingInlineFormControl
-                    id="duration"
-                    label={t('Duration of summing up')}
-                    onChange={handleChangeFormControl}
-                  />
-                  <VotingInlineFormControl
-                    id="threshold"
-                    label={t('Winner score')}
-                    onChange={handleChangeFormControl}
-                  />
-                  <VotingInlineFormControl
-                    id="minCommitteeSize"
-                    label={t('Max committee size')}
-                    onChange={handleChangeFormControl}
-                  />
-                  <VotingInlineFormControl
-                    id="maxCommitteeSize"
-                    label={t('Min committee size')}
-                    onChange={handleChangeFormControl}
-                  />
-                  <VotingInlineFormControl
-                    id="deposit"
-                    label={t('Voting deposit')}
-                    onChange={handleChangeFormControl}
-                  />
-                  <VotingInlineFormControl
-                    id="reward"
-                    label={t('Voting reward')}
-                    onChange={handleChangeFormControl}
-                  />
-                </Stack>
-              </Collapse>
-            </Stack>
-            <Flex ml={32} mb={rem(84)}>
-              <Box
-                flex={1}
-                bg="gray.50"
-                borderRadius="lg"
-                px={10}
-                py={5}
-                w="md"
-              >
-                <Text py={rem(10)} mb={2}>
-                  {t('Number of options')}
-                </Text>
-                <Stack spacing={3}>
-                  <VotingOptionText
-                    onChange={({target: {value}}) => {
-                      send('SET_OPTIONS', {idx: 0, value})
-                    }}
-                    label={t('Option 1')}
-                  />
-                  <VotingOptionText
-                    onChange={({target: {value}}) =>
-                      send('SET_OPTIONS', {idx: 1, value})
-                    }
-                    label={t('Option 2')}
-                  />
-                </Stack>
-              </Box>
-            </Flex>
+                <VotingInlineFormControl
+                  id="pubicVotingDuration"
+                  type="number"
+                  label={t('Duration of summing up, blocks')}
+                  defaultValue={4320}
+                  helperText={`The average speed of the block is ${BLOCK_TIME} seconds`}
+                  onChange={handleChange}
+                />
+                <VotingInlineFormControl
+                  id="winnerThreshold"
+                  type="number"
+                  label={t('Winner score')}
+                  defaultValue={50}
+                  onChange={handleChange}
+                />
+                <VotingInlineFormControl
+                  id="quorum"
+                  type="number"
+                  label={t('Min committee size')}
+                  defaultValue={20}
+                  onChange={handleChange}
+                />
+                <VotingInlineFormControl
+                  id="committeeSize"
+                  label={t('Max committee size')}
+                  type="number"
+                  defaultValue={100}
+                  onChange={handleChange}
+                />
+                <VotingInlineFormControl
+                  id="maxOptions"
+                  label={t('Options')}
+                  type="number"
+                  defaultValue={current.context.options.length}
+                  onChange={({target: {value}}) =>
+                    send('SET_OPTIONS_NUMBER', {value})
+                  }
+                />
+              </Stack>
+            </Collapse>
           </Stack>
-        </Box>
-      </Flex>
+          <Flex ml={32} mb={rem(84)}>
+            <Box flex={1} bg="gray.50" borderRadius="lg" px={10} py={5} w="md">
+              <Text py={rem(10)} mb={2}>
+                {t('Name of options')}
+              </Text>
+              <Stack spacing={3}>
+                {current.context.options.map((option, idx) => (
+                  <VotingOptionText
+                    key={idx}
+                    label={t('Option {{num}}', {num: idx + 1})}
+                    onChange={({target: {value}}) => {
+                      send('SET_OPTIONS', {idx, value})
+                    }}
+                  >
+                    {option}
+                  </VotingOptionText>
+                ))}
+              </Stack>
+            </Box>
+          </Flex>
+        </Stack>
+      </Box>
       <Stack
         isInline
         mt="auto"
@@ -195,11 +194,8 @@ function NewVotingPage() {
         py={3}
         px={4}
       >
-        <SecondaryButton onClick={() => send('PUBLISH')}>
+        <PrimaryButton onClick={() => send('PUBLISH')}>
           {t('Publish')}
-        </SecondaryButton>
-        <PrimaryButton onClick={() => send('LAUNCH')}>
-          {t('Launch')}
         </PrimaryButton>
       </Stack>
       <FloatDebug>{current.value}</FloatDebug>
