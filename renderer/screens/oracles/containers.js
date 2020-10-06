@@ -30,7 +30,7 @@ import {
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {Link} from '../../shared/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {buildViewVotingHref} from './utils'
+import {viewVotingHref, votingFinishDate} from './utils'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -51,15 +51,26 @@ export function VotingCard({votingRef, ...props}) {
     desc,
     issuer,
     status,
-    finishDate,
-    fundingAmount = 0,
+    balance = 0,
+    fundingAmount = balance,
+    startDate,
+    votingDuration,
+    publicVotingDuration,
+    finishDate = votingFinishDate({
+      startDate,
+      votingDuration,
+      publicVotingDuration,
+    }),
     votesCount,
     contractHash,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
 
-  const viewVotingHref = buildViewVotingHref(id)
+  const viewHref = viewVotingHref(id)
+
+  const eitherIdleState = (...states) =>
+    eitherState(current, ...states.map(s => `idle.${s}`))
 
   return (
     <>
@@ -73,15 +84,22 @@ export function VotingCard({votingRef, ...props}) {
             </Stack>
           </VotingBadge>
         </Stack>
-        <Link href={viewVotingHref}>
+        <Link href={viewHref}>
           <Text fontSize="base" fontWeight={500} mb={2}>
             {title}
+            <VotingStatusBadge status={status} ml={2}>
+              {JSON.stringify(current.value)}
+            </VotingStatusBadge>
           </Text>
         </Link>
         <Text color="muted" mb={4}>
           {desc}
         </Text>
-        {eitherState(current, VotingStatus.Archived, VotingStatus.Counting) && (
+        {eitherIdleState(
+          VotingStatus.Voted,
+          VotingStatus.Archived,
+          VotingStatus.Counting
+        ) && (
           <Stack spacing={2} mb={6}>
             <Text color="muted" fontSize="sm">
               {t('Results')}
@@ -98,9 +116,21 @@ export function VotingCard({votingRef, ...props}) {
         </Stack>
         <Flex justify="space-between" align="center">
           <Stack isInline spacing={2}>
-            <PrimaryButton onClick={() => router.push(viewVotingHref)}>
-              {t('Open')}
-            </PrimaryButton>
+            {eitherIdleState(VotingStatus.Pending) && (
+              <PrimaryButton onClick={() => send('START_VOTING')}>
+                {t('Launch')}
+              </PrimaryButton>
+            )}
+            {eitherIdleState(
+              VotingStatus.Running,
+              VotingStatus.Voted,
+              VotingStatus.Archived,
+              VotingStatus.Counting
+            ) && (
+              <PrimaryButton onClick={() => router.push(viewHref)}>
+                {t('Open')}
+              </PrimaryButton>
+            )}
             <SecondaryButton onClick={onOpenAddFund}>
               {t('Add fund')}
             </SecondaryButton>
@@ -110,7 +140,7 @@ export function VotingCard({votingRef, ...props}) {
               <Text as="span" color="muted">
                 {t('Deadline')}:
               </Text>{' '}
-              <Text as="span">{new Date(finishDate).toLocaleDateString()}</Text>
+              <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
             </Text>
             <Divider
               orientation="vertical"
@@ -143,7 +173,12 @@ export function VotingCard({votingRef, ...props}) {
 export function VotingStatusBadge({status, ...props}) {
   const colors = (() => {
     switch (status) {
-      case VotingStatus.Open:
+      case VotingStatus.Pending:
+        return {
+          bg: 'rgb(218 121 255 /0.2)',
+          color: 'rgb(218 121 255)',
+        }
+      case VotingStatus.Running:
         return {
           bg: 'green.020',
           color: 'green.500',
@@ -153,7 +188,9 @@ export function VotingStatusBadge({status, ...props}) {
           bg: 'blue.020',
           color: 'blue.500',
         }
-      case VotingStatus.Mining:
+      case VotingStatus.Deploying:
+      case VotingStatus.Funding:
+      case VotingStatus.Starting:
         return {
           bg: 'orange.020',
           color: 'orange.500',

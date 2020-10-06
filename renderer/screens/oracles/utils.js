@@ -1,51 +1,43 @@
-import nanoid from 'nanoid'
 import dayjs from 'dayjs'
+import {assign} from 'xstate'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
 import {strip as omit} from '../../shared/utils/obj'
 
-export const mockVotingDb = new Map([
-  createVoting({
-    title: `Did Trump win the 2020 election?`,
-    desc: `President Trump on Monday threatened to yank the Republican National Convention from Charlotte, N.C., where it is scheduled to be held in August, accusing the state’s Democratic governor of being...`,
-    issuer: `0x5A3abB61A9c5475B8243B61A9c5475B8243`,
-    totalPrize: 200,
-    status: VotingStatus.Open,
-    deadline: dayjs().add(Math.floor(Math.random() * 10), 'd'),
-    votesCount: Math.floor(Math.random() * 100),
-  }),
-  createVoting({
-    title: `Will oil fall below $1 per barrel?`,
-    desc: `The oil market has had a month of significant recovery. Since the historic cuts by Saudi Arabia and Russia took hold, and the US shale industry began to contract, crude prices have jumped around 70 percent and seem to have...`,
-    issuer: `0x5A3abB61A9c5475B8243B61A9c5475B8243`,
-    totalPrize: 80000,
-    status: VotingStatus.Mining,
-    deadline: dayjs().add(Math.floor(Math.random() * 10 + 3), 'd'),
-    votesCount: Math.floor(Math.random() * 100),
-  }),
-  createVoting({
-    title: `Will the Democrats win the next US election?`,
-    desc: `President Trump on Monday threatened to yank the Republican National Convention from Charlotte, N.C., where it is scheduled to be held in August, accusing the state’s Democratic governor of being...`,
-    issuer: `0x5A3abB61A9c5475B8243B61A9c5475B8243`,
-    totalPrize: 240,
-    status: VotingStatus.Archived,
-    deadline: dayjs().add(Math.floor(Math.random() * 10 + 3), 'd'),
-    votesCount: Math.floor(Math.random() * 100),
-  }),
-])
-
-export function createVoting(voting) {
-  return {
-    ...voting,
-    id: nanoid(),
-    createdAt: Date.now(),
-  }
+export const ContractRpcMode = {
+  Estimate: 'estimate',
+  Call: 'call',
 }
 
-export async function fetchVotings(params = {limit: 10}) {
+export function resolveVotingStatus({status, startDate, vote}) {
+  if (status !== VotingStatus.Running)
+    return startDate ? VotingStatus.Pending : VotingStatus.Invalid
+  return vote ? VotingStatus.Voted : VotingStatus.Running
+}
+
+export const ensureVotingStatus = targetStatus => ({status, ...voting}) =>
+  status === targetStatus ||
+  resolveVotingStatus(voting) === VotingStatus.Pending
+
+export const isVotingStatus = targetStatus => ({status}) =>
+  status === targetStatus
+
+export const isVotingMiningStatus = targetStatus => ({status, txHash}) =>
+  status === targetStatus && Boolean(txHash)
+
+export const eitherStatus = (...statuses) => ({status}) =>
+  statuses.some(s => s === status)
+
+export const setVotingStatus = status =>
+  assign({
+    prevStatus: ({status: currentStatus}) => currentStatus,
+    status,
+  })
+
+export async function fetchVotings({limit = 10, ...params}) {
   const invokeUrl = new URL(`https://api.idena.io/api/OracleVotingContracts`)
 
-  Object.entries(params)
+  Object.entries({limit, ...params})
     .filter(([, v]) => Boolean(v))
     .forEach(([k, v]) => {
       invokeUrl.searchParams.append(k, v)
@@ -58,61 +50,47 @@ export async function fetchVotings(params = {limit: 10}) {
   return result || []
 }
 
-export function updateVotingList(votings, {id, ...restVoting}) {
-  return votings.map(voting =>
-    voting.id === id
-      ? {
-          ...voting,
-          ...restVoting,
-        }
-      : voting
-  )
+export const createContractCaller = ({
+  issuer,
+  contractHash,
+  votingMinPayment,
+  gasCost,
+  txFee,
+  amount,
+  broadcastBlock,
+}) => (method, mode = ContractRpcMode.Call, ...args) => {
+  const isCalling = mode === ContractRpcMode.Call
+
+  const payload = omit({
+    from: issuer,
+    contract: contractHash,
+    method,
+    amount: amount || votingMinPayment,
+    maxFee: isCalling ? contractDeploymentMaxFee(gasCost, txFee) : null,
+    broadcastBlock: isCalling ? broadcastBlock : null,
+    args: buildDynamicArgs(...args),
+  })
+
+  return callRpc(isCalling ? 'contract_call' : 'contract_estimateCall', payload)
 }
 
-export function callContract({from, contract, method, amount, args}) {
-  return callRpc(
-    'contract_call',
-    omit({
-      from,
-      contract,
-      method,
-      amount,
-      args,
-    })
-  )
-}
-
-export const createContractCaller = ({issuer, contractHash}) => (
+export const createContractReadonlyCaller = ({contractHash}) => (
   method,
-  amount = 0,
-  args
+  format = 'hex',
+  ...args
 ) =>
   callRpc(
-    'contract_call',
+    'contract_readonlyCall',
     omit({
-      from: issuer,
       contract: contractHash,
       method,
-      amount,
-      args,
+      format,
+      args: buildDynamicArgs(...args),
     })
   )
 
-export const createEstimateContractCaller = ({issuer, contractHash}) => (
-  method,
-  amount = 0,
-  args
-) =>
-  callRpc(
-    'contract_estimateCall',
-    omit({
-      from: issuer,
-      contract: contractHash,
-      method,
-      amount,
-      args,
-    })
-  )
+export const createContractDataReader = ({contractHash}) => (key, format) =>
+  callRpc('contract_readData', contractHash, key, format)
 
 export function objectToHex(obj) {
   return Buffer.from(new TextEncoder().encode(JSON.stringify(obj))).toString(
@@ -120,50 +98,91 @@ export function objectToHex(obj) {
   )
 }
 
+export function stringToHex(str) {
+  return Buffer.from(new TextEncoder().encode(str)).toString('hex')
+}
+
 export function hexToObject(hex) {
   return new TextDecoder().decode(Buffer.from(hex, 'hex'))
 }
 
-export function buildViewVotingHref(id) {
-  return `/oracles/view?id=${id}`
-}
-
-export const ContractRpcMode = {
-  Estimate: 'estimate',
-  Call: 'call',
-}
-
-export function contractDeploymentParams(
-  {title, desc, options, startDate, gasCost, txFee},
+export function buildContractDeploymentParams(
+  {
+    title,
+    desc,
+    options,
+    startDate,
+    gasCost,
+    txFee,
+    votingDuration,
+    publicVotingDuration,
+    winnerThreshold,
+    quorum,
+    committeeSize,
+    maxOptions,
+    votingMinPayment = 0,
+    ownerFee = 0,
+    shouldStartImmediately,
+  },
   {address: from},
-  rpcMode = ContractRpcMode.Call
+  mode = ContractRpcMode.Call
 ) {
-  const deploymentParams = {
+  return omit({
     from,
     codeHash: '0x02',
-    amount: 1,
-    args: [
+    amount: 6001,
+    maxFee:
+      mode === ContractRpcMode.Call
+        ? contractDeploymentMaxFee(gasCost, txFee)
+        : null,
+    args: buildDynamicArgs(
       {
-        index: 0,
-        format: 'hex',
-        value: objectToHex({
+        value: `0x${objectToHex({
           title,
           desc,
           options,
-        }),
+        })}`,
       },
       {
-        index: 1,
+        value: dayjs(shouldStartImmediately ? Date.now() : startDate)
+          .unix()
+          .toString(),
         format: 'uint64',
-        value: new Date(startDate).valueOf().toString(),
       },
-    ],
-  }
+      {value: votingDuration, format: 'uint64'},
+      {value: publicVotingDuration, format: 'uint64'},
+      {value: winnerThreshold, format: 'uint64'},
+      {value: quorum, format: 'uint64'},
+      {value: committeeSize, format: 'uint64'},
+      {value: maxOptions, format: 'uint64'},
+      {value: votingMinPayment, format: 'bigint'},
+      {value: ownerFee, format: 'byte'}
+    ),
+  })
+}
 
-  return rpcMode === ContractRpcMode.Estimate
-    ? deploymentParams
-    : {
-        ...deploymentParams,
-        maxFee: Math.ceil((gasCost + txFee) * 1.1),
-      }
+export function buildDynamicArgs(...args) {
+  return args
+    .map(({format = 'hex', ...arg}, index) => ({index, format, ...arg}))
+    .filter(({value}) => Boolean(value))
+}
+
+export function contractDeploymentMaxFee(gasCost, txFee) {
+  return Math.ceil((gasCost + txFee) * 1.1)
+}
+
+export const BLOCK_TIME = 20
+const defaultVotingDuration = 4320
+
+export const votingFinishDate = ({
+  startDate,
+  votingDuration = defaultVotingDuration,
+  pubicVotingDuration = defaultVotingDuration,
+}) =>
+  dayjs(startDate)
+    .add(votingDuration * BLOCK_TIME, 's')
+    .add(pubicVotingDuration * BLOCK_TIME, 's')
+
+export function viewVotingHref(id) {
+  return `/oracles/view?id=${id}`
 }

@@ -1,12 +1,19 @@
 import {Machine, assign, spawn} from 'xstate'
-import {log, sendParent} from 'xstate/lib/actions'
+import {log} from 'xstate/lib/actions'
 import {
   fetchVotings,
-  updateVotingList,
-  callContract,
-  createEstimateContractCaller,
-  contractDeploymentParams,
+  createContractCaller,
+  buildContractDeploymentParams,
   ContractRpcMode,
+  isVotingStatus,
+  isVotingMiningStatus,
+  eitherStatus,
+  createContractReadonlyCaller,
+  createContractDataReader,
+  buildDynamicArgs,
+  contractDeploymentMaxFee,
+  setVotingStatus,
+  votingFinishDate,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc, mergeById} from '../../shared/utils/utils'
@@ -17,8 +24,8 @@ export const votingListMachine = Machine(
   {
     context: {
       votings: [],
-      filteredVotings: [],
       filter: VotingStatus.All,
+      showAll: false,
     },
     on: {
       REFRESH: 'loading',
@@ -30,10 +37,10 @@ export const votingListMachine = Machine(
           src: 'loadVotings',
           onDone: {
             target: 'loaded',
-            actions: ['applyLoadedVotings', log()],
+            actions: ['applyVotings', log()],
           },
           onError: {
-            target: 'loadingFailed',
+            target: 'failure',
             actions: [log()],
           },
         },
@@ -41,43 +48,23 @@ export const votingListMachine = Machine(
       loaded: {
         on: {
           FILTER: {
-            actions: [
-              assign({
-                filteredVotings: ({votings}, {filter}) =>
-                  votings.filter(
-                    ({status}) =>
-                      status === filter || filter === VotingStatus.All
-                  ),
-                filter: (_, {filter}) => filter,
-              }),
-              log(),
-            ],
+            target: 'loading',
+            actions: ['setFilter', log()],
           },
-          MINED: {
-            actions: [
-              assign(({votings}, {id}) => {
-                const nextVotings = updateVotingList(votings, {
-                  id,
-                  type: VotingStatus.Pending,
-                })
-                return {
-                  votings: nextVotings,
-                  filteredVotings: nextVotings,
-                }
-              }),
-              log(),
-            ],
+          TOGGLE_SHOW_ALL: {
+            target: 'loading',
+            actions: ['toggleShowAll', log()],
           },
         },
       },
-      loadingFailed: {},
+      failure: {},
     },
   },
   {
     actions: {
-      applyLoadedVotings: assign({
-        votings: ({votings, epoch}, {data: {persistedVotings, knownVotings}}) =>
-          mergeById(votings, persistedVotings, knownVotings).map(voting => ({
+      applyVotings: assign({
+        votings: ({epoch}, {data: {persistedVotings, knownVotings}}) =>
+          mergeById(persistedVotings, knownVotings).map(voting => ({
             ...voting,
             ref: spawn(
               // eslint-disable-next-line no-use-before-define
@@ -89,11 +76,26 @@ export const votingListMachine = Machine(
             ),
           })),
       }),
+      setFilter: assign({
+        filter: (_, {filter}) => filter,
+      }),
+      toggleShowAll: assign({
+        showAll: ({showAll}) => !showAll,
+      }),
     },
     services: {
-      loadVotings: async ({epoch: {epoch}}) => ({
+      loadVotings: async ({
+        epoch: {epoch},
+        identity: {address},
+        filter,
+        showAll,
+      }) => ({
         persistedVotings: await epochDb('votings', epoch).all(),
-        knownVotings: await fetchVotings(),
+        knownVotings: await fetchVotings({
+          all: showAll.toString(),
+          oracle: address,
+          state: filter,
+        }),
       }),
     },
   }
@@ -101,145 +103,281 @@ export const votingListMachine = Machine(
 
 export const votingMachine = Machine(
   {
-    context: {},
+    id: 'voting',
     initial: 'unknown',
     states: {
       unknown: {
         on: {
           '': [
+            {target: 'idle.unknown', cond: 'isIdle'},
+            {target: 'mining.unknown', cond: 'isMining'},
             {
-              target: 'deploying',
-              cond: ({status, txHash}) =>
-                status === VotingStatus.Mining && Boolean(txHash),
+              target: VotingStatus.Invalid,
+              cond: ({status}) => status === VotingStatus.Invalid,
             },
-            {
-              target: 'counting',
-              cond: ({status}) => status === VotingStatus.Counting,
-            },
-            {
-              target: 'archived',
-              cond: ({status}) => status === VotingStatus.Archived,
-            },
-            {target: 'idle'},
           ],
         },
       },
       idle: {
-        on: {
-          ADD_FUND: {
-            target: 'funding',
-            actions: [
-              assign({
-                fundingAmount: ({fundingAmount = 0}, {amount}) =>
-                  fundingAmount + amount,
-              }),
-              log(),
-            ],
-          },
-        },
-      },
-      deploying: {
-        invoke: {
-          src: 'pollStatus',
-        },
-        on: {
-          MINED: {
-            target: 'idle',
-            actions: [
-              assign({
-                status: VotingStatus.Pending,
-              }),
-              sendParent(({id}) => ({
-                type: 'MINED',
-                id,
-              })),
-              'persist',
-              log(),
-            ],
-          },
-          TX_NULL: {
-            target: 'invalid',
-            actions: [
-              assign({
-                type: VotingStatus.Invalid,
-              }),
-              'persist',
-              log(),
-            ],
-          },
-        },
-      },
-      funding: {
-        initial: 'submitting',
+        initial: 'unknown',
         states: {
-          submitting: {
-            invoke: {
-              src: 'addFund',
-              onDone: {
-                target: 'mining',
-                actions: [
-                  assign((context, {data}) => ({
-                    ...context,
-                    txHash: data,
-                    status: VotingStatus.Mining,
-                  })),
-                  'persist',
-                  log(),
-                ],
-              },
-              onError: {
-                target: 'failure',
-                actions: [
-                  assign({
-                    error: (_, {data: {message}}) => message,
-                  }),
-                  'persist',
-                  log(),
-                ],
+          unknown: {
+            on: {
+              '': [
+                {
+                  target: VotingStatus.Pending,
+                  cond: 'isPending',
+                },
+                {
+                  target: VotingStatus.Running,
+                  cond: 'isRunning',
+                },
+                {
+                  target: VotingStatus.Voted,
+                  cond: 'isVoted',
+                },
+                {
+                  target: `#voting.${VotingStatus.Invalid}`,
+                  actions: ['setInvalid', 'persist'],
+                },
+              ],
+            },
+          },
+          [VotingStatus.Pending]: {
+            on: {
+              START_VOTING: {
+                target: `#voting.mining.${VotingStatus.Starting}`,
+                actions: ['setStarting', 'persist'],
               },
             },
           },
-          mining: {
+          [VotingStatus.Running]: {},
+          [VotingStatus.Voted]: {},
+          hist: {
+            type: 'history',
+          },
+        },
+        on: {
+          ADD_FUND: {
+            target: 'mining.funding',
+            actions: ['setFunding', 'addFunding', 'persist', log()],
+          },
+        },
+      },
+      mining: {
+        initial: 'unknown',
+        states: {
+          unknown: {
+            on: {
+              '': [
+                {
+                  target: VotingStatus.Deploying,
+                  cond: 'isDeploying',
+                },
+                {
+                  target: VotingStatus.Funding,
+                  cond: 'isFunding',
+                },
+                {
+                  target: VotingStatus.Starting,
+                  cond: 'isStarting',
+                },
+              ],
+            },
+          },
+          [VotingStatus.Deploying]: {
             invoke: {
               src: 'pollStatus',
             },
-          },
-          failure: {
             on: {
-              PUBLISH: 'submitting',
+              MINED: {
+                target: `#voting.idle.${VotingStatus.Pending}`,
+                actions: ['setPending', 'clearMiningStatus', 'persist', log()],
+              },
+            },
+          },
+          [VotingStatus.Funding]: {
+            initial: 'checkMiningStatus',
+            states: {
+              checkMiningStatus: {
+                on: {
+                  '': [
+                    {
+                      target: 'submitting',
+                      cond: ({miningStatus}) => !miningStatus,
+                    },
+                    {
+                      target: 'mining',
+                      cond: ({miningStatus}) => miningStatus === 'mining',
+                    },
+                    {
+                      target: '#voting.invalid',
+                      actions: ['setInvalid', 'persist'],
+                    },
+                  ],
+                },
+              },
+              submitting: {
+                invoke: {
+                  src: 'addFund',
+                  onDone: {
+                    target: 'mining',
+                    actions: ['applyTx'],
+                  },
+                  onError: {
+                    target: '#voting.idle.hist',
+                    actions: ['handleError', 'restorePrevStatus', log()],
+                  },
+                },
+              },
+              mining: {
+                entry: [
+                  assign({
+                    miningStatus: 'mining',
+                  }),
+                  'persist',
+                ],
+                invoke: {
+                  src: 'pollStatus',
+                },
+                on: {
+                  MINED: {
+                    target: `#voting.idle.hist`,
+                    actions: [
+                      'restorePrevStatus',
+                      'clearMiningStatus',
+                      'persist',
+                      log(),
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          [VotingStatus.Starting]: {
+            initial: 'checkMiningStatus',
+            states: {
+              checkMiningStatus: {
+                on: {
+                  '': [
+                    {
+                      target: 'submitting',
+                      cond: ({miningStatus}) => !miningStatus,
+                    },
+                    {
+                      target: 'mining',
+                      cond: ({miningStatus}) => miningStatus === 'mining',
+                    },
+                    {
+                      target: '#voting.invalid',
+                      actions: ['setInvalid', 'persist'],
+                    },
+                  ],
+                },
+              },
+              submitting: {
+                invoke: {
+                  src: 'startVoting',
+                  onDone: {
+                    target: 'mining',
+                    actions: ['applyTx', log()],
+                  },
+                  onError: {
+                    target: '#voting.idle.hist',
+                    actions: ['handleError', 'restorePrevStatus', log()],
+                  },
+                },
+              },
+              mining: {
+                entry: [
+                  assign({
+                    miningStatus: 'mining',
+                  }),
+                  'persist',
+                ],
+                invoke: {
+                  src: 'pollStatus',
+                },
+                on: {
+                  MINED: {
+                    target: `#voting.idle.${VotingStatus.Running}`,
+                    actions: [
+                      'setRunning',
+                      'clearMiningStatus',
+                      'persist',
+                      log(),
+                    ],
+                  },
+                },
+              },
             },
           },
         },
         on: {
-          MINED: {
-            target: 'idle',
-            actions: [
-              assign({
-                status: VotingStatus.Pending,
-              }),
-              'persist',
-              log(),
-            ],
-          },
           TX_NULL: {
             target: 'invalid',
-            actions: [
-              assign({
-                error: 'Funding tx is missing',
-                type: VotingStatus.Invalid,
-              }),
-              'persist',
-            ],
+            actions: ['setInvalid', 'clearMiningStatus', log()],
           },
         },
       },
-      [VotingStatus.Counting]: {},
-      [VotingStatus.Archived]: {},
-      invalid: {},
+      [VotingStatus.Invalid]: {
+        on: {
+          ADD_FUND: {
+            target: 'mining.funding',
+            actions: ['setFunding', 'addFunding', 'persist', log()],
+          },
+        },
+      },
     },
   },
   {
+    actions: {
+      setPending: setVotingStatus(VotingStatus.Pending),
+      setFunding: setVotingStatus(VotingStatus.Funding),
+      addFunding: assign({
+        fundingAmount: ({fundingAmount = 0}, {amount}) =>
+          fundingAmount + amount,
+      }),
+      setStarting: setVotingStatus(VotingStatus.Starting),
+      setRunning: setVotingStatus(VotingStatus.Running),
+      setInvalid: assign({
+        status: VotingStatus.Invalid,
+        errorMessage: (_, {error}) => error?.message,
+      }),
+      restorePrevStatus: assign({
+        status: ({status, prevStatus}) => prevStatus || status,
+      }),
+      applyTx: assign({
+        txHash: (_, {data}) => data,
+      }),
+      handleError: assign({
+        errorMessage: (_, {data}) => data?.message,
+      }),
+      clearMiningStatus: assign({
+        miningStatus: null,
+      }),
+      persist: ({epoch: {epoch}, ...context}) => {
+        epochDb('votings', epoch).put(context)
+      },
+    },
     services: {
+      addFund: ({issuer, contractHash, fundingAmount}) =>
+        callRpc('dna_sendTransaction', {
+          to: contractHash,
+          from: issuer,
+          amount: fundingAmount,
+        }),
+      startVoting: async contract => {
+        const callContract = createContractCaller(contract)
+
+        const {error} = await callContract(
+          'startVoting',
+          ContractRpcMode.Estimate
+        )
+        if (error) throw new Error(error)
+
+        return callContract('startVoting')
+      },
       pollStatus: ({txHash}) => cb => {
         let timeoutId
 
@@ -251,8 +389,8 @@ export const votingMachine = Machine(
             } else {
               timeoutId = setTimeout(fetchStatus, 10 * 1000)
             }
-          } catch {
-            cb('TX_NULL')
+          } catch (error) {
+            cb('TX_NULL', {error})
           }
         }
 
@@ -262,17 +400,28 @@ export const votingMachine = Machine(
           clearTimeout(timeoutId)
         }
       },
-      addFund: ({issuer, contractHash, fundingAmount}) =>
-        callRpc('dna_sendTransaction', {
-          to: contractHash,
-          from: issuer,
-          amount: fundingAmount,
-        }),
     },
-    actions: {
-      persist: ({epoch: {epoch}, ...context}) => {
-        epochDb('votings', epoch).put(context)
-      },
+    guards: {
+      isIdle: eitherStatus(
+        VotingStatus.Pending,
+        VotingStatus.Running,
+        VotingStatus.Voted,
+        VotingStatus.Archived
+      ),
+      isMining: ({status, txHash}) =>
+        Boolean(txHash) &&
+        eitherStatus(
+          VotingStatus.Deploying,
+          VotingStatus.Funding,
+          VotingStatus.Starting,
+          VotingStatus.Terminating
+        )({status}),
+      isDeploying: isVotingMiningStatus(VotingStatus.Deploying),
+      isFunding: isVotingMiningStatus(VotingStatus.Funding),
+      isStarting: isVotingMiningStatus(VotingStatus.Starting),
+      isPending: isVotingStatus(VotingStatus.Pending),
+      isRunning: isVotingStatus(VotingStatus.Running),
+      isVoted: isVotingStatus(VotingStatus.Voted),
     },
   }
 )
@@ -284,7 +433,7 @@ export const createNewVotingMachine = epoch =>
         epoch: {
           epoch,
         },
-        options: [],
+        options: [0, 1],
       },
       initial: 'editing',
       states: {
@@ -295,6 +444,9 @@ export const createNewVotingMachine = epoch =>
             },
             SET_OPTIONS: {
               actions: ['setOptions', log()],
+            },
+            SET_OPTIONS_NUMBER: {
+              actions: ['setOptionsNumber'],
             },
             PUBLISH: {
               target: 'publishing',
@@ -315,21 +467,24 @@ export const createNewVotingMachine = epoch =>
                       target: 'deploying',
                       actions: ['applyDeployResult', log()],
                     },
+                    onError: {
+                      actions: ['onDeployFailed', log()],
+                    },
                   },
                 },
                 deploying: {
                   invoke: {
                     src: 'deployContract',
                     onDone: {
-                      target: 'deployed',
+                      target: 'done',
                       actions: ['applyContractHash', log()],
                     },
                     onError: {
-                      actions: [log()],
+                      actions: ['onDeployFailed', log()],
                     },
                   },
                 },
-                deployed: {
+                done: {
                   entry: ['onDeployed'],
                 },
               },
@@ -363,25 +518,42 @@ export const createNewVotingMachine = epoch =>
           ...context,
           options: [...options.slice(0, idx), value, ...options.slice(idx + 1)],
         })),
+        setOptionsNumber: assign({
+          maxOptions: (_, {value}) => value,
+          options: ({options}, {value}) =>
+            value > options.length
+              ? options.concat(
+                  Array.from({length: value - options.length}, () => null)
+                )
+              : options.slice(0, value),
+        }),
       },
       services: {
-        estimateDeployContract: async ({identity, ...voting}) =>
-          callRpc(
+        estimateDeployContract: async ({identity, ...voting}) => {
+          const {error, ...result} = await callRpc(
             'contract_estimateDeploy',
-            contractDeploymentParams(voting, identity, ContractRpcMode.Estimate)
-          ),
+            buildContractDeploymentParams(
+              voting,
+              identity,
+              ContractRpcMode.Estimate
+            )
+          )
+          if (error) throw new Error(error)
+          return result
+        },
         // eslint-disable-next-line no-shadow
         deployContract: async ({epoch: {epoch}, identity, ...voting}) => {
           const deployResult = await callRpc(
             'contract_deploy',
-            contractDeploymentParams(voting, identity)
+            buildContractDeploymentParams(voting, identity)
           )
 
           await epochDb('votings', epoch).put({
             ...voting,
             txHash: deployResult,
-            issuer: identity.from,
-            status: VotingStatus.Mining,
+            issuer: identity.address,
+            finishDate: votingFinishDate(voting),
+            status: VotingStatus.Deploying,
           })
 
           return deployResult
@@ -390,12 +562,13 @@ export const createNewVotingMachine = epoch =>
     }
   )
 
-export const createViewVotingMachine = (id, epoch) =>
+export const createViewVotingMachine = (id, epoch, address) =>
   Machine(
     {
       context: {
         id,
         epoch,
+        address,
       },
       initial: 'loading',
       states: {
@@ -404,29 +577,16 @@ export const createViewVotingMachine = (id, epoch) =>
             src: 'loadVoting',
             onDone: {
               target: 'idle',
-              actions: [
-                assign((context, {data}) => ({
-                  ...context,
-                  ...data,
-                })),
-                log(),
-              ],
+              actions: ['applyVoting', log()],
             },
-            onError: {target: 'invalid', actions: [log()]},
+            onError: {
+              target: 'invalid',
+              actions: [log()],
+            },
           },
         },
         idle: {
           on: {
-            ADD_FUND: {
-              target: 'funding',
-              actions: [
-                assign({
-                  fundingAmount: ({fundingAmount = 0}, {amount}) =>
-                    fundingAmount + amount,
-                }),
-                log(),
-              ],
-            },
             SELECT_OPTION: {
               actions: ['selectOption', log()],
             },
@@ -435,10 +595,13 @@ export const createViewVotingMachine = (id, epoch) =>
               target: 'voting',
               actions: ['selectOption'],
             },
-            START_VOTING: 'startVoting',
+            ADD_FUND: VotingStatus.Funding,
+            START_VOTING: VotingStatus.Starting,
+            TERMINATE_CONTRACT: VotingStatus.Terminating,
           },
         },
-        funding: {
+        [VotingStatus.Funding]: {
+          entry: ['setFunding', 'persist'],
           initial: 'submitting',
           states: {
             submitting: {
@@ -446,25 +609,11 @@ export const createViewVotingMachine = (id, epoch) =>
                 src: 'addFund',
                 onDone: {
                   target: 'mining',
-                  actions: [
-                    assign((context, {data}) => ({
-                      ...context,
-                      txHash: data,
-                      status: VotingStatus.Mining,
-                    })),
-                    'persist',
-                    log(),
-                  ],
+                  actions: ['applyTx', log()],
                 },
                 onError: {
                   target: 'failure',
-                  actions: [
-                    assign({
-                      error: (_, {data: {message}}) => message,
-                    }),
-                    'persist',
-                    log(),
-                  ],
+                  actions: ['onError', 'restorePrevStatus', log()],
                 },
               },
             },
@@ -475,70 +624,211 @@ export const createViewVotingMachine = (id, epoch) =>
             },
             failure: {
               on: {
-                PUBLISH: 'submitting',
+                RETRY: 'submitting',
               },
             },
           },
-          on: {
-            MINED: {
-              target: 'idle',
-              actions: [
-                assign({
-                  status: VotingStatus.Pending,
-                }),
-                'persist',
-                log(),
-              ],
-            },
-            TX_NULL: {
-              target: 'invalid',
-              actions: [
-                assign({
-                  error: 'Funding tx is missing',
-                  type: VotingStatus.Invalid,
-                }),
-                'persist',
-              ],
-            },
-          },
         },
-        startVoting: {
+        [VotingStatus.Starting]: {
+          entry: ['setStarting', 'persist'],
           invoke: {
-            src: async ({issuer, contractHash}) => {
-              let result = await createEstimateContractCaller({
-                issuer,
-                contractHash,
-              })('startVoting')
-
-              result = await callContract({
-                method: 'startVoting',
-                from: issuer,
-                contract: contractHash,
-                amount: 100,
-              })
-
-              return result
+            src: 'startVoting',
+            onDone: {
+              actions: ['applyTx', log()],
             },
-          },
-          onDone: {
-            actions: [log()],
-          },
-          onError: {
-            actions: [log()],
+            onError: {
+              actions: ['onError', 'restorePrevStatus', log()],
+            },
           },
         },
         voting: {
           invoke: {
             src: 'vote',
-            onDone: 'idle',
-            onError: {target: 'invalid', actions: [log()]},
+            onDone: {
+              target: 'idle',
+              actions: ['setVoted', 'applyTx', 'persist', log()],
+            },
+            onError: {
+              target: 'invalid',
+              actions: ['onError', log()],
+            },
+          },
+        },
+        [VotingStatus.Terminating]: {
+          invoke: {
+            src: 'terminateContract',
+            onDone: {
+              actions: [log()],
+            },
+            onError: {
+              actions: ['onError', log()],
+            },
           },
         },
         invalid: {},
       },
+      on: {
+        MINED: {
+          target: 'idle',
+          actions: ['restorePrevStatus', 'persist', log()],
+        },
+        TX_NULL: {
+          target: 'invalid',
+          actions: ['handleError'],
+        },
+      },
     },
     {
+      actions: {
+        setFunding: assign({
+          prevStatus: ({status}) => status,
+          status: VotingStatus.Funding,
+          fundingAmount: ({fundingAmount = 0}, {amount}) =>
+            fundingAmount + amount,
+        }),
+        setStarting: assign({
+          prevStatus: ({status}) => status,
+          status: VotingStatus.Starting,
+        }),
+        applyVoting: assign((context, {data}) => ({
+          ...context,
+          ...data,
+        })),
+        setVoted: assign({
+          status: VotingStatus.Voted,
+        }),
+        restorePrevStatus: assign({
+          status: ({prevStatus}) => prevStatus,
+        }),
+        selectOption: assign({
+          selectedOption: ({options}, {option}) =>
+            options.findIndex(o => o === option),
+        }),
+        applyTx: assign({
+          txHash: (_, {data}) => data,
+        }),
+        handleError: assign({
+          errorMessage: (_, {error}) => error,
+        }),
+        // eslint-disable-next-line no-shadow
+        persist: ({epoch, ...context}) => {
+          epochDb('votings', epoch).put(context)
+        },
+      },
       services: {
+        // eslint-disable-next-line no-shadow
+        loadVoting: async ({epoch, id}) => epochDb('votings', epoch).load(id),
+        addFund: ({issuer, contractHash, fundingAmount}) =>
+          callRpc('dna_sendTransaction', {
+            to: contractHash,
+            from: issuer,
+            amount: fundingAmount,
+          }),
+        startVoting: async contract => {
+          const callContract = createContractCaller(contract)
+
+          const {error} = await callContract(
+            'startVoting',
+            ContractRpcMode.Estimate
+          )
+          if (error) throw new Error(error)
+
+          return callContract('startVoting')
+        },
+        vote: async ({
+          // eslint-disable-next-line no-shadow
+          address,
+          issuer,
+          contractHash,
+          amount,
+          selectedOption,
+        }) => {
+          const readonlyCallContract = createContractReadonlyCaller({
+            contractHash,
+          })
+          const readContractData = createContractDataReader({contractHash})
+
+          const proof = await readonlyCallContract('proof', 'hex', {
+            value: address,
+          })
+
+          const {error} = proof
+
+          if (error) throw new Error(error)
+
+          const voteHash = await readonlyCallContract(
+            'voteHash',
+            'hex',
+            {value: selectedOption.toString(), format: 'byte'},
+            {value: issuer}
+          )
+
+          const votingMinPayment = Number(
+            await readContractData('votingMinPayment', 'dna')
+          )
+
+          const voteBlock = Number(
+            await readonlyCallContract('voteBlock', 'uint64')
+          )
+
+          const callContract = createContractCaller({
+            issuer,
+            contractHash,
+            amount: votingMinPayment || amount,
+            broadcastBlock: voteBlock,
+          })
+
+          const voteProofResp = await callContract(
+            'sendVoteProof',
+            ContractRpcMode.Estimate,
+            {
+              value: voteHash,
+            }
+          )
+
+          const {errorProof} = voteProofResp
+          if (errorProof) throw new Error(errorProof)
+
+          const resp = await callContract(
+            'sendVote',
+            ContractRpcMode.Call,
+            {value: selectedOption.toString(), format: 'byte'},
+            {value: issuer}
+          )
+
+          console.log(
+            proof,
+            voteHash,
+            votingMinPayment,
+            voteBlock,
+            voteProofResp,
+            resp
+          )
+
+          return resp
+        },
+        terminateContract: async ({
+          // eslint-disable-next-line no-shadow
+          address,
+          issuer = address,
+          contractHash,
+          gasCost,
+          txFee,
+        }) => {
+          const payload = {
+            from: issuer,
+            contract: contractHash,
+            args: buildDynamicArgs({value: issuer}),
+          }
+
+          const {error} = await callRpc('contract_estimateTerminate', payload)
+          if (error) throw new Error(error)
+
+          return callRpc('contract_terminate', {
+            ...payload,
+            maxFee: contractDeploymentMaxFee(gasCost, txFee),
+          })
+        },
         pollStatus: ({txHash}) => cb => {
           let timeoutId
 
@@ -550,8 +840,8 @@ export const createViewVotingMachine = (id, epoch) =>
               } else {
                 timeoutId = setTimeout(fetchStatus, 10 * 1000)
               }
-            } catch {
-              cb('TX_NULL')
+            } catch (error) {
+              cb('TX_NULL', {error: error?.message})
             }
           }
 
@@ -561,45 +851,6 @@ export const createViewVotingMachine = (id, epoch) =>
             clearTimeout(timeoutId)
           }
         },
-        addFund: ({issuer, contractHash, fundingAmount}) =>
-          callRpc('dna_sendTransaction', {
-            to: contractHash,
-            from: issuer,
-            amount: fundingAmount,
-          }),
-        // eslint-disable-next-line no-shadow
-        loadVoting: async ({epoch, id}) => epochDb('votings', epoch).load(id),
-        vote: async ({issuer, contractHash, deposit = 100, selectedOption}) => {
-          const resp = await callContract({
-            from: issuer,
-            contract: contractHash,
-            method: 'sendVote',
-            amount: deposit,
-            args: [
-              {
-                index: 0,
-                format: 'byte',
-                value: selectedOption.toString(),
-              },
-              {
-                index: 1,
-                format: 'hex',
-                value: '0x1',
-              },
-            ],
-          })
-          return resp
-        },
-      },
-      actions: {
-        // eslint-disable-next-line no-shadow
-        persist: ({epoch, ...context}) => {
-          epochDb('votings', epoch).put(context)
-        },
-        selectOption: assign({
-          selectedOption: ({options}, {option}) =>
-            options.findIndex(o => o === option),
-        }),
       },
     }
   )

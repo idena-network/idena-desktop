@@ -48,13 +48,16 @@ export const FlipFilter = {
 
 export const VotingStatus = {
   All: 'all',
-  Open: 'open',
+  Pending: 'pending',
+  Running: 'running',
   Voted: 'voted',
   Counting: 'counting',
   Archived: 'archived',
-  Mining: 'mining',
+  Deploying: 'deploying',
+  Funding: 'funding',
+  Terminating: 'terminating',
+  Starting: 'starting',
   Invalid: 'invalid',
-  Pending: 'pending',
 }
 
 export const VoteOption = {

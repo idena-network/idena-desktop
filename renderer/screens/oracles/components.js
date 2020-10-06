@@ -91,7 +91,7 @@ export function OracleFormHelperText(props) {
 export function VotingBadge(props) {
   return (
     <Badge
-      display="flex"
+      display="inline-flex"
       alignItems="center"
       borderRadius="xl"
       fontSize="sm"
@@ -148,17 +148,31 @@ export function VotingInlineFormControl({
   id,
   type = 'text',
   label,
-  align = 'center',
+  defaultValue,
+  value,
+  helperText,
   children,
   ...props
 }) {
   return (
     <FormControl {...props}>
-      <Stack isInline alignItems={align}>
-        <FormLabel htmlFor={id} color="muted" py={2} w={32}>
+      <Stack isInline>
+        <FormLabel htmlFor={id} color="muted" py={2} minW={32} w={32}>
           {label}
         </FormLabel>
-        {children || <VotingInput id={id} type={type} />}
+        {children || (
+          <Box w="md">
+            <Input
+              id={id}
+              type={type}
+              defaultValue={defaultValue}
+              value={value}
+            />
+            {helperText && (
+              <FormHelperText color="muted">{helperText}</FormHelperText>
+            )}
+          </Box>
+        )}
       </Stack>
     </FormControl>
   )
@@ -169,14 +183,10 @@ export function VotingOptionText({label, onChange, ...props}) {
     <FormControl {...props}>
       <Flex align="center" justify="space-between">
         <FormLabel color="muted">{label}</FormLabel>
-        <VotingInput w="2xs" onChange={onChange} />
+        <Input w="2xs" onChange={onChange} />
       </Flex>
     </FormControl>
   )
-}
-
-export function VotingInput(props) {
-  return <Input w="md" {...props} />
 }
 
 export function VotingCardSkeleton(props) {
@@ -222,7 +232,7 @@ export function VotingListDivider() {
   return <Divider borderColor="gray.300" mt={6} mb={0} />
 }
 
-export function VotingFormAdvancedDivider(props) {
+export function VotingFormAdvancedToggle(props) {
   const {t} = useTranslation()
   return (
     <IconButton2 icon="chevron-down" my={2} {...props}>

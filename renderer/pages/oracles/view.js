@@ -14,19 +14,27 @@ import {
   StatLabel,
   useDisclosure,
   StatHelpText,
+  useToast,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
+import dayjs from 'dayjs'
 import {Page} from '../../screens/app/components'
-import {Avatar, FloatDebug} from '../../shared/components/components'
+import {
+  Avatar,
+  Debug,
+  FloatDebug,
+  Input,
+  Toast,
+} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
   PrimaryButton,
   SecondaryButton,
   IconButton2,
 } from '../../shared/components/button'
-import {toLocaleDna} from '../../shared/utils/utils'
+import {callRpc, toLocaleDna} from '../../shared/utils/utils'
 import {VotingBadge, VotingSkeleton} from '../../screens/oracles/components'
 import {
   AddFundDrawer,
@@ -38,9 +46,15 @@ import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {VoteOption} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
+import {
+  createContractDataReader,
+  createContractReadonlyCaller,
+} from '../../screens/oracles/utils'
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
+
+  const toast = useToast()
 
   const {
     isOpen: isOpenConfirm,
@@ -69,27 +83,44 @@ export default function ViewVotingPage() {
 
   const {address} = useIdentityState()
 
-  const viewMachine = React.useMemo(() => createViewVotingMachine(id, epoch), [
-    epoch,
-    id,
-  ])
-  const [current, send] = useMachine(viewMachine)
+  const viewMachine = React.useMemo(
+    () => createViewVotingMachine(id, epoch, address),
+    [address, epoch, id]
+  )
+  const [current, send] = useMachine(viewMachine, {
+    actions: {
+      onError: (_, {data: {message}}) => {
+        toast({
+          status: 'error',
+          // eslint-disable-next-line react/display-name
+          render: () => <Toast title={message} status="error" />,
+        })
+      },
+    },
+  })
 
   const toDna = toLocaleDna(i18n.language)
 
   const {
     title,
     desc,
+    contractHash,
     issuer,
     status,
-    finishDate,
     fundingAmount = 0,
-    votesCount = 0,
-    contractHash,
+    votingMinPayment = 0,
+    startDate,
+    votingDuration = 0,
+    pubicVotingDuration = 0,
     quorum = 0,
-    deposit = 0,
+    committeeSize = 100,
     options = [],
+    votesCount = 0,
   } = current.context
+
+  const finishDate = dayjs(startDate)
+    .add(votingDuration, 's')
+    .add(pubicVotingDuration, 's')
 
   const isLoaded = !current.matches('loading')
 
@@ -153,7 +184,7 @@ export default function ViewVotingPage() {
                         {t(options[0])}
                       </Radio>
                       <Text color="muted" fontSize="sm">
-                        {t('{{count}} votes required', {count: quorum})}
+                        {t('{{count}} votes required', {count: committeeSize})}
                       </Text>
                     </Flex>
                     <Flex
@@ -174,7 +205,7 @@ export default function ViewVotingPage() {
                         {t(options[1])}
                       </Radio>
                       <Text color="muted" fontSize="sm">
-                        {t('{{count}} votes required', {count: quorum})}
+                        {t('{{count}} votes required', {count: committeeSize})}
                       </Text>
                     </Flex>
                   </RadioGroup>
@@ -183,12 +214,29 @@ export default function ViewVotingPage() {
               <VotingSkeleton isLoaded={isLoaded}>
                 <Flex justify="space-between" align="center">
                   <Stack isInline spacing={2}>
+                    <PrimaryButton
+                      variantColor="green"
+                      onClick={() => {
+                        send('START_VOTING')
+                      }}
+                    >
+                      {t('Start voting')}
+                    </PrimaryButton>
                     <PrimaryButton onClick={() => send('VOTE_SELECTED')}>
                       {t('Vote')}
                     </PrimaryButton>
                     <SecondaryButton onClick={() => redirect('/oracles/list')}>
                       {t('Cancel')}
                     </SecondaryButton>
+                    <PrimaryButton
+                      variantColor="red"
+                      ml="auto"
+                      onClick={() => {
+                        send('TERMINATE_CONTRACT')
+                      }}
+                    >
+                      {t('Terminate')}
+                    </PrimaryButton>
                   </Stack>
                   <Stack isInline spacing={3}>
                     <Divider
@@ -226,20 +274,28 @@ export default function ViewVotingPage() {
                 </StatHelpText>
               </Stat>
               <Stack spacing={6}>
-                <AsideStat label={t('Deposit')} value={toDna(deposit)} />
-                <AsideStat label={t('Your reward')} value={toDna(500000000)} />
+                <AsideStat
+                  label={t('Deposit')}
+                  value={toDna(votingMinPayment)}
+                />
+                <AsideStat
+                  label={t('Your reward')}
+                  value={toDna(fundingAmount / committeeSize)}
+                />
                 <AsideStat
                   label={t('Quorum required')}
                   value={t('{{count}} votes', {count: quorum})}
                 />
                 <AsideStat
                   label={t('Deadline')}
-                  value={new Date(finishDate).toLocaleDateString()}
+                  value={new Date(finishDate).toLocaleString()}
                 />
               </Stack>
             </Box>
           </VotingSkeleton>
         </Stack>
+
+        <VotingDevTools {...current.context} />
       </Page>
 
       <VoteDrawer
@@ -248,7 +304,7 @@ export default function ViewVotingPage() {
         option={VoteOption.Confirm}
         from={address}
         to={contractHash}
-        deposit={deposit}
+        deposit={votingMinPayment}
         onVote={() => send('VOTE', {option: 0})}
       />
 
@@ -258,7 +314,7 @@ export default function ViewVotingPage() {
         option={VoteOption.Reject}
         from={address}
         to={contractHash}
-        deposit={deposit}
+        deposit={votingMinPayment}
         onVote={() => send('VOTE', {option: 1})}
       />
 
@@ -275,5 +331,140 @@ export default function ViewVotingPage() {
 
       <FloatDebug>{current.value}</FloatDebug>
     </>
+  )
+}
+
+function VotingDevTools(contract) {
+  const [result, setResult] = React.useState({})
+  return (
+    <Stack spacing={4} w="lg" mt={10}>
+      <Divider borderColor="gray.300" w="full" />
+      <Heading fontSize="lg" fontWeight={500}>
+        Voting DevTools
+      </Heading>
+      <Stack>
+        <Box>
+          <Heading fontSize="base" fontWeight={500} my={4}>
+            Contract
+          </Heading>
+          <Debug>{contract}</Debug>
+        </Box>
+        <Box mt={2}>
+          <Heading fontSize="base" fontWeight={500} my={4}>
+            readonlyCall
+          </Heading>
+          <Stack
+            as="form"
+            spacing={3}
+            onSubmit={async e => {
+              e.preventDefault()
+              const {
+                readonlyCallMethod,
+                readonlyCallMethodFormat,
+                readonlyCallArgs,
+              } = e.target.elements
+
+              setResult(
+                await createContractReadonlyCaller(contract)(
+                  readonlyCallMethod.value,
+                  readonlyCallMethodFormat.value,
+                  ...JSON.parse(readonlyCallArgs.value || '[]')
+                )
+              )
+            }}
+          >
+            <Stack isInline spacing={2} justify="space-between">
+              <Input
+                id="readonlyCallMethod"
+                placeholder="readonlyCallMethod method"
+              />
+              <Input
+                id="readonlyCallMethodFormat"
+                placeholder="format"
+                w={100}
+              />
+            </Stack>
+            <Input id="readonlyCallArgs" placeholder="readonlyCall args" />
+            <SecondaryButton type="submit" ml="auto">
+              Readonly call
+            </SecondaryButton>
+          </Stack>
+        </Box>
+        <Box>
+          <Heading fontSize="base" fontWeight={500} my={4}>
+            readKey
+          </Heading>
+          <Stack
+            as="form"
+            spacing={3}
+            onSubmit={async e => {
+              e.preventDefault()
+
+              const {readKey, readKeyFormat} = e.target.elements
+
+              setResult(
+                await createContractDataReader(contract)(
+                  readKey.value,
+                  readKeyFormat.value
+                )
+              )
+            }}
+          >
+            <Stack isInline>
+              <Input id="readKey" placeholder="readKey key" />
+              <Input id="readKeyFormat" placeholder="format" w={100} />
+            </Stack>
+            <SecondaryButton type="submit" ml="auto" onClick={async () => {}}>
+              Read data
+            </SecondaryButton>
+          </Stack>
+        </Box>
+        <Box>
+          <Heading fontSize="base" fontWeight={500} my={4}>
+            txReceipt
+          </Heading>
+          <Stack
+            as="form"
+            spacing={3}
+            onSubmit={async e => {
+              e.preventDefault()
+              setResult(
+                await callRpc('bcn_txReceipt', e.target.elements.txHash.value)
+              )
+            }}
+          >
+            <Stack isInline>
+              <Input id="txHash" placeholder="txHash" />
+            </Stack>
+            <SecondaryButton type="submit" ml="auto" onClick={async () => {}}>
+              Show receipt
+            </SecondaryButton>
+          </Stack>
+        </Box>
+        <Box>
+          <Heading fontSize="base" fontWeight={500} my={4}>
+            contract_getStake
+          </Heading>
+          <Stack
+            as="form"
+            spacing={3}
+            onSubmit={async e => {
+              e.preventDefault()
+              setResult(
+                await callRpc('contract_getStake', contract.contractHash)
+              )
+            }}
+          >
+            <Stack isInline>
+              <Input value={contract.contractHash} isReadonly isDisabled />
+            </Stack>
+            <SecondaryButton type="submit" ml="auto" onClick={async () => {}}>
+              Get stake
+            </SecondaryButton>
+          </Stack>
+        </Box>
+      </Stack>
+      <Debug>{result}</Debug>
+    </Stack>
   )
 }
