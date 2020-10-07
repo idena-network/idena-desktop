@@ -65,9 +65,12 @@ export const createContractCaller = ({
     from: issuer,
     contract: contractHash,
     method,
-    amount: amount || votingMinPayment,
-    maxFee: isCalling ? contractDeploymentMaxFee(gasCost, txFee) : null,
-    broadcastBlock: isCalling ? broadcastBlock : null,
+    maxFee: isCalling ? contractMaxFee(gasCost, txFee) : null,
+    amount:
+      isCalling && method !== 'sendVoteProof'
+        ? null
+        : amount || votingMinPayment,
+    broadcastBlock: isCalling && method === 'sendVote' ? broadcastBlock : null,
     args: buildDynamicArgs(...args),
   })
 
@@ -132,9 +135,7 @@ export function buildContractDeploymentParams(
     codeHash: '0x02',
     amount: 6001,
     maxFee:
-      mode === ContractRpcMode.Call
-        ? contractDeploymentMaxFee(gasCost, txFee)
-        : null,
+      mode === ContractRpcMode.Call ? contractMaxFee(gasCost, txFee) : null,
     args: buildDynamicArgs(
       {
         value: `0x${objectToHex({
@@ -167,8 +168,8 @@ export function buildDynamicArgs(...args) {
     .filter(({value}) => Boolean(value))
 }
 
-export function contractDeploymentMaxFee(gasCost, txFee) {
-  return Math.ceil((gasCost + txFee) * 1.1)
+export function contractMaxFee(gasCost, txFee) {
+  return Math.ceil((Number(gasCost) + Number(txFee)) * 1.1)
 }
 
 export const BLOCK_TIME = 20
