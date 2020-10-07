@@ -11,7 +11,7 @@ import {
   createContractReadonlyCaller,
   createContractDataReader,
   buildDynamicArgs,
-  contractDeploymentMaxFee,
+  contractMaxFee,
   setVotingStatus,
   votingFinishDate,
 } from './utils'
@@ -742,6 +742,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
           contractHash,
           amount,
           selectedOption,
+          gasCost,
+          txFee,
         }) => {
           const readonlyCallContract = createContractReadonlyCaller({
             contractHash,
@@ -771,23 +773,41 @@ export const createViewVotingMachine = (id, epoch, address) =>
             await readonlyCallContract('voteBlock', 'uint64')
           )
 
-          const callContract = createContractCaller({
+          let callContract = createContractCaller({
             issuer,
             contractHash,
             amount: votingMinPayment || amount,
             broadcastBlock: voteBlock,
+            gasCost,
+            txFee,
+          })
+
+          const {
+            error: errorProof,
+            gasCost: callGasCost,
+            txFee: callTxFee,
+          } = await callContract('sendVoteProof', ContractRpcMode.Estimate, {
+            value: voteHash,
+          })
+
+          if (errorProof) throw new Error(errorProof)
+
+          callContract = createContractCaller({
+            issuer,
+            contractHash,
+            amount: votingMinPayment || amount,
+            broadcastBlock: voteBlock,
+            gasCost: Number(callGasCost),
+            txFee: Number(callTxFee),
           })
 
           const voteProofResp = await callContract(
             'sendVoteProof',
-            ContractRpcMode.Estimate,
+            ContractRpcMode.Call,
             {
               value: voteHash,
             }
           )
-
-          const {errorProof} = voteProofResp
-          if (errorProof) throw new Error(errorProof)
 
           const resp = await callContract(
             'sendVote',
@@ -826,7 +846,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
 
           return callRpc('contract_terminate', {
             ...payload,
-            maxFee: contractDeploymentMaxFee(gasCost, txFee),
+            maxFee: contractMaxFee(gasCost, txFee),
           })
         },
         pollStatus: ({txHash}) => cb => {
