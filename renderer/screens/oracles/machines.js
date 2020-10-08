@@ -117,16 +117,26 @@ export const votingListMachine = Machine(
         })
 
         const promises = knownVotings.map(
-          async ({contractAddress, ...voting}) => ({
-            contractAddress,
-            votingMinPayment: Number(
-              await createContractDataReader({contractHash: contractAddress})(
-                'votingMinPayment',
-                'dna'
+          async ({contractAddress, ...voting}) => {
+            let votingMinPayment
+
+            try {
+              votingMinPayment = Number(
+                await createContractDataReader({contractHash: contractAddress})(
+                  'votingMinPayment',
+                  'dna'
+                )
               )
-            ),
-            ...voting,
-          })
+            } catch {
+              votingMinPayment = 0
+            }
+
+            return {
+              contractAddress,
+              votingMinPayment,
+              ...voting,
+            }
+          }
         )
 
         return {
