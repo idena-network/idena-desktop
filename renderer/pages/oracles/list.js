@@ -62,9 +62,9 @@ function VotingListPage() {
             value={filter}
             onChange={e => send('FILTER', {filter: e.target.value})}
           >
-            <VotingFilter value={VotingStatus.All} />
+            <Text fontWeight={500}>{t('Status')}</Text>
+            <VotingFilter value={VotingStatus.Open} />
             <VotingFilter value={VotingStatus.Pending} />
-            <VotingFilter value="Open" />
             <VotingFilter value={VotingStatus.Voted} />
             <VotingFilter value={VotingStatus.Counting} />
             <VotingFilter value={VotingStatus.Archived} />

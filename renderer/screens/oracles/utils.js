@@ -10,23 +10,19 @@ export const ContractRpcMode = {
 }
 
 export function resolveVotingStatus({status, startDate, vote}) {
-  if (status !== VotingStatus.Running)
+  if (status !== VotingStatus.Open)
     return startDate ? VotingStatus.Pending : VotingStatus.Invalid
-  return vote ? VotingStatus.Voted : VotingStatus.Running
+  return vote ? VotingStatus.Voted : VotingStatus.Open
 }
 
-export const ensureVotingStatus = targetStatus => ({status, ...voting}) =>
-  status === targetStatus ||
-  resolveVotingStatus(voting) === VotingStatus.Pending
-
 export const isVotingStatus = targetStatus => ({status}) =>
-  status === targetStatus
+  status.toUpperCase() === targetStatus.toUpperCase()
 
 export const isVotingMiningStatus = targetStatus => ({status, txHash}) =>
   status === targetStatus && Boolean(txHash)
 
 export const eitherStatus = (...statuses) => ({status}) =>
-  statuses.some(s => s === status)
+  statuses.some(s => s.toUpperCase() === status.toUpperCase())
 
 export const setVotingStatus = status =>
   assign({
@@ -187,3 +183,6 @@ export const votingFinishDate = ({
 export function viewVotingHref(id) {
   return `/oracles/view?id=${id}`
 }
+
+export const byContractHash = a => b =>
+  a.contractHash.toUpperCase() === b.contractHash.toUpperCase()
