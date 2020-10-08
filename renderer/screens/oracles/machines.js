@@ -65,25 +65,8 @@ export const votingListMachine = Machine(
   {
     actions: {
       applyVotings: assign({
-        votings: ({epoch}, {data: {persistedVotings, knownVotings}}) => {
-          const normalizedKnownVotings = knownVotings.map(
-            ({contractAddress, fact, state, balance, ...voting}) => ({
-              ...voting,
-              status: state,
-              fundingAmount: balance,
-              contractHash: contractAddress,
-              ...hexToObject(`0x${fact}`),
-            })
-          )
-
-          const linkedPersistedVotings = persistedVotings.filter(voting =>
-            normalizedKnownVotings.some(byContractHash(voting))
-          )
-
-          return merge(byContractHash)(
-            linkedPersistedVotings,
-            normalizedKnownVotings
-          ).map(voting => ({
+        votings: ({epoch}, {data}) =>
+          data.map(voting => ({
             ...voting,
             ref: spawn(
               // eslint-disable-next-line no-use-before-define
@@ -93,8 +76,7 @@ export const votingListMachine = Machine(
               }),
               `voting-${voting.id}`
             ),
-          }))
-        },
+          })),
       }),
       setFilter: assign({
         filter: (_, {filter}) => filter,
@@ -116,8 +98,8 @@ export const votingListMachine = Machine(
           state: filter,
         })
 
-        const promises = knownVotings.map(
-          async ({contractAddress, ...voting}) => {
+        const enrichedKnownVotings = await Promise.all(
+          knownVotings.map(async ({contractAddress, ...voting}) => {
             let votingMinPayment
 
             try {
@@ -136,13 +118,33 @@ export const votingListMachine = Machine(
               votingMinPayment,
               ...voting,
             }
-          }
+          })
         )
 
-        return {
-          persistedVotings: await epochDb('votings', epoch).all(),
-          knownVotings: await Promise.all(promises),
-        }
+        const normalizedKnownVotings = enrichedKnownVotings.map(
+          ({contractAddress, fact, state, balance, ...voting}) => ({
+            ...voting,
+            status: state,
+            fundingAmount: balance,
+            contractHash: contractAddress,
+            ...hexToObject(`0x${fact}`),
+          })
+        )
+
+        const db = epochDb('votings', epoch)
+
+        const persistedVotings = (await db.all()).filter(voting =>
+          normalizedKnownVotings.some(byContractHash(voting))
+        )
+
+        const votings = merge(byContractHash)(
+          persistedVotings,
+          normalizedKnownVotings
+        )
+
+        await db.putMany(votings)
+
+        return votings
       },
     },
   }

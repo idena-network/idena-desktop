@@ -38,6 +38,31 @@ export const epochDb = (db, epoch, options) => {
         ? updatePersistedItem(targetDb, id, item)
         : addPersistedItem(targetDb, item)
     },
+    async putMany(items) {
+      const ids = await safeReadIds(targetDb)
+
+      const newItems = items.filter(({id}) => !ids.includes(id))
+
+      const newIds = []
+
+      let batch = targetDb.batch()
+
+      for (const item of newItems) {
+        const id = nanoid()
+        newIds.push(id)
+        batch = batch.put(id, item)
+      }
+
+      const savedItems = await Promise.all(
+        ids.map(async id => ({...(await targetDb.get(id)), id}))
+      )
+
+      for (const {id, ...item} of savedItems) {
+        batch = batch.put(id, {...item, ...items.find(x => x.id === id)})
+      }
+
+      return batch.put('ids', ids.concat(newIds)).write()
+    },
     delete(id) {
       return deletePersistedItem(targetDb, id)
     },
