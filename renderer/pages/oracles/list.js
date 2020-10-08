@@ -1,8 +1,12 @@
 import React from 'react'
-import {Stack, Box, Text, Switch, FormLabel, Flex} from '@chakra-ui/core'
+import {Stack, Text, Flex} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page, PageTitle} from '../../screens/app/components'
+import {
+  FlipFilter as FilterList,
+  FlipFilterOption as FilterOption,
+} from '../../screens/flips/components'
 import {IconLink} from '../../shared/components/link'
 import {VotingStatus} from '../../shared/types'
 import {FloatDebug} from '../../shared/components/components'
@@ -29,24 +33,36 @@ function VotingListPage() {
 
   return (
     <Page>
-      <PageTitle mb={10}>{t('Oracle votings')}</PageTitle>
+      <PageTitle mb={4}>{t('Oracle votings')}</PageTitle>
       <Stack isInline spacing={20} w="full">
-        <Stack spacing={6} w="md">
-          {current.matches('loading') &&
-            Array.from({length: 5}).map((_, idx) => (
-              <VotingCardSkeleton key={idx} />
-            ))}
+        <Stack spacing={8}>
+          <FilterList
+            value={showAll ? 'all' : 'my'}
+            mb={8}
+            onChange={() => send('TOGGLE_SHOW_ALL')}
+          >
+            <FilterOption value="all">{t('All votings')}</FilterOption>
+            <FilterOption value="my">{t('My votings')}</FilterOption>
+          </FilterList>
+          <Stack spacing={6} w="md">
+            {current.matches('loading') &&
+              Array.from({length: 5}).map((_, idx) => (
+                <VotingCardSkeleton key={idx} />
+              ))}
 
-          {current.matches('failure') && (
-            <Flex>Failish {current.context.error}</Flex>
-          )}
+            {current.matches('failure') && (
+              <Flex>Failish {current.context.error}</Flex>
+            )}
 
-          {current.matches('loaded') && votings.length === 0 && (
-            <Flex>Emptyish</Flex>
-          )}
+            {current.matches('loaded') && votings.length === 0 && (
+              <Flex>Emptyish</Flex>
+            )}
 
-          {current.matches('loaded') &&
-            votings.map(({id, ref}) => <VotingCard key={id} votingRef={ref} />)}
+            {current.matches('loaded') &&
+              votings.map(({id, ref}) => (
+                <VotingCard key={id} votingRef={ref} />
+              ))}
+          </Stack>
         </Stack>
         <Stack spacing={8} align="flex-start" maxW={40}>
           <IconLink
@@ -69,21 +85,6 @@ function VotingListPage() {
             <VotingFilter value={VotingStatus.Counting} />
             <VotingFilter value={VotingStatus.Archived} />
           </VotingFilterList>
-          <Box>
-            <Text color="muted" mb={3}>
-              {t('There are hidden votings not available for me')}
-            </Text>
-            <Stack isInline spacing={3} align="center">
-              <Switch
-                id="show-all"
-                defaultIsChecked={showAll}
-                onChange={() => {
-                  send('TOGGLE_SHOW_ALL')
-                }}
-              ></Switch>
-              <FormLabel htmlFor="show-all">{t('Show all')}</FormLabel>
-            </Stack>
-          </Box>
         </Stack>
       </Stack>
       <FloatDebug>{current.value}</FloatDebug>
