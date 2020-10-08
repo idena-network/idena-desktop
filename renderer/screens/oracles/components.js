@@ -23,7 +23,6 @@ import {
   DrawerBody,
   Input,
 } from '../../shared/components/components'
-import {VoteOption} from '../../shared/types'
 import {IconButton2} from '../../shared/components/button'
 
 export function OracleDrawerHeader({
@@ -125,21 +124,31 @@ export const VotingFilter = React.forwardRef(function VotingFilterRef(
   )
 })
 
-export function VotingResultBar({value, action, ...props}) {
+export function VotingResultBar({label, value, option, ...props}) {
+  const percentage = Number.isFinite(value) ? `${value * 100}%` : '0%'
   return (
     <Flex
       align="center"
       justify="space-between"
-      bg={action === VoteOption.Confirm ? 'blue.012' : 'gray.50'}
-      borderRadius="md"
       textTransform="capitalize"
+      position="relative"
       px={2}
       h={6}
-      w={`${value}%`}
+      w="full"
       {...props}
     >
-      <Text>{action}</Text>
-      <Text fontWeight={500}>{`${value}%`}</Text>
+      <Box
+        borderRadius="md"
+        bg={option === 0 ? 'blue.012' : 'gray.50'}
+        position="absolute"
+        left={0}
+        width={percentage}
+        top={0}
+        bottom={0}
+        zIndex={-1}
+      ></Box>
+      <Text>{label}</Text>
+      <Text fontWeight={500}>{percentage}</Text>
     </Flex>
   )
 }

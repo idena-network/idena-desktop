@@ -63,14 +63,23 @@ export function VotingCard({votingRef, ...props}) {
     }),
     votesCount,
     contractHash,
+    prevStatus,
+    options,
+    votes = [],
+    votingMinPayment,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
 
   const viewHref = viewVotingHref(id)
 
+  const isMining = eitherState(current, 'mining')
+
+  const somePrevStatus = (...statuses) => statuses.some(s => s === prevStatus)
+
   const eitherIdleState = (...states) =>
-    eitherState(current, ...states.map(s => `idle.${s}`))
+    eitherState(current, ...states.map(s => `idle.${s.toLowerCase()}`)) ||
+    (isMining && somePrevStatus(...states))
 
   return (
     <>
@@ -87,42 +96,65 @@ export function VotingCard({votingRef, ...props}) {
         <Link href={viewHref}>
           <Text fontSize="base" fontWeight={500} mb={2}>
             {title}
-            <VotingStatusBadge status={status} ml={2}>
-              {JSON.stringify(current.value)}
-            </VotingStatusBadge>
           </Text>
         </Link>
         <Text color="muted" mb={4}>
           {desc}
         </Text>
-        {eitherIdleState(
-          VotingStatus.Voted,
-          VotingStatus.Archived,
-          VotingStatus.Counting
-        ) && (
+        {eitherIdleState(VotingStatus.Archived, VotingStatus.Counting) && (
           <Stack spacing={2} mb={6}>
             <Text color="muted" fontSize="sm">
               {t('Results')}
             </Text>
-            <VotingResultBar action={VoteOption.Confirm} value={60} />
-            <VotingResultBar action={VoteOption.Reject} value={40} />
+            {options.map((option, idx) => (
+              <VotingResultBar
+                option={idx}
+                label={option}
+                value={
+                  votes.find(v => v.option === idx)?.count ?? 0 / votesCount
+                }
+              />
+            ))}
           </Stack>
         )}
-        <Stack isInline spacing={2} align="center" mb={6}>
-          <Icon name="star" size={4} color="white" />
+        <Stack
+          isInline
+          spacing={2}
+          align="center"
+          bg="orange.010"
+          borderColor="orange.050"
+          borderWidth="1px"
+          borderRadius="md"
+          py={2}
+          px={3}
+          mb={6}
+        >
+          <Icon name="star" size={5} color="white" />
           <Text fontWeight={500}>
             {t('Total prize')}: {toDna(fundingAmount)}
+          </Text>
+          <Text color="orange.500">
+            {votingMinPayment
+              ? t(`Deposit {{amount}} for voting`, {
+                  amount: toLocaleDna(i18n.language)(votingMinPayment),
+                })
+              : t('Free voting')}
           </Text>
         </Stack>
         <Flex justify="space-between" align="center">
           <Stack isInline spacing={2}>
             {eitherIdleState(VotingStatus.Pending) && (
-              <PrimaryButton onClick={() => send('START_VOTING')}>
+              <PrimaryButton
+                isDisabled={isMining}
+                loadingText={t('Starting')}
+                onClick={() => send('START_VOTING')}
+              >
                 {t('Launch')}
               </PrimaryButton>
             )}
+
             {eitherIdleState(
-              VotingStatus.Running,
+              VotingStatus.Open,
               VotingStatus.Voted,
               VotingStatus.Archived,
               VotingStatus.Counting
@@ -131,7 +163,11 @@ export function VotingCard({votingRef, ...props}) {
                 {t('Open')}
               </PrimaryButton>
             )}
-            <SecondaryButton onClick={onOpenAddFund}>
+            <SecondaryButton
+              isDisabled={isMining}
+              loadingText={t('Funding')}
+              onClick={onOpenAddFund}
+            >
               {t('Add fund')}
             </SecondaryButton>
           </Stack>
@@ -149,10 +185,11 @@ export function VotingCard({votingRef, ...props}) {
             />
             <Stack isInline spacing={2} align="center">
               <Icon name="user" w={4} h={4} />
-              <Text as="span">{votesCount || 0} votes</Text>
+              <Text as="span">{t('{{count}} votes', {count: votesCount})}</Text>
             </Stack>
           </Stack>
         </Flex>
+
         <VotingListDivider />
       </Box>
 
@@ -172,7 +209,7 @@ export function VotingCard({votingRef, ...props}) {
 
 export function VotingStatusBadge({status, ...props}) {
   const colors = (() => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case VotingStatus.Pending:
         return {
           bg: 'rgb(218 121 255 /0.2)',

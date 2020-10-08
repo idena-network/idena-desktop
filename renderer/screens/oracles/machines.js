@@ -14,9 +14,11 @@ import {
   contractMaxFee,
   setVotingStatus,
   votingFinishDate,
+  byContractHash,
+  hexToObject,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
-import {callRpc, mergeById} from '../../shared/utils/utils'
+import {callRpc, merge} from '../../shared/utils/utils'
 import {epochDb} from '../../shared/utils/db'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 
@@ -24,7 +26,7 @@ export const votingListMachine = Machine(
   {
     context: {
       votings: [],
-      filter: VotingStatus.All,
+      filter: VotingStatus.Open,
       showAll: false,
     },
     on: {
@@ -49,11 +51,11 @@ export const votingListMachine = Machine(
         on: {
           FILTER: {
             target: 'loading',
-            actions: ['setFilter', log()],
+            actions: ['setFilter'],
           },
           TOGGLE_SHOW_ALL: {
             target: 'loading',
-            actions: ['toggleShowAll', log()],
+            actions: ['toggleShowAll'],
           },
         },
       },
@@ -63,8 +65,25 @@ export const votingListMachine = Machine(
   {
     actions: {
       applyVotings: assign({
-        votings: ({epoch}, {data: {persistedVotings, knownVotings}}) =>
-          mergeById(persistedVotings, knownVotings).map(voting => ({
+        votings: ({epoch}, {data: {persistedVotings, knownVotings}}) => {
+          const normalizedKnownVotings = knownVotings.map(
+            ({contractAddress, fact, state, balance, ...voting}) => ({
+              ...voting,
+              status: state,
+              fundingAmount: balance,
+              contractHash: contractAddress,
+              ...hexToObject(`0x${fact}`),
+            })
+          )
+
+          const linkedPersistedVotings = persistedVotings.filter(voting =>
+            normalizedKnownVotings.some(byContractHash(voting))
+          )
+
+          return merge(byContractHash)(
+            linkedPersistedVotings,
+            normalizedKnownVotings
+          ).map(voting => ({
             ...voting,
             ref: spawn(
               // eslint-disable-next-line no-use-before-define
@@ -74,7 +93,8 @@ export const votingListMachine = Machine(
               }),
               `voting-${voting.id}`
             ),
-          })),
+          }))
+        },
       }),
       setFilter: assign({
         filter: (_, {filter}) => filter,
@@ -89,14 +109,31 @@ export const votingListMachine = Machine(
         identity: {address},
         filter,
         showAll,
-      }) => ({
-        persistedVotings: await epochDb('votings', epoch).all(),
-        knownVotings: await fetchVotings({
+      }) => {
+        const knownVotings = await fetchVotings({
           all: showAll.toString(),
           oracle: address,
           state: filter,
-        }),
-      }),
+        })
+
+        const promises = knownVotings.map(
+          async ({contractAddress, ...voting}) => ({
+            contractAddress,
+            votingMinPayment: Number(
+              await createContractDataReader({contractHash: contractAddress})(
+                'votingMinPayment',
+                'dna'
+              )
+            ),
+            ...voting,
+          })
+        )
+
+        return {
+          persistedVotings: await epochDb('votings', epoch).all(),
+          knownVotings: await Promise.all(promises),
+        }
+      },
     },
   }
 )
@@ -129,12 +166,16 @@ export const votingMachine = Machine(
                   cond: 'isPending',
                 },
                 {
-                  target: VotingStatus.Running,
+                  target: VotingStatus.Open,
                   cond: 'isRunning',
                 },
                 {
                   target: VotingStatus.Voted,
                   cond: 'isVoted',
+                },
+                {
+                  target: VotingStatus.Counting,
+                  cond: 'isCounting',
                 },
                 {
                   target: `#voting.${VotingStatus.Invalid}`,
@@ -151,8 +192,9 @@ export const votingMachine = Machine(
               },
             },
           },
-          [VotingStatus.Running]: {},
+          [VotingStatus.Open]: {},
           [VotingStatus.Voted]: {},
+          [VotingStatus.Counting]: {},
           hist: {
             type: 'history',
           },
@@ -300,7 +342,7 @@ export const votingMachine = Machine(
                 },
                 on: {
                   MINED: {
-                    target: `#voting.idle.${VotingStatus.Running}`,
+                    target: `#voting.idle.${VotingStatus.Open}`,
                     actions: [
                       'setRunning',
                       'clearMiningStatus',
@@ -339,7 +381,7 @@ export const votingMachine = Machine(
           fundingAmount + amount,
       }),
       setStarting: setVotingStatus(VotingStatus.Starting),
-      setRunning: setVotingStatus(VotingStatus.Running),
+      setRunning: setVotingStatus(VotingStatus.Open),
       setInvalid: assign({
         status: VotingStatus.Invalid,
         errorMessage: (_, {error}) => error?.message,
@@ -404,8 +446,9 @@ export const votingMachine = Machine(
     guards: {
       isIdle: eitherStatus(
         VotingStatus.Pending,
-        VotingStatus.Running,
+        VotingStatus.Open,
         VotingStatus.Voted,
+        VotingStatus.Counting,
         VotingStatus.Archived
       ),
       isMining: ({status, txHash}) =>
@@ -420,8 +463,9 @@ export const votingMachine = Machine(
       isFunding: isVotingMiningStatus(VotingStatus.Funding),
       isStarting: isVotingMiningStatus(VotingStatus.Starting),
       isPending: isVotingStatus(VotingStatus.Pending),
-      isRunning: isVotingStatus(VotingStatus.Running),
+      isRunning: isVotingStatus(VotingStatus.Open),
       isVoted: isVotingStatus(VotingStatus.Voted),
+      isCounting: isVotingStatus(VotingStatus.Counting),
     },
   }
 )
