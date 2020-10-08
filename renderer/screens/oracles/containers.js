@@ -81,12 +81,14 @@ export function VotingCard({votingRef, ...props}) {
     eitherState(current, ...states.map(s => `idle.${s.toLowerCase()}`)) ||
     (isMining && somePrevStatus(...states))
 
+  const maxCount = Math.max(...votes.map(({count}) => count))
+
   return (
     <>
       <Box key={id} {...props}>
         <Stack isInline spacing={2} mb={3} align="center">
           <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
-          <VotingBadge bg="gray.300" color="muted" pl="1/2">
+          <VotingBadge bg="gray.50" color="muted" pl="1/2">
             <Stack isInline spacing={1} align="center">
               <Avatar w={5} h={5} address={issuer} />
               <Text>{issuer}</Text>
@@ -106,15 +108,28 @@ export function VotingCard({votingRef, ...props}) {
             <Text color="muted" fontSize="sm">
               {t('Results')}
             </Text>
-            {options.map((option, idx) => (
-              <VotingResultBar
-                option={idx}
-                label={option}
-                value={
-                  votes.find(v => v.option === idx)?.count ?? 0 / votesCount
-                }
-              />
-            ))}
+            {votesCount ? (
+              options.map((option, idx) => {
+                const value = votes.find(v => v.option === idx)?.count ?? 0
+                return (
+                  <VotingResultBar
+                    label={option}
+                    value={value / votesCount}
+                    isMax={maxCount === value}
+                  />
+                )
+              })
+            ) : (
+              <Text
+                bg="gray.50"
+                borderRadius="md"
+                p={2}
+                color="muted"
+                fontSize="sm"
+              >
+                {t('No votes')}
+              </Text>
+            )}
           </Stack>
         )}
         <Stack
