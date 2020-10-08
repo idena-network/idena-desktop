@@ -156,7 +156,9 @@ export const uiTheme = {
     },
     orange: {
       ...chakraTheme.colors.orange,
+      '010': 'rgb(255 163 102 /0.1)',
       '020': 'rgb(255 163 102 /0.2)',
+      '050': 'rgb(255 163 102 /0.5)',
       500: 'rgb(255, 163, 102)',
     },
     warning: {
@@ -717,7 +719,7 @@ export const uiTheme = {
       path: (
         <g fill="none" fillRule="evenodd">
           <path
-            fill="#FFF"
+            fill="transparent"
             d="M0 0H1080V1635H0z"
             transform="translate(-280 -250)"
           />
