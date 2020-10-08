@@ -24,6 +24,7 @@ import {
   Input,
 } from '../../shared/components/components'
 import {IconButton2} from '../../shared/components/button'
+import {toPercent} from '../../shared/utils/utils'
 
 export function OracleDrawerHeader({
   icon,
@@ -124,8 +125,7 @@ export const VotingFilter = React.forwardRef(function VotingFilterRef(
   )
 })
 
-export function VotingResultBar({label, value, option, ...props}) {
-  const percentage = Number.isFinite(value) ? `${value * 100}%` : '0%'
+export function VotingResultBar({label, value, isMax, ...props}) {
   return (
     <Flex
       align="center"
@@ -139,16 +139,21 @@ export function VotingResultBar({label, value, option, ...props}) {
     >
       <Box
         borderRadius="md"
-        bg={option === 0 ? 'blue.012' : 'gray.50'}
+        bg="blue.012"
         position="absolute"
         left={0}
-        width={percentage}
+        width={value > 0 ? `${value * 100}%` : 1}
         top={0}
         bottom={0}
         zIndex={-1}
-      ></Box>
-      <Text>{label}</Text>
-      <Text fontWeight={500}>{percentage}</Text>
+      />
+      <Stack isInline spacing={1} align="center">
+        <Text>{label}</Text>
+        {isMax && <Icon name="ok" size={4} color="brandBlue.500" />}
+      </Stack>
+      <Text fontWeight={500} textTransform="initial">
+        {toPercent(value)}
+      </Text>
     </Flex>
   )
 }
