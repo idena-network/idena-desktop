@@ -21,35 +21,30 @@ import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import dayjs from 'dayjs'
 import {Page} from '../../screens/app/components'
-import {
-  Avatar,
-  Debug,
-  FloatDebug,
-  Input,
-  Toast,
-} from '../../shared/components/components'
+import {Avatar, FloatDebug, Toast} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
   PrimaryButton,
   SecondaryButton,
   IconButton2,
 } from '../../shared/components/button'
-import {callRpc, toLocaleDna} from '../../shared/utils/utils'
-import {VotingBadge, VotingSkeleton} from '../../screens/oracles/components'
+import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
+import {
+  VotingBadge,
+  VotingResultBar,
+  VotingSkeleton,
+} from '../../screens/oracles/components'
 import {
   AddFundDrawer,
   VotingStatusBadge,
   VoteDrawer,
   AsideStat,
+  VotingInspector,
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {VoteOption} from '../../shared/types'
+import {VotingStatus} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {
-  createContractDataReader,
-  createContractReadonlyCaller,
-} from '../../screens/oracles/utils'
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
@@ -57,15 +52,9 @@ export default function ViewVotingPage() {
   const toast = useToast()
 
   const {
-    isOpen: isOpenConfirm,
-    onOpen: onOpenConfirm,
-    onClose: onCloseConfirm,
-  } = useDisclosure()
-
-  const {
-    isOpen: isOpenReject,
-    onOpen: onOpenReject,
-    onClose: onCloseReject,
+    isOpen: isOpenVote,
+    onOpen: onOpenVote,
+    onClose: onCloseVote,
   } = useDisclosure()
 
   const {
@@ -112,17 +101,29 @@ export default function ViewVotingPage() {
     startDate,
     votingDuration = 0,
     pubicVotingDuration = 0,
-    quorum = 0,
+    quorum = 20,
     committeeSize = 100,
     options = [],
     votesCount = 0,
+    finishDate = dayjs(startDate)
+      .add(votingDuration, 's')
+      .add(pubicVotingDuration, 's'),
+    prevStatus,
+    votes = [],
+    selectedOption,
   } = current.context
 
-  const finishDate = dayjs(startDate)
-    .add(votingDuration, 's')
-    .add(pubicVotingDuration, 's')
-
   const isLoaded = !current.matches('loading')
+
+  const isMining = eitherState(current, 'mining')
+
+  const somePrevStatus = (...statuses) => statuses.some(s => s === prevStatus)
+
+  const eitherIdleState = (...states) =>
+    eitherState(current, ...states.map(s => `idle.${s.toLowerCase()}`)) ||
+    (isMining && somePrevStatus(...states))
+
+  const maxCount = Math.max(...votes.map(({count}) => count))
 
   return (
     <>
@@ -157,86 +158,116 @@ export default function ViewVotingPage() {
                   <Text lineHeight="tall">{desc}</Text>
                 </Stack>
               </VotingSkeleton>
-              <VotingSkeleton isLoaded={isLoaded}>
-                <Box>
-                  <Text color="muted" fontSize="sm" mb={3}>
-                    {t('Choose an option to vote')}
+              {eitherIdleState(VotingStatus.Open) && (
+                <VotingSkeleton isLoaded={isLoaded}>
+                  <Box>
+                    <Text color="muted" fontSize="sm" mb={3}>
+                      {t('Choose an option to vote')}
+                    </Text>
+                    <RadioGroup
+                      onChange={e =>
+                        send('SELECT_OPTION', {option: e.target.value})
+                      }
+                    >
+                      {options.map((option, idx) => (
+                        <Flex
+                          key={`${option}-${idx}`}
+                          justify="space-between"
+                          border="1px"
+                          borderColor="gray.300"
+                          borderRadius="md"
+                          px={3}
+                          py={2}
+                        >
+                          <Radio
+                            borderColor="gray.100"
+                            name="option"
+                            value={option}
+                            onClick={onOpenVote}
+                          >
+                            {option}
+                          </Radio>
+                          <Text color="muted" fontSize="sm">
+                            {t('{{count}} min. votes required', {
+                              count: toPercent(quorum / committeeSize),
+                            })}
+                          </Text>
+                        </Flex>
+                      ))}
+                    </RadioGroup>
+                  </Box>
+                </VotingSkeleton>
+              )}
+              {eitherIdleState(
+                VotingStatus.Archived,
+                VotingStatus.Counting
+              ) && (
+                <Stack spacing={2} mb={6}>
+                  <Text color="muted" fontSize="sm">
+                    {t('Results')}
                   </Text>
-                  <RadioGroup
-                    onChange={e =>
-                      send('SELECT_OPTION', {option: e.target.value})
-                    }
-                  >
-                    <Flex
-                      justify="space-between"
-                      border="1px"
-                      borderColor="gray.300"
+                  {votesCount ? (
+                    options.map((option, idx) => {
+                      const value =
+                        votes.find(v => v.option === idx)?.count ?? 0
+                      return (
+                        <VotingResultBar
+                          label={option}
+                          value={value / votesCount}
+                          isMax={maxCount === value}
+                        />
+                      )
+                    })
+                  ) : (
+                    <Text
+                      bg="gray.50"
                       borderRadius="md"
-                      px={3}
-                      py={2}
+                      p={2}
+                      color="muted"
+                      fontSize="sm"
                     >
-                      <Radio
-                        borderColor="gray.100"
-                        name="option"
-                        value={options[0]}
-                        onClick={onOpenConfirm}
-                      >
-                        {t(options[0])}
-                      </Radio>
-                      <Text color="muted" fontSize="sm">
-                        {t('{{count}} votes required', {count: committeeSize})}
-                      </Text>
-                    </Flex>
-                    <Flex
-                      justify="space-between"
-                      border="1px"
-                      borderColor="gray.300"
-                      borderRadius="md"
-                      px={3}
-                      py={2}
-                    >
-                      <Radio
-                        borderColor="gray.100"
-                        variantColor="red"
-                        name="option"
-                        value={options[1]}
-                        onClick={onOpenReject}
-                      >
-                        {t(options[1])}
-                      </Radio>
-                      <Text color="muted" fontSize="sm">
-                        {t('{{count}} votes required', {count: committeeSize})}
-                      </Text>
-                    </Flex>
-                  </RadioGroup>
-                </Box>
-              </VotingSkeleton>
+                      {t('No votes')}
+                    </Text>
+                  )}
+                </Stack>
+              )}
               <VotingSkeleton isLoaded={isLoaded}>
                 <Flex justify="space-between" align="center">
                   <Stack isInline spacing={2}>
-                    <PrimaryButton
-                      variantColor="green"
-                      onClick={() => {
-                        send('START_VOTING')
-                      }}
-                    >
-                      {t('Start voting')}
-                    </PrimaryButton>
-                    <PrimaryButton onClick={() => send('VOTE_SELECTED')}>
-                      {t('Vote')}
-                    </PrimaryButton>
+                    {eitherIdleState(VotingStatus.Pending) && (
+                      <PrimaryButton
+                        variantColor="green"
+                        isLoading={isMining}
+                        loadingText={t('Launching')}
+                        onClick={() => {
+                          send('START_VOTING')
+                        }}
+                      >
+                        {t('Launch')}
+                      </PrimaryButton>
+                    )}
+                    {eitherIdleState(VotingStatus.Open) && (
+                      <PrimaryButton
+                        isLoading={isMining}
+                        loadingText={t('Voting')}
+                        onClick={() => send('VOTE')}
+                      >
+                        {t('Vote')}
+                      </PrimaryButton>
+                    )}
+                    {eitherIdleState(VotingStatus.Counting) &&
+                      dayjs().isAfter(dayjs(finishDate)) && (
+                        <PrimaryButton
+                          isLoading={isMining}
+                          loadingText={t('Finishing')}
+                          onClick={() => send('FINISH_VOTING')}
+                        >
+                          {t('Finish voting')}
+                        </PrimaryButton>
+                      )}
                     <SecondaryButton onClick={() => redirect('/oracles/list')}>
                       {t('Cancel')}
                     </SecondaryButton>
-                    <PrimaryButton
-                      variantColor="red"
-                      ml="auto"
-                      onClick={() => {
-                        send('TERMINATE_CONTRACT')
-                      }}
-                    >
-                      {t('Terminate')}
-                    </PrimaryButton>
                   </Stack>
                   <Stack isInline spacing={3}>
                     <Divider
@@ -280,7 +311,7 @@ export default function ViewVotingPage() {
                 />
                 <AsideStat
                   label={t('Your reward')}
-                  value={toDna(fundingAmount / committeeSize)}
+                  value={toDna(fundingAmount / votesCount)}
                 />
                 <AsideStat
                   label={t('Quorum required')}
@@ -294,28 +325,16 @@ export default function ViewVotingPage() {
             </Box>
           </VotingSkeleton>
         </Stack>
-
-        <VotingDevTools {...current.context} />
       </Page>
 
       <VoteDrawer
-        isOpen={isOpenConfirm}
-        onClose={onCloseConfirm}
-        option={VoteOption.Confirm}
+        isOpen={isOpenVote}
+        onClose={onCloseVote}
+        option={options[selectedOption]}
         from={address}
         to={contractHash}
         deposit={votingMinPayment}
-        onVote={() => send('VOTE', {option: 0})}
-      />
-
-      <VoteDrawer
-        isOpen={isOpenReject}
-        onClose={onCloseReject}
-        option={VoteOption.Reject}
-        from={address}
-        to={contractHash}
-        deposit={votingMinPayment}
-        onVote={() => send('VOTE', {option: 1})}
+        onVote={() => send('VOTE')}
       />
 
       <AddFundDrawer
@@ -330,141 +349,11 @@ export default function ViewVotingPage() {
       />
 
       <FloatDebug>{current.value}</FloatDebug>
+      {global.isDev && (
+        <Box position="absolute" top={6} right={6}>
+          <VotingInspector {...current.context} />
+        </Box>
+      )}
     </>
-  )
-}
-
-function VotingDevTools(contract) {
-  const [result, setResult] = React.useState({})
-  return (
-    <Stack spacing={4} w="lg" mt={10}>
-      <Divider borderColor="gray.300" w="full" />
-      <Heading fontSize="lg" fontWeight={500}>
-        Voting DevTools
-      </Heading>
-      <Stack>
-        <Box>
-          <Heading fontSize="base" fontWeight={500} my={4}>
-            Contract
-          </Heading>
-          <Debug>{contract}</Debug>
-        </Box>
-        <Box mt={2}>
-          <Heading fontSize="base" fontWeight={500} my={4}>
-            readonlyCall
-          </Heading>
-          <Stack
-            as="form"
-            spacing={3}
-            onSubmit={async e => {
-              e.preventDefault()
-              const {
-                readonlyCallMethod,
-                readonlyCallMethodFormat,
-                readonlyCallArgs,
-              } = e.target.elements
-
-              setResult(
-                await createContractReadonlyCaller(contract)(
-                  readonlyCallMethod.value,
-                  readonlyCallMethodFormat.value,
-                  ...JSON.parse(readonlyCallArgs.value || '[]')
-                )
-              )
-            }}
-          >
-            <Stack isInline spacing={2} justify="space-between">
-              <Input
-                id="readonlyCallMethod"
-                placeholder="readonlyCallMethod method"
-              />
-              <Input
-                id="readonlyCallMethodFormat"
-                placeholder="format"
-                w={100}
-              />
-            </Stack>
-            <Input id="readonlyCallArgs" placeholder="readonlyCall args" />
-            <SecondaryButton type="submit" ml="auto">
-              Readonly call
-            </SecondaryButton>
-          </Stack>
-        </Box>
-        <Box>
-          <Heading fontSize="base" fontWeight={500} my={4}>
-            readKey
-          </Heading>
-          <Stack
-            as="form"
-            spacing={3}
-            onSubmit={async e => {
-              e.preventDefault()
-
-              const {readKey, readKeyFormat} = e.target.elements
-
-              setResult(
-                await createContractDataReader(contract)(
-                  readKey.value,
-                  readKeyFormat.value
-                )
-              )
-            }}
-          >
-            <Stack isInline>
-              <Input id="readKey" placeholder="readKey key" />
-              <Input id="readKeyFormat" placeholder="format" w={100} />
-            </Stack>
-            <SecondaryButton type="submit" ml="auto" onClick={async () => {}}>
-              Read data
-            </SecondaryButton>
-          </Stack>
-        </Box>
-        <Box>
-          <Heading fontSize="base" fontWeight={500} my={4}>
-            txReceipt
-          </Heading>
-          <Stack
-            as="form"
-            spacing={3}
-            onSubmit={async e => {
-              e.preventDefault()
-              setResult(
-                await callRpc('bcn_txReceipt', e.target.elements.txHash.value)
-              )
-            }}
-          >
-            <Stack isInline>
-              <Input id="txHash" placeholder="txHash" />
-            </Stack>
-            <SecondaryButton type="submit" ml="auto" onClick={async () => {}}>
-              Show receipt
-            </SecondaryButton>
-          </Stack>
-        </Box>
-        <Box>
-          <Heading fontSize="base" fontWeight={500} my={4}>
-            contract_getStake
-          </Heading>
-          <Stack
-            as="form"
-            spacing={3}
-            onSubmit={async e => {
-              e.preventDefault()
-              setResult(
-                await callRpc('contract_getStake', contract.contractHash)
-              )
-            }}
-          >
-            <Stack isInline>
-              <Input value={contract.contractHash} isReadonly isDisabled />
-            </Stack>
-            <SecondaryButton type="submit" ml="auto" onClick={async () => {}}>
-              Get stake
-            </SecondaryButton>
-          </Stack>
-        </Box>
-      </Stack>
-      <Debug>{result}</Debug>
-    </Stack>
   )
 }

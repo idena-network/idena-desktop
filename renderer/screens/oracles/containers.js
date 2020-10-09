@@ -14,9 +14,24 @@ import {
   Stat,
   StatLabel,
   StatNumber,
+  Drawer as ChakraDrawer,
+  DrawerOverlay,
+  DrawerCloseButton,
+  DrawerContent,
+  Heading,
+  Collapse,
+  IconButton,
+  Button,
 } from '@chakra-ui/core'
-import {toLocaleDna, eitherState} from '../../shared/utils/utils'
-import {Avatar, Drawer, Input} from '../../shared/components/components'
+import {toLocaleDna, eitherState, callRpc} from '../../shared/utils/utils'
+import {
+  Avatar,
+  Debug,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  Input,
+} from '../../shared/components/components'
 import {VotingStatus, VoteOption} from '../../shared/types'
 import {
   VotingResultBar,
@@ -30,7 +45,12 @@ import {
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {Link} from '../../shared/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {viewVotingHref, votingFinishDate} from './utils'
+import {
+  createContractDataReader,
+  createContractReadonlyCaller,
+  viewVotingHref,
+  votingFinishDate,
+} from './utils'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -161,7 +181,7 @@ export function VotingCard({votingRef, ...props}) {
             {eitherIdleState(VotingStatus.Pending) && (
               <PrimaryButton
                 isDisabled={isMining}
-                loadingText={t('Starting')}
+                loadingText={t('Launching')}
                 onClick={() => send('START_VOTING')}
               >
                 {t('Launch')}
@@ -230,7 +250,7 @@ export function VotingStatusBadge({status, ...props}) {
           bg: 'rgb(218 121 255 /0.2)',
           color: 'rgb(218 121 255)',
         }
-      case VotingStatus.Running:
+      case VotingStatus.Open:
         return {
           bg: 'green.020',
           color: 'green.500',
@@ -315,10 +335,7 @@ export function VoteDrawer({option, from, to, deposit = 0, onVote, ...props}) {
 
   return (
     <Drawer {...props}>
-      <OracleDrawerHeader
-        icon="send-out"
-        variantColor={option === VoteOption.Reject ? 'red' : 'blue'}
-      >
+      <OracleDrawerHeader icon="send-out" variantColor="blue">
         {t('Voting: {{option}}', {option, nsSeparator: '!'})}
       </OracleDrawerHeader>
       <OracleDrawerBody>
@@ -355,5 +372,208 @@ export function AsideStat({label, value, ...props}) {
         {value}
       </StatNumber>
     </Stat>
+  )
+}
+
+export function VotingInspector(contract) {
+  const [result, setResult] = React.useState({})
+
+  const {isOpen, onOpen, onClose} = useDisclosure()
+  const {isOpen: isOpenContract, onToggle: onToggleContract} = useDisclosure()
+
+  return (
+    <>
+      <Button
+        rightIcon="info"
+        variant="outline"
+        variantColor="blue"
+        onClick={onOpen}
+      >
+        Open inspector
+      </Button>
+      <ChakraDrawer isOpen={isOpen} size="lg" onClose={onClose}>
+        <DrawerOverlay bg="xblack.080" />
+        <DrawerContent px={8} py={12} overflowY="auto">
+          <DrawerCloseButton />
+          <DrawerHeader>
+            <Heading fontSize="lg" fontWeight={500} mb={2}>
+              Inspector
+            </Heading>
+          </DrawerHeader>
+          <DrawerBody fontSize="md">
+            <Stack spacing={4} w="lg">
+              <Stack>
+                <Flex align="center">
+                  <Heading fontSize="base" fontWeight={500} my={4}>
+                    Contract
+                  </Heading>
+                  <IconButton
+                    icon="chevron-down"
+                    size="sm"
+                    fontSize="lg"
+                    ml={1}
+                    onClick={onToggleContract}
+                  />
+                </Flex>
+                <Collapse isOpen={isOpenContract}>
+                  <Debug>{contract}</Debug>
+                </Collapse>
+                <Box mt={2}>
+                  <Heading fontSize="base" fontWeight={500} my={4}>
+                    readonlyCall
+                  </Heading>
+                  <Stack
+                    as="form"
+                    spacing={3}
+                    onSubmit={async e => {
+                      e.preventDefault()
+                      const {
+                        readonlyCallMethod,
+                        readonlyCallMethodFormat,
+                        readonlyCallArgs,
+                      } = e.target.elements
+
+                      setResult(
+                        await createContractReadonlyCaller(contract)(
+                          readonlyCallMethod.value,
+                          readonlyCallMethodFormat.value,
+                          ...JSON.parse(readonlyCallArgs.value || '[]')
+                        )
+                      )
+                    }}
+                  >
+                    <Stack isInline spacing={2} justify="space-between">
+                      <Input
+                        id="readonlyCallMethod"
+                        placeholder="readonlyCallMethod method"
+                      />
+                      <Input
+                        id="readonlyCallMethodFormat"
+                        placeholder="format"
+                        w={100}
+                      />
+                    </Stack>
+                    <Input
+                      id="readonlyCallArgs"
+                      placeholder="readonlyCall args"
+                    />
+                    <SecondaryButton type="submit" ml="auto">
+                      Readonly call
+                    </SecondaryButton>
+                  </Stack>
+                </Box>
+                <Box>
+                  <Heading fontSize="base" fontWeight={500} my={4}>
+                    readKey
+                  </Heading>
+                  <Stack
+                    as="form"
+                    spacing={3}
+                    onSubmit={async e => {
+                      e.preventDefault()
+
+                      const {readKey, readKeyFormat} = e.target.elements
+
+                      setResult(
+                        await createContractDataReader(contract)(
+                          readKey.value,
+                          readKeyFormat.value
+                        )
+                      )
+                    }}
+                  >
+                    <Stack isInline>
+                      <Input id="readKey" placeholder="readKey key" />
+                      <Input id="readKeyFormat" placeholder="format" w={100} />
+                    </Stack>
+                    <SecondaryButton
+                      type="submit"
+                      ml="auto"
+                      onClick={async () => {}}
+                    >
+                      Read data
+                    </SecondaryButton>
+                  </Stack>
+                </Box>
+                <Box>
+                  <Heading fontSize="base" fontWeight={500} my={4}>
+                    txReceipt
+                  </Heading>
+                  <Stack
+                    as="form"
+                    spacing={3}
+                    onSubmit={async e => {
+                      e.preventDefault()
+                      setResult(
+                        await callRpc(
+                          'bcn_txReceipt',
+                          e.target.elements.txHash.value
+                        )
+                      )
+                    }}
+                  >
+                    <Stack isInline>
+                      <Input id="txHash" placeholder="txHash" />
+                    </Stack>
+                    <SecondaryButton
+                      type="submit"
+                      ml="auto"
+                      onClick={async () => {}}
+                    >
+                      Show receipt
+                    </SecondaryButton>
+                  </Stack>
+                </Box>
+                <Box>
+                  <Heading fontSize="base" fontWeight={500} my={4}>
+                    contract_getStake
+                  </Heading>
+                  <Stack
+                    as="form"
+                    spacing={3}
+                    onSubmit={async e => {
+                      e.preventDefault()
+                      setResult(
+                        await callRpc(
+                          'contract_getStake',
+                          contract.contractHash
+                        )
+                      )
+                    }}
+                  >
+                    <Stack isInline>
+                      <Input
+                        value={contract.contractHash}
+                        isReadonly
+                        isDisabled
+                      />
+                    </Stack>
+                    <SecondaryButton
+                      type="submit"
+                      ml="auto"
+                      onClick={async () => {}}
+                    >
+                      Get stake
+                    </SecondaryButton>
+                  </Stack>
+                </Box>
+                <Box ml="auto" mt={6}>
+                  <PrimaryButton
+                    variantColor="red"
+                    onClick={() => {
+                      alert('🤷‍♂️')
+                      // send('TERMINATE_CONTRACT')
+                    }}
+                  >
+                    Terminate contact
+                  </PrimaryButton>
+                </Box>
+              </Stack>
+              <Debug>{result}</Debug>
+            </Stack>
+          </DrawerBody>
+        </DrawerContent>
+      </ChakraDrawer>
+    </>
   )
 }
