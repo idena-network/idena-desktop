@@ -456,28 +456,8 @@ export const votingMachine = Machine(
       },
     },
     guards: {
-      isIdle: eitherStatus(
-        VotingStatus.Pending,
-        VotingStatus.Open,
-        VotingStatus.Voted,
-        VotingStatus.Counting,
-        VotingStatus.Archived
-      ),
-      isMining: ({status, txHash}) =>
-        Boolean(txHash) &&
-        eitherStatus(
-          VotingStatus.Deploying,
-          VotingStatus.Funding,
-          VotingStatus.Starting,
-          VotingStatus.Terminating
-        )({status}),
-      isDeploying: isVotingMiningStatus(VotingStatus.Deploying),
-      isFunding: isVotingMiningStatus(VotingStatus.Funding),
-      isStarting: isVotingMiningStatus(VotingStatus.Starting),
-      isPending: isVotingStatus(VotingStatus.Pending),
-      isRunning: isVotingStatus(VotingStatus.Open),
-      isVoted: isVotingStatus(VotingStatus.Voted),
-      isCounting: isVotingStatus(VotingStatus.Counting),
+      // eslint-disable-next-line no-use-before-define
+      ...votingStatusGuards(),
     },
   }
 )
@@ -621,6 +601,7 @@ export const createNewVotingMachine = epoch =>
 export const createViewVotingMachine = (id, epoch, address) =>
   Machine(
     {
+      id: 'viewVoting',
       context: {
         id,
         epoch,
@@ -642,82 +623,147 @@ export const createViewVotingMachine = (id, epoch, address) =>
           },
         },
         idle: {
+          initial: 'detecting',
+          states: {
+            detecting: {
+              on: {
+                '': [
+                  {
+                    target: VotingStatus.Pending,
+                    cond: 'isPending',
+                  },
+                  {
+                    target: VotingStatus.Open,
+                    cond: 'isRunning',
+                  },
+                  {
+                    target: VotingStatus.Voted,
+                    cond: 'isVoted',
+                  },
+                  {
+                    target: VotingStatus.Counting,
+                    cond: 'isCounting',
+                  },
+                  {
+                    target: `#viewVoting.${VotingStatus.Invalid}`,
+                    actions: ['setInvalid', 'persist'],
+                  },
+                ],
+              },
+            },
+            [VotingStatus.Pending]: {
+              on: {
+                START_VOTING: {
+                  target: `#viewVoting.mining.voting`,
+                  actions: ['setStarting', 'persist'],
+                },
+              },
+            },
+            [VotingStatus.Open]: {},
+            [VotingStatus.Voted]: {},
+            [VotingStatus.Counting]: {
+              on: {
+                FINISH_VOTING: `#viewVoting.mining.finishVoting`,
+              },
+            },
+            hist: {
+              type: 'hist',
+            },
+          },
           on: {
             SELECT_OPTION: {
               actions: ['selectOption', log()],
             },
-            VOTE_SELECTED: 'voting',
-            VOTE: {
-              target: 'voting',
-              actions: ['selectOption'],
-            },
-            ADD_FUND: VotingStatus.Funding,
-            START_VOTING: VotingStatus.Starting,
-            TERMINATE_CONTRACT: VotingStatus.Terminating,
+            VOTE: 'mining.voting',
+            ADD_FUND: `mining.${VotingStatus.Funding}`,
+            START_VOTING: `mining.${VotingStatus.Starting}`,
+            TERMINATE_CONTRACT: `mining.${VotingStatus.Terminating}`,
           },
         },
-        [VotingStatus.Funding]: {
-          entry: ['setFunding', 'persist'],
-          initial: 'submitting',
+        mining: {
           states: {
-            submitting: {
+            [VotingStatus.Funding]: {
+              entry: ['setFunding', 'persist'],
+              initial: 'submitting',
+              states: {
+                submitting: {
+                  invoke: {
+                    src: 'addFund',
+                    onDone: {
+                      target: 'mining',
+                      actions: ['applyTx', log()],
+                    },
+                    onError: {
+                      target: 'failure',
+                      actions: ['onError', 'restorePrevStatus', log()],
+                    },
+                  },
+                },
+                mining: {
+                  invoke: {
+                    src: 'pollStatus',
+                  },
+                },
+                failure: {
+                  on: {
+                    RETRY: 'submitting',
+                  },
+                },
+              },
+            },
+            [VotingStatus.Starting]: {
+              entry: ['setStarting'],
               invoke: {
-                src: 'addFund',
+                src: 'startVoting',
                 onDone: {
-                  target: 'mining',
-                  actions: ['applyTx', log()],
+                  actions: ['applyTx', 'persist', log()],
                 },
                 onError: {
-                  target: 'failure',
                   actions: ['onError', 'restorePrevStatus', log()],
                 },
               },
             },
-            mining: {
+            voting: {
               invoke: {
-                src: 'pollStatus',
+                src: 'vote',
+                onDone: {
+                  target: `#viewVoting.idle.${VotingStatus.Voted}`,
+                  actions: ['setVoted', 'applyTx', 'persist', log()],
+                },
+                onError: {
+                  target: '#viewVoting.invalid',
+                  actions: ['onError', log()],
+                },
               },
             },
-            failure: {
-              on: {
-                RETRY: 'submitting',
+            finishVoting: {
+              invoke: {
+                src: 'finishVoting',
+                onDone: {
+                  actions: [
+                    assign({
+                      status: VotingStatus.Archived,
+                    }),
+                    'applyTx',
+                    'persist',
+                    log(),
+                  ],
+                },
+                onError: {
+                  actions: ['onError', 'restorePrevStatus', log()],
+                },
               },
             },
-          },
-        },
-        [VotingStatus.Starting]: {
-          entry: ['setStarting', 'persist'],
-          invoke: {
-            src: 'startVoting',
-            onDone: {
-              actions: ['applyTx', log()],
-            },
-            onError: {
-              actions: ['onError', 'restorePrevStatus', log()],
-            },
-          },
-        },
-        voting: {
-          invoke: {
-            src: 'vote',
-            onDone: {
-              target: 'idle',
-              actions: ['setVoted', 'applyTx', 'persist', log()],
-            },
-            onError: {
-              target: 'invalid',
-              actions: ['onError', log()],
-            },
-          },
-        },
-        [VotingStatus.Terminating]: {
-          invoke: {
-            src: 'terminateContract',
-            onDone: {
-              actions: [log()],
-            },
-            onError: {
-              actions: ['onError', log()],
+            [VotingStatus.Terminating]: {
+              invoke: {
+                src: 'terminateContract',
+                onDone: {
+                  actions: [log()],
+                },
+                onError: {
+                  actions: ['onError', log()],
+                },
+              },
             },
           },
         },
@@ -725,7 +771,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
       },
       on: {
         MINED: {
-          target: 'idle',
+          target: 'idle.hist',
           actions: ['restorePrevStatus', 'persist', log()],
         },
         TX_NULL: {
@@ -755,10 +801,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
         }),
         restorePrevStatus: assign({
           status: ({prevStatus}) => prevStatus,
-        }),
-        selectOption: assign({
-          selectedOption: ({options}, {option}) =>
-            options.findIndex(o => o === option),
         }),
         applyTx: assign({
           txHash: (_, {data}) => data,
@@ -865,23 +907,31 @@ export const createViewVotingMachine = (id, epoch, address) =>
             }
           )
 
-          const resp = await callContract(
+          await callContract(
             'sendVote',
             ContractRpcMode.Call,
             {value: selectedOption.toString(), format: 'byte'},
             {value: issuer}
           )
 
-          console.log(
-            proof,
-            voteHash,
-            votingMinPayment,
-            voteBlock,
-            voteProofResp,
-            resp
-          )
+          return voteProofResp
+        },
+        finishVoting: async contract => {
+          let callContract = createContractCaller(contract)
 
-          return resp
+          const {error, gasCost, txFee} = await callContract(
+            'terminate',
+            ContractRpcMode.Estimate
+          )
+          if (error) throw new Error(error)
+
+          callContract = createContractCaller({
+            ...contract,
+            gasCost: Number(gasCost),
+            txFee: Number(txFee),
+          })
+
+          return callContract('terminate')
         },
         terminateContract: async ({
           // eslint-disable-next-line no-shadow
@@ -928,5 +978,36 @@ export const createViewVotingMachine = (id, epoch, address) =>
           }
         },
       },
+      guards: {
+        // eslint-disable-next-line no-use-before-define
+        ...votingStatusGuards(),
+      },
     }
   )
+
+function votingStatusGuards() {
+  return {
+    isIdle: eitherStatus(
+      VotingStatus.Pending,
+      VotingStatus.Open,
+      VotingStatus.Voted,
+      VotingStatus.Counting,
+      VotingStatus.Archived
+    ),
+    isMining: ({status, txHash}) =>
+      Boolean(txHash) &&
+      eitherStatus(
+        VotingStatus.Deploying,
+        VotingStatus.Funding,
+        VotingStatus.Starting,
+        VotingStatus.Terminating
+      )({status}),
+    isDeploying: isVotingMiningStatus(VotingStatus.Deploying),
+    isFunding: isVotingMiningStatus(VotingStatus.Funding),
+    isStarting: isVotingMiningStatus(VotingStatus.Starting),
+    isPending: isVotingStatus(VotingStatus.Pending),
+    isRunning: isVotingStatus(VotingStatus.Open),
+    isVoted: isVotingStatus(VotingStatus.Voted),
+    isCounting: isVotingStatus(VotingStatus.Counting),
+  }
+}
