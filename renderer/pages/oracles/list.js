@@ -80,13 +80,7 @@ function VotingListPage() {
         </Stack>
         <VotingSkeleton isLoaded={!current.matches('preload')}>
           <Stack spacing={8} align="flex-start" maxW={40}>
-            <IconLink
-              href="/oracles/new"
-              icon="plus-solid"
-              px={0}
-              _focus={null}
-              _hover={null}
-            >
+            <IconLink href="/oracles/new" icon="plus-solid" ml={-2}>
               {t('New voting')}
             </IconLink>
             <VotingFilterList

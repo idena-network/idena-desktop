@@ -1,17 +1,15 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import {FiUsers} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
-import {Box, Placeholder} from '../../../shared/components'
-import Layout from '../../../shared/components/layout'
-import Flex from '../../../shared/components/flex'
+import {Box, Flex, Icon, Stack, Text} from '@chakra-ui/core'
 import ContactDetails from './contact-details'
 import {ContactProvider} from '../../../shared/providers/contact-context'
 import Sidebar from './sidebar'
 import InviteDetails from './invite-details'
-import {useChainState} from '../../../shared/providers/chain-context'
 import {SendInviteDrawer, SendInviteForm} from './send-invite-form'
+import {Page} from '../../app/components'
 
+// eslint-disable-next-line react/prop-types
 function ContactsPage({showNewInviteForm = false}) {
   const {t} = useTranslation()
 
@@ -27,12 +25,10 @@ function ContactsPage({showNewInviteForm = false}) {
     setIsSendInviteOpen(false)
   }
 
-  const {syncing, offline, loading} = useChainState()
-
   return (
     <ContactProvider>
-      <Layout syncing={syncing} offline={offline} loading={loading}>
-        <Flex>
+      <Page p={0}>
+        <Flex flex={1} w="full">
           <Sidebar
             onSelectContact={setSelectedContact}
             onSelectInvite={invite => {
@@ -41,12 +37,7 @@ function ContactsPage({showNewInviteForm = false}) {
             }}
             onNewInvite={() => setIsSendInviteOpen(true)}
           />
-          <Box
-            css={{
-              flexBasis: 0,
-              flexGrow: 1,
-            }}
-          >
+          <Box flex={1}>
             {showInvite && (
               <InviteDetails
                 dbkey={selectedInvite.id}
@@ -65,14 +56,14 @@ function ContactsPage({showNewInviteForm = false}) {
             {showContact && <ContactDetails {...selectedContact} />}
 
             {!showContact && !showInvite && !selectedInvite && (
-              <Placeholder
-                icon={<FiUsers />}
-                text={
-                  <>
-                    {t('You haven’t selected contacts yet.')} <br />
-                  </>
-                }
-              />
+              <Flex align="center" justify="center" h="full">
+                <Stack spacing={4} align="center" color="muted" m="auto">
+                  <Icon as={FiUsers} size={16} />
+                  <Text fontWeight={500}>
+                    {t('You haven’t selected contacts yet.')}
+                  </Text>
+                </Stack>
+              </Flex>
             )}
           </Box>
 
@@ -90,13 +81,9 @@ function ContactsPage({showNewInviteForm = false}) {
             />
           </SendInviteDrawer>
         </Flex>
-      </Layout>
+      </Page>
     </ContactProvider>
   )
-}
-
-ContactsPage.propTypes = {
-  showNewInviteForm: PropTypes.bool,
 }
 
 export default ContactsPage
