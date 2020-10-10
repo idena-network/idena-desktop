@@ -54,10 +54,10 @@ export const VotingStatus = {
   Archived: 'archive',
   Deploying: 'deploying',
   Funding: 'funding',
-  Terminating: 'terminating',
   Starting: 'starting',
   Voting: 'voting',
   Finishing: 'finishing',
+  Terminating: 'terminating',
   Invalid: 'invalid',
 }
 

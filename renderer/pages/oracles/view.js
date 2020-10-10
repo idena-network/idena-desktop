@@ -45,6 +45,7 @@ import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {VotingStatus} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
+import {areSameCaseInsensitive} from '../../screens/oracles/utils'
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
@@ -121,7 +122,7 @@ export default function ViewVotingPage() {
   const isMining = current.matches('mining')
   const isMiningFunding = current.matches('mining.funding')
 
-  const sameString = a => b => a?.toLowerCase() === b?.toLowerCase()
+  const sameString = a => b => areSameCaseInsensitive(a, b)
 
   const eitherIdleState = (...states) =>
     eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase())) ||
