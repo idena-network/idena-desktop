@@ -257,3 +257,25 @@ export function VotingFormAdvancedToggle(props) {
     </IconButton2>
   )
 }
+
+// eslint-disable-next-line react/display-name
+export const VotingOption = React.forwardRef(
+  ({value, annotation, ...props}, ref) => (
+    <Flex
+      ref={ref}
+      justify="space-between"
+      border="1px"
+      borderColor="gray.300"
+      borderRadius="md"
+      px={3}
+      py={2}
+    >
+      <Radio borderColor="gray.100" name="option" value={value} {...props}>
+        {value}
+      </Radio>
+      <Text color="muted" fontSize="sm">
+        {annotation}
+      </Text>
+    </Flex>
+  )
+)
