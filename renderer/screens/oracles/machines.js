@@ -538,7 +538,10 @@ export const createViewVotingMachine = (id, epoch, address) =>
             [VotingStatus.Voted]: {},
             [VotingStatus.Counting]: {
               on: {
-                FINISH_VOTING: `#viewVoting.mining.finishVoting`,
+                FINISH_VOTING: {
+                  target: `#viewVoting.mining.${VotingStatus.Finishing}`,
+                  actions: ['setFinishing', 'persist'],
+                },
               },
             },
             [VotingStatus.Archived]: {},
@@ -551,11 +554,17 @@ export const createViewVotingMachine = (id, epoch, address) =>
               target: `mining.${VotingStatus.Funding}`,
               actions: ['setFunding', 'persist', log()],
             },
-            START_VOTING: `mining.${VotingStatus.Starting}`,
+            START_VOTING: {
+              target: `mining.${VotingStatus.Starting}`,
+              actions: ['setStarting', 'persist'],
+            },
             SELECT_OPTION: {
               actions: ['selectOption', log()],
             },
-            VOTE: 'mining.voting',
+            VOTE: {
+              target: 'mining.voting',
+              actions: ['setVoting', 'persist'],
+            },
             TERMINATE_CONTRACT: `mining.${VotingStatus.Terminating}`,
           },
         },
@@ -572,16 +581,16 @@ export const createViewVotingMachine = (id, epoch, address) =>
             Number(fundingAmount) + Number(amount),
         }),
         setStarting: setVotingStatus(VotingStatus.Starting),
-        setRunning: assign({
-          prevStatus: ({status}) => status,
-          status: VotingStatus.Open,
-        }),
+        setRunning: setVotingStatus(VotingStatus.Open),
+        setVoting: setVotingStatus(VotingStatus.Voting),
+        setFinishing: setVotingStatus(VotingStatus.Finishing),
         applyVoting: assign((context, {data}) => ({
           ...context,
           ...data,
         })),
-        setVoted: assign({
-          status: VotingStatus.Voted,
+        setVoted: setVotingStatus(VotingStatus.Voted),
+        setArchived: assign({
+          status: VotingStatus.Archived,
         }),
         setInvalid: assign({
           status: VotingStatus.Invalid,
@@ -783,6 +792,14 @@ function votingMiningStates(machineId) {
               target: VotingStatus.Starting,
               cond: 'isStarting',
             },
+            {
+              target: VotingStatus.Voting,
+              cond: 'isVoting',
+            },
+            {
+              target: VotingStatus.Finishing,
+              cond: 'isFinishing',
+            },
           ],
         },
       },
@@ -917,24 +934,19 @@ function votingMiningStates(machineId) {
           },
           onError: {
             target: `#${machineId}.invalid`,
-            actions: ['onError', log()],
+            actions: ['onError', 'restorePrevStatus', log()],
           },
         },
       },
-      finishVoting: {
+      [VotingStatus.Finishing]: {
         invoke: {
           src: 'finishVoting',
           onDone: {
-            actions: [
-              assign({
-                status: VotingStatus.Archived,
-              }),
-              'applyTx',
-              'persist',
-              log(),
-            ],
+            target: `#${machineId}.idle.${VotingStatus.Archived}`,
+            actions: ['setArchived', 'applyTx', 'persist', log()],
           },
           onError: {
+            target: `#${machineId}.idle.hist`,
             actions: ['onError', 'restorePrevStatus', log()],
           },
         },
@@ -946,7 +958,7 @@ function votingMiningStates(machineId) {
             actions: [log()],
           },
           onError: {
-            actions: ['onError', log()],
+            actions: ['onError', 'restorePrevStatus', log()],
           },
         },
       },
@@ -1012,6 +1024,8 @@ function votingStatusGuards() {
     isRunning: isVotingStatus(VotingStatus.Open),
     isVoted: isVotingStatus(VotingStatus.Voted),
     isCounting: isVotingStatus(VotingStatus.Counting),
+    isVoting: isVotingStatus(VotingStatus.Voting),
+    isFinishing: isVotingStatus(VotingStatus.Finishing),
     isArchived: isVotingStatus(VotingStatus.Archived),
     shouldSubmit: ({miningStatus}) => !miningStatus,
     shouldPollStatus: ({miningStatus}) => miningStatus === 'mining',
