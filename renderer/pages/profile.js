@@ -19,8 +19,6 @@ import {
   UserInlineCard,
   SimpleUserStat,
   UserStatList,
-  UserStat,
-  UserStatLabel,
   UserStatValue,
   AnnotatedUserStat,
   SpoilInviteDrawer,
