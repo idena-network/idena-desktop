@@ -621,23 +621,17 @@ export const createViewVotingMachine = (id, epoch, address) =>
         // eslint-disable-next-line no-shadow
         loadVoting: async ({epoch, id}) => epochDb('votings', epoch).load(id),
         ...votingServices(),
-        vote: async ({
-          // eslint-disable-next-line no-shadow
-          address,
-          issuer = address,
-          contractHash,
-          amount,
-          selectedOption,
-          gasCost,
-          txFee,
-        }) => {
+        vote: async (
+          {contractHash, amount, selectedOption, gasCost, txFee},
+          {from}
+        ) => {
           const readonlyCallContract = createContractReadonlyCaller({
             contractHash,
           })
           const readContractData = createContractDataReader({contractHash})
 
           const proof = await readonlyCallContract('proof', 'hex', {
-            value: address,
+            value: from,
           })
 
           const {error} = proof
@@ -647,7 +641,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
             'voteHash',
             'hex',
             {value: selectedOption.toString(), format: 'byte'},
-            {value: issuer}
+            {value: from}
           )
 
           const votingMinPayment = Number(
@@ -659,7 +653,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           )
 
           let callContract = createContractCaller({
-            issuer,
+            from,
             contractHash,
             amount: votingMinPayment || amount,
             broadcastBlock: voteBlock,
@@ -678,7 +672,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           if (errorProof) throw new Error(errorProof)
 
           callContract = createContractCaller({
-            issuer,
+            from,
             contractHash,
             amount: votingMinPayment || amount,
             broadcastBlock: voteBlock,
@@ -698,13 +692,13 @@ export const createViewVotingMachine = (id, epoch, address) =>
             'sendVote',
             ContractRpcMode.Call,
             {value: selectedOption.toString(), format: 'byte'},
-            {value: issuer}
+            {value: from}
           )
 
           return voteProofResp
         },
-        finishVoting: async contract => {
-          let callContract = createContractCaller(contract)
+        finishVoting: async (contract, {from}) => {
+          let callContract = createContractCaller({...contract, from})
 
           const {error, gasCost, txFee} = await callContract(
             'finishVoting',
@@ -714,20 +708,24 @@ export const createViewVotingMachine = (id, epoch, address) =>
 
           callContract = createContractCaller({
             ...contract,
+            from,
             gasCost: Number(gasCost),
             txFee: Number(txFee),
           })
 
           return callContract('finishVoting')
         },
-        terminateContract: async ({
-          // eslint-disable-next-line no-shadow
-          address,
-          issuer = address,
-          contractHash,
-        }) => {
+        terminateContract: async (
+          {
+            // eslint-disable-next-line no-shadow
+            address,
+            issuer = address,
+            contractHash,
+          },
+          {from}
+        ) => {
           const payload = {
-            from: issuer,
+            from,
             contract: contractHash,
             args: buildDynamicArgs({value: issuer}),
           }
@@ -980,8 +978,8 @@ function votingServices() {
         from,
         amount,
       }),
-    startVoting: async contract => {
-      let callContract = createContractCaller(contract)
+    startVoting: async (contract, {from}) => {
+      let callContract = createContractCaller({...contract, from})
 
       const {error, gasCost, txFee} = await callContract(
         'startVoting',
@@ -991,6 +989,7 @@ function votingServices() {
 
       callContract = createContractCaller({
         ...contract,
+        from,
         gasCost: Number(gasCost),
         txFee: Number(txFee),
       })

@@ -47,7 +47,7 @@ export async function fetchVotings({limit = 10, ...params}) {
 }
 
 export const createContractCaller = ({
-  issuer,
+  from,
   contractHash,
   votingMinPayment,
   gasCost,
@@ -58,7 +58,7 @@ export const createContractCaller = ({
   const isCalling = mode === ContractRpcMode.Call
 
   const payload = omit({
-    from: issuer,
+    from,
     contract: contractHash,
     method,
     maxFee: isCalling ? contractMaxFee(gasCost, txFee) : null,

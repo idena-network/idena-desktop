@@ -76,6 +76,7 @@ export default function ViewVotingPage() {
     () => createViewVotingMachine(id, epoch, address),
     [address, epoch, id]
   )
+
   const [current, send] = useMachine(viewMachine, {
     actions: {
       onError: (_, {data: {message}}) => {
@@ -241,7 +242,7 @@ export default function ViewVotingPage() {
                           isMiningFunding ? t('Mining') : t('Launching')
                         }
                         onClick={() => {
-                          send('START_VOTING')
+                          send('START_VOTING', {from: address})
                         }}
                       >
                         {t('Launch')}
@@ -253,7 +254,7 @@ export default function ViewVotingPage() {
                         loadingText={
                           isMiningFunding ? t('Mining') : t('Voting')
                         }
-                        onClick={() => send('VOTE')}
+                        onClick={() => send('VOTE', {from: address})}
                       >
                         {t('Vote')}
                       </PrimaryButton>
@@ -264,7 +265,7 @@ export default function ViewVotingPage() {
                         loadingText={
                           isMiningFunding ? t('Mining') : t('Finishing')
                         }
-                        onClick={() => send('FINISH_VOTING')}
+                        onClick={() => send('FINISH_VOTING', {from: address})}
                       >
                         {t('Finish voting')}
                       </PrimaryButton>
