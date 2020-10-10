@@ -16,6 +16,7 @@ import {
   votingFinishDate,
   byContractHash,
   hexToObject,
+  areSameCaseInsensitive,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc, merge} from '../../shared/utils/utils'
@@ -159,18 +160,43 @@ export const votingListMachine = Machine(
 
         const db = epochDb('votings', epoch)
 
-        const persistedVotings = (await db.all()).filter(voting =>
+        const persistedVotings = await db.all()
+
+        const knownPersistedVotings = persistedVotings.filter(voting =>
           normalizedKnownVotings.some(byContractHash(voting))
         )
 
         const votings = merge(byContractHash)(
-          persistedVotings,
+          knownPersistedVotings,
           normalizedKnownVotings
         )
 
         await db.putMany(votings)
 
-        return votings
+        const miningVotings = persistedVotings.filter(
+          ({status, prevStatus}) =>
+            (status === VotingStatus.Deploying &&
+              filter === VotingStatus.Pending) ||
+            (status === VotingStatus.Starting &&
+              filter === VotingStatus.Open) ||
+            (status === VotingStatus.Voting && filter === VotingStatus.Voted) ||
+            (status === VotingStatus.Finishing &&
+              filter === VotingStatus.Archived) ||
+            (status === VotingStatus.Funding &&
+              areSameCaseInsensitive(filter, prevStatus))
+        )
+
+        const ownVotings = showAll
+          ? []
+          : persistedVotings.filter(({issuer, status}) => {
+              console.log(status, filter, issuer, address)
+              return (
+                areSameCaseInsensitive(status, filter) &&
+                areSameCaseInsensitive(issuer, address)
+              )
+            })
+
+        return votings.concat(miningVotings).concat(ownVotings)
       },
       loadFilter: async ({filter}) => {
         try {
@@ -610,7 +636,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
         }),
         selectOption: assign({
           selectedOption: ({options}, {option}) =>
-            options.findIndex(o => o.toUpperCase() === option.toUpperCase()),
+            options.findIndex(o => areSameCaseInsensitive(o, option)),
         }),
         // eslint-disable-next-line no-shadow
         persist: ({epoch, ...context}) => {
