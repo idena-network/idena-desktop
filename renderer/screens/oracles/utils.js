@@ -16,13 +16,13 @@ export function resolveVotingStatus({status, startDate, vote}) {
 }
 
 export const isVotingStatus = targetStatus => ({status}) =>
-  status.toUpperCase() === targetStatus.toUpperCase()
+  areSameCaseInsensitive(status, targetStatus)
 
 export const isVotingMiningStatus = targetStatus => ({status, txHash}) =>
   status === targetStatus && Boolean(txHash)
 
 export const eitherStatus = (...statuses) => ({status}) =>
-  statuses.some(s => s.toUpperCase() === status.toUpperCase())
+  statuses.some(s => areSameCaseInsensitive(s, status))
 
 export const setVotingStatus = status =>
   assign({
@@ -187,4 +187,8 @@ export function viewVotingHref(id) {
 }
 
 export const byContractHash = a => b =>
-  a.contractHash.toUpperCase() === b.contractHash.toUpperCase()
+  areSameCaseInsensitive(a.contractHash, b.contractHash)
+
+export function areSameCaseInsensitive(a, b) {
+  return a?.toUpperCase() === b?.toUpperCase()
+}
