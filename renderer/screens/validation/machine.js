@@ -901,7 +901,7 @@ export const createValidationMachine = ({
           fetchFlips(
             longFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
             cb,
-            3000
+            1000
           ),
         // eslint-disable-next-line no-shadow
         fetchTranslations: ({longFlips, currentIndex, locale}) =>
