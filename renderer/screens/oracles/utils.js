@@ -102,7 +102,9 @@ export function stringToHex(str) {
 }
 
 export function hexToObject(hex) {
-  return new TextDecoder().decode(Buffer.from(hex, 'hex'))
+  return JSON.parse(
+    new TextDecoder().decode(Buffer.from(hex.substring(2), 'hex'))
+  )
 }
 
 export function buildContractDeploymentParams(
