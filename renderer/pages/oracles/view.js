@@ -5,7 +5,6 @@ import {
   Text,
   Heading,
   RadioGroup,
-  Radio,
   Flex,
   Divider,
   Icon,
@@ -31,6 +30,7 @@ import {
 import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
   VotingBadge,
+  VotingOption,
   VotingResultBar,
   VotingSkeleton,
 } from '../../screens/oracles/components'
@@ -70,7 +70,7 @@ export default function ViewVotingPage() {
 
   const {epoch} = useEpochState()
 
-  const {address} = useIdentityState()
+  const {address, balance} = useIdentityState()
 
   const viewMachine = React.useMemo(
     () => createViewVotingMachine(id, epoch, address),
@@ -104,7 +104,9 @@ export default function ViewVotingPage() {
     quorum = 20,
     committeeSize = 100,
     options = [],
-    votesCount = 0,
+    voteProofsCount,
+    votesCount,
+    actualVotesCount = votesCount || voteProofsCount,
     finishDate = dayjs(startDate)
       .add(votingDuration, 's')
       .add(pubicVotingDuration, 's'),
@@ -115,15 +117,19 @@ export default function ViewVotingPage() {
 
   const isLoaded = !current.matches('loading')
 
-  const isMining = eitherState(current, 'mining')
+  const isMining = current.matches('mining')
+  const isMiningFunding = current.matches('mining.funding')
 
-  const somePrevStatus = (...statuses) => statuses.some(s => s === prevStatus)
+  const sameString = a => b => a?.toLowerCase() === b?.toLowerCase()
 
   const eitherIdleState = (...states) =>
-    eitherState(current, ...states.map(s => `idle.${s.toLowerCase()}`)) ||
-    (isMining && somePrevStatus(...states))
+    eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase())) ||
+    states.some(sameString(status)) ||
+    (isMining && states.some(sameString(prevStatus)))
 
   const maxCount = Math.max(...votes.map(({count}) => count))
+
+  const isLate = dayjs().isAfter(dayjs(finishDate))
 
   return (
     <>
@@ -158,87 +164,82 @@ export default function ViewVotingPage() {
                   <Text lineHeight="tall">{desc}</Text>
                 </Stack>
               </VotingSkeleton>
-              {eitherIdleState(VotingStatus.Open) && (
+
+              {eitherIdleState(VotingStatus.Open, VotingStatus.Voted) && (
                 <VotingSkeleton isLoaded={isLoaded}>
                   <Box>
                     <Text color="muted" fontSize="sm" mb={3}>
                       {t('Choose an option to vote')}
                     </Text>
                     <RadioGroup
-                      onChange={e =>
-                        send('SELECT_OPTION', {option: e.target.value})
-                      }
+                      defaultValue={options[selectedOption]}
+                      onChange={e => {
+                        send('SELECT_OPTION', {
+                          option: e.target.value,
+                        })
+                        onOpenVote()
+                      }}
                     >
                       {options.map((option, idx) => (
-                        <Flex
+                        <VotingOption
                           key={`${option}-${idx}`}
-                          justify="space-between"
-                          border="1px"
-                          borderColor="gray.300"
-                          borderRadius="md"
-                          px={3}
-                          py={2}
-                        >
-                          <Radio
-                            borderColor="gray.100"
-                            name="option"
-                            value={option}
-                            onClick={onOpenVote}
-                          >
-                            {option}
-                          </Radio>
-                          <Text color="muted" fontSize="sm">
-                            {t('{{count}} min. votes required', {
-                              count: toPercent(quorum / committeeSize),
-                            })}
-                          </Text>
-                        </Flex>
+                          value={option}
+                          isDisabled={eitherIdleState(VotingStatus.Voted)}
+                          annotation={t('{{count}} min. votes required', {
+                            count: toPercent(quorum / committeeSize),
+                          })}
+                        />
                       ))}
                     </RadioGroup>
                   </Box>
                 </VotingSkeleton>
               )}
+
               {eitherIdleState(
-                VotingStatus.Archived,
-                VotingStatus.Counting
+                VotingStatus.Counting,
+                VotingStatus.Archived
               ) && (
-                <Stack spacing={2} mb={6}>
-                  <Text color="muted" fontSize="sm">
-                    {t('Results')}
-                  </Text>
-                  {votesCount ? (
-                    options.map((option, idx) => {
-                      const value =
-                        votes.find(v => v.option === idx)?.count ?? 0
-                      return (
-                        <VotingResultBar
-                          label={option}
-                          value={value / votesCount}
-                          isMax={maxCount === value}
-                        />
-                      )
-                    })
-                  ) : (
-                    <Text
-                      bg="gray.50"
-                      borderRadius="md"
-                      p={2}
-                      color="muted"
-                      fontSize="sm"
-                    >
-                      {t('No votes')}
+                <VotingSkeleton isLoaded={isLoaded}>
+                  <Stack spacing={2} mb={6}>
+                    <Text color="muted" fontSize="sm">
+                      {t('Results')}
                     </Text>
-                  )}
-                </Stack>
+                    {actualVotesCount ? (
+                      options.map((option, idx) => {
+                        const value =
+                          votes.find(v => v.option === idx)?.count ?? 0
+                        return (
+                          <VotingResultBar
+                            label={option}
+                            value={value / actualVotesCount}
+                            isMax={maxCount === value}
+                          />
+                        )
+                      })
+                    ) : (
+                      <Text
+                        bg="gray.50"
+                        borderRadius="md"
+                        p={2}
+                        color="muted"
+                        fontSize="sm"
+                      >
+                        {t('No votes')}
+                      </Text>
+                    )}
+                  </Stack>
+                </VotingSkeleton>
               )}
+
               <VotingSkeleton isLoaded={isLoaded}>
                 <Flex justify="space-between" align="center">
                   <Stack isInline spacing={2}>
                     {eitherIdleState(VotingStatus.Pending) && (
                       <PrimaryButton
-                        variantColor="green"
                         isLoading={isMining}
-                        loadingText={t('Launching')}
+                        loadingText={
+                          isMiningFunding ? t('Mining') : t('Launching')
+                        }
                         onClick={() => {
                           send('START_VOTING')
                         }}
@@ -249,22 +250,25 @@ export default function ViewVotingPage() {
                     {eitherIdleState(VotingStatus.Open) && (
                       <PrimaryButton
                         isLoading={isMining}
-                        loadingText={t('Voting')}
+                        loadingText={
+                          isMiningFunding ? t('Mining') : t('Voting')
+                        }
                         onClick={() => send('VOTE')}
                       >
                         {t('Vote')}
                       </PrimaryButton>
                     )}
-                    {eitherIdleState(VotingStatus.Counting) &&
-                      dayjs().isAfter(dayjs(finishDate)) && (
-                        <PrimaryButton
-                          isLoading={isMining}
-                          loadingText={t('Finishing')}
-                          onClick={() => send('FINISH_VOTING')}
-                        >
-                          {t('Finish voting')}
-                        </PrimaryButton>
-                      )}
+                    {eitherIdleState(VotingStatus.Counting) && isLate && (
+                      <PrimaryButton
+                        isLoading={isMining}
+                        loadingText={
+                          isMiningFunding ? t('Mining') : t('Finishing')
+                        }
+                        onClick={() => send('FINISH_VOTING')}
+                      >
+                        {t('Finish voting')}
+                      </PrimaryButton>
+                    )}
                     <SecondaryButton onClick={() => redirect('/oracles/list')}>
                       {t('Cancel')}
                     </SecondaryButton>
@@ -276,9 +280,14 @@ export default function ViewVotingPage() {
                       borderLeft="1px"
                     />
                     <Stack isInline spacing={2} align="center">
-                      <Icon name="user" w={4} h={4} />
+                      <Icon
+                        name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
+                        color="muted"
+                        w={4}
+                        h={4}
+                      />
                       <Text as="span">
-                        {t('{{count}} votes', {count: votesCount})}
+                        {t('{{count}} votes', {count: actualVotesCount})}
                       </Text>
                     </Stack>
                   </Stack>
@@ -311,7 +320,12 @@ export default function ViewVotingPage() {
                 />
                 <AsideStat
                   label={t('Your reward')}
-                  value={toDna(fundingAmount / votesCount)}
+                  value={
+                    Number.isFinite(fundingAmount) &&
+                    Number.isFinite(actualVotesCount)
+                      ? toDna(fundingAmount / actualVotesCount)
+                      : '--'
+                  }
                 />
                 <AsideStat
                   label={t('Quorum required')}
@@ -342,8 +356,9 @@ export default function ViewVotingPage() {
         onClose={onCloseAddFund}
         from={issuer}
         to={contractHash}
-        onAddFund={amount => {
-          send('ADD_FUND', {amount})
+        available={balance}
+        onAddFund={({amount, from}) => {
+          send('ADD_FUND', {amount, from})
           onCloseAddFund()
         }}
       />

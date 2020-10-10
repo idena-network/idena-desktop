@@ -32,7 +32,7 @@ import {
   DrawerHeader,
   Input,
 } from '../../shared/components/components'
-import {VotingStatus, VoteOption} from '../../shared/types'
+import {VotingStatus} from '../../shared/types'
 import {
   VotingResultBar,
   VotingBadge,
@@ -81,12 +81,16 @@ export function VotingCard({votingRef, ...props}) {
       votingDuration,
       publicVotingDuration,
     }),
+    voteProofsCount,
     votesCount,
+    actualVotesCount = votesCount || voteProofsCount,
     contractHash,
     prevStatus,
     options,
     votes = [],
     votingMinPayment,
+    quorum,
+    identity,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -95,11 +99,12 @@ export function VotingCard({votingRef, ...props}) {
 
   const isMining = eitherState(current, 'mining')
 
-  const somePrevStatus = (...statuses) => statuses.some(s => s === prevStatus)
+  const sameString = a => b => a?.toLowerCase() === b?.toLowerCase()
 
   const eitherIdleState = (...states) =>
-    eitherState(current, ...states.map(s => `idle.${s.toLowerCase()}`)) ||
-    (isMining && somePrevStatus(...states))
+    eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase())) ||
+    states.some(sameString(status)) ||
+    (isMining && states.some(sameString(prevStatus)))
 
   const maxCount = Math.max(...votes.map(({count}) => count))
 
@@ -128,13 +133,13 @@ export function VotingCard({votingRef, ...props}) {
             <Text color="muted" fontSize="sm">
               {t('Results')}
             </Text>
-            {votesCount ? (
+            {actualVotesCount ? (
               options.map((option, idx) => {
                 const value = votes.find(v => v.option === idx)?.count ?? 0
                 return (
                   <VotingResultBar
                     label={option}
-                    value={value / votesCount}
+                    value={value / actualVotesCount}
                     isMax={maxCount === value}
                   />
                 )
@@ -219,8 +224,15 @@ export function VotingCard({votingRef, ...props}) {
               borderLeft="1px"
             />
             <Stack isInline spacing={2} align="center">
-              <Icon name="user" w={4} h={4} />
-              <Text as="span">{t('{{count}} votes', {count: votesCount})}</Text>
+              <Icon
+                name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
+                color="muted"
+                w={4}
+                h={4}
+              />
+              <Text as="span">
+                {t('{{count}} votes', {count: actualVotesCount})}
+              </Text>
             </Stack>
           </Stack>
         </Flex>
@@ -233,8 +245,9 @@ export function VotingCard({votingRef, ...props}) {
         onClose={onCloseAddFund}
         from={issuer}
         to={contractHash}
-        onAddFund={amount => {
-          send('ADD_FUND', {amount})
+        available={identity.balance}
+        onAddFund={({amount, from}) => {
+          send('ADD_FUND', {amount, from})
           onCloseAddFund()
         }}
       />
@@ -284,7 +297,7 @@ export function VotingStatusBadge({status, ...props}) {
   return <VotingBadge {...colors} {...props} />
 }
 
-export function AddFundDrawer({from, to, onAddFund, ...props}) {
+export function AddFundDrawer({from, to, available, onAddFund, ...props}) {
   const {t, i18n} = useTranslation()
 
   const toDna = toLocaleDna(i18n.language)
@@ -300,22 +313,23 @@ export function AddFundDrawer({from, to, onAddFund, ...props}) {
           e.preventDefault()
           const {
             amountInput: {value: amount},
+            fromInput: {value: fromInputValue},
           } = e.target.elements
-          onAddFund(Number(amount))
+          onAddFund({amount: Number(amount), from: fromInputValue})
         }}
       >
         <OracleDrawerBody>
           <OracleFormControl label={t('Transfer from')}>
-            <Input defaultValue={from} />
-            <OracleFormHelper label={t('Available')} value={toDna(80200)} />
+            <Input name="fromInput" defaultValue={from} />
+            <OracleFormHelper label={t('Available')} value={toDna(available)} />
           </OracleFormControl>
           <OracleFormControl label="To address">
             <Input isDisabled value={to} />
           </OracleFormControl>
           <OracleFormControl label={t('Deposit, DNA')}>
             <Input name="amountInput" />
-            <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
-            <OracleFormHelper label={t('Total amount')} value={toDna(240.01)} />
+            {/* <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
+            <OracleFormHelper label={t('Total amount')} value={toDna(240.01)} /> */}
           </OracleFormControl>
           <PrimaryButton type="submit" mt={3} ml="auto">
             {t('Send')}
