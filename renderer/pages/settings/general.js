@@ -94,13 +94,13 @@ function Settings() {
         <ExportPK />
       </SettingsSection>
 
-      <Box>
-        {runInternalNode && !useExternalNode && (
+      {runInternalNode && !useExternalNode && (
+        <Box>
           <SettingsSection title={t('Import private key')}>
             <ImportPK />
           </SettingsSection>
-        )}
-      </Box>
+        </Box>
+      )}
 
       <SettingsSection title={t('Language')}>
         <LocaleSwitcher />

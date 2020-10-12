@@ -26,6 +26,8 @@ import {
   MinerStatusSwitcher,
   ActivateInviteForm,
   ValidationResultToast,
+  UserStat,
+  UserStatLabel,
 } from '../screens/profile/components'
 import {IconButton2} from '../shared/components/button'
 import {IconLink} from '../shared/components/link'
