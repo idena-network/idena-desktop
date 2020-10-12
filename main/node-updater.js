@@ -45,9 +45,6 @@ class NodeUpdater extends events.EventEmitter {
       if (semver.lt(this.currentVersion, remoteVersion)) {
         this.logger.info('update available')
         this.emit('update-available', {version: remoteVersion})
-
-        if (this.isInternalNode) {
-          if (!this.downloadPromise) {
             promiseTimeout(5000, getCurrentVersion(true))
               .then(version => {
                 this.logger.info('got local temp version', version)
@@ -61,10 +58,10 @@ class NodeUpdater extends events.EventEmitter {
           } else {
             this.logger.info('download promise is not null, skip downloading')
           }
-        }
+        
 
         return true
-      }
+      
     } catch (e) {
       this.logger.error('error while checking update', e.toString())
     } finally {
