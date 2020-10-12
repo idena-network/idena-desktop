@@ -182,6 +182,7 @@ export function AutoUpdateProvider({children}) {
       (settings.useExternalNode && state.nodeUpdateAvailable))
 
   const mustUpdateNode =
+    state.nodeCurrentVersion !== '0.0.1' &&
     canUpdateNode &&
     isHardFork(state.nodeCurrentVersion, state.nodeRemoteVersion)
 
