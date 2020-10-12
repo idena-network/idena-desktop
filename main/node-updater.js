@@ -58,10 +58,10 @@ class NodeUpdater extends events.EventEmitter {
           } else {
             this.logger.info('download promise is not null, skip downloading')
           }
-        
+        }
 
         return true
-      
+      }
     } catch (e) {
       this.logger.error('error while checking update', e.toString())
     } finally {
