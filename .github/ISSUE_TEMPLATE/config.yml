@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Installation and troubleshooting
+    url: https://idena.io/?view=guide
+    about: Please check Idena installation and troubleshooting guide.
+  - name: Get to know Idena
+    url: https://idena.io/?view=faq
+    about: Browse through the most frequently asked questions about Idena.
