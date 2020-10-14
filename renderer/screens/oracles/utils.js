@@ -30,8 +30,10 @@ export const setVotingStatus = status =>
     status,
   })
 
-export async function fetchVotings({limit = 10, ...params}) {
-  const invokeUrl = new URL(`https://api.idena.io/api/OracleVotingContracts`)
+export async function fetchVotings({limit = 30, ...params}) {
+  const invokeUrl = new URL(
+    `http://195.201.2.44:18888/api/OracleVotingContracts`
+  )
 
   Object.entries({limit, ...params})
     .filter(([, v]) => Boolean(v))

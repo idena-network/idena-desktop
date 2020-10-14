@@ -278,3 +278,11 @@ export const VotingOption = React.forwardRef(
     </Flex>
   )
 )
+
+export function FillPlaceholder(props) {
+  return (
+    <Flex direction="column" flex={1} align="center" justify="center">
+      <Text color="muted" {...props} />
+    </Flex>
+  )
+}
