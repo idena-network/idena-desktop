@@ -1,12 +1,12 @@
 import React from 'react'
 import {
   Stack,
-  Box,
   Text,
   Icon,
   useDisclosure,
   useToast,
   Button,
+  Flex,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
@@ -104,8 +104,8 @@ export default function ProfilePage() {
       <Page>
         <PageTitle mb={8}>{t('Profile')}</PageTitle>
         <Stack isInline spacing={10}>
-          <Stack spacing={6}>
-            <UserInlineCard address={address} status={status} />
+          <Stack spacing={6} w="md">
+            <UserInlineCard address={address} status={status} h={24} />
             <UserStatList>
               <UserStat>
                 <UserStatLabel>{t('Address')}</UserStatLabel>
@@ -217,14 +217,16 @@ export default function ProfilePage() {
             </UserStatList>
             <ActivateInviteForm />
           </Stack>
-          <Box w={rem(200)}>
-            {canMine && (
-              <Text fontWeight={500} mt={4} mb={2}>
-                {t('Online mining status')}
-              </Text>
-            )}
-            <MinerStatusSwitcher />
-            <Stack mt={canMine ? 0 : rem(104)} spacing={1} align="flex-start">
+          <Stack spacing={6} w={rem(200)}>
+            <Flex h={24}>
+              {canMine && (
+                <Stack spacing={2} justify="center" flex={1}>
+                  <Text fontWeight={500}>{t('Online mining status')}</Text>
+                  <MinerStatusSwitcher />
+                </Stack>
+              )}
+            </Flex>
+            <Stack spacing={1} align="flex-start">
               <IconLink
                 href="/contacts/new-invite"
                 isDisabled={invitesCount === 0}
@@ -246,7 +248,7 @@ export default function ProfilePage() {
                 {t('Terminate')}
               </IconButton2>
             </Stack>
-          </Box>
+          </Stack>
         </Stack>
 
         <KillIdentityDrawer

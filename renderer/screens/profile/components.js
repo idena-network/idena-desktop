@@ -56,9 +56,9 @@ import {
 import {createTimerMachine} from '../../shared/machines'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 
-export function UserInlineCard({address, status}) {
+export function UserInlineCard({address, status, ...props}) {
   return (
-    <Stack isInline spacing={6} align="center" mb={6} width={rem(480)}>
+    <Stack isInline spacing={6} align="center" {...props}>
       <Avatar address={address} />
       <Stack spacing={1}>
         <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
@@ -365,7 +365,7 @@ export function MinerStatusSwitcher() {
   }, [mined])
 
   return (
-    <Box mb={6}>
+    <>
       <FormGroup onClick={() => dispatch(['open'])}>
         <div className="form-control">
           <Flex align="center" justify="space-between">
@@ -445,7 +445,7 @@ export function MinerStatusSwitcher() {
           </PrimaryButton>
         </DialogFooter>
       </Dialog>
-    </Box>
+    </>
   )
 }
 
