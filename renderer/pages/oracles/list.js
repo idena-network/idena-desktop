@@ -16,6 +16,7 @@ import {
   VotingFilterList,
   VotingCardSkeleton,
   VotingSkeleton,
+  FillPlaceholder,
 } from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {VotingCard} from '../../screens/oracles/containers'
@@ -47,7 +48,7 @@ function VotingListPage() {
   return (
     <Page>
       <PageTitle mb={4}>{t('Oracle votings')}</PageTitle>
-      <Stack isInline spacing={20} w="full">
+      <Stack isInline spacing={20} w="full" flex={1}>
         <Stack spacing={8}>
           <VotingSkeleton isLoaded={!current.matches('preload')}>
             <FilterList
@@ -58,18 +59,20 @@ function VotingListPage() {
               <FilterOption value="my">{t('My votings')}</FilterOption>
             </FilterList>
           </VotingSkeleton>
-          <Stack spacing={6} w="md">
-            {eitherState(current, 'preload', 'loading') &&
+          <Stack spacing={6} w="md" flex={1}>
+            {current.matches('failure') && (
+              <FillPlaceholder>{current.context.errorMessage}</FillPlaceholder>
+            )}
+
+            {eitherState(current, 'preload', 'loading.delayed') &&
               Array.from({length: 5}).map((_, idx) => (
                 <VotingCardSkeleton key={idx} />
               ))}
 
-            {current.matches('failure') && (
-              <Flex>Failish {current.context.error}</Flex>
-            )}
-
             {current.matches('loaded') && votings.length === 0 && (
-              <Flex>Emptyish</Flex>
+              <FillPlaceholder>
+                {t(`You haven't any votings yet`)}
+              </FillPlaceholder>
             )}
 
             {current.matches('loaded') &&

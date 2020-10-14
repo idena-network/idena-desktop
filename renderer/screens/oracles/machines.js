@@ -60,8 +60,17 @@ export const votingListMachine = Machine(
           },
           onError: {
             target: 'failure',
-            actions: [log()],
+            actions: ['setError', log()],
           },
+        },
+        initial: 'normal',
+        states: {
+          normal: {
+            after: {
+              1000: 'delayed',
+            },
+          },
+          delayed: {},
         },
       },
       loaded: {
@@ -111,6 +120,9 @@ export const votingListMachine = Machine(
           .sub(global.db, 'votings', {valueEncoding: 'json'})
           .put('filter', {filter, showAll})
       },
+      setError: assign({
+        errorMessage: (_, {data}) => data?.message,
+      }),
     },
     services: {
       loadVotings: async ({
