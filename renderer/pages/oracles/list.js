@@ -64,7 +64,7 @@ function VotingListPage() {
               <FillPlaceholder>{current.context.errorMessage}</FillPlaceholder>
             )}
 
-            {eitherState(current, 'preload', 'loading.delayed') &&
+            {eitherState(current, 'loading.delayed') &&
               Array.from({length: 5}).map((_, idx) => (
                 <VotingCardSkeleton key={idx} />
               ))}
