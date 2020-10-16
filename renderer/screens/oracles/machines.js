@@ -137,78 +137,64 @@ export const votingListMachine = Machine(
           state: filter,
         })
 
-        const enrichedKnownVotings = await Promise.all(
-          knownVotings.map(async ({contractAddress, ...voting}) => {
-            let votingMinPayment
+        const normalizedKnownVotings = await Promise.all(
+          knownVotings.map(
+            async ({contractAddress, state, balance, fact, ...voting}) => {
+              let votingMinPayment
 
-            try {
-              votingMinPayment = Number(
-                await createContractDataReader({contractHash: contractAddress})(
-                  'votingMinPayment',
-                  'dna'
+              try {
+                votingMinPayment = Number(
+                  await createContractDataReader({
+                    contractHash: contractAddress,
+                  })('votingMinPayment', 'dna')
                 )
-              )
-            } catch {
-              votingMinPayment = 0
-            }
+              } catch {
+                votingMinPayment = 0
+              }
 
-            return {
-              contractAddress,
-              votingMinPayment,
-              ...voting,
+              return {
+                ...voting,
+                votingMinPayment,
+                status: state,
+                fundingAmount: balance,
+                contractHash: contractAddress,
+                ...hexToObject(fact),
+              }
             }
-          })
-        )
-
-        const normalizedKnownVotings = enrichedKnownVotings.map(
-          ({contractAddress, fact, state, balance, ...voting}) => ({
-            ...voting,
-            status: state,
-            fundingAmount: balance,
-            contractHash: contractAddress,
-            ...hexToObject(fact),
-          })
+          )
         )
 
         const db = epochDb('votings', epoch)
 
         const persistedVotings = await db.all()
 
-        const knownPersistedVotings = persistedVotings.filter(voting =>
+        const persistedKnownVotings = persistedVotings.filter(voting =>
           normalizedKnownVotings.some(byContractHash(voting))
         )
 
         const votings = merge(byContractHash)(
-          knownPersistedVotings,
+          persistedKnownVotings,
           normalizedKnownVotings
         )
 
         await db.putMany(votings)
 
         const miningVotings = persistedVotings.filter(
-          ({status, prevStatus}) =>
-            (status === VotingStatus.Deploying &&
-              filter === VotingStatus.Pending) ||
-            (status === VotingStatus.Starting &&
-              filter === VotingStatus.Open) ||
-            (status === VotingStatus.Voting && filter === VotingStatus.Voted) ||
-            (status === VotingStatus.Finishing &&
-              filter === VotingStatus.Archived) ||
-            (status === VotingStatus.Funding &&
+          ({status, prevStatus, issuer}) =>
+            (areSameCaseInsensitive(issuer, address) &&
+              areSameCaseInsensitive(status, VotingStatus.Deploying) &&
+              areSameCaseInsensitive(filter, VotingStatus.Pending)) ||
+            (areSameCaseInsensitive(status, VotingStatus.Starting) &&
+              areSameCaseInsensitive(filter, VotingStatus.Open)) ||
+            (areSameCaseInsensitive(status, VotingStatus.Voting) &&
+              areSameCaseInsensitive(filter, VotingStatus.Voted)) ||
+            (areSameCaseInsensitive(status, VotingStatus.Finishing) &&
+              areSameCaseInsensitive(filter, VotingStatus.Archived)) ||
+            (areSameCaseInsensitive(status, VotingStatus.Funding) &&
               areSameCaseInsensitive(filter, prevStatus))
         )
 
-        const ownVotings = showAll
-          ? []
-          : persistedVotings.filter(({issuer, status}) => {
-              console.log(status, filter, issuer, address)
-              return (
-                areSameCaseInsensitive(status, filter) &&
-                areSameCaseInsensitive(issuer, address)
-              )
-            })
-
-        return votings.concat(miningVotings).concat(ownVotings)
+        return votings.concat(miningVotings)
       },
       loadFilter: async ({filter}) => {
         try {
@@ -592,10 +578,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
               target: `mining.${VotingStatus.Funding}`,
               actions: ['setFunding', 'persist', log()],
             },
-            START_VOTING: {
-              target: `mining.${VotingStatus.Starting}`,
-              actions: ['setStarting', 'persist'],
-            },
             SELECT_OPTION: {
               actions: ['selectOption', log()],
             },
@@ -969,7 +951,7 @@ function votingMiningStates(machineId) {
             actions: ['setVoted', 'applyTx', 'persist', log()],
           },
           onError: {
-            target: `#${machineId}.invalid`,
+            target: `#${machineId}.idle.hist`,
             actions: ['onError', 'restorePrevStatus', log()],
           },
         },

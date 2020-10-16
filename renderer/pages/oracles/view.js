@@ -350,7 +350,10 @@ export default function ViewVotingPage() {
         from={address}
         to={contractHash}
         deposit={votingMinPayment}
-        onVote={() => send('VOTE')}
+        onVote={() => {
+          send('VOTE', {from: address})
+          onCloseVote()
+        }}
       />
 
       <AddFundDrawer
