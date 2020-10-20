@@ -20,7 +20,7 @@ import {
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc, merge} from '../../shared/utils/utils'
-import {epochDb} from '../../shared/utils/db'
+import {epochDb, requestDb} from '../../shared/utils/db'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 
 export const votingListMachine = Machine(
@@ -117,7 +117,7 @@ export const votingListMachine = Machine(
       }),
       persistFilter: ({filter, showAll}) => {
         global
-          .sub(global.db, 'votings', {valueEncoding: 'json'})
+          .sub(requestDb(), 'votings', {valueEncoding: 'json'})
           .put('filter', {filter, showAll})
       },
       setError: assign({
@@ -177,7 +177,7 @@ export const votingListMachine = Machine(
           normalizedKnownVotings
         )
 
-        await db.putMany(votings)
+        await db.batchPut(votings)
 
         const miningVotings = persistedVotings.filter(
           ({status, prevStatus, issuer}) =>
@@ -199,7 +199,7 @@ export const votingListMachine = Machine(
       loadFilter: async ({filter}) => {
         try {
           return JSON.parse(
-            await global.sub(global.db, 'votings').get('filter')
+            await global.sub(requestDb(), 'votings').get('filter')
           )
         } catch (error) {
           if (error.notFound) return filter
