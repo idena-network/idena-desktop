@@ -369,6 +369,7 @@ export default function ViewVotingPage() {
       />
 
       <FloatDebug>{current.value}</FloatDebug>
+
       {global.isDev && (
         <Box position="absolute" top={6} right={6}>
           <VotingInspector {...current.context} />

@@ -118,7 +118,7 @@ function NewVotingPage() {
                   type="number"
                   label={t('Duration of vote, blocks')}
                   defaultValue={4320}
-                  helperText={`The average speed of the block is ${BLOCK_TIME} seconds`}
+                  helperText={`The average speed for block is ${BLOCK_TIME} seconds`}
                   onChange={handleChange}
                 />
                 <VotingInlineFormControl
@@ -126,7 +126,7 @@ function NewVotingPage() {
                   type="number"
                   label={t('Duration of summing up, blocks')}
                   defaultValue={4320}
-                  helperText={`The average speed of the block is ${BLOCK_TIME} seconds`}
+                  helperText={`The average speed for block is ${BLOCK_TIME} seconds`}
                   onChange={handleChange}
                 />
                 <VotingInlineFormControl
