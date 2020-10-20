@@ -893,8 +893,7 @@ export const createValidationMachine = ({
         fetchShortFlips: ({shortFlips}) => cb =>
           fetchFlips(
             shortFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
-            cb,
-            1000
+            cb
           ),
         fetchLongHashes: () => fetchFlipHashes(SessionType.Long),
         fetchLongFlips: ({longFlips}) => cb =>
@@ -1045,7 +1044,7 @@ export const createValidationMachine = ({
     }
   )
 
-function fetchFlips(hashes, cb, delay = 1000) {
+function fetchFlips(hashes, cb, delay = 0) {
   global.logger.debug(`Calling flip_get rpc for hashes`, hashes)
   return forEachAsync(hashes, hash =>
     fetchFlip(hash)
@@ -1061,7 +1060,7 @@ function fetchFlips(hashes, cb, delay = 1000) {
           },
         })
       })
-      .then(() => wait(delay))
+      .then(() => (delay > 0 ? wait(delay) : Promise.resolve()))
       .catch(() => {
         global.logger.debug(`Catch flip_get reject`, hash)
         cb({
