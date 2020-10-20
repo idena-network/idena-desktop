@@ -23,8 +23,6 @@ const logger = require('./logger')
 const {prepareDb, dbPath} = require('./stores/setup')
 const {loadKeyword} = require('./utils/keywords')
 
-const db = levelup(leveldown(dbPath('db')))
-
 process.once('loaded', () => {
   global.ipcRenderer = ipcRenderer
   global.openExternal = shell.openExternal
@@ -64,7 +62,9 @@ process.once('loaded', () => {
     currentWindow.setFullScreen(!currentWindow.isFullScreen())
   }
 
-  global.db = db
+  global.levelup = levelup
+  global.leveldown = leveldown
+  global.dbPath = dbPath
   global.sub = sub
 
   // eslint-disable-next-line global-require
@@ -75,8 +75,4 @@ process.once('loaded', () => {
     // eslint-disable-next-line no-underscore-dangle
     global.__devtron = {require, process}
   }
-})
-
-process.on('exit', () => {
-  db.close()
 })

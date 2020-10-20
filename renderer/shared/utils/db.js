@@ -1,5 +1,14 @@
 import nanoid from 'nanoid'
 
+const {levelup, leveldown, dbPath, sub} = global
+
+let idenaDb = null
+
+export function requestDb(name = 'db') {
+  if (idenaDb === null) idenaDb = levelup(leveldown(dbPath(name)))
+  return idenaDb
+}
+
 export const epochDb = (db, epoch, options) => {
   const epochPrefix = `epoch${epoch}`
 
@@ -12,10 +21,10 @@ export const epochDb = (db, epoch, options) => {
 
   switch (typeof db) {
     case 'string':
-      targetDb = global.sub(global.sub(global.db, db), epochPrefix, nextOptions)
+      targetDb = sub(sub(requestDb(), db), epochPrefix, nextOptions)
       break
     case 'object':
-      targetDb = global.sub(db, epochPrefix, nextOptions)
+      targetDb = sub(db, epochPrefix, nextOptions)
       break
     default:
       throw new Error('db should be either string or Level instance')
@@ -38,7 +47,7 @@ export const epochDb = (db, epoch, options) => {
         ? updatePersistedItem(targetDb, id, item)
         : addPersistedItem(targetDb, item)
     },
-    async putMany(items) {
+    async batchPut(items) {
       const ids = await safeReadIds(targetDb)
 
       const newItems = items.filter(({id}) => !ids.includes(id))
