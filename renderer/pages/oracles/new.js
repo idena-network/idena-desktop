@@ -12,6 +12,8 @@ import {
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
+import duration from 'dayjs/plugin/duration'
+import dayjs from 'dayjs'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
   FloatDebug,
@@ -29,6 +31,8 @@ import {
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
 import {BLOCK_TIME} from '../../screens/oracles/utils'
+
+dayjs.extend(duration)
 
 function NewVotingPage() {
   const {t} = useTranslation()
@@ -63,6 +67,13 @@ function NewVotingPage() {
     },
   })
 
+  const {
+    votingDuration,
+    publicVotingDuration,
+    options,
+    shouldStartImmediately,
+  } = current.context
+
   const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
 
   return (
@@ -94,7 +105,7 @@ function NewVotingPage() {
               id="startDate"
               type="date"
               label={t('Start date')}
-              isDisabled={current.context.shouldStartImmediately}
+              isDisabled={shouldStartImmediately}
               onChange={handleChange}
             />
             <VotingInlineFormControl spacing={0}>
@@ -117,16 +128,20 @@ function NewVotingPage() {
                   id="votingDuration"
                   type="number"
                   label={t('Duration of vote, blocks')}
-                  defaultValue={4320}
-                  helperText={`The average speed for block is ${BLOCK_TIME} seconds`}
+                  defaultValue={votingDuration}
+                  helperText={dayjs
+                    .duration(votingDuration * BLOCK_TIME, 's')
+                    .humanize()}
                   onChange={handleChange}
                 />
                 <VotingInlineFormControl
                   id="publicVotingDuration"
                   type="number"
                   label={t('Duration of summing up, blocks')}
-                  defaultValue={4320}
-                  helperText={`The average speed for block is ${BLOCK_TIME} seconds`}
+                  defaultValue={publicVotingDuration}
+                  helperText={dayjs
+                    .duration(publicVotingDuration * BLOCK_TIME, 's')
+                    .humanize()}
                   onChange={handleChange}
                 />
                 <VotingInlineFormControl
@@ -154,7 +169,7 @@ function NewVotingPage() {
                   id="maxOptions"
                   label={t('Options')}
                   type="number"
-                  defaultValue={current.context.options.length}
+                  defaultValue={options.length}
                   onChange={({target: {value}}) =>
                     send('SET_OPTIONS_NUMBER', {value})
                   }
@@ -168,7 +183,7 @@ function NewVotingPage() {
                 {t('Name of options')}
               </Text>
               <Stack spacing={3}>
-                {current.context.options.map((option, idx) => (
+                {options.map((option, idx) => (
                   <VotingOptionText
                     key={idx}
                     label={t('Option {{num}}', {num: idx + 1})}
