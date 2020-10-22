@@ -139,7 +139,8 @@ export function VotingCard({votingRef, ...props}) {
                 return (
                   <VotingResultBar
                     label={option}
-                    value={value / actualVotesCount}
+                    value={value}
+                    percentage={value / actualVotesCount}
                     isMax={maxCount === value}
                   />
                 )
@@ -323,10 +324,8 @@ export function AddFundDrawer({from, to, available, onAddFund, ...props}) {
           <OracleFormControl label="To address">
             <Input isDisabled value={to} />
           </OracleFormControl>
-          <OracleFormControl label={t('Deposit, DNA')}>
+          <OracleFormControl label={t('Lock, DNA')}>
             <Input name="amountInput" />
-            {/* <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
-            <OracleFormHelper label={t('Total amount')} value={toDna(240.01)} /> */}
           </OracleFormControl>
           <PrimaryButton type="submit" mt={3} ml="auto">
             {t('Send')}
@@ -357,7 +356,7 @@ export function VoteDrawer({option, from, to, deposit = 0, onVote, ...props}) {
         <OracleFormControl label="To address">
           <Input isDisabled value={to} />
         </OracleFormControl>
-        <OracleFormControl label={t('Deposit, DNA')}>
+        <OracleFormControl label={t('Lock, DNA')}>
           <Input isDisabled value={deposit} />
           <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
           <OracleFormHelper

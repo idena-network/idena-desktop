@@ -45,7 +45,7 @@ import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {VotingStatus} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {areSameCaseInsensitive} from '../../screens/oracles/utils'
+import {areSameCaseInsensitive, oracleReward} from '../../screens/oracles/utils'
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
@@ -104,7 +104,6 @@ export default function ViewVotingPage() {
     votingDuration = 0,
     publicVotingDuration = 0,
     quorum = 20,
-    committeeSize = 100,
     options = [],
     voteProofsCount,
     votesCount,
@@ -115,6 +114,7 @@ export default function ViewVotingPage() {
     prevStatus,
     votes = [],
     selectedOption,
+    winnerThreshold = 50,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -131,7 +131,14 @@ export default function ViewVotingPage() {
 
   const maxCount = Math.max(...votes.map(({count}) => count))
 
-  const isLate = dayjs().isAfter(dayjs(finishDate))
+  const reward = oracleReward({
+    fundingAmount,
+    votesCount: actualVotesCount,
+    quorum,
+  })
+
+  const hasQuorum = votesCount >= quorum
+  const canFinish = dayjs().isAfter(dayjs(finishDate)) && hasQuorum
 
   return (
     <>
@@ -188,7 +195,7 @@ export default function ViewVotingPage() {
                           value={option}
                           isDisabled={eitherIdleState(VotingStatus.Voted)}
                           annotation={t('{{count}} min. votes required', {
-                            count: toPercent(quorum / committeeSize),
+                            count: toPercent(winnerThreshold / 100),
                           })}
                         />
                       ))}
@@ -213,8 +220,15 @@ export default function ViewVotingPage() {
                         return (
                           <VotingResultBar
                             label={option}
-                            value={value / actualVotesCount}
+                            value={value}
+                            percentage={value / actualVotesCount}
                             isMax={maxCount === value}
+                            isWinner={
+                              eitherIdleState(VotingStatus.Archived) &&
+                              hasQuorum &&
+                              Math.ceil((value / actualVotesCount) * 100) >
+                                winnerThreshold
+                            }
                           />
                         )
                       })
@@ -260,7 +274,7 @@ export default function ViewVotingPage() {
                         {t('Vote')}
                       </PrimaryButton>
                     )}
-                    {eitherIdleState(VotingStatus.Counting) && isLate && (
+                    {eitherIdleState(VotingStatus.Counting) && canFinish && (
                       <PrimaryButton
                         isLoading={isMining}
                         loadingText={
@@ -271,8 +285,21 @@ export default function ViewVotingPage() {
                         {t('Finish voting')}
                       </PrimaryButton>
                     )}
+                    {eitherIdleState(VotingStatus.Counting) && !hasQuorum && (
+                      <PrimaryButton
+                        isLoading={isMining}
+                        loadingText={
+                          isMiningFunding ? t('Mining') : t('Prolongating')
+                        }
+                        onClick={() =>
+                          send('PROLONGATE_VOTING', {from: address})
+                        }
+                      >
+                        {t('Prolongate voting')}
+                      </PrimaryButton>
+                    )}
                     <SecondaryButton onClick={() => redirect('/oracles/list')}>
-                      {t('Cancel')}
+                      {t('Close')}
                     </SecondaryButton>
                   </Stack>
                   <Stack isInline spacing={3}>
@@ -306,7 +333,7 @@ export default function ViewVotingPage() {
                     <Text fontWeight={500}>{t('Total prize')}</Text>
                   </Stack>
                 </StatLabel>
-                <StatNumber fontSize={rem(16)} fontWeight={500}>
+                <StatNumber fontSize="base" fontWeight={500}>
                   {toDna(fundingAmount)}
                 </StatNumber>
                 <StatHelpText mt={1}>
@@ -316,18 +343,22 @@ export default function ViewVotingPage() {
                 </StatHelpText>
               </Stat>
               <Stack spacing={6}>
-                <AsideStat
-                  label={t('Deposit')}
-                  value={toDna(votingMinPayment)}
-                />
+                <Stat>
+                  <StatLabel color="muted" fontSize="md">
+                    {t('Lock to vote')}
+                  </StatLabel>
+                  <StatNumber fontSize="base" fontWeight={500}>
+                    {toDna(votingMinPayment)}
+                  </StatNumber>
+                  <StatHelpText mt={1} color="muted" fontSize="small">
+                    {t(
+                      'Deposit will be refunded if your vote matches the majority'
+                    )}
+                  </StatHelpText>
+                </Stat>
                 <AsideStat
                   label={t('Your reward')}
-                  value={
-                    Number.isFinite(fundingAmount) &&
-                    Number.isFinite(actualVotesCount)
-                      ? toDna(fundingAmount / actualVotesCount)
-                      : '--'
-                  }
+                  value={reward ? toDna(reward) : '--'}
                 />
                 <AsideStat
                   label={t('Quorum required')}

@@ -127,7 +127,14 @@ export const VotingFilter = React.forwardRef(function VotingFilterRef(
   )
 })
 
-export function VotingResultBar({label, value, isMax, ...props}) {
+export function VotingResultBar({
+  label,
+  value,
+  percentage,
+  isMax,
+  isWinner,
+  ...props
+}) {
   return (
     <Flex
       align="center"
@@ -141,20 +148,20 @@ export function VotingResultBar({label, value, isMax, ...props}) {
     >
       <Box
         borderRadius="md"
-        bg="blue.012"
+        bg={isMax ? 'blue.012' : 'gray.50'}
         position="absolute"
         left={0}
-        width={value > 0 ? `${value * 100}%` : 1}
+        width={percentage > 0 ? `${percentage * 100}%` : 1}
         top={0}
         bottom={0}
         zIndex={-1}
       />
       <Stack isInline spacing={1} align="center">
         <Text>{label}</Text>
-        {isMax && <Icon name="ok" size={4} color="brandBlue.500" />}
+        {isWinner && <Icon name="ok" size={4} color="brandBlue.500" />}
       </Stack>
       <Text fontWeight={500} textTransform="initial">
-        {toPercent(value)}
+        {toPercent(percentage)} ({value})
       </Text>
     </Flex>
   )

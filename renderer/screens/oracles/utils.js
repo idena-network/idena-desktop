@@ -195,3 +195,9 @@ export const byContractHash = a => b =>
 export function areSameCaseInsensitive(a, b) {
   return a?.toUpperCase() === b?.toUpperCase()
 }
+
+export function oracleReward({fundingAmount, votesCount, quorum}) {
+  if ([fundingAmount, votesCount, quorum].some(v => Number.isNaN(v))) return
+
+  return fundingAmount / Math.max(quorum, votesCount)
+}
