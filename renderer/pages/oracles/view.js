@@ -102,7 +102,7 @@ export default function ViewVotingPage() {
     votingMinPayment = 0,
     startDate,
     votingDuration = 0,
-    pubicVotingDuration = 0,
+    publicVotingDuration = 0,
     quorum = 20,
     committeeSize = 100,
     options = [],
@@ -111,7 +111,7 @@ export default function ViewVotingPage() {
     actualVotesCount = votesCount || voteProofsCount,
     finishDate = dayjs(startDate)
       .add(votingDuration, 's')
-      .add(pubicVotingDuration, 's'),
+      .add(publicVotingDuration, 's'),
     prevStatus,
     votes = [],
     selectedOption,

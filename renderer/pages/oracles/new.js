@@ -122,7 +122,7 @@ function NewVotingPage() {
                   onChange={handleChange}
                 />
                 <VotingInlineFormControl
-                  id="pubicVotingDuration"
+                  id="publicVotingDuration"
                   type="number"
                   label={t('Duration of summing up, blocks')}
                   defaultValue={4320}
