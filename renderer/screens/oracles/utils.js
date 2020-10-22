@@ -156,7 +156,7 @@ export function buildContractDeploymentParams(
       {value: quorum, format: 'uint64'},
       {value: committeeSize, format: 'uint64'},
       {value: maxOptions, format: 'uint64'},
-      {value: votingMinPayment, format: 'bigint'},
+      {value: votingMinPayment, format: 'dna'},
       {value: ownerFee, format: 'byte'}
     ),
   })
@@ -178,11 +178,11 @@ const defaultVotingDuration = 4320
 export const votingFinishDate = ({
   startDate,
   votingDuration = defaultVotingDuration,
-  pubicVotingDuration = defaultVotingDuration,
+  publicVotingDuration = defaultVotingDuration,
 }) =>
   dayjs(startDate)
     .add(votingDuration * BLOCK_TIME, 's')
-    .add(pubicVotingDuration * BLOCK_TIME, 's')
+    .add(publicVotingDuration * BLOCK_TIME, 's')
 
 export function viewVotingHref(id) {
   return `/oracles/view?id=${id}`
