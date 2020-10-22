@@ -13,6 +13,7 @@ import {
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import duration from 'dayjs/plugin/duration'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import dayjs from 'dayjs'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
@@ -34,6 +35,7 @@ import {BLOCK_TIME} from '../../screens/oracles/utils'
 import {toLocaleDna} from '../../shared/utils/utils'
 
 dayjs.extend(duration)
+dayjs.extend(relativeTime)
 
 function NewVotingPage() {
   const {t, i18n} = useTranslation()

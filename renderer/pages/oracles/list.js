@@ -1,5 +1,6 @@
 import React from 'react'
-import {Stack, Text, Flex, useToast} from '@chakra-ui/core'
+import NextLink from 'next/link'
+import {Link, Stack, Text, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page, PageTitle} from '../../screens/app/components'
@@ -17,6 +18,7 @@ import {
   VotingCardSkeleton,
   VotingSkeleton,
   FillPlaceholder,
+  FillCenter,
 } from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {VotingCard} from '../../screens/oracles/containers'
@@ -52,11 +54,16 @@ function VotingListPage() {
         <Stack spacing={8}>
           <VotingSkeleton isLoaded={!current.matches('preload')}>
             <FilterList
-              value={showAll ? 'all' : 'my'}
+              defaultValue="todo"
+              display="flex"
               onChange={() => send('TOGGLE_SHOW_ALL')}
             >
-              <FilterOption value="all">{t('All votings')}</FilterOption>
-              <FilterOption value="my">{t('My votings')}</FilterOption>
+              <FilterOption value="todo">{t('To do')}</FilterOption>
+              <FilterOption value="voting">{t('Voting')}</FilterOption>
+              <FilterOption value="closed">{t('Closed')}</FilterOption>
+              <FilterOption value="owned" variantColor="blue" ml="auto">
+                {t('My votings')}
+              </FilterOption>
             </FilterList>
           </VotingSkeleton>
           <Stack spacing={6} w="md" flex={1}>
@@ -70,9 +77,30 @@ function VotingListPage() {
               ))}
 
             {current.matches('loaded') && votings.length === 0 && (
-              <FillPlaceholder>
-                {t(`You haven't any votings yet`)}
-              </FillPlaceholder>
+              <FillCenter justify="center">
+                <>
+                  {filter === 'owned' && (
+                    <Text>{t(`There are no votings yet.`)}</Text>
+                  )}
+                  {filter !== 'owned' && identity.isValidated && (
+                    <Text>{t(`There are no votings yet.`)}</Text>
+                  )}
+                  {filter !== 'owned' && !identity.isValidated && (
+                    <Text>{t(`No votings for you 😕`)}</Text>
+                  )}
+                  <NextLink href="/oracles/new">
+                    <Link
+                      color="brandBlue.500"
+                      fontWeight={500}
+                      _hover={{
+                        textDecoration: 'none',
+                      }}
+                    >
+                      {t('Create new voting')}
+                    </Link>
+                  </NextLink>
+                </>
+              </FillCenter>
             )}
 
             {current.matches('loaded') &&
