@@ -587,8 +587,12 @@ export const createViewVotingMachine = (id, epoch, address) =>
               actions: ['selectOption', log()],
             },
             VOTE: {
-              target: 'mining.voting',
+              target: `mining.${VotingStatus.Voting}`,
               actions: ['setVoting', 'persist'],
+            },
+            PROLONGATE_VOTING: {
+              target: `mining.${VotingStatus.Prolongating}`,
+              actions: ['setProlongating', 'persist'],
             },
             TERMINATE_CONTRACT: `mining.${VotingStatus.Terminating}`,
           },
@@ -608,6 +612,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
         setStarting: setVotingStatus(VotingStatus.Starting),
         setRunning: setVotingStatus(VotingStatus.Open),
         setVoting: setVotingStatus(VotingStatus.Voting),
+        setProlongating: setVotingStatus(VotingStatus.Prolongating),
         setFinishing: setVotingStatus(VotingStatus.Finishing),
         applyVoting: assign((context, {data}) => ({
           ...context,
@@ -721,6 +726,28 @@ export const createViewVotingMachine = (id, epoch, address) =>
           )
 
           return voteProofResp
+        },
+        prolongateVoting: async ({contractHash}, {from}) => {
+          let callContract = createContractCaller({
+            from,
+            contractHash,
+          })
+
+          const {error, gasCost, txFee} = await callContract(
+            'prolongVoting',
+            ContractRpcMode.Estimate
+          )
+
+          if (error) throw new Error(error)
+
+          callContract = createContractCaller({
+            from,
+            contractHash,
+            gasCost: Number(gasCost),
+            txFee: Number(txFee),
+          })
+
+          return callContract('prolongVoting')
         },
         finishVoting: async (contract, {from}) => {
           let callContract = createContractCaller({...contract, from})
@@ -948,12 +975,25 @@ function votingMiningStates(machineId) {
           },
         },
       },
-      voting: {
+      [VotingStatus.Voting]: {
         invoke: {
           src: 'vote',
           onDone: {
             target: `#${machineId}.idle.${VotingStatus.Voted}`,
             actions: ['setVoted', 'applyTx', 'persist', log()],
+          },
+          onError: {
+            target: `#${machineId}.idle.hist`,
+            actions: ['onError', 'restorePrevStatus', log()],
+          },
+        },
+      },
+      [VotingStatus.Prolongating]: {
+        invoke: {
+          src: 'prolongateVoting',
+          onDone: {
+            target: `#${machineId}.idle.${VotingStatus.Open}`,
+            actions: ['setRunning', 'applyTx', 'persist', log()],
           },
           onError: {
             target: `#${machineId}.idle.hist`,
