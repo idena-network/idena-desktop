@@ -126,6 +126,7 @@ export function buildContractDeploymentParams(
     votingMinPayment = 0,
     ownerFee = 0,
     shouldStartImmediately,
+    isFreeVoting,
   },
   {address: from},
   mode = ContractRpcMode.Call
@@ -156,7 +157,7 @@ export function buildContractDeploymentParams(
       {value: quorum, format: 'uint64'},
       {value: committeeSize, format: 'uint64'},
       {value: maxOptions, format: 'uint64'},
-      {value: votingMinPayment, format: 'dna'},
+      {value: isFreeVoting ? 0 : votingMinPayment, format: 'dna'},
       {value: ownerFee, format: 'byte'}
     ),
   })
