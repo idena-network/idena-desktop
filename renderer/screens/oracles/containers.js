@@ -175,7 +175,7 @@ export function VotingCard({votingRef, ...props}) {
           </Text>
           <Text color="orange.500">
             {votingMinPayment
-              ? t(`Deposit {{amount}} for voting`, {
+              ? t(`Lock {{amount}} for voting`, {
                   amount: toLocaleDna(i18n.language)(votingMinPayment),
                 })
               : t('Free voting')}
@@ -193,8 +193,12 @@ export function VotingCard({votingRef, ...props}) {
               </PrimaryButton>
             )}
 
+            {eitherIdleState(VotingStatus.Open) && (
+              <PrimaryButton onClick={() => router.push(viewHref)}>
+                {t('Vote')}
+              </PrimaryButton>
+            )}
             {eitherIdleState(
-              VotingStatus.Open,
               VotingStatus.Voted,
               VotingStatus.Archived,
               VotingStatus.Counting
@@ -203,13 +207,6 @@ export function VotingCard({votingRef, ...props}) {
                 {t('Open')}
               </PrimaryButton>
             )}
-            <SecondaryButton
-              isDisabled={isMining}
-              loadingText={t('Funding')}
-              onClick={onOpenAddFund}
-            >
-              {t('Add fund')}
-            </SecondaryButton>
           </Stack>
           <Stack isInline spacing={3}>
             <Text>

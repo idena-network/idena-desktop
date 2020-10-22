@@ -3,7 +3,14 @@ import {useAppMachine} from './app-context'
 
 export function useIdentityState() {
   const [{context}] = useAppMachine()
-  return context.identity
+  return {
+    ...context.identity,
+    isValidated: [
+      IdentityStatus.Newbie,
+      IdentityStatus.Verified,
+      IdentityStatus.Human,
+    ].some(s => s === context.identity.state),
+  }
 }
 
 export function useIdentityDispatch() {

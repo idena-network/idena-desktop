@@ -181,17 +181,17 @@ export const votingListMachine = Machine(
 
         const miningVotings = persistedVotings.filter(
           ({status, prevStatus, issuer}) =>
-            (areSameCaseInsensitive(issuer, address) &&
-              areSameCaseInsensitive(status, VotingStatus.Deploying) &&
+            areSameCaseInsensitive(issuer, address) &&
+            ((areSameCaseInsensitive(status, VotingStatus.Deploying) &&
               areSameCaseInsensitive(filter, VotingStatus.Pending)) ||
-            (areSameCaseInsensitive(status, VotingStatus.Starting) &&
-              areSameCaseInsensitive(filter, VotingStatus.Open)) ||
-            (areSameCaseInsensitive(status, VotingStatus.Voting) &&
-              areSameCaseInsensitive(filter, VotingStatus.Voted)) ||
-            (areSameCaseInsensitive(status, VotingStatus.Finishing) &&
-              areSameCaseInsensitive(filter, VotingStatus.Archived)) ||
-            (areSameCaseInsensitive(status, VotingStatus.Funding) &&
-              areSameCaseInsensitive(filter, prevStatus))
+              (areSameCaseInsensitive(status, VotingStatus.Starting) &&
+                areSameCaseInsensitive(filter, VotingStatus.Open)) ||
+              (areSameCaseInsensitive(status, VotingStatus.Voting) &&
+                areSameCaseInsensitive(filter, VotingStatus.Voted)) ||
+              (areSameCaseInsensitive(status, VotingStatus.Finishing) &&
+                areSameCaseInsensitive(filter, VotingStatus.Archived)) ||
+              (areSameCaseInsensitive(status, VotingStatus.Funding) &&
+                areSameCaseInsensitive(filter, prevStatus)))
         )
 
         return votings.concat(miningVotings)
@@ -365,6 +365,11 @@ export const createNewVotingMachine = epoch =>
           epoch,
         },
         options: [0, 1],
+        votingDuration: 4320,
+        publicVotingDuration: 4320,
+        oracleReward: 0,
+        quorum: 20,
+        committeeSize: 100,
       },
       initial: 'editing',
       states: {
