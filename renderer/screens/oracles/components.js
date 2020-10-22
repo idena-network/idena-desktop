@@ -16,6 +16,8 @@ import {
   Skeleton,
   useTheme,
   Divider,
+  InputGroup,
+  InputRightAddon,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
@@ -166,6 +168,7 @@ export function VotingInlineFormControl({
   value,
   helperText,
   children,
+  unit,
   ...props
 }) {
   return (
@@ -176,12 +179,38 @@ export function VotingInlineFormControl({
         </FormLabel>
         {children || (
           <Box w="md">
-            <Input
-              id={id}
-              type={type}
-              defaultValue={defaultValue}
-              value={value}
-            />
+            {unit ? (
+              <InputGroup>
+                <Input
+                  id={id}
+                  type={type}
+                  defaultValue={defaultValue}
+                  value={value}
+                  borderRightColor="white"
+                  borderTopRightRadius={0}
+                  borderBottomRightRadius={0}
+                  _hover={{
+                    borderRightColor: 'white',
+                  }}
+                />
+                <InputRightAddon
+                  background="unset"
+                  borderColor="gray.300"
+                  color="muted"
+                  h={8}
+                  px={3}
+                >
+                  {unit}
+                </InputRightAddon>
+              </InputGroup>
+            ) : (
+              <Input
+                id={id}
+                type={type}
+                defaultValue={defaultValue}
+                value={value}
+              />
+            )}
             {helperText && (
               <FormHelperText color="muted">{helperText}</FormHelperText>
             )}

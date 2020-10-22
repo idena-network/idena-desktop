@@ -31,11 +31,12 @@ import {
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
 import {BLOCK_TIME} from '../../screens/oracles/utils'
+import {toLocaleDna} from '../../shared/utils/utils'
 
 dayjs.extend(duration)
 
 function NewVotingPage() {
-  const {t} = useTranslation()
+  const {t, i18n} = useTranslation()
 
   const router = useRouter()
 
@@ -72,9 +73,13 @@ function NewVotingPage() {
     publicVotingDuration,
     options,
     shouldStartImmediately,
+    isFreeVoting,
+    committeeSize,
+    oracleReward,
   } = current.context
 
   const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
+  const dna = toLocaleDna(i18n)
 
   return (
     <Page p={0}>
@@ -99,6 +104,29 @@ function NewVotingPage() {
               id="votingMinPayment"
               type="number"
               label={t('Voting deposit')}
+              unit="DNA"
+              isDisabled={isFreeVoting}
+              onChange={handleChange}
+            />
+            <VotingInlineFormControl mt={-2}>
+              <Checkbox
+                id="isFreeVoting"
+                borderColor="gray.100"
+                onChange={({target: {id, checked}}) => {
+                  send('CHANGE', {id, value: checked})
+                }}
+              >
+                {t('Free voting')}
+              </Checkbox>
+            </VotingInlineFormControl>
+            <VotingInlineFormControl
+              id="oracleReward"
+              type="number"
+              label={t('Min reward per oracle')}
+              unit="DNA"
+              helperText={t('Total oracles rewards: {{amount}}', {
+                amount: dna(oracleReward * committeeSize),
+              })}
               onChange={handleChange}
             />
             <VotingInlineFormControl
@@ -108,7 +136,7 @@ function NewVotingPage() {
               isDisabled={shouldStartImmediately}
               onChange={handleChange}
             />
-            <VotingInlineFormControl spacing={0}>
+            <VotingInlineFormControl>
               <Checkbox
                 id="shouldStartImmediately"
                 borderColor="gray.100"
@@ -149,6 +177,7 @@ function NewVotingPage() {
                   type="number"
                   label={t('Winner score')}
                   defaultValue={50}
+                  unit="%"
                   onChange={handleChange}
                 />
                 <VotingInlineFormControl
@@ -156,6 +185,7 @@ function NewVotingPage() {
                   type="number"
                   label={t('Min committee size')}
                   defaultValue={20}
+                  unit="%"
                   onChange={handleChange}
                 />
                 <VotingInlineFormControl
