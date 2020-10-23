@@ -1,6 +1,6 @@
 import React from 'react'
 import NextLink from 'next/link'
-import {Link, Stack, Text, useToast} from '@chakra-ui/core'
+import {Button, Link, Stack, Text, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page, PageTitle} from '../../screens/app/components'
@@ -24,6 +24,7 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {VotingCard} from '../../screens/oracles/containers'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {eitherState} from '../../shared/utils/utils'
+import {IconButton2} from '../../shared/components/button'
 
 function VotingListPage() {
   const {t} = useTranslation()
@@ -45,7 +46,7 @@ function VotingListPage() {
       },
     },
   })
-  const {votings, filter, showAll} = current.context
+  const {votings, filter, showAll = true, continuationToken} = current.context
 
   return (
     <Page>
@@ -56,14 +57,21 @@ function VotingListPage() {
             <FilterList
               defaultValue="todo"
               display="flex"
-              onChange={() => send('TOGGLE_SHOW_ALL')}
+              onChange={value => send('TOGGLE_SHOW_ALL', {value})}
             >
               <FilterOption value="todo">{t('To do')}</FilterOption>
               <FilterOption value="voting">{t('Voting')}</FilterOption>
               <FilterOption value="closed">{t('Closed')}</FilterOption>
-              <FilterOption value="owned" variantColor="blue" ml="auto">
+              <IconButton2
+                value="owned"
+                isActive={!showAll}
+                aria-checked={!showAll}
+                role="radio"
+                icon="user"
+                ml="auto"
+              >
                 {t('My votings')}
-              </FilterOption>
+              </IconButton2>
             </FilterList>
           </VotingSkeleton>
           <Stack spacing={6} w="md" flex={1}>
@@ -79,15 +87,16 @@ function VotingListPage() {
             {current.matches('loaded') && votings.length === 0 && (
               <FillCenter justify="center">
                 <>
-                  {filter === 'owned' && (
-                    <Text>{t(`There are no votings yet.`)}</Text>
+                  {!showAll && <Text>{t(`There are no votings yet.`)}</Text>}
+
+                  {showAll && (
+                    <Text>
+                      {identity.isValidated
+                        ? t(`No votings for you 🤷‍♂️`)
+                        : t(`There are no votings yet.`)}
+                    </Text>
                   )}
-                  {filter !== 'owned' && identity.isValidated && (
-                    <Text>{t(`There are no votings yet.`)}</Text>
-                  )}
-                  {filter !== 'owned' && !identity.isValidated && (
-                    <Text>{t(`No votings for you 😕`)}</Text>
-                  )}
+
                   <NextLink href="/oracles/new">
                     <Link
                       color="brandBlue.500"
@@ -107,6 +116,16 @@ function VotingListPage() {
               votings.map(({id, ref}) => (
                 <VotingCard key={id} votingRef={ref} />
               ))}
+
+            {current.matches('loaded') && continuationToken && (
+              <Button
+                variant="link"
+                variantColor="brandBlue"
+                onClick={() => send('LOAD_MORE')}
+              >
+                {t('Load more')}
+              </Button>
+            )}
           </Stack>
         </Stack>
         <VotingSkeleton isLoaded={!current.matches('preload')}>
