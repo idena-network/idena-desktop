@@ -390,8 +390,6 @@ export const FlipFilterOption = React.forwardRef(
       _active={{bg: 'gray.50', color: 'brand.blue'}}
       _hover={{bg: 'gray.50', color: 'brand.blue'}}
       {...props}
-      variant="ghost"
-      variantColor="gray"
     />
   )
 )

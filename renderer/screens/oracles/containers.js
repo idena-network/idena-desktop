@@ -57,11 +57,7 @@ export function VotingCard({votingRef, ...props}) {
 
   const {t, i18n} = useTranslation()
 
-  const {
-    isOpen: isOpenAddFund,
-    onOpen: onOpenAddFund,
-    onClose: onCloseAddFund,
-  } = useDisclosure()
+  const {isOpen: isOpenAddFund, onClose: onCloseAddFund} = useDisclosure()
 
   const [current, send] = useService(votingRef)
 
@@ -72,7 +68,6 @@ export function VotingCard({votingRef, ...props}) {
     issuer,
     status,
     balance = 0,
-    fundingAmount = balance,
     startDate,
     votingDuration,
     publicVotingDuration,
@@ -113,11 +108,18 @@ export function VotingCard({votingRef, ...props}) {
       <Box key={id} {...props}>
         <Stack isInline spacing={2} mb={3} align="center">
           <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
-          <VotingBadge bg="gray.50" color="muted" pl="1/2">
-            <Stack isInline spacing={1} align="center">
-              <Avatar w={5} h={5} address={issuer} />
-              <Text>{issuer}</Text>
-            </Stack>
+          <VotingBadge align="center" bg="gray.50" color="muted" pl="1/2">
+            <Avatar
+              address={issuer}
+              bg="white"
+              borderColor="brandGray.016"
+              borderWidth="1px"
+              borderRadius="full"
+              w={5}
+              h={5}
+              mr={1}
+            />
+            <Text as="span">{issuer}</Text>
           </VotingBadge>
         </Stack>
         <Link href={viewHref}>
@@ -172,10 +174,10 @@ export function VotingCard({votingRef, ...props}) {
         >
           <Icon name="star" size={5} color="white" />
           <Text fontWeight={500}>
-            {t('Total prize')}: {toDna(fundingAmount)}
+            {t('Total prize')}: {toDna(balance)}
           </Text>
           <Text color="orange.500">
-            {votingMinPayment
+            {Number(votingMinPayment) > 0
               ? t(`Lock {{amount}} for voting`, {
                   amount: toLocaleDna(i18n.language)(votingMinPayment),
                 })

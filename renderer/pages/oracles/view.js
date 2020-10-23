@@ -71,7 +71,7 @@ export default function ViewVotingPage() {
 
   const {epoch} = useEpochState()
 
-  const {address, balance} = useIdentityState()
+  const {address, balance: identityBalance} = useIdentityState()
 
   const viewMachine = React.useMemo(
     () => createViewVotingMachine(id, epoch, address),
@@ -98,7 +98,7 @@ export default function ViewVotingPage() {
     contractHash,
     issuer,
     status,
-    fundingAmount = 0,
+    balance: contractBalance = 0,
     votingMinPayment = 0,
     startDate,
     votingDuration = 0,
@@ -132,7 +132,7 @@ export default function ViewVotingPage() {
   const maxCount = Math.max(...votes.map(({count}) => count))
 
   const reward = oracleReward({
-    fundingAmount,
+    balance: contractBalance,
     votesCount: actualVotesCount,
     quorum,
   })
@@ -334,7 +334,7 @@ export default function ViewVotingPage() {
                   </Stack>
                 </StatLabel>
                 <StatNumber fontSize="base" fontWeight={500}>
-                  {toDna(fundingAmount)}
+                  {toDna(contractBalance)}
                 </StatNumber>
                 <StatHelpText mt={1}>
                   <IconButton2 icon="add-fund" onClick={onOpenAddFund}>
@@ -392,7 +392,7 @@ export default function ViewVotingPage() {
         onClose={onCloseAddFund}
         from={issuer}
         to={contractHash}
-        available={balance}
+        available={identityBalance}
         onAddFund={({amount, from}) => {
           send('ADD_FUND', {amount, from})
           onCloseAddFund()

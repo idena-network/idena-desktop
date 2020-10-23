@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import {assign} from 'xstate'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
-import {strip as omit} from '../../shared/utils/obj'
+import {strip} from '../../shared/utils/obj'
 
 export const ContractRpcMode = {
   Estimate: 'estimate',
@@ -30,7 +30,7 @@ export const setVotingStatus = status =>
     status,
   })
 
-export async function fetchVotings({limit = 30, ...params}) {
+export async function fetchVotings({limit = 10, ...params}) {
   const invokeUrl = new URL(
     `http://195.201.2.44:18888/api/OracleVotingContracts`
   )
@@ -41,11 +41,13 @@ export async function fetchVotings({limit = 30, ...params}) {
       invokeUrl.searchParams.append(k, v)
     })
 
-  const {result, error} = await (await fetch(invokeUrl)).json()
+  const {result, error, continuationToken} = await (
+    await fetch(invokeUrl)
+  ).json()
 
   if (error) throw new Error(error.message)
 
-  return result || []
+  return {result, continuationToken}
 }
 
 export const createContractCaller = ({
@@ -59,7 +61,7 @@ export const createContractCaller = ({
 }) => (method, mode = ContractRpcMode.Call, ...args) => {
   const isCalling = mode === ContractRpcMode.Call
 
-  const payload = omit({
+  const payload = strip({
     from,
     contract: contractHash,
     method,
@@ -82,7 +84,7 @@ export const createContractReadonlyCaller = ({contractHash}) => (
 ) =>
   callRpc(
     'contract_readonlyCall',
-    omit({
+    strip({
       contract: contractHash,
       method,
       format,
@@ -131,7 +133,7 @@ export function buildContractDeploymentParams(
   {address: from},
   mode = ContractRpcMode.Call
 ) {
-  return omit({
+  return strip({
     from,
     codeHash: '0x02',
     amount: 6001,
@@ -157,7 +159,10 @@ export function buildContractDeploymentParams(
       {value: quorum, format: 'uint64'},
       {value: committeeSize, format: 'uint64'},
       {value: maxOptions, format: 'uint64'},
-      {value: isFreeVoting ? 0 : votingMinPayment, format: 'dna'},
+      {
+        value: isFreeVoting ? Number(0).toString() : votingMinPayment,
+        format: 'dna',
+      },
       {value: ownerFee, format: 'byte'}
     ),
   })
@@ -165,8 +170,12 @@ export function buildContractDeploymentParams(
 
 export function buildDynamicArgs(...args) {
   return args
-    .map(({format = 'hex', ...arg}, index) => ({index, format, ...arg}))
-    .filter(({value}) => Boolean(value))
+    .map(({format = 'hex', value}, index) => ({
+      index,
+      format,
+      value: value?.toString(),
+    }))
+    .filter(({value = null}) => value !== null)
 }
 
 export function contractMaxFee(gasCost, txFee) {
@@ -196,8 +205,8 @@ export function areSameCaseInsensitive(a, b) {
   return a?.toUpperCase() === b?.toUpperCase()
 }
 
-export function oracleReward({fundingAmount, votesCount, quorum}) {
-  if ([fundingAmount, votesCount, quorum].some(v => Number.isNaN(v))) return
+export function oracleReward({balance, votesCount, quorum}) {
+  if ([balance, votesCount, quorum].some(v => Number.isNaN(v))) return undefined
 
-  return fundingAmount / Math.max(quorum, votesCount)
+  return balance / Math.max(quorum, votesCount)
 }

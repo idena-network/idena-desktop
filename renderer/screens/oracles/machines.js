@@ -84,6 +84,25 @@ export const votingListMachine = Machine(
             actions: ['toggleShowAll', 'persistFilter'],
           },
         },
+        initial: 'idle',
+        states: {
+          idle: {
+            on: {
+              LOAD_MORE: 'loadMore',
+            },
+          },
+          loadMore: {
+            invoke: {
+              src: 'loadVotings',
+              onDone: {
+                actions: ['applyMoreVotings', log()],
+              },
+              onError: {
+                actions: ['setError', log()],
+              },
+            },
+          },
+        },
       },
       failure: {},
     },
@@ -91,8 +110,8 @@ export const votingListMachine = Machine(
   {
     actions: {
       applyVotings: assign({
-        votings: ({epoch, identity}, {data}) =>
-          data.map(voting => ({
+        votings: ({epoch, identity}, {data: {votings}}) =>
+          votings.map(voting => ({
             ...voting,
             ref: spawn(
               // eslint-disable-next-line no-use-before-define
@@ -104,6 +123,27 @@ export const votingListMachine = Machine(
               `voting-${voting.id}`
             ),
           })),
+        continuationToken: (_, {data: {continuationToken}}) =>
+          continuationToken,
+      }),
+      applyMoreVotings: assign({
+        votings: ({votings, epoch, identity}, {data: {votings: nextVotings}}) =>
+          votings.concat(
+            nextVotings.map(voting => ({
+              ...voting,
+              ref: spawn(
+                // eslint-disable-next-line no-use-before-define
+                votingMachine.withContext({
+                  ...voting,
+                  epoch,
+                  identity,
+                }),
+                `voting-${voting.id}`
+              ),
+            }))
+          ),
+        continuationToken: (_, {data: {continuationToken}}) =>
+          continuationToken,
       }),
       applyFilter: assign((context, {data}) => ({
         ...context,
@@ -111,9 +151,10 @@ export const votingListMachine = Machine(
       })),
       setFilter: assign({
         filter: (_, {filter}) => filter,
+        continuationToken: null,
       }),
       toggleShowAll: assign({
-        showAll: ({showAll}) => !showAll,
+        showAll: (_, {value}) => value !== 'owned',
       }),
       persistFilter: ({filter, showAll}) => {
         global
@@ -130,51 +171,49 @@ export const votingListMachine = Machine(
         identity: {address},
         filter,
         showAll,
+        continuationToken,
       }) => {
-        const knownVotings = await fetchVotings({
+        const {
+          result,
+          continuationToken: nextContinuationToken,
+        } = await fetchVotings({
           all: showAll.toString(),
           oracle: address,
           state: filter,
+          continuationToken,
         })
 
-        const normalizedKnownVotings = await Promise.all(
-          knownVotings.map(
-            async ({contractAddress, state, balance, fact, ...voting}) => {
-              let votingMinPayment
-
-              try {
-                votingMinPayment = Number(
-                  await createContractDataReader({
-                    contractHash: contractAddress,
-                  })('votingMinPayment', 'dna')
-                )
-              } catch {
-                votingMinPayment = 0
-              }
-
-              return {
-                ...voting,
-                votingMinPayment,
-                status: state,
-                fundingAmount: balance,
-                contractHash: contractAddress,
-                ...hexToObject(fact),
-              }
-            }
-          )
+        const knownVotings = (result ?? []).map(
+          ({
+            contractAddress,
+            author,
+            fact,
+            state,
+            startTime,
+            minPayment,
+            ...voting
+          }) => ({
+            ...voting,
+            contractHash: contractAddress,
+            issuer: author,
+            status: state,
+            startDate: startTime,
+            votingMinPayment: minPayment,
+            ...hexToObject(fact),
+          })
         )
 
         const db = epochDb('votings', epoch)
 
         const persistedVotings = await db.all()
 
-        const persistedKnownVotings = persistedVotings.filter(voting =>
-          normalizedKnownVotings.some(byContractHash(voting))
+        const knownPersistedVotings = persistedVotings.filter(voting =>
+          knownVotings.some(byContractHash(voting))
         )
 
         const votings = merge(byContractHash)(
-          persistedKnownVotings,
-          normalizedKnownVotings
+          knownPersistedVotings,
+          knownVotings
         )
 
         await db.batchPut(votings)
@@ -194,7 +233,10 @@ export const votingListMachine = Machine(
                 areSameCaseInsensitive(filter, prevStatus)))
         )
 
-        return votings.concat(miningVotings)
+        return {
+          votings: votings.concat(miningVotings),
+          continuationToken: nextContinuationToken,
+        }
       },
       loadFilter: async ({filter}) => {
         try {
@@ -300,8 +342,7 @@ export const votingMachine = Machine(
       setFunding: assign({
         prevStatus: ({status}) => status,
         status: VotingStatus.Funding,
-        fundingAmount: ({fundingAmount = 0}, {amount}) =>
-          fundingAmount + amount,
+        balance: ({balance = 0}, {amount}) => balance + amount,
       }),
       setStarting: setVotingStatus(VotingStatus.Starting),
       setRunning: setVotingStatus(VotingStatus.Open),
@@ -606,8 +647,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
         setFunding: assign({
           prevStatus: ({status}) => status,
           status: VotingStatus.Funding,
-          fundingAmount: ({fundingAmount = 0}, {amount}) =>
-            Number(fundingAmount) + Number(amount),
+          balance: ({balance = 0}, {amount}) =>
+            Number(balance) + Number(amount),
         }),
         setStarting: setVotingStatus(VotingStatus.Starting),
         setRunning: setVotingStatus(VotingStatus.Open),
