@@ -67,9 +67,7 @@ export const createContractCaller = ({
     method,
     maxFee: isCalling ? contractMaxFee(gasCost, txFee) : null,
     amount:
-      isCalling && method !== 'sendVoteProof'
-        ? null
-        : amount || votingMinPayment,
+      isCalling && method === 'sendVote' ? null : amount || votingMinPayment,
     broadcastBlock: isCalling && method === 'sendVote' ? broadcastBlock : null,
     args: buildDynamicArgs(...args),
   })

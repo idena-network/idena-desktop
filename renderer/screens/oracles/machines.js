@@ -1,5 +1,5 @@
 import {Machine, assign, spawn} from 'xstate'
-import {log, sendParent} from 'xstate/lib/actions'
+import {choose, log, send, sendParent} from 'xstate/lib/actions'
 import {
   fetchVotings,
   createContractCaller,
@@ -398,13 +398,12 @@ export const votingMachine = Machine(
   }
 )
 
-export const createNewVotingMachine = epoch =>
+export const createNewVotingMachine = (epoch, address) =>
   Machine(
     {
       context: {
-        epoch: {
-          epoch,
-        },
+        epoch,
+        address,
         options: [0, 1],
         votingDuration: 4320,
         publicVotingDuration: 4320,
@@ -450,22 +449,88 @@ export const createNewVotingMachine = epoch =>
                   },
                 },
                 deploying: {
-                  invoke: {
-                    src: 'deployContract',
-                    onDone: {
-                      target: 'done',
-                      actions: ['applyContractHash', log()],
+                  initial: 'submitting',
+                  states: {
+                    submitting: {
+                      invoke: {
+                        src: 'deployContract',
+                        onDone: {
+                          target: 'mining',
+                          actions: ['applyTx', log()],
+                        },
+                        onError: {
+                          actions: ['onError', send('EDIT'), log()],
+                        },
+                      },
                     },
-                    onError: {
-                      actions: ['onDeployFailed', log()],
+                    mining: {
+                      invoke: {
+                        src: 'pollStatus',
+                      },
+                      on: {
+                        MINED: {
+                          actions: [
+                            choose([
+                              {
+                                actions: [
+                                  send({
+                                    type: 'START_VOTING',
+                                    from: address,
+                                    amount: 10000,
+                                  }),
+                                ],
+                                cond: 'shouldStartImmediately',
+                              },
+                              {
+                                actions: [send('DONE')],
+                              },
+                            ]),
+                            log(),
+                          ],
+                        },
+                      },
                     },
                   },
                 },
-                done: {
-                  entry: ['onDeployed'],
+              },
+              on: {
+                START_VOTING: VotingStatus.Starting,
+              },
+            },
+            [VotingStatus.Starting]: {
+              initial: 'submitting',
+              states: {
+                submitting: {
+                  invoke: {
+                    src: 'startVoting',
+                    onDone: {
+                      target: 'mining',
+                      actions: ['applyTx', log()],
+                    },
+                    onError: {
+                      actions: ['onError', send('EDIT'), log()],
+                    },
+                  },
+                },
+                mining: {
+                  invoke: {
+                    src: 'pollStatus',
+                  },
+                  on: {
+                    MINED: {
+                      actions: ['setRunning', 'persist', send('DONE'), log()],
+                    },
+                  },
                 },
               },
             },
+            done: {
+              actions: ['onDone'],
+            },
+          },
+          on: {
+            EDIT: 'editing',
+            DONE: '.done',
           },
         },
       },
@@ -484,7 +549,7 @@ export const createNewVotingMachine = epoch =>
             txFee: Number(txFee),
           })
         ),
-        applyContractHash: assign({
+        applyTx: assign({
           txHash: (_, {data}) => data,
         }),
         setContractParams: assign((context, {id, value}) => ({
@@ -504,14 +569,20 @@ export const createNewVotingMachine = epoch =>
                 )
               : options.slice(0, value),
         }),
+        setRunning: setVotingStatus(VotingStatus.Open),
+        // eslint-disable-next-line no-shadow
+        persist: ({epoch, ...context}) => {
+          epochDb('votings', epoch).put(context)
+        },
       },
       services: {
-        estimateDeployContract: async ({identity, ...voting}) => {
+        // eslint-disable-next-line no-shadow
+        estimateDeployContract: async ({address, ...voting}) => {
           const {error, ...result} = await callRpc(
             'contract_estimateDeploy',
             buildContractDeploymentParams(
               voting,
-              identity,
+              {address},
               ContractRpcMode.Estimate
             )
           )
@@ -519,22 +590,49 @@ export const createNewVotingMachine = epoch =>
           return result
         },
         // eslint-disable-next-line no-shadow
-        deployContract: async ({epoch: {epoch}, identity, ...voting}) => {
+        deployContract: async ({epoch, address, ...voting}) => {
           const deployResult = await callRpc(
             'contract_deploy',
-            buildContractDeploymentParams(voting, identity)
+            buildContractDeploymentParams(voting, {address})
           )
 
           await epochDb('votings', epoch).put({
             ...voting,
             txHash: deployResult,
-            issuer: identity.address,
+            issuer: address,
             finishDate: votingFinishDate(voting),
             status: VotingStatus.Deploying,
           })
 
           return deployResult
         },
+        startVoting: votingServices().startVoting,
+        pollStatus: ({txHash}) => cb => {
+          let timeoutId
+
+          const fetchStatus = async () => {
+            try {
+              const result = await callRpc('bcn_transaction', txHash)
+              if (result.blockHash !== HASH_IN_MEMPOOL) {
+                cb('MINED')
+              } else {
+                timeoutId = setTimeout(fetchStatus, 10 * 1000)
+              }
+            } catch (error) {
+              cb('TX_NULL', {error: error?.message})
+            }
+          }
+
+          timeoutId = setTimeout(fetchStatus, 10 * 1000)
+
+          return () => {
+            clearTimeout(timeoutId)
+          }
+        },
+      },
+      guards: {
+        shouldStartImmediately: ({shouldStartImmediately}) =>
+          shouldStartImmediately,
       },
     }
   )
@@ -1084,8 +1182,8 @@ function votingServices() {
         from,
         amount,
       }),
-    startVoting: async (contract, {from}) => {
-      let callContract = createContractCaller({...contract, from})
+    startVoting: async (contract, {from, amount}) => {
+      let callContract = createContractCaller({...contract, from, amount})
 
       const {error, gasCost, txFee} = await callContract(
         'startVoting',
@@ -1096,6 +1194,7 @@ function votingServices() {
       callContract = createContractCaller({
         ...contract,
         from,
+        amount,
         gasCost: Number(gasCost),
         txFee: Number(txFee),
       })
