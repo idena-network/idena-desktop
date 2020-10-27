@@ -53,7 +53,6 @@ export async function fetchVotings({limit = 10, ...params}) {
 export const createContractCaller = ({
   from,
   contractHash,
-  votingMinPayment,
   gasCost,
   txFee,
   amount,
@@ -66,8 +65,7 @@ export const createContractCaller = ({
     contract: contractHash,
     method,
     maxFee: isCalling ? contractMaxFee(gasCost, txFee) : null,
-    amount:
-      isCalling && method === 'sendVote' ? null : amount || votingMinPayment,
+    amount: isCalling && method === 'sendVote' ? null : amount,
     broadcastBlock: isCalling && method === 'sendVote' ? broadcastBlock : null,
     args: buildDynamicArgs(...args),
   })
@@ -109,32 +107,30 @@ export function hexToObject(hex) {
   )
 }
 
-export function buildContractDeploymentParams(
+export function buildContractDeploymentArgs(
   {
     title,
     desc,
-    options,
     startDate,
-    gasCost,
-    txFee,
     votingDuration,
     publicVotingDuration,
     winnerThreshold,
     quorum,
     committeeSize,
-    maxOptions,
     votingMinPayment = 0,
+    maxOptions,
+    options,
     ownerFee = 0,
     shouldStartImmediately,
     isFreeVoting,
   },
-  {address: from},
+  {from, stake, gasCost, txFee},
   mode = ContractRpcMode.Call
 ) {
   return strip({
     from,
     codeHash: '0x02',
-    amount: 6001,
+    amount: stake,
     maxFee:
       mode === ContractRpcMode.Call ? contractMaxFee(gasCost, txFee) : null,
     args: buildDynamicArgs(
@@ -146,9 +142,7 @@ export function buildContractDeploymentParams(
         })}`,
       },
       {
-        value: dayjs(shouldStartImmediately ? Date.now() : startDate)
-          .unix()
-          .toString(),
+        value: dayjs(shouldStartImmediately ? Date.now() : startDate).unix(),
         format: 'uint64',
       },
       {value: votingDuration, format: 'uint64'},
@@ -158,7 +152,7 @@ export function buildContractDeploymentParams(
       {value: committeeSize, format: 'uint64'},
       {value: maxOptions, format: 'uint64'},
       {
-        value: isFreeVoting ? Number(0).toString() : votingMinPayment,
+        value: isFreeVoting ? 0 : votingMinPayment,
         format: 'dna',
       },
       {value: ownerFee, format: 'byte'}
@@ -171,7 +165,7 @@ export function buildDynamicArgs(...args) {
     .map(({format = 'hex', value}, index) => ({
       index,
       format,
-      value: value?.toString(),
+      value: typeof value !== 'string' ? value?.toString() ?? null : value,
     }))
     .filter(({value = null}) => value !== null)
 }
@@ -191,6 +185,7 @@ export const votingFinishDate = ({
   dayjs(startDate)
     .add(votingDuration * BLOCK_TIME, 's')
     .add(publicVotingDuration * BLOCK_TIME, 's')
+    .toDate()
 
 export function viewVotingHref(id) {
   return `/oracles/view?id=${id}`
@@ -207,4 +202,13 @@ export function oracleReward({balance, votesCount, quorum}) {
   if ([balance, votesCount, quorum].some(v => Number.isNaN(v))) return undefined
 
   return balance / Math.max(quorum, votesCount)
+}
+
+export function votingMinStake(feePerGas) {
+  return 3000000 * feePerGas * 10 ** -18
+}
+
+// eslint-disable-next-line no-shadow
+export function votingMinBalance({oracleReward, committeeSize, feePerGas}) {
+  return oracleReward * feePerGas * 10 ** -18 * 100 * 100 * committeeSize
 }
