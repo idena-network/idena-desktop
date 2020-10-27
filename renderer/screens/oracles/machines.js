@@ -3,7 +3,7 @@ import {choose, log, send, sendParent} from 'xstate/lib/actions'
 import {
   fetchVotings,
   createContractCaller,
-  buildContractDeploymentParams,
+  buildContractDeploymentArgs,
   ContractRpcMode,
   isVotingStatus,
   isVotingMiningStatus,
@@ -411,8 +411,22 @@ export const createNewVotingMachine = (epoch, address) =>
         quorum: 20,
         committeeSize: 100,
       },
-      initial: 'editing',
+      initial: 'preload',
       states: {
+        preload: {
+          invoke: {
+            src: () => callRpc('bcn_feePerGas'),
+            onDone: {
+              target: 'editing',
+              actions: [
+                assign({
+                  feePerGas: (_, {data}) => data,
+                }),
+                log(),
+              ],
+            },
+          },
+        },
         editing: {
           on: {
             CHANGE: {
@@ -431,9 +445,15 @@ export const createNewVotingMachine = (epoch, address) =>
           },
         },
         publishing: {
-          initial: 'deployingContract',
+          initial: 'review',
           states: {
-            deployingContract: {
+            review: {
+              on: {
+                CANCEL: {actions: send('EDIT')},
+                CONFIRM: 'deploy',
+              },
+            },
+            deploy: {
               initial: 'estimating',
               states: {
                 estimating: {
@@ -441,10 +461,10 @@ export const createNewVotingMachine = (epoch, address) =>
                     src: 'estimateDeployContract',
                     onDone: {
                       target: 'deploying',
-                      actions: ['applyDeployResult', log()],
+                      actions: [log()],
                     },
                     onError: {
-                      actions: ['onDeployFailed', log()],
+                      actions: ['onError', log()],
                     },
                   },
                 },
@@ -456,7 +476,7 @@ export const createNewVotingMachine = (epoch, address) =>
                         src: 'deployContract',
                         onDone: {
                           target: 'mining',
-                          actions: ['applyTx', log()],
+                          actions: ['applyDeployResult', log()],
                         },
                         onError: {
                           actions: ['onError', send('EDIT'), log()],
@@ -473,11 +493,11 @@ export const createNewVotingMachine = (epoch, address) =>
                             choose([
                               {
                                 actions: [
-                                  send({
+                                  send((_, {from, balance}) => ({
                                     type: 'START_VOTING',
-                                    from: address,
-                                    amount: 10000,
-                                  }),
+                                    from,
+                                    balance,
+                                  })),
                                 ],
                                 cond: 'shouldStartImmediately',
                               },
@@ -498,14 +518,51 @@ export const createNewVotingMachine = (epoch, address) =>
               },
             },
             [VotingStatus.Starting]: {
-              initial: 'submitting',
+              initial: 'submittingAddFund',
               states: {
+                submittingAddFund: {
+                  invoke: {
+                    src: async ({contractHash}, {from, balance}) => ({
+                      txHash: await callRpc('dna_sendTransaction', {
+                        to: contractHash,
+                        from,
+                        amount: balance,
+                      }),
+                      from,
+                      balance,
+                    }),
+                    onDone: {
+                      target: 'miningFund',
+                      actions: ['applyTx', log()],
+                    },
+                    onError: {
+                      actions: ['onError', send('EDIT'), log()],
+                    },
+                  },
+                },
+                miningFund: {
+                  invoke: {
+                    src: 'pollStatus',
+                  },
+                  on: {
+                    MINED: {
+                      target: 'submitting',
+                      actions: [log()],
+                    },
+                  },
+                },
                 submitting: {
                   invoke: {
-                    src: 'startVoting',
+                    src: (context, {from}) =>
+                      votingServices().startVoting(context, {from}),
                     onDone: {
                       target: 'mining',
-                      actions: ['applyTx', log()],
+                      actions: [
+                        assign({
+                          txHash: (_, {data}) => data,
+                        }),
+                        log(),
+                      ],
                     },
                     onError: {
                       actions: ['onError', send('EDIT'), log()],
@@ -524,33 +581,26 @@ export const createNewVotingMachine = (epoch, address) =>
                 },
               },
             },
-            done: {
-              actions: ['onDone'],
-            },
           },
           on: {
             EDIT: 'editing',
-            DONE: '.done',
+            DONE: 'done',
           },
+        },
+        done: {
+          actions: ['onDone'],
         },
       },
     },
     {
       actions: {
-        applyDeployResult: assign(
-          (
-            context,
-            {data: {contract: contractHash, txHash, gasCost, txFee}}
-          ) => ({
-            ...context,
-            contractHash,
-            txHash,
-            gasCost: Number(gasCost),
-            txFee: Number(txFee),
-          })
-        ),
+        applyDeployResult: assign((context, {data: {txHash, voting}}) => ({
+          ...context,
+          txHash,
+          ...voting,
+        })),
         applyTx: assign({
-          txHash: (_, {data}) => data,
+          txHash: (_, {data: {txHash}}) => txHash,
         }),
         setContractParams: assign((context, {id, value}) => ({
           ...context,
@@ -577,44 +627,51 @@ export const createNewVotingMachine = (epoch, address) =>
       },
       services: {
         // eslint-disable-next-line no-shadow
-        estimateDeployContract: async ({address, ...voting}) => {
+        estimateDeployContract: async (voting, {from, balance, stake}) => {
           const {error, ...result} = await callRpc(
             'contract_estimateDeploy',
-            buildContractDeploymentParams(
+            buildContractDeploymentArgs(
               voting,
-              {address},
+              {from, stake},
               ContractRpcMode.Estimate
             )
           )
           if (error) throw new Error(error)
-          return result
+          return {...result, from, balance, stake}
         },
-        // eslint-disable-next-line no-shadow
-        deployContract: async ({epoch, address, ...voting}) => {
-          const deployResult = await callRpc(
+        deployContract: async (
+          // eslint-disable-next-line no-shadow
+          {epoch, address, ...voting},
+          {data: {contract, from, balance, stake, gasCost, txFee}}
+        ) => {
+          const txHash = await callRpc(
             'contract_deploy',
-            buildContractDeploymentParams(voting, {address})
+            buildContractDeploymentArgs(voting, {from, stake, gasCost, txFee})
           )
 
-          await epochDb('votings', epoch).put({
+          const nextVoting = {
             ...voting,
-            txHash: deployResult,
+            contractHash: contract,
             issuer: address,
             finishDate: votingFinishDate(voting),
+          }
+
+          await epochDb('votings', epoch).put({
+            ...nextVoting,
+            txHash,
             status: VotingStatus.Deploying,
           })
 
-          return deployResult
+          return {txHash, voting: nextVoting, from, balance}
         },
-        startVoting: votingServices().startVoting,
-        pollStatus: ({txHash}) => cb => {
+        pollStatus: ({txHash}, {data: {from, balance}}) => cb => {
           let timeoutId
 
           const fetchStatus = async () => {
             try {
               const result = await callRpc('bcn_transaction', txHash)
               if (result.blockHash !== HASH_IN_MEMPOOL) {
-                cb('MINED')
+                cb({type: 'MINED', from, balance})
               } else {
                 timeoutId = setTimeout(fetchStatus, 10 * 1000)
               }
@@ -791,7 +848,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
         loadVoting: async ({epoch, id}) => epochDb('votings', epoch).load(id),
         ...votingServices(),
         vote: async (
-          {contractHash, amount, selectedOption, gasCost, txFee},
+          {contractHash, selectedOption, gasCost, txFee},
           {from}
         ) => {
           const readonlyCallContract = createContractReadonlyCaller({
@@ -824,7 +881,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           let callContract = createContractCaller({
             from,
             contractHash,
-            amount: votingMinPayment || amount,
+            amount: votingMinPayment,
             broadcastBlock: voteBlock,
             gasCost,
             txFee,
@@ -843,7 +900,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           callContract = createContractCaller({
             from,
             contractHash,
-            amount: votingMinPayment || amount,
+            amount: votingMinPayment,
             broadcastBlock: voteBlock,
             gasCost: Number(callGasCost),
             txFee: Number(callTxFee),
@@ -1182,7 +1239,7 @@ function votingServices() {
         from,
         amount,
       }),
-    startVoting: async (contract, {from, amount}) => {
+    startVoting: async (contract, {from, balance, amount = balance}) => {
       let callContract = createContractCaller({...contract, from, amount})
 
       const {error, gasCost, txFee} = await callContract(

@@ -41,6 +41,7 @@ import {
   OracleFormControl,
   OracleFormHelper,
   VotingListDivider,
+  OracleFormHelperText,
 } from './components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {Link} from '../../shared/components'
@@ -304,9 +305,7 @@ export function AddFundDrawer({from, to, available, onAddFund, ...props}) {
 
   return (
     <Drawer {...props}>
-      <OracleDrawerHeader icon="add-fund">
-        {t('Add fund', {nsSeparator: '!'})}
-      </OracleDrawerHeader>
+      <OracleDrawerHeader icon="add-fund">{t('Add fund')}</OracleDrawerHeader>
       <Box
         as="form"
         onSubmit={e => {
@@ -326,7 +325,7 @@ export function AddFundDrawer({from, to, available, onAddFund, ...props}) {
           <OracleFormControl label="To address">
             <Input isDisabled value={to} />
           </OracleFormControl>
-          <OracleFormControl label={t('Lock, DNA')}>
+          <OracleFormControl label={t('Lock, iDNA')}>
             <Input name="amountInput" />
           </OracleFormControl>
           <PrimaryButton type="submit" mt={3} ml="auto">
@@ -358,16 +357,81 @@ export function VoteDrawer({option, from, to, deposit = 0, onVote, ...props}) {
         <OracleFormControl label="To address">
           <Input isDisabled value={to} />
         </OracleFormControl>
-        <OracleFormControl label={t('Lock, DNA')}>
+        <OracleFormControl label={t('Lock, iDNA')}>
           <Input isDisabled value={deposit} />
-          <OracleFormHelper label={t('Fee')} value={toDna(0.01)} />
-          <OracleFormHelper
-            label={t('Total amount')}
-            value={toDna(deposit * 1.01)}
-          />
         </OracleFormControl>
         <PrimaryButton mt={3} ml="auto" onClick={onVote}>
           {t('Send')}
+        </PrimaryButton>
+      </OracleDrawerBody>
+    </Drawer>
+  )
+}
+
+export function ReviewVotingDrawer({
+  from,
+  available,
+  minBalance,
+  minStake,
+  isLoading,
+  onConfirm,
+  ...props
+}) {
+  const {t, i18n} = useTranslation()
+
+  return (
+    <Drawer {...props}>
+      <OracleDrawerHeader icon="oracle">
+        {t('Create Oracles Voting')}
+      </OracleDrawerHeader>
+      <OracleDrawerBody
+        as="form"
+        onSubmit={e => {
+          e.preventDefault()
+          const {fromInput, balanceInput, stakeInput} = e.target.elements
+          onConfirm({
+            from: fromInput.value,
+            balance: Number(balanceInput.value),
+            stake: Number(stakeInput.value),
+          })
+        }}
+      >
+        <OracleFormControl label={t('Transfer from')}>
+          <Input name="fromInput" defaultValue={from} />
+          <OracleFormHelper
+            label={t('Available')}
+            value={toLocaleDna(i18n.language)(available)}
+          />
+        </OracleFormControl>
+        <OracleFormControl label={t('Rewards, iDNA')}>
+          <Input
+            name="balanceInput"
+            defaultValue={minBalance}
+            type="number"
+            min={0}
+          />
+          <OracleFormHelperText>
+            {t(
+              `Rewards will be paid to Oracles. You’ll be able to increase Oracles' rewards after the voting is created.`
+            )}
+          </OracleFormHelperText>
+        </OracleFormControl>
+        <OracleFormControl label={t('Stake, iDNA')}>
+          <Input name="stakeInput" value={minStake} />
+          <OracleFormHelperText>
+            {t(
+              'Voting stake will be refunded to your address once the voting smart contract is terminated'
+            )}
+          </OracleFormHelperText>
+        </OracleFormControl>
+        <PrimaryButton
+          isLoading={isLoading}
+          loadingText={t('Publishing')}
+          type="submit"
+          mt={3}
+          ml="auto"
+        >
+          {t('Confirm')}
         </PrimaryButton>
       </OracleDrawerBody>
     </Drawer>

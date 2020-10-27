@@ -31,8 +31,14 @@ import {
   VotingOptionText,
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
-import {BLOCK_TIME} from '../../screens/oracles/utils'
-import {toLocaleDna} from '../../shared/utils/utils'
+import {
+  BLOCK_TIME,
+  votingMinBalance,
+  votingMinStake,
+} from '../../screens/oracles/utils'
+import {eitherState, toLocaleDna} from '../../shared/utils/utils'
+import {ReviewVotingDrawer} from '../../screens/oracles/containers'
+import {VotingStatus} from '../../shared/types'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
@@ -48,13 +54,16 @@ function NewVotingPage() {
 
   const [
     {
-      context: {epoch, identity},
+      context: {
+        epoch: {epoch},
+        identity: {address, balance},
+      },
     },
   ] = useAppMachine()
 
   const newVotingMachine = React.useMemo(
-    () => createNewVotingMachine(epoch.epoch, identity.address),
-    [epoch.epoch, identity.address]
+    () => createNewVotingMachine(epoch, address),
+    [address, epoch]
   )
 
   const [current, send] = useMachine(newVotingMachine, {
@@ -88,6 +97,7 @@ function NewVotingPage() {
     isFreeVoting,
     committeeSize,
     oracleReward,
+    feePerGas,
   } = current.context
 
   const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
@@ -137,7 +147,9 @@ function NewVotingPage() {
               label={t('Min reward per oracle')}
               unit="DNA"
               helperText={t('Total oracles rewards: {{amount}}', {
-                amount: dna(oracleReward * committeeSize),
+                amount: dna(
+                  votingMinBalance({oracleReward, committeeSize, feePerGas})
+                ),
               })}
               onChange={handleChange}
             />
@@ -259,6 +271,25 @@ function NewVotingPage() {
           {t('Publish')}
         </PrimaryButton>
       </Stack>
+
+      <ReviewVotingDrawer
+        isOpen={current.matches('publishing')}
+        onClose={() => send('CANCEL')}
+        from={address}
+        available={balance}
+        minBalance={votingMinBalance({oracleReward, committeeSize, feePerGas})}
+        minStake={votingMinStake(feePerGas)}
+        isLoading={eitherState(
+          current,
+          'publishing.deploy',
+          `publishing.${VotingStatus.Starting}`
+        )}
+        // eslint-disable-next-line no-shadow
+        onConfirm={({from, balance, stake}) =>
+          send('CONFIRM', {from, balance, stake})
+        }
+      />
+
       <FloatDebug>{current.value}</FloatDebug>
     </Page>
   )
