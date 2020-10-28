@@ -204,11 +204,19 @@ export function oracleReward({balance, votesCount, quorum}) {
   return balance / Math.max(quorum, votesCount)
 }
 
+export function minOracleReward(feePerGas) {
+  return dnaFeePerGas(feePerGas) * 100 * 100
+}
+
 export function votingMinStake(feePerGas) {
-  return 3000000 * feePerGas * 10 ** -18
+  return 3000000 * dnaFeePerGas(feePerGas)
 }
 
 // eslint-disable-next-line no-shadow
 export function votingMinBalance({oracleReward, committeeSize, feePerGas}) {
-  return oracleReward * feePerGas * 10 ** -18 * 100 * 100 * committeeSize
+  return Math.max(oracleReward, minOracleReward(feePerGas)) * committeeSize
+}
+
+function dnaFeePerGas(value) {
+  return value * 10 ** -18
 }

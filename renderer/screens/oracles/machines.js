@@ -67,10 +67,10 @@ export const votingListMachine = Machine(
         states: {
           normal: {
             after: {
-              1000: 'delayed',
+              1000: 'late',
             },
           },
-          delayed: {},
+          late: {},
         },
       },
       loaded: {
@@ -425,6 +425,15 @@ export const createNewVotingMachine = (epoch, address) =>
                 log(),
               ],
             },
+          },
+          initial: 'normal',
+          states: {
+            normal: {
+              after: {
+                1000: 'late',
+              },
+            },
+            late: {},
           },
         },
         editing: {

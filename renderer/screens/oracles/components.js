@@ -173,6 +173,8 @@ export function VotingInlineFormControl({
   label,
   defaultValue,
   value,
+  min,
+  max,
   helperText,
   children,
   unit,
@@ -193,6 +195,8 @@ export function VotingInlineFormControl({
                   type={type}
                   defaultValue={defaultValue}
                   value={value}
+                  min={min}
+                  max={max}
                   borderRightColor="white"
                   borderTopRightRadius={0}
                   borderBottomRightRadius={0}
@@ -216,6 +220,8 @@ export function VotingInlineFormControl({
                 type={type}
                 defaultValue={defaultValue}
                 value={value}
+                min={min}
+                max={max}
               />
             )}
             {helperText && (
@@ -332,5 +338,15 @@ export function FillPlaceholder(props) {
     <Flex direction="column" flex={1} align="center" justify="center">
       <Text color="muted" {...props} />
     </Flex>
+  )
+}
+
+export function NewVotingFormSkeleton() {
+  return (
+    <Stack spacing={3} my={8} w="xl">
+      {Array.from({length: 6}).map((_, idx) => (
+        <VotingSkeleton h={idx === 1 ? 32 : 8} key={idx} />
+      ))}
+    </Stack>
   )
 }
