@@ -18,6 +18,8 @@ import {
   Divider,
   InputGroup,
   InputRightAddon,
+  Button,
+  IconButton,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
@@ -25,7 +27,6 @@ import {
   DrawerBody,
   Input,
 } from '../../shared/components/components'
-import {IconButton2} from '../../shared/components/button'
 import {toPercent} from '../../shared/utils/utils'
 
 export function OracleDrawerHeader({
@@ -181,40 +182,14 @@ export function VotingInlineFormControl({
   ...props
 }) {
   return (
-    <FormControl {...props}>
-      <Stack isInline>
-        <FormLabel htmlFor={id} color="muted" py={2} minW={32} w={32}>
-          {label}
-        </FormLabel>
-        {children || (
-          <Box w="md">
-            {unit ? (
-              <InputGroup>
-                <Input
-                  id={id}
-                  type={type}
-                  defaultValue={defaultValue}
-                  value={value}
-                  min={min}
-                  max={max}
-                  borderRightColor="white"
-                  borderTopRightRadius={0}
-                  borderBottomRightRadius={0}
-                  _hover={{
-                    borderRightColor: 'white',
-                  }}
-                />
-                <InputRightAddon
-                  background="unset"
-                  borderColor="gray.300"
-                  color="muted"
-                  h={8}
-                  px={3}
-                >
-                  {unit}
-                </InputRightAddon>
-              </InputGroup>
-            ) : (
+    <FormControl display="inline-flex" {...props}>
+      <FormLabel htmlFor={id} color="muted" py={2} minW={32} w={32}>
+        {label}
+      </FormLabel>
+      {children || (
+        <Box w="md">
+          {unit ? (
+            <InputGroup>
               <Input
                 id={id}
                 type={type}
@@ -222,26 +197,89 @@ export function VotingInlineFormControl({
                 value={value}
                 min={min}
                 max={max}
+                borderRightColor="white"
+                borderTopRightRadius={0}
+                borderBottomRightRadius={0}
+                _hover={{
+                  borderRightColor: 'white',
+                }}
               />
-            )}
-            {helperText && (
-              <FormHelperText color="muted">{helperText}</FormHelperText>
-            )}
-          </Box>
-        )}
-      </Stack>
+              <InputRightAddon
+                background="unset"
+                borderColor="gray.300"
+                color="muted"
+                h={8}
+                px={3}
+              >
+                {unit}
+              </InputRightAddon>
+            </InputGroup>
+          ) : (
+            <Input
+              id={id}
+              type={type}
+              defaultValue={defaultValue}
+              value={value}
+              min={min}
+              max={max}
+            />
+          )}
+          {helperText && (
+            <FormHelperText color="muted">{helperText}</FormHelperText>
+          )}
+        </Box>
+      )}
     </FormControl>
   )
 }
 
-export function VotingOptionText({label, onChange, ...props}) {
+export function VotingOptionInput({
+  isLast,
+  onAddOption,
+  onRemoveOption,
+  ...props
+}) {
   return (
-    <FormControl {...props}>
+    <React.Fragment>
       <Flex align="center" justify="space-between">
-        <FormLabel color="muted">{label}</FormLabel>
-        <Input w="2xs" onChange={onChange} />
+        <Stack isInline spacing={1} flex={1}>
+          <Flex h={6} w={6} align="center" justify="center">
+            <Box bg="muted" borderRadius="full" h={1} w={1} />
+          </Flex>
+          <Input
+            border="none"
+            px={0}
+            h="auto"
+            _focus={null}
+            _placeholder={{
+              color: 'muted',
+            }}
+            onFocus={() => {
+              if (isLast) onAddOption()
+            }}
+            {...props}
+          />
+        </Stack>
+        <IconButton
+          icon="cross-small"
+          bg="unset"
+          color="muted"
+          fontSize={20}
+          w={5}
+          minW={5}
+          h={5}
+          p={0}
+          _hover={{
+            bg: 'gray.50',
+          }}
+          _focus={{
+            bg: 'gray.50',
+          }}
+          onClick={onRemoveOption}
+        />
       </Flex>
-    </FormControl>
+      {!isLast && <Divider borderBottomColor="gray.300" mx={-1} />}
+    </React.Fragment>
   )
 }
 
@@ -288,15 +326,29 @@ export function VotingListDivider() {
   return <Divider borderColor="gray.300" mt={6} mb={0} />
 }
 
-export function VotingFormAdvancedToggle(props) {
+export function VotingFormAdvancedToggle({isOpen, ...props}) {
   const {t} = useTranslation()
   return (
-    <IconButton2 icon="chevron-down" my={2} {...props}>
-      <Flex flex={1} justify="space-between">
-        <Text>{t('Part of the options is hidden')}</Text>
-        <Text>{t('Show all')}</Text>
-      </Flex>
-    </IconButton2>
+    <Button
+      variant="ghost"
+      p={0}
+      ml={32}
+      mr="auto"
+      _hover={{background: 'transparent'}}
+      _active={{background: 'transparent'}}
+      _focus={{outline: 'none'}}
+      {...props}
+    >
+      {t('Advanced')}
+      <Icon
+        size={5}
+        name="chevron-down"
+        color="muted"
+        ml={1}
+        transform={isOpen ? 'rotate(180deg)' : ''}
+        transition="all 0.2s ease-in-out"
+      />
+    </Button>
   )
 }
 

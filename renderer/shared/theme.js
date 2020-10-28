@@ -774,5 +774,17 @@ export const uiTheme = {
       ),
       viewBox: '0 0 16 16',
     },
+    'cross-small': {
+      path: (
+        <g fill="none" fillRule="evenodd">
+          <path
+            fill="currentColor"
+            fillRule="nonzero"
+            d="M8.586 10L5.293 6.707 6.707 5.293 10 8.586 13.293 5.293 14.707 6.707 11.414 10 14.707 13.293 13.293 14.707 10 11.414 6.707 14.707 5.293 13.293z"
+          />
+        </g>
+      ),
+      viewBox: '0 0 20 20',
+    },
   },
 }
