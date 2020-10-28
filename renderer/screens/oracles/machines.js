@@ -1,5 +1,6 @@
 import {Machine, assign, spawn} from 'xstate'
 import {choose, log, send, sendParent} from 'xstate/lib/actions'
+import nanoid from 'nanoid'
 import {
   fetchVotings,
   createContractCaller,
@@ -404,7 +405,7 @@ export const createNewVotingMachine = (epoch, address) =>
       context: {
         epoch,
         address,
-        options: [0, 1],
+        options: [{id: nanoid()}, {id: nanoid()}],
         votingDuration: 4320,
         publicVotingDuration: 4320,
         oracleReward: 0,
@@ -444,8 +445,11 @@ export const createNewVotingMachine = (epoch, address) =>
             SET_OPTIONS: {
               actions: ['setOptions', log()],
             },
-            SET_OPTIONS_NUMBER: {
-              actions: ['setOptionsNumber'],
+            ADD_OPTION: {
+              actions: ['addOption'],
+            },
+            REMOVE_OPTION: {
+              actions: ['removeOption'],
             },
             PUBLISH: {
               target: 'publishing',
@@ -615,18 +619,24 @@ export const createNewVotingMachine = (epoch, address) =>
           ...context,
           [id]: value,
         })),
-        setOptions: assign(({options, ...context}, {idx, value}) => ({
-          ...context,
-          options: [...options.slice(0, idx), value, ...options.slice(idx + 1)],
-        })),
-        setOptionsNumber: assign({
-          maxOptions: (_, {value}) => value,
-          options: ({options}, {value}) =>
-            value > options.length
-              ? options.concat(
-                  Array.from({length: value - options.length}, () => null)
-                )
-              : options.slice(0, value),
+        setOptions: assign({
+          options: ({options}, {id, value}) => {
+            const idx = options.findIndex(o => o.id === id)
+            return [
+              ...options.slice(0, idx),
+              {...options[idx], value},
+              ...options.slice(idx + 1),
+            ]
+          },
+        }),
+        addOption: assign({
+          options: ({options}) =>
+            options.concat({
+              id: nanoid(),
+            }),
+        }),
+        removeOption: assign({
+          options: ({options}, {id}) => options.filter(o => o.id !== id),
         }),
         setRunning: setVotingStatus(VotingStatus.Open),
         // eslint-disable-next-line no-shadow
