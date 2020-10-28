@@ -26,6 +26,7 @@ import {rem} from '../../shared/theme'
 import {PrimaryButton} from '../../shared/components/button'
 import {createNewVotingMachine} from '../../screens/oracles/machines'
 import {
+  NewVotingFormSkeleton,
   VotingFormAdvancedToggle,
   VotingInlineFormControl,
   VotingOptionText,
@@ -33,6 +34,7 @@ import {
 import {useAppMachine} from '../../shared/providers/app-context'
 import {
   BLOCK_TIME,
+  minOracleReward,
   votingMinBalance,
   votingMinStake,
 } from '../../screens/oracles/utils'
@@ -112,146 +114,166 @@ function NewVotingPage() {
             'After publishing or launching, you will not be able to edit the voting parameters.'
           )}
         </SuccessAlert>
-        <Stack maxW="xl" spacing={5} my={8}>
-          <Stack as="form" spacing={3}>
-            <VotingInlineFormControl
-              id="title"
-              label={t('Title')}
-              onChange={handleChange}
-            />
-            <VotingInlineFormControl label={t('Description')}>
-              <Textarea id="desc" w="md" h={32} onChange={handleChange} />
-            </VotingInlineFormControl>
-            <VotingInlineFormControl
-              id="votingMinPayment"
-              type="number"
-              label={t('Voting deposit')}
-              unit="DNA"
-              isDisabled={isFreeVoting}
-              onChange={handleChange}
-            />
-            <VotingInlineFormControl mt={-2}>
-              <Checkbox
-                id="isFreeVoting"
-                borderColor="gray.100"
-                onChange={({target: {id, checked}}) => {
-                  send('CHANGE', {id, value: checked})
-                }}
-              >
-                {t('Free voting')}
-              </Checkbox>
-            </VotingInlineFormControl>
-            <VotingInlineFormControl
-              id="oracleReward"
-              type="number"
-              label={t('Min reward per oracle')}
-              unit="DNA"
-              helperText={t('Total oracles rewards: {{amount}}', {
-                amount: dna(
-                  votingMinBalance({oracleReward, committeeSize, feePerGas})
-                ),
-              })}
-              onChange={handleChange}
-            />
-            <VotingInlineFormControl
-              id="startDate"
-              type="date"
-              label={t('Start date')}
-              isDisabled={shouldStartImmediately}
-              onChange={handleChange}
-            />
-            <VotingInlineFormControl>
-              <Checkbox
-                id="shouldStartImmediately"
-                borderColor="gray.100"
-                onChange={({target: {id, checked}}) => {
-                  send('CHANGE', {id, value: checked})
-                }}
-              >
-                {t('Start now')}
-              </Checkbox>
-            </VotingInlineFormControl>
 
-            <VotingFormAdvancedToggle onClick={onToggleAdvanced} />
+        {current.matches('preload.late') && <NewVotingFormSkeleton />}
 
-            <Collapse mt={2} isOpen={isOpenAdvanced}>
-              <Stack spacing={3}>
-                <VotingInlineFormControl
-                  id="votingDuration"
-                  type="number"
-                  label={t('Duration of vote, blocks')}
-                  defaultValue={votingDuration}
-                  helperText={dayjs
-                    .duration(votingDuration * BLOCK_TIME, 's')
-                    .humanize()}
-                  onChange={handleChange}
-                />
-                <VotingInlineFormControl
-                  id="publicVotingDuration"
-                  type="number"
-                  label={t('Duration of summing up, blocks')}
-                  defaultValue={publicVotingDuration}
-                  helperText={dayjs
-                    .duration(publicVotingDuration * BLOCK_TIME, 's')
-                    .humanize()}
-                  onChange={handleChange}
-                />
-                <VotingInlineFormControl
-                  id="winnerThreshold"
-                  type="number"
-                  label={t('Winner score')}
-                  defaultValue={50}
-                  unit="%"
-                  onChange={handleChange}
-                />
-                <VotingInlineFormControl
-                  id="quorum"
-                  type="number"
-                  label={t('Min committee size')}
-                  defaultValue={20}
-                  unit="%"
-                  onChange={handleChange}
-                />
-                <VotingInlineFormControl
-                  id="committeeSize"
-                  label={t('Max committee size')}
-                  type="number"
-                  defaultValue={100}
-                  onChange={handleChange}
-                />
-                <VotingInlineFormControl
-                  id="maxOptions"
-                  label={t('Options')}
-                  type="number"
-                  defaultValue={options.length}
-                  onChange={({target: {value}}) =>
-                    send('SET_OPTIONS_NUMBER', {value})
-                  }
-                />
-              </Stack>
-            </Collapse>
+        {!current.matches('preload') && (
+          <Stack maxW="xl" spacing={5} my={8}>
+            <Stack as="form" spacing={3}>
+              <VotingInlineFormControl
+                id="title"
+                label={t('Title')}
+                onChange={handleChange}
+              />
+              <VotingInlineFormControl label={t('Description')}>
+                <Textarea id="desc" w="md" h={32} onChange={handleChange} />
+              </VotingInlineFormControl>
+              <VotingInlineFormControl
+                id="votingMinPayment"
+                type="number"
+                label={t('Voting deposit')}
+                unit="DNA"
+                isDisabled={isFreeVoting}
+                onChange={handleChange}
+              />
+              <VotingInlineFormControl>
+                <Checkbox
+                  id="isFreeVoting"
+                  borderColor="gray.100"
+                  mt={-2}
+                  onChange={({target: {id, checked}}) => {
+                    send('CHANGE', {id, value: checked})
+                  }}
+                >
+                  {t('Free voting')}
+                </Checkbox>
+              </VotingInlineFormControl>
+
+              <VotingInlineFormControl
+                id="oracleReward"
+                type="number"
+                defaultValue={20 || minOracleReward(feePerGas)}
+                min={20 || minOracleReward(feePerGas)}
+                label={t('Min reward per oracle')}
+                unit="DNA"
+                helperText={t('Total oracles rewards: {{amount}}', {
+                  amount: dna(
+                    votingMinBalance({oracleReward, committeeSize, feePerGas})
+                  ),
+                  nsSeparator: '!',
+                })}
+                onChange={handleChange}
+              />
+
+              <VotingInlineFormControl
+                id="startDate"
+                type="date"
+                label={t('Start date')}
+                isDisabled={shouldStartImmediately}
+                onChange={handleChange}
+              />
+
+              <VotingInlineFormControl>
+                <Checkbox
+                  id="shouldStartImmediately"
+                  borderColor="gray.100"
+                  mt={-2}
+                  onChange={({target: {id, checked}}) => {
+                    send('CHANGE', {id, value: checked})
+                  }}
+                >
+                  {t('Start now')}
+                </Checkbox>
+              </VotingInlineFormControl>
+
+              <VotingFormAdvancedToggle onClick={onToggleAdvanced} />
+
+              <Collapse mt={2} isOpen={isOpenAdvanced}>
+                <Stack spacing={3}>
+                  <VotingInlineFormControl
+                    id="votingDuration"
+                    type="number"
+                    label={t('Duration of vote, blocks')}
+                    defaultValue={votingDuration}
+                    helperText={dayjs
+                      .duration(votingDuration * BLOCK_TIME, 's')
+                      .humanize()}
+                    onChange={handleChange}
+                  />
+                  <VotingInlineFormControl
+                    id="publicVotingDuration"
+                    type="number"
+                    label={t('Duration of summing up, blocks')}
+                    defaultValue={publicVotingDuration}
+                    helperText={dayjs
+                      .duration(publicVotingDuration * BLOCK_TIME, 's')
+                      .humanize()}
+                    onChange={handleChange}
+                  />
+                  <VotingInlineFormControl
+                    id="winnerThreshold"
+                    type="number"
+                    label={t('Winner score')}
+                    defaultValue={50}
+                    unit="%"
+                    onChange={handleChange}
+                  />
+                  <VotingInlineFormControl
+                    id="quorum"
+                    type="number"
+                    label={t('Min committee size')}
+                    defaultValue={20}
+                    unit="%"
+                    onChange={handleChange}
+                  />
+                  <VotingInlineFormControl
+                    id="committeeSize"
+                    label={t('Max committee size')}
+                    type="number"
+                    defaultValue={100}
+                    onChange={handleChange}
+                  />
+                  <VotingInlineFormControl
+                    id="maxOptions"
+                    label={t('Options')}
+                    type="number"
+                    defaultValue={options.length}
+                    onChange={({target: {value}}) =>
+                      send('SET_OPTIONS_NUMBER', {value})
+                    }
+                  />
+                </Stack>
+              </Collapse>
+            </Stack>
+            <Flex ml={32} mb={rem(84)}>
+              <Box
+                flex={1}
+                bg="gray.50"
+                borderRadius="lg"
+                px={10}
+                py={5}
+                w="md"
+              >
+                <Text py={rem(10)} mb={2}>
+                  {t('Name of options')}
+                </Text>
+                <Stack spacing={3}>
+                  {options.map((option, idx) => (
+                    <VotingOptionText
+                      key={idx}
+                      label={t('Option {{num}}', {num: idx + 1})}
+                      onChange={({target: {value}}) => {
+                        send('SET_OPTIONS', {idx, value})
+                      }}
+                    >
+                      {option}
+                    </VotingOptionText>
+                  ))}
+                </Stack>
+              </Box>
+            </Flex>
           </Stack>
-          <Flex ml={32} mb={rem(84)}>
-            <Box flex={1} bg="gray.50" borderRadius="lg" px={10} py={5} w="md">
-              <Text py={rem(10)} mb={2}>
-                {t('Name of options')}
-              </Text>
-              <Stack spacing={3}>
-                {options.map((option, idx) => (
-                  <VotingOptionText
-                    key={idx}
-                    label={t('Option {{num}}', {num: idx + 1})}
-                    onChange={({target: {value}}) => {
-                      send('SET_OPTIONS', {idx, value})
-                    }}
-                  >
-                    {option}
-                  </VotingOptionText>
-                ))}
-              </Stack>
-            </Box>
-          </Flex>
-        </Stack>
+        )}
       </Box>
       <Stack
         isInline
