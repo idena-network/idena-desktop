@@ -20,6 +20,9 @@ import {
   InputRightAddon,
   Button,
   IconButton,
+  RadioButtonGroup,
+  Collapse,
+  useDisclosure,
 } from '@chakra-ui/core'
 import {
   DrawerHeader,
@@ -167,51 +170,13 @@ export function VotingResultBar({
   )
 }
 
-export function VotingInlineFormControl({
-  id: htmlFor,
-  type = 'text',
-  label,
-  defaultValue,
-  value,
-  min,
-  max,
-  helperText,
-  children,
-  unit: addon,
-  ...props
-}) {
+export function VotingInlineFormControl({htmlFor, label, children, ...props}) {
   return (
     <FormControl display="inline-flex" {...props}>
       <FormLabel htmlFor={htmlFor} color="muted" py={2} minW={32} w={32}>
         {label}
       </FormLabel>
-      {children || (
-        <Box w="md">
-          {addon ? (
-            <InputWithRightAddon
-              id={htmlFor}
-              type={type}
-              defaultValue={defaultValue}
-              value={value}
-              min={min}
-              max={max}
-              addon={addon}
-            />
-          ) : (
-            <Input
-              id={htmlFor}
-              type={type}
-              defaultValue={defaultValue}
-              value={value}
-              min={min}
-              max={max}
-            />
-          )}
-          {helperText && (
-            <FormHelperText color="muted">{helperText}</FormHelperText>
-          )}
-        </Box>
-      )}
+      {children}
     </FormControl>
   )
 }
@@ -240,7 +205,7 @@ export function InputWithRightAddon({
 }) {
   const bg = isDisabled ? _disabled.bg : 'white'
   return (
-    <InputGroup size={size} w="full">
+    <InputGroup size={size} flex={1}>
       <Input
         borderRightColor={bg}
         borderTopRightRadius={0}
@@ -408,25 +373,23 @@ export function NewVotingFormSkeleton() {
   )
 }
 
-export const VotingDurationOption = React.forwardRef(
-  ({isChecked, ...props}, ref) => (
-    <Button
-      ref={ref}
-      isActive={isChecked}
-      aria-checked={isChecked}
-      role="radio"
-      bg="white"
-      color="muted"
-      fontWeight={500}
-      size="sm"
-      fontSize="md"
-      _active={{bg: 'gray.50', color: 'brand.blue'}}
-      _hover={{bg: 'gray.50', color: 'brand.blue'}}
-      {...props}
-    />
-  )
-)
-VotingDurationOption.displayName = 'VotingDurationOption'
+export const Option = React.forwardRef(({isChecked, ...props}, ref) => (
+  <Button
+    ref={ref}
+    isActive={isChecked}
+    aria-checked={isChecked}
+    role="radio"
+    bg="white"
+    color="muted"
+    fontWeight={500}
+    size="sm"
+    fontSize="md"
+    _active={{bg: 'gray.50', color: 'brand.blue'}}
+    _hover={{bg: 'gray.50', color: 'brand.blue'}}
+    {...props}
+  />
+))
+Option.displayName = 'VotingDurationOption'
 
 export function NewOracleFormHelperText(props) {
   return <OracleFormHelperText fontSize="sm" {...props} />
@@ -434,4 +397,64 @@ export function NewOracleFormHelperText(props) {
 
 export function NewVotingFormSubtitle(props) {
   return <Heading as="h2" fontSize="base" fontWeight={500} mt={4} {...props} />
+}
+
+export function TaggedInput({
+  id,
+  type,
+  value,
+  defaultValue,
+  min,
+  max,
+  presets,
+  helperText,
+  customText,
+  onChangePreset,
+  onChangeCustom,
+  ...props
+}) {
+  const {isOpen, onToggle} = useDisclosure()
+  return (
+    <VotingInlineFormControl {...props}>
+      <Stack flex={1}>
+        <Stack isInline justify="space-between">
+          <RadioButtonGroup isInline value={value} onChange={onChangePreset}>
+            {/* eslint-disable-next-line no-shadow */}
+            {presets.map(({value, label}) => (
+              <Option key={label} value={value}>
+                {label}
+              </Option>
+            ))}
+          </RadioButtonGroup>
+          <Button
+            variant="link"
+            color="muted"
+            fontWeight={500}
+            _hover={{
+              textDecoration: 'none',
+            }}
+            _active={{}}
+            _focus={{}}
+            onClick={onToggle}
+          >
+            {customText}
+          </Button>
+        </Stack>
+        <Collapse isOpen={isOpen}>
+          <Input
+            id={id}
+            type={type}
+            value={value}
+            defaultValue={defaultValue}
+            min={min}
+            max={max}
+            onChange={onChangeCustom}
+          />
+          <NewOracleFormHelperText textAlign="right">
+            {helperText}
+          </NewOracleFormHelperText>
+        </Collapse>
+      </Stack>
+    </VotingInlineFormControl>
+  )
 }
