@@ -22,7 +22,9 @@ import {
   Collapse,
   IconButton,
   Button,
+  RadioButtonGroup,
 } from '@chakra-ui/core'
+import dayjs from 'dayjs'
 import {toLocaleDna, eitherState, callRpc} from '../../shared/utils/utils'
 import {
   Avatar,
@@ -42,11 +44,15 @@ import {
   OracleFormHelper,
   VotingListDivider,
   OracleFormHelperText,
+  VotingInlineFormControl,
+  VotingDurationOption,
+  NewOracleFormHelperText,
 } from './components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {Link} from '../../shared/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {
+  BLOCK_TIME,
   createContractDataReader,
   createContractReadonlyCaller,
   viewVotingHref,
@@ -651,5 +657,60 @@ export function VotingInspector(contract) {
         </DrawerContent>
       </ChakraDrawer>
     </>
+  )
+}
+
+export function VotingDurationInput({
+  presets,
+  onToggleCustom,
+  isOpenCustom,
+  value,
+  onChangePreset,
+  onChangeCustom,
+  ...props
+}) {
+  const {t} = useTranslation()
+
+  return (
+    <VotingInlineFormControl {...props}>
+      <Stack flex={1}>
+        <Stack isInline justify="space-between">
+          <RadioButtonGroup isInline value={value} onChange={onChangePreset}>
+            {/* eslint-disable-next-line no-shadow */}
+            {presets.map(({value, label}) => (
+              <VotingDurationOption key={label} value={value}>
+                {label}
+              </VotingDurationOption>
+            ))}
+          </RadioButtonGroup>
+          <Button
+            variant="link"
+            color="muted"
+            fontWeight={500}
+            _hover={{
+              textDecoration: 'none',
+            }}
+            _active={{}}
+            _focus={{}}
+            onClick={onToggleCustom}
+          >
+            {t('Blocks')}
+          </Button>
+        </Stack>
+        <Collapse isOpen={isOpenCustom}>
+          <Input
+            id="votingDuration"
+            type="number"
+            min={1}
+            value={value}
+            onChange={onChangeCustom}
+          />
+          <NewOracleFormHelperText textAlign="right">
+            {'About '}
+            {dayjs.duration(value * BLOCK_TIME, 's').humanize()}
+          </NewOracleFormHelperText>
+        </Collapse>
+      </Stack>
+    </VotingInlineFormControl>
   )
 }
