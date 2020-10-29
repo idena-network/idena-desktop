@@ -21,7 +21,6 @@ import {
   Button,
   IconButton,
 } from '@chakra-ui/core'
-import {useTranslation} from 'react-i18next'
 import {
   DrawerHeader,
   DrawerBody,
@@ -229,7 +228,7 @@ export function DnaInput(props) {
   )
 }
 
-function InputWithRightAddon({
+export function InputWithRightAddon({
   addon,
   size,
   isDisabled,
@@ -241,7 +240,7 @@ function InputWithRightAddon({
 }) {
   const bg = isDisabled ? _disabled.bg : 'white'
   return (
-    <InputGroup size={size}>
+    <InputGroup size={size} w="full">
       <Input
         borderRightColor={bg}
         borderTopRightRadius={0}
@@ -358,33 +357,6 @@ export function VotingListDivider() {
   return <Divider borderColor="gray.300" mt={6} mb={0} />
 }
 
-export function VotingFormAdvancedToggle({isOpen, ...props}) {
-  const {t} = useTranslation()
-  return (
-    <Button
-      variant="ghost"
-      p={0}
-      ml={32}
-      mr="auto"
-      _hover={{background: 'transparent'}}
-      _active={{background: 'transparent'}}
-      _focus={{outline: 'none'}}
-      {...props}
-    >
-      {t('Advanced')}
-      <Icon
-        size={5}
-        name="chevron-down"
-        color="muted"
-        ml={1}
-        transform={isOpen ? 'rotate(180deg)' : ''}
-        transition="all 0.2s ease-in-out"
-      />
-    </Button>
-  )
-}
-
-// eslint-disable-next-line react/display-name
 export const VotingOption = React.forwardRef(
   ({value, annotation, ...props}, ref) => (
     <Flex
@@ -404,6 +376,7 @@ export const VotingOption = React.forwardRef(
     </Flex>
   )
 )
+VotingOption.displayName = 'VotingOption'
 
 export function FillCenter(props) {
   return (
@@ -454,3 +427,11 @@ export const VotingDurationOption = React.forwardRef(
   )
 )
 VotingDurationOption.displayName = 'VotingDurationOption'
+
+export function NewOracleFormHelperText(props) {
+  return <OracleFormHelperText fontSize="sm" {...props} />
+}
+
+export function NewVotingFormSubtitle(props) {
+  return <Heading as="h2" fontSize="base" fontWeight={500} mt={4} {...props} />
+}

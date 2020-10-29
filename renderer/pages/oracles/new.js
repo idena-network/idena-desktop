@@ -6,8 +6,7 @@ import {
   Collapse,
   useDisclosure,
   useToast,
-  Button,
-  RadioButtonGroup,
+  Icon,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
@@ -28,23 +27,24 @@ import {createNewVotingMachine} from '../../screens/oracles/machines'
 import {
   DnaInput,
   NewVotingFormSkeleton,
-  OracleFormHelperText,
-  VotingDurationOption,
-  VotingFormAdvancedToggle,
+  NewOracleFormHelperText,
   VotingInlineFormControl,
   VotingOptionInput,
+  InputWithRightAddon,
+  NewVotingFormSubtitle,
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
 import {
-  BLOCK_TIME,
   minOracleReward,
   votingMinBalance,
   votingMinStake,
-  blocksPerInterval,
   durationPreset,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
-import {ReviewVotingDrawer} from '../../screens/oracles/containers'
+import {
+  ReviewVotingDrawer,
+  VotingDurationInput,
+} from '../../screens/oracles/containers'
 import {VotingStatus} from '../../shared/types'
 
 dayjs.extend(duration)
@@ -58,9 +58,15 @@ function NewVotingPage() {
   const toast = useToast()
 
   const {isOpen: isOpenAdvanced, onToggle: onToggleAdvanced} = useDisclosure()
+
   const {
     isOpen: isOpenCustomDuration,
     onToggle: onToggleCustomDuration,
+  } = useDisclosure()
+
+  const {
+    isOpen: isOpenCustomPublicDuration,
+    onToggle: onToggleCustomPublicDuration,
   } = useDisclosure()
 
   const [
@@ -107,8 +113,10 @@ function NewVotingPage() {
     shouldStartImmediately,
     isFreeVoting,
     committeeSize,
+    quorum,
     oracleReward,
     feePerGas,
+    isWholeNetwork,
   } = current.context
 
   const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
@@ -189,66 +197,78 @@ function NewVotingPage() {
               </Stack>
             </VotingInlineFormControl>
 
-            <VotingInlineFormControl
+            <VotingDurationInput
               id="votingDuration"
               label={t('Voting duration')}
-              mt={4}
+              value={votingDuration}
+              presets={[
+                durationPreset({hours: 12}),
+                durationPreset({days: 1}),
+                durationPreset({days: 2}),
+                durationPreset({days: 5}),
+                durationPreset({weeks: 1}),
+              ]}
+              onChangePreset={value => {
+                send('CHANGE', {id: 'votingDuration', value})
+              }}
+              onChangeCustom={({target}) => {
+                send('CHANGE', {
+                  id: 'votingDuration',
+                  value: Number(target.value),
+                })
+              }}
+              onToggleCustom={onToggleCustomDuration}
+              isOpenCustom={isOpenCustomDuration}
+              mt={2}
+            />
+
+            <NewVotingFormSubtitle>
+              {t('Oracles requirements')}
+            </NewVotingFormSubtitle>
+
+            <VotingInlineFormControl
+              id="committeeSize"
+              label={t('Committee size')}
+              mt={2}
             >
-              <Stack flex={1}>
-                <Stack isInline justify="space-between">
-                  <RadioButtonGroup
-                    isInline
-                    value={votingDuration}
-                    onChange={value => {
-                      send('CHANGE', {id: 'votingDuration', value})
-                    }}
-                  >
-                    {[
-                      durationPreset({hours: 12}),
-                      durationPreset({days: 1}),
-                      durationPreset({days: 2}),
-                      durationPreset({days: 5}),
-                      durationPreset({weeks: 1}),
-                    ].map(({value, label}) => (
-                      <VotingDurationOption key={label} value={value}>
-                        {label}
-                      </VotingDurationOption>
-                    ))}
-                  </RadioButtonGroup>
-                  <Button
-                    variant="link"
-                    color="muted"
-                    fontWeight={500}
-                    _hover={{
-                      textDecoration: 'none',
-                    }}
-                    _active={{}}
-                    _focus={{}}
-                    onClick={onToggleCustomDuration}
-                  >
-                    {t('Blocks')}
-                  </Button>
-                </Stack>
-                <Collapse isOpen={isOpenCustomDuration}>
-                  <Input
-                    id="votingDuration"
-                    type="number"
-                    min={1}
-                    value={votingDuration}
-                    onChange={({target}) => {
-                      send('CHANGE', {
-                        id: 'votingDuration',
-                        value: Number(target.value),
-                      })
-                    }}
-                  />
-                  <OracleFormHelperText>
-                    {'About '}
-                    {dayjs
-                      .duration(votingDuration * BLOCK_TIME, 's')
-                      .humanize()}
-                  </OracleFormHelperText>
-                </Collapse>
+              <Stack spacing={3} flex={1}>
+                <Input
+                  id="committeeSize"
+                  type="number"
+                  value={committeeSize}
+                  isDisabled={isWholeNetwork}
+                  onChange={handleChange}
+                />
+                <Checkbox
+                  id="isWholeNetwork"
+                  onChange={({target: {checked}}) => {
+                    send('SET_WHOLE_NETWORK', {checked})
+                  }}
+                >
+                  {t('Whole network')}
+                </Checkbox>
+              </Stack>
+            </VotingInlineFormControl>
+
+            <VotingInlineFormControl
+              id="quorum"
+              label={t('Quorum')}
+              mt={2}
+              onChange={handleChange}
+            >
+              <Stack spacing={0} flex={1}>
+                <InputWithRightAddon
+                  id="quorum"
+                  type="number"
+                  defaultValue={20}
+                  addon="%"
+                  onChange={handleChange}
+                />
+                <NewOracleFormHelperText textAlign="right">
+                  {t('{{count}} votes are required', {
+                    count: Math.ceil((committeeSize * quorum) / 100),
+                  })}
+                </NewOracleFormHelperText>
               </Stack>
             </VotingInlineFormControl>
 
@@ -256,7 +276,7 @@ function NewVotingPage() {
               id="votingMinPayment"
               label={t('Voting deposit')}
               isDisabled={isFreeVoting}
-              mt={4}
+              mt={2}
             >
               <Stack spacing={3} flex={1}>
                 <DnaInput
@@ -278,71 +298,81 @@ function NewVotingPage() {
               </Stack>
             </VotingInlineFormControl>
 
+            <NewVotingFormSubtitle>{t('Rewards')}</NewVotingFormSubtitle>
+
             <VotingInlineFormControl
               id="oracleReward"
-              type="number"
-              defaultValue={20 || minOracleReward(feePerGas)}
-              min={20 || minOracleReward(feePerGas)}
               label={t('Min reward per oracle')}
-              unit="iDNA"
-              helperText={t('Total oracles rewards: {{amount}}', {
-                amount: dna(
-                  votingMinBalance({oracleReward, committeeSize, feePerGas})
-                ),
-                nsSeparator: '!',
-              })}
-              onChange={handleChange}
-            />
-
-            <VotingFormAdvancedToggle
-              onClick={onToggleAdvanced}
-              isOpen={isOpenAdvanced}
-            />
-
-            <Collapse isOpen={isOpenAdvanced}>
-              <Stack spacing={3}>
-                <VotingInlineFormControl
-                  id="publicVotingDuration"
-                  type="number"
-                  label={t('Duration of summing up, blocks')}
-                  defaultValue={publicVotingDuration}
-                  helperText={dayjs
-                    .duration(publicVotingDuration * BLOCK_TIME, 's')
-                    .humanize()}
+              mt={2}
+            >
+              <Stack spacing={0} flex={1}>
+                <DnaInput
+                  defaultValue={minOracleReward(feePerGas)}
+                  min={minOracleReward(feePerGas)}
                   onChange={handleChange}
                 />
+                <NewOracleFormHelperText>
+                  {t('Total oracles rewards: {{amount}}', {
+                    amount: dna(
+                      votingMinBalance({oracleReward, committeeSize, feePerGas})
+                    ),
+                    nsSeparator: '!',
+                  })}
+                </NewOracleFormHelperText>
+              </Stack>
+            </VotingInlineFormControl>
+
+            <NewVotingFormSubtitle cursor="pointer" onClick={onToggleAdvanced}>
+              {t('Advanced settings')}
+              <Icon
+                size={5}
+                name="chevron-down"
+                color="muted"
+                ml={1}
+                transform={isOpenAdvanced ? 'rotate(180deg)' : ''}
+                transition="all 0.2s ease-in-out"
+              />
+            </NewVotingFormSubtitle>
+
+            <Collapse isOpen={isOpenAdvanced} mt={2}>
+              <Stack spacing={3}>
+                <VotingDurationInput
+                  id="publicVotingDuration"
+                  label={t('Duration of summing up')}
+                  value={publicVotingDuration}
+                  presets={[
+                    durationPreset({hours: 1}),
+                    durationPreset({hours: 2}),
+                    durationPreset({hours: 12}),
+                    durationPreset({days: 1}),
+                  ]}
+                  onChangePreset={value => {
+                    send('CHANGE', {id: 'publicVotingDuration', value})
+                  }}
+                  onChangeCustom={({target}) => {
+                    send('CHANGE', {
+                      id: 'publicVotingDuration',
+                      value: Number(target.value),
+                    })
+                  }}
+                  onToggleCustom={onToggleCustomPublicDuration}
+                  isOpenCustom={isOpenCustomPublicDuration}
+                  mt={2}
+                />
+
                 <VotingInlineFormControl
                   id="winnerThreshold"
-                  type="number"
                   label={t('Winner score')}
-                  defaultValue={50}
-                  unit="%"
-                  onChange={handleChange}
-                />
-                <VotingInlineFormControl
-                  id="quorum"
-                  type="number"
-                  label={t('Min committee size')}
-                  defaultValue={20}
-                  unit="%"
-                  onChange={handleChange}
-                />
-                <VotingInlineFormControl
-                  id="committeeSize"
-                  label={t('Max committee size')}
-                  type="number"
-                  defaultValue={100}
-                  onChange={handleChange}
-                />
-                <VotingInlineFormControl
-                  id="maxOptions"
-                  label={t('Options')}
-                  type="number"
-                  defaultValue={options.length}
-                  onChange={({target: {value}}) =>
-                    send('SET_OPTIONS_NUMBER', {value})
-                  }
-                />
+                >
+                  <InputWithRightAddon
+                    id="winnerThreshold"
+                    addon="%"
+                    type="number"
+                    defaultValue={50}
+                    flex={1}
+                    onChange={handleChange}
+                  />
+                </VotingInlineFormControl>
               </Stack>
             </Collapse>
           </Stack>

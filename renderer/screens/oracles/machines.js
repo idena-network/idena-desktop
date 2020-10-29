@@ -451,9 +451,41 @@ export const createNewVotingMachine = (epoch, address) =>
             REMOVE_OPTION: {
               actions: ['removeOption'],
             },
+            SET_WHOLE_NETWORK: [
+              {
+                target: '.fetchNetworkSize',
+                actions: [assign({isWholeNetwork: true})],
+                cond: (_, {checked}) => checked,
+              },
+              {
+                actions: [assign({isWholeNetwork: false})],
+              },
+            ],
             PUBLISH: {
               target: 'publishing',
               actions: [log()],
+            },
+          },
+          initial: 'idle',
+          states: {
+            idle: {},
+            fetchNetworkSize: {
+              invoke: {
+                src: async () =>
+                  (
+                    await fetch(
+                      'https://api.idena.io/api/onlineidentities/count'
+                    )
+                  ).json(),
+                onDone: {
+                  target: 'idle',
+                  actions: [
+                    assign({
+                      committeeSize: (_, {data: {result}}) => result,
+                    }),
+                  ],
+                },
+              },
             },
           },
         },
