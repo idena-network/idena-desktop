@@ -169,7 +169,7 @@ export function VotingResultBar({
 }
 
 export function VotingInlineFormControl({
-  id,
+  id: htmlFor,
   type = 'text',
   label,
   defaultValue,
@@ -178,45 +178,29 @@ export function VotingInlineFormControl({
   max,
   helperText,
   children,
-  unit,
+  unit: addon,
   ...props
 }) {
   return (
     <FormControl display="inline-flex" {...props}>
-      <FormLabel htmlFor={id} color="muted" py={2} minW={32} w={32}>
+      <FormLabel htmlFor={htmlFor} color="muted" py={2} minW={32} w={32}>
         {label}
       </FormLabel>
       {children || (
         <Box w="md">
-          {unit ? (
-            <InputGroup>
-              <Input
-                id={id}
-                type={type}
-                defaultValue={defaultValue}
-                value={value}
-                min={min}
-                max={max}
-                borderRightColor="white"
-                borderTopRightRadius={0}
-                borderBottomRightRadius={0}
-                _hover={{
-                  borderRightColor: 'white',
-                }}
-              />
-              <InputRightAddon
-                background="unset"
-                borderColor="gray.300"
-                color="muted"
-                h={8}
-                px={3}
-              >
-                {unit}
-              </InputRightAddon>
-            </InputGroup>
+          {addon ? (
+            <InputWithRightAddon
+              id={htmlFor}
+              type={type}
+              defaultValue={defaultValue}
+              value={value}
+              min={min}
+              max={max}
+              addon={addon}
+            />
           ) : (
             <Input
-              id={id}
+              id={htmlFor}
               type={type}
               defaultValue={defaultValue}
               value={value}
@@ -230,6 +214,54 @@ export function VotingInlineFormControl({
         </Box>
       )}
     </FormControl>
+  )
+}
+
+export function DnaInput(props) {
+  return (
+    <InputWithRightAddon
+      addon="iDNA"
+      type="number"
+      min={0}
+      required
+      {...props}
+    />
+  )
+}
+
+function InputWithRightAddon({
+  addon,
+  size,
+  isDisabled,
+  _disabled = {
+    bg: 'gray.50',
+  },
+  _hover,
+  ...props
+}) {
+  const bg = isDisabled ? _disabled.bg : 'white'
+  return (
+    <InputGroup size={size}>
+      <Input
+        borderRightColor={bg}
+        borderTopRightRadius={0}
+        borderBottomRightRadius={0}
+        _hover={{
+          borderRightColor: bg,
+          ..._hover,
+        }}
+        {...props}
+      />
+      <InputRightAddon
+        bg={bg}
+        borderColor="gray.300"
+        color="muted"
+        h={8}
+        px={3}
+      >
+        {addon}
+      </InputRightAddon>
+    </InputGroup>
   )
 }
 
@@ -402,3 +434,23 @@ export function NewVotingFormSkeleton() {
     </Stack>
   )
 }
+
+export const VotingDurationOption = React.forwardRef(
+  ({isChecked, ...props}, ref) => (
+    <Button
+      ref={ref}
+      isActive={isChecked}
+      aria-checked={isChecked}
+      role="radio"
+      bg="white"
+      color="muted"
+      fontWeight={500}
+      size="sm"
+      fontSize="md"
+      _active={{bg: 'gray.50', color: 'brand.blue'}}
+      _hover={{bg: 'gray.50', color: 'brand.blue'}}
+      {...props}
+    />
+  )
+)
+VotingDurationOption.displayName = 'VotingDurationOption'

@@ -6,7 +6,8 @@ import {
   Collapse,
   useDisclosure,
   useToast,
-  Checkbox,
+  Button,
+  RadioButtonGroup,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
@@ -15,7 +16,9 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import dayjs from 'dayjs'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
+  Checkbox,
   FloatDebug,
+  Input,
   SuccessAlert,
   Textarea,
   Toast,
@@ -23,7 +26,10 @@ import {
 import {PrimaryButton} from '../../shared/components/button'
 import {createNewVotingMachine} from '../../screens/oracles/machines'
 import {
+  DnaInput,
   NewVotingFormSkeleton,
+  OracleFormHelperText,
+  VotingDurationOption,
   VotingFormAdvancedToggle,
   VotingInlineFormControl,
   VotingOptionInput,
@@ -34,6 +40,8 @@ import {
   minOracleReward,
   votingMinBalance,
   votingMinStake,
+  blocksPerInterval,
+  durationPreset,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {ReviewVotingDrawer} from '../../screens/oracles/containers'
@@ -50,6 +58,10 @@ function NewVotingPage() {
   const toast = useToast()
 
   const {isOpen: isOpenAdvanced, onToggle: onToggleAdvanced} = useDisclosure()
+  const {
+    isOpen: isOpenCustomDuration,
+    onToggle: onToggleCustomDuration,
+  } = useDisclosure()
 
   const [
     {
@@ -126,7 +138,7 @@ function NewVotingPage() {
               <Textarea id="desc" w="md" h={32} onChange={handleChange} />
             </VotingInlineFormControl>
 
-            <VotingInlineFormControl label={t('Options')}>
+            <VotingInlineFormControl label={t('Voting options')}>
               <Box
                 borderWidth={1}
                 borderColor="gray.300"
@@ -155,25 +167,115 @@ function NewVotingPage() {
             </VotingInlineFormControl>
 
             <VotingInlineFormControl
-              id="votingMinPayment"
-              type="number"
-              label={t('Voting deposit')}
-              unit="iDNA"
-              isDisabled={isFreeVoting}
-              onChange={handleChange}
-            />
+              id="startDate"
+              label={t('Start date')}
+              isDisabled={shouldStartImmediately}
+              mt={4}
+            >
+              <Stack spacing={3} flex={1}>
+                <Input
+                  id="startDate"
+                  type="datetime-local"
+                  onChange={handleChange}
+                />
+                <Checkbox
+                  id="shouldStartImmediately"
+                  onChange={({target: {id, checked}}) => {
+                    send('CHANGE', {id, value: checked})
+                  }}
+                >
+                  {t('Start now')}
+                </Checkbox>
+              </Stack>
+            </VotingInlineFormControl>
 
-            <VotingInlineFormControl>
-              <Checkbox
-                id="isFreeVoting"
-                borderColor="gray.100"
-                mt={-2}
-                onChange={({target: {id, checked}}) => {
-                  send('CHANGE', {id, value: checked})
-                }}
-              >
-                {t('Free voting')}
-              </Checkbox>
+            <VotingInlineFormControl
+              id="votingDuration"
+              label={t('Voting duration')}
+              mt={4}
+            >
+              <Stack flex={1}>
+                <Stack isInline justify="space-between">
+                  <RadioButtonGroup
+                    isInline
+                    value={votingDuration}
+                    onChange={value => {
+                      send('CHANGE', {id: 'votingDuration', value})
+                    }}
+                  >
+                    {[
+                      durationPreset({hours: 12}),
+                      durationPreset({days: 1}),
+                      durationPreset({days: 2}),
+                      durationPreset({days: 5}),
+                      durationPreset({weeks: 1}),
+                    ].map(({value, label}) => (
+                      <VotingDurationOption key={label} value={value}>
+                        {label}
+                      </VotingDurationOption>
+                    ))}
+                  </RadioButtonGroup>
+                  <Button
+                    variant="link"
+                    color="muted"
+                    fontWeight={500}
+                    _hover={{
+                      textDecoration: 'none',
+                    }}
+                    _active={{}}
+                    _focus={{}}
+                    onClick={onToggleCustomDuration}
+                  >
+                    {t('Blocks')}
+                  </Button>
+                </Stack>
+                <Collapse isOpen={isOpenCustomDuration}>
+                  <Input
+                    id="votingDuration"
+                    type="number"
+                    min={1}
+                    value={votingDuration}
+                    onChange={({target}) => {
+                      send('CHANGE', {
+                        id: 'votingDuration',
+                        value: Number(target.value),
+                      })
+                    }}
+                  />
+                  <OracleFormHelperText>
+                    {'About '}
+                    {dayjs
+                      .duration(votingDuration * BLOCK_TIME, 's')
+                      .humanize()}
+                  </OracleFormHelperText>
+                </Collapse>
+              </Stack>
+            </VotingInlineFormControl>
+
+            <VotingInlineFormControl
+              id="votingMinPayment"
+              label={t('Voting deposit')}
+              isDisabled={isFreeVoting}
+              mt={4}
+            >
+              <Stack spacing={3} flex={1}>
+                <DnaInput
+                  addon="iDNA"
+                  isDisabled={isFreeVoting}
+                  _disabled={{
+                    bg: 'gray.50',
+                  }}
+                  onChange={handleChange}
+                />
+                <Checkbox
+                  id="isFreeVoting"
+                  onChange={({target: {id, checked}}) => {
+                    send('CHANGE', {id, value: checked})
+                  }}
+                >
+                  {t('Free voting')}
+                </Checkbox>
+              </Stack>
             </VotingInlineFormControl>
 
             <VotingInlineFormControl
@@ -192,27 +294,6 @@ function NewVotingPage() {
               onChange={handleChange}
             />
 
-            <VotingInlineFormControl
-              id="startDate"
-              type="date"
-              label={t('Start date')}
-              isDisabled={shouldStartImmediately}
-              onChange={handleChange}
-            />
-
-            <VotingInlineFormControl>
-              <Checkbox
-                id="shouldStartImmediately"
-                borderColor="gray.100"
-                mt={-2}
-                onChange={({target: {id, checked}}) => {
-                  send('CHANGE', {id, value: checked})
-                }}
-              >
-                {t('Start now')}
-              </Checkbox>
-            </VotingInlineFormControl>
-
             <VotingFormAdvancedToggle
               onClick={onToggleAdvanced}
               isOpen={isOpenAdvanced}
@@ -220,16 +301,6 @@ function NewVotingPage() {
 
             <Collapse isOpen={isOpenAdvanced}>
               <Stack spacing={3}>
-                <VotingInlineFormControl
-                  id="votingDuration"
-                  type="number"
-                  label={t('Duration of vote, blocks')}
-                  defaultValue={votingDuration}
-                  helperText={dayjs
-                    .duration(votingDuration * BLOCK_TIME, 's')
-                    .humanize()}
-                  onChange={handleChange}
-                />
                 <VotingInlineFormControl
                   id="publicVotingDuration"
                   type="number"

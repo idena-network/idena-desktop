@@ -29,6 +29,7 @@ import {
   Button,
   NumberInput as ChakraNumberInput,
   Textarea as ChakraTextarea,
+  Checkbox as ChakraCheckbox,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 
@@ -103,6 +104,10 @@ export function NumberInput(props) {
       {...props}
     />
   )
+}
+
+export function Checkbox(props) {
+  return <ChakraCheckbox borderColor="gray.100" {...props} />
 }
 
 export function Textarea(props) {

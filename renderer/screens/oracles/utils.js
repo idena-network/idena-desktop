@@ -220,3 +220,24 @@ export function votingMinBalance({oracleReward, committeeSize, feePerGas}) {
 function dnaFeePerGas(value) {
   return value * 10 ** -18
 }
+
+export function blocksPerInterval({
+  weeks,
+  days = weeks * 7,
+  hours = days * 24,
+}) {
+  return Math.round((hours * 60 * 60) / 20)
+}
+
+export function durationPreset(interval, label) {
+  const value = blocksPerInterval(interval)
+
+  if (label) return {value, label}
+
+  const [[unit], unitValue] = Object.entries(interval).find(([, v]) => v)
+
+  return {
+    value,
+    label: `${unitValue}${unit}`,
+  }
+}
