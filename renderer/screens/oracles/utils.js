@@ -50,6 +50,18 @@ export async function fetchVotings({limit = 10, ...params}) {
   return {result, continuationToken}
 }
 
+export async function fetchOracleRewardsEstimates() {
+  const {result, error} = await (
+    await fetch(
+      'http://195.201.2.44:18888/api/OracleVotingContract/EstimatedOracleRewards'
+    )
+  ).json()
+
+  if (error) throw new Error(error.message)
+
+  return result
+}
+
 export const createContractCaller = ({
   from,
   contractHash,

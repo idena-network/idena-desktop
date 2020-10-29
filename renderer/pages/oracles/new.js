@@ -32,6 +32,7 @@ import {
   VotingOptionInput,
   InputWithRightAddon,
   NewVotingFormSubtitle,
+  TaggedInput,
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
 import {
@@ -59,16 +60,6 @@ function NewVotingPage() {
 
   const {isOpen: isOpenAdvanced, onToggle: onToggleAdvanced} = useDisclosure()
 
-  const {
-    isOpen: isOpenCustomDuration,
-    onToggle: onToggleCustomDuration,
-  } = useDisclosure()
-
-  const {
-    isOpen: isOpenCustomPublicDuration,
-    onToggle: onToggleCustomPublicDuration,
-  } = useDisclosure()
-
   const [
     {
       context: {
@@ -83,7 +74,7 @@ function NewVotingPage() {
     [address, epoch]
   )
 
-  const [current, send] = useMachine(newVotingMachine, {
+  const [current, send, service] = useMachine(newVotingMachine, {
     actions: {
       onDone: ({shouldStartImmediately: didStart}) => {
         toast({
@@ -114,9 +105,10 @@ function NewVotingPage() {
     isFreeVoting,
     committeeSize,
     quorum,
-    oracleReward,
     feePerGas,
+    oracleReward,
     isWholeNetwork,
+    oracleRewardsEstimates,
   } = current.context
 
   const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
@@ -136,13 +128,11 @@ function NewVotingPage() {
 
         {!current.matches('preload') && (
           <Stack spacing={3} w="xl">
-            <VotingInlineFormControl
-              id="title"
-              label={t('Title')}
-              onChange={handleChange}
-            />
+            <VotingInlineFormControl htmlFor="title" label={t('Title')}>
+              <Input id="title" onChange={handleChange} />
+            </VotingInlineFormControl>
 
-            <VotingInlineFormControl label={t('Description')}>
+            <VotingInlineFormControl htmlFor="desc" label={t('Description')}>
               <Textarea id="desc" w="md" h={32} onChange={handleChange} />
             </VotingInlineFormControl>
 
@@ -175,7 +165,7 @@ function NewVotingPage() {
             </VotingInlineFormControl>
 
             <VotingInlineFormControl
-              id="startDate"
+              htmlFor="startDate"
               label={t('Start date')}
               isDisabled={shouldStartImmediately}
               mt={4}
@@ -208,17 +198,7 @@ function NewVotingPage() {
                 durationPreset({days: 5}),
                 durationPreset({weeks: 1}),
               ]}
-              onChangePreset={value => {
-                send('CHANGE', {id: 'votingDuration', value})
-              }}
-              onChangeCustom={({target}) => {
-                send('CHANGE', {
-                  id: 'votingDuration',
-                  value: Number(target.value),
-                })
-              }}
-              onToggleCustom={onToggleCustomDuration}
-              isOpenCustom={isOpenCustomDuration}
+              service={service}
               mt={2}
             />
 
@@ -227,7 +207,7 @@ function NewVotingPage() {
             </NewVotingFormSubtitle>
 
             <VotingInlineFormControl
-              id="committeeSize"
+              htmlFor="committeeSize"
               label={t('Committee size')}
               mt={2}
             >
@@ -251,10 +231,9 @@ function NewVotingPage() {
             </VotingInlineFormControl>
 
             <VotingInlineFormControl
-              id="quorum"
+              htmlFor="quorum"
               label={t('Quorum')}
               mt={2}
-              onChange={handleChange}
             >
               <Stack spacing={0} flex={1}>
                 <InputWithRightAddon
@@ -273,13 +252,14 @@ function NewVotingPage() {
             </VotingInlineFormControl>
 
             <VotingInlineFormControl
-              id="votingMinPayment"
+              htmlFor="votingMinPayment"
               label={t('Voting deposit')}
               isDisabled={isFreeVoting}
               mt={2}
             >
               <Stack spacing={3} flex={1}>
                 <DnaInput
+                  id="votingMinPayment"
                   addon="iDNA"
                   isDisabled={isFreeVoting}
                   _disabled={{
@@ -300,27 +280,33 @@ function NewVotingPage() {
 
             <NewVotingFormSubtitle>{t('Rewards')}</NewVotingFormSubtitle>
 
-            <VotingInlineFormControl
+            <TaggedInput
               id="oracleReward"
+              type="number"
+              value={oracleReward}
+              min={minOracleReward(feePerGas)}
               label={t('Min reward per oracle')}
-              mt={2}
-            >
-              <Stack spacing={0} flex={1}>
-                <DnaInput
-                  defaultValue={minOracleReward(feePerGas)}
-                  min={minOracleReward(feePerGas)}
-                  onChange={handleChange}
-                />
-                <NewOracleFormHelperText>
-                  {t('Total oracles rewards: {{amount}}', {
-                    amount: dna(
-                      votingMinBalance({oracleReward, committeeSize, feePerGas})
-                    ),
-                    nsSeparator: '!',
-                  })}
-                </NewOracleFormHelperText>
-              </Stack>
-            </VotingInlineFormControl>
+              presets={oracleRewardsEstimates}
+              helperText={t('Total oracles rewards: {{amount}}', {
+                amount: dna(
+                  votingMinBalance({oracleReward, committeeSize, feePerGas})
+                ),
+                nsSeparator: '!',
+              })}
+              customText={t('iDNA')}
+              onChangePreset={value => {
+                send('CHANGE', {
+                  id: 'oracleReward',
+                  value,
+                })
+              }}
+              onChangeCustom={({target}) => {
+                send('CHANGE', {
+                  id: 'oracleReward',
+                  value: Number(target.value),
+                })
+              }}
+            />
 
             <NewVotingFormSubtitle cursor="pointer" onClick={onToggleAdvanced}>
               {t('Advanced settings')}
@@ -338,30 +324,19 @@ function NewVotingPage() {
               <Stack spacing={3}>
                 <VotingDurationInput
                   id="publicVotingDuration"
-                  label={t('Duration of summing up')}
                   value={publicVotingDuration}
+                  label={t('Duration of summing up')}
                   presets={[
                     durationPreset({hours: 1}),
                     durationPreset({hours: 2}),
                     durationPreset({hours: 12}),
                     durationPreset({days: 1}),
                   ]}
-                  onChangePreset={value => {
-                    send('CHANGE', {id: 'publicVotingDuration', value})
-                  }}
-                  onChangeCustom={({target}) => {
-                    send('CHANGE', {
-                      id: 'publicVotingDuration',
-                      value: Number(target.value),
-                    })
-                  }}
-                  onToggleCustom={onToggleCustomPublicDuration}
-                  isOpenCustom={isOpenCustomPublicDuration}
-                  mt={2}
+                  service={service}
                 />
 
                 <VotingInlineFormControl
-                  id="winnerThreshold"
+                  htmlFor="winnerThreshold"
                   label={t('Winner score')}
                 >
                   <InputWithRightAddon
@@ -369,7 +344,6 @@ function NewVotingPage() {
                     addon="%"
                     type="number"
                     defaultValue={50}
-                    flex={1}
                     onChange={handleChange}
                   />
                 </VotingInlineFormControl>

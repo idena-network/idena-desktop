@@ -18,6 +18,8 @@ import {
   byContractHash,
   hexToObject,
   areSameCaseInsensitive,
+  fetchOracleRewardsEstimates,
+  minOracleReward,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc, merge} from '../../shared/utils/utils'
@@ -408,7 +410,7 @@ export const createNewVotingMachine = (epoch, address) =>
         options: [{id: nanoid()}, {id: nanoid()}],
         votingDuration: 4320,
         publicVotingDuration: 4320,
-        oracleReward: 0,
+        oracleReward: undefined,
         quorum: 20,
         committeeSize: 100,
       },
@@ -416,12 +418,24 @@ export const createNewVotingMachine = (epoch, address) =>
       states: {
         preload: {
           invoke: {
-            src: () => callRpc('bcn_feePerGas'),
+            src: () =>
+              Promise.all([
+                callRpc('bcn_feePerGas'),
+                fetchOracleRewardsEstimates(),
+              ]),
             onDone: {
               target: 'editing',
               actions: [
                 assign({
-                  feePerGas: (_, {data}) => data,
+                  feePerGas: (_, {data: [fee]}) => fee,
+                  oracleReward: (_, {data: [fee]}) => minOracleReward(fee),
+                  oracleRewardsEstimates: (_, {data: [feePerGas, estimates]}) =>
+                    estimates.map(({amount, type}) => ({
+                      value: Math.round(
+                        Math.exp(amount) * minOracleReward(feePerGas)
+                      ),
+                      label: type,
+                    })),
                 }),
                 log(),
               ],
