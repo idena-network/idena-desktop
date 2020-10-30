@@ -429,11 +429,9 @@ export const createNewVotingMachine = (epoch, address) =>
                 assign({
                   feePerGas: (_, {data: [fee]}) => fee,
                   oracleReward: (_, {data: [fee]}) => minOracleReward(fee),
-                  oracleRewardsEstimates: (_, {data: [feePerGas, estimates]}) =>
+                  oracleRewardsEstimates: (_, {data: [, estimates]}) =>
                     estimates.map(({amount, type}) => ({
-                      value: Math.round(
-                        Math.exp(amount) * minOracleReward(feePerGas)
-                      ),
+                      value: amount,
                       label: type,
                     })),
                 }),
