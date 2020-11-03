@@ -3,6 +3,7 @@ import {assign} from 'xstate'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
+import {VotingListFilter} from './types'
 
 export const ContractRpcMode = {
   Estimate: 'estimate',
@@ -30,20 +31,30 @@ export const setVotingStatus = status =>
     status,
   })
 
-export async function fetchVotings({limit = 10, ...params}) {
-  const invokeUrl = new URL(
-    `http://195.201.2.44:18888/api/OracleVotingContracts`
+export async function fetchVotings({
+  limit = 10,
+  all = false,
+  oracle,
+  address = oracle,
+  ...params
+}) {
+  const url = new URL(
+    all
+      ? `http://195.201.2.44:18888/api/OracleVotingContracts`
+      : `http://195.201.2.44:18888/api/Address/${address}/OracleVotingContracts`
   )
 
-  Object.entries({limit, ...params})
+  let queryParams = {limit, all: all.toString(), oracle, ...params}
+
+  queryParams = all ? queryParams : {...queryParams, address}
+
+  Object.entries(queryParams)
     .filter(([, v]) => Boolean(v))
     .forEach(([k, v]) => {
-      invokeUrl.searchParams.append(k, v)
+      url.searchParams.append(k, v)
     })
 
-  const {result, error, continuationToken} = await (
-    await fetch(invokeUrl)
-  ).json()
+  const {result, error, continuationToken} = await (await fetch(url)).json()
 
   if (error) throw new Error(error.message)
 
@@ -56,6 +67,34 @@ export async function fetchOracleRewardsEstimates() {
       'http://195.201.2.44:18888/api/OracleVotingContract/EstimatedOracleRewards'
     )
   ).json()
+
+  if (error) throw new Error(error.message)
+
+  return result
+}
+
+export async function fetchContractTxs({
+  address,
+  contractAddress,
+  limit,
+  continuationToken,
+}) {
+  const url = new URL(
+    'http://195.201.2.44:18888/api/Contracts/AddressContractTxBalanceUpdates'
+  )
+
+  Object.entries({
+    address,
+    contractAddress,
+    limit,
+    continuationToken,
+  })
+    .filter(([, v]) => Boolean(v))
+    .forEach(([k, v]) => {
+      url.searchParams.append(k, v)
+    })
+
+  const {result, error} = await (await fetch(url)).json()
 
   if (error) throw new Error(error.message)
 
@@ -251,5 +290,33 @@ export function durationPreset(interval, label) {
   return {
     value,
     label: `${unitValue}${unit}`,
+  }
+}
+
+export function votingStatuses(filter) {
+  switch (filter) {
+    case VotingListFilter.Todo:
+      return [VotingStatus.Pending, VotingStatus.Open]
+    case VotingListFilter.Voting:
+      return [VotingStatus.Voted, VotingStatus.Counting]
+    case VotingListFilter.Closed:
+      return [VotingStatus.Archived]
+    case VotingListFilter.All:
+    case VotingListFilter.Own:
+      return [
+        VotingStatus.Pending,
+        VotingStatus.Open,
+        VotingStatus.Voted,
+        VotingStatus.Counting,
+        VotingStatus.Archived,
+      ]
+
+    default: {
+      console.warn(
+        typeof filter === 'undefined'
+          ? 'You must provide a filter'
+          : `Unknown filter: ${filter}`
+      )
+    }
   }
 }

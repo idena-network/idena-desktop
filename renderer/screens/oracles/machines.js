@@ -15,22 +15,25 @@ import {
   contractMaxFee,
   setVotingStatus,
   votingFinishDate,
-  byContractHash,
   hexToObject,
   areSameCaseInsensitive,
   fetchOracleRewardsEstimates,
   minOracleReward,
+  votingStatuses,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
-import {callRpc, merge} from '../../shared/utils/utils'
+import {callRpc} from '../../shared/utils/utils'
 import {epochDb, requestDb} from '../../shared/utils/db'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
+import {VotingListFilter} from './types'
 
 export const votingListMachine = Machine(
   {
     context: {
       votings: [],
-      filter: VotingStatus.Open,
+      votingListFilter: 'todo',
+      filter: VotingListFilter.Todo,
+      statuses: [],
       showAll: false,
     },
     on: {
@@ -78,10 +81,7 @@ export const votingListMachine = Machine(
       },
       loaded: {
         on: {
-          FILTER: {
-            target: 'loading',
-            actions: ['setFilter', 'persistFilter'],
-          },
+          FILTER: {target: 'loading', actions: ['setFilter', 'persistFilter']},
           TOGGLE_SHOW_ALL: {
             target: 'loading',
             actions: ['toggleShowAll', 'persistFilter'],
@@ -91,23 +91,50 @@ export const votingListMachine = Machine(
         states: {
           idle: {
             on: {
-              LOAD_MORE: 'loadMore',
+              LOAD_MORE: 'loadingMore',
+              TOGGLE_STATUS: {
+                target: 'filtering',
+                actions: ['applyStatuses', 'persistFilter', log()],
+              },
             },
           },
-          loadMore: {
+          loadingMore: {
             invoke: {
               src: 'loadVotings',
               onDone: {
+                target: 'idle',
                 actions: ['applyMoreVotings', log()],
               },
               onError: {
+                target: 'idle',
+                actions: ['setError', log()],
+              },
+            },
+          },
+          filtering: {
+            invoke: {
+              src: 'loadVotings',
+              onDone: {
+                target: 'idle',
+                actions: ['applyVotings', log()],
+              },
+              onError: {
+                target: 'idle',
                 actions: ['setError', log()],
               },
             },
           },
         },
       },
-      failure: {},
+      failure: {
+        on: {
+          FILTER: {target: 'loading', actions: ['setFilter', 'persistFilter']},
+          TOGGLE_STATUS: {
+            target: 'loading',
+            actions: ['applyStatuses', 'persistFilter', log()],
+          },
+        },
+      },
     },
   },
   {
@@ -153,16 +180,24 @@ export const votingListMachine = Machine(
         ...data,
       })),
       setFilter: assign({
-        filter: (_, {filter}) => filter,
+        filter: (_, {value}) => value,
+        statuses: [],
+        continuationToken: null,
+      }),
+      applyStatuses: assign({
+        statuses: ({statuses}, {value}) =>
+          statuses.includes(value)
+            ? statuses.filter(s => s !== value)
+            : statuses.concat(value),
         continuationToken: null,
       }),
       toggleShowAll: assign({
         showAll: (_, {value}) => value !== 'owned',
       }),
-      persistFilter: ({filter, showAll}) => {
+      persistFilter: ({filter, statuses, showAll}) => {
         global
           .sub(requestDb(), 'votings', {valueEncoding: 'json'})
-          .put('filter', {filter, showAll})
+          .put('filter', {filter, statuses, showAll})
       },
       setError: assign({
         errorMessage: (_, {data}) => data?.message,
@@ -170,19 +205,21 @@ export const votingListMachine = Machine(
     },
     services: {
       loadVotings: async ({
-        epoch: {epoch},
         identity: {address},
         filter,
-        showAll,
+        statuses,
         continuationToken,
       }) => {
         const {
           result,
           continuationToken: nextContinuationToken,
         } = await fetchVotings({
-          all: showAll.toString(),
+          all: filter !== VotingListFilter.Own,
           oracle: address,
-          state: filter,
+          'states[]': (statuses.length
+            ? statuses
+            : votingStatuses(filter)
+          ).join(','),
           continuationToken,
         })
 
@@ -206,38 +243,40 @@ export const votingListMachine = Machine(
           })
         )
 
-        const db = epochDb('votings', epoch)
+        // const db = epochDb('votings', epoch)
 
-        const persistedVotings = await db.all()
+        // const persistedVotings = await db.all()
 
-        const knownPersistedVotings = persistedVotings.filter(voting =>
-          knownVotings.some(byContractHash(voting))
-        )
+        // const knownPersistedVotings = persistedVotings.filter(voting =>
+        //   knownVotings.some(byContractHash(voting))
+        // )
 
-        const votings = merge(byContractHash)(
-          knownPersistedVotings,
-          knownVotings
-        )
+        // const votings = merge(byContractHash)(
+        //   knownVotings.map(({contractHash}) => contractHash),
+        //   knownPersistedVotings,
+        //   knownVotings
+        // )
 
-        await db.batchPut(votings)
+        // await db.batchPut(votings)
 
-        const miningVotings = persistedVotings.filter(
-          ({status, prevStatus, issuer}) =>
-            areSameCaseInsensitive(issuer, address) &&
-            ((areSameCaseInsensitive(status, VotingStatus.Deploying) &&
-              areSameCaseInsensitive(filter, VotingStatus.Pending)) ||
-              (areSameCaseInsensitive(status, VotingStatus.Starting) &&
-                areSameCaseInsensitive(filter, VotingStatus.Open)) ||
-              (areSameCaseInsensitive(status, VotingStatus.Voting) &&
-                areSameCaseInsensitive(filter, VotingStatus.Voted)) ||
-              (areSameCaseInsensitive(status, VotingStatus.Finishing) &&
-                areSameCaseInsensitive(filter, VotingStatus.Archived)) ||
-              (areSameCaseInsensitive(status, VotingStatus.Funding) &&
-                areSameCaseInsensitive(filter, prevStatus)))
-        )
+        // const miningVotings = persistedVotings.filter(
+        //   ({status, prevStatus, issuer}) =>
+        //     areSameCaseInsensitive(issuer, address) &&
+        //     ((areSameCaseInsensitive(status, VotingStatus.Deploying) &&
+        //       areSameCaseInsensitive(filter, VotingStatus.Pending)) ||
+        //       (areSameCaseInsensitive(status, VotingStatus.Starting) &&
+        //         areSameCaseInsensitive(filter, VotingStatus.Open)) ||
+        //       (areSameCaseInsensitive(status, VotingStatus.Voting) &&
+        //         areSameCaseInsensitive(filter, VotingStatus.Voted)) ||
+        //       (areSameCaseInsensitive(status, VotingStatus.Finishing) &&
+        //         areSameCaseInsensitive(filter, VotingStatus.Archived)) ||
+        //       (areSameCaseInsensitive(status, VotingStatus.Funding) &&
+        //         areSameCaseInsensitive(filter, prevStatus)))
+        // )
 
         return {
-          votings: votings.concat(miningVotings),
+          // votings: votings.concat(miningVotings),
+          votings: knownVotings,
           continuationToken: nextContinuationToken,
         }
       },
