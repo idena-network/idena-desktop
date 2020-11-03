@@ -30,6 +30,7 @@ import {
   NumberInput as ChakraNumberInput,
   Textarea as ChakraTextarea,
   Checkbox as ChakraCheckbox,
+  Divider,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 
@@ -267,5 +268,17 @@ export function SuccessAlert({children, ...props}) {
       <AlertIcon name="info" color="green.500" size={5} mr={3} />
       {children}
     </Alert>
+  )
+}
+
+export function VDivider(props) {
+  return (
+    <Divider
+      orientation="vertical"
+      borderColor="gray.300"
+      h={6}
+      mx={0}
+      {...props}
+    />
   )
 }

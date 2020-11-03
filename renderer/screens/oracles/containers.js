@@ -684,3 +684,22 @@ export function VotingDurationInput({service, ...props}) {
     />
   )
 }
+
+export const VotingFilter = React.forwardRef(
+  ({value, isChecked, children, ...props}, ref) => (
+    <VotingStatusBadge
+      ref={ref}
+      value={value}
+      aria-checked={isChecked}
+      role="radio"
+      pl={isChecked ? 1 : 3}
+      {...props}
+    >
+      <Stack isInline spacing={1}>
+        {isChecked && <Icon name="tick" size={4} />}
+        <Text>{children}</Text>
+      </Stack>
+    </VotingStatusBadge>
+  )
+)
+VotingFilter.displayName = 'VotingFilter'
