@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import React from 'react'
 import {
   Flex,
   Heading,
@@ -44,22 +45,22 @@ export function LayoutContainer(props) {
   )
 }
 
-export function Page(props) {
-  return (
-    <Flex
-      flexDirection="column"
-      align="flex-start"
-      flexBasis={0}
-      flexGrow={999}
-      maxH="100vh"
-      minW="50%"
-      px={20}
-      py={6}
-      overflowY="auto"
-      {...props}
-    />
-  )
-}
+export const Page = React.forwardRef((props, ref) => (
+  <Flex
+    ref={ref}
+    flexDirection="column"
+    align="flex-start"
+    flexBasis={0}
+    flexGrow={999}
+    maxH="100vh"
+    minW="50%"
+    px={20}
+    py={6}
+    overflowY="auto"
+    {...props}
+  />
+))
+Page.displayName = 'Page'
 
 export function PageSidebar(props) {
   return (

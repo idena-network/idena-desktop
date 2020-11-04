@@ -27,6 +27,7 @@ import {
   DrawerHeader,
   DrawerBody,
   Input,
+  HDivider,
 } from '../../shared/components/components'
 import {toPercent} from '../../shared/utils/utils'
 
@@ -276,7 +277,7 @@ export function VotingCardSkeleton(props) {
         <VotingSkeleton h={8} w={20} />
         <VotingSkeleton h={8} w={64} />
       </Flex>
-      <VotingListDivider />
+      <HDivider mt={6} mb={0} />
     </Box>
   )
 }
@@ -294,10 +295,6 @@ export function VotingSkeleton(props) {
 
 function FullSkeleton(props) {
   return <Skeleton w="full" {...props} />
-}
-
-export function VotingListDivider() {
-  return <Divider borderColor="gray.300" mt={6} mb={0} />
 }
 
 export const VotingOption = React.forwardRef(
@@ -434,5 +431,90 @@ export function TaggedInput({
         </Collapse>
       </Stack>
     </VotingInlineFormControl>
+  )
+}
+
+export function OutlineButton(props) {
+  return (
+    <Button
+      bg="unset"
+      borderColor="gray.100"
+      borderWidth="1px"
+      borderRadius="lg"
+      fontWeight={500}
+      px={4}
+      h={8}
+      _hover={{
+        bg: 'gray.50',
+      }}
+      _active={{
+        bg: 'gray.50',
+      }}
+      _disabled={{
+        bg: 'gray.50',
+      }}
+      {...props}
+    />
+  )
+}
+
+export function ScrollToTop({scrollableRef, children, ...props}) {
+  const [opacity, setOpacity] = React.useState(0)
+  const lastOpacity = React.useRef(Number.EPSILON)
+
+  const scrollableElement = scrollableRef.current
+
+  React.useEffect(() => {
+    const handleScroll = e => {
+      const prevOpacity = lastOpacity.current
+      const nextOpacity = Math.min(
+        Math.round((e.target.scrollTop / 2000) * 100),
+        100
+      )
+
+      if (Math.abs(nextOpacity - prevOpacity) > 10) {
+        setOpacity(nextOpacity < 11 ? 0 : nextOpacity / 100)
+        lastOpacity.current = nextOpacity
+      }
+    }
+
+    if (scrollableElement) {
+      scrollableElement.addEventListener('scroll', handleScroll)
+      return () => {
+        scrollableElement.removeEventListener('scroll', handleScroll)
+      }
+    }
+  }, [scrollableElement])
+
+  return (
+    <Button
+      variant="unstyled"
+      display="inline-flex"
+      alignItems="center"
+      justifyContent="center"
+      position="absolute"
+      bottom={4}
+      right={4}
+      borderRadius="lg"
+      boxShadow="md"
+      h={8}
+      minH={8}
+      minW={8}
+      p={4}
+      py={0}
+      opacity={opacity}
+      _focus={{
+        boxShadow: 'md',
+      }}
+      onClick={() => {
+        scrollableElement.scrollTo({top: 0, left: 0, behavior: 'smooth'})
+      }}
+      {...props}
+    >
+      <Stack isInline spacing={1} align="center">
+        <Icon name="arrow-up" size={5} />
+        <Text as="span">{children}</Text>
+      </Stack>
+    </Button>
   )
 }

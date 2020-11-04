@@ -282,3 +282,7 @@ export function VDivider(props) {
     />
   )
 }
+
+export function HDivider(props) {
+  return <Divider borderColor="gray.300" my={0} {...props} />
+}

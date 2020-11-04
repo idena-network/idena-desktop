@@ -41,7 +41,6 @@ import {
   OracleDrawerBody,
   OracleFormControl,
   OracleFormHelper,
-  VotingListDivider,
   OracleFormHelperText,
   TaggedInput,
 } from './components'
@@ -56,7 +55,7 @@ import {
   votingFinishDate,
 } from './utils'
 
-export function VotingCard({votingRef, ...props}) {
+export function VotingCard({votingRef}) {
   const router = useRouter()
 
   const {t, i18n} = useTranslation()
@@ -109,140 +108,136 @@ export function VotingCard({votingRef, ...props}) {
 
   return (
     <>
-      <Box key={id} {...props}>
-        <Stack isInline spacing={2} mb={3} align="center">
-          <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
-          <VotingBadge align="center" bg="gray.50" color="muted" pl="1/2">
-            <Avatar
-              address={issuer}
-              bg="white"
-              borderColor="brandGray.016"
-              borderWidth="1px"
-              borderRadius="full"
-              w={5}
-              h={5}
-              mr={1}
-            />
-            <Text as="span">{issuer}</Text>
-          </VotingBadge>
-        </Stack>
-        <Link href={viewHref}>
-          <Text fontSize="base" fontWeight={500} mb={2}>
-            {title}
-          </Text>
-        </Link>
-        <Text color="muted" mb={4}>
-          {desc}
+      <Stack isInline spacing={2} mb={3} align="center">
+        <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
+        <VotingBadge align="center" bg="gray.50" color="muted" pl="1/2">
+          <Avatar
+            address={issuer}
+            bg="white"
+            borderColor="brandGray.016"
+            borderWidth="1px"
+            borderRadius="full"
+            w={5}
+            h={5}
+            mr={1}
+          />
+          <Text as="span">{issuer}</Text>
+        </VotingBadge>
+      </Stack>
+      <Link href={viewHref}>
+        <Text fontSize="base" fontWeight={500} mb={2}>
+          {title}
         </Text>
-        {eitherIdleState(VotingStatus.Archived, VotingStatus.Counting) && (
-          <Stack spacing={2} mb={6}>
-            <Text color="muted" fontSize="sm">
-              {t('Results')}
+      </Link>
+      <Text color="muted" mb={4}>
+        {desc}
+      </Text>
+      {eitherIdleState(VotingStatus.Archived, VotingStatus.Counting) && (
+        <Stack spacing={2} mb={6}>
+          <Text color="muted" fontSize="sm">
+            {t('Results')}
+          </Text>
+          {actualVotesCount ? (
+            options.map((option, idx) => {
+              const value = votes.find(v => v.option === idx)?.count ?? 0
+              return (
+                <VotingResultBar
+                  label={option}
+                  value={value}
+                  percentage={value / actualVotesCount}
+                  isMax={maxCount === value}
+                />
+              )
+            })
+          ) : (
+            <Text
+              bg="gray.50"
+              borderRadius="md"
+              p={2}
+              color="muted"
+              fontSize="sm"
+            >
+              {t('No votes')}
             </Text>
-            {actualVotesCount ? (
-              options.map((option, idx) => {
-                const value = votes.find(v => v.option === idx)?.count ?? 0
-                return (
-                  <VotingResultBar
-                    label={option}
-                    value={value}
-                    percentage={value / actualVotesCount}
-                    isMax={maxCount === value}
-                  />
-                )
-              })
-            ) : (
-              <Text
-                bg="gray.50"
-                borderRadius="md"
-                p={2}
-                color="muted"
-                fontSize="sm"
-              >
-                {t('No votes')}
-              </Text>
-            )}
-          </Stack>
-        )}
-        <Stack
-          isInline
-          spacing={2}
-          align="center"
-          bg="orange.010"
-          borderColor="orange.050"
-          borderWidth="1px"
-          borderRadius="md"
-          py={2}
-          px={3}
-          mb={6}
-        >
-          <Icon name="star" size={5} color="white" />
-          <Text fontWeight={500}>
-            {t('Total prize')}: {toDna(balance)}
-          </Text>
-          <Text color="orange.500">
-            {Number(votingMinPayment) > 0
-              ? t(`Lock {{amount}} for voting`, {
-                  amount: toLocaleDna(i18n.language)(votingMinPayment),
-                })
-              : t('Free voting')}
-          </Text>
+          )}
         </Stack>
-        <Flex justify="space-between" align="center">
-          <Stack isInline spacing={2}>
-            {eitherIdleState(VotingStatus.Pending) && (
-              <PrimaryButton
-                isDisabled={isMining}
-                loadingText={t('Launching')}
-                onClick={() => send('START_VOTING')}
-              >
-                {t('Launch')}
-              </PrimaryButton>
-            )}
+      )}
+      <Stack
+        isInline
+        spacing={2}
+        align="center"
+        bg="orange.010"
+        borderColor="orange.050"
+        borderWidth="1px"
+        borderRadius="md"
+        py={2}
+        px={3}
+        mb={6}
+      >
+        <Icon name="star" size={5} color="white" />
+        <Text fontWeight={500}>
+          {t('Total prize')}: {toDna(balance)}
+        </Text>
+        <Text color="orange.500">
+          {Number(votingMinPayment) > 0
+            ? t(`Lock {{amount}} for voting`, {
+                amount: toLocaleDna(i18n.language)(votingMinPayment),
+              })
+            : t('Free voting')}
+        </Text>
+      </Stack>
+      <Flex justify="space-between" align="center">
+        <Stack isInline spacing={2}>
+          {eitherIdleState(VotingStatus.Pending) && (
+            <PrimaryButton
+              isDisabled={isMining}
+              loadingText={t('Launching')}
+              onClick={() => send('START_VOTING')}
+            >
+              {t('Launch')}
+            </PrimaryButton>
+          )}
 
-            {eitherIdleState(VotingStatus.Open) && (
-              <PrimaryButton onClick={() => router.push(viewHref)}>
-                {t('Vote')}
-              </PrimaryButton>
-            )}
-            {eitherIdleState(
-              VotingStatus.Voted,
-              VotingStatus.Archived,
-              VotingStatus.Counting
-            ) && (
-              <PrimaryButton onClick={() => router.push(viewHref)}>
-                {t('Open')}
-              </PrimaryButton>
-            )}
-          </Stack>
-          <Stack isInline spacing={3}>
-            <Text>
-              <Text as="span" color="muted">
-                {t('Deadline')}:
-              </Text>{' '}
-              <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
-            </Text>
-            <Divider
-              orientation="vertical"
-              borderColor="gray.300"
-              borderLeft="1px"
+          {eitherIdleState(VotingStatus.Open) && (
+            <PrimaryButton onClick={() => router.push(viewHref)}>
+              {t('Vote')}
+            </PrimaryButton>
+          )}
+          {eitherIdleState(
+            VotingStatus.Voted,
+            VotingStatus.Archived,
+            VotingStatus.Counting
+          ) && (
+            <PrimaryButton onClick={() => router.push(viewHref)}>
+              {t('Open')}
+            </PrimaryButton>
+          )}
+        </Stack>
+        <Stack isInline spacing={3}>
+          <Text>
+            <Text as="span" color="muted">
+              {t('Deadline')}:
+            </Text>{' '}
+            <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
+          </Text>
+          <Divider
+            orientation="vertical"
+            borderColor="gray.300"
+            borderLeft="1px"
+          />
+          <Stack isInline spacing={2} align="center">
+            <Icon
+              name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
+              color="muted"
+              w={4}
+              h={4}
             />
-            <Stack isInline spacing={2} align="center">
-              <Icon
-                name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
-                color="muted"
-                w={4}
-                h={4}
-              />
-              <Text as="span">
-                {t('{{count}} votes', {count: actualVotesCount})}
-              </Text>
-            </Stack>
+            <Text as="span">
+              {t('{{count}} votes', {count: actualVotesCount})}
+            </Text>
           </Stack>
-        </Flex>
-
-        <VotingListDivider />
-      </Box>
+        </Stack>
+      </Flex>
 
       <AddFundDrawer
         isOpen={isOpenAddFund}
@@ -696,9 +691,23 @@ export const VotingFilter = React.forwardRef(
       {...props}
     >
       <Stack isInline spacing={1}>
-        {isChecked && <Icon name="tick" size={4} />}
+        {isChecked && (
+          <Icon name="tick" size={4} animation="0.3s both zoomIn" />
+        )}
         <Text>{children}</Text>
       </Stack>
+      <style jsx global>{`
+        @keyframes zoomIn {
+          from {
+            opacity: 0;
+            transform: scale3d(0.7, 0.7, 0.7);
+          }
+
+          50% {
+            opacity: 1;
+          }
+        }
+      `}</style>
     </VotingStatusBadge>
   )
 )
