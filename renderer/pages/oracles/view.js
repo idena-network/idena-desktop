@@ -71,11 +71,11 @@ export default function ViewVotingPage() {
 
   const {epoch} = useEpochState()
 
-  const {address, balance: identityBalance} = useIdentityState()
+  const identity = useIdentityState()
 
   const viewMachine = React.useMemo(
-    () => createViewVotingMachine(id, epoch, address),
-    [address, epoch, id]
+    () => createViewVotingMachine(id, epoch, identity.address),
+    [epoch, id, identity.address]
   )
 
   const [current, send] = useMachine(viewMachine, {
@@ -257,7 +257,7 @@ export default function ViewVotingPage() {
                           isMiningFunding ? t('Mining') : t('Launching')
                         }
                         onClick={() => {
-                          send('START_VOTING', {from: address})
+                          send('START_VOTING', {from: identity.address})
                         }}
                       >
                         {t('Launch')}
@@ -269,7 +269,7 @@ export default function ViewVotingPage() {
                         loadingText={
                           isMiningFunding ? t('Mining') : t('Voting')
                         }
-                        onClick={() => send('VOTE', {from: address})}
+                        onClick={() => send('VOTE', {from: identity.address})}
                       >
                         {t('Vote')}
                       </PrimaryButton>
@@ -280,7 +280,9 @@ export default function ViewVotingPage() {
                         loadingText={
                           isMiningFunding ? t('Mining') : t('Finishing')
                         }
-                        onClick={() => send('FINISH_VOTING', {from: address})}
+                        onClick={() =>
+                          send('FINISH_VOTING', {from: identity.address})
+                        }
                       >
                         {t('Finish voting')}
                       </PrimaryButton>
@@ -292,7 +294,7 @@ export default function ViewVotingPage() {
                           isMiningFunding ? t('Mining') : t('Prolongating')
                         }
                         onClick={() =>
-                          send('PROLONGATE_VOTING', {from: address})
+                          send('PROLONGATE_VOTING', {from: identity.address})
                         }
                       >
                         {t('Prolongate voting')}
@@ -378,11 +380,11 @@ export default function ViewVotingPage() {
         isOpen={isOpenVote}
         onClose={onCloseVote}
         option={options[selectedOption]}
-        from={address}
+        from={identity.address}
         to={contractHash}
         deposit={votingMinPayment}
         onVote={() => {
-          send('VOTE', {from: address})
+          send('VOTE', {from: identity.address})
           onCloseVote()
         }}
       />
@@ -392,7 +394,7 @@ export default function ViewVotingPage() {
         onClose={onCloseAddFund}
         from={issuer}
         to={contractHash}
-        available={identityBalance}
+        available={identity.balance}
         onAddFund={({amount, from}) => {
           send('ADD_FUND', {amount, from})
           onCloseAddFund()

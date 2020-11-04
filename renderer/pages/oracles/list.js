@@ -38,11 +38,11 @@ function VotingListPage() {
 
   const pageRef = React.useRef()
 
-  const identity = useIdentityState()
-  const epoch = useEpochState()
+  const {address, isValidated} = useIdentityState()
+  const {epoch} = useEpochState()
 
   const [current, send] = useMachine(votingListMachine, {
-    context: {epoch, identity},
+    context: {epoch, address},
     actions: {
       onError: (_, {data: {message}}) => {
         toast({
@@ -53,7 +53,8 @@ function VotingListPage() {
       },
     },
   })
-  const {votings, filter, statuses = '', continuationToken} = current.context
+
+  const {votings, filter, statuses, continuationToken} = current.context
 
   return (
     <Page ref={pageRef}>
@@ -105,7 +106,7 @@ function VotingListPage() {
                     {/* eslint-disable-next-line no-nested-ternary */}
                     {filter === VotingListFilter.Own
                       ? t(`There are no votings yet.`)
-                      : identity.isValidated
+                      : isValidated
                       ? t(`No votings for you 🤷‍♂️`)
                       : t(`There are no votings yet.`)}
                   </Text>

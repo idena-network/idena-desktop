@@ -56,8 +56,7 @@ export const epochDb = (db, epoch, options) => {
 
       let batch = targetDb.batch()
 
-      for (const item of newItems) {
-        const id = nanoid()
+      for (const {id = nanoid(), ...item} of newItems) {
         newIds.push(id)
         batch = batch.put(id, item)
       }

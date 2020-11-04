@@ -60,8 +60,6 @@ export function VotingCard({votingRef}) {
 
   const {t, i18n} = useTranslation()
 
-  const {isOpen: isOpenAddFund, onClose: onCloseAddFund} = useDisclosure()
-
   const [current, send] = useService(votingRef)
 
   const {
@@ -82,13 +80,11 @@ export function VotingCard({votingRef}) {
     voteProofsCount,
     votesCount,
     actualVotesCount = votesCount || voteProofsCount,
-    contractHash,
     prevStatus,
     options,
     votes = [],
     votingMinPayment,
     quorum,
-    identity,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -238,18 +234,6 @@ export function VotingCard({votingRef}) {
           </Stack>
         </Stack>
       </Flex>
-
-      <AddFundDrawer
-        isOpen={isOpenAddFund}
-        onClose={onCloseAddFund}
-        from={issuer}
-        to={contractHash}
-        available={identity.balance}
-        onAddFund={({amount, from}) => {
-          send('ADD_FUND', {amount, from})
-          onCloseAddFund()
-        }}
-      />
     </>
   )
 }
