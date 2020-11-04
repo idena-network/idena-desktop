@@ -1,6 +1,6 @@
 import React from 'react'
 import NextLink from 'next/link'
-import {Button, Icon, Link, Stack, Text, useToast} from '@chakra-ui/core'
+import {Box, Icon, Stack, Text, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page, PageTitle} from '../../screens/app/components'
@@ -9,13 +9,20 @@ import {
   FlipFilterOption as FilterOption,
 } from '../../screens/flips/components'
 import {IconLink} from '../../shared/components/link'
-import {FloatDebug, Toast, VDivider} from '../../shared/components/components'
+import {
+  FloatDebug,
+  HDivider,
+  Toast,
+  VDivider,
+} from '../../shared/components/components'
 import {votingListMachine} from '../../screens/oracles/machines'
 import {
   VotingCardSkeleton,
   VotingSkeleton,
   FillPlaceholder,
   FillCenter,
+  OutlineButton,
+  ScrollToTop,
 } from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {VotingCard, VotingFilter} from '../../screens/oracles/containers'
@@ -28,6 +35,8 @@ function VotingListPage() {
   const {t} = useTranslation()
 
   const toast = useToast()
+
+  const pageRef = React.useRef()
 
   const identity = useIdentityState()
   const epoch = useEpochState()
@@ -47,7 +56,7 @@ function VotingListPage() {
   const {votings, filter, statuses = '', continuationToken} = current.context
 
   return (
-    <Page>
+    <Page ref={pageRef}>
       <PageTitle mb={4}>{t('Oracle votings')}</PageTitle>
       <Stack isInline spacing={20} w="full" flex={1}>
         <Stack spacing={8}>
@@ -91,47 +100,40 @@ function VotingListPage() {
 
             {current.matches('loaded') && votings.length === 0 && (
               <FillCenter justify="center">
-                <>
-                  {filter === VotingListFilter.Own && (
-                    <Text>{t(`There are no votings yet.`)}</Text>
-                  )}
-
-                  {filter !== VotingListFilter.Own && (
-                    <Text>
-                      {identity.isValidated
-                        ? t(`No votings for you 🤷‍♂️`)
-                        : t(`There are no votings yet.`)}
-                    </Text>
-                  )}
+                <Stack spacing={4}>
+                  <Text color="muted" textAlign="center">
+                    {/* eslint-disable-next-line no-nested-ternary */}
+                    {filter === VotingListFilter.Own
+                      ? t(`There are no votings yet.`)
+                      : identity.isValidated
+                      ? t(`No votings for you 🤷‍♂️`)
+                      : t(`There are no votings yet.`)}
+                  </Text>
 
                   <NextLink href="/oracles/new">
-                    <Link
-                      color="brandBlue.500"
-                      fontWeight={500}
-                      _hover={{
-                        textDecoration: 'none',
-                      }}
-                    >
-                      {t('Create new voting')}
-                    </Link>
+                    <OutlineButton>{t('Create new voting')}</OutlineButton>
                   </NextLink>
-                </>
+                </Stack>
               </FillCenter>
             )}
 
             {current.matches('loaded') &&
-              votings.map(({id, ref}) => (
-                <VotingCard key={id} votingRef={ref} />
+              votings.map(({id, ref}, idx) => (
+                <Box key={id}>
+                  <VotingCard votingRef={ref} />
+                  {idx < votings.length - 1 && <HDivider mt={6} mb={0} />}
+                </Box>
               ))}
 
             {current.matches('loaded') && continuationToken && (
-              <Button
-                variant="link"
-                variantColor="brandBlue"
+              <OutlineButton
+                alignSelf="center"
+                isLoading={current.matches('loaded.loadingMore')}
+                loadingText={t('Loading')}
                 onClick={() => send('LOAD_MORE')}
               >
-                {t('Load more')}
-              </Button>
+                {t('Load more votings')}
+              </OutlineButton>
             )}
           </Stack>
         </Stack>
@@ -163,6 +165,7 @@ function VotingListPage() {
           </Stack>
         </VotingSkeleton>
       </Stack>
+      <ScrollToTop scrollableRef={pageRef}>{t('Back to top')}</ScrollToTop>
       <FloatDebug>{current.value}</FloatDebug>
     </Page>
   )
