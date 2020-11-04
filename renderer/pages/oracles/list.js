@@ -120,10 +120,10 @@ function VotingListPage() {
 
             {current.matches('loaded') &&
               votings.map(({id, ref}, idx) => (
-                <Box key={id}>
+                <Stack key={id} spacing={6}>
                   <VotingCard votingRef={ref} />
-                  {idx < votings.length - 1 && <HDivider mt={6} mb={0} />}
-                </Box>
+                  {idx < votings.length - 1 && <HDivider mt={0} mb={0} />}
+                </Stack>
               ))}
 
             {current.matches('loaded') && continuationToken && (
