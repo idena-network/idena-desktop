@@ -55,7 +55,7 @@ import {
   votingFinishDate,
 } from './utils'
 
-export function VotingCard({votingRef}) {
+export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
 
   const {t, i18n} = useTranslation()
@@ -103,7 +103,7 @@ export function VotingCard({votingRef}) {
   const maxCount = Math.max(...votes.map(({count}) => count))
 
   return (
-    <>
+    <Box {...props}>
       <Stack isInline spacing={2} mb={3} align="center">
         <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
         <VotingBadge align="center" bg="gray.50" color="muted" pl="1/2">
@@ -234,7 +234,7 @@ export function VotingCard({votingRef}) {
           </Stack>
         </Stack>
       </Flex>
-    </>
+    </Box>
   )
 }
 
