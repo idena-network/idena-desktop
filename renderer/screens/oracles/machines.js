@@ -31,7 +31,6 @@ export const votingListMachine = Machine(
   {
     context: {
       votings: [],
-      votingListFilter: 'todo',
       filter: VotingListFilter.Todo,
       statuses: [],
       showAll: false,
@@ -140,35 +139,23 @@ export const votingListMachine = Machine(
   {
     actions: {
       applyVotings: assign({
-        votings: ({epoch, identity}, {data: {votings}}) =>
+        votings: ({epoch, address}, {data: {votings}}) =>
           votings.map(voting => ({
             ...voting,
-            ref: spawn(
-              // eslint-disable-next-line no-use-before-define
-              votingMachine.withContext({
-                ...voting,
-                epoch,
-                identity,
-              }),
-              `voting-${voting.id}`
-            ),
+            // eslint-disable-next-line no-use-before-define
+            ref: spawn(votingMachine.withContext({...voting, epoch, address})),
           })),
         continuationToken: (_, {data: {continuationToken}}) =>
           continuationToken,
       }),
       applyMoreVotings: assign({
-        votings: ({votings, epoch, identity}, {data: {votings: nextVotings}}) =>
+        votings: ({votings, epoch, address}, {data: {votings: nextVotings}}) =>
           votings.concat(
             nextVotings.map(voting => ({
               ...voting,
               ref: spawn(
                 // eslint-disable-next-line no-use-before-define
-                votingMachine.withContext({
-                  ...voting,
-                  epoch,
-                  identity,
-                }),
-                `voting-${voting.id}`
+                votingMachine.withContext({...voting, epoch, address})
               ),
             }))
           ),
@@ -205,7 +192,8 @@ export const votingListMachine = Machine(
     },
     services: {
       loadVotings: async ({
-        identity: {address},
+        epoch,
+        address,
         filter,
         statuses,
         continuationToken,
@@ -234,6 +222,7 @@ export const votingListMachine = Machine(
             ...voting
           }) => ({
             ...voting,
+            id: contractAddress,
             contractHash: contractAddress,
             issuer: author,
             status: state,
@@ -243,21 +232,7 @@ export const votingListMachine = Machine(
           })
         )
 
-        // const db = epochDb('votings', epoch)
-
-        // const persistedVotings = await db.all()
-
-        // const knownPersistedVotings = persistedVotings.filter(voting =>
-        //   knownVotings.some(byContractHash(voting))
-        // )
-
-        // const votings = merge(byContractHash)(
-        //   knownVotings.map(({contractHash}) => contractHash),
-        //   knownPersistedVotings,
-        //   knownVotings
-        // )
-
-        // await db.batchPut(votings)
+        await epochDb('votings', epoch).batchPut(knownVotings)
 
         // const miningVotings = persistedVotings.filter(
         //   ({status, prevStatus, issuer}) =>
@@ -275,19 +250,17 @@ export const votingListMachine = Machine(
         // )
 
         return {
-          // votings: votings.concat(miningVotings),
           votings: knownVotings,
           continuationToken: nextContinuationToken,
         }
       },
-      loadFilter: async ({filter}) => {
+      loadFilter: async () => {
         try {
           return JSON.parse(
             await global.sub(requestDb(), 'votings').get('filter')
           )
         } catch (error) {
-          if (error.notFound) return filter
-          throw new Error(error)
+          if (!error.notFound) throw new Error(error)
         }
       },
     },
@@ -405,7 +378,8 @@ export const votingMachine = Machine(
       clearMiningStatus: assign({
         miningStatus: null,
       }),
-      persist: ({epoch: {epoch}, ...context}) => {
+      // eslint-disable-next-line no-shadow
+      persist: ({epoch, identity, ...context}) => {
         epochDb('votings', epoch).put(context)
       },
     },
