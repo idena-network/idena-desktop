@@ -24,6 +24,7 @@ import {
   Avatar,
   ExternalLink,
   FloatDebug,
+  GoogleTranslateButton,
   Toast,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
@@ -177,16 +178,28 @@ export default function ViewVotingPage() {
             <Stack spacing={6}>
               <VotingSkeleton isLoaded={isLoaded}>
                 <Stack
-                  spacing={4}
+                  spacing={8}
                   borderRadius="md"
                   bg="gray.50"
                   py={8}
                   px={10}
                 >
-                  <Heading fontSize={rem(21)} fontWeight={500}>
-                    {title}
-                  </Heading>
-                  <Text lineHeight="tall">{desc}</Text>
+                  <Stack spacing={4}>
+                    <Heading fontSize={rem(21)} fontWeight={500}>
+                      {title}
+                    </Heading>
+                    <Text lineHeight="tall">{desc}</Text>
+                  </Stack>
+                  <GoogleTranslateButton
+                    text={encodeURIComponent(
+                      [
+                        title,
+                        desc,
+                        options.map(({value}) => value).join('\n'),
+                      ].join('\n\n')
+                    )}
+                    alignSelf="start"
+                  />
                 </Stack>
               </VotingSkeleton>
 
