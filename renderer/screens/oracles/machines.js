@@ -378,7 +378,7 @@ export const votingMachine = Machine(
         miningStatus: null,
       }),
       // eslint-disable-next-line no-shadow
-      persist: ({epoch, identity, ...context}) => {
+      persist: ({epoch, ...context}) => {
         epochDb('votings', epoch).put(context)
       },
     },
@@ -936,7 +936,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
         }),
         ...votingServices(),
         vote: async (
-          {contractHash, selectedOption, gasCost, txFee},
+          // eslint-disable-next-line no-shadow
+          {contractHash, selectedOption, gasCost, txFee, epoch},
           {from}
         ) => {
           const readonlyCallContract = createContractReadonlyCaller({
@@ -955,7 +956,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
             'voteHash',
             'hex',
             {value: selectedOption, format: 'byte'},
-            {value: from}
+            {value: await callRpc('dna_sign', `salt-${contractHash}-${epoch}`)}
           )
 
           const votingMinPayment = Number(
