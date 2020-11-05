@@ -43,6 +43,7 @@ import {
   OracleFormHelper,
   OracleFormHelperText,
   TaggedInput,
+  DnaInput,
 } from './components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {Link} from '../../shared/components'
@@ -294,8 +295,8 @@ export function AddFundDrawer({from, to, available, onAddFund, ...props}) {
           <OracleFormControl label="To address">
             <Input isDisabled value={to} />
           </OracleFormControl>
-          <OracleFormControl label={t('Lock, iDNA')}>
-            <Input name="amountInput" />
+          <OracleFormControl label={t('Amount')}>
+            <DnaInput name="amountInput" />
           </OracleFormControl>
           <PrimaryButton type="submit" mt={3} ml="auto">
             {t('Send')}
@@ -306,7 +307,15 @@ export function AddFundDrawer({from, to, available, onAddFund, ...props}) {
   )
 }
 
-export function VoteDrawer({option, from, to, deposit = 0, onVote, ...props}) {
+export function VoteDrawer({
+  option,
+  from,
+  to,
+  deposit = 0,
+  isLoading,
+  onVote,
+  ...props
+}) {
   const {t, i18n} = useTranslation()
 
   const {balance} = useIdentityState()
@@ -329,7 +338,13 @@ export function VoteDrawer({option, from, to, deposit = 0, onVote, ...props}) {
         <OracleFormControl label={t('Lock, iDNA')}>
           <Input isDisabled value={deposit} />
         </OracleFormControl>
-        <PrimaryButton mt={3} ml="auto" onClick={onVote}>
+        <PrimaryButton
+          mt={3}
+          ml="auto"
+          isLoading={isLoading}
+          loadingText={t('Publishing')}
+          onClick={onVote}
+        >
           {t('Send')}
         </PrimaryButton>
       </OracleDrawerBody>
@@ -686,7 +701,7 @@ VotingFilter.displayName = 'VotingFilter'
 
 export function VotingResult({
   options,
-  votes,
+  votes = [],
   votesCount,
   voteProofsCount,
   actualVotesCount = votesCount || voteProofsCount,

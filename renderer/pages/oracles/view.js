@@ -66,12 +66,6 @@ export default function ViewVotingPage() {
   const toast = useToast()
 
   const {
-    isOpen: isOpenVote,
-    onOpen: onOpenVote,
-    onClose: onCloseVote,
-  } = useDisclosure()
-
-  const {
     isOpen: isOpenAddFund,
     onOpen: onOpenAddFund,
     onClose: onCloseAddFund,
@@ -133,6 +127,7 @@ export default function ViewVotingPage() {
   const isLoaded = !current.matches('loading')
 
   const isMining = current.matches('mining')
+  const isVoting = current.matches(`mining.${VotingStatus.Voting}`)
   const isMiningFunding = current.matches('mining.funding')
 
   const sameString = a => b => areSameCaseInsensitive(a, b)
@@ -208,19 +203,18 @@ export default function ViewVotingPage() {
                       {t('Choose an option to vote')}
                     </Text>
                     <RadioGroup
-                      defaultValue={selectedOption}
+                      value={String(selectedOption)}
                       onChange={e => {
                         send('SELECT_OPTION', {
-                          option: e.target.value,
+                          option: Number(e.target.value),
                         })
-                        onOpenVote()
                       }}
                     >
                       {/* eslint-disable-next-line no-shadow */}
                       {options.map(({id, value}) => (
                         <VotingOption
                           key={id}
-                          value={id}
+                          value={String(id)}
                           isDisabled={eitherIdleState(VotingStatus.Voted)}
                           annotation={t('{{count}} min. votes required', {
                             count: toPercent(winnerThreshold / 100),
@@ -282,7 +276,7 @@ export default function ViewVotingPage() {
                         loadingText={
                           isMiningFunding ? t('Mining') : t('Voting')
                         }
-                        onClick={() => send('VOTE', {from: identity.address})}
+                        onClick={() => send('REVIEW')}
                       >
                         {t('Vote')}
                       </PrimaryButton>
@@ -396,13 +390,17 @@ export default function ViewVotingPage() {
                                     <Text>
                                       {isSent ? t('Sent') : t('Received')}
                                     </Text>
-                                    <SmallText isTruncated>{from}</SmallText>
+                                    <SmallText isTruncated title={from}>
+                                      {from}
+                                    </SmallText>
                                   </Box>
                                 </Stack>
                               </TableCol>
                               <TableCol>
                                 <Text>{type}</Text>
-                                <SmallText isTruncated>{hash}</SmallText>
+                                <SmallText isTruncated title={hash}>
+                                  {hash}
+                                </SmallText>
                               </TableCol>
                               <TableCol>
                                 <Text>
@@ -485,16 +483,18 @@ export default function ViewVotingPage() {
       </Page>
 
       <VoteDrawer
-        isOpen={isOpenVote}
-        onClose={onCloseVote}
+        isOpen={eitherState(current, 'review', 'mining')}
+        onClose={() => {
+          send('CANCEL')
+        }}
         // eslint-disable-next-line no-shadow
         option={options.find(({id}) => id === selectedOption)?.value}
         from={identity.address}
         to={contractHash}
         deposit={votingMinPayment}
+        isLoading={isVoting}
         onVote={() => {
           send('VOTE', {from: identity.address})
-          onCloseVote()
         }}
       />
 
