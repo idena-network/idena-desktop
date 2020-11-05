@@ -16,10 +16,10 @@ import {
   setVotingStatus,
   votingFinishDate,
   hexToObject,
-  areSameCaseInsensitive,
   fetchOracleRewardsEstimates,
   minOracleReward,
   votingStatuses,
+  fetchContractBalanceUpdates,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
@@ -778,6 +778,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
         id,
         epoch,
         address,
+        balanceUpdates: [],
       },
       initial: 'loading',
       states: {
@@ -911,17 +912,22 @@ export const createViewVotingMachine = (id, epoch, address) =>
           miningStatus: null,
         }),
         selectOption: assign({
-          selectedOption: ({options}, {option}) =>
-            options.findIndex(o => areSameCaseInsensitive(o, option)),
+          selectedOption: (_, {option}) => option,
         }),
         // eslint-disable-next-line no-shadow
-        persist: ({epoch, ...context}) => {
+        persist: ({epoch, address, ...context}) => {
           epochDb('votings', epoch).put(context)
         },
       },
       services: {
         // eslint-disable-next-line no-shadow
-        loadVoting: async ({epoch, id}) => epochDb('votings', epoch).load(id),
+        loadVoting: async ({epoch, address, id}) => ({
+          ...(await epochDb('votings', epoch).load(id)),
+          balanceUpdates: await fetchContractBalanceUpdates({
+            address,
+            contractAddress: id,
+          }),
+        }),
         ...votingServices(),
         vote: async (
           {contractHash, selectedOption, gasCost, txFee},
@@ -942,7 +948,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           const voteHash = await readonlyCallContract(
             'voteHash',
             'hex',
-            {value: selectedOption.toString(), format: 'byte'},
+            {value: selectedOption, format: 'byte'},
             {value: from}
           )
 

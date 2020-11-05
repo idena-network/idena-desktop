@@ -298,7 +298,7 @@ function FullSkeleton(props) {
 }
 
 export const VotingOption = React.forwardRef(
-  ({value, annotation, ...props}, ref) => (
+  ({value, annotation, children, ...props}, ref) => (
     <Flex
       justify="space-between"
       border="1px"
@@ -308,7 +308,7 @@ export const VotingOption = React.forwardRef(
       py={2}
     >
       <Radio ref={ref} borderColor="gray.100" value={value} {...props}>
-        {value}
+        {children || value}
       </Radio>
       <Text color="muted" fontSize="sm">
         {annotation}
@@ -434,29 +434,29 @@ export function TaggedInput({
   )
 }
 
-export function OutlineButton(props) {
-  return (
-    <Button
-      bg="unset"
-      borderColor="gray.100"
-      borderWidth="1px"
-      borderRadius="lg"
-      fontWeight={500}
-      px={4}
-      h={8}
-      _hover={{
-        bg: 'gray.50',
-      }}
-      _active={{
-        bg: 'gray.50',
-      }}
-      _disabled={{
-        bg: 'gray.50',
-      }}
-      {...props}
-    />
-  )
-}
+export const OutlineButton = React.forwardRef((props, ref) => (
+  <Button
+    ref={ref}
+    bg="unset"
+    borderColor="gray.100"
+    borderWidth="1px"
+    borderRadius="lg"
+    fontWeight={500}
+    px={4}
+    h={8}
+    _hover={{
+      bg: 'gray.50',
+    }}
+    _active={{
+      bg: 'gray.50',
+    }}
+    _disabled={{
+      bg: 'gray.50',
+    }}
+    {...props}
+  />
+))
+OutlineButton.displayName = 'OutlineButton'
 
 export function ScrollToTop({scrollableRef, children, ...props}) {
   const [opacity, setOpacity] = React.useState(0)
@@ -517,4 +517,8 @@ export function ScrollToTop({scrollableRef, children, ...props}) {
       </Stack>
     </Button>
   )
+}
+
+export function SmallText(props) {
+  return <Text color="muted" fontSize="sm" {...props} />
 }

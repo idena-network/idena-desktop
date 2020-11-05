@@ -20,7 +20,12 @@ import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import dayjs from 'dayjs'
 import {Page} from '../../screens/app/components'
-import {Avatar, FloatDebug, Toast} from '../../shared/components/components'
+import {
+  Avatar,
+  ExternalLink,
+  FloatDebug,
+  Toast,
+} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
   PrimaryButton,
@@ -29,9 +34,9 @@ import {
 } from '../../shared/components/button'
 import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
+  SmallText,
   VotingBadge,
   VotingOption,
-  VotingResultBar,
   VotingSkeleton,
 } from '../../screens/oracles/components'
 import {
@@ -40,12 +45,19 @@ import {
   VoteDrawer,
   AsideStat,
   VotingInspector,
+  VotingResult,
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {VotingStatus} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {areSameCaseInsensitive, oracleReward} from '../../screens/oracles/utils'
+import {
+  Table,
+  TableCol,
+  TableHeaderCol,
+  TableRow,
+} from '../../shared/components'
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
@@ -112,9 +124,9 @@ export default function ViewVotingPage() {
       .add(votingDuration, 's')
       .add(publicVotingDuration, 's'),
     prevStatus,
-    votes = [],
     selectedOption,
     winnerThreshold = 50,
+    balanceUpdates,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -128,8 +140,6 @@ export default function ViewVotingPage() {
     eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase())) ||
     states.some(sameString(status)) ||
     (isMining && states.some(sameString(prevStatus)))
-
-  const maxCount = Math.max(...votes.map(({count}) => count))
 
   const reward = oracleReward({
     balance: contractBalance,
@@ -181,7 +191,7 @@ export default function ViewVotingPage() {
                       {t('Choose an option to vote')}
                     </Text>
                     <RadioGroup
-                      defaultValue={options[selectedOption]}
+                      defaultValue={selectedOption}
                       onChange={e => {
                         send('SELECT_OPTION', {
                           option: e.target.value,
@@ -189,15 +199,18 @@ export default function ViewVotingPage() {
                         onOpenVote()
                       }}
                     >
-                      {options.map((option, idx) => (
+                      {/* eslint-disable-next-line no-shadow */}
+                      {options.map(({id, value}) => (
                         <VotingOption
-                          key={`${option}-${idx}`}
-                          value={option}
+                          key={id}
+                          value={id}
                           isDisabled={eitherIdleState(VotingStatus.Voted)}
                           annotation={t('{{count}} min. votes required', {
                             count: toPercent(winnerThreshold / 100),
                           })}
-                        />
+                        >
+                          {value}
+                        </VotingOption>
                       ))}
                     </RadioGroup>
                   </Box>
@@ -209,29 +222,12 @@ export default function ViewVotingPage() {
                 VotingStatus.Archived
               ) && (
                 <VotingSkeleton isLoaded={isLoaded}>
-                  <Stack spacing={2} mb={6}>
+                  <Stack spacing={2}>
                     <Text color="muted" fontSize="sm">
                       {t('Results')}
                     </Text>
                     {actualVotesCount ? (
-                      options.map((option, idx) => {
-                        const value =
-                          votes.find(v => v.option === idx)?.count ?? 0
-                        return (
-                          <VotingResultBar
-                            label={option}
-                            value={value}
-                            percentage={value / actualVotesCount}
-                            isMax={maxCount === value}
-                            isWinner={
-                              eitherIdleState(VotingStatus.Archived) &&
-                              hasQuorum &&
-                              Math.ceil((value / actualVotesCount) * 100) >
-                                winnerThreshold
-                            }
-                          />
-                        )
-                      })
+                      <VotingResult {...current.context} />
                     ) : (
                       <Text
                         bg="gray.50"
@@ -246,6 +242,99 @@ export default function ViewVotingPage() {
                   </Stack>
                 </VotingSkeleton>
               )}
+
+              <VotingSkeleton isLoaded={isLoaded}>
+                <Stack spacing={5}>
+                  <Box>
+                    <Text fontWeight={500}>{t('Recent transactions')}</Text>
+                    <ExternalLink
+                      href={`https://scan.idena.io/address/${identity.address}/contract/${id}/balanceUpdates`}
+                    >
+                      {t('See balance updates in Explorer')}
+                    </ExternalLink>
+                  </Box>
+                  <Table style={{tableLayout: 'fixed', fontWeight: 500}}>
+                    <thead>
+                      <TableRow>
+                        <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
+                        <TableHeaderCol>{t('Address')}</TableHeaderCol>
+                        <TableHeaderCol>{t('Date and time')}</TableHeaderCol>
+                        <TableHeaderCol>{t('iDNA value')}</TableHeaderCol>
+                      </TableRow>
+                    </thead>
+                    <tbody>
+                      {balanceUpdates.map(
+                        ({
+                          hash,
+                          type,
+                          timestamp,
+                          from,
+                          amount,
+                          fee,
+                          tips,
+                          balanceNew,
+                          balanceOld,
+                        }) => {
+                          const isSent = areSameCaseInsensitive(
+                            from,
+                            identity.address
+                          )
+                          return (
+                            <TableRow>
+                              <TableCol>
+                                <Stack isInline>
+                                  <Flex
+                                    align="center"
+                                    justify="center"
+                                    bg={isSent ? 'red.012' : 'brandBlue.012'}
+                                    color={isSent ? 'red.500' : 'brandBlue.500'}
+                                    borderRadius="lg"
+                                    minH={8}
+                                    minW={8}
+                                  >
+                                    <Icon
+                                      name={`arrow-${isSent ? 'up' : 'down'}`}
+                                      size={5}
+                                    />
+                                  </Flex>
+                                  <Box isTruncated>
+                                    <Text>
+                                      {isSent ? t('Sent') : t('Received')}
+                                    </Text>
+                                    <SmallText isTruncated>{from}</SmallText>
+                                  </Box>
+                                </Stack>
+                              </TableCol>
+                              <TableCol>
+                                <Text>{type}</Text>
+                                <SmallText isTruncated>{hash}</SmallText>
+                              </TableCol>
+                              <TableCol>
+                                <Text>
+                                  {new Date(timestamp).toLocaleString()}
+                                </Text>
+                              </TableCol>
+                              <TableCol>
+                                <Text
+                                  color={isSent ? 'red.500' : 'brandGray.500'}
+                                >
+                                  {toLocaleDna(i18n.language, {
+                                    signDisplay: 'exceptZero',
+                                  })(
+                                    (isSent ? -amount : 0) +
+                                      (balanceNew ? balanceNew - balanceOld : 0)
+                                  )}
+                                </Text>
+                                <SmallText>{toDna(fee + tips)}</SmallText>
+                              </TableCol>
+                            </TableRow>
+                          )
+                        }
+                      )}
+                    </tbody>
+                  </Table>
+                </Stack>
+              </VotingSkeleton>
 
               <VotingSkeleton isLoaded={isLoaded}>
                 <Flex justify="space-between" align="center">
@@ -353,9 +442,11 @@ export default function ViewVotingPage() {
                     {toDna(votingMinPayment)}
                   </StatNumber>
                   <StatHelpText mt={1} color="muted" fontSize="small">
-                    {t(
-                      'Deposit will be refunded if your vote matches the majority'
-                    )}
+                    {Number(votingMinPayment) > 0
+                      ? t(
+                          'Deposit will be refunded if your vote matches the majority'
+                        )
+                      : t('Free voting')}
                   </StatHelpText>
                 </Stat>
                 <AsideStat
@@ -379,7 +470,8 @@ export default function ViewVotingPage() {
       <VoteDrawer
         isOpen={isOpenVote}
         onClose={onCloseVote}
-        option={options[selectedOption]}
+        // eslint-disable-next-line no-shadow
+        option={options.find(({id}) => id === selectedOption)?.value}
         from={identity.address}
         to={contractHash}
         deposit={votingMinPayment}

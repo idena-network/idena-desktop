@@ -31,6 +31,10 @@ export const setVotingStatus = status =>
     status,
   })
 
+export function apiUrl(path) {
+  return `http://195.201.2.44:18888/api/${path}`
+}
+
 export async function fetchVotings({
   limit = 10,
   all = false,
@@ -39,9 +43,9 @@ export async function fetchVotings({
   ...params
 }) {
   const url = new URL(
-    all
-      ? `http://195.201.2.44:18888/api/OracleVotingContracts`
-      : `http://195.201.2.44:18888/api/Address/${address}/OracleVotingContracts`
+    apiUrl(
+      all ? 'OracleVotingContracts' : `Address/${address}/OracleVotingContracts`
+    )
   )
 
   let queryParams = {limit, all: all.toString(), oracle, ...params}
@@ -63,9 +67,7 @@ export async function fetchVotings({
 
 export async function fetchOracleRewardsEstimates() {
   const {result, error} = await (
-    await fetch(
-      'http://195.201.2.44:18888/api/OracleVotingContract/EstimatedOracleRewards'
-    )
+    await fetch(apiUrl('OracleVotingContract/EstimatedOracleRewards'))
   ).json()
 
   if (error) throw new Error(error.message)
@@ -79,9 +81,7 @@ export async function fetchContractTxs({
   limit,
   continuationToken,
 }) {
-  const url = new URL(
-    'http://195.201.2.44:18888/api/Contracts/AddressContractTxBalanceUpdates'
-  )
+  const url = new URL(apiUrl('Contracts/AddressContractTxBalanceUpdates'))
 
   Object.entries({
     address,
@@ -99,6 +99,24 @@ export async function fetchContractTxs({
   if (error) throw new Error(error.message)
 
   return result
+}
+
+export async function fetchContractBalanceUpdates({
+  address,
+  contractAddress,
+  limit = 50,
+}) {
+  return (
+    (
+      await (
+        await fetch(
+          apiUrl(
+            `Address/${address}/Contract/${contractAddress}/BalanceUpdates?limit=${limit}`
+          )
+        )
+      ).json()
+    ).result || []
+  )
 }
 
 export const createContractCaller = ({

@@ -1,13 +1,5 @@
 import React from 'react'
-import {
-  Stack,
-  Text,
-  Icon,
-  useDisclosure,
-  useToast,
-  Button,
-  Flex,
-} from '@chakra-ui/core'
+import {Stack, Text, Icon, useDisclosure, useToast, Flex} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
   useIdentityState,
@@ -33,7 +25,7 @@ import {IconButton2} from '../shared/components/button'
 import {IconLink} from '../shared/components/link'
 import {IdentityStatus} from '../shared/types'
 import {toPercent, toLocaleDna, callRpc} from '../shared/utils/utils'
-import {Toast} from '../shared/components/components'
+import {ExternalLink, Toast} from '../shared/components/components'
 import KillForm, {
   KillIdentityDrawer,
 } from '../screens/wallets/components/kill-form'

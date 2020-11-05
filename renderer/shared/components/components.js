@@ -31,6 +31,8 @@ import {
   Textarea as ChakraTextarea,
   Checkbox as ChakraCheckbox,
   Divider,
+  Text,
+  Icon,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 
@@ -271,18 +273,43 @@ export function SuccessAlert({children, ...props}) {
   )
 }
 
-export function VDivider(props) {
-  return (
-    <Divider
-      orientation="vertical"
-      borderColor="gray.300"
-      h={6}
-      mx={0}
-      {...props}
-    />
-  )
-}
+export const VDivider = React.forwardRef((props, ref) => (
+  <Divider
+    ref={ref}
+    orientation="vertical"
+    borderColor="gray.300"
+    h={6}
+    mx={0}
+    {...props}
+  />
+))
+VDivider.displayName = 'VDivider'
 
-export function HDivider(props) {
-  return <Divider borderColor="gray.300" my={0} {...props} />
+export const HDivider = React.forwardRef((props, ref) => (
+  <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
+))
+HDivider.displayName = 'HDivider'
+
+export function ExternalLink({href, children, ...props}) {
+  return (
+    <Button
+      variant="link"
+      variantColor="brandBlue"
+      fontWeight={500}
+      alignSelf="flex-start"
+      _hover={{background: 'transparent'}}
+      _focus={{
+        outline: 'none',
+      }}
+      onClick={() => {
+        global.openExternal(href)
+      }}
+      {...props}
+    >
+      <Text as="span" lineHeight="short" mt="-2px">
+        {children || href}
+      </Text>
+      <Icon name="chevron-down" size={4} transform="rotate(-90deg)" />
+    </Button>
+  )
 }
