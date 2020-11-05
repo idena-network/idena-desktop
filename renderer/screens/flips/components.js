@@ -547,11 +547,7 @@ export function FlipKeywordTranslationSwitch({
               />
             ) : null}
             <GoogleTranslateButton
-              text={encodeURIComponent(
-                keywords.words
-                  .map(({name, desc}) => `${name}\n${desc}`)
-                  .join('\n')
-              )}
+              phrases={keywords.words.map(({name, desc}) => `${name}\n${desc}`)}
             />
           </>
         )}

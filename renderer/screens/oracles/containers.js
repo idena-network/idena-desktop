@@ -693,26 +693,32 @@ export function VotingResult({
   winnerThreshold,
   quorum,
   status,
+  ...props
 }) {
   const maxCount = Math.max(...votes.map(({count}) => count))
 
   const hasQuorum = votesCount >= quorum
 
-  return options.map(({id, value}) => {
-    const optionScore = votes.find(v => v.option === id)?.count ?? 0
-    return (
-      <VotingResultBar
-        key={id}
-        label={value}
-        value={optionScore}
-        percentage={optionScore / actualVotesCount}
-        isMax={maxCount === optionScore}
-        isWinner={
-          status === VotingStatus.Archived &&
-          hasQuorum &&
-          Math.ceil((optionScore / actualVotesCount) * 100) > winnerThreshold
-        }
-      />
-    )
-  })
+  return (
+    <Stack {...props}>
+      {options.map(({id, value}) => {
+        const optionScore = votes.find(v => v.option === id)?.count ?? 0
+        return (
+          <VotingResultBar
+            key={id}
+            label={value}
+            value={optionScore}
+            percentage={optionScore / actualVotesCount}
+            isMax={maxCount === optionScore}
+            isWinner={
+              status === VotingStatus.Archived &&
+              hasQuorum &&
+              Math.ceil((optionScore / actualVotesCount) * 100) >
+                winnerThreshold
+            }
+          />
+        )
+      })}
+    </Stack>
+  )
 }
