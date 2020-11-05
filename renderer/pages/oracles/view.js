@@ -157,13 +157,19 @@ export default function ViewVotingPage() {
           <Box minWidth="lg" maxW="lg">
             <VotingSkeleton isLoaded={isLoaded}>
               <Stack isInline spacing={2} mb={10}>
-                <VotingStatusBadge status={status}>
+                <VotingStatusBadge status={status} fontSize="md">
                   {t(status)}
                 </VotingStatusBadge>
-                <VotingBadge bg="gray.300" color="muted" pl="1/2">
+                <VotingBadge bg="gray.300" color="muted" fontSize="md" pl="1/2">
                   <Stack isInline spacing={1} align="center">
                     <Avatar w={5} h={5} address={issuer} />
-                    <Text>{issuer}</Text>
+                    <Text>
+                      {issuer}{' '}
+                      <Text as="span" textTransform="initial">
+                        {areSameCaseInsensitive(identity.address, issuer) &&
+                          t('(you)')}
+                      </Text>
+                    </Text>
                   </Stack>
                 </VotingBadge>
               </Stack>
@@ -242,6 +248,84 @@ export default function ViewVotingPage() {
                   </Stack>
                 </VotingSkeleton>
               )}
+
+              <VotingSkeleton isLoaded={isLoaded}>
+                <Flex justify="space-between" align="center">
+                  <Stack isInline spacing={2}>
+                    {eitherIdleState(VotingStatus.Pending) && (
+                      <PrimaryButton
+                        isLoading={isMining}
+                        loadingText={
+                          isMiningFunding ? t('Mining') : t('Launching')
+                        }
+                        onClick={() => {
+                          send('START_VOTING', {from: identity.address})
+                        }}
+                      >
+                        {t('Launch')}
+                      </PrimaryButton>
+                    )}
+                    {eitherIdleState(VotingStatus.Open) && (
+                      <PrimaryButton
+                        isLoading={isMining}
+                        loadingText={
+                          isMiningFunding ? t('Mining') : t('Voting')
+                        }
+                        onClick={() => send('VOTE', {from: identity.address})}
+                      >
+                        {t('Vote')}
+                      </PrimaryButton>
+                    )}
+                    {eitherIdleState(VotingStatus.Counting) && canFinish && (
+                      <PrimaryButton
+                        isLoading={isMining}
+                        loadingText={
+                          isMiningFunding ? t('Mining') : t('Finishing')
+                        }
+                        onClick={() =>
+                          send('FINISH_VOTING', {from: identity.address})
+                        }
+                      >
+                        {t('Finish voting')}
+                      </PrimaryButton>
+                    )}
+                    {eitherIdleState(VotingStatus.Counting) && !hasQuorum && (
+                      <PrimaryButton
+                        isLoading={isMining}
+                        loadingText={
+                          isMiningFunding ? t('Mining') : t('Prolongating')
+                        }
+                        onClick={() =>
+                          send('PROLONGATE_VOTING', {from: identity.address})
+                        }
+                      >
+                        {t('Prolongate voting')}
+                      </PrimaryButton>
+                    )}
+                    <SecondaryButton onClick={() => redirect('/oracles/list')}>
+                      {t('Close')}
+                    </SecondaryButton>
+                  </Stack>
+                  <Stack isInline spacing={3}>
+                    <Divider
+                      orientation="vertical"
+                      borderColor="gray.300"
+                      borderLeft="1px"
+                    />
+                    <Stack isInline spacing={2} align="center">
+                      <Icon
+                        name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
+                        color="muted"
+                        w={4}
+                        h={4}
+                      />
+                      <Text as="span">
+                        {t('{{count}} votes', {count: actualVotesCount})}
+                      </Text>
+                    </Stack>
+                  </Stack>
+                </Flex>
+              </VotingSkeleton>
 
               <VotingSkeleton isLoaded={isLoaded}>
                 <Stack spacing={5}>
@@ -334,84 +418,6 @@ export default function ViewVotingPage() {
                     </tbody>
                   </Table>
                 </Stack>
-              </VotingSkeleton>
-
-              <VotingSkeleton isLoaded={isLoaded}>
-                <Flex justify="space-between" align="center">
-                  <Stack isInline spacing={2}>
-                    {eitherIdleState(VotingStatus.Pending) && (
-                      <PrimaryButton
-                        isLoading={isMining}
-                        loadingText={
-                          isMiningFunding ? t('Mining') : t('Launching')
-                        }
-                        onClick={() => {
-                          send('START_VOTING', {from: identity.address})
-                        }}
-                      >
-                        {t('Launch')}
-                      </PrimaryButton>
-                    )}
-                    {eitherIdleState(VotingStatus.Open) && (
-                      <PrimaryButton
-                        isLoading={isMining}
-                        loadingText={
-                          isMiningFunding ? t('Mining') : t('Voting')
-                        }
-                        onClick={() => send('VOTE', {from: identity.address})}
-                      >
-                        {t('Vote')}
-                      </PrimaryButton>
-                    )}
-                    {eitherIdleState(VotingStatus.Counting) && canFinish && (
-                      <PrimaryButton
-                        isLoading={isMining}
-                        loadingText={
-                          isMiningFunding ? t('Mining') : t('Finishing')
-                        }
-                        onClick={() =>
-                          send('FINISH_VOTING', {from: identity.address})
-                        }
-                      >
-                        {t('Finish voting')}
-                      </PrimaryButton>
-                    )}
-                    {eitherIdleState(VotingStatus.Counting) && !hasQuorum && (
-                      <PrimaryButton
-                        isLoading={isMining}
-                        loadingText={
-                          isMiningFunding ? t('Mining') : t('Prolongating')
-                        }
-                        onClick={() =>
-                          send('PROLONGATE_VOTING', {from: identity.address})
-                        }
-                      >
-                        {t('Prolongate voting')}
-                      </PrimaryButton>
-                    )}
-                    <SecondaryButton onClick={() => redirect('/oracles/list')}>
-                      {t('Close')}
-                    </SecondaryButton>
-                  </Stack>
-                  <Stack isInline spacing={3}>
-                    <Divider
-                      orientation="vertical"
-                      borderColor="gray.300"
-                      borderLeft="1px"
-                    />
-                    <Stack isInline spacing={2} align="center">
-                      <Icon
-                        name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
-                        color="muted"
-                        w={4}
-                        h={4}
-                      />
-                      <Text as="span">
-                        {t('{{count}} votes', {count: actualVotesCount})}
-                      </Text>
-                    </Stack>
-                  </Stack>
-                </Flex>
               </VotingSkeleton>
             </Stack>
           </Box>
