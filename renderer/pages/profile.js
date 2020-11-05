@@ -1,13 +1,5 @@
 import React from 'react'
-import {
-  Stack,
-  Text,
-  Icon,
-  useDisclosure,
-  useToast,
-  Button,
-  Flex,
-} from '@chakra-ui/core'
+import {Stack, Text, Icon, useDisclosure, useToast, Flex} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
   useIdentityState,
@@ -33,7 +25,7 @@ import {IconButton2} from '../shared/components/button'
 import {IconLink} from '../shared/components/link'
 import {IdentityStatus} from '../shared/types'
 import {toPercent, toLocaleDna, callRpc} from '../shared/utils/utils'
-import {Toast} from '../shared/components/components'
+import {ExternalLink, Toast} from '../shared/components/components'
 import KillForm, {
   KillIdentityDrawer,
 } from '../screens/wallets/components/kill-form'
@@ -110,30 +102,9 @@ export default function ProfilePage() {
               <UserStat>
                 <UserStatLabel>{t('Address')}</UserStatLabel>
                 <UserStatValue>{address}</UserStatValue>
-                <Button
-                  variant="link"
-                  variantColor="brandBlue"
-                  fontWeight={500}
-                  alignSelf="flex-start"
-                  _hover={{background: 'transparent'}}
-                  _focus={{
-                    outline: 'none',
-                  }}
-                  onClick={() => {
-                    global.openExternal(
-                      `https://scan.idena.io/address/${address}`
-                    )
-                  }}
-                >
-                  <Text as="span" lineHeight="short" mt="-2px">
-                    {t('Open in blockhain explorer')}
-                  </Text>
-                  <Icon
-                    name="chevron-down"
-                    size={4}
-                    transform="rotate(-90deg)"
-                  />
-                </Button>
+                <ExternalLink href={`https://scan.idena.io/address/${address}`}>
+                  {t('Open in blockhain explorer')}
+                </ExternalLink>
               </UserStat>
 
               {status === IdentityStatus.Newbie ? (

@@ -111,9 +111,11 @@ function VotingListPage() {
                       : t(`There are no votings yet.`)}
                   </Text>
 
-                  <NextLink href="/oracles/new">
-                    <OutlineButton>{t('Create new voting')}</OutlineButton>
-                  </NextLink>
+                  <Box>
+                    <NextLink href="/oracles/new">
+                      <OutlineButton>{t('Create new voting')}</OutlineButton>
+                    </NextLink>
+                  </Box>
                 </Stack>
               </FillCenter>
             )}
@@ -149,6 +151,7 @@ function VotingListPage() {
                 <Stack isInline wrap="wrap" spacing={2}>
                   {votingStatuses(filter).map(status => (
                     <VotingFilter
+                      key={status}
                       isChecked={statuses.includes(status)}
                       status={status}
                       cursor="pointer"

@@ -81,8 +81,6 @@ export function VotingCard({votingRef, ...props}) {
     votesCount,
     actualVotesCount = votesCount || voteProofsCount,
     prevStatus,
-    options,
-    votes = [],
     votingMinPayment,
     quorum,
   } = current.context
@@ -99,8 +97,6 @@ export function VotingCard({votingRef, ...props}) {
     eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase())) ||
     states.some(sameString(status)) ||
     (isMining && states.some(sameString(prevStatus)))
-
-  const maxCount = Math.max(...votes.map(({count}) => count))
 
   return (
     <Box {...props}>
@@ -134,18 +130,9 @@ export function VotingCard({votingRef, ...props}) {
             {t('Results')}
           </Text>
           {actualVotesCount ? (
-            options.map((option, idx) => {
-              const value = votes.find(v => v.option === idx)?.count ?? 0
-              return (
-                <VotingResultBar
-                  label={option}
-                  value={value}
-                  percentage={value / actualVotesCount}
-                  isMax={maxCount === value}
-                />
-              )
-            })
+            <VotingResult {...current.context} />
           ) : (
+            // eslint-disable-next-line no-shadow
             <Text
               bg="gray.50"
               borderRadius="md"
@@ -696,3 +683,36 @@ export const VotingFilter = React.forwardRef(
   )
 )
 VotingFilter.displayName = 'VotingFilter'
+
+export function VotingResult({
+  options,
+  votes,
+  votesCount,
+  voteProofsCount,
+  actualVotesCount = votesCount || voteProofsCount,
+  winnerThreshold,
+  quorum,
+  status,
+}) {
+  const maxCount = Math.max(...votes.map(({count}) => count))
+
+  const hasQuorum = votesCount >= quorum
+
+  return options.map(({id, value}) => {
+    const optionScore = votes.find(v => v.option === id)?.count ?? 0
+    return (
+      <VotingResultBar
+        key={id}
+        label={value}
+        value={optionScore}
+        percentage={optionScore / actualVotesCount}
+        isMax={maxCount === optionScore}
+        isWinner={
+          status === VotingStatus.Archived &&
+          hasQuorum &&
+          Math.ceil((optionScore / actualVotesCount) * 100) > winnerThreshold
+        }
+      />
+    )
+  })
+}
