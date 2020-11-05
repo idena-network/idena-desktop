@@ -375,7 +375,7 @@ export default function ViewVotingPage() {
                             identity.address
                           )
                           return (
-                            <TableRow>
+                            <TableRow key={hash}>
                               <TableCol>
                                 <Stack isInline>
                                   <Flex

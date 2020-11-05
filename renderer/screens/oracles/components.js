@@ -378,10 +378,9 @@ export function TaggedInput({
   id,
   type,
   value,
-  defaultValue,
   min,
   max,
-  presets,
+  presets = [],
   helperText,
   customText,
   onChangePreset,
@@ -420,7 +419,6 @@ export function TaggedInput({
             id={id}
             type={type}
             value={value}
-            defaultValue={defaultValue}
             min={min}
             max={max}
             onChange={onChangeCustom}

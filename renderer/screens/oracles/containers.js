@@ -386,7 +386,7 @@ export function ReviewVotingDrawer({
           </OracleFormHelperText>
         </OracleFormControl>
         <OracleFormControl label={t('Stake, iDNA')}>
-          <Input name="stakeInput" value={minStake} />
+          <Input name="stakeInput" defaultValue={minStake} />
           <OracleFormHelperText>
             {t(
               'Voting stake will be refunded to your address once the voting smart contract is terminated'
