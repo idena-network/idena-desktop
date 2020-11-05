@@ -132,7 +132,7 @@ export function Avatar({address, ...props}) {
   return (
     <Image
       size={rem(80)}
-      src={`https://robohash.org/${address}`}
+      src={`https://robohash.org/${address?.toLowerCase()}`}
       bg="gray.50"
       rounded="lg"
       ignoreFallback
