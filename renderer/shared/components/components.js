@@ -35,6 +35,7 @@ import {
   Icon,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
+import {IconButton2} from './button'
 
 export function FloatDebug({children, ...props}) {
   return (
@@ -311,5 +312,27 @@ export function ExternalLink({href, children, ...props}) {
       </Text>
       <Icon name="chevron-down" size={4} transform="rotate(-90deg)" />
     </Button>
+  )
+}
+
+export function GoogleTranslateButton({
+  text,
+  locale = global.locale,
+  children,
+  ...props
+}) {
+  return (
+    <IconButton2
+      icon="gtranslate"
+      _hover={{background: 'transparent'}}
+      onClick={() => {
+        global.openExternal(
+          `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${locale}&text=${text}`
+        )
+      }}
+      {...props}
+    >
+      {children || 'Google Translate'}
+    </IconButton2>
   )
 }
