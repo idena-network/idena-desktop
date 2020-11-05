@@ -316,7 +316,8 @@ export function ExternalLink({href, children, ...props}) {
 }
 
 export function GoogleTranslateButton({
-  text,
+  phrases = [],
+  text = encodeURIComponent(phrases.join('\n\n')),
   locale = global.locale,
   children,
   ...props

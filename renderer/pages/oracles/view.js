@@ -191,13 +191,11 @@ export default function ViewVotingPage() {
                     <Text lineHeight="tall">{desc}</Text>
                   </Stack>
                   <GoogleTranslateButton
-                    text={encodeURIComponent(
-                      [
-                        title,
-                        desc,
-                        options.map(({value}) => value).join('\n'),
-                      ].join('\n\n')
-                    )}
+                    phrases={[
+                      title,
+                      desc,
+                      options.map(({value}) => value).join('\n'),
+                    ]}
                     alignSelf="start"
                   />
                 </Stack>
@@ -241,12 +239,12 @@ export default function ViewVotingPage() {
                 VotingStatus.Archived
               ) && (
                 <VotingSkeleton isLoaded={isLoaded}>
-                  <Stack spacing={2}>
+                  <Stack spacing={3}>
                     <Text color="muted" fontSize="sm">
                       {t('Results')}
                     </Text>
                     {actualVotesCount ? (
-                      <VotingResult {...current.context} />
+                      <VotingResult spacing={3} {...current.context} />
                     ) : (
                       <Text
                         bg="gray.50"
