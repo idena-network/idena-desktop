@@ -444,7 +444,7 @@ export const createNewVotingMachine = (epoch, address) =>
                   oracleReward: (_, {data: [fee]}) => minOracleReward(fee),
                   oracleRewardsEstimates: (_, {data: [, estimates]}) =>
                     estimates.map(({amount, type}) => ({
-                      value: amount,
+                      value: Number(amount),
                       label: type,
                     })),
                 }),
@@ -534,7 +534,7 @@ export const createNewVotingMachine = (epoch, address) =>
                       actions: [log()],
                     },
                     onError: {
-                      actions: ['onError', log()],
+                      actions: ['onError', send('PUBLISH_FAILED'), log()],
                     },
                   },
                 },
@@ -549,7 +549,7 @@ export const createNewVotingMachine = (epoch, address) =>
                           actions: ['applyDeployResult', log()],
                         },
                         onError: {
-                          actions: ['onError', send('EDIT'), log()],
+                          actions: ['onError', send('PUBLISH_FAILED'), log()],
                         },
                       },
                     },
@@ -606,7 +606,7 @@ export const createNewVotingMachine = (epoch, address) =>
                       actions: ['applyTx', log()],
                     },
                     onError: {
-                      actions: ['onError', send('EDIT'), log()],
+                      actions: ['onError', send('PUBLISH_FAILED'), log()],
                     },
                   },
                 },
@@ -635,7 +635,7 @@ export const createNewVotingMachine = (epoch, address) =>
                       ],
                     },
                     onError: {
-                      actions: ['onError', send('EDIT'), log()],
+                      actions: ['onError', send('PUBLISH_FAILED'), log()],
                     },
                   },
                 },
@@ -653,12 +653,12 @@ export const createNewVotingMachine = (epoch, address) =>
             },
           },
           on: {
-            EDIT: 'editing',
             DONE: 'done',
+            PUBLISH_FAILED: 'editing',
           },
         },
         done: {
-          actions: ['onDone'],
+          entry: ['onDone'],
         },
       },
     },
@@ -948,7 +948,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           const voteHash = await readonlyCallContract(
             'voteHash',
             'hex',
-            {value: selectedOption, format: 'byte'},
+            {value: selectedOption, format: 'string'},
             {value: from}
           )
 

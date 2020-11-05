@@ -9,7 +9,6 @@ import {
   Icon,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
-import {useRouter} from 'next/router'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import dayjs from 'dayjs'
@@ -54,8 +53,6 @@ dayjs.extend(relativeTime)
 function NewVotingPage() {
   const {t, i18n} = useTranslation()
 
-  const router = useRouter()
-
   const toast = useToast()
 
   const {isOpen: isOpenAdvanced, onToggle: onToggleAdvanced} = useDisclosure()
@@ -81,12 +78,10 @@ function NewVotingPage() {
           // eslint-disable-next-line react/display-name
           render: () => (
             <Toast
-              title={t(`Deployed ${didStart && 'and started'} sir`)}
-              status="error"
+              title={t(`Deploy ${didStart ? 'and start' : ''} done sir 🎩`)}
             />
           ),
         })
-        if (Math.random() > 1) router.push('/oracles/list')
       },
       onError: (_, {data: {message}}) => {
         toast({
@@ -283,7 +278,7 @@ function NewVotingPage() {
             <TaggedInput
               id="oracleReward"
               type="number"
-              value={oracleReward}
+              value={Number(oracleReward)}
               min={minOracleReward(feePerGas)}
               label={t('Min reward per oracle')}
               presets={oracleRewardsEstimates}

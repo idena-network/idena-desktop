@@ -207,7 +207,7 @@ export function buildContractDeploymentArgs(
         value: `0x${objectToHex({
           title,
           desc,
-          options,
+          options: options.filter(({value}) => Boolean(value)),
         })}`,
       },
       {
