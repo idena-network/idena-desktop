@@ -348,24 +348,6 @@ export function NewVotingFormSkeleton() {
   )
 }
 
-export const Option = React.forwardRef(({isChecked, ...props}, ref) => (
-  <Button
-    ref={ref}
-    isActive={isChecked}
-    aria-checked={isChecked}
-    role="radio"
-    bg="white"
-    color="muted"
-    fontWeight={500}
-    size="sm"
-    fontSize="md"
-    _active={{bg: 'gray.50', color: 'brand.blue'}}
-    _hover={{bg: 'gray.50', color: 'brand.blue'}}
-    {...props}
-  />
-))
-Option.displayName = 'VotingDurationOption'
-
 export function NewOracleFormHelperText(props) {
   return <OracleFormHelperText fontSize="sm" {...props} />
 }
@@ -395,9 +377,9 @@ export function TaggedInput({
           <RadioButtonGroup isInline value={value} onChange={onChangePreset}>
             {/* eslint-disable-next-line no-shadow */}
             {presets.map(({value, label}) => (
-              <Option key={label} value={value}>
+              <TagOption key={label} value={value}>
                 {label}
-              </Option>
+              </TagOption>
             ))}
           </RadioButtonGroup>
           <Button
@@ -431,6 +413,24 @@ export function TaggedInput({
     </VotingInlineFormControl>
   )
 }
+
+const TagOption = React.forwardRef(({isChecked, ...props}, ref) => (
+  <Button
+    ref={ref}
+    isActive={isChecked}
+    aria-checked={isChecked}
+    role="radio"
+    bg="white"
+    color="muted"
+    fontWeight={500}
+    size="sm"
+    fontSize="md"
+    _active={{bg: 'gray.50', color: 'brand.blue'}}
+    _hover={{bg: 'gray.50', color: 'brand.blue'}}
+    {...props}
+  />
+))
+TagOption.displayName = 'TagOption'
 
 export const OutlineButton = React.forwardRef((props, ref) => (
   <Button

@@ -1,6 +1,5 @@
 import {Machine, assign, spawn} from 'xstate'
 import {choose, log, send, sendParent} from 'xstate/lib/actions'
-import nanoid from 'nanoid'
 import {
   fetchVotings,
   createContractCaller,
@@ -420,7 +419,7 @@ export const createNewVotingMachine = (epoch, address) =>
       context: {
         epoch,
         address,
-        options: [{id: nanoid()}, {id: nanoid()}],
+        options: [{id: 0}, {id: 1}],
         votingDuration: 4320,
         publicVotingDuration: 4320,
         oracleReward: undefined,
@@ -654,6 +653,7 @@ export const createNewVotingMachine = (epoch, address) =>
           },
           on: {
             DONE: 'done',
+            EDIT: 'editing',
             PUBLISH_FAILED: 'editing',
           },
         },
@@ -689,7 +689,7 @@ export const createNewVotingMachine = (epoch, address) =>
         addOption: assign({
           options: ({options}) =>
             options.concat({
-              id: nanoid(),
+              id: Math.max(...options.map(({id}) => id)) + 1,
             }),
         }),
         removeOption: assign({
@@ -859,15 +859,21 @@ export const createViewVotingMachine = (id, epoch, address) =>
             SELECT_OPTION: {
               actions: ['selectOption', log()],
             },
-            VOTE: {
-              target: `mining.${VotingStatus.Voting}`,
-              actions: ['setVoting', 'persist'],
-            },
+            REVIEW: 'review',
             PROLONGATE_VOTING: {
               target: `mining.${VotingStatus.Prolongating}`,
               actions: ['setProlongating', 'persist'],
             },
             TERMINATE_CONTRACT: `mining.${VotingStatus.Terminating}`,
+          },
+        },
+        review: {
+          on: {
+            VOTE: {
+              target: `mining.${VotingStatus.Voting}`,
+              actions: ['setVoting', 'persist'],
+            },
+            CANCEL: 'idle',
           },
         },
         mining: votingMiningStates('viewVoting'),
@@ -948,7 +954,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           const voteHash = await readonlyCallContract(
             'voteHash',
             'hex',
-            {value: selectedOption, format: 'string'},
+            {value: selectedOption, format: 'byte'},
             {value: from}
           )
 
@@ -1254,15 +1260,55 @@ function votingMiningStates(machineId) {
         },
       },
       [VotingStatus.Voting]: {
-        invoke: {
-          src: 'vote',
-          onDone: {
-            target: `#${machineId}.idle.${VotingStatus.Voted}`,
-            actions: ['setVoted', 'applyTx', 'persist', log()],
+        initial: 'checkMiningStatus',
+        states: {
+          checkMiningStatus: {
+            on: {
+              '': [
+                {
+                  target: 'submitting',
+                  cond: 'shouldSubmit',
+                },
+                {
+                  target: 'mining',
+                  cond: 'shouldPollStatus',
+                },
+                {
+                  target: `#${machineId}.invalid`,
+                  actions: ['setInvalid', 'persist'],
+                },
+              ],
+            },
           },
-          onError: {
-            target: `#${machineId}.idle.hist`,
-            actions: ['onError', 'restorePrevStatus', log()],
+          submitting: {
+            invoke: {
+              src: 'vote',
+              onDone: {
+                target: 'mining',
+                actions: ['applyTx', log()],
+              },
+              onError: {
+                target: `#${machineId}.idle.hist`,
+                actions: ['onError', 'restorePrevStatus', log()],
+              },
+            },
+          },
+          mining: {
+            entry: [
+              assign({
+                miningStatus: 'mining',
+              }),
+              'persist',
+            ],
+            invoke: {
+              src: 'pollStatus',
+            },
+            on: {
+              MINED: {
+                target: `#${machineId}.idle.${VotingStatus.Voted}`,
+                actions: ['setVoted', 'clearMiningStatus', 'persist', log()],
+              },
+            },
           },
         },
       },
