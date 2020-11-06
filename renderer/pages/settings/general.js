@@ -76,7 +76,7 @@ function Settings() {
       </DevSettingsSection>
 
       {current?.context?.epoch && (
-        <DevSettingsSection title={t('Oracles')}>
+        <SettingsSection title={t('Oracles')}>
           <Box my={4}>
             <PrimaryButton
               onClick={async () => {
@@ -87,7 +87,7 @@ function Settings() {
               {t('Clear votings')}
             </PrimaryButton>
           </Box>
-        </DevSettingsSection>
+        </SettingsSection>
       )}
 
       <SettingsSection title={t('Export private key')}>
