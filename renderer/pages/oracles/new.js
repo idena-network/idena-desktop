@@ -39,6 +39,7 @@ import {
   votingMinBalance,
   votingMinStake,
   durationPreset,
+  quorumVotesCount,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -99,7 +100,8 @@ function NewVotingPage() {
     shouldStartImmediately,
     isFreeVoting,
     committeeSize,
-    quorum,
+    quorum = 20,
+    winnerThreshold = 50,
     feePerGas,
     oracleReward,
     isWholeNetwork,
@@ -234,13 +236,13 @@ function NewVotingPage() {
                 <InputWithRightAddon
                   id="quorum"
                   type="number"
-                  defaultValue={20}
+                  value={quorum}
                   addon="%"
                   onChange={handleChange}
                 />
                 <NewOracleFormHelperText textAlign="right">
                   {t('{{count}} votes are required', {
-                    count: Math.ceil((committeeSize * quorum) / 100),
+                    count: quorumVotesCount({quorum, committeeSize}),
                   })}
                 </NewOracleFormHelperText>
               </Stack>
@@ -338,7 +340,7 @@ function NewVotingPage() {
                     id="winnerThreshold"
                     addon="%"
                     type="number"
-                    defaultValue={50}
+                    value={winnerThreshold}
                     onChange={handleChange}
                   />
                 </VotingInlineFormControl>

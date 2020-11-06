@@ -52,6 +52,7 @@ import {
   BLOCK_TIME,
   createContractDataReader,
   createContractReadonlyCaller,
+  quorumVotesCount,
   viewVotingHref,
   votingFinishDate,
 } from './utils'
@@ -84,6 +85,7 @@ export function VotingCard({votingRef, ...props}) {
     prevStatus,
     votingMinPayment,
     quorum,
+    committeeSize,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -98,6 +100,8 @@ export function VotingCard({votingRef, ...props}) {
     eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase())) ||
     states.some(sameString(status)) ||
     (isMining && states.some(sameString(prevStatus)))
+
+  const hasQuorum = votesCount >= quorumVotesCount({quorum, committeeSize})
 
   return (
     <Box {...props}>
@@ -212,7 +216,7 @@ export function VotingCard({votingRef, ...props}) {
             />
             <Stack isInline spacing={2} align="center">
               <Icon
-                name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
+                name={hasQuorum ? 'user-tick' : 'user'}
                 color="muted"
                 w={4}
                 h={4}
@@ -709,12 +713,13 @@ export function VotingResult({
   actualVotesCount = votesCount || voteProofsCount,
   winnerThreshold,
   quorum,
+  committeeSize,
   status,
   ...props
 }) {
   const maxCount = Math.max(...votes.map(({count}) => count))
 
-  const hasQuorum = votesCount >= quorum
+  const hasQuorum = votesCount >= quorumVotesCount({quorum, committeeSize})
 
   return (
     <Stack {...props} title="">
