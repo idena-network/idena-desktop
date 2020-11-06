@@ -55,6 +55,7 @@ import {useIdentityState} from '../../shared/providers/identity-context'
 import {
   areSameCaseInsensitive,
   oracleReward,
+  quorumVotesCount,
   votingFinishDate,
 } from '../../screens/oracles/utils'
 import {
@@ -115,6 +116,7 @@ export default function ViewVotingPage() {
     votingDuration = 0,
     publicVotingDuration = 0,
     quorum = 20,
+    committeeSize,
     options = [],
     voteProofsCount,
     votesCount,
@@ -147,9 +149,10 @@ export default function ViewVotingPage() {
     balance: contractBalance,
     votesCount: actualVotesCount,
     quorum,
+    committeeSize,
   })
 
-  const hasQuorum = votesCount >= quorum
+  const hasQuorum = votesCount >= quorumVotesCount({quorum, committeeSize})
   const canFinish = dayjs().isAfter(dayjs(finishDate)) && hasQuorum
 
   return (
@@ -325,7 +328,7 @@ export default function ViewVotingPage() {
                     />
                     <Stack isInline spacing={2} align="center">
                       <Icon
-                        name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
+                        name={hasQuorum ? 'user-tick' : 'user'}
                         color="muted"
                         w={4}
                         h={4}
@@ -482,7 +485,9 @@ export default function ViewVotingPage() {
                 />
                 <AsideStat
                   label={t('Quorum required')}
-                  value={t('{{count}} votes', {count: quorum})}
+                  value={t('{{count}} votes', {
+                    count: quorumVotesCount({quorum, committeeSize}),
+                  })}
                 />
                 {!eitherIdleState(VotingStatus.Pending) && (
                   <AsideStat
