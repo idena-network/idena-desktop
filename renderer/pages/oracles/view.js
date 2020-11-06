@@ -52,7 +52,11 @@ import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {VotingStatus} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {areSameCaseInsensitive, oracleReward} from '../../screens/oracles/utils'
+import {
+  areSameCaseInsensitive,
+  oracleReward,
+  votingFinishDate,
+} from '../../screens/oracles/utils'
 import {
   Table,
   TableCol,
@@ -115,9 +119,11 @@ export default function ViewVotingPage() {
     voteProofsCount,
     votesCount,
     actualVotesCount = votesCount || voteProofsCount,
-    finishDate = dayjs(startDate)
-      .add(votingDuration, 's')
-      .add(publicVotingDuration, 's'),
+    finishDate = votingFinishDate({
+      startDate,
+      votingDuration,
+      publicVotingDuration,
+    }),
     prevStatus,
     selectedOption,
     winnerThreshold = 50,
@@ -363,6 +369,7 @@ export default function ViewVotingPage() {
                           tips,
                           balanceNew,
                           balanceOld,
+                          contractCallMethod,
                         }) => {
                           const isSent = areSameCaseInsensitive(
                             from,
@@ -398,6 +405,11 @@ export default function ViewVotingPage() {
                               </TableCol>
                               <TableCol>
                                 <Text>{type}</Text>
+                                {contractCallMethod && (
+                                  <Text fontSize="sm">
+                                    {contractCallMethod}
+                                  </Text>
+                                )}
                                 <SmallText isTruncated title={hash}>
                                   {hash}
                                 </SmallText>
@@ -472,10 +484,12 @@ export default function ViewVotingPage() {
                   label={t('Quorum required')}
                   value={t('{{count}} votes', {count: quorum})}
                 />
-                <AsideStat
-                  label={t('Deadline')}
-                  value={new Date(finishDate).toLocaleString()}
-                />
+                {!eitherIdleState(VotingStatus.Pending) && (
+                  <AsideStat
+                    label={t('Deadline')}
+                    value={new Date(finishDate).toLocaleString()}
+                  />
+                )}
               </Stack>
             </Box>
           </VotingSkeleton>

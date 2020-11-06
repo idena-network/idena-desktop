@@ -197,30 +197,32 @@ export function VotingCard({votingRef, ...props}) {
             </PrimaryButton>
           )}
         </Stack>
-        <Stack isInline spacing={3}>
-          <Text>
-            <Text as="span" color="muted">
-              {t('Deadline')}:
-            </Text>{' '}
-            <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
-          </Text>
-          <Divider
-            orientation="vertical"
-            borderColor="gray.300"
-            borderLeft="1px"
-          />
-          <Stack isInline spacing={2} align="center">
-            <Icon
-              name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
-              color="muted"
-              w={4}
-              h={4}
-            />
-            <Text as="span">
-              {t('{{count}} votes', {count: actualVotesCount})}
+        {!eitherIdleState(VotingStatus.Pending) && (
+          <Stack isInline spacing={3}>
+            <Text>
+              <Text as="span" color="muted">
+                {t('Deadline')}:
+              </Text>{' '}
+              <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
             </Text>
+            <Divider
+              orientation="vertical"
+              borderColor="gray.300"
+              borderLeft="1px"
+            />
+            <Stack isInline spacing={2} align="center">
+              <Icon
+                name={actualVotesCount >= quorum ? 'user-tick' : 'user'}
+                color="muted"
+                w={4}
+                h={4}
+              />
+              <Text as="span">
+                {t('{{count}} votes', {count: actualVotesCount})}
+              </Text>
+            </Stack>
           </Stack>
-        </Stack>
+        )}
       </Flex>
     </Box>
   )
@@ -715,7 +717,7 @@ export function VotingResult({
   const hasQuorum = votesCount >= quorum
 
   return (
-    <Stack {...props}>
+    <Stack {...props} title="">
       {options.map(({id, value}) => {
         const optionScore = votes.find(v => v.option === id)?.count ?? 0
         return (

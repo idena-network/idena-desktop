@@ -36,15 +36,16 @@ export function apiUrl(path) {
 }
 
 export async function fetchVotings({
-  limit = 10,
   all = false,
+  own = false,
   oracle,
   address = oracle,
+  limit = 20,
   ...params
 }) {
   const url = new URL(
     apiUrl(
-      all ? 'OracleVotingContracts' : `Address/${address}/OracleVotingContracts`
+      own ? `Address/${address}/OracleVotingContracts` : 'OracleVotingContracts'
     )
   )
 
@@ -119,6 +120,16 @@ export async function fetchContractBalanceUpdates({
   )
 }
 
+export async function fetchNetworkSize() {
+  const {result, error} = await (
+    await fetch(apiUrl('onlineidentities/count'))
+  ).json()
+
+  if (error) throw new Error(error.message)
+
+  return result
+}
+
 export const createContractCaller = ({
   from,
   contractHash,
@@ -161,12 +172,10 @@ export const createContractDataReader = ({contractHash}) => (key, format) =>
   callRpc('contract_readData', contractHash, key, format)
 
 export function objectToHex(obj) {
-  return Buffer.from(new TextEncoder().encode(JSON.stringify(obj))).toString(
-    'hex'
-  )
+  return Buffer.from(stringToHex(JSON.stringify(obj)))
 }
 
-export function stringToHex(str) {
+function stringToHex(str) {
   return Buffer.from(new TextEncoder().encode(str)).toString('hex')
 }
 
