@@ -79,7 +79,7 @@ function NewVotingPage() {
           // eslint-disable-next-line react/display-name
           render: () => (
             <Toast
-              title={t(`Deploy ${didStart ? 'and start' : ''} done sir 🎩`)}
+              title={t(`Deploy ${didStart ? '(and start)' : ''} done sir 🎩`)}
             />
           ),
         })

@@ -502,7 +502,7 @@ export default function ViewVotingPage() {
       </Page>
 
       <VoteDrawer
-        isOpen={eitherState(current, 'review', 'mining')}
+        isOpen={eitherState(current, 'review', `mining.${VotingStatus.Voting}`)}
         onClose={() => {
           send('CANCEL')
         }}

@@ -1303,28 +1303,108 @@ function votingMiningStates(machineId) {
         },
       },
       [VotingStatus.Prolongating]: {
-        invoke: {
-          src: 'prolongateVoting',
-          onDone: {
-            target: `#${machineId}.idle.${VotingStatus.Open}`,
-            actions: ['setRunning', 'applyTx', 'persist', log()],
+        initial: 'checkMiningStatus',
+        states: {
+          checkMiningStatus: {
+            on: {
+              '': [
+                {
+                  target: 'submitting',
+                  cond: 'shouldSubmit',
+                },
+                {
+                  target: 'mining',
+                  cond: 'shouldPollStatus',
+                },
+                {
+                  target: `#${machineId}.invalid`,
+                  actions: ['setInvalid', 'persist'],
+                },
+              ],
+            },
           },
-          onError: {
-            target: `#${machineId}.idle.hist`,
-            actions: ['onError', 'restorePrevStatus', log()],
+          submitting: {
+            invoke: {
+              src: 'prolongateVoting',
+              onDone: {
+                target: 'mining',
+                actions: ['applyTx', log()],
+              },
+              onError: {
+                target: `#${machineId}.idle.hist`,
+                actions: ['onError', 'restorePrevStatus', log()],
+              },
+            },
+          },
+          mining: {
+            entry: [
+              assign({
+                miningStatus: 'mining',
+              }),
+              'persist',
+            ],
+            invoke: {
+              src: 'pollStatus',
+            },
+            on: {
+              MINED: {
+                target: `#${machineId}.idle.${VotingStatus.Open}`,
+                actions: ['setRunning', 'clearMiningStatus', 'persist', log()],
+              },
+            },
           },
         },
       },
       [VotingStatus.Finishing]: {
-        invoke: {
-          src: 'finishVoting',
-          onDone: {
-            target: `#${machineId}.idle.${VotingStatus.Archived}`,
-            actions: ['setArchived', 'applyTx', 'persist', log()],
+        initial: 'checkMiningStatus',
+        states: {
+          checkMiningStatus: {
+            on: {
+              '': [
+                {
+                  target: 'submitting',
+                  cond: 'shouldSubmit',
+                },
+                {
+                  target: 'mining',
+                  cond: 'shouldPollStatus',
+                },
+                {
+                  target: `#${machineId}.invalid`,
+                  actions: ['setInvalid', 'persist'],
+                },
+              ],
+            },
           },
-          onError: {
-            target: `#${machineId}.idle.hist`,
-            actions: ['onError', 'restorePrevStatus', log()],
+          submitting: {
+            invoke: {
+              src: 'finishVoting',
+              onDone: {
+                target: 'mining',
+                actions: ['applyTx', log()],
+              },
+              onError: {
+                target: `#${machineId}.idle.hist`,
+                actions: ['onError', 'restorePrevStatus', log()],
+              },
+            },
+          },
+          mining: {
+            entry: [
+              assign({
+                miningStatus: 'mining',
+              }),
+              'persist',
+            ],
+            invoke: {
+              src: 'pollStatus',
+            },
+            on: {
+              MINED: {
+                target: `#${machineId}.idle.${VotingStatus.Archived}`,
+                actions: ['setArchived', 'clearMiningStatus', 'persist', log()],
+              },
+            },
           },
         },
       },
