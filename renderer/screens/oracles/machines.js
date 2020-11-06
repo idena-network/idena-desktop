@@ -19,6 +19,7 @@ import {
   minOracleReward,
   votingStatuses,
   fetchContractBalanceUpdates,
+  fetchNetworkSize,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
@@ -201,7 +202,8 @@ export const votingListMachine = Machine(
           result,
           continuationToken: nextContinuationToken,
         } = await fetchVotings({
-          all: filter !== VotingListFilter.Own,
+          all: filter === VotingListFilter.All,
+          own: filter === VotingListFilter.Own,
           oracle: address,
           'states[]': (statuses.length
             ? statuses
@@ -217,6 +219,7 @@ export const votingListMachine = Machine(
             fact,
             state,
             startTime,
+            finishTime,
             minPayment,
             ...voting
           }) => ({
@@ -226,27 +229,13 @@ export const votingListMachine = Machine(
             issuer: author,
             status: state,
             startDate: startTime,
+            finishDate: finishTime,
             votingMinPayment: minPayment,
             ...hexToObject(fact),
           })
         )
 
         await epochDb('votings', epoch).batchPut(knownVotings)
-
-        // const miningVotings = persistedVotings.filter(
-        //   ({status, prevStatus, issuer}) =>
-        //     areSameCaseInsensitive(issuer, address) &&
-        //     ((areSameCaseInsensitive(status, VotingStatus.Deploying) &&
-        //       areSameCaseInsensitive(filter, VotingStatus.Pending)) ||
-        //       (areSameCaseInsensitive(status, VotingStatus.Starting) &&
-        //         areSameCaseInsensitive(filter, VotingStatus.Open)) ||
-        //       (areSameCaseInsensitive(status, VotingStatus.Voting) &&
-        //         areSameCaseInsensitive(filter, VotingStatus.Voted)) ||
-        //       (areSameCaseInsensitive(status, VotingStatus.Finishing) &&
-        //         areSameCaseInsensitive(filter, VotingStatus.Archived)) ||
-        //       (areSameCaseInsensitive(status, VotingStatus.Funding) &&
-        //         areSameCaseInsensitive(filter, prevStatus)))
-        // )
 
         return {
           votings: knownVotings,
@@ -495,17 +484,12 @@ export const createNewVotingMachine = (epoch, address) =>
             idle: {},
             fetchNetworkSize: {
               invoke: {
-                src: async () =>
-                  (
-                    await fetch(
-                      'https://api.idena.io/api/onlineidentities/count'
-                    )
-                  ).json(),
+                src: () => fetchNetworkSize(),
                 onDone: {
                   target: 'idle',
                   actions: [
                     assign({
-                      committeeSize: (_, {data: {result}}) => result,
+                      committeeSize: (_, {data}) => data,
                     }),
                   ],
                 },
@@ -952,11 +936,16 @@ export const createViewVotingMachine = (id, epoch, address) =>
           const {error} = proof
           if (error) throw new Error(error)
 
+          const salt = await callRpc(
+            'dna_sign',
+            `salt-${contractHash}-${epoch}`
+          )
+
           const voteHash = await readonlyCallContract(
             'voteHash',
             'hex',
             {value: selectedOption, format: 'byte'},
-            {value: await callRpc('dna_sign', `salt-${contractHash}-${epoch}`)}
+            {value: salt}
           )
 
           const votingMinPayment = Number(
@@ -1007,7 +996,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
             'sendVote',
             ContractRpcMode.Call,
             {value: selectedOption.toString(), format: 'byte'},
-            {value: from}
+            {value: salt}
           )
 
           return voteProofResp
