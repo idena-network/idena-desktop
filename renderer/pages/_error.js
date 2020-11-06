@@ -1,12 +1,11 @@
 import React from 'react'
 import Error from 'next/error'
-import {margin} from 'polished'
 import {useTranslation} from 'react-i18next'
-import Layout from '../shared/components/layout'
+import {Box, Flex, Heading, Stack} from '@chakra-ui/core'
 import {Button} from '../shared/components'
-import theme, {rem} from '../shared/theme'
+import {Page} from '../screens/app/components'
+import {FillCenter} from '../screens/oracles/components'
 
-// make ssr happy
 global.logger = global.logger || {
   error() {},
 }
@@ -23,66 +22,33 @@ function MyError({statusCode, hasGetInitialPropsRun, err}) {
   const {t} = useTranslation()
 
   return (
-    <Layout>
-      <article>
-        <div>{t('Something went wrong')}</div>
-        <div>
-          <section>
-            <h2>
+    <Page p={0}>
+      <Flex
+        bg="graphite.500"
+        color="white"
+        direction="column"
+        flex={1}
+        w="full"
+      >
+        <Box bg="red.500" p={3} textAlign="center">
+          {t('Something went wrong')}
+        </Box>
+        <FillCenter>
+          <Stack align="center">
+            <Heading fontSize="lg" fontWeight={500}>
               {statusCode
                 ? `An error ${statusCode} occurred on server`
                 : t('An error occurred on client')}
-            </h2>
-            <div>
+            </Heading>
+            <Box>
               <Button onClick={() => global.ipcRenderer.send('reload')}>
                 {t('Go to My Idena')}
               </Button>
-            </div>
-          </section>
-        </div>
-        <style jsx>{`
-          article {
-            background: ${theme.colors.darkGraphite};
-            color: white;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-height: 100vh;
-          }
-          div:first-child {
-            background: rgb(255, 102, 102);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: ${rem(20, 13)};
-            padding: ${rem(12, 13)};
-            position: relative;
-            text-align: center;
-          }
-          div:nth-child(2) {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-          }
-          h2 {
-            font-size: ${rem(18)};
-            font-weight: 500;
-            margin: ${margin(0, 0, rem(40))};
-            word-break: break-all;
-          }
-          section > div:nth-child(2) > section {
-            background: rgb(255, 102, 102);
-            border-radius: ${rem(9)};
-            font-size: ${rem(14, 13)};
-            line-height: ${rem(20, 13)};
-            margin-top: ${rem(40)};
-            padding: ${rem(18)} ${rem(24)};
-            max-width: ${rem(480)};
-          }
-        `}</style>
-      </article>
-    </Layout>
+            </Box>
+          </Stack>
+        </FillCenter>
+      </Flex>
+    </Page>
   )
 }
 
