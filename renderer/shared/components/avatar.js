@@ -6,7 +6,7 @@ import theme, {rem} from '../theme'
 // eslint-disable-next-line react/prop-types
 function Avatar({username, size = 80, style}) {
   const src = username
-    ? `https://robohash.org/${username}`
+    ? `https://robohash.idena.io/${username}`
     : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
   return (
     <img
