@@ -90,7 +90,7 @@ export function Avatar({address, ...props}) {
   return (
     <Image
       size={rem(80)}
-      src={`https://robohash.org/${address}`}
+      src={`https://robohash.idena.io/${address}`}
       bg="gray.50"
       rounded="lg"
       ignoreFallback
