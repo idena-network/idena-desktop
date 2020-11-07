@@ -9,6 +9,7 @@ import {signNonce} from '../../shared/utils/dna-link'
 
 export const FLIP_LENGTH = 4
 export const DEFAULT_FLIP_ORDER = [0, 1, 2, 3]
+export const UNKNOWN_SCORE = undefined
 
 export function getRandomKeywordPair() {
   function getRandomInt(min, max) {

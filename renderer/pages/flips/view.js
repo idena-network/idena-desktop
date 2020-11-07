@@ -91,6 +91,7 @@ export default function ViewFlipPage() {
     hash,
     keywords,
     images,
+    flipScore,
     originalOrder,
     order,
     showTranslation,
@@ -172,7 +173,10 @@ export default function ViewFlipPage() {
           )}
         </Flex>
         {type !== FlipType.Archived && (
-          <FlipMasterFooter>
+          <FlipMasterFooter
+            flipScore={flipScore}
+            onUpdateFlipScore={() => send('RECALCULATE_SCORE')}
+          >
             <FlipCardMenu>
               <FlipCardMenuItem
                 onClick={() => {

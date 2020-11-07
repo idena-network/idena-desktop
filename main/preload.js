@@ -11,6 +11,7 @@ const {
 } = electron
 
 const isDev = require('electron-is-dev')
+//const {tf} = require('@tensorflow/tfjs')
 
 const flips = require('./stores/flips')
 const invites = require('./stores/invites')
@@ -63,4 +64,6 @@ process.once('loaded', () => {
     // eslint-disable-next-line no-underscore-dangle
     global.__devtron = {require, process}
   }
+
+  //global.tfHanddrawing = tf.loadLayersModel('/static/mobilenet/model.json')
 })

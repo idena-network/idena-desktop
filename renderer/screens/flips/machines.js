@@ -1,5 +1,5 @@
 import {Machine, assign, spawn, sendParent} from 'xstate'
-import {log, send} from 'xstate/lib/actions'
+import {log, send, choose} from 'xstate/lib/actions'
 import nanoid from 'nanoid'
 import {
   fetchKeywordTranslations,
@@ -8,6 +8,7 @@ import {
   publishFlip,
   updateFlipType,
   DEFAULT_FLIP_ORDER,
+  UNKNOWN_SCORE,
 } from './utils'
 import {callRpc} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
@@ -484,6 +485,8 @@ export const flipMasterMachine = Machine(
         translations: [[], []],
       },
       images: Array.from({length: 4}),
+      imagesScore: [0, 0, 0, 0],
+      flipScore: 1,
       originalOrder: DEFAULT_FLIP_ORDER,
       order: DEFAULT_FLIP_ORDER,
       orderPermutations: DEFAULT_FLIP_ORDER,
@@ -643,6 +646,30 @@ export const flipMasterMachine = Machine(
           },
           images: {
             on: {
+              RECALCULATE_IMAGES_SCORE: {
+                target: '.scoring',
+                actions: [
+                  assign({
+                    flipScore: 2,
+                  }),
+                  f => console.log('RECALCULATE_IMAGES_SCORE'),
+                  log(),
+                ],
+              },
+
+              RESET_SCORE: {
+                target: '.idle',
+                actions: [
+                  choose([
+                    {
+                      cond: () => false,
+                      actions: [send('RECALCULATE_IMAGES_SCORE')],
+                    },
+                  ]),
+                  log(),
+                ],
+              },
+
               CHANGE_IMAGES: {
                 target: '.persisting',
                 actions: [
@@ -653,6 +680,17 @@ export const flipMasterMachine = Machine(
                       ...images.slice(currentIndex + 1),
                     ],
                   }),
+                  assign({
+                    flipScore: UNKNOWN_SCORE,
+                  }),
+                  assign({
+                    imagesScore: ({imagesScore}, {currentIndex}) => [
+                      ...imagesScore.slice(0, currentIndex),
+                      UNKNOWN_SCORE,
+                      ...imagesScore.slice(currentIndex + 1),
+                    ],
+                  }),
+                  send('RESET_SCORE'),
                   log(),
                 ],
               },
@@ -673,6 +711,22 @@ export const flipMasterMachine = Machine(
             initial: 'idle',
             states: {
               idle: {},
+              scoring: {
+                invoke: {
+                  src: 'calculateScore',
+                  onDone: {
+                    target: 'persisting',
+                    actions: [
+                      assign((context, {data}) => ({
+                        ...context,
+                        flipScore: data.flipSocre,
+                      })),
+                      log(),
+                    ],
+                  },
+                },
+              },
+
               painting: {},
               persisting: {
                 invoke: {
@@ -791,6 +845,11 @@ export const flipMasterMachine = Machine(
   },
   {
     services: {
+      calculateScore: async ({flipScore, images, imagesScore}) => {
+        console.log('calculateScore:', flipScore, images, imagesScore)
+        const data = {flipScore: 4}
+        return data
+      },
       loadKeywords: async ({availableKeywords, keywordPairId}) => {
         const {words} = availableKeywords.find(({id}) => id === keywordPairId)
         return words.map(id => ({id, ...global.loadKeyword(id)}))
@@ -807,6 +866,8 @@ export const flipMasterMachine = Machine(
           order,
           orderPermutations,
           images,
+          imagesScore,
+          flipScore,
           keywords,
           type,
           createdAt,
@@ -817,6 +878,7 @@ export const flipMasterMachine = Machine(
           'CHANGE_IMAGES',
           'CHANGE_ORIGINAL_ORDER',
           'CHANGE_ORDER',
+          'RECALCULATE_IMAGES_SCORE',
         ]
 
         if (persistingEventTypes.includes(event.type)) {
@@ -826,6 +888,8 @@ export const flipMasterMachine = Machine(
             order,
             orderPermutations,
             images,
+            imagesScore,
+            flipScore,
             keywords,
           }
 
@@ -869,6 +933,9 @@ export const flipMasterMachine = Machine(
         orderPermutations: ({originalOrder}, {order}) =>
           order.map(n => originalOrder.findIndex(o => o === n)),
       }),
+      calculateImagesScore: flip => {
+        console.log('calculateImagesScore...', flip)
+      },
       persistFlip: context => {
         global.flipStore.updateDraft(context)
       },

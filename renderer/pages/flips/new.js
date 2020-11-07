@@ -112,6 +112,7 @@ export default function NewFlipPage() {
     keywordPairId,
     keywords,
     images,
+    flipScore,
     originalOrder,
     order,
     showTranslation,
@@ -292,7 +293,10 @@ export default function NewFlipPage() {
             </FlipMaster>
           )}
         </Flex>
-        <FlipMasterFooter>
+        <FlipMasterFooter
+          flipScore={flipScore}
+          onUpdateFlipScore={() => send('RECALCULATE_IMAGES_SCORE')}
+        >
           {not('keywords') && (
             <SecondaryButton
               isDisabled={is('images.painting')}

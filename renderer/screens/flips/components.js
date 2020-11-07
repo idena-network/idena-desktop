@@ -31,6 +31,7 @@ import {
   Alert,
   AlertIcon,
 } from '@chakra-ui/core'
+import * as tf from '@tensorflow/tfjs'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
 import {transparentize} from 'polished'
@@ -40,7 +41,8 @@ import {Step} from './types'
 import {formatKeywords} from './utils'
 import {PageTitle} from '../app/components'
 import {PrimaryButton, IconButton2} from '../../shared/components/button'
-import {rem} from '../../shared/theme'
+import {Spinner} from '../../shared/components/spinner'
+import theme, {rem} from '../../shared/theme'
 import {capitalize} from '../../shared/utils/string'
 import {reorder} from '../../shared/utils/arr'
 import {FlipType} from '../../shared/types'
@@ -51,6 +53,8 @@ import {
   DrawerBody,
   FormLabel,
 } from '../../shared/components/components'
+import {StarsRating, FlipRatingTooltip} from './components/tools'
+import {initTfModel, getFlipSecurityScore} from './ai'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -909,18 +913,100 @@ export function FlipStepBody(props) {
   return <Stack isInline spacing={10} {...props} />
 }
 
-export function FlipMasterFooter(props) {
+export function FlipMasterFooter({flipScore, onUpdateFlipScore, ...props}) {
+  const [isFlipRatingHintOpen, setIsFlipRatingHintOpen] = React.useState(false)
+
+  const [tfModel, setTfModel] = React.useState(null)
+  const [isFlipChanged, setFlipChanged] = React.useState(true)
+
+  //  const [flipScore, setFlipScore] = React.useState(flipScore)
+  const [isUpdingScore, setIsUpdingScore] = React.useState(false)
+
   return (
-    <Box
-      alignSelf="stretch"
+    <Flex
       borderTop="1px"
       borderTopColor="gray.300"
-      mt="auto"
-      px={4}
-      py={3}
+      align="center"
+      alignSelf="stretch"
+      justify="space-between"
     >
-      <Stack isInline spacing={2} justify="flex-end" {...props} />
-    </Box>
+      <Flex isInline justify="flex-end" mt="auto" px={6} py={4}>
+        {isFlipRatingHintOpen && (
+          <FlipRatingTooltip
+            onClose={() => {
+              setIsFlipRatingHintOpen(false)
+            }}
+          />
+        )}
+
+        <Flex isInline>
+          <Flex
+            isInline
+            style={{cursor: 'pointer'}}
+            onClick={() => {
+              setIsFlipRatingHintOpen(!isFlipRatingHintOpen)
+            }}
+          >
+            <Icon
+              name="info"
+              size={5}
+              color={theme.colors.primary}
+              marginLeft={rem(3)}
+              marginRight={rem(9)}
+            />
+            <Box paddingBottom={rem(3)} marginRight={rem(6)} fontWeight="500">
+              Flip security rating
+            </Box>
+            <StarsRating rating={flipScore} />
+          </Flex>
+
+          {isUpdingScore && (
+            <Flex align="center" justify="center" h={5} w={5} mr={3}>
+              <Box style={{transform: 'scale(0.3) translateY(-7px)'}}>
+                <Spinner color={theme.colors.black} />
+              </Box>
+            </Flex>
+          )}
+          {(!isUpdingScore || !flipScore) && (
+            <Box
+              style={{cursor: 'pointer'}}
+              marginRight={rem(6)}
+              borderBottom="thin dashed gray"
+              fontWeight="500"
+              onClick={async () => {
+                onUpdateFlipScore()
+
+                // setIsUpdingScore(true)
+
+                /*
+                // 1. Init model
+                if (tfModel) {
+                  const score = await getFlipSecurityScore(tfModel, images)
+                  setFlipScore(score)
+                  console.log('score=', score)
+                  // setIsUpdingScore(true)
+
+
+                } else {
+                  const model = await initTfModel()
+                  setTfModel(model)
+                  // setIsUpdingScore(true)
+                  const score = await getFlipSecurityScore(model, images)
+                  // setIsUpdingScore(false)
+                  // setFlipScore(score)
+                }
+                  */
+              }}
+            >
+              Update
+            </Box>
+          )}
+        </Flex>
+      </Flex>
+      <Box alignSelf="stretch" mt="auto" px={4} py={3}>
+        <Stack isInline spacing={2} justify="flex-end" {...props} />
+      </Box>
+    </Flex>
   )
 }
 
