@@ -53,12 +53,12 @@ export function Debug({children}) {
   )
 }
 
-export function Drawer({children, ...props}) {
+export function Drawer({isCloseable = true, children, ...props}) {
   return (
     <ChakraDrawer {...props}>
       <DrawerOverlay bg="xblack.080" />
       <DrawerContent px={8} py={12} maxW={360}>
-        <DrawerCloseButton />
+        {isCloseable && <DrawerCloseButton />}
         {children}
       </DrawerContent>
     </ChakraDrawer>

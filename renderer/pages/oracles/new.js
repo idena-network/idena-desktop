@@ -12,6 +12,7 @@ import {useMachine} from '@xstate/react'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import dayjs from 'dayjs'
+import {useRouter} from 'next/router'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
   Checkbox,
@@ -40,6 +41,7 @@ import {
   votingMinStake,
   durationPreset,
   quorumVotesCount,
+  viewVotingHref,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -53,6 +55,8 @@ dayjs.extend(relativeTime)
 
 function NewVotingPage() {
   const {t, i18n} = useTranslation()
+
+  const router = useRouter()
 
   const toast = useToast()
 
@@ -74,15 +78,8 @@ function NewVotingPage() {
 
   const [current, send, service] = useMachine(newVotingMachine, {
     actions: {
-      onDone: ({shouldStartImmediately: didStart}) => {
-        toast({
-          // eslint-disable-next-line react/display-name
-          render: () => (
-            <Toast
-              title={t(`Deploy ${didStart ? '(and start)' : ''} done sir 🎩`)}
-            />
-          ),
-        })
+      onDone: () => {
+        router.push(viewVotingHref(current.context.contractHash))
       },
       onError: (_, {data: {message}}) => {
         toast({

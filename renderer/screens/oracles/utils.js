@@ -276,17 +276,28 @@ export function areSameCaseInsensitive(a, b) {
   return a?.toUpperCase() === b?.toUpperCase()
 }
 
-export function oracleReward({balance, votesCount, quorum, committeeSize}) {
+export function oracleReward({
+  balance,
+  votesCount,
+  quorum,
+  committeeSize,
+  ownerFee,
+}) {
   if ([balance, votesCount, quorum, committeeSize].some(v => Number.isNaN(v)))
     return undefined
 
   return (
-    balance / Math.max(quorumVotesCount({quorum, committeeSize}), votesCount)
+    (balance * (1 - ownerFee / 100)) /
+    Math.max(quorumVotesCount({quorum, committeeSize}), votesCount)
   )
 }
 
 export function quorumVotesCount({quorum, committeeSize}) {
   return Math.ceil((committeeSize * quorum) / 100)
+}
+
+export function winnerVotesCount({winnerThreshold, committeeSize}) {
+  return Math.ceil((committeeSize * winnerThreshold) / 100)
 }
 
 export function minOracleReward(feePerGas) {
