@@ -172,6 +172,12 @@ export function DnaInput(props) {
   )
 }
 
+export function PercentInput(props) {
+  return (
+    <InputWithRightAddon addon="%" type="number" min={0} max={100} {...props} />
+  )
+}
+
 export function InputWithRightAddon({
   addon,
   size,

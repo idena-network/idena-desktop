@@ -29,9 +29,9 @@ import {
   NewOracleFormHelperText,
   VotingInlineFormControl,
   VotingOptionInput,
-  InputWithRightAddon,
   NewVotingFormSubtitle,
   TaggedInput,
+  PercentInput,
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
 import {
@@ -234,11 +234,9 @@ function NewVotingPage() {
               mt={2}
             >
               <Stack spacing={0} flex={1}>
-                <InputWithRightAddon
+                <PercentInput
                   id="quorum"
-                  type="number"
                   value={quorum}
-                  addon="%"
                   onChange={handleChange}
                 />
                 <NewOracleFormHelperText textAlign="right">
@@ -337,10 +335,8 @@ function NewVotingPage() {
                   htmlFor="winnerThreshold"
                   label={t('Winner score')}
                 >
-                  <InputWithRightAddon
+                  <PercentInput
                     id="winnerThreshold"
-                    addon="%"
-                    type="number"
                     value={winnerThreshold}
                     onChange={handleChange}
                   />
@@ -350,10 +346,8 @@ function NewVotingPage() {
                   htmlFor="ownerFee"
                   label={t('Owner fee')}
                 >
-                  <InputWithRightAddon
+                  <PercentInput
                     id="ownerFee"
-                    addon="%"
-                    type="number"
                     value={ownerFee}
                     onChange={handleChange}
                   />
