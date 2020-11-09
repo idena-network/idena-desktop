@@ -57,6 +57,7 @@ import {
   oracleReward,
   quorumVotesCount,
   votingFinishDate,
+  winnerVotesCount,
 } from '../../screens/oracles/utils'
 import {
   Table,
@@ -113,6 +114,7 @@ export default function ViewVotingPage() {
     balance: contractBalance = 0,
     votingMinPayment = 0,
     startDate,
+    createDate,
     votingDuration = 0,
     publicVotingDuration = 0,
     quorum = 20,
@@ -124,12 +126,19 @@ export default function ViewVotingPage() {
     finishDate = votingFinishDate({
       startDate,
       votingDuration,
+      publicVotingDuration: 0,
+    }),
+    finishCountingDate = votingFinishDate({
+      startDate,
+      votingDuration,
       publicVotingDuration,
     }),
     prevStatus,
     selectedOption,
     winnerThreshold = 50,
     balanceUpdates,
+    ownerFee,
+    paidAmount,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -145,11 +154,17 @@ export default function ViewVotingPage() {
     states.some(sameString(status)) ||
     (isMining && states.some(sameString(prevStatus)))
 
+  const isClosed = eitherIdleState(
+    VotingStatus.Archived,
+    VotingStatus.Terminated
+  )
+
   const reward = oracleReward({
     balance: contractBalance,
     votesCount: actualVotesCount,
     quorum,
     committeeSize,
+    ownerFee,
   })
 
   const hasQuorum = votesCount >= quorumVotesCount({quorum, committeeSize})
@@ -167,14 +182,8 @@ export default function ViewVotingPage() {
                 </VotingStatusBadge>
                 <VotingBadge bg="gray.300" color="muted" fontSize="md" pl="1/2">
                   <Stack isInline spacing={1} align="center">
-                    <Avatar w={5} h={5} address={issuer} />
-                    <Text>
-                      {issuer}{' '}
-                      <Text as="span" textTransform="initial">
-                        {areSameCaseInsensitive(identity.address, issuer) &&
-                          t('(you)')}
-                      </Text>
-                    </Text>
+                    <Avatar w={5} h={5} address={contractHash} />
+                    <Text>{contractHash}</Text>
                   </Stack>
                 </VotingBadge>
               </Stack>
@@ -350,14 +359,14 @@ export default function ViewVotingPage() {
                     <ExternalLink
                       href={`https://scan.idena.io/address/${identity.address}/contract/${id}/balanceUpdates`}
                     >
-                      {t('See balance updates in Explorer')}
+                      {t('See all transactions updates in Explorer')}
                     </ExternalLink>
                   </Box>
                   <Table style={{tableLayout: 'fixed', fontWeight: 500}}>
                     <thead>
                       <TableRow>
                         <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
-                        <TableHeaderCol>{t('Address')}</TableHeaderCol>
+                        <TableHeaderCol>{t('Type')}</TableHeaderCol>
                         <TableHeaderCol>{t('Date and time')}</TableHeaderCol>
                         <TableHeaderCol>{t('iDNA value')}</TableHeaderCol>
                       </TableRow>
@@ -376,7 +385,7 @@ export default function ViewVotingPage() {
                           balanceOld,
                           contractCallMethod,
                         }) => {
-                          const isSent = areSameCaseInsensitive(
+                          const isSender = areSameCaseInsensitive(
                             from,
                             identity.address
                           )
@@ -387,23 +396,23 @@ export default function ViewVotingPage() {
                                   <Flex
                                     align="center"
                                     justify="center"
-                                    bg={isSent ? 'red.012' : 'brandBlue.012'}
-                                    color={isSent ? 'red.500' : 'brandBlue.500'}
+                                    bg={isSender ? 'red.012' : 'blue.012'}
+                                    color={isSender ? 'red.500' : 'blue.500'}
                                     borderRadius="lg"
                                     minH={8}
                                     minW={8}
                                   >
                                     <Icon
-                                      name={`arrow-${isSent ? 'up' : 'down'}`}
+                                      name={`arrow-${isSender ? 'up' : 'down'}`}
                                       size={5}
                                     />
                                   </Flex>
                                   <Box isTruncated>
                                     <Text>
-                                      {isSent ? t('Sent') : t('Received')}
+                                      {isSender ? t('Sent') : t('Received')}
                                     </Text>
                                     <SmallText isTruncated title={from}>
-                                      {from}
+                                      {hash}
                                     </SmallText>
                                   </Box>
                                 </Stack>
@@ -415,9 +424,6 @@ export default function ViewVotingPage() {
                                     {contractCallMethod}
                                   </Text>
                                 )}
-                                <SmallText isTruncated title={hash}>
-                                  {hash}
-                                </SmallText>
                               </TableCol>
                               <TableCol>
                                 <Text>
@@ -426,16 +432,20 @@ export default function ViewVotingPage() {
                               </TableCol>
                               <TableCol>
                                 <Text
-                                  color={isSent ? 'red.500' : 'brandGray.500'}
+                                  color={isSender ? 'red.500' : 'brandGray.500'}
                                 >
                                   {toLocaleDna(i18n.language, {
                                     signDisplay: 'exceptZero',
                                   })(
-                                    (isSent ? -amount : 0) +
+                                    (isSender ? -amount : 0) +
                                       (balanceNew ? balanceNew - balanceOld : 0)
                                   )}
                                 </Text>
-                                <SmallText>{toDna(fee + tips)}</SmallText>
+                                {isSender && (
+                                  <SmallText>
+                                    {t('Fee')} {toDna(fee + tips)}
+                                  </SmallText>
+                                )}
                               </TableCol>
                             </TableRow>
                           )
@@ -448,53 +458,91 @@ export default function ViewVotingPage() {
             </Stack>
           </Box>
           <VotingSkeleton isLoaded={isLoaded} mt={isLoaded ? 0 : 16}>
-            <Box mt={20}>
-              <Stat mb={8}>
-                <StatLabel as="div" color="muted" fontSize="md">
-                  <Stack isInline spacing={2} align="center">
-                    <Icon name="star" size={4} color="white" />
-                    <Text fontWeight={500}>{t('Total prize')}</Text>
-                  </Stack>
-                </StatLabel>
-                <StatNumber fontSize="base" fontWeight={500}>
-                  {toDna(contractBalance)}
-                </StatNumber>
-                <StatHelpText mt={1}>
-                  <IconButton2 icon="add-fund" onClick={onOpenAddFund}>
-                    {t('Add fund')}
-                  </IconButton2>
-                </StatHelpText>
-              </Stat>
-              <Stack spacing={6}>
-                <Stat>
-                  <StatLabel color="muted" fontSize="md">
-                    {t('Lock to vote')}
+            <Box mt={isClosed ? 20 : 16}>
+              {!isClosed && (
+                <Stat mb={8}>
+                  <StatLabel as="div" color="muted" fontSize="md">
+                    <Stack isInline spacing={2} align="center">
+                      <Icon name="star" size={4} color="white" />
+                      <Text fontWeight={500}>{t('Total prize')}</Text>
+                    </Stack>
                   </StatLabel>
                   <StatNumber fontSize="base" fontWeight={500}>
-                    {toDna(votingMinPayment)}
+                    {toDna(contractBalance)}
                   </StatNumber>
-                  <StatHelpText mt={1} color="muted" fontSize="small">
-                    {Number(votingMinPayment) > 0
-                      ? t(
-                          'Deposit will be refunded if your vote matches the majority'
-                        )
-                      : t('Free voting')}
+                  <StatHelpText mt={1}>
+                    <IconButton2 icon="add-fund" onClick={onOpenAddFund}>
+                      {t('Add fund')}
+                    </IconButton2>
                   </StatHelpText>
                 </Stat>
-                <AsideStat
-                  label={t('Your reward')}
-                  value={reward ? toDna(reward) : '--'}
-                />
+              )}
+              <Stack spacing={6}>
+                {!isClosed && (
+                  <Stat>
+                    <StatLabel color="muted" fontSize="md">
+                      {t('Lock to vote')}
+                    </StatLabel>
+                    <StatNumber fontSize="base" fontWeight={500}>
+                      {toDna(votingMinPayment)}
+                    </StatNumber>
+                    <StatHelpText mt={1} color="muted" fontSize="small">
+                      {Number(votingMinPayment) > 0
+                        ? t(
+                            'Deposit will be refunded if your vote matches the majority'
+                          )
+                        : t('Free voting')}
+                    </StatHelpText>
+                  </Stat>
+                )}
+                {!isClosed && (
+                  <AsideStat
+                    label={t('Your reward')}
+                    value={reward ? toDna(reward) : '--'}
+                  />
+                )}
+                {ownerFee && (
+                  <AsideStat
+                    label={t('Owner fee')}
+                    value={toPercent(ownerFee / 100)}
+                  />
+                )}
                 <AsideStat
                   label={t('Quorum required')}
                   value={t('{{count}} votes', {
                     count: quorumVotesCount({quorum, committeeSize}),
                   })}
                 />
+                <AsideStat
+                  label={t('Winner required')}
+                  value={t('{{count}} votes', {
+                    count: winnerVotesCount({winnerThreshold, committeeSize}),
+                  })}
+                />
+                <AsideStat
+                  label={t('Created')}
+                  value={new Date(createDate).toLocaleString()}
+                />
                 {!eitherIdleState(VotingStatus.Pending) && (
+                  <Stack spacing={6}>
+                    <AsideStat
+                      label={t('Start voting')}
+                      value={new Date(startDate).toLocaleString()}
+                    />
+                    <AsideStat
+                      label={t('End voting')}
+                      value={new Date(finishDate).toLocaleString()}
+                    />
+                    <AsideStat
+                      label={t('End counting')}
+                      value={new Date(finishCountingDate).toLocaleString()}
+                    />
+                  </Stack>
+                )}
+                {isClosed && (
                   <AsideStat
-                    label={t('Deadline')}
-                    value={new Date(finishDate).toLocaleString()}
+                    label={t('Prize paid')}
+                    value={toDna(paidAmount)}
                   />
                 )}
               </Stack>
@@ -535,7 +583,12 @@ export default function ViewVotingPage() {
 
       {global.isDev && (
         <Box position="absolute" top={6} right={6}>
-          <VotingInspector {...current.context} />
+          <VotingInspector
+            onTerminate={() => {
+              send('TERMINATE_CONTRACT')
+            }}
+            {...current.context}
+          />
         </Box>
       )}
     </>

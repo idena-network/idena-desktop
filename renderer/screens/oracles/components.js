@@ -84,13 +84,17 @@ export function OracleFormHelper({label, value, ...props}) {
   return (
     <Flex justify="space-between">
       <OracleFormHelperText {...props}>{label}</OracleFormHelperText>
-      <OracleFormHelperText {...props}>{value}</OracleFormHelperText>
+      <OracleFormHelperValue {...props}>{value}</OracleFormHelperValue>
     </Flex>
   )
 }
 
 export function OracleFormHelperText(props) {
   return <FormHelperText color="muted" fontSize="md" {...props} />
+}
+
+export function OracleFormHelperValue(props) {
+  return <FormHelperText color="brandGray.500" fontSize="md" {...props} />
 }
 
 export function VotingBadge(props) {
@@ -195,6 +199,7 @@ export function InputWithRightAddon({
         borderRightColor={bg}
         borderTopRightRadius={0}
         borderBottomRightRadius={0}
+        isDisabled={isDisabled}
         _hover={{
           borderRightColor: bg,
           ..._hover,

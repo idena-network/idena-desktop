@@ -59,6 +59,7 @@ export const VotingStatus = {
   Finishing: 'finishing',
   Prolongating: 'prolongating',
   Terminating: 'terminating',
+  Terminated: 'terminated',
   Invalid: 'invalid',
 }
 

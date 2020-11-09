@@ -69,7 +69,7 @@ export function VotingCard({votingRef, ...props}) {
     id,
     title,
     desc,
-    issuer,
+    contractHash,
     status,
     balance = 0,
     startDate,
@@ -109,19 +109,21 @@ export function VotingCard({votingRef, ...props}) {
     <Box {...props}>
       <Stack isInline spacing={2} mb={3} align="center">
         <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
-        <VotingBadge align="center" bg="gray.50" color="muted" pl="1/2">
-          <Avatar
-            address={issuer}
-            bg="white"
-            borderColor="brandGray.016"
-            borderWidth="1px"
-            borderRadius="full"
-            w={5}
-            h={5}
-            mr={1}
-          />
-          <Text as="span">{issuer}</Text>
-        </VotingBadge>
+        <Link href={viewHref}>
+          <VotingBadge align="center" bg="gray.50" color="muted" pl="1/2">
+            <Avatar
+              address={contractHash}
+              bg="white"
+              borderColor="brandGray.016"
+              borderWidth="1px"
+              borderRadius="full"
+              w={5}
+              h={5}
+              mr={1}
+            />
+            <Text as="span">{contractHash}</Text>
+          </VotingBadge>
+        </Link>
       </Stack>
       <Link href={viewHref}>
         <Text fontSize="base" fontWeight={500} mb={2}>
@@ -383,7 +385,7 @@ export function ReviewVotingDrawer({
   const {t, i18n} = useTranslation()
 
   return (
-    <Drawer {...props}>
+    <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
         {t('Create Oracles Voting')}
       </OracleDrawerHeader>
@@ -400,33 +402,34 @@ export function ReviewVotingDrawer({
         }}
       >
         <OracleFormControl label={t('Transfer from')}>
-          <Input name="fromInput" defaultValue={from} />
+          <Input name="fromInput" defaultValue={from} isDisabled />
           <OracleFormHelper
             label={t('Available')}
             value={toLocaleDna(i18n.language)(available)}
           />
         </OracleFormControl>
-        <OracleFormControl label={t('Rewards, iDNA')}>
-          <Input
-            name="balanceInput"
-            defaultValue={minBalance}
-            type="number"
-            min={0}
-          />
+        <OracleFormControl label={t('Rewards')}>
+          <DnaInput name="balanceInput" defaultValue={minBalance} isDisabled />
           <OracleFormHelperText>
             {t(
               `Rewards will be paid to Oracles. You’ll be able to increase Oracles' rewards after the voting is created.`
             )}
           </OracleFormHelperText>
         </OracleFormControl>
-        <OracleFormControl label={t('Stake, iDNA')}>
-          <Input name="stakeInput" defaultValue={minStake} />
+        <OracleFormControl label={t('Stake')}>
+          <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
           <OracleFormHelperText>
             {t(
               'Voting stake will be refunded to your address once the voting smart contract is terminated'
             )}
           </OracleFormHelperText>
         </OracleFormControl>
+        <Box>
+          <OracleFormHelper
+            label={t('Total amount')}
+            value={toLocaleDna(i18n.language)(minBalance + minStake)}
+          />
+        </Box>
         <PrimaryButton
           isLoading={isLoading}
           loadingText={t('Publishing')}
@@ -454,7 +457,7 @@ export function AsideStat({label, value, ...props}) {
   )
 }
 
-export function VotingInspector(contract) {
+export function VotingInspector({onTerminate, ...contract}) {
   const [result, setResult] = React.useState({})
 
   const {isOpen, onOpen, onClose} = useDisclosure()
@@ -637,13 +640,7 @@ export function VotingInspector(contract) {
                   </Stack>
                 </Box>
                 <Box ml="auto" mt={6}>
-                  <PrimaryButton
-                    variantColor="red"
-                    onClick={() => {
-                      alert('🤷‍♂️')
-                      // send('TERMINATE_CONTRACT')
-                    }}
-                  >
+                  <PrimaryButton variantColor="red" onClick={onTerminate}>
                     Terminate contact
                   </PrimaryButton>
                 </Box>

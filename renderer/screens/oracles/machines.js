@@ -202,7 +202,9 @@ export const votingListMachine = Machine(
           result,
           continuationToken: nextContinuationToken,
         } = await fetchVotings({
-          all: filter === VotingListFilter.All,
+          all: [VotingListFilter.All, VotingListFilter.Own].some(
+            s => s === filter
+          ),
           own: filter === VotingListFilter.Own,
           oracle: address,
           'states[]': (statuses.length
