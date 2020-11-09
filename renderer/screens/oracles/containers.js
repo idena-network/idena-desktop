@@ -32,6 +32,7 @@ import {
   DrawerBody,
   DrawerHeader,
   Input,
+  Tooltip,
 } from '../../shared/components/components'
 import {VotingStatus} from '../../shared/types'
 import {
@@ -86,6 +87,7 @@ export function VotingCard({votingRef, ...props}) {
     votingMinPayment,
     quorum,
     committeeSize,
+    isOracle,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -186,11 +188,22 @@ export function VotingCard({votingRef, ...props}) {
             </PrimaryButton>
           )}
 
-          {eitherIdleState(VotingStatus.Open) && (
-            <PrimaryButton onClick={() => router.push(viewHref)}>
-              {t('Vote')}
-            </PrimaryButton>
-          )}
+          {eitherIdleState(VotingStatus.Open) &&
+            (isOracle ? (
+              <PrimaryButton onClick={() => router.push(viewHref)}>
+                {t('Vote')}
+              </PrimaryButton>
+            ) : (
+              <Tooltip
+                label={t('This vote is not available to you')}
+                placement="top"
+              >
+                {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
+                <PrimaryButton as={Box} isDisabled>
+                  {t('Vote')}
+                </PrimaryButton>
+              </Tooltip>
+            ))}
           {eitherIdleState(
             VotingStatus.Voted,
             VotingStatus.Archived,
