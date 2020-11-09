@@ -303,19 +303,21 @@ export default function ViewVotingPage() {
                         {t('Finish voting')}
                       </PrimaryButton>
                     )}
-                    {eitherIdleState(VotingStatus.Counting) && !hasQuorum && (
-                      <PrimaryButton
-                        isLoading={isMining}
-                        loadingText={
-                          isMiningFunding ? t('Mining') : t('Prolongating')
-                        }
-                        onClick={() =>
-                          send('PROLONGATE_VOTING', {from: identity.address})
-                        }
-                      >
-                        {t('Prolongate voting')}
-                      </PrimaryButton>
-                    )}
+                    {eitherIdleState(VotingStatus.Counting) &&
+                      !hasQuorum &&
+                      dayjs().isAfter(finishDate) && (
+                        <PrimaryButton
+                          isLoading={isMining}
+                          loadingText={
+                            isMiningFunding ? t('Mining') : t('Prolongating')
+                          }
+                          onClick={() =>
+                            send('PROLONGATE_VOTING', {from: identity.address})
+                          }
+                        >
+                          {t('Prolongate voting')}
+                        </PrimaryButton>
+                      )}
                     <SecondaryButton onClick={() => redirect('/oracles/list')}>
                       {t('Close')}
                     </SecondaryButton>

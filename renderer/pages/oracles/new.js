@@ -106,6 +106,7 @@ function NewVotingPage() {
     oracleReward,
     isWholeNetwork,
     oracleRewardsEstimates,
+    ownerFee = 0,
   } = current.context
 
   const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
@@ -341,6 +342,19 @@ function NewVotingPage() {
                     addon="%"
                     type="number"
                     value={winnerThreshold}
+                    onChange={handleChange}
+                  />
+                </VotingInlineFormControl>
+
+                <VotingInlineFormControl
+                  htmlFor="ownerFee"
+                  label={t('Owner fee')}
+                >
+                  <InputWithRightAddon
+                    id="ownerFee"
+                    addon="%"
+                    type="number"
+                    value={ownerFee}
                     onChange={handleChange}
                   />
                 </VotingInlineFormControl>
