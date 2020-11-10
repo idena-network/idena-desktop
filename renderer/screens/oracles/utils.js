@@ -358,7 +358,7 @@ export function votingStatuses(filter) {
     case VotingListFilter.Voting:
       return [VotingStatus.Voted, VotingStatus.Counting]
     case VotingListFilter.Closed:
-      return [VotingStatus.Archived]
+      return [VotingStatus.Archived, VotingStatus.Terminated]
     case VotingListFilter.All:
     case VotingListFilter.Own:
       return [

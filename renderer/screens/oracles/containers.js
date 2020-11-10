@@ -755,3 +755,116 @@ export function VotingResult({
     </Stack>
   )
 }
+
+export function LaunchDrawer({
+  balance,
+  requiredBalance,
+  available,
+  from,
+  isLoading,
+  onLaunch,
+  ...props
+}) {
+  const {t, i18n} = useTranslation()
+
+  const dna = toLocaleDna(i18n.language)
+
+  return (
+    <Drawer isCloseable={!isLoading} {...props}>
+      <OracleDrawerHeader icon="oracle">
+        {t('Launch Oracles Voting')}
+      </OracleDrawerHeader>
+      <OracleDrawerBody
+        as="form"
+        onSubmit={e => {
+          e.preventDefault()
+          const {balanceInput, fromInput} = e.target.elements
+          onLaunch({
+            amount: Number(balanceInput.value),
+            from: Number(fromInput.value),
+          })
+        }}
+      >
+        <OracleFormControl label={t('Transfer from')}>
+          <Input name="fromInput" defaultValue={from} isDisabled />
+          <OracleFormHelper label={t('Available')} value={dna(available)} />
+        </OracleFormControl>
+        {requiredBalance - balance > 0 && (
+          <OracleFormControl label={t('Send')}>
+            <DnaInput
+              name="balanceInput"
+              defaultValue={requiredBalance - balance}
+            />
+            <OracleFormHelper
+              label={t('Minimum deposit required')}
+              value={requiredBalance}
+            />
+            <OracleFormHelper
+              label={t('Current contract balance')}
+              value={balance}
+            />
+          </OracleFormControl>
+        )}
+        <PrimaryButton
+          isLoading={isLoading}
+          loadingText={t('Launching')}
+          type="submit"
+          mt={3}
+          ml="auto"
+        >
+          {t('Launch')}
+        </PrimaryButton>
+      </OracleDrawerBody>
+    </Drawer>
+  )
+}
+
+export function ProlongateDrawer({
+  isLoading,
+  from,
+  available,
+  onProlongate,
+  ...props
+}) {
+  const {t, i18n} = useTranslation()
+
+  return (
+    <Drawer isCloseable={!isLoading} {...props}>
+      <OracleDrawerHeader icon="oracle">
+        {t('Prolongate Oracles Voting')}
+      </OracleDrawerHeader>
+      <OracleDrawerBody
+        as="form"
+        onSubmit={e => {
+          e.preventDefault()
+          const {fromInput} = e.target.elements
+          onProlongate({
+            from: Number(fromInput.value),
+          })
+        }}
+      >
+        <OracleFormHelperText>
+          {t('Prolong the voting in order to select a new voting committee')}
+        </OracleFormHelperText>
+
+        <OracleFormControl label={t('Transfer from')}>
+          <Input name="fromInput" defaultValue={from} isDisabled />
+          <OracleFormHelper
+            label={t('Available')}
+            value={toLocaleDna(i18n.language)(available)}
+          />
+        </OracleFormControl>
+
+        <PrimaryButton
+          isLoading={isLoading}
+          loadingText={t('Prolongating')}
+          type="submit"
+          mt={3}
+          ml="auto"
+        >
+          {t('Prolong')}
+        </PrimaryButton>
+      </OracleDrawerBody>
+    </Drawer>
+  )
+}
