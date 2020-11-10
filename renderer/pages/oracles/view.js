@@ -609,6 +609,7 @@ export default function ViewVotingPage() {
         })}
         from={identity.address}
         available={identity.balance}
+        isLoading={current.matches(`mining.${VotingStatus.Starting}`)}
         onLaunch={e => {
           send('START_VOTING', e)
         }}
@@ -625,6 +626,7 @@ export default function ViewVotingPage() {
         }}
         from={identity.address}
         available={identity.balance}
+        isLoading={current.matches(`mining.${VotingStatus.Prolongating}`)}
         onProlongate={({from}) => {
           send('PROLONGATE_VOTING', {from})
         }}

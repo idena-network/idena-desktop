@@ -199,14 +199,20 @@ export default function ProfilePage() {
             </Flex>
             <Stack spacing={1} align="flex-start">
               <IconLink
+                href="/oracles/new"
+                icon={<Icon name="oracle" size={5} />}
+              >
+                {t('New voting')}
+              </IconLink>
+              <IconLink href="/flips/new" icon={<Icon name="photo" size={5} />}>
+                {t('New flip')}
+              </IconLink>
+              <IconLink
                 href="/contacts/new-invite"
                 isDisabled={invitesCount === 0}
                 icon={<Icon name="add-user" size={5} />}
               >
                 {t('Invite')}
-              </IconLink>
-              <IconLink href="/flips/new" icon={<Icon name="photo" size={5} />}>
-                {t('New flip')}
               </IconLink>
               <IconButton2 icon="poo" onClick={onOpenSpoilForm}>
                 {t('Spoil invite')}

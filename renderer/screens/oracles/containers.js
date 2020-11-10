@@ -353,7 +353,7 @@ export function VoteDrawer({
   const toDna = toLocaleDna(i18n.language)
 
   return (
-    <Drawer {...props}>
+    <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="send-out" variantColor="blue">
         {t('Voting: {{option}}', {option, nsSeparator: '!'})}
       </OracleDrawerHeader>
@@ -785,7 +785,7 @@ export function LaunchDrawer({
           const {balanceInput, fromInput} = e.target.elements
           onLaunch({
             amount: Number(balanceInput.value),
-            from: Number(fromInput.value),
+            from: fromInput.value,
           })
         }}
       >
@@ -843,7 +843,7 @@ export function ProlongateDrawer({
           e.preventDefault()
           const {fromInput} = e.target.elements
           onProlongate({
-            from: Number(fromInput.value),
+            from: fromInput.value,
           })
         }}
       >
@@ -873,7 +873,7 @@ export function ProlongateDrawer({
   )
 }
 
-export function LaunchVotingDrawer({votingService, ...props}) {
+export function LaunchVotingDrawer({votingService}) {
   const identity = useIdentityState()
 
   const [current, send] = useService(votingService)
@@ -903,10 +903,10 @@ export function LaunchVotingDrawer({votingService, ...props}) {
       })}
       from={identity.address}
       available={identity.balance}
+      isLoading={current.matches(`mining.${VotingStatus.Starting}`)}
       onLaunch={e => {
         send('START_VOTING', e)
       }}
-      {...props}
     />
   )
 }
