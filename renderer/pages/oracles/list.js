@@ -25,7 +25,11 @@ import {
   ScrollToTop,
 } from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {VotingCard, VotingFilter} from '../../screens/oracles/containers'
+import {
+  VotingCard,
+  VotingFilter,
+  LaunchVotingDrawer,
+} from '../../screens/oracles/containers'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {eitherState} from '../../shared/utils/utils'
 import {VotingListFilter} from '../../screens/oracles/types'
@@ -54,7 +58,13 @@ function VotingListPage() {
     },
   })
 
-  const {votings, filter, statuses, continuationToken} = current.context
+  const {
+    votings,
+    filter,
+    statuses,
+    continuationToken,
+    startingVotingRef,
+  } = current.context
 
   return (
     <Page ref={pageRef}>
@@ -169,6 +179,11 @@ function VotingListPage() {
           </Stack>
         </VotingSkeleton>
       </Stack>
+
+      {startingVotingRef && (
+        <LaunchVotingDrawer votingService={startingVotingRef} />
+      )}
+
       <ScrollToTop scrollableRef={pageRef}>{t('Back to top')}</ScrollToTop>
       <FloatDebug>{current.value}</FloatDebug>
     </Page>

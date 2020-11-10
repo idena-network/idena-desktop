@@ -45,10 +45,10 @@ export const votingListMachine = Machine(
     states: {
       preload: {
         invoke: {
-          src: 'loadFilter',
+          src: 'preload',
           onDone: {
             target: 'loading',
-            actions: ['applyFilter', log()],
+            actions: ['applyPreloadData', log()],
           },
           onError: {
             target: 'loading',
@@ -84,6 +84,15 @@ export const votingListMachine = Machine(
           TOGGLE_SHOW_ALL: {
             target: 'loading',
             actions: ['toggleShowAll', 'persistFilter'],
+          },
+          REVIEW_START_VOTING: {
+            actions: [
+              assign({
+                startingVotingRef: ({votings}, {id}) =>
+                  votings.find(({id: currId}) => currId === id)?.ref,
+              }),
+              log(),
+            ],
           },
         },
         initial: 'idle',
@@ -139,30 +148,42 @@ export const votingListMachine = Machine(
   {
     actions: {
       applyVotings: assign({
-        votings: ({epoch, address}, {data: {votings}}) =>
+        votings: ({epoch, address, feePerGas}, {data: {votings}}) =>
           votings.map(voting => ({
             ...voting,
-            // eslint-disable-next-line no-use-before-define
-            ref: spawn(votingMachine.withContext({...voting, epoch, address})),
+            feePerGas,
+            ref: spawn(
+              // eslint-disable-next-line no-use-before-define
+              votingMachine.withContext({...voting, epoch, address, feePerGas})
+            ),
           })),
         continuationToken: (_, {data: {continuationToken}}) =>
           continuationToken,
       }),
       applyMoreVotings: assign({
-        votings: ({votings, epoch, address}, {data: {votings: nextVotings}}) =>
+        votings: (
+          {votings, epoch, address, feePerGas},
+          {data: {votings: nextVotings}}
+        ) =>
           votings.concat(
             nextVotings.map(voting => ({
               ...voting,
+              feePerGas,
               ref: spawn(
                 // eslint-disable-next-line no-use-before-define
-                votingMachine.withContext({...voting, epoch, address})
+                votingMachine.withContext({
+                  ...voting,
+                  epoch,
+                  address,
+                  feePerGas,
+                })
               ),
             }))
           ),
         continuationToken: (_, {data: {continuationToken}}) =>
           continuationToken,
       }),
-      applyFilter: assign((context, {data}) => ({
+      applyPreloadData: assign((context, {data}) => ({
         ...context,
         ...data,
       })),
@@ -248,13 +269,20 @@ export const votingListMachine = Machine(
           continuationToken: nextContinuationToken,
         }
       },
-      loadFilter: async () => {
-        try {
-          return JSON.parse(
-            await global.sub(requestDb(), 'votings').get('filter')
-          )
-        } catch (error) {
-          if (!error.notFound) throw new Error(error)
+      preload: async () => {
+        const feePerGas = await callRpc('bcn_feePerGas')
+        const filters = await (async () => {
+          try {
+            return JSON.parse(
+              await global.sub(requestDb(), 'votings').get('filter')
+            )
+          } catch (error) {
+            if (!error.notFound) throw new Error(error)
+          }
+        })()
+        return {
+          ...filters,
+          feePerGas,
         }
       },
     },
@@ -312,11 +340,29 @@ export const votingMachine = Machine(
             },
           },
           [VotingStatus.Pending]: {
-            on: {
-              START_VOTING: {
-                target: `#voting.mining.${VotingStatus.Starting}`,
-                actions: ['setStarting', 'persist'],
+            initial: 'idle',
+            states: {
+              idle: {
+                on: {
+                  REVIEW_START_VOTING: {
+                    target: 'review',
+                    actions: [
+                      sendParent(({id}) => ({type: 'REVIEW_START_VOTING', id})),
+                    ],
+                  },
+                },
               },
+              review: {
+                on: {
+                  START_VOTING: {
+                    target: `#voting.mining.${VotingStatus.Starting}`,
+                    actions: ['setStarting', 'persist'],
+                  },
+                },
+              },
+            },
+            on: {
+              CANCEL: '.idle',
             },
           },
           [VotingStatus.Open]: {},
