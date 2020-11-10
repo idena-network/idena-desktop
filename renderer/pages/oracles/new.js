@@ -7,6 +7,8 @@ import {
   useDisclosure,
   useToast,
   Icon,
+  Flex,
+  CloseButton,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import duration from 'dayjs/plugin/duration'
@@ -112,7 +114,10 @@ function NewVotingPage() {
   return (
     <Page p={0}>
       <Box px={20} py={6} w="full" overflowY="auto">
-        <PageTitle mb={0}>{t('New voting')}</PageTitle>
+        <Flex justify="space-between" align="center">
+          <PageTitle mb={0}>{t('New voting')}</PageTitle>
+          <CloseButton ml="auto" onClick={() => router.push('/oracles/list')} />
+        </Flex>
         <SuccessAlert my={8}>
           {t(
             'After publishing or launching, you will not be able to edit the voting parameters.'

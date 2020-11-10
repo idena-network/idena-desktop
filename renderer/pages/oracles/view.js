@@ -14,6 +14,7 @@ import {
   useDisclosure,
   StatHelpText,
   useToast,
+  CloseButton,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -186,21 +187,22 @@ export default function ViewVotingPage() {
   return (
     <>
       <Page pt={8}>
+        <VotingSkeleton isLoaded={isLoaded}>
+          <Stack isInline spacing={2} align="center" mb={10}>
+            <VotingStatusBadge status={status} fontSize="md">
+              {t(status)}
+            </VotingStatusBadge>
+            <VotingBadge bg="gray.300" color="muted" fontSize="md" pl="1/2">
+              <Stack isInline spacing={1} align="center">
+                <Avatar w={5} h={5} address={contractHash} />
+                <Text>{contractHash}</Text>
+              </Stack>
+            </VotingBadge>
+            <CloseButton ml="auto" onClick={() => redirect('/oracles/list')} />
+          </Stack>
+        </VotingSkeleton>
         <Stack isInline spacing={10} w="full">
           <Box minWidth="lg" maxW="lg">
-            <VotingSkeleton isLoaded={isLoaded}>
-              <Stack isInline spacing={2} mb={10}>
-                <VotingStatusBadge status={status} fontSize="md">
-                  {t(status)}
-                </VotingStatusBadge>
-                <VotingBadge bg="gray.300" color="muted" fontSize="md" pl="1/2">
-                  <Stack isInline spacing={1} align="center">
-                    <Avatar w={5} h={5} address={contractHash} />
-                    <Text>{contractHash}</Text>
-                  </Stack>
-                </VotingBadge>
-              </Stack>
-            </VotingSkeleton>
             <Stack spacing={6}>
               <VotingSkeleton isLoaded={isLoaded}>
                 <Stack
@@ -612,7 +614,7 @@ export default function ViewVotingPage() {
       <FloatDebug>{current.value}</FloatDebug>
 
       {global.isDev && (
-        <Box position="absolute" top={6} right={6}>
+        <Box position="absolute" bottom={6} right={6}>
           <VotingInspector
             onTerminate={() => {
               send('TERMINATE_CONTRACT')
