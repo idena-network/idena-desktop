@@ -16,7 +16,6 @@ import {
   votingFinishDate,
   hexToObject,
   fetchOracleRewardsEstimates,
-  minOracleReward,
   votingStatuses,
   fetchContractBalanceUpdates,
   fetchNetworkSize,
@@ -481,7 +480,8 @@ export const createNewVotingMachine = (epoch, address) =>
               actions: [
                 assign({
                   feePerGas: (_, {data: [fee]}) => fee,
-                  oracleReward: (_, {data: [fee]}) => minOracleReward(fee),
+                  oracleReward: (_, {data: [, estimates]}) =>
+                    Number(estimates.find(({type}) => type === 'min')?.amount),
                   oracleRewardsEstimates: (_, {data: [, estimates]}) =>
                     estimates.map(({amount, type}) => ({
                       value: Number(amount),
@@ -732,6 +732,8 @@ export const createNewVotingMachine = (epoch, address) =>
 
           const nextVoting = {
             ...voting,
+            id: contract,
+            options: voting.options.filter(({value}) => Boolean(value)),
             contractHash: contract,
             issuer: address,
             finishDate: votingFinishDate(voting),
