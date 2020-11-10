@@ -5,9 +5,9 @@ const {levelup, leveldown, dbPath, sub} = global
 let idenaDb = null
 
 export function requestDb(name = 'db') {
-  if (idenaDb === null) idenaDb = levelup(leveldown(dbPath(name)))
-  return idenaDb
-}
+    if (idenaDb === null) idenaDb = levelup(leveldown(dbPath(name)))
+    return idenaDb
+  }
 
 export const epochDb = (db, epoch, options) => {
   const epochPrefix = `epoch${epoch}`
@@ -45,7 +45,7 @@ export const epochDb = (db, epoch, options) => {
       const {id} = item
       return id
         ? updatePersistedItem(targetDb, id, item)
-        : addPersistedItem(targetDb, item)
+        : addPersistedItem(targetDb, {id, ...item})
     },
     async batchPut(items) {
       const ids = await safeReadIds(targetDb)
@@ -92,9 +92,7 @@ export async function loadPersistedItems(db) {
   )
 }
 
-export async function addPersistedItem(db, item) {
-  const id = nanoid()
-
+export async function addPersistedItem(db, {id = nanoid(), ...item}) {
   const ids = [...(await safeReadIds(db)), id]
 
   await db
@@ -107,11 +105,14 @@ export async function addPersistedItem(db, item) {
 }
 
 export async function updatePersistedItem(db, id, item) {
-  const nextItem = {...(await db.get(id)), ...item}
-
-  await db.put(id, nextItem)
-
-  return {...nextItem, id}
+  try {
+    const nextItem = {...(await db.get(id)), ...item}
+    await db.put(id, nextItem)
+    return {...nextItem, id}
+  } catch (error) {
+    if (error.notFound) return addPersistedItem(db, {id, ...item})
+    throw new Error(error.message)
+  }
 }
 
 export async function deletePersistedItem(db, id) {
