@@ -54,6 +54,8 @@ import {VotingStatus} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {
   areSameCaseInsensitive,
+  hasQuorum,
+  hasWinner,
   oracleReward,
   quorumVotesCount,
   votingFinishDate,
@@ -65,6 +67,10 @@ import {
   TableHeaderCol,
   TableRow,
 } from '../../shared/components'
+import {
+  ContractTransactionType,
+  ContractCallMethod,
+} from '../../screens/oracles/types'
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
@@ -120,6 +126,7 @@ export default function ViewVotingPage() {
     quorum = 20,
     committeeSize,
     options = [],
+    votes = [],
     voteProofsCount,
     votesCount,
     actualVotesCount = votesCount || voteProofsCount,
@@ -139,6 +146,7 @@ export default function ViewVotingPage() {
     balanceUpdates,
     ownerFee,
     paidAmount,
+    committeeEpoch,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -167,8 +175,13 @@ export default function ViewVotingPage() {
     ownerFee,
   })
 
-  const hasQuorum = votesCount >= quorumVotesCount({quorum, committeeSize})
-  const canFinish = dayjs().isAfter(dayjs(finishDate)) && hasQuorum
+  const didReachQuorum = hasQuorum({votes, quorum, committeeSize})
+  const canFinish = dayjs().isAfter(dayjs(finishDate)) && didReachQuorum
+
+  const canProlongate =
+    eitherIdleState(VotingStatus.Counting) &&
+    !didReachQuorum &&
+    (dayjs().isAfter(finishCountingDate) || committeeEpoch !== epoch)
 
   return (
     <>
@@ -312,21 +325,19 @@ export default function ViewVotingPage() {
                         {t('Finish voting')}
                       </PrimaryButton>
                     )}
-                    {eitherIdleState(VotingStatus.Counting) &&
-                      !hasQuorum &&
-                      dayjs().isAfter(finishDate) && (
-                        <PrimaryButton
-                          isLoading={isMining}
-                          loadingText={
-                            isMiningFunding ? t('Mining') : t('Prolongating')
-                          }
-                          onClick={() =>
-                            send('PROLONGATE_VOTING', {from: identity.address})
-                          }
-                        >
-                          {t('Prolongate voting')}
-                        </PrimaryButton>
-                      )}
+                    {canProlongate && (
+                      <PrimaryButton
+                        isLoading={isMining}
+                        loadingText={
+                          isMiningFunding ? t('Mining') : t('Prolongating')
+                        }
+                        onClick={() =>
+                          send('PROLONGATE_VOTING', {from: identity.address})
+                        }
+                      >
+                        {t('Prolongate voting')}
+                      </PrimaryButton>
+                    )}
                     <SecondaryButton onClick={() => redirect('/oracles/list')}>
                       {t('Close')}
                     </SecondaryButton>
@@ -339,7 +350,16 @@ export default function ViewVotingPage() {
                     />
                     <Stack isInline spacing={2} align="center">
                       <Icon
-                        name={hasQuorum ? 'user-tick' : 'user'}
+                        name={
+                          hasWinner({
+                            votes,
+                            winnerThreshold,
+                            quorum,
+                            committeeSize,
+                          })
+                            ? 'user-tick'
+                            : 'user'
+                        }
                         color="muted"
                         w={4}
                         h={4}
@@ -381,14 +401,28 @@ export default function ViewVotingPage() {
                           amount,
                           fee,
                           tips,
-                          balanceNew,
-                          balanceOld,
+                          balanceChange = 0,
                           contractCallMethod,
                         }) => {
                           const isSender = areSameCaseInsensitive(
                             from,
                             identity.address
                           )
+
+                          const txCost =
+                            (isSender ? 0 : -amount) + balanceChange
+                          const totalTxCost = txCost - (fee + tips)
+
+                          const isCredit = totalTxCost > 0
+
+                          const color =
+                            // eslint-disable-next-line no-nested-ternary
+                            totalTxCost === 0
+                              ? 'brandGray.500'
+                              : isCredit
+                              ? 'blue.500'
+                              : 'red.500'
+
                           return (
                             <TableRow key={hash}>
                               <TableCol>
@@ -396,8 +430,8 @@ export default function ViewVotingPage() {
                                   <Flex
                                     align="center"
                                     justify="center"
-                                    bg={isSender ? 'red.012' : 'blue.012'}
-                                    color={isSender ? 'red.500' : 'blue.500'}
+                                    bg={isCredit ? 'blue.012' : 'red.012'}
+                                    color={color}
                                     borderRadius="lg"
                                     minH={8}
                                     minW={8}
@@ -418,11 +452,12 @@ export default function ViewVotingPage() {
                                 </Stack>
                               </TableCol>
                               <TableCol>
-                                <Text>{type}</Text>
-                                {contractCallMethod && (
-                                  <Text fontSize="sm">
-                                    {contractCallMethod}
+                                {contractCallMethod ? (
+                                  <Text>
+                                    {ContractCallMethod[contractCallMethod]}
                                   </Text>
+                                ) : (
+                                  <Text>{ContractTransactionType[type]}</Text>
                                 )}
                               </TableCol>
                               <TableCol>
@@ -431,15 +466,10 @@ export default function ViewVotingPage() {
                                 </Text>
                               </TableCol>
                               <TableCol>
-                                <Text
-                                  color={isSender ? 'red.500' : 'brandGray.500'}
-                                >
+                                <Text color={color} overflowWrap="break-word">
                                   {toLocaleDna(i18n.language, {
                                     signDisplay: 'exceptZero',
-                                  })(
-                                    (isSender ? -amount : 0) +
-                                      (balanceNew ? balanceNew - balanceOld : 0)
-                                  )}
+                                  })(txCost)}
                                 </Text>
                                 {isSender && (
                                   <SmallText>

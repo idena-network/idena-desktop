@@ -300,6 +300,19 @@ export function winnerVotesCount({winnerThreshold, committeeSize}) {
   return Math.ceil((committeeSize * winnerThreshold) / 100)
 }
 
+export function hasQuorum({votes, quorum, committeeSize}) {
+  const requiredVotesCount = quorumVotesCount({quorum, committeeSize})
+  return votes.some(({count}) => count >= requiredVotesCount)
+}
+
+export function hasWinner({votes, winnerThreshold, quorum, committeeSize}) {
+  const requiredVotesCount = winnerVotesCount({winnerThreshold, committeeSize})
+  return (
+    hasQuorum({votes, quorum, committeeSize}) &&
+    votes.some(({count}) => count >= requiredVotesCount)
+  )
+}
+
 export function minOracleReward(feePerGas) {
   return dnaFeePerGas(feePerGas) * 100 * 100
 }

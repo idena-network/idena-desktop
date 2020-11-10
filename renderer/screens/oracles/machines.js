@@ -220,8 +220,10 @@ export const votingListMachine = Machine(
             author,
             fact,
             state,
+            createTime,
             startTime,
-            finishTime,
+            estimatedVotingFinishTime,
+            estimatedPublicVotingFinishTime,
             minPayment,
             ...voting
           }) => ({
@@ -230,8 +232,10 @@ export const votingListMachine = Machine(
             contractHash: contractAddress,
             issuer: author,
             status: state,
+            createDate: createTime,
             startDate: startTime,
-            finishDate: finishTime,
+            finishDate: estimatedVotingFinishTime,
+            finishCountingDate: estimatedPublicVotingFinishTime,
             votingMinPayment: minPayment,
             ...hexToObject(fact),
           })

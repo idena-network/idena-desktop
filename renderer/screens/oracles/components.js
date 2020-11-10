@@ -135,12 +135,13 @@ export function VotingResultBar({
       <Box
         borderRadius="md"
         bg={isMax ? 'blue.012' : 'gray.50'}
+        h={6}
+        width={percentage > 0 ? `${percentage * 100}%` : 1}
         position="absolute"
         left={0}
-        width={percentage > 0 ? `${percentage * 100}%` : 1}
         top={0}
         bottom={0}
-        zIndex={-1}
+        zIndex="base"
       />
       <Stack isInline spacing={1} align="center">
         <Text>{label}</Text>
