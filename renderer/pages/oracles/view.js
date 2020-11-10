@@ -529,7 +529,7 @@ export default function ViewVotingPage() {
                 <AsideStat
                   label={t('Winner required')}
                   value={t('{{count}} votes', {
-                    count: winnerVotesCount({winnerThreshold, committeeSize}),
+                    count: winnerVotesCount({winnerThreshold, votes}),
                   })}
                 />
                 <AsideStat

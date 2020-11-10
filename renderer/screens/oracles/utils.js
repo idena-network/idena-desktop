@@ -296,8 +296,8 @@ export function quorumVotesCount({quorum, committeeSize}) {
   return Math.ceil((committeeSize * quorum) / 100)
 }
 
-export function winnerVotesCount({winnerThreshold, committeeSize}) {
-  return Math.ceil((committeeSize * winnerThreshold) / 100)
+export function winnerVotesCount({winnerThreshold, votes}) {
+  return Math.ceil((votes * winnerThreshold) / 100)
 }
 
 export function hasQuorum({votes, quorum, committeeSize}) {
@@ -306,10 +306,17 @@ export function hasQuorum({votes, quorum, committeeSize}) {
 }
 
 export function hasWinner({votes, winnerThreshold, quorum, committeeSize}) {
-  const requiredVotesCount = winnerVotesCount({winnerThreshold, committeeSize})
-  return (
-    hasQuorum({votes, quorum, committeeSize}) &&
-    votes.some(({count}) => count >= requiredVotesCount)
+  const requiredVotesCountByVotes = winnerVotesCount({winnerThreshold, votes})
+  const requiredVotesCountByCommittee = winnerVotesCount({
+    winnerThreshold,
+    votes: committeeSize,
+  })
+  const didReachQuorum = hasQuorum({votes, quorum, committeeSize})
+
+  return votes.some(
+    ({count}) =>
+      count >= requiredVotesCountByCommittee ||
+      (count >= requiredVotesCountByVotes && didReachQuorum)
   )
 }
 
