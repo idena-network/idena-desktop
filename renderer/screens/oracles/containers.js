@@ -744,7 +744,7 @@ export function VotingResult({
         const optionScore = votes.find(v => v.option === id)?.count ?? 0
         const isWinner =
           hasWinner({votes, winnerThreshold, quorum, committeeSize}) &&
-          optionScore >= winnerVotesCount({winnerThreshold, committeeSize})
+          optionScore >= winnerVotesCount({winnerThreshold, votes})
         return (
           <VotingResultBar
             key={id}
