@@ -54,8 +54,10 @@ import {
   createContractDataReader,
   createContractReadonlyCaller,
   hasWinner,
+  minOracleReward,
   viewVotingHref,
   votingFinishDate,
+  votingMinBalance,
   winnerVotesCount,
 } from './utils'
 
@@ -185,7 +187,9 @@ export function VotingCard({votingRef, ...props}) {
             <PrimaryButton
               isDisabled={isMining}
               loadingText={t('Launching')}
-              onClick={() => send('START_VOTING')}
+              onClick={() => {
+                send('REVIEW_START_VOTING')
+              }}
             >
               {t('Launch')}
             </PrimaryButton>
@@ -866,5 +870,43 @@ export function ProlongateDrawer({
         </PrimaryButton>
       </OracleDrawerBody>
     </Drawer>
+  )
+}
+
+export function LaunchVotingDrawer({votingService, ...props}) {
+  const identity = useIdentityState()
+
+  const [current, send] = useService(votingService)
+
+  const {
+    balance,
+    feePerGas,
+    oracleReward = minOracleReward(feePerGas),
+    committeeSize,
+  } = current.context
+
+  return (
+    <LaunchDrawer
+      isOpen={eitherState(
+        current,
+        `idle.${VotingStatus.Pending}.review`,
+        `mining.${VotingStatus.Starting}`
+      )}
+      onClose={() => {
+        send('CANCEL')
+      }}
+      balance={Number(balance)}
+      requiredBalance={votingMinBalance({
+        oracleReward,
+        committeeSize,
+        feePerGas,
+      })}
+      from={identity.address}
+      available={identity.balance}
+      onLaunch={e => {
+        send('START_VOTING', e)
+      }}
+      {...props}
+    />
   )
 }
