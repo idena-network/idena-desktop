@@ -736,6 +736,10 @@ export const createNewVotingMachine = (epoch, address) =>
             options: voting.options.filter(({value}) => Boolean(value)),
             contractHash: contract,
             issuer: address,
+            createDate: Date.now(),
+            startDate: voting.shouldStartImmediately
+              ? Date.now()
+              : voting.startDate,
             finishDate: votingFinishDate(voting),
           }
 
