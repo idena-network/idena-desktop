@@ -48,6 +48,8 @@ import {
   AsideStat,
   VotingInspector,
   VotingResult,
+  LaunchDrawer,
+  ProlongateDrawer,
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -57,9 +59,11 @@ import {
   areSameCaseInsensitive,
   hasQuorum,
   hasWinner,
+  minOracleReward,
   oracleReward,
   quorumVotesCount,
   votingFinishDate,
+  votingMinBalance,
   winnerVotesCount,
 } from '../../screens/oracles/utils'
 import {
@@ -141,27 +145,23 @@ export default function ViewVotingPage() {
       votingDuration,
       publicVotingDuration,
     }),
-    prevStatus,
     selectedOption,
     winnerThreshold = 50,
     balanceUpdates,
     ownerFee,
-    paidAmount,
+    totalReward,
     committeeEpoch,
+    feePerGas,
+    oracleReward: assignedOracleReward = minOracleReward(feePerGas),
   } = current.context
 
   const isLoaded = !current.matches('loading')
-
-  const isMining = current.matches('mining')
-  const isVoting = current.matches(`mining.${VotingStatus.Voting}`)
-  const isMiningFunding = current.matches('mining.funding')
 
   const sameString = a => b => areSameCaseInsensitive(a, b)
 
   const eitherIdleState = (...states) =>
     eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase())) ||
-    states.some(sameString(status)) ||
-    (isMining && states.some(sameString(prevStatus)))
+    states.some(sameString(status))
 
   const isClosed = eitherIdleState(
     VotingStatus.Archived,
@@ -292,34 +292,25 @@ export default function ViewVotingPage() {
                   <Stack isInline spacing={2}>
                     {eitherIdleState(VotingStatus.Pending) && (
                       <PrimaryButton
-                        isLoading={isMining}
-                        loadingText={
-                          isMiningFunding ? t('Mining') : t('Launching')
-                        }
+                        loadingText={t('Launching')}
                         onClick={() => {
-                          send('START_VOTING', {from: identity.address})
+                          send('REVIEW_START_VOTING', {from: identity.address})
                         }}
                       >
                         {t('Launch')}
                       </PrimaryButton>
                     )}
                     {eitherIdleState(VotingStatus.Open) && (
-                      <PrimaryButton
-                        isLoading={isMining}
-                        loadingText={
-                          isMiningFunding ? t('Mining') : t('Voting')
-                        }
-                        onClick={() => send('REVIEW')}
-                      >
+                      <PrimaryButton onClick={() => send('REVIEW')}>
                         {t('Vote')}
                       </PrimaryButton>
                     )}
                     {eitherIdleState(VotingStatus.Counting) && canFinish && (
                       <PrimaryButton
-                        isLoading={isMining}
-                        loadingText={
-                          isMiningFunding ? t('Mining') : t('Finishing')
-                        }
+                        isLoading={current.matches(
+                          `mining.${VotingStatus.Finishing}`
+                        )}
+                        loadingText={t('Finishing')}
                         onClick={() =>
                           send('FINISH_VOTING', {from: identity.address})
                         }
@@ -329,13 +320,7 @@ export default function ViewVotingPage() {
                     )}
                     {canProlongate && (
                       <PrimaryButton
-                        isLoading={isMining}
-                        loadingText={
-                          isMiningFunding ? t('Mining') : t('Prolongating')
-                        }
-                        onClick={() =>
-                          send('PROLONGATE_VOTING', {from: identity.address})
-                        }
+                        onClick={() => send('REVIEW_PROLONGATE_VOTING')}
                       >
                         {t('Prolongate voting')}
                       </PrimaryButton>
@@ -388,7 +373,6 @@ export default function ViewVotingPage() {
                     <thead>
                       <TableRow>
                         <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
-                        <TableHeaderCol>{t('Type')}</TableHeaderCol>
                         <TableHeaderCol>{t('Date and time')}</TableHeaderCol>
                         <TableHeaderCol>{t('iDNA value')}</TableHeaderCol>
                       </TableRow>
@@ -444,23 +428,20 @@ export default function ViewVotingPage() {
                                     />
                                   </Flex>
                                   <Box isTruncated>
-                                    <Text>
-                                      {isSender ? t('Sent') : t('Received')}
-                                    </Text>
+                                    {contractCallMethod ? (
+                                      <Text>
+                                        {ContractCallMethod[contractCallMethod]}
+                                      </Text>
+                                    ) : (
+                                      <Text>
+                                        {ContractTransactionType[type]}
+                                      </Text>
+                                    )}
                                     <SmallText isTruncated title={from}>
                                       {hash}
                                     </SmallText>
                                   </Box>
                                 </Stack>
-                              </TableCol>
-                              <TableCol>
-                                {contractCallMethod ? (
-                                  <Text>
-                                    {ContractCallMethod[contractCallMethod]}
-                                  </Text>
-                                ) : (
-                                  <Text>{ContractTransactionType[type]}</Text>
-                                )}
                               </TableCol>
                               <TableCol>
                                 <Text>
@@ -489,8 +470,8 @@ export default function ViewVotingPage() {
               </VotingSkeleton>
             </Stack>
           </Box>
-          <VotingSkeleton isLoaded={isLoaded} mt={isLoaded ? 0 : 16}>
-            <Box mt={isClosed ? 20 : 16}>
+          <VotingSkeleton isLoaded={isLoaded}>
+            <Box mt={3}>
               {!isClosed && (
                 <Stat mb={8}>
                   <StatLabel as="div" color="muted" fontSize="md">
@@ -574,7 +555,7 @@ export default function ViewVotingPage() {
                 {isClosed && (
                   <AsideStat
                     label={t('Prize paid')}
-                    value={toDna(paidAmount)}
+                    value={toDna(totalReward)}
                   />
                 )}
               </Stack>
@@ -593,7 +574,7 @@ export default function ViewVotingPage() {
         from={identity.address}
         to={contractHash}
         deposit={votingMinPayment}
-        isLoading={isVoting}
+        isLoading={current.matches(`mining.${VotingStatus.Voting}`)}
         onVote={() => {
           send('VOTE', {from: identity.address})
         }}
@@ -608,6 +589,44 @@ export default function ViewVotingPage() {
         onAddFund={({amount, from}) => {
           send('ADD_FUND', {amount, from})
           onCloseAddFund()
+        }}
+      />
+
+      <LaunchDrawer
+        isOpen={eitherState(
+          current,
+          `idle.${VotingStatus.Pending}.review`,
+          `mining.${VotingStatus.Starting}`
+        )}
+        onClose={() => {
+          send('CANCEL')
+        }}
+        balance={contractBalance}
+        requiredBalance={votingMinBalance({
+          oracleReward: assignedOracleReward,
+          committeeSize,
+          feePerGas,
+        })}
+        from={identity.address}
+        available={identity.balance}
+        onLaunch={e => {
+          send('START_VOTING', e)
+        }}
+      />
+
+      <ProlongateDrawer
+        isOpen={eitherState(
+          current,
+          `idle.${VotingStatus.Counting}.review`,
+          `mining.${VotingStatus.Prolongating}`
+        )}
+        onClose={() => {
+          send('CANCEL')
+        }}
+        from={identity.address}
+        available={identity.balance}
+        onProlongate={({from}) => {
+          send('PROLONGATE_VOTING', {from})
         }}
       />
 

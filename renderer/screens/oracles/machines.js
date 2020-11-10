@@ -577,43 +577,12 @@ export const createNewVotingMachine = (epoch, address) =>
               },
             },
             [VotingStatus.Starting]: {
-              initial: 'submittingAddFund',
+              initial: 'submitting',
               states: {
-                submittingAddFund: {
-                  invoke: {
-                    src: async ({contractHash}, {from, balance}) => ({
-                      txHash: await callRpc('dna_sendTransaction', {
-                        to: contractHash,
-                        from,
-                        amount: balance,
-                      }),
-                      from,
-                      balance,
-                    }),
-                    onDone: {
-                      target: 'miningFund',
-                      actions: ['applyTx', log()],
-                    },
-                    onError: {
-                      actions: ['onError', send('PUBLISH_FAILED'), log()],
-                    },
-                  },
-                },
-                miningFund: {
-                  invoke: {
-                    src: 'pollStatus',
-                  },
-                  on: {
-                    MINED: {
-                      target: 'submitting',
-                      actions: [log()],
-                    },
-                  },
-                },
                 submitting: {
                   invoke: {
-                    src: (context, {from}) =>
-                      votingServices().startVoting(context, {from}),
+                    src: (context, {from, balance}) =>
+                      votingServices().startVoting(context, {from, balance}),
                     onDone: {
                       target: 'mining',
                       actions: [
@@ -819,21 +788,51 @@ export const createViewVotingMachine = (id, epoch, address) =>
               },
             },
             [VotingStatus.Pending]: {
-              on: {
-                START_VOTING: {
-                  target: `#viewVoting.mining.${VotingStatus.Starting}`,
-                  actions: ['setStarting', 'persist'],
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    REVIEW_START_VOTING: 'review',
+                  },
                 },
+                review: {
+                  on: {
+                    START_VOTING: {
+                      target: `#viewVoting.mining.${VotingStatus.Starting}`,
+                      actions: ['setStarting', 'persist'],
+                    },
+                  },
+                },
+              },
+              on: {
+                CANCEL: '.idle',
               },
             },
             [VotingStatus.Open]: {},
             [VotingStatus.Voted]: {},
             [VotingStatus.Counting]: {
-              on: {
-                FINISH_VOTING: {
-                  target: `#viewVoting.mining.${VotingStatus.Finishing}`,
-                  actions: ['setFinishing', 'persist'],
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    REVIEW_PROLONGATE_VOTING: 'review',
+                    FINISH_VOTING: {
+                      target: `#viewVoting.mining.${VotingStatus.Finishing}`,
+                      actions: ['setFinishing', 'persist'],
+                    },
+                  },
                 },
+                review: {
+                  on: {
+                    PROLONGATE_VOTING: {
+                      target: `#viewVoting.mining.${VotingStatus.Prolongating}`,
+                      actions: ['setProlongating', 'persist'],
+                    },
+                  },
+                },
+              },
+              on: {
+                CANCEL: '.idle',
               },
             },
             [VotingStatus.Archived]: {},
@@ -850,10 +849,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
               actions: ['selectOption', log()],
             },
             REVIEW: 'review',
-            PROLONGATE_VOTING: {
-              target: `mining.${VotingStatus.Prolongating}`,
-              actions: ['setProlongating', 'persist'],
-            },
             TERMINATE_CONTRACT: `mining.${VotingStatus.Terminating}`,
           },
         },
@@ -923,6 +918,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
             address,
             contractAddress: id,
           }),
+          feePerGas: await callRpc('bcn_feePerGas'),
         }),
         ...votingServices(),
         vote: async (
