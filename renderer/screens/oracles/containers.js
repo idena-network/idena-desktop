@@ -496,6 +496,19 @@ export function AsideStat({label, value, ...props}) {
   )
 }
 
+export function VotingMilestone({label, value, ...props}) {
+  return (
+    <Stat {...props}>
+      <StatLabel fontSize="md" fontWeight={500}>
+        {label}
+      </StatLabel>
+      <StatNumber color="muted" fontSize="md">
+        {value}
+      </StatNumber>
+    </Stat>
+  )
+}
+
 export function VotingInspector({onTerminate, ...contract}) {
   const [result, setResult] = React.useState({})
 
