@@ -44,6 +44,7 @@ import {
   durationPreset,
   quorumVotesCount,
   viewVotingHref,
+  humanError,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -83,10 +84,12 @@ function NewVotingPage() {
       onDone: () => {
         router.push(viewVotingHref(current.context.contractHash))
       },
-      onError: (_, {data: {message}}) => {
+      onError: (context, {data: {message}}) => {
         toast({
           // eslint-disable-next-line react/display-name
-          render: () => <Toast title={message} status="error" />,
+          render: () => (
+            <Toast title={humanError(message, context)} status="error" />
+          ),
         })
       },
     },

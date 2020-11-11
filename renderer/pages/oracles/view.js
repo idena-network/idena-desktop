@@ -60,6 +60,7 @@ import {
   areSameCaseInsensitive,
   hasQuorum,
   hasWinner,
+  humanError,
   minOracleReward,
   oracleReward,
   quorumVotesCount,
@@ -105,11 +106,13 @@ export default function ViewVotingPage() {
 
   const [current, send] = useMachine(viewMachine, {
     actions: {
-      onError: (_, {data: {message}}) => {
+      onError: (context, {data: {message}}) => {
         toast({
           status: 'error',
           // eslint-disable-next-line react/display-name
-          render: () => <Toast title={message} status="error" />,
+          render: () => (
+            <Toast title={humanError(message, context)} status="error" />
+          ),
         })
       },
     },
