@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import {assign} from 'xstate'
 import {VotingStatus} from '../../shared/types'
-import {callRpc} from '../../shared/utils/utils'
+import {callRpc, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
 import {VotingListFilter} from './types'
 
@@ -397,3 +397,69 @@ export function votingStatuses(filter) {
 
 export const humanizeDuration = duration =>
   dayjs.duration(duration * BLOCK_TIME, 's').humanize()
+
+export const humanError = (
+  error,
+  {
+    startDate,
+    balance,
+    feePerGas,
+    oracleReward: contractOracleReward = minOracleReward(feePerGas),
+    committeeSize,
+    votingMinPayment,
+  },
+  locale = global.locale
+) => {
+  const dna = toLocaleDna(locale)
+
+  switch (error) {
+    case 'no value':
+      return 'Invalid parameter when calling smart contract method'
+    case 'contract is not in pending state':
+      return 'Voting has already started'
+    case 'starting is locked':
+      return `Cannot start the voting before specific time: ${new Date(
+        startDate
+      ).toLocaleString()}`
+    case 'contract balance is less than minimal oracles reward': {
+      const requiredBalance = votingMinBalance({
+        oracleReward: contractOracleReward,
+        committeeSize,
+        feePerGas,
+      })
+      return `Insufficient funds to start the voting. Minimum deposit is required: ${dna(
+        requiredBalance
+      )}. Current balance: ${dna(balance)}.`
+    }
+    case 'sender is not identity':
+      return 'Your address cannot vote'
+    case 'voting should be prolonged':
+      return 'The voting must be prolonged since a new epoch has started'
+    case 'contract is not in running state':
+      return 'Voting has not started yet'
+    case 'sender has voted already':
+      return 'Your address has already voted.'
+    case 'too late to accept secret vote':
+      return 'Cannot vote. Voting is finished.'
+    case 'tx amount is less than voting minimal payment':
+      return `Cannot vote. Transaction amount is less than the required minimum deposit: ${dna(
+        votingMinPayment
+      )}`
+    case 'invalid proof':
+      return 'Your address is not selected for the voting'
+    case 'too early to accept open vote':
+      return 'Cannot publish the vote yet'
+    case 'too late to accept open vote':
+      return 'Cannot publish the vote. Voting is finished.'
+    case 'wrong vote hash':
+      return 'Invalid vote hash'
+    case 'not enough votes to finish voting':
+      return 'Not enough votes to finish the voting'
+    case 'voting can not be prolonged':
+      return 'The voting cannot be prolonged'
+    case 'voting can not be terminated':
+      return 'The voting cannot be terminated'
+    default:
+      return error
+  }
+}

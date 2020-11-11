@@ -33,7 +33,7 @@ import {
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {eitherState} from '../../shared/utils/utils'
 import {VotingListFilter} from '../../screens/oracles/types'
-import {votingStatuses} from '../../screens/oracles/utils'
+import {humanError, votingStatuses} from '../../screens/oracles/utils'
 
 function VotingListPage() {
   const {t} = useTranslation()
@@ -48,11 +48,13 @@ function VotingListPage() {
   const [current, send] = useMachine(votingListMachine, {
     context: {epoch, address},
     actions: {
-      onError: (_, {data: {message}}) => {
+      onError: (context, {data: {message}}) => {
         toast({
           status: 'error',
           // eslint-disable-next-line react/display-name
-          render: () => <Toast title={message} status="error" />,
+          render: () => (
+            <Toast title={humanError(message, context)} status="error" />
+          ),
         })
       },
     },
