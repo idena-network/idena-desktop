@@ -182,7 +182,7 @@ export default function ViewVotingPage() {
     ownerFee,
   })
 
-  const didReachQuorum = hasQuorum({votes, quorum, committeeSize})
+  const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
   const canFinish = hasWinner({
     votes,
     votesCount,
