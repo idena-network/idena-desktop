@@ -385,6 +385,8 @@ function NewVotingPage() {
         available={balance}
         minBalance={votingMinBalance({oracleReward, committeeSize, feePerGas})}
         minStake={votingMinStake(feePerGas)}
+        votingDuration={votingDuration}
+        publicVotingDuration={publicVotingDuration}
         isLoading={eitherState(
           current,
           'publishing.deploy',

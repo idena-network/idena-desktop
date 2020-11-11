@@ -23,7 +23,6 @@ import {
   IconButton,
   Button,
 } from '@chakra-ui/core'
-import dayjs from 'dayjs'
 import {toLocaleDna, eitherState, callRpc} from '../../shared/utils/utils'
 import {
   Avatar,
@@ -50,10 +49,10 @@ import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {Link} from '../../shared/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {
-  BLOCK_TIME,
   createContractDataReader,
   createContractReadonlyCaller,
   hasWinner,
+  humanizeDuration,
   minOracleReward,
   viewVotingHref,
   votingFinishDate,
@@ -93,6 +92,7 @@ export function VotingCard({votingRef, ...props}) {
     quorum,
     committeeSize,
     isOracle,
+    totalReward,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -107,6 +107,11 @@ export function VotingCard({votingRef, ...props}) {
     eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase())) ||
     states.some(sameString(status)) ||
     (isMining && states.some(sameString(prevStatus)))
+
+  const isClosed = eitherIdleState(
+    VotingStatus.Archived,
+    VotingStatus.Terminated
+  )
 
   return (
     <Box {...props}>
@@ -171,15 +176,18 @@ export function VotingCard({votingRef, ...props}) {
       >
         <Icon name="star" size={5} color="white" />
         <Text fontWeight={500}>
-          {t('Total prize')}: {toDna(balance)}
+          {isClosed ? t('Oracles rewards paid') : t('Total prize')}:{' '}
+          {toDna(isClosed ? totalReward : balance)}
         </Text>
-        <Text color="orange.500">
-          {Number(votingMinPayment) > 0
-            ? t(`Lock {{amount}} for voting`, {
-                amount: toLocaleDna(i18n.language)(votingMinPayment),
-              })
-            : t('Free voting')}
-        </Text>
+        {!isClosed && (
+          <Text color="orange.500">
+            {Number(votingMinPayment) > 0
+              ? t(`Lock {{amount}} for voting`, {
+                  amount: toLocaleDna(i18n.language)(votingMinPayment),
+                })
+              : t('Free voting')}
+          </Text>
+        )}
       </Stack>
       <Flex justify="space-between" align="center">
         <Stack isInline spacing={2}>
@@ -237,7 +245,13 @@ export function VotingCard({votingRef, ...props}) {
             <Stack isInline spacing={2} align="center">
               <Icon
                 name={
-                  hasWinner({votes, winnerThreshold, quorum, committeeSize})
+                  hasWinner({
+                    votes,
+                    votesCount,
+                    winnerThreshold,
+                    quorum,
+                    committeeSize,
+                  })
                     ? 'user-tick'
                     : 'user'
                 }
@@ -388,6 +402,8 @@ export function ReviewVotingDrawer({
   minBalance,
   minStake,
   isLoading,
+  votingDuration,
+  publicVotingDuration,
   onConfirm,
   ...props
 }) {
@@ -433,6 +449,20 @@ export function ReviewVotingDrawer({
             )}
           </OracleFormHelperText>
         </OracleFormControl>
+        <Box>
+          <OracleFormHelper
+            label={t('Secret voting')}
+            value={t('About {{duration}}', {
+              duration: humanizeDuration(votingDuration),
+            })}
+          />
+          <OracleFormHelper
+            label={t('Public voting')}
+            value={t('About {{duration}}', {
+              duration: humanizeDuration(publicVotingDuration),
+            })}
+          />
+        </Box>
         <Box>
           <OracleFormHelper
             label={t('Total amount')}
@@ -673,10 +703,10 @@ export function VotingDurationInput({service, ...props}) {
     <TaggedInput
       type="number"
       min={1}
-      helperText={`${t('About')} ${dayjs
+      helperText={t('About {{duration}}', {
         // eslint-disable-next-line react/destructuring-assignment
-        .duration(props.value * BLOCK_TIME, 's')
-        .humanize()}`}
+        duration: humanizeDuration(props.value),
+      })}
       customText={t('Blocks')}
       onChangePreset={value => {
         send('CHANGE', {id: props.id, value})
@@ -743,8 +773,13 @@ export function VotingResult({
       {options.map(({id, value}) => {
         const optionScore = votes.find(v => v.option === id)?.count ?? 0
         const isWinner =
-          hasWinner({votes, winnerThreshold, quorum, committeeSize}) &&
-          optionScore >= winnerVotesCount({winnerThreshold, votes})
+          hasWinner({
+            votes,
+            votesCount,
+            winnerThreshold,
+            quorum,
+            committeeSize,
+          }) && optionScore >= winnerVotesCount({winnerThreshold, votesCount})
         return (
           <VotingResultBar
             key={id}
@@ -798,6 +833,7 @@ export function LaunchDrawer({
             <DnaInput
               name="balanceInput"
               defaultValue={requiredBalance - balance}
+              step={10 ** -14}
             />
             <OracleFormHelper
               label={t('Minimum deposit required')}

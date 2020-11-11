@@ -27,6 +27,7 @@ import {
   FloatDebug,
   GoogleTranslateButton,
   Toast,
+  Tooltip,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
@@ -153,6 +154,7 @@ export default function ViewVotingPage() {
     committeeEpoch,
     feePerGas,
     oracleReward: assignedOracleReward = minOracleReward(feePerGas),
+    isOracle,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -177,7 +179,13 @@ export default function ViewVotingPage() {
   })
 
   const didReachQuorum = hasQuorum({votes, quorum, committeeSize})
-  const canFinish = dayjs().isAfter(dayjs(finishDate)) && didReachQuorum
+  const canFinish = hasWinner({
+    votes,
+    votesCount,
+    winnerThreshold,
+    quorum,
+    committeeSize,
+  })
 
   const canProlongate =
     eitherIdleState(VotingStatus.Counting) &&
@@ -187,7 +195,7 @@ export default function ViewVotingPage() {
   return (
     <>
       <Page pt={8}>
-        <VotingSkeleton isLoaded={isLoaded}>
+        <VotingSkeleton isLoaded={isLoaded} mb={isLoaded ? 0 : 10}>
           <Stack isInline spacing={2} align="center" mb={10}>
             <VotingStatusBadge status={status} fontSize="md">
               {t(status)}
@@ -300,11 +308,23 @@ export default function ViewVotingPage() {
                         {t('Launch')}
                       </PrimaryButton>
                     )}
-                    {eitherIdleState(VotingStatus.Open) && (
-                      <PrimaryButton onClick={() => send('REVIEW')}>
-                        {t('Vote')}
-                      </PrimaryButton>
-                    )}
+                    {eitherIdleState(VotingStatus.Open) &&
+                      (isOracle ? (
+                        <PrimaryButton onClick={() => send('REVIEW')}>
+                          {t('Vote')}
+                        </PrimaryButton>
+                      ) : (
+                        <Tooltip
+                          label={t('This vote is not available to you')}
+                          placement="top"
+                        >
+                          {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
+                          <PrimaryButton as={Box} isDisabled>
+                            {t('Vote')}
+                          </PrimaryButton>
+                        </Tooltip>
+                      ))}
+
                     {eitherIdleState(VotingStatus.Counting) && canFinish && (
                       <PrimaryButton
                         isLoading={current.matches(
@@ -340,6 +360,7 @@ export default function ViewVotingPage() {
                         name={
                           hasWinner({
                             votes,
+                            votesCount,
                             winnerThreshold,
                             quorum,
                             committeeSize,
@@ -470,7 +491,7 @@ export default function ViewVotingPage() {
               </VotingSkeleton>
             </Stack>
           </Box>
-          <VotingSkeleton isLoaded={isLoaded}>
+          <VotingSkeleton isLoaded={isLoaded} h={isLoaded ? 'auto' : 'lg'}>
             <Box mt={3}>
               {!isClosed && (
                 <Stat mb={8}>
@@ -529,7 +550,7 @@ export default function ViewVotingPage() {
                 <AsideStat
                   label={t('Winner required')}
                   value={t('{{count}} votes', {
-                    count: winnerVotesCount({winnerThreshold, votes}),
+                    count: winnerVotesCount({winnerThreshold, votesCount}),
                   })}
                 />
                 <AsideStat

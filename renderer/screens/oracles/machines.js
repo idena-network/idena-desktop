@@ -461,7 +461,7 @@ export const createNewVotingMachine = (epoch, address) =>
         address,
         options: [{id: 0}, {id: 1}],
         votingDuration: 4320,
-        publicVotingDuration: 4320,
+        publicVotingDuration: 180,
         oracleReward: undefined,
         quorum: 20,
         committeeSize: 100,
