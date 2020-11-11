@@ -8,7 +8,11 @@ import {useIdentityState, IdentityStatus} from './identity-context'
 
 const db = global.invitesDb || {}
 
-const killableIdentities = [IdentityStatus.Newbie, IdentityStatus.Candidate]
+const killableIdentities = [
+  IdentityStatus.Newbie,
+  IdentityStatus.Candidate,
+  IdentityStatus.Invite,
+]
 
 const InviteStateContext = React.createContext()
 const InviteDispatchContext = React.createContext()
@@ -76,8 +80,8 @@ function InviteProvider({children}) {
         const isNewInviteActivated = !!invitee
 
         const canKill =
-          !!invitee &&
           !!invitedIdentity &&
+          (!!invitee || invitedIdentity.state === IdentityStatus.Invite) &&
           killableIdentities.includes(invitedIdentity.state)
 
         const isMining =

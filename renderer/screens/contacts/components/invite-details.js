@@ -80,7 +80,7 @@ function InviteDetails({dbkey, onClose, onSelect}) {
             })
           }}
           onKill={
-            canKill
+            canKill && !mining && !terminating
               ? () => {
                   setShowKillInviteForm(true)
                 }
