@@ -296,8 +296,8 @@ export function quorumVotesCount({quorum, committeeSize}) {
   return Math.ceil((committeeSize * quorum) / 100)
 }
 
-export function winnerVotesCount({winnerThreshold, votes}) {
-  return Math.ceil((votes * winnerThreshold) / 100)
+export function winnerVotesCount({winnerThreshold, votesCount}) {
+  return Math.ceil((votesCount * winnerThreshold) / 100)
 }
 
 export function hasQuorum({votes, quorum, committeeSize}) {
@@ -305,11 +305,20 @@ export function hasQuorum({votes, quorum, committeeSize}) {
   return votes.some(({count}) => count >= requiredVotesCount)
 }
 
-export function hasWinner({votes, winnerThreshold, quorum, committeeSize}) {
-  const requiredVotesCountByVotes = winnerVotesCount({winnerThreshold, votes})
+export function hasWinner({
+  votes,
+  votesCount,
+  winnerThreshold,
+  quorum,
+  committeeSize,
+}) {
+  const requiredVotesCountByVotes = winnerVotesCount({
+    winnerThreshold,
+    votesCount,
+  })
   const requiredVotesCountByCommittee = winnerVotesCount({
     winnerThreshold,
-    votes: committeeSize,
+    votesCount: committeeSize,
   })
   const didReachQuorum = hasQuorum({votes, quorum, committeeSize})
 
@@ -385,3 +394,6 @@ export function votingStatuses(filter) {
     }
   }
 }
+
+export const humanizeDuration = duration =>
+  dayjs.duration(duration * BLOCK_TIME, 's').humanize()
