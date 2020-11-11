@@ -51,6 +51,7 @@ import {
   VotingResult,
   LaunchDrawer,
   ProlongateDrawer,
+  VotingMilestone,
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -297,6 +298,37 @@ export default function ViewVotingPage() {
                   </Stack>
                 </VotingSkeleton>
               )}
+
+              <Stack isInline spacing={6}>
+                <VotingMilestone
+                  label={t('Created')}
+                  value={new Date(createDate).toLocaleString()}
+                />
+                <VotingMilestone
+                  label={t('Start voting')}
+                  value={
+                    eitherIdleState(VotingStatus.Pending)
+                      ? '--'
+                      : new Date(startDate).toLocaleString()
+                  }
+                />
+                <VotingMilestone
+                  label={t('End voting')}
+                  value={
+                    eitherIdleState(VotingStatus.Pending)
+                      ? '--'
+                      : new Date(finishDate).toLocaleString()
+                  }
+                />
+                <VotingMilestone
+                  label={t('End counting')}
+                  value={
+                    eitherIdleState(VotingStatus.Pending)
+                      ? '--'
+                      : new Date(finishCountingDate).toLocaleString()
+                  }
+                />
+              </Stack>
 
               <VotingSkeleton isLoaded={isLoaded}>
                 <Flex justify="space-between" align="center">
@@ -556,26 +588,6 @@ export default function ViewVotingPage() {
                     count: winnerVotesCount({winnerThreshold, votesCount}),
                   })}
                 />
-                <AsideStat
-                  label={t('Created')}
-                  value={new Date(createDate).toLocaleString()}
-                />
-                {!eitherIdleState(VotingStatus.Pending) && (
-                  <Stack spacing={6}>
-                    <AsideStat
-                      label={t('Start voting')}
-                      value={new Date(startDate).toLocaleString()}
-                    />
-                    <AsideStat
-                      label={t('End voting')}
-                      value={new Date(finishDate).toLocaleString()}
-                    />
-                    <AsideStat
-                      label={t('End counting')}
-                      value={new Date(finishCountingDate).toLocaleString()}
-                    />
-                  </Stack>
-                )}
                 {isClosed && (
                   <AsideStat
                     label={t('Prize paid')}
