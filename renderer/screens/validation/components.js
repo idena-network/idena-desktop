@@ -414,7 +414,12 @@ export function Thumbnail({
             height={32}
             width={32}
             fit="cover"
-            style={{borderRadius: rem(12)}}
+            style={{
+              borderRadius: rem(12),
+              border: isCurrent
+                ? 'transparent'
+                : 'solid 1px rgb(83 86 92 /0.16)',
+            }}
           />
         </>
       )}
