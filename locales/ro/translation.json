@@ -345,5 +345,13 @@
   "Help": "Ajutor",
   "Explorer": "Explorator",
   "Open Idena": "Deschide Idena",
-  "Open in blockhain explorer": "Deschide în exploratorul blockchainului"
+  "Open in blockhain explorer": "Deschide în exploratorul blockchainului",
+  "Submit the answers": "Submit the answers",
+  "Answered": "Answered",
+  "{{answeredFlips}} out of {{totalFlips}}": "{{answeredFlips}} out of {{totalFlips}}",
+  "Flips reported": "Flips reported",
+  "{{reportedFlipsCount}} out of {{availableReportsCount}}": "{{reportedFlipsCount}} out of {{availableReportsCount}}",
+  "You may lose rewards. Are you sure?": "You may lose rewards. Are you sure?",
+  "reviewMissingFlips": "You need to answer <2>all flips</2> otherwise you may fail the validation.",
+  "reviewMissingReports": "In order to get maximum rewards use <2>all available reports</2>."
 }

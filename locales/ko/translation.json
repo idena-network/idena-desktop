@@ -345,5 +345,13 @@
   "Help": "Help",
   "Explorer": "Explorer",
   "Open Idena": "Open Idena",
-  "Open in blockhain explorer": "Open in blockhain explorer"
+  "Open in blockhain explorer": "Open in blockhain explorer",
+  "Submit the answers": "Submit the answers",
+  "Answered": "Answered",
+  "{{answeredFlips}} out of {{totalFlips}}": "{{answeredFlips}} out of {{totalFlips}}",
+  "Flips reported": "Flips reported",
+  "{{reportedFlipsCount}} out of {{availableReportsCount}}": "{{reportedFlipsCount}} out of {{availableReportsCount}}",
+  "You may lose rewards. Are you sure?": "You may lose rewards. Are you sure?",
+  "reviewMissingFlips": "You need to answer <2>all flips</2> otherwise you may fail the validation.",
+  "reviewMissingReports": "In order to get maximum rewards use <2>all available reports</2>."
 }

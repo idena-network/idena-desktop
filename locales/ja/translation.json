@@ -348,5 +348,13 @@
   "One of the keywords is not relevant to the flip": "One of the keywords is not relevant to the flip",
   "You'll get a reward for the reported flip if the flip is also reported by other participants": "You'll get a reward for the reported flip if the flip is also reported by other participants",
   "Toggle Full Screen": "Toggle Full Screen",
-  "Open in blockhain explorer": "Open in blockhain explorer"
+  "Open in blockhain explorer": "Open in blockhain explorer",
+  "Submit the answers": "Submit the answers",
+  "Answered": "Answered",
+  "{{answeredFlips}} out of {{totalFlips}}": "{{answeredFlips}} out of {{totalFlips}}",
+  "Flips reported": "Flips reported",
+  "{{reportedFlipsCount}} out of {{availableReportsCount}}": "{{reportedFlipsCount}} out of {{availableReportsCount}}",
+  "You may lose rewards. Are you sure?": "You may lose rewards. Are you sure?",
+  "reviewMissingFlips": "You need to answer <2>all flips</2> otherwise you may fail the validation.",
+  "reviewMissingReports": "In order to get maximum rewards use <2>all available reports</2>."
 }
