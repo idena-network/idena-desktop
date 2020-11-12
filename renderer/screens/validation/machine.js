@@ -1,6 +1,6 @@
 import {Machine, assign} from 'xstate'
 import {decode} from 'rlp'
-import {choose, log} from 'xstate/lib/actions'
+import {choose, log, send} from 'xstate/lib/actions'
 import dayjs from 'dayjs'
 import {
   fetchFlipHashes,
@@ -797,9 +797,22 @@ export const createValidationMachine = ({
                         TOGGLE_WORDS: {
                           actions: ['toggleKeywords', log()],
                         },
-                        SUBMIT: {
-                          target: 'submitLongSession',
+                        SUBMIT: 'review',
+                      },
+                    },
+                    review: {
+                      on: {
+                        CHECK_FLIPS: {
+                          target: 'flips',
+                          actions: [
+                            send((_, {index}) => ({
+                              type: 'PICK',
+                              index,
+                            })),
+                          ],
                         },
+                        CHECK_REPORTS: 'keywords',
+                        SUBMIT: 'submitLongSession',
                       },
                     },
                     submitLongSession: {

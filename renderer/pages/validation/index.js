@@ -27,6 +27,7 @@ import {
   readyFlip,
   decodedWithKeywords,
   availableReportsNumber,
+  solvableFlips,
 } from '../../screens/validation/utils'
 import {
   ValidationScene,
@@ -50,6 +51,7 @@ import {
   ValidationSucceededDialog,
   SubmitFailedDialog,
   FailedFlipAnnotation,
+  ReviewValidationDialog,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {AnswerType} from '../../shared/types'
@@ -480,6 +482,24 @@ function ValidationSession({
           </PrimaryButton>
         </DialogFooter>
       </Dialog>
+
+      <ReviewValidationDialog
+        flips={flips.filter(solvableFlips)}
+        reportedFlipsCount={reportedFlipsCount}
+        availableReportsCount={availableReportsNumber(longFlips)}
+        isOpen={state.matches('longSession.solve.answer.review')}
+        isSubmitting={isSubmitting(state)}
+        onSubmit={() => send('SUBMIT')}
+        onMisingAnswers={() => {
+          send({
+            type: 'CHECK_FLIPS',
+            index: flips.findIndex(({option = 0}) => option < 1),
+          })
+        }}
+        onMisingReports={() => {
+          send('CHECK_REPORTS')
+        }}
+      />
 
       {global.isDev && <FloatDebug>{state.value}</FloatDebug>}
     </ValidationScene>
