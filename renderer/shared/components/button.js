@@ -2,7 +2,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {transparentize, darken} from 'polished'
-import {Button as ChakraButton, PseudoBox, Icon} from '@chakra-ui/core'
+import {
+  Button as ChakraButton,
+  IconButton as ChakraIconButton,
+  PseudoBox,
+  Icon,
+} from '@chakra-ui/core'
 import theme, {rem} from '../theme'
 import {Tooltip} from './tooltip'
 
@@ -213,6 +218,30 @@ export function IconButton2({icon, children, ...props}) {
     </ChakraButton>
   )
 }
+
+export const InfoButton = React.forwardRef((props, ref) => (
+  <ChakraIconButton
+    ref={ref}
+    icon="info"
+    color="brandBlue.500"
+    bg="unset"
+    fontSize={rem(20)}
+    minW={5}
+    w={5}
+    h={5}
+    _active={{
+      bg: 'unset',
+    }}
+    _hover={{
+      bg: 'unset',
+    }}
+    _focus={{
+      outline: 'none',
+    }}
+    {...props}
+  />
+))
+InfoButton.displayName = 'InfoButton'
 
 export {FlatButton, IconButtonRef as IconButton}
 export default Button
