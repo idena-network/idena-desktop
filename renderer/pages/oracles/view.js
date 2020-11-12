@@ -20,6 +20,7 @@ import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import {Page} from '../../screens/app/components'
 import {
   Avatar,
@@ -28,6 +29,7 @@ import {
   GoogleTranslateButton,
   Toast,
   Tooltip,
+  HDivider,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
@@ -67,7 +69,6 @@ import {
   quorumVotesCount,
   votingFinishDate,
   votingMinBalance,
-  winnerVotesCount,
 } from '../../screens/oracles/utils'
 import {
   Table,
@@ -79,6 +80,8 @@ import {
   ContractTransactionType,
   ContractCallMethod,
 } from '../../screens/oracles/types'
+
+dayjs.extend(relativeTime)
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
@@ -105,7 +108,7 @@ export default function ViewVotingPage() {
     [epoch, id, identity.address]
   )
 
-  const [current, send] = useMachine(viewMachine, {
+  const [current, send, service] = useMachine(viewMachine, {
     actions: {
       onError: (context, {data: {message}}) => {
         toast({
@@ -130,7 +133,6 @@ export default function ViewVotingPage() {
     balance: contractBalance = 0,
     votingMinPayment = 0,
     startDate,
-    createDate,
     votingDuration = 0,
     publicVotingDuration = 0,
     quorum = 20,
@@ -140,11 +142,6 @@ export default function ViewVotingPage() {
     voteProofsCount,
     votesCount,
     actualVotesCount = votesCount || voteProofsCount,
-    finishDate = votingFinishDate({
-      startDate,
-      votingDuration,
-      publicVotingDuration: 0,
-    }),
     finishCountingDate = votingFinishDate({
       startDate,
       votingDuration,
@@ -183,13 +180,15 @@ export default function ViewVotingPage() {
   })
 
   const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
-  const canFinish = hasWinner({
-    votes,
-    votesCount,
-    winnerThreshold,
-    quorum,
-    committeeSize,
-  })
+  const canFinish =
+    dayjs().isAfter(finishCountingDate) &&
+    hasWinner({
+      votes,
+      votesCount,
+      winnerThreshold,
+      quorum,
+      committeeSize,
+    })
 
   const canProlongate =
     eitherIdleState(VotingStatus.Counting) &&
@@ -238,6 +237,8 @@ export default function ViewVotingPage() {
                     ]}
                     alignSelf="start"
                   />
+                  <HDivider />
+                  {isLoaded && <VotingMilestone service={service} />}
                 </Stack>
               </VotingSkeleton>
 
@@ -298,37 +299,6 @@ export default function ViewVotingPage() {
                   </Stack>
                 </VotingSkeleton>
               )}
-
-              <Stack isInline spacing={6}>
-                <VotingMilestone
-                  label={t('Created')}
-                  value={new Date(createDate).toLocaleString()}
-                />
-                <VotingMilestone
-                  label={t('Start voting')}
-                  value={
-                    eitherIdleState(VotingStatus.Pending)
-                      ? '--'
-                      : new Date(startDate).toLocaleString()
-                  }
-                />
-                <VotingMilestone
-                  label={t('End voting')}
-                  value={
-                    eitherIdleState(VotingStatus.Pending)
-                      ? '--'
-                      : new Date(finishDate).toLocaleString()
-                  }
-                />
-                <VotingMilestone
-                  label={t('End counting')}
-                  value={
-                    eitherIdleState(VotingStatus.Pending)
-                      ? '--'
-                      : new Date(finishCountingDate).toLocaleString()
-                  }
-                />
-              </Stack>
 
               <VotingSkeleton isLoaded={isLoaded}>
                 <Flex justify="space-between" align="center">
@@ -584,9 +554,7 @@ export default function ViewVotingPage() {
                 />
                 <AsideStat
                   label={t('Winner required')}
-                  value={t('{{count}} votes', {
-                    count: winnerVotesCount({winnerThreshold, votesCount}),
-                  })}
+                  value={toPercent(winnerThreshold / 100)}
                 />
                 {isClosed && (
                   <AsideStat

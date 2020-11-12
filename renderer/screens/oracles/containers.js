@@ -22,7 +22,14 @@ import {
   Collapse,
   IconButton,
   Button,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverHeader,
+  PopoverBody,
 } from '@chakra-ui/core'
+import dayjs from 'dayjs'
 import {toLocaleDna, eitherState, callRpc} from '../../shared/utils/utils'
 import {
   Avatar,
@@ -45,7 +52,11 @@ import {
   TaggedInput,
   DnaInput,
 } from './components'
-import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
+import {
+  InfoButton,
+  PrimaryButton,
+  SecondaryButton,
+} from '../../shared/components/button'
 import {Link} from '../../shared/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {
@@ -490,19 +501,6 @@ export function AsideStat({label, value, ...props}) {
         {label}
       </StatLabel>
       <StatNumber fontSize="base" fontWeight={500}>
-        {value}
-      </StatNumber>
-    </Stat>
-  )
-}
-
-export function VotingMilestone({label, value, ...props}) {
-  return (
-    <Stat {...props}>
-      <StatLabel fontSize="md" fontWeight={500}>
-        {label}
-      </StatLabel>
-      <StatNumber color="muted" fontSize="md">
         {value}
       </StatNumber>
     </Stat>
@@ -957,5 +955,185 @@ export function LaunchVotingDrawer({votingService}) {
         send('START_VOTING', e)
       }}
     />
+  )
+}
+
+export function VotingMilestone({service}) {
+  const {t} = useTranslation()
+
+  const [current] = useService(service)
+
+  const {
+    createDate,
+    startDate,
+    finishDate,
+    finishCountingDate,
+  } = current.context
+
+  const eitherIdleState = (...states) =>
+    eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase()))
+
+  // eslint-disable-next-line no-nested-ternary
+  const [nextPhaseLabel, nextPhaseDate] = eitherIdleState(VotingStatus.Pending)
+    ? [t('Start voting'), startDate]
+    : // eslint-disable-next-line no-nested-ternary
+    eitherIdleState(VotingStatus.Open)
+    ? [t('End voting'), finishDate]
+    : eitherIdleState(VotingStatus.Counting)
+    ? [t('End counting'), finishCountingDate]
+    : [t('Voting closed'), Date.now()]
+
+  return (
+    <Flex align="center" justify="space-between">
+      <Box fontWeight={500}>
+        <Text color="muted">{nextPhaseLabel}</Text>
+        <Text>
+          {new Date(nextPhaseDate).toLocaleString()}
+          {eitherIdleState(
+            VotingStatus.Open,
+            VotingStatus.Voted,
+            VotingStatus.Counting
+          ) && <Text asp="span"> ({dayjs().to(nextPhaseDate)})</Text>}
+        </Text>
+      </Box>
+      <Popover placement="top">
+        <PopoverTrigger>
+          <InfoButton display="inline-flex" />
+        </PopoverTrigger>
+        <PopoverContent
+          bg="graphite.500"
+          border="none"
+          zIndex="popover"
+          w="2xs"
+          px={4}
+          py={2}
+          pb={4}
+        >
+          <PopoverArrow />
+          <PopoverHeader borderBottom="none" p={0} mb={3}>
+            <Text color="white" fontWeight={500}>
+              {t('Full cycle')}
+            </Text>
+          </PopoverHeader>
+          <PopoverBody p={0}>
+            <Stack spacing="10px" fontSize="sm">
+              <VotingMilestone.ListItem
+                isPast={eitherIdleState(
+                  VotingStatus.Pending,
+                  VotingStatus.Open,
+                  VotingStatus.Voted,
+                  VotingStatus.Counting,
+                  VotingStatus.Archived,
+                  VotingStatus.Terminated
+                )}
+                isNext={false}
+                label={t('Created')}
+                value={new Date(createDate).toLocaleString()}
+              />
+              <VotingMilestone.ListItem
+                isPast={eitherIdleState(
+                  VotingStatus.Open,
+                  VotingStatus.Voted,
+                  VotingStatus.Counting,
+                  VotingStatus.Archived,
+                  VotingStatus.Terminated
+                )}
+                isNext={eitherIdleState(VotingStatus.Pending)}
+                label={t('Start voting')}
+                value={
+                  eitherIdleState(VotingStatus.Pending)
+                    ? '--'
+                    : new Date(startDate).toLocaleString()
+                }
+              />
+              <VotingMilestone.ListItem
+                isPast={eitherIdleState(
+                  VotingStatus.Voted,
+                  VotingStatus.Counting,
+                  VotingStatus.Archived,
+                  VotingStatus.Terminated
+                )}
+                isNext={eitherIdleState(
+                  VotingStatus.Pending,
+                  VotingStatus.Open
+                )}
+                label={t('End voting')}
+                value={
+                  eitherIdleState(VotingStatus.Pending)
+                    ? '--'
+                    : new Date(finishDate).toLocaleString()
+                }
+              />
+              <VotingMilestone.ListItem
+                isPast={eitherIdleState(
+                  VotingStatus.Counting,
+                  VotingStatus.Archived,
+                  VotingStatus.Terminated
+                )}
+                isNext={eitherIdleState(
+                  VotingStatus.Pending,
+                  VotingStatus.Open,
+                  VotingStatus.Voted
+                )}
+                // isCurrent={eitherIdleState(VotingStatus.Voted)}
+                label={t('End counting')}
+                value={
+                  eitherIdleState(VotingStatus.Pending)
+                    ? '--'
+                    : new Date(finishCountingDate).toLocaleString()
+                }
+              />
+            </Stack>
+          </PopoverBody>
+        </PopoverContent>
+      </Popover>
+    </Flex>
+  )
+}
+VotingMilestone.ListItem = VotingMilestoneListItem
+
+export function VotingMilestoneListItem({
+  label,
+  value,
+  isPast,
+  isNext = true,
+  ...props
+}) {
+  const colorScheme = (() => {
+    switch (true) {
+      case isPast:
+        return {
+          bg: 'transparent',
+          borderColor: 'xwhite.040',
+          color: 'white',
+        }
+      case isNext:
+        return {
+          bg: 'xwhite.016',
+          borderColor: 'gray.100',
+          color: 'white',
+        }
+
+      default:
+        break
+    }
+  })()
+
+  return (
+    <Flex justify="space-between" color="white" {...props}>
+      <Stack isInline spacing={2} align="center">
+        <Box
+          {...colorScheme}
+          borderRadius="full"
+          borderWidth="1px"
+          w="10px"
+          h="10px"
+        />
+        <Text opacity={isPast ? 0.4 : 1}>{label}</Text>
+      </Stack>
+      <Text ml="auto" opacity={isPast ? 0.4 : 1}>
+        {value}
+      </Text>
+    </Flex>
   )
 }
