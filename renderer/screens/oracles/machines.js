@@ -1,5 +1,5 @@
 import {Machine, assign, spawn} from 'xstate'
-import {choose, log, send, sendParent} from 'xstate/lib/actions'
+import {log, send, sendParent} from 'xstate/lib/actions'
 import {
   fetchVotings,
   createContractCaller,
@@ -594,9 +594,7 @@ export const createNewVotingMachine = (epoch, address) =>
                         src: 'pollStatus',
                       },
                       on: {
-                        MINED: {
-                          actions: [
-                            choose([
+                        MINED: [
                               {
                                 actions: [
                                   send((_, {from, balance}) => ({
@@ -608,11 +606,20 @@ export const createNewVotingMachine = (epoch, address) =>
                                 cond: 'shouldStartImmediately',
                               },
                               {
+                            target: 'persist',
+                            actions: ['setPending', log()],
+                          },
+                        ],
+                      },
+                    },
+                    persist: {
+                      invoke: {
+                        src: 'persist',
+                        onDone: {
                                 actions: [send('DONE')],
                               },
-                            ]),
-                            log(),
-                          ],
+                        onError: {
+                          actions: ['onError', send('EDIT'), log()],
                         },
                       },
                     },
@@ -650,7 +657,19 @@ export const createNewVotingMachine = (epoch, address) =>
                   },
                   on: {
                     MINED: {
-                      actions: ['setRunning', 'persist', send('DONE'), log()],
+                      target: 'persist',
+                      actions: ['setRunning', log()],
+                    },
+                  },
+                },
+                persist: {
+                  invoke: {
+                    src: 'persist',
+                    onDone: {
+                      actions: [send('DONE')],
+                    },
+                    onError: {
+                      actions: ['onError', send('EDIT'), log()],
                     },
                   },
                 },
@@ -664,7 +683,7 @@ export const createNewVotingMachine = (epoch, address) =>
           },
         },
         done: {
-          entry: ['onDone'],
+          entry: ['onDone', 'persist'],
         },
       },
     },
@@ -701,6 +720,7 @@ export const createNewVotingMachine = (epoch, address) =>
         removeOption: assign({
           options: ({options}, {id}) => options.filter(o => o.id !== id),
         }),
+        setPending: setVotingStatus(VotingStatus.Pending),
         setRunning: setVotingStatus(VotingStatus.Open),
         // eslint-disable-next-line no-shadow
         persist: ({epoch, ...context}) => {
@@ -774,6 +794,7 @@ export const createNewVotingMachine = (epoch, address) =>
             clearTimeout(timeoutId)
           }
         },
+        persist: context => epochDb('votings', epoch).put(context),
       },
       guards: {
         shouldStartImmediately: ({shouldStartImmediately}) =>

@@ -977,13 +977,21 @@ export function VotingMilestone({service}) {
     eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase()))
 
   // eslint-disable-next-line no-nested-ternary
-  const [nextPhaseLabel, nextPhaseDate] = eitherIdleState(VotingStatus.Pending)
+  const [nextPhaseLabel, nextPhaseDate] = eitherIdleState(
+    VotingStatus.Deploying,
+    VotingStatus.Pending,
+    VotingStatus.Starting
+  )
     ? [t('Start voting'), startDate]
     : // eslint-disable-next-line no-nested-ternary
-    eitherIdleState(VotingStatus.Open, VotingStatus.Voted)
+    eitherIdleState(VotingStatus.Open, VotingStatus.Voting, VotingStatus.Voted)
     ? [t('End voting'), finishDate]
     : // eslint-disable-next-line no-nested-ternary
-    eitherIdleState(VotingStatus.Counting)
+    eitherIdleState(
+        VotingStatus.Counting,
+        VotingStatus.Prolongating,
+        VotingStatus.Finishing
+      )
     ? // eslint-disable-next-line no-nested-ternary
       dayjs().isBefore(finishCountingDate)
       ? [t('End counting'), finishCountingDate]
@@ -1005,7 +1013,7 @@ export function VotingMilestone({service}) {
           null,
         ]
     : // eslint-disable-next-line no-nested-ternary
-    eitherIdleState(VotingStatus.Archived)
+    eitherIdleState(VotingStatus.Archived, VotingStatus.Terminating)
     ? [t('Waiting for termination'), null]
     : eitherIdleState(VotingStatus.Terminated)
     ? [t('Terminated'), null]
