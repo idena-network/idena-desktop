@@ -250,7 +250,12 @@ export default function ViewVotingPage() {
                 </Stack>
               </VotingSkeleton>
 
-              {eitherIdleState(VotingStatus.Open, VotingStatus.Voted) && (
+              {eitherIdleState(
+                VotingStatus.Open,
+                VotingStatus.Voting,
+                VotingStatus.Voted,
+                VotingStatus.Prolongating
+              ) && (
                 <VotingSkeleton isLoaded={isLoaded}>
                   <Box>
                     <Text color="muted" fontSize="sm" mb={3}>
