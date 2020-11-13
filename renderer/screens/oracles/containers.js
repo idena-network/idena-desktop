@@ -69,6 +69,7 @@ import {
   votingFinishDate,
   votingMinBalance,
   winnerVotesCount,
+  isPendingTermination,
 } from './utils'
 
 export function VotingCard({votingRef, ...props}) {
@@ -335,11 +336,8 @@ export function AddFundDrawer({from, to, available, onAddFund, ...props}) {
         as="form"
         onSubmit={e => {
           e.preventDefault()
-          const {
-            amountInput: {value: amount},
-            fromInput: {value: fromInputValue},
-          } = e.target.elements
-          onAddFund({amount: Number(amount), from: fromInputValue})
+          const {amountInput, fromInput} = e.target.elements
+          onAddFund({amount: Number(amountInput.value), from: fromInput.value})
         }}
       >
         <OracleDrawerBody>
@@ -968,6 +966,11 @@ export function VotingMilestone({service}) {
     startDate,
     finishDate,
     finishCountingDate,
+    votes = [],
+    votesCount,
+    winnerThreshold,
+    quorum,
+    committeeSize,
   } = current.context
 
   const eitherIdleState = (...states) =>
@@ -977,24 +980,51 @@ export function VotingMilestone({service}) {
   const [nextPhaseLabel, nextPhaseDate] = eitherIdleState(VotingStatus.Pending)
     ? [t('Start voting'), startDate]
     : // eslint-disable-next-line no-nested-ternary
-    eitherIdleState(VotingStatus.Open)
+    eitherIdleState(VotingStatus.Open, VotingStatus.Voted)
     ? [t('End voting'), finishDate]
-    : eitherIdleState(VotingStatus.Counting)
-    ? [t('End counting'), finishCountingDate]
-    : [t('Voting closed'), Date.now()]
+    : // eslint-disable-next-line no-nested-ternary
+    eitherIdleState(VotingStatus.Counting)
+    ? // eslint-disable-next-line no-nested-ternary
+      dayjs().isBefore(finishCountingDate)
+      ? [t('End counting'), finishCountingDate]
+      : hasWinner({votes, votesCount, winnerThreshold, quorum, committeeSize})
+      ? [
+          t(
+            `Waiting for rewards ${
+              isPendingTermination({finishCountingDate}) ? 'or termination' : ''
+            }`
+          ),
+          null,
+        ]
+      : [
+          t(
+            `Waiting for prolongation ${
+              isPendingTermination({finishCountingDate}) ? 'or termination' : ''
+            }`
+          ),
+          null,
+        ]
+    : // eslint-disable-next-line no-nested-ternary
+    eitherIdleState(VotingStatus.Archived)
+    ? [t('Waiting for termination'), null]
+    : eitherIdleState(VotingStatus.Terminated)
+    ? [t('Terminated'), null]
+    : []
 
   return (
     <Flex align="center" justify="space-between">
       <Box fontWeight={500}>
         <Text color="muted">{nextPhaseLabel}</Text>
-        <Text>
-          {new Date(nextPhaseDate).toLocaleString()}
-          {eitherIdleState(
-            VotingStatus.Open,
-            VotingStatus.Voted,
-            VotingStatus.Counting
-          ) && <Text asp="span"> ({dayjs().to(nextPhaseDate)})</Text>}
-        </Text>
+        {nextPhaseDate && (
+          <Text>
+            {new Date(nextPhaseDate).toLocaleString()}
+            {eitherIdleState(
+              VotingStatus.Open,
+              VotingStatus.Voted,
+              VotingStatus.Counting
+            ) && <Text as="span"> ({dayjs().to(nextPhaseDate)})</Text>}
+          </Text>
+        )}
       </Box>
       <Popover placement="top">
         <PopoverTrigger>
@@ -1018,27 +1048,15 @@ export function VotingMilestone({service}) {
           <PopoverBody p={0}>
             <Stack spacing="10px" fontSize="sm">
               <VotingMilestone.ListItem
-                isPast={eitherIdleState(
-                  VotingStatus.Pending,
-                  VotingStatus.Open,
-                  VotingStatus.Voted,
-                  VotingStatus.Counting,
-                  VotingStatus.Archived,
-                  VotingStatus.Terminated
-                )}
-                isNext={false}
+                isActive={eitherIdleState(VotingStatus.Pending)}
                 label={t('Created')}
                 value={new Date(createDate).toLocaleString()}
               />
               <VotingMilestone.ListItem
-                isPast={eitherIdleState(
-                  VotingStatus.Open,
-                  VotingStatus.Voted,
-                  VotingStatus.Counting,
-                  VotingStatus.Archived,
-                  VotingStatus.Terminated
+                isActive={eitherIdleState(
+                  VotingStatus.Pending,
+                  VotingStatus.Open
                 )}
-                isNext={eitherIdleState(VotingStatus.Pending)}
                 label={t('Start voting')}
                 value={
                   eitherIdleState(VotingStatus.Pending)
@@ -1047,15 +1065,10 @@ export function VotingMilestone({service}) {
                 }
               />
               <VotingMilestone.ListItem
-                isPast={eitherIdleState(
-                  VotingStatus.Voted,
-                  VotingStatus.Counting,
-                  VotingStatus.Archived,
-                  VotingStatus.Terminated
-                )}
-                isNext={eitherIdleState(
+                isActive={eitherIdleState(
                   VotingStatus.Pending,
-                  VotingStatus.Open
+                  VotingStatus.Open,
+                  VotingStatus.Voted
                 )}
                 label={t('End voting')}
                 value={
@@ -1065,17 +1078,12 @@ export function VotingMilestone({service}) {
                 }
               />
               <VotingMilestone.ListItem
-                isPast={eitherIdleState(
-                  VotingStatus.Counting,
-                  VotingStatus.Archived,
-                  VotingStatus.Terminated
-                )}
-                isNext={eitherIdleState(
+                isActive={eitherIdleState(
                   VotingStatus.Pending,
                   VotingStatus.Open,
-                  VotingStatus.Voted
+                  VotingStatus.Voted,
+                  VotingStatus.Counting
                 )}
-                // isCurrent={eitherIdleState(VotingStatus.Voted)}
                 label={t('End counting')}
                 value={
                   eitherIdleState(VotingStatus.Pending)
@@ -1092,32 +1100,18 @@ export function VotingMilestone({service}) {
 }
 VotingMilestone.ListItem = VotingMilestoneListItem
 
-export function VotingMilestoneListItem({
-  label,
-  value,
-  isPast,
-  isNext = true,
-  ...props
-}) {
-  const colorScheme = (() => {
-    switch (true) {
-      case isPast:
-        return {
-          bg: 'transparent',
-          borderColor: 'xwhite.040',
-          color: 'white',
-        }
-      case isNext:
-        return {
-          bg: 'xwhite.016',
-          borderColor: 'gray.100',
-          color: 'white',
-        }
-
-      default:
-        break
-    }
-  })()
+export function VotingMilestoneListItem({label, value, isActive, ...props}) {
+  const colorScheme = isActive
+    ? {
+        bg: 'xwhite.016',
+        borderColor: 'gray.100',
+        color: 'white',
+      }
+    : {
+        bg: 'transparent',
+        borderColor: 'xwhite.040',
+        color: 'white',
+      }
 
   return (
     <Flex justify="space-between" color="white" {...props}>
@@ -1129,11 +1123,107 @@ export function VotingMilestoneListItem({
           w="10px"
           h="10px"
         />
-        <Text opacity={isPast ? 0.4 : 1}>{label}</Text>
+        <Text opacity={isActive ? 1 : 0.4}>{label}</Text>
       </Stack>
-      <Text ml="auto" opacity={isPast ? 0.4 : 1}>
+      <Text ml="auto" opacity={isActive ? 1 : 0.4}>
         {value}
       </Text>
     </Flex>
+  )
+}
+
+export function FinishDrawer({isLoading, from, available, onFinish, ...props}) {
+  const {t, i18n} = useTranslation()
+
+  return (
+    <Drawer isCloseable={!isLoading} {...props}>
+      <OracleDrawerHeader icon="oracle">
+        {t('Finish Oracles Voting')}
+      </OracleDrawerHeader>
+      <OracleDrawerBody
+        as="form"
+        onSubmit={e => {
+          e.preventDefault()
+          const {fromInput} = e.target.elements
+          onFinish({
+            from: fromInput.value,
+          })
+        }}
+      >
+        <OracleFormHelperText>
+          {t('Finish the voting to declare the winner and pay rewards')}
+        </OracleFormHelperText>
+
+        <OracleFormControl label={t('Transfer from')}>
+          <Input name="fromInput" defaultValue={from} isDisabled />
+          <OracleFormHelper
+            label={t('Available')}
+            value={toLocaleDna(i18n.language)(available)}
+          />
+        </OracleFormControl>
+
+        <PrimaryButton
+          isLoading={isLoading}
+          loadingText={t('Finishing')}
+          type="submit"
+          mt={3}
+          ml="auto"
+        >
+          {t('Finish')}
+        </PrimaryButton>
+      </OracleDrawerBody>
+    </Drawer>
+  )
+}
+
+export function TerminateDrawer({
+  isLoading,
+  from,
+  available,
+  onTerminate,
+  ...props
+}) {
+  const {t, i18n} = useTranslation()
+
+  return (
+    <Drawer isCloseable={!isLoading} {...props}>
+      <OracleDrawerHeader icon="oracle">
+        {t('Terminate Oracles Voting')}
+      </OracleDrawerHeader>
+      <OracleDrawerBody
+        as="form"
+        onSubmit={e => {
+          e.preventDefault()
+          const {fromInput} = e.target.elements
+          onTerminate({
+            from: fromInput.value,
+          })
+        }}
+      >
+        <OracleFormHelperText>
+          {t(
+            'Terminate the contract to clean-up its state and release the stake'
+          )}
+        </OracleFormHelperText>
+
+        <OracleFormControl label={t('Transfer from')}>
+          <Input name="fromInput" defaultValue={from} isDisabled />
+          <OracleFormHelper
+            label={t('Available')}
+            value={toLocaleDna(i18n.language)(available)}
+          />
+        </OracleFormControl>
+
+        <PrimaryButton
+          isLoading={isLoading}
+          loadingText={t('Terminating')}
+          type="submit"
+          mt={3}
+          ml="auto"
+        >
+          {t('Terminate')}
+        </PrimaryButton>
+      </OracleDrawerBody>
+    </Drawer>
   )
 }

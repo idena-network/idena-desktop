@@ -103,7 +103,7 @@ function NewVotingPage() {
     isFreeVoting,
     committeeSize,
     quorum = 20,
-    winnerThreshold = 50,
+    winnerThreshold = 51,
     feePerGas,
     oracleReward,
     isWholeNetwork,

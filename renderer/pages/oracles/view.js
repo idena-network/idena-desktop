@@ -54,6 +54,8 @@ import {
   LaunchDrawer,
   ProlongateDrawer,
   VotingMilestone,
+  TerminateDrawer,
+  FinishDrawer,
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -64,6 +66,7 @@ import {
   hasQuorum,
   hasWinner,
   humanError,
+  isPendingTermination,
   minOracleReward,
   oracleReward,
   quorumVotesCount,
@@ -195,6 +198,11 @@ export default function ViewVotingPage() {
     !didReachQuorum &&
     (dayjs().isAfter(finishCountingDate) || committeeEpoch !== epoch)
 
+  const shouldTerminate =
+    isPendingTermination({finishCountingDate}) &&
+    (eitherIdleState(VotingStatus.Archived) ||
+      (eitherIdleState(VotingStatus.Counting) && !canFinish))
+
   return (
     <>
       <Page pt={8}>
@@ -276,7 +284,10 @@ export default function ViewVotingPage() {
 
               {eitherIdleState(
                 VotingStatus.Counting,
-                VotingStatus.Archived
+                VotingStatus.Finishing,
+                VotingStatus.Archived,
+                VotingStatus.Terminating,
+                VotingStatus.Terminated
               ) && (
                 <VotingSkeleton isLoaded={isLoaded}>
                   <Stack spacing={3}>
@@ -319,15 +330,17 @@ export default function ViewVotingPage() {
                           {t('Vote')}
                         </PrimaryButton>
                       ) : (
-                        <Tooltip
-                          label={t('This vote is not available to you')}
-                          placement="top"
-                        >
-                          {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
-                          <PrimaryButton as={Box} isDisabled>
-                            {t('Vote')}
-                          </PrimaryButton>
-                        </Tooltip>
+                        <Box>
+                          <Tooltip
+                            label={t('This vote is not available to you')}
+                            placement="top"
+                          >
+                            {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
+                            <PrimaryButton as={Box} isDisabled>
+                              {t('Vote')}
+                            </PrimaryButton>
+                          </Tooltip>
+                        </Box>
                       ))}
 
                     {eitherIdleState(VotingStatus.Counting) && canFinish && (
@@ -336,13 +349,12 @@ export default function ViewVotingPage() {
                           `mining.${VotingStatus.Finishing}`
                         )}
                         loadingText={t('Finishing')}
-                        onClick={() =>
-                          send('FINISH_VOTING', {from: identity.address})
-                        }
+                        onClick={() => send('FINISH', {from: identity.address})}
                       >
                         {t('Finish voting')}
                       </PrimaryButton>
                     )}
+
                     {canProlongate && (
                       <PrimaryButton
                         onClick={() => send('REVIEW_PROLONGATE_VOTING')}
@@ -350,6 +362,13 @@ export default function ViewVotingPage() {
                         {t('Prolongate voting')}
                       </PrimaryButton>
                     )}
+
+                    {shouldTerminate && (
+                      <PrimaryButton onClick={() => send('TERMINATE')}>
+                        {t('Terminate')}
+                      </PrimaryButton>
+                    )}
+
                     <SecondaryButton onClick={() => redirect('/oracles/list')}>
                       {t('Close')}
                     </SecondaryButton>
@@ -587,7 +606,7 @@ export default function ViewVotingPage() {
       <AddFundDrawer
         isOpen={isOpenAddFund}
         onClose={onCloseAddFund}
-        from={issuer}
+        from={identity.address}
         to={contractHash}
         available={identity.balance}
         onAddFund={({amount, from}) => {
@@ -619,10 +638,27 @@ export default function ViewVotingPage() {
         }}
       />
 
+      <FinishDrawer
+        isOpen={eitherState(
+          current,
+          `idle.${VotingStatus.Counting}.finish`,
+          `mining.${VotingStatus.Finishing}`
+        )}
+        onClose={() => {
+          send('CANCEL')
+        }}
+        from={identity.address}
+        available={identity.balance}
+        isLoading={current.matches(`mining.${VotingStatus.Finishing}`)}
+        onFinish={({from}) => {
+          send('FINISH', {from})
+        }}
+      />
+
       <ProlongateDrawer
         isOpen={eitherState(
           current,
-          `idle.${VotingStatus.Counting}.review`,
+          `idle.${VotingStatus.Counting}.prolongate`,
           `mining.${VotingStatus.Prolongating}`
         )}
         onClose={() => {
@@ -636,13 +672,31 @@ export default function ViewVotingPage() {
         }}
       />
 
+      <TerminateDrawer
+        isOpen={eitherState(
+          current,
+          `idle.${VotingStatus.Archived}.terminate`,
+          `idle.${VotingStatus.Counting}.terminate`,
+          `mining.${VotingStatus.Terminating}`
+        )}
+        onClose={() => {
+          send('CANCEL')
+        }}
+        from={identity.address}
+        available={identity.balance}
+        isLoading={current.matches(`mining.${VotingStatus.Terminating}`)}
+        onTerminate={({from}) => {
+          send('TERMINATE', {from})
+        }}
+      />
+
       <FloatDebug>{current.value}</FloatDebug>
 
       {global.isDev && (
         <Box position="absolute" bottom={6} right={6}>
           <VotingInspector
             onTerminate={() => {
-              send('TERMINATE_CONTRACT')
+              send('TERMINATE')
             }}
             {...current.context}
           />

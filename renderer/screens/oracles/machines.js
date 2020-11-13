@@ -368,6 +368,7 @@ export const votingMachine = Machine(
           [VotingStatus.Voted]: {},
           [VotingStatus.Counting]: {},
           [VotingStatus.Archived]: {},
+          [VotingStatus.Terminated]: {},
           hist: {
             type: 'history',
           },
@@ -867,18 +868,32 @@ export const createViewVotingMachine = (id, epoch, address) =>
               states: {
                 idle: {
                   on: {
-                    REVIEW_PROLONGATE_VOTING: 'review',
-                    FINISH_VOTING: {
+                    FINISH: 'finish',
+                    REVIEW_PROLONGATE_VOTING: 'prolongate',
+                    TERMINATE: 'terminate',
+                  },
+                },
+                finish: {
+                  on: {
+                    FINISH: {
                       target: `#viewVoting.mining.${VotingStatus.Finishing}`,
                       actions: ['setFinishing', 'persist'],
                     },
                   },
                 },
-                review: {
+                prolongate: {
                   on: {
                     PROLONGATE_VOTING: {
                       target: `#viewVoting.mining.${VotingStatus.Prolongating}`,
                       actions: ['setProlongating', 'persist'],
+                    },
+                  },
+                },
+                terminate: {
+                  on: {
+                    TERMINATE: {
+                      target: `#viewVoting.mining.${VotingStatus.Terminating}`,
+                      actions: ['setTerminating', 'persist'],
                     },
                   },
                 },
@@ -887,7 +902,28 @@ export const createViewVotingMachine = (id, epoch, address) =>
                 CANCEL: '.idle',
               },
             },
-            [VotingStatus.Archived]: {},
+            [VotingStatus.Archived]: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    TERMINATE: 'terminate',
+                  },
+                },
+                terminate: {
+                  on: {
+                    TERMINATE: {
+                      target: `#viewVoting.mining.${VotingStatus.Terminating}`,
+                      actions: ['setTerminating', 'persist'],
+                    },
+                  },
+                },
+              },
+              on: {
+                CANCEL: '.idle',
+              },
+            },
+            [VotingStatus.Terminated]: {},
             hist: {
               type: 'hist',
             },
@@ -901,7 +937,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
               actions: ['selectOption', log()],
             },
             REVIEW: 'review',
-            TERMINATE_CONTRACT: `mining.${VotingStatus.Terminating}`,
           },
         },
         review: {
@@ -930,6 +965,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
         setVoting: setVotingStatus(VotingStatus.Voting),
         setProlongating: setVotingStatus(VotingStatus.Prolongating),
         setFinishing: setVotingStatus(VotingStatus.Finishing),
+        setTerminating: setVotingStatus(VotingStatus.Terminating),
+        setTerminated: setVotingStatus(VotingStatus.Terminated),
         applyVoting: assign((context, {data}) => ({
           ...context,
           ...data,
@@ -1463,13 +1500,60 @@ function votingMiningStates(machineId) {
         },
       },
       [VotingStatus.Terminating]: {
-        invoke: {
-          src: 'terminateContract',
-          onDone: {
-            actions: [log()],
+        initial: 'checkMiningStatus',
+        states: {
+          checkMiningStatus: {
+            on: {
+              '': [
+                {
+                  target: 'submitting',
+                  cond: 'shouldSubmit',
+                },
+                {
+                  target: 'mining',
+                  cond: 'shouldPollStatus',
+                },
+                {
+                  target: `#${machineId}.invalid`,
+                  actions: ['setInvalid', 'persist'],
+                },
+              ],
+            },
           },
-          onError: {
-            actions: ['onError', 'restorePrevStatus', log()],
+          submitting: {
+            invoke: {
+              src: 'terminateContract',
+              onDone: {
+                target: 'mining',
+                actions: ['applyTx', log()],
+              },
+              onError: {
+                target: `#${machineId}.idle.hist`,
+                actions: ['onError', 'restorePrevStatus', log()],
+              },
+            },
+          },
+          mining: {
+            entry: [
+              assign({
+                miningStatus: 'mining',
+              }),
+              'persist',
+            ],
+            invoke: {
+              src: 'pollStatus',
+            },
+            on: {
+              MINED: {
+                target: `#${machineId}.idle.${VotingStatus.Terminated}`,
+                actions: [
+                  'setTerminated',
+                  'clearMiningStatus',
+                  'persist',
+                  log(),
+                ],
+              },
+            },
           },
         },
       },
