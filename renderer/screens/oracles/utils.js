@@ -306,7 +306,7 @@ export function hasQuorum({votesCount, quorum, committeeSize}) {
 }
 
 export function hasWinner({
-  votes,
+  votes = [],
   votesCount,
   winnerThreshold,
   quorum,
@@ -463,3 +463,6 @@ export const humanError = (
       return error
   }
 }
+
+export const isPendingTermination = ({finishCountingDate}) =>
+  dayjs().diff(finishCountingDate, 'd') >= 7
