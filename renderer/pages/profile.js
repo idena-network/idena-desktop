@@ -131,7 +131,7 @@ export default function ProfilePage() {
                     }}
                   >
                     <Text as="span" lineHeight="short" mt="-2px">
-                      {t('Open in blockhain explorer')}
+                      {t('Open in blockchain explorer')}
                     </Text>
                     <Icon
                       name="chevron-down"
