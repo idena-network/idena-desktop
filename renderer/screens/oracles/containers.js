@@ -69,7 +69,7 @@ import {
   votingFinishDate,
   votingMinBalance,
   winnerVotesCount,
-  isPendingTermination,
+  isAllowedToTerminate,
 } from './utils'
 
 export function VotingCard({votingRef, ...props}) {
@@ -971,6 +971,7 @@ export function VotingMilestone({service}) {
     winnerThreshold,
     quorum,
     committeeSize,
+    estimatedTerminationTime,
   } = current.context
 
   const eitherIdleState = (...states) =>
@@ -999,7 +1000,9 @@ export function VotingMilestone({service}) {
       ? [
           t(
             `Waiting for rewards ${
-              isPendingTermination({finishCountingDate}) ? 'or termination' : ''
+              isAllowedToTerminate({estimatedTerminationTime})
+                ? 'or termination'
+                : ''
             }`
           ),
           null,
@@ -1007,7 +1010,9 @@ export function VotingMilestone({service}) {
       : [
           t(
             `Waiting for prolongation ${
-              isPendingTermination({finishCountingDate}) ? 'or termination' : ''
+              isAllowedToTerminate({estimatedTerminationTime})
+                ? 'or termination'
+                : ''
             }`
           ),
           null,

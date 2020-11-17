@@ -66,7 +66,7 @@ import {
   hasQuorum,
   hasWinner,
   humanError,
-  isPendingTermination,
+  isAllowedToTerminate,
   minOracleReward,
   oracleReward,
   quorumVotesCount,
@@ -131,7 +131,6 @@ export default function ViewVotingPage() {
     title,
     desc,
     contractHash,
-    issuer,
     status,
     balance: contractBalance = 0,
     votingMinPayment = 0,
@@ -159,6 +158,7 @@ export default function ViewVotingPage() {
     feePerGas,
     oracleReward: assignedOracleReward = minOracleReward(feePerGas),
     isOracle,
+    estimatedTerminationTime,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -199,9 +199,13 @@ export default function ViewVotingPage() {
     (dayjs().isAfter(finishCountingDate) || committeeEpoch !== epoch)
 
   const shouldTerminate =
-    isPendingTermination({finishCountingDate}) &&
-    (eitherIdleState(VotingStatus.Archived) ||
-      (eitherIdleState(VotingStatus.Counting) && !canFinish))
+    isAllowedToTerminate({estimatedTerminationTime}) &&
+    eitherIdleState(
+      VotingStatus.Open,
+      VotingStatus.Counting,
+      VotingStatus.Voted,
+      VotingStatus.Archived
+    )
 
   return (
     <>
