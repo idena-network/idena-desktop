@@ -225,8 +225,8 @@ export function buildContractDeploymentArgs(
       },
       {value: votingDuration, format: 'uint64'},
       {value: publicVotingDuration, format: 'uint64'},
-      {value: winnerThreshold, format: 'uint64'},
-      {value: quorum, format: 'uint64'},
+      {value: winnerThreshold, format: 'byte'},
+      {value: quorum, format: 'byte'},
       {value: committeeSize, format: 'uint64'},
       {value: maxOptions, format: 'uint64'},
       {
@@ -464,5 +464,5 @@ export const humanError = (
   }
 }
 
-export const isPendingTermination = ({finishCountingDate}) =>
-  dayjs().diff(finishCountingDate, 'd') >= 7
+export const isAllowedToTerminate = ({estimatedTerminationTime}) =>
+  estimatedTerminationTime && dayjs().isAfter(estimatedTerminationTime)
