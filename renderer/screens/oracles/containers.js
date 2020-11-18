@@ -74,6 +74,7 @@ import {
   votingFinishDate,
   votingMinBalance,
   isAllowedToTerminate,
+  hasQuorum,
 } from './utils'
 
 export function VotingCard({votingRef, ...props}) {
@@ -798,7 +799,7 @@ export function VotingResult({votingService, ...props}) {
     selectedOption,
   } = current.context
 
-  const didDecideWinner = hasWinner({
+  const didDetermineWinner = hasWinner({
     votes,
     votesCount,
     winnerThreshold,
@@ -819,7 +820,7 @@ export function VotingResult({votingService, ...props}) {
             value={currentValue}
             max={max}
             isMine={id === selectedOption}
-            isWinner={didDecideWinner && currentValue === max}
+            isWinner={didDetermineWinner && currentValue === max}
           />
         )
       })}
@@ -1017,7 +1018,7 @@ export function LaunchVotingDrawer({votingService}) {
   )
 }
 
-export function VotingMilestone({service}) {
+export function VotingPhase({service}) {
   const {t} = useTranslation()
 
   const [current] = useService(service)
@@ -1038,6 +1039,16 @@ export function VotingMilestone({service}) {
   const eitherIdleState = (...states) =>
     eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase()))
 
+  const didDetermineWinner = hasWinner({
+    votes,
+    votesCount,
+    winnerThreshold,
+    quorum,
+    committeeSize,
+  })
+
+  const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
+
   // eslint-disable-next-line no-nested-ternary
   const [nextPhaseLabel, nextPhaseDate] = eitherIdleState(
     VotingStatus.Deploying,
@@ -1056,11 +1067,18 @@ export function VotingMilestone({service}) {
       )
     ? // eslint-disable-next-line no-nested-ternary
       dayjs().isBefore(finishCountingDate)
-      ? [t('End counting'), finishCountingDate]
-      : hasWinner({votes, votesCount, winnerThreshold, quorum, committeeSize})
+      ? [
+          didDetermineWinner
+            ? t('Waiting for rewards distribution')
+            : t('End counting'),
+          finishCountingDate,
+        ]
+      : didReachQuorum
       ? [
           t(
-            `Waiting for rewards ${
+            `Waiting for ${
+              didDetermineWinner ? 'rewards distribution' : 'refunds'
+            } ${
               isAllowedToTerminate({estimatedTerminationTime})
                 ? 'or termination'
                 : ''
@@ -1121,12 +1139,12 @@ export function VotingMilestone({service}) {
           </PopoverHeader>
           <PopoverBody p={0}>
             <Stack spacing="10px" fontSize="sm">
-              <VotingMilestone.ListItem
+              <VotingPhase.ListItem
                 isActive={eitherIdleState(VotingStatus.Pending)}
                 label={t('Created')}
                 value={new Date(createDate).toLocaleString()}
               />
-              <VotingMilestone.ListItem
+              <VotingPhase.ListItem
                 isActive={eitherIdleState(
                   VotingStatus.Pending,
                   VotingStatus.Open
@@ -1138,7 +1156,7 @@ export function VotingMilestone({service}) {
                     : new Date(startDate).toLocaleString()
                 }
               />
-              <VotingMilestone.ListItem
+              <VotingPhase.ListItem
                 isActive={eitherIdleState(
                   VotingStatus.Pending,
                   VotingStatus.Open,
@@ -1151,7 +1169,7 @@ export function VotingMilestone({service}) {
                     : new Date(finishDate).toLocaleString()
                 }
               />
-              <VotingMilestone.ListItem
+              <VotingPhase.ListItem
                 isActive={eitherIdleState(
                   VotingStatus.Pending,
                   VotingStatus.Open,
@@ -1172,7 +1190,7 @@ export function VotingMilestone({service}) {
     </Flex>
   )
 }
-VotingMilestone.ListItem = VotingMilestoneListItem
+VotingPhase.ListItem = VotingMilestoneListItem
 
 export function VotingMilestoneListItem({label, value, isActive, ...props}) {
   const colorScheme = isActive
