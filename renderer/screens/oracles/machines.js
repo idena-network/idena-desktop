@@ -19,6 +19,8 @@ import {
   votingStatuses,
   fetchContractBalanceUpdates,
   fetchNetworkSize,
+  stripOptions,
+  hasValuableOptions,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
@@ -466,6 +468,7 @@ export const createNewVotingMachine = (epoch, address) =>
         oracleReward: undefined,
         quorum: 20,
         committeeSize: 100,
+        dirtyBag: {},
       },
       initial: 'preload',
       states: {
@@ -506,10 +509,17 @@ export const createNewVotingMachine = (epoch, address) =>
         editing: {
           on: {
             CHANGE: {
-              actions: ['setContractParams', log()],
+              actions: ['setContractParams', 'setDirty', log()],
+            },
+            SET_DIRTY: {
+              actions: 'setDirty',
             },
             SET_OPTIONS: {
-              actions: ['setOptions', log()],
+              actions: [
+                'setOptions',
+                send({type: 'SET_DIRTY', id: 'options'}),
+                log(),
+              ],
             },
             ADD_OPTION: {
               actions: ['addOption'],
@@ -527,10 +537,36 @@ export const createNewVotingMachine = (epoch, address) =>
                 actions: [assign({isWholeNetwork: false})],
               },
             ],
-            PUBLISH: {
-              target: 'publishing',
-              actions: [log()],
-            },
+            PUBLISH: [
+              {
+                target: 'publishing',
+                actions: [log()],
+                cond: 'isValidForm',
+              },
+              {
+                actions: [
+                  'onInvalidForm',
+                  send(
+                    ({
+                      options,
+                      startDate,
+                      shouldStartImmediately,
+                      ...context
+                    }) => ({
+                      type: 'SET_DIRTY',
+                      ids: [
+                        hasValuableOptions(options) ? null : 'options',
+                        shouldStartImmediately || startDate
+                          ? null
+                          : 'startDate',
+                        ...['title', 'desc'].filter(f => !context[f]),
+                      ].filter(v => v),
+                    })
+                  ),
+                  log(),
+                ],
+              },
+            ],
           },
           initial: 'idle',
           states: {
@@ -595,17 +631,17 @@ export const createNewVotingMachine = (epoch, address) =>
                       },
                       on: {
                         MINED: [
-                              {
-                                actions: [
-                                  send((_, {from, balance}) => ({
-                                    type: 'START_VOTING',
-                                    from,
-                                    balance,
-                                  })),
-                                ],
-                                cond: 'shouldStartImmediately',
-                              },
-                              {
+                          {
+                            actions: [
+                              send((_, {from, balance}) => ({
+                                type: 'START_VOTING',
+                                from,
+                                balance,
+                              })),
+                            ],
+                            cond: 'shouldStartImmediately',
+                          },
+                          {
                             target: 'persist',
                             actions: ['setPending', log()],
                           },
@@ -616,8 +652,8 @@ export const createNewVotingMachine = (epoch, address) =>
                       invoke: {
                         src: 'persist',
                         onDone: {
-                                actions: [send('DONE')],
-                              },
+                          actions: [send('DONE')],
+                        },
                         onError: {
                           actions: ['onError', send('EDIT'), log()],
                         },
@@ -720,6 +756,19 @@ export const createNewVotingMachine = (epoch, address) =>
         removeOption: assign({
           options: ({options}, {id}) => options.filter(o => o.id !== id),
         }),
+        setDirty: assign({
+          dirtyBag: ({dirtyBag}, {id, ids = []}) => ({
+            ...dirtyBag,
+            [id]: true,
+            ...ids.reduce(
+              (acc, curr) => ({
+                ...acc,
+                [curr]: true,
+              }),
+              {}
+            ),
+          }),
+        }),
         setPending: setVotingStatus(VotingStatus.Pending),
         setRunning: setVotingStatus(VotingStatus.Open),
         // eslint-disable-next-line no-shadow
@@ -754,7 +803,7 @@ export const createNewVotingMachine = (epoch, address) =>
           const nextVoting = {
             ...voting,
             id: contract,
-            options: voting.options.filter(({value}) => Boolean(value)),
+            options: stripOptions(voting.options),
             contractHash: contract,
             issuer: address,
             createDate: Date.now(),
@@ -799,6 +848,19 @@ export const createNewVotingMachine = (epoch, address) =>
       guards: {
         shouldStartImmediately: ({shouldStartImmediately}) =>
           shouldStartImmediately,
+        isValidForm: ({
+          title,
+          desc,
+          options,
+          startDate,
+          shouldStartImmediately,
+          committeeSize,
+        }) =>
+          title &&
+          desc &&
+          hasValuableOptions(options) &&
+          (startDate || shouldStartImmediately) &&
+          Number(committeeSize) > 0,
       },
     }
   )
@@ -853,6 +915,10 @@ export const createViewVotingMachine = (id, epoch, address) =>
                   {
                     target: VotingStatus.Archived,
                     cond: 'isArchived',
+                  },
+                  {
+                    target: VotingStatus.Terminated,
+                    cond: 'isTerminated',
                   },
                   {
                     target: `#viewVoting.${VotingStatus.Invalid}`,
@@ -1645,6 +1711,7 @@ function votingStatusGuards() {
     isVoting: isVotingStatus(VotingStatus.Voting),
     isFinishing: isVotingStatus(VotingStatus.Finishing),
     isArchived: isVotingStatus(VotingStatus.Archived),
+    isTerminated: isVotingStatus(VotingStatus.Terminated),
     shouldSubmit: ({miningStatus}) => !miningStatus,
     shouldPollStatus: ({miningStatus}) => miningStatus === 'mining',
   }

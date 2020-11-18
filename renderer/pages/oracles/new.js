@@ -45,6 +45,7 @@ import {
   quorumVotesCount,
   viewVotingHref,
   humanError,
+  hasValuableOptions,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -92,24 +93,41 @@ function NewVotingPage() {
           ),
         })
       },
+      onInvalidForm: () => {
+        toast({
+          // eslint-disable-next-line react/display-name
+          render: () => (
+            <Toast title={t('Please correct form fields')} status="error" />
+          ),
+        })
+      },
     },
   })
 
   const {
+    title,
+    desc,
+    options,
+    startDate,
     votingDuration,
     publicVotingDuration,
-    options,
     shouldStartImmediately,
     isFreeVoting,
     committeeSize,
     quorum = 20,
-    winnerThreshold = 51,
+    winnerThreshold = 66,
     feePerGas,
     oracleReward,
     isWholeNetwork,
     oracleRewardsEstimates,
     ownerFee = 0,
+    dirtyBag,
   } = current.context
+
+  const isInvalid = (field, cond = current.context[field]) =>
+    dirtyBag[field] && !cond
+
+  const isInvalidOptions = isInvalid('options', hasValuableOptions(options))
 
   const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
   const dna = toLocaleDna(i18n)
@@ -131,18 +149,35 @@ function NewVotingPage() {
 
         {!current.matches('preload') && (
           <Stack spacing={3} w="xl">
-            <VotingInlineFormControl htmlFor="title" label={t('Title')}>
-              <Input id="title" onChange={handleChange} />
+            <VotingInlineFormControl
+              htmlFor="title"
+              label={t('Title')}
+              isInvalid={isInvalid('title')}
+            >
+              <Input id="title" value={title} onChange={handleChange} />
             </VotingInlineFormControl>
 
-            <VotingInlineFormControl htmlFor="desc" label={t('Description')}>
-              <Textarea id="desc" w="md" h={32} onChange={handleChange} />
+            <VotingInlineFormControl
+              htmlFor="desc"
+              label={t('Description')}
+              isInvalid={isInvalid('desc')}
+            >
+              <Textarea
+                id="desc"
+                value={desc}
+                w="md"
+                h={32}
+                onChange={handleChange}
+              />
             </VotingInlineFormControl>
 
-            <VotingInlineFormControl label={t('Voting options')}>
+            <VotingInlineFormControl
+              label={t('Voting options')}
+              isInvalid={isInvalidOptions}
+            >
               <Box
-                borderWidth={1}
-                borderColor="gray.300"
+                borderWidth={isInvalidOptions ? '2px' : 1}
+                borderColor={isInvalidOptions ? 'red.500' : 'gray.300'}
                 borderRadius="md"
                 p={1}
                 w="md"
@@ -162,6 +197,7 @@ function NewVotingPage() {
                     onRemoveOption={() => {
                       send('REMOVE_OPTION', {id})
                     }}
+                    _invalid={null}
                   />
                 ))}
               </Box>
@@ -171,12 +207,17 @@ function NewVotingPage() {
               htmlFor="startDate"
               label={t('Start date')}
               isDisabled={shouldStartImmediately}
+              isInvalid={isInvalid(
+                'startDate',
+                startDate || shouldStartImmediately
+              )}
               mt={4}
             >
               <Stack spacing={3} flex={1}>
                 <Input
                   id="startDate"
                   type="datetime-local"
+                  value={startDate}
                   onChange={handleChange}
                 />
                 <Checkbox
@@ -212,6 +253,7 @@ function NewVotingPage() {
             <VotingInlineFormControl
               htmlFor="committeeSize"
               label={t('Committee size')}
+              isInvalid={committeeSize < 1}
               mt={2}
             >
               <Stack spacing={3} flex={1}>
@@ -219,6 +261,7 @@ function NewVotingPage() {
                   id="committeeSize"
                   type="number"
                   value={committeeSize}
+                  min={1}
                   isDisabled={isWholeNetwork}
                   onChange={handleChange}
                 />
@@ -362,6 +405,7 @@ function NewVotingPage() {
           </Stack>
         )}
       </Box>
+
       <Stack
         isInline
         mt="auto"

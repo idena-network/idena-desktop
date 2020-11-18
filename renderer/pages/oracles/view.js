@@ -6,7 +6,6 @@ import {
   Heading,
   RadioGroup,
   Flex,
-  Divider,
   Icon,
   Stat,
   StatNumber,
@@ -30,6 +29,7 @@ import {
   Toast,
   Tooltip,
   HDivider,
+  VDivider,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
@@ -182,16 +182,16 @@ export default function ViewVotingPage() {
     ownerFee,
   })
 
+  const didDecideWinner = hasWinner({
+    votes,
+    votesCount,
+    winnerThreshold,
+    quorum,
+    committeeSize,
+  })
+
   const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
-  const canFinish =
-    dayjs().isAfter(finishCountingDate) &&
-    hasWinner({
-      votes,
-      votesCount,
-      winnerThreshold,
-      quorum,
-      committeeSize,
-    })
+  const canFinish = dayjs().isAfter(finishCountingDate) && didDecideWinner
 
   const canProlongate =
     eitherIdleState(VotingStatus.Counting) &&
@@ -301,10 +301,10 @@ export default function ViewVotingPage() {
                 <VotingSkeleton isLoaded={isLoaded}>
                   <Stack spacing={3}>
                     <Text color="muted" fontSize="sm">
-                      {t('Results')}
+                      {t('Current results')}
                     </Text>
                     {actualVotesCount ? (
-                      <VotingResult spacing={3} {...current.context} />
+                      <VotingResult votingService={service} spacing={3} />
                     ) : (
                       <Text
                         bg="gray.50"
@@ -373,7 +373,10 @@ export default function ViewVotingPage() {
                     )}
 
                     {shouldTerminate && (
-                      <PrimaryButton onClick={() => send('TERMINATE')}>
+                      <PrimaryButton
+                        variantColor="red"
+                        onClick={() => send('TERMINATE')}
+                      >
                         {t('Terminate')}
                       </PrimaryButton>
                     )}
@@ -382,25 +385,14 @@ export default function ViewVotingPage() {
                       {t('Close')}
                     </SecondaryButton>
                   </Stack>
-                  <Stack isInline spacing={3}>
-                    <Divider
-                      orientation="vertical"
-                      borderColor="gray.300"
-                      borderLeft="1px"
-                    />
+                  <Stack isInline spacing={3} align="center">
+                    {!didDecideWinner && (
+                      <Text color="red.500">{t('No winner selected')}</Text>
+                    )}
+                    <VDivider />
                     <Stack isInline spacing={2} align="center">
                       <Icon
-                        name={
-                          hasWinner({
-                            votes,
-                            votesCount,
-                            winnerThreshold,
-                            quorum,
-                            committeeSize,
-                          })
-                            ? 'user-tick'
-                            : 'user'
-                        }
+                        name={didDecideWinner ? 'user-tick' : 'user'}
                         color="muted"
                         w={4}
                         h={4}
@@ -450,7 +442,7 @@ export default function ViewVotingPage() {
                           )
 
                           const txCost =
-                            (isSender ? 0 : -amount) + balanceChange
+                            (isSender ? -amount : 0) + balanceChange
                           const totalTxCost = txCost - (fee + tips)
 
                           const isCredit = totalTxCost > 0
