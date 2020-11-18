@@ -482,7 +482,7 @@ function ValidationSession({
         flips={flips.filter(solvableFlips)}
         reportedFlipsCount={reportedFlipsCount}
         availableReportsCount={availableReportsNumber(longFlips)}
-        isOpen={state.matches('longSession.solve.answer.review.reviewing')}
+        isOpen={state.matches('longSession.solve.answer.review')}
         isSubmitting={isSubmitting(state)}
         onSubmit={() => send('SUBMIT')}
         onMisingAnswers={() => {
@@ -515,7 +515,7 @@ function isLongSessionFlips(state) {
 }
 
 function isLongSessionKeywords(state) {
-  return ['keywords', 'review', 'submitLongSession']
+  return ['keywords', 'submitLongSession']
     .map(substate => `longSession.solve.answer.${substate}`)
     .some(state.matches)
 }

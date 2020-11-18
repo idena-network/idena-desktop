@@ -798,23 +798,7 @@ export const createValidationMachine = ({
                           actions: ['toggleKeywords', log()],
                         },
                         SUBMIT: 'review',
-                      },
-                    },
-                    review: {
-                      initial: 'reviewing',
-                      states: {
-                        reviewing: {
-                          on: {
-                            SUBMIT:
-                              '#validation.longSession.solve.answer.submitLongSession',
-                            CANCEL: 'idle',
-                          },
-                        },
-                        idle: {on: {SUBMIT: 'reviewing'}},
-                      },
-                      on: {
-                        CHECK_FLIPS: {
-                          target: 'flips',
+                        PICK_INDEX: {
                           actions: [
                             send((_, {index}) => ({
                               type: 'PICK',
@@ -822,7 +806,30 @@ export const createValidationMachine = ({
                             })),
                           ],
                         },
+                      },
+                    },
+                    review: {
+                      on: {
+                        CHECK_FLIPS: {
+                          target: 'keywords',
+                          actions: [
+                            send((_, {index}) => ({
+                              type: 'PICK_INDEX',
+                              index,
+                            })),
+                          ],
+                        },
                         CHECK_REPORTS: 'keywords',
+                        SUBMIT: 'submitLongSession',
+                        CANCEL: {
+                          target: 'keywords',
+                          actions: [
+                            send(({currentIndex}) => ({
+                              type: 'PICK_INDEX',
+                              index: currentIndex,
+                            })),
+                          ],
+                        },
                       },
                     },
                     submitLongSession: {
