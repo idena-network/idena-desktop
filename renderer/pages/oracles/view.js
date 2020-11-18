@@ -236,7 +236,7 @@ export default function ViewVotingPage() {
                     <Heading isTruncated fontSize={rem(21)} fontWeight={500}>
                       {title}
                     </Heading>
-                    <Text isTruncated lineHeight="tall">
+                    <Text isTruncated lineHeight="tall" whiteSpace="pre-wrap">
                       {desc}
                     </Text>
                   </Stack>
