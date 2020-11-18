@@ -801,6 +801,17 @@ export const createValidationMachine = ({
                       },
                     },
                     review: {
+                      initial: 'reviewing',
+                      states: {
+                        reviewing: {
+                          on: {
+                            SUBMIT:
+                              '#validation.longSession.solve.answer.submitLongSession',
+                            CANCEL: 'idle',
+                          },
+                        },
+                        idle: {on: {SUBMIT: 'reviewing'}},
+                      },
                       on: {
                         CHECK_FLIPS: {
                           target: 'flips',
@@ -812,7 +823,6 @@ export const createValidationMachine = ({
                           ],
                         },
                         CHECK_REPORTS: 'keywords',
-                        SUBMIT: 'submitLongSession',
                       },
                     },
                     submitLongSession: {
@@ -896,7 +906,7 @@ export const createValidationMachine = ({
         },
         validationSucceeded: {
           type: 'final',
-          entry: log('VALIDATION SUCCEEDED'),
+          entry: ['onValidationSucceeded', log('VALIDATION SUCCEEDED')],
         },
       },
     },
