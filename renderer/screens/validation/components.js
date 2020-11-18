@@ -748,29 +748,6 @@ export function SubmitFailedDialog(props) {
   )
 }
 
-export function ValidationSucceededDialog(props) {
-  const {t} = useTranslation()
-  return (
-    <ValidationDialog
-      title={t('Wait for validation results')}
-      submitText={t('Go to My Idena')}
-      {...props}
-    >
-      <ValidationDialogBody>
-        <Text>
-          {t(`Your answers for the qualification session have been submited
-          successfully!`)}
-        </Text>
-        <Text>
-          {t(`Please wait for the validation results. It will take some time for
-          network to reach consensus about the list of validated accounts. You
-          can find the validation end time on the left panel.`)}
-        </Text>
-      </ValidationDialogBody>
-    </ValidationDialog>
-  )
-}
-
 export function ValidationFailedDialog(props) {
   const {t} = useTranslation()
   return (
@@ -978,6 +955,7 @@ export function ReviewValidationDialog({
   onSubmit,
   onMisingAnswers,
   onMisingReports,
+  onCancel,
   ...props
 }) {
   const {t} = useTranslation()
@@ -988,12 +966,7 @@ export function ReviewValidationDialog({
   const areReportsMissing = reportedFlipsCount < availableReportsCount
 
   return (
-    <Dialog
-      closeOnOverlayClick={false}
-      closeOnEsc={false}
-      title={t('Submit the answers')}
-      {...props}
-    >
+    <Dialog title={t('Submit the answers')} onClose={onCancel} {...props}>
       <ValidationDialogBody>
         <Stack spacing={6}>
           <Stack spacing={4}>
@@ -1038,7 +1011,7 @@ export function ReviewValidationDialog({
                     >
                       all available reports
                     </ReviewValidationDialog.LinkButton>
-                    .
+                    for the worst flips.
                   </Trans>
                 )}
               </Text>
@@ -1062,6 +1035,7 @@ export function ReviewValidationDialog({
         </Stack>
       </ValidationDialogBody>
       <DialogFooter {...props}>
+        <SecondaryButton onClick={onCancel}>{t('Cancel')}</SecondaryButton>
         <PrimaryButton
           isLoading={isSubmitting}
           loadingText={t('Submitting answers...')}

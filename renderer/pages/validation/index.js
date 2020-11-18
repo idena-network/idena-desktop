@@ -48,7 +48,6 @@ import {
   WelcomeKeywordsQualificationDialog,
   ValidationTimer,
   ValidationFailedDialog,
-  ValidationSucceededDialog,
   SubmitFailedDialog,
   FailedFlipAnnotation,
   ReviewValidationDialog,
@@ -129,6 +128,9 @@ function ValidationSession({
       onExceededReports: () => {
         onOpenExceededTooltip()
         setTimeout(onCloseExceededTooltip, 3000)
+      },
+      onValidationSucceeded: () => {
+        router.push('/profile')
       },
     },
     state: loadValidationState(),
@@ -419,13 +421,6 @@ function ValidationSession({
         />
       )}
 
-      {state.matches('validationSucceeded') && (
-        <ValidationSucceededDialog
-          isOpen
-          onSubmit={() => router.push('/profile')}
-        />
-      )}
-
       {state.matches('validationFailed') && (
         <ValidationFailedDialog
           isOpen
@@ -498,6 +493,9 @@ function ValidationSession({
         }}
         onMisingReports={() => {
           send('CHECK_REPORTS')
+        }}
+        onCancel={() => {
+          send('CANCEL')
         }}
       />
 
