@@ -236,10 +236,12 @@ export default function ViewVotingPage() {
                   px={10}
                 >
                   <Stack spacing={4}>
-                    <Heading fontSize={rem(21)} fontWeight={500}>
+                    <Heading isTruncated fontSize={rem(21)} fontWeight={500}>
                       {title}
                     </Heading>
-                    <Text lineHeight="tall">{desc}</Text>
+                    <Text isTruncated lineHeight="tall">
+                      {desc}
+                    </Text>
                   </Stack>
                   <GoogleTranslateButton
                     phrases={[
