@@ -39,6 +39,7 @@ import {
 } from '../../shared/components/button'
 import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
+  FillCenter,
   SmallText,
   VotingBadge,
   VotingOption,
@@ -421,7 +422,9 @@ export default function ViewVotingPage() {
                       <TableRow>
                         <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
                         <TableHeaderCol>{t('Date and time')}</TableHeaderCol>
-                        <TableHeaderCol>{t('iDNA value')}</TableHeaderCol>
+                        <TableHeaderCol className="text-right">
+                          {t('Amount')}
+                        </TableHeaderCol>
                       </TableRow>
                     </thead>
                     <tbody>
@@ -495,7 +498,7 @@ export default function ViewVotingPage() {
                                   {new Date(timestamp).toLocaleString()}
                                 </Text>
                               </TableCol>
-                              <TableCol>
+                              <TableCol className="text-right">
                                 <Text color={color} overflowWrap="break-word">
                                   {toLocaleDna(i18n.language, {
                                     signDisplay: 'exceptZero',
@@ -510,6 +513,24 @@ export default function ViewVotingPage() {
                             </TableRow>
                           )
                         }
+                      )}
+                      {balanceUpdates.length === 0 && (
+                        <tr>
+                          <td colSpan={3}>
+                            <FillCenter py={12}>
+                              <Stack spacing={4} align="center">
+                                <Icon
+                                  name="coins-lg"
+                                  size={20}
+                                  color="gray.300"
+                                />
+                                <Text color="muted">
+                                  {t('No transactions')}
+                                </Text>
+                              </Stack>
+                            </FillCenter>
+                          </td>
+                        </tr>
                       )}
                     </tbody>
                   </Table>
