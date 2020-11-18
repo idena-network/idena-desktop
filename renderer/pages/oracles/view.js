@@ -53,7 +53,7 @@ import {
   VotingResult,
   LaunchDrawer,
   ProlongateDrawer,
-  VotingMilestone,
+  VotingPhase,
   TerminateDrawer,
   FinishDrawer,
 } from '../../screens/oracles/containers'
@@ -182,7 +182,7 @@ export default function ViewVotingPage() {
     ownerFee,
   })
 
-  const didDecideWinner = hasWinner({
+  const didDetermineWinner = hasWinner({
     votes,
     votesCount,
     winnerThreshold,
@@ -191,21 +191,17 @@ export default function ViewVotingPage() {
   })
 
   const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
-  const canFinish = dayjs().isAfter(finishCountingDate) && didDecideWinner
+
+  const canFinish =
+    didDetermineWinner ||
+    (dayjs().isAfter(finishCountingDate) && didReachQuorum)
 
   const canProlongate =
-    eitherIdleState(VotingStatus.Counting) &&
-    !didReachQuorum &&
-    (dayjs().isAfter(finishCountingDate) || committeeEpoch !== epoch)
+    committeeEpoch !== epoch ||
+    !didDetermineWinner ||
+    (!didReachQuorum && dayjs().isAfter(finishCountingDate))
 
-  const shouldTerminate =
-    isAllowedToTerminate({estimatedTerminationTime}) &&
-    eitherIdleState(
-      VotingStatus.Open,
-      VotingStatus.Counting,
-      VotingStatus.Voted,
-      VotingStatus.Archived
-    )
+  const shouldTerminate = isAllowedToTerminate({estimatedTerminationTime})
 
   return (
     <>
@@ -252,7 +248,7 @@ export default function ViewVotingPage() {
                     alignSelf="start"
                   />
                   <HDivider />
-                  {isLoaded && <VotingMilestone service={service} />}
+                  {isLoaded && <VotingPhase service={service} />}
                 </Stack>
               </VotingSkeleton>
 
@@ -362,17 +358,20 @@ export default function ViewVotingPage() {
                         loadingText={t('Finishing')}
                         onClick={() => send('FINISH', {from: identity.address})}
                       >
-                        {t('Finish voting')}
+                        {didDetermineWinner
+                          ? t('Distribute rewards')
+                          : t('Refund')}
                       </PrimaryButton>
                     )}
 
-                    {canProlongate && (
-                      <PrimaryButton
-                        onClick={() => send('REVIEW_PROLONGATE_VOTING')}
-                      >
-                        {t('Prolongate voting')}
-                      </PrimaryButton>
-                    )}
+                    {eitherIdleState(VotingStatus.Counting) &&
+                      canProlongate && (
+                        <PrimaryButton
+                          onClick={() => send('REVIEW_PROLONGATE_VOTING')}
+                        >
+                          {t('Prolongate voting')}
+                        </PrimaryButton>
+                      )}
 
                     {shouldTerminate && (
                       <PrimaryButton
@@ -388,13 +387,13 @@ export default function ViewVotingPage() {
                     </SecondaryButton>
                   </Stack>
                   <Stack isInline spacing={3} align="center">
-                    {!didDecideWinner && (
+                    {!didDetermineWinner && (
                       <Text color="red.500">{t('No winner selected')}</Text>
                     )}
                     <VDivider />
                     <Stack isInline spacing={2} align="center">
                       <Icon
-                        name={didDecideWinner ? 'user-tick' : 'user'}
+                        name={didDetermineWinner ? 'user-tick' : 'user'}
                         color="muted"
                         w={4}
                         h={4}
