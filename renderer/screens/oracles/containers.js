@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
+import Link from 'next/link'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
 import {useService} from '@xstate/react'
@@ -46,6 +47,7 @@ import {
   Tooltip,
 } from '../../shared/components/components'
 import {VotingStatus} from '../../shared/types'
+
 import {
   VotingBadge,
   OracleDrawerHeader,
@@ -61,7 +63,6 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from '../../shared/components/button'
-import {Link} from '../../shared/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {
   createContractDataReader,
@@ -133,7 +134,13 @@ export function VotingCard({votingRef, ...props}) {
       <Stack isInline spacing={2} mb={3} align="center">
         <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
         <Link href={viewHref}>
-          <VotingBadge align="center" bg="gray.50" color="muted" pl="1/2">
+          <VotingBadge
+            align="center"
+            bg="gray.50"
+            color="muted"
+            cursor="pointer"
+            pl="1/2"
+          >
             <Avatar
               address={contractHash}
               bg="white"
@@ -149,11 +156,17 @@ export function VotingCard({votingRef, ...props}) {
         </Link>
       </Stack>
       <Link href={viewHref}>
-        <Text fontSize="base" fontWeight={500} mb={2}>
+        <Text
+          isTruncated
+          fontSize="base"
+          fontWeight={500}
+          cursor="pointer"
+          mb={2}
+        >
           {title}
         </Text>
       </Link>
-      <Text color="muted" mb={4}>
+      <Text isTruncated color="muted" mb={4}>
         {desc}
       </Text>
       {eitherIdleState(
@@ -241,6 +254,7 @@ export function VotingCard({votingRef, ...props}) {
           {eitherIdleState(
             VotingStatus.Voted,
             VotingStatus.Archived,
+            VotingStatus.Terminated,
             VotingStatus.Counting
           ) && (
             <PrimaryButton onClick={() => router.push(viewHref)}>
@@ -831,7 +845,7 @@ function VotingResultBar({label, value, max, isMine, isWinner, ...props}) {
         borderRadius="md"
         bg={isWinner ? 'blue.012' : 'gray.50'}
         h={6}
-        width={percentage > 0 ? `${percentage * 100}%` : 1}
+        width={percentage > 0 ? `${percentage * 100}%` : 2}
         position="absolute"
         left={0}
         top={0}
@@ -839,7 +853,9 @@ function VotingResultBar({label, value, max, isMine, isWinner, ...props}) {
         zIndex="base"
       />
       <Stack isInline spacing={1} align="center" zIndex={1}>
-        <Text>{label}</Text>
+        <Text isTruncated maxW="sm" title={label.length > 50 ? label : ''}>
+          {label}
+        </Text>
         {isMine && <Icon name="ok" size={4} color="brandBlue.500" />}
       </Stack>
       <Text fontWeight={500} textTransform="initial" zIndex={1}>
