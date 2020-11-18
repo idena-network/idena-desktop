@@ -30,7 +30,12 @@ import {
   PopoverBody,
 } from '@chakra-ui/core'
 import dayjs from 'dayjs'
-import {toLocaleDna, eitherState, callRpc} from '../../shared/utils/utils'
+import {
+  toLocaleDna,
+  eitherState,
+  callRpc,
+  toPercent,
+} from '../../shared/utils/utils'
 import {
   Avatar,
   Debug,
@@ -42,7 +47,6 @@ import {
 } from '../../shared/components/components'
 import {VotingStatus} from '../../shared/types'
 import {
-  VotingResultBar,
   VotingBadge,
   OracleDrawerHeader,
   OracleDrawerBody,
@@ -68,7 +72,6 @@ import {
   viewVotingHref,
   votingFinishDate,
   votingMinBalance,
-  winnerVotesCount,
   isAllowedToTerminate,
 } from './utils'
 
@@ -153,13 +156,17 @@ export function VotingCard({votingRef, ...props}) {
       <Text color="muted" mb={4}>
         {desc}
       </Text>
-      {eitherIdleState(VotingStatus.Archived, VotingStatus.Counting) && (
+      {eitherIdleState(
+        VotingStatus.Archived,
+        VotingStatus.Terminated,
+        VotingStatus.Counting
+      ) && (
         <Stack spacing={2} mb={6}>
           <Text color="muted" fontSize="sm">
             {t('Results')}
           </Text>
           {actualVotesCount ? (
-            <VotingResult {...current.context} />
+            <VotingResult votingService={votingRef} {...current.context} />
           ) : (
             // eslint-disable-next-line no-shadow
             <Text
@@ -764,43 +771,81 @@ export const VotingFilter = React.forwardRef(
 )
 VotingFilter.displayName = 'VotingFilter'
 
-export function VotingResult({
-  options,
-  votes = [],
-  votesCount,
-  voteProofsCount,
-  actualVotesCount = votesCount || voteProofsCount,
-  winnerThreshold,
-  committeeSize,
-  quorum,
-  ...props
-}) {
-  const maxCount = Math.max(...votes.map(({count}) => count))
+export function VotingResult({votingService, ...props}) {
+  const [current] = useService(votingService)
+
+  const {
+    options,
+    votes = [],
+    votesCount,
+    winnerThreshold,
+    committeeSize,
+    quorum,
+    selectedOption,
+  } = current.context
+
+  const didDecideWinner = hasWinner({
+    votes,
+    votesCount,
+    winnerThreshold,
+    quorum,
+    committeeSize,
+  })
+
+  const max = Math.max(...votes.map(({count}) => count))
 
   return (
-    <Stack {...props} title="">
+    <Stack {...props}>
       {options.map(({id, value}) => {
-        const optionScore = votes.find(v => v.option === id)?.count ?? 0
-        const isWinner =
-          hasWinner({
-            votes,
-            votesCount,
-            winnerThreshold,
-            quorum,
-            committeeSize,
-          }) && optionScore >= winnerVotesCount({winnerThreshold, votesCount})
+        const currentValue = votes.find(v => v.option === id)?.count ?? 0
         return (
           <VotingResultBar
             key={id}
             label={value}
-            value={optionScore}
-            percentage={optionScore / actualVotesCount}
-            isMax={maxCount === optionScore}
-            isWinner={isWinner}
+            value={currentValue}
+            max={max}
+            isMine={id === selectedOption}
+            isWinner={didDecideWinner && currentValue === max}
           />
         )
       })}
     </Stack>
+  )
+}
+
+function VotingResultBar({label, value, max, isMine, isWinner, ...props}) {
+  const percentage = value / max
+
+  return (
+    <Flex
+      align="center"
+      justify="space-between"
+      textTransform="capitalize"
+      position="relative"
+      px={2}
+      h={6}
+      w="full"
+      {...props}
+    >
+      <Box
+        borderRadius="md"
+        bg={isWinner ? 'blue.012' : 'gray.50'}
+        h={6}
+        width={percentage > 0 ? `${percentage * 100}%` : 1}
+        position="absolute"
+        left={0}
+        top={0}
+        bottom={0}
+        zIndex="base"
+      />
+      <Stack isInline spacing={1} align="center" zIndex={1}>
+        <Text>{label}</Text>
+        {isMine && <Icon name="ok" size={4} color="brandBlue.500" />}
+      </Stack>
+      <Text fontWeight={500} textTransform="initial" zIndex={1}>
+        {toPercent(percentage)} ({value})
+      </Text>
+    </Flex>
   )
 }
 
@@ -842,7 +887,7 @@ export function LaunchDrawer({
             <DnaInput
               name="balanceInput"
               defaultValue={requiredBalance - balance}
-              step={10 ** -14}
+              step="any"
             />
             <OracleFormHelper
               label={t('Minimum deposit required')}

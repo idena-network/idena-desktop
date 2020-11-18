@@ -29,7 +29,6 @@ import {
   Input,
   HDivider,
 } from '../../shared/components/components'
-import {toPercent} from '../../shared/utils/utils'
 
 export function OracleDrawerHeader({
   icon,
@@ -110,47 +109,6 @@ export function VotingBadge(props) {
       px={3}
       {...props}
     />
-  )
-}
-
-export function VotingResultBar({
-  label,
-  value,
-  percentage,
-  isMax,
-  isWinner,
-  ...props
-}) {
-  return (
-    <Flex
-      align="center"
-      justify="space-between"
-      textTransform="capitalize"
-      position="relative"
-      px={2}
-      h={6}
-      w="full"
-      {...props}
-    >
-      <Box
-        borderRadius="md"
-        bg={isMax ? 'blue.012' : 'gray.50'}
-        h={6}
-        width={percentage > 0 ? `${percentage * 100}%` : 1}
-        position="absolute"
-        left={0}
-        top={0}
-        bottom={0}
-        zIndex="base"
-      />
-      <Stack isInline spacing={1} align="center">
-        <Text>{label}</Text>
-        {isWinner && <Icon name="ok" size={4} color="brandBlue.500" />}
-      </Stack>
-      <Text fontWeight={500} textTransform="initial">
-        {toPercent(percentage)} ({value})
-      </Text>
-    </Flex>
   )
 }
 

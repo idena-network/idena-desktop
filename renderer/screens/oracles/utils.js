@@ -192,7 +192,7 @@ export function buildContractDeploymentArgs(
     startDate,
     votingDuration,
     publicVotingDuration,
-    winnerThreshold,
+    winnerThreshold = 66,
     quorum,
     committeeSize,
     votingMinPayment = 0,
@@ -216,7 +216,7 @@ export function buildContractDeploymentArgs(
         value: `0x${objectToHex({
           title,
           desc,
-          options: options.filter(({value}) => Boolean(value)),
+          options: stripOptions(options),
         })}`,
       },
       {
@@ -466,3 +466,11 @@ export const humanError = (
 
 export const isAllowedToTerminate = ({estimatedTerminationTime}) =>
   estimatedTerminationTime && dayjs().isAfter(estimatedTerminationTime)
+
+export function stripOptions(options) {
+  return options.filter(({value}) => Boolean(value))
+}
+
+export function hasValuableOptions(options) {
+  return stripOptions(options).length > 0
+}
