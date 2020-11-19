@@ -69,7 +69,6 @@ import {
   createContractReadonlyCaller,
   hasWinner,
   humanizeDuration,
-  minOracleReward,
   viewVotingHref,
   votingFinishDate,
   votingMinBalance,
@@ -738,7 +737,6 @@ export function VotingDurationInput({service, ...props}) {
         // eslint-disable-next-line react/destructuring-assignment
         duration: humanizeDuration(props.value),
       })}
-      customText={t('Blocks')}
       onChangePreset={value => {
         send('CHANGE', {id: props.id, value})
       }}
@@ -987,8 +985,8 @@ export function LaunchVotingDrawer({votingService}) {
 
   const {
     balance,
-    feePerGas,
-    oracleReward = minOracleReward(feePerGas),
+    minOracleReward,
+    oracleReward,
     committeeSize,
   } = current.context
 
@@ -1004,9 +1002,8 @@ export function LaunchVotingDrawer({votingService}) {
       }}
       balance={Number(balance)}
       requiredBalance={votingMinBalance({
-        oracleReward,
+        oracleReward: Math.max(minOracleReward, oracleReward),
         committeeSize,
-        feePerGas,
       })}
       from={identity.address}
       available={identity.balance}
@@ -1034,6 +1031,8 @@ export function VotingPhase({service}) {
     quorum,
     committeeSize,
     estimatedTerminationTime,
+    finishTime,
+    terminationTime,
   } = current.context
 
   const eitherIdleState = (...states) =>
@@ -1098,9 +1097,9 @@ export function VotingPhase({service}) {
         ]
     : // eslint-disable-next-line no-nested-ternary
     eitherIdleState(VotingStatus.Archived, VotingStatus.Terminating)
-    ? [t('Waiting for termination'), null]
+    ? [t('Waiting for termination'), finishTime]
     : eitherIdleState(VotingStatus.Terminated)
-    ? [t('Terminated'), null]
+    ? [t('Terminated'), terminationTime]
     : []
 
   return (

@@ -465,32 +465,37 @@ export const createNewVotingMachine = (epoch, address) =>
         options: [{id: 0}, {id: 1}],
         votingDuration: 4320,
         publicVotingDuration: 180,
-        oracleReward: undefined,
         quorum: 20,
         committeeSize: 100,
+        shouldStartImmediately: true,
         dirtyBag: {},
       },
       initial: 'preload',
       states: {
         preload: {
           invoke: {
-            src: () =>
+            src: ({committeeSize}) =>
               Promise.all([
                 callRpc('bcn_feePerGas'),
-                fetchOracleRewardsEstimates(),
+                fetchOracleRewardsEstimates(committeeSize),
               ]),
             onDone: {
               target: 'editing',
               actions: [
-                assign({
-                  feePerGas: (_, {data: [fee]}) => fee,
-                  oracleReward: (_, {data: [, estimates]}) =>
-                    Number(estimates.find(({type}) => type === 'min')?.amount),
-                  oracleRewardsEstimates: (_, {data: [, estimates]}) =>
-                    estimates.map(({amount, type}) => ({
+                assign((context, {data: [feePerGas, estimates]}) => {
+                  const minOracleReward = Number(
+                    estimates.find(({type}) => type === 'min')?.amount
+                  )
+                  return {
+                    ...context,
+                    feePerGas,
+                    minOracleReward,
+                    oracleReward: minOracleReward,
+                    oracleRewardsEstimates: estimates.map(({amount, type}) => ({
                       value: Number(amount),
                       label: type,
                     })),
+                  }
                 }),
                 log(),
               ],
@@ -509,6 +514,10 @@ export const createNewVotingMachine = (epoch, address) =>
         editing: {
           on: {
             CHANGE: {
+              actions: ['setContractParams', 'setDirty', log()],
+            },
+            CHANGE_COMMITTEE: {
+              target: '.updateCommittee',
               actions: ['setContractParams', 'setDirty', log()],
             },
             SET_DIRTY: {
@@ -575,10 +584,35 @@ export const createNewVotingMachine = (epoch, address) =>
               invoke: {
                 src: () => fetchNetworkSize(),
                 onDone: {
-                  target: 'idle',
+                  target: 'updateCommittee',
                   actions: [
                     assign({
                       committeeSize: (_, {data}) => data,
+                    }),
+                  ],
+                },
+              },
+            },
+            updateCommittee: {
+              invoke: {
+                src: ({committeeSize}) =>
+                  fetchOracleRewardsEstimates(committeeSize),
+                onDone: {
+                  target: 'idle',
+                  actions: [
+                    assign((context, {data}) => {
+                      const minOracleReward = Number(
+                        data.find(({type}) => type === 'min')?.amount
+                      )
+                      return {
+                        ...context,
+                        minOracleReward,
+                        oracleReward: minOracleReward,
+                        oracleRewardsEstimates: data.map(({amount, type}) => ({
+                          value: Number(amount),
+                          label: type,
+                        })),
+                      }
                     }),
                   ],
                 },
