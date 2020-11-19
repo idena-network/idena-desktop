@@ -149,34 +149,28 @@ export const votingListMachine = Machine(
   {
     actions: {
       applyVotings: assign({
-        votings: ({epoch, address, feePerGas}, {data: {votings}}) =>
+        votings: ({epoch, address}, {data: {votings}}) =>
           votings.map(voting => ({
             ...voting,
-            feePerGas,
             ref: spawn(
               // eslint-disable-next-line no-use-before-define
-              votingMachine.withContext({...voting, epoch, address, feePerGas})
+              votingMachine.withContext({...voting, epoch, address})
             ),
           })),
         continuationToken: (_, {data: {continuationToken}}) =>
           continuationToken,
       }),
       applyMoreVotings: assign({
-        votings: (
-          {votings, epoch, address, feePerGas},
-          {data: {votings: nextVotings}}
-        ) =>
+        votings: ({votings, epoch, address}, {data: {votings: nextVotings}}) =>
           votings.concat(
             nextVotings.map(voting => ({
               ...voting,
-              feePerGas,
               ref: spawn(
                 // eslint-disable-next-line no-use-before-define
                 votingMachine.withContext({
                   ...voting,
                   epoch,
                   address,
-                  feePerGas,
                 })
               ),
             }))
@@ -271,19 +265,12 @@ export const votingListMachine = Machine(
         }
       },
       preload: async () => {
-        const feePerGas = await callRpc('bcn_feePerGas')
-        const filters = await (async () => {
-          try {
-            return JSON.parse(
+        try {
+          return JSON.parse(
               await global.sub(requestDb(), 'votings').get('filter')
-            )
-          } catch (error) {
-            if (!error.notFound) throw new Error(error)
-          }
-        })()
-        return {
-          ...filters,
-          feePerGas,
+          )
+        } catch (error) {
+          if (!error.notFound) throw new Error(error)
         }
       },
     },
@@ -1075,6 +1062,10 @@ export const createViewVotingMachine = (id, epoch, address) =>
     },
     {
       actions: {
+        applyVoting: assign((context, {data}) => ({
+          ...context,
+          ...data,
+        })),
         setFunding: assign({
           prevStatus: ({status}) => status,
           status: VotingStatus.Funding,
@@ -1088,10 +1079,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
         setFinishing: setVotingStatus(VotingStatus.Finishing),
         setTerminating: setVotingStatus(VotingStatus.Terminating),
         setTerminated: setVotingStatus(VotingStatus.Terminated),
-        applyVoting: assign((context, {data}) => ({
-          ...context,
-          ...data,
-        })),
         setVoted: setVotingStatus(VotingStatus.Voted),
         setArchived: assign({
           status: VotingStatus.Archived,
@@ -1128,7 +1115,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
             address,
             contractAddress: id,
           }),
-          feePerGas: await callRpc('bcn_feePerGas'),
         }),
         ...votingServices(),
         vote: async (
