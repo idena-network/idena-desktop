@@ -118,7 +118,7 @@ export function VotingInlineFormControl({htmlFor, label, children, ...props}) {
       <FormLabel htmlFor={htmlFor} color="muted" py={2} minW={32} w={32}>
         {label}
       </FormLabel>
-      {children}
+      <Box w="md">{children}</Box>
     </FormControl>
   )
 }
@@ -342,12 +342,10 @@ export function TaggedInput({
   max,
   presets = [],
   helperText,
-  customText,
   onChangePreset,
   onChangeCustom,
   ...props
 }) {
-  const {isOpen, onToggle} = useDisclosure()
   return (
     <VotingInlineFormControl {...props}>
       <Stack flex={1}>
@@ -355,26 +353,21 @@ export function TaggedInput({
           <RadioButtonGroup isInline value={value} onChange={onChangePreset}>
             {/* eslint-disable-next-line no-shadow */}
             {presets.map(({value, label}) => (
-              <TagOption key={label} value={value}>
+              <Radio
+                key={label}
+                value={value}
+                borderColor="gray.300"
+                borderWidth={1}
+                borderRadius="md"
+                p={2}
+                px={3}
+              >
                 {label}
-              </TagOption>
+              </Radio>
             ))}
           </RadioButtonGroup>
-          <Button
-            variant="link"
-            color="muted"
-            fontWeight={500}
-            _hover={{
-              textDecoration: 'none',
-            }}
-            _active={{}}
-            _focus={{}}
-            onClick={onToggle}
-          >
-            {customText}
-          </Button>
         </Stack>
-        <Collapse isOpen={isOpen}>
+        <Box>
           <Input
             id={id}
             type={type}
@@ -386,29 +379,11 @@ export function TaggedInput({
           <NewOracleFormHelperText textAlign="right">
             {helperText}
           </NewOracleFormHelperText>
-        </Collapse>
+        </Box>
       </Stack>
     </VotingInlineFormControl>
   )
 }
-
-const TagOption = React.forwardRef(({isChecked, ...props}, ref) => (
-  <Button
-    ref={ref}
-    isActive={isChecked}
-    aria-checked={isChecked}
-    role="radio"
-    bg="white"
-    color="muted"
-    fontWeight={500}
-    size="sm"
-    fontSize="md"
-    _active={{bg: 'gray.50', color: 'brand.blue'}}
-    _hover={{bg: 'gray.50', color: 'brand.blue'}}
-    {...props}
-  />
-))
-TagOption.displayName = 'TagOption'
 
 export const OutlineButton = React.forwardRef((props, ref) => (
   <Button

@@ -66,9 +66,13 @@ export async function fetchVotings({
   return {result, continuationToken}
 }
 
-export async function fetchOracleRewardsEstimates() {
+export async function fetchOracleRewardsEstimates(committeeSize) {
   const {result, error} = await (
-    await fetch(apiUrl('OracleVotingContract/EstimatedOracleRewards'))
+    await fetch(
+      apiUrl(
+        `OracleVotingContracts/EstimatedOracleRewards?committeeSize=${committeeSize}`
+      )
+    )
   ).json()
 
   if (error) throw new Error(error.message)
@@ -196,8 +200,7 @@ export function buildContractDeploymentArgs(
     quorum,
     committeeSize,
     votingMinPayment = 0,
-    maxOptions,
-    options,
+    options = [],
     ownerFee = 0,
     shouldStartImmediately,
     isFreeVoting,
@@ -228,7 +231,6 @@ export function buildContractDeploymentArgs(
       {value: winnerThreshold, format: 'byte'},
       {value: quorum, format: 'byte'},
       {value: committeeSize, format: 'uint64'},
-      {value: maxOptions, format: 'uint64'},
       {
         value: isFreeVoting ? 0 : votingMinPayment,
         format: 'dna',
@@ -338,8 +340,8 @@ export function votingMinStake(feePerGas) {
 }
 
 // eslint-disable-next-line no-shadow
-export function votingMinBalance({oracleReward, committeeSize, feePerGas}) {
-  return Math.max(oracleReward, minOracleReward(feePerGas)) * committeeSize
+export function votingMinBalance({oracleReward, committeeSize}) {
+  return oracleReward * committeeSize
 }
 
 function dnaFeePerGas(value) {
@@ -403,8 +405,10 @@ export const humanError = (
   {
     startDate,
     balance,
-    feePerGas,
-    oracleReward: contractOracleReward = minOracleReward(feePerGas),
+    // eslint-disable-next-line no-shadow
+    minOracleReward,
+    // eslint-disable-next-line no-shadow
+    oracleReward,
     committeeSize,
     votingMinPayment,
   },
@@ -423,9 +427,8 @@ export const humanError = (
       ).toLocaleString()}`
     case 'contract balance is less than minimal oracles reward': {
       const requiredBalance = votingMinBalance({
-        oracleReward: contractOracleReward,
+        oracleReward: Math.max(oracleReward, minOracleReward),
         committeeSize,
-        feePerGas,
       })
       return `Insufficient funds to start the voting. Minimum deposit is required: ${dna(
         requiredBalance

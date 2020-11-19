@@ -38,7 +38,6 @@ import {
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
 import {
-  minOracleReward,
   votingMinBalance,
   votingMinStake,
   durationPreset,
@@ -121,6 +120,7 @@ function NewVotingPage() {
     isWholeNetwork,
     oracleRewardsEstimates,
     ownerFee = 0,
+    minOracleReward,
     dirtyBag,
   } = current.context
 
@@ -148,7 +148,7 @@ function NewVotingPage() {
         {current.matches('preload.late') && <NewVotingFormSkeleton />}
 
         {!current.matches('preload') && (
-          <Stack spacing={3} w="xl">
+          <Stack spacing={3}>
             <VotingInlineFormControl
               htmlFor="title"
               label={t('Title')}
@@ -222,6 +222,7 @@ function NewVotingPage() {
                 />
                 <Checkbox
                   id="shouldStartImmediately"
+                  isChecked={shouldStartImmediately}
                   onChange={({target: {id, checked}}) => {
                     send('CHANGE', {id, value: checked})
                   }}
@@ -263,7 +264,9 @@ function NewVotingPage() {
                   value={committeeSize}
                   min={1}
                   isDisabled={isWholeNetwork}
-                  onChange={handleChange}
+                  onChange={({target: {id, value}}) => {
+                    send('CHANGE_COMMITTEE', {id, value})
+                  }}
                 />
                 <Checkbox
                   id="isWholeNetwork"
@@ -328,16 +331,13 @@ function NewVotingPage() {
               id="oracleReward"
               type="number"
               value={Number(oracleReward)}
-              min={minOracleReward(feePerGas)}
+              min={minOracleReward}
               label={t('Min reward per oracle')}
               presets={oracleRewardsEstimates}
               helperText={t('Total oracles rewards: {{amount}}', {
-                amount: dna(
-                  votingMinBalance({oracleReward, committeeSize, feePerGas})
-                ),
+                amount: dna(votingMinBalance({oracleReward, committeeSize})),
                 nsSeparator: '!',
               })}
-              customText={t('iDNA')}
               onChangePreset={value => {
                 send('CHANGE', {
                   id: 'oracleReward',
@@ -430,7 +430,10 @@ function NewVotingPage() {
         onClose={() => send('CANCEL')}
         from={address}
         available={balance}
-        minBalance={votingMinBalance({oracleReward, committeeSize, feePerGas})}
+        minBalance={votingMinBalance({
+          oracleReward: Math.max(oracleReward, minOracleReward),
+          committeeSize,
+        })}
         minStake={votingMinStake(feePerGas)}
         votingDuration={votingDuration}
         publicVotingDuration={publicVotingDuration}

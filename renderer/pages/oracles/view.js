@@ -68,8 +68,6 @@ import {
   hasWinner,
   humanError,
   isAllowedToTerminate,
-  minOracleReward,
-  oracleReward,
   quorumVotesCount,
   votingFinishDate,
   votingMinBalance,
@@ -156,10 +154,11 @@ export default function ViewVotingPage() {
     ownerFee,
     totalReward,
     committeeEpoch,
-    feePerGas,
-    oracleReward: assignedOracleReward = minOracleReward(feePerGas),
+    estimatedOracleReward,
     isOracle,
     estimatedTerminationTime,
+    minOracleReward,
+    oracleReward,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -174,14 +173,6 @@ export default function ViewVotingPage() {
     VotingStatus.Archived,
     VotingStatus.Terminated
   )
-
-  const reward = oracleReward({
-    balance: contractBalance,
-    votesCount: actualVotesCount,
-    quorum,
-    committeeSize,
-    ownerFee,
-  })
 
   const didDetermineWinner = hasWinner({
     votes,
@@ -579,7 +570,7 @@ export default function ViewVotingPage() {
                 {!isClosed && (
                   <AsideStat
                     label={t('Your reward')}
-                    value={reward ? toDna(reward) : '--'}
+                    value={toDna(estimatedOracleReward)}
                   />
                 )}
                 {ownerFee && (
@@ -649,9 +640,8 @@ export default function ViewVotingPage() {
         }}
         balance={contractBalance}
         requiredBalance={votingMinBalance({
-          oracleReward: assignedOracleReward,
+          oracleReward: Math.max(minOracleReward, oracleReward),
           committeeSize,
-          feePerGas,
         })}
         from={identity.address}
         available={identity.balance}
