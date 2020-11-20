@@ -40,6 +40,7 @@ import {
 import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
   FillCenter,
+  OutlineButton,
   SmallText,
   VotingBadge,
   VotingOption,
@@ -531,6 +532,15 @@ export default function ViewVotingPage() {
           </Box>
           <VotingSkeleton isLoaded={isLoaded} h={isLoaded ? 'auto' : 'lg'}>
             <Box mt={3}>
+              <Box mt={-2} mb={4}>
+                <OutlineButton
+                  onClick={() => {
+                    send('REFRESH')
+                  }}
+                >
+                  {t('Refresh')}
+                </OutlineButton>
+              </Box>
               {!isClosed && (
                 <Stat mb={8}>
                   <StatLabel as="div" color="muted" fontSize="md">
