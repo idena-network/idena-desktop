@@ -17,7 +17,6 @@ import {
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
-import {pluralize} from '../utils/string'
 import {loadValidationState} from '../../screens/validation/utils'
 import {IdentityStatus, EpochPeriod} from '../types'
 
