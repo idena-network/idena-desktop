@@ -470,16 +470,14 @@ export function ReviewVotingDrawer({
         <OracleFormControl label={t('Rewards')}>
           <DnaInput name="balanceInput" defaultValue={minBalance} isDisabled />
           <OracleFormHelperText>
-            {t(
-              `Rewards will be paid to Oracles. You’ll be able to increase Oracles' rewards after the voting is created.`
-            )}
+            {t(`Rewards will be paid to Oracles`)}
           </OracleFormHelperText>
         </OracleFormControl>
         <OracleFormControl label={t('Stake')}>
           <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
           <OracleFormHelperText>
             {t(
-              'Voting stake will be refunded to your address once the voting smart contract is terminated'
+              '50% of the stake will be refunded to your address after termination'
             )}
           </OracleFormHelperText>
         </OracleFormControl>
@@ -741,6 +739,7 @@ export function VotingDurationInput({service, ...props}) {
         // eslint-disable-next-line react/destructuring-assignment
         duration: humanizeDuration(props.value),
       })}
+      addonText={t('Blocks')}
       onChangePreset={value => {
         send('CHANGE', {id: props.id, value})
       }}
@@ -1236,13 +1235,21 @@ export function VotingMilestoneListItem({label, value, isActive, ...props}) {
   )
 }
 
-export function FinishDrawer({isLoading, from, available, onFinish, ...props}) {
+export function FinishDrawer({
+  isLoading,
+  from,
+  available,
+  // eslint-disable-next-line no-shadow
+  hasWinner,
+  onFinish,
+  ...props
+}) {
   const {t, i18n} = useTranslation()
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
-        {t('Finish Oracles Voting')}
+        {hasWinner ? t('Distribute rewards') : t('Refund Oracles Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
@@ -1255,7 +1262,9 @@ export function FinishDrawer({isLoading, from, available, onFinish, ...props}) {
         }}
       >
         <OracleFormHelperText>
-          {t('Finish the voting to declare the winner and pay rewards')}
+          {hasWinner
+            ? t('Declare the winner and pay rewards to oracles.')
+            : t('Finish voting and refund oracles with their lock funds.')}
         </OracleFormHelperText>
 
         <OracleFormControl label={t('Transfer from')}>
@@ -1268,12 +1277,12 @@ export function FinishDrawer({isLoading, from, available, onFinish, ...props}) {
 
         <PrimaryButton
           isLoading={isLoading}
-          loadingText={t('Finishing')}
+          loadingText={hasWinner ? t('Distributing') : t('Refunding')}
           type="submit"
           mt={3}
           ml="auto"
         >
-          {t('Finish')}
+          {hasWinner ? t('Distribute rewards') : t('Refund')}
         </PrimaryButton>
       </OracleDrawerBody>
     </Drawer>

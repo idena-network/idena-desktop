@@ -687,6 +687,7 @@ export default function ViewVotingPage() {
         onFinish={({from}) => {
           send('FINISH', {from})
         }}
+        hasWinner={didDetermineWinner}
       />
 
       <ProlongateDrawer

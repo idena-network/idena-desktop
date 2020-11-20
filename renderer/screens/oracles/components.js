@@ -342,6 +342,7 @@ export function TaggedInput({
   max,
   presets = [],
   helperText,
+  addonText,
   onChangePreset,
   onChangeCustom,
   ...props
@@ -368,7 +369,8 @@ export function TaggedInput({
           </RadioButtonGroup>
         </Stack>
         <Box>
-          <Input
+          <InputWithRightAddon
+            addon={addonText}
             id={id}
             type={type}
             value={value}
