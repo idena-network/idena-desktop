@@ -1088,7 +1088,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
         // eslint-disable-next-line no-shadow
         loadVoting: async ({epoch, address, id}) => ({
           ...(await epochDb('votings', epoch).load(id)),
-          ...mapVoting(await fetchVoting({id})),
+          ...mapVoting(await fetchVoting({id, address})),
           id,
           balanceUpdates: await fetchContractBalanceUpdates({
             address,

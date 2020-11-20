@@ -134,9 +134,11 @@ export async function fetchNetworkSize() {
   return result
 }
 
-export async function fetchVoting({id, address = id}) {
+export async function fetchVoting({id, contractHash = id, address}) {
   const {result, error} = await (
-    await fetch(apiUrl(`/OracleVotingContract/${address}`))
+    await fetch(
+      apiUrl(`/OracleVotingContract/${contractHash}?oracle=${address}`)
+    )
   ).json()
 
   if (error) throw new Error(error.message)
