@@ -380,9 +380,13 @@ export default function ViewVotingPage() {
                     </SecondaryButton>
                   </Stack>
                   <Stack isInline spacing={3} align="center">
-                    {!didDetermineWinner && (
-                      <Text color="red.500">{t('No winner selected')}</Text>
-                    )}
+                    {eitherIdleState(
+                      VotingStatus.Archived,
+                      VotingStatus.Terminated
+                    ) &&
+                      !didDetermineWinner && (
+                        <Text color="red.500">{t('No winner selected')}</Text>
+                      )}
                     <VDivider />
                     <Stack isInline spacing={2} align="center">
                       <Icon
