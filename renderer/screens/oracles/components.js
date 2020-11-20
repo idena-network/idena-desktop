@@ -331,7 +331,7 @@ export function NewOracleFormHelperText(props) {
 }
 
 export function NewVotingFormSubtitle(props) {
-  return <Heading as="h2" fontSize="base" fontWeight={500} mt={4} {...props} />
+  return <Heading as="h2" fontSize="md" fontWeight="bold" mt={4} {...props} />
 }
 
 export function TaggedInput({
