@@ -14,13 +14,14 @@ import {
   contractMaxFee,
   setVotingStatus,
   votingFinishDate,
-  hexToObject,
   fetchOracleRewardsEstimates,
   votingStatuses,
   fetchContractBalanceUpdates,
   fetchNetworkSize,
   stripOptions,
   hasValuableOptions,
+  fetchVoting,
+  mapVoting,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
@@ -230,32 +231,7 @@ export const votingListMachine = Machine(
           continuationToken,
         })
 
-        const knownVotings = (result ?? []).map(
-          ({
-            contractAddress,
-            author,
-            fact,
-            state,
-            createTime,
-            startTime,
-            estimatedVotingFinishTime,
-            estimatedPublicVotingFinishTime,
-            minPayment,
-            ...voting
-          }) => ({
-            ...voting,
-            id: contractAddress,
-            contractHash: contractAddress,
-            issuer: author,
-            status: state,
-            createDate: createTime,
-            startDate: startTime,
-            finishDate: estimatedVotingFinishTime,
-            finishCountingDate: estimatedPublicVotingFinishTime,
-            votingMinPayment: minPayment,
-            ...hexToObject(fact),
-          })
-        )
+        const knownVotings = (result ?? []).map(mapVoting)
 
         await epochDb('votings', epoch).batchPut(knownVotings)
 
@@ -267,7 +243,7 @@ export const votingListMachine = Machine(
       preload: async () => {
         try {
           return JSON.parse(
-              await global.sub(requestDb(), 'votings').get('filter')
+            await global.sub(requestDb(), 'votings').get('filter')
           )
         } catch (error) {
           if (!error.notFound) throw new Error(error)
@@ -1045,6 +1021,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
               actions: ['selectOption', log()],
             },
             REVIEW: 'review',
+            REFRESH: 'loading',
           },
         },
         review: {
@@ -1111,6 +1088,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
         // eslint-disable-next-line no-shadow
         loadVoting: async ({epoch, address, id}) => ({
           ...(await epochDb('votings', epoch).load(id)),
+          ...mapVoting(await fetchVoting({id})),
+          id,
           balanceUpdates: await fetchContractBalanceUpdates({
             address,
             contractAddress: id,

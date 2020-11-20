@@ -134,6 +134,16 @@ export async function fetchNetworkSize() {
   return result
 }
 
+export async function fetchVoting({id, address = id}) {
+  const {result, error} = await (
+    await fetch(apiUrl(`/OracleVotingContract/${address}`))
+  ).json()
+
+  if (error) throw new Error(error.message)
+
+  return result
+}
+
 export const createContractCaller = ({
   from,
   contractHash,
@@ -477,3 +487,28 @@ export function stripOptions(options) {
 export function hasValuableOptions(options) {
   return stripOptions(options).length > 0
 }
+
+export const mapVoting = ({
+  contractAddress,
+  author,
+  fact,
+  state,
+  createTime,
+  startTime,
+  estimatedVotingFinishTime,
+  estimatedPublicVotingFinishTime,
+  minPayment,
+  ...voting
+}) => ({
+  ...voting,
+  id: contractAddress,
+  contractHash: contractAddress,
+  issuer: author,
+  status: state,
+  createDate: createTime,
+  startDate: startTime,
+  finishDate: estimatedVotingFinishTime,
+  finishCountingDate: estimatedPublicVotingFinishTime,
+  votingMinPayment: minPayment,
+  ...hexToObject(fact),
+})
