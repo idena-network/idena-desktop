@@ -37,3 +37,8 @@ export const ContractCallMethod = {
   Prolong: 'Prolong voting',
   Finish: 'Finish voting',
 }
+
+export const ContractRpcMode = {
+  Estimate: 'estimate',
+  Call: 'call',
+}

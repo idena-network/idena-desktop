@@ -3,18 +3,7 @@ import {assign} from 'xstate'
 import {VotingStatus} from '../../shared/types'
 import {callRpc, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
-import {VotingListFilter} from './types'
-
-export const ContractRpcMode = {
-  Estimate: 'estimate',
-  Call: 'call',
-}
-
-export function resolveVotingStatus({status, startDate, vote}) {
-  if (status !== VotingStatus.Open)
-    return startDate ? VotingStatus.Pending : VotingStatus.Invalid
-  return vote ? VotingStatus.Voted : VotingStatus.Open
-}
+import {ContractRpcMode, VotingListFilter} from './types'
 
 export const isVotingStatus = targetStatus => ({status}) =>
   areSameCaseInsensitive(status, targetStatus)
@@ -325,21 +314,26 @@ export function hasWinner({
   winnerThreshold,
   quorum,
   committeeSize,
+  finishCountingDate,
 }) {
   const requiredVotesCountByVotes = winnerVotesCount({
     winnerThreshold,
     votesCount,
   })
+
   const requiredVotesCountByCommittee = winnerVotesCount({
     winnerThreshold,
     votesCount: committeeSize,
   })
+
   const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
 
   return votes.some(
     ({count}) =>
       count >= requiredVotesCountByCommittee ||
-      (count >= requiredVotesCountByVotes && didReachQuorum)
+      (count >= requiredVotesCountByVotes &&
+        didReachQuorum &&
+        dayjs().isAfter(finishCountingDate))
   )
 }
 
@@ -397,6 +391,7 @@ export function votingStatuses(filter) {
         VotingStatus.Voted,
         VotingStatus.Counting,
         VotingStatus.Archived,
+        VotingStatus.Terminated,
       ]
 
     default: {
@@ -474,6 +469,8 @@ export const humanError = (
       return 'The voting cannot be prolonged'
     case 'voting can not be terminated':
       return 'The voting cannot be terminated'
+    case 'insufficient funds':
+      return 'Not enough funds to vote'
     default:
       return error
   }
@@ -514,3 +511,7 @@ export const mapVoting = ({
   votingMinPayment: minPayment,
   ...hexToObject(fact),
 })
+
+export function mapVotingStatus(status) {
+  return areSameCaseInsensitive(status, VotingStatus.Voted) ? 'Voting' : status
+}

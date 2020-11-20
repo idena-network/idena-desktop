@@ -33,7 +33,11 @@ import {
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {eitherState} from '../../shared/utils/utils'
 import {VotingListFilter} from '../../screens/oracles/types'
-import {humanError, votingStatuses} from '../../screens/oracles/utils'
+import {
+  humanError,
+  mapVotingStatus,
+  votingStatuses,
+} from '../../screens/oracles/utils'
 
 function VotingListPage() {
   const {t} = useTranslation()
@@ -86,7 +90,7 @@ function VotingListPage() {
                 {t('To Do')}
               </FilterOption>
               <FilterOption value={VotingListFilter.Voting}>
-                {t('Voting')}
+                {t('Running')}
               </FilterOption>
               <FilterOption value={VotingListFilter.Closed}>
                 {t('Closed')}
@@ -172,7 +176,7 @@ function VotingListPage() {
                         send('TOGGLE_STATUS', {value: status})
                       }}
                     >
-                      {status}
+                      {t(mapVotingStatus(status))}
                     </VotingFilter>
                   ))}
                 </Stack>

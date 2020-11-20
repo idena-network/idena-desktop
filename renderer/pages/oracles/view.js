@@ -69,6 +69,7 @@ import {
   hasWinner,
   humanError,
   isAllowedToTerminate,
+  mapVotingStatus,
   quorumVotesCount,
   votingFinishDate,
   votingMinBalance,
@@ -191,8 +192,9 @@ export default function ViewVotingPage() {
 
   const canProlongate =
     committeeEpoch !== epoch ||
-    !didDetermineWinner ||
-    (!didReachQuorum && dayjs().isAfter(finishCountingDate))
+    (!didDetermineWinner &&
+      !didReachQuorum &&
+      dayjs().isAfter(finishCountingDate))
 
   const shouldTerminate = isAllowedToTerminate({estimatedTerminationTime})
 
@@ -202,7 +204,7 @@ export default function ViewVotingPage() {
         <VotingSkeleton isLoaded={isLoaded} mb={isLoaded ? 0 : 10}>
           <Stack isInline spacing={2} align="center" mb={10}>
             <VotingStatusBadge status={status} fontSize="md">
-              {t(status)}
+              {t(mapVotingStatus(status))}
             </VotingStatusBadge>
             <VotingBadge bg="gray.300" color="muted" fontSize="md" pl="1/2">
               <Stack isInline spacing={1} align="center">
@@ -366,14 +368,18 @@ export default function ViewVotingPage() {
                         </PrimaryButton>
                       )}
 
-                    {shouldTerminate && (
-                      <PrimaryButton
-                        variantColor="red"
-                        onClick={() => send('TERMINATE')}
-                      >
-                        {t('Terminate')}
-                      </PrimaryButton>
-                    )}
+                    {!eitherIdleState(
+                      VotingStatus.Terminated,
+                      VotingStatus.Terminating
+                    ) &&
+                      shouldTerminate && (
+                        <PrimaryButton
+                          variantColor="red"
+                          onClick={() => send('TERMINATE')}
+                        >
+                          {t('Terminate')}
+                        </PrimaryButton>
+                      )}
 
                     <SecondaryButton onClick={() => redirect('/oracles/list')}>
                       {t('Close')}
@@ -443,7 +449,8 @@ export default function ViewVotingPage() {
 
                           const txCost =
                             (isSender ? -amount : 0) + balanceChange
-                          const totalTxCost = txCost - (fee + tips)
+                          const totalTxCost =
+                            txCost - ((isSender ? fee : 0) + tips)
 
                           const isCredit = totalTxCost > 0
 
