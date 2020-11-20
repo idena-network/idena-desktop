@@ -74,6 +74,7 @@ import {
   votingMinBalance,
   isAllowedToTerminate,
   hasQuorum,
+  mapVotingStatus,
 } from './utils'
 
 export function VotingCard({votingRef, ...props}) {
@@ -132,7 +133,9 @@ export function VotingCard({votingRef, ...props}) {
   return (
     <Box {...props}>
       <Stack isInline spacing={2} mb={3} align="center">
-        <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
+        <VotingStatusBadge status={status}>
+          {t(mapVotingStatus(status))}
+        </VotingStatusBadge>
         <VotingBadge
           align="center"
           bg="gray.50"
@@ -790,7 +793,7 @@ export function VotingResult({votingService, ...props}) {
 
   const {
     options,
-    votes = [],
+    votes = options.map(({id}) => ({option: id, count: 0})),
     votesCount,
     winnerThreshold,
     committeeSize,
@@ -820,6 +823,7 @@ export function VotingResult({votingService, ...props}) {
             max={max}
             isMine={id === selectedOption}
             isWinner={didDetermineWinner && currentValue === max}
+            votesCount={votesCount}
           />
         )
       })}
@@ -827,7 +831,15 @@ export function VotingResult({votingService, ...props}) {
   )
 }
 
-function VotingResultBar({label, value, max, isMine, isWinner, ...props}) {
+function VotingResultBar({
+  label,
+  value,
+  max,
+  isMine,
+  isWinner,
+  votesCount,
+  ...props
+}) {
   const percentage = value / max
 
   return (
@@ -859,7 +871,7 @@ function VotingResultBar({label, value, max, isMine, isWinner, ...props}) {
         {isMine && <Icon name="ok" size={4} color="brandBlue.500" />}
       </Stack>
       <Text fontWeight={500} textTransform="initial" zIndex={1}>
-        {toPercent(percentage)} ({value})
+        {toPercent(value / Number(votesCount))} ({value})
       </Text>
     </Flex>
   )
@@ -1134,7 +1146,7 @@ export function VotingPhase({service}) {
           <PopoverArrow />
           <PopoverHeader borderBottom="none" p={0} mb={3}>
             <Text color="white" fontWeight={500}>
-              {t('Full cycle')}
+              {t('Voting timeline')}
             </Text>
           </PopoverHeader>
           <PopoverBody p={0}>
