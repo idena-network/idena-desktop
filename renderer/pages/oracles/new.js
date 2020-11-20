@@ -365,6 +365,7 @@ function NewVotingPage() {
                 amount: dna(votingMinBalance({oracleReward, committeeSize})),
                 nsSeparator: '!',
               })}
+              addonText={t('iDNA')}
               onChangePreset={value => {
                 send('CHANGE', {
                   id: 'oracleReward',

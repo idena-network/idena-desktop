@@ -89,6 +89,7 @@ export const Input = React.forwardRef((props, ref) => (
     h={8}
     _disabled={{
       bg: 'gray.50',
+      color: 'muted',
     }}
     _placeholder={{
       color: 'muted',
