@@ -133,27 +133,28 @@ export function VotingCard({votingRef, ...props}) {
     <Box {...props}>
       <Stack isInline spacing={2} mb={3} align="center">
         <VotingStatusBadge status={status}>{t(status)}</VotingStatusBadge>
-        <Link href={viewHref}>
-          <VotingBadge
-            align="center"
-            bg="gray.50"
-            color="muted"
-            cursor="pointer"
-            pl="1/2"
-          >
-            <Avatar
-              address={contractHash}
-              bg="white"
-              borderColor="brandGray.016"
-              borderWidth="1px"
-              borderRadius="full"
-              w={5}
-              h={5}
-              mr={1}
-            />
-            <Text as="span">{contractHash}</Text>
-          </VotingBadge>
-        </Link>
+        <VotingBadge
+          align="center"
+          bg="gray.50"
+          color="muted"
+          cursor="pointer"
+          pl="1/2"
+          onClick={() => {
+            router.push(viewHref)
+          }}
+        >
+          <Avatar
+            address={contractHash}
+            bg="white"
+            borderColor="brandGray.016"
+            borderWidth="1px"
+            borderRadius="full"
+            w={5}
+            h={5}
+            mr={1}
+          />
+          <Text as="span">{contractHash}</Text>
+        </VotingBadge>
       </Stack>
       <Link href={viewHref}>
         <Text
