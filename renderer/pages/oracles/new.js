@@ -9,6 +9,7 @@ import {
   Icon,
   Flex,
   CloseButton,
+  FormErrorMessage,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import duration from 'dayjs/plugin/duration'
@@ -44,7 +45,7 @@ import {
   quorumVotesCount,
   viewVotingHref,
   humanError,
-  hasValuableOptions,
+  stripOptions,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -127,7 +128,10 @@ function NewVotingPage() {
   const isInvalid = (field, cond = current.context[field]) =>
     dirtyBag[field] && !cond
 
-  const isInvalidOptions = isInvalid('options', hasValuableOptions(options))
+  const isInvalidOptions = isInvalid(
+    'options',
+    stripOptions(options).length >= 2
+  )
 
   const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
   const dna = toLocaleDna(i18n)
@@ -155,6 +159,11 @@ function NewVotingPage() {
               isInvalid={isInvalid('title')}
             >
               <Input id="title" value={title} onChange={handleChange} />
+              {isInvalid('title') && (
+                <FormErrorMessage fontSize="md" mt={1}>
+                  {t('You must provide title')}
+                </FormErrorMessage>
+              )}
             </VotingInlineFormControl>
 
             <VotingInlineFormControl
@@ -169,6 +178,11 @@ function NewVotingPage() {
                 h={32}
                 onChange={handleChange}
               />
+              {isInvalid('desc') && (
+                <FormErrorMessage fontSize="md" mt={1}>
+                  {t('You must provide description')}
+                </FormErrorMessage>
+              )}
             </VotingInlineFormControl>
 
             <VotingInlineFormControl
@@ -201,6 +215,11 @@ function NewVotingPage() {
                   />
                 ))}
               </Box>
+              {isInvalidOptions && (
+                <FormErrorMessage fontSize="md" mt={1}>
+                  {t('You must provide at least 2 options')}
+                </FormErrorMessage>
+              )}
             </VotingInlineFormControl>
 
             <VotingInlineFormControl
@@ -220,6 +239,14 @@ function NewVotingPage() {
                   value={startDate}
                   onChange={handleChange}
                 />
+                {isInvalid(
+                  'startDate',
+                  startDate || shouldStartImmediately
+                ) && (
+                  <FormErrorMessage fontSize="md" mt={-2}>
+                    {t('You must either choose start date or start now')}
+                  </FormErrorMessage>
+                )}
                 <Checkbox
                   id="shouldStartImmediately"
                   isChecked={shouldStartImmediately}
