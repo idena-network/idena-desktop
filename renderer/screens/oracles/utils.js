@@ -328,12 +328,10 @@ export function hasWinner({
 
   const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
 
-  return votes.some(
-    ({count}) =>
-      count >= requiredVotesCountByCommittee ||
-      (count >= requiredVotesCountByVotes &&
-        didReachQuorum &&
-        dayjs().isAfter(finishCountingDate))
+  return votes.some(({count}) =>
+    dayjs().isBefore(finishCountingDate)
+      ? count >= requiredVotesCountByCommittee
+      : count >= requiredVotesCountByVotes && didReachQuorum
   )
 }
 
