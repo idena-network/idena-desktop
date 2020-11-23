@@ -600,6 +600,7 @@ export default function ViewVotingPage() {
                     value={toPercent(ownerFee / 100)}
                   />
                 )}
+                <AsideStat label={t('Committee size')} value={committeeSize} />
                 <AsideStat
                   label={t('Quorum required')}
                   value={t('{{count}} votes', {
