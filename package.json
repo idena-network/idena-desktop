@@ -95,7 +95,7 @@
     "@xstate/react": "^0.8.1",
     "ansi-to-react": "^6.0.5",
     "axios": "^0.18.1",
-    "dayjs": "^1.9.3",
+    "dayjs": "^1.9.6",
     "dequal": "^1.0.0",
     "electron-is-dev": "^1.0.1",
     "electron-next": "^3.1.5",

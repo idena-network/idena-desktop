@@ -19,6 +19,7 @@ import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import duration from 'dayjs/plugin/duration'
 import {Page} from '../../screens/app/components'
 import {
   Avatar,
@@ -31,11 +32,7 @@ import {
   VDivider,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
-import {
-  PrimaryButton,
-  SecondaryButton,
-  IconButton2,
-} from '../../shared/components/button'
+import {PrimaryButton, IconButton2} from '../../shared/components/button'
 import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
   FillCenter,
@@ -83,6 +80,7 @@ import {
 } from '../../screens/oracles/types'
 
 dayjs.extend(relativeTime)
+dayjs.extend(duration)
 
 export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
@@ -362,6 +360,21 @@ export default function ViewVotingPage() {
                         </PrimaryButton>
                       )}
 
+                      {eitherIdleState(VotingStatus.Counting) &&
+                        !canProlong &&
+                        !canFinish && (
+                          <Box>
+                            <Tooltip
+                              label={t('This vote is not available to you')}
+                              placement="top"
+                            >
+                              <PrimaryButton as={Box} isDisabled>
+                                {t('Vote')}
+                              </PrimaryButton>
+                            </Tooltip>
+                          </Box>
+                        )}
+
                       {!eitherIdleState(
                         VotingStatus.Terminated,
                         VotingStatus.Terminating
@@ -374,12 +387,6 @@ export default function ViewVotingPage() {
                             {t('Terminate')}
                           </PrimaryButton>
                         )}
-
-                      <SecondaryButton
-                        onClick={() => redirect('/oracles/list')}
-                      >
-                        {t('Close')}
-                      </SecondaryButton>
                     </Stack>
                     <Stack isInline spacing={3} align="center">
                       {eitherIdleState(
