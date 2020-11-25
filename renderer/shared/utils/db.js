@@ -5,9 +5,17 @@ const {levelup, leveldown, dbPath, sub} = global
 let idenaDb = null
 
 export function requestDb(name = 'db') {
-    if (idenaDb === null) idenaDb = levelup(leveldown(dbPath(name)))
-    return idenaDb
+  if (idenaDb === null) {
+    idenaDb = levelup(leveldown(dbPath(name)))
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', async () => {
+        if (idenaDb?.isOpen()) await idenaDb.close()
+      })
+    }
   }
+  return idenaDb
+}
 
 export const epochDb = (db, epoch, options) => {
   const epochPrefix = `epoch${epoch}`
