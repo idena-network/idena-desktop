@@ -863,7 +863,7 @@ export function VotingResult({votingService, ...props}) {
     winnerThreshold,
     committeeSize,
     quorum,
-    selectedOption,
+    selectedOption = -1,
     finishCountingDate,
   } = current.context
 
@@ -889,6 +889,7 @@ export function VotingResult({votingService, ...props}) {
             value={currentValue}
             max={max}
             isMine={id === selectedOption}
+            didVote={selectedOption > -1}
             isWinner={didDetermineWinner && currentValue === max}
             votesCount={votesCount}
           />
@@ -905,6 +906,7 @@ function VotingResultBar({
   isMine,
   isWinner,
   votesCount,
+  didVote,
   ...props
 }) {
   const percentage = value / max
@@ -932,17 +934,19 @@ function VotingResultBar({
         zIndex="base"
       />
       <Stack isInline spacing={2} align="center" zIndex={1}>
-        <Flex
-          align="center"
-          justify="center"
-          bg={isMine ? 'brandBlue.500' : 'gray.100'}
-          borderRadius="full"
-          color="white"
-          w={4}
-          h={4}
-        >
-          <Icon name={isMine ? 'ok' : 'cross-small'} size={3} />
-        </Flex>
+        {didVote && (
+          <Flex
+            align="center"
+            justify="center"
+            bg={isMine ? 'brandBlue.500' : 'gray.100'}
+            borderRadius="full"
+            color="white"
+            w={4}
+            h={4}
+          >
+            <Icon name={isMine ? 'ok' : 'cross-small'} size={3} />
+          </Flex>
+        )}
         <Text isTruncated maxW="sm" title={label.length > 50 ? label : ''}>
           {label}
         </Text>
