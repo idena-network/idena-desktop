@@ -80,7 +80,7 @@ export function AppSidebar({fallbackApp}) {
           {t('Contacts')}
         </NavItem>
         <NavItem href="/oracles/list" icon="oracle">
-          {t('Oracle')}
+          {t('Oracle voting')}
         </NavItem>
         <NavItem href="/settings/general" icon="settings">
           {t('Settings')}
