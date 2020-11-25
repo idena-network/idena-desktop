@@ -319,6 +319,9 @@ function NewVotingPage() {
               <VotingInlineFormControl
                 htmlFor="quorum"
                 label={t('Quorum')}
+                tooltip={t(
+                  'The share of Oracle committee sufficient to determine the voting outcome'
+                )}
                 mt={2}
               >
                 <Stack spacing={0} flex={1}>
