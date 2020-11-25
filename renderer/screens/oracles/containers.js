@@ -55,8 +55,14 @@ import {
   OracleFormControl,
   OracleFormHelper,
   OracleFormHelperText,
-  TaggedInput,
+  PresetFormControl,
   DnaInput,
+  PresetFormControlOptionList,
+  PresetFormControlOption,
+  PresetFormControlHelperText,
+  PresetFormControlInputBox,
+  BlockInput,
+  OracleFormHelperSmall,
 } from './components'
 import {
   InfoButton,
@@ -110,6 +116,7 @@ export function VotingCard({votingRef, ...props}) {
     committeeSize,
     isOracle,
     totalReward,
+    finishCountingDate,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -288,6 +295,7 @@ export function VotingCard({votingRef, ...props}) {
                     winnerThreshold,
                     quorum,
                     committeeSize,
+                    finishCountingDate,
                   })
                     ? 'user-tick'
                     : 'user'
@@ -349,7 +357,14 @@ export function VotingStatusBadge({status, ...props}) {
   return <VotingBadge {...colors} {...props} />
 }
 
-export function AddFundDrawer({from, to, available, onAddFund, ...props}) {
+export function AddFundDrawer({
+  from,
+  to,
+  available,
+  isLoading,
+  onAddFund,
+  ...props
+}) {
   const {t, i18n} = useTranslation()
 
   const toDna = toLocaleDna(i18n.language)
@@ -376,7 +391,13 @@ export function AddFundDrawer({from, to, available, onAddFund, ...props}) {
           <OracleFormControl label={t('Amount')}>
             <DnaInput name="amountInput" />
           </OracleFormControl>
-          <PrimaryButton type="submit" mt={3} ml="auto">
+          <PrimaryButton
+            type="submit"
+            isLoading={isLoading}
+            loadingText={t('Sending')}
+            mt={3}
+            ml="auto"
+          >
             {t('Send')}
           </PrimaryButton>
         </OracleDrawerBody>
@@ -390,6 +411,9 @@ export function VoteDrawer({
   from,
   to,
   deposit = 0,
+  publicVotingDuration,
+  finishDate,
+  finishCountingDate,
   isLoading,
   onVote,
   ...props
@@ -413,9 +437,30 @@ export function VoteDrawer({
         <OracleFormControl label="To address">
           <Input isDisabled value={to} />
         </OracleFormControl>
-        <OracleFormControl label={t('Lock, iDNA')}>
+        <OracleFormControl label={t('Voting Deposit, iDNA')}>
           <Input isDisabled value={deposit} />
         </OracleFormControl>
+        <Stack spacing={2} bg="gray.50" borderRadius="md" py={5} px={6}>
+          <OracleFormHelperSmall
+            label={t('Vote counting')}
+            value={t('About {{duration}}', {
+              duration: humanizeDuration(publicVotingDuration),
+            })}
+          />
+          <OracleFormHelperSmall
+            label={t('Start counting')}
+            value={finishDate}
+          />
+          <OracleFormHelperSmall
+            label={t('End counting')}
+            value={finishCountingDate}
+          />
+        </Stack>
+        <OracleFormHelperText>
+          {t(
+            'To get a reward for the voting you must be online at least once during the period of vote counting'
+          )}
+        </OracleFormHelperText>
         <PrimaryButton
           mt={3}
           ml="auto"
@@ -446,7 +491,7 @@ export function ReviewVotingDrawer({
   return (
     <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
-        {t('Create Oracles Voting')}
+        {t('Create Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
@@ -726,31 +771,52 @@ export function VotingInspector({onTerminate, ...contract}) {
   )
 }
 
-export function VotingDurationInput({service, ...props}) {
+export function VotingDurationInput({
+  id,
+  value,
+  presets,
+  tooltip,
+  service,
+  ...props
+}) {
   const {t} = useTranslation()
 
   const [, send] = useService(service)
 
   return (
-    <TaggedInput
-      type="number"
-      min={1}
-      helperText={t('About {{duration}}', {
-        // eslint-disable-next-line react/destructuring-assignment
-        duration: humanizeDuration(props.value),
-      })}
-      addonText={t('Blocks')}
-      onChangePreset={value => {
-        send('CHANGE', {id: props.id, value})
-      }}
-      onChangeCustom={({target}) => {
-        send('CHANGE', {
-          id: props.id,
-          value: Number(target.value),
-        })
-      }}
-      {...props}
-    />
+    <PresetFormControl tooltip={tooltip} {...props}>
+      <PresetFormControlOptionList
+        value={String(value)}
+        // eslint-disable-next-line no-shadow
+        onChange={value => {
+          send('CHANGE', {id, value})
+        }}
+      >
+        {/* eslint-disable-next-line no-shadow */}
+        {presets.map(({label, value}) => (
+          <PresetFormControlOption key={value} value={String(value)}>
+            {label}
+          </PresetFormControlOption>
+        ))}
+      </PresetFormControlOptionList>
+      <PresetFormControlInputBox>
+        <BlockInput
+          id={id}
+          value={value}
+          onChange={({target}) => {
+            send('CHANGE', {
+              id,
+              value: target.value,
+            })
+          }}
+        />
+        <PresetFormControlHelperText>
+          {t('About {{duration}}', {
+            duration: humanizeDuration(value),
+          })}
+        </PresetFormControlHelperText>
+      </PresetFormControlInputBox>
+    </PresetFormControl>
   )
 }
 
@@ -798,6 +864,7 @@ export function VotingResult({votingService, ...props}) {
     committeeSize,
     quorum,
     selectedOption,
+    finishCountingDate,
   } = current.context
 
   const didDetermineWinner = hasWinner({
@@ -806,6 +873,7 @@ export function VotingResult({votingService, ...props}) {
     winnerThreshold,
     quorum,
     committeeSize,
+    finishCountingDate,
   })
 
   const max = Math.max(...votes.map(({count}) => count))
@@ -863,11 +931,21 @@ function VotingResultBar({
         bottom={0}
         zIndex="base"
       />
-      <Stack isInline spacing={1} align="center" zIndex={1}>
+      <Stack isInline spacing={2} align="center" zIndex={1}>
+        <Flex
+          align="center"
+          justify="center"
+          bg={isMine ? 'brandBlue.500' : 'gray.100'}
+          borderRadius="full"
+          color="white"
+          w={4}
+          h={4}
+        >
+          <Icon name={isMine ? 'ok' : 'cross-small'} size={3} />
+        </Flex>
         <Text isTruncated maxW="sm" title={label.length > 50 ? label : ''}>
           {label}
         </Text>
-        {isMine && <Icon name="ok" size={4} color="brandBlue.500" />}
       </Stack>
       <Text fontWeight={500} textTransform="initial" zIndex={1}>
         {toPercent(value / Number(votesCount))} ({value})
@@ -892,7 +970,7 @@ export function LaunchDrawer({
   return (
     <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
-        {t('Launch Oracles Voting')}
+        {t('Launch Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
@@ -940,11 +1018,11 @@ export function LaunchDrawer({
   )
 }
 
-export function ProlongateDrawer({
+export function ProlongDrawer({
   isLoading,
   from,
   available,
-  onProlongate,
+  onProlong,
   ...props
 }) {
   const {t, i18n} = useTranslation()
@@ -952,14 +1030,14 @@ export function ProlongateDrawer({
   return (
     <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
-        {t('Prolongate Oracles Voting')}
+        {t('Prolong Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
         onSubmit={e => {
           e.preventDefault()
           const {fromInput} = e.target.elements
-          onProlongate({
+          onProlong({
             from: fromInput.value,
           })
         }}
@@ -978,7 +1056,7 @@ export function ProlongateDrawer({
 
         <PrimaryButton
           isLoading={isLoading}
-          loadingText={t('Prolongating')}
+          loadingText={t('Prolonging')}
           type="submit"
           mt={3}
           ml="auto"
@@ -1056,6 +1134,7 @@ export function VotingPhase({service}) {
     winnerThreshold,
     quorum,
     committeeSize,
+    finishCountingDate,
   })
 
   const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
@@ -1073,7 +1152,7 @@ export function VotingPhase({service}) {
     : // eslint-disable-next-line no-nested-ternary
     eitherIdleState(
         VotingStatus.Counting,
-        VotingStatus.Prolongating,
+        VotingStatus.Prolonging,
         VotingStatus.Finishing
       )
     ? // eslint-disable-next-line no-nested-ternary
@@ -1249,7 +1328,7 @@ export function FinishDrawer({
   return (
     <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
-        {hasWinner ? t('Distribute rewards') : t('Refund Oracles Voting')}
+        {hasWinner ? t('Distribute rewards') : t('Refund Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
@@ -1301,7 +1380,7 @@ export function TerminateDrawer({
   return (
     <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
-        {t('Terminate Oracles Voting')}
+        {t('Terminate Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"

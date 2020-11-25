@@ -33,6 +33,8 @@ import {
   Divider,
   Text,
   Icon,
+  InputGroup,
+  InputRightAddon,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -125,6 +127,55 @@ export function Textarea(props) {
       _placeholder={{
         color: 'muted',
       }}
+      {...props}
+    />
+  )
+}
+
+export function ChainedInputGroup({addon, children, ...props}) {
+  const {isDisabled} = props
+
+  return (
+    <InputGroup flex={1} {...props}>
+      {addon ? (
+        <>
+          <ChainedInput {...props} />
+          <ChainedInputAddon isDisabled={isDisabled}>%</ChainedInputAddon>
+        </>
+      ) : (
+        children
+      )}
+    </InputGroup>
+  )
+}
+
+export function ChainedInput(props) {
+  const {isDisabled, bg, _hover} = props
+
+  const borderRightColor = isDisabled ? 'gray.50' : bg
+
+  return (
+    <Input
+      borderRightColor={borderRightColor}
+      borderTopRightRadius={0}
+      borderBottomRightRadius={0}
+      _hover={{
+        borderRightColor,
+        ..._hover,
+      }}
+      {...props}
+    />
+  )
+}
+
+export function ChainedInputAddon({isDisabled, bg = 'white', ...props}) {
+  return (
+    <InputRightAddon
+      bg={isDisabled ? 'gray.50' : bg}
+      borderColor="gray.300"
+      color="muted"
+      h={8}
+      px={3}
       {...props}
     />
   )

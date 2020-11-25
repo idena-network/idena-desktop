@@ -185,9 +185,13 @@ function stringToHex(str) {
 }
 
 export function hexToObject(hex) {
-  return JSON.parse(
-    new TextDecoder().decode(Buffer.from(hex.substring(2), 'hex'))
-  )
+  try {
+    return JSON.parse(
+      new TextDecoder().decode(Buffer.from(hex.substring(2), 'hex'))
+    )
+  } catch {
+    return {}
+  }
 }
 
 export function buildContractDeploymentArgs(
@@ -328,11 +332,11 @@ export function hasWinner({
 
   const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
 
-  return votes.some(({count}) =>
-    dayjs().isBefore(finishCountingDate)
-      ? count >= requiredVotesCountByCommittee
-      : count >= requiredVotesCountByVotes && didReachQuorum
-  )
+  return dayjs().isBefore(finishCountingDate)
+    ? votes.some(({count}) => count >= requiredVotesCountByCommittee)
+    : votes.some(
+        ({count}) => count >= requiredVotesCountByVotes && didReachQuorum
+      )
 }
 
 export function minOracleReward(feePerGas) {
@@ -352,14 +356,6 @@ function dnaFeePerGas(value) {
   return value * 10 ** -18
 }
 
-export function blocksPerInterval({
-  weeks,
-  days = weeks * 7,
-  hours = days * 24,
-}) {
-  return Math.round((hours * 60 * 60) / 20)
-}
-
 export function durationPreset(interval, label) {
   const value = blocksPerInterval(interval)
 
@@ -371,6 +367,14 @@ export function durationPreset(interval, label) {
     value,
     label: `${unitValue}${unit}`,
   }
+}
+
+export function blocksPerInterval({
+  weeks,
+  days = weeks * 7,
+  hours = days * 24,
+}) {
+  return Math.round((hours * 60 * 60) / 20)
 }
 
 export function votingStatuses(filter) {
@@ -494,6 +498,8 @@ export const mapVoting = ({
   startTime,
   estimatedVotingFinishTime,
   estimatedPublicVotingFinishTime,
+  votingFinishTime,
+  publicVotingFinishTime,
   minPayment,
   ...voting
 }) => ({
@@ -504,8 +510,8 @@ export const mapVoting = ({
   status: state,
   createDate: createTime,
   startDate: startTime,
-  finishDate: estimatedVotingFinishTime,
-  finishCountingDate: estimatedPublicVotingFinishTime,
+  finishDate: estimatedVotingFinishTime || votingFinishTime,
+  finishCountingDate: estimatedPublicVotingFinishTime || publicVotingFinishTime,
   votingMinPayment: minPayment,
   ...hexToObject(fact),
 })

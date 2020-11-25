@@ -23,7 +23,7 @@ import {
   mapVoting,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
-import {callRpc} from '../../shared/utils/utils'
+import {callRpc, mergeById} from '../../shared/utils/utils'
 import {epochDb, requestDb} from '../../shared/utils/db'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 import {ContractRpcMode, VotingListFilter} from './types'
@@ -232,10 +232,16 @@ export const votingListMachine = Machine(
 
         const knownVotings = (result ?? []).map(mapVoting)
 
-        await epochDb('votings', epoch).batchPut(knownVotings)
+        const db = epochDb('votings', epoch)
+
+        await db.batchPut(knownVotings)
+
+        const persistedOptions = (
+          await db.all()
+        ).map(({id, selectedOption}) => ({id, selectedOption}))
 
         return {
-          votings: knownVotings,
+          votings: mergeById(knownVotings, persistedOptions),
           continuationToken: nextContinuationToken,
         }
       },
@@ -952,7 +958,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
                 idle: {
                   on: {
                     FINISH: 'finish',
-                    REVIEW_PROLONGATE_VOTING: 'prolongate',
+                    REVIEW_PROLONG_VOTING: 'prolong',
                     TERMINATE: 'terminate',
                   },
                 },
@@ -964,11 +970,11 @@ export const createViewVotingMachine = (id, epoch, address) =>
                     },
                   },
                 },
-                prolongate: {
+                prolong: {
                   on: {
-                    PROLONGATE_VOTING: {
-                      target: `#viewVoting.mining.${VotingStatus.Prolongating}`,
-                      actions: ['setProlongating', 'persist'],
+                    PROLONG_VOTING: {
+                      target: `#viewVoting.mining.${VotingStatus.Prolonging}`,
+                      actions: ['setProlonging', 'persist'],
                     },
                   },
                 },
@@ -1012,15 +1018,28 @@ export const createViewVotingMachine = (id, epoch, address) =>
             },
           },
           on: {
-            ADD_FUND: {
-              target: `mining.${VotingStatus.Funding}`,
-              actions: ['setFunding', 'persist', log()],
-            },
+            ADD_FUND: 'funding',
             SELECT_OPTION: {
               actions: ['selectOption', log()],
             },
-            REVIEW: 'review',
+            REVIEW: [
+              {
+                actions: [
+                  send({
+                    type: 'ERROR',
+                    data: {message: 'Please choose an option'},
+                  }),
+                ],
+                cond: ({selectedOption = -1}) => selectedOption < 0,
+              },
+              {
+                target: 'review',
+              },
+            ],
             REFRESH: 'loading',
+            ERROR: {
+              actions: ['onError'],
+            },
           },
         },
         review: {
@@ -1028,6 +1047,15 @@ export const createViewVotingMachine = (id, epoch, address) =>
             VOTE: {
               target: `mining.${VotingStatus.Voting}`,
               actions: ['setVoting', 'persist'],
+            },
+            CANCEL: 'idle',
+          },
+        },
+        funding: {
+          on: {
+            ADD_FUND: {
+              target: `mining.${VotingStatus.Funding}`,
+              actions: ['applyFundingAmount', 'persist'],
             },
             CANCEL: 'idle',
           },
@@ -1042,16 +1070,14 @@ export const createViewVotingMachine = (id, epoch, address) =>
           ...context,
           ...data,
         })),
-        setFunding: assign({
-          prevStatus: ({status}) => status,
-          status: VotingStatus.Funding,
+        applyFundingAmount: assign({
           balance: ({balance = 0}, {amount}) =>
             Number(balance) + Number(amount),
         }),
         setStarting: setVotingStatus(VotingStatus.Starting),
         setRunning: setVotingStatus(VotingStatus.Open),
         setVoting: setVotingStatus(VotingStatus.Voting),
-        setProlongating: setVotingStatus(VotingStatus.Prolongating),
+        setProlonging: setVotingStatus(VotingStatus.Prolonging),
         setFinishing: setVotingStatus(VotingStatus.Finishing),
         setTerminating: setVotingStatus(VotingStatus.Terminating),
         setTerminated: setVotingStatus(VotingStatus.Terminated),
@@ -1177,7 +1203,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
 
           return voteProofResp
         },
-        prolongateVoting: async ({contractHash}, {from}) => {
+        prolongVoting: async ({contractHash}, {from}) => {
           let callContract = createContractCaller({
             from,
             contractHash,
@@ -1344,7 +1370,7 @@ function votingMiningStates(machineId) {
               },
               onError: {
                 target: `#${machineId}.idle.hist`,
-                actions: ['handleError', 'onError', 'restorePrevStatus', log()],
+                actions: ['onError', 'restorePrevStatus', log()],
               },
             },
           },
@@ -1478,7 +1504,7 @@ function votingMiningStates(machineId) {
           },
         },
       },
-      [VotingStatus.Prolongating]: {
+      [VotingStatus.Prolonging]: {
         initial: 'checkMiningStatus',
         states: {
           checkMiningStatus: {
@@ -1501,7 +1527,7 @@ function votingMiningStates(machineId) {
           },
           submitting: {
             invoke: {
-              src: 'prolongateVoting',
+              src: 'prolongVoting',
               onDone: {
                 target: 'mining',
                 actions: ['applyTx', log()],

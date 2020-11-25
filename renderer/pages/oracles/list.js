@@ -74,7 +74,7 @@ function VotingListPage() {
 
   return (
     <Page ref={pageRef}>
-      <PageTitle mb={4}>{t('Oracle votings')}</PageTitle>
+      <PageTitle mb={4}>{t('Oracle voting')}</PageTitle>
       <Stack isInline spacing={20} w="full" flex={1}>
         <Stack spacing={8}>
           <VotingSkeleton isLoaded={!current.matches('preload')}>

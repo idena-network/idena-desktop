@@ -10,7 +10,6 @@ import {
   Stat,
   StatNumber,
   StatLabel,
-  useDisclosure,
   StatHelpText,
   useToast,
   CloseButton,
@@ -40,7 +39,6 @@ import {
 import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
   FillCenter,
-  OutlineButton,
   SmallText,
   VotingBadge,
   VotingOption,
@@ -54,7 +52,7 @@ import {
   VotingInspector,
   VotingResult,
   LaunchDrawer,
-  ProlongateDrawer,
+  ProlongDrawer,
   VotingPhase,
   TerminateDrawer,
   FinishDrawer,
@@ -71,7 +69,6 @@ import {
   isAllowedToTerminate,
   mapVotingStatus,
   quorumVotesCount,
-  votingFinishDate,
   votingMinBalance,
 } from '../../screens/oracles/utils'
 import {
@@ -91,12 +88,6 @@ export default function ViewVotingPage() {
   const {t, i18n} = useTranslation()
 
   const toast = useToast()
-
-  const {
-    isOpen: isOpenAddFund,
-    onOpen: onOpenAddFund,
-    onClose: onCloseAddFund,
-  } = useDisclosure()
 
   const {
     query: {id},
@@ -135,8 +126,6 @@ export default function ViewVotingPage() {
     status,
     balance: contractBalance = 0,
     votingMinPayment = 0,
-    startDate,
-    votingDuration = 0,
     publicVotingDuration = 0,
     quorum = 20,
     committeeSize,
@@ -145,11 +134,8 @@ export default function ViewVotingPage() {
     voteProofsCount,
     votesCount,
     actualVotesCount = votesCount || voteProofsCount,
-    finishCountingDate = votingFinishDate({
-      startDate,
-      votingDuration,
-      publicVotingDuration,
-    }),
+    finishDate,
+    finishCountingDate,
     selectedOption,
     winnerThreshold = 50,
     balanceUpdates,
@@ -182,6 +168,7 @@ export default function ViewVotingPage() {
     winnerThreshold,
     quorum,
     committeeSize,
+    finishCountingDate,
   })
 
   const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
@@ -190,7 +177,7 @@ export default function ViewVotingPage() {
     didDetermineWinner ||
     (dayjs().isAfter(finishCountingDate) && didReachQuorum)
 
-  const canProlongate =
+  const canProlong =
     committeeEpoch !== epoch ||
     (!didDetermineWinner &&
       !didReachQuorum &&
@@ -201,425 +188,453 @@ export default function ViewVotingPage() {
   return (
     <>
       <Page pt={8}>
-        <VotingSkeleton isLoaded={isLoaded} mb={isLoaded ? 0 : 10}>
-          <Stack isInline spacing={2} align="center" mb={10}>
-            <VotingStatusBadge status={status} fontSize="md">
-              {t(mapVotingStatus(status))}
-            </VotingStatusBadge>
-            <VotingBadge bg="gray.300" color="muted" fontSize="md" pl="1/2">
-              <Stack isInline spacing={1} align="center">
-                <Avatar w={5} h={5} address={contractHash} />
-                <Text>{contractHash}</Text>
-              </Stack>
-            </VotingBadge>
-            <CloseButton ml="auto" onClick={() => redirect('/oracles/list')} />
-          </Stack>
-        </VotingSkeleton>
-        <Stack isInline spacing={10} w="full">
-          <Box minWidth="lg" maxW="lg">
-            <Stack spacing={6}>
-              <VotingSkeleton isLoaded={isLoaded}>
-                <Stack
-                  spacing={8}
-                  borderRadius="md"
-                  bg="gray.50"
-                  py={8}
-                  px={10}
-                >
-                  <Stack spacing={4}>
-                    <Heading isTruncated fontSize={rem(21)} fontWeight={500}>
-                      {title}
-                    </Heading>
-                    <Text isTruncated lineHeight="tall" whiteSpace="pre-wrap">
-                      {desc}
-                    </Text>
-                  </Stack>
-                  <GoogleTranslateButton
-                    phrases={[
-                      title,
-                      desc,
-                      options.map(({value}) => value).join('\n'),
-                    ]}
-                    alignSelf="start"
-                  />
-                  <HDivider />
-                  {isLoaded && <VotingPhase service={service} />}
+        <Stack spacing={10}>
+          <VotingSkeleton isLoaded={isLoaded} h={6}>
+            <Stack isInline spacing={2} align="center">
+              <VotingStatusBadge status={status} fontSize="md">
+                {t(mapVotingStatus(status))}
+              </VotingStatusBadge>
+              <VotingBadge bg="gray.300" color="muted" fontSize="md" pl="1/2">
+                <Stack isInline spacing={1} align="center">
+                  <Avatar w={5} h={5} address={contractHash} />
+                  <Text>{contractHash}</Text>
                 </Stack>
-              </VotingSkeleton>
-
-              {eitherIdleState(
-                VotingStatus.Open,
-                VotingStatus.Voting,
-                VotingStatus.Voted,
-                VotingStatus.Prolongating
-              ) && (
+              </VotingBadge>
+              <CloseButton
+                ml="auto"
+                onClick={() => redirect('/oracles/list')}
+              />
+            </Stack>
+          </VotingSkeleton>
+          <Stack isInline spacing={10} w="full">
+            <Box minWidth="lg" maxW="lg">
+              <Stack spacing={6}>
                 <VotingSkeleton isLoaded={isLoaded}>
-                  <Box>
-                    <Text color="muted" fontSize="sm" mb={3}>
-                      {t('Choose an option to vote')}
-                    </Text>
-                    <RadioGroup
-                      value={String(selectedOption)}
-                      onChange={e => {
-                        send('SELECT_OPTION', {
-                          option: Number(e.target.value),
-                        })
-                      }}
-                    >
-                      {/* eslint-disable-next-line no-shadow */}
-                      {options.map(({id, value}) => (
-                        <VotingOption
-                          key={id}
-                          value={String(id)}
-                          isDisabled={eitherIdleState(VotingStatus.Voted)}
-                          annotation={t('{{count}} min. votes required', {
-                            count: toPercent(winnerThreshold / 100),
-                          })}
-                        >
-                          {value}
-                        </VotingOption>
-                      ))}
-                    </RadioGroup>
-                  </Box>
-                </VotingSkeleton>
-              )}
-
-              {eitherIdleState(
-                VotingStatus.Counting,
-                VotingStatus.Finishing,
-                VotingStatus.Archived,
-                VotingStatus.Terminating,
-                VotingStatus.Terminated
-              ) && (
-                <VotingSkeleton isLoaded={isLoaded}>
-                  <Stack spacing={3}>
-                    <Text color="muted" fontSize="sm">
-                      {t('Current results')}
-                    </Text>
-                    {actualVotesCount ? (
-                      <VotingResult votingService={service} spacing={3} />
-                    ) : (
-                      <Text
-                        bg="gray.50"
-                        borderRadius="md"
-                        p={2}
-                        color="muted"
-                        fontSize="sm"
-                      >
-                        {t('No votes')}
+                  <Stack
+                    spacing={8}
+                    borderRadius="md"
+                    bg="gray.50"
+                    py={8}
+                    px={10}
+                  >
+                    <Stack spacing={4}>
+                      <Heading isTruncated fontSize={rem(21)} fontWeight={500}>
+                        {title}
+                      </Heading>
+                      <Text isTruncated lineHeight="tall" whiteSpace="pre-wrap">
+                        {desc}
                       </Text>
-                    )}
+                    </Stack>
+                    <GoogleTranslateButton
+                      phrases={[
+                        title,
+                        desc,
+                        options.map(({value}) => value).join('\n'),
+                      ]}
+                      alignSelf="start"
+                    />
+                    <HDivider />
+                    {isLoaded && <VotingPhase service={service} />}
                   </Stack>
                 </VotingSkeleton>
-              )}
 
-              <VotingSkeleton isLoaded={isLoaded}>
-                <Flex justify="space-between" align="center">
-                  <Stack isInline spacing={2}>
-                    {eitherIdleState(VotingStatus.Pending) && (
-                      <PrimaryButton
-                        loadingText={t('Launching')}
-                        onClick={() => {
-                          send('REVIEW_START_VOTING', {from: identity.address})
+                {eitherIdleState(
+                  VotingStatus.Open,
+                  VotingStatus.Voting,
+                  VotingStatus.Voted,
+                  VotingStatus.Prolonging
+                ) && (
+                  <VotingSkeleton isLoaded={isLoaded}>
+                    <Box>
+                      <Text color="muted" fontSize="sm" mb={3}>
+                        {t('Choose an option to vote')}
+                      </Text>
+                      <RadioGroup
+                        value={String(selectedOption)}
+                        onChange={e => {
+                          send('SELECT_OPTION', {
+                            option: Number(e.target.value),
+                          })
                         }}
                       >
-                        {t('Launch')}
-                      </PrimaryButton>
-                    )}
-                    {eitherIdleState(VotingStatus.Open) &&
-                      (isOracle ? (
-                        <PrimaryButton onClick={() => send('REVIEW')}>
-                          {t('Vote')}
-                        </PrimaryButton>
-                      ) : (
-                        <Box>
-                          <Tooltip
-                            label={t('This vote is not available to you')}
-                            placement="top"
+                        {/* eslint-disable-next-line no-shadow */}
+                        {options.map(({id, value}) => (
+                          <VotingOption
+                            key={id}
+                            value={String(id)}
+                            isDisabled={eitherIdleState(VotingStatus.Voted)}
+                            annotation={t('{{count}} min. votes required', {
+                              count: toPercent(winnerThreshold / 100),
+                            })}
                           >
-                            {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
-                            <PrimaryButton as={Box} isDisabled>
-                              {t('Vote')}
-                            </PrimaryButton>
-                          </Tooltip>
-                        </Box>
-                      ))}
+                            {value}
+                          </VotingOption>
+                        ))}
+                      </RadioGroup>
+                    </Box>
+                  </VotingSkeleton>
+                )}
 
-                    {eitherIdleState(VotingStatus.Counting) && canFinish && (
-                      <PrimaryButton
-                        isLoading={current.matches(
-                          `mining.${VotingStatus.Finishing}`
-                        )}
-                        loadingText={t('Finishing')}
-                        onClick={() => send('FINISH', {from: identity.address})}
-                      >
-                        {didDetermineWinner
-                          ? t('Distribute rewards')
-                          : t('Refund')}
-                      </PrimaryButton>
-                    )}
-
-                    {eitherIdleState(VotingStatus.Counting) &&
-                      canProlongate && (
-                        <PrimaryButton
-                          onClick={() => send('REVIEW_PROLONGATE_VOTING')}
-                        >
-                          {t('Prolongate voting')}
-                        </PrimaryButton>
-                      )}
-
-                    {!eitherIdleState(
-                      VotingStatus.Terminated,
-                      VotingStatus.Terminating
-                    ) &&
-                      shouldTerminate && (
-                        <PrimaryButton
-                          variantColor="red"
-                          onClick={() => send('TERMINATE')}
-                        >
-                          {t('Terminate')}
-                        </PrimaryButton>
-                      )}
-
-                    <SecondaryButton onClick={() => redirect('/oracles/list')}>
-                      {t('Close')}
-                    </SecondaryButton>
-                  </Stack>
-                  <Stack isInline spacing={3} align="center">
-                    {eitherIdleState(
-                      VotingStatus.Archived,
-                      VotingStatus.Terminated
-                    ) &&
-                      !didDetermineWinner && (
-                        <Text color="red.500">{t('No winner selected')}</Text>
-                      )}
-                    <VDivider />
-                    <Stack isInline spacing={2} align="center">
-                      <Icon
-                        name={didDetermineWinner ? 'user-tick' : 'user'}
-                        color="muted"
-                        w={4}
-                        h={4}
-                      />
-                      <Text as="span">
-                        {t('{{count}} votes', {count: actualVotesCount})}
+                {eitherIdleState(
+                  VotingStatus.Counting,
+                  VotingStatus.Finishing,
+                  VotingStatus.Archived,
+                  VotingStatus.Terminating,
+                  VotingStatus.Terminated
+                ) && (
+                  <VotingSkeleton isLoaded={isLoaded}>
+                    <Stack spacing={3}>
+                      <Text color="muted" fontSize="sm">
+                        {t('Voting results')}
                       </Text>
+                      {actualVotesCount ? (
+                        <VotingResult votingService={service} spacing={3} />
+                      ) : (
+                        <Text
+                          bg="gray.50"
+                          borderRadius="md"
+                          p={2}
+                          color="muted"
+                          fontSize="sm"
+                        >
+                          {t('No votes')}
+                        </Text>
+                      )}
                     </Stack>
-                  </Stack>
-                </Flex>
-              </VotingSkeleton>
+                  </VotingSkeleton>
+                )}
 
-              <VotingSkeleton isLoaded={isLoaded}>
-                <Stack spacing={5}>
-                  <Box>
-                    <Text fontWeight={500}>{t('Recent transactions')}</Text>
-                    <ExternalLink
-                      href={`https://scan.idena.io/address/${identity.address}/contract/${id}/balanceUpdates`}
-                    >
-                      {t('See all transactions updates in Explorer')}
-                    </ExternalLink>
-                  </Box>
-                  <Table style={{tableLayout: 'fixed', fontWeight: 500}}>
-                    <thead>
-                      <TableRow>
-                        <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
-                        <TableHeaderCol>{t('Date and time')}</TableHeaderCol>
-                        <TableHeaderCol className="text-right">
-                          {t('Amount')}
-                        </TableHeaderCol>
-                      </TableRow>
-                    </thead>
-                    <tbody>
-                      {balanceUpdates.map(
-                        ({
-                          hash,
-                          type,
-                          timestamp,
-                          from,
-                          amount,
-                          fee,
-                          tips,
-                          balanceChange = 0,
-                          contractCallMethod,
-                        }) => {
-                          const isSender = areSameCaseInsensitive(
+                <VotingSkeleton isLoaded={isLoaded}>
+                  <Flex justify="space-between" align="center">
+                    <Stack isInline spacing={2}>
+                      {eitherIdleState(VotingStatus.Pending) && (
+                        <PrimaryButton
+                          loadingText={t('Launching')}
+                          onClick={() => {
+                            send('REVIEW_START_VOTING', {
+                              from: identity.address,
+                            })
+                          }}
+                        >
+                          {t('Launch')}
+                        </PrimaryButton>
+                      )}
+                      {eitherIdleState(VotingStatus.Open) &&
+                        (isOracle ? (
+                          <PrimaryButton onClick={() => send('REVIEW')}>
+                            {t('Vote')}
+                          </PrimaryButton>
+                        ) : (
+                          <Box>
+                            <Tooltip
+                              label={t('This vote is not available to you')}
+                              placement="top"
+                            >
+                              {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
+                              <PrimaryButton as={Box} isDisabled>
+                                {t('Vote')}
+                              </PrimaryButton>
+                            </Tooltip>
+                          </Box>
+                        ))}
+
+                      {eitherIdleState(VotingStatus.Counting) && canFinish && (
+                        <PrimaryButton
+                          isLoading={current.matches(
+                            `mining.${VotingStatus.Finishing}`
+                          )}
+                          loadingText={t('Finishing')}
+                          onClick={() =>
+                            send('FINISH', {from: identity.address})
+                          }
+                        >
+                          {didDetermineWinner
+                            ? t('Distribute rewards')
+                            : t('Refund')}
+                        </PrimaryButton>
+                      )}
+
+                      {eitherIdleState(VotingStatus.Counting) && canProlong && (
+                        <PrimaryButton
+                          onClick={() => send('REVIEW_PROLONG_VOTING')}
+                        >
+                          {t('Prolong voting')}
+                        </PrimaryButton>
+                      )}
+
+                      {!eitherIdleState(
+                        VotingStatus.Terminated,
+                        VotingStatus.Terminating
+                      ) &&
+                        shouldTerminate && (
+                          <PrimaryButton
+                            variantColor="red"
+                            onClick={() => send('TERMINATE')}
+                          >
+                            {t('Terminate')}
+                          </PrimaryButton>
+                        )}
+
+                      <SecondaryButton
+                        onClick={() => redirect('/oracles/list')}
+                      >
+                        {t('Close')}
+                      </SecondaryButton>
+                    </Stack>
+                    <Stack isInline spacing={3} align="center">
+                      {eitherIdleState(
+                        VotingStatus.Archived,
+                        VotingStatus.Terminated
+                      ) &&
+                        !didDetermineWinner && (
+                          <Text color="red.500">{t('No winner selected')}</Text>
+                        )}
+                      <VDivider />
+                      <Stack isInline spacing={2} align="center">
+                        <Icon
+                          name={didDetermineWinner ? 'user-tick' : 'user'}
+                          color="muted"
+                          w={4}
+                          h={4}
+                        />
+                        <Text as="span">
+                          {t('{{count}} votes', {count: actualVotesCount})}
+                        </Text>
+                      </Stack>
+                    </Stack>
+                  </Flex>
+                </VotingSkeleton>
+
+                <VotingSkeleton isLoaded={isLoaded}>
+                  <Stack spacing={5}>
+                    <Box>
+                      <Text fontWeight={500}>{t('Recent transactions')}</Text>
+                      <ExternalLink
+                        href={`https://scan.idena.io/address/${identity.address}/contract/${id}/balanceUpdates`}
+                      >
+                        {t('See all transactions updates in Explorer')}
+                      </ExternalLink>
+                    </Box>
+                    <Table style={{tableLayout: 'fixed', fontWeight: 500}}>
+                      <thead>
+                        <TableRow>
+                          <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
+                          <TableHeaderCol>{t('Date and time')}</TableHeaderCol>
+                          <TableHeaderCol className="text-right">
+                            {t('Amount')}
+                          </TableHeaderCol>
+                        </TableRow>
+                      </thead>
+                      <tbody>
+                        {balanceUpdates.map(
+                          ({
+                            hash,
+                            type,
+                            timestamp,
                             from,
-                            identity.address
-                          )
+                            amount,
+                            fee,
+                            tips,
+                            balanceChange = 0,
+                            contractCallMethod,
+                          }) => {
+                            const isSender = areSameCaseInsensitive(
+                              from,
+                              identity.address
+                            )
 
-                          const txCost =
-                            (isSender ? -amount : 0) + balanceChange
-                          const totalTxCost =
-                            txCost - ((isSender ? fee : 0) + tips)
+                            const txCost =
+                              (isSender ? -amount : 0) + balanceChange
+                            const totalTxCost =
+                              txCost - ((isSender ? fee : 0) + tips)
 
-                          const isCredit = totalTxCost > 0
+                            const isCredit = totalTxCost > 0
 
-                          const color =
-                            // eslint-disable-next-line no-nested-ternary
-                            totalTxCost === 0
-                              ? 'brandGray.500'
-                              : isCredit
-                              ? 'blue.500'
-                              : 'red.500'
+                            const color =
+                              // eslint-disable-next-line no-nested-ternary
+                              totalTxCost === 0
+                                ? 'brandGray.500'
+                                : isCredit
+                                ? 'blue.500'
+                                : 'red.500'
 
-                          return (
-                            <TableRow key={hash}>
-                              <TableCol>
-                                <Stack isInline>
-                                  <Flex
-                                    align="center"
-                                    justify="center"
-                                    bg={isCredit ? 'blue.012' : 'red.012'}
-                                    color={color}
-                                    borderRadius="lg"
-                                    minH={8}
-                                    minW={8}
-                                  >
-                                    <Icon
-                                      name={`arrow-${isSender ? 'up' : 'down'}`}
-                                      size={5}
-                                    />
-                                  </Flex>
-                                  <Box isTruncated>
-                                    {contractCallMethod ? (
-                                      <Text>
-                                        {ContractCallMethod[contractCallMethod]}
-                                      </Text>
-                                    ) : (
-                                      <Text>
-                                        {ContractTransactionType[type]}
-                                      </Text>
-                                    )}
-                                    <SmallText isTruncated title={from}>
-                                      {hash}
+                            return (
+                              <TableRow key={hash}>
+                                <TableCol>
+                                  <Stack isInline>
+                                    <Flex
+                                      align="center"
+                                      justify="center"
+                                      bg={isCredit ? 'blue.012' : 'red.012'}
+                                      color={color}
+                                      borderRadius="lg"
+                                      minH={8}
+                                      minW={8}
+                                    >
+                                      <Icon
+                                        name={`arrow-${
+                                          isSender ? 'up' : 'down'
+                                        }`}
+                                        size={5}
+                                      />
+                                    </Flex>
+                                    <Box isTruncated>
+                                      {contractCallMethod ? (
+                                        <Text>
+                                          {
+                                            ContractCallMethod[
+                                              contractCallMethod
+                                            ]
+                                          }
+                                        </Text>
+                                      ) : (
+                                        <Text>
+                                          {ContractTransactionType[type]}
+                                        </Text>
+                                      )}
+                                      <SmallText isTruncated title={from}>
+                                        {hash}
+                                      </SmallText>
+                                    </Box>
+                                  </Stack>
+                                </TableCol>
+                                <TableCol>
+                                  <Text>
+                                    {new Date(timestamp).toLocaleString()}
+                                  </Text>
+                                </TableCol>
+                                <TableCol className="text-right">
+                                  <Text color={color} overflowWrap="break-word">
+                                    {toLocaleDna(i18n.language, {
+                                      signDisplay: 'exceptZero',
+                                    })(txCost)}
+                                  </Text>
+                                  {isSender && (
+                                    <SmallText>
+                                      {t('Fee')} {toDna(fee + tips)}
                                     </SmallText>
-                                  </Box>
+                                  )}
+                                </TableCol>
+                              </TableRow>
+                            )
+                          }
+                        )}
+                        {balanceUpdates.length === 0 && (
+                          <tr>
+                            <td colSpan={3}>
+                              <FillCenter py={12}>
+                                <Stack spacing={4} align="center">
+                                  <Icon
+                                    name="coins-lg"
+                                    size={20}
+                                    color="gray.300"
+                                  />
+                                  <Text color="muted">
+                                    {t('No transactions')}
+                                  </Text>
                                 </Stack>
-                              </TableCol>
-                              <TableCol>
-                                <Text>
-                                  {new Date(timestamp).toLocaleString()}
-                                </Text>
-                              </TableCol>
-                              <TableCol className="text-right">
-                                <Text color={color} overflowWrap="break-word">
-                                  {toLocaleDna(i18n.language, {
-                                    signDisplay: 'exceptZero',
-                                  })(txCost)}
-                                </Text>
-                                {isSender && (
-                                  <SmallText>
-                                    {t('Fee')} {toDna(fee + tips)}
-                                  </SmallText>
-                                )}
-                              </TableCol>
-                            </TableRow>
-                          )
-                        }
-                      )}
-                      {balanceUpdates.length === 0 && (
-                        <tr>
-                          <td colSpan={3}>
-                            <FillCenter py={12}>
-                              <Stack spacing={4} align="center">
-                                <Icon
-                                  name="coins-lg"
-                                  size={20}
-                                  color="gray.300"
-                                />
-                                <Text color="muted">
-                                  {t('No transactions')}
-                                </Text>
-                              </Stack>
-                            </FillCenter>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </Table>
-                </Stack>
-              </VotingSkeleton>
-            </Stack>
-          </Box>
-          <VotingSkeleton isLoaded={isLoaded} h={isLoaded ? 'auto' : 'lg'}>
-            <Box mt={3}>
-              <Box mt={-2} mb={4}>
-                <OutlineButton
-                  onClick={() => {
-                    send('REFRESH')
-                  }}
-                >
-                  {t('Refresh')}
-                </OutlineButton>
-              </Box>
-              {!isClosed && (
-                <Stat mb={8}>
-                  <StatLabel as="div" color="muted" fontSize="md">
-                    <Stack isInline spacing={2} align="center">
-                      <Icon name="star" size={4} color="white" />
-                      <Text fontWeight={500}>{t('Total prize')}</Text>
-                    </Stack>
-                  </StatLabel>
-                  <StatNumber fontSize="base" fontWeight={500}>
-                    {toDna(contractBalance)}
-                  </StatNumber>
-                  <StatHelpText mt={1}>
-                    <IconButton2 icon="add-fund" onClick={onOpenAddFund}>
-                      {t('Add fund')}
-                    </IconButton2>
-                  </StatHelpText>
-                </Stat>
-              )}
-              <Stack spacing={6}>
-                {!isClosed && (
-                  <Stat>
-                    <StatLabel color="muted" fontSize="md">
-                      {t('Lock to vote')}
-                    </StatLabel>
-                    <StatNumber fontSize="base" fontWeight={500}>
-                      {toDna(votingMinPayment)}
-                    </StatNumber>
-                    <StatHelpText mt={1} color="muted" fontSize="small">
-                      {Number(votingMinPayment) > 0
-                        ? t(
-                            'Deposit will be refunded if your vote matches the majority'
-                          )
-                        : t('Free voting')}
-                    </StatHelpText>
-                  </Stat>
-                )}
-                {!isClosed && (
-                  <AsideStat
-                    label={t('Your reward')}
-                    value={toDna(estimatedOracleReward)}
-                  />
-                )}
-                {ownerFee && (
-                  <AsideStat
-                    label={t('Owner fee')}
-                    value={toPercent(ownerFee / 100)}
-                  />
-                )}
-                <AsideStat label={t('Committee size')} value={committeeSize} />
-                <AsideStat
-                  label={t('Quorum required')}
-                  value={t('{{count}} votes', {
-                    count: quorumVotesCount({quorum, committeeSize}),
-                  })}
-                />
-                <AsideStat
-                  label={t('Winner required')}
-                  value={toPercent(winnerThreshold / 100)}
-                />
-                {isClosed && (
-                  <AsideStat
-                    label={t('Prize paid')}
-                    value={toDna(totalReward)}
-                  />
-                )}
+                              </FillCenter>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </Table>
+                  </Stack>
+                </VotingSkeleton>
               </Stack>
             </Box>
-          </VotingSkeleton>
+            <VotingSkeleton isLoaded={isLoaded} h={isLoaded ? 'auto' : 'lg'}>
+              <Box mt={3}>
+                <Box mt={-2} mb={4}>
+                  <IconButton2
+                    icon="refresh"
+                    px={1}
+                    pr={3}
+                    _focus={null}
+                    onClick={() => {
+                      send('REFRESH')
+                    }}
+                  >
+                    {t('Refresh')}
+                  </IconButton2>
+                </Box>
+                {!isClosed && (
+                  <Stat mb={8}>
+                    <StatLabel as="div" color="muted" fontSize="md">
+                      <Stack isInline spacing={2} align="center">
+                        <Icon name="star" size={4} color="white" />
+                        <Text fontWeight={500}>{t('Total prize')}</Text>
+                      </Stack>
+                    </StatLabel>
+                    <StatNumber fontSize="base" fontWeight={500}>
+                      {toDna(contractBalance)}
+                    </StatNumber>
+                    <Box mt={1}>
+                      <IconButton2
+                        icon="add-fund"
+                        onClick={() => {
+                          send('ADD_FUND')
+                        }}
+                      >
+                        {t('Add funds')}
+                      </IconButton2>
+                    </Box>
+                  </Stat>
+                )}
+                <Stack spacing={6}>
+                  {!isClosed && (
+                    <Stat>
+                      <StatLabel color="muted" fontSize="md">
+                        {t('Voting deposit')}
+                      </StatLabel>
+                      <StatNumber fontSize="base" fontWeight={500}>
+                        {toDna(votingMinPayment)}
+                      </StatNumber>
+                      <StatHelpText mt={1} color="muted" fontSize="small">
+                        {Number(votingMinPayment) > 0
+                          ? t(
+                              'Deposit will be refunded if your vote matches the majority'
+                            )
+                          : t('Free voting')}
+                      </StatHelpText>
+                    </Stat>
+                  )}
+                  {!isClosed && (
+                    <AsideStat
+                      label={t('Your reward')}
+                      value={toDna(estimatedOracleReward)}
+                    />
+                  )}
+                  {ownerFee && (
+                    <AsideStat
+                      label={t('Owner fee')}
+                      value={toPercent(ownerFee / 100)}
+                    />
+                  )}
+                  <AsideStat
+                    label={t('Committee size')}
+                    value={t('{{committeeSize}} oracles', {committeeSize})}
+                  />
+                  <AsideStat
+                    label={t('Quorum required')}
+                    value={t('{{count}} votes', {
+                      count: quorumVotesCount({quorum, committeeSize}),
+                    })}
+                  />
+                  <AsideStat
+                    label={t('Majority threshold')}
+                    value={toPercent(winnerThreshold / 100)}
+                  />
+                  {isClosed && (
+                    <AsideStat
+                      label={t('Prize paid')}
+                      value={toDna(totalReward)}
+                    />
+                  )}
+                </Stack>
+              </Box>
+            </VotingSkeleton>
+          </Stack>
         </Stack>
       </Page>
 
@@ -633,6 +648,9 @@ export default function ViewVotingPage() {
         from={identity.address}
         to={contractHash}
         deposit={votingMinPayment}
+        publicVotingDuration={publicVotingDuration}
+        finishDate={finishDate}
+        finishCountingDate={finishCountingDate}
         isLoading={current.matches(`mining.${VotingStatus.Voting}`)}
         onVote={() => {
           send('VOTE', {from: identity.address})
@@ -640,14 +658,20 @@ export default function ViewVotingPage() {
       />
 
       <AddFundDrawer
-        isOpen={isOpenAddFund}
-        onClose={onCloseAddFund}
+        isOpen={eitherState(
+          current,
+          'funding',
+          `mining.${VotingStatus.Funding}`
+        )}
+        onClose={() => {
+          send('CANCEL')
+        }}
         from={identity.address}
         to={contractHash}
         available={identity.balance}
+        isLoading={current.matches(`mining.${VotingStatus.Funding}`)}
         onAddFund={({amount, from}) => {
           send('ADD_FUND', {amount, from})
-          onCloseAddFund()
         }}
       />
 
@@ -691,20 +715,20 @@ export default function ViewVotingPage() {
         hasWinner={didDetermineWinner}
       />
 
-      <ProlongateDrawer
+      <ProlongDrawer
         isOpen={eitherState(
           current,
-          `idle.${VotingStatus.Counting}.prolongate`,
-          `mining.${VotingStatus.Prolongating}`
+          `idle.${VotingStatus.Counting}.prolong`,
+          `mining.${VotingStatus.Prolonging}`
         )}
         onClose={() => {
           send('CANCEL')
         }}
         from={identity.address}
         available={identity.balance}
-        isLoading={current.matches(`mining.${VotingStatus.Prolongating}`)}
-        onProlongate={({from}) => {
-          send('PROLONGATE_VOTING', {from})
+        isLoading={current.matches(`mining.${VotingStatus.Prolonging}`)}
+        onProlong={({from}) => {
+          send('PROLONG_VOTING', {from})
         }}
       />
 

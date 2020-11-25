@@ -15,20 +15,22 @@ import {
   Skeleton,
   useTheme,
   Divider,
-  InputGroup,
-  InputRightAddon,
   Button,
   IconButton,
   RadioButtonGroup,
-  Collapse,
-  useDisclosure,
 } from '@chakra-ui/core'
+import {useTranslation} from 'react-i18next'
 import {
   DrawerHeader,
   DrawerBody,
   Input,
   HDivider,
+  ChainedInputGroup,
+  ChainedInput,
+  ChainedInputAddon,
+  Tooltip,
 } from '../../shared/components/components'
+import {clampValue} from '../../shared/utils/utils'
 
 export function OracleDrawerHeader({
   icon,
@@ -81,9 +83,9 @@ export function OracleFormControl({label, children, ...props}) {
 }
 export function OracleFormHelper({label, value, ...props}) {
   return (
-    <Flex justify="space-between">
-      <OracleFormHelperText {...props}>{label}</OracleFormHelperText>
-      <OracleFormHelperValue {...props}>{value}</OracleFormHelperValue>
+    <Flex justify="space-between" {...props}>
+      <OracleFormHelperText>{label}</OracleFormHelperText>
+      <OracleFormHelperValue>{value}</OracleFormHelperValue>
     </Flex>
   )
 }
@@ -94,6 +96,19 @@ export function OracleFormHelperText(props) {
 
 export function OracleFormHelperValue(props) {
   return <FormHelperText color="brandGray.500" fontSize="md" {...props} />
+}
+
+export function OracleFormHelperSmall({label, value, ...props}) {
+  return (
+    <Flex {...props}>
+      <OracleFormHelperText fontSize="sm" mt={0} w={24}>
+        {label}
+      </OracleFormHelperText>
+      <OracleFormHelperValue fontSize="sm" mt={0}>
+        {value}
+      </OracleFormHelperValue>
+    </Flex>
+  )
 }
 
 export function VotingBadge(props) {
@@ -112,69 +127,104 @@ export function VotingBadge(props) {
   )
 }
 
-export function VotingInlineFormControl({htmlFor, label, children, ...props}) {
+export function VotingInlineFormControl({
+  htmlFor,
+  label,
+  tooltip,
+  children,
+  ...props
+}) {
   return (
     <FormControl display="inline-flex" {...props}>
-      <FormLabel htmlFor={htmlFor} color="muted" py={2} minW={32} w={32}>
-        {label}
-      </FormLabel>
+      {tooltip ? (
+        <FormLabel htmlFor={htmlFor} color="muted" py={2} minW={32} w={32}>
+          <Tooltip label={tooltip} placement="top">
+            <Text
+              as="span"
+              borderBottomStyle="dotted"
+              borderBottomWidth="1px"
+              borderBottomColor="muted"
+              cursor="help"
+            >
+              {label}
+            </Text>
+          </Tooltip>
+        </FormLabel>
+      ) : (
+        <FormLabel htmlFor={htmlFor} color="muted" py={2} minW={32} w={32}>
+          {label}
+        </FormLabel>
+      )}
       <Box w="md">{children}</Box>
     </FormControl>
   )
 }
 
 export function DnaInput(props) {
+  const {isDisabled} = props
+
   return (
-    <InputWithRightAddon
-      addon="iDNA"
-      type="number"
-      min={0}
-      required
-      {...props}
-    />
+    <ChainedInputGroup>
+      <ChainedInput as={NumberInput} min={0} {...props} />
+      <ChainedInputAddon isDisabled={isDisabled}>iDNA</ChainedInputAddon>
+    </ChainedInputGroup>
   )
 }
 
 export function PercentInput(props) {
+  const {isDisabled} = props
+
   return (
-    <InputWithRightAddon addon="%" type="number" min={0} max={100} {...props} />
+    <ChainedInputGroup>
+      <ChainedInput as={NumberInput} min={0} max={100} {...props} />
+      <ChainedInputAddon isDisabled={isDisabled}>%</ChainedInputAddon>
+    </ChainedInputGroup>
   )
 }
 
-export function InputWithRightAddon({
-  addon,
-  size,
-  isDisabled,
-  _disabled = {
-    bg: 'gray.50',
-  },
-  _hover,
+export function BlockInput(props) {
+  const {t} = useTranslation()
+
+  const {isDisabled} = props
+
+  return (
+    <ChainedInputGroup>
+      <ChainedInput as={NumberInput} min={0} {...props} />
+      <ChainedInputAddon isDisabled={isDisabled}>
+        {t('Blocks')}
+      </ChainedInputAddon>
+    </ChainedInputGroup>
+  )
+}
+
+export function NumberInput({
+  min,
+  max = Number.MAX_VALUE,
+  onChange,
+  onClamp,
   ...props
 }) {
-  const bg = isDisabled ? _disabled.bg : 'white'
   return (
-    <InputGroup size={size} flex={1}>
-      <Input
-        borderRightColor={bg}
-        borderTopRightRadius={0}
-        borderBottomRightRadius={0}
-        isDisabled={isDisabled}
-        _hover={{
-          borderRightColor: bg,
-          ..._hover,
-        }}
-        {...props}
-      />
-      <InputRightAddon
-        bg={bg}
-        borderColor="gray.300"
-        color="muted"
-        h={8}
-        px={3}
-      >
-        {addon}
-      </InputRightAddon>
-    </InputGroup>
+    <Input
+      type="number"
+      min={min}
+      max={max}
+      onBlur={({target}) => {
+        const {id, value} = target
+        if (!target.checkValidity()) {
+          const clampedValue = clampValue(min, max, Number(value))
+          onChange({
+            target: {
+              id,
+              value: clampedValue,
+            },
+          })
+          if (onClamp) onClamp(clampedValue)
+        }
+      }}
+      onChange={onChange}
+      {...props}
+    />
   )
 }
 
@@ -270,6 +320,7 @@ function FullSkeleton(props) {
 export const VotingOption = React.forwardRef(
   ({value, annotation, children = value, ...props}, ref) => (
     <Flex
+      align="center"
       justify="space-between"
       border="1px"
       borderColor="gray.300"
@@ -278,15 +329,15 @@ export const VotingOption = React.forwardRef(
       py={2}
     >
       <Radio
-        isTruncated
         ref={ref}
         borderColor="gray.100"
         value={value}
         title={children.length > 50 ? children : ''}
-        maxW="xs"
         {...props}
       >
-        {children}
+        <Text maxW="xs" isTruncated>
+          {children}
+        </Text>
       </Radio>
       <Text color="muted" fontSize="sm">
         {annotation}
@@ -334,57 +385,37 @@ export function NewVotingFormSubtitle(props) {
   return <Heading as="h2" fontSize="md" fontWeight="bold" mt={4} {...props} />
 }
 
-export function TaggedInput({
-  id,
-  type,
-  value,
-  min,
-  max,
-  presets = [],
-  helperText,
-  addonText,
-  onChangePreset,
-  onChangeCustom,
-  ...props
-}) {
+export function PresetFormControl({tooltip, children, ...props}) {
   return (
-    <VotingInlineFormControl {...props}>
-      <Stack flex={1}>
-        <Stack isInline justify="space-between">
-          <RadioButtonGroup isInline value={value} onChange={onChangePreset}>
-            {/* eslint-disable-next-line no-shadow */}
-            {presets.map(({value, label}) => (
-              <Radio
-                key={label}
-                value={value}
-                borderColor="gray.300"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-                px={3}
-              >
-                {label}
-              </Radio>
-            ))}
-          </RadioButtonGroup>
-        </Stack>
-        <Box>
-          <InputWithRightAddon
-            addon={addonText}
-            id={id}
-            type={type}
-            value={value}
-            min={min}
-            max={max}
-            onChange={onChangeCustom}
-          />
-          <NewOracleFormHelperText textAlign="right">
-            {helperText}
-          </NewOracleFormHelperText>
-        </Box>
-      </Stack>
+    <VotingInlineFormControl tooltip={tooltip} {...props}>
+      <Stack flex={1}>{children}</Stack>
     </VotingInlineFormControl>
   )
+}
+
+export function PresetFormControlOptionList(props) {
+  return <RadioButtonGroup isInline {...props} />
+}
+
+export function PresetFormControlOption(props) {
+  return (
+    <Radio
+      borderColor="gray.300"
+      borderWidth={1}
+      borderRadius="md"
+      p={2}
+      px={3}
+      {...props}
+    />
+  )
+}
+
+export function PresetFormControlInputBox(props) {
+  return <Box {...props} />
+}
+
+export function PresetFormControlHelperText(props) {
+  return <NewOracleFormHelperText textAlign="right" {...props} />
 }
 
 export const OutlineButton = React.forwardRef((props, ref) => (

@@ -34,8 +34,12 @@ import {
   VotingInlineFormControl,
   VotingOptionInput,
   NewVotingFormSubtitle,
-  TaggedInput,
   PercentInput,
+  PresetFormControl,
+  PresetFormControlOptionList,
+  PresetFormControlOption,
+  PresetFormControlInputBox,
+  PresetFormControlHelperText,
 } from '../../screens/oracles/components'
 import {useAppMachine} from '../../shared/providers/app-context'
 import {
@@ -122,6 +126,7 @@ function NewVotingPage() {
     oracleRewardsEstimates,
     ownerFee = 0,
     minOracleReward,
+    votingMinPayment,
     dirtyBag,
   } = current.context
 
@@ -263,6 +268,7 @@ function NewVotingPage() {
               id="votingDuration"
               label={t('Voting duration')}
               value={votingDuration}
+              tooltip={t('Secret voting period')}
               presets={[
                 durationPreset({hours: 12}),
                 durationPreset({days: 1}),
@@ -280,7 +286,7 @@ function NewVotingPage() {
 
             <VotingInlineFormControl
               htmlFor="committeeSize"
-              label={t('Committee size')}
+              label={t('Committee size, oracles')}
               isInvalid={committeeSize < 1}
               mt={2}
             >
@@ -328,17 +334,17 @@ function NewVotingPage() {
             <VotingInlineFormControl
               htmlFor="votingMinPayment"
               label={t('Voting deposit')}
+              tooltip={t(
+                'Refunded when voting in majority and lost when voting in minority'
+              )}
               isDisabled={isFreeVoting}
               mt={2}
             >
               <Stack spacing={3} flex={1}>
                 <DnaInput
                   id="votingMinPayment"
-                  addon="iDNA"
+                  value={votingMinPayment}
                   isDisabled={isFreeVoting}
-                  _disabled={{
-                    bg: 'gray.50',
-                  }}
                   onChange={handleChange}
                 />
                 <Checkbox
@@ -354,31 +360,40 @@ function NewVotingPage() {
 
             <NewVotingFormSubtitle>{t('Rewards')}</NewVotingFormSubtitle>
 
-            <TaggedInput
-              id="oracleReward"
-              type="number"
-              value={Number(oracleReward)}
-              min={minOracleReward}
-              label={t('Min reward per oracle')}
-              presets={oracleRewardsEstimates}
-              helperText={t('Total oracles rewards: {{amount}}', {
-                amount: dna(votingMinBalance({oracleReward, committeeSize})),
-                nsSeparator: '!',
-              })}
-              addonText={t('iDNA')}
-              onChangePreset={value => {
-                send('CHANGE', {
-                  id: 'oracleReward',
-                  value,
-                })
-              }}
-              onChangeCustom={({target}) => {
-                send('CHANGE', {
-                  id: 'oracleReward',
-                  value: Number(target.value),
-                })
-              }}
-            />
+            <PresetFormControl label={t('Min reward per oracle')}>
+              <PresetFormControlOptionList
+                value={String(oracleReward)}
+                onChange={value => {
+                  send('CHANGE', {
+                    id: 'oracleReward',
+                    value,
+                  })
+                }}
+              >
+                {oracleRewardsEstimates.map(({label, value}) => (
+                  <PresetFormControlOption key={value} value={String(value)}>
+                    {label}
+                  </PresetFormControlOption>
+                ))}
+              </PresetFormControlOptionList>
+
+              <PresetFormControlInputBox>
+                <DnaInput
+                  id="oracleReward"
+                  value={oracleReward}
+                  min={minOracleReward}
+                  onChange={handleChange}
+                />
+                <PresetFormControlHelperText>
+                  {t('Total oracles rewards: {{amount}}', {
+                    amount: dna(
+                      votingMinBalance({oracleReward, committeeSize})
+                    ),
+                    nsSeparator: '!',
+                  })}
+                </PresetFormControlHelperText>
+              </PresetFormControlInputBox>
+            </PresetFormControl>
 
             <NewVotingFormSubtitle cursor="pointer" onClick={onToggleAdvanced}>
               {t('Advanced settings')}
@@ -397,7 +412,10 @@ function NewVotingPage() {
                 <VotingDurationInput
                   id="publicVotingDuration"
                   value={publicVotingDuration}
-                  label={t('Duration of summing up')}
+                  label={t('Counting duration')}
+                  tooltip={t(
+                    'Period when secret votes are getting published and results are counted'
+                  )}
                   presets={[
                     durationPreset({hours: 1}),
                     durationPreset({hours: 2}),
@@ -407,20 +425,45 @@ function NewVotingPage() {
                   service={service}
                 />
 
-                <VotingInlineFormControl
-                  htmlFor="winnerThreshold"
-                  label={t('Winner score')}
+                <PresetFormControl
+                  label={t('Majority threshold')}
+                  tooltip={t(
+                    'The minimum share of the votes which an option requires to achieve before it becomes the voting outcome'
+                  )}
                 >
-                  <PercentInput
-                    id="winnerThreshold"
+                  <PresetFormControlOptionList
                     value={winnerThreshold}
-                    onChange={handleChange}
-                  />
-                </VotingInlineFormControl>
+                    onChange={value => {
+                      send('CHANGE', {
+                        id: 'winnerThreshold',
+                        value,
+                      })
+                    }}
+                  >
+                    <PresetFormControlOption value="51">
+                      {t('Simple majority')}
+                    </PresetFormControlOption>
+                    <PresetFormControlOption value="66">
+                      {t('Super majority')}
+                    </PresetFormControlOption>
+                    <PresetFormControlOption value="100">
+                      {t('N/A (polls)')}
+                    </PresetFormControlOption>
+                  </PresetFormControlOptionList>
+
+                  <PresetFormControlInputBox>
+                    <PercentInput
+                      id="winnerThreshold"
+                      value={winnerThreshold}
+                      onChange={handleChange}
+                    />
+                  </PresetFormControlInputBox>
+                </PresetFormControl>
 
                 <VotingInlineFormControl
                   htmlFor="ownerFee"
                   label={t('Owner fee')}
+                  tooltip={t('% of the Oracle rewards you receive')}
                 >
                   <PercentInput
                     id="ownerFee"

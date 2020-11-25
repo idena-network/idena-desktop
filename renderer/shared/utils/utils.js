@@ -59,3 +59,7 @@ export const byId = ({id: givenId}) => ({id: currentId}) =>
   currentId === givenId
 
 export const mergeById = (...items) => merge(byId)(...items)
+
+export function clampValue(min, max, value) {
+  return Math.min(Math.max(value, min), max)
+}
