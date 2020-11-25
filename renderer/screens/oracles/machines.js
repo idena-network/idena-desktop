@@ -23,7 +23,7 @@ import {
   mapVoting,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
-import {callRpc, mergeById} from '../../shared/utils/utils'
+import {callRpc} from '../../shared/utils/utils'
 import {epochDb, requestDb} from '../../shared/utils/db'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 import {ContractRpcMode, VotingListFilter} from './types'
@@ -236,12 +236,14 @@ export const votingListMachine = Machine(
 
         await db.batchPut(knownVotings)
 
-        const persistedOptions = (
-          await db.all()
-        ).map(({id, selectedOption}) => ({id, selectedOption}))
-
         return {
-          votings: mergeById(knownVotings, persistedOptions),
+          votings: await Promise.all(
+            knownVotings.map(async ({id, ...voting}) => ({
+              ...(await db.load(id)),
+              id,
+              ...voting,
+            }))
+          ),
           continuationToken: nextContinuationToken,
         }
       },
