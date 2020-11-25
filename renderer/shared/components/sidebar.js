@@ -139,40 +139,24 @@ function Nav() {
           textAlign: 'left',
         }}
       >
-        <NavItem
-          href="/profile"
-          active
-          icon={<i className="icon icon--user" />}
-        >
+        <NavItem href="/profile" active icon={<Icon name="profile" size={5} />}>
           {t('My Idena') || nickname}
         </NavItem>
-        <NavItem
-          href="/wallets"
-          icon={<i className="icon icon--menu_wallets" />}
-        >
+        <NavItem href="/wallets" icon={<Icon name="wallet" size={5} />}>
           {t('Wallets')}
         </NavItem>
-        <NavItem
-          href="/flips/list"
-          icon={<i className="icon icon--menu_gallery" />}
-        >
+        <NavItem href="/flips/list" icon={<Icon name="gallery" size={5} />}>
           {t('Flips')}
         </NavItem>
-        <NavItem
-          href="/contacts"
-          icon={<i className="icon icon--menu_contacts" />}
-        >
+        <NavItem href="/contacts" icon={<Icon name="contacts" size={5} />}>
           {t('Contacts')}
         </NavItem>
-        <NavItem
-          href="/oracles/list"
-          icon={<Icon name="oracle" w={5} h={5} ml={-1} />}
-        >
+        <NavItem href="/oracles/list" icon={<Icon name="oracle" w={5} h={5} />}>
           {t('Oracle voting')}
         </NavItem>
         <NavItem
           href="/settings/general"
-          icon={<i className="icon icon--settings" />}
+          icon={<Icon name="settings" size={5} />}
         >
           {t('Settings')}
         </NavItem>
