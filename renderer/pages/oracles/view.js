@@ -95,7 +95,7 @@ export default function ViewVotingPage() {
   } = useRouter()
 
   const {syncing, offline} = useChainState()
-  const {epoch} = useEpochState()
+  const {epoch} = useEpochState() ?? {epoch: -1}
   const identity = useIdentityState()
 
   const viewMachine = React.useMemo(
@@ -375,16 +375,9 @@ export default function ViewVotingPage() {
                         {eitherIdleState(VotingStatus.Counting) &&
                           !canProlong &&
                           !canFinish && (
-                            <Box>
-                              <Tooltip
-                                label={t('This vote is not available to you')}
-                                placement="top"
-                              >
-                                <PrimaryButton as={Box} isDisabled>
-                                  {t('Vote')}
-                                </PrimaryButton>
-                              </Tooltip>
-                            </Box>
+                            <PrimaryButton as={Box} isDisabled>
+                              {t('Vote')}
+                            </PrimaryButton>
                           )}
 
                         {!eitherIdleState(
@@ -589,7 +582,7 @@ export default function ViewVotingPage() {
                       <StatLabel as="div" color="muted" fontSize="md">
                         <Stack isInline spacing={2} align="center">
                           <Icon name="star" size={4} color="white" />
-                          <Text fontWeight={500}>{t('Total prize')}</Text>
+                          <Text fontWeight={500}>{t('Prize pool')}</Text>
                         </Stack>
                       </StatLabel>
                       <StatNumber fontSize="base" fontWeight={500}>

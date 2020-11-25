@@ -219,7 +219,7 @@ export function VotingCard({votingRef, ...props}) {
       >
         <Icon name="star" size={5} color="white" />
         <Text fontWeight={500}>
-          {isClosed ? t('Oracles rewards paid') : t('Total prize')}:{' '}
+          {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
           {toDna(isClosed ? totalReward : balance)}
         </Text>
         {!isClosed && (

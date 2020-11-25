@@ -50,7 +50,7 @@ function VotingListPage() {
 
   const {offline, syncing} = useChainState()
   const {address, isValidated} = useIdentityState()
-  const {epoch} = useEpochState()
+  const {epoch} = useEpochState() ?? {epoch: -1}
 
   const [current, send] = useMachine(votingListMachine, {
     context: {epoch, address},
