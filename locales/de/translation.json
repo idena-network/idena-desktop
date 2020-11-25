@@ -496,5 +496,10 @@
   "Refunding": "Refunding",
   "Terminate Oracle Voting": "Terminate Oracle Voting",
   "Terminate the contract to clean-up its state and release the stake": "Terminate the contract to clean-up its state and release the stake",
-  "Terminating": "Terminating"
+  "Terminating": "Terminating",
+  "Waiting for rewards distribution or termination": "Waiting for rewards distribution or termination",
+  "Waiting for refunds or termination": "Waiting for refunds or termination",
+  "Waiting for refunds": "Waiting for refunds",
+  "Waiting for prolongation or termination": "Waiting for prolongation or termination",
+  "Waiting for prolongation": "Waiting for prolongation"
 }

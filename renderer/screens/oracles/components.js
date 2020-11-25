@@ -138,7 +138,7 @@ export function VotingInlineFormControl({
     <FormControl display="inline-flex" {...props}>
       {tooltip ? (
         <FormLabel htmlFor={htmlFor} color="muted" py={2} minW={32} w={32}>
-          <Tooltip label={tooltip} placement="top">
+          <Tooltip label={tooltip} placement="top" zIndex="tooltip">
             <Text
               as="span"
               borderBottomStyle="dotted"

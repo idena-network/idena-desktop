@@ -1165,25 +1165,20 @@ export function VotingPhase({service}) {
         ]
       : didReachQuorum
       ? [
-          t(
-            `Waiting for ${
-              didDetermineWinner ? 'rewards distribution' : 'refunds'
-            } ${
-              isAllowedToTerminate({estimatedTerminationTime})
-                ? 'or termination'
-                : ''
-            }`
-          ),
+          // eslint-disable-next-line no-nested-ternary
+          didDetermineWinner
+            ? isAllowedToTerminate({estimatedTerminationTime})
+              ? t('Waiting for rewards distribution or termination')
+              : t('Waiting for rewards distribution')
+            : isAllowedToTerminate({estimatedTerminationTime})
+            ? t('Waiting for refunds or termination')
+            : t('Waiting for refunds'),
           null,
         ]
       : [
-          t(
-            `Waiting for prolongation ${
-              isAllowedToTerminate({estimatedTerminationTime})
-                ? 'or termination'
-                : ''
-            }`
-          ),
+          isAllowedToTerminate({estimatedTerminationTime})
+            ? t('Waiting for prolongation or termination')
+            : t('Waiting for prolongation'),
           null,
         ]
     : // eslint-disable-next-line no-nested-ternary
