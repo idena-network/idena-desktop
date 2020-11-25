@@ -19,6 +19,7 @@ import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
 import {loadValidationState} from '../../screens/validation/utils'
 import {IdentityStatus, EpochPeriod} from '../types'
+import {Logo} from '../../screens/app/components'
 
 function Sidebar() {
   return (
@@ -125,24 +126,6 @@ function NodeStatus() {
   )
 }
 
-export function Logo() {
-  return (
-    <Box
-      css={{
-        alignSelf: 'center',
-        ...margin(rem(32), 0),
-      }}
-    >
-      <img src="/static/logo.svg" alt="Idena logo" />
-      <style jsx>{`
-        img {
-          width: ${rem(56)};
-        }
-      `}</style>
-    </Box>
-  )
-}
-
 function Nav() {
   const {t} = useTranslation()
   const {nickname} = useIdentityState()
@@ -185,7 +168,7 @@ function Nav() {
           href="/oracles/list"
           icon={<Icon name="oracle" w={5} h={5} ml={-1} />}
         >
-          {t('Oracles')}
+          {t('Oracle voting')}
         </NavItem>
         <NavItem
           href="/settings/general"

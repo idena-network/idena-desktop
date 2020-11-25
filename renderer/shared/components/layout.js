@@ -84,7 +84,6 @@ export default function Layout({
           )}
         </>
       )}
-
       <UpdateExternalNodeDialog />
     </LayoutContainer>
   )

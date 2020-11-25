@@ -343,11 +343,17 @@ export function MinerStatusSwitcher() {
       }
     },
     {
-      online: identity.online,
+      online: null,
       showModal: false,
       isMining: false,
     }
   )
+
+  React.useEffect(() => {
+    if (!state.showModal) {
+      dispatch(['init', identity])
+    }
+  }, [identity, state.showModal])
 
   React.useEffect(() => setHash(hash), [hash, setHash])
 
@@ -363,6 +369,10 @@ export function MinerStatusSwitcher() {
       dispatch(['mined'])
     }
   }, [mined])
+
+  if (!identity.canMine) {
+    return null
+  }
 
   return (
     <>

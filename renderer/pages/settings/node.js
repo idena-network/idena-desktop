@@ -27,7 +27,6 @@ import {
   useNodeDispatch,
 } from '../../shared/providers/node-context'
 import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
-import {getLayout} from '../../screens/app/layout'
 import {Toast} from '../../shared/components/components'
 import {
   SettingsFormControl,
@@ -147,144 +146,142 @@ function NodeSettings() {
   const [revealApiKey, setRevealApiKey] = useState(false)
 
   return (
-    <Stack spacing={8} mt={8}>
-      <Stack isInline spacing={3} align="center">
-        <Box>
-          <Switcher
-            isChecked={settings.runInternalNode}
-            onChange={() => {
-              toggleRunInternalNode(!settings.runInternalNode)
-            }}
-            bgOn={theme.colors.primary}
-          />
-        </Box>
-        <Box>
-          <Text fontWeight={500}>{t('Run built-in node')}</Text>
-          <Text color="muted">
-            {t('Use built-in node to have automatic updates')}
-          </Text>
-        </Box>
-        {settings.runInternalNode && nodeFailed && (
-          <Box mb={3}>
-            <Text color="red.500">{t('Node failed to start')}</Text>
-            <SecondaryButton onClick={() => tryRestartNode()}>
-              {t('Try restart')}
-            </SecondaryButton>
+    <SettingsLayout>
+      <Stack spacing={8} mt={8}>
+        <Stack isInline spacing={3} align="center">
+          <Box>
+            <Switcher
+              isChecked={settings.runInternalNode}
+              onChange={() => {
+                toggleRunInternalNode(!settings.runInternalNode)
+              }}
+              bgOn={theme.colors.primary}
+            />
+          </Box>
+          <Box>
+            <Text fontWeight={500}>{t('Run built-in node')}</Text>
+            <Text color="muted">
+              {t('Use built-in node to have automatic updates')}
+            </Text>
+          </Box>
+          {settings.runInternalNode && nodeFailed && (
+            <Box mb={3}>
+              <Text color="red.500">{t('Node failed to start')}</Text>
+              <SecondaryButton onClick={() => tryRestartNode()}>
+                {t('Try restart')}
+              </SecondaryButton>
+            </Box>
+          )}
+        </Stack>
+        <Stack isInline spacing={3} align="center">
+          <Box>
+            <Switcher
+              isChecked={settings.useExternalNode}
+              onChange={() => {
+                toggleUseExternalNode(!settings.useExternalNode)
+              }}
+              bgOn={theme.colors.primary}
+            />
+          </Box>
+          <Box>
+            <Text fontWeight={500}>{t('Connect to remote node')}</Text>
+            <Text color="muted">
+              {t(
+                'Specify the Node address if you want to connect to remote node'
+              )}
+            </Text>
+          </Box>
+        </Stack>
+
+        {settings.useExternalNode && (
+          <SettingsSection title={t('Node settings')}>
+            <Stack
+              spacing={3}
+              as="form"
+              onSubmit={e => {
+                e.preventDefault()
+                setConnectionDetails(state)
+                notify()
+              }}
+            >
+              <SettingsFormControl>
+                <SettingsFormLabel htmlFor="url">
+                  {t('Node address')}
+                </SettingsFormLabel>
+                <SettingsInput
+                  id="url"
+                  value={state.url}
+                  onChange={e =>
+                    dispatch({type: 'SET_URL', data: e.target.value})
+                  }
+                />
+              </SettingsFormControl>
+              <SettingsFormControl>
+                <SettingsFormLabel htmlFor="key">
+                  {t('Node api key')}
+                </SettingsFormLabel>
+                <InputGroup>
+                  <SettingsInput
+                    id="key"
+                    value={state.apiKey}
+                    type={revealApiKey ? 'text' : 'password'}
+                    onChange={e =>
+                      dispatch({type: 'SET_API_KEY', data: e.target.value})
+                    }
+                  />
+                  <InputRightElement h="full">
+                    <IconButton
+                      icon={revealApiKey ? FiEyeOff : FiEye}
+                      size="xs"
+                      bg={revealApiKey ? 'gray.300' : 'white'}
+                      w={8}
+                      _hover={{
+                        bg: revealApiKey ? 'gray.300' : 'white',
+                      }}
+                      onClick={() => setRevealApiKey(!revealApiKey)}
+                    />
+                  </InputRightElement>
+                </InputGroup>
+              </SettingsFormControl>
+
+              <SettingsFormControl mt={3}>
+                <SecondaryButton
+                  ml="auto"
+                  onClick={() => {
+                    dispatch({type: 'SET_URL', data: BASE_API_URL})
+                  }}
+                >
+                  {t('Use default')}
+                </SecondaryButton>
+                <PrimaryButton type="submit">{t('Save')}</PrimaryButton>
+              </SettingsFormControl>
+            </Stack>
+          </SettingsSection>
+        )}
+
+        {!settings.useExternalNode && (
+          <Box>
+            <Heading fontWeight={500} fontSize="lg" mb={4}>
+              {t('Built-in node log')}
+            </Heading>
+            <Flex
+              ref={logsRef}
+              direction="column"
+              height="xs"
+              overflow="auto"
+              wordBreak="break-word"
+              borderColor="muted"
+              borderWidth="px"
+            >
+              {state.logs.map((log, idx) => (
+                <Ansi key={idx}>{log}</Ansi>
+              ))}
+            </Flex>
           </Box>
         )}
       </Stack>
-      <Stack isInline spacing={3} align="center">
-        <Box>
-          <Switcher
-            isChecked={settings.useExternalNode}
-            onChange={() => {
-              toggleUseExternalNode(!settings.useExternalNode)
-            }}
-            bgOn={theme.colors.primary}
-          />
-        </Box>
-        <Box>
-          <Text fontWeight={500}>{t('Connect to remote node')}</Text>
-          <Text color="muted">
-            {t(
-              'Specify the Node address if you want to connect to remote node'
-            )}
-          </Text>
-        </Box>
-      </Stack>
-
-      {settings.useExternalNode && (
-        <SettingsSection title={t('Node settings')}>
-          <Stack
-            spacing={3}
-            as="form"
-            onSubmit={e => {
-              e.preventDefault()
-              setConnectionDetails(state)
-              notify()
-            }}
-          >
-            <SettingsFormControl>
-              <SettingsFormLabel htmlFor="url">
-                {t('Node address')}
-              </SettingsFormLabel>
-              <SettingsInput
-                id="url"
-                value={state.url}
-                onChange={e =>
-                  dispatch({type: 'SET_URL', data: e.target.value})
-                }
-              />
-            </SettingsFormControl>
-            <SettingsFormControl>
-              <SettingsFormLabel htmlFor="key">
-                {t('Node api key')}
-              </SettingsFormLabel>
-              <InputGroup>
-                <SettingsInput
-                  id="key"
-                  value={state.apiKey}
-                  type={revealApiKey ? 'text' : 'password'}
-                  onChange={e =>
-                    dispatch({type: 'SET_API_KEY', data: e.target.value})
-                  }
-                />
-                <InputRightElement h="full">
-                  <IconButton
-                    icon={revealApiKey ? FiEyeOff : FiEye}
-                    size="xs"
-                    bg={revealApiKey ? 'gray.300' : 'white'}
-                    w={8}
-                    _hover={{
-                      bg: revealApiKey ? 'gray.300' : 'white',
-                    }}
-                    onClick={() => setRevealApiKey(!revealApiKey)}
-                  />
-                </InputRightElement>
-              </InputGroup>
-            </SettingsFormControl>
-
-            <SettingsFormControl mt={3}>
-              <SecondaryButton
-                ml="auto"
-                onClick={() => {
-                  dispatch({type: 'SET_URL', data: BASE_API_URL})
-                }}
-              >
-                {t('Use default')}
-              </SecondaryButton>
-              <PrimaryButton type="submit">{t('Save')}</PrimaryButton>
-            </SettingsFormControl>
-          </Stack>
-        </SettingsSection>
-      )}
-
-      {!settings.useExternalNode && (
-        <Box>
-          <Heading fontWeight={500} fontSize="lg" mb={4}>
-            {t('Built-in node log')}
-          </Heading>
-          <Flex
-            ref={logsRef}
-            direction="column"
-            height="xs"
-            overflow="auto"
-            wordBreak="break-word"
-            borderColor="muted"
-            borderWidth="px"
-          >
-            {state.logs.map((log, idx) => (
-              <Ansi key={idx}>{log}</Ansi>
-            ))}
-          </Flex>
-        </Box>
-      )}
-    </Stack>
+    </SettingsLayout>
   )
-}
-
-NodeSettings.getLayout = function getNodeSettingsLayout(page, fallbackApp) {
-  return getLayout(<SettingsLayout>{page}</SettingsLayout>, fallbackApp)
 }
 
 export default NodeSettings

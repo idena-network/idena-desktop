@@ -3,6 +3,7 @@ import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
 import {FlipFilter, FlipFilterOption} from '../../screens/flips/components'
 import {Page, PageTitle} from '../../screens/app/components'
+import Layout from '../../shared/components/layout'
 
 // eslint-disable-next-line react/prop-types
 function SettingsLayout({children}) {
@@ -10,16 +11,20 @@ function SettingsLayout({children}) {
   const {t} = useTranslation()
 
   return (
-    <Page>
-      <PageTitle>{t('Settings')}</PageTitle>
-      <FlipFilter value={router.pathname} onChange={router.push}>
-        <FlipFilterOption value="/settings/general">
-          {t('General')}
-        </FlipFilterOption>
-        <FlipFilterOption value="/settings/node">{t('Node')}</FlipFilterOption>
-      </FlipFilter>
-      {children}
-    </Page>
+    <Layout skipHardForkScreen>
+      <Page>
+        <PageTitle>{t('Settings')}</PageTitle>
+        <FlipFilter value={router.pathname} onChange={router.push}>
+          <FlipFilterOption value="/settings/general">
+            {t('General')}
+          </FlipFilterOption>
+          <FlipFilterOption value="/settings/node">
+            {t('Node')}
+          </FlipFilterOption>
+        </FlipFilter>
+        {children}
+      </Page>
+    </Layout>
   )
 }
 

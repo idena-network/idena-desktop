@@ -1,6 +1,5 @@
 import React from 'react'
 import useTiming from '../hooks/use-timing'
-import {useAppMachine} from './app-context'
 
 const TimingStateContext = React.createContext()
 
@@ -10,6 +9,9 @@ export function TimingProvider(props) {
 }
 
 export function useTimingState() {
-  const [{context}] = useAppMachine()
-  return context.ceremonyIntervals
+  const context = React.useContext(TimingStateContext)
+  if (context === undefined) {
+    throw new Error('useTimingState must be used within a TimingProvider')
+  }
+  return context
 }
