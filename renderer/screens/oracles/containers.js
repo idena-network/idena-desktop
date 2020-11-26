@@ -456,7 +456,7 @@ export function VoteDrawer({
             value={finishCountingDate}
           />
         </Stack>
-        <OracleFormHelperText>
+        <OracleFormHelperText mt={0}>
           {t(
             'To get a reward for the voting you must be online at least once during the period of vote counting'
           )}

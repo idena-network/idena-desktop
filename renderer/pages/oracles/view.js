@@ -372,13 +372,17 @@ export default function ViewVotingPage() {
                             </PrimaryButton>
                           )}
 
-                        {eitherIdleState(VotingStatus.Counting) &&
-                          !canProlong &&
-                          !canFinish && (
-                            <PrimaryButton as={Box} isDisabled>
-                              {t('Vote')}
-                            </PrimaryButton>
-                          )}
+                        {(eitherIdleState(
+                          VotingStatus.Voted,
+                          VotingStatus.Voting
+                        ) ||
+                          (eitherIdleState(VotingStatus.Counting) &&
+                            !canProlong &&
+                            !canFinish)) && (
+                          <PrimaryButton as={Box} isDisabled>
+                            {t('Vote')}
+                          </PrimaryButton>
+                        )}
 
                         {!eitherIdleState(
                           VotingStatus.Terminated,
