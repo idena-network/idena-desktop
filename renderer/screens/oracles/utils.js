@@ -126,7 +126,7 @@ export async function fetchNetworkSize() {
 export async function fetchVoting({id, contractHash = id, address}) {
   const {result, error} = await (
     await fetch(
-      apiUrl(`/OracleVotingContract/${contractHash}?oracle=${address}`)
+      apiUrl(`OracleVotingContract/${contractHash}?oracle=${address}`)
     )
   ).json()
 

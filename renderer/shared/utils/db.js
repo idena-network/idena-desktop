@@ -47,40 +47,50 @@ export const epochDb = (db, epoch, options) => {
       }
     },
     load(id) {
-      return targetDb.get(id)
+      return targetDb.get(normalizeId(id))
     },
     put(item) {
       const {id} = item
       return id
-        ? updatePersistedItem(targetDb, id, item)
-        : addPersistedItem(targetDb, {id, ...item})
+        ? updatePersistedItem(targetDb, normalizeId(id), item)
+        : addPersistedItem(targetDb, item)
     },
     async batchPut(items) {
       const ids = await safeReadIds(targetDb)
 
-      const newItems = items.filter(({id}) => !ids.includes(id))
+      const newItems = items.filter(({id}) => !ids.includes(normalizeId(id)))
 
       const newIds = []
 
       let batch = targetDb.batch()
 
       for (const {id = nanoid(), ...item} of newItems) {
-        newIds.push(id)
-        batch = batch.put(id, item)
+        const normalizedId = normalizeId(id)
+        newIds.push(normalizedId)
+        batch = batch.put(normalizedId, item)
       }
 
       const savedItems = await Promise.all(
-        ids.map(async id => ({...(await targetDb.get(id)), id}))
+        ids.map(async id => {
+          const normalizedId = normalizeId(id)
+          return {
+            ...(await targetDb.get(normalizedId)),
+            id: normalizedId,
+          }
+        })
       )
 
       for (const {id, ...item} of savedItems) {
-        batch = batch.put(id, {...item, ...items.find(x => x.id === id)})
+        batch = batch.put(id, {
+          ...item,
+          ...items.find(x => x.id === id),
+        })
       }
 
       return batch.put('ids', ids.concat(newIds)).write()
     },
     delete(id) {
-      return deletePersistedItem(targetDb, id)
+      return deletePersistedItem(targetDb, normalizeId(id))
     },
     clear() {
       return clearPersistedItems(targetDb)
@@ -90,7 +100,7 @@ export const epochDb = (db, epoch, options) => {
 }
 
 export async function loadPersistedItems(db) {
-  const ids = await db.get('ids')
+  const ids = (await db.get('ids')).map(normalizeId)
 
   return Promise.all(
     ids.map(async id => ({
@@ -137,9 +147,13 @@ export function clearPersistedItems(db) {
 
 async function safeReadIds(db) {
   try {
-    return await db.get('ids')
+    return (await db.get('ids')).map(normalizeId)
   } catch (error) {
     if (error.notFound) return []
     throw new Error(error)
   }
+}
+
+function normalizeId(id) {
+  return id?.toLowerCase()
 }
