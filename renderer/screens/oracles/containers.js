@@ -938,13 +938,15 @@ function VotingResultBar({
           <Flex
             align="center"
             justify="center"
-            bg={isMine ? 'brandBlue.500' : 'gray.100'}
+            bg={isMine ? 'brandBlue.500' : 'transparent'}
             borderRadius="full"
+            borderWidth={isMine ? 0 : '4px'}
+            borderColor="gray.100"
             color="white"
             w={4}
             h={4}
           >
-            <Icon name={isMine ? 'ok' : 'cross-small'} size={3} />
+            {isMine && <Icon name="ok" size={3} />}
           </Flex>
         )}
         <Text isTruncated maxW="sm" title={label.length > 50 ? label : ''}>
