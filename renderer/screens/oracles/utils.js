@@ -38,9 +38,7 @@ export async function fetchVotings({
     )
   )
 
-  let queryParams = {limit, all: all.toString(), oracle, ...params}
-
-  queryParams = all ? queryParams : {...queryParams, address}
+  const queryParams = {limit, all: all.toString(), oracle, ...params}
 
   Object.entries(queryParams)
     .filter(([, v]) => Boolean(v))
