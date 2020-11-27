@@ -21,7 +21,7 @@ export const setVotingStatus = status =>
   })
 
 export function apiUrl(path) {
-  return `http://195.201.2.44:18888/api/${path}`
+  return `http://95.216.138.96:18888/api/${path}`
 }
 
 export async function fetchVotings({
