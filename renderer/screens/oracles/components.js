@@ -393,22 +393,26 @@ export function PresetFormControl({tooltip, children, ...props}) {
   )
 }
 
-export function PresetFormControlOptionList(props) {
-  return <RadioButtonGroup isInline {...props} />
-}
+// eslint-disable-next-line react/display-name
+export const PresetFormControlOptionList = React.forwardRef((props, ref) => (
+  <RadioButtonGroup ref={ref} isInline {...props} />
+))
 
-export function PresetFormControlOption(props) {
-  return (
+// eslint-disable-next-line react/display-name
+export const PresetFormControlOption = React.forwardRef(
+  ({isChecked, ...props}, ref) => (
     <Radio
+      ref={ref}
       borderColor="gray.300"
       borderWidth={1}
       borderRadius="md"
       p={2}
       px={3}
+      defaultIsChecked={isChecked}
       {...props}
     />
   )
-}
+)
 
 export function PresetFormControlInputBox(props) {
   return <Box {...props} />

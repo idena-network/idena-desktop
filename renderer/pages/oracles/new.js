@@ -167,7 +167,7 @@ function NewVotingPage() {
                 label={t('Title')}
                 isInvalid={isInvalid('title')}
               >
-                <Input id="title" value={title} onChange={handleChange} />
+                <Input id="title" onChange={handleChange} />
                 {isInvalid('title') && (
                   <FormErrorMessage fontSize="md" mt={1}>
                     {t('You must provide title')}
@@ -180,13 +180,7 @@ function NewVotingPage() {
                 label={t('Description')}
                 isInvalid={isInvalid('desc')}
               >
-                <Textarea
-                  id="desc"
-                  value={desc}
-                  w="md"
-                  h={32}
-                  onChange={handleChange}
-                />
+                <Textarea id="desc" w="md" h={32} onChange={handleChange} />
                 {isInvalid('desc') && (
                   <FormErrorMessage fontSize="md" mt={1}>
                     {t('You must provide description')}
@@ -245,7 +239,6 @@ function NewVotingPage() {
                   <Input
                     id="startDate"
                     type="datetime-local"
-                    value={startDate}
                     onChange={handleChange}
                   />
                   {isInvalid(

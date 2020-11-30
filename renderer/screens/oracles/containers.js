@@ -792,9 +792,11 @@ export function VotingDurationInput({
           send('CHANGE', {id, value})
         }}
       >
-        {/* eslint-disable-next-line no-shadow */}
-        {presets.map(({label, value}) => (
-          <PresetFormControlOption key={value} value={String(value)}>
+        {presets.map(({label, value: presetValue}) => (
+          <PresetFormControlOption
+            key={presetValue}
+            value={String(presetValue)}
+          >
             {label}
           </PresetFormControlOption>
         ))}
