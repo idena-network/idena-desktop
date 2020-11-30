@@ -109,8 +109,6 @@ function NewVotingPage() {
   })
 
   const {
-    title,
-    desc,
     options,
     startDate,
     votingDuration,
