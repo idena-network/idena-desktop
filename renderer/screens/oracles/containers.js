@@ -431,7 +431,7 @@ export function VoteDrawer({
       </OracleDrawerHeader>
       <OracleDrawerBody>
         <OracleFormControl label={t('Transfer from')}>
-          <Input defaultValue={from} />
+          <Input defaultValue={from} isDisabled />
           <OracleFormHelper label={t('Available')} value={toDna(balance)} />
         </OracleFormControl>
         <OracleFormControl label="To address">
