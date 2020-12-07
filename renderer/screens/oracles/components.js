@@ -189,7 +189,7 @@ export function BlockInput(props) {
 
   return (
     <ChainedInputGroup>
-      <ChainedInput as={NumberInput} min={0} {...props} />
+      <ChainedInput as={NumberInput} min={0} max={157000000} {...props} />
       <ChainedInputAddon isDisabled={isDisabled}>
         {t('Blocks')}
       </ChainedInputAddon>
