@@ -220,9 +220,14 @@ export default function ViewVotingPage() {
                     >
                       <Stack spacing={4}>
                         <Heading
-                          isTruncated
+                          overflow="hidden"
                           fontSize={rem(21)}
                           fontWeight={500}
+                          display="-webkit-box"
+                          style={{
+                            '-webkit-box-orient': 'vertical',
+                            '-webkit-line-clamp': '2',
+                          }}
                         >
                           {title}
                         </Heading>
