@@ -351,7 +351,7 @@ function NewVotingPage() {
                       send('CHANGE', {id, value: checked})
                     }}
                   >
-                    {t('Free voting')}
+                    {t('No voting deposit for oracles')}
                   </Checkbox>
                 </Stack>
               </VotingInlineFormControl>
