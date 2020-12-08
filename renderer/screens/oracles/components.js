@@ -230,6 +230,7 @@ export function NumberInput({
 
 export function VotingOptionInput({
   isLast,
+  isRemovable,
   onAddOption,
   onRemoveOption,
   ...props
@@ -255,23 +256,25 @@ export function VotingOptionInput({
             {...props}
           />
         </Stack>
-        <IconButton
-          icon="cross-small"
-          bg="unset"
-          color="muted"
-          fontSize={20}
-          w={5}
-          minW={5}
-          h={5}
-          p={0}
-          _hover={{
-            bg: 'gray.50',
-          }}
-          _focus={{
-            bg: 'gray.50',
-          }}
-          onClick={onRemoveOption}
-        />
+        {isRemovable && (
+          <IconButton
+            icon="cross-small"
+            bg="unset"
+            color="muted"
+            fontSize={20}
+            w={5}
+            minW={5}
+            h={5}
+            p={0}
+            _hover={{
+              bg: 'gray.50',
+            }}
+            _focus={{
+              bg: 'gray.50',
+            }}
+            onClick={onRemoveOption}
+          />
+        )}
       </Flex>
       {!isLast && <Divider borderBottomColor="gray.300" mx={-1} />}
     </React.Fragment>
