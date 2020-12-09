@@ -174,7 +174,7 @@ export default function ViewFlipPage() {
         </Flex>
         {type !== FlipType.Archived && (
           <FlipMasterFooter
-            flipScore={flipScore}
+            flipScore={flipScore && flipScore.totalScore}
             onUpdateFlipScore={() => send('RECALCULATE_SCORE')}
           >
             <FlipCardMenu>

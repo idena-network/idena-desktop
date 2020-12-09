@@ -16,6 +16,7 @@ import {FlipType, FlipFilter} from '../../shared/types'
 import {fetchTx, deleteFlip} from '../../shared/api'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 import {persistState} from '../../shared/utils/persist'
+import {getImageSecurityScore, initTfModel} from './ai'
 
 export const flipsMachine = Machine(
   {
@@ -485,8 +486,7 @@ export const flipMasterMachine = Machine(
         translations: [[], []],
       },
       images: Array.from({length: 4}),
-      imagesScore: [0, 0, 0, 0],
-      flipScore: 1,
+      flipScore: {totalScore: 1, imagesScore: [0, 0, 0, 0]},
       originalOrder: DEFAULT_FLIP_ORDER,
       order: DEFAULT_FLIP_ORDER,
       orderPermutations: DEFAULT_FLIP_ORDER,
@@ -648,13 +648,7 @@ export const flipMasterMachine = Machine(
             on: {
               RECALCULATE_IMAGES_SCORE: {
                 target: '.scoring',
-                actions: [
-                  assign({
-                    flipScore: 2,
-                  }),
-                  f => console.log('RECALCULATE_IMAGES_SCORE'),
-                  log(),
-                ],
+                actions: [log()],
               },
 
               RESET_SCORE: {
@@ -662,7 +656,7 @@ export const flipMasterMachine = Machine(
                 actions: [
                   choose([
                     {
-                      cond: () => false,
+                      cond: () => global.tfEnableGPU,
                       actions: [send('RECALCULATE_IMAGES_SCORE')],
                     },
                   ]),
@@ -681,14 +675,15 @@ export const flipMasterMachine = Machine(
                     ],
                   }),
                   assign({
-                    flipScore: UNKNOWN_SCORE,
-                  }),
-                  assign({
-                    imagesScore: ({imagesScore}, {currentIndex}) => [
-                      ...imagesScore.slice(0, currentIndex),
-                      UNKNOWN_SCORE,
-                      ...imagesScore.slice(currentIndex + 1),
-                    ],
+                    flipScore: ({flipScore}, {currentIndex}) => ({
+                      totalSocre: UNKNOWN_SCORE,
+                      imagesScore: flipScore &&
+                        flipScore.imagesScore && [
+                          ...flipScore.imagesScore.slice(0, currentIndex),
+                          UNKNOWN_SCORE,
+                          ...flipScore.imagesScore.slice(currentIndex + 1),
+                        ],
+                    }),
                   }),
                   send('RESET_SCORE'),
                   log(),
@@ -713,20 +708,20 @@ export const flipMasterMachine = Machine(
               idle: {},
               scoring: {
                 invoke: {
+                  id: 'calculateScore',
                   src: 'calculateScore',
                   onDone: {
                     target: 'persisting',
                     actions: [
                       assign((context, {data}) => ({
                         ...context,
-                        flipScore: data.flipSocre,
+                        flipScore: data && data.flipScore,
                       })),
                       log(),
                     ],
                   },
                 },
               },
-
               painting: {},
               persisting: {
                 invoke: {
@@ -845,12 +840,35 @@ export const flipMasterMachine = Machine(
   },
   {
     services: {
-      calculateScore: async ({flipScore, images, imagesScore}) => {
-        console.log('calculateScore:', flipScore, images, imagesScore)
-        const data = {flipScore: 4}
-        return data
+      calculateScore: async ({flipScore, images}) => {
+        const imagesScore = (flipScore && flipScore.imagesScore) || [
+          UNKNOWN_SCORE,
+          UNKNOWN_SCORE,
+          UNKNOWN_SCORE,
+          UNKNOWN_SCORE,
+        ]
+        const scores = await Promise.all(
+          images.map((image, idx) => {
+            return imagesScore[idx] || getImageSecurityScore(image)
+          })
+        )
+        return {
+          flipScore: {
+            totalScore: Math.min(4, scores.reduce((s1, s2) => s1 + s2) + 1),
+            imagesScore: scores,
+          },
+        }
       },
-      loadKeywords: async ({availableKeywords, keywordPairId}) => {
+      loadKeywords: async ({ availableKeywords, keywordPairId }) => {
+        await initTfModel()
+        //const model = global.tfModel || (await initTfModel())
+        /*
+        const model = global.tfModel || (await initTfModel())
+        if (!global.tfModel) {
+          global.tfModel = model
+        }
+*/
+
         const {words} = availableKeywords.find(({id}) => id === keywordPairId)
         return words.map(id => ({id, ...global.loadKeyword(id)}))
       },
@@ -866,7 +884,6 @@ export const flipMasterMachine = Machine(
           order,
           orderPermutations,
           images,
-          imagesScore,
           flipScore,
           keywords,
           type,
@@ -878,7 +895,7 @@ export const flipMasterMachine = Machine(
           'CHANGE_IMAGES',
           'CHANGE_ORIGINAL_ORDER',
           'CHANGE_ORDER',
-          'RECALCULATE_IMAGES_SCORE',
+          'done.invoke.calculateScore',
         ]
 
         if (persistingEventTypes.includes(event.type)) {
@@ -888,7 +905,6 @@ export const flipMasterMachine = Machine(
             order,
             orderPermutations,
             images,
-            imagesScore,
             flipScore,
             keywords,
           }
@@ -933,9 +949,6 @@ export const flipMasterMachine = Machine(
         orderPermutations: ({originalOrder}, {order}) =>
           order.map(n => originalOrder.findIndex(o => o === n)),
       }),
-      calculateImagesScore: flip => {
-        console.log('calculateImagesScore...', flip)
-      },
       persistFlip: context => {
         global.flipStore.updateDraft(context)
       },

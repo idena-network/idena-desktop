@@ -19,6 +19,8 @@ const i18next = require('i18next')
 const {zoomIn, zoomOut, resetZoom} = require('./utils')
 const loadRoute = require('./utils/routes')
 const {getI18nConfig} = require('./language')
+const {initTfModel, getTfModelFiles} = require('./ai')
+const cors = require('cors')
 
 const isWin = process.platform === 'win32'
 const isMac = process.platform === 'darwin'
@@ -46,6 +48,7 @@ const {
   AUTO_UPDATE_COMMAND,
   NODE_COMMAND,
   NODE_EVENT,
+  SERVER_PORT,
 } = require('./channels')
 const {
   startNode,
@@ -334,6 +337,8 @@ app.on('ready', async () => {
     if (isWin) {
       checkForUpdates()
     }
+
+    initTfModel(expressPort)
   })
 })
 
@@ -557,6 +562,10 @@ ipcMain.on('node-log', ({sender}, message) => {
   sender.send('node-log', message)
 })
 
+ipcMain.on(SERVER_PORT, event => {
+  event.sender.send(SERVER_PORT, [expressPort])
+});
+
 function checkPort(port) {
   logger.debug('Looking for open port...', port)
   return new Promise((res, rej) => {
@@ -577,8 +586,18 @@ function checkPort(port) {
 
 function runExpress(port) {
   const server = express()
+  server.use(cors())
   server.get('/', (_, res) => {
     res.sendFile(resolve(__dirname, './server.html'))
+  })
+
+  // Resolve TensorFlow model data
+  const {fileNames, fileFullNames} = getTfModelFiles()
+  fileNames.map((file, idx) => {
+    server.get(`/${file}`, (_, res) => {
+      res.sendFile(resolve(fileFullNames[idx]))
+    })
+    return null
   })
 
   server.listen(port, () => {

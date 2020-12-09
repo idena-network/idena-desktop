@@ -54,7 +54,6 @@ import {
   FormLabel,
 } from '../../shared/components/components'
 import {StarsRating, FlipRatingTooltip} from './components/tools'
-import {initTfModel, getFlipSecurityScore} from './ai'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -913,14 +912,13 @@ export function FlipStepBody(props) {
   return <Stack isInline spacing={10} {...props} />
 }
 
-export function FlipMasterFooter({flipScore, onUpdateFlipScore, ...props}) {
+export function FlipMasterFooter({
+  flipScore,
+  onUpdateFlipScore,
+  isFlipScoreUpdating,
+  ...props
+}) {
   const [isFlipRatingHintOpen, setIsFlipRatingHintOpen] = React.useState(false)
-
-  const [tfModel, setTfModel] = React.useState(null)
-  const [isFlipChanged, setFlipChanged] = React.useState(true)
-
-  //  const [flipScore, setFlipScore] = React.useState(flipScore)
-  const [isUpdingScore, setIsUpdingScore] = React.useState(false)
 
   return (
     <Flex
@@ -939,69 +937,51 @@ export function FlipMasterFooter({flipScore, onUpdateFlipScore, ...props}) {
           />
         )}
 
-        <Flex isInline>
-          <Flex
-            isInline
-            style={{cursor: 'pointer'}}
-            onClick={() => {
-              setIsFlipRatingHintOpen(!isFlipRatingHintOpen)
-            }}
-          >
-            <Icon
-              name="info"
-              size={5}
-              color={theme.colors.primary}
-              marginLeft={rem(3)}
-              marginRight={rem(9)}
-            />
-            <Box paddingBottom={rem(3)} marginRight={rem(6)} fontWeight="500">
-              Flip security rating
-            </Box>
-            <StarsRating rating={flipScore} />
-          </Flex>
-
-          {isUpdingScore && (
-            <Flex align="center" justify="center" h={5} w={5} mr={3}>
-              <Box style={{transform: 'scale(0.3) translateY(-7px)'}}>
-                <Spinner color={theme.colors.black} />
-              </Box>
-            </Flex>
-          )}
-          {(!isUpdingScore || !flipScore) && (
-            <Box
+        {global.tfModel && (
+          <Flex isInline>
+            <Flex
+              isInline
               style={{cursor: 'pointer'}}
-              marginRight={rem(6)}
-              borderBottom="thin dashed gray"
-              fontWeight="500"
-              onClick={async () => {
-                onUpdateFlipScore()
-
-                // setIsUpdingScore(true)
-
-                /*
-                // 1. Init model
-                if (tfModel) {
-                  const score = await getFlipSecurityScore(tfModel, images)
-                  setFlipScore(score)
-                  console.log('score=', score)
-                  // setIsUpdingScore(true)
-
-
-                } else {
-                  const model = await initTfModel()
-                  setTfModel(model)
-                  // setIsUpdingScore(true)
-                  const score = await getFlipSecurityScore(model, images)
-                  // setIsUpdingScore(false)
-                  // setFlipScore(score)
-                }
-                  */
+              onClick={() => {
+                setIsFlipRatingHintOpen(!isFlipRatingHintOpen)
               }}
             >
-              Update
-            </Box>
-          )}
-        </Flex>
+              <Icon
+                name="info"
+                size={5}
+                color={theme.colors.primary}
+                marginLeft={rem(3)}
+                marginRight={rem(9)}
+              />
+              <Box paddingBottom={rem(3)} marginRight={rem(6)} fontWeight="500">
+                Flip security rating
+              </Box>
+              <StarsRating rating={flipScore} />
+            </Flex>
+
+            {isFlipScoreUpdating && (
+              <Flex align="center" justify="center" h={5} w={5} mr={3}>
+                <Box style={{transform: 'scale(0.3) translateY(-7px)'}}>
+                  <Spinner color={theme.colors.black} />
+                </Box>
+              </Flex>
+            )}
+            {!isFlipScoreUpdating && !flipScore && (
+              <Box
+                style={{cursor: 'pointer'}}
+                marginRight={rem(6)}
+                borderBottom="thin dashed gray"
+                fontWeight="500"
+                onClick={async () => {
+                  onUpdateFlipScore()
+                }}
+              >
+                Update
+              </Box>
+            )}
+          </Flex>
+        )}
+
       </Flex>
       <Box alignSelf="stretch" mt="auto" px={4} py={3}>
         <Stack isInline spacing={2} justify="flex-end" {...props} />

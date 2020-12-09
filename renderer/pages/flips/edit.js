@@ -288,8 +288,9 @@ export default function EditFlipPage() {
           )}
         </Flex>
         <FlipMasterFooter
-          flipScore={flipScore}
+          flipScore={flipScore && flipScore.totalScore}
           onUpdateFlipScore={() => send('RECALCULATE_IMAGES_SCORE')}
+          isFlipScoreUpdating={is('images.scoring')}
         >
           {not('keywords') && (
             <SecondaryButton
