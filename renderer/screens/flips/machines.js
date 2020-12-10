@@ -9,6 +9,8 @@ import {
   updateFlipType,
   DEFAULT_FLIP_ORDER,
   updateFlipTypeByHash,
+  recentFlip,
+  outdatedFlip,
 } from './utils'
 import {callRpc} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
@@ -42,18 +44,21 @@ export const flipsMachine = Machine(
           src: async ({knownFlips, availableKeywords}) => {
             const flipDb = global.flipStore
 
-            const persistedFlips = flipDb
-              .getFlips()
-              .map(
-                ({pics, compressedPics, hint, images, keywords, ...flip}) => ({
-                  ...flip,
-                  images: images || compressedPics || pics,
-                  keywords: keywords || hint || [],
-                  pics,
-                  compressedPics,
-                  hint,
-                })
-              )
+            const allPersistedFlips = flipDb.getFlips()
+
+            if (allPersistedFlips.filter(outdatedFlip).length > 0)
+              flipDb.saveFlips(allPersistedFlips.filter(recentFlip))
+
+            const persistedFlips = allPersistedFlips.map(
+              ({pics, compressedPics, hint, images, keywords, ...flip}) => ({
+                ...flip,
+                images: images || compressedPics || pics,
+                keywords: keywords || hint || [],
+                pics,
+                compressedPics,
+                hint,
+              })
+            )
 
             const persistedHashes = persistedFlips.map(flip => flip.hash)
 

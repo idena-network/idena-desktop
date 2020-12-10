@@ -11,6 +11,7 @@ import {
   didArchiveFlips,
   markFlipsArchived,
   archiveFlips,
+  removeOutdatedFlips,
 } from '../../screens/flips/utils'
 import {persistItem} from '../utils/persist'
 
@@ -72,6 +73,7 @@ export function EpochProvider({children}) {
   React.useEffect(() => {
     if (epoch && didValidate(epoch.epoch) && !didArchiveFlips(epoch.epoch)) {
       archiveFlips()
+      removeOutdatedFlips()
       markFlipsArchived(epoch.epoch)
     }
   }, [epoch])
