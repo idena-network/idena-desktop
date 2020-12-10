@@ -9,8 +9,7 @@ import {
   updateFlipType,
   DEFAULT_FLIP_ORDER,
   updateFlipTypeByHash,
-  recentFlip,
-  outdatedFlip,
+  handleOutdatedFlips,
 } from './utils'
 import {callRpc} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
@@ -42,23 +41,22 @@ export const flipsMachine = Machine(
       initializing: {
         invoke: {
           src: async ({knownFlips, availableKeywords}) => {
+            handleOutdatedFlips()
+
             const flipDb = global.flipStore
 
-            const allPersistedFlips = flipDb.getFlips()
-
-            if (allPersistedFlips.filter(outdatedFlip).length > 0)
-              flipDb.saveFlips(allPersistedFlips.filter(recentFlip))
-
-            const persistedFlips = allPersistedFlips.map(
-              ({pics, compressedPics, hint, images, keywords, ...flip}) => ({
-                ...flip,
-                images: images || compressedPics || pics,
-                keywords: keywords || hint || [],
-                pics,
-                compressedPics,
-                hint,
-              })
-            )
+            const persistedFlips = flipDb
+              .getFlips()
+              .map(
+                ({pics, compressedPics, hint, images, keywords, ...flip}) => ({
+                  ...flip,
+                  images: images || compressedPics || pics,
+                  keywords: keywords || hint || [],
+                  pics,
+                  compressedPics,
+                  hint,
+                })
+              )
 
             const persistedHashes = persistedFlips.map(flip => flip.hash)
 
@@ -947,7 +945,7 @@ export const createViewFlipMachine = id =>
                     translations: data,
                   }),
                   showTranslation: ({locale}, {data}) =>
-                    locale.toLowerCase() !== 'en' &&
+                    locale?.toLowerCase() !== 'en' &&
                     data?.every(w => w?.some(t => t?.confirmed)),
                 }),
                 send('LOADED'),

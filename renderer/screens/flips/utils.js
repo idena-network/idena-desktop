@@ -47,15 +47,16 @@ export function archiveFlips() {
   )
 }
 
-export const recentFlip = ({createdAt, modifiedAt = createdAt}) =>
+export const freshFlip = ({createdAt, modifiedAt = createdAt}) =>
   dayjs().diff(modifiedAt, 'day') < 30
 
 export const outdatedFlip = ({createdAt, modifiedAt = createdAt}) =>
   dayjs().diff(modifiedAt, 'day') >= 30
 
-export function removeOutdatedFlips() {
+export function handleOutdatedFlips() {
   const {getFlips, saveFlips} = global.flipStore
-  saveFlips(getFlips().filter(recentFlip))
+  const flips = getFlips()
+  if (flips.filter(outdatedFlip).length > 0) saveFlips(flips.filter(freshFlip))
 }
 
 export function markFlipsArchived(epoch) {

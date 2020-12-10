@@ -15,9 +15,7 @@ function getFlip(id) {
 }
 
 function saveFlips(flips) {
-  if (flips.length > 0) {
-    store.set(keyName, flips)
-  }
+  store.set(keyName, flips)
 }
 
 function addDraft(draft) {
