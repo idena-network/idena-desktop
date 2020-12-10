@@ -1241,7 +1241,7 @@ export function CommunityTranslationUnavailable() {
   )
 }
 
-export function DeleteFlipDrawer({hash, cover, onDelete, ...props}) {
+export function DeleteFlipDrawer({hash, cover, isMissing, onDelete, ...props}) {
   const {t} = useTranslation()
   return (
     <Drawer {...props}>
@@ -1261,9 +1261,11 @@ export function DeleteFlipDrawer({hash, cover, onDelete, ...props}) {
         </Heading>
       </DrawerHeader>
       <DrawerBody>
-        <Text color="brandGray.500" fontSize="md">
-          {t('Deleted flip will be moved to the drafts.')}
-        </Text>
+        {!isMissing && (
+          <Text color="brandGray.500" fontSize="md">
+            {t('Deleted flip will be moved to the drafts.')}
+          </Text>
+        )}
         <FlipImage
           src={cover}
           size={160}
