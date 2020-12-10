@@ -280,7 +280,6 @@ export default function FlipListPage() {
                         </FlipCardTitle>
                         <FlipCardSubtitle>
                           {t('Missing on client')}
-                          {flip.type}
                         </FlipCardSubtitle>
                       </Box>
                       <FlipCardMenu>
