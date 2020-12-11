@@ -1,6 +1,7 @@
 import {encode} from 'rlp'
 import axios from 'axios'
 import Jimp from 'jimp'
+import dayjs from 'dayjs'
 import {loadPersistentStateValue, persistItem} from '../../shared/utils/persist'
 import {FlipType} from '../../shared/types'
 import {areSame, areEual} from '../../shared/utils/arr'
@@ -44,6 +45,18 @@ export function archiveFlips() {
         : {...flip, type: FlipType.Archived}
     )
   )
+}
+
+export const freshFlip = ({createdAt, modifiedAt = createdAt}) =>
+  dayjs().diff(modifiedAt, 'day') < 30
+
+export const outdatedFlip = ({createdAt, modifiedAt = createdAt}) =>
+  dayjs().diff(modifiedAt, 'day') >= 30
+
+export function handleOutdatedFlips() {
+  const {getFlips, saveFlips} = global.flipStore
+  const flips = getFlips()
+  if (flips.filter(outdatedFlip).length > 0) saveFlips(flips.filter(freshFlip))
 }
 
 export function markFlipsArchived(epoch) {

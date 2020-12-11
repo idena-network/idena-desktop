@@ -9,6 +9,7 @@ import {
   updateFlipType,
   DEFAULT_FLIP_ORDER,
   updateFlipTypeByHash,
+  handleOutdatedFlips,
 } from './utils'
 import {callRpc} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
@@ -40,6 +41,8 @@ export const flipsMachine = Machine(
       initializing: {
         invoke: {
           src: async ({knownFlips, availableKeywords}) => {
+            handleOutdatedFlips()
+
             const flipDb = global.flipStore
 
             const persistedFlips = flipDb
@@ -942,7 +945,7 @@ export const createViewFlipMachine = id =>
                     translations: data,
                   }),
                   showTranslation: ({locale}, {data}) =>
-                    locale.toLowerCase() !== 'en' &&
+                    locale?.toLowerCase() !== 'en' &&
                     data?.every(w => w?.some(t => t?.confirmed)),
                 }),
                 send('LOADED'),
