@@ -8,6 +8,7 @@ import {
   publishFlip,
   updateFlipType,
   DEFAULT_FLIP_ORDER,
+  updateFlipTypeByHash,
 } from './utils'
 import {callRpc} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
@@ -99,7 +100,16 @@ export const flipsMachine = Machine(
                         `flip-${flip.id}`
                       ),
                     })),
-                  missingFlips: (_, {data: {missingFlips}}) => missingFlips,
+                  missingFlips: (_, {data: {missingFlips}}) =>
+                    missingFlips.map(flip => ({
+                      ...flip,
+                      isMissing: true,
+                      ref: spawn(
+                        // eslint-disable-next-line no-use-before-define
+                        flipMachine.withContext({...flip, isMissing: true}),
+                        `flip-${flip.id}`
+                      ),
+                    })),
                 }),
                 log(),
               ],
@@ -170,6 +180,11 @@ export const flipsMachine = Machine(
                   assign({
                     flips: ({flips}, {id}) =>
                       updateFlipType(flips, {id, type: FlipType.Deleting}),
+                    missingFlips: ({missingFlips}, {hash}) =>
+                      updateFlipTypeByHash(missingFlips, {
+                        hash,
+                        type: FlipType.Deleting,
+                      }),
                   }),
                   log(),
                 ],
@@ -179,6 +194,8 @@ export const flipsMachine = Machine(
                   assign({
                     flips: ({flips}, {id}) =>
                       updateFlipType(flips, {id, type: FlipType.Draft}),
+                    missingFlips: ({missingFlips}, {hash}) =>
+                      missingFlips.filter(flip => flip.hash !== hash),
                   }),
                   log(),
                 ],
@@ -260,8 +277,17 @@ export const flipMachine = Machine(
               target: 'deleting.mining',
               cond: ({type}) => type === FlipType.Deleting,
             },
+            {
+              target: 'missing',
+              cond: ({isMissing}) => isMissing,
+            },
             {target: 'idle'},
           ],
+        },
+      },
+      missing: {
+        on: {
+          DELETE: 'deleting',
         },
       },
       idle: {
@@ -372,9 +398,10 @@ export const flipMachine = Machine(
                     txHash: data,
                     type: FlipType.Deleting,
                   })),
-                  sendParent(({id}) => ({
+                  sendParent(({id, hash}) => ({
                     type: 'DELETING',
                     id,
+                    hash,
                   })),
                   'persistFlip',
                   log(),
@@ -408,9 +435,10 @@ export const flipMachine = Machine(
             target: 'deleted',
             actions: [
               assign({type: FlipType.Draft}),
-              sendParent(({id}) => ({
+              sendParent(({id, hash}) => ({
                 type: 'DELETED',
                 id,
+                hash,
               })),
               'persistFlip',
             ],

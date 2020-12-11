@@ -136,6 +136,18 @@ export function updateFlipType(flips, {id, type}) {
   )
 }
 
+export function updateFlipTypeByHash(flips, {hash, type}) {
+  return flips.map(flip =>
+    flip.hash === hash
+      ? {
+          ...flip,
+          type,
+          ref: flip.ref,
+        }
+      : flip
+  )
+}
+
 export async function publishFlip({
   keywordPairId,
   pics,

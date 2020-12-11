@@ -9,8 +9,10 @@ import {
   Image,
   useToast,
   useDisclosure,
+  useTheme,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
+import {transparentize} from 'polished'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
   FlipCardTitle,
@@ -23,6 +25,13 @@ import {
   EmptyFlipBox,
   FlipCard,
   DeleteFlipDrawer,
+  FlipCardMenu,
+  FlipCardMenuItem,
+  FlipCardMenuItemIcon,
+  FlipOverlay,
+  FlipOverlayStatus,
+  FlipOverlayIcon,
+  FlipOverlayText,
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
 import {IconLink} from '../../shared/components/link'
@@ -50,6 +59,8 @@ export default function FlipListPage() {
     onOpen: openDeleteForm,
     onClose: onCloseDeleteForm,
   } = useDisclosure()
+
+  const {colors} = useTheme()
 
   const {syncing, offline, loading} = useChainState()
 
@@ -225,21 +236,69 @@ export default function FlipListPage() {
             ))}
             {current.matches('ready.dirty.active') && (
               <>
-                {missingFlips.map(({keywords}, idx) => (
+                {missingFlips.map(({keywords, ...flip}, idx) => (
                   <Box key={idx}>
-                    <EmptyFlipBox>
+                    <EmptyFlipBox position="relative">
+                      {[FlipType.Deleting, FlipType.Invalid].some(
+                        x => x === flip.type
+                      ) && (
+                        <FlipOverlay
+                          backgroundImage={
+                            // eslint-disable-next-line no-nested-ternary
+                            flip.type === FlipType.Deleting
+                              ? `linear-gradient(to top, ${
+                                  colors.warning[500]
+                                }, ${transparentize(100, colors.warning[500])})`
+                              : flip.type === FlipType.Invalid
+                              ? `linear-gradient(to top, ${
+                                  colors.red[500]
+                                }, ${transparentize(100, colors.red[500])})`
+                              : ''
+                          }
+                        >
+                          <FlipOverlayStatus>
+                            <FlipOverlayIcon name="info-solid" />
+                            <FlipOverlayText>
+                              {flip.type === FlipType.Deleting &&
+                                t('Deleting...')}
+                            </FlipOverlayText>
+                          </FlipOverlayStatus>
+                        </FlipOverlay>
+                      )}
                       <Image src="/static/flips-cant-icn.svg" />
                     </EmptyFlipBox>
-                    <Box mt={4}>
-                      <FlipCardTitle>
-                        {keywords
-                          ? formatKeywords(keywords.words)
-                          : t('Missing keywords')}
-                      </FlipCardTitle>
-                      <FlipCardSubtitle>
-                        {t('Missing on client')}
-                      </FlipCardSubtitle>
-                    </Box>
+                    <Flex
+                      justifyContent="space-between"
+                      alignItems="flex-start"
+                      mt={4}
+                    >
+                      <Box>
+                        <FlipCardTitle>
+                          {keywords
+                            ? formatKeywords(keywords.words)
+                            : t('Missing keywords')}
+                        </FlipCardTitle>
+                        <FlipCardSubtitle>
+                          {t('Missing on client')}
+                        </FlipCardSubtitle>
+                      </Box>
+                      <FlipCardMenu>
+                        <FlipCardMenuItem
+                          onClick={() => {
+                            setSelectedFlip(flip)
+                            openDeleteForm()
+                          }}
+                        >
+                          <FlipCardMenuItemIcon
+                            name="delete"
+                            size={5}
+                            mr={2}
+                            color="red.500"
+                          />
+                          {t('Delete flip')}
+                        </FlipCardMenuItem>
+                      </FlipCardMenu>
+                    </Flex>
                   </Box>
                 ))}
                 {Array.from({length: remainingRequiredFlips}, (flip, idx) => (
@@ -267,7 +326,12 @@ export default function FlipListPage() {
 
         <DeleteFlipDrawer
           hash={selectedFlip?.hash}
-          cover={selectedFlip?.images[selectedFlip.originalOrder[0]]}
+          cover={
+            selectedFlip?.isMissing
+              ? '/static/flips-cant-icn.svg'
+              : selectedFlip?.images[selectedFlip.originalOrder[0]]
+          }
+          isMissing={selectedFlip?.isMissing}
           isOpen={isOpenDeleteForm}
           onClose={onCloseDeleteForm}
           onDelete={() => {
