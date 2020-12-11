@@ -64,7 +64,6 @@
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.9.0",
     "cors": "^2.8.5",
-    "devtron": "^1.4.0",
     "dotenv-cli": "^3.1.0",
     "electron": "^8.2.4",
     "electron-builder": "^21.2.0",
