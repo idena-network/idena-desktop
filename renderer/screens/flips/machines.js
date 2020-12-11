@@ -487,7 +487,7 @@ export const flipMachine = Machine(
           } else cb('TX_NULL')
         }
 
-        timeoutId = setTimeout(fetchStatus, 10 * 1000)
+        fetchStatus()
 
         return () => {
           clearTimeout(timeoutId)
