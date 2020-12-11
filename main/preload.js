@@ -57,10 +57,4 @@ process.once('loaded', () => {
     const currentWindow = electron.remote.getCurrentWindow()
     currentWindow.setFullScreen(!currentWindow.isFullScreen())
   }
-
-  if (isDev) {
-    global.require = require
-    // eslint-disable-next-line no-underscore-dangle
-    global.__devtron = {require, process}
-  }
 })
