@@ -215,7 +215,7 @@
   "Can not start validation session because you did not submit flips.": "Nu puteți începe sesiunea de validare, deoarece nu ați trimis flipuri",
   "Shuffling flips...": "Amestecarea flipurilor...",
   "Synchronizing blocks": "Sincronizarea blocurilor",
-  "Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers.": "Vă rugăm să verificați ceasul local. Timpul trebuie sincronizat cu timpul de internet pentru a avea conexiuni cu alți gigi.",
+  "Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers.": "Vă rugăm să verificați ceasul local. Timpul trebuie sincronizat cu timpul de internet pentru a avea conexiuni cu alți colegi.",
   "Active": "Active",
   "Drafts": "Schițe",
   "Archived": "Arhivă",
