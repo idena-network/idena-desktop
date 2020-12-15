@@ -148,8 +148,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   const [insertImageMode, setInsertImageMode] = useState(0)
 
   const epoch = useEpochState()
-  const bottomWatermark =
-    epoch && `${epoch.nextValidation.substr(5, 5).replace('-', ' ')}`
+  const bottomWatermark = epoch && `${epoch.nextValidation.substr(5, 5)}`
 
   const setImageUrl = useCallback(
     (data, onDone = null) => {
