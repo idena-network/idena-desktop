@@ -189,7 +189,7 @@ export default function ProfilePage() {
                 {penalty > 0 && (
                   <AnnotatedUserStat
                     annotation={t(
-                      "Your node was offline more than 1 hour. The penalty will be charged automaically. Once it's fully paid you'll continue to mine coins."
+                      "Your node was offline more than 1 hour. The penalty will be charged automatically. Once it's fully paid you'll continue to mine coins."
                     )}
                     label={t('Mining penalty')}
                     value={toDna(penalty)}

@@ -261,7 +261,7 @@
   "Erase": "消去",
   "Select image to erase": "消去する画像を選択",
   "Use keywords for the story": "ストーリーにキーワードを使って下さい",
-  "Your node was offline more than 1 hour. The penalty will be charged automaically. Once it's fully paid you'll continue to mine coins.": "１時間以上採掘が中断していました。不採掘ペナルティが自動的に科せられます。支払いが完了すれば、再度コインを採掘することができます。",
+  "Your node was offline more than 1 hour. The penalty will be charged automatically. Once it's fully paid you'll continue to mine coins.": "１時間以上採掘が中断していました。不採掘ペナルティが自動的に科せられます。支払いが完了すれば、再度コインを採掘することができます。",
   "Total score for all validations": "全ての検証の総合スコア",
   "Spoil invite": "招待状を無効にする",
   "Invitation is successfully spoiled": "招待状は無効になりました",
