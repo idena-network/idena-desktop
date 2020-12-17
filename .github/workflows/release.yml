@@ -22,6 +22,12 @@ jobs:
         with:
           node-version: 12
 
+      - name: Install canvas deps
+        if: matrix.os === 'macos-latest'
+        run: brew install pkg-config cairo pango libpng jpeg giflib librsvg
+        if: matrix.os === 'ubuntu-latest'
+        run: sudo apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
       - name: Build & release
         uses: samuelmeuli/action-electron-builder@v1
         with:
