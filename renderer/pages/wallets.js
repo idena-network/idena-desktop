@@ -114,15 +114,17 @@ export default function Index() {
                   marginBottom: rem(19),
                 }}
               >
-                <span>{t('See Explorer for rewards and penalties')} </span>
+                <Flex>
+                  <span>{t('See Explorer for rewards and penalties')} </span>
 
-                <FiChevronRight
-                  style={{
-                    position: 'relative',
-                    top: '3px',
-                  }}
-                  fontSize={rem(19)}
-                />
+                  <FiChevronRight
+                    style={{
+                      position: 'relative',
+                      top: '3px',
+                    }}
+                    fontSize={rem(14)}
+                  />
+                </Flex>
               </FlatButton>
               <WalletActions transactions={txs} />
             </>
