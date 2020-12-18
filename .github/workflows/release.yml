@@ -8,6 +8,9 @@ on:
 jobs:
   install:
     runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
       - name: Check out
         uses: actions/checkout@v1
@@ -46,6 +49,9 @@ jobs:
 
   dist:
     runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
     steps:
       - name: Build & release
         uses: samuelmeuli/action-electron-builder@v1
