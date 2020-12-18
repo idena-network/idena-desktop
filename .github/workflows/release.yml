@@ -25,6 +25,7 @@ jobs:
         run: sudo apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
 
       - name: Install Windows canvas deps
+        if: matrix.os == 'windows-latest'
         # env:
         #   PATH: /c/Python27:/c/Python27/Scripts:$PATH
         run: |
