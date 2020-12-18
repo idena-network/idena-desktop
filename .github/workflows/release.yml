@@ -6,7 +6,7 @@ on:
     #   - v*
 
 jobs:
-  install:}})
+  install:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out
