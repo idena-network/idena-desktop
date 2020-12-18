@@ -30,8 +30,8 @@ jobs:
         #   PATH: /c/Python27:/c/Python27/Scripts:$PATH
         run: |
           choco install -y gtk-runtime libjpeg-turbo 7zip curl
-          Invoke-WebRequest -Uri 'http://ftp.gnome.org/pub/GNOME/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip' -OutFile 'gtk.zip'
-          7z x gtk.zip -y -o/c/GTK
+          curl -LO http://ftp.gnome.org/pub/GNOME/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip
+          7z x gtk+-bundle_2.22.1-20101229_win64.zip -y -o/c/GTK
 
       - name: Install macOS canvas deps
         if: matrix.os == 'macos-latest'
