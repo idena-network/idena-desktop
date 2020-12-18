@@ -61,3 +61,12 @@ export async function fetchPendingTransactions(address, count) {
   })
   return data
 }
+
+export async function fetchTransactionReceipt(txHash) {
+  const {data} = await api().post('/', {
+    method: 'bcn_txReceipt',
+    params: [txHash],
+    id: 1,
+  })
+  return data
+}
