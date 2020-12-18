@@ -6,7 +6,8 @@ on:
     #   - v*
 
 jobs:
-  install:
+  install:}})
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out
         uses: actions/checkout@v1
@@ -44,6 +45,7 @@ jobs:
         run: brew install pkg-config cairo pango libpng jpeg giflib librsvg
 
   dist:
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Build & release
         uses: samuelmeuli/action-electron-builder@v1
