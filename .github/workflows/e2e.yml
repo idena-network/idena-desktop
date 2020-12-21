@@ -1,0 +1,32 @@
+name: Run E2E tests
+
+on: [pull_request]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Setup xvfb
+        run: |
+          sudo apt-get install xvfb
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          npm install -g xvfb-maybe
+
+      - name: Run xvfb
+        run: |
+          npm run build
+          xvfb-maybe npm run e2e
+        env:
+          DISPLAY: ':99.0'

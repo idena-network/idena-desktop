@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    steps:
+      - name: Check out
+        uses: actions/checkout@v1
+
+      - name: Set tag
+        id: refs
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        shell: bash
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install Linux canvas deps
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
+      - name: Install Windows canvas deps
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install -y gtk-runtime libjpeg-turbo 7zip curl
+          curl -LO http://ftp.gnome.org/pub/GNOME/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip
+          7z x gtk+-bundle_2.22.1-20101229_win64.zip -y -oC:\GTK
+
+      - name: Install macOS canvas deps
+        if: matrix.os == 'macos-latest'
+        run: brew install pkg-config cairo pango libpng jpeg giflib librsvg
+
+      - name: Bump version
+        run: npm --no-git-tag-version version ${{ steps.refs.outputs.tag }}
+
+      - name: Build & release
+        uses: samuelmeuli/action-electron-builder@v1.6.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          skip_build: true
+          release: true
