@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "main": "main/index.js",
   "repository": "idena-network/idena-desktop",
+  "license": "MIT",
   "scripts": {
     "start": "electron .",
     "build": "next build renderer && next export renderer",
