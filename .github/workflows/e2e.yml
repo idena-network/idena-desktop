@@ -3,7 +3,7 @@ name: Run E2E tests
 on: [pull_request]
 
 jobs:
-  build:
+  e2e:
     runs-on: ubuntu-latest
 
     steps:
