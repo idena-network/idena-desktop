@@ -18,6 +18,7 @@ jobs:
       - name: Set tag
         id: refs
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        shell: bash
 
       - name: Setup Node.js
         uses: actions/setup-node@v1
