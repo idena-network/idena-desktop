@@ -40,14 +40,14 @@ import {
   IdentityStatus,
   FlipFilter as FlipFilterType,
 } from '../../shared/types'
-import {Debug} from '../../shared/components/components'
+import {FloatDebug} from '../../shared/components/components'
 import {flipsMachine} from '../../screens/flips/machines'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import Layout from '../../shared/components/layout'
-import {useChainState} from '../../shared/providers/chain-context'
 import {Notification} from '../../shared/components/notifications'
 import {NotificationType} from '../../shared/providers/notification-context'
 import {loadPersistentState} from '../../shared/utils/persist'
+import {useChainState} from '../../shared/providers/chain-context'
+import Layout from '../../shared/components/layout'
 
 export default function FlipListPage() {
   const {t} = useTranslation()
@@ -63,7 +63,6 @@ export default function FlipListPage() {
   const {colors} = useTheme()
 
   const {syncing, offline, loading} = useChainState()
-
   const {
     flips: knownFlips,
     requiredFlips: requiredFlipsNumber,
@@ -340,11 +339,7 @@ export default function FlipListPage() {
           }}
         />
 
-        {global.isDev && (
-          <Box position="absolute" left={6} bottom={6} zIndex="popover">
-            <Debug>{current.value}</Debug>
-          </Box>
-        )}
+        {global.isDev && <FloatDebug>{current.value}</FloatDebug>}
       </Page>
     </Layout>
   )

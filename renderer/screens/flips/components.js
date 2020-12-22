@@ -50,6 +50,7 @@ import {
   DrawerHeader,
   DrawerBody,
   FormLabel,
+  GoogleTranslateButton,
 } from '../../shared/components/components'
 
 export function FlipPageTitle({onClose, ...props}) {
@@ -390,8 +391,6 @@ export const FlipFilterOption = React.forwardRef(
       _active={{bg: 'gray.50', color: 'brand.blue'}}
       _hover={{bg: 'gray.50', color: 'brand.blue'}}
       {...props}
-      variant="ghost"
-      variantColor="gray"
     />
   )
 )
@@ -547,23 +546,9 @@ export function FlipKeywordTranslationSwitch({
                 h={rem(24)}
               />
             ) : null}
-            <IconButton2
-              icon="gtranslate"
-              _hover={{background: 'transparent'}}
-              onClick={() => {
-                global.openExternal(
-                  `https://translate.google.com/#view=home&op=translate&sl=auto&tl=${
-                    global.locale
-                  }&text=${encodeURIComponent(
-                    keywords.words
-                      .map(({name, desc}) => `${name}\n${desc}`)
-                      .join('\n')
-                  )}`
-                )
-              }}
-            >
-              Google Translate
-            </IconButton2>
+            <GoogleTranslateButton
+              phrases={keywords.words.map(({name, desc}) => `${name}\n${desc}`)}
+            />
           </>
         )}
       </Stack>

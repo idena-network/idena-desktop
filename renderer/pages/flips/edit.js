@@ -1,6 +1,6 @@
 import React from 'react'
 import {useRouter} from 'next/router'
-import {Box, Code, Flex, useToast, Divider} from '@chakra-ui/core'
+import {Box, Flex, useToast, Divider} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page} from '../../screens/app/components'
@@ -23,8 +23,6 @@ import {
   FlipSubmitStep,
   CommunityTranslationUnavailable,
 } from '../../screens/flips/components'
-import Layout from '../../shared/components/layout'
-import {useChainState} from '../../shared/providers/chain-context'
 import {NotificationType} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine} from '../../screens/flips/machines'
@@ -36,7 +34,8 @@ import {
   SecondaryButton,
   PrimaryButton,
 } from '../../shared/components/button'
-import {Toast} from '../../shared/components/components'
+import {FloatDebug, Toast} from '../../shared/components/components'
+import Layout from '../../shared/components/layout'
 
 export default function EditFlipPage() {
   const {t, i18n} = useTranslation()
@@ -47,8 +46,7 @@ export default function EditFlipPage() {
 
   const toast = useToast()
 
-  const {syncing} = useChainState()
-
+  const {syncing} = useIdentityState()
   const {flipKeyWordPairs} = useIdentityState()
 
   const [current, send] = useMachine(flipMasterMachine, {
@@ -314,12 +312,8 @@ export default function EditFlipPage() {
             </PrimaryButton>
           )}
         </FlipMasterFooter>
+        {global.isDev && <FloatDebug>{current.value}</FloatDebug>}
       </Page>
-      {global.isDev && (
-        <Box position="absolute" left={6} bottom={6} zIndex="popover">
-          <Code>{JSON.stringify(current.value)}</Code>
-        </Box>
-      )}
     </Layout>
   )
 }
