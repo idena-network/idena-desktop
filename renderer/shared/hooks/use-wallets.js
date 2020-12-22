@@ -8,6 +8,7 @@ import {
   fetchBalance,
   fetchTransactions,
   fetchPendingTransactions,
+  fetchTransactionReceipt,
 } from '../api/wallet'
 
 function isAddress(address) {
@@ -15,8 +16,7 @@ function isAddress(address) {
 }
 
 function transactionType(tx) {
-  const {type} = tx
-  const {payload} = tx
+  const {type, receipt, payload} = tx
   if (type === 'send') return 'Transfer'
   if (type === 'activation') return 'Invitation activated'
   if (type === 'invite') return 'Invitation issued'
@@ -25,7 +25,21 @@ function transactionType(tx) {
   if (type === 'submitFlip') return 'Flip submitted'
   if (type === 'online')
     return `Mining status ${payload === '0x' ? 'Off' : 'On'}`
-  return ''
+
+  if (type === 'deployContract') return 'Deploy'
+  if (type === 'terminateContract') return 'Deploy'
+  if (type === 'callContract') {
+    const method = receipt ? receipt.method : 'unknown'
+    if (method === 'sendVote') return 'Send public vote'
+    if (method === 'sendVoteProof') return 'Send secret vote'
+    if (method === 'startVoting') return 'Start voting'
+    if (method === 'finishVoting') return 'Finish voting'
+    if (method === 'prolongVoting') return 'Prolong voting'
+    if (method === 'startVoting') return 'Start voting'
+
+    return `Call ${method}`
+  }
+  return type
 }
 
 async function fetchWallets(address) {
@@ -45,7 +59,24 @@ async function fetchTxs({address, wallets}) {
   const txResp = await fetchTransactions(address, 50)
   const txPendingResp = await fetchPendingTransactions(address, 50)
 
-  const txs = txResp && txResp.result && txResp.result.transactions
+  const txsResp = txResp && txResp.result && txResp.result.transactions
+
+  const hasReceipt = ['callContract', 'deployContract', 'terminateContract']
+
+  const txs = await Promise.all(
+    txsResp.map(tx => {
+      if (hasReceipt.find(type => tx.type === type))
+        return fetchTransactionReceipt(tx.hash).then(resp => {
+          const receipt = resp && resp.result
+          const nextTx = {
+            ...tx,
+            receipt,
+          }
+          return nextTx
+        })
+      return tx
+    })
+  )
   const txsPending =
     txPendingResp && txPendingResp.result && txPendingResp.result.transactions
 
@@ -70,12 +101,17 @@ async function fetchTxs({address, wallets}) {
 
       const sourceWallet = fromWallet || toWallet
       const signAmount = fromWallet ? -tx.amount : `+${tx.amount}`
-      const counterParty = fromWallet ? tx.to : tx.from
+
+      const contractAddress = tx.receipt && tx.receipt.contract
+      const toAddress = tx.to ? tx.to : contractAddress
+
+      const counterParty = fromWallet ? toAddress : tx.from
       const counterPartyWallet = fromWallet ? toWallet : fromWallet
       const isMining = tx.blockHash === HASH_IN_MEMPOOL
 
       const nextTx = {
         ...tx,
+        to: tx.to ? tx.to : contractAddress,
         typeName,
         wallet: sourceWallet,
         direction,
