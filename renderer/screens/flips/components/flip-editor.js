@@ -13,6 +13,7 @@ import {
   Divider,
   Icon,
 } from '@chakra-ui/core'
+import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
@@ -61,6 +62,9 @@ const IMAGE_WIDTH = 440
 const IMAGE_HEIGHT = 330
 const INSERT_OBJECT_IMAGE = 1
 const INSERT_BACKGROUND_IMAGE = 2
+const SHADOW_IMAGE_DATAURL =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGUmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDIgNzkuMTYwOTI0LCAyMDE3LzA3LzEzLTAxOjA2OjM5ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdEV2dD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlRXZlbnQjIiB4bWxuczpwaG90b3Nob3A9Imh0dHA6Ly9ucy5hZG9iZS5jb20vcGhvdG9zaG9wLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAyMC0xMi0xNFQxOTo0ODo0NyswNTowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMC0xMi0xNFQxOTo0ODo0NyswNTowMCIgeG1wOk1vZGlmeURhdGU9IjIwMjAtMTItMTRUMTk6NDg6NDcrMDU6MDAiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6N2E3N2JjODgtMmY5Zi0yZTQ2LTg3YzItMWIwY2MyNmU1MDEzIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZDljNDkxYWItZTZjNy1lNzQwLWEyM2YtYzhmNTY3NGI1MmQ2IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6ZDA4NzlhOWUtMTg0NS1mODQ1LWEyNjktNDQ3YjJlOTA4MGI2IiBwaG90b3Nob3A6Q29sb3JNb2RlPSIzIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6ZDA4NzlhOWUtMTg0NS1mODQ1LWEyNjktNDQ3YjJlOTA4MGI2IiBzdEV2dDp3aGVuPSIyMDIwLTEyLTE0VDE5OjQ4OjQ3KzA1OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo3YTc3YmM4OC0yZjlmLTJlNDYtODdjMi0xYjBjYzI2ZTUwMTMiIHN0RXZ0OndoZW49IjIwMjAtMTItMTRUMTk6NDg6NDcrMDU6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDxwaG90b3Nob3A6RG9jdW1lbnRBbmNlc3RvcnM+IDxyZGY6QmFnPiA8cmRmOmxpPnhtcC5kaWQ6ODdmMTc3ZWMtN2VhNi04OTQ3LTk3NjgtNWM4NzY2ZWY1MGYxPC9yZGY6bGk+IDwvcmRmOkJhZz4gPC9waG90b3Nob3A6RG9jdW1lbnRBbmNlc3RvcnM+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+7upEZAAAAAtJREFUCB1jAAIpAAAfABtLdwBIAAAAAElFTkSuQmCC'
+
 const BLANK_IMAGE_DATAURL =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVQYlWP4//8/AAX+Av5e8BQ1AAAAAElFTkSuQmCC'
 const BLANK_IMAGE =
@@ -141,9 +145,12 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
 
   const [insertImageMode, setInsertImageMode] = useState(0)
 
+  const epoch = useEpochState()
+  const bottomWatermark = epoch && `${epoch.nextValidation.substr(5, 5)}`
+
   const setImageUrl = useCallback(
     (data, onDone = null) => {
-      const {url, insertMode, customEditor} = data
+      const {url, insertMode, customEditor, watermark} = data
       const nextInsertMode = insertMode || insertImageMode
       const editor = customEditor || editors[idx]
 
@@ -216,7 +223,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
               opacity: 0.5,
             })
             editor.loadImageFromURL(editor.toDataURL(), 'BlurBkgd').then(() => {
-              editor.addImageObject(url).then(objectProps2 => {
+              editor.addImageObject(url).then(async objectProps2 => {
                 const {id: id2} = objectProps2
 
                 editor.setObjectPropertiesQuietly(id2, {
@@ -225,16 +232,74 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                   scaleX: newWidth / width,
                   scaleY: newHeight / height,
                 })
-                editor.loadImageFromURL(editor.toDataURL(), 'Bkgd').then(() => {
-                  editor.clearUndoStack()
-                  editor.clearRedoStack()
-                  handleOnChanged()
-                  if (onDone) onDone()
 
-                  if (editors[idx]._graphics) {
-                    editors[idx]._graphics.renderAll()
-                  }
-                })
+                if (watermark) {
+                  const {id: shadowId2} = await editor.addImageObject(
+                    SHADOW_IMAGE_DATAURL
+                  )
+                  editor.setObjectPropertiesQuietly(shadowId2, {
+                    left: IMAGE_WIDTH / 2,
+                    top: IMAGE_HEIGHT / 2,
+                    scaleX: IMAGE_WIDTH,
+                    scaleY: IMAGE_HEIGHT,
+                  })
+
+                  const xPos = IMAGE_WIDTH / 2 + Math.random() * 30 - 15
+                  const yPos = IMAGE_HEIGHT / 2 + Math.random() * 40 - 20
+                  const anglePos = Math.random() * 70 - 35
+
+                  const angleRad = (Math.PI * anglePos) / 180
+                  const xPos2 = xPos - 80 * Math.sin(angleRad)
+                  const yPos2 = yPos + 80 * Math.abs(Math.cos(angleRad))
+
+                  const {id: textOjectId} = await editor.addText(watermark, {
+                    styles: {
+                      fill: '#ffffff35',
+                      fontFamily: 'Inter',
+                      fontSize: 170,
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                    },
+                    position: {
+                      x: xPos,
+                      y: yPos,
+                    },
+                  })
+
+                  editor.setObjectPropertiesQuietly(textOjectId, {
+                    angle: anglePos,
+                  })
+
+                  const {id: textOjectId1} = await editor.addText(
+                    'www.idena.io',
+                    {
+                      styles: {
+                        fill: '#ffffff35',
+                        fontFamily: 'Inter',
+                        fontSize: 40,
+                        fontWeight: 'normal',
+                        textAlign: 'center',
+                      },
+                      position: {
+                        x: xPos2,
+                        y: yPos2,
+                      },
+                    }
+                  )
+
+                  editor.setObjectPropertiesQuietly(textOjectId1, {
+                    angle: anglePos,
+                  })
+                }
+                await editor.loadImageFromURL(editor.toDataURL(), 'Bkgd')
+                editor.clearUndoStack()
+                editor.clearRedoStack()
+                handleOnChanged()
+                if (onDone) onDone()
+
+                if (editors[idx]._graphics) {
+                  editors[idx]._graphics.renderAll()
+                }
               })
             })
           })
@@ -255,7 +320,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     reader.addEventListener('loadend', re => {
       const img = global.nativeImage.createFromDataURL(re.target.result)
       const url = imageResize(img, IMAGE_WIDTH, IMAGE_HEIGHT)
-      setImageUrl({url})
+      setImageUrl({url, watermark: bottomWatermark})
       setInsertImageMode(0)
     })
     reader.readAsDataURL(file)
@@ -268,7 +333,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     const handleImageSearchPick = (_, data) => {
       if (visible) {
         const [{url}] = data.docs[0].thumbnails
-        setImageUrl({url})
+        setImageUrl({url, watermark: bottomWatermark})
       }
       setInsertImageMode(0)
     }
@@ -279,7 +344,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
         handleImageSearchPick
       )
     }
-  }, [setImageUrl, insertImageMode, visible])
+  }, [setImageUrl, insertImageMode, visible, bottomWatermark])
 
   // Clipboard handling
   const handleImageFromClipboard = (insertMode = null) => {
@@ -295,7 +360,11 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           if (img.width === IMAGE_WIDTH && img.height === IMAGE_HEIGHT) {
             setImageUrl({url, insertMode: INSERT_BACKGROUND_IMAGE})
           } else {
-            setImageUrl({url, insertMode: INSERT_OBJECT_IMAGE})
+            setImageUrl({
+              url,
+              watermark: bottomWatermark,
+              insertMode: INSERT_OBJECT_IMAGE,
+            })
           }
           img = null
         }
