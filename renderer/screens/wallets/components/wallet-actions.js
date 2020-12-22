@@ -156,9 +156,17 @@ function WalletTransfer({transactions = []}) {
                 {}
               </TableCol>
               <TableCol>
-                {!tx.timestamp
-                  ? '\u2013'
-                  : new Date(tx.timestamp * 1000).toLocaleString()}
+                <div>
+                  {!tx.timestamp
+                    ? '\u2013'
+                    : new Date(tx.timestamp * 1000).toLocaleDateString()}
+                </div>
+
+                <div>
+                  {!tx.timestamp
+                    ? '\u2013'
+                    : new Date(tx.timestamp * 1000).toLocaleTimeString()}
+                </div>
               </TableCol>
 
               <TableCol>

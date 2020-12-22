@@ -26,11 +26,19 @@ function transactionType(tx) {
   if (type === 'online')
     return `Mining status ${payload === '0x' ? 'Off' : 'On'}`
 
-  if (type === '' && receipt) {
-    if (!tx.to) return 'Deploy'
-    return 'Call'
-  }
+  if (type === 'deployContract') return 'Deploy'
+  if (type === 'terminateContract') return 'Deploy'
+  if (type === 'callContract') {
+    const method = receipt ? receipt.method : 'unknown'
+    if (method === 'sendVote') return 'Send public vote'
+    if (method === 'sendVoteProof') return 'Send secret vote'
+    if (method === 'startVoting') return 'Start voting'
+    if (method === 'finishVoting') return 'Finish voting'
+    if (method === 'prolongVoting') return 'Prolong voting'
+    if (method === 'startVoting') return 'Start voting'
 
+    return `Call ${method}`
+  }
   return type
 }
 
@@ -53,17 +61,21 @@ async function fetchTxs({address, wallets}) {
 
   const txsResp = txResp && txResp.result && txResp.result.transactions
 
+  const hasReceipt = ['callContract', 'deployContract', 'terminateContract']
+
   const txs = await Promise.all(
-    txsResp.map(tx =>
-      fetchTransactionReceipt(tx.hash).then(resp => {
-        const receipt = resp && resp.result
-        const nextTx = {
-          ...tx,
-          receipt,
-        }
-        return nextTx
-      })
-    )
+    txsResp.map(tx => {
+      if (hasReceipt.find(type => tx.type === type))
+        return fetchTransactionReceipt(tx.hash).then(resp => {
+          const receipt = resp && resp.result
+          const nextTx = {
+            ...tx,
+            receipt,
+          }
+          return nextTx
+        })
+      return tx
+    })
   )
   const txsPending =
     txPendingResp && txPendingResp.result && txPendingResp.result.transactions
