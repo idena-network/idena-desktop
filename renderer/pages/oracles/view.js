@@ -432,11 +432,6 @@ export default function ViewVotingPage() {
                     <Stack spacing={5}>
                       <Box>
                         <Text fontWeight={500}>{t('Recent transactions')}</Text>
-                        <ExternalLink
-                          href={`https://scan.idena.io/address/${identity.address}/contract/${id}/balanceUpdates`}
-                        >
-                          {t('See all transactions updates in Explorer')}
-                        </ExternalLink>
                       </Box>
                       <Table style={{tableLayout: 'fixed', fontWeight: 500}}>
                         <thead>
