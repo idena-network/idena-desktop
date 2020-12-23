@@ -23,7 +23,7 @@ import {IdentityProvider} from '../shared/providers/identity-context'
 export default function App({Component, err, ...pageProps}) {
   return (
     <>
-      <GoogleFonts href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+      <GoogleFonts href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
       <Head>
         <link href="/static/fonts/icons.css" rel="stylesheet" />
       </Head>

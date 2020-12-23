@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {Icon} from '@chakra-ui/core'
+import {Badge, Icon, Stack, Text as ChakraText} from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
@@ -152,7 +152,23 @@ function Nav() {
           {t('Contacts')}
         </NavItem>
         <NavItem href="/oracles/list" icon={<Icon name="oracle" w={5} h={5} />}>
-          {t('Oracle voting')}
+          <Stack isInline align="center">
+            <ChakraText as="span">{t('Oracle voting')}</ChakraText>
+            <Badge
+              variantColor="green"
+              bg="green.020"
+              color="green.500"
+              fontSize={8}
+              fontWeight={700}
+              rounded={4}
+              letterSpacing={1.4}
+              lineHeight="taller"
+              mt="3px"
+              w={30}
+            >
+              {t('New')}
+            </Badge>
+          </Stack>
         </NavItem>
         <NavItem
           href="/settings/general"
