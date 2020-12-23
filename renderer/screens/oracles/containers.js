@@ -1373,12 +1373,11 @@ export function FinishDrawer({
 
 export function TerminateDrawer({
   isLoading,
-  from,
-  available,
+  contractAddress,
   onTerminate,
   ...props
 }) {
-  const {t, i18n} = useTranslation()
+  const {t} = useTranslation()
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
@@ -1389,24 +1388,17 @@ export function TerminateDrawer({
         as="form"
         onSubmit={e => {
           e.preventDefault()
-          const {fromInput} = e.target.elements
-          onTerminate({
-            from: fromInput.value,
-          })
+          onTerminate()
         }}
       >
         <OracleFormHelperText>
           {t(
-            'Terminate the contract to clean-up its state and release the stake'
+            'Terminate the contract to clean-up its state and refund 50% of the stake to the owner'
           )}
         </OracleFormHelperText>
 
-        <OracleFormControl label={t('Transfer from')}>
-          <Input name="fromInput" defaultValue={from} isDisabled />
-          <OracleFormHelper
-            label={t('Available')}
-            value={toLocaleDna(i18n.language)(available)}
-          />
+        <OracleFormControl label={t('Smart contract address')}>
+          <Input defaultValue={contractAddress} isDisabled />
         </OracleFormControl>
 
         <PrimaryButton

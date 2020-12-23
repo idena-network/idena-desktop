@@ -23,7 +23,6 @@ import duration from 'dayjs/plugin/duration'
 import {Page} from '../../screens/app/components'
 import {
   Avatar,
-  ExternalLink,
   FloatDebug,
   GoogleTranslateButton,
   Toast,
@@ -766,11 +765,10 @@ export default function ViewVotingPage() {
         onClose={() => {
           send('CANCEL')
         }}
-        from={identity.address}
-        available={identity.balance}
+        contractAddress={contractHash}
         isLoading={current.matches(`mining.${VotingStatus.Terminating}`)}
-        onTerminate={({from}) => {
-          send('TERMINATE', {from})
+        onTerminate={() => {
+          send('TERMINATE', {from: identity.address})
         }}
       />
 
