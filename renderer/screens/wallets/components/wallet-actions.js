@@ -85,7 +85,13 @@ function WalletTransfer({transactions = []}) {
       <Table>
         <thead>
           <TableRow>
-            <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
+            <TableHeaderCol
+              style={{
+                minWidth: '130px',
+              }}
+            >
+              {t('Transaction')}
+            </TableHeaderCol>
             <TableHeaderCol>{t('Address')}</TableHeaderCol>
             <TableHeaderCol className="text-right">
               {t('Amount, iDNA')}
@@ -122,7 +128,7 @@ function WalletTransfer({transactions = []}) {
                           ? t('smart contract')
                           : t('address')}
                       </div>
-                      <TableHint style={{...ellipsis(rem(130))}}>
+                      <TableHint style={{...ellipsis(rem(110))}}>
                         {tx.counterParty}
                       </TableHint>
                     </div>
@@ -193,7 +199,7 @@ function WalletTransfer({transactions = []}) {
                       <div>{t('Confirmed')}</div>
                     </Flex>
 
-                    <TableHint style={{...ellipsis(rem(130))}}>
+                    <TableHint style={{...ellipsis(rem(90))}}>
                       {tx.isMining ? '' : tx.hash}
                     </TableHint>
                   </div>
