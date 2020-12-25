@@ -123,7 +123,8 @@ export default function ViewVotingPage() {
     desc,
     contractHash,
     status,
-    balance: contractBalance = 0,
+    balance = 0,
+    contractBalance = Number(balance),
     votingMinPayment = 0,
     publicVotingDuration = 0,
     quorum = 20,
@@ -145,7 +146,6 @@ export default function ViewVotingPage() {
     isOracle,
     estimatedTerminationTime,
     minOracleReward,
-    oracleReward,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -252,6 +252,8 @@ export default function ViewVotingPage() {
                   </VotingSkeleton>
 
                   {eitherIdleState(
+                    VotingStatus.Pending,
+                    VotingStatus.Starting,
                     VotingStatus.Open,
                     VotingStatus.Voting,
                     VotingStatus.Voted,
@@ -275,7 +277,11 @@ export default function ViewVotingPage() {
                             <VotingOption
                               key={id}
                               value={String(id)}
-                              isDisabled={eitherIdleState(VotingStatus.Voted)}
+                              isDisabled={eitherIdleState(
+                                VotingStatus.Pending,
+                                VotingStatus.Starting,
+                                VotingStatus.Voted
+                              )}
                               annotation={t('{{count}} min. votes required', {
                                 count: toPercent(winnerThreshold / 100),
                               })}
@@ -709,7 +715,8 @@ export default function ViewVotingPage() {
         }}
         balance={contractBalance}
         requiredBalance={votingMinBalance({
-          oracleReward: Math.max(minOracleReward, oracleReward),
+          minOracleReward,
+          oracleReward: estimatedOracleReward,
           committeeSize,
         })}
         from={identity.address}

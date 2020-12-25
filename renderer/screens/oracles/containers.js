@@ -995,23 +995,22 @@ export function LaunchDrawer({
           <Input name="fromInput" defaultValue={from} isDisabled />
           <OracleFormHelper label={t('Available')} value={dna(available)} />
         </OracleFormControl>
-        {requiredBalance - balance > 0 && (
-          <OracleFormControl label={t('Send')}>
-            <DnaInput
-              name="balanceInput"
-              defaultValue={requiredBalance - balance}
-              step="any"
-            />
-            <OracleFormHelper
-              label={t('Minimum deposit required')}
-              value={requiredBalance}
-            />
-            <OracleFormHelper
-              label={t('Current contract balance')}
-              value={balance}
-            />
-          </OracleFormControl>
-        )}
+        <OracleFormControl label={t('Send')}>
+          <DnaInput
+            name="balanceInput"
+            defaultValue={Math.max(requiredBalance - balance, 0)}
+            step="any"
+          />
+          <OracleFormHelper
+            label={t('Minimum deposit required')}
+            value={requiredBalance}
+          />
+          <OracleFormHelper
+            label={t('Current contract balance')}
+            value={balance}
+          />
+        </OracleFormControl>
+        )
         <PrimaryButton
           isLoading={isLoading}
           loadingText={t('Launching')}
@@ -1084,7 +1083,7 @@ export function LaunchVotingDrawer({votingService}) {
   const {
     balance,
     minOracleReward,
-    oracleReward,
+    estimatedOracleReward,
     committeeSize,
   } = current.context
 
@@ -1100,7 +1099,8 @@ export function LaunchVotingDrawer({votingService}) {
       }}
       balance={Number(balance)}
       requiredBalance={votingMinBalance({
-        oracleReward: Math.max(minOracleReward, oracleReward),
+        minOracleReward,
+        oracleReward: estimatedOracleReward,
         committeeSize,
       })}
       from={identity.address}

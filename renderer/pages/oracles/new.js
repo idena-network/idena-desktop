@@ -203,6 +203,7 @@ function NewVotingPage() {
                       value={value}
                       placeholder={`${t('Option')} ${idx + 1}...`}
                       isLast={idx === options.length - 1}
+                      isDisabled={[0, 1].includes(idx)}
                       onChange={({target}) => {
                         send('SET_OPTIONS', {id, value: target.value})
                       }}
@@ -384,9 +385,7 @@ function NewVotingPage() {
                   />
                   <PresetFormControlHelperText>
                     {t('Total oracles rewards: {{amount}}', {
-                      amount: dna(
-                        votingMinBalance({oracleReward, committeeSize})
-                      ),
+                      amount: dna(oracleReward * committeeSize),
                       nsSeparator: '!',
                     })}
                   </PresetFormControlHelperText>
@@ -503,7 +502,8 @@ function NewVotingPage() {
           from={address}
           available={balance}
           minBalance={votingMinBalance({
-            oracleReward: Math.max(oracleReward, minOracleReward),
+            minOracleReward,
+            oracleReward,
             committeeSize,
           })}
           minStake={votingMinStake(feePerGas)}

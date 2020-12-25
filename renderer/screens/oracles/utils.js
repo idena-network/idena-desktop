@@ -345,9 +345,16 @@ export function votingMinStake(feePerGas) {
   return 3000000 * dnaFeePerGas(feePerGas)
 }
 
-// eslint-disable-next-line no-shadow
-export function votingMinBalance({oracleReward, committeeSize}) {
-  return oracleReward * committeeSize
+export function votingMinBalance({
+  // eslint-disable-next-line no-shadow
+  minOracleReward,
+  // eslint-disable-next-line no-shadow
+  oracleReward,
+  committeeSize,
+}) {
+  const rawBalance =
+    Math.max(Number(minOracleReward), Number(oracleReward)) * committeeSize
+  return Math.ceil((rawBalance + Number.EPSILON) * 10 ** 4) / 10 ** 4
 }
 
 function dnaFeePerGas(value) {
@@ -414,8 +421,9 @@ export const humanError = (
     balance,
     // eslint-disable-next-line no-shadow
     minOracleReward,
+    estimatedOracleReward,
     // eslint-disable-next-line no-shadow
-    oracleReward,
+    oracleReward = estimatedOracleReward,
     committeeSize,
     votingMinPayment,
   },
@@ -434,7 +442,8 @@ export const humanError = (
       ).toLocaleString()}`
     case 'contract balance is less than minimal oracles reward': {
       const requiredBalance = votingMinBalance({
-        oracleReward: Math.max(oracleReward, minOracleReward),
+        minOracleReward,
+        oracleReward,
         committeeSize,
       })
       return `Insufficient funds to start the voting. Minimum deposit is required: ${dna(
@@ -516,4 +525,8 @@ export const mapVoting = ({
 
 export function mapVotingStatus(status) {
   return areSameCaseInsensitive(status, VotingStatus.Voted) ? 'Voting' : status
+}
+
+export function minOracleRewardFromEstimates(data) {
+  return Number(data.find(({type}) => type === 'min')?.amount)
 }

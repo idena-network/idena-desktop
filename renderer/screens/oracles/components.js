@@ -230,6 +230,7 @@ export function NumberInput({
 
 export function VotingOptionInput({
   isLast,
+  isDisabled,
   onAddOption,
   onRemoveOption,
   ...props
@@ -257,6 +258,7 @@ export function VotingOptionInput({
         </Stack>
         <IconButton
           icon="cross-small"
+          isDisabled={isDisabled}
           bg="unset"
           color="muted"
           fontSize={20}
