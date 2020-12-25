@@ -534,5 +534,9 @@
   "Funding": "Funding",
   "Starting": "Starting",
   "Voting": "Voting",
-  "Invalid": "Invalid"
+  "Invalid": "Invalid",
+  "Votings cache": "Votings cache",
+  "Clear persisted votings.": "Clear persisted votings.",
+  "Recommended in some scenarios, e.g. switching accounts.": "Recommended in some scenarios, e.g. switching accounts.",
+  "Clear cache": "Clear cache"
 }
