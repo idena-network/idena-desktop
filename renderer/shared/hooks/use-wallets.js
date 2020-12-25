@@ -63,20 +63,22 @@ async function fetchTxs({address, wallets}) {
 
   const hasReceipt = ['callContract', 'deployContract', 'terminateContract']
 
-  const txs = await Promise.all(
-    txsResp.map(tx => {
-      if (hasReceipt.find(type => tx.type === type))
-        return fetchTransactionReceipt(tx.hash).then(resp => {
-          const receipt = resp && resp.result
-          const nextTx = {
-            ...tx,
-            receipt,
-          }
-          return nextTx
+  const txs = !txsResp
+    ? []
+    : await Promise.all(
+        txsResp.map(tx => {
+          if (hasReceipt.find(type => tx.type === type))
+            return fetchTransactionReceipt(tx.hash).then(resp => {
+              const receipt = resp && resp.result
+              const nextTx = {
+                ...tx,
+                receipt,
+              }
+              return nextTx
+            })
+          return tx
         })
-      return tx
-    })
-  )
+      )
   const txsPending =
     txPendingResp && txPendingResp.result && txPendingResp.result.transactions
 
