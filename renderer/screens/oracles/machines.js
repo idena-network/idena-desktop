@@ -21,6 +21,7 @@ import {
   hasValuableOptions,
   fetchVoting,
   mapVoting,
+  minOracleRewardFromEstimates,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
@@ -315,15 +316,19 @@ export const votingMachine = Machine(
             states: {
               idle: {
                 on: {
-                  REVIEW_START_VOTING: {
-                    target: 'review',
+                  REVIEW_START_VOTING: 'review',
+                },
+              },
+              review: {
+                invoke: {
+                  src: 'loadMinOracleReward',
+                  onDone: {
                     actions: [
+                      'applyMinOracleReward',
                       sendParent(({id}) => ({type: 'REVIEW_START_VOTING', id})),
                     ],
                   },
                 },
-              },
-              review: {
                 on: {
                   START_VOTING: {
                     target: `#voting.mining.${VotingStatus.Starting}`,
@@ -394,9 +399,13 @@ export const votingMachine = Machine(
       persist: ({epoch, ...context}) => {
         epochDb('votings', epoch).put(context)
       },
+      applyMinOracleReward: assign({
+        minOracleReward: (_, {data}) => data,
+      }),
     },
     services: {
       ...votingServices(),
+      loadMinOracleReward,
       pollStatus: ({txHash}) => cb => {
         let timeoutId
 
@@ -453,8 +462,8 @@ export const createNewVotingMachine = (epoch, address) =>
               target: 'editing',
               actions: [
                 assign((context, {data: [feePerGas, estimates]}) => {
-                  const minOracleReward = Number(
-                    estimates.find(({type}) => type === 'min')?.amount
+                  const minOracleReward = minOracleRewardFromEstimates(
+                    estimates
                   )
                   return {
                     ...context,
@@ -571,9 +580,7 @@ export const createNewVotingMachine = (epoch, address) =>
                   target: 'idle',
                   actions: [
                     assign((context, {data}) => {
-                      const minOracleReward = Number(
-                        data.find(({type}) => type === 'min')?.amount
-                      )
+                      const minOracleReward = minOracleRewardFromEstimates(data)
                       return {
                         ...context,
                         minOracleReward,
@@ -885,8 +892,21 @@ export const createViewVotingMachine = (id, epoch, address) =>
           invoke: {
             src: 'loadVoting',
             onDone: {
-              target: 'idle',
+              target: 'loadMinOracleReward',
               actions: ['applyVoting', log()],
+            },
+            onError: {
+              target: 'invalid',
+              actions: [log()],
+            },
+          },
+        },
+        loadMinOracleReward: {
+          invoke: {
+            src: 'loadMinOracleReward',
+            onDone: {
+              target: 'idle',
+              actions: ['applyMinOracleReward', log()],
             },
             onError: {
               target: 'invalid',
@@ -1110,6 +1130,9 @@ export const createViewVotingMachine = (id, epoch, address) =>
         persist: ({epoch, address, ...context}) => {
           epochDb('votings', epoch).put(context)
         },
+        applyMinOracleReward: assign({
+          minOracleReward: (_, {data}) => data,
+        }),
       },
       services: {
         // eslint-disable-next-line no-shadow
@@ -1122,6 +1145,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
             contractAddress: id,
           }),
         }),
+        loadMinOracleReward,
         ...votingServices(),
         vote: async (
           // eslint-disable-next-line no-shadow
@@ -1708,6 +1732,12 @@ function votingServices() {
       return callContract('startVoting')
     },
   }
+}
+
+async function loadMinOracleReward({committeeSize}) {
+  return minOracleRewardFromEstimates(
+    await fetchOracleRewardsEstimates(committeeSize)
+  )
 }
 
 function votingStatusGuards() {

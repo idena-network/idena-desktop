@@ -385,9 +385,7 @@ function NewVotingPage() {
                   />
                   <PresetFormControlHelperText>
                     {t('Total oracles rewards: {{amount}}', {
-                      amount: dna(
-                        votingMinBalance({oracleReward, committeeSize})
-                      ),
+                      amount: dna(oracleReward * committeeSize),
                       nsSeparator: '!',
                     })}
                   </PresetFormControlHelperText>
@@ -504,7 +502,8 @@ function NewVotingPage() {
           from={address}
           available={balance}
           minBalance={votingMinBalance({
-            oracleReward: Math.max(oracleReward, minOracleReward),
+            minOracleReward,
+            oracleReward,
             committeeSize,
           })}
           minStake={votingMinStake(feePerGas)}
