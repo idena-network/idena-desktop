@@ -427,7 +427,7 @@ export function VoteDrawer({
   return (
     <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="send-out" variantColor="blue">
-        {t('Voting: {{option}}', {option, nsSeparator: '!'})}
+        {t('Voting')}: {option}
       </OracleDrawerHeader>
       <OracleDrawerBody>
         <OracleFormControl label={t('Transfer from')}>
