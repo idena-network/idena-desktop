@@ -158,7 +158,6 @@ export function useWallets() {
           }
         }
         case 'REJECT':
-          console.log(data.error)
           return {...state, status: 'fail', error: data.error}
         default:
           return state
