@@ -203,6 +203,7 @@ function NewVotingPage() {
                       value={value}
                       placeholder={`${t('Option')} ${idx + 1}...`}
                       isLast={idx === options.length - 1}
+                      isDisabled={[0, 1].includes(idx)}
                       onChange={({target}) => {
                         send('SET_OPTIONS', {id, value: target.value})
                       }}
