@@ -277,7 +277,11 @@ export default function ViewVotingPage() {
                             <VotingOption
                               key={id}
                               value={String(id)}
-                              isDisabled={eitherIdleState(VotingStatus.Voted)}
+                              isDisabled={eitherIdleState(
+                                VotingStatus.Pending,
+                                VotingStatus.Starting,
+                                VotingStatus.Voted
+                              )}
                               annotation={t('{{count}} min. votes required', {
                                 count: toPercent(winnerThreshold / 100),
                               })}
