@@ -253,6 +253,7 @@ export default function ViewVotingPage() {
 
                   {eitherIdleState(
                     VotingStatus.Pending,
+                    VotingStatus.Starting,
                     VotingStatus.Open,
                     VotingStatus.Voting,
                     VotingStatus.Voted,
