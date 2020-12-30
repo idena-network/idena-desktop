@@ -410,7 +410,7 @@ export const PresetFormControlOption = React.forwardRef(
       borderRadius="md"
       p={2}
       px={3}
-      defaultIsChecked={isChecked}
+      isChecked={isChecked}
       {...props}
     />
   )
