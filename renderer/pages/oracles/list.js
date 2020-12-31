@@ -129,8 +129,10 @@ function VotingListPage() {
                       {filter === VotingListFilter.Own
                         ? t(`There are no votings yet.`)
                         : isValidated
-                        ? t(`No votings for you 🤷‍♂️`)
-                        : t(`There are no votings yet.`)}
+                        ? t(`There are no votings for you`)
+                        : t(
+                            `There are no votings for you because your status is not validated.`
+                          )}
                     </Text>
 
                     <Box>
