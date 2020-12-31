@@ -622,9 +622,6 @@ export default function ViewVotingPage() {
                     {!isClosed && (
                       <Stat>
                         <StatLabel color="muted" fontSize="md">
-                          {t('Voting deposit')}
-                        </StatLabel>
-                        <StatNumber fontSize="base" fontWeight={500}>
                           <Tooltip
                             label={
                               Number(votingMinPayment) > 0
@@ -641,17 +638,36 @@ export default function ViewVotingPage() {
                               borderBottomColor="muted"
                               cursor="help"
                             >
-                              {toDna(votingMinPayment)}
+                              {t('Voting deposit')}
                             </Text>
                           </Tooltip>
+                        </StatLabel>
+                        <StatNumber fontSize="base" fontWeight={500}>
+                          {toDna(votingMinPayment)}
                         </StatNumber>
                       </Stat>
                     )}
                     {!isClosed && (
-                      <AsideStat
-                        label={t('Your reward')}
-                        value={toDna(estimatedOracleReward)}
-                      />
+                      <Stat>
+                        <StatLabel color="muted" fontSize="md">
+                          <Tooltip
+                            label={t('Including your Voting deposit')}
+                            placement="top"
+                          >
+                            <Text
+                              as="span"
+                              borderBottom="dotted 1px"
+                              borderBottomColor="muted"
+                              cursor="help"
+                            >
+                              {t('Your min reward')}
+                            </Text>
+                          </Tooltip>
+                        </StatLabel>
+                        <StatNumber fontSize="base" fontWeight={500}>
+                          {toDna(estimatedOracleReward)}
+                        </StatNumber>
+                      </Stat>
                     )}
                     <AsideStat
                       label={t('Committee size')}
