@@ -153,7 +153,7 @@ export default function FlipListPage() {
             </FlipFilterOption>
           </FlipFilter>
           <IconLink href="/flips/new" icon="plus-solid">
-            {t('Add flip')}
+            {t('New flip')}
           </IconLink>
         </Flex>
         {current.matches('ready.dirty.active') &&
