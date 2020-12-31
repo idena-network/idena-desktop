@@ -643,12 +643,6 @@ export default function ViewVotingPage() {
                         value={toDna(estimatedOracleReward)}
                       />
                     )}
-                    {ownerFee && (
-                      <AsideStat
-                        label={t('Owner fee')}
-                        value={toPercent(ownerFee / 100)}
-                      />
-                    )}
                     <AsideStat
                       label={t('Committee size')}
                       value={t('{{committeeSize}} oracles', {committeeSize})}
