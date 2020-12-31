@@ -81,6 +81,7 @@ import {
   isAllowedToTerminate,
   hasQuorum,
   mapVotingStatus,
+  effectiveBalance,
 } from './utils'
 
 export function VotingCard({votingRef, ...props}) {
@@ -117,6 +118,7 @@ export function VotingCard({votingRef, ...props}) {
     isOracle,
     totalReward,
     finishCountingDate,
+    ownerFee,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -220,7 +222,9 @@ export function VotingCard({votingRef, ...props}) {
         <Icon name="star" size={5} color="white" />
         <Text fontWeight={500}>
           {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
-          {toDna(isClosed ? totalReward : balance)}
+          {toDna(
+            isClosed ? totalReward : effectiveBalance({balance, ownerFee})
+          )}
         </Text>
         {!isClosed && (
           <Text color="orange.500">

@@ -59,6 +59,7 @@ import {VotingStatus} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {
   areSameCaseInsensitive,
+  effectiveBalance,
   hasQuorum,
   hasWinner,
   humanError,
@@ -602,7 +603,9 @@ export default function ViewVotingPage() {
                         </Stack>
                       </StatLabel>
                       <StatNumber fontSize="base" fontWeight={500}>
-                        {toDna(contractBalance)}
+                        {toDna(
+                          effectiveBalance({balance: contractBalance, ownerFee})
+                        )}
                       </StatNumber>
                       <Box mt={1}>
                         <IconButton2
