@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
+import {useRouter} from 'next/router'
 import {
   margin,
   padding,
@@ -32,8 +33,11 @@ import Avatar from './avatar'
 import {Tooltip} from './tooltip'
 import {useNotificationDispatch} from '../providers/notification-context'
 import {Dialog, DialogBody, DialogFooter} from './components'
+import {viewVotingHref} from '../../screens/oracles/utils'
 
 export function DnaLinkHandler({children}) {
+  const router = useRouter()
+
   const [dnaUrl, setDnaUrl] = React.useState()
 
   const {addError} = useNotificationDispatch()
@@ -60,6 +64,12 @@ export function DnaLinkHandler({children}) {
       global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
     }
   }, [])
+
+  if (isValidUrl(dnaUrl)) {
+    const {address} = parseQuery(dnaUrl)
+    router.push(viewVotingHref(address))
+    return null
+  }
 
   return validDnaUrl(dnaUrl) &&
     React.Children.only(children).props.isOpen(dnaUrl)
