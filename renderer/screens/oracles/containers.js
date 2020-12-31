@@ -1041,6 +1041,7 @@ export function LaunchDrawer({
   requiredBalance,
   available,
   from,
+  ownerFee,
   isLoading,
   onLaunch,
   ...props
@@ -1048,6 +1049,11 @@ export function LaunchDrawer({
   const {t, i18n} = useTranslation()
 
   const dna = toLocaleDna(i18n.language)
+
+  const oracleAmount = effectiveBalance({
+    balance: requiredBalance - balance,
+    ownerFee,
+  })
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
@@ -1077,11 +1083,19 @@ export function LaunchDrawer({
           />
           <OracleFormHelper
             label={t('Minimum deposit required')}
-            value={requiredBalance}
+            value={dna(requiredBalance)}
           />
           <OracleFormHelper
             label={t('Current contract balance')}
-            value={balance}
+            value={dna(balance)}
+          />
+          <OracleFormHelper
+            label={t('Paid to oracles')}
+            value={dna(oracleAmount)}
+          />
+          <OracleFormHelper
+            label={t('Paid to owner')}
+            value={dna(requiredBalance - balance - oracleAmount)}
           />
         </OracleFormControl>
         )
