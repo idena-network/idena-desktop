@@ -143,6 +143,7 @@ export default function ViewVotingPage() {
     totalReward,
     committeeEpoch,
     estimatedOracleReward,
+    estimatedMaxOracleReward = estimatedOracleReward,
     isOracle,
     estimatedTerminationTime,
     minOracleReward,
@@ -666,6 +667,30 @@ export default function ViewVotingPage() {
                         </StatLabel>
                         <StatNumber fontSize="base" fontWeight={500}>
                           {toDna(estimatedOracleReward)}
+                        </StatNumber>
+                      </Stat>
+                    )}
+                    {!isClosed && (
+                      <Stat>
+                        <StatLabel color="muted" fontSize="md">
+                          <Tooltip
+                            label={t(
+                              `Including a share of minority voters' deposit`
+                            )}
+                            placement="top"
+                          >
+                            <Text
+                              as="span"
+                              borderBottom="dotted 1px"
+                              borderBottomColor="muted"
+                              cursor="help"
+                            >
+                              {t('Your max reward')}
+                            </Text>
+                          </Tooltip>
+                        </StatLabel>
+                        <StatNumber fontSize="base" fontWeight={500}>
+                          {toDna(estimatedMaxOracleReward)}
                         </StatNumber>
                       </Stat>
                     )}
