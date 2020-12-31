@@ -73,11 +73,18 @@ export default function FlipListPage() {
 
   const [selectedFlip, setSelectedFlip] = React.useState()
 
+  const canSubmitFlips = [
+    IdentityStatus.Verified,
+    IdentityStatus.Human,
+    IdentityStatus.Newbie,
+  ].includes(status)
+
   const [current, send] = useMachine(flipsMachine, {
     context: {
       knownFlips: knownFlips || [],
       availableKeywords: availableKeywords || [],
       filter: loadPersistentState('flipFilter') || FlipFilterType.Active,
+      canSubmitFlips,
     },
     actions: {
       onError: (_, {error}) =>
@@ -125,12 +132,6 @@ export default function FlipListPage() {
   const remainingRequiredFlips = requiredFlipsNumber - madeFlipsNumber
   const remainingOptionalFlips =
     availableFlipsNumber - Math.max(requiredFlipsNumber, madeFlipsNumber)
-
-  const canSubmitFlips = [
-    IdentityStatus.Verified,
-    IdentityStatus.Human,
-    IdentityStatus.Newbie,
-  ].includes(status)
 
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
