@@ -29,6 +29,7 @@ import {
   PopoverArrow,
   PopoverHeader,
   PopoverBody,
+  FormControl,
 } from '@chakra-ui/core'
 import dayjs from 'dayjs'
 import {
@@ -43,6 +44,7 @@ import {
   Drawer,
   DrawerBody,
   DrawerHeader,
+  FormLabel,
   Input,
   Tooltip,
 } from '../../shared/components/components'
@@ -406,6 +408,7 @@ export function AddFundDrawer({
               onChange={e => {
                 // eslint-disable-next-line no-shadow
                 const amount = Number(e.target.value)
+                // eslint-disable-next-line no-shadow
                 const oracleAmount = effectiveBalance({
                   balance: amount,
                   ownerFee,
@@ -514,6 +517,7 @@ export function ReviewVotingDrawer({
   available,
   minBalance,
   minStake,
+  ownerFee,
   isLoading,
   votingDuration,
   publicVotingDuration,
@@ -521,6 +525,13 @@ export function ReviewVotingDrawer({
   ...props
 }) {
   const {t, i18n} = useTranslation()
+
+  const oracleAmount = effectiveBalance({
+    balance: minBalance,
+    ownerFee,
+  })
+
+  const toDna = toLocaleDna(i18n.language)
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
@@ -546,20 +557,52 @@ export function ReviewVotingDrawer({
             value={toLocaleDna(i18n.language)(available)}
           />
         </OracleFormControl>
-        <OracleFormControl label={t('Rewards')}>
+        <FormControl>
+          <FormLabel mb={2}>
+            <Tooltip
+              label={t(`Rewards will be paid to Oracles`)}
+              placement="top"
+              zIndex="tooltip"
+            >
+              <Text
+                borderBottom="dotted 1px"
+                borderBottomColor="muted"
+                cursor="help"
+              >
+                {t('Rewards')}
+              </Text>
+            </Tooltip>
+          </FormLabel>
           <DnaInput name="balanceInput" defaultValue={minBalance} isDisabled />
-          <OracleFormHelperText>
-            {t(`Rewards will be paid to Oracles`)}
-          </OracleFormHelperText>
-        </OracleFormControl>
-        <OracleFormControl label={t('Stake')}>
+          <OracleFormHelper
+            label={t('Paid to oracles')}
+            value={toDna(oracleAmount)}
+          />
+          <OracleFormHelper
+            label={t('Paid to owner')}
+            value={toDna(minBalance - oracleAmount)}
+          />
+        </FormControl>
+        <FormControl>
+          <FormLabel mb={2}>
+            <Tooltip
+              label={t(
+                '50% of the stake will be refunded to your address after termination'
+              )}
+              placement="top"
+              zIndex="tooltip"
+            >
+              <Text
+                borderBottom="dotted 1px"
+                borderBottomColor="muted"
+                cursor="help"
+              >
+                {t('Stake')}
+              </Text>
+            </Tooltip>
+          </FormLabel>
           <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
-          <OracleFormHelperText>
-            {t(
-              '50% of the stake will be refunded to your address after termination'
-            )}
-          </OracleFormHelperText>
-        </OracleFormControl>
+        </FormControl>
         <Box>
           <OracleFormHelper
             label={t('Secret voting')}
