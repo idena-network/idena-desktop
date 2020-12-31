@@ -367,6 +367,7 @@ export function AddFundDrawer({
   from,
   to,
   available,
+  ownerFee,
   isLoading,
   onAddFund,
   ...props
@@ -374,6 +375,11 @@ export function AddFundDrawer({
   const {t, i18n} = useTranslation()
 
   const toDna = toLocaleDna(i18n.language)
+
+  const [{oracleAmount, ownerAmount}, setAmount] = React.useState({
+    oracleAmount: 0,
+    ownerAmount: 0,
+  })
 
   return (
     <Drawer {...props}>
@@ -395,7 +401,29 @@ export function AddFundDrawer({
             <Input isDisabled value={to} />
           </OracleFormControl>
           <OracleFormControl label={t('Amount')}>
-            <DnaInput name="amountInput" />
+            <DnaInput
+              name="amountInput"
+              onChange={e => {
+                // eslint-disable-next-line no-shadow
+                const amount = Number(e.target.value)
+                const oracleAmount = effectiveBalance({
+                  balance: amount,
+                  ownerFee,
+                })
+                setAmount({
+                  oracleAmount,
+                  ownerAmount: amount - oracleAmount,
+                })
+              }}
+            />
+            <OracleFormHelper
+              label={t('Paid to oracles')}
+              value={toDna(oracleAmount)}
+            />
+            <OracleFormHelper
+              label={t('Paid to owner')}
+              value={toDna(ownerAmount)}
+            />
           </OracleFormControl>
           <PrimaryButton
             type="submit"

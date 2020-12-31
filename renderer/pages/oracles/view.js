@@ -753,6 +753,7 @@ export default function ViewVotingPage() {
         from={identity.address}
         to={contractHash}
         available={identity.balance}
+        ownerFee={ownerFee}
         isLoading={current.matches(`mining.${VotingStatus.Funding}`)}
         onAddFund={({amount, from}) => {
           send('ADD_FUND', {amount, from})
