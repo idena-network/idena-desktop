@@ -10,7 +10,6 @@ import {
   Stat,
   StatNumber,
   StatLabel,
-  StatHelpText,
   useToast,
   CloseButton,
 } from '@chakra-ui/core'
@@ -626,15 +625,26 @@ export default function ViewVotingPage() {
                           {t('Voting deposit')}
                         </StatLabel>
                         <StatNumber fontSize="base" fontWeight={500}>
-                          {toDna(votingMinPayment)}
+                          <Tooltip
+                            label={
+                              Number(votingMinPayment) > 0
+                                ? t(
+                                    'Deposit will be refunded if your vote matches the majority'
+                                  )
+                                : t('Free voting')
+                            }
+                            placement="top"
+                          >
+                            <Text
+                              as="span"
+                              borderBottom="dotted 1px"
+                              borderBottomColor="muted"
+                              cursor="help"
+                            >
+                              {toDna(votingMinPayment)}
+                            </Text>
+                          </Tooltip>
                         </StatNumber>
-                        <StatHelpText mt={1} color="muted" fontSize="small">
-                          {Number(votingMinPayment) > 0
-                            ? t(
-                                'Deposit will be refunded if your vote matches the majority'
-                              )
-                            : t('Free voting')}
-                        </StatHelpText>
                       </Stat>
                     )}
                     {!isClosed && (
