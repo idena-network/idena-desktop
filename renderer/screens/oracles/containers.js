@@ -449,11 +449,11 @@ export function VoteDrawer({
           />
           <OracleFormHelperSmall
             label={t('Start counting')}
-            value={finishDate}
+            value={new Date(finishDate).toLocaleString()}
           />
           <OracleFormHelperSmall
             label={t('End counting')}
-            value={finishCountingDate}
+            value={new Date(finishCountingDate).toLocaleString()}
           />
         </Stack>
         <OracleFormHelperText mt={0}>
