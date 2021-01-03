@@ -269,7 +269,7 @@ export function VotingCard({votingRef, ...props}) {
             VotingStatus.Counting
           ) && (
             <PrimaryButton onClick={() => router.push(viewHref)}>
-              {t('Open')}
+              {t('View')}
             </PrimaryButton>
           )}
         </Stack>
