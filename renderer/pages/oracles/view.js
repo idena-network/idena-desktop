@@ -753,7 +753,7 @@ export default function ViewVotingPage() {
       <ProlongDrawer
         isOpen={eitherState(
           current,
-          `idle.${VotingStatus.Counting}.prolong`,
+          'prolong',
           `mining.${VotingStatus.Prolonging}`
         )}
         onClose={() => {

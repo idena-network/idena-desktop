@@ -980,7 +980,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
                 idle: {
                   on: {
                     FINISH: 'finish',
-                    REVIEW_PROLONG_VOTING: 'prolong',
                     TERMINATE: 'terminate',
                   },
                 },
@@ -989,14 +988,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
                     FINISH: {
                       target: `#viewVoting.mining.${VotingStatus.Finishing}`,
                       actions: ['setFinishing', 'persist'],
-                    },
-                  },
-                },
-                prolong: {
-                  on: {
-                    PROLONG_VOTING: {
-                      target: `#viewVoting.mining.${VotingStatus.Prolonging}`,
-                      actions: ['setProlonging', 'persist'],
                     },
                   },
                 },
@@ -1062,6 +1053,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
             ERROR: {
               actions: ['onError'],
             },
+            REVIEW_PROLONG_VOTING: 'prolong',
           },
         },
         review: {
@@ -1078,6 +1070,15 @@ export const createViewVotingMachine = (id, epoch, address) =>
             ADD_FUND: {
               target: `mining.${VotingStatus.Funding}`,
               actions: ['applyFundingAmount', 'persist'],
+            },
+            CANCEL: 'idle',
+          },
+        },
+        prolong: {
+          on: {
+            PROLONG_VOTING: {
+              target: `#viewVoting.mining.${VotingStatus.Prolonging}`,
+              actions: ['setProlonging', 'persist'],
             },
             CANCEL: 'idle',
           },
