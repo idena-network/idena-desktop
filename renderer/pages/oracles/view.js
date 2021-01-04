@@ -373,7 +373,12 @@ export default function ViewVotingPage() {
                           </PrimaryButton>
                         )}
 
-                        {eitherIdleState(VotingStatus.Counting) &&
+                        {eitherIdleState(
+                          VotingStatus.Open,
+                          VotingStatus.Voting,
+                          VotingStatus.Voted,
+                          VotingStatus.Counting
+                        ) &&
                           canProlong && (
                             <PrimaryButton
                               onClick={() => send('REVIEW_PROLONG_VOTING')}
@@ -748,7 +753,7 @@ export default function ViewVotingPage() {
       <ProlongDrawer
         isOpen={eitherState(
           current,
-          `idle.${VotingStatus.Counting}.prolong`,
+          'prolong',
           `mining.${VotingStatus.Prolonging}`
         )}
         onClose={() => {
