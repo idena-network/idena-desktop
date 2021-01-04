@@ -33,7 +33,10 @@ import Avatar from './avatar'
 import {Tooltip} from './tooltip'
 import {useNotificationDispatch} from '../providers/notification-context'
 import {Dialog, DialogBody, DialogFooter} from './components'
-import {viewVotingHref} from '../../screens/oracles/utils'
+import {
+  areSameCaseInsensitive,
+  viewVotingHref,
+} from '../../screens/oracles/utils'
 
 export function DnaLinkHandler({children}) {
   const router = useRouter()
@@ -65,10 +68,12 @@ export function DnaLinkHandler({children}) {
     }
   }, [])
 
-  if (isValidUrl(dnaUrl)) {
+  if (validDnaUrl(dnaUrl) && new URL(dnaUrl).pathname.includes('vote')) {
     const {address} = parseQuery(dnaUrl)
-    router.push(viewVotingHref(address))
-    return null
+    if (!areSameCaseInsensitive(router.asPath, viewVotingHref(address))) {
+      router.push(viewVotingHref(address))
+      return null
+    }
   }
 
   return validDnaUrl(dnaUrl) &&
