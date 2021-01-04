@@ -530,3 +530,6 @@ export function mapVotingStatus(status) {
 export function minOracleRewardFromEstimates(data) {
   return Number(data.find(({type}) => type === 'min')?.amount)
 }
+
+export const effectiveBalance = ({balance, ownerFee}) =>
+  balance * (1 - (ownerFee || 0) / 100)

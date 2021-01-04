@@ -10,7 +10,6 @@ import {
   Stat,
   StatNumber,
   StatLabel,
-  StatHelpText,
   useToast,
   CloseButton,
 } from '@chakra-ui/core'
@@ -59,6 +58,7 @@ import {VotingStatus} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {
   areSameCaseInsensitive,
+  effectiveBalance,
   hasQuorum,
   hasWinner,
   humanError,
@@ -143,6 +143,7 @@ export default function ViewVotingPage() {
     totalReward,
     committeeEpoch,
     estimatedOracleReward,
+    estimatedMaxOracleReward = estimatedOracleReward,
     isOracle,
     estimatedTerminationTime,
     minOracleReward,
@@ -602,7 +603,9 @@ export default function ViewVotingPage() {
                         </Stack>
                       </StatLabel>
                       <StatNumber fontSize="base" fontWeight={500}>
-                        {toDna(contractBalance)}
+                        {toDna(
+                          effectiveBalance({balance: contractBalance, ownerFee})
+                        )}
                       </StatNumber>
                       <Box mt={1}>
                         <IconButton2
@@ -620,31 +623,76 @@ export default function ViewVotingPage() {
                     {!isClosed && (
                       <Stat>
                         <StatLabel color="muted" fontSize="md">
-                          {t('Voting deposit')}
+                          <Tooltip
+                            label={
+                              Number(votingMinPayment) > 0
+                                ? t(
+                                    'Deposit will be refunded if your vote matches the majority'
+                                  )
+                                : t('Free voting')
+                            }
+                            placement="top"
+                          >
+                            <Text
+                              as="span"
+                              borderBottom="dotted 1px"
+                              borderBottomColor="muted"
+                              cursor="help"
+                            >
+                              {t('Voting deposit')}
+                            </Text>
+                          </Tooltip>
                         </StatLabel>
                         <StatNumber fontSize="base" fontWeight={500}>
                           {toDna(votingMinPayment)}
                         </StatNumber>
-                        <StatHelpText mt={1} color="muted" fontSize="small">
-                          {Number(votingMinPayment) > 0
-                            ? t(
-                                'Deposit will be refunded if your vote matches the majority'
-                              )
-                            : t('Free voting')}
-                        </StatHelpText>
                       </Stat>
                     )}
                     {!isClosed && (
-                      <AsideStat
-                        label={t('Your reward')}
-                        value={toDna(estimatedOracleReward)}
-                      />
+                      <Stat>
+                        <StatLabel color="muted" fontSize="md">
+                          <Tooltip
+                            label={t('Including your Voting deposit')}
+                            placement="top"
+                          >
+                            <Text
+                              as="span"
+                              borderBottom="dotted 1px"
+                              borderBottomColor="muted"
+                              cursor="help"
+                            >
+                              {t('Your min reward')}
+                            </Text>
+                          </Tooltip>
+                        </StatLabel>
+                        <StatNumber fontSize="base" fontWeight={500}>
+                          {toDna(estimatedOracleReward)}
+                        </StatNumber>
+                      </Stat>
                     )}
-                    {ownerFee && (
-                      <AsideStat
-                        label={t('Owner fee')}
-                        value={toPercent(ownerFee / 100)}
-                      />
+                    {!isClosed && (
+                      <Stat>
+                        <StatLabel color="muted" fontSize="md">
+                          <Tooltip
+                            label={t(
+                              `Including a share of minority voters' deposit`
+                            )}
+                            placement="top"
+                          >
+                            <Text
+                              as="span"
+                              borderBottom="dotted 1px"
+                              borderBottomColor="muted"
+                              cursor="help"
+                            >
+                              {t('Your max reward')}
+                            </Text>
+                          </Tooltip>
+                        </StatLabel>
+                        <StatNumber fontSize="base" fontWeight={500}>
+                          {toDna(estimatedMaxOracleReward)}
+                        </StatNumber>
+                      </Stat>
                     )}
                     <AsideStat
                       label={t('Committee size')}
@@ -705,6 +753,7 @@ export default function ViewVotingPage() {
         from={identity.address}
         to={contractHash}
         available={identity.balance}
+        ownerFee={ownerFee}
         isLoading={current.matches(`mining.${VotingStatus.Funding}`)}
         onAddFund={({amount, from}) => {
           send('ADD_FUND', {amount, from})

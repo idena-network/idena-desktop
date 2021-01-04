@@ -509,6 +509,7 @@ function NewVotingPage() {
           minStake={votingMinStake(feePerGas)}
           votingDuration={votingDuration}
           publicVotingDuration={publicVotingDuration}
+          ownerFee={ownerFee}
           isLoading={eitherState(
             current,
             'publishing.deploy',

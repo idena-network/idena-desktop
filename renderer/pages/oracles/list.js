@@ -132,8 +132,7 @@ function VotingListPage() {
                         ? t(`No votings for you 🤷‍♂️`)
                         : t(`There are no votings yet.`)}
                     </Text>
-
-                    <Box>
+                    <Box alignSelf="center">
                       <NextLink href="/oracles/new">
                         <OutlineButton>{t('Create new voting')}</OutlineButton>
                       </NextLink>

@@ -29,6 +29,7 @@ import {
   PopoverArrow,
   PopoverHeader,
   PopoverBody,
+  FormControl,
 } from '@chakra-ui/core'
 import dayjs from 'dayjs'
 import {
@@ -43,6 +44,7 @@ import {
   Drawer,
   DrawerBody,
   DrawerHeader,
+  FormLabel,
   Input,
   Tooltip,
 } from '../../shared/components/components'
@@ -81,6 +83,7 @@ import {
   isAllowedToTerminate,
   hasQuorum,
   mapVotingStatus,
+  effectiveBalance,
 } from './utils'
 
 export function VotingCard({votingRef, ...props}) {
@@ -117,6 +120,7 @@ export function VotingCard({votingRef, ...props}) {
     isOracle,
     totalReward,
     finishCountingDate,
+    ownerFee,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -220,7 +224,9 @@ export function VotingCard({votingRef, ...props}) {
         <Icon name="star" size={5} color="white" />
         <Text fontWeight={500}>
           {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
-          {toDna(isClosed ? totalReward : balance)}
+          {toDna(
+            isClosed ? totalReward : effectiveBalance({balance, ownerFee})
+          )}
         </Text>
         {!isClosed && (
           <Text color="orange.500">
@@ -363,6 +369,7 @@ export function AddFundDrawer({
   from,
   to,
   available,
+  ownerFee,
   isLoading,
   onAddFund,
   ...props
@@ -370,6 +377,11 @@ export function AddFundDrawer({
   const {t, i18n} = useTranslation()
 
   const toDna = toLocaleDna(i18n.language)
+
+  const [{oracleAmount, ownerAmount}, setAmount] = React.useState({
+    oracleAmount: 0,
+    ownerAmount: 0,
+  })
 
   return (
     <Drawer {...props}>
@@ -391,7 +403,30 @@ export function AddFundDrawer({
             <Input isDisabled value={to} />
           </OracleFormControl>
           <OracleFormControl label={t('Amount')}>
-            <DnaInput name="amountInput" />
+            <DnaInput
+              name="amountInput"
+              onChange={e => {
+                // eslint-disable-next-line no-shadow
+                const amount = Number(e.target.value)
+                // eslint-disable-next-line no-shadow
+                const oracleAmount = effectiveBalance({
+                  balance: amount,
+                  ownerFee,
+                })
+                setAmount({
+                  oracleAmount,
+                  ownerAmount: amount - oracleAmount,
+                })
+              }}
+            />
+            <OracleFormHelper
+              label={t('Paid to oracles')}
+              value={toDna(oracleAmount)}
+            />
+            <OracleFormHelper
+              label={t('Paid to owner')}
+              value={toDna(ownerAmount)}
+            />
           </OracleFormControl>
           <PrimaryButton
             type="submit"
@@ -482,6 +517,7 @@ export function ReviewVotingDrawer({
   available,
   minBalance,
   minStake,
+  ownerFee,
   isLoading,
   votingDuration,
   publicVotingDuration,
@@ -489,6 +525,13 @@ export function ReviewVotingDrawer({
   ...props
 }) {
   const {t, i18n} = useTranslation()
+
+  const oracleAmount = effectiveBalance({
+    balance: minBalance,
+    ownerFee,
+  })
+
+  const toDna = toLocaleDna(i18n.language)
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
@@ -514,20 +557,52 @@ export function ReviewVotingDrawer({
             value={toLocaleDna(i18n.language)(available)}
           />
         </OracleFormControl>
-        <OracleFormControl label={t('Rewards')}>
+        <FormControl>
+          <FormLabel mb={2}>
+            <Tooltip
+              label={t(`Rewards will be paid to Oracles`)}
+              placement="top"
+              zIndex="tooltip"
+            >
+              <Text
+                borderBottom="dotted 1px"
+                borderBottomColor="muted"
+                cursor="help"
+              >
+                {t('Rewards')}
+              </Text>
+            </Tooltip>
+          </FormLabel>
           <DnaInput name="balanceInput" defaultValue={minBalance} isDisabled />
-          <OracleFormHelperText>
-            {t(`Rewards will be paid to Oracles`)}
-          </OracleFormHelperText>
-        </OracleFormControl>
-        <OracleFormControl label={t('Stake')}>
+          <OracleFormHelper
+            label={t('Paid to oracles')}
+            value={toDna(oracleAmount)}
+          />
+          <OracleFormHelper
+            label={t('Paid to owner')}
+            value={toDna(minBalance - oracleAmount)}
+          />
+        </FormControl>
+        <FormControl>
+          <FormLabel mb={2}>
+            <Tooltip
+              label={t(
+                '50% of the stake will be refunded to your address after termination'
+              )}
+              placement="top"
+              zIndex="tooltip"
+            >
+              <Text
+                borderBottom="dotted 1px"
+                borderBottomColor="muted"
+                cursor="help"
+              >
+                {t('Stake')}
+              </Text>
+            </Tooltip>
+          </FormLabel>
           <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
-          <OracleFormHelperText>
-            {t(
-              '50% of the stake will be refunded to your address after termination'
-            )}
-          </OracleFormHelperText>
-        </OracleFormControl>
+        </FormControl>
         <Box>
           <OracleFormHelper
             label={t('Secret voting')}
@@ -966,6 +1041,7 @@ export function LaunchDrawer({
   requiredBalance,
   available,
   from,
+  ownerFee,
   isLoading,
   onLaunch,
   ...props
@@ -973,6 +1049,11 @@ export function LaunchDrawer({
   const {t, i18n} = useTranslation()
 
   const dna = toLocaleDna(i18n.language)
+
+  const oracleAmount = effectiveBalance({
+    balance: requiredBalance - balance,
+    ownerFee,
+  })
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
@@ -1002,11 +1083,19 @@ export function LaunchDrawer({
           />
           <OracleFormHelper
             label={t('Minimum deposit required')}
-            value={requiredBalance}
+            value={dna(requiredBalance)}
           />
           <OracleFormHelper
             label={t('Current contract balance')}
-            value={balance}
+            value={dna(balance)}
+          />
+          <OracleFormHelper
+            label={t('Paid to oracles')}
+            value={dna(oracleAmount)}
+          />
+          <OracleFormHelper
+            label={t('Paid to owner')}
+            value={dna(requiredBalance - balance - oracleAmount)}
           />
         </OracleFormControl>
         )
