@@ -373,7 +373,12 @@ export default function ViewVotingPage() {
                           </PrimaryButton>
                         )}
 
-                        {eitherIdleState(VotingStatus.Counting) &&
+                        {eitherIdleState(
+                          VotingStatus.Open,
+                          VotingStatus.Voting,
+                          VotingStatus.Voted,
+                          VotingStatus.Counting
+                        ) &&
                           canProlong && (
                             <PrimaryButton
                               onClick={() => send('REVIEW_PROLONG_VOTING')}
