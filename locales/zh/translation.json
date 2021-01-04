@@ -530,5 +530,13 @@
   "Clear persisted votings.": "Clear persisted votings.",
   "Recommended in some scenarios, e.g. switching accounts.": "Recommended in some scenarios, e.g. switching accounts.",
   "Clear cache": "Clear cache",
-  "This vote is not available to you. Only validated identities randomly selected to the committee can vote.": "This vote is not available to you. Only validated identities randomly selected to the committee can vote."
+  "This vote is not available to you. Only validated identities randomly selected to the committee can vote.": "This vote is not available to you. Only validated identities randomly selected to the committee can vote.",
+  "There are no votings for you": "There are no votings for you",
+  "There are no votings for you because your status is not validated.": "There are no votings for you because your status is not validated.",
+  "Including your Voting deposit": "Including your Voting deposit",
+  "Your min reward": "Your min reward",
+  "Including a share of minority voters' deposit": "Including a share of minority voters' deposit",
+  "Your max reward": "Your max reward",
+  "Paid to oracles": "Paid to oracles",
+  "Paid to owner": "Paid to owner"
 }
