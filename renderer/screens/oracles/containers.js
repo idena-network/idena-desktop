@@ -786,17 +786,14 @@ export function VotingDurationInput({
   return (
     <PresetFormControl tooltip={tooltip} {...props}>
       <PresetFormControlOptionList
-        value={String(value)}
+        value={value}
         // eslint-disable-next-line no-shadow
         onChange={value => {
           send('CHANGE', {id, value})
         }}
       >
         {presets.map(({label, value: presetValue}) => (
-          <PresetFormControlOption
-            key={presetValue}
-            value={String(presetValue)}
-          >
+          <PresetFormControlOption key={presetValue} value={presetValue}>
             {label}
           </PresetFormControlOption>
         ))}
@@ -808,7 +805,7 @@ export function VotingDurationInput({
           onChange={({target}) => {
             send('CHANGE', {
               id,
-              value: target.value,
+              value: Number(target.value),
             })
           }}
         />
