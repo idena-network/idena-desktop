@@ -253,7 +253,9 @@ export function VotingCard({votingRef, ...props}) {
               </PrimaryButton>
             ) : (
               <Tooltip
-                label={t('This vote is not available to you')}
+                label={t(
+                  'This vote is not available to you. Only validated identities randomly selected to the committee can vote.'
+                )}
                 placement="top"
               >
                 {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
