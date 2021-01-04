@@ -40,6 +40,7 @@ import {
 } from '../../screens/oracles/utils'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
+import {IdentityStatus} from '../../shared/types'
 
 function VotingListPage() {
   const {t} = useTranslation()
@@ -49,7 +50,7 @@ function VotingListPage() {
   const pageRef = React.useRef()
 
   const {offline, syncing} = useChainState()
-  const {address, isValidated} = useIdentityState()
+  const {address, state} = useIdentityState()
   const {epoch} = useEpochState() ?? {epoch: -1}
 
   const [current, send] = useMachine(votingListMachine, {
@@ -128,7 +129,11 @@ function VotingListPage() {
                       {/* eslint-disable-next-line no-nested-ternary */}
                       {filter === VotingListFilter.Own
                         ? t(`There are no votings yet.`)
-                        : isValidated
+                        : [
+                            IdentityStatus.Newbie,
+                            IdentityStatus.Verified,
+                            IdentityStatus.Human,
+                          ].includes(state)
                         ? t(`There are no votings for you`)
                         : t(
                             `There are no votings for you because your status is not validated.`
