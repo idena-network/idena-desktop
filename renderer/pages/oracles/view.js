@@ -58,7 +58,6 @@ import {VotingStatus} from '../../shared/types'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {
   areSameCaseInsensitive,
-  effectiveBalance,
   hasQuorum,
   hasWinner,
   humanError,
@@ -147,6 +146,7 @@ export default function ViewVotingPage() {
     isOracle,
     estimatedTerminationTime,
     minOracleReward,
+    estimatedTotalReward,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -603,9 +603,7 @@ export default function ViewVotingPage() {
                         </Stack>
                       </StatLabel>
                       <StatNumber fontSize="base" fontWeight={500}>
-                        {toDna(
-                          effectiveBalance({balance: contractBalance, ownerFee})
-                        )}
+                        {toDna(estimatedTotalReward)}
                       </StatNumber>
                       <Box mt={1}>
                         <IconButton2
