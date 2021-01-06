@@ -470,7 +470,6 @@ export const createNewVotingMachine = (epoch, address) =>
                     feePerGas,
                     minOracleReward,
                     oracleReward: minOracleReward,
-                    totalVotingFunds: minOracleReward * context.committeeSize,
                     oracleRewardsEstimates: estimates.map(({amount, type}) => ({
                       value: Number(amount),
                       label: type,
@@ -586,8 +585,6 @@ export const createNewVotingMachine = (epoch, address) =>
                         ...context,
                         minOracleReward,
                         oracleReward: minOracleReward,
-                        totalVotingFunds:
-                          minOracleReward * context.committeeSize,
                         oracleRewardsEstimates: data.map(({amount, type}) => ({
                           value: Number(amount),
                           label: type,

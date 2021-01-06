@@ -49,6 +49,7 @@ import {
   viewVotingHref,
   humanError,
   stripOptions,
+  rewardPerOracle,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -120,7 +121,6 @@ function NewVotingPage() {
     winnerThreshold = '66',
     feePerGas,
     oracleReward,
-    totalVotingFunds = oracleReward * committeeSize,
     isWholeNetwork,
     oracleRewardsEstimates,
     ownerFee = 0,
@@ -378,10 +378,6 @@ function NewVotingPage() {
                       id: 'oracleReward',
                       value,
                     })
-                    send('CHANGE', {
-                      id: 'totalVotingFunds',
-                      value: value * committeeSize,
-                    })
                   }}
                 >
                   {oracleRewardsEstimates.map(({label, value}) => (
@@ -393,28 +389,22 @@ function NewVotingPage() {
 
                 <PresetFormControlInputBox>
                   <DnaInput
-                    id="totalVotingFunds"
-                    value={totalVotingFunds}
+                    id="oracleReward"
+                    value={oracleReward * committeeSize}
                     min={minOracleReward * committeeSize}
-                    onChange={value => {
+                    onChange={({target: {id, value}}) => {
                       send('CHANGE', {
-                        id: 'oracleReward',
-                        value: value / committeeSize,
-                      })
-                      send('CHANGE', {
-                        id: 'totalVotingFunds',
-                        value,
+                        id,
+                        value: (value || 0) / Math.max(1, committeeSize),
                       })
                     }}
                   />
-                  <PresetFormControlHelperText>
+                  <NewOracleFormHelperText textAlign="right">
                     {t('Min reward per oracle: {{amount}}', {
-                      amount: dna(
-                        (oracleReward * (100 - Math.min(100, ownerFee))) / 100
-                      ),
+                      amount: dna(rewardPerOracle({oracleReward, ownerFee})),
                       nsSeparator: '!',
                     })}
-                  </PresetFormControlHelperText>
+                  </NewOracleFormHelperText>
                 </PresetFormControlInputBox>
               </PresetFormControl>
 
@@ -429,15 +419,15 @@ function NewVotingPage() {
                   onChange={handleChange}
                 />
 
-                <PresetFormControlHelperText>
+                <NewOracleFormHelperText textAlign="right">
                   {t('Paid to owner: {{amount}}', {
                     amount: dna(
                       (oracleReward * committeeSize * Math.min(100, ownerFee)) /
-                        100
+                        100 || 0
                     ),
                     nsSeparator: '!',
                   })}
-                </PresetFormControlHelperText>
+                </NewOracleFormHelperText>
               </VotingInlineFormControl>
 
               <NewVotingFormSubtitle
