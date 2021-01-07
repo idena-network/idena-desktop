@@ -39,7 +39,6 @@ import {
   PresetFormControlOptionList,
   PresetFormControlOption,
   PresetFormControlInputBox,
-  PresetFormControlHelperText,
 } from '../../screens/oracles/components'
 import {
   votingMinBalance,
@@ -401,7 +400,9 @@ function NewVotingPage() {
                   />
                   <NewOracleFormHelperText textAlign="right">
                     {t('Min reward per oracle: {{amount}}', {
-                      amount: dna(rewardPerOracle({oracleReward, ownerFee})),
+                      amount: dna(
+                        rewardPerOracle({fundPerOracle: oracleReward, ownerFee})
+                      ),
                       nsSeparator: '!',
                     })}
                   </NewOracleFormHelperText>

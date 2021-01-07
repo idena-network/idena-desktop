@@ -543,17 +543,5 @@
   "Including a share of minority voters' deposit": "Including a share of minority voters' deposit",
   "Your max reward": "Your max reward",
   "Paid to oracles": "Paid to oracles",
-  "Paid to owner": "Paid to owner",
-  "The number of randomly selected oracles allowed to vote": "The number of randomly selected oracles allowed to vote",
-  "Cost of voting": "Cost of voting",
-  "Total funds": "Total funds",
-  "Total funds locked during the voting and paid to oracles and owner afterwards": "Total funds locked during the voting and paid to oracles and owner afterwards",
-  "Min reward per oracle: {{amount}}": "Min reward per oracle: {{amount}}",
-  "% of the Total funds you receive": "% of the Total funds you receive",
-  "Paid to owner: {{amount}}": "Paid to owner: {{amount}}",
-  "and template \"Before\r\n          – Something happens – After\"": "and template \"Before\r\n          – Something happens – After\"",
-  "Submit the form to start mining. Your node has to be online\r\n              unless you deactivate your status. Otherwise penalties might be\r\n              charged after being offline more than 1 hour.": "Submit the form to start mining. Your node has to be online\r\n              unless you deactivate your status. Otherwise penalties might be\r\n              charged after being offline more than 1 hour.",
-  "Now solve bunch of flips to check its quality. The flip is qualified\r\n            if the majority, equals more than 2/3 participants, gives the same\r\n            answer.": "Now solve bunch of flips to check its quality. The flip is qualified\r\n            if the majority, equals more than 2/3 participants, gives the same\r\n            answer.",
-  "Sorry your answers won’t be submitted since the validation session is\r\n          over.": "Sorry your answers won’t be submitted since the validation session is\r\n          over.",
-  "Terminate your identity and withdraw the stake. Your identity status\r\n            will be reset to 'Not validated'.": "Terminate your identity and withdraw the stake. Your identity status\r\n            will be reset to 'Not validated'."
+  "Paid to owner": "Paid to owner"
 }
