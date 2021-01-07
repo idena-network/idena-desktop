@@ -115,6 +115,10 @@ export default function ViewVotingPage() {
     },
   })
 
+  React.useEffect(() => {
+    send('RELOAD', {id, epoch, address: identity.address})
+  }, [epoch, id, identity.address, send])
+
   const toDna = toLocaleDna(i18n.language)
 
   const {
@@ -351,6 +355,7 @@ export default function ViewVotingPage() {
                                   'This vote is not available to you. Only validated identities randomly selected to the committee can vote.'
                                 )}
                                 placement="top"
+                                zIndex="tooltip"
                               >
                                 {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
                                 <PrimaryButton as={Box} isDisabled>

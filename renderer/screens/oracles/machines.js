@@ -886,6 +886,17 @@ export const createViewVotingMachine = (id, epoch, address) =>
         address,
         balanceUpdates: [],
       },
+      on: {
+        RELOAD: {
+          target: 'loading',
+          actions: [
+            assign((context, event) => ({
+              ...context,
+              ...event,
+            })),
+          ],
+        },
+      },
       initial: 'loading',
       states: {
         loading: {
