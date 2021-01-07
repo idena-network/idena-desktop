@@ -547,5 +547,12 @@
   "Including a share of minority voters' deposit": "Including a share of minority voters' deposit",
   "Your max reward": "Your max reward",
   "Paid to oracles": "Paid to oracles",
-  "Paid to owner": "Paid to owner"
+  "Paid to owner": "Paid to owner",
+  "The number of randomly selected oracles allowed to vote": "The number of randomly selected oracles allowed to vote",
+  "Cost of voting": "Cost of voting",
+  "Total funds": "Total funds",
+  "Total funds locked during the voting and paid to oracles and owner afterwards": "Total funds locked during the voting and paid to oracles and owner afterwards",
+  "Min reward per oracle: {{amount}}": "Min reward per oracle: {{amount}}",
+  "% of the Total funds you receive": "% of the Total funds you receive",
+  "Paid to owner: {{amount}}": "Paid to owner: {{amount}}"
 }

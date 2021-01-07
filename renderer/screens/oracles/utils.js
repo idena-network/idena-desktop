@@ -301,6 +301,10 @@ export function quorumVotesCount({quorum, committeeSize}) {
   return Math.ceil((committeeSize * quorum) / 100)
 }
 
+export function rewardPerOracle({fundPerOracle, ownerFee}) {
+  return (fundPerOracle * (100 - Math.min(100, ownerFee))) / 100 || 0
+}
+
 export function winnerVotesCount({winnerThreshold, votesCount}) {
   return Math.ceil((votesCount * winnerThreshold) / 100)
 }

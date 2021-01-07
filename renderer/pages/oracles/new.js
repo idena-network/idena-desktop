@@ -39,7 +39,6 @@ import {
   PresetFormControlOptionList,
   PresetFormControlOption,
   PresetFormControlInputBox,
-  PresetFormControlHelperText,
 } from '../../screens/oracles/components'
 import {
   votingMinBalance,
@@ -49,6 +48,7 @@ import {
   viewVotingHref,
   humanError,
   stripOptions,
+  rewardPerOracle,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -284,6 +284,9 @@ function NewVotingPage() {
                 htmlFor="committeeSize"
                 label={t('Committee size, oracles')}
                 isInvalid={committeeSize < 1}
+                tooltip={t(
+                  'The number of randomly selected oracles allowed to vote'
+                )}
                 mt={2}
               >
                 <Stack spacing={3} flex={1}>
@@ -357,9 +360,16 @@ function NewVotingPage() {
                 </Stack>
               </VotingInlineFormControl>
 
-              <NewVotingFormSubtitle>{t('Rewards')}</NewVotingFormSubtitle>
+              <NewVotingFormSubtitle>
+                {t('Cost of voting')}
+              </NewVotingFormSubtitle>
 
-              <PresetFormControl label={t('Min reward per oracle')}>
+              <PresetFormControl
+                label={t('Total funds')}
+                tooltip={t(
+                  'Total funds locked during the voting and paid to oracles and owner afterwards'
+                )}
+              >
                 <PresetFormControlOptionList
                   value={String(oracleReward)}
                   onChange={value => {
@@ -379,18 +389,47 @@ function NewVotingPage() {
                 <PresetFormControlInputBox>
                   <DnaInput
                     id="oracleReward"
-                    value={oracleReward}
-                    min={minOracleReward}
-                    onChange={handleChange}
+                    value={oracleReward * committeeSize}
+                    min={minOracleReward * committeeSize}
+                    onChange={({target: {id, value}}) => {
+                      send('CHANGE', {
+                        id,
+                        value: (value || 0) / Math.max(1, committeeSize),
+                      })
+                    }}
                   />
-                  <PresetFormControlHelperText>
-                    {t('Total oracles rewards: {{amount}}', {
-                      amount: dna(oracleReward * committeeSize),
+                  <NewOracleFormHelperText textAlign="right">
+                    {t('Min reward per oracle: {{amount}}', {
+                      amount: dna(
+                        rewardPerOracle({fundPerOracle: oracleReward, ownerFee})
+                      ),
                       nsSeparator: '!',
                     })}
-                  </PresetFormControlHelperText>
+                  </NewOracleFormHelperText>
                 </PresetFormControlInputBox>
               </PresetFormControl>
+
+              <VotingInlineFormControl
+                htmlFor="ownerFee"
+                label={t('Owner fee')}
+                tooltip={t('% of the Total funds you receive')}
+              >
+                <PercentInput
+                  id="ownerFee"
+                  value={ownerFee}
+                  onChange={handleChange}
+                />
+
+                <NewOracleFormHelperText textAlign="right">
+                  {t('Paid to owner: {{amount}}', {
+                    amount: dna(
+                      (oracleReward * committeeSize * Math.min(100, ownerFee)) /
+                        100 || 0
+                    ),
+                    nsSeparator: '!',
+                  })}
+                </NewOracleFormHelperText>
+              </VotingInlineFormControl>
 
               <NewVotingFormSubtitle
                 cursor="pointer"
@@ -459,18 +498,6 @@ function NewVotingPage() {
                       />
                     </PresetFormControlInputBox>
                   </PresetFormControl>
-
-                  <VotingInlineFormControl
-                    htmlFor="ownerFee"
-                    label={t('Owner fee')}
-                    tooltip={t('% of the Oracle rewards you receive')}
-                  >
-                    <PercentInput
-                      id="ownerFee"
-                      value={ownerFee}
-                      onChange={handleChange}
-                    />
-                  </VotingInlineFormControl>
                 </Stack>
               </Collapse>
             </Stack>
