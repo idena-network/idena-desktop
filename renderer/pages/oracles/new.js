@@ -323,6 +323,7 @@ function NewVotingPage() {
                   <PercentInput
                     id="quorum"
                     value={quorum}
+                    onKeyDown={e => /[+-.,]$/.test(e.key) && e.preventDefault()}
                     onChange={handleChange}
                   />
                   <NewOracleFormHelperText textAlign="right">
@@ -417,6 +418,7 @@ function NewVotingPage() {
                 <PercentInput
                   id="ownerFee"
                   value={ownerFee}
+                  onKeyDown={e => /[+-.,]$/.test(e.key) && e.preventDefault()}
                   onChange={handleChange}
                 />
 
