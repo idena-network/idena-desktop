@@ -136,7 +136,6 @@ export default function ViewVotingPage() {
     votes = [],
     voteProofsCount,
     votesCount,
-    actualVotesCount = votesCount || voteProofsCount,
     finishDate,
     finishCountingDate,
     selectedOption,
@@ -311,7 +310,7 @@ export default function ViewVotingPage() {
                         <Text color="muted" fontSize="sm">
                           {t('Voting results')}
                         </Text>
-                        {actualVotesCount ? (
+                        {votesCount ? (
                           <VotingResult votingService={service} spacing={3} />
                         ) : (
                           <Text
@@ -439,7 +438,8 @@ export default function ViewVotingPage() {
                             h={4}
                           />
                           <Text as="span">
-                            {t('{{count}} votes', {count: actualVotesCount})}
+                            {t('{{count}} votes', {count: votesCount})}{' '}
+                            {t('out of {{count}}', {count: voteProofsCount})}
                           </Text>
                         </Stack>
                       </Stack>

@@ -110,7 +110,6 @@ export function VotingCard({votingRef, ...props}) {
     votes = [],
     voteProofsCount,
     votesCount,
-    actualVotesCount = votesCount || voteProofsCount,
     prevStatus,
     votingMinPayment,
     winnerThreshold,
@@ -192,7 +191,7 @@ export function VotingCard({votingRef, ...props}) {
           <Text color="muted" fontSize="sm">
             {t('Results')}
           </Text>
-          {actualVotesCount ? (
+          {votesCount ? (
             <VotingResult votingService={votingRef} {...current.context} />
           ) : (
             // eslint-disable-next-line no-shadow
@@ -310,7 +309,8 @@ export function VotingCard({votingRef, ...props}) {
                 h={4}
               />
               <Text as="span">
-                {t('{{count}} votes', {count: actualVotesCount})}
+                {t('{{count}} votes', {count: votesCount})}{' '}
+                {t('out of {{count}}', {count: voteProofsCount})}
               </Text>
             </Stack>
           </Stack>
@@ -1027,7 +1027,10 @@ function VotingResultBar({
         </Text>
       </Stack>
       <Text fontWeight={500} textTransform="initial" zIndex={1}>
-        {toPercent(value / Number(votesCount))} ({value})
+        {votesCount === 0
+          ? toPercent(0)
+          : toPercent(value / Number(votesCount))}{' '}
+        ({value})
       </Text>
     </Flex>
   )
