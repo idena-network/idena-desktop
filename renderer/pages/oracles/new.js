@@ -417,7 +417,9 @@ function NewVotingPage() {
                 <PercentInput
                   id="ownerFee"
                   value={ownerFee}
-                  onChange={handleChange}
+                  onChange={e => {
+                    if (e.target.checkValidity()) handleChange(e)
+                  }}
                 />
 
                 <NewOracleFormHelperText textAlign="right">
