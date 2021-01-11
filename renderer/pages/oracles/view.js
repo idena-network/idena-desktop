@@ -189,6 +189,8 @@ export default function ViewVotingPage() {
 
   const shouldTerminate = isAllowedToTerminate({estimatedTerminationTime})
 
+  const isMaxWinnerThreshold = winnerThreshold === 100
+
   return (
     <>
       <Layout syncing={syncing} offline={offline}>
@@ -287,9 +289,13 @@ export default function ViewVotingPage() {
                                 VotingStatus.Starting,
                                 VotingStatus.Voted
                               )}
-                              annotation={t('{{count}} min. votes required', {
-                                count: toPercent(winnerThreshold / 100),
-                              })}
+                              annotation={
+                                isMaxWinnerThreshold
+                                  ? null
+                                  : t('{{count}} min. votes required', {
+                                      count: toPercent(winnerThreshold / 100),
+                                    })
+                              }
                             >
                               {value}
                             </VotingOption>
@@ -628,10 +634,13 @@ export default function ViewVotingPage() {
                         <StatLabel color="muted" fontSize="md">
                           <Tooltip
                             label={
+                              // eslint-disable-next-line no-nested-ternary
                               Number(votingMinPayment) > 0
-                                ? t(
-                                    'Deposit will be refunded if your vote matches the majority'
-                                  )
+                                ? isMaxWinnerThreshold
+                                  ? t('Deposit will be refunded')
+                                  : t(
+                                      'Deposit will be refunded if your vote matches the majority'
+                                    )
                                 : t('Free voting')
                             }
                             placement="top"
@@ -709,7 +718,11 @@ export default function ViewVotingPage() {
                     />
                     <AsideStat
                       label={t('Majority threshold')}
-                      value={toPercent(winnerThreshold / 100)}
+                      value={
+                        isMaxWinnerThreshold
+                          ? t('N/A')
+                          : toPercent(winnerThreshold / 100)
+                      }
                     />
                     {isClosed && (
                       <AsideStat
