@@ -53,6 +53,16 @@ export async function fetchVotings({
   return {result, continuationToken}
 }
 
+export function fetchVotingTodoCount({oracle}) {
+  return fetchVotings({
+    all: true,
+    own: true,
+    oracle,
+    limit: 10,
+    sortBy: 'timestamp',
+  })
+}
+
 export async function fetchOracleRewardsEstimates(committeeSize) {
   const {result, error} = await (
     await fetch(
