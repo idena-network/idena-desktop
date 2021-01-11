@@ -128,7 +128,7 @@ function NodeStatus() {
 
 function Nav() {
   const {t} = useTranslation()
-  const {nickname} = useIdentityState()
+  const {nickname, todoVotingCount} = useIdentityState()
   return (
     <nav>
       <ul
@@ -155,18 +155,15 @@ function Nav() {
           <Stack isInline align="center">
             <ChakraText as="span">{t('Oracle voting')}</ChakraText>
             <Badge
-              variantColor="green"
-              bg="green.020"
-              color="green.500"
-              fontSize={8}
-              fontWeight={700}
+              variantColor="blue"
+              bg="blue.020"
+              color="blue.500"
+              fontSize="sm"
               rounded={4}
-              letterSpacing={1.4}
-              lineHeight="taller"
-              mt="3px"
-              w={30}
+              minW={30}
             >
-              {t('New')}
+              {todoVotingCount}
+              {todoVotingCount > 10 && '+'}
             </Badge>
           </Stack>
         </NavItem>
