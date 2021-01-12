@@ -353,11 +353,9 @@ export function votingMinBalance({
   // eslint-disable-next-line no-shadow
   minOracleReward,
   // eslint-disable-next-line no-shadow
-  oracleReward,
   committeeSize,
 }) {
-  const rawBalance =
-    Math.max(Number(minOracleReward), Number(oracleReward)) * committeeSize
+  const rawBalance = Number(minOracleReward) * committeeSize
   return Math.ceil((rawBalance + Number.EPSILON) * 10 ** 4) / 10 ** 4
 }
 
@@ -425,9 +423,6 @@ export const humanError = (
     balance,
     // eslint-disable-next-line no-shadow
     minOracleReward,
-    estimatedOracleReward,
-    // eslint-disable-next-line no-shadow
-    oracleReward = estimatedOracleReward,
     committeeSize,
     votingMinPayment,
   },
@@ -447,7 +442,6 @@ export const humanError = (
     case 'contract balance is less than minimal oracles reward': {
       const requiredBalance = votingMinBalance({
         minOracleReward,
-        oracleReward,
         committeeSize,
       })
       return `Insufficient funds to start the voting. Minimum deposit is required: ${dna(

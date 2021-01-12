@@ -1165,12 +1165,7 @@ export function LaunchVotingDrawer({votingService}) {
 
   const [current, send] = useService(votingService)
 
-  const {
-    balance,
-    minOracleReward,
-    estimatedOracleReward,
-    committeeSize,
-  } = current.context
+  const {balance, minOracleReward, committeeSize, ownerFee} = current.context
 
   return (
     <LaunchDrawer
@@ -1185,9 +1180,9 @@ export function LaunchVotingDrawer({votingService}) {
       balance={Number(balance)}
       requiredBalance={votingMinBalance({
         minOracleReward,
-        oracleReward: estimatedOracleReward,
         committeeSize,
       })}
+      ownerFee={ownerFee}
       from={identity.address}
       available={identity.balance}
       isLoading={current.matches(`mining.${VotingStatus.Starting}`)}
