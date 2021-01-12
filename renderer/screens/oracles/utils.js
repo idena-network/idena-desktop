@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import {assign} from 'xstate'
 import {VotingStatus} from '../../shared/types'
-import {callRpc, toLocaleDna} from '../../shared/utils/utils'
+import {callRpc, roundToPrecision, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
 import {ContractRpcMode, VotingListFilter} from './types'
 
@@ -355,8 +355,7 @@ export function votingMinBalance({
   // eslint-disable-next-line no-shadow
   committeeSize,
 }) {
-  const rawBalance = Number(minOracleReward) * committeeSize
-  return Math.ceil((rawBalance + Number.EPSILON) * 10 ** 4) / 10 ** 4
+  return roundToPrecision(4, Number(minOracleReward) * committeeSize)
 }
 
 function dnaFeePerGas(value) {
@@ -530,4 +529,4 @@ export function minOracleRewardFromEstimates(data) {
 }
 
 export const effectiveBalance = ({balance, ownerFee}) =>
-  balance * (1 - (ownerFee || 0) / 100)
+  roundToPrecision(4, balance * (1 - (ownerFee || 0) / 100))
