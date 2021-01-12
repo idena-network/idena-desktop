@@ -296,8 +296,9 @@ function NewVotingPage() {
                     value={committeeSize}
                     min={1}
                     isDisabled={isWholeNetwork}
-                    onChange={({target: {id, value}}) => {
-                      send('CHANGE_COMMITTEE', {id, value})
+                    onChange={({target, target: {id, value}}) => {
+                      if (target.checkValidity())
+                        send('CHANGE_COMMITTEE', {id, value})
                     }}
                   />
                   <Checkbox
@@ -417,9 +418,7 @@ function NewVotingPage() {
                 <PercentInput
                   id="ownerFee"
                   value={ownerFee}
-                  onChange={e => {
-                    if (e.target.checkValidity()) handleChange(e)
-                  }}
+                  onChange={handleChange}
                 />
 
                 <NewOracleFormHelperText textAlign="right">
