@@ -3,7 +3,6 @@ import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
 import {fetchIdentity, killIdentity} from '../api'
 import useRpc from '../hooks/use-rpc'
-import {fetchTodoVotingCount} from '../../screens/oracles/utils'
 
 export const IdentityStatus = {
   Undefined: 'Undefined',
@@ -62,12 +61,8 @@ function IdentityProvider({children}) {
     async () => {
       async function fetchData() {
         try {
-          const nextIdentity = {
-            ...(await fetchIdentity()),
-            todoVotingCount: await fetchTodoVotingCount({
-              oracle: identity.address,
-            }),
-          }
+          const nextIdentity = await fetchIdentity()
+
           if (!deepEqual(identity, nextIdentity)) {
             const state =
               identity &&

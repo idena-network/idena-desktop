@@ -53,16 +53,19 @@ export async function fetchVotings({
   return {result, continuationToken}
 }
 
-export async function fetchTodoVotingCount({oracle}) {
-  return (
-    await fetchVotings({
-      all: true,
-      own: true,
-      oracle,
-      limit: 10,
-      sortBy: 'timestamp',
-    })
-  ).result
+export async function fetchLastOpenVotings({oracle, limit = 11}) {
+  const {result, error} = await fetchVotings({
+    all: false,
+    own: true,
+    oracle,
+    states: VotingStatus.Open,
+    limit,
+    sortBy: 'timestamp',
+  })
+
+  if (error) throw new Error(error.message)
+
+  return result
 }
 
 export async function fetchOracleRewardsEstimates(committeeSize) {

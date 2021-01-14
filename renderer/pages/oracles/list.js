@@ -41,6 +41,7 @@ import {
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {IdentityStatus} from '../../shared/types'
+import {useVotingNotification} from '../../shared/providers/voting-notification-context'
 
 function VotingListPage() {
   const {t} = useTranslation()
@@ -52,6 +53,8 @@ function VotingListPage() {
   const {offline, syncing} = useChainState()
   const {address, state} = useIdentityState()
   const {epoch} = useEpochState() ?? {epoch: -1}
+
+  const [, {resetLastVotingTimestamp}] = useVotingNotification()
 
   const [current, send] = useMachine(votingListMachine, {
     context: {epoch, address},
@@ -65,6 +68,7 @@ function VotingListPage() {
           ),
         })
       },
+      onResetLastVotingTimestamp: resetLastVotingTimestamp,
     },
   })
 

@@ -1,5 +1,5 @@
 import {Machine, assign, spawn} from 'xstate'
-import {log, send, sendParent} from 'xstate/lib/actions'
+import {choose, log, send, sendParent} from 'xstate/lib/actions'
 import {
   fetchVotings,
   createContractCaller,
@@ -22,6 +22,7 @@ import {
   fetchVoting,
   mapVoting,
   minOracleRewardFromEstimates,
+  fetchLastOpenVotings,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
@@ -82,7 +83,21 @@ export const votingListMachine = Machine(
       },
       loaded: {
         on: {
-          FILTER: {target: 'loading', actions: ['setFilter', 'persistFilter']},
+          FILTER: {
+            target: 'loading',
+            actions: [
+              'setFilter',
+              'persistFilter',
+              choose([
+                {
+                  actions: ['onResetLastVotingTimestamp'],
+                  cond: ({prevFilter}, {value}) =>
+                    prevFilter === VotingListFilter.Todo &&
+                    value !== VotingListFilter.Todo,
+                },
+              ]),
+            ],
+          },
           TOGGLE_SHOW_ALL: {
             target: 'loading',
             actions: ['toggleShowAll', 'persistFilter'],
@@ -184,6 +199,7 @@ export const votingListMachine = Machine(
         ...data,
       })),
       setFilter: assign({
+        prevFilter: ({filter}) => filter,
         filter: (_, {value}) => value,
         statuses: [],
         continuationToken: null,
@@ -237,12 +253,28 @@ export const votingListMachine = Machine(
 
         await db.batchPut(knownVotings)
 
+        if (filter === VotingListFilter.Todo) {
+          const [{createTime}] = (await fetchLastOpenVotings({
+            oracle: address,
+            limit: 1,
+          })) ?? [{createTime: new Date(0)}]
+
+          await global
+            .sub(requestDb(), 'votings')
+            .put('lastVotingTimestamp', createTime)
+        }
+
+        const lastVotingTimestamp = await global
+          .sub(requestDb(), 'votings')
+          .get('lastVotingTimestamp')
+
         return {
           votings: await Promise.all(
             knownVotings.map(async ({id, ...voting}) => ({
               ...(await db.load(id)),
               id,
               ...voting,
+              isNew: new Date(voting.createTime) > lastVotingTimestamp,
             }))
           ),
           continuationToken: nextContinuationToken,
