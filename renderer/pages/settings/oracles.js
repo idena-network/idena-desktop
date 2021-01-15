@@ -4,7 +4,7 @@ import {SettingsSection} from '../../screens/settings/components'
 import {PrimaryButton} from '../../shared/components/button'
 import {Toast} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {epochDb} from '../../shared/utils/db'
+import {epochDb, requestDb} from '../../shared/utils/db'
 import SettingsLayout from './layout'
 
 export default function OracleSettings() {
@@ -29,6 +29,7 @@ export default function OracleSettings() {
               <PrimaryButton
                 onClick={async () => {
                   await epochDb('votings', epochState.epoch).clear()
+                  await global.sub(requestDb(), 'votings').clear()
                   toast({
                     // eslint-disable-next-line react/display-name
                     render: () => <Toast title={t('Votings removed')} />,
