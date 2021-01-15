@@ -162,7 +162,7 @@ export function ActivateInviteForm() {
       onSubmit={async e => {
         e.preventDefault()
         try {
-          await activateInvite(code)
+          await activateInvite(code?.trim())
         } catch ({message}) {
           addError({
             title: message,
