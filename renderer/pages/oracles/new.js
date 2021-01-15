@@ -456,10 +456,11 @@ function NewVotingPage() {
                       'Period when secret votes are getting published and results are counted'
                     )}
                     presets={[
-                      durationPreset({hours: 1}),
-                      durationPreset({hours: 2}),
                       durationPreset({hours: 12}),
                       durationPreset({days: 1}),
+                      durationPreset({days: 2}),
+                      durationPreset({days: 5}),
+                      durationPreset({weeks: 1}),
                     ]}
                     service={service}
                   />
