@@ -92,7 +92,7 @@ function VotingListPage() {
                 display="flex"
                 alignItems="center"
                 onChange={value => {
-                  send('FILTER', {value})
+                  if (value) send('FILTER', {value})
                 }}
               >
                 <FilterOption value={VotingListFilter.Todo}>
