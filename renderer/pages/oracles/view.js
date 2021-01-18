@@ -775,9 +775,9 @@ export default function ViewVotingPage() {
         balance={contractBalance}
         requiredBalance={votingMinBalance({
           minOracleReward,
-          oracleReward: estimatedOracleReward,
           committeeSize,
         })}
+        ownerFee={ownerFee}
         from={identity.address}
         available={identity.balance}
         isLoading={current.matches(`mining.${VotingStatus.Starting}`)}

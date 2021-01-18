@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import {assign} from 'xstate'
 import {VotingStatus} from '../../shared/types'
-import {callRpc, toLocaleDna} from '../../shared/utils/utils'
+import {callRpc, roundToPrecision, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
 import {ContractRpcMode, VotingListFilter} from './types'
 
@@ -353,12 +353,9 @@ export function votingMinBalance({
   // eslint-disable-next-line no-shadow
   minOracleReward,
   // eslint-disable-next-line no-shadow
-  oracleReward,
   committeeSize,
 }) {
-  const rawBalance =
-    Math.max(Number(minOracleReward), Number(oracleReward)) * committeeSize
-  return Math.ceil((rawBalance + Number.EPSILON) * 10 ** 4) / 10 ** 4
+  return roundToPrecision(4, Number(minOracleReward) * committeeSize)
 }
 
 function dnaFeePerGas(value) {
@@ -425,9 +422,6 @@ export const humanError = (
     balance,
     // eslint-disable-next-line no-shadow
     minOracleReward,
-    estimatedOracleReward,
-    // eslint-disable-next-line no-shadow
-    oracleReward = estimatedOracleReward,
     committeeSize,
     votingMinPayment,
   },
@@ -447,7 +441,6 @@ export const humanError = (
     case 'contract balance is less than minimal oracles reward': {
       const requiredBalance = votingMinBalance({
         minOracleReward,
-        oracleReward,
         committeeSize,
       })
       return `Insufficient funds to start the voting. Minimum deposit is required: ${dna(
@@ -536,4 +529,4 @@ export function minOracleRewardFromEstimates(data) {
 }
 
 export const effectiveBalance = ({balance, ownerFee}) =>
-  balance * (1 - (ownerFee || 0) / 100)
+  roundToPrecision(4, balance * (1 - (ownerFee || 0) / 100))

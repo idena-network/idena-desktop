@@ -531,7 +531,6 @@ function NewVotingPage() {
           available={balance}
           minBalance={votingMinBalance({
             minOracleReward,
-            oracleReward,
             committeeSize,
           })}
           minStake={votingMinStake(feePerGas)}
