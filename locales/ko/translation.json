@@ -545,5 +545,6 @@
   "Total funds locked during the voting and paid to oracles and owner afterwards": "Total funds locked during the voting and paid to oracles and owner afterwards",
   "Min reward per oracle: {{amount}}": "Min reward per oracle: {{amount}}",
   "% of the Total funds you receive": "% of the Total funds you receive",
-  "Paid to owner: {{amount}}": "Paid to owner: {{amount}}"
+  "Paid to owner: {{amount}}": "Paid to owner: {{amount}}",
+  "out of {{count}}_0": "out of {{count}}"
 }
