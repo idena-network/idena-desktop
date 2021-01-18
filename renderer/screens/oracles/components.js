@@ -172,11 +172,19 @@ export function DnaInput(props) {
 }
 
 export function PercentInput(props) {
-  const {isDisabled} = props
+  const {isDisabled, onChange} = props
 
   return (
     <ChainedInputGroup>
-      <ChainedInput as={NumberInput} min={0} max={100} {...props} />
+      <ChainedInput
+        as={NumberInput}
+        min={0}
+        max={100}
+        onChange={e => {
+          if (e.target.checkValidity()) onChange(e)
+        }}
+        {...props}
+      />
       <ChainedInputAddon isDisabled={isDisabled}>%</ChainedInputAddon>
     </ChainedInputGroup>
   )
@@ -185,11 +193,19 @@ export function PercentInput(props) {
 export function BlockInput(props) {
   const {t} = useTranslation()
 
-  const {isDisabled} = props
+  const {isDisabled, onChange} = props
 
   return (
     <ChainedInputGroup>
-      <ChainedInput as={NumberInput} min={0} max={157000000} {...props} />
+      <ChainedInput
+        as={NumberInput}
+        min={0}
+        max={157000000}
+        onChange={e => {
+          if (e.target.checkValidity()) onChange(e)
+        }}
+        {...props}
+      />
       <ChainedInputAddon isDisabled={isDisabled}>
         {t('Blocks')}
       </ChainedInputAddon>
