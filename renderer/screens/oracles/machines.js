@@ -253,20 +253,27 @@ export const votingListMachine = Machine(
 
         await db.batchPut(knownVotings)
 
+        const votingDb = global.sub(requestDb(), 'votings')
+
+        const prevLastVotingTimestamp = await (async () => {
+          try {
+            return await votingDb.get('lastVotingTimestamp')
+          } catch (error) {
+            if (error.notFound) {
+              return new Date(0)
+            }
+          }
+        })()
+
         if (filter === VotingListFilter.Todo) {
           const [{createTime}] = (await fetchLastOpenVotings({
             oracle: address,
             limit: 1,
           })) ?? [{createTime: new Date(0)}]
 
-          await global
-            .sub(requestDb(), 'votings')
-            .put('lastVotingTimestamp', createTime)
+          await votingDb.put('lastVotingTimestamp', createTime)
+          await votingDb.put('prevLastVotingTimestamp', prevLastVotingTimestamp)
         }
-
-        const lastVotingTimestamp = await global
-          .sub(requestDb(), 'votings')
-          .get('lastVotingTimestamp')
 
         return {
           votings: await Promise.all(
@@ -274,7 +281,8 @@ export const votingListMachine = Machine(
               ...(await db.load(id)),
               id,
               ...voting,
-              isNew: new Date(voting.createTime) > lastVotingTimestamp,
+              isNew:
+                new Date(voting.createDate) > new Date(prevLastVotingTimestamp),
             }))
           ),
           continuationToken: nextContinuationToken,
