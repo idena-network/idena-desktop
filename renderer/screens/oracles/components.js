@@ -26,7 +26,6 @@ import {
   Input,
   HDivider,
   ChainedInputGroup,
-  ChainedInput,
   ChainedInputAddon,
   Tooltip,
 } from '../../shared/components/components'
@@ -165,24 +164,22 @@ export function DnaInput(props) {
 
   return (
     <ChainedInputGroup>
-      <ChainedInput as={NumberInput} min={0} {...props} />
+      <ChainedNumberInput min={0} {...props} />
       <ChainedInputAddon isDisabled={isDisabled}>iDNA</ChainedInputAddon>
     </ChainedInputGroup>
   )
 }
 
 export function PercentInput(props) {
-  const {isDisabled, onChange} = props
+  const {isDisabled} = props
 
   return (
     <ChainedInputGroup>
-      <ChainedInput
-        as={NumberInput}
+      <ChainedNumberInput
         min={0}
         max={100}
-        onChange={e => {
-          if (e.target.checkValidity()) onChange(e)
-        }}
+        step={1}
+        preventInvalidInput
         {...props}
       />
       <ChainedInputAddon isDisabled={isDisabled}>%</ChainedInputAddon>
@@ -193,17 +190,15 @@ export function PercentInput(props) {
 export function BlockInput(props) {
   const {t} = useTranslation()
 
-  const {isDisabled, onChange} = props
+  const {isDisabled} = props
 
   return (
     <ChainedInputGroup>
-      <ChainedInput
-        as={NumberInput}
+      <ChainedNumberInput
         min={0}
         max={157000000}
-        onChange={e => {
-          if (e.target.checkValidity()) onChange(e)
-        }}
+        step={1}
+        preventInvalidInput
         {...props}
       />
       <ChainedInputAddon isDisabled={isDisabled}>
@@ -216,6 +211,7 @@ export function BlockInput(props) {
 export function NumberInput({
   min,
   max = Number.MAX_VALUE,
+  preventInvalidInput = false,
   onChange,
   onClamp,
   ...props
@@ -238,7 +234,30 @@ export function NumberInput({
           if (onClamp) onClamp(clampedValue)
         }
       }}
-      onChange={onChange}
+      onChange={e => {
+        if (preventInvalidInput) {
+          if (e.target.checkValidity()) onChange(e)
+        } else onChange(e)
+      }}
+      {...props}
+    />
+  )
+}
+
+export function ChainedNumberInput(props) {
+  const {isDisabled, bg, _hover} = props
+
+  const borderRightColor = isDisabled ? 'gray.50' : bg
+
+  return (
+    <NumberInput
+      borderRightColor={borderRightColor}
+      borderTopRightRadius={0}
+      borderBottomRightRadius={0}
+      _hover={{
+        borderRightColor,
+        ..._hover,
+      }}
       {...props}
     />
   )
