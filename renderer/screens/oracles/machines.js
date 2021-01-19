@@ -282,6 +282,7 @@ export const votingListMachine = Machine(
               id,
               ...voting,
               isNew:
+                filter === VotingListFilter.Todo &&
                 new Date(voting.createDate) > new Date(prevLastVotingTimestamp),
             }))
           ),
