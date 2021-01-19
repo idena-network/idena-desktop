@@ -58,7 +58,7 @@ export async function fetchLastOpenVotings({oracle, limit = 11}) {
     all: false,
     own: true,
     oracle,
-    states: VotingStatus.Open,
+    'states[]': [VotingStatus.Open].join(','),
     limit,
     sortBy: 'timestamp',
   })
