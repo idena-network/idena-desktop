@@ -324,8 +324,9 @@ export function VotingCard({votingRef, ...props}) {
                 h={4}
               />
               <Text as="span">
-                {t('{{count}} votes', {count: votesCount})}{' '}
-                {t('out of {{count}}', {count: voteProofsCount})}
+                {t('{{count}} votes', {count: votesCount || voteProofsCount})}{' '}
+                {eitherIdleState(VotingStatus.Counting) &&
+                  t('out of {{count}}', {count: voteProofsCount})}
               </Text>
             </Stack>
           </Stack>
