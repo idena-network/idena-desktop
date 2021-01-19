@@ -55,8 +55,6 @@ export async function fetchVotings({
 
 export async function fetchLastOpenVotings({oracle, limit = 11}) {
   const {result, error} = await fetchVotings({
-    all: false,
-    own: true,
     oracle,
     'states[]': [VotingStatus.Open].join(','),
     limit,
