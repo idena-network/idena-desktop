@@ -49,9 +49,7 @@ import {callRpc} from '../utils/utils'
 export function DnaLinkHandler({children}) {
   const router = useRouter()
 
-  const [dnaUrl, setDnaUrl] = React.useState(
-    'dna://raw/v1?tx=0x0a370806103e181022145a278c6cc3f5bd0267a48a9f86c230c8f5259b4432080de0b6b3a7640000420f0a0d70726f6c6f6e67566f74696e671241a19ce0a687cb595e94f8cd2a8bf7126c385beea8c92487199a6d381778a3302d67d16bd9a321853d27c12117bfb252e8b4f29c166897bde95e32e89225ac7b5400'
-  )
+  const [dnaUrl, setDnaUrl] = React.useState()
 
   const {addError} = useNotificationDispatch()
 
