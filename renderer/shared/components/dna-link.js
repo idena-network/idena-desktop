@@ -363,7 +363,7 @@ export function DnaRawTxDialog({
 
   const {balance} = useIdentityState()
 
-  const {tx: rawTx} = parseQuery(url)
+  const {tx: rawTx, callback_url: callbackUrl} = parseQuery(url)
 
   const {amount, to} = new Transaction().fromHex(rawTx)
 
@@ -489,7 +489,14 @@ export function DnaRawTxDialog({
               return resolve()
             })
               .then(() => callRpc('bcn_sendRawTx', rawTx))
-              .then(onSendSuccess)
+              .then(hash => {
+                if (isValidUrl(callbackUrl)) {
+                  const txUrl = new URL(callbackUrl)
+                  txUrl.searchParams.append('tx', hash)
+                  global.openExternal(txUrl.href)
+                }
+                onSendSuccess(hash)
+              })
               .catch(({message}) => {
                 global.logger.error(message)
                 if (onSendError) onSendError(message)
