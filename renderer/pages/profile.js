@@ -1,5 +1,13 @@
 import React from 'react'
-import {Stack, Text, Icon, useDisclosure, useToast, Flex} from '@chakra-ui/core'
+import {
+  Stack,
+  Text,
+  Icon,
+  useDisclosure,
+  useToast,
+  Flex,
+  PopoverTrigger,
+} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
   useIdentityState,
@@ -38,6 +46,10 @@ import {persistItem} from '../shared/utils/persist'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {rem} from '../shared/theme'
 import {useChainState} from '../shared/providers/chain-context'
+import {
+  OnboardingPopover,
+  OnboardingPopoverContent,
+} from '../shared/components/onboarding'
 
 export default function ProfilePage() {
   const {
@@ -195,7 +207,33 @@ export default function ProfilePage() {
                   </AnnotatedUserStat>
                 )}
               </UserStatList>
-              <ActivateInviteForm />
+
+              <OnboardingPopover isOpen closeOnBlur={false} placement="top">
+                <PopoverTrigger>
+                  <ActivateInviteForm zIndex={2} />
+                </PopoverTrigger>
+                <OnboardingPopoverContent
+                  title={t('Enter invitation code')}
+                  zIndex={2}
+                >
+                  <Stack spacing={2}>
+                    <Text>
+                      {t(`New invitations can be provided by validated participants. Join the
+          official Idena public Telegram group and follow instructions in the
+          pinned message.`)}
+                    </Text>
+                    <IconButton2
+                      variant="unstyled"
+                      icon="send"
+                      onClick={() => {
+                        global.openExternal('https://t.me/IdenaNetworkPublic')
+                      }}
+                    >
+                      https://t.me/IdenaNetworkPublic
+                    </IconButton2>
+                  </Stack>
+                </OnboardingPopoverContent>
+              </OnboardingPopover>
             </Stack>
             <Stack spacing={6} w={rem(200)}>
               <Flex h={24}>

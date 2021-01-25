@@ -138,7 +138,7 @@ export function UserStatLabelTooltip(props) {
   return <Tooltip placement="top" zIndex="tooltip" {...props} />
 }
 
-export function ActivateInviteForm() {
+export function ActivateInviteForm(props) {
   const {t} = useTranslation()
 
   const {addError} = useNotificationDispatch()
@@ -159,6 +159,7 @@ export function ActivateInviteForm() {
   return (
     <Box
       as="form"
+      {...props}
       onSubmit={async e => {
         e.preventDefault()
         try {

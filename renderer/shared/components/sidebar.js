@@ -3,7 +3,12 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {Badge, Icon, Text as ChakraText} from '@chakra-ui/core'
+import {
+  Badge,
+  Box as ChakraBox,
+  Icon,
+  Text as ChakraText,
+} from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
@@ -18,9 +23,13 @@ import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
 import {Tooltip} from './tooltip'
 import {loadValidationState} from '../../screens/validation/utils'
-import {IdentityStatus, EpochPeriod} from '../types'
+import {IdentityStatus, EpochPeriod, OnboardingStep} from '../types'
 import {Logo} from '../../screens/app/components'
 import {useVotingNotification} from '../providers/voting-notification-context'
+import {
+  idleOnboardingStep,
+  useOnboarding,
+} from '../providers/onboarding-context'
 
 function Sidebar() {
   return (
@@ -248,10 +257,17 @@ function NavItem({href, icon, children}) {
 }
 
 function ActionPanel() {
+  const {t} = useTranslation()
+
   const {syncing} = useChainState()
   const identity = useIdentityState()
   const epoch = useEpochState()
-  const {t} = useTranslation()
+
+  const [currentOnboarding, {showCurrentTask}] = useOnboarding()
+
+  const shouldActivatingInvite = currentOnboarding.matches(
+    idleOnboardingStep(OnboardingStep.ActivateInvite)
+  )
 
   if (syncing || !epoch) {
     return null
@@ -271,13 +287,21 @@ function ActionPanel() {
       {currentPeriod !== EpochPeriod.None && (
         <Block title={t('Current period')}>{currentPeriod}</Block>
       )}
-      <Block title={t('My current task')}>
-        <CurrentTask
-          epoch={epoch.epoch}
-          period={currentPeriod}
-          identity={identity}
-        />
-      </Block>
+
+      <ChakraBox
+        roundedTop="md"
+        shadow={shouldActivatingInvite ? 'outline' : 'none'}
+        onClick={showCurrentTask}
+      >
+        <Block title={t('My current task')}>
+          <CurrentTask
+            epoch={epoch.epoch}
+            period={currentPeriod}
+            identity={identity}
+          />
+        </Block>
+      </ChakraBox>
+
       {currentPeriod === EpochPeriod.None && (
         <Block title={t('Next validation')}>
           {new Date(nextValidation).toLocaleString()}
