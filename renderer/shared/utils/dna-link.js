@@ -1,10 +1,9 @@
 import axios from 'axios'
-import {margin} from 'polished'
 import apiClient from '../api/api-client'
 import {sendTransaction} from '../api'
 import {bufferToHex} from './string'
-import {Box} from '../components'
-import theme, {rem} from '../theme'
+import messages from '../proto/models_pb'
+import {toBuffer, hexToUint8Array, toHexString, bufferToInt} from './buffers'
 
 export const DNA_LINK_VERSION = `v1`
 export const DNA_NONCE_PREFIX = 'signin-'
@@ -105,18 +104,78 @@ export async function sendDna({from, to, amount, comment}) {
   return result
 }
 
-// eslint-disable-next-line react/prop-types
-export function AlertText({textAlign = 'initial', ...props}) {
-  return (
-    <Box
-      color={theme.colors.danger}
-      style={{
-        fontWeight: theme.fontWeights.medium,
-        fontSize: rem(11),
-        ...margin(rem(12), 0, 0),
-        textAlign,
-      }}
-      {...props}
-    />
-  )
+export class Transaction {
+  constructor(nonce, epoch, type, to, amount, maxFee, tips, payload) {
+    this.nonce = nonce || 0
+    this.epoch = epoch || 0
+    this.type = type || 0
+    this.to = to
+    this.amount = amount || 0
+    this.maxFee = maxFee || 0
+    this.tips = tips || 0
+    this.payload = payload
+    this.signature = null
+  }
+
+  fromHex(hex) {
+    return this.fromBytes(hexToUint8Array(hex))
+  }
+
+  fromBytes(bytes) {
+    const protoTx = messages.ProtoTransaction.deserializeBinary(bytes)
+
+    const protoTxData = protoTx.getData()
+    this.nonce = protoTxData.getNonce()
+    this.epoch = protoTxData.getEpoch()
+    this.type = protoTxData.getType()
+    this.to = toHexString(protoTxData.getTo(), true)
+    this.amount = bufferToInt(protoTxData.getAmount())
+    this.maxFee = bufferToInt(protoTxData.getMaxfee())
+    this.tips = bufferToInt(protoTxData.getTips())
+    this.payload = protoTxData.getPayload()
+
+    this.signature = protoTx.getSignature()
+
+    return this
+  }
+
+  toBytes() {
+    const transaction = new messages.ProtoTransaction()
+    transaction.setData(this._createProtoTxData())
+    if (this.signature) {
+      transaction.setSignature(toBuffer(this.signature))
+    }
+    return Buffer.from(transaction.serializeBinary())
+  }
+
+  toHex() {
+    return this.toBytes().toString('hex')
+  }
+
+  _createProtoTxData() {
+    const data = new messages.ProtoTransaction.Data()
+    data
+      .setNonce(this.nonce)
+      .setEpoch(this.epoch)
+      .setType(this.type)
+
+    if (this.to) {
+      data.setTo(toBuffer(this.to))
+    }
+
+    if (this.amount) {
+      data.setAmount(toBuffer(this.amount))
+    }
+    if (this.maxFee) {
+      data.setMaxfee(toBuffer(this.maxFee))
+    }
+    if (this.amount) {
+      data.setTips(toBuffer(this.tips))
+    }
+    if (this.payload) {
+      data.setPayload(toBuffer(this.payload))
+    }
+
+    return data
+  }
 }
