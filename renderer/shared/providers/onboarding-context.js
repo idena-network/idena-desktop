@@ -1,8 +1,8 @@
 import {useMachine} from '@xstate/react'
 import React from 'react'
 import {Machine} from 'xstate'
-import {log} from 'xstate/lib/actions'
 import {IdentityStatus, OnboardingStep} from '../types'
+import {loadOnboardingState, persistOnboardingState} from '../utils/onboarding'
 import {useChainState} from './chain-context'
 import {useEpochState} from './epoch-context'
 import {useIdentityState} from './identity-context'
@@ -24,21 +24,30 @@ export function OnboardingProvider(props) {
           initial: 'idle',
           states: {
             idle: {
-              on: {SHOW: {target: 'showing', actions: [log()]}},
+              on: {SHOW: 'showing'},
             },
             showing: {},
           },
           on: {
             DISMISS: 'dismissed',
-            DONE: 'done',
           },
         },
-        done: {},
+        done: {
+          initial: 'salut',
+          states: {
+            salut: {
+              entry: ['onDone'],
+              after: {300: 'done'},
+            },
+            done: {},
+          },
+        },
         dismissed: {
           SHOW: 'active',
         },
       },
       on: {
+        DONE: '.done',
         NEXT: next,
       },
     },
@@ -90,10 +99,19 @@ export function OnboardingProvider(props) {
         },
       },
       {
-        services: {},
-        actions: {},
+        actions: {
+          onDone: () => {
+            alert('salut')
+          },
+        },
       }
-    )
+    ),
+    {
+      state: loadOnboardingState(),
+      logger: global.isDev
+        ? console.log
+        : (...args) => global.logger.debug(...args),
+    }
   )
 
   React.useEffect(() => {
@@ -105,6 +123,10 @@ export function OnboardingProvider(props) {
       send('START')
   }, [epoch, send, state, syncing])
 
+  React.useEffect(() => {
+    persistOnboardingState(current)
+  }, [current])
+
   return (
     <OnboardingStateContext.Provider value={current}>
       <OnboardingDispatchContext.Provider
@@ -112,12 +134,12 @@ export function OnboardingProvider(props) {
           showCurrentTask() {
             send('SHOW')
           },
-          dismissCurrentStep() {
+          dismiss() {
             send('DISMISS')
           },
-          finishOnboarding() {
+          done: React.useCallback(() => {
             send('DONE')
-          },
+          }, [send]),
         }}
         {...props}
       />
@@ -145,9 +167,6 @@ export function useOnboardingDispatch() {
   return context
 }
 
-export function useOnboarding() {
-  return [useOnboardingState(), useOnboardingDispatch()]
+export function useOnboarding(config) {
+  return [useOnboardingState(config), useOnboardingDispatch()]
 }
-
-export const idleOnboardingStep = step => `onboarding.${step}.active.idle`
-export const showingOnboardingStep = step => `onboarding.${step}.active.showing`

@@ -26,10 +26,8 @@ import {loadValidationState} from '../../screens/validation/utils'
 import {IdentityStatus, EpochPeriod, OnboardingStep} from '../types'
 import {Logo} from '../../screens/app/components'
 import {useVotingNotification} from '../providers/voting-notification-context'
-import {
-  idleOnboardingStep,
-  useOnboarding,
-} from '../providers/onboarding-context'
+import {useOnboarding} from '../providers/onboarding-context'
+import {activeOnboardingStep} from '../utils/onboarding'
 
 function Sidebar() {
   return (
@@ -265,8 +263,8 @@ function ActionPanel() {
 
   const [currentOnboarding, {showCurrentTask}] = useOnboarding()
 
-  const shouldActivatingInvite = currentOnboarding.matches(
-    idleOnboardingStep(OnboardingStep.ActivateInvite)
+  const shouldActivateInvite = currentOnboarding.matches(
+    activeOnboardingStep(OnboardingStep.ActivateInvite)
   )
 
   if (syncing || !epoch) {
@@ -290,7 +288,7 @@ function ActionPanel() {
 
       <ChakraBox
         roundedTop="md"
-        shadow={shouldActivatingInvite ? 'outline' : 'none'}
+        shadow={shouldActivateInvite ? 'outline' : 'none'}
         onClick={showCurrentTask}
       >
         <Block title={t('My current task')}>

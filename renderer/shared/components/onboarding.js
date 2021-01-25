@@ -16,21 +16,29 @@ import {useTranslation} from 'react-i18next'
 export function OnboardingPopover({children, ...props}) {
   return (
     <>
-      <Box
-        bg="xblack.080"
-        position="absolute"
-        top={0}
-        left={0}
-        bottom={0}
-        right={0}
-        zIndex={2}
-      />
+      {/* eslint-disable-next-line react/destructuring-assignment */}
+      {props.isOpen && (
+        <Box
+          bg="xblack.080"
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          zIndex={2}
+        />
+      )}
       <Popover {...props}>{children}</Popover>
     </>
   )
 }
 
-export function OnboardingPopoverContent({title, children, ...props}) {
+export function OnboardingPopoverContent({
+  title,
+  children,
+  onDismiss,
+  ...props
+}) {
   const {t} = useTranslation()
 
   return (
@@ -51,7 +59,7 @@ export function OnboardingPopoverContent({title, children, ...props}) {
           {children}
         </PopoverBody>
         <PopoverFooter border="none" p={0} display="inline-flex">
-          <Button variant="unstyled" ml="auto">
+          <Button variant="unstyled" ml="auto" onClick={onDismiss}>
             {t('Okay, got it')}
           </Button>
         </PopoverFooter>

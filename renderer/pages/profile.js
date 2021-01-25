@@ -32,7 +32,7 @@ import {
 import {IconButton2} from '../shared/components/button'
 import Layout from '../shared/components/layout'
 import {IconLink} from '../shared/components/link'
-import {IdentityStatus} from '../shared/types'
+import {IdentityStatus, OnboardingStep} from '../shared/types'
 import {toPercent, toLocaleDna, callRpc} from '../shared/utils/utils'
 import {ExternalLink, Toast} from '../shared/components/components'
 import KillForm, {
@@ -50,6 +50,8 @@ import {
   OnboardingPopover,
   OnboardingPopoverContent,
 } from '../shared/components/onboarding'
+import {useOnboarding} from '../shared/providers/onboarding-context'
+import {activeShowingOnboardingStep} from '../shared/utils/onboarding'
 
 export default function ProfilePage() {
   const {
@@ -104,6 +106,12 @@ export default function ProfilePage() {
       }
     }
   }, [epoch])
+
+  const [currentOnboarding, {done, dismiss}] = useOnboarding()
+
+  const isShowingActivateInvitePopover = currentOnboarding.matches(
+    activeShowingOnboardingStep(OnboardingStep.ActivateInvite)
+  )
 
   const toDna = toLocaleDna(language)
 
@@ -208,13 +216,18 @@ export default function ProfilePage() {
                 )}
               </UserStatList>
 
-              <OnboardingPopover isOpen closeOnBlur={false} placement="top">
+              <OnboardingPopover
+                isOpen={isShowingActivateInvitePopover}
+                closeOnBlur={false}
+                placement="top-start"
+              >
                 <PopoverTrigger>
-                  <ActivateInviteForm zIndex={2} />
+                  <ActivateInviteForm zIndex={2} onActivated={done} />
                 </PopoverTrigger>
                 <OnboardingPopoverContent
                   title={t('Enter invitation code')}
                   zIndex={2}
+                  onDismiss={dismiss}
                 >
                   <Stack spacing={2}>
                     <Text>

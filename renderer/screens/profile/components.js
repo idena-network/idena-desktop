@@ -138,7 +138,10 @@ export function UserStatLabelTooltip(props) {
   return <Tooltip placement="top" zIndex="tooltip" {...props} />
 }
 
-export function ActivateInviteForm(props) {
+export const ActivateInviteForm = React.forwardRef(function ActivateInviteForm(
+  {onActivated = () => {}, ...props},
+  ref
+) {
   const {t} = useTranslation()
 
   const {addError} = useNotificationDispatch()
@@ -150,6 +153,12 @@ export function ActivateInviteForm(props) {
 
   const [code, setCode] = React.useState()
 
+  React.useEffect(() => {
+    if (status === IdentityStatus.Candidate) {
+      onActivated()
+    }
+  }, [activationTx, onActivated, status])
+
   if (!canActivateInvite) {
     return null
   }
@@ -158,6 +167,7 @@ export function ActivateInviteForm(props) {
 
   return (
     <Box
+      ref={ref}
       as="form"
       {...props}
       onSubmit={async e => {
@@ -228,7 +238,7 @@ export function ActivateInviteForm(props) {
       </Stack>
     </Box>
   )
-}
+})
 
 export function SpoilInviteDrawer({children, ...props}) {
   const {t} = useTranslation()
