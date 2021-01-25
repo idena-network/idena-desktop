@@ -257,6 +257,8 @@ function NavItem({href, icon, children}) {
 function ActionPanel() {
   const {t} = useTranslation()
 
+  const router = useRouter()
+
   const {syncing} = useChainState()
   const identity = useIdentityState()
   const epoch = useEpochState()
@@ -289,7 +291,10 @@ function ActionPanel() {
       <ChakraBox
         roundedTop="md"
         shadow={shouldActivateInvite ? 'outline' : 'none'}
-        onClick={showCurrentTask}
+        onClick={() => {
+          if (!router.pathname.endsWith('/profile')) router.push('/profile')
+          showCurrentTask()
+        }}
       >
         <Block title={t('My current task')}>
           <CurrentTask
