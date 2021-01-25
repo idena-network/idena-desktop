@@ -7,6 +7,8 @@ export const activeIdleOnboardingStep = step =>
 export const activeShowingOnboardingStep = step =>
   `${activeOnboardingStep(step)}.showing`
 
+export const doneOnboardingStep = step => `onboarding.${step}.done`
+
 export function loadOnboardingState() {
   const stateDefinition = loadPersistentState('onboarding')
   return stateDefinition && State.create(stateDefinition)

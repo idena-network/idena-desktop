@@ -8,6 +8,7 @@ import {
   Flex,
   PopoverTrigger,
 } from '@chakra-ui/core'
+import Confetti from 'react-dom-confetti'
 import {useTranslation} from 'react-i18next'
 import {
   useIdentityState,
@@ -33,7 +34,12 @@ import {IconButton2} from '../shared/components/button'
 import Layout from '../shared/components/layout'
 import {IconLink} from '../shared/components/link'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
-import {toPercent, toLocaleDna, callRpc} from '../shared/utils/utils'
+import {
+  toPercent,
+  toLocaleDna,
+  callRpc,
+  eitherState,
+} from '../shared/utils/utils'
 import {ExternalLink, Toast} from '../shared/components/components'
 import KillForm, {
   KillIdentityDrawer,
@@ -51,7 +57,10 @@ import {
   OnboardingPopoverContent,
 } from '../shared/components/onboarding'
 import {useOnboarding} from '../shared/providers/onboarding-context'
-import {activeShowingOnboardingStep} from '../shared/utils/onboarding'
+import {
+  doneOnboardingStep,
+  activeShowingOnboardingStep,
+} from '../shared/utils/onboarding'
 
 export default function ProfilePage() {
   const {
@@ -123,6 +132,35 @@ export default function ProfilePage() {
           <Stack isInline spacing={10}>
             <Stack spacing={6} w="md">
               <UserInlineCard address={address} status={status} h={24} />
+
+              <Confetti
+                active={eitherState(
+                  currentOnboarding,
+                  ...Object.keys(OnboardingStep).map(
+                    step => `${doneOnboardingStep(OnboardingStep[step])}.salut`
+                  )
+                )}
+                config={{
+                  angle: 90,
+                  spread: 360,
+                  startVelocity: 40,
+                  elementCount: 70,
+                  dragFriction: 0.12,
+                  duration: 3000,
+                  stagger: 3,
+                  width: '10px',
+                  height: '10px',
+                  perspective: '500px',
+                  colors: [
+                    '#a864fd',
+                    '#29cdff',
+                    '#78ff44',
+                    '#ff718d',
+                    '#fdff6a',
+                  ],
+                }}
+              />
+
               <UserStatList>
                 <UserStat>
                   <UserStatLabel>{t('Address')}</UserStatLabel>

@@ -36,7 +36,6 @@ export function OnboardingProvider(props) {
           initial: 'salut',
           states: {
             salut: {
-              entry: ['onDone'],
               after: {300: 'done'},
             },
             done: {},
@@ -54,58 +53,49 @@ export function OnboardingProvider(props) {
   })
 
   const [current, send] = useMachine(
-    Machine(
-      {
-        id: 'onboarding',
-        context: {
-          currentStep: OnboardingStep.ActivateInvite,
-        },
-        initial: 'idle',
-        states: {
-          idle: {
-            on: {
-              START: 'onboarding',
-            },
-          },
-          onboarding: {
-            initial: OnboardingStep.ActivateInvite,
-            states: {
-              ...createStep({
-                current: OnboardingStep.ActivateInvite,
-                next: OnboardingStep.Validate,
-              }),
-              ...createStep({
-                current: OnboardingStep.Validate,
-                next: OnboardingStep.FlipLottery,
-              }),
-              ...createStep({
-                current: OnboardingStep.FlipLottery,
-                next: OnboardingStep.WaitingValidationResults,
-              }),
-              ...createStep({
-                current: OnboardingStep.WaitingValidationResults,
-                next: OnboardingStep.CreateFlips,
-              }),
-              ...createStep({
-                current: OnboardingStep.CreateFlips,
-                next: '#onboarding.done',
-              }),
-            },
-            on: {
-              FINISH: 'done',
-            },
-          },
-          done: {},
-        },
+    Machine({
+      id: 'onboarding',
+      context: {
+        currentStep: OnboardingStep.ActivateInvite,
       },
-      {
-        actions: {
-          onDone: () => {
-            alert('salut')
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            START: 'onboarding',
           },
         },
-      }
-    ),
+        onboarding: {
+          initial: OnboardingStep.ActivateInvite,
+          states: {
+            ...createStep({
+              current: OnboardingStep.ActivateInvite,
+              next: OnboardingStep.Validate,
+            }),
+            ...createStep({
+              current: OnboardingStep.Validate,
+              next: OnboardingStep.FlipLottery,
+            }),
+            ...createStep({
+              current: OnboardingStep.FlipLottery,
+              next: OnboardingStep.WaitingValidationResults,
+            }),
+            ...createStep({
+              current: OnboardingStep.WaitingValidationResults,
+              next: OnboardingStep.CreateFlips,
+            }),
+            ...createStep({
+              current: OnboardingStep.CreateFlips,
+              next: '#onboarding.done',
+            }),
+          },
+          on: {
+            FINISH: 'done',
+          },
+        },
+        done: {},
+      },
+    }),
     {
       state: loadOnboardingState(),
       logger: global.isDev
