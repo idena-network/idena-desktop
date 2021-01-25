@@ -39,6 +39,7 @@ import {
   PresetFormControlOptionList,
   PresetFormControlOption,
   PresetFormControlInputBox,
+  NumberInput,
 } from '../../screens/oracles/components'
 import {
   votingMinBalance,
@@ -290,15 +291,15 @@ function NewVotingPage() {
                 mt={2}
               >
                 <Stack spacing={3} flex={1}>
-                  <Input
+                  <NumberInput
                     id="committeeSize"
-                    type="number"
                     value={committeeSize}
                     min={1}
+                    step={1}
+                    preventInvalidInput
                     isDisabled={isWholeNetwork}
-                    onChange={({target, target: {id, value}}) => {
-                      if (target.checkValidity())
-                        send('CHANGE_COMMITTEE', {id, value})
+                    onChange={({target: {id, value}}) => {
+                      send('CHANGE_COMMITTEE', {id, value})
                     }}
                   />
                   <Checkbox

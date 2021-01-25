@@ -53,6 +53,19 @@ export async function fetchVotings({
   return {result, continuationToken}
 }
 
+export async function fetchLastOpenVotings({oracle, limit = 11}) {
+  const {result, error} = await fetchVotings({
+    oracle,
+    'states[]': [VotingStatus.Open].join(','),
+    limit,
+    sortBy: 'timestamp',
+  })
+
+  if (error) throw new Error(error.message)
+
+  return result
+}
+
 export async function fetchOracleRewardsEstimates(committeeSize) {
   const {result, error} = await (
     await fetch(

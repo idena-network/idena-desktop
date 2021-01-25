@@ -444,8 +444,11 @@ export default function ViewVotingPage() {
                             h={4}
                           />
                           <Text as="span">
-                            {t('{{count}} votes', {count: votesCount})}{' '}
-                            {t('out of {{count}}', {count: voteProofsCount})}
+                            {t('{{count}} votes', {
+                              count: votesCount || voteProofsCount,
+                            })}{' '}
+                            {eitherIdleState(VotingStatus.Counting) &&
+                              t('out of {{count}}', {count: voteProofsCount})}
                           </Text>
                         </Stack>
                       </Stack>
@@ -685,21 +688,25 @@ export default function ViewVotingPage() {
                     {!isClosed && (
                       <Stat>
                         <StatLabel color="muted" fontSize="md">
-                          <Tooltip
-                            label={t(
-                              `Including a share of minority voters' deposit`
-                            )}
-                            placement="top"
-                          >
-                            <Text
-                              as="span"
-                              borderBottom="dotted 1px"
-                              borderBottomColor="muted"
-                              cursor="help"
+                          {isMaxWinnerThreshold ? (
+                            <Text as="span">{t('Your max reward')}</Text>
+                          ) : (
+                            <Tooltip
+                              label={t(
+                                `Including a share of minority voters' deposit`
+                              )}
+                              placement="top"
                             >
-                              {t('Your max reward')}
-                            </Text>
-                          </Tooltip>
+                              <Text
+                                as="span"
+                                borderBottom="dotted 1px"
+                                borderBottomColor="muted"
+                                cursor="help"
+                              >
+                                {t('Your max reward')}
+                              </Text>
+                            </Tooltip>
+                          )}
                         </StatLabel>
                         <StatNumber fontSize="base" fontWeight={500}>
                           {toDna(estimatedMaxOracleReward)}

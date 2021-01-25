@@ -119,6 +119,7 @@ export function VotingCard({votingRef, ...props}) {
     totalReward,
     finishCountingDate,
     estimatedTotalReward,
+    isNew,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -140,7 +141,20 @@ export function VotingCard({votingRef, ...props}) {
   )
 
   return (
-    <Box {...props}>
+    <Box position="relative" {...props}>
+      {isNew && (
+        <Box
+          bg="gray.50"
+          rounded="lg"
+          position="absolute"
+          top={-16}
+          left={-16}
+          right={-16}
+          bottom={-16}
+          opacity={0.5}
+          zIndex={-1}
+        />
+      )}
       <Stack isInline spacing={2} mb={3} align="center">
         <VotingStatusBadge status={status}>
           {t(mapVotingStatus(status))}
@@ -259,6 +273,7 @@ export function VotingCard({votingRef, ...props}) {
                   'This vote is not available to you. Only validated identities randomly selected to the committee can vote.'
                 )}
                 placement="top"
+                zIndex="tooltip"
               >
                 {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
                 <PrimaryButton as={Box} isDisabled>
@@ -309,8 +324,9 @@ export function VotingCard({votingRef, ...props}) {
                 h={4}
               />
               <Text as="span">
-                {t('{{count}} votes', {count: votesCount})}{' '}
-                {t('out of {{count}}', {count: voteProofsCount})}
+                {t('{{count}} votes', {count: votesCount || voteProofsCount})}{' '}
+                {eitherIdleState(VotingStatus.Counting) &&
+                  t('out of {{count}}', {count: voteProofsCount})}
               </Text>
             </Stack>
           </Stack>

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {Badge, Icon, Stack, Text as ChakraText} from '@chakra-ui/core'
+import {Badge, Icon, Text as ChakraText} from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
@@ -20,6 +20,7 @@ import {Tooltip} from './tooltip'
 import {loadValidationState} from '../../screens/validation/utils'
 import {IdentityStatus, EpochPeriod} from '../types'
 import {Logo} from '../../screens/app/components'
+import {useVotingNotification} from '../providers/voting-notification-context'
 
 function Sidebar() {
   return (
@@ -129,6 +130,7 @@ function NodeStatus() {
 function Nav() {
   const {t} = useTranslation()
   const {nickname} = useIdentityState()
+  const [{todoCount}] = useVotingNotification()
   return (
     <nav>
       <ul
@@ -152,23 +154,25 @@ function Nav() {
           {t('Contacts')}
         </NavItem>
         <NavItem href="/oracles/list" icon={<Icon name="oracle" w={5} h={5} />}>
-          <Stack isInline align="center">
+          <Flex flex={1} align="center" justify="space-between">
             <ChakraText as="span">{t('Oracle voting')}</ChakraText>
-            <Badge
-              variantColor="green"
-              bg="green.020"
-              color="green.500"
-              fontSize={8}
-              fontWeight={700}
-              rounded={4}
-              letterSpacing={1.4}
-              lineHeight="taller"
-              mt="3px"
-              w={30}
-            >
-              {t('New')}
-            </Badge>
-          </Stack>
+            {todoCount > 0 ? (
+              <Badge
+                bg="blue.500"
+                color="white"
+                fontSize={8}
+                fontWeight={700}
+                textAlign="center"
+                rounded={4}
+                px={1}
+                py="3px"
+                lineHeight="short"
+                minW={4}
+              >
+                {todoCount > 10 ? '10+' : todoCount}
+              </Badge>
+            ) : null}
+          </Flex>
         </NavItem>
         <NavItem
           href="/settings/general"
