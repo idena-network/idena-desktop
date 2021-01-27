@@ -290,19 +290,20 @@ function ActionPanel() {
 
       <ChakraBox
         roundedTop="md"
-        shadow={shouldActivateInvite ? 'outline' : 'none'}
         onClick={() => {
           if (!router.pathname.endsWith('/profile')) router.push('/profile')
           showCurrentTask()
         }}
       >
-        <Block title={t('My current task')}>
-          <CurrentTask
-            epoch={epoch.epoch}
-            period={currentPeriod}
-            identity={identity}
-          />
-        </Block>
+        <PulseFrame isActive={shouldActivateInvite}>
+          <Block title={t('My current task')}>
+            <CurrentTask
+              epoch={epoch.epoch}
+              period={currentPeriod}
+              identity={identity}
+            />
+          </Block>
+        </PulseFrame>
       </ChakraBox>
 
       {currentPeriod === EpochPeriod.None && (
@@ -312,6 +313,42 @@ function ActionPanel() {
       )}
     </Box>
   )
+}
+
+function PulseFrame({isActive, children}) {
+  return (
+    <ChakraBox
+      roundedTop="md"
+      style={{
+        boxShadow: `${isActive ? 'inset 0 0 0 2px #578fff' : ''}`,
+      }}
+    >
+      <div className={isActive ? 'pulseFrame' : ''}>{children}</div>
+      <style jsx>{`
+        .pulseFrame {
+          border-radius: 6px;
+          box-shadow: inset 0 0 0 2px #578fff3d;
+          animation: pulseFrame 1.2s infinite;
+        }
+        @keyframes pulseFrame {
+          0% {
+            box-shadow: inset 0 0 0 2px #578fff3d;
+          }
+          60% {
+            box-shadow: inset 0 0 0 5px #578fff3d;
+          }
+          100% {
+            box-shadow: inset 0 0 0 5px #578fff00;
+          }
+        }
+      `}</style>
+    </ChakraBox>
+  )
+}
+
+PulseFrame.propTypes = {
+  isActive: PropTypes.bool,
+  children: PropTypes.node,
 }
 
 function Block({title, children}) {

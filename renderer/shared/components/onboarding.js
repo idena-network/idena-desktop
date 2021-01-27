@@ -51,19 +51,21 @@ export function OnboardingPopoverContent({
       {...props}
     >
       <PopoverArrow />
-      <Stack spacing={3}>
-        <PopoverHeader borderBottom="none" fontWeight={500} p={0}>
-          {title}
-        </PopoverHeader>
-        <PopoverBody fontSize="sm" p={0}>
-          {children}
-        </PopoverBody>
-        <PopoverFooter border="none" p={0} display="inline-flex">
-          <Button variant="unstyled" ml="auto" onClick={onDismiss}>
-            {t('Okay, got it')}
-          </Button>
-        </PopoverFooter>
-      </Stack>
+      <Box p={2}>
+        <Stack spacing={3}>
+          <PopoverHeader borderBottom="none" fontWeight={500} p={0}>
+            {title}
+          </PopoverHeader>
+          <PopoverBody fontSize="sm" p={0}>
+            {children}
+          </PopoverBody>
+          <PopoverFooter border="none" p={0} display="inline-flex">
+            <Button variant="unstyled" ml="auto" onClick={onDismiss}>
+              {t('Okay, got it')}
+            </Button>
+          </PopoverFooter>
+        </Stack>
+      </Box>
     </PopoverContent>
   )
 }

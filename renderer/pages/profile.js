@@ -30,7 +30,7 @@ import {
   UserStat,
   UserStatLabel,
 } from '../screens/profile/components'
-import {IconButton2} from '../shared/components/button'
+import {PrimaryButton, IconButton2} from '../shared/components/button'
 import Layout from '../shared/components/layout'
 import {IconLink} from '../shared/components/link'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
@@ -118,6 +118,7 @@ export default function ProfilePage() {
 
   const [currentOnboarding, {done, dismiss}] = useOnboarding()
 
+  console.log('currentOnboarding=', currentOnboarding)
   const isShowingActivateInvitePopover = currentOnboarding.matches(
     activeShowingOnboardingStep(OnboardingStep.ActivateInvite)
   )
@@ -132,34 +133,6 @@ export default function ProfilePage() {
           <Stack isInline spacing={10}>
             <Stack spacing={6} w="md">
               <UserInlineCard address={address} status={status} h={24} />
-
-              <Confetti
-                active={eitherState(
-                  currentOnboarding,
-                  ...Object.keys(OnboardingStep).map(
-                    step => `${doneOnboardingStep(OnboardingStep[step])}.salut`
-                  )
-                )}
-                config={{
-                  angle: 90,
-                  spread: 360,
-                  startVelocity: 40,
-                  elementCount: 70,
-                  dragFriction: 0.12,
-                  duration: 3000,
-                  stagger: 3,
-                  width: '10px',
-                  height: '10px',
-                  perspective: '500px',
-                  colors: [
-                    '#a864fd',
-                    '#29cdff',
-                    '#78ff44',
-                    '#ff718d',
-                    '#fdff6a',
-                  ],
-                }}
-              />
 
               <UserStatList>
                 <UserStat>
@@ -269,22 +242,66 @@ export default function ProfilePage() {
                 >
                   <Stack spacing={2}>
                     <Text>
-                      {t(`New invitations can be provided by validated participants. Join the
-          official Idena public Telegram group and follow instructions in the
-          pinned message.`)}
+                      {t(
+                        `An invitation can be provided by validated participants.`
+                      )}
+                      <br />
+                      <br />
+                      {t(`Join the official Idena public Telegram group and follow instructions in the
+                pinned message.`)}
                     </Text>
-                    <IconButton2
-                      variant="unstyled"
-                      icon="send"
-                      onClick={() => {
-                        global.openExternal('https://t.me/IdenaNetworkPublic')
-                      }}
-                    >
-                      https://t.me/IdenaNetworkPublic
-                    </IconButton2>
+                    <Flex>
+                      <img
+                        alt={t('Invitation')}
+                        src="/static/body-telegram-icn.svg"
+                        style={{
+                          height: rem(16),
+                          width: rem(16),
+                          margin: rem(8),
+                        }}
+                      />
+                      <PrimaryButton
+                        variant="unstyled"
+                        onClick={() => {
+                          global.openExternal('https://t.me/IdenaNetworkPublic')
+                        }}
+                      >
+                        https://t.me/IdenaNetworkPublic
+                      </PrimaryButton>
+                    </Flex>
                   </Stack>
                 </OnboardingPopoverContent>
               </OnboardingPopover>
+
+              <Confetti
+                active={eitherState(
+                  currentOnboarding,
+                  ...Object.keys(OnboardingStep).map(
+                    step => `${doneOnboardingStep(OnboardingStep[step])}.salut`
+                  )
+                )}
+                config={{
+                  angle: '70',
+                  spread: '35',
+                  startVelocity: '70',
+                  elementCount: '200',
+                  dragFriction: '0.15',
+                  duration: '3000',
+                  stagger: 4,
+                  width: '6px',
+                  height: '6px',
+                  perspective: '1000px',
+                  colors: [
+                    '#578fff',
+                    '#ff6666',
+                    '#27d980',
+                    '#ffc969',
+                    '#ff74e1',
+                    '#c08afa',
+                    '#8e62f5',
+                  ],
+                }}
+              />
             </Stack>
             <Stack spacing={6} w={rem(200)}>
               <Flex h={24}>

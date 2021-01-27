@@ -42,7 +42,7 @@ export function OnboardingProvider(props) {
           },
         },
         dismissed: {
-          SHOW: 'active',
+          on: {SHOW: 'active.showing'},
         },
       },
       on: {
