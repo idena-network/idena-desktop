@@ -2,7 +2,6 @@ import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position} from 'polished'
 import Jimp from 'jimp'
-
 import {useTranslation} from 'react-i18next'
 import mousetrap from 'mousetrap'
 import {
@@ -29,8 +28,6 @@ import {
   getImageURLFromClipboard,
   writeImageURLToClipboard,
 } from '../../../shared/utils/clipboard'
-
-import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
 
 import {
   Brushes,
@@ -326,25 +323,6 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     reader.readAsDataURL(file)
     e.target.value = ''
   }
-
-  // Google search handling
-  useEffect(() => {
-    // eslint-disable-next-line no-shadow
-    const handleImageSearchPick = (_, data) => {
-      if (visible) {
-        const [{url}] = data.docs[0].thumbnails
-        setImageUrl({url, watermark: bottomWatermark})
-      }
-      setInsertImageMode(0)
-    }
-    global.ipcRenderer.on(IMAGE_SEARCH_PICK, handleImageSearchPick)
-    return () => {
-      global.ipcRenderer.removeListener(
-        IMAGE_SEARCH_PICK,
-        handleImageSearchPick
-      )
-    }
-  }, [setImageUrl, insertImageMode, visible, bottomWatermark])
 
   // Clipboard handling
   const handleImageFromClipboard = (insertMode = null) => {
@@ -734,10 +712,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                     setRightMenuPanel(RightMenu.None)
                   }
                   setInsertImageMode(INSERT_BACKGROUND_IMAGE)
-                  global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
-                    on: true,
-                    id: `google-search-img`,
-                  })
+                  // launch picker
                 }}
               />
 
@@ -927,10 +902,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                           onClick={async () => {
                             setInsertImageMenuOpen(false)
                             setInsertImageMode(INSERT_OBJECT_IMAGE)
-                            global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
-                              on: true,
-                              id: `google-search-img`,
-                            })
+                            // launch picker here
                           }}
                           disabled={false}
                           icon={<Icon size={5} name="google" />}
