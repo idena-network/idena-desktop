@@ -14,6 +14,8 @@ const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
 const fs = require('fs-extra')
 const i18next = require('i18next')
+// eslint-disable-next-line camelcase
+const {image_search} = require('duckduckgo-images-api')
 const {zoomIn, zoomOut, resetZoom} = require('./utils')
 const loadRoute = require('./utils/routes')
 const {getI18nConfig} = require('./language')
@@ -570,3 +572,11 @@ function sendMainWindowMsg(channel, message, data) {
     logger.error('cannot send msg to main window', e.toString())
   }
 }
+
+ipcMain.handle('search-image', async (_, query) => {
+  console.log(query)
+  return image_search({
+    query,
+    moderate: false,
+  })
+})

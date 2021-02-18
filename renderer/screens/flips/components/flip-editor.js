@@ -11,6 +11,7 @@ import {
   IconButton as ChakraIconButton,
   Divider,
   Icon,
+  Image,
 } from '@chakra-ui/core'
 import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
@@ -37,6 +38,7 @@ import {
   ImageEraseEditor,
   ApplyChangesBottomPanel,
 } from './flip-editor-tools'
+import {ImageSearchDialog} from './image-search'
 
 const ImageEditor =
   typeof window !== 'undefined'
@@ -608,6 +610,8 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorRefs, src, idx])
 
+  const [showImageSearch, setShowImageSearch] = React.useState()
+
   return (
     <div
       style={{
@@ -712,7 +716,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                     setRightMenuPanel(RightMenu.None)
                   }
                   setInsertImageMode(INSERT_BACKGROUND_IMAGE)
-                  // launch picker
+                  setShowImageSearch(true)
                 }}
               />
 
@@ -981,6 +985,12 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           </Stack>
         )}
       </Flex>
+      <ImageSearchDialog
+        isOpen={showImageSearch}
+        onClose={() => {
+          setShowImageSearch(false)
+        }}
+      />
     </div>
   )
 }
