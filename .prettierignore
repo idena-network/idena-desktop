@@ -1,4 +1,4 @@
-dist/*
-renderer/out/*
-renderer/.next/*
-renderer/shared/proto/*
+dist
+renderer/out
+renderer/.next
+renderer/shared/proto
