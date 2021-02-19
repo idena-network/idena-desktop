@@ -27,7 +27,7 @@ import {
 import {eitherState} from '../../../shared/utils/utils'
 import {FillCenter} from '../../oracles/components'
 
-export function ImageSearchDialog({onClose, ...props}) {
+export function ImageSearchDialog({onPick, onClose, ...props}) {
   const {t} = useTranslation()
 
   const [current, send] = useMachine(
@@ -135,19 +135,24 @@ export function ImageSearchDialog({onClose, ...props}) {
           )}
           {eitherState(current, 'done') && (
             <SimpleGrid columns={4} spacing={2} overflow="auto" mx={-8} px={8}>
-              {images.map(({image, thumbnail}) => (
+              {images.map(({thumbnail}) => (
                 <AspectRatioBox
                   ratio={1}
                   w={88}
-                  bg={image === selectedImage ? 'blue.032' : 'white'}
-                  borderColor={image === selectedImage ? 'blue.500' : 'gray.50'}
+                  bg={thumbnail === selectedImage ? 'blue.032' : 'white'}
+                  borderColor={
+                    thumbnail === selectedImage ? 'blue.500' : 'gray.50'
+                  }
                   borderWidth={1}
                   borderRadius="md"
                   overflow="hidden"
                   position="relative"
                   transition="all 0.6s cubic-bezier(0.16, 1, 0.3, 1)"
                   onClick={() => {
-                    send('PICK', {image})
+                    send('PICK', {image: thumbnail})
+                  }}
+                  onDoubleClick={() => {
+                    onPick(selectedImage)
                   }}
                 >
                   <Image
@@ -155,7 +160,7 @@ export function ImageSearchDialog({onClose, ...props}) {
                     objectFit="contain"
                     objectPosition="center"
                     borderColor={
-                      image === selectedImage ? 'blue.500' : 'transparent'
+                      thumbnail === selectedImage ? 'blue.500' : 'transparent'
                     }
                     borderWidth={1}
                     borderRadius="md"
@@ -173,7 +178,13 @@ export function ImageSearchDialog({onClose, ...props}) {
       </DialogBody>
       <DialogFooter>
         <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
-        <PrimaryButton>{t('Select')}</PrimaryButton>
+        <PrimaryButton
+          onClick={() => {
+            onPick(selectedImage)
+          }}
+        >
+          {t('Select')}
+        </PrimaryButton>
       </DialogFooter>
     </Dialog>
   )

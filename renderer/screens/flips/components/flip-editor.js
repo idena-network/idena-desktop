@@ -906,7 +906,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                           onClick={async () => {
                             setInsertImageMenuOpen(false)
                             setInsertImageMode(INSERT_OBJECT_IMAGE)
-                            // launch picker here
+                            setShowImageSearch(true)
                           }}
                           disabled={false}
                           icon={<Icon size={5} name="google" />}
@@ -987,6 +987,13 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       </Flex>
       <ImageSearchDialog
         isOpen={showImageSearch}
+        onPick={url => {
+          if (visible) {
+            setImageUrl({url, watermark: bottomWatermark})
+          }
+          setInsertImageMode(0)
+          setShowImageSearch(false)
+        }}
         onClose={() => {
           setShowImageSearch(false)
         }}
