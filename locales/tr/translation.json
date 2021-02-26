@@ -552,5 +552,13 @@
   "% of the Total funds you receive": "% of the Total funds you receive",
   "Paid to owner: {{amount}}": "Paid to owner: {{amount}}",
   "out of {{count}}": "out of {{count}}",
-  "out of {{count}}_plural": "out of {{count}}"
+  "out of {{count}}_plural": "out of {{count}}",
+  "Deposit will be refunded": "Deposit will be refunded",
+  "N/A": "N/A",
+  "Search the picture on the web": "Search the picture on the web",
+  "Type your search in the box above to find images using search box": "Type your search in the box above to find images using search box",
+  "Select": "Select",
+  "Confirm transaction": "Confirm transaction",
+  "You’re about to sign and send tx from your wallet": "You’re about to sign and send tx from your wallet",
+  "Transaction details": "Transaction details"
 }
