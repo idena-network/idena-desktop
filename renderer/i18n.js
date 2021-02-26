@@ -70,6 +70,30 @@ export const AVAILABLE_LANGS = [
   'ja',
 ]
 
+export const flagEmojis = {
+  en: '🌐',
+  id: '🇮🇩',
+  fr: '🇫🇷',
+  de: '🇩🇪',
+  es: '🇪🇸',
+  ru: '🇷🇺',
+  zh: '🇨🇳',
+  ko: '🇰🇷',
+  hr: '🇭🇷',
+  hi: '🇮🇳',
+  uk: '🇺🇦',
+  sr: '🇷🇸',
+  ro: '🇷🇴',
+  it: '🇮🇹',
+  pt: '🇵🇹',
+  pl: '🇵🇱',
+  sl: '🇸🇮',
+  tr: '🇹🇷',
+  bg: '🇧🇬',
+  sv: '🇸🇪',
+  ja: '🇯🇵',
+}
+
 i18n.use(initReactI18next).init({
   debug: global.isDev,
   resources: {
