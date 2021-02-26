@@ -27,7 +27,7 @@ import {
 import {eitherState} from '../../../shared/utils/utils'
 import {FillCenter} from '../../oracles/components'
 
-export function ImageSearchDialog({onPick, onClose, ...props}) {
+export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
   const {t} = useTranslation()
 
   const [current, send] = useMachine(
@@ -66,7 +66,9 @@ export function ImageSearchDialog({onPick, onClose, ...props}) {
             },
           },
         },
-        fail: {},
+        fail: {
+          entry: [(_, {data: {message}}) => onError(message), log()],
+        },
       },
       on: {
         SEARCH: 'searching',

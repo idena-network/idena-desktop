@@ -12,6 +12,7 @@ import {
   Divider,
   Icon,
   Image,
+  useToast,
 } from '@chakra-ui/core'
 import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
@@ -21,7 +22,7 @@ import {Menu, MenuItem} from '../../../shared/components/menu'
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {Box, Absolute} from '../../../shared/components'
 import {Tooltip} from '../../../shared/components/tooltip'
-import {Tooltip as TooltipX} from '../../../shared/components/components'
+import {Toast, Tooltip as TooltipX} from '../../../shared/components/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {resizing, imageResize} from '../../../shared/utils/img'
@@ -75,6 +76,8 @@ const BLANK_IMAGE =
 
 function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   const {t} = useTranslation()
+
+  const toast = useToast()
 
   // Button menu
   const [isInsertImageMenuOpen, setInsertImageMenuOpen] = useState(false)
@@ -997,6 +1000,12 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
         onClose={() => {
           setShowImageSearch(false)
         }}
+        onError={error =>
+          toast({
+            // eslint-disable-next-line react/display-name
+            render: () => <Toast title={error} status="error" />,
+          })
+        }
       />
     </div>
   )
