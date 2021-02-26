@@ -270,36 +270,82 @@ export default function ViewVotingPage() {
                         <Text color="muted" fontSize="sm" mb={3}>
                           {t('Choose an option to vote')}
                         </Text>
-                        <RadioGroup
-                          value={String(selectedOption)}
-                          onChange={e => {
-                            send('SELECT_OPTION', {
-                              option: Number(e.target.value),
-                            })
-                          }}
-                        >
-                          {/* eslint-disable-next-line no-shadow */}
-                          {options.map(({id, value}) => (
-                            <VotingOption
-                              key={id}
-                              value={String(id)}
-                              isDisabled={eitherIdleState(
-                                VotingStatus.Pending,
-                                VotingStatus.Starting,
-                                VotingStatus.Voted
-                              )}
-                              annotation={
-                                isMaxWinnerThreshold
-                                  ? null
-                                  : t('{{count}} min. votes required', {
-                                      count: toPercent(winnerThreshold / 100),
-                                    })
-                              }
-                            >
-                              {value}
-                            </VotingOption>
-                          ))}
-                        </RadioGroup>
+                        {eitherIdleState(VotingStatus.Voted) ? (
+                          <Stack spacing={3}>
+                            {/* eslint-disable-next-line no-shadow */}
+                            {options.map(({id, value}) => {
+                              const isMine = id < 1 // === selectedOption
+                              return (
+                                <Stack
+                                  isInline
+                                  spacing={2}
+                                  align="center"
+                                  bg={isMine ? 'blue.012' : 'gray.50'}
+                                  borderRadius="md"
+                                  minH={8}
+                                  px={3}
+                                  py={2}
+                                  zIndex={1}
+                                >
+                                  <Flex
+                                    align="center"
+                                    justify="center"
+                                    bg={
+                                      isMine ? 'brandBlue.500' : 'transparent'
+                                    }
+                                    borderRadius="full"
+                                    borderWidth={isMine ? 0 : '4px'}
+                                    borderColor="gray.100"
+                                    color="white"
+                                    w={4}
+                                    h={4}
+                                  >
+                                    {isMine && <Icon name="ok" size={3} />}
+                                  </Flex>
+
+                                  <Text
+                                    isTruncated
+                                    maxW="sm"
+                                    title={value.length > 50 ? value : ''}
+                                  >
+                                    {value}
+                                  </Text>
+                                </Stack>
+                              )
+                            })}
+                          </Stack>
+                        ) : (
+                          <RadioGroup
+                            value={String(selectedOption)}
+                            onChange={e => {
+                              send('SELECT_OPTION', {
+                                option: Number(e.target.value),
+                              })
+                            }}
+                          >
+                            {/* eslint-disable-next-line no-shadow */}
+                            {options.map(({id, value}) => (
+                              <VotingOption
+                                key={id}
+                                value={String(id)}
+                                isDisabled={eitherIdleState(
+                                  VotingStatus.Pending,
+                                  VotingStatus.Starting,
+                                  VotingStatus.Voted
+                                )}
+                                annotation={
+                                  isMaxWinnerThreshold
+                                    ? null
+                                    : t('{{count}} min. votes required', {
+                                        count: toPercent(winnerThreshold / 100),
+                                      })
+                                }
+                              >
+                                {value}
+                              </VotingOption>
+                            ))}
+                          </RadioGroup>
+                        )}
                       </Box>
                     </VotingSkeleton>
                   )}
