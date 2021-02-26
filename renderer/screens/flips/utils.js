@@ -7,6 +7,7 @@ import {FlipType} from '../../shared/types'
 import {areSame, areEual} from '../../shared/utils/arr'
 import {submitFlip} from '../../shared/api'
 import {signNonce} from '../../shared/utils/dna-link'
+import i18n from '../../i18n'
 
 export const FLIP_LENGTH = 4
 export const DEFAULT_FLIP_ORDER = [0, 1, 2, 3]
@@ -171,7 +172,8 @@ export async function publishFlip({
   orderPermutations,
   hint,
 }) {
-  if (images.some(x => !x)) throw new Error('You must use 4 images for a flip')
+  if (images.some(x => !x))
+    throw new Error(i18n.t('You must use 4 images for a flip'))
 
   const flips = global.flipStore.getFlips()
 
@@ -183,10 +185,10 @@ export async function publishFlip({
         areSame(flip.images, images)
     )
   )
-    throw new Error('You already submitted this flip')
+    throw new Error(i18n.t('You already submitted this flip'))
 
   if (areEual(order, hint ? DEFAULT_FLIP_ORDER : originalOrder))
-    throw new Error('You must shuffle flip before submit')
+    throw new Error(i18n.t('You must shuffle flip before submit'))
 
   const compressedImages = await Promise.all(
     images.map(image =>
@@ -205,22 +207,23 @@ export async function publishFlip({
   )
 
   if (publicHex.length + privateHex.length > 2 * 1024 * 1024)
-    throw new Error('Flip is too large')
+    throw new Error(i18n.t('Cannot submit flip, content is too big'))
 
   const {result, error} = await submitFlip(publicHex, privateHex, keywordPairId)
 
   if (error) {
-    let {message} = error
+    const {message} = error
 
     if (message.includes('candidate'))
-      message = `It's not allowed to submit flips with your identity status`
+      throw new Error(
+        i18n.t(`It's not allowed to submit flips with your identity status`)
+      )
 
     if (message.includes('ceremony'))
-      message = `Can not submit flip during the validation session`
-
-    throw new Error(message)
+      throw new Error(
+        i18n.t(`Can not submit flip during the validation session`)
+      )
   }
-
   return result
 }
 

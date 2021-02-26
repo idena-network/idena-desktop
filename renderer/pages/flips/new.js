@@ -87,7 +87,7 @@ export default function NewFlipPage() {
       onError: (
         _,
         {data, error = data.response?.data?.error ?? data.message}
-      ) =>
+      ) => {
         toast({
           title: error,
           status: 'error',
@@ -97,13 +97,18 @@ export default function NewFlipPage() {
           render: () => (
             <Box fontSize="md">
               <Notification
-                title={error}
+                title={
+                  data.response?.status === 413
+                    ? t('Cannot submit flip, content is too big')
+                    : error
+                }
                 type={NotificationType.Error}
                 delay={5000}
               />
             </Box>
           ),
-        }),
+        })
+      },
     },
   })
 
