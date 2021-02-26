@@ -104,6 +104,12 @@ export async function sendDna({from, to, amount, comment}) {
   return result
 }
 
+export function appendTxHash(url, hash) {
+  const txUrl = new URL(url)
+  txUrl.searchParams.append('tx', hash)
+  return txUrl
+}
+
 export class Transaction {
   constructor(nonce, epoch, type, to, amount, maxFee, tips, payload) {
     this.nonce = nonce || 0
