@@ -573,10 +573,9 @@ function sendMainWindowMsg(channel, message, data) {
   }
 }
 
-ipcMain.handle('search-image', async (_, query) => {
-  console.log(query)
-  return image_search({
+ipcMain.handle('search-image', async (_, query) =>
+  image_search({
     query,
     moderate: false,
   })
-})
+)
