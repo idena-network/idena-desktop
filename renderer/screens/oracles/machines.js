@@ -485,7 +485,7 @@ export const createNewVotingMachine = (epoch, address) =>
         options: [{id: 0}, {id: 1}],
         votingDuration: 4320,
         publicVotingDuration: 2160,
-        quorum: 20,
+        quorum: 1,
         committeeSize: 100,
         shouldStartImmediately: true,
         dirtyBag: {},

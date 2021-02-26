@@ -117,7 +117,7 @@ function NewVotingPage() {
     shouldStartImmediately,
     isFreeVoting,
     committeeSize,
-    quorum = 20,
+    quorum = 1,
     winnerThreshold = '66',
     feePerGas,
     oracleReward,
