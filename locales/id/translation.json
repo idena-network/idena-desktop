@@ -548,5 +548,16 @@
   "Min reward per oracle: {{amount}}": "Min reward per oracle: {{amount}}",
   "% of the Total funds you receive": "% of the Total funds you receive",
   "Paid to owner: {{amount}}": "Paid to owner: {{amount}}",
-  "out of {{count}}_0": "out of {{count}}"
+  "out of {{count}}_0": "out of {{count}}",
+  "Cannot submit flip, content is too big": "Cannot submit flip, content is too big",
+  "Deposit will be refunded": "Deposit will be refunded",
+  "N/A": "N/A",
+  "You must use 4 images for a flip": "You must use 4 images for a flip",
+  "You already submitted this flip": "You already submitted this flip",
+  "You must shuffle flip before submit": "You must shuffle flip before submit",
+  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status",
+  "Can not submit flip during the validation session": "Can not submit flip during the validation session",
+  "Confirm transaction": "Confirm transaction",
+  "You’re about to sign and send tx from your wallet": "You’re about to sign and send tx from your wallet",
+  "Transaction details": "Transaction details"
 }
