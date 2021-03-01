@@ -266,7 +266,8 @@ export function Toast({
 export function Dialog({
   title,
   children,
-  shouldShowCloseButton = false,
+  isCloseable,
+  shouldShowCloseButton = isCloseable || false,
   ...props
 }) {
   return (

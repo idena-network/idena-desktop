@@ -136,7 +136,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
             </FillCenter>
           )}
           {eitherState(current, 'done') && (
-            <SimpleGrid columns={4} spacing={2} overflow="auto" mx={-8} px={8}>
+            <SimpleGrid columns={4} spacing={2} overflow="auto" mx={-6} px={6}>
               {images.map(({thumbnail}) => (
                 <AspectRatioBox
                   ratio={1}
