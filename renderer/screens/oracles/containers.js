@@ -152,186 +152,188 @@ export function VotingCard({votingRef, ...props}) {
           right={-16}
           bottom={-16}
           opacity={0.5}
-          zIndex={-1}
+          zIndex="base"
         />
       )}
-      <Stack isInline spacing={2} mb={3} align="center">
-        <VotingStatusBadge status={status}>
-          {t(mapVotingStatus(status))}
-        </VotingStatusBadge>
-        <VotingBadge
-          align="center"
-          bg="gray.50"
-          color="muted"
-          cursor="pointer"
-          pl="1/2"
-          onClick={() => {
-            router.push(viewHref)
-          }}
-        >
-          <Avatar
-            address={contractHash}
-            bg="white"
-            borderColor="brandGray.016"
-            borderWidth="1px"
-            borderRadius="full"
-            w={5}
-            h={5}
-            mr={1}
-          />
-          <Text as="span">{contractHash}</Text>
-        </VotingBadge>
-      </Stack>
-      <Link href={viewHref}>
-        <Text
-          isTruncated
-          fontSize="base"
-          fontWeight={500}
-          cursor="pointer"
-          mb={2}
-        >
-          {title}
-        </Text>
-      </Link>
-      <Text isTruncated color="muted" mb={4}>
-        {desc}
-      </Text>
-      {eitherIdleState(
-        VotingStatus.Archived,
-        VotingStatus.Terminated,
-        VotingStatus.Counting
-      ) && (
-        <Stack spacing={2} mb={6}>
-          <Text color="muted" fontSize="sm">
-            {t('Results')}
-          </Text>
-          {votesCount ? (
-            <VotingResult votingService={votingRef} {...current.context} />
-          ) : (
-            // eslint-disable-next-line no-shadow
-            <Text
-              bg="gray.50"
-              borderRadius="md"
-              p={2}
-              color="muted"
-              fontSize="sm"
-            >
-              {t('No votes')}
-            </Text>
-          )}
-        </Stack>
-      )}
-      <Stack
-        isInline
-        spacing={2}
-        align="center"
-        bg="orange.010"
-        borderColor="orange.050"
-        borderWidth="1px"
-        borderRadius="md"
-        py={2}
-        px={3}
-        mb={6}
-      >
-        <Icon name="star" size={5} color="white" />
-        <Text fontWeight={500}>
-          {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
-          {toDna(isClosed ? totalReward : estimatedTotalReward)}
-        </Text>
-        {!isClosed && (
-          <Text color="orange.500">
-            {Number(votingMinPayment) > 0
-              ? t(`Lock {{amount}} for voting`, {
-                  amount: toLocaleDna(i18n.language)(votingMinPayment),
-                })
-              : t('Free voting')}
-          </Text>
-        )}
-      </Stack>
-      <Flex justify="space-between" align="center">
-        <Stack isInline spacing={2}>
-          {eitherIdleState(VotingStatus.Pending) && (
-            <PrimaryButton
-              isDisabled={isMining}
-              loadingText={t('Launching')}
-              onClick={() => {
-                send('REVIEW_START_VOTING')
-              }}
-            >
-              {t('Launch')}
-            </PrimaryButton>
-          )}
-
-          {eitherIdleState(VotingStatus.Open) &&
-            (isOracle ? (
-              <PrimaryButton onClick={() => router.push(viewHref)}>
-                {t('Vote')}
-              </PrimaryButton>
-            ) : (
-              <Tooltip
-                label={t(
-                  'This vote is not available to you. Only validated identities randomly selected to the committee can vote.'
-                )}
-                placement="top"
-                zIndex="tooltip"
-              >
-                {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
-                <PrimaryButton as={Box} isDisabled>
-                  {t('Vote')}
-                </PrimaryButton>
-              </Tooltip>
-            ))}
-          {eitherIdleState(
-            VotingStatus.Voted,
-            VotingStatus.Archived,
-            VotingStatus.Terminated,
-            VotingStatus.Counting
-          ) && (
-            <PrimaryButton onClick={() => router.push(viewHref)}>
-              {t('View')}
-            </PrimaryButton>
-          )}
-        </Stack>
-        {!eitherIdleState(VotingStatus.Pending) && (
-          <Stack isInline spacing={3}>
-            <Text>
-              <Text as="span" color="muted">
-                {t('Deadline')}:
-              </Text>{' '}
-              <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
-            </Text>
-            <Divider
-              orientation="vertical"
-              borderColor="gray.300"
-              borderLeft="1px"
+      <Box position="relative" zIndex={1}>
+        <Stack isInline spacing={2} mb={3} align="center">
+          <VotingStatusBadge status={status}>
+            {t(mapVotingStatus(status))}
+          </VotingStatusBadge>
+          <VotingBadge
+            align="center"
+            bg="gray.50"
+            color="muted"
+            cursor="pointer"
+            pl="1/2"
+            onClick={() => {
+              router.push(viewHref)
+            }}
+          >
+            <Avatar
+              address={contractHash}
+              bg="white"
+              borderColor="brandGray.016"
+              borderWidth="1px"
+              borderRadius="full"
+              w={5}
+              h={5}
+              mr={1}
             />
-            <Stack isInline spacing={2} align="center">
-              <Icon
-                name={
-                  hasWinner({
-                    votes,
-                    votesCount,
-                    winnerThreshold,
-                    quorum,
-                    committeeSize,
-                    finishCountingDate,
-                  })
-                    ? 'user-tick'
-                    : 'user'
-                }
+            <Text as="span">{contractHash}</Text>
+          </VotingBadge>
+        </Stack>
+        <Link href={viewHref}>
+          <Text
+            isTruncated
+            fontSize="base"
+            fontWeight={500}
+            cursor="pointer"
+            mb={2}
+          >
+            {title}
+          </Text>
+        </Link>
+        <Text isTruncated color="muted" mb={4}>
+          {desc}
+        </Text>
+        {eitherIdleState(
+          VotingStatus.Archived,
+          VotingStatus.Terminated,
+          VotingStatus.Counting
+        ) && (
+          <Stack spacing={2} mb={6}>
+            <Text color="muted" fontSize="sm">
+              {t('Results')}
+            </Text>
+            {votesCount ? (
+              <VotingResult votingService={votingRef} {...current.context} />
+            ) : (
+              // eslint-disable-next-line no-shadow
+              <Text
+                bg="gray.50"
+                borderRadius="md"
+                p={2}
                 color="muted"
-                w={4}
-                h={4}
-              />
-              <Text as="span">
-                {t('{{count}} votes', {count: votesCount || voteProofsCount})}{' '}
-                {eitherIdleState(VotingStatus.Counting) &&
-                  t('out of {{count}}', {count: voteProofsCount})}
+                fontSize="sm"
+              >
+                {t('No votes')}
               </Text>
-            </Stack>
+            )}
           </Stack>
         )}
-      </Flex>
+        <Stack
+          isInline
+          spacing={2}
+          align="center"
+          bg="orange.010"
+          borderColor="orange.050"
+          borderWidth="1px"
+          borderRadius="md"
+          py={2}
+          px={3}
+          mb={6}
+        >
+          <Icon name="star" size={5} color="white" />
+          <Text fontWeight={500}>
+            {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
+            {toDna(isClosed ? totalReward : estimatedTotalReward)}
+          </Text>
+          {!isClosed && (
+            <Text color="orange.500">
+              {Number(votingMinPayment) > 0
+                ? t(`Lock {{amount}} for voting`, {
+                    amount: toLocaleDna(i18n.language)(votingMinPayment),
+                  })
+                : t('Free voting')}
+            </Text>
+          )}
+        </Stack>
+        <Flex justify="space-between" align="center">
+          <Stack isInline spacing={2}>
+            {eitherIdleState(VotingStatus.Pending) && (
+              <PrimaryButton
+                isDisabled={isMining}
+                loadingText={t('Launching')}
+                onClick={() => {
+                  send('REVIEW_START_VOTING')
+                }}
+              >
+                {t('Launch')}
+              </PrimaryButton>
+            )}
+
+            {eitherIdleState(VotingStatus.Open) &&
+              (isOracle ? (
+                <PrimaryButton onClick={() => router.push(viewHref)}>
+                  {t('Vote')}
+                </PrimaryButton>
+              ) : (
+                <Tooltip
+                  label={t(
+                    'This vote is not available to you. Only validated identities randomly selected to the committee can vote.'
+                  )}
+                  placement="top"
+                  zIndex="tooltip"
+                >
+                  {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
+                  <PrimaryButton as={Box} isDisabled>
+                    {t('Vote')}
+                  </PrimaryButton>
+                </Tooltip>
+              ))}
+            {eitherIdleState(
+              VotingStatus.Voted,
+              VotingStatus.Archived,
+              VotingStatus.Terminated,
+              VotingStatus.Counting
+            ) && (
+              <PrimaryButton onClick={() => router.push(viewHref)}>
+                {t('View')}
+              </PrimaryButton>
+            )}
+          </Stack>
+          {!eitherIdleState(VotingStatus.Pending) && (
+            <Stack isInline spacing={3}>
+              <Text>
+                <Text as="span" color="muted">
+                  {t('Deadline')}:
+                </Text>{' '}
+                <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
+              </Text>
+              <Divider
+                orientation="vertical"
+                borderColor="gray.300"
+                borderLeft="1px"
+              />
+              <Stack isInline spacing={2} align="center">
+                <Icon
+                  name={
+                    hasWinner({
+                      votes,
+                      votesCount,
+                      winnerThreshold,
+                      quorum,
+                      committeeSize,
+                      finishCountingDate,
+                    })
+                      ? 'user-tick'
+                      : 'user'
+                  }
+                  color="muted"
+                  w={4}
+                  h={4}
+                />
+                <Text as="span">
+                  {t('{{count}} votes', {count: votesCount || voteProofsCount})}{' '}
+                  {eitherIdleState(VotingStatus.Counting) &&
+                    t('out of {{count}}', {count: voteProofsCount})}
+                </Text>
+              </Stack>
+            </Stack>
+          )}
+        </Flex>
+      </Box>
     </Box>
   )
 }
