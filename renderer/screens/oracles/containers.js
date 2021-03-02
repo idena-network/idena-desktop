@@ -32,6 +32,7 @@ import {
   FormControl,
 } from '@chakra-ui/core'
 import dayjs from 'dayjs'
+import getUrls from 'get-urls'
 import {
   toLocaleDna,
   eitherState,
@@ -85,6 +86,7 @@ import {
   mapVotingStatus,
   effectiveBalance,
 } from './utils'
+import {isValidUrl} from '../../shared/utils/dna-link'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -1513,5 +1515,51 @@ export function TerminateDrawer({
         </PrimaryButton>
       </OracleDrawerBody>
     </Drawer>
+  )
+}
+
+function splitMany(str, ...separators) {
+  return separators.reduce((acc, s, idx) => {
+    const parts = str.split(s)
+    acc.push(parts[0], s)
+
+    if (idx === separators.length - 1 && parts[1]) acc.push(parts[1])
+    // eslint-disable-next-line no-param-reassign
+    else [str] = parts
+
+    return acc
+  }, [])
+}
+
+export function Linkify({onClick, children}) {
+  if (!children) return null
+
+  if (typeof children !== 'string') throw new Error('Only text nodes supported')
+
+  const parts = splitMany(children, ...getUrls(children, {stripWWW: false}))
+
+  return (
+    <>
+      {parts.map(part =>
+        isValidUrl(part) ? (
+          <Button
+            variant="link"
+            variantColor="brandBlue"
+            fontWeight={500}
+            _hover={{background: 'transparent'}}
+            _focus={{
+              outline: 'none',
+            }}
+            onClick={() => {
+              onClick(part)
+            }}
+          >
+            {part}
+          </Button>
+        ) : (
+          <Text>{part}</Text>
+        )
+      )}
+    </>
   )
 }

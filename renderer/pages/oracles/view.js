@@ -28,9 +28,17 @@ import {
   Tooltip,
   HDivider,
   VDivider,
+  Dialog,
+  DialogHeader,
+  DialogFooter,
+  DialogBody,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
-import {PrimaryButton, IconButton2} from '../../shared/components/button'
+import {
+  PrimaryButton,
+  IconButton2,
+  SecondaryButton,
+} from '../../shared/components/button'
 import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
   FillCenter,
@@ -51,6 +59,7 @@ import {
   VotingPhase,
   TerminateDrawer,
   FinishDrawer,
+  Linkify,
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -241,7 +250,13 @@ export default function ViewVotingPage() {
                           lineHeight="tall"
                           whiteSpace="pre-wrap"
                         >
-                          {desc}
+                          <Linkify
+                            onClick={url => {
+                              send('FOLLOW_LINK', {url})
+                            }}
+                          >
+                            {desc}
+                          </Linkify>
                         </Text>
                       </Stack>
                       <GoogleTranslateButton
@@ -905,6 +920,25 @@ export default function ViewVotingPage() {
           send('TERMINATE', {from: identity.address})
         }}
       />
+
+      <Dialog
+        isOpen={eitherIdleState('redirecting')}
+        onClose={() => send('CANCEL')}
+      >
+        <DialogHeader>{t('Leaving Idena')}</DialogHeader>
+        <DialogBody>
+          <Text>You're about to leave Idena.</Text>
+          <Text>Are you sure?</Text>
+        </DialogBody>
+        <DialogFooter>
+          <SecondaryButton onClick={() => send('CANCEL')}>
+            {t('Cancel')}
+          </SecondaryButton>
+          <PrimaryButton onClick={() => send('CONTINUE')}>
+            {t('Continue')}
+          </PrimaryButton>
+        </DialogFooter>
+      </Dialog>
 
       {global.isDev && (
         <>
