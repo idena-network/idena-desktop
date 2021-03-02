@@ -712,7 +712,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           {bottomMenuPanel === BottomMenu.Main && (
             <Stack isInline align="center" spacing={3} mt={6}>
               <FlipEditorIcon
-                tooltip={t('Search on Google')}
+                tooltip={t('Search on web')}
                 icon="google"
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
@@ -914,7 +914,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                           disabled={false}
                           icon={<Icon size={5} name="google" />}
                         >
-                          {t('Search on Google')}
+                          {t('Search on web')}
                         </MenuItem>
                         <MenuItem
                           onClick={async () => {
