@@ -28,6 +28,7 @@ import {
   DNA_SEND_CONFIRM_TRESHOLD,
   validDnaUrl,
   Transaction,
+  appendTxHash,
 } from '../utils/dna-link'
 import {Input, FormGroup, Label} from './form'
 import Avatar from './avatar'
@@ -225,7 +226,9 @@ export function DnaSendDialog({
 
   const {address: from, balance} = useIdentityState()
 
-  const {address: to, amount, comment} = parseQuery(url)
+  const {address: to, amount, comment, callback_url: callbackUrl} = parseQuery(
+    url
+  )
 
   const shouldConfirmTx = amount / balance > DNA_SEND_CONFIRM_TRESHOLD
 
@@ -337,7 +340,12 @@ export function DnaSendDialog({
               return resolve()
             })
               .then(() => sendDna({from, to, amount, comment}))
-              .then(onDepositSuccess)
+              .then(hash => {
+                if (isValidUrl(callbackUrl)) {
+                  global.openExternal(appendTxHash(callbackUrl, hash).href)
+                }
+                onDepositSuccess(hash)
+              })
               .catch(({message}) => {
                 global.logger.error(message)
                 if (onDepositError) onDepositError(message)
@@ -365,7 +373,9 @@ export function DnaRawTxDialog({
 
   const {tx: rawTx, callback_url: callbackUrl} = parseQuery(url)
 
-  const {amount, to} = new Transaction().fromHex(rawTx)
+  const {amount: rawAmount, to} = new Transaction().fromHex(rawTx)
+
+  const amount = rawAmount / 10 ** 18
 
   const shouldConfirmTx = amount / balance > DNA_SEND_CONFIRM_TRESHOLD
 
@@ -491,9 +501,7 @@ export function DnaRawTxDialog({
               .then(() => callRpc('bcn_sendRawTx', rawTx))
               .then(hash => {
                 if (isValidUrl(callbackUrl)) {
-                  const txUrl = new URL(callbackUrl)
-                  txUrl.searchParams.append('tx', hash)
-                  global.openExternal(txUrl.href)
+                  global.openExternal(appendTxHash(callbackUrl, hash).href)
                 }
                 onSendSuccess(hash)
               })
