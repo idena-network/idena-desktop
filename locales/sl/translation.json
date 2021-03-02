@@ -573,6 +573,12 @@
   "Search the picture on the web": "Search the picture on the web",
   "Type your search in the box above to find images using search box": "Type your search in the box above to find images using search box",
   "Select": "Select",
+  "Cannot submit flip, content is too big": "Cannot submit flip, content is too big",
+  "You must use 4 images for a flip": "You must use 4 images for a flip",
+  "You already submitted this flip": "You already submitted this flip",
+  "You must shuffle flip before submit": "You must shuffle flip before submit",
+  "It's not allowed to submit flips with your identity status": "It's not allowed to submit flips with your identity status",
+  "Can not submit flip during the validation session": "Can not submit flip during the validation session",
   "Confirm transaction": "Confirm transaction",
   "You’re about to sign and send tx from your wallet": "You’re about to sign and send tx from your wallet",
   "Transaction details": "Transaction details"
