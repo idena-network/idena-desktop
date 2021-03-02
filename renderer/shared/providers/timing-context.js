@@ -6,7 +6,7 @@ import {fetchCeremonyIntervals} from '../api'
 import {Toast} from '../components/components'
 import {useInterval} from '../hooks/use-interval'
 
-const TIME_DRIFT_THRESHOLD = (10 * 1000) / 10000
+const TIME_DRIFT_THRESHOLD = 10 * 1000
 
 const TimingStateContext = React.createContext()
 
