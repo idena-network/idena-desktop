@@ -24,7 +24,9 @@ export function OnboardingProvider(props) {
           initial: 'idle',
           states: {
             idle: {
-              on: {SHOW: 'showing'},
+              on: {
+                SHOW: 'showing',
+              },
             },
             showing: {},
           },
@@ -36,13 +38,21 @@ export function OnboardingProvider(props) {
           initial: 'salut',
           states: {
             salut: {
-              after: {300: 'done'},
+              after: {
+                300: 'done',
+              },
             },
-            done: {},
+            done: {
+              after: {
+                300: `#onboarding.onboarding.${next}`,
+              },
+            },
           },
         },
         dismissed: {
-          on: {SHOW: 'active.showing'},
+          on: {
+            SHOW: 'active.showing',
+          },
         },
       },
       on: {
@@ -157,6 +167,6 @@ export function useOnboardingDispatch() {
   return context
 }
 
-export function useOnboarding(config) {
-  return [useOnboardingState(config), useOnboardingDispatch()]
+export function useOnboarding() {
+  return [useOnboardingState(), useOnboardingDispatch()]
 }

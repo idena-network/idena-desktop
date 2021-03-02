@@ -8,7 +8,6 @@ import {
   Flex,
   PopoverTrigger,
 } from '@chakra-ui/core'
-import Confetti from 'react-dom-confetti'
 import {useTranslation} from 'react-i18next'
 import {
   useIdentityState,
@@ -55,6 +54,7 @@ import {useChainState} from '../shared/providers/chain-context'
 import {
   OnboardingPopover,
   OnboardingPopoverContent,
+  TaskConfetti,
 } from '../shared/components/onboarding'
 import {useOnboarding} from '../shared/providers/onboarding-context'
 import {
@@ -118,7 +118,6 @@ export default function ProfilePage() {
 
   const [currentOnboarding, {done, dismiss}] = useOnboarding()
 
-  console.log('currentOnboarding=', currentOnboarding)
   const isShowingActivateInvitePopover = currentOnboarding.matches(
     activeShowingOnboardingStep(OnboardingStep.ActivateInvite)
   )
@@ -273,34 +272,13 @@ export default function ProfilePage() {
                 </OnboardingPopoverContent>
               </OnboardingPopover>
 
-              <Confetti
+              <TaskConfetti
                 active={eitherState(
                   currentOnboarding,
                   ...Object.keys(OnboardingStep).map(
                     step => `${doneOnboardingStep(OnboardingStep[step])}.salut`
                   )
                 )}
-                config={{
-                  angle: '70',
-                  spread: '35',
-                  startVelocity: '70',
-                  elementCount: '200',
-                  dragFriction: '0.15',
-                  duration: '3000',
-                  stagger: 4,
-                  width: '6px',
-                  height: '6px',
-                  perspective: '1000px',
-                  colors: [
-                    '#578fff',
-                    '#ff6666',
-                    '#27d980',
-                    '#ffc969',
-                    '#ff74e1',
-                    '#c08afa',
-                    '#8e62f5',
-                  ],
-                }}
               />
             </Stack>
             <Stack spacing={6} w={rem(200)}>

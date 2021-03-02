@@ -7,6 +7,9 @@ import {
   Badge,
   Box as ChakraBox,
   Icon,
+  List,
+  ListItem,
+  PopoverTrigger,
   Text as ChakraText,
 } from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
@@ -27,7 +30,18 @@ import {IdentityStatus, EpochPeriod, OnboardingStep} from '../types'
 import {Logo} from '../../screens/app/components'
 import {useVotingNotification} from '../providers/voting-notification-context'
 import {useOnboarding} from '../providers/onboarding-context'
-import {activeOnboardingStep} from '../utils/onboarding'
+import {
+  activeOnboardingStep,
+  activeShowingOnboardingStep,
+  doneOnboardingStep,
+} from '../utils/onboarding'
+import {
+  OnboardingPopover,
+  OnboardingPopoverContent,
+  TaskConfetti,
+} from './onboarding'
+import {eitherState} from '../utils/utils'
+import {ExternalLink} from './components'
 
 function Sidebar() {
   return (
@@ -263,10 +277,18 @@ function ActionPanel() {
   const identity = useIdentityState()
   const epoch = useEpochState()
 
-  const [currentOnboarding, {showCurrentTask}] = useOnboarding()
+  const [currentOnboarding, {showCurrentTask, dismiss}] = useOnboarding()
 
   const shouldActivateInvite = currentOnboarding.matches(
     activeOnboardingStep(OnboardingStep.ActivateInvite)
+  )
+
+  const shouldValidate = currentOnboarding.matches(
+    activeOnboardingStep(OnboardingStep.Validate)
+  )
+
+  const isShowingValidateStep = currentOnboarding.matches(
+    activeShowingOnboardingStep(OnboardingStep.Validate)
   )
 
   if (syncing || !epoch) {
@@ -291,7 +313,8 @@ function ActionPanel() {
       <ChakraBox
         roundedTop="md"
         onClick={() => {
-          if (!router.pathname.endsWith('/profile')) router.push('/profile')
+          if (shouldActivateInvite && !router.pathname.endsWith('/profile'))
+            router.push('/profile')
           showCurrentTask()
         }}
       >
@@ -307,41 +330,127 @@ function ActionPanel() {
       </ChakraBox>
 
       {currentPeriod === EpochPeriod.None && (
-        <Block title={t('Next validation')}>
-          {new Date(nextValidation).toLocaleString()}
-        </Block>
+        <>
+          <OnboardingPopover
+            isOpen={isShowingValidateStep}
+            closeOnBlur={false}
+            placement="right"
+            usePortal
+          >
+            <PopoverTrigger>
+              <ChakraBox roundedTop="md" zIndex={3} onClick={showCurrentTask}>
+                <PulseFrame
+                  isActive={shouldValidate && !isShowingValidateStep}
+                  roundedTop={0}
+                  roundedBottom="md"
+                >
+                  <Block title={t('Next validation')}>
+                    {new Date(nextValidation).toLocaleString()}
+                  </Block>
+                </PulseFrame>
+              </ChakraBox>
+            </PopoverTrigger>
+            <OnboardingPopoverContent
+              title={t('Schedule your next validation')}
+              onDismiss={dismiss}
+            >
+              <ChakraBox
+                bg="rgba(216, 216, 216, .1)"
+                position="absolute"
+                right="332px"
+                top="137px"
+                h="56px"
+                w={168}
+                roundedBottom="md"
+              >
+                <Block title={t('Next validation')}>
+                  {new Date(nextValidation).toLocaleString()}
+                </Block>
+              </ChakraBox>
+              <List as="ol" styleType="decimal" spacing={2}>
+                <ListItem>
+                  {t('Check the next validation time')}: 
+                  {new Date(nextValidation).toLocaleString()}
+                </ListItem>
+                <ListItem>
+                  {t(`Subscribe to the Idena Announcements Telegram channel to
+                    follow updates.`)}{' '}
+                  <ExternalLink
+                    href="https://t.me/IdenaAnnouncements"
+                    color="white"
+                    fontSize="sm"
+                  >
+                    {t('Subscribe')}
+                  </ExternalLink>
+                </ListItem>
+                <ListItem>
+                  {t(`You computer clock must be synchronized with the internet
+                    time.`)}{' '}
+                  <ExternalLink
+                    href="https://time.is"
+                    color="white"
+                    fontSize="sm"
+                  >
+                    {t('Check')}
+                  </ExternalLink>
+                </ListItem>
+                <ListItem>
+                  {t(`Keep your node fully synchronized in 30 minutes before the
+                    validation ceremony starts.`)}
+                </ListItem>
+                <ListItem>
+                  {t(`Solve the flips during the validation time. Be agile. The
+                    first 6 flips must be submitted in less than 2 minutes.`)}
+                </ListItem>
+              </List>
+            </OnboardingPopoverContent>
+          </OnboardingPopover>
+
+          <TaskConfetti
+            active={eitherState(
+              currentOnboarding,
+              ...Object.keys(OnboardingStep).map(
+                step => `${doneOnboardingStep(OnboardingStep[step])}.salut`
+              )
+            )}
+          />
+        </>
       )}
     </Box>
   )
 }
 
-function PulseFrame({isActive, children}) {
+function PulseFrame({isActive, children, ...props}) {
   return (
     <ChakraBox
       roundedTop="md"
-      style={{
-        boxShadow: `${isActive ? 'inset 0 0 0 2px #578fff' : ''}`,
-      }}
+      shadow={isActive ? 'inset 0 0 0 2px #578fff' : 'none'}
+      {...props}
     >
-      <div className={isActive ? 'pulseFrame' : ''}>{children}</div>
-      <style jsx>{`
-        .pulseFrame {
-          border-radius: 6px;
-          box-shadow: inset 0 0 0 2px #578fff3d;
-          animation: pulseFrame 1.2s infinite;
-        }
-        @keyframes pulseFrame {
-          0% {
-            box-shadow: inset 0 0 0 2px #578fff3d;
-          }
-          60% {
-            box-shadow: inset 0 0 0 5px #578fff3d;
-          }
-          100% {
-            box-shadow: inset 0 0 0 5px #578fff00;
-          }
-        }
-      `}</style>
+      {isActive ? (
+        <ChakraBox
+          rounded="md"
+          shadow="inset 0 0 0 2px #578fff3d"
+          animation="pulseFrame 1.2s infinite"
+        >
+          {children}
+          <style jsx global>{`
+            @keyframes pulseFrame {
+              0% {
+                box-shadow: inset 0 0 0 2px #578fff3d;
+              }
+              60% {
+                box-shadow: inset 0 0 0 5px #578fff3d;
+              }
+              100% {
+                box-shadow: inset 0 0 0 5px #578fff00;
+              }
+            }
+          `}</style>
+        </ChakraBox>
+      ) : (
+        children
+      )}
     </ChakraBox>
   )
 }
