@@ -261,11 +261,9 @@ export default function ViewVotingPage() {
                       </Stack>
                       <GoogleTranslateButton
                         phrases={[
-                          encodeURIComponent(title),
+                          title,
                           encodeURIComponent(desc?.replace(/%/g, '%25')),
-                          options
-                            .map(({value}) => encodeURIComponent(value))
-                            .join('\n'),
+                          options.map(({value}) => value).join('\n'),
                         ]}
                         alignSelf="start"
                       />
