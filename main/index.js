@@ -12,10 +12,10 @@ const {
 const {autoUpdater} = require('electron-updater')
 const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
-const express = require('express')
-const net = require('net')
 const fs = require('fs-extra')
 const i18next = require('i18next')
+// eslint-disable-next-line camelcase
+const {image_search} = require('duckduckgo-images-api')
 const {zoomIn, zoomOut, resetZoom} = require('./utils')
 const loadRoute = require('./utils/routes')
 const {getI18nConfig} = require('./language')
@@ -40,8 +40,6 @@ const logger = require('./logger')
 logger.info('idena started', global.appVersion || app.getVersion())
 
 const {
-  IMAGE_SEARCH_TOGGLE,
-  IMAGE_SEARCH_PICK,
   AUTO_UPDATE_EVENT,
   AUTO_UPDATE_COMMAND,
   NODE_COMMAND,
@@ -64,7 +62,6 @@ let node
 let nodeDownloadPromise = null
 let searchWindow
 let tray
-let expressPort = 3051
 
 const nodeUpdater = new NodeUpdater(logger)
 
@@ -557,87 +554,6 @@ ipcMain.on('node-log', ({sender}, message) => {
   sender.send('node-log', message)
 })
 
-function checkPort(port) {
-  logger.debug('Looking for open port...', port)
-  return new Promise((res, rej) => {
-    const tempServer = net.createServer()
-
-    tempServer.once('error', () => {
-      rej()
-    })
-
-    tempServer.once('listening', () => {
-      tempServer.close()
-      res()
-    })
-
-    tempServer.listen(port)
-  })
-}
-
-function runExpress(port) {
-  const server = express()
-  server.get('/', (_, res) => {
-    res.sendFile(resolve(__dirname, './server.html'))
-  })
-
-  server.listen(port, () => {
-    logger.debug(`Running on localhost:${port}`)
-  })
-}
-
-function choosePort() {
-  return checkPort(expressPort)
-    .then(() => {
-      logger.debug(`Found open port: ${expressPort}`)
-      runExpress(expressPort)
-      return Promise.resolve()
-    })
-    .catch(() => {
-      expressPort += 1
-      return choosePort()
-    })
-}
-
-choosePort()
-
-function createSearchWindow() {
-  searchWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    frame: false,
-    webPreferences: {
-      nodeIntegration: false,
-      preload: join(__dirname, 'preload.js'),
-    },
-    parent: mainWindow,
-    show: false,
-  })
-  searchWindow.loadURL(`http://localhost:${expressPort}/`)
-  searchWindow.on('closed', () => {
-    searchWindow = null
-  })
-}
-
-let lastUsedFlipId
-ipcMain.on(IMAGE_SEARCH_TOGGLE, (_event, {on, id}) => {
-  if (on) {
-    if (lastUsedFlipId !== id) {
-      createSearchWindow()
-      lastUsedFlipId = id
-    }
-    if (!searchWindow) createSearchWindow()
-    searchWindow.show()
-    searchWindow.focus()
-  } else {
-    searchWindow.hide()
-  }
-})
-
-ipcMain.on(IMAGE_SEARCH_PICK, (_event, message) => {
-  sendMainWindowMsg(IMAGE_SEARCH_PICK, message)
-})
-
 ipcMain.on('reload', () => {
   loadRoute(mainWindow, 'dashboard')
 })
@@ -656,3 +572,10 @@ function sendMainWindowMsg(channel, message, data) {
     logger.error('cannot send msg to main window', e.toString())
   }
 }
+
+ipcMain.handle('search-image', async (_, query) =>
+  image_search({
+    query,
+    moderate: false,
+  })
+)

@@ -2,7 +2,6 @@ import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position} from 'polished'
 import Jimp from 'jimp'
-
 import {useTranslation} from 'react-i18next'
 import mousetrap from 'mousetrap'
 import {
@@ -12,6 +11,8 @@ import {
   IconButton as ChakraIconButton,
   Divider,
   Icon,
+  Image,
+  useToast,
 } from '@chakra-ui/core'
 import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
@@ -21,7 +22,7 @@ import {Menu, MenuItem} from '../../../shared/components/menu'
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {Box, Absolute} from '../../../shared/components'
 import {Tooltip} from '../../../shared/components/tooltip'
-import {Tooltip as TooltipX} from '../../../shared/components/components'
+import {Toast, Tooltip as TooltipX} from '../../../shared/components/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {resizing, imageResize} from '../../../shared/utils/img'
@@ -29,8 +30,6 @@ import {
   getImageURLFromClipboard,
   writeImageURLToClipboard,
 } from '../../../shared/utils/clipboard'
-
-import {IMAGE_SEARCH_PICK, IMAGE_SEARCH_TOGGLE} from '../../../../main/channels'
 
 import {
   Brushes,
@@ -40,6 +39,7 @@ import {
   ImageEraseEditor,
   ApplyChangesBottomPanel,
 } from './flip-editor-tools'
+import {ImageSearchDialog} from './image-search'
 
 const ImageEditor =
   typeof window !== 'undefined'
@@ -76,6 +76,8 @@ const BLANK_IMAGE =
 
 function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   const {t} = useTranslation()
+
+  const toast = useToast()
 
   // Button menu
   const [isInsertImageMenuOpen, setInsertImageMenuOpen] = useState(false)
@@ -326,25 +328,6 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     reader.readAsDataURL(file)
     e.target.value = ''
   }
-
-  // Google search handling
-  useEffect(() => {
-    // eslint-disable-next-line no-shadow
-    const handleImageSearchPick = (_, data) => {
-      if (visible) {
-        const [{url}] = data.docs[0].thumbnails
-        setImageUrl({url, watermark: bottomWatermark})
-      }
-      setInsertImageMode(0)
-    }
-    global.ipcRenderer.on(IMAGE_SEARCH_PICK, handleImageSearchPick)
-    return () => {
-      global.ipcRenderer.removeListener(
-        IMAGE_SEARCH_PICK,
-        handleImageSearchPick
-      )
-    }
-  }, [setImageUrl, insertImageMode, visible, bottomWatermark])
 
   // Clipboard handling
   const handleImageFromClipboard = (insertMode = null) => {
@@ -630,6 +613,8 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorRefs, src, idx])
 
+  const [showImageSearch, setShowImageSearch] = React.useState()
+
   return (
     <div
       style={{
@@ -727,17 +712,14 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           {bottomMenuPanel === BottomMenu.Main && (
             <Stack isInline align="center" spacing={3} mt={6}>
               <FlipEditorIcon
-                tooltip={t('Search on Google')}
+                tooltip={t('Search on web')}
                 icon="google"
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
                     setRightMenuPanel(RightMenu.None)
                   }
                   setInsertImageMode(INSERT_BACKGROUND_IMAGE)
-                  global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
-                    on: true,
-                    id: `google-search-img`,
-                  })
+                  setShowImageSearch(true)
                 }}
               />
 
@@ -927,15 +909,12 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                           onClick={async () => {
                             setInsertImageMenuOpen(false)
                             setInsertImageMode(INSERT_OBJECT_IMAGE)
-                            global.ipcRenderer.send(IMAGE_SEARCH_TOGGLE, {
-                              on: true,
-                              id: `google-search-img`,
-                            })
+                            setShowImageSearch(true)
                           }}
                           disabled={false}
                           icon={<Icon size={5} name="google" />}
                         >
-                          {t('Search on Google')}
+                          {t('Search on web')}
                         </MenuItem>
                         <MenuItem
                           onClick={async () => {
@@ -1009,6 +988,25 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           </Stack>
         )}
       </Flex>
+      <ImageSearchDialog
+        isOpen={showImageSearch}
+        onPick={url => {
+          if (visible) {
+            setImageUrl({url, watermark: bottomWatermark})
+          }
+          setInsertImageMode(0)
+          setShowImageSearch(false)
+        }}
+        onClose={() => {
+          setShowImageSearch(false)
+        }}
+        onError={error =>
+          toast({
+            // eslint-disable-next-line react/display-name
+            render: () => <Toast title={error} status="error" />,
+          })
+        }
+      />
     </div>
   )
 }
