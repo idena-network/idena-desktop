@@ -67,7 +67,7 @@ export function TimingProvider(props) {
         Math.abs(new Date() - new Date(datetime)) > TIME_DRIFT_THRESHOLD
       )
     },
-    1000 * 60 * 5,
+    1000 * 60 * 1,
     true
   )
 
