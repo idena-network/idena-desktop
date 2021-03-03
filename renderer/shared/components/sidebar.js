@@ -315,8 +315,17 @@ function ActionPanel() {
         roundedTop="md"
         cursor="pointer"
         onClick={() => {
-          if (shouldActivateInvite && !router.pathname.endsWith('/profile'))
-            router.push('/profile')
+          if (shouldActivateInvite) {
+            if (!router.pathname.endsWith('/profile')) router.push('/profile')
+            document
+              .querySelectorAll('#__next section')[1]
+              .querySelector('div')
+              .scroll({
+                left: 0,
+                top: 9999,
+                behavior: 'smooth',
+              })
+          }
           showCurrentTask()
         }}
       >
