@@ -2,14 +2,14 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
 import {margin, borderRadius, darken, transparentize, padding} from 'polished'
-import {useTranslation} from 'react-i18next'
+import {Trans, useTranslation} from 'react-i18next'
 import {
   Badge,
   Box as ChakraBox,
+  Button,
   Icon,
-  List,
-  ListItem,
   PopoverTrigger,
+  Stack,
   Text as ChakraText,
 } from '@chakra-ui/core'
 import {Box, Link, Text} from '.'
@@ -36,12 +36,13 @@ import {
   doneOnboardingStep,
 } from '../utils/onboarding'
 import {
+  OnboardingLinkButton,
   OnboardingPopover,
   OnboardingPopoverContent,
+  OnboardingPopoverContentIconRow,
   TaskConfetti,
 } from './onboarding'
 import {eitherState} from '../utils/utils'
-import {ExternalLink} from './components'
 
 function Sidebar() {
   return (
@@ -347,6 +348,19 @@ function ActionPanel() {
             </PopoverTrigger>
             <OnboardingPopoverContent
               title={t('Schedule your next validation')}
+              maxW="sm"
+              additionFooterActions={
+                <Button
+                  variant="unstyled"
+                  onClick={() => {
+                    global.openExternal(
+                      'https://medium.com/idena/how-do-i-start-using-idena-c49418e01a06'
+                    )
+                  }}
+                >
+                  {t('Read more')}
+                </Button>
+              }
               onDismiss={dismiss}
             >
               <ChakraBox
@@ -362,42 +376,34 @@ function ActionPanel() {
                   {new Date(nextValidation).toLocaleString()}
                 </Block>
               </ChakraBox>
-              <List as="ol" styleType="decimal" spacing={2}>
-                <ListItem>
-                  {t('Check the next validation time')}: 
-                  {new Date(nextValidation).toLocaleString()}
-                </ListItem>
-                <ListItem>
-                  {t(`Subscribe to the Idena Announcements Telegram channel to
-                    follow updates.`)}{' '}
-                  <ExternalLink
-                    href="https://t.me/IdenaAnnouncements"
-                    color="white"
-                    fontSize="sm"
-                  >
-                    {t('Subscribe')}
-                  </ExternalLink>
-                </ListItem>
-                <ListItem>
-                  {t(`You computer clock must be synchronized with the internet
-                    time.`)}{' '}
-                  <ExternalLink
-                    href="https://time.is"
-                    color="white"
-                    fontSize="sm"
-                  >
-                    {t('Check')}
-                  </ExternalLink>
-                </ListItem>
-                <ListItem>
-                  {t(`Keep your node fully synchronized in 30 minutes before the
-                    validation ceremony starts.`)}
-                </ListItem>
-                <ListItem>
-                  {t(`Solve the flips during the validation time. Be agile. The
-                    first 6 flips must be submitted in less than 2 minutes.`)}
-                </ListItem>
-              </List>
+              <Stack spacing={5}>
+                <OnboardingPopoverContentIconRow icon="telegram">
+                  <Trans i18nKey="onboardingValidateSubscribe" t={t}>
+                    <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
+                      Subscribe
+                    </OnboardingLinkButton>{' '}
+                    to the Idena Announcements (important updates only)
+                  </Trans>
+                </OnboardingPopoverContentIconRow>
+                <OnboardingPopoverContentIconRow icon="sync">
+                  {t(
+                    `Keep your node synchronized in 60-30 minutes before the validation starts.`
+                  )}
+                </OnboardingPopoverContentIconRow>
+                <OnboardingPopoverContentIconRow icon="timer">
+                  {t(
+                    `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
+                  )}
+                </OnboardingPopoverContentIconRow>
+                <OnboardingPopoverContentIconRow icon="gallery">
+                  <Trans i18nKey="onboardingValidateTest" t={t}>
+                    <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
+                      Test yourself
+                    </OnboardingLinkButton>{' '}
+                    before the validation
+                  </Trans>
+                </OnboardingPopoverContentIconRow>
+              </Stack>
             </OnboardingPopoverContent>
           </OnboardingPopover>
 

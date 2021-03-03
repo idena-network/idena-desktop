@@ -570,5 +570,7 @@
   "Can not submit flip during the validation session": "Can not submit flip during the validation session",
   "Confirm transaction": "Confirm transaction",
   "You’re about to sign and send tx from your wallet": "You’re about to sign and send tx from your wallet",
-  "Transaction details": "Transaction details"
+  "Transaction details": "Transaction details",
+  "onboardingValidateSubscribe":"<0>Subscribe</0> to the Idena Announcements (important updates only)",
+  "onboardingValidateTest":"<0>Test yourself</0> before the validation"
 }

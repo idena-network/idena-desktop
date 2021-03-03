@@ -55,6 +55,7 @@ import {useChainState} from '../shared/providers/chain-context'
 import {
   OnboardingPopover,
   OnboardingPopoverContent,
+  OnboardingPopoverContentIconRow,
   TaskConfetti,
 } from '../shared/components/onboarding'
 import {useOnboarding} from '../shared/providers/onboarding-context'
@@ -239,18 +240,19 @@ export default function ProfilePage() {
                   zIndex={2}
                   onDismiss={dismiss}
                 >
-                  <Stack spacing={2}>
-                    <Text>
-                      {t(
-                        `An invitation can be provided by validated participants.`
-                      )}
-                      <br />
-                      <br />
-                      {t(`Join the official Idena public Telegram group and follow instructions in the
+                  <Stack spacing={5}>
+                    <Stack>
+                      <Text>
+                        {t(
+                          `An invitation can be provided by validated participants.`
+                        )}
+                      </Text>
+                      <Text>
+                        {t(`Join the official Idena public Telegram group and follow instructions in the
                 pinned message.`)}
-                    </Text>
-                    <Stack isInline align="center" spacing={4}>
-                      <Icon name="telegram" size={18} />
+                      </Text>
+                    </Stack>
+                    <OnboardingPopoverContentIconRow icon="telegram">
                       <Box>
                         <PrimaryButton
                           variant="unstyled"
@@ -267,7 +269,7 @@ export default function ProfilePage() {
                           {t('Official group')}
                         </Text>
                       </Box>
-                    </Stack>
+                    </OnboardingPopoverContentIconRow>
                   </Stack>
                 </OnboardingPopoverContent>
               </OnboardingPopover>

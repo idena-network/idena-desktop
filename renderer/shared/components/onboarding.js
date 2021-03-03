@@ -3,6 +3,7 @@ import React from 'react'
 import {
   Box,
   Button,
+  Icon,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -11,6 +12,7 @@ import {
   PopoverHeader,
   Portal,
   Stack,
+  useTheme,
 } from '@chakra-ui/core'
 import Confetti from 'react-dom-confetti'
 import {useTranslation} from 'react-i18next'
@@ -41,6 +43,7 @@ export function OnboardingPopover({children, ...props}) {
 
 export function OnboardingPopoverContent({
   title,
+  additionFooterActions,
   children,
   onDismiss,
   ...props
@@ -65,20 +68,37 @@ export function OnboardingPopoverContent({
             fontWeight={500}
             fontSize="md"
             p={0}
+            mb={0}
           >
             {title}
           </PopoverHeader>
           <PopoverBody fontSize="sm" p={0}>
             {children}
           </PopoverBody>
-          <PopoverFooter border="none" p={0} display="inline-flex">
-            <Button variant="unstyled" ml="auto" onClick={onDismiss}>
-              {t('Okay, got it')}
-            </Button>
+          <PopoverFooter as={Stack} border="none" p={0}>
+            <Stack isInline spacing={6} justify="flex-end">
+              {additionFooterActions}
+              <Button variant="unstyled" onClick={onDismiss}>
+                {t('Okay, got it')}
+              </Button>
+            </Stack>
           </PopoverFooter>
         </Stack>
       </Box>
     </PopoverContent>
+  )
+}
+
+export function OnboardingPopoverContentIconRow({icon, children, ...props}) {
+  return (
+    <Stack isInline spacing={4} align="center" {...props}>
+      {typeof icon === 'string' ? (
+        <Icon name={icon} size={5} />
+      ) : (
+        <Box>{icon}</Box>
+      )}
+      <Box color="white">{children}</Box>
+    </Stack>
   )
 }
 
@@ -106,6 +126,28 @@ export function TaskConfetti({config, ...props}) {
           '#8e62f5',
         ],
         ...config,
+      }}
+      {...props}
+    />
+  )
+}
+
+export function OnboardingLinkButton({href, ...props}) {
+  const {colors} = useTheme()
+  return (
+    <Button
+      variant="link"
+      color="white"
+      fontSize="sm"
+      fontWeight="normal"
+      verticalAlign="baseline"
+      textDecoration={`underline ${colors.xwhite['040']}`}
+      minW={0}
+      _hover={null}
+      _active={null}
+      _focus={null}
+      onClick={() => {
+        global.openExternal(href)
       }}
       {...props}
     />
