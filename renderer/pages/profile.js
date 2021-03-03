@@ -228,7 +228,6 @@ export default function ProfilePage() {
 
               <OnboardingPopover
                 isOpen={isShowingActivateInvitePopover}
-                closeOnBlur={false}
                 placement="top-start"
               >
                 <PopoverTrigger>

@@ -32,7 +32,9 @@ export function OnboardingPopover({children, ...props}) {
           />
         </Portal>
       )}
-      <Popover {...props}>{children}</Popover>
+      <Popover closeOnBlur={false} usePortal {...props}>
+        {children}
+      </Popover>
     </>
   )
 }

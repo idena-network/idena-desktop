@@ -331,12 +331,7 @@ function ActionPanel() {
 
       {currentPeriod === EpochPeriod.None && (
         <>
-          <OnboardingPopover
-            isOpen={isShowingValidateStep}
-            closeOnBlur={false}
-            placement="right"
-            usePortal
-          >
+          <OnboardingPopover isOpen={isShowingValidateStep} placement="right">
             <PopoverTrigger>
               <ChakraBox roundedTop="md" zIndex={3} onClick={showCurrentTask}>
                 <PulseFrame
