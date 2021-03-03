@@ -7,6 +7,7 @@ import {
   useToast,
   Flex,
   PopoverTrigger,
+  Box,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
@@ -248,25 +249,25 @@ export default function ProfilePage() {
                       {t(`Join the official Idena public Telegram group and follow instructions in the
                 pinned message.`)}
                     </Text>
-                    <Flex>
-                      <img
-                        alt={t('Invitation')}
-                        src="/static/body-telegram-icn.svg"
-                        style={{
-                          height: rem(16),
-                          width: rem(16),
-                          margin: rem(8),
-                        }}
-                      />
-                      <PrimaryButton
-                        variant="unstyled"
-                        onClick={() => {
-                          global.openExternal('https://t.me/IdenaNetworkPublic')
-                        }}
-                      >
-                        https://t.me/IdenaNetworkPublic
-                      </PrimaryButton>
-                    </Flex>
+                    <Stack isInline align="center" spacing={4}>
+                      <Icon name="telegram" size={18} />
+                      <Box>
+                        <PrimaryButton
+                          variant="unstyled"
+                          p={0}
+                          onClick={() => {
+                            global.openExternal(
+                              'https://t.me/IdenaNetworkPublic'
+                            )
+                          }}
+                        >
+                          https://t.me/IdenaNetworkPublic
+                        </PrimaryButton>
+                        <Text fontSize="sm" color="rgba(255, 255, 255, 0.56)">
+                          {t('Official group')}
+                        </Text>
+                      </Box>
+                    </Stack>
                   </Stack>
                 </OnboardingPopoverContent>
               </OnboardingPopover>

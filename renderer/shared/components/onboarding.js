@@ -60,7 +60,12 @@ export function OnboardingPopoverContent({
       <PopoverArrow />
       <Box p={2}>
         <Stack spacing={3}>
-          <PopoverHeader borderBottom="none" fontWeight={500} p={0}>
+          <PopoverHeader
+            borderBottom="none"
+            fontWeight={500}
+            fontSize="md"
+            p={0}
+          >
             {title}
           </PopoverHeader>
           <PopoverBody fontSize="sm" p={0}>
