@@ -240,7 +240,7 @@ export function Toast({
         <AlertTitle fontWeight={500} lineHeight="base">
           {title}
         </AlertTitle>
-        <AlertDescription color="muted" lineHeight="base">
+        <AlertDescription color="muted" lineHeight="base" textAlign="left">
           {description}
         </AlertDescription>
       </Flex>

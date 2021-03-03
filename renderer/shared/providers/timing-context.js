@@ -79,9 +79,11 @@ export function TimingProvider(props) {
         render: ({onClose}) => (
           <Toast
             status="error"
-            title={t('Please check your local clock')}
-            description={t('The time must be synchronized with internet time')}
-            actionContent={t('Okay')}
+            title={t('Please check your local time')}
+            description={t(
+              'The time must be synchronized with internet time for the successful validation'
+            )}
+            actionContent={t('Check')}
             onAction={() => {
               onClose()
               global.openExternal('https://time.is/')
