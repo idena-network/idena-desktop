@@ -11,7 +11,7 @@ const OnboardingStateContext = React.createContext()
 const OnboardingDispatchContext = React.createContext()
 
 export function OnboardingProvider(props) {
-  const {syncing} = useChainState()
+  const {syncing, offline} = useChainState()
   const {epoch} = useEpochState() ?? {epoch: -1}
   const {state} = useIdentityState()
 
@@ -118,10 +118,11 @@ export function OnboardingProvider(props) {
     if (
       epoch > 0 &&
       !syncing &&
+      !offline &&
       [IdentityStatus.Undefined, IdentityStatus.Invite].includes(state)
     )
       send('START')
-  }, [epoch, send, state, syncing])
+  }, [epoch, offline, send, state, syncing])
 
   React.useEffect(() => {
     persistOnboardingState(current)
