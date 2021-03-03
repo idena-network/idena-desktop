@@ -313,13 +313,14 @@ function ActionPanel() {
 
       <ChakraBox
         roundedTop="md"
+        cursor="pointer"
         onClick={() => {
           if (shouldActivateInvite && !router.pathname.endsWith('/profile'))
             router.push('/profile')
           showCurrentTask()
         }}
       >
-        <PulseFrame isActive={shouldActivateInvite}>
+        <PulseFrame isActive={shouldActivateInvite || shouldValidate}>
           <Block title={t('My current task')}>
             <CurrentTask
               epoch={epoch.epoch}
@@ -334,16 +335,19 @@ function ActionPanel() {
         <>
           <OnboardingPopover isOpen={isShowingValidateStep} placement="right">
             <PopoverTrigger>
-              <ChakraBox roundedTop="md" zIndex={3} onClick={showCurrentTask}>
-                <PulseFrame
-                  isActive={shouldValidate && !isShowingValidateStep}
-                  roundedTop={0}
-                  roundedBottom="md"
-                >
-                  <Block title={t('Next validation')}>
-                    {new Date(nextValidation).toLocaleString()}
-                  </Block>
-                </PulseFrame>
+              <ChakraBox
+                roundedBottom="md"
+                bg={
+                  isShowingValidateStep
+                    ? 'rgba(216, 216, 216, .1)'
+                    : 'transparent'
+                }
+                position="relative"
+                zIndex={9}
+              >
+                <Block title={t('Next validation')}>
+                  {new Date(nextValidation).toLocaleString()}
+                </Block>
               </ChakraBox>
             </PopoverTrigger>
             <OnboardingPopoverContent
@@ -363,19 +367,6 @@ function ActionPanel() {
               }
               onDismiss={dismiss}
             >
-              <ChakraBox
-                bg="rgba(216, 216, 216, .1)"
-                position="absolute"
-                right="332px"
-                top="137px"
-                h="56px"
-                w={168}
-                roundedBottom="md"
-              >
-                <Block title={t('Next validation')}>
-                  {new Date(nextValidation).toLocaleString()}
-                </Block>
-              </ChakraBox>
               <Stack spacing={5}>
                 <OnboardingPopoverContentIconRow icon="telegram">
                   <Trans i18nKey="onboardingValidateSubscribe" t={t}>

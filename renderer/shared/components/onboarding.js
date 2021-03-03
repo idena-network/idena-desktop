@@ -10,7 +10,6 @@ import {
   PopoverContent,
   PopoverFooter,
   PopoverHeader,
-  Portal,
   Stack,
   useTheme,
 } from '@chakra-ui/core'
@@ -22,17 +21,15 @@ export function OnboardingPopover({children, ...props}) {
     <>
       {/* eslint-disable-next-line react/destructuring-assignment */}
       {props.isOpen && (
-        <Portal>
-          <Box
-            bg="xblack.080"
-            position="fixed"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            zIndex={2}
-          />
-        </Portal>
+        <Box
+          bg="xblack.080"
+          position="fixed"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          zIndex={2}
+        />
       )}
       <Popover closeOnBlur={false} usePortal {...props}>
         {children}
