@@ -33,16 +33,13 @@ import {useOnboarding} from '../providers/onboarding-context'
 import {
   activeOnboardingStep,
   activeShowingOnboardingStep,
-  doneOnboardingStep,
 } from '../utils/onboarding'
 import {
   OnboardingLinkButton,
   OnboardingPopover,
   OnboardingPopoverContent,
   OnboardingPopoverContentIconRow,
-  TaskConfetti,
 } from './onboarding'
-import {eitherState} from '../utils/utils'
 
 function Sidebar() {
   return (
@@ -313,7 +310,7 @@ function ActionPanel() {
 
       <ChakraBox
         roundedTop="md"
-        cursor="pointer"
+        cursor={shouldActivateInvite || shouldValidate ? 'pointer' : 'default'}
         onClick={() => {
           if (shouldActivateInvite) {
             if (!router.pathname.endsWith('/profile')) router.push('/profile')
@@ -406,15 +403,6 @@ function ActionPanel() {
               </Stack>
             </OnboardingPopoverContent>
           </OnboardingPopover>
-
-          <TaskConfetti
-            active={eitherState(
-              currentOnboarding,
-              ...Object.keys(OnboardingStep).map(
-                step => `${doneOnboardingStep(OnboardingStep[step])}.salut`
-              )
-            )}
-          />
         </>
       )}
     </Box>

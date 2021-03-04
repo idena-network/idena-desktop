@@ -125,7 +125,7 @@ export function OnboardingProvider(props) {
   }, [epoch, offline, send, state, syncing])
 
   React.useEffect(() => {
-    persistOnboardingState(current)
+    if (current.changed) persistOnboardingState(current)
   }, [current])
 
   return (

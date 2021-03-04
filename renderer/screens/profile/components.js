@@ -138,10 +138,8 @@ export function UserStatLabelTooltip(props) {
   return <Tooltip placement="top" zIndex="tooltip" {...props} />
 }
 
-export const ActivateInviteForm = React.forwardRef(function ActivateInviteForm(
-  {onActivated = () => {}, ...props},
-  ref
-) {
+// eslint-disable-next-line react/display-name
+export const ActivateInviteForm = React.forwardRef((props, ref) => {
   const {t} = useTranslation()
 
   const {addError} = useNotificationDispatch()
@@ -152,12 +150,6 @@ export const ActivateInviteForm = React.forwardRef(function ActivateInviteForm(
   const {canActivateInvite, state: status} = useIdentityState()
 
   const [code, setCode] = React.useState()
-
-  React.useEffect(() => {
-    if (status === IdentityStatus.Candidate) {
-      onActivated()
-    }
-  }, [activationTx, onActivated, status])
 
   if (!canActivateInvite) {
     return null

@@ -62,6 +62,7 @@ import {useOnboarding} from '../shared/providers/onboarding-context'
 import {
   doneOnboardingStep,
   activeShowingOnboardingStep,
+  onboardingStep,
 } from '../shared/utils/onboarding'
 
 export default function ProfilePage() {
@@ -118,7 +119,27 @@ export default function ProfilePage() {
     }
   }, [epoch])
 
-  const [currentOnboarding, {done, dismiss}] = useOnboarding()
+  const [currentOnboarding, {done, dismiss, next}] = useOnboarding()
+
+  React.useEffect(() => {
+    // console.log('entering effect', {state: currentOnboarding.value})
+    if (
+      status === IdentityStatus.Candidate &&
+      eitherState(
+        currentOnboarding,
+        onboardingStep(OnboardingStep.ActivateInvite)
+      ) &&
+      !eitherState(
+        currentOnboarding,
+        'idle',
+        doneOnboardingStep(OnboardingStep.ActivateInvite)
+      )
+    ) {
+      // console.log('bumping done')
+      done()
+      // console.log('bumping done DONE', {state: currentOnboarding.value})
+    }
+  }, [currentOnboarding, done, next, status])
 
   const isShowingActivateInvitePopover = currentOnboarding.matches(
     activeShowingOnboardingStep(OnboardingStep.ActivateInvite)
@@ -233,7 +254,7 @@ export default function ProfilePage() {
                 placement="top-start"
               >
                 <PopoverTrigger>
-                  <ActivateInviteForm zIndex={2} onActivated={done} />
+                  <ActivateInviteForm zIndex={2} />
                 </PopoverTrigger>
                 <OnboardingPopoverContent
                   title={t('Enter invitation code')}
@@ -277,9 +298,7 @@ export default function ProfilePage() {
               <TaskConfetti
                 active={eitherState(
                   currentOnboarding,
-                  ...Object.keys(OnboardingStep).map(
-                    step => `${doneOnboardingStep(OnboardingStep[step])}.salut`
-                  )
+                  `${doneOnboardingStep(OnboardingStep.ActivateInvite)}.salut`
                 )}
               />
             </Stack>

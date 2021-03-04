@@ -1,6 +1,8 @@
 import {State} from 'xstate'
 import {loadPersistentState, persistState} from './persist'
 
+export const onboardingStep = step => `onboarding.${step}`
+
 export const activeOnboardingStep = step => `onboarding.${step}.active`
 export const activeIdleOnboardingStep = step =>
   `${activeOnboardingStep(step)}.idle`
