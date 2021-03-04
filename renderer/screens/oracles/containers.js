@@ -1526,7 +1526,6 @@ function splitMany(str, ...separators) {
     if (idx === separators.length - 1 && parts[1]) acc.push(parts[1])
     // eslint-disable-next-line no-param-reassign
     else [str] = parts
-
     return acc
   }, [])
 }
@@ -1541,7 +1540,7 @@ export function Linkify({onClick, children}) {
   return (
     <>
       {parts.map(part =>
-        isValidUrl(part) ? (
+        part.startsWith('http') ? (
           <Button
             variant="link"
             variantColor="brandBlue"

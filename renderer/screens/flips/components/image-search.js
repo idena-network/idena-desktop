@@ -38,18 +38,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
       },
       initial: 'idle',
       states: {
-        idle: {
-          on: {
-            TYPE: {
-              actions: [
-                assign({
-                  // eslint-disable-next-line no-shadow
-                  query: (_, {query}) => query,
-                }),
-              ],
-            },
-          },
-        },
+        idle: {},
         searching: {
           invoke: {
             // eslint-disable-next-line no-shadow
@@ -84,6 +73,14 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
       },
       on: {
         SEARCH: 'searching',
+        TYPE: {
+          actions: [
+            assign({
+              // eslint-disable-next-line no-shadow
+              query: (_, {query}) => query,
+            }),
+          ],
+        },
       },
     })
   )
@@ -91,7 +88,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
   const {images, query, selectedImage} = current.context
 
   return (
-    <Dialog size={440} onClose={onClose} {...props}>
+    <Dialog size="md" onClose={onClose} {...props}>
       <DialogBody d="flex">
         <Stack minH="sm" maxH="sm" spacing={4} flex={1}>
           <Stack
@@ -156,7 +153,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
                 <AspectRatioBox
                   key={`${image}-${idx}`}
                   ratio={1}
-                  w={88}
+                  w={98}
                   bg={thumbnail === selectedImage ? 'blue.032' : 'white'}
                   borderColor={
                     thumbnail === selectedImage ? 'blue.500' : 'gray.50'
