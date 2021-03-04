@@ -58,14 +58,18 @@ export function TimingProvider(props) {
 
   useInterval(
     async () => {
-      const {datetime} = await (
-        await fetch('http://worldtimeapi.org/api/ip')
-      ).json()
+      try {
+        const {datetime} = await (
+          await fetch('http://worldtimeapi.org/api/ip')
+        ).json()
 
-      // same as within the node = 10 sec
-      setWrongClientTime(
-        Math.abs(new Date() - new Date(datetime)) > TIME_DRIFT_THRESHOLD
-      )
+        // same as in the node = 10 sec
+        setWrongClientTime(
+          Math.abs(new Date() - new Date(datetime)) > TIME_DRIFT_THRESHOLD
+        )
+      } catch {
+        global.logger.error('An error occured while fetching time API')
+      }
     },
     1000 * 60 * 1,
     true

@@ -33,6 +33,7 @@ import {useOnboarding} from '../providers/onboarding-context'
 import {
   activeOnboardingStep,
   activeShowingOnboardingStep,
+  onboardingStep,
 } from '../utils/onboarding'
 import {
   OnboardingLinkButton,
@@ -40,6 +41,7 @@ import {
   OnboardingPopoverContent,
   OnboardingPopoverContentIconRow,
 } from './onboarding'
+import {eitherState} from '../utils/utils'
 
 function Sidebar() {
   return (
@@ -310,7 +312,15 @@ function ActionPanel() {
 
       <ChakraBox
         roundedTop="md"
-        cursor={shouldActivateInvite || shouldValidate ? 'pointer' : 'default'}
+        cursor={
+          eitherState(
+            currentOnboarding,
+            onboardingStep(OnboardingStep.ActivateInvite),
+            onboardingStep(OnboardingStep.Validate)
+          )
+            ? 'pointer'
+            : 'default'
+        }
         onClick={() => {
           if (shouldActivateInvite) {
             if (!router.pathname.endsWith('/profile')) router.push('/profile')
