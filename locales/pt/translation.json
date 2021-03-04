@@ -567,5 +567,21 @@
   "Can not submit flip during the validation session": "Can not submit flip during the validation session",
   "Confirm transaction": "Confirm transaction",
   "You’re about to sign and send tx from your wallet": "You’re about to sign and send tx from your wallet",
-  "Transaction details": "Transaction details"
+  "Transaction details": "Transaction details",
+  "onboardingValidateSubscribe": "<0>Subscribe</0> to the Idena Announcements (important updates only)",
+  "onboardingValidateTest": "<0>Test yourself</0> before the validation",
+  "Leaving Idena": "Leaving Idena",
+  "Continue": "Continue",
+  "Enter invitation code": "Enter invitation code",
+  "An invitation can be provided by validated participants.": "An invitation can be provided by validated participants.",
+  "Join the official Idena public Telegram group and follow instructions in the\n                pinned message.": "Join the official Idena public Telegram group and follow instructions in the\n                pinned message.",
+  "Official group": "Official group",
+  "Search on web": "Search on web",
+  "Schedule your next validation": "Schedule your next validation",
+  "Read more": "Read more",
+  "Keep your node synchronized in 60-30 minutes before the validation starts.": "Keep your node synchronized in 60-30 minutes before the validation starts.",
+  "Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.": "Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.",
+  "Please check your local time": "Please check your local time",
+  "The time must be synchronized with internet time for the successful validation": "The time must be synchronized with internet time for the successful validation",
+  "Check": "Check"
 }

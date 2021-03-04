@@ -34,14 +34,26 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
     Machine({
       context: {
         images: [],
+        query: '',
       },
       initial: 'idle',
       states: {
-        idle: {},
+        idle: {
+          on: {
+            TYPE: {
+              actions: [
+                assign({
+                  // eslint-disable-next-line no-shadow
+                  query: (_, {query}) => query,
+                }),
+              ],
+            },
+          },
+        },
         searching: {
           invoke: {
-            src: (_, {query}) =>
-              global.ipcRenderer.invoke('search-image', query),
+            // eslint-disable-next-line no-shadow
+            src: ({query}) => global.ipcRenderer.invoke('search-image', query),
             onDone: {
               target: 'done',
               actions: [
@@ -76,7 +88,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
     })
   )
 
-  const {images, selectedImage} = current.context
+  const {images, query, selectedImage} = current.context
 
   return (
     <Dialog size={440} onClose={onClose} {...props}>
@@ -87,7 +99,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
             as="form"
             onSubmit={e => {
               e.preventDefault()
-              send('SEARCH', {query: e.target.elements.query.value})
+              send('SEARCH')
             }}
           >
             <InputGroup w="full">
@@ -114,10 +126,13 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
               </InputLeftElement>
               <Input
                 type="search"
-                id="query"
+                value={query}
                 placeholder={t('Search the picture on the web')}
                 bg="gray.50"
                 pl={10}
+                onChange={e => {
+                  send('TYPE', {query: e.target.value})
+                }}
               />
             </InputGroup>
           </Stack>
@@ -137,8 +152,9 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
           )}
           {eitherState(current, 'done') && (
             <SimpleGrid columns={4} spacing={2} overflow="auto" mx={-6} px={6}>
-              {images.map(({thumbnail}) => (
+              {images.map(({thumbnail, image}, idx) => (
                 <AspectRatioBox
+                  key={`${image}-${idx}`}
                   ratio={1}
                   w={88}
                   bg={thumbnail === selectedImage ? 'blue.032' : 'white'}

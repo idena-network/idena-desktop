@@ -58,16 +58,20 @@ export function TimingProvider(props) {
 
   useInterval(
     async () => {
-      const {datetime} = await (
-        await fetch('http://worldtimeapi.org/api/ip')
-      ).json()
+      try {
+        const {datetime} = await (
+          await fetch('http://worldtimeapi.org/api/ip')
+        ).json()
 
-      // same as within the node = 10 sec
-      setWrongClientTime(
-        Math.abs(new Date() - new Date(datetime)) > TIME_DRIFT_THRESHOLD
-      )
+        // same as in the node = 10 sec
+        setWrongClientTime(
+          Math.abs(new Date() - new Date(datetime)) > TIME_DRIFT_THRESHOLD
+        )
+      } catch {
+        global.logger.error('An error occured while fetching time API')
+      }
     },
-    1000 * 60 * 5,
+    1000 * 60 * 1,
     true
   )
 
@@ -79,9 +83,11 @@ export function TimingProvider(props) {
         render: ({onClose}) => (
           <Toast
             status="error"
-            title={t('Please check your local clock')}
-            description={t('The time must be synchronized with internet time')}
-            actionContent={t('Okay')}
+            title={t('Please check your local time')}
+            description={t(
+              'The time must be synchronized with internet time for the successful validation'
+            )}
+            actionContent={t('Check')}
             onAction={() => {
               onClose()
               global.openExternal('https://time.is/')

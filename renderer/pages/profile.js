@@ -1,5 +1,14 @@
 import React from 'react'
-import {Stack, Text, Icon, useDisclosure, useToast, Flex} from '@chakra-ui/core'
+import {
+  Stack,
+  Text,
+  Icon,
+  useDisclosure,
+  useToast,
+  Flex,
+  PopoverTrigger,
+  Box,
+} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
   useIdentityState,
@@ -21,11 +30,16 @@ import {
   UserStat,
   UserStatLabel,
 } from '../screens/profile/components'
-import {IconButton2} from '../shared/components/button'
+import {PrimaryButton, IconButton2} from '../shared/components/button'
 import Layout from '../shared/components/layout'
 import {IconLink} from '../shared/components/link'
-import {IdentityStatus} from '../shared/types'
-import {toPercent, toLocaleDna, callRpc} from '../shared/utils/utils'
+import {IdentityStatus, OnboardingStep} from '../shared/types'
+import {
+  toPercent,
+  toLocaleDna,
+  callRpc,
+  eitherState,
+} from '../shared/utils/utils'
 import {ExternalLink, Toast} from '../shared/components/components'
 import KillForm, {
   KillIdentityDrawer,
@@ -38,6 +52,18 @@ import {persistItem} from '../shared/utils/persist'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {rem} from '../shared/theme'
 import {useChainState} from '../shared/providers/chain-context'
+import {
+  OnboardingPopover,
+  OnboardingPopoverContent,
+  OnboardingPopoverContentIconRow,
+  TaskConfetti,
+} from '../shared/components/onboarding'
+import {useOnboarding} from '../shared/providers/onboarding-context'
+import {
+  doneOnboardingStep,
+  activeShowingOnboardingStep,
+  onboardingStep,
+} from '../shared/utils/onboarding'
 
 export default function ProfilePage() {
   const {
@@ -93,6 +119,32 @@ export default function ProfilePage() {
     }
   }, [epoch])
 
+  const [currentOnboarding, {done, dismiss, next}] = useOnboarding()
+
+  React.useEffect(() => {
+    // console.log('entering effect', {state: currentOnboarding.value})
+    if (
+      status === IdentityStatus.Candidate &&
+      eitherState(
+        currentOnboarding,
+        onboardingStep(OnboardingStep.ActivateInvite)
+      ) &&
+      !eitherState(
+        currentOnboarding,
+        'idle',
+        doneOnboardingStep(OnboardingStep.ActivateInvite)
+      )
+    ) {
+      // console.log('bumping done')
+      done()
+      // console.log('bumping done DONE', {state: currentOnboarding.value})
+    }
+  }, [currentOnboarding, done, next, status])
+
+  const isShowingActivateInvitePopover = currentOnboarding.matches(
+    activeShowingOnboardingStep(OnboardingStep.ActivateInvite)
+  )
+
   const toDna = toLocaleDna(language)
 
   return (
@@ -103,6 +155,7 @@ export default function ProfilePage() {
           <Stack isInline spacing={10}>
             <Stack spacing={6} w="md">
               <UserInlineCard address={address} status={status} h={24} />
+
               <UserStatList>
                 <UserStat>
                   <UserStatLabel>{t('Address')}</UserStatLabel>
@@ -195,7 +248,59 @@ export default function ProfilePage() {
                   </AnnotatedUserStat>
                 )}
               </UserStatList>
-              <ActivateInviteForm />
+
+              <OnboardingPopover
+                isOpen={isShowingActivateInvitePopover}
+                placement="top-start"
+              >
+                <PopoverTrigger>
+                  <ActivateInviteForm zIndex={2} />
+                </PopoverTrigger>
+                <OnboardingPopoverContent
+                  title={t('Enter invitation code')}
+                  zIndex={2}
+                  onDismiss={dismiss}
+                >
+                  <Stack spacing={5}>
+                    <Stack>
+                      <Text>
+                        {t(
+                          `An invitation can be provided by validated participants.`
+                        )}
+                      </Text>
+                      <Text>
+                        {t(`Join the official Idena public Telegram group and follow instructions in the
+                pinned message.`)}
+                      </Text>
+                    </Stack>
+                    <OnboardingPopoverContentIconRow icon="telegram">
+                      <Box>
+                        <PrimaryButton
+                          variant="unstyled"
+                          p={0}
+                          onClick={() => {
+                            global.openExternal(
+                              'https://t.me/IdenaNetworkPublic'
+                            )
+                          }}
+                        >
+                          https://t.me/IdenaNetworkPublic
+                        </PrimaryButton>
+                        <Text fontSize="sm" color="rgba(255, 255, 255, 0.56)">
+                          {t('Official group')}
+                        </Text>
+                      </Box>
+                    </OnboardingPopoverContentIconRow>
+                  </Stack>
+                </OnboardingPopoverContent>
+              </OnboardingPopover>
+
+              <TaskConfetti
+                active={eitherState(
+                  currentOnboarding,
+                  `${doneOnboardingStep(OnboardingStep.ActivateInvite)}.salut`
+                )}
+              />
             </Stack>
             <Stack spacing={6} w={rem(200)}>
               <Flex h={24}>
