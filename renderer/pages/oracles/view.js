@@ -289,7 +289,7 @@ export default function ViewVotingPage() {
                           <Stack spacing={3}>
                             {/* eslint-disable-next-line no-shadow */}
                             {options.map(({id, value}) => {
-                              const isMine = id < 1 // === selectedOption
+                              const isMine = id === selectedOption
                               return (
                                 <Stack
                                   isInline
