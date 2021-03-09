@@ -48,6 +48,7 @@ module.exports = {
       loadPath: 'locales/{{lng}}/{{ns}}.json',
       savePath: 'locales/{{lng}}/{{ns}}.json',
       jsonIndent: 2,
+      lineEnding: '\n',
     },
     keySeparator: false,
   },

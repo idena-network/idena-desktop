@@ -62,6 +62,7 @@ function IdentityProvider({children}) {
       async function fetchData() {
         try {
           const nextIdentity = await fetchIdentity()
+
           if (!deepEqual(identity, nextIdentity)) {
             const state =
               identity &&

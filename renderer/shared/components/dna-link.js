@@ -1,5 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
+import {useRouter} from 'next/router'
+import {Text as ChakraText} from '@chakra-ui/core'
 import {
   margin,
   padding,
@@ -24,16 +26,30 @@ import {
   parseQuery,
   sendDna,
   DNA_SEND_CONFIRM_TRESHOLD,
-  AlertText,
   validDnaUrl,
+  Transaction,
+  appendTxHash,
 } from '../utils/dna-link'
 import {Input, FormGroup, Label} from './form'
 import Avatar from './avatar'
 import {Tooltip} from './tooltip'
 import {useNotificationDispatch} from '../providers/notification-context'
-import {Dialog, DialogBody, DialogFooter} from './components'
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Tooltip as ChakraTooltip,
+} from './components'
+
+import {
+  areSameCaseInsensitive,
+  viewVotingHref,
+} from '../../screens/oracles/utils'
+import {callRpc} from '../utils/utils'
 
 export function DnaLinkHandler({children}) {
+  const router = useRouter()
+
   const [dnaUrl, setDnaUrl] = React.useState()
 
   const {addError} = useNotificationDispatch()
@@ -60,6 +76,14 @@ export function DnaLinkHandler({children}) {
       global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
     }
   }, [])
+
+  if (validDnaUrl(dnaUrl) && new URL(dnaUrl).pathname.includes('vote')) {
+    const {address} = parseQuery(dnaUrl)
+    if (!areSameCaseInsensitive(router.asPath, viewVotingHref(address))) {
+      router.push(viewVotingHref(address))
+      return null
+    }
+  }
 
   return validDnaUrl(dnaUrl) &&
     React.Children.only(children).props.isOpen(dnaUrl)
@@ -202,7 +226,9 @@ export function DnaSendDialog({
 
   const {address: from, balance} = useIdentityState()
 
-  const {address: to, amount, comment} = parseQuery(url)
+  const {address: to, amount, comment, callback_url: callbackUrl} = parseQuery(
+    url
+  )
 
   const shouldConfirmTx = amount / balance > DNA_SEND_CONFIRM_TRESHOLD
 
@@ -314,10 +340,174 @@ export function DnaSendDialog({
               return resolve()
             })
               .then(() => sendDna({from, to, amount, comment}))
-              .then(onDepositSuccess)
+              .then(hash => {
+                if (isValidUrl(callbackUrl)) {
+                  global.openExternal(appendTxHash(callbackUrl, hash).href)
+                }
+                onDepositSuccess(hash)
+              })
               .catch(({message}) => {
                 global.logger.error(message)
                 if (onDepositError) onDepositError(message)
+              })
+              .finally(onHide)
+          }}
+        >
+          {t('Confirm')}
+        </PrimaryButton>
+      </DnaDialogFooter>
+    </DnaDialog>
+  )
+}
+
+export function DnaRawTxDialog({
+  url,
+  onHide,
+  onSendSuccess,
+  onSendError,
+  ...props
+}) {
+  const {t} = useTranslation()
+
+  const {balance} = useIdentityState()
+
+  const {tx: rawTx, callback_url: callbackUrl} = parseQuery(url)
+
+  const {amount: rawAmount, to} = new Transaction().fromHex(rawTx)
+
+  const amount = rawAmount / 10 ** 18
+
+  const shouldConfirmTx = amount / balance > DNA_SEND_CONFIRM_TRESHOLD
+
+  const [confirmAmount, setConfirmAmount] = React.useState()
+
+  const areSameAmounts = +confirmAmount === +amount
+  const isExceededBalance = +amount > balance
+
+  return (
+    <DnaDialog
+      isOpen={url}
+      onClose={onHide}
+      m={0}
+      title={t('Confirm transaction')}
+      {...props}
+    >
+      <DnaDialogBody>
+        <DnaDialogSubtitle>
+          {t('You’re about to sign and send tx from your wallet')}
+        </DnaDialogSubtitle>
+        <DnaDialogAlert>
+          {t('Attention! This is irreversible operation')}
+        </DnaDialogAlert>
+        <DnaDialogDetails>
+          <DnaDialogPanel>
+            <PanelRow>
+              <Box>
+                <DnaDialogPanelLabel>{t('To')}</DnaDialogPanelLabel>
+                <DnaDialogPanelValue>{to}</DnaDialogPanelValue>
+              </Box>
+              <PanelMediaCell>
+                <Address address={to} />
+              </PanelMediaCell>
+            </PanelRow>
+          </DnaDialogPanel>
+          <DnaDialogPanelDivider />
+          <DnaDialogPanel>
+            <DnaDialogPanelLabel>{t('Amount')}, iDNA</DnaDialogPanelLabel>
+            <DnaDialogPanelValue
+              color={
+                isExceededBalance ? theme.colors.danger : theme.colors.text
+              }
+            >
+              <PanelRow justify="flex-start">
+                <Box style={{...margin(0, rem(4), 0, 0)}}>{amount}</Box>
+                <Box
+                  style={{
+                    lineHeight: rem(theme.fontSizes.base),
+                    ...margin(rem(2), 0, 0),
+                  }}
+                >
+                  {isExceededBalance && (
+                    <Tooltip
+                      content={t('The amount is larger than your balance')}
+                    >
+                      <FiAlertCircle
+                        size={rem(16)}
+                        color={theme.colors.danger}
+                      />
+                    </Tooltip>
+                  )}
+                </Box>
+              </PanelRow>
+            </DnaDialogPanelValue>
+          </DnaDialogPanel>
+          <DnaDialogPanelDivider />
+          <DnaDialogPanel
+            label={`${t('Available balance')}, iDNA`}
+            value={balance}
+          />
+          <DnaDialogPanelDivider />
+          <DnaDialogPanel label={t('Transaction details')}>
+            <ChakraTooltip label={rawTx} zIndex="tooltip" wordBreak="break-all">
+              <ChakraText
+                display="-webkit-box"
+                overflow="hidden"
+                style={{
+                  '-webkit-box-orient': 'vertical',
+                  '-webkit-line-clamp': '2',
+                }}
+                wordBreak="break-all"
+              >
+                {rawTx}
+              </ChakraText>
+            </ChakraTooltip>
+          </DnaDialogPanel>
+        </DnaDialogDetails>
+        {shouldConfirmTx && (
+          <FormGroup style={{...margin(rem(20), 0, 0)}}>
+            <Label style={{fontWeight: 500}}>
+              {t('Enter amount to confirm transfer')}
+            </Label>
+            <Input
+              disabled={isExceededBalance}
+              value={confirmAmount}
+              onChange={e => setConfirmAmount(e.target.value)}
+            />
+            {Number.isFinite(+confirmAmount) && !areSameAmounts && (
+              <AlertText>
+                {t('Entered amount does not match target amount')}
+              </AlertText>
+            )}
+          </FormGroup>
+        )}
+      </DnaDialogBody>
+      <DnaDialogFooter>
+        <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
+        <PrimaryButton
+          isDisabled={isExceededBalance || (shouldConfirmTx && !areSameAmounts)}
+          onClick={async () => {
+            new Promise((resolve, reject) => {
+              if (shouldConfirmTx) {
+                return areSameAmounts
+                  ? resolve()
+                  : reject(
+                      new Error(
+                        t('Entered amount does not match target amount')
+                      )
+                    )
+              }
+              return resolve()
+            })
+              .then(() => callRpc('bcn_sendRawTx', rawTx))
+              .then(hash => {
+                if (isValidUrl(callbackUrl)) {
+                  global.openExternal(appendTxHash(callbackUrl, hash).href)
+                }
+                onSendSuccess(hash)
+              })
+              .catch(({message}) => {
+                global.logger.error(message)
+                if (onSendError) onSendError(message)
               })
               .finally(onHide)
           }}
@@ -463,6 +653,21 @@ function Address({address}) {
         border: `solid 1px ${theme.colors.gray2}`,
         ...margin(0),
       }}
+    />
+  )
+}
+
+function AlertText({textAlign = 'initial', ...props}) {
+  return (
+    <Box
+      color={theme.colors.danger}
+      style={{
+        fontWeight: theme.fontWeights.medium,
+        fontSize: rem(11),
+        ...margin(rem(12), 0, 0),
+        textAlign,
+      }}
+      {...props}
     />
   )
 }

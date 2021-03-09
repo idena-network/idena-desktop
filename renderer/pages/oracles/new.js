@@ -39,7 +39,7 @@ import {
   PresetFormControlOptionList,
   PresetFormControlOption,
   PresetFormControlInputBox,
-  PresetFormControlHelperText,
+  NumberInput,
 } from '../../screens/oracles/components'
 import {
   votingMinBalance,
@@ -49,6 +49,7 @@ import {
   viewVotingHref,
   humanError,
   stripOptions,
+  rewardPerOracle,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -116,7 +117,7 @@ function NewVotingPage() {
     shouldStartImmediately,
     isFreeVoting,
     committeeSize,
-    quorum = 20,
+    quorum = 1,
     winnerThreshold = '66',
     feePerGas,
     oracleReward,
@@ -203,6 +204,7 @@ function NewVotingPage() {
                       value={value}
                       placeholder={`${t('Option')} ${idx + 1}...`}
                       isLast={idx === options.length - 1}
+                      isDisabled={[0, 1].includes(idx)}
                       onChange={({target}) => {
                         send('SET_OPTIONS', {id, value: target.value})
                       }}
@@ -283,14 +285,18 @@ function NewVotingPage() {
                 htmlFor="committeeSize"
                 label={t('Committee size, oracles')}
                 isInvalid={committeeSize < 1}
+                tooltip={t(
+                  'The number of randomly selected oracles allowed to vote'
+                )}
                 mt={2}
               >
                 <Stack spacing={3} flex={1}>
-                  <Input
+                  <NumberInput
                     id="committeeSize"
-                    type="number"
                     value={committeeSize}
                     min={1}
+                    step={1}
+                    preventInvalidInput
                     isDisabled={isWholeNetwork}
                     onChange={({target: {id, value}}) => {
                       send('CHANGE_COMMITTEE', {id, value})
@@ -356,9 +362,16 @@ function NewVotingPage() {
                 </Stack>
               </VotingInlineFormControl>
 
-              <NewVotingFormSubtitle>{t('Rewards')}</NewVotingFormSubtitle>
+              <NewVotingFormSubtitle>
+                {t('Cost of voting')}
+              </NewVotingFormSubtitle>
 
-              <PresetFormControl label={t('Min reward per oracle')}>
+              <PresetFormControl
+                label={t('Total funds')}
+                tooltip={t(
+                  'Total funds locked during the voting and paid to oracles and owner afterwards'
+                )}
+              >
                 <PresetFormControlOptionList
                   value={String(oracleReward)}
                   onChange={value => {
@@ -378,20 +391,47 @@ function NewVotingPage() {
                 <PresetFormControlInputBox>
                   <DnaInput
                     id="oracleReward"
-                    value={oracleReward}
-                    min={minOracleReward}
-                    onChange={handleChange}
+                    value={oracleReward * committeeSize}
+                    min={minOracleReward * committeeSize}
+                    onChange={({target: {id, value}}) => {
+                      send('CHANGE', {
+                        id,
+                        value: (value || 0) / Math.max(1, committeeSize),
+                      })
+                    }}
                   />
-                  <PresetFormControlHelperText>
-                    {t('Total oracles rewards: {{amount}}', {
+                  <NewOracleFormHelperText textAlign="right">
+                    {t('Min reward per oracle: {{amount}}', {
                       amount: dna(
-                        votingMinBalance({oracleReward, committeeSize})
+                        rewardPerOracle({fundPerOracle: oracleReward, ownerFee})
                       ),
                       nsSeparator: '!',
                     })}
-                  </PresetFormControlHelperText>
+                  </NewOracleFormHelperText>
                 </PresetFormControlInputBox>
               </PresetFormControl>
+
+              <VotingInlineFormControl
+                htmlFor="ownerFee"
+                label={t('Owner fee')}
+                tooltip={t('% of the Total funds you receive')}
+              >
+                <PercentInput
+                  id="ownerFee"
+                  value={ownerFee}
+                  onChange={handleChange}
+                />
+
+                <NewOracleFormHelperText textAlign="right">
+                  {t('Paid to owner: {{amount}}', {
+                    amount: dna(
+                      (oracleReward * committeeSize * Math.min(100, ownerFee)) /
+                        100 || 0
+                    ),
+                    nsSeparator: '!',
+                  })}
+                </NewOracleFormHelperText>
+              </VotingInlineFormControl>
 
               <NewVotingFormSubtitle
                 cursor="pointer"
@@ -418,10 +458,11 @@ function NewVotingPage() {
                       'Period when secret votes are getting published and results are counted'
                     )}
                     presets={[
-                      durationPreset({hours: 1}),
-                      durationPreset({hours: 2}),
                       durationPreset({hours: 12}),
                       durationPreset({days: 1}),
+                      durationPreset({days: 2}),
+                      durationPreset({days: 5}),
+                      durationPreset({weeks: 1}),
                     ]}
                     service={service}
                   />
@@ -460,18 +501,6 @@ function NewVotingPage() {
                       />
                     </PresetFormControlInputBox>
                   </PresetFormControl>
-
-                  <VotingInlineFormControl
-                    htmlFor="ownerFee"
-                    label={t('Owner fee')}
-                    tooltip={t('% of the Oracle rewards you receive')}
-                  >
-                    <PercentInput
-                      id="ownerFee"
-                      value={ownerFee}
-                      onChange={handleChange}
-                    />
-                  </VotingInlineFormControl>
                 </Stack>
               </Collapse>
             </Stack>
@@ -503,12 +532,13 @@ function NewVotingPage() {
           from={address}
           available={balance}
           minBalance={votingMinBalance({
-            oracleReward: Math.max(oracleReward, minOracleReward),
+            minOracleReward,
             committeeSize,
           })}
           minStake={votingMinStake(feePerGas)}
           votingDuration={votingDuration}
           publicVotingDuration={publicVotingDuration}
+          ownerFee={ownerFee}
           isLoading={eitherState(
             current,
             'publishing.deploy',

@@ -1,6 +1,14 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {Box, Flex, FormControl, Heading, Stack, Text} from '@chakra-ui/core'
+import {
+  Box,
+  Flex,
+  FormControl,
+  Heading,
+  Select,
+  Stack,
+  Text,
+} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import QRCode from 'qrcode.react'
 import {
@@ -13,12 +21,12 @@ import {
 } from '../../shared/components/components'
 import useRpc from '../../shared/hooks/use-rpc'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
-import {Field, Select} from '../../shared/components'
+import {Field} from '../../shared/components'
 import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {useNodeDispatch} from '../../shared/providers/node-context'
 import {importKey} from '../../shared/api'
 import {useSettingsDispatch} from '../../shared/providers/settings-context'
-import {AVAILABLE_LANGS} from '../../i18n'
+import {AVAILABLE_LANGS, flagEmojis} from '../../i18n'
 
 export function ExportPK() {
   const {t} = useTranslation()
@@ -173,7 +181,13 @@ export function LocaleSwitcher() {
           i18n.changeLanguage(e.target.value)
           changeLanguage(e.target.value)
         }}
-      />
+      >
+        {AVAILABLE_LANGS.map(lang => (
+          <option key={lang} value={lang}>
+            {flagEmojis[lang]}&nbsp;{lang}
+          </option>
+        ))}
+      </Select>
     </Box>
   )
 }

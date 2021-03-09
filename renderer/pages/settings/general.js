@@ -13,9 +13,7 @@ import {
   SettingsSection,
   DevSettingsSection,
 } from '../../screens/settings/components'
-import {epochDb} from '../../shared/utils/db'
 import {Toast} from '../../shared/components/components'
-import {useEpochState} from '../../shared/providers/epoch-context'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -31,8 +29,6 @@ function Settings() {
     })
 
   const {runInternalNode, useExternalNode} = useSettingsState()
-
-  const epochState = useEpochState()
 
   return (
     <SettingsLayout>
@@ -74,21 +70,6 @@ function Settings() {
             </PrimaryButton>
           </Box>
         </DevSettingsSection>
-
-        {epochState && (
-          <SettingsSection title={t('Oracles')}>
-            <Box my={4}>
-              <PrimaryButton
-                onClick={async () => {
-                  await epochDb('votings', epochState.epoch).clear()
-                  toastify(t('Votings removed'))
-                }}
-              >
-                {t('Clear votings')}
-              </PrimaryButton>
-            </Box>
-          </SettingsSection>
-        )}
 
         <SettingsSection title={t('Export private key')}>
           <ExportPK />

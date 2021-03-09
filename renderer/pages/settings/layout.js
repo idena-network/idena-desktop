@@ -21,6 +21,9 @@ function SettingsLayout({children}) {
           <FlipFilterOption value="/settings/node">
             {t('Node')}
           </FlipFilterOption>
+          <FlipFilterOption value="/settings/oracles">
+            {t('Oracle voting')}
+          </FlipFilterOption>
         </FlipFilter>
         {children}
       </Page>

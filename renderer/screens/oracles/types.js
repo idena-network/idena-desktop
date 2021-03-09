@@ -36,6 +36,7 @@ export const ContractCallMethod = {
   VoteProof: 'Vote (secret)',
   Prolong: 'Prolong voting',
   Finish: 'Finish voting',
+  AddStake: 'Add stake',
 }
 
 export const ContractRpcMode = {

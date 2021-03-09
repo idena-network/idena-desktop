@@ -26,6 +26,7 @@ export const flipsMachine = Machine(
       epoch: null,
       knownFlips: [],
       availableKeywords: [],
+      canSubmitFlips: undefined,
     },
     on: {
       EPOCH: {
@@ -33,21 +34,7 @@ export const flipsMachine = Machine(
           assign({
             flips: [],
           }),
-          ({epoch: {epoch}}) => {
-            console.log(epoch)
-            // if (didValidate(epoch) && !didArchiveFlips(epoch)) {
-            //   archiveFlips()
-            //   markFlipsArchived(epoch)
-            // }
-            // if (
-            //   shouldExpectValidationResults(epoch) &&
-            //   !hasPersistedValidationResults(epoch)
-            // ) {
-            //   persistItem('validationResults', epoch, {
-            //     epochStart: new Date().toISOString(),
-            //   })
-            // }
-          },
+          log(),
         ],
       },
     },
@@ -102,7 +89,11 @@ export const flipsMachine = Machine(
             {
               target: 'ready.pristine',
               actions: log(),
-              cond: (_, {data: {persistedFlips, missingFlips}}) =>
+              cond: (
+                {canSubmitFlips},
+                {data: {persistedFlips, missingFlips}}
+              ) =>
+                !canSubmitFlips &&
                 persistedFlips.concat(missingFlips).length === 0,
             },
             {
@@ -159,7 +150,18 @@ export const flipsMachine = Machine(
       ready: {
         initial: 'pristine',
         states: {
-          pristine: {},
+          pristine: {
+            on: {
+              FILTER: {
+                actions: [
+                  assign({
+                    filter: (_, {filter}) => filter,
+                  }),
+                  'persistFilter',
+                ],
+              },
+            },
+          },
           dirty: {
             on: {
               FILTER: {

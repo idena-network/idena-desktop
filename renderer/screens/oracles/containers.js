@@ -29,8 +29,10 @@ import {
   PopoverArrow,
   PopoverHeader,
   PopoverBody,
+  FormControl,
 } from '@chakra-ui/core'
 import dayjs from 'dayjs'
+import getUrls from 'get-urls'
 import {
   toLocaleDna,
   eitherState,
@@ -43,6 +45,7 @@ import {
   Drawer,
   DrawerBody,
   DrawerHeader,
+  FormLabel,
   Input,
   Tooltip,
 } from '../../shared/components/components'
@@ -81,7 +84,9 @@ import {
   isAllowedToTerminate,
   hasQuorum,
   mapVotingStatus,
+  effectiveBalance,
 } from './utils'
+import {isValidUrl} from '../../shared/utils/dna-link'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -96,7 +101,6 @@ export function VotingCard({votingRef, ...props}) {
     desc,
     contractHash,
     status,
-    balance = 0,
     startDate,
     votingDuration,
     publicVotingDuration,
@@ -108,7 +112,6 @@ export function VotingCard({votingRef, ...props}) {
     votes = [],
     voteProofsCount,
     votesCount,
-    actualVotesCount = votesCount || voteProofsCount,
     prevStatus,
     votingMinPayment,
     winnerThreshold,
@@ -117,6 +120,8 @@ export function VotingCard({votingRef, ...props}) {
     isOracle,
     totalReward,
     finishCountingDate,
+    estimatedTotalReward,
+    isNew,
   } = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -138,179 +143,199 @@ export function VotingCard({votingRef, ...props}) {
   )
 
   return (
-    <Box {...props}>
-      <Stack isInline spacing={2} mb={3} align="center">
-        <VotingStatusBadge status={status}>
-          {t(mapVotingStatus(status))}
-        </VotingStatusBadge>
-        <VotingBadge
-          align="center"
+    <Box position="relative" {...props}>
+      {isNew && (
+        <Box
           bg="gray.50"
-          color="muted"
-          cursor="pointer"
-          pl="1/2"
-          onClick={() => {
-            router.push(viewHref)
-          }}
-        >
-          <Avatar
-            address={contractHash}
-            bg="white"
-            borderColor="brandGray.016"
-            borderWidth="1px"
-            borderRadius="full"
-            w={5}
-            h={5}
-            mr={1}
-          />
-          <Text as="span">{contractHash}</Text>
-        </VotingBadge>
-      </Stack>
-      <Link href={viewHref}>
-        <Text
-          isTruncated
-          fontSize="base"
-          fontWeight={500}
-          cursor="pointer"
-          mb={2}
-        >
-          {title}
-        </Text>
-      </Link>
-      <Text isTruncated color="muted" mb={4}>
-        {desc}
-      </Text>
-      {eitherIdleState(
-        VotingStatus.Archived,
-        VotingStatus.Terminated,
-        VotingStatus.Counting
-      ) && (
-        <Stack spacing={2} mb={6}>
-          <Text color="muted" fontSize="sm">
-            {t('Results')}
-          </Text>
-          {actualVotesCount ? (
-            <VotingResult votingService={votingRef} {...current.context} />
-          ) : (
-            // eslint-disable-next-line no-shadow
-            <Text
-              bg="gray.50"
-              borderRadius="md"
-              p={2}
-              color="muted"
-              fontSize="sm"
-            >
-              {t('No votes')}
-            </Text>
-          )}
-        </Stack>
+          rounded="lg"
+          position="absolute"
+          top={-16}
+          left={-16}
+          right={-16}
+          bottom={-16}
+          opacity={0.5}
+          zIndex="base"
+        />
       )}
-      <Stack
-        isInline
-        spacing={2}
-        align="center"
-        bg="orange.010"
-        borderColor="orange.050"
-        borderWidth="1px"
-        borderRadius="md"
-        py={2}
-        px={3}
-        mb={6}
-      >
-        <Icon name="star" size={5} color="white" />
-        <Text fontWeight={500}>
-          {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
-          {toDna(isClosed ? totalReward : balance)}
-        </Text>
-        {!isClosed && (
-          <Text color="orange.500">
-            {Number(votingMinPayment) > 0
-              ? t(`Lock {{amount}} for voting`, {
-                  amount: toLocaleDna(i18n.language)(votingMinPayment),
-                })
-              : t('Free voting')}
-          </Text>
-        )}
-      </Stack>
-      <Flex justify="space-between" align="center">
-        <Stack isInline spacing={2}>
-          {eitherIdleState(VotingStatus.Pending) && (
-            <PrimaryButton
-              isDisabled={isMining}
-              loadingText={t('Launching')}
-              onClick={() => {
-                send('REVIEW_START_VOTING')
-              }}
-            >
-              {t('Launch')}
-            </PrimaryButton>
-          )}
-
-          {eitherIdleState(VotingStatus.Open) &&
-            (isOracle ? (
-              <PrimaryButton onClick={() => router.push(viewHref)}>
-                {t('Vote')}
-              </PrimaryButton>
-            ) : (
-              <Tooltip
-                label={t('This vote is not available to you')}
-                placement="top"
-              >
-                {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
-                <PrimaryButton as={Box} isDisabled>
-                  {t('Vote')}
-                </PrimaryButton>
-              </Tooltip>
-            ))}
-          {eitherIdleState(
-            VotingStatus.Voted,
-            VotingStatus.Archived,
-            VotingStatus.Terminated,
-            VotingStatus.Counting
-          ) && (
-            <PrimaryButton onClick={() => router.push(viewHref)}>
-              {t('Open')}
-            </PrimaryButton>
-          )}
-        </Stack>
-        {!eitherIdleState(VotingStatus.Pending) && (
-          <Stack isInline spacing={3}>
-            <Text>
-              <Text as="span" color="muted">
-                {t('Deadline')}:
-              </Text>{' '}
-              <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
-            </Text>
-            <Divider
-              orientation="vertical"
-              borderColor="gray.300"
-              borderLeft="1px"
+      <Box position="relative" zIndex={1}>
+        <Stack isInline spacing={2} mb={3} align="center">
+          <VotingStatusBadge status={status}>
+            {t(mapVotingStatus(status))}
+          </VotingStatusBadge>
+          <VotingBadge
+            align="center"
+            bg="gray.50"
+            color="muted"
+            cursor="pointer"
+            pl="1/2"
+            onClick={() => {
+              router.push(viewHref)
+            }}
+          >
+            <Avatar
+              address={contractHash}
+              bg="white"
+              borderColor="brandGray.016"
+              borderWidth="1px"
+              borderRadius="full"
+              w={5}
+              h={5}
+              mr={1}
             />
-            <Stack isInline spacing={2} align="center">
-              <Icon
-                name={
-                  hasWinner({
-                    votes,
-                    votesCount,
-                    winnerThreshold,
-                    quorum,
-                    committeeSize,
-                    finishCountingDate,
-                  })
-                    ? 'user-tick'
-                    : 'user'
-                }
+            <Text as="span">{contractHash}</Text>
+          </VotingBadge>
+        </Stack>
+        <Link href={viewHref}>
+          <Text
+            isTruncated
+            fontSize="base"
+            fontWeight={500}
+            cursor="pointer"
+            mb={2}
+          >
+            {title}
+          </Text>
+        </Link>
+        <Text isTruncated color="muted" mb={4}>
+          {desc}
+        </Text>
+        {eitherIdleState(
+          VotingStatus.Archived,
+          VotingStatus.Terminated,
+          VotingStatus.Counting
+        ) && (
+          <Stack spacing={2} mb={6}>
+            <Text color="muted" fontSize="sm">
+              {t('Results')}
+            </Text>
+            {votesCount ? (
+              <VotingResult votingService={votingRef} {...current.context} />
+            ) : (
+              // eslint-disable-next-line no-shadow
+              <Text
+                bg="gray.50"
+                borderRadius="md"
+                p={2}
                 color="muted"
-                w={4}
-                h={4}
-              />
-              <Text as="span">
-                {t('{{count}} votes', {count: actualVotesCount})}
+                fontSize="sm"
+              >
+                {t('No votes')}
               </Text>
-            </Stack>
+            )}
           </Stack>
         )}
-      </Flex>
+        <Stack
+          isInline
+          spacing={2}
+          align="center"
+          bg="orange.010"
+          borderColor="orange.050"
+          borderWidth="1px"
+          borderRadius="md"
+          py={2}
+          px={3}
+          mb={6}
+        >
+          <Icon name="star" size={5} color="white" />
+          <Text fontWeight={500}>
+            {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
+            {toDna(isClosed ? totalReward : estimatedTotalReward)}
+          </Text>
+          {!isClosed && (
+            <Text color="orange.500">
+              {Number(votingMinPayment) > 0
+                ? t(`Lock {{amount}} for voting`, {
+                    amount: toLocaleDna(i18n.language)(votingMinPayment),
+                  })
+                : t('Free voting')}
+            </Text>
+          )}
+        </Stack>
+        <Flex justify="space-between" align="center">
+          <Stack isInline spacing={2}>
+            {eitherIdleState(VotingStatus.Pending) && (
+              <PrimaryButton
+                isDisabled={isMining}
+                loadingText={t('Launching')}
+                onClick={() => {
+                  send('REVIEW_START_VOTING')
+                }}
+              >
+                {t('Launch')}
+              </PrimaryButton>
+            )}
+
+            {eitherIdleState(VotingStatus.Open) &&
+              (isOracle ? (
+                <PrimaryButton onClick={() => router.push(viewHref)}>
+                  {t('Vote')}
+                </PrimaryButton>
+              ) : (
+                <Tooltip
+                  label={t(
+                    'This vote is not available to you. Only validated identities randomly selected to the committee can vote.'
+                  )}
+                  placement="top"
+                  zIndex="tooltip"
+                >
+                  {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
+                  <PrimaryButton as={Box} isDisabled>
+                    {t('Vote')}
+                  </PrimaryButton>
+                </Tooltip>
+              ))}
+            {eitherIdleState(
+              VotingStatus.Voted,
+              VotingStatus.Archived,
+              VotingStatus.Terminated,
+              VotingStatus.Counting
+            ) && (
+              <PrimaryButton onClick={() => router.push(viewHref)}>
+                {t('View')}
+              </PrimaryButton>
+            )}
+          </Stack>
+          {!eitherIdleState(VotingStatus.Pending) && (
+            <Stack isInline spacing={3}>
+              <Text>
+                <Text as="span" color="muted">
+                  {t('Deadline')}:
+                </Text>{' '}
+                <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
+              </Text>
+              <Divider
+                orientation="vertical"
+                borderColor="gray.300"
+                borderLeft="1px"
+              />
+              <Stack isInline spacing={2} align="center">
+                <Icon
+                  name={
+                    hasWinner({
+                      votes,
+                      votesCount,
+                      winnerThreshold,
+                      quorum,
+                      committeeSize,
+                      finishCountingDate,
+                    })
+                      ? 'user-tick'
+                      : 'user'
+                  }
+                  color="muted"
+                  w={4}
+                  h={4}
+                />
+                <Text as="span">
+                  {t('{{count}} votes', {count: votesCount || voteProofsCount})}{' '}
+                  {eitherIdleState(VotingStatus.Counting) &&
+                    t('out of {{count}}', {count: voteProofsCount})}
+                </Text>
+              </Stack>
+            </Stack>
+          )}
+        </Flex>
+      </Box>
     </Box>
   )
 }
@@ -361,6 +386,7 @@ export function AddFundDrawer({
   from,
   to,
   available,
+  ownerFee,
   isLoading,
   onAddFund,
   ...props
@@ -368,6 +394,11 @@ export function AddFundDrawer({
   const {t, i18n} = useTranslation()
 
   const toDna = toLocaleDna(i18n.language)
+
+  const [{oracleAmount, ownerAmount}, setAmount] = React.useState({
+    oracleAmount: 0,
+    ownerAmount: 0,
+  })
 
   return (
     <Drawer {...props}>
@@ -389,7 +420,30 @@ export function AddFundDrawer({
             <Input isDisabled value={to} />
           </OracleFormControl>
           <OracleFormControl label={t('Amount')}>
-            <DnaInput name="amountInput" />
+            <DnaInput
+              name="amountInput"
+              onChange={e => {
+                // eslint-disable-next-line no-shadow
+                const amount = Number(e.target.value)
+                // eslint-disable-next-line no-shadow
+                const oracleAmount = effectiveBalance({
+                  balance: amount,
+                  ownerFee,
+                })
+                setAmount({
+                  oracleAmount,
+                  ownerAmount: amount - oracleAmount,
+                })
+              }}
+            />
+            <OracleFormHelper
+              label={t('Paid to oracles')}
+              value={toDna(oracleAmount)}
+            />
+            <OracleFormHelper
+              label={t('Paid to owner')}
+              value={toDna(ownerAmount)}
+            />
           </OracleFormControl>
           <PrimaryButton
             type="submit"
@@ -427,7 +481,7 @@ export function VoteDrawer({
   return (
     <Drawer isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="send-out" variantColor="blue">
-        {t('Voting: {{option}}', {option, nsSeparator: '!'})}
+        {t('Voting')}: {option}
       </OracleDrawerHeader>
       <OracleDrawerBody>
         <OracleFormControl label={t('Transfer from')}>
@@ -449,11 +503,11 @@ export function VoteDrawer({
           />
           <OracleFormHelperSmall
             label={t('Start counting')}
-            value={finishDate}
+            value={new Date(finishDate).toLocaleString()}
           />
           <OracleFormHelperSmall
             label={t('End counting')}
-            value={finishCountingDate}
+            value={new Date(finishCountingDate).toLocaleString()}
           />
         </Stack>
         <OracleFormHelperText mt={0}>
@@ -480,6 +534,7 @@ export function ReviewVotingDrawer({
   available,
   minBalance,
   minStake,
+  ownerFee,
   isLoading,
   votingDuration,
   publicVotingDuration,
@@ -487,6 +542,13 @@ export function ReviewVotingDrawer({
   ...props
 }) {
   const {t, i18n} = useTranslation()
+
+  const oracleAmount = effectiveBalance({
+    balance: minBalance,
+    ownerFee,
+  })
+
+  const toDna = toLocaleDna(i18n.language)
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
@@ -512,20 +574,52 @@ export function ReviewVotingDrawer({
             value={toLocaleDna(i18n.language)(available)}
           />
         </OracleFormControl>
-        <OracleFormControl label={t('Rewards')}>
+        <FormControl>
+          <FormLabel mb={2}>
+            <Tooltip
+              label={t(`Rewards will be paid to Oracles`)}
+              placement="top"
+              zIndex="tooltip"
+            >
+              <Text
+                borderBottom="dotted 1px"
+                borderBottomColor="muted"
+                cursor="help"
+              >
+                {t('Rewards')}
+              </Text>
+            </Tooltip>
+          </FormLabel>
           <DnaInput name="balanceInput" defaultValue={minBalance} isDisabled />
-          <OracleFormHelperText>
-            {t(`Rewards will be paid to Oracles`)}
-          </OracleFormHelperText>
-        </OracleFormControl>
-        <OracleFormControl label={t('Stake')}>
+          <OracleFormHelper
+            label={t('Paid to oracles')}
+            value={toDna(oracleAmount)}
+          />
+          <OracleFormHelper
+            label={t('Paid to owner')}
+            value={toDna(minBalance - oracleAmount)}
+          />
+        </FormControl>
+        <FormControl>
+          <FormLabel mb={2}>
+            <Tooltip
+              label={t(
+                '50% of the stake will be refunded to your address after termination'
+              )}
+              placement="top"
+              zIndex="tooltip"
+            >
+              <Text
+                borderBottom="dotted 1px"
+                borderBottomColor="muted"
+                cursor="help"
+              >
+                {t('Stake')}
+              </Text>
+            </Tooltip>
+          </FormLabel>
           <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
-          <OracleFormHelperText>
-            {t(
-              '50% of the stake will be refunded to your address after termination'
-            )}
-          </OracleFormHelperText>
-        </OracleFormControl>
+        </FormControl>
         <Box>
           <OracleFormHelper
             label={t('Secret voting')}
@@ -786,17 +880,14 @@ export function VotingDurationInput({
   return (
     <PresetFormControl tooltip={tooltip} {...props}>
       <PresetFormControlOptionList
-        value={String(value)}
+        value={value}
         // eslint-disable-next-line no-shadow
         onChange={value => {
           send('CHANGE', {id, value})
         }}
       >
         {presets.map(({label, value: presetValue}) => (
-          <PresetFormControlOption
-            key={presetValue}
-            value={String(presetValue)}
-          >
+          <PresetFormControlOption key={presetValue} value={presetValue}>
             {label}
           </PresetFormControlOption>
         ))}
@@ -808,7 +899,7 @@ export function VotingDurationInput({
           onChange={({target}) => {
             send('CHANGE', {
               id,
-              value: target.value,
+              value: Number(target.value),
             })
           }}
         />
@@ -956,7 +1047,10 @@ function VotingResultBar({
         </Text>
       </Stack>
       <Text fontWeight={500} textTransform="initial" zIndex={1}>
-        {toPercent(value / Number(votesCount))} ({value})
+        {votesCount === 0
+          ? toPercent(0)
+          : toPercent(value / Number(votesCount))}{' '}
+        ({value})
       </Text>
     </Flex>
   )
@@ -967,6 +1061,7 @@ export function LaunchDrawer({
   requiredBalance,
   available,
   from,
+  ownerFee,
   isLoading,
   onLaunch,
   ...props
@@ -974,6 +1069,11 @@ export function LaunchDrawer({
   const {t, i18n} = useTranslation()
 
   const dna = toLocaleDna(i18n.language)
+
+  const oracleAmount = effectiveBalance({
+    balance: requiredBalance - balance,
+    ownerFee,
+  })
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
@@ -995,23 +1095,30 @@ export function LaunchDrawer({
           <Input name="fromInput" defaultValue={from} isDisabled />
           <OracleFormHelper label={t('Available')} value={dna(available)} />
         </OracleFormControl>
-        {requiredBalance - balance > 0 && (
-          <OracleFormControl label={t('Send')}>
-            <DnaInput
-              name="balanceInput"
-              defaultValue={requiredBalance - balance}
-              step="any"
-            />
-            <OracleFormHelper
-              label={t('Minimum deposit required')}
-              value={requiredBalance}
-            />
-            <OracleFormHelper
-              label={t('Current contract balance')}
-              value={balance}
-            />
-          </OracleFormControl>
-        )}
+        <OracleFormControl label={t('Send')}>
+          <DnaInput
+            name="balanceInput"
+            defaultValue={Math.max(requiredBalance - balance, 0)}
+            step="any"
+          />
+          <OracleFormHelper
+            label={t('Minimum deposit required')}
+            value={dna(requiredBalance)}
+          />
+          <OracleFormHelper
+            label={t('Current contract balance')}
+            value={dna(balance)}
+          />
+          <OracleFormHelper
+            label={t('Paid to oracles')}
+            value={dna(oracleAmount)}
+          />
+          <OracleFormHelper
+            label={t('Paid to owner')}
+            value={dna(requiredBalance - balance - oracleAmount)}
+          />
+        </OracleFormControl>
+        )
         <PrimaryButton
           isLoading={isLoading}
           loadingText={t('Launching')}
@@ -1081,12 +1188,7 @@ export function LaunchVotingDrawer({votingService}) {
 
   const [current, send] = useService(votingService)
 
-  const {
-    balance,
-    minOracleReward,
-    oracleReward,
-    committeeSize,
-  } = current.context
+  const {balance, minOracleReward, committeeSize, ownerFee} = current.context
 
   return (
     <LaunchDrawer
@@ -1100,9 +1202,10 @@ export function LaunchVotingDrawer({votingService}) {
       }}
       balance={Number(balance)}
       requiredBalance={votingMinBalance({
-        oracleReward: Math.max(minOracleReward, oracleReward),
+        minOracleReward,
         committeeSize,
       })}
+      ownerFee={ownerFee}
       from={identity.address}
       available={identity.balance}
       isLoading={current.matches(`mining.${VotingStatus.Starting}`)}
@@ -1373,12 +1476,11 @@ export function FinishDrawer({
 
 export function TerminateDrawer({
   isLoading,
-  from,
-  available,
+  contractAddress,
   onTerminate,
   ...props
 }) {
-  const {t, i18n} = useTranslation()
+  const {t} = useTranslation()
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
@@ -1389,24 +1491,17 @@ export function TerminateDrawer({
         as="form"
         onSubmit={e => {
           e.preventDefault()
-          const {fromInput} = e.target.elements
-          onTerminate({
-            from: fromInput.value,
-          })
+          onTerminate()
         }}
       >
         <OracleFormHelperText>
           {t(
-            'Terminate the contract to clean-up its state and release the stake'
+            'Terminate the contract to clean-up its state and refund 50% of the stake to the owner'
           )}
         </OracleFormHelperText>
 
-        <OracleFormControl label={t('Transfer from')}>
-          <Input name="fromInput" defaultValue={from} isDisabled />
-          <OracleFormHelper
-            label={t('Available')}
-            value={toLocaleDna(i18n.language)(available)}
-          />
+        <OracleFormControl label={t('Smart contract address')}>
+          <Input defaultValue={contractAddress} isDisabled />
         </OracleFormControl>
 
         <PrimaryButton
@@ -1420,5 +1515,50 @@ export function TerminateDrawer({
         </PrimaryButton>
       </OracleDrawerBody>
     </Drawer>
+  )
+}
+
+function splitMany(str, ...separators) {
+  return separators.reduce((acc, s, idx) => {
+    const parts = str.split(s)
+    acc.push(parts[0], s)
+
+    if (idx === separators.length - 1 && parts[1]) acc.push(parts[1])
+    // eslint-disable-next-line no-param-reassign
+    else [str] = parts
+    return acc
+  }, [])
+}
+
+export function Linkify({onClick, children}) {
+  if (!children) return null
+
+  if (typeof children !== 'string') throw new Error('Only text nodes supported')
+
+  const parts = splitMany(children, ...getUrls(children, {stripWWW: false}))
+
+  return (
+    <>
+      {parts.map(part =>
+        part.startsWith('http') ? (
+          <Button
+            variant="link"
+            variantColor="brandBlue"
+            fontWeight={500}
+            _hover={{background: 'transparent'}}
+            _focus={{
+              outline: 'none',
+            }}
+            onClick={() => {
+              onClick(part)
+            }}
+          >
+            {part}
+          </Button>
+        ) : (
+          <Text>{part}</Text>
+        )
+      )}
+    </>
   )
 }

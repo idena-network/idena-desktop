@@ -40,6 +40,8 @@ import {
 } from '../../screens/oracles/utils'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
+import {IdentityStatus} from '../../shared/types'
+import {useVotingNotification} from '../../shared/providers/voting-notification-context'
 
 function VotingListPage() {
   const {t} = useTranslation()
@@ -49,8 +51,10 @@ function VotingListPage() {
   const pageRef = React.useRef()
 
   const {offline, syncing} = useChainState()
-  const {address, isValidated} = useIdentityState()
+  const {address, state} = useIdentityState()
   const {epoch} = useEpochState() ?? {epoch: -1}
+
+  const [, {resetLastVotingTimestamp}] = useVotingNotification()
 
   const [current, send] = useMachine(votingListMachine, {
     context: {epoch, address},
@@ -64,6 +68,7 @@ function VotingListPage() {
           ),
         })
       },
+      onResetLastVotingTimestamp: resetLastVotingTimestamp,
     },
   })
 
@@ -87,7 +92,7 @@ function VotingListPage() {
                 display="flex"
                 alignItems="center"
                 onChange={value => {
-                  send('FILTER', {value})
+                  if (value) send('FILTER', {value})
                 }}
               >
                 <FilterOption value={VotingListFilter.Todo}>
@@ -128,12 +133,17 @@ function VotingListPage() {
                       {/* eslint-disable-next-line no-nested-ternary */}
                       {filter === VotingListFilter.Own
                         ? t(`There are no votings yet.`)
-                        : isValidated
-                        ? t(`No votings for you 🤷‍♂️`)
-                        : t(`There are no votings yet.`)}
+                        : [
+                            IdentityStatus.Newbie,
+                            IdentityStatus.Verified,
+                            IdentityStatus.Human,
+                          ].includes(state)
+                        ? t(`There are no votings for you`)
+                        : t(
+                            `There are no votings for you because your status is not validated.`
+                          )}
                     </Text>
-
-                    <Box>
+                    <Box alignSelf="center">
                       <NextLink href="/oracles/new">
                         <OutlineButton>{t('Create new voting')}</OutlineButton>
                       </NextLink>

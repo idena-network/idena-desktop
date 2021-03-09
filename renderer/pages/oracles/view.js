@@ -10,7 +10,6 @@ import {
   Stat,
   StatNumber,
   StatLabel,
-  StatHelpText,
   useToast,
   CloseButton,
 } from '@chakra-ui/core'
@@ -23,16 +22,23 @@ import duration from 'dayjs/plugin/duration'
 import {Page} from '../../screens/app/components'
 import {
   Avatar,
-  ExternalLink,
   FloatDebug,
   GoogleTranslateButton,
   Toast,
   Tooltip,
   HDivider,
   VDivider,
+  Dialog,
+  DialogHeader,
+  DialogFooter,
+  DialogBody,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
-import {PrimaryButton, IconButton2} from '../../shared/components/button'
+import {
+  PrimaryButton,
+  IconButton2,
+  SecondaryButton,
+} from '../../shared/components/button'
 import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
   FillCenter,
@@ -53,6 +59,7 @@ import {
   VotingPhase,
   TerminateDrawer,
   FinishDrawer,
+  Linkify,
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -117,6 +124,10 @@ export default function ViewVotingPage() {
     },
   })
 
+  React.useEffect(() => {
+    send('RELOAD', {id, epoch, address: identity.address})
+  }, [epoch, id, identity.address, send])
+
   const toDna = toLocaleDna(i18n.language)
 
   const {
@@ -124,7 +135,8 @@ export default function ViewVotingPage() {
     desc,
     contractHash,
     status,
-    balance: contractBalance = 0,
+    balance = 0,
+    contractBalance = Number(balance),
     votingMinPayment = 0,
     publicVotingDuration = 0,
     quorum = 20,
@@ -133,7 +145,6 @@ export default function ViewVotingPage() {
     votes = [],
     voteProofsCount,
     votesCount,
-    actualVotesCount = votesCount || voteProofsCount,
     finishDate,
     finishCountingDate,
     selectedOption,
@@ -143,10 +154,11 @@ export default function ViewVotingPage() {
     totalReward,
     committeeEpoch,
     estimatedOracleReward,
+    estimatedMaxOracleReward = estimatedOracleReward,
     isOracle,
     estimatedTerminationTime,
     minOracleReward,
-    oracleReward,
+    estimatedTotalReward,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -184,6 +196,8 @@ export default function ViewVotingPage() {
       dayjs().isAfter(finishCountingDate))
 
   const shouldTerminate = isAllowedToTerminate({estimatedTerminationTime})
+
+  const isMaxWinnerThreshold = winnerThreshold === 100
 
   return (
     <>
@@ -236,13 +250,19 @@ export default function ViewVotingPage() {
                           lineHeight="tall"
                           whiteSpace="pre-wrap"
                         >
-                          {desc}
+                          <Linkify
+                            onClick={url => {
+                              send('FOLLOW_LINK', {url})
+                            }}
+                          >
+                            {desc}
+                          </Linkify>
                         </Text>
                       </Stack>
                       <GoogleTranslateButton
                         phrases={[
                           title,
-                          desc,
+                          encodeURIComponent(desc?.replace(/%/g, '%25')),
                           options.map(({value}) => value).join('\n'),
                         ]}
                         alignSelf="start"
@@ -253,6 +273,8 @@ export default function ViewVotingPage() {
                   </VotingSkeleton>
 
                   {eitherIdleState(
+                    VotingStatus.Pending,
+                    VotingStatus.Starting,
                     VotingStatus.Open,
                     VotingStatus.Voting,
                     VotingStatus.Voted,
@@ -263,28 +285,82 @@ export default function ViewVotingPage() {
                         <Text color="muted" fontSize="sm" mb={3}>
                           {t('Choose an option to vote')}
                         </Text>
-                        <RadioGroup
-                          value={String(selectedOption)}
-                          onChange={e => {
-                            send('SELECT_OPTION', {
-                              option: Number(e.target.value),
-                            })
-                          }}
-                        >
-                          {/* eslint-disable-next-line no-shadow */}
-                          {options.map(({id, value}) => (
-                            <VotingOption
-                              key={id}
-                              value={String(id)}
-                              isDisabled={eitherIdleState(VotingStatus.Voted)}
-                              annotation={t('{{count}} min. votes required', {
-                                count: toPercent(winnerThreshold / 100),
-                              })}
-                            >
-                              {value}
-                            </VotingOption>
-                          ))}
-                        </RadioGroup>
+                        {eitherIdleState(VotingStatus.Voted) ? (
+                          <Stack spacing={3}>
+                            {/* eslint-disable-next-line no-shadow */}
+                            {options.map(({id, value}) => {
+                              const isMine = id === selectedOption
+                              return (
+                                <Stack
+                                  isInline
+                                  spacing={2}
+                                  align="center"
+                                  bg={isMine ? 'blue.012' : 'gray.50'}
+                                  borderRadius="md"
+                                  minH={8}
+                                  px={3}
+                                  py={2}
+                                  zIndex={1}
+                                >
+                                  <Flex
+                                    align="center"
+                                    justify="center"
+                                    bg={
+                                      isMine ? 'brandBlue.500' : 'transparent'
+                                    }
+                                    borderRadius="full"
+                                    borderWidth={isMine ? 0 : '4px'}
+                                    borderColor="gray.100"
+                                    color="white"
+                                    w={4}
+                                    h={4}
+                                  >
+                                    {isMine && <Icon name="ok" size={3} />}
+                                  </Flex>
+
+                                  <Text
+                                    isTruncated
+                                    maxW="sm"
+                                    title={value.length > 50 ? value : ''}
+                                  >
+                                    {value}
+                                  </Text>
+                                </Stack>
+                              )
+                            })}
+                          </Stack>
+                        ) : (
+                          <RadioGroup
+                            value={String(selectedOption)}
+                            onChange={e => {
+                              send('SELECT_OPTION', {
+                                option: Number(e.target.value),
+                              })
+                            }}
+                          >
+                            {/* eslint-disable-next-line no-shadow */}
+                            {options.map(({id, value}) => (
+                              <VotingOption
+                                key={id}
+                                value={String(id)}
+                                isDisabled={eitherIdleState(
+                                  VotingStatus.Pending,
+                                  VotingStatus.Starting,
+                                  VotingStatus.Voted
+                                )}
+                                annotation={
+                                  isMaxWinnerThreshold
+                                    ? null
+                                    : t('{{count}} min. votes required', {
+                                        count: toPercent(winnerThreshold / 100),
+                                      })
+                                }
+                              >
+                                {value}
+                              </VotingOption>
+                            ))}
+                          </RadioGroup>
+                        )}
                       </Box>
                     </VotingSkeleton>
                   )}
@@ -301,7 +377,7 @@ export default function ViewVotingPage() {
                         <Text color="muted" fontSize="sm">
                           {t('Voting results')}
                         </Text>
-                        {actualVotesCount ? (
+                        {votesCount ? (
                           <VotingResult votingService={service} spacing={3} />
                         ) : (
                           <Text
@@ -341,8 +417,11 @@ export default function ViewVotingPage() {
                           ) : (
                             <Box>
                               <Tooltip
-                                label={t('This vote is not available to you')}
+                                label={t(
+                                  'This vote is not available to you. Only validated identities randomly selected to the committee can vote.'
+                                )}
                                 placement="top"
+                                zIndex="tooltip"
                               >
                                 {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
                                 <PrimaryButton as={Box} isDisabled>
@@ -368,7 +447,12 @@ export default function ViewVotingPage() {
                           </PrimaryButton>
                         )}
 
-                        {eitherIdleState(VotingStatus.Counting) &&
+                        {eitherIdleState(
+                          VotingStatus.Open,
+                          VotingStatus.Voting,
+                          VotingStatus.Voted,
+                          VotingStatus.Counting
+                        ) &&
                           canProlong && (
                             <PrimaryButton
                               onClick={() => send('REVIEW_PROLONG_VOTING')}
@@ -421,7 +505,11 @@ export default function ViewVotingPage() {
                             h={4}
                           />
                           <Text as="span">
-                            {t('{{count}} votes', {count: actualVotesCount})}
+                            {t('{{count}} votes', {
+                              count: votesCount || voteProofsCount,
+                            })}{' '}
+                            {eitherIdleState(VotingStatus.Counting) &&
+                              t('out of {{count}}', {count: voteProofsCount})}
                           </Text>
                         </Stack>
                       </Stack>
@@ -432,11 +520,6 @@ export default function ViewVotingPage() {
                     <Stack spacing={5}>
                       <Box>
                         <Text fontWeight={500}>{t('Recent transactions')}</Text>
-                        <ExternalLink
-                          href={`https://scan.idena.io/address/${identity.address}/contract/${id}/balanceUpdates`}
-                        >
-                          {t('See all transactions updates in Explorer')}
-                        </ExternalLink>
                       </Box>
                       <Table style={{tableLayout: 'fixed', fontWeight: 500}}>
                         <thead>
@@ -595,7 +678,7 @@ export default function ViewVotingPage() {
                         </Stack>
                       </StatLabel>
                       <StatNumber fontSize="base" fontWeight={500}>
-                        {toDna(contractBalance)}
+                        {toDna(estimatedTotalReward)}
                       </StatNumber>
                       <Box mt={1}>
                         <IconButton2
@@ -613,31 +696,83 @@ export default function ViewVotingPage() {
                     {!isClosed && (
                       <Stat>
                         <StatLabel color="muted" fontSize="md">
-                          {t('Voting deposit')}
+                          <Tooltip
+                            label={
+                              // eslint-disable-next-line no-nested-ternary
+                              Number(votingMinPayment) > 0
+                                ? isMaxWinnerThreshold
+                                  ? t('Deposit will be refunded')
+                                  : t(
+                                      'Deposit will be refunded if your vote matches the majority'
+                                    )
+                                : t('Free voting')
+                            }
+                            placement="top"
+                          >
+                            <Text
+                              as="span"
+                              borderBottom="dotted 1px"
+                              borderBottomColor="muted"
+                              cursor="help"
+                            >
+                              {t('Voting deposit')}
+                            </Text>
+                          </Tooltip>
                         </StatLabel>
                         <StatNumber fontSize="base" fontWeight={500}>
                           {toDna(votingMinPayment)}
                         </StatNumber>
-                        <StatHelpText mt={1} color="muted" fontSize="small">
-                          {Number(votingMinPayment) > 0
-                            ? t(
-                                'Deposit will be refunded if your vote matches the majority'
-                              )
-                            : t('Free voting')}
-                        </StatHelpText>
                       </Stat>
                     )}
                     {!isClosed && (
-                      <AsideStat
-                        label={t('Your reward')}
-                        value={toDna(estimatedOracleReward)}
-                      />
+                      <Stat>
+                        <StatLabel color="muted" fontSize="md">
+                          <Tooltip
+                            label={t('Including your Voting deposit')}
+                            placement="top"
+                          >
+                            <Text
+                              as="span"
+                              borderBottom="dotted 1px"
+                              borderBottomColor="muted"
+                              cursor="help"
+                            >
+                              {t('Your min reward')}
+                            </Text>
+                          </Tooltip>
+                        </StatLabel>
+                        <StatNumber fontSize="base" fontWeight={500}>
+                          {toDna(estimatedOracleReward)}
+                        </StatNumber>
+                      </Stat>
                     )}
-                    {ownerFee && (
-                      <AsideStat
-                        label={t('Owner fee')}
-                        value={toPercent(ownerFee / 100)}
-                      />
+                    {!isClosed && (
+                      <Stat>
+                        <StatLabel color="muted" fontSize="md">
+                          {isMaxWinnerThreshold ? (
+                            <Text as="span">{t('Your max reward')}</Text>
+                          ) : (
+                            <Tooltip
+                              label={t(
+                                `Including a share of minority voters' deposit`
+                              )}
+                              placement="top"
+                            >
+                              <Text
+                                as="span"
+                                borderBottom="dotted 1px"
+                                borderBottomColor="muted"
+                                cursor="help"
+                              >
+                                {t('Your max reward')}
+                              </Text>
+                            </Tooltip>
+                          )}
+                        </StatLabel>
+                        <StatNumber fontSize="base" fontWeight={500}>
+                          {toDna(estimatedMaxOracleReward)}
+                        </StatNumber>
+                      </Stat>
                     )}
                     <AsideStat
                       label={t('Committee size')}
@@ -651,7 +786,11 @@ export default function ViewVotingPage() {
                     />
                     <AsideStat
                       label={t('Majority threshold')}
-                      value={toPercent(winnerThreshold / 100)}
+                      value={
+                        isMaxWinnerThreshold
+                          ? t('N/A')
+                          : toPercent(winnerThreshold / 100)
+                      }
                     />
                     {isClosed && (
                       <AsideStat
@@ -698,6 +837,7 @@ export default function ViewVotingPage() {
         from={identity.address}
         to={contractHash}
         available={identity.balance}
+        ownerFee={ownerFee}
         isLoading={current.matches(`mining.${VotingStatus.Funding}`)}
         onAddFund={({amount, from}) => {
           send('ADD_FUND', {amount, from})
@@ -715,9 +855,10 @@ export default function ViewVotingPage() {
         }}
         balance={contractBalance}
         requiredBalance={votingMinBalance({
-          oracleReward: Math.max(minOracleReward, oracleReward),
+          minOracleReward,
           committeeSize,
         })}
+        ownerFee={ownerFee}
         from={identity.address}
         available={identity.balance}
         isLoading={current.matches(`mining.${VotingStatus.Starting}`)}
@@ -747,7 +888,7 @@ export default function ViewVotingPage() {
       <ProlongDrawer
         isOpen={eitherState(
           current,
-          `idle.${VotingStatus.Counting}.prolong`,
+          'prolong',
           `mining.${VotingStatus.Prolonging}`
         )}
         onClose={() => {
@@ -771,13 +912,31 @@ export default function ViewVotingPage() {
         onClose={() => {
           send('CANCEL')
         }}
-        from={identity.address}
-        available={identity.balance}
+        contractAddress={contractHash}
         isLoading={current.matches(`mining.${VotingStatus.Terminating}`)}
-        onTerminate={({from}) => {
-          send('TERMINATE', {from})
+        onTerminate={() => {
+          send('TERMINATE', {from: identity.address})
         }}
       />
+
+      <Dialog
+        isOpen={eitherIdleState('redirecting')}
+        onClose={() => send('CANCEL')}
+      >
+        <DialogHeader>{t('Leaving Idena')}</DialogHeader>
+        <DialogBody>
+          <Text>You're about to leave Idena.</Text>
+          <Text>Are you sure?</Text>
+        </DialogBody>
+        <DialogFooter>
+          <SecondaryButton onClick={() => send('CANCEL')}>
+            {t('Cancel')}
+          </SecondaryButton>
+          <PrimaryButton onClick={() => send('CONTINUE')}>
+            {t('Continue')}
+          </PrimaryButton>
+        </DialogFooter>
+      </Dialog>
 
       {global.isDev && (
         <>

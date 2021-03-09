@@ -138,7 +138,8 @@ export function UserStatLabelTooltip(props) {
   return <Tooltip placement="top" zIndex="tooltip" {...props} />
 }
 
-export function ActivateInviteForm() {
+// eslint-disable-next-line react/display-name
+export const ActivateInviteForm = React.forwardRef((props, ref) => {
   const {t} = useTranslation()
 
   const {addError} = useNotificationDispatch()
@@ -158,11 +159,13 @@ export function ActivateInviteForm() {
 
   return (
     <Box
+      ref={ref}
       as="form"
+      {...props}
       onSubmit={async e => {
         e.preventDefault()
         try {
-          await activateInvite(code)
+          await activateInvite(code?.trim())
         } catch ({message}) {
           addError({
             title: message,
@@ -227,7 +230,7 @@ export function ActivateInviteForm() {
       </Stack>
     </Box>
   )
-}
+})
 
 export function SpoilInviteDrawer({children, ...props}) {
   const {t} = useTranslation()

@@ -67,3 +67,11 @@ export const VoteOption = {
   Confirm: 'confirm',
   Reject: 'reject',
 }
+
+export const OnboardingStep = {
+  ActivateInvite: 'activateInvite',
+  Validate: 'validate',
+  CreateFlips: 'createFlips',
+  FlipLottery: 'flipLottery',
+  WaitingValidationResults: 'waitingValidationResults',
+}

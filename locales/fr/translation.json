@@ -506,7 +506,7 @@
   "Waiting for prolongation or termination": "En attente de la prolongation ou de la termination",
   "Waiting for prolongation": "En attente de la prolongation",
   "The share of Oracle committee sufficient to determine the voting outcome": "La part du comité Oracle nécessaire pour déterminer le résultat du vote",
-  "No voting deposit for oracles": "Pas de dépot pour voter pour les oracles"
+  "No voting deposit for oracles": "Pas de dépot pour voter pour les oracles",
   "Terminate the contract to clean-up its state and refund 50% of the stake to the owner": "Terminer le contrat pour clarifier son état et restituer 50% du stake au propriétaire",
   "Smart contract address": "Adresse du Smart contract",
   "smart contract": "smart contract",
@@ -561,7 +561,7 @@
   "N/A": "N/A",
   "Search the picture on the web": "Cherchez une photo sur internet",
   "Type your search in the box above to find images using search box": "Tapez votre recherche ci-dessus pour trouver des images grâce à la boîte de recherche",
-  "Select": "Sélectionner
+  "Select": "Sélectionner",
   "Cannot submit flip, content is too big": "Ne peut souemttre le flip, le contenu est trop gros",
   "You must use 4 images for a flip": "Vous devez utiliser 4 images pour un flip",
   "You already submitted this flip": "Vous avez déjà soumis ce flip",

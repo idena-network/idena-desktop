@@ -18,14 +18,17 @@ import {ChainProvider} from '../shared/providers/chain-context'
 import {TimingProvider} from '../shared/providers/timing-context'
 import {EpochProvider} from '../shared/providers/epoch-context'
 import {IdentityProvider} from '../shared/providers/identity-context'
+import {VotingNotificationProvider} from '../shared/providers/voting-notification-context'
+import {OnboardingProvider} from '../shared/providers/onboarding-context'
 
 // err is a workaround for https://github.com/zeit/next.js/issues/8592
 export default function App({Component, err, ...pageProps}) {
   return (
     <>
-      <GoogleFonts href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+      <GoogleFonts href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
       <Head>
         <link href="/static/fonts/icons.css" rel="stylesheet" />
+        <link href="/static/scrollbars.css" rel="stylesheet" />
       </Head>
 
       <ThemeProvider theme={uiTheme}>
@@ -47,7 +50,11 @@ function AppProviders(props) {
             <ChainProvider>
               <TimingProvider>
                 <EpochProvider>
-                  <IdentityProvider {...props} />
+                  <IdentityProvider>
+                    <OnboardingProvider>
+                      <VotingNotificationProvider {...props} />
+                    </OnboardingProvider>
+                  </IdentityProvider>
                 </EpochProvider>
               </TimingProvider>
             </ChainProvider>

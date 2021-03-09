@@ -215,6 +215,7 @@ export function Toast({
   icon = 'info',
   status = 'info',
   actionContent,
+  actionColor = status === 'error' ? 'red.500' : 'brandBlue.500',
   onAction,
   ...props
 }) {
@@ -239,14 +240,14 @@ export function Toast({
         <AlertTitle fontWeight={500} lineHeight="base">
           {title}
         </AlertTitle>
-        <AlertDescription color="muted" lineHeight="base">
+        <AlertDescription color="muted" lineHeight="base" textAlign="left">
           {description}
         </AlertDescription>
       </Flex>
       {actionContent && (
         <Button
           variant="ghost"
-          color="brandBlue.500"
+          color={actionColor}
           fontWeight={500}
           lineHeight="base"
           px={3}
@@ -266,7 +267,8 @@ export function Toast({
 export function Dialog({
   title,
   children,
-  shouldShowCloseButton = false,
+  isCloseable,
+  shouldShowCloseButton = isCloseable || false,
   ...props
 }) {
   return (

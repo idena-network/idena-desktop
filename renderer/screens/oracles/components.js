@@ -26,7 +26,6 @@ import {
   Input,
   HDivider,
   ChainedInputGroup,
-  ChainedInput,
   ChainedInputAddon,
   Tooltip,
 } from '../../shared/components/components'
@@ -165,7 +164,7 @@ export function DnaInput(props) {
 
   return (
     <ChainedInputGroup>
-      <ChainedInput as={NumberInput} min={0} {...props} />
+      <ChainedNumberInput min={0} {...props} />
       <ChainedInputAddon isDisabled={isDisabled}>iDNA</ChainedInputAddon>
     </ChainedInputGroup>
   )
@@ -176,7 +175,13 @@ export function PercentInput(props) {
 
   return (
     <ChainedInputGroup>
-      <ChainedInput as={NumberInput} min={0} max={100} {...props} />
+      <ChainedNumberInput
+        min={0}
+        max={100}
+        step={1}
+        preventInvalidInput
+        {...props}
+      />
       <ChainedInputAddon isDisabled={isDisabled}>%</ChainedInputAddon>
     </ChainedInputGroup>
   )
@@ -189,7 +194,13 @@ export function BlockInput(props) {
 
   return (
     <ChainedInputGroup>
-      <ChainedInput as={NumberInput} min={0} max={157000000} {...props} />
+      <ChainedNumberInput
+        min={0}
+        max={157000000}
+        step={1}
+        preventInvalidInput
+        {...props}
+      />
       <ChainedInputAddon isDisabled={isDisabled}>
         {t('Blocks')}
       </ChainedInputAddon>
@@ -200,6 +211,7 @@ export function BlockInput(props) {
 export function NumberInput({
   min,
   max = Number.MAX_VALUE,
+  preventInvalidInput = false,
   onChange,
   onClamp,
   ...props
@@ -222,7 +234,30 @@ export function NumberInput({
           if (onClamp) onClamp(clampedValue)
         }
       }}
-      onChange={onChange}
+      onChange={e => {
+        if (preventInvalidInput) {
+          if (e.target.checkValidity()) onChange(e)
+        } else onChange(e)
+      }}
+      {...props}
+    />
+  )
+}
+
+export function ChainedNumberInput(props) {
+  const {isDisabled, bg, _hover} = props
+
+  const borderRightColor = isDisabled ? 'gray.50' : bg
+
+  return (
+    <NumberInput
+      borderRightColor={borderRightColor}
+      borderTopRightRadius={0}
+      borderBottomRightRadius={0}
+      _hover={{
+        borderRightColor,
+        ..._hover,
+      }}
       {...props}
     />
   )
@@ -230,6 +265,7 @@ export function NumberInput({
 
 export function VotingOptionInput({
   isLast,
+  isDisabled,
   onAddOption,
   onRemoveOption,
   ...props
@@ -257,6 +293,7 @@ export function VotingOptionInput({
         </Stack>
         <IconButton
           icon="cross-small"
+          isDisabled={isDisabled}
           bg="unset"
           color="muted"
           fontSize={20}
@@ -408,7 +445,7 @@ export const PresetFormControlOption = React.forwardRef(
       borderRadius="md"
       p={2}
       px={3}
-      defaultIsChecked={isChecked}
+      isChecked={isChecked}
       {...props}
     />
   )

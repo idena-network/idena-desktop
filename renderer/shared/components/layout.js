@@ -12,7 +12,12 @@ import {shouldStartValidation} from '../../screens/validation/utils'
 import {useIdentityState} from '../providers/identity-context'
 import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
-import {DnaSignInDialog, DnaSendDialog, DnaLinkHandler} from './dna-link'
+import {
+  DnaSignInDialog,
+  DnaSendDialog,
+  DnaLinkHandler,
+  DnaRawTxDialog,
+} from './dna-link'
 import {useNotificationDispatch} from '../providers/notification-context'
 import {ValidationToast} from '../../screens/validation/components'
 import {
@@ -149,6 +154,22 @@ function NormalApp({children}) {
             })
           }
           onDepositError={error =>
+            addError({
+              title: error,
+            })
+          }
+        />
+      </DnaLinkHandler>
+      <DnaLinkHandler>
+        <DnaRawTxDialog
+          isOpen={url => new URL(url).pathname.includes('raw')}
+          onSendSuccess={hash =>
+            addNotification({
+              title: t('Transaction sent'),
+              body: hash,
+            })
+          }
+          onSendError={error =>
             addError({
               title: error,
             })

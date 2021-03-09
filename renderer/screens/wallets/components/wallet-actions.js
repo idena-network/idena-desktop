@@ -1,10 +1,13 @@
+/* eslint-disable no-nested-ternary */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {ellipsis, rgba} from 'polished'
 import {useTranslation} from 'react-i18next'
+import {FaExclamationCircle} from 'react-icons/fa'
 import theme, {rem} from '../../../shared/theme'
 import Avatar from '../../../shared/components/avatar'
 import Flex from '../../../shared/components/flex'
+import {Tooltip} from '../../../shared/components/tooltip'
 import {
   Table,
   TableCol,
@@ -82,7 +85,13 @@ function WalletTransfer({transactions = []}) {
       <Table>
         <thead>
           <TableRow>
-            <TableHeaderCol>{t('Transaction')}</TableHeaderCol>
+            <TableHeaderCol
+              style={{
+                minWidth: '130px',
+              }}
+            >
+              {t('Transaction')}
+            </TableHeaderCol>
             <TableHeaderCol>{t('Address')}</TableHeaderCol>
             <TableHeaderCol className="text-right">
               {t('Amount, iDNA')}
@@ -115,9 +124,11 @@ function WalletTransfer({transactions = []}) {
                         {tx.direction === 'Sent' ? t('To') : t('From')}{' '}
                         {tx.counterPartyWallet
                           ? `${t('wallet')} ${tx.counterPartyWallet.name}`
+                          : tx.receipt
+                          ? t('smart contract')
                           : t('address')}
                       </div>
-                      <TableHint style={{...ellipsis(rem(130))}}>
+                      <TableHint style={{...ellipsis(rem(110))}}>
                         {tx.counterParty}
                       </TableHint>
                     </div>
@@ -151,16 +162,44 @@ function WalletTransfer({transactions = []}) {
                 {}
               </TableCol>
               <TableCol>
-                {!tx.timestamp
-                  ? '\u2013'
-                  : new Date(tx.timestamp * 1000).toLocaleString()}
+                <div>
+                  {!tx.timestamp
+                    ? '\u2013'
+                    : new Date(tx.timestamp * 1000).toLocaleDateString()}
+                </div>
+
+                <div>
+                  {!tx.timestamp
+                    ? '\u2013'
+                    : new Date(tx.timestamp * 1000).toLocaleTimeString()}
+                </div>
               </TableCol>
 
               <TableCol>
                 {(tx.isMining && t('Mining...')) || (
                   <div>
-                    <div> {t('Confirmed')}</div>
-                    <TableHint style={{...ellipsis(rem(130))}}>
+                    <Flex>
+                      {tx.receipt && tx.receipt.error && (
+                        <Tooltip
+                          content={`${t('Smart contract failed')}: ${
+                            tx.receipt.error
+                          }`}
+                        >
+                          <FaExclamationCircle
+                            style={{
+                              position: 'relative',
+                              top: '2px',
+                              marginRight: '4px',
+                              color: theme.colors.danger,
+                            }}
+                            fontSize={rem(15)}
+                          />
+                        </Tooltip>
+                      )}
+                      <div>{t('Confirmed')}</div>
+                    </Flex>
+
+                    <TableHint style={{...ellipsis(rem(90))}}>
                       {tx.isMining ? '' : tx.hash}
                     </TableHint>
                   </div>

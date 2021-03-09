@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import {assign} from 'xstate'
 import {VotingStatus} from '../../shared/types'
-import {callRpc, toLocaleDna} from '../../shared/utils/utils'
+import {callRpc, roundToPrecision, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
 import {ContractRpcMode, VotingListFilter} from './types'
 
@@ -21,7 +21,7 @@ export const setVotingStatus = status =>
   })
 
 export function apiUrl(path) {
-  return `http://95.216.138.96:18888/api/${path}`
+  return `http://api.idena.io/api/${path}`
 }
 
 export async function fetchVotings({
@@ -51,6 +51,19 @@ export async function fetchVotings({
   if (error) throw new Error(error.message)
 
   return {result, continuationToken}
+}
+
+export async function fetchLastOpenVotings({oracle, limit = 11}) {
+  const {result, error} = await fetchVotings({
+    oracle,
+    'states[]': [VotingStatus.Open].join(','),
+    limit,
+    sortBy: 'timestamp',
+  })
+
+  if (error) throw new Error(error.message)
+
+  return result
 }
 
 export async function fetchOracleRewardsEstimates(committeeSize) {
@@ -301,6 +314,10 @@ export function quorumVotesCount({quorum, committeeSize}) {
   return Math.ceil((committeeSize * quorum) / 100)
 }
 
+export function rewardPerOracle({fundPerOracle, ownerFee}) {
+  return (fundPerOracle * (100 - Math.min(100, ownerFee))) / 100 || 0
+}
+
 export function winnerVotesCount({winnerThreshold, votesCount}) {
   return Math.ceil((votesCount * winnerThreshold) / 100)
 }
@@ -345,9 +362,13 @@ export function votingMinStake(feePerGas) {
   return 3000000 * dnaFeePerGas(feePerGas)
 }
 
-// eslint-disable-next-line no-shadow
-export function votingMinBalance({oracleReward, committeeSize}) {
-  return oracleReward * committeeSize
+export function votingMinBalance({
+  // eslint-disable-next-line no-shadow
+  minOracleReward,
+  // eslint-disable-next-line no-shadow
+  committeeSize,
+}) {
+  return roundToPrecision(4, Number(minOracleReward) * committeeSize)
 }
 
 function dnaFeePerGas(value) {
@@ -414,8 +435,6 @@ export const humanError = (
     balance,
     // eslint-disable-next-line no-shadow
     minOracleReward,
-    // eslint-disable-next-line no-shadow
-    oracleReward,
     committeeSize,
     votingMinPayment,
   },
@@ -434,7 +453,7 @@ export const humanError = (
       ).toLocaleString()}`
     case 'contract balance is less than minimal oracles reward': {
       const requiredBalance = votingMinBalance({
-        oracleReward: Math.max(oracleReward, minOracleReward),
+        minOracleReward,
         committeeSize,
       })
       return `Insufficient funds to start the voting. Minimum deposit is required: ${dna(
@@ -517,3 +536,10 @@ export const mapVoting = ({
 export function mapVotingStatus(status) {
   return areSameCaseInsensitive(status, VotingStatus.Voted) ? 'Voting' : status
 }
+
+export function minOracleRewardFromEstimates(data) {
+  return Number(data.find(({type}) => type === 'min')?.amount)
+}
+
+export const effectiveBalance = ({balance, ownerFee}) =>
+  roundToPrecision(4, balance * (1 - (ownerFee || 0) / 100))
