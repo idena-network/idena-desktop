@@ -14,6 +14,7 @@ import {
   Image,
   useToast,
 } from '@chakra-ui/core'
+import {FiGlobe} from 'react-icons/fi'
 import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
@@ -713,7 +714,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
             <Stack isInline align="center" spacing={3} mt={6}>
               <FlipEditorIcon
                 tooltip={t('Search on web')}
-                icon="google"
+                icon={FiGlobe}
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
                     setRightMenuPanel(RightMenu.None)
