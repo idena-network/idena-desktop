@@ -87,7 +87,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
   const {images, query, selectedImage} = current.context
 
   return (
-    <Dialog size="2xl" onClose={onClose} {...props}>
+    <Dialog size="38rem" onClose={onClose} {...props}>
       <DialogBody d="flex">
         <Stack minH="md" maxH="md" spacing={4} flex={1}>
           <Stack
