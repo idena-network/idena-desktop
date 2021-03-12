@@ -89,7 +89,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
   return (
     <Dialog size="38rem" onClose={onClose} {...props}>
       <DialogBody d="flex">
-        <Stack minH="md" maxH="md" spacing={4} flex={1}>
+        <Stack minH="sm" maxH="sm" spacing={4} flex={1}>
           <Stack
             isInline
             as="form"
