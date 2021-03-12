@@ -11,7 +11,6 @@ import {
   IconButton as ChakraIconButton,
   Divider,
   Icon,
-  Image,
   useToast,
 } from '@chakra-ui/core'
 import {useEpochState} from '../../../shared/providers/epoch-context'
