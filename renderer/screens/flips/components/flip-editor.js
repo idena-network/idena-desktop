@@ -911,7 +911,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                             setShowImageSearch(true)
                           }}
                           disabled={false}
-                          icon={<Icon size={5} name="google" />}
+                          icon={<Icon size={5} name="search" />}
                         >
                           {t('Search on web')}
                         </MenuItem>
