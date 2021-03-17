@@ -45,9 +45,6 @@ import {
   useInviteState,
   useInviteDispatch,
 } from '../../shared/providers/invite-context'
-import useRpc from '../../shared/hooks/use-rpc'
-import useTx from '../../shared/hooks/use-tx'
-import {FormGroup, Label, Switcher} from '../../shared/components'
 import {Notification, Snackbar} from '../../shared/components/notifications'
 import {Spinner} from '../../shared/components/spinner'
 import {
@@ -289,222 +286,97 @@ export function SpoilInviteForm({onSpoil}) {
   )
 }
 
-export function MinerStatusSwitcher() {
+export function ActivateMiningDrawer({isLoading, onActivate, ...props}) {
   const {t} = useTranslation()
-
-  const {colors} = useTheme()
-
-  const initialRef = React.useRef()
-
-  const identity = useIdentityState()
-  const {addError} = useNotificationDispatch()
-
-  const [{result: hash, error}, callRpc] = useRpc()
-  const [{mined}, setHash] = useTx()
-
-  const [state, dispatch] = React.useReducer(
-    function miningReducer(
-      // eslint-disable-next-line no-shadow
-      state,
-      [action, payload]
-    ) {
-      switch (action) {
-        case 'init':
-          return {
-            ...state,
-            online: payload.online,
-          }
-        case 'open':
-          return {
-            ...state,
-            showModal: true,
-          }
-        case 'close':
-          return {
-            ...state,
-            showModal: false,
-          }
-
-        case 'toggle':
-          return {
-            ...state,
-            isMining: true,
-          }
-        case 'mined':
-          return {
-            ...state,
-            isMining: false,
-            showModal: false,
-          }
-        case 'error':
-          return {
-            ...state,
-            showModal: false,
-            isMining: false,
-          }
-        default:
-          return state
-      }
-    },
-    {
-      online: null,
-      showModal: false,
-      isMining: false,
-    }
-  )
-
-  React.useEffect(() => {
-    if (!state.showModal) {
-      dispatch(['init', identity])
-    }
-  }, [identity, state.showModal])
-
-  React.useEffect(() => setHash(hash), [hash, setHash])
-
-  React.useEffect(() => {
-    if (error) {
-      dispatch(['error'])
-      addError({title: error.message})
-    }
-  }, [addError, error])
-
-  React.useEffect(() => {
-    if (mined) {
-      dispatch(['mined'])
-    }
-  }, [mined])
-
-  if (!identity.canMine) {
-    return null
-  }
-
   return (
-    <>
-      <FormGroup onClick={() => dispatch(['open'])}>
-        <div className="form-control">
-          <Flex align="center" justify="space-between">
-            <Label
-              htmlFor="switcher"
-              style={{margin: 0, cursor: 'pointer', maxWidth: rem(110)}}
-            >
-              {t('Mining')}
-            </Label>
-            <Box pointerEvents="none">
-              {state.online !== null && state.online !== undefined && (
-                <Switcher
-                  withStatusHint
-                  isChecked={state.online}
-                  isInProgress={state.isMining}
-                  bgOff={colors.red[500]}
-                  bgOn={colors.brandBlue[500]}
-                />
-              )}
-            </Box>
-          </Flex>
-        </div>
-        <style jsx>{`
-          .form-control {
-            border: solid 1px ${colors.gray[300]};
-            color: ${colors.brandGray[500]};
-            background: ${colors.white};
-            border-radius: 6px;
-            font-size: 1em;
-            padding: 0.5em 1em 0.65em;
-            cursor: pointer;
-          }
-        `}</style>
-      </FormGroup>
-      <Drawer
-        isOpen={state.showModal}
-        isCloseable={false}
-        onClose={() => dispatch(['close'])}
-      >
-        <DrawerHeader>
-          <Flex
-            align="center"
-            justify="center"
-            bg="blue.012"
-            h={12}
-            w={12}
-            rounded="xl"
-          >
-            <Icon name="user" w={6} h={6} color="blue.500" />
-          </Flex>
-          <Heading
-            color="brandGray.500"
-            fontSize="lg"
-            fontWeight={500}
-            lineHeight="base"
-            mt={4}
-          >
-            {t('Miner status')}
-          </Heading>
-        </DrawerHeader>
-        <DrawerBody>
-          <Stack spacing={6} mt={30}>
-            <FormLabel m={0} p={0}>
+    <Drawer {...props}>
+      <DrawerHeader>
+        <Flex
+          align="center"
+          justify="center"
+          bg="blue.012"
+          h={12}
+          w={12}
+          rounded="xl"
+        >
+          <Icon name="user" w={6} h={6} color="blue.500" />
+        </Flex>
+        <Heading
+          color="brandGray.500"
+          fontSize="lg"
+          fontWeight={500}
+          lineHeight="base"
+          mt={4}
+        >
+          {t('Miner status')}
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>
+        <Stack spacing={6} mt={30}>
+          <FormControl>
+            <FormLabel mb={3} p={0}>
               {t('Type')}
             </FormLabel>
-            <RadioButtonGroup mt={3}>
-              <Stack isInline spacing={2}>
-                <Radio
-                  borderColor="gray.300"
-                  borderWidth={1}
-                  borderRadius="md"
-                  p={2}
-                  px={3}
-                >
-                  {t('Mining')}
-                </Radio>
-                <Radio
-                  borderColor="gray.300"
-                  borderWidth={1}
-                  borderRadius="md"
-                  p={2}
-                  px={3}
-                >
-                  {t('Delegation')}
-                </Radio>
-              </Stack>
-            </RadioButtonGroup>
-            <Box bg="gray.50" p={6} py={4}>
-              <Heading
-                color="brandGray.500"
-                fontSize="base"
-                fontWeight={500}
-                mb={2}
+            <RadioButtonGroup spacing={2} isInline d="flex">
+              <Radio
+                value="miner"
+                flex={1}
+                borderColor="gray.300"
+                borderWidth={1}
+                borderRadius="md"
+                p={2}
+                px={3}
               >
-                {t('Activate mining status')}
-              </Heading>
-              <Text fontSize="md" color="muted" mb={3}>
-                {t(`Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.
-You can deactivate your online status at any time.`)}
-              </Text>
-              <Text fontSize="md" color="muted">
-                {t('You can deactivate your online status at any time.')}
-              </Text>
-            </Box>
-          </Stack>
-        </DrawerBody>
-        <DrawerFooter px={0}>
-          <Stack isInline>
-            <SecondaryButton fontSize="md">{t('Cancel')}</SecondaryButton>
-            <PrimaryButton
-              isLoading={state.isMining}
-              onClick={() => {
-                dispatch(['toggle'])
-                callRpc(
-                  state.online ? 'dna_becomeOffline' : 'dna_becomeOnline',
-                  {}
-                )
-              }}
+                {t('Mining')}
+              </Radio>
+              <Radio
+                value="delegator"
+                flex={1}
+                borderColor="gray.300"
+                borderWidth={1}
+                borderRadius="md"
+                p={2}
+                px={3}
+              >
+                {t('Delegation')}
+              </Radio>
+            </RadioButtonGroup>
+          </FormControl>
+          <Box bg="gray.50" p={6} py={4}>
+            <Heading
+              color="brandGray.500"
+              fontSize="base"
+              fontWeight={500}
+              mb={2}
             >
-              {state.isMining ? t('Waiting...') : t('Submit')}
-            </PrimaryButton>
-          </Stack>
-        </DrawerFooter>
-      </Drawer>
-    </>
+              {t('Activate mining status')}
+            </Heading>
+            <Text fontSize="md" color="muted" mb={3}>
+              {t(`Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.
+You can deactivate your online status at any time.`)}
+            </Text>
+            <Text fontSize="md" color="muted">
+              {t('You can deactivate your online status at any time.')}
+            </Text>
+          </Box>
+        </Stack>
+      </DrawerBody>
+      <DrawerFooter px={0}>
+        <Stack isInline>
+          {/* eslint-disable-next-line react/destructuring-assignment */}
+          <SecondaryButton onClick={props.onClose}>
+            {t('Cancel')}
+          </SecondaryButton>
+          <PrimaryButton
+            isLoading={isLoading}
+            onClick={onActivate}
+            loadingText={t('Waiting...')}
+          >
+            {t('Submit')}
+          </PrimaryButton>
+        </Stack>
+      </DrawerFooter>
+    </Drawer>
   )
 }
 
