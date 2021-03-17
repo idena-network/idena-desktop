@@ -306,7 +306,7 @@ export default function ProfilePage() {
               <Flex h={24}>
                 {canMine && (
                   <Stack spacing={2} justify="center" flex={1}>
-                    <Text fontWeight={500}>{t('Online mining status')}</Text>
+                    <Text fontWeight={500}>{t('Status')}</Text>
                     <MinerStatusSwitcher />
                   </Stack>
                 )}

@@ -13,6 +13,10 @@ import {
   Flex,
   Textarea,
   Button,
+  RadioButtonGroup,
+  Radio,
+  DrawerFooter,
+  Icon,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -25,9 +29,6 @@ import {
   Drawer,
   DrawerHeader,
   DrawerBody,
-  Dialog,
-  DialogBody,
-  DialogFooter,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
@@ -413,51 +414,96 @@ export function MinerStatusSwitcher() {
           }
         `}</style>
       </FormGroup>
-      <Dialog
-        title={
-          !state.online
-            ? t('Activate mining status')
-            : t('Deactivate mining status')
-        }
+      <Drawer
         isOpen={state.showModal}
-        initialFocusRef={state.online ? null : initialRef}
+        isCloseable={false}
         onClose={() => dispatch(['close'])}
       >
-        <DialogBody>
-          <Stack spacing={1}>
-            <Text>
-              {state.online
-                ? t('Submit the form to deactivate your mining status.')
-                : t(`Submit the form to start mining. Your node has to be online
-              unless you deactivate your status. Otherwise penalties might be
-              charged after being offline more than 1 hour.`)}
-            </Text>
-            <Text>
-              {state.online
-                ? t('You can activate it again afterwards.')
-                : t('You can deactivate your online status at any time.')}
-            </Text>
-          </Stack>
-        </DialogBody>
-        <DialogFooter>
-          <SecondaryButton onClick={() => dispatch(['close'])}>
-            {t('Cancel')}
-          </SecondaryButton>
-          <PrimaryButton
-            ref={initialRef}
-            onClick={() => {
-              dispatch(['toggle'])
-              callRpc(
-                state.online ? 'dna_becomeOffline' : 'dna_becomeOnline',
-                {}
-              )
-            }}
-            isDisabled={state.isMining}
+        <DrawerHeader>
+          <Flex
+            align="center"
+            justify="center"
+            bg="blue.012"
+            h={12}
+            w={12}
+            rounded="xl"
           >
-            {state.isMining ? t('Waiting...') : t('Submit')}
-          </PrimaryButton>
-        </DialogFooter>
-      </Dialog>
+            <Icon name="user" w={6} h={6} color="blue.500" />
+          </Flex>
+          <Heading
+            color="brandGray.500"
+            fontSize="lg"
+            fontWeight={500}
+            lineHeight="base"
+            mt={4}
+          >
+            {t('Miner status')}
+          </Heading>
+        </DrawerHeader>
+        <DrawerBody>
+          <Stack spacing={6} mt={30}>
+            <FormLabel m={0} p={0}>
+              {t('Type')}
+            </FormLabel>
+            <RadioButtonGroup mt={3}>
+              <Stack isInline spacing={2}>
+                <Radio
+                  borderColor="gray.300"
+                  borderWidth={1}
+                  borderRadius="md"
+                  p={2}
+                  px={3}
+                >
+                  {t('Mining')}
+                </Radio>
+                <Radio
+                  borderColor="gray.300"
+                  borderWidth={1}
+                  borderRadius="md"
+                  p={2}
+                  px={3}
+                >
+                  {t('Delegation')}
+                </Radio>
+              </Stack>
+            </RadioButtonGroup>
+            <Box bg="gray.50" p={6} py={4}>
+              <Heading
+                color="brandGray.500"
+                fontSize="base"
+                fontWeight={500}
+                mb={2}
+              >
+                {t('Activate mining status')}
+              </Heading>
+              <Text fontSize="md" color="muted" mb={3}>
+                {t(`Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.
+You can deactivate your online status at any time.`)}
+              </Text>
+              <Text fontSize="md" color="muted">
+                {t('You can deactivate your online status at any time.')}
+              </Text>
+            </Box>
+          </Stack>
+        </DrawerBody>
+        <DrawerFooter px={0}>
+          <Stack isInline>
+            <SecondaryButton fontSize="md">{t('Cancel')}</SecondaryButton>
+            <PrimaryButton
+              isLoading={state.isMining}
+              onClick={() => {
+                dispatch(['toggle'])
+                callRpc(
+                  state.online ? 'dna_becomeOffline' : 'dna_becomeOnline',
+                  {}
+                )
+              }}
+            >
+              {state.isMining ? t('Waiting...') : t('Submit')}
+            </PrimaryButton>
+          </Stack>
+        </DrawerFooter>
+      </Drawer>
     </>
   )
 }
