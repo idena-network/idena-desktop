@@ -176,6 +176,7 @@ export const SecondaryButton = React.forwardRef((props, ref) => (
     as="button"
     bg="brandBlue.10"
     color="brandBlue.500"
+    fontSize="md"
     fontWeight={500}
     h={8}
     px={4}
