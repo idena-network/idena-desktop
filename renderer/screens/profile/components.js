@@ -17,6 +17,7 @@ import {
   Radio,
   DrawerFooter,
   Icon,
+  Switch,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -53,6 +54,8 @@ import {
 } from '../../shared/utils/persist'
 import {createTimerMachine} from '../../shared/machines'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
+import {activateMiningMachine} from './machines'
+import {eitherState} from '../../shared/utils/utils'
 
 export function UserInlineCard({address, status, ...props}) {
   return (
@@ -286,100 +289,6 @@ export function SpoilInviteForm({onSpoil}) {
   )
 }
 
-export function ActivateMiningDrawer({isLoading, onActivate, ...props}) {
-  const {t} = useTranslation()
-  return (
-    <Drawer {...props}>
-      <DrawerHeader>
-        <Flex
-          align="center"
-          justify="center"
-          bg="blue.012"
-          h={12}
-          w={12}
-          rounded="xl"
-        >
-          <Icon name="user" w={6} h={6} color="blue.500" />
-        </Flex>
-        <Heading
-          color="brandGray.500"
-          fontSize="lg"
-          fontWeight={500}
-          lineHeight="base"
-          mt={4}
-        >
-          {t('Miner status')}
-        </Heading>
-      </DrawerHeader>
-      <DrawerBody>
-        <Stack spacing={6} mt={30}>
-          <FormControl>
-            <FormLabel mb={3} p={0}>
-              {t('Type')}
-            </FormLabel>
-            <RadioButtonGroup spacing={2} isInline d="flex">
-              <Radio
-                value="miner"
-                flex={1}
-                borderColor="gray.300"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-                px={3}
-              >
-                {t('Mining')}
-              </Radio>
-              <Radio
-                value="delegator"
-                flex={1}
-                borderColor="gray.300"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-                px={3}
-              >
-                {t('Delegation')}
-              </Radio>
-            </RadioButtonGroup>
-          </FormControl>
-          <Box bg="gray.50" p={6} py={4}>
-            <Heading
-              color="brandGray.500"
-              fontSize="base"
-              fontWeight={500}
-              mb={2}
-            >
-              {t('Activate mining status')}
-            </Heading>
-            <Text fontSize="md" color="muted" mb={3}>
-              {t(`Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.
-You can deactivate your online status at any time.`)}
-            </Text>
-            <Text fontSize="md" color="muted">
-              {t('You can deactivate your online status at any time.')}
-            </Text>
-          </Box>
-        </Stack>
-      </DrawerBody>
-      <DrawerFooter px={0}>
-        <Stack isInline>
-          {/* eslint-disable-next-line react/destructuring-assignment */}
-          <SecondaryButton onClick={props.onClose}>
-            {t('Cancel')}
-          </SecondaryButton>
-          <PrimaryButton
-            isLoading={isLoading}
-            onClick={onActivate}
-            loadingText={t('Waiting...')}
-          >
-            {t('Submit')}
-          </PrimaryButton>
-        </Stack>
-      </DrawerFooter>
-    </Drawer>
-  )
-}
-
 export function ValidationResultToast({epoch}) {
   const timerMachine = React.useMemo(
     () =>
@@ -461,4 +370,166 @@ export function ValidationResultToast({epoch}) {
       )}
     </Snackbar>
   ) : null
+}
+
+export function ActivateMiningForm({isOnline, isDelegator}) {
+  const [current, send] = useMachine(activateMiningMachine, {
+    context: {
+      isOnline,
+    },
+  })
+
+  return (
+    <>
+      <ActivateMiningSwitch
+        isOnline={isOnline}
+        isDelegator={isDelegator}
+        onActivate={() => {
+          send('ACTIVATE')
+        }}
+      />
+      <ActivateMiningDrawer
+        isOpen={eitherState(current, 'activating.preview')}
+        isCloseable={false}
+        isLoading={eitherState(current, 'activating.mining')}
+        onSubmit={() => {
+          send('ACTIVATE')
+        }}
+        onClose={() => {
+          send('CANCEL')
+        }}
+      />
+    </>
+  )
+}
+
+export function ActivateMiningSwitch({isOnline, isDelegator, onActivate}) {
+  const {t} = useTranslation()
+
+  const accentColor = `${isOnline ? 'green' : 'red'}.500`
+
+  return (
+    <Stack spacing={3}>
+      <Text fontWeight={500} h={18}>
+        {t('Status')}
+      </Text>
+      <Flex
+        align="center"
+        justify="space-between"
+        borderColor="gray.300"
+        borderWidth={1}
+        rounded="md"
+        h={8}
+        px={3}
+        py={2}
+      >
+        <FormLabel htmlFor="mining" fontWeight="normal" pb={0}>
+          {isDelegator ? t('Delegation') : t('Mining')}
+        </FormLabel>
+        <Stack isInline align="center">
+          <Text color={accentColor} fontWeight={500}>
+            {isOnline ? t('On') : t('Off')}
+          </Text>
+          <Switch
+            id="mining"
+            isChecked={isOnline}
+            color={accentColor}
+            onChange={onActivate}
+          />
+        </Stack>
+      </Flex>
+    </Stack>
+  )
+}
+
+export function ActivateMiningDrawer({isLoading, onSubmit, onClose, ...props}) {
+  const {t} = useTranslation()
+
+  return (
+    <Drawer onClose={onClose} {...props}>
+      <DrawerHeader>
+        <Flex
+          align="center"
+          justify="center"
+          bg="blue.012"
+          h={12}
+          w={12}
+          rounded="xl"
+        >
+          <Icon name="user" w={6} h={6} color="blue.500" />
+        </Flex>
+        <Heading
+          color="brandGray.500"
+          fontSize="lg"
+          fontWeight={500}
+          lineHeight="base"
+          mt={4}
+        >
+          {t('Miner status')}
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>
+        <Stack spacing={6} mt={30}>
+          <FormControl>
+            <FormLabel mb={3} p={0}>
+              {t('Type')}
+            </FormLabel>
+            <RadioButtonGroup spacing={2} isInline d="flex">
+              <Radio
+                value="miner"
+                flex={1}
+                borderColor="gray.300"
+                borderWidth={1}
+                borderRadius="md"
+                p={2}
+                px={3}
+              >
+                {t('Mining')}
+              </Radio>
+              <Radio
+                value="delegator"
+                flex={1}
+                borderColor="gray.300"
+                borderWidth={1}
+                borderRadius="md"
+                p={2}
+                px={3}
+              >
+                {t('Delegation')}
+              </Radio>
+            </RadioButtonGroup>
+          </FormControl>
+          <Box bg="gray.50" p={6} py={4}>
+            <Heading
+              color="brandGray.500"
+              fontSize="base"
+              fontWeight={500}
+              mb={2}
+            >
+              {t('Activate mining status')}
+            </Heading>
+            <Text fontSize="md" color="muted" mb={3}>
+              {t(`Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.
+You can deactivate your online status at any time.`)}
+            </Text>
+            <Text fontSize="md" color="muted">
+              {t('You can deactivate your online status at any time.')}
+            </Text>
+          </Box>
+        </Stack>
+      </DrawerBody>
+      <DrawerFooter px={0}>
+        <Stack isInline>
+          <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
+          <PrimaryButton
+            isLoading={isLoading}
+            onClick={onSubmit}
+            loadingText={t('Waiting...')}
+          >
+            {t('Submit')}
+          </PrimaryButton>
+        </Stack>
+      </DrawerFooter>
+    </Drawer>
+  )
 }
