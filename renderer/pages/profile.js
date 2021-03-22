@@ -5,14 +5,10 @@ import {
   Icon,
   useDisclosure,
   useToast,
-  Flex,
   PopoverTrigger,
   Box,
-  Switch,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {useMachine} from '@xstate/react'
-import {Machine, assign} from 'xstate'
 import {
   useIdentityState,
   mapToFriendlyStatus,
@@ -31,7 +27,7 @@ import {
   ValidationResultToast,
   UserStat,
   UserStatLabel,
-  ActivateMiningDrawer,
+  ActivateMiningForm,
 } from '../screens/profile/components'
 import {PrimaryButton, IconButton2} from '../shared/components/button'
 import Layout from '../shared/components/layout'
@@ -43,7 +39,7 @@ import {
   callRpc,
   eitherState,
 } from '../shared/utils/utils'
-import {ExternalLink, FormLabel, Toast} from '../shared/components/components'
+import {ExternalLink, Toast} from '../shared/components/components'
 import KillForm, {
   KillIdentityDrawer,
 } from '../screens/wallets/components/kill-form'
@@ -67,7 +63,6 @@ import {
   activeShowingOnboardingStep,
   onboardingStep,
 } from '../shared/utils/onboarding'
-import {HASH_IN_MEMPOOL} from '../shared/hooks/use-tx'
 
 export default function ProfilePage() {
   const {
@@ -104,6 +99,7 @@ export default function ProfilePage() {
     canTerminate,
     canMine,
     online,
+    delegatee,
   } = useIdentityState()
 
   const epoch = useEpochState()
@@ -149,89 +145,6 @@ export default function ProfilePage() {
 
   const toDna = toLocaleDna(language)
 
-  const [currentMining, sendMining] = useMachine(
-    Machine({
-      id: 'mining',
-      context: {
-        isOnline: online,
-      },
-      initial: 'idle',
-      states: {
-        idle: {
-          on: {
-            ACTIVATE: 'activating',
-          },
-        },
-        activating: {
-          initial: 'preview',
-          states: {
-            preview: {
-              on: {
-                ACTIVATE: 'submitting',
-              },
-            },
-            submitting: {
-              invoke: {
-                src: ({isOnline, delegatee}) =>
-                  callRpc(
-                    isOnline ? 'dna_becomeOffline' : 'dna_becomeOnline',
-                    delegatee
-                  ),
-                onDone: {
-                  target: 'mining',
-                  actions: [
-                    assign({
-                      hash: (_, {data}) => data,
-                    }),
-                  ],
-                },
-              },
-            },
-            mining: {
-              invoke: {
-                src: ({hash}) => cb => {
-                  let timeoutId
-
-                  const fetchStatus = async () => {
-                    try {
-                      const result = await callRpc('bcn_transaction', hash)
-                      if (result.blockHash !== HASH_IN_MEMPOOL) {
-                        cb({type: 'MINED'})
-                      } else {
-                        timeoutId = setTimeout(fetchStatus, 10 * 1000)
-                      }
-                    } catch (error) {
-                      cb('TX_NULL', {error: error?.message})
-                    }
-                  }
-
-                  timeoutId = setTimeout(fetchStatus, 10 * 1000)
-
-                  return () => {
-                    clearTimeout(timeoutId)
-                  }
-                },
-              },
-              on: {
-                MINED: {
-                  target: '#mining.idle',
-                  actions: [
-                    assign({
-                      isOnline: true,
-                    }),
-                  ],
-                },
-              },
-            },
-          },
-          on: {
-            CANCEL: 'idle',
-          },
-        },
-      },
-    })
-  )
-
   return (
     <>
       <InviteProvider>
@@ -241,7 +154,6 @@ export default function ProfilePage() {
             <Stack isInline spacing={10}>
               <Stack spacing={6} w="md">
                 <UserInlineCard address={address} status={status} h={24} />
-
                 <UserStatList>
                   <UserStat>
                     <UserStatLabel>{t('Address')}</UserStatLabel>
@@ -391,23 +303,16 @@ export default function ProfilePage() {
                   )}
                 />
               </Stack>
-              <Stack spacing={6} w={rem(200)}>
-                <Flex h={24}>
-                  {canMine && (
-                    <Stack spacing={2} justify="center" flex={1}>
-                      <Text fontWeight={500}>{t('Online mining status')}</Text>
-                      {/* <MinerStatusSwitcher /> */}
-                      <Flex align="center">
-                        <FormLabel htmlFor="mining">{t('Mining')}</FormLabel>
-                        <Switch
-                          is="mining"
-                          isChecked={currentMining.context.isOnline}
-                          onChange={() => sendMining('ACTIVATE')}
-                        />
-                      </Flex>
-                    </Stack>
+              <Stack spacing={10} w={rem(200)}>
+                <Box minH={62} mt={4}>
+                  {address && canMine && (
+                    <ActivateMiningForm
+                      isOnline={online}
+                      isDelegator={typeof delegatee === 'string'}
+                    />
                   )}
-                </Flex>
+                </Box>
+
                 <Stack spacing={1} align="flex-start">
                   <IconLink
                     href="/oracles/new"
@@ -490,18 +395,6 @@ export default function ProfilePage() {
           </Page>
         </Layout>
       </InviteProvider>
-
-      <ActivateMiningDrawer
-        isOpen={eitherState(currentMining, 'activating.preview')}
-        isCloseable={false}
-        isLoading={eitherState(currentMining, 'activating.mining')}
-        onActivate={() => {
-          sendMining('ACTIVATE')
-        }}
-        onClose={() => {
-          sendMining('CANCEL')
-        }}
-      />
     </>
   )
 }
