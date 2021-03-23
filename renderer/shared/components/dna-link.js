@@ -342,6 +342,7 @@ export function DnaSendDialog({
               .then(() => sendDna({from, to, amount, comment}))
               .then(hash => {
                 if (isValidUrl(callbackUrl)) {
+                  global.logger.info('Received dna://send cb url', callbackUrl)
                   global.openExternal(appendTxHash(callbackUrl, hash).href)
                 }
                 onDepositSuccess(hash)
@@ -501,6 +502,7 @@ export function DnaRawTxDialog({
               .then(() => callRpc('bcn_sendRawTx', rawTx))
               .then(hash => {
                 if (isValidUrl(callbackUrl)) {
+                  global.logger.info('Received dna://rawTx cb url', callbackUrl)
                   global.openExternal(appendTxHash(callbackUrl, hash).href)
                 }
                 onSendSuccess(hash)
