@@ -2,6 +2,7 @@
 import {useToast} from '@chakra-ui/core'
 import React from 'react'
 import {useTranslation} from 'react-i18next'
+import {apiUrl} from '../../screens/oracles/utils'
 import {fetchCeremonyIntervals} from '../api'
 import {Toast} from '../components/components'
 import {useInterval} from '../hooks/use-interval'
@@ -62,9 +63,7 @@ export function TimingProvider(props) {
       try {
         const requestOriginTime = Date.now()
 
-        const {datetime} = await (
-          await fetch('http://worldtimeapi.org/api/ip')
-        ).json()
+        const {datetime} = await (await fetch(apiUrl('now'))).json()
 
         setWrongClientTime(
           ntp(

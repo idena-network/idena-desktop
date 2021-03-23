@@ -21,7 +21,7 @@ export const setVotingStatus = status =>
   })
 
 export function apiUrl(path) {
-  return `http://api.idena.io/api/${path}`
+  return `https://api.idena.io/api/${path}`
 }
 
 export async function fetchVotings({
