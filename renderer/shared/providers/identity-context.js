@@ -129,11 +129,12 @@ function IdentityProvider({children}) {
 
   const canMine =
     identity &&
-    [
+    ([
       IdentityStatus.Newbie,
       IdentityStatus.Verified,
       IdentityStatus.Human,
-    ].includes(identity.state)
+    ].includes(identity.state) ||
+      identity.isPool)
 
   const killMe = useCallback(
     async ({to}) => {
