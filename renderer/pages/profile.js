@@ -100,6 +100,7 @@ export default function ProfilePage() {
     canMine,
     online,
     delegatee,
+    delegationEpoch,
   } = useIdentityState()
 
   const epoch = useEpochState()
@@ -308,7 +309,8 @@ export default function ProfilePage() {
                   {address && canMine && (
                     <ActivateMiningForm
                       isOnline={online}
-                      isDelegator={typeof delegatee === 'string'}
+                      delegatee={delegatee}
+                      delegationEpoch={delegationEpoch}
                     />
                   )}
                 </Box>

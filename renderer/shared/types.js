@@ -75,3 +75,8 @@ export const OnboardingStep = {
   FlipLottery: 'flipLottery',
   WaitingValidationResults: 'waitingValidationResults',
 }
+
+export const NodeType = {
+  Miner: 'miner',
+  Delegator: 'delegator',
+}
