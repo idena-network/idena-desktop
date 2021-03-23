@@ -737,7 +737,7 @@ export default function ViewVotingPage() {
                               borderBottomColor="muted"
                               cursor="help"
                             >
-                              {t('Your min reward')}
+                              {t('Min reward')}
                             </Text>
                           </Tooltip>
                         </StatLabel>
@@ -764,7 +764,7 @@ export default function ViewVotingPage() {
                                 borderBottomColor="muted"
                                 cursor="help"
                               >
-                                {t('Your max reward')}
+                                {t('Max reward')}
                               </Text>
                             </Tooltip>
                           )}
