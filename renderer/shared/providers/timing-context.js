@@ -5,6 +5,7 @@ import {useTranslation} from 'react-i18next'
 import {fetchCeremonyIntervals} from '../api'
 import {Toast} from '../components/components'
 import {useInterval} from '../hooks/use-interval'
+import {ntp} from '../utils/utils'
 
 const TIME_DRIFT_THRESHOLD = 10 * 1000
 
@@ -59,13 +60,19 @@ export function TimingProvider(props) {
   useInterval(
     async () => {
       try {
+        const requestOriginTime = Date.now()
+
         const {datetime} = await (
           await fetch('http://worldtimeapi.org/api/ip')
         ).json()
 
-        // same as in the node = 10 sec
         setWrongClientTime(
-          Math.abs(new Date() - new Date(datetime)) > TIME_DRIFT_THRESHOLD
+          ntp(
+            requestOriginTime,
+            new Date(datetime),
+            new Date(datetime),
+            Date.now()
+          ).offset > TIME_DRIFT_THRESHOLD
         )
       } catch {
         global.logger.error('An error occured while fetching time API')
