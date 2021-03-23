@@ -63,15 +63,12 @@ export function TimingProvider(props) {
       try {
         const requestOriginTime = Date.now()
 
-        const {datetime} = await (await fetch(apiUrl('now'))).json()
+        const {result} = await (await fetch(apiUrl('now'))).json()
+        const serverTime = new Date(result)
 
         setWrongClientTime(
-          ntp(
-            requestOriginTime,
-            new Date(datetime),
-            new Date(datetime),
-            Date.now()
-          ).offset > TIME_DRIFT_THRESHOLD
+          ntp(requestOriginTime, serverTime, serverTime, Date.now()).offset >
+            TIME_DRIFT_THRESHOLD
         )
       } catch {
         global.logger.error('An error occured while fetching time API')
