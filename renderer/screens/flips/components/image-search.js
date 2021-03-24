@@ -4,7 +4,6 @@ import {
   AspectRatioBox,
   Box,
   Icon,
-  IconButton,
   Image,
   InputGroup,
   InputLeftElement,
@@ -88,7 +87,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
   const {images, query, selectedImage} = current.context
 
   return (
-    <Dialog size="md" onClose={onClose} {...props}>
+    <Dialog size="38rem" onClose={onClose} {...props}>
       <DialogBody d="flex">
         <Stack minH="sm" maxH="sm" spacing={4} flex={1}>
           <Stack
@@ -101,25 +100,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
           >
             <InputGroup w="full">
               <InputLeftElement w={5} h={5} top="3/2" left={3}>
-                <IconButton
-                  type="submit"
-                  icon="search"
-                  variant="ghost"
-                  size={5}
-                  w={5}
-                  h={5}
-                  _hover={{
-                    bg: 'transparent',
-                    boxShadow: 'none',
-                  }}
-                  _active={{
-                    bg: 'transparent',
-                    boxShadow: 'none',
-                  }}
-                  _focus={{
-                    boxShadow: 'none',
-                  }}
-                />
+                <Icon name="search" size={3} color="gray.100" />
               </InputLeftElement>
               <Input
                 type="search"
@@ -132,6 +113,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
                 }}
               />
             </InputGroup>
+            <PrimaryButton type="submit">Search</PrimaryButton>
           </Stack>
           {eitherState(current, 'idle') && (
             <FillCenter>
@@ -153,7 +135,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
                 <AspectRatioBox
                   key={`${image}-${idx}`}
                   ratio={1}
-                  w={98}
+                  w={32}
                   bg={thumbnail === selectedImage ? 'blue.032' : 'white'}
                   borderColor={
                     thumbnail === selectedImage ? 'blue.500' : 'gray.50'
