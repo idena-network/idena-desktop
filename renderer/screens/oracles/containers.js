@@ -86,7 +86,6 @@ import {
   mapVotingStatus,
   effectiveBalance,
 } from './utils'
-import {isValidUrl} from '../../shared/utils/dna-link'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()

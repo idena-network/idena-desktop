@@ -2,9 +2,11 @@
 import {useToast} from '@chakra-ui/core'
 import React from 'react'
 import {useTranslation} from 'react-i18next'
+import {apiUrl} from '../../screens/oracles/utils'
 import {fetchCeremonyIntervals} from '../api'
 import {Toast} from '../components/components'
 import {useInterval} from '../hooks/use-interval'
+import {ntp} from '../utils/utils'
 
 const TIME_DRIFT_THRESHOLD = 10 * 1000
 
@@ -59,13 +61,14 @@ export function TimingProvider(props) {
   useInterval(
     async () => {
       try {
-        const {datetime} = await (
-          await fetch('http://worldtimeapi.org/api/ip')
-        ).json()
+        const requestOriginTime = Date.now()
 
-        // same as in the node = 10 sec
+        const {result} = await (await fetch(apiUrl('now'))).json()
+        const serverTime = new Date(result)
+
         setWrongClientTime(
-          Math.abs(new Date() - new Date(datetime)) > TIME_DRIFT_THRESHOLD
+          ntp(requestOriginTime, serverTime, serverTime, Date.now()).offset >
+            TIME_DRIFT_THRESHOLD
         )
       } catch {
         global.logger.error('An error occured while fetching time API')

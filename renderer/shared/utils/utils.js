@@ -70,3 +70,15 @@ export function roundToPrecision(precision, value) {
     10 ** precision
   )
 }
+
+// the NTP algorithm
+// t0 is the client's timestamp of the request packet transmission,
+// t1 is the server's timestamp of the request packet reception,
+// t2 is the server's timestamp of the response packet transmission and
+// t3 is the client's timestamp of the response packet reception.
+export function ntp(t0, t1, t2, t3) {
+  return {
+    roundTripDelay: t3 - t0 - (t2 - t1),
+    offset: (t1 - t0 + (t2 - t3)) / 2,
+  }
+}
