@@ -79,7 +79,7 @@ export const activateMiningMachine = createMachine({
                     timeoutId = setTimeout(fetchStatus, 10 * 1000)
                   }
                 } catch (error) {
-                  cb('TX_NULL', {error: error?.message})
+                  global.logger.error('Error retrieving tx', hash)
                 }
               }
 
