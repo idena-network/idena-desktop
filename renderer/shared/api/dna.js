@@ -201,24 +201,6 @@ export async function killInvitee(from, to) {
   return data
 }
 
-export async function becomeOnline() {
-  const {data} = await api().post('/', {
-    method: 'dna_becomeOnline',
-    params: [],
-    id: 1,
-  })
-  return data
-}
-
-export async function becomeOffline() {
-  const {data} = await api().post('/', {
-    method: 'dna_becomeOffline',
-    params: [],
-    id: 1,
-  })
-  return data
-}
-
 export async function sendTransaction(from, to, amount, payload = null) {
   const {data} = await api().post('/', {
     method: 'dna_sendTransaction',

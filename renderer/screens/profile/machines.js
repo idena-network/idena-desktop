@@ -38,7 +38,7 @@ export const activateMiningMachine = createMachine({
             src: ({mode}, {delegatee}) =>
               mode === NodeType.Delegator
                 ? callRpc('dna_delegate', {to: delegatee})
-                : callRpc('dna_becomeOnline'),
+                : callRpc('dna_becomeOnline', {}),
             onDone: {
               target: 'mining',
               actions: [
@@ -53,8 +53,8 @@ export const activateMiningMachine = createMachine({
           invoke: {
             src: (_, {mode}) =>
               mode === NodeType.Delegator
-                ? callRpc('dna_undelegate')
-                : callRpc('dna_becomeOffline'),
+                ? callRpc('dna_undelegate', {})
+                : callRpc('dna_becomeOffline', {}),
             onDone: {
               target: 'mining',
               actions: [
