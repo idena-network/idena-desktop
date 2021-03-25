@@ -386,8 +386,11 @@ export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
       delegationEpoch,
     },
   })
-
   const {mode} = current.context
+
+  React.useEffect(() => {
+    send('CANCEL')
+  }, [isOnline, delegatee, send])
 
   const isDelegator = typeof delegatee === 'string'
 
