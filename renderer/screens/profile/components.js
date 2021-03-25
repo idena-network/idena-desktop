@@ -21,6 +21,7 @@ import {
   Alert,
   AlertIcon,
   AlertDescription,
+  useToast,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -33,6 +34,7 @@ import {
   Drawer,
   DrawerHeader,
   DrawerBody,
+  Toast,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
@@ -377,6 +379,8 @@ export function ValidationResultToast({epoch}) {
 }
 
 export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
+  const toast = useToast()
+
   const epoch = useEpochState()
 
   const [current, send] = useMachine(activateMiningMachine, {
@@ -384,6 +388,15 @@ export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
       isOnline,
       delegatee,
       delegationEpoch,
+    },
+    actions: {
+      onError: (_, {data: {message}}) => {
+        toast({
+          status: 'error',
+          // eslint-disable-next-line react/display-name
+          render: () => <Toast title={message} status="error" />,
+        })
+      },
     },
   })
   const {mode} = current.context

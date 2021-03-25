@@ -47,6 +47,7 @@ export const activateMiningMachine = createMachine({
                 }),
               ],
             },
+            onError: {actions: ['onError']},
           },
         },
         deactivating: {
@@ -63,6 +64,7 @@ export const activateMiningMachine = createMachine({
                 }),
               ],
             },
+            onError: {actions: ['onError']},
           },
         },
         mining: {
