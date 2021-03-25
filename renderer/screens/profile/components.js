@@ -457,6 +457,8 @@ export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
 export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
   const {t} = useTranslation()
 
+  const {colors} = useTheme()
+
   const accentColor = isOnline ? 'blue' : 'red'
 
   return (
@@ -486,8 +488,14 @@ export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
             isChecked={isOnline}
             color={accentColor}
             h={4}
+            className="toggle"
             onChange={onShow}
           />
+          <style jsx global>{`
+            .toggle > input[type='checkbox']:not(:checked) + div {
+              background: ${colors.red[500]};
+            }
+          `}</style>
         </Stack>
       </Flex>
     </Stack>
