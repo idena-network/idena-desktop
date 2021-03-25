@@ -51,7 +51,7 @@ export const activateMiningMachine = createMachine({
         },
         deactivating: {
           invoke: {
-            src: ({mode}) =>
+            src: (_, {mode}) =>
               mode === NodeType.Delegator
                 ? callRpc('dna_undelegate')
                 : callRpc('dna_becomeOffline'),

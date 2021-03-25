@@ -389,11 +389,13 @@ export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
 
   const {mode} = current.context
 
+  const isDelegator = typeof delegatee === 'string'
+
   return (
     <>
       <ActivateMiningSwitch
-        isOnline={isOnline}
-        isDelegator={typeof delegatee === 'string'}
+        isOnline={isOnline || isDelegator}
+        isDelegator={isDelegator}
         onShow={() => {
           send('SHOW')
         }}
@@ -406,7 +408,9 @@ export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
           isCloseable={false}
           isLoading={eitherState(current, 'showing.mining')}
           onDeactivate={() => {
-            send('DEACTIVATE')
+            send('DEACTIVATE', {
+              mode: isDelegator ? NodeType.Delegator : NodeType.Miner,
+            })
           }}
           onClose={() => {
             send('CANCEL')
