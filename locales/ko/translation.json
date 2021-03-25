@@ -576,5 +576,18 @@
   "Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.": "Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.",
   "Please check your local time": "Please check your local time",
   "The time must be synchronized with internet time for the successful validation": "The time must be synchronized with internet time for the successful validation",
-  "Check": "Check"
+  "Check": "Check",
+  "Delegation": "Delegation",
+  "On": "On",
+  "Off": "Off",
+  "Miner status": "Miner status",
+  "Type": "Type",
+  "Delegation address": "Delegation address",
+  "You can lose your stake, all your mining and validation rewards if you delegate your mining status.": "You can lose your stake, all your mining and validation rewards if you delegate your mining status.",
+  "You can disable delegation at the next epoch only.": "You can disable delegation at the next epoch only.",
+  "Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.\nYou can deactivate your online status at any time.": "Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.\nYou can deactivate your online status at any time.",
+  "Deactivate delegation status": "Deactivate delegation status",
+  "Submit the form to deactivate your delegation status.": "Submit the form to deactivate your delegation status.",
+  "Submit the form to deactivate your mining status. You can activate it again afterwards.": "Submit the form to deactivate your mining status. You can activate it again afterwards.",
+  "You can disable delegation at the next epoch only": "You can disable delegation at the next epoch only"
 }

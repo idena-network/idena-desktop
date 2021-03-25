@@ -575,7 +575,7 @@
   "Continue": "Continua",
   "Enter invitation code": "Introduceți codul invitației",
   "An invitation can be provided by validated participants.": "O invitație poate fi furnizată de participanții validați.",
-  "Join the official Idena public Telegram group and follow instructions in the\n                pinned message.": "Alăturați-vă grupului oficial Idena Telegram public și urmați instrucțiunile din\                mesajul fixat.",
+  "Join the official Idena public Telegram group and follow instructions in the\n                pinned message.": "Alăturați-vă grupului oficial Idena Telegram public și urmați instrucțiunile din\n                mesajul fixat.",
   "Official group": "Grup oficial",
   "Search on web": "Căutați pe web",
   "Schedule your next validation": "Programează-ți următoarea validare",
@@ -584,5 +584,18 @@
   "Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.": "Rezolvați flip-urile rapid când începe validarea. Primele 6 flip-uri trebuie trimise în mai puțin de 2 minute.",
   "Please check your local time": "Vă rugăm să verificați ora locală",
   "The time must be synchronized with internet time for the successful validation": "Ora trebuie sincronizată cu ora internetului pentru a valida cu succes",
-  "Check": "Verifica"
+  "Check": "Verifica",
+  "Delegation": "Delegation",
+  "On": "On",
+  "Off": "Off",
+  "Miner status": "Miner status",
+  "Type": "Type",
+  "Delegation address": "Delegation address",
+  "You can lose your stake, all your mining and validation rewards if you delegate your mining status.": "You can lose your stake, all your mining and validation rewards if you delegate your mining status.",
+  "You can disable delegation at the next epoch only.": "You can disable delegation at the next epoch only.",
+  "Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.\nYou can deactivate your online status at any time.": "Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.\nYou can deactivate your online status at any time.",
+  "Deactivate delegation status": "Deactivate delegation status",
+  "Submit the form to deactivate your delegation status.": "Submit the form to deactivate your delegation status.",
+  "Submit the form to deactivate your mining status. You can activate it again afterwards.": "Submit the form to deactivate your mining status. You can activate it again afterwards.",
+  "You can disable delegation at the next epoch only": "You can disable delegation at the next epoch only"
 }
