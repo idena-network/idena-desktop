@@ -416,7 +416,7 @@ export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
           send('SHOW')
         }}
       />
-      {isOnline ? (
+      {isOnline || isDelegator ? (
         <DeactivateMiningDrawer
           delegatee={delegatee}
           canUndelegate={epoch?.epoch > delegationEpoch}
