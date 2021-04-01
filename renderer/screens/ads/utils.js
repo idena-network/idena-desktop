@@ -2,7 +2,7 @@ import {encode, decode} from 'rlp'
 import {rgb} from 'polished'
 import {global} from 'styled-jsx/css'
 import theme from '../../shared/theme'
-import {loadPersistentState, persistState} from '../../shared/utils/persist'
+import {epochDb, requestDb} from '../../shared/utils/db'
 
 export const COUNTRY_CODES = {
   AF: 'Afghanistan',
@@ -302,26 +302,24 @@ export function toHex(encoded) {
   return `0x${encoded.toString('hex')}`
 }
 
-export function loadAds() {
-  try {
-    return loadPersistentState('ads') || []
-  } catch (e) {
-    global.logger.error('Error retrieving ads state')
-  }
+const coverKey = ad => `ads.${ad.id}.cover`
+
+export async function loadAds(epoch = 0) {
+  return epochDb('ads', epoch)
 }
 
-export function saveAd(ad) {
-  persistState('ads', loadAds().concat(ad))
+export async function saveAd({cover, ...ad}, epoch = -1) {
+  epochDb('ads', epoch).put({cover, ...ad})
+  await global
+    .sub(requestDb(), 'ads', {valueEncoding: 'binary'})
+    .put(coverKey(ad), cover)
 }
 
-export function updateAd(ad) {
-  const prevAds = loadAds()
-  const idx = prevAds.findIndex(({id}) => id === ad.id)
-  persistState('ads', [
-    ...prevAds.slice(0, idx),
-    {...prevAds[idx], ...ad},
-    ...prevAds.slice(idx + 1),
-  ])
+export async function updateAd({cover, ...ad}, epoch = -1) {
+  epochDb('ads', epoch).put({cover, ...ad})
+  await global
+    .sub(requestDb(), 'ads', {valueEncoding: 'binary'})
+    .put(coverKey(ad), cover)
 }
 
 export function toDna(num) {

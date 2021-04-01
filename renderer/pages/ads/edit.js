@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import {
   Stack,
   TabList,
@@ -12,7 +12,7 @@ import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
-import {PrimaryButton} from '../../shared/components'
+import {PrimaryButton} from '../../shared/components/button'
 import {updateAd, loadAds} from '../../screens/ads/utils'
 import {
   AdFooter,
@@ -27,13 +27,14 @@ export default function EditAd() {
   const router = useRouter()
   const {id} = router.query
 
-  const editedAd = useMemo(() => loadAds().find(a => a.id === id), [id])
-
   const [current, send] = useMachine(editAdMachine, {
+    context: {id},
     actions: {
       onSuccess: () => router.push('/ads/list'),
     },
     services: {
+      // eslint-disable-next-line no-shadow
+      init: async ({id}) => (await loadAds()).find(a => a.id === id),
       submit: async ctx => {
         updateAd(ctx)
         return Promise.resolve()
@@ -64,7 +65,11 @@ export default function EditAd() {
           </Alert>
           <TabPanels>
             <TabPanel>
-              <AdForm {...editedAd} onChange={ad => send('UPDATE', {ad})} />
+              {JSON.stringify(current.context)}
+              <AdForm
+                {...current.context}
+                onChange={ad => send('UPDATE', {ad})}
+              />
             </TabPanel>
             <TabPanel>
               <Stack spacing={6} w="480px">

@@ -16,7 +16,9 @@ import {EpochProvider} from '../shared/providers/epoch-context'
 import {IdentityProvider} from '../shared/providers/identity-context'
 import {VotingNotificationProvider} from '../shared/providers/voting-notification-context'
 import {OnboardingProvider} from '../shared/providers/onboarding-context'
-import {uiTheme} from '../shared/theme'
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import 'tui-image-editor/dist/tui-image-editor.css'
 
 // err is a workaround for https://github.com/zeit/next.js/issues/8592
 export default function App({Component, err, ...pageProps}) {

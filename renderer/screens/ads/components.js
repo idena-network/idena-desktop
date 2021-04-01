@@ -17,26 +17,26 @@ import {
   MenuList,
   PseudoBox,
   MenuItem,
-  InputGroup,
-  NumberInput,
-  NumberInputField,
-  InputRightAddon,
   FormControl,
-  FormLabel,
   Heading,
   Tab,
   Select,
-  Input,
-  Textarea,
+  NumberInputField,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {hideVisually} from 'polished'
 import {rem} from '../../shared/theme'
-import {IconButton} from '../../shared/components'
+import {IconButton} from '../../shared/components/button'
 import {AVAILABLE_LANGS} from '../../i18n'
 import {adFormMachine} from './machines'
-import {COUNTRY_CODES, validImageType, toDataURL} from './utils'
+import {COUNTRY_CODES, validImageType} from './utils'
+import {
+  FormLabel,
+  Input,
+  NumberInput,
+  Textarea,
+} from '../../shared/components/components'
 
 export function Toolbar(props) {
   return <Flex mb={8} {...props} />
@@ -180,7 +180,7 @@ export const AdFormTab = forwardRef(({isSelected, ...props}, ref) => (
   />
 ))
 
-export function AdForm({onChange, ...ad}) {
+export function NewAdForm({onChange, ...ad}) {
   const [current, send] = useMachine(adFormMachine, {
     context: {
       ...ad,
@@ -190,7 +190,7 @@ export function AdForm({onChange, ...ad}) {
     },
   })
 
-  const {title, cover, url, location, lang, age, os, stake} = current.context
+  const {title, cover, url, location, lang, age, os, stake} = ad
 
   return (
     <Stack spacing={6} w="480px">
@@ -213,7 +213,11 @@ export function AdForm({onChange, ...ad}) {
           </Stack>
           <Stack spacing={4} alignItems="flex-start">
             {cover ? (
-              <Image src={cover} size={rem(80)} rounded="lg" />
+              <Image
+                src={URL.createObjectURL(new Blob([cover]))}
+                size={rem(80)}
+                rounded="lg"
+              />
             ) : (
               <Box bg="gray.50" borderWidth="1px" p={rem(19)} rounded="lg">
                 <Icon name="pic" size={rem(40)} color="#d2d4d9" />
@@ -231,7 +235,7 @@ export function AdForm({onChange, ...ad}) {
                   const [file] = files
                   if (validImageType(file)) {
                     send('CHANGE', {
-                      cover: await toDataURL(file),
+                      cover: await file.arrayBuffer(), // await toDataURL(file),
                     })
                   }
                 }
@@ -254,6 +258,7 @@ export function AdForm({onChange, ...ad}) {
           <AdFormField label="Location" id="location">
             <Select
               value={location}
+              borderColor="gray.300"
               onChange={e => send('CHANGE', {location: e.target.value})}
             >
               <option></option>
@@ -265,6 +270,7 @@ export function AdForm({onChange, ...ad}) {
           <AdFormField label="Language" id="lang">
             <Select
               value={lang}
+              borderColor="gray.300"
               onChange={e => send('CHANGE', {lang: e.target.value})}
             >
               <option></option>
@@ -280,16 +286,15 @@ export function AdForm({onChange, ...ad}) {
             />
           </AdFormField>
           <AdFormField label="Stake" id="stake">
-            <NumberInput>
-              <AdNumberInput
-                defaultValue={stake}
-                onBlur={({target: {value}}) => send('CHANGE', {stake: value})}
-              />
-            </NumberInput>
+            <AdNumberInput
+              defaultValue={stake}
+              onBlur={({target: {value}}) => send('CHANGE', {stake: value})}
+            />
           </AdFormField>
           <AdFormField label="OS" id="os">
             <Select
               value={os}
+              borderColor="gray.300"
               onChange={e => send('CHANGE', {os: e.target.value})}
             >
               <option></option>

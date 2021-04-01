@@ -51,30 +51,25 @@ import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../screens/app/components'
 import {
   SecondaryButton,
-  IconButton,
   PrimaryButton,
-} from '../../shared/components'
+  IconButton2,
+} from '../../shared/components/button'
 import {adsMachine} from '../../screens/ads/machines'
 import {loadAds, AdStatus, adStatusColor, toDna} from '../../screens/ads/utils'
 import {persistState} from '../../shared/utils/persist'
 
 export default function MyAds() {
-  const [current, send] = useMachine(
-    adsMachine.withConfig(
-      {
-        actions: {
-          // eslint-disable-next-line no-shadow
-          persist: ({ads}) => {
-            persistState('ads', ads)
-          },
-        },
+  const [current, send] = useMachine(adsMachine, {
+    actions: {
+      // eslint-disable-next-line no-shadow
+      persist: ({ads}) => {
+        persistState('ads', ads)
       },
-      {
-        selected: {},
-        ads: loadAds(),
-      }
-    )
-  )
+    },
+    services: {
+      init: loadAds,
+    },
+  })
   const {ads, selected} = current.context
 
   const {address, balance} = useIdentityState()
@@ -85,8 +80,8 @@ export default function MyAds() {
     <Layout style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
       <AdBanner {...ads[0]} owner={address} />
       <Page as={Flex} flexDirection="column">
-        <PageTitle>My Ads</PageTitle>
-        <Toolbar>
+        <PageTitle mb={4}>My Ads</PageTitle>
+        <Toolbar w="full">
           <FigureGroup>
             <Figure mr={rem(84)}>
               <FigureLabel>My balance</FigureLabel>
@@ -103,11 +98,13 @@ export default function MyAds() {
               </FigureNumber>
             </Figure>
           </FigureGroup>
-          <NextLink href="/ads/new">
-            <IconButton icon="plus-solid" ml="auto">
-              New banner
-            </IconButton>
-          </NextLink>
+          <Box ml="auto">
+            <NextLink href="/ads/new">
+              <IconButton2 icon="plus-solid" ml="auto">
+                New banner
+              </IconButton2>
+            </NextLink>
+          </Box>
         </Toolbar>
         <AdList spacing={4}>
           {ads.map(
@@ -129,7 +126,7 @@ export default function MyAds() {
                   <Box w={rem(60)}>
                     <Box mb={3} position="relative">
                       <AdImage
-                        src={adCover}
+                        src={URL.createObjectURL(new Blob([adCover]))}
                         fallbackSrc="//placekitten.com/60/60"
                         alt={title}
                       ></AdImage>

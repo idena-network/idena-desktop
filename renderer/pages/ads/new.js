@@ -1,70 +1,70 @@
 import React from 'react'
-import {
-  Stack,
-  TabList,
-  Tabs,
-  TabPanels,
-  TabPanel,
-  Alert,
-  AlertIcon,
-} from '@chakra-ui/core'
+import {Stack, Tabs, TabPanels, TabPanel} from '@chakra-ui/core'
 import {useRouter} from 'next/router'
 import {useMachine} from '@xstate/react'
 import nanoid from 'nanoid'
+import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
-import {PrimaryButton} from '../../shared/components'
 import {saveAd} from '../../screens/ads/utils'
 import {
   AdFooter,
   AdNumberInput,
   AdFormField,
-  AdFormTab,
-  AdForm,
+  NewAdForm,
 } from '../../screens/ads/components'
 import {editAdMachine} from '../../screens/ads/machines'
+import {PrimaryButton} from '../../shared/components/button'
+import {
+  FlipFilter as FilterList,
+  FlipFilterOption as FilterOption,
+} from '../../screens/flips/components'
+import {SuccessAlert} from '../../shared/components/components'
 
 export default function NewAd() {
   const router = useRouter()
+
+  const {t} = useTranslation()
 
   const [current, send] = useMachine(editAdMachine, {
     actions: {
       onSuccess: () => router.push('/ads/list'),
     },
     services: {
-      submit: async ctx => {
-        saveAd({id: nanoid(), ...ctx})
-        return Promise.resolve()
+      submit: ctx => {
+        console.log(ctx)
+        return saveAd({id: nanoid(), ...ctx})
       },
     },
   })
+
+  const [tab, setTab] = React.useState('options')
 
   return (
     <Layout style={{flex: 1, display: 'flex'}}>
       <Page mb={12}>
         <PageTitle>New ad</PageTitle>
+        <FilterList
+          value={tab}
+          display="flex"
+          alignItems="center"
+          onChange={value => {
+            setTab(value)
+            if (value) send('FILTER', {value})
+          }}
+        >
+          <FilterOption value="options">{t('Parameters')}</FilterOption>
+          <FilterOption value="advanced">{t('Publish options')}</FilterOption>
+        </FilterList>
+        <SuccessAlert minH={8} my={6} alignSelf="stretch">
+          You must publish this banner after creating
+        </SuccessAlert>
         <Tabs variant="unstyled">
-          <TabList>
-            <AdFormTab>Parameters</AdFormTab>
-            <AdFormTab isDisabled>Publish options</AdFormTab>
-          </TabList>
-          <Alert
-            my={6}
-            variant="subtle"
-            status="success"
-            border="1px"
-            borderColor="green.200"
-            fontWeight={500}
-            rounded="md"
-          >
-            <AlertIcon size="20px" name="info" />
-            You must publish this banner after creating.
-          </Alert>
           <TabPanels>
-            <TabPanel>
-              <AdForm onChange={ad => send('UPDATE', {ad})} />
+            <TabPanel isSelected={false && tab === 'options'}>
+              <NewAdForm onChange={ad => send('UPDATE', {ad})} />
             </TabPanel>
-            <TabPanel>
+            <TabPanel isSelected={true || tab === 'advanced'}>
               <Stack spacing={6} w="480px">
                 <Stack spacing={4} shouldWrapChildren>
                   <AdFormField label="Max burn rate" id="maxBurnRate">

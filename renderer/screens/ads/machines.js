@@ -13,24 +13,46 @@ export const adsMachine = Machine({
   initial: 'init',
   states: {
     init: {
-      entry: [
-        assign({
-          // eslint-disable-next-line no-shadow
-          ads: ({ads}) =>
-            ads.map(ad => ({
-              ...ad,
-              ref: spawn(adMachine.withContext(ad)),
-            })),
-        }),
-        log(),
-      ],
-      on: {
-        '': 'ready',
+      invoke: {
+        src: 'init',
+        onDone: {
+          target: 'ready',
+          actions: [
+            assign({
+              // eslint-disable-next-line no-shadow
+              ads: (_, {data: ads = []}) =>
+                ads.map(ad => ({
+                  ...ad,
+                  ref: spawn(adMachine.withContext(ad)),
+                })),
+            }),
+            log(),
+          ],
+        },
+        onError: {
+          target: 'fail',
+          actions: [log()],
+        },
       },
+      // entry: [
+      //   assign({
+      //     // eslint-disable-next-line no-shadow
+      //     ads: ({ads}) =>
+      //       ads.map(ad => ({
+      //         ...ad,
+      //         ref: spawn(adMachine.withContext(ad)),
+      //       })),
+      //   }),
+      //   log(),
+      // ],
+      // on: {
+      //   '': 'ready',
+      // },
     },
     ready: {
       entry: log(),
     },
+    fail: {},
   },
   on: {
     'NEW_AD.CHANGE': {
@@ -116,9 +138,20 @@ export const adMachine = Machine({
 
 export const editAdMachine = Machine({
   id: 'editAd',
-  context: {},
-  initial: 'editing',
+  initial: 'init',
   states: {
+    init: {
+      invoke: {
+        src: 'init',
+        onDone: {
+          target: 'editing',
+          actions: [assign((ctx, {data}) => ({...ctx, ...data})), log()],
+        },
+        onFail: {
+          actions: [log()],
+        },
+      },
+    },
     editing: {
       on: {
         UPDATE: {
