@@ -34,20 +34,6 @@ export const adsMachine = Machine({
           actions: [log()],
         },
       },
-      // entry: [
-      //   assign({
-      //     // eslint-disable-next-line no-shadow
-      //     ads: ({ads}) =>
-      //       ads.map(ad => ({
-      //         ...ad,
-      //         ref: spawn(adMachine.withContext(ad)),
-      //       })),
-      //   }),
-      //   log(),
-      // ],
-      // on: {
-      //   '': 'ready',
-      // },
     },
     ready: {
       entry: log(),
@@ -58,7 +44,7 @@ export const adsMachine = Machine({
     'NEW_AD.CHANGE': {
       actions: [
         assign({
-          newAd: ({newAd}, {type, ...ad}) => ({...newAd, ...ad}),
+          newAd: ({newAd}, {ad}) => ({...newAd, ...ad}),
         }),
         log(),
       ],
@@ -119,7 +105,7 @@ export const adMachine = Machine({
       on: {
         CHANGE: {
           actions: [
-            assign((ctx, {type, ...ad}) => ({
+            assign((ctx, {ad}) => ({
               ...ctx,
               ...ad,
             })),
@@ -210,9 +196,9 @@ export const adFormMachine = Machine({
         CHANGE: {
           target: '.idle',
           actions: [
-            assign((ctx, {type, ...value}) => ({
+            assign((ctx, {ad}) => ({
               ...ctx,
-              ...value,
+              ...ad,
             })),
             'change',
           ],

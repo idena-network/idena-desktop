@@ -19,7 +19,7 @@ import {
   AdNumberInput,
   AdFormField,
   AdFormTab,
-  AdForm,
+  NewAdForm,
 } from '../../screens/ads/components'
 import {editAdMachine} from '../../screens/ads/machines'
 
@@ -66,7 +66,7 @@ export default function EditAd() {
           <TabPanels>
             <TabPanel>
               {JSON.stringify(current.context)}
-              <AdForm
+              <NewAdForm
                 {...current.context}
                 onChange={ad => send('UPDATE', {ad})}
               />

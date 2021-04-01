@@ -181,7 +181,7 @@ export const AdFormTab = forwardRef(({isSelected, ...props}, ref) => (
 ))
 
 export function NewAdForm({onChange, ...ad}) {
-  const [current, send] = useMachine(adFormMachine, {
+  const [, send] = useMachine(adFormMachine, {
     context: {
       ...ad,
     },
@@ -201,13 +201,13 @@ export function NewAdForm({onChange, ...ad}) {
             <AdFormField label="Text" id="text" align="flex-start">
               <AdTextarea
                 defaultValue={title}
-                onBlur={e => send('CHANGE', {title: e.target.value})}
+                onBlur={e => send('CHANGE', {ad: {title: e.target.value}})}
               />
             </AdFormField>
             <AdFormField label="Link" id="link">
               <AdInput
                 defaultValue={url}
-                onBlur={e => send('CHANGE', {url: e.target.value})}
+                onBlur={e => send('CHANGE', {ad: {url: e.target.value}})}
               />
             </AdFormField>
           </Stack>
@@ -235,7 +235,7 @@ export function NewAdForm({onChange, ...ad}) {
                   const [file] = files
                   if (validImageType(file)) {
                     send('CHANGE', {
-                      cover: await file.arrayBuffer(), // await toDataURL(file),
+                      ad: {cover: await file.arrayBuffer()}, // await toDataURL(file),
                     })
                   }
                 }
@@ -259,7 +259,7 @@ export function NewAdForm({onChange, ...ad}) {
             <Select
               value={location}
               borderColor="gray.300"
-              onChange={e => send('CHANGE', {location: e.target.value})}
+              onChange={e => send('CHANGE', {ad: {location: e.target.value}})}
             >
               <option></option>
               {Object.values(COUNTRY_CODES).map(c => (
@@ -271,7 +271,7 @@ export function NewAdForm({onChange, ...ad}) {
             <Select
               value={lang}
               borderColor="gray.300"
-              onChange={e => send('CHANGE', {lang: e.target.value})}
+              onChange={e => send('CHANGE', {ad: {lang: e.target.value}})}
             >
               <option></option>
               {AVAILABLE_LANGS.map(l => (
@@ -282,20 +282,22 @@ export function NewAdForm({onChange, ...ad}) {
           <AdFormField label="Age" id="age">
             <AdNumberInput
               defaulValue={age}
-              onBlur={({target: {value}}) => send('CHANGE', {age: value})}
+              onBlur={({target: {value}}) => send('CHANGE', {ad: {age: value}})}
             />
           </AdFormField>
           <AdFormField label="Stake" id="stake">
             <AdNumberInput
               defaultValue={stake}
-              onBlur={({target: {value}}) => send('CHANGE', {stake: value})}
+              onBlur={({target: {value}}) =>
+                send('CHANGE', {ad: {stake: value}})
+              }
             />
           </AdFormField>
           <AdFormField label="OS" id="os">
             <Select
               value={os}
               borderColor="gray.300"
-              onChange={e => send('CHANGE', {os: e.target.value})}
+              onChange={e => send('CHANGE', {ad: {os: e.target.value}})}
             >
               <option></option>
               <option>macOS</option>
