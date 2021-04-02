@@ -304,19 +304,19 @@ export function toHex(encoded) {
 
 const coverKey = ad => `ads.${ad.id}.cover`
 
-export async function loadAds(epoch = 0) {
-  return epochDb('ads', epoch)
+export async function loadAds(epoch = -1) {
+  return epochDb('ads', epoch).all()
 }
 
 export async function saveAd({cover, ...ad}, epoch = -1) {
-  epochDb('ads', epoch).put({cover, ...ad})
+  await epochDb('ads', epoch).put(ad)
   await global
     .sub(requestDb(), 'ads', {valueEncoding: 'binary'})
     .put(coverKey(ad), cover)
 }
 
 export async function updateAd({cover, ...ad}, epoch = -1) {
-  epochDb('ads', epoch).put({cover, ...ad})
+  await epochDb('ads', epoch).put(ad)
   await global
     .sub(requestDb(), 'ads', {valueEncoding: 'binary'})
     .put(coverKey(ad), cover)

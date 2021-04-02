@@ -31,10 +31,8 @@ export default function NewAd() {
       onSuccess: () => router.push('/ads/list'),
     },
     services: {
-      submit: ctx => {
-        console.log(ctx)
-        return saveAd({id: nanoid(), ...ctx})
-      },
+      init: () => Promise.resolve(),
+      submit: ctx => saveAd(ctx),
     },
   })
 
@@ -86,7 +84,9 @@ export default function NewAd() {
         </Tabs>
         <AdFooter>
           <PrimaryButton
-            onClick={() => send('SUBMIT')}
+            onClick={() => {
+              send('SUBMIT')
+            }}
             isLoading={current.matches('submitting')}
           >
             Save

@@ -3,7 +3,7 @@ import {Machine, assign, spawn, sendParent} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import nanoid from 'nanoid'
 
-export const adsMachine = Machine({
+export const adListMachine = Machine({
   id: 'ads',
   context: {
     newAd: null,
@@ -20,8 +20,8 @@ export const adsMachine = Machine({
           actions: [
             assign({
               // eslint-disable-next-line no-shadow
-              ads: (_, {data: ads = []}) =>
-                ads.map(ad => ({
+              ads: (_, {data}) =>
+                data.map(ad => ({
                   ...ad,
                   ref: spawn(adMachine.withContext(ad)),
                 })),
@@ -171,7 +171,7 @@ export const editAdMachine = Machine({
       },
     },
     success: {
-      entry: 'onSuccess',
+      entry: ['onSuccess'],
       type: 'final',
     },
   },

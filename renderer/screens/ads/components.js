@@ -27,7 +27,7 @@ import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {hideVisually} from 'polished'
 import {rem} from '../../shared/theme'
-import {IconButton} from '../../shared/components/button'
+import {IconButton2} from '../../shared/components/button'
 import {AVAILABLE_LANGS} from '../../i18n'
 import {adFormMachine} from './machines'
 import {COUNTRY_CODES, validImageType} from './utils'
@@ -106,9 +106,9 @@ export function NoAds() {
   const {t} = useTranslation()
   return (
     <Flex
-      flex={1}
       flexDirection="column"
       align="center"
+      alignSelf="stretch"
       justify="center"
       color="muted"
       my="auto"
@@ -219,8 +219,15 @@ export function NewAdForm({onChange, ...ad}) {
                 rounded="lg"
               />
             ) : (
-              <Box bg="gray.50" borderWidth="1px" p={rem(19)} rounded="lg">
-                <Icon name="pic" size={rem(40)} color="#d2d4d9" />
+              <Box
+                bg="gray.50"
+                borderWidth="1px"
+                borderColor="gray.300"
+                p={rem(19)}
+                rounded="lg"
+                onClick={() => document.querySelector('#cover').click()}
+              >
+                <Icon name="photo" size={rem(40)} color="#d2d4d9" />
               </Box>
             )}
             <Input
@@ -241,14 +248,14 @@ export function NewAdForm({onChange, ...ad}) {
                 }
               }}
             />
-            <IconButton
+            <IconButton2
               as={FormLabel}
               htmlFor="cover"
               type="file"
-              icon="laptop"
+              icon="upload"
             >
               Upload cover
-            </IconButton>
+            </IconButton2>
           </Stack>
         </Stack>
       </FormSection>

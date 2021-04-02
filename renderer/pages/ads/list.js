@@ -54,12 +54,12 @@ import {
   PrimaryButton,
   IconButton2,
 } from '../../shared/components/button'
-import {adsMachine} from '../../screens/ads/machines'
+import {adListMachine} from '../../screens/ads/machines'
 import {loadAds, AdStatus, adStatusColor, toDna} from '../../screens/ads/utils'
 import {persistState} from '../../shared/utils/persist'
 
 export default function MyAds() {
-  const [current, send] = useMachine(adsMachine, {
+  const [current, send] = useMachine(adListMachine, {
     actions: {
       // eslint-disable-next-line no-shadow
       persist: ({ads}) => {
@@ -67,7 +67,7 @@ export default function MyAds() {
       },
     },
     services: {
-      init: loadAds,
+      init: () => loadAds(),
     },
   })
   const {ads, selected} = current.context
