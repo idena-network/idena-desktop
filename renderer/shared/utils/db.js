@@ -110,7 +110,10 @@ export async function loadPersistedItems(db) {
   )
 }
 
-export async function addPersistedItem(db, {id = nanoid(), ...item}) {
+export async function addPersistedItem(
+  db,
+  {id = normalizeId(nanoid()), ...item}
+) {
   const ids = [...(await safeReadIds(db)), id]
 
   await db

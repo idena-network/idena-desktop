@@ -2,7 +2,6 @@ import React from 'react'
 import {Stack, Tabs, TabPanels, TabPanel} from '@chakra-ui/core'
 import {useRouter} from 'next/router'
 import {useMachine} from '@xstate/react'
-import nanoid from 'nanoid'
 import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
@@ -20,11 +19,14 @@ import {
   FlipFilterOption as FilterOption,
 } from '../../screens/flips/components'
 import {SuccessAlert} from '../../shared/components/components'
+import {useEpochState} from '../../shared/providers/epoch-context'
 
 export default function NewAd() {
   const router = useRouter()
 
   const {t} = useTranslation()
+
+  const epoch = useEpochState()
 
   const [current, send] = useMachine(editAdMachine, {
     actions: {
@@ -32,7 +34,7 @@ export default function NewAd() {
     },
     services: {
       init: () => Promise.resolve(),
-      submit: ctx => saveAd(ctx),
+      submit: ctx => saveAd(ctx, epoch?.epoch ?? -1),
     },
   })
 

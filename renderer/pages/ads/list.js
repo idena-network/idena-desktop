@@ -56,29 +56,28 @@ import {
 } from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
 import {loadAds, AdStatus, adStatusColor, toDna} from '../../screens/ads/utils'
-import {persistState} from '../../shared/utils/persist'
+import {useEpochState} from '../../shared/providers/epoch-context'
+import {eitherState} from '../../shared/utils/utils'
 
 export default function MyAds() {
+  const {isOpen, onOpen, onClose} = useDisclosure()
+
+  const {address, balance} = useIdentityState()
+
+  const epoch = useEpochState()
+
   const [current, send] = useMachine(adListMachine, {
-    actions: {
-      // eslint-disable-next-line no-shadow
-      persist: ({ads}) => {
-        persistState('ads', ads)
-      },
-    },
     services: {
-      init: () => loadAds(),
+      init: () => loadAds(epoch?.epoch ?? -1),
     },
   })
   const {ads, selected} = current.context
 
-  const {address, balance} = useIdentityState()
-
-  const {isOpen, onOpen, onClose} = useDisclosure()
+  const isState = state => eitherState(current, state)
 
   return (
     <Layout style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
-      <AdBanner {...ads[0]} owner={address} />
+      {isState('ready') && <AdBanner {...ads[0]} owner={address} />}
       <Page as={Flex} flexDirection="column">
         <PageTitle mb={4}>My Ads</PageTitle>
         <Toolbar w="full">

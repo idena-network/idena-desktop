@@ -181,7 +181,7 @@ export const AdFormTab = forwardRef(({isSelected, ...props}, ref) => (
 ))
 
 export function NewAdForm({onChange, ...ad}) {
-  const [, send] = useMachine(adFormMachine, {
+  const [current, send] = useMachine(adFormMachine, {
     context: {
       ...ad,
     },
@@ -190,7 +190,7 @@ export function NewAdForm({onChange, ...ad}) {
     },
   })
 
-  const {title, cover, url, location, lang, age, os, stake} = ad
+  const {title, cover, url, location, lang, age, os, stake} = current.context
 
   return (
     <Stack spacing={6} w="480px">

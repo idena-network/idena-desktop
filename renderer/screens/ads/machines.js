@@ -1,7 +1,6 @@
 /* eslint-disable no-use-before-define */
 import {Machine, assign, spawn, sendParent} from 'xstate'
 import {log} from 'xstate/lib/actions'
-import nanoid from 'nanoid'
 
 export const adListMachine = Machine({
   id: 'ads',
@@ -41,31 +40,6 @@ export const adListMachine = Machine({
     fail: {},
   },
   on: {
-    'NEW_AD.CHANGE': {
-      actions: [
-        assign({
-          newAd: ({newAd}, {ad}) => ({...newAd, ...ad}),
-        }),
-        log(),
-      ],
-      cond: (_, e) => Boolean(e),
-    },
-    'NEW_AD.COMMIT': {
-      actions: [
-        assign({
-          newAd: {},
-          ads: ({newAd, ads}) =>
-            ads.concat({
-              ...newAd,
-              id: nanoid(),
-              ref: spawn(adMachine.withContext(newAd)),
-            }),
-        }),
-        log(),
-        'persist',
-      ],
-      cond: ({newAd}) => Boolean(newAd),
-    },
     'AD.COMMIT': {
       actions: [
         assign({
@@ -74,7 +48,6 @@ export const adListMachine = Machine({
               ad.id === e.ad.id ? {...ad, ...e.ad, ref: ad.ref} : ad
             ),
         }),
-        'persist',
       ],
       cond: (_, {ad}) => ad && ad.title,
     },
