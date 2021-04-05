@@ -24,6 +24,7 @@ export default function SettingsLayout({children}) {
           <FlipFilterOption value="/settings/advanced">
             {t('Advanced')}
           </FlipFilterOption>
+          <FlipFilterOption value="/settings/ads">{t('Ads')}</FlipFilterOption>
         </FlipFilter>
         {children}
       </Page>

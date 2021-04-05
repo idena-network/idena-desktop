@@ -302,24 +302,28 @@ export function toHex(encoded) {
   return `0x${encoded.toString('hex')}`
 }
 
-const coverKey = ad => `ads.${ad.id}.cover`
+const coverKey = ({id}) => `ads.${id}.cover`
+
+const coverDb = () => global.sub(requestDb(), 'ads', {valueEncoding: 'binary'})
 
 export async function loadAds(epoch = -1) {
-  return epochDb('ads', epoch).all()
+  const ads = await epochDb('ads', epoch).all()
+  return Promise.all(
+    ads.map(async ad => ({
+      ...ad,
+      cover: await coverDb().get(coverKey(ad)),
+    }))
+  )
 }
 
 export async function saveAd({cover, ...ad}, epoch = -1) {
-  await epochDb('ads', epoch).put(ad)
-  await global
-    .sub(requestDb(), 'ads', {valueEncoding: 'binary'})
-    .put(coverKey(ad), cover)
+  const {id} = await epochDb('ads', epoch).put(ad)
+  await coverDb().put(coverKey({id}), cover)
 }
 
 export async function updateAd({cover, ...ad}, epoch = -1) {
-  await epochDb('ads', epoch).put(ad)
-  await global
-    .sub(requestDb(), 'ads', {valueEncoding: 'binary'})
-    .put(coverKey(ad), cover)
+  const {id} = await epochDb('ads', epoch).put(ad)
+  await coverDb().put(coverKey({id}), cover)
 }
 
 export function toDna(num) {
