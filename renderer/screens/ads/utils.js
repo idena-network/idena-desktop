@@ -351,3 +351,5 @@ export async function toDataURL(file) {
   await new Promise(resolve => (reader.onload = resolve))
   return reader.result
 }
+
+export const adUrlFromBytes = cover => URL.createObjectURL(new Blob([cover]))

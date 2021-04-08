@@ -29,7 +29,13 @@ import {rem} from '../../shared/theme'
 import {IconButton2} from '../../shared/components/button'
 import {AVAILABLE_LANGS} from '../../i18n'
 import {adFormMachine} from './machines'
-import {COUNTRY_CODES, validImageType, coverDb, coverKey} from './utils'
+import {
+  COUNTRY_CODES,
+  validImageType,
+  coverDb,
+  coverKey,
+  adUrlFromBytes,
+} from './utils'
 import {
   FormLabel,
   Input,
@@ -52,19 +58,18 @@ export function Figure(props) {
 
 export function FigureLabel(props) {
   return (
-    <StatLabel color="muted" fontSize={rem(13)} fontWeight={400} {...props} />
+    <StatLabel
+      color="muted"
+      fontSize="md"
+      fontWeight={400}
+      minW={100}
+      {...props}
+    />
   )
 }
 
 export function FigureNumber(props) {
-  return (
-    <StatNumber
-      fontSize={rem(18)}
-      fontWeight={500}
-      minW={rem(116)}
-      {...props}
-    />
-  )
+  return <StatNumber fontSize="md" fontWeight={500} {...props} />
 }
 export function SmallFigureLabel(props) {
   return <FigureLabel fontSize={rem(11)} {...props} />
@@ -209,11 +214,7 @@ export function AdForm({onChange, ...ad}) {
           </Stack>
           <Stack spacing={4} alignItems="flex-start">
             {cover ? (
-              <Image
-                src={URL.createObjectURL(new Blob([cover]))}
-                size={rem(80)}
-                rounded="lg"
-              />
+              <Image src={adUrlFromBytes(cover)} size={rem(80)} rounded="lg" />
             ) : (
               <Box
                 bg="gray.50"
@@ -416,7 +417,7 @@ export function AdBanner({id, title, owner, url}) {
         onClick={() => global.openExternal(url)}
       >
         <AdImage
-          src={URL.createObjectURL(new Blob([cover]))}
+          src={adUrlFromBytes(cover)}
           size={rem(40)}
           fallbackSrc="//placekitten.com/40"
         />

@@ -6,19 +6,7 @@ import {
   Text,
   Divider,
   MenuDivider,
-  Drawer,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerBody,
   useDisclosure,
-  DrawerContent,
-  DrawerOverlay,
-  DrawerCloseButton,
-  Heading,
-  Icon,
-  NumberInput,
-  FormLabel,
-  FormControl,
   Link,
   useTheme,
 } from '@chakra-ui/core'
@@ -53,15 +41,21 @@ import {add} from '../../shared/utils/math'
 import {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../screens/app/components'
-import {SecondaryButton, PrimaryButton} from '../../shared/components/button'
+import {SecondaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
-import {loadAds, AdStatus, adStatusColor} from '../../screens/ads/utils'
+import {
+  loadAds,
+  AdStatus,
+  adStatusColor,
+  adUrlFromBytes,
+} from '../../screens/ads/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {toLocaleDna} from '../../shared/utils/utils'
 import {useChainState} from '../../shared/providers/chain-context'
 import {HDivider, VDivider} from '../../shared/components/components'
 import {IconLink} from '../../shared/components/link'
 import {Fill} from '../../shared/components'
+import {PublishAdDrawer} from '../../screens/ads/containers'
 
 export default function MyAds() {
   const {i18n} = useTranslation()
@@ -138,7 +132,7 @@ export default function MyAds() {
                   <Stack spacing={3} w={rem(60)}>
                     <Box position="relative">
                       <AdImage
-                        src={URL.createObjectURL(new Blob([adCover]))}
+                        src={adUrlFromBytes(adCover)}
                         fallbackSrc="//placekitten.com/60/60"
                         alt={title}
                       />
@@ -281,78 +275,12 @@ export default function MyAds() {
 
         {current.matches('ready') && ads.length === 0 && <NoAds />}
 
-        <Drawer isOpen={isOpen} onClose={onClose} size={rem(360)}>
-          <DrawerOverlay />
-          <DrawerContent px={8} py={10} size={rem(360)}>
-            <DrawerCloseButton />
-            <DrawerHeader p={0}>
-              <Box
-                display="inline-block"
-                bg="brandBlue.10"
-                rounded="lg"
-                mb={4}
-                p={3}
-                alignSelf="flex-start"
-              >
-                <Icon name="ads" size={6} color="brandBlue.500" />
-              </Box>
-              <Heading fontSize={rem(18)} fontWeight={500}>
-                Pay
-              </Heading>
-            </DrawerHeader>
-            <DrawerBody mt={2} p={0}>
-              <Text>
-                In order to make your ads visible for Idena users you need to
-                burn more coins than competitors targeting the same audience.
-              </Text>
-              <Box bg="gray.50" p={6} my={6} rounded="lg">
-                <Stack isInline spacing={rem(10)} mb={6}>
-                  <AdImage src={selected.cover} size={rem(60)}></AdImage>
-                  <Text fontWeight={500}>{selected.title}</Text>
-                </Stack>
-                <Divider />
-                <Stack isInline spacing={6} my={rem(10)}>
-                  <Stack spacing={rem(6)} w={rem(80)}>
-                    <FigureLabel>Competitors</FigureLabel>
-                    <FigureLabel>Max price</FigureLabel>
-                  </Stack>
-                  <Stack spacing={rem(6)}>
-                    <FigureNumber fontSize={rem(13)} fontWeight={500}>
-                      1
-                    </FigureNumber>
-                    <FigureNumber fontSize={rem(13)} fontWeight={500}>
-                      {toDna(0.000000000123)} DNA
-                    </FigureNumber>
-                  </Stack>
-                </Stack>
-                <Divider borderWidth="1px" />
-                <Stack isInline spacing={6} mt={4}>
-                  <Stack spacing={1} w={rem(80)}>
-                    <SmallFigureLabel>Location</SmallFigureLabel>
-                    <SmallFigureLabel>Language</SmallFigureLabel>
-                    <SmallFigureLabel>Stake</SmallFigureLabel>
-                    <SmallFigureLabel>Age</SmallFigureLabel>
-                    <SmallFigureLabel>OS</SmallFigureLabel>
-                  </Stack>
-                  <Stack spacing={1}>
-                    <SmallTargetFigure>{selected.location}</SmallTargetFigure>
-                    <SmallTargetFigure>{selected.lang}</SmallTargetFigure>
-                    <SmallTargetFigure>{selected.stake}</SmallTargetFigure>
-                    <SmallTargetFigure>{selected.age}</SmallTargetFigure>
-                    <SmallTargetFigure>{selected.os}</SmallTargetFigure>
-                  </Stack>
-                </Stack>
-              </Box>
-              <FormControl>
-                <FormLabel htmlFor="amount">Amount, DNA</FormLabel>
-                <NumberInput id="amount"></NumberInput>
-              </FormControl>
-            </DrawerBody>
-            <DrawerFooter p={0}>
-              <PrimaryButton>Burn</PrimaryButton>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
+        <PublishAdDrawer
+          isOpen={isOpen}
+          onClose={onClose}
+          size={rem(360)}
+          ad={selected}
+        />
       </Page>
     </Layout>
   )

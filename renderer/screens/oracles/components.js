@@ -398,9 +398,9 @@ export function FillCenter(props) {
 
 export function FillPlaceholder(props) {
   return (
-    <Flex direction="column" flex={1} align="center" justify="center">
+    <FillCenter>
       <Text color="muted" {...props} />
-    </Flex>
+    </FillCenter>
   )
 }
 
