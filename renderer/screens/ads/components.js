@@ -2,7 +2,6 @@
 import React, {forwardRef} from 'react'
 import {
   Box,
-  Divider,
   Flex,
   Image,
   Text,
@@ -30,13 +29,14 @@ import {rem} from '../../shared/theme'
 import {IconButton2} from '../../shared/components/button'
 import {AVAILABLE_LANGS} from '../../i18n'
 import {adFormMachine} from './machines'
-import {COUNTRY_CODES, validImageType} from './utils'
+import {COUNTRY_CODES, validImageType, coverDb, coverKey} from './utils'
 import {
   FormLabel,
   Input,
   NumberInput,
   Textarea,
 } from '../../shared/components/components'
+import {DnaInput} from '../oracles/components'
 
 export function Toolbar(props) {
   return <Flex mb={8} {...props} />
@@ -92,10 +92,6 @@ export function AdEntry(props) {
 
 export function AdImage(props) {
   return <Image rounded="lg" size={rem(60)} {...props} />
-}
-
-export function AdEntryDivider(props) {
-  return <Divider border="px" borderColor="gray.100" mb={0} {...props} />
 }
 
 export function AdTarget(props) {
@@ -157,7 +153,7 @@ export function AdMenuItem(props) {
       _selected={{bg: 'gray.50'}}
       _active={{bg: 'gray.50'}}
       {...props}
-    ></PseudoBox>
+    />
   )
 }
 
@@ -180,7 +176,7 @@ export const AdFormTab = forwardRef(({isSelected, ...props}, ref) => (
   />
 ))
 
-export function NewAdForm({onChange, ...ad}) {
+export function AdForm({onChange, ...ad}) {
   const [current, send] = useMachine(adFormMachine, {
     context: {
       ...ad,
@@ -293,9 +289,9 @@ export function NewAdForm({onChange, ...ad}) {
             />
           </AdFormField>
           <AdFormField label="Stake" id="stake">
-            <AdNumberInput
+            <DnaInput
               defaultValue={stake}
-              onBlur={({target: {value}}) =>
+              onChange={({target: {value}}) =>
                 send('CHANGE', {ad: {stake: value}})
               }
             />
@@ -388,7 +384,17 @@ export function AdFooter(props) {
   )
 }
 
-export function AdBanner({cover, title, owner, url}) {
+export function AdBanner({id, title, owner, url}) {
+  const [cover, setCover] = React.useState()
+
+  React.useEffect(() => {
+    if (id) {
+      coverDb()
+        .get(coverKey({id}))
+        .then(setCover)
+    }
+  }, [id])
+
   return (
     <Flex
       align="center"
@@ -410,7 +416,7 @@ export function AdBanner({cover, title, owner, url}) {
         onClick={() => global.openExternal(url)}
       >
         <AdImage
-          src={cover}
+          src={URL.createObjectURL(new Blob([cover]))}
           size={rem(40)}
           fallbackSrc="//placekitten.com/40"
         />

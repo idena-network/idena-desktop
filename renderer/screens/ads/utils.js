@@ -302,9 +302,10 @@ export function toHex(encoded) {
   return `0x${encoded.toString('hex')}`
 }
 
-const coverKey = ({id}) => `ads.${id}.cover`
+export const coverKey = ({id}) => `ads.${id}.cover`
 
-const coverDb = () => global.sub(requestDb(), 'ads', {valueEncoding: 'binary'})
+export const coverDb = () =>
+  global.sub(requestDb(), 'ads', {valueEncoding: 'binary'})
 
 export async function loadAds(epoch = -1) {
   const ads = await epochDb('ads', epoch).all()
@@ -324,14 +325,6 @@ export async function saveAd({cover, ...ad}, epoch = -1) {
 export async function updateAd({cover, ...ad}, epoch = -1) {
   const {id} = await epochDb('ads', epoch).put(ad)
   await coverDb().put(coverKey({id}), cover)
-}
-
-export function toDna(num) {
-  return num.toLocaleString(undefined, {
-    style: 'decimal',
-    minimumFractionDigits: 16,
-    maximumFractionDigits: 16,
-  })
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types

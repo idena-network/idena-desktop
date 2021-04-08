@@ -20,11 +20,13 @@ import {
   FormLabel,
   FormControl,
   Link,
+  useTheme,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import NextLink from 'next/link'
 import dayjs from 'dayjs'
-import {linearGradient, transparentize, cover} from 'polished'
+import {transparentize} from 'polished'
+import {useTranslation} from 'react-i18next'
 import {
   AdList,
   AdEntry,
@@ -34,36 +36,41 @@ import {
   FigureNumber,
   AdImage,
   FigureGroup,
-  AdEntryDivider,
   AdTarget,
   SmallFigureLabel,
   AdMenu,
   AdMenuItem,
   AdMenuItemIcon,
-  AdBanner,
   NoAds,
   SmallTargetFigure,
 } from '../../screens/ads/components'
+import {
+  FlipFilter as FilterList,
+  FlipFilterOption as FilterOption,
+} from '../../screens/flips/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {add} from '../../shared/utils/math'
 import {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../screens/app/components'
-import {
-  SecondaryButton,
-  PrimaryButton,
-  IconButton2,
-} from '../../shared/components/button'
+import {SecondaryButton, PrimaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
-import {loadAds, AdStatus, adStatusColor, toDna} from '../../screens/ads/utils'
+import {loadAds, AdStatus, adStatusColor} from '../../screens/ads/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {eitherState} from '../../shared/utils/utils'
+import {toLocaleDna} from '../../shared/utils/utils'
+import {useChainState} from '../../shared/providers/chain-context'
+import {HDivider, VDivider} from '../../shared/components/components'
+import {IconLink} from '../../shared/components/link'
+import {Fill} from '../../shared/components'
 
 export default function MyAds() {
+  const {i18n} = useTranslation()
+
   const {isOpen, onOpen, onClose} = useDisclosure()
+  const {colors} = useTheme()
 
-  const {address, balance} = useIdentityState()
-
+  const {syncing, offline} = useChainState()
+  const {balance} = useIdentityState()
   const epoch = useEpochState()
 
   const [current, send] = useMachine(adListMachine, {
@@ -73,39 +80,45 @@ export default function MyAds() {
   })
   const {ads, selected} = current.context
 
-  const isState = state => eitherState(current, state)
+  const toDna = toLocaleDna(i18n.language)
 
   return (
-    <Layout style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
-      {isState('ready') && <AdBanner {...ads[0]} owner={address} />}
-      <Page as={Flex} flexDirection="column">
+    <Layout syncing={syncing} offline={offline}>
+      <Page as={Stack} spacing={4}>
         <PageTitle mb={4}>My Ads</PageTitle>
         <Toolbar w="full">
           <FigureGroup>
             <Figure mr={rem(84)}>
               <FigureLabel>My balance</FigureLabel>
-              <FigureNumber>{(balance || 0).toLocaleString()} DNA</FigureNumber>
+              <FigureNumber>{toDna(balance)}</FigureNumber>
             </Figure>
             <Figure>
               <FigureLabel>Total spent, 4hrs</FigureLabel>
               <FigureNumber>
-                {ads
-                  .map(({burnt}) => burnt || 0)
-                  .reduce(add, 0)
-                  .toLocaleString()}{' '}
-                DNA
+                {toDna(ads.map(({burnt}) => burnt || 0).reduce(add, 0))}
               </FigureNumber>
             </Figure>
           </FigureGroup>
-          <Box ml="auto">
-            <NextLink href="/ads/new">
-              <IconButton2 icon="plus-solid" ml="auto">
-                New banner
-              </IconButton2>
-            </NextLink>
-          </Box>
         </Toolbar>
-        <AdList spacing={4}>
+        <FilterList
+          value="active"
+          display="flex"
+          alignItems="center"
+          alignSelf="stretch"
+          onChange={value => {
+            if (value) send('FILTER', {value})
+          }}
+        >
+          <FilterOption value="active">Active</FilterOption>
+          <FilterOption value="drafts">Drafts</FilterOption>
+          <FilterOption value="review">On review</FilterOption>
+          <FilterOption value="rejected">Rejected</FilterOption>
+          <VDivider ml="auto" />
+          <IconLink icon="plus-solid" href="/ads/new">
+            New banner
+          </IconLink>
+        </FilterList>
+        <AdList py={4} spacing={4} alignSelf="stretch">
           {ads.map(
             ({
               id,
@@ -121,38 +134,37 @@ export default function MyAds() {
               status = AdStatus.Idle,
             }) => (
               <AdEntry key={id}>
-                <Flex>
-                  <Box w={rem(60)}>
-                    <Box mb={3} position="relative">
+                <Stack isInline spacing={5}>
+                  <Stack spacing={3} w={rem(60)}>
+                    <Box position="relative">
                       <AdImage
                         src={URL.createObjectURL(new Blob([adCover]))}
                         fallbackSrc="//placekitten.com/60/60"
                         alt={title}
-                      ></AdImage>
-                      {status !== AdStatus.Idle && (
-                        <Box
+                      />
+                      {status === AdStatus.Idle && (
+                        <Fill
                           rounded="lg"
-                          {...cover()}
-                          {...linearGradient({
-                            colorStops: [
-                              adStatusColor(status),
-                              transparentize(0.84, adStatusColor(status)),
-                            ],
-                            fallback: 'none',
-                            toDirection: 'to top',
-                          })}
+                          backgroundImage={
+                            // eslint-disable-next-line no-nested-ternary
+                            status === AdStatus.PartiallyShowing
+                              ? `linear-gradient(to top, ${
+                                  colors.warning[500]
+                                }, ${transparentize(100, colors.warning[500])})`
+                              : status === AdStatus.NotShowing
+                              ? `linear-gradient(to top, ${
+                                  colors.red[500]
+                                }, ${transparentize(100, colors.red[500])})`
+                              : ''
+                          }
                         />
                       )}
                     </Box>
-                    <Text
-                      color={adStatusColor(status)}
-                      fontWeight={500}
-                      wordBreak="break-word"
-                    >
+                    <Text color={adStatusColor(status)} fontWeight={500}>
                       {status}
                     </Text>
-                  </Box>
-                  <Box ml={5} flex={1}>
+                  </Stack>
+                  <Box flex={1}>
                     <Flex>
                       <NextLink href={`/ads/edit?id=${id}`} passHref>
                         <Link
@@ -260,8 +272,8 @@ export default function MyAds() {
                       </Box>
                     </AdTarget>
                   </Box>
-                </Flex>
-                <AdEntryDivider />
+                </Stack>
+                {ads.length > 1 && <HDivider />}
               </AdEntry>
             )
           )}

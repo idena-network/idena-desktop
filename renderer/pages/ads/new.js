@@ -10,7 +10,7 @@ import {
   AdFooter,
   AdNumberInput,
   AdFormField,
-  NewAdForm,
+  AdForm,
 } from '../../screens/ads/components'
 import {editAdMachine} from '../../screens/ads/machines'
 import {PrimaryButton} from '../../shared/components/button'
@@ -62,7 +62,11 @@ export default function NewAd() {
         <Tabs variant="unstyled">
           <TabPanels>
             <TabPanel isSelected={false && tab === 'options'}>
-              <NewAdForm onChange={ad => send('UPDATE', {ad})} />
+              <AdForm
+                onChange={ad => {
+                  send('UPDATE', {ad})
+                }}
+              />
             </TabPanel>
             <TabPanel isSelected={true || tab === 'advanced'}>
               <Stack spacing={6} w="480px">
