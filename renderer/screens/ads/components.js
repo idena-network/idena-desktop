@@ -357,9 +357,7 @@ export function AdBanner({id, title, owner, url}) {
 
   React.useEffect(() => {
     if (id) {
-      coverDb()
-        .get(coverKey({id}))
-        .then(setCover)
+      coverDb.get(coverKey({id})).then(setCover)
     }
   }, [id])
 

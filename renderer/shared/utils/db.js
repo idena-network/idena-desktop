@@ -1,19 +1,68 @@
 import nanoid from 'nanoid'
 
-const {levelup, leveldown, dbPath, sub} = global
+export const dbProxy = {
+  get(k, ns, opts) {
+    return global.ipcRenderer.invoke('DB_GET', [k, ns, opts])
+  },
+  put(k, v, ns, opts) {
+    return global.ipcRenderer.invoke('DB_PUT', [k, v, ns, opts])
+  },
+  clear(ns) {
+    return global.ipcRenderer.invoke('DB_CLEAR', [ns])
+  },
+}
 
-let idenaDb = null
+export function epochDb2(epoch, db, opts = {valueEncoding: 'json'}) {
+  const ns = [epoch, db]
+  const args = [ns, opts]
 
-export function requestDb(name = 'db') {
-  if (idenaDb === null) {
-    idenaDb = levelup(leveldown(dbPath(name)))
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('beforeunload', async () => {
-        if (idenaDb?.isOpen()) await idenaDb.close()
-      })
+  const safeReadIds2 = async () => {
+    try {
+      return await dbProxy.get('ids', ...args)
+    } catch {
+      return []
     }
   }
+
+  return {
+    async all() {
+      const ids = await safeReadIds2()
+      return Promise.all(
+        ids.map(async id => ({
+          id,
+          ...(await this.get(id)),
+        }))
+      )
+    },
+    get(k) {
+      return dbProxy.get(k, ...args)
+    },
+    async put({id = nanoid(), ...v}) {
+      const prevIds = await safeReadIds2()
+      await dbProxy.put('ids', prevIds.concat(id), ...args)
+      await dbProxy.put(id, v, ...args)
+      return id
+    },
+    clear() {
+      return dbProxy.clear(ns)
+    },
+  }
+}
+
+// const {levelup, leveldown, dbPath, sub} = global
+
+const idenaDb = {}
+
+export function requestDb(name = 'db') {
+  // if (idenaDb === null) {
+  //   idenaDb = levelup(leveldown(dbPath(name)))
+
+  //   if (typeof window !== 'undefined') {
+  //     window.addEventListener('beforeunload', async () => {
+  //       if (idenaDb?.isOpen()) await idenaDb.close()
+  //     })
+  //   }
+  // }
   return idenaDb
 }
 
@@ -27,12 +76,12 @@ export const epochDb = (db, epoch, options) => {
 
   let targetDb
 
-  switch (typeof db) {
+  switch (typeof dbProxy) {
     case 'string':
-      targetDb = sub(sub(requestDb(), db), epochPrefix, nextOptions)
+      // targetDb = sub(sub(requestDb(), db), epochPrefix, nextOptions)
       break
     case 'object':
-      targetDb = sub(db, epochPrefix, nextOptions)
+      // targetDb = sub(db, epochPrefix, nextOptions)
       break
     default:
       throw new Error('db should be either string or Level instance')

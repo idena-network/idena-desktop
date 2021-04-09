@@ -4,7 +4,7 @@ import {SettingsSection} from '../../screens/settings/components'
 import {PrimaryButton} from '../../shared/components/button'
 import {Toast} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {requestDb} from '../../shared/utils/db'
+import {dbProxy} from '../../shared/utils/db'
 import SettingsLayout from './layout'
 
 export default function AdsSettings() {
@@ -28,7 +28,7 @@ export default function AdsSettings() {
               </Box>
               <PrimaryButton
                 onClick={async () => {
-                  await global.sub(requestDb(), 'ads').clear()
+                  await dbProxy.clear('ads')
                   toast({
                     // eslint-disable-next-line react/display-name
                     render: () => <Toast title={t('Ads removed')} />,

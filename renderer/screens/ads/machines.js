@@ -139,12 +139,13 @@ export const editAdMachine = Machine({
       },
     },
     failure: {
+      entry: [log()],
       on: {
         RETRY: 'submitting',
       },
     },
     success: {
-      entry: ['onSuccess'],
+      entry: [log(), 'onSuccess'],
       type: 'final',
     },
   },

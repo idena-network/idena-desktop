@@ -1,8 +1,7 @@
 import {encode, decode} from 'rlp'
 import {rgb} from 'polished'
-import {global} from 'styled-jsx/css'
 import theme from '../../shared/theme'
-import {epochDb, requestDb} from '../../shared/utils/db'
+import {dbProxy, epochDb, epochDb2} from '../../shared/utils/db'
 
 export const COUNTRY_CODES = {
   AF: 'Afghanistan',
@@ -282,12 +281,6 @@ export function adStatusColor(status) {
   }
 }
 
-export function linearGradient(color) {
-  return `linear-gradient(to top, ${color}, ${color
-    .replace('rgb', 'rgba')
-    .replace(')', ', 0.16)')})`
-}
-
 export function encodeAd(data) {
   const encoded = new TextEncoder().encode(JSON.stringify(data))
   return encode(encoded)
@@ -304,27 +297,34 @@ export function toHex(encoded) {
 
 export const coverKey = ({id}) => `ads.${id}.cover`
 
-export const coverDb = () =>
-  global.sub(requestDb(), 'ads', {valueEncoding: 'binary'})
+export const coverDb = {
+  options: ['ads', {valueEncoding: 'binary'}],
+  get({id}) {
+    return dbProxy.get(coverKey({id}), ...this.options)
+  },
+  put({id, cover}) {
+    return dbProxy.put(coverKey({id}), cover, ...this.options)
+  },
+}
 
 export async function loadAds(epoch = -1) {
-  const ads = await epochDb('ads', epoch).all()
+  const ads = await epochDb2(epoch, 'ads').all()
   return Promise.all(
     ads.map(async ad => ({
       ...ad,
-      cover: await coverDb().get(coverKey(ad)),
+      cover: await coverDb.get(ad),
     }))
   )
 }
 
 export async function saveAd({cover, ...ad}, epoch = -1) {
-  const {id} = await epochDb('ads', epoch).put(ad)
-  await coverDb().put(coverKey({id}), cover)
+  const id = await epochDb2(epoch, 'ads').put(ad)
+  await coverDb.put({id, cover})
 }
 
 export async function updateAd({cover, ...ad}, epoch = -1) {
   const {id} = await epochDb('ads', epoch).put(ad)
-  await coverDb().put(coverKey({id}), cover)
+  await coverDb.put({id, cover})
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types

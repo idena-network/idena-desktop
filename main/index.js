@@ -56,6 +56,9 @@ const {
 } = require('./idena-node')
 
 const NodeUpdater = require('./node-updater')
+const setupDb = require('./setup-db')
+
+let db
 
 let mainWindow
 let node
@@ -311,7 +314,10 @@ const createTray = () => {
 
 // Prepare the renderer once the app is ready
 app.on('ready', async () => {
+  db = setupDb()
+
   await prepareNext('./renderer')
+
   const i18nConfig = getI18nConfig()
 
   i18next.init(i18nConfig, function(err) {
@@ -615,3 +621,7 @@ ipcMain.handle('search-image', async (_, query) =>
     moderate: true,
   })
 )
+
+process.on('beforeExit', async () => {
+  if (db.isOpen()) await db.close()
+})

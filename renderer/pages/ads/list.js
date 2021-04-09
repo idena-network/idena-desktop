@@ -7,7 +7,6 @@ import {
   MenuDivider,
   useDisclosure,
   Link,
-  useTheme,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import NextLink from 'next/link'
@@ -86,24 +85,23 @@ export default function MyAds() {
             </AdStatNumber>
           </BlockAdStat>
         </Stack>
-        <FilterList
-          value="active"
-          display="flex"
-          alignItems="center"
-          alignSelf="stretch"
-          onChange={value => {
-            if (value) send('FILTER', {value})
-          }}
-        >
-          <FilterOption value="active">Active</FilterOption>
-          <FilterOption value="drafts">Drafts</FilterOption>
-          <FilterOption value="review">On review</FilterOption>
-          <FilterOption value="rejected">Rejected</FilterOption>
+        <Flex align="center" alignSelf="stretch">
+          <FilterList
+            value="active"
+            onChange={value => {
+              if (value) send('FILTER', {value})
+            }}
+          >
+            <FilterOption value="active">Active</FilterOption>
+            <FilterOption value="drafts">Drafts</FilterOption>
+            <FilterOption value="review">On review</FilterOption>
+            <FilterOption value="rejected">Rejected</FilterOption>
+          </FilterList>
           <VDivider ml="auto" />
           <IconLink icon="plus-solid" href="/ads/new">
             New banner
           </IconLink>
-        </FilterList>
+        </Flex>
         <AdList py={4} spacing={4} alignSelf="stretch">
           {ads.map(
             ({
