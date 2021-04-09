@@ -95,3 +95,5 @@ datadir
 .DS_Store
 
 main/node/**
+
+idena.db/
