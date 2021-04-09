@@ -4,7 +4,6 @@ import {
   Flex,
   Stack,
   Text,
-  Divider,
   MenuDivider,
   useDisclosure,
   Link,
@@ -13,24 +12,16 @@ import {
 import {useMachine} from '@xstate/react'
 import NextLink from 'next/link'
 import dayjs from 'dayjs'
-import {transparentize} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {
   AdList,
   AdEntry,
-  Toolbar,
-  Figure,
-  FigureLabel,
-  FigureNumber,
   AdImage,
-  FigureGroup,
-  AdTarget,
-  SmallFigureLabel,
   AdMenu,
   AdMenuItem,
   AdMenuItemIcon,
   NoAds,
-  SmallTargetFigure,
+  AdStatNumber,
 } from '../../screens/ads/components'
 import {
   FlipFilter as FilterList,
@@ -54,14 +45,19 @@ import {toLocaleDna} from '../../shared/utils/utils'
 import {useChainState} from '../../shared/providers/chain-context'
 import {HDivider, VDivider} from '../../shared/components/components'
 import {IconLink} from '../../shared/components/link'
-import {Fill} from '../../shared/components'
-import {PublishAdDrawer} from '../../screens/ads/containers'
+import {
+  AdOverlayStatus,
+  BlockAdStat,
+  InlineAdGroup,
+  InlineAdStat,
+  PublishAdDrawer,
+  SmallInlineAdStat,
+} from '../../screens/ads/containers'
 
 export default function MyAds() {
   const {i18n} = useTranslation()
 
   const {isOpen, onOpen, onClose} = useDisclosure()
-  const {colors} = useTheme()
 
   const {syncing, offline} = useChainState()
   const {balance} = useIdentityState()
@@ -79,21 +75,17 @@ export default function MyAds() {
   return (
     <Layout syncing={syncing} offline={offline}>
       <Page as={Stack} spacing={4}>
-        <PageTitle mb={4}>My Ads</PageTitle>
-        <Toolbar w="full">
-          <FigureGroup>
-            <Figure mr={rem(84)}>
-              <FigureLabel>My balance</FigureLabel>
-              <FigureNumber>{toDna(balance)}</FigureNumber>
-            </Figure>
-            <Figure>
-              <FigureLabel>Total spent, 4hrs</FigureLabel>
-              <FigureNumber>
-                {toDna(ads.map(({burnt}) => burnt || 0).reduce(add, 0))}
-              </FigureNumber>
-            </Figure>
-          </FigureGroup>
-        </Toolbar>
+        <PageTitle>My Ads</PageTitle>
+        <Stack isInline spacing={20}>
+          <BlockAdStat label="My balance">
+            <AdStatNumber fontSize="lg">{toDna(balance)}</AdStatNumber>
+          </BlockAdStat>
+          <BlockAdStat label="Total spent, 4hrs">
+            <AdStatNumber fontSize="lg">
+              {toDna(ads.map(({burnt = 0}) => burnt).reduce(add, 0))}
+            </AdStatNumber>
+          </BlockAdStat>
+        </Stack>
         <FilterList
           value="active"
           display="flex"
@@ -137,21 +129,7 @@ export default function MyAds() {
                         alt={title}
                       />
                       {status === AdStatus.Idle && (
-                        <Fill
-                          rounded="lg"
-                          backgroundImage={
-                            // eslint-disable-next-line no-nested-ternary
-                            status === AdStatus.PartiallyShowing
-                              ? `linear-gradient(to top, ${
-                                  colors.warning[500]
-                                }, ${transparentize(100, colors.warning[500])})`
-                              : status === AdStatus.NotShowing
-                              ? `linear-gradient(to top, ${
-                                  colors.red[500]
-                                }, ${transparentize(100, colors.red[500])})`
-                              : ''
-                          }
-                        />
+                        <AdOverlayStatus status={status} />
                       )}
                     </Box>
                     <Text color={adStatusColor(status)} fontWeight={500}>
@@ -199,72 +177,48 @@ export default function MyAds() {
                         </SecondaryButton>
                       </Stack>
                     </Flex>
-                    <Stack isInline spacing={rem(58)} mt="px">
-                      <Figure>
-                        <FigureLabel>Spent, 4hrs</FigureLabel>
-                        <FigureNumber fontSize={rem(13)}>
-                          {toDna(spent)}
-                        </FigureNumber>
-                      </Figure>
-                      <Figure>
-                        <FigureLabel>Total spent, DNA</FigureLabel>
-                        <FigureNumber fontSize={rem(13)}>
-                          {toDna(spent)}
-                        </FigureNumber>
-                      </Figure>
-                      <Figure>
-                        <FigureLabel>Last tx</FigureLabel>
-                        <FigureNumber fontSize={rem(13)}>
-                          {dayjs().diff(lastTx, 'ms')} ms ago
-                        </FigureNumber>
-                      </Figure>
+                    <Stack isInline spacing={rem(58)}>
+                      <BlockAdStat label="Spent, 4hrs" value={toDna(spent)} />
+                      <BlockAdStat
+                        label="Total spent, DNA"
+                        value={toDna(spent)}
+                      />
+                      <BlockAdStat
+                        label="Last tx"
+                        value={`${dayjs().diff(lastTx, 'ms')} ms ago`}
+                      />
                     </Stack>
-                    <AdTarget>
-                      <Stack isInline spacing={2}>
-                        <Stack spacing={1}>
-                          <SmallFigureLabel>Location</SmallFigureLabel>
-                          <SmallFigureLabel>Language</SmallFigureLabel>
-                          <SmallFigureLabel>Stake</SmallFigureLabel>
-                        </Stack>
-                        <Stack spacing={1}>
-                          <SmallTargetFigure>{location}</SmallTargetFigure>
-                          <SmallTargetFigure>{lang}</SmallTargetFigure>
-                          <SmallTargetFigure>{stake}</SmallTargetFigure>
-                        </Stack>
+                    <Stack
+                      isInline
+                      spacing={4}
+                      bg="gray.50"
+                      p={2}
+                      my={5}
+                      rounded="md"
+                    >
+                      <Stack flex={1} isInline px={2} pt={1}>
+                        <InlineAdGroup spacing="3/2" labelWidth={55} flex={1}>
+                          <SmallInlineAdStat
+                            label="Location"
+                            value={location}
+                          />
+                          <SmallInlineAdStat label="Language" value={lang} />
+                          <SmallInlineAdStat label="Stake" value={stake} />
+                        </InlineAdGroup>
+                        <InlineAdGroup labelWidth={24} flex={1}>
+                          <SmallInlineAdStat label="Age" value={age} />
+                          <SmallInlineAdStat label="OS" value={os} />
+                        </InlineAdGroup>
                       </Stack>
-                      <Stack isInline spacing={2}>
-                        <Stack spacing={1}>
-                          <SmallFigureLabel>Age</SmallFigureLabel>
-                          <SmallFigureLabel>OS</SmallFigureLabel>
-                        </Stack>
-                        <Stack spacing={1}>
-                          <SmallTargetFigure>{age}</SmallTargetFigure>
-                          <SmallTargetFigure>{os}</SmallTargetFigure>
-                        </Stack>
+                      <VDivider minH={68} h="full" />
+                      <Stack flex={1} justify="center">
+                        <InlineAdStat label="Competitors" value={10} />
+                        <InlineAdStat
+                          label="Max price"
+                          value={toLocaleDna(i18n.language)(0.000000000123)}
+                        />
                       </Stack>
-                      <Divider
-                        borderColor="gray.100"
-                        border="1px"
-                        orientation="vertical"
-                        opacity={1}
-                      ></Divider>
-                      <Box ml={4} mt={rem(6)}>
-                        <Stack isInline spacing={2}>
-                          <Stack spacing={rem(6)}>
-                            <FigureLabel>Competitors</FigureLabel>
-                            <FigureLabel>Max price</FigureLabel>
-                          </Stack>
-                          <Stack spacing={rem(6)}>
-                            <FigureNumber fontSize={rem(13)} fontWeight={500}>
-                              1
-                            </FigureNumber>
-                            <FigureNumber fontSize={rem(13)} fontWeight={500}>
-                              0.000000000123 DNA
-                            </FigureNumber>
-                          </Stack>
-                        </Stack>
-                      </Box>
-                    </AdTarget>
+                    </Stack>
                   </Box>
                 </Stack>
                 {ads.length > 1 && <HDivider />}

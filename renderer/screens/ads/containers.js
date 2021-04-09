@@ -1,12 +1,14 @@
 /* eslint-disable react/prop-types */
+import * as React from 'react'
 import {
   DrawerFooter,
-  Flex,
   FormControl,
   Heading,
   Icon,
   Stack,
+  Stat,
   Text,
+  useTheme,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {PrimaryButton} from '../../shared/components/button'
@@ -19,14 +21,52 @@ import {
 } from '../../shared/components/components'
 import {toLocaleDna} from '../../shared/utils/utils'
 import {DnaInput, FillCenter} from '../oracles/components'
-import {
-  AdImage,
-  FigureLabel,
-  FigureNumber,
-  SmallFigureLabel,
-  SmallTargetFigure,
-} from './components'
-import {adUrlFromBytes} from './utils'
+import {AdImage, AdStatLabel, AdStatNumber} from './components'
+import {AdStatus, adUrlFromBytes} from './utils'
+import {Fill} from '../../shared/components'
+
+export function BlockAdStat({label, value, children, ...props}) {
+  return (
+    <Stat flex="initial" {...props}>
+      {label && <AdStatLabel>{label}</AdStatLabel>}
+      {value && <AdStatNumber>{value}</AdStatNumber>}
+      {children}
+    </Stat>
+  )
+}
+
+export function InlineAdGroup({labelWidth, children, ...props}) {
+  return (
+    <Stack {...props}>
+      {React.Children.map(children, c => React.cloneElement(c, {labelWidth}))}
+    </Stack>
+  )
+}
+
+export function InlineAdStat({
+  label,
+  value,
+  labelWidth,
+  fontSize,
+  children,
+  ...props
+}) {
+  return (
+    <Stack as={BlockAdStat} isInline {...props}>
+      {label && (
+        <AdStatLabel fontSize={fontSize} flexBasis={labelWidth}>
+          {label}
+        </AdStatLabel>
+      )}
+      {value && <AdStatNumber fontSize={fontSize}>{value}</AdStatNumber>}
+      {children}
+    </Stack>
+  )
+}
+
+export function SmallInlineAdStat(props) {
+  return <InlineAdStat fontSize="sm" {...props} />
+}
 
 export function PublishAdDrawer({ad, ...props}) {
   const {i18n} = useTranslation()
@@ -63,41 +103,19 @@ export function PublishAdDrawer({ad, ...props}) {
             <Stack spacing={3}>
               <HDivider />
               <Stack>
-                <Flex>
-                  <FigureLabel>Competitors</FigureLabel>
-                  <FigureNumber fontSize="md" fontWeight={500}>
-                    1
-                  </FigureNumber>
-                </Flex>
-                <Flex>
-                  <FigureLabel>Max price</FigureLabel>
-                  <FigureNumber fontSize="md" fontWeight={500}>
-                    {toLocaleDna(i18n.language)(0.22)} DNA
-                  </FigureNumber>
-                </Flex>
+                <InlineAdStat label="Competitors" value={10} />
+                <InlineAdStat
+                  label="Max price"
+                  value={toLocaleDna(i18n.language)(0.22)}
+                />
               </Stack>
               <HDivider />
               <Stack>
-                <Flex>
-                  <SmallFigureLabel>Location</SmallFigureLabel>
-                  <SmallTargetFigure>{ad.location}</SmallTargetFigure>
-                </Flex>
-                <Flex>
-                  <SmallFigureLabel>Language</SmallFigureLabel>
-                  <SmallTargetFigure>{ad.lang}</SmallTargetFigure>
-                </Flex>
-                <Flex>
-                  <SmallFigureLabel>Stake</SmallFigureLabel>
-                  <SmallTargetFigure>{ad.stake}</SmallTargetFigure>
-                </Flex>
-                <Flex>
-                  <SmallFigureLabel>Age</SmallFigureLabel>
-                  <SmallTargetFigure>{ad.age}</SmallTargetFigure>
-                </Flex>
-                <Flex>
-                  <SmallFigureLabel>OS</SmallFigureLabel>
-                  <SmallTargetFigure>{ad.os}</SmallTargetFigure>
-                </Flex>
+                <SmallInlineAdStat label="Location" value={ad.location} />
+                <SmallInlineAdStat label="Language" value={ad.lang} />
+                <SmallInlineAdStat label="Stake" value={ad.stake} />
+                <SmallInlineAdStat label="Age" value={ad.age} />
+                <SmallInlineAdStat label="OS" value={ad.os} />
               </Stack>
             </Stack>
           </Stack>
@@ -108,16 +126,35 @@ export function PublishAdDrawer({ad, ...props}) {
         </Stack>
       </DrawerBody>
       <DrawerFooter
-        pt={6}
-        px={8}
+        borderTopWidth={1}
+        borderTopColor="gray.300"
+        py={3}
+        px={4}
         position="absolute"
         left={0}
         right={0}
         bottom={0}
-        // top={0}
       >
         <PrimaryButton>Burn</PrimaryButton>
       </DrawerFooter>
     </Drawer>
+  )
+}
+
+export function AdOverlayStatus({status}) {
+  const {colors} = useTheme()
+
+  const statusColor = {
+    [AdStatus.PartiallyShowing]: 'warning',
+    [AdStatus.NotShowing]: 'red',
+  }
+
+  const startColor = colors[statusColor[status]]?.['500'] ?? 'transparent'
+
+  return (
+    <Fill
+      rounded="lg"
+      backgroundImage={`linear-gradient(to top, ${startColor}, transparent)`}
+    />
   )
 }

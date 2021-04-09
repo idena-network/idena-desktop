@@ -6,10 +6,8 @@ import {
   Image,
   Text,
   Stack,
-  Stat,
   StatLabel,
   StatNumber,
-  StatGroup,
   Menu,
   MenuButton,
   Icon,
@@ -44,46 +42,19 @@ import {
 } from '../../shared/components/components'
 import {DnaInput} from '../oracles/components'
 
-export function Toolbar(props) {
-  return <Flex mb={8} {...props} />
+export function AdStatLabel(props) {
+  return <StatLabel color="muted" fontSize="md" {...props} />
 }
 
-export function FigureGroup(props) {
-  return <StatGroup {...props} />
-}
-
-export function Figure(props) {
-  return <Stat {...props} />
-}
-
-export function FigureLabel(props) {
-  return (
-    <StatLabel
-      color="muted"
-      fontSize="md"
-      fontWeight={400}
-      minW={100}
-      {...props}
-    />
-  )
-}
-
-export function FigureNumber(props) {
+export function AdStatNumber(props) {
   return <StatNumber fontSize="md" fontWeight={500} {...props} />
-}
-export function SmallFigureLabel(props) {
-  return <FigureLabel fontSize={rem(11)} {...props} />
-}
-
-export function SmallFigureNumber(props) {
-  return <FigureNumber fontSize={rem(11)} {...props} />
 }
 
 export function SmallTargetFigure({children = 'Any', ...props}) {
   return (
-    <FigureNumber fontSize={rem(11)} {...props}>
+    <AdStatNumber fontSize={rem(11)} {...props}>
       {children}
-    </FigureNumber>
+    </AdStatNumber>
   )
 }
 
@@ -97,10 +68,6 @@ export function AdEntry(props) {
 
 export function AdImage(props) {
   return <Image rounded="lg" size={rem(60)} {...props} />
-}
-
-export function AdTarget(props) {
-  return <Flex bg="gray.50" px={4} py={3} my={4} rounded="md" {...props}></Flex>
 }
 
 export function NoAds() {
