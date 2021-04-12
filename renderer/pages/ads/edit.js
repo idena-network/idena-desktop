@@ -1,15 +1,8 @@
 import React from 'react'
-import {
-  Stack,
-  TabList,
-  Tabs,
-  TabPanels,
-  TabPanel,
-  Alert,
-  AlertIcon,
-} from '@chakra-ui/core'
+import {Stack, Tabs, TabPanels, TabPanel} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
+import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 import {PrimaryButton} from '../../shared/components/button'
@@ -18,13 +11,20 @@ import {
   AdFooter,
   AdNumberInput,
   AdFormField,
-  AdFormTab,
   AdForm,
 } from '../../screens/ads/components'
 import {editAdMachine} from '../../screens/ads/machines'
+import {
+  FlipFilter as FilterList,
+  FlipFilterOption as FilterOption,
+} from '../../screens/flips/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
+import {SuccessAlert} from '../../shared/components/components'
+import {eitherState} from '../../shared/utils/utils'
 
 export default function EditAd() {
+  const {t} = useTranslation()
+
   const router = useRouter()
   const {id} = router.query
 
@@ -44,34 +44,38 @@ export default function EditAd() {
     },
   })
 
+  const [tab, setTab] = React.useState(0)
+
   return (
     <Layout style={{flex: 1, display: 'flex'}}>
       <Page mb={12}>
         <PageTitle>Edit ad</PageTitle>
-        <Tabs variant="unstyled">
-          <TabList>
-            <AdFormTab>Parameters</AdFormTab>
-            <AdFormTab isDisabled>Publish options</AdFormTab>
-          </TabList>
-          <Alert
-            my={6}
-            variant="subtle"
-            status="success"
-            border="1px"
-            borderColor="green.200"
-            fontWeight={500}
-            rounded="md"
-          >
-            <AlertIcon size="20px" name="info" />
-            You must re-publish this banner after editing.
-          </Alert>
+        <FilterList
+          value={tab}
+          display="flex"
+          alignItems="center"
+          onChange={value => {
+            setTab(value)
+            if (value) send('FILTER', {value})
+          }}
+        >
+          <FilterOption value={0}>{t('Parameters')}</FilterOption>
+          <FilterOption value={1}>{t('Publish options')}</FilterOption>
+        </FilterList>
+        <SuccessAlert flexShrink={0} my={6} alignSelf="stretch">
+          You must publish this banner after creating
+        </SuccessAlert>
+        <Tabs variant="unstyled" index={tab} onChange={setTab}>
           <TabPanels>
             <TabPanel>
-              {JSON.stringify(current.context)}
-              <AdForm
-                {...current.context}
-                onChange={ad => send('UPDATE', {ad})}
-              />
+              {eitherState(current, 'editing') && (
+                <AdForm
+                  {...current.context}
+                  onChange={ad => {
+                    send('UPDATE', {ad})
+                  }}
+                />
+              )}
             </TabPanel>
             <TabPanel>
               <Stack spacing={6} w="480px">

@@ -40,7 +40,7 @@ export default function NewAd() {
     },
   })
 
-  const [tab, setTab] = React.useState('options')
+  const [tab, setTab] = React.useState(0)
 
   return (
     <Layout style={{flex: 1, display: 'flex'}}>
@@ -55,13 +55,13 @@ export default function NewAd() {
             if (value) send('FILTER', {value})
           }}
         >
-          <FilterOption value="options">{t('Parameters')}</FilterOption>
-          <FilterOption value="advanced">{t('Publish options')}</FilterOption>
+          <FilterOption value={0}>{t('Parameters')}</FilterOption>
+          <FilterOption value={1}>{t('Publish options')}</FilterOption>
         </FilterList>
-        <SuccessAlert minH={8} my={6} alignSelf="stretch">
+        <SuccessAlert flexShrink={0} my={6} alignSelf="stretch">
           You must publish this banner after creating
         </SuccessAlert>
-        <Tabs variant="unstyled">
+        <Tabs variant="unstyled" index={tab} onChange={setTab}>
           <TabPanels>
             <TabPanel isSelected={false && tab === 'options'}>
               <AdForm

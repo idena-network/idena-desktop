@@ -293,7 +293,6 @@ export function createAdDb(epoch) {
       await dbProxy.put(id, cover, ...coverDbArgs)
     },
     async get(id) {
-      console.log(await dbProxy.get(id, ...coverDbArgs))
       return {
         ...(await db.get(id)),
         cover: await dbProxy.get(id, ...coverDbArgs),
