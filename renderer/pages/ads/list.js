@@ -34,7 +34,7 @@ import {Page, PageTitle} from '../../screens/app/components'
 import {SecondaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
 import {
-  loadAds,
+  createAdDb,
   AdStatus,
   adStatusColor,
   adUrlFromBytes,
@@ -64,7 +64,7 @@ export default function MyAds() {
 
   const [current, send] = useMachine(adListMachine, {
     services: {
-      init: () => loadAds(epoch?.epoch ?? -1),
+      init: () => createAdDb(epoch?.epoch ?? -1).all(),
     },
   })
   const {ads, selected} = current.context

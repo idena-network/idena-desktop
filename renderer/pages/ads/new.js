@@ -5,7 +5,7 @@ import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
-import {saveAd} from '../../screens/ads/utils'
+import {createAdDb} from '../../screens/ads/utils'
 import {
   AdFooter,
   AdNumberInput,
@@ -28,13 +28,15 @@ export default function NewAd() {
 
   const epoch = useEpochState()
 
+  const db = createAdDb(epoch?.epoch ?? -1)
+
   const [current, send] = useMachine(editAdMachine, {
     actions: {
       onSuccess: () => router.push('/ads/list'),
     },
     services: {
       init: () => Promise.resolve(),
-      submit: ctx => saveAd(ctx, epoch?.epoch ?? -1),
+      submit: ctx => db.put(ctx),
     },
   })
 

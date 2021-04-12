@@ -4,7 +4,6 @@ import {
   Box,
   Flex,
   Image,
-  Text,
   Stack,
   StatLabel,
   StatNumber,
@@ -27,13 +26,7 @@ import {rem} from '../../shared/theme'
 import {IconButton2} from '../../shared/components/button'
 import {AVAILABLE_LANGS} from '../../i18n'
 import {adFormMachine} from './machines'
-import {
-  COUNTRY_CODES,
-  validImageType,
-  coverDb,
-  coverKey,
-  adUrlFromBytes,
-} from './utils'
+import {COUNTRY_CODES, validImageType, adUrlFromBytes} from './utils'
 import {
   FormLabel,
   Input,
@@ -349,76 +342,5 @@ export function AdFooter(props) {
     >
       <Stack isInline spacing={2} justify="flex-end" {...props} />
     </Box>
-  )
-}
-
-export function AdBanner({id, title, owner, url}) {
-  const [cover, setCover] = React.useState()
-
-  React.useEffect(() => {
-    if (id) {
-      coverDb.get(coverKey({id})).then(setCover)
-    }
-  }, [id])
-
-  return (
-    <Flex
-      align="center"
-      justify="space-between"
-      bg="white"
-      borderBottom="1px"
-      borderBottomColor="gray.100"
-      color="brandGray.500"
-      px={4}
-      py={2}
-      position="sticky"
-      top={0}
-      zIndex="banner"
-    >
-      <Stack
-        isInline
-        spacing={2}
-        cursor="pointer"
-        onClick={() => global.openExternal(url)}
-      >
-        <AdImage
-          src={adUrlFromBytes(cover)}
-          size={rem(40)}
-          fallbackSrc="//placekitten.com/40"
-        />
-        <Box>
-          <Text>{title}</Text>
-          <Stack isInline spacing={1}>
-            <Image
-              src={`https://robohash.org/${owner}`}
-              size={rem(16)}
-              border="1px"
-              borderColor="brandGray.16"
-              rounded="md"
-            />
-            <Text
-              color="muted"
-              fontSize={rem(11)}
-              fontWeight={500}
-              lineHeight={rem(16)}
-            >
-              {owner}
-            </Text>
-          </Stack>
-        </Box>
-      </Stack>
-      <Box>
-        <AdMenu>
-          <AdMenuItem>
-            <AdMenuItemIcon name="ads" />
-            My Ads
-          </AdMenuItem>
-          <AdMenuItem>
-            <AdMenuItemIcon name="cards" />
-            View all offers
-          </AdMenuItem>
-        </AdMenu>
-      </Box>
-    </Flex>
   )
 }

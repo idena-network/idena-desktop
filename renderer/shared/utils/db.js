@@ -12,11 +12,12 @@ export const dbProxy = {
   },
 }
 
-export function epochDb2(epoch, db, opts = {valueEncoding: 'json'}) {
-  const ns = [epoch, db]
+export function createEpochDb(epoch, dbName, opts = {valueEncoding: 'json'}) {
+  const ns = [epoch, dbName]
   const args = [ns, opts]
 
-  const safeReadIds2 = async () => {
+  // eslint-disable-next-line no-shadow
+  const safeReadIds = async () => {
     try {
       return await dbProxy.get('ids', ...args)
     } catch {
@@ -25,23 +26,22 @@ export function epochDb2(epoch, db, opts = {valueEncoding: 'json'}) {
   }
 
   return {
-    async all() {
-      const ids = await safeReadIds2()
-      return Promise.all(
-        ids.map(async id => ({
-          id,
-          ...(await this.get(id)),
-        }))
-      )
-    },
     get(k) {
       return dbProxy.get(k, ...args)
     },
     async put({id = nanoid(), ...v}) {
-      const prevIds = await safeReadIds2()
+      const prevIds = await safeReadIds()
       await dbProxy.put('ids', prevIds.concat(id), ...args)
       await dbProxy.put(id, v, ...args)
       return id
+    },
+    async all() {
+      return Promise.all(
+        (await safeReadIds()).map(async id => ({
+          id,
+          ...(await this.get(id)),
+        }))
+      )
     },
     clear() {
       return dbProxy.clear(ns)

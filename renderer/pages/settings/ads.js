@@ -1,10 +1,10 @@
 import {Box, Stack, Text, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
+import {createAdDb} from '../../screens/ads/utils'
 import {SettingsSection} from '../../screens/settings/components'
 import {PrimaryButton} from '../../shared/components/button'
 import {Toast} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {dbProxy} from '../../shared/utils/db'
 import SettingsLayout from './layout'
 
 export default function AdsSettings() {
@@ -28,7 +28,7 @@ export default function AdsSettings() {
               </Box>
               <PrimaryButton
                 onClick={async () => {
-                  await dbProxy.clear('ads')
+                  await createAdDb(epochState.epoch).clear()
                   toast({
                     // eslint-disable-next-line react/display-name
                     render: () => <Toast title={t('Ads removed')} />,

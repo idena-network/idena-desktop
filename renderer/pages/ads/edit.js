@@ -13,19 +13,24 @@ import {useRouter} from 'next/router'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 import {PrimaryButton} from '../../shared/components/button'
-import {updateAd, loadAds} from '../../screens/ads/utils'
+import {createAdDb} from '../../screens/ads/utils'
 import {
   AdFooter,
   AdNumberInput,
   AdFormField,
   AdFormTab,
-  NewAdForm,
+  AdForm,
 } from '../../screens/ads/components'
 import {editAdMachine} from '../../screens/ads/machines'
+import {useEpochState} from '../../shared/providers/epoch-context'
 
 export default function EditAd() {
   const router = useRouter()
   const {id} = router.query
+
+  const epoch = useEpochState()
+
+  const db = createAdDb(epoch?.epoch ?? -1)
 
   const [current, send] = useMachine(editAdMachine, {
     context: {id},
@@ -34,11 +39,8 @@ export default function EditAd() {
     },
     services: {
       // eslint-disable-next-line no-shadow
-      init: async ({id}) => (await loadAds()).find(a => a.id === id),
-      submit: async ctx => {
-        updateAd(ctx)
-        return Promise.resolve()
-      },
+      init: ({id}) => db.get(id),
+      submit: ctx => db.put(ctx),
     },
   })
 
@@ -66,7 +68,7 @@ export default function EditAd() {
           <TabPanels>
             <TabPanel>
               {JSON.stringify(current.context)}
-              <NewAdForm
+              <AdForm
                 {...current.context}
                 onChange={ad => send('UPDATE', {ad})}
               />

@@ -1,10 +1,13 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react'
 import {
+  Box,
   DrawerFooter,
+  Flex,
   FormControl,
   Heading,
   Icon,
+  Image,
   Stack,
   Stat,
   Text,
@@ -21,7 +24,14 @@ import {
 } from '../../shared/components/components'
 import {toLocaleDna} from '../../shared/utils/utils'
 import {DnaInput, FillCenter} from '../oracles/components'
-import {AdImage, AdStatLabel, AdStatNumber} from './components'
+import {
+  AdImage,
+  AdMenu,
+  AdMenuItem,
+  AdMenuItemIcon,
+  AdStatLabel,
+  AdStatNumber,
+} from './components'
 import {AdStatus, adUrlFromBytes} from './utils'
 import {Fill} from '../../shared/components'
 
@@ -156,5 +166,68 @@ export function AdOverlayStatus({status}) {
       rounded="lg"
       backgroundImage={`linear-gradient(to top, ${startColor}, transparent)`}
     />
+  )
+}
+
+export function AdBanner({title, cover, owner, url}) {
+  return (
+    <Flex
+      align="center"
+      justify="space-between"
+      bg="white"
+      borderBottom="1px"
+      borderBottomColor="gray.100"
+      color="brandGray.500"
+      px={4}
+      py={2}
+      position="sticky"
+      top={0}
+      zIndex="banner"
+    >
+      <Stack
+        isInline
+        spacing={2}
+        cursor="pointer"
+        onClick={() => global.openExternal(url)}
+      >
+        <AdImage
+          src={adUrlFromBytes(cover)}
+          size={40}
+          fallbackSrc="//placekitten.com/40"
+        />
+        <Box>
+          <Text>{title}</Text>
+          <Stack isInline spacing={1}>
+            <Image
+              src={`https://robohash.org/${owner}`}
+              size={4}
+              border="1px"
+              borderColor="brandGray.16"
+              rounded="md"
+            />
+            <Text
+              color="muted"
+              fontSize="sm"
+              fontWeight={500}
+              lineHeight="base"
+            >
+              {owner}
+            </Text>
+          </Stack>
+        </Box>
+      </Stack>
+      <Box>
+        <AdMenu>
+          <AdMenuItem>
+            <AdMenuItemIcon name="ads" />
+            My Ads
+          </AdMenuItem>
+          <AdMenuItem>
+            <AdMenuItemIcon name="cards" />
+            View all offers
+          </AdMenuItem>
+        </AdMenu>
+      </Box>
+    </Flex>
   )
 }

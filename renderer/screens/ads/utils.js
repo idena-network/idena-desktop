@@ -1,7 +1,6 @@
-import {encode, decode} from 'rlp'
 import {rgb} from 'polished'
 import theme from '../../shared/theme'
-import {dbProxy, epochDb, epochDb2} from '../../shared/utils/db'
+import {dbProxy, createEpochDb} from '../../shared/utils/db'
 
 export const COUNTRY_CODES = {
   AF: 'Afghanistan',
@@ -281,50 +280,38 @@ export function adStatusColor(status) {
   }
 }
 
-export function encodeAd(data) {
-  const encoded = new TextEncoder().encode(JSON.stringify(data))
-  return encode(encoded)
-}
+export function createAdDb(epoch) {
+  const ns = [epoch, 'ads']
 
-export function decodeAd(hex) {
-  const decoded = decode(hex)
-  return JSON.parse(new TextDecoder().decode(decoded))
-}
+  const db = createEpochDb(...ns)
 
-export function toHex(encoded) {
-  return `0x${encoded.toString('hex')}`
-}
+  const coverDbArgs = [['covers', ...ns], {valueEncoding: 'binary'}]
 
-export const coverKey = ({id}) => `ads.${id}.cover`
-
-export const coverDb = {
-  options: ['ads', {valueEncoding: 'binary'}],
-  get({id}) {
-    return dbProxy.get(coverKey({id}), ...this.options)
-  },
-  put({id, cover}) {
-    return dbProxy.put(coverKey({id}), cover, ...this.options)
-  },
-}
-
-export async function loadAds(epoch = -1) {
-  const ads = await epochDb2(epoch, 'ads').all()
-  return Promise.all(
-    ads.map(async ad => ({
-      ...ad,
-      cover: await coverDb.get(ad),
-    }))
-  )
-}
-
-export async function saveAd({cover, ...ad}, epoch = -1) {
-  const id = await epochDb2(epoch, 'ads').put(ad)
-  await coverDb.put({id, cover})
-}
-
-export async function updateAd({cover, ...ad}, epoch = -1) {
-  const {id} = await epochDb('ads', epoch).put(ad)
-  await coverDb.put({id, cover})
+  return {
+    async put({cover, ...ad}) {
+      const id = await db.put(ad)
+      await dbProxy.put(id, cover, ...coverDbArgs)
+    },
+    async get(id) {
+      console.log(await dbProxy.get(id, ...coverDbArgs))
+      return {
+        ...(await db.get(id)),
+        cover: await dbProxy.get(id, ...coverDbArgs),
+      }
+    },
+    async all() {
+      return Promise.all(
+        (await db.all()).map(async ({id, ...ad}) => ({
+          id,
+          cover: await dbProxy.get(id, ...coverDbArgs),
+          ...ad,
+        }))
+      )
+    },
+    clear() {
+      return db.clear()
+    },
+  }
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
