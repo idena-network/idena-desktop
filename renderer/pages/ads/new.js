@@ -1,5 +1,5 @@
 import React from 'react'
-import {Stack, Tabs, TabPanels, TabPanel} from '@chakra-ui/core'
+import {Stack, TabPanel, TabPanels} from '@chakra-ui/core'
 import {useRouter} from 'next/router'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
@@ -14,10 +14,10 @@ import {
 import {editAdMachine} from '../../screens/ads/machines'
 import {PrimaryButton} from '../../shared/components/button'
 import {
-  FlipFilter as FilterList,
-  FlipFilterOption as FilterOption,
-} from '../../screens/flips/components'
-import {SuccessAlert} from '../../shared/components/components'
+  SimpleTabFilterList,
+  SuccessAlert,
+  TabFilters,
+} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {AdForm} from '../../screens/ads/containers'
 
@@ -40,37 +40,26 @@ export default function NewAdPage() {
     },
   })
 
-  const [tab, setTab] = React.useState(0)
-
   return (
     <Layout style={{flex: 1, display: 'flex'}}>
       <Page mb={12}>
         <PageTitle>New ad</PageTitle>
-        <FilterList
-          value={tab}
-          display="flex"
-          alignItems="center"
-          onChange={value => {
-            setTab(value)
-            if (value) send('FILTER', {value})
-          }}
-        >
-          <FilterOption value={0}>{t('Parameters')}</FilterOption>
-          <FilterOption value={1}>{t('Publish options')}</FilterOption>
-        </FilterList>
-        <SuccessAlert flexShrink={0} my={6} alignSelf="stretch">
-          You must publish this banner after creating
-        </SuccessAlert>
-        <Tabs variant="unstyled" index={tab} onChange={setTab}>
+        <TabFilters spacing={6}>
+          <SimpleTabFilterList
+            filters={[t('Parameters'), t('Publish options')]}
+          />
+          <SuccessAlert>
+            You must publish this banner after creating
+          </SuccessAlert>
           <TabPanels>
-            <TabPanel isSelected={false && tab === 'options'}>
+            <TabPanel>
               <AdForm
                 onChange={ad => {
                   send('UPDATE', {ad})
                 }}
               />
             </TabPanel>
-            <TabPanel isSelected={true || tab === 'advanced'}>
+            <TabPanel>
               <Stack spacing={6} w="480px">
                 <Stack spacing={4} shouldWrapChildren>
                   <AdFormField label="Max burn rate" id="maxBurnRate">
@@ -89,7 +78,7 @@ export default function NewAdPage() {
               </Stack>
             </TabPanel>
           </TabPanels>
-        </Tabs>
+        </TabFilters>
         <AdFooter>
           <PrimaryButton
             onClick={() => {
