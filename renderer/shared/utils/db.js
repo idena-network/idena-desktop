@@ -31,8 +31,12 @@ export function createEpochDb(epoch, dbName, opts = {valueEncoding: 'json'}) {
     },
     async put({id = nanoid(), ...v}) {
       const prevIds = await safeReadIds()
-      await dbProxy.put('ids', prevIds.concat(id), ...args)
+
+      if (!prevIds.includes(id))
+        await dbProxy.put('ids', prevIds.concat(id), ...args)
+
       await dbProxy.put(id, v, ...args)
+
       return id
     },
     async all() {
