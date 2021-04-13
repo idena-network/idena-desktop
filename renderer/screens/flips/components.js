@@ -13,7 +13,6 @@ import {
   MenuItem,
   MenuList,
   PseudoBox,
-  Button,
   RadioButtonGroup,
   Stack,
   useTheme,
@@ -374,30 +373,6 @@ export function FlipOverlayIcon(props) {
 export function FlipOverlayText(props) {
   return <Text fontWeight={500} {...props} />
 }
-
-export function FlipFilter(props) {
-  return <RadioButtonGroup isInline spacing={2} {...props} />
-}
-
-export const FlipFilterOption = React.forwardRef(
-  ({isChecked, ...props}, ref) => (
-    <Button
-      ref={ref}
-      isActive={isChecked}
-      aria-checked={isChecked}
-      role="radio"
-      bg="white"
-      color="muted"
-      fontWeight={500}
-      size="sm"
-      fontSize="md"
-      _active={{bg: 'gray.50', color: 'brand.blue'}}
-      _hover={{bg: 'gray.50', color: 'brand.blue'}}
-      {...props}
-    />
-  )
-)
-FlipFilterOption.displayName = 'FlipFilterOption'
 
 export function FlipMaster({children}) {
   return children

@@ -46,6 +46,7 @@ import {
   TabList,
   TabPanels,
   TabPanel,
+  RadioButtonGroup,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -597,3 +598,26 @@ export function SimpleTabFilterList({filters, ...props}) {
     </TabFilterList>
   )
 }
+
+export function FilterButtonList(props) {
+  return <RadioButtonGroup isInline spacing={2} {...props} />
+}
+
+// eslint-disable-next-line react/display-name
+export const FilterButton = React.forwardRef(({isChecked, ...props}, ref) => (
+  <Button
+    ref={ref}
+    isActive={isChecked}
+    aria-checked={isChecked}
+    role="radio"
+    bg="white"
+    color="muted"
+    fontWeight={500}
+    size="sm"
+    px={4}
+    fontSize="md"
+    _active={{bg: 'gray.50', color: 'brand.blue'}}
+    _hover={{bg: 'gray.50', color: 'brand.blue'}}
+    {...props}
+  />
+))

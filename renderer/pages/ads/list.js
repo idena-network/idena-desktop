@@ -20,10 +20,6 @@ import {
   NoAds,
   AdStatNumber,
 } from '../../screens/ads/components'
-import {
-  FlipFilter as FilterList,
-  FlipFilterOption as FilterOption,
-} from '../../screens/flips/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {add} from '../../shared/utils/math'
 import {rem} from '../../shared/theme'
@@ -35,7 +31,12 @@ import {createAdDb} from '../../screens/ads/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {toLocaleDna} from '../../shared/utils/utils'
 import {useChainState} from '../../shared/providers/chain-context'
-import {HDivider, VDivider} from '../../shared/components/components'
+import {
+  FilterButton,
+  FilterButtonList,
+  HDivider,
+  VDivider,
+} from '../../shared/components/components'
 import {IconLink} from '../../shared/components/link'
 import {
   AdCoverImage,
@@ -82,17 +83,17 @@ export default function AdListPage() {
           </BlockAdStat>
         </Stack>
         <Flex justify="space-between" alignSelf="stretch">
-          <FilterList
+          <FilterButtonList
             value="active"
             onChange={value => {
               if (value) send('FILTER', {value})
             }}
           >
-            <FilterOption value="active">Active</FilterOption>
-            <FilterOption value="drafts">Drafts</FilterOption>
-            <FilterOption value="review">On review</FilterOption>
-            <FilterOption value="rejected">Rejected</FilterOption>
-          </FilterList>
+            <FilterButton value="active">Active</FilterButton>
+            <FilterButton value="drafts">Drafts</FilterButton>
+            <FilterButton value="review">On review</FilterButton>
+            <FilterButton value="rejected">Rejected</FilterButton>
+          </FilterButtonList>
           <Stack isInline spacing={1} align="center">
             <VDivider />
             <IconLink icon="plus-solid" href="/ads/new">
