@@ -11,7 +11,6 @@ import {
   AdFooter,
   AdNumberInput,
   AdFormField,
-  AdForm,
 } from '../../screens/ads/components'
 import {editAdMachine} from '../../screens/ads/machines'
 import {
@@ -21,8 +20,9 @@ import {
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {SuccessAlert} from '../../shared/components/components'
 import {eitherState} from '../../shared/utils/utils'
+import {AdForm} from '../../screens/ads/containers'
 
-export default function EditAd() {
+export default function EditAdPage() {
   const {t} = useTranslation()
 
   const router = useRouter()

@@ -28,8 +28,7 @@ import {
 } from './utils'
 import {forEachAsync, wait} from '../../shared/utils/fn'
 import {fetchConfirmedKeywordTranslations} from '../flips/utils'
-import {loadKeyword} from '../../shared/utils/utils'
-import {adUrlFromBytes} from '../ads/utils'
+import {loadKeyword, urlFromBytes} from '../../shared/utils/utils'
 
 export const createValidationMachine = ({
   epoch,
@@ -1194,7 +1193,7 @@ function decodeFlip({hash, hex, publicHex, privateHex}) {
     return {
       hash,
       decoded: true,
-      images: images.map(adUrlFromBytes),
+      images: images.map(urlFromBytes),
       orders: orders.map(order => order.map(([idx = 0]) => idx)),
       hex: '',
     }

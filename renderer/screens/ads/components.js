@@ -3,7 +3,6 @@ import React, {forwardRef} from 'react'
 import {
   Box,
   Flex,
-  Image,
   Stack,
   StatLabel,
   StatNumber,
@@ -16,24 +15,16 @@ import {
   FormControl,
   Heading,
   Tab,
-  Select,
   NumberInputField,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {useMachine} from '@xstate/react'
-import {hideVisually} from 'polished'
 import {rem} from '../../shared/theme'
-import {IconButton2} from '../../shared/components/button'
-import {AVAILABLE_LANGS} from '../../i18n'
-import {adFormMachine} from './machines'
-import {COUNTRY_CODES, validImageType, adUrlFromBytes} from './utils'
 import {
   FormLabel,
   Input,
   NumberInput,
   Textarea,
 } from '../../shared/components/components'
-import {DnaInput} from '../oracles/components'
 
 export function AdStatLabel(props) {
   return <StatLabel color="muted" fontSize="md" {...props} />
@@ -57,10 +48,6 @@ export function AdList(props) {
 
 export function AdEntry(props) {
   return <Box {...props} />
-}
-
-export function AdImage(props) {
-  return <Image rounded="lg" size={rem(60)} {...props} />
 }
 
 export function NoAds() {
@@ -140,140 +127,6 @@ export const AdFormTab = forwardRef(({isSelected, ...props}, ref) => (
     {...props}
   />
 ))
-
-export function AdForm({onChange, ...ad}) {
-  const [current, send] = useMachine(adFormMachine, {
-    context: {
-      ...ad,
-    },
-    actions: {
-      change: ctx => onChange(ctx),
-    },
-  })
-
-  const {title, cover, url, location, lang, age, os, stake} = current.context
-
-  return (
-    <Stack spacing={6} w="480px">
-      <FormSection>
-        <FormSectionTitle>Parameters</FormSectionTitle>
-        <Stack isInline spacing={10}>
-          <Stack spacing={4} shouldWrapChildren>
-            <AdFormField label="Text" id="text" align="flex-start">
-              <AdTextarea
-                defaultValue={title}
-                onBlur={e => send('CHANGE', {ad: {title: e.target.value}})}
-              />
-            </AdFormField>
-            <AdFormField label="Link" id="link">
-              <AdInput
-                defaultValue={url}
-                onBlur={e => send('CHANGE', {ad: {url: e.target.value}})}
-              />
-            </AdFormField>
-          </Stack>
-          <Stack spacing={4} alignItems="flex-start">
-            {cover ? (
-              <Image src={adUrlFromBytes(cover)} size={rem(80)} rounded="lg" />
-            ) : (
-              <Box
-                bg="gray.50"
-                borderWidth="1px"
-                borderColor="gray.300"
-                p={rem(19)}
-                rounded="lg"
-                onClick={() => document.querySelector('#cover').click()}
-              >
-                <Icon name="photo" size={rem(40)} color="#d2d4d9" />
-              </Box>
-            )}
-            <Input
-              id="cover"
-              type="file"
-              accept="image/*"
-              {...hideVisually()}
-              opacity={0}
-              onChange={async e => {
-                const {files} = e.target
-                if (files.length) {
-                  const [file] = files
-                  if (validImageType(file)) {
-                    send('CHANGE', {
-                      ad: {cover: await file.arrayBuffer()}, // await toDataURL(file),
-                    })
-                  }
-                }
-              }}
-            />
-            <IconButton2
-              as={FormLabel}
-              htmlFor="cover"
-              type="file"
-              icon="upload"
-            >
-              Upload cover
-            </IconButton2>
-          </Stack>
-        </Stack>
-      </FormSection>
-      <FormSection>
-        <FormSectionTitle>Targeting conditions</FormSectionTitle>
-        <Stack spacing={4} shouldWrapChildren>
-          <AdFormField label="Location" id="location">
-            <Select
-              value={location}
-              borderColor="gray.300"
-              onChange={e => send('CHANGE', {ad: {location: e.target.value}})}
-            >
-              <option></option>
-              {Object.values(COUNTRY_CODES).map(c => (
-                <option key={c}>{c}</option>
-              ))}
-            </Select>
-          </AdFormField>
-          <AdFormField label="Language" id="lang">
-            <Select
-              value={lang}
-              borderColor="gray.300"
-              onChange={e => send('CHANGE', {ad: {lang: e.target.value}})}
-            >
-              <option></option>
-              {AVAILABLE_LANGS.map(l => (
-                <option key={l}>{l}</option>
-              ))}
-            </Select>
-          </AdFormField>
-          <AdFormField label="Age" id="age">
-            <AdNumberInput
-              defaulValue={age}
-              onBlur={({target: {value}}) => send('CHANGE', {ad: {age: value}})}
-            />
-          </AdFormField>
-          <AdFormField label="Stake" id="stake">
-            <DnaInput
-              defaultValue={stake}
-              onChange={({target: {value}}) =>
-                send('CHANGE', {ad: {stake: value}})
-              }
-            />
-          </AdFormField>
-          <AdFormField label="OS" id="os">
-            <Select
-              value={os}
-              borderColor="gray.300"
-              onChange={e => send('CHANGE', {ad: {os: e.target.value}})}
-            >
-              <option></option>
-              <option>macOS</option>
-              <option>Windows</option>
-              <option>Linux</option>
-            </Select>
-          </AdFormField>
-        </Stack>
-      </FormSection>
-    </Stack>
-  )
-}
 
 // eslint-disable-next-line react/prop-types
 export function FormSection(props) {

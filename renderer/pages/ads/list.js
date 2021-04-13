@@ -3,7 +3,6 @@ import {
   Box,
   Flex,
   Stack,
-  Text,
   MenuDivider,
   useDisclosure,
   Link,
@@ -15,7 +14,6 @@ import {useTranslation} from 'react-i18next'
 import {
   AdList,
   AdEntry,
-  AdImage,
   AdMenu,
   AdMenuItem,
   AdMenuItemIcon,
@@ -33,27 +31,25 @@ import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../screens/app/components'
 import {SecondaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
-import {
-  createAdDb,
-  AdStatus,
-  adStatusColor,
-  adUrlFromBytes,
-} from '../../screens/ads/utils'
+import {createAdDb} from '../../screens/ads/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {toLocaleDna} from '../../shared/utils/utils'
 import {useChainState} from '../../shared/providers/chain-context'
 import {HDivider, VDivider} from '../../shared/components/components'
 import {IconLink} from '../../shared/components/link'
 import {
+  AdCoverImage,
   AdOverlayStatus,
+  AdStatusText,
   BlockAdStat,
   InlineAdGroup,
   InlineAdStat,
   PublishAdDrawer,
   SmallInlineAdStat,
 } from '../../screens/ads/containers'
+import {AdStatus} from '../../shared/types'
 
-export default function MyAds() {
+export default function AdListPage() {
   const {i18n} = useTranslation()
 
   const {isOpen, onOpen, onClose} = useDisclosure()
@@ -85,7 +81,7 @@ export default function MyAds() {
             </AdStatNumber>
           </BlockAdStat>
         </Stack>
-        <Flex align="center" alignSelf="stretch">
+        <Flex justify="space-between" alignSelf="stretch">
           <FilterList
             value="active"
             onChange={value => {
@@ -97,16 +93,18 @@ export default function MyAds() {
             <FilterOption value="review">On review</FilterOption>
             <FilterOption value="rejected">Rejected</FilterOption>
           </FilterList>
-          <VDivider ml="auto" />
-          <IconLink icon="plus-solid" href="/ads/new">
-            New banner
-          </IconLink>
+          <Stack isInline spacing={1} align="center">
+            <VDivider />
+            <IconLink icon="plus-solid" href="/ads/new">
+              New banner
+            </IconLink>
+          </Stack>
         </Flex>
         <AdList py={4} spacing={4} alignSelf="stretch">
           {ads.map(
             ({
               id,
-              cover: adCover,
+              cover,
               title,
               location,
               lang,
@@ -121,18 +119,12 @@ export default function MyAds() {
                 <Stack isInline spacing={5}>
                   <Stack spacing={3} w={rem(60)}>
                     <Box position="relative">
-                      <AdImage
-                        src={adUrlFromBytes(adCover)}
-                        fallbackSrc="//placekitten.com/60/60"
-                        alt={title}
-                      />
+                      <AdCoverImage ad={{cover}} alt={title} />
                       {status === AdStatus.Idle && (
                         <AdOverlayStatus status={status} />
                       )}
                     </Box>
-                    <Text color={adStatusColor(status)} fontWeight={500}>
-                      {status}
-                    </Text>
+                    <AdStatusText status={status} />
                   </Stack>
                   <Box flex={1}>
                     <Flex>

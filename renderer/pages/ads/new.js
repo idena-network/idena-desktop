@@ -10,7 +10,6 @@ import {
   AdFooter,
   AdNumberInput,
   AdFormField,
-  AdForm,
 } from '../../screens/ads/components'
 import {editAdMachine} from '../../screens/ads/machines'
 import {PrimaryButton} from '../../shared/components/button'
@@ -20,8 +19,9 @@ import {
 } from '../../screens/flips/components'
 import {SuccessAlert} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
+import {AdForm} from '../../screens/ads/containers'
 
-export default function NewAd() {
+export default function NewAdPage() {
   const router = useRouter()
 
   const {t} = useTranslation()

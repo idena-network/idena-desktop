@@ -63,11 +63,6 @@ export const VotingStatus = {
   Invalid: 'invalid',
 }
 
-export const VoteOption = {
-  Confirm: 'confirm',
-  Reject: 'reject',
-}
-
 export const OnboardingStep = {
   ActivateInvite: 'activateInvite',
   Validate: 'validate',
@@ -80,4 +75,18 @@ export const OnboardingStep = {
 export const NodeType = {
   Miner: 'miner',
   Delegator: 'delegator',
+}
+
+export const AdRelevance = {
+  Top: 'Top',
+  Normal: 'Normal',
+  Low: 'Low',
+}
+
+export const AdStatus = {
+  Disabled: 'Disabled',
+  Showing: 'Showing',
+  PartiallyShowing: 'Partially showing',
+  NotShowing: 'Not showing',
+  Idle: 'Idle',
 }
