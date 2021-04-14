@@ -17,9 +17,6 @@ import {IdentityProvider} from '../shared/providers/identity-context'
 import {VotingNotificationProvider} from '../shared/providers/voting-notification-context'
 import {OnboardingProvider} from '../shared/providers/onboarding-context'
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import 'tui-image-editor/dist/tui-image-editor.css'
-
 // err is a workaround for https://github.com/zeit/next.js/issues/8592
 export default function App({Component, err, ...pageProps}) {
   return (
@@ -28,7 +25,6 @@ export default function App({Component, err, ...pageProps}) {
       <Head>
         <link href="/static/scrollbars.css" rel="stylesheet" />
       </Head>
-
       <ThemeProvider theme={theme}>
         <CSSReset />
         <AppProviders>
