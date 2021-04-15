@@ -12,14 +12,11 @@ export const DNA_SEND_CONFIRM_TRESHOLD = 0.05
 
 export function isValidUrl(string) {
   try {
-    // eslint-disable-next-line no-new
-    new URL(string)
+    return ['https:', 'http:', 'dna:'].includes(new URL(string).protocol)
   } catch (_) {
     global.logger.error('Invalid URL', string)
     return false
   }
-
-  return true
 }
 
 export function validDnaUrl(url) {
