@@ -548,11 +548,6 @@ export default function FlipEditor({
           handleOnChanging()
         },
       })
-      e.on({
-        objectActivated() {
-          //
-        },
-      })
 
       e.on({
         selectionCreated() {
@@ -625,10 +620,10 @@ export default function FlipEditor({
   const [showImageSearch, setShowImageSearch] = React.useState()
 
   React.useEffect(() => {
-    if (showImageSearch) {
+    if (showImageSearch || !visible) {
       editorRefs.current[idx].current.getInstance().discardSelection()
     }
-  }, [idx, showImageSearch])
+  }, [idx, showImageSearch, visible])
 
   return (
     <div
