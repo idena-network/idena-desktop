@@ -1,5 +1,5 @@
+/* eslint-disable react/prop-types */
 import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
-import PropTypes from 'prop-types'
 import {rem, position} from 'polished'
 import Jimp from 'jimp'
 import {useTranslation} from 'react-i18next'
@@ -17,7 +17,6 @@ import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
-
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {Box, Absolute} from '../../../shared/components'
 import {Tooltip} from '../../../shared/components/tooltip'
@@ -29,7 +28,6 @@ import {
   getImageURLFromClipboard,
   writeImageURLToClipboard,
 } from '../../../shared/utils/clipboard'
-
 import {
   Brushes,
   ColorPicker,
@@ -73,7 +71,13 @@ const BLANK_IMAGE =
     .resize({width: IMAGE_WIDTH, height: IMAGE_HEIGHT})
     .toDataURL()
 
-function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
+export default function FlipEditor({
+  idx = 0,
+  src,
+  visible,
+  onChange,
+  onChanging,
+}) {
   const {t} = useTranslation()
 
   const toast = useToast()
@@ -410,14 +414,11 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   }
 
   if (visible) {
-    mousetrap(editorRefs.current[idx]?.current?.getRootElement()).bind(
-      ['del'],
-      function(e) {
-        handleOnDelete()
-        e.stopImmediatePropagation()
-        return false
-      }
-    )
+    mousetrap.bind(['del'], function(e) {
+      handleOnDelete()
+      e.stopImmediatePropagation()
+      return false
+    })
 
     mousetrap.bind(['command+v', 'ctrl+v'], function(e) {
       handleOnPaste()
@@ -452,7 +453,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
     return editor
   }
 
-  function getEditorActiveObjecId(editor) {
+  function getEditorActiveObjectId(editor) {
     const objId =
       editor &&
       editor._graphics &&
@@ -496,7 +497,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
           setShowContextMenu(false)
 
           const editor = getEditorInstance()
-          const objId = getEditorActiveObjecId(editor)
+          const objId = getEditorActiveObjectId(editor)
           const url = getEditorObjecUrl(editor, objId)
 
           setActiveObjectId(objId)
@@ -526,7 +527,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       e.on({
         undoStackChanged() {
           const editor = getEditorInstance()
-          const objId = getEditorActiveObjecId(editor)
+          const objId = getEditorActiveObjectId(editor)
           const url = getEditorObjecUrl(editor, objId)
 
           setActiveObjectId(objId)
@@ -538,7 +539,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
       e.on({
         redoStackChanged() {
           const editor = getEditorInstance()
-          const objId = getEditorActiveObjecId(editor)
+          const objId = getEditorActiveObjectId(editor)
           const url = getEditorObjecUrl(editor, objId)
 
           setActiveObjectId(objId)
@@ -727,6 +728,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                     setRightMenuPanel(RightMenu.None)
                   }
                   setInsertImageMode(INSERT_BACKGROUND_IMAGE)
+                  getEditorInstance().discardSelection()
                   setShowImageSearch(true)
                 }}
               />
@@ -917,6 +919,7 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
                           onClick={async () => {
                             setInsertImageMenuOpen(false)
                             setInsertImageMode(INSERT_OBJECT_IMAGE)
+                            getEditorInstance().discardSelection()
                             setShowImageSearch(true)
                           }}
                           disabled={false}
@@ -1019,14 +1022,6 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   )
 }
 
-FlipEditor.propTypes = {
-  idx: PropTypes.number,
-  src: PropTypes.string,
-  visible: PropTypes.bool,
-  onChange: PropTypes.func,
-  onChanging: PropTypes.func,
-}
-
 // eslint-disable-next-line react/prop-types
 function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
   const icon = (
@@ -1066,5 +1061,3 @@ function FlipEditorToolbarDivider(props) {
     />
   )
 }
-
-export default FlipEditor
