@@ -414,12 +414,6 @@ export default function FlipEditor({
   }
 
   if (visible) {
-    // mousetrap.bind(['del'], function(e) {
-    //   handleOnDelete()
-    //   e.stopImmediatePropagation()
-    //   return false
-    // })
-
     mousetrap.bind(['command+v', 'ctrl+v'], function(e) {
       handleOnPaste()
       e.stopImmediatePropagation()
