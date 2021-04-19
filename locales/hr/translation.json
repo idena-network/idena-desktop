@@ -178,7 +178,7 @@
   "Use built-in node to have automatic updates": "Koristi unutarnji nod za automatska azuriranja",
   "Node failed to start": "Nod nemoze da se pokrene",
   "Try restart": "Pokusaj ponovno pokrenut",
-  "Connect to remote node": "Povezan na nod na daljinu",
+  "Connect to remote node": "Povezi se na nod na daljinu",
   "Specify the Node address if you want to connect to remote node": "Postavi nod addresu ako zelite da se konektujete na nod an daljini",
   "Node address": "Nod addresa",
   "Save": "Spremi",
