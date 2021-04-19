@@ -686,11 +686,13 @@ export function FlipEditorStep({
         <Box>
           {originalOrder.map((num, idx) => (
             <FlipEditor
-              key={num}
+              key={`${num}${currentIndex === idx ? '-selected' : ''}`}
               idx={num}
               visible={currentIndex === idx}
               src={images[num]}
-              onChange={url => onChangeImage(url, num)}
+              onChange={url => {
+                onChangeImage(url, num)
+              }}
               onChanging={onPainting}
             />
           ))}

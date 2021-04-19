@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, {createRef, useRef, useCallback, useEffect, useState} from 'react'
+import React, {createRef, useRef, useCallback, useState} from 'react'
 import {rem, position} from 'polished'
 import Jimp from 'jimp'
 import {useTranslation} from 'react-i18next'
@@ -116,7 +116,7 @@ export default function FlipEditor({
     }
   }
 
-  const [isSelectionCreated, SetIsSelectionCreated] = useState(null)
+  const [isSelectionCreated, setIsSelectionCreated] = useState(null)
   const [activeObjectUrl, setActiveObjectUrl] = useState(null)
   const [activeObjectId, setActiveObjectId] = useState(null)
 
@@ -414,11 +414,11 @@ export default function FlipEditor({
   }
 
   if (visible) {
-    mousetrap.bind(['del'], function(e) {
-      handleOnDelete()
-      e.stopImmediatePropagation()
-      return false
-    })
+    // mousetrap.bind(['del'], function(e) {
+    //   handleOnDelete()
+    //   e.stopImmediatePropagation()
+    //   return false
+    // })
 
     mousetrap.bind(['command+v', 'ctrl+v'], function(e) {
       handleOnPaste()
@@ -463,7 +463,7 @@ export default function FlipEditor({
     return objId
   }
 
-  function getEditorObjecUrl(editor, objId) {
+  function getEditorObjectUrl(editor, objId) {
     const obj =
       objId && editor && editor._graphics && editor._graphics._objects[objId]
     const url = obj && obj._element && obj._element.src
@@ -471,7 +471,7 @@ export default function FlipEditor({
     return url
   }
 
-  function getEditorObjecProps(editor, objId) {
+  function getEditorObjectProps(editor, objId) {
     const obj =
       objId && editor && editor._graphics && editor._graphics._objects[objId]
     if (obj) {
@@ -489,7 +489,7 @@ export default function FlipEditor({
   }
 
   // init editor
-  useEffect(() => {
+  React.useEffect(() => {
     const updateEvents = e => {
       if (!e) return
       e.on({
@@ -498,7 +498,7 @@ export default function FlipEditor({
 
           const editor = getEditorInstance()
           const objId = getEditorActiveObjectId(editor)
-          const url = getEditorObjecUrl(editor, objId)
+          const url = getEditorObjectUrl(editor, objId)
 
           setActiveObjectId(objId)
           setActiveObjectUrl(url)
@@ -528,7 +528,7 @@ export default function FlipEditor({
         undoStackChanged() {
           const editor = getEditorInstance()
           const objId = getEditorActiveObjectId(editor)
-          const url = getEditorObjecUrl(editor, objId)
+          const url = getEditorObjectUrl(editor, objId)
 
           setActiveObjectId(objId)
           setActiveObjectUrl(url)
@@ -540,7 +540,7 @@ export default function FlipEditor({
         redoStackChanged() {
           const editor = getEditorInstance()
           const objId = getEditorActiveObjectId(editor)
-          const url = getEditorObjecUrl(editor, objId)
+          const url = getEditorObjectUrl(editor, objId)
 
           setActiveObjectId(objId)
           setActiveObjectUrl(url)
@@ -556,13 +556,13 @@ export default function FlipEditor({
 
       e.on({
         selectionCreated() {
-          SetIsSelectionCreated(true)
+          setIsSelectionCreated(true)
         },
       })
 
       e.on({
         selectionCleared() {
-          SetIsSelectionCreated(false)
+          setIsSelectionCreated(false)
         },
       })
     }
@@ -624,6 +624,12 @@ export default function FlipEditor({
 
   const [showImageSearch, setShowImageSearch] = React.useState()
 
+  React.useEffect(() => {
+    if (showImageSearch) {
+      editorRefs.current[idx].current.getInstance().discardSelection()
+    }
+  }, [idx, showImageSearch])
+
   return (
     <div
       style={{
@@ -638,7 +644,7 @@ export default function FlipEditor({
               url={activeObjectUrl}
               isDone={bottomMenuPanel !== BottomMenu.Erase}
               brushWidth={brush}
-              imageObjectProps={getEditorObjecProps(
+              imageObjectProps={getEditorObjectProps(
                 editors[idx],
                 activeObjectId
               )}
@@ -728,7 +734,6 @@ export default function FlipEditor({
                     setRightMenuPanel(RightMenu.None)
                   }
                   setInsertImageMode(INSERT_BACKGROUND_IMAGE)
-                  getEditorInstance().discardSelection()
                   setShowImageSearch(true)
                 }}
               />
@@ -919,7 +924,6 @@ export default function FlipEditor({
                           onClick={async () => {
                             setInsertImageMenuOpen(false)
                             setInsertImageMode(INSERT_OBJECT_IMAGE)
-                            getEditorInstance().discardSelection()
                             setShowImageSearch(true)
                           }}
                           disabled={false}
