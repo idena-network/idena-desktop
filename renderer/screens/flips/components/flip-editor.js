@@ -410,11 +410,14 @@ function FlipEditor({idx = 0, src, visible, onChange, onChanging}) {
   }
 
   if (visible) {
-    mousetrap.bind(['del'], function(e) {
-      handleOnDelete()
-      e.stopImmediatePropagation()
-      return false
-    })
+    mousetrap(editorRefs.current[idx]?.current?.getRootElement()).bind(
+      ['del'],
+      function(e) {
+        handleOnDelete()
+        e.stopImmediatePropagation()
+        return false
+      }
+    )
 
     mousetrap.bind(['command+v', 'ctrl+v'], function(e) {
       handleOnPaste()
