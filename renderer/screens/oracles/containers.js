@@ -1518,15 +1518,17 @@ export function TerminateDrawer({
 }
 
 function splitMany(str, ...separators) {
-  return separators.reduce((acc, s, idx) => {
-    const parts = str.split(s)
-    acc.push(parts[0], s)
+  return separators.length > 0
+    ? separators.reduce((acc, s, idx) => {
+        const parts = str.split(s)
+        acc.push(parts[0], s)
 
-    if (idx === separators.length - 1 && parts[1]) acc.push(parts[1])
-    // eslint-disable-next-line no-param-reassign
-    else [str] = parts
-    return acc
-  }, [])
+        if (idx === separators.length - 1 && parts[1]) acc.push(parts[1])
+        // eslint-disable-next-line no-param-reassign
+        else [str] = parts
+        return acc
+      }, [])
+    : [str]
 }
 
 export function Linkify({onClick, children}) {
