@@ -29,6 +29,8 @@ import {FillCenter} from '../../oracles/components'
 export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
   const {t} = useTranslation()
 
+  const searchInputRef = React.useRef()
+
   const [current, send] = useMachine(
     Machine({
       context: {
@@ -87,7 +89,12 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
   const {images, query, selectedImage} = current.context
 
   return (
-    <Dialog size="38rem" onClose={onClose} {...props}>
+    <Dialog
+      size="38rem"
+      initialFocusRef={searchInputRef}
+      onClose={onClose}
+      {...props}
+    >
       <DialogBody d="flex">
         <Stack minH="sm" maxH="sm" spacing={4} flex={1}>
           <Stack
@@ -103,6 +110,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
                 <Icon name="search" size={3} color="gray.100" />
               </InputLeftElement>
               <Input
+                ref={searchInputRef}
                 type="search"
                 value={query}
                 placeholder={t('Search the picture on the web')}

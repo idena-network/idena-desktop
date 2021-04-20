@@ -690,7 +690,9 @@ export function FlipEditorStep({
               idx={num}
               visible={currentIndex === idx}
               src={images[num]}
-              onChange={url => onChangeImage(url, num)}
+              onChange={url => {
+                onChangeImage(url, num)
+              }}
               onChanging={onPainting}
             />
           ))}
