@@ -10,7 +10,7 @@ export function createAdDb(epoch) {
   return {
     async put({cover, ...ad}) {
       const id = await db.put(ad)
-      await dbProxy.put(id, cover, ...coverDbArgs)
+      if (cover) await dbProxy.put(id, cover, ...coverDbArgs)
     },
     async get(id) {
       return {

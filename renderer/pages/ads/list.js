@@ -1,6 +1,6 @@
 import React from 'react'
 import {Box, Flex, Stack, Link} from '@chakra-ui/core'
-import {useMachine} from '@xstate/react'
+import {useMachine, asEffect} from '@xstate/react'
 import NextLink from 'next/link'
 import dayjs from 'dayjs'
 import {useTranslation} from 'react-i18next'
@@ -50,9 +50,16 @@ export default function AdListPage() {
   const {balance} = useIdentityState()
   const epoch = useEpochState()
 
+  const db = createAdDb(epoch?.epoch)
+
   const [current, send] = useMachine(adListMachine, {
+    actions: {
+      onSentToReview: asEffect(({selectedAd: {id, status}}) => {
+        db.put({id, status})
+      }),
+    },
     services: {
-      init: () => createAdDb(epoch?.epoch ?? -1).all(),
+      init: () => db.all(),
     },
   })
   const {ads, selectedAd} = current.context
@@ -223,6 +230,10 @@ export default function AdListPage() {
 
         <ReviewAdDrawer
           isOpen={eitherState(current, 'ready.sendingToReview')}
+          isMining={eitherState(current, 'ready.sendingToReview.mining')}
+          onSend={() => {
+            send('SUBMIT')
+          }}
           onClose={() => {
             send('CANCEL')
           }}

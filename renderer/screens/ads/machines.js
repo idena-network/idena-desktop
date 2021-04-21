@@ -1,9 +1,12 @@
 /* eslint-disable no-use-before-define */
 import {Machine, assign, spawn} from 'xstate'
 import {log} from 'xstate/lib/actions'
+import {AdStatus} from '../../shared/types'
+import {wait} from '../../shared/utils/fn'
+import {byId} from '../../shared/utils/utils'
 
 export const adListMachine = Machine({
-  id: 'ads',
+  id: 'adList',
   context: {
     selectedAd: {},
     ads: [],
@@ -17,7 +20,6 @@ export const adListMachine = Machine({
           target: 'ready',
           actions: [
             assign({
-              // eslint-disable-next-line no-shadow
               ads: (_, {data}) =>
                 data.map(ad => ({
                   ...ad,
@@ -39,7 +41,7 @@ export const adListMachine = Machine({
               target: 'sendingToReview',
               actions: [
                 assign({
-                  selectedAd: ({ads}, {id}) => ads.find(a => a.id === id),
+                  selectedAd: ({ads}, ad) => ads.find(byId(ad)),
                 }),
               ],
             },
@@ -48,6 +50,54 @@ export const adListMachine = Machine({
         sendingToReview: {
           on: {
             CANCEL: 'idle',
+          },
+          initial: 'preview',
+          states: {
+            preview: {
+              entry: [log()],
+              on: {
+                SUBMIT: 'submitting',
+              },
+            },
+            submitting: {
+              entry: [log()],
+              invoke: {
+                src: () => wait(100),
+                onDone: 'mining',
+              },
+            },
+            mining: {
+              invoke: {
+                src: () => cb => {
+                  wait(3000).then(() => {
+                    cb('MINED')
+                  })
+                },
+              },
+              on: {
+                MINED: {
+                  target: '#adList.ready.idle',
+                  actions: [
+                    assign({
+                      ads: ({ads, selectedAd}) =>
+                        ads.map(ad =>
+                          ad.id === selectedAd.id
+                            ? {
+                                status: AdStatus.Reviewing,
+                                ...ad,
+                              }
+                            : ad
+                        ),
+                      selectedAd: ({selectedAd}) => ({
+                        ...selectedAd,
+                        status: AdStatus.Reviewing,
+                      }),
+                    }),
+                    'onSentToReview',
+                  ],
+                },
+              },
+            },
           },
         },
       },

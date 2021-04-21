@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react'
 import {
+  Badge,
   Box,
   DrawerFooter,
   Flex,
@@ -399,7 +400,7 @@ export function PublishAdDrawer({ad, ...props}) {
   )
 }
 
-export function ReviewAdDrawer({onSend, ...props}) {
+export function ReviewAdDrawer({isMining, onSend, ...props}) {
   const {t} = useTranslation()
 
   return (
@@ -422,10 +423,30 @@ export function ReviewAdDrawer({onSend, ...props}) {
       </DrawerHeader>
       <DrawerBody overflowY="auto" mx={-6}>
         <Stack spacing={6} color="brandGray.500" fontSize="md" p={6} pt={0}>
-          <Text>
-            Please keep in mind that you will not be able to edit the banner
-            after it has been submitted for verification
-          </Text>
+          <Stack spacing={3}>
+            <Text>
+              Please keep in mind that you will not be able to edit the banner
+              after it has been submitted for verification
+            </Text>
+            {isMining && (
+              <Badge
+                display="inline-flex"
+                alignItems="center"
+                alignSelf="flex-start"
+                variantColor="orange"
+                bg="orange.020"
+                color="orange.500"
+                fontWeight="normal"
+                rounded="xl"
+                h={8}
+                px={3}
+                textTransform="initial"
+                {...props}
+              >
+                Mining...
+              </Badge>
+            )}
+          </Stack>
           <FormControl>
             <Stack>
               <FormLabel htmlFor="amount">Review fee, DNA</FormLabel>
@@ -448,7 +469,13 @@ export function ReviewAdDrawer({onSend, ...props}) {
         <Stack isInline>
           {/* eslint-disable-next-line react/destructuring-assignment */}
           <SecondaryButton onClick={props.onClose}>Not now</SecondaryButton>
-          <PrimaryButton onClick={onSend}>Send</PrimaryButton>
+          <PrimaryButton
+            isLoading={isMining}
+            loadingText="Sending..."
+            onClick={onSend}
+          >
+            Send
+          </PrimaryButton>
         </Stack>
       </DrawerFooter>
     </Drawer>
