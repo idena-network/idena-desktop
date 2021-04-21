@@ -1,12 +1,11 @@
 /* eslint-disable no-use-before-define */
-import {Machine, assign, spawn, sendParent} from 'xstate'
+import {Machine, assign, spawn} from 'xstate'
 import {log} from 'xstate/lib/actions'
 
 export const adListMachine = Machine({
   id: 'ads',
   context: {
-    newAd: null,
-    selected: {},
+    selectedAd: {},
     ads: [],
   },
   initial: 'init',
@@ -28,33 +27,38 @@ export const adListMachine = Machine({
             log(),
           ],
         },
-        onError: {
-          target: 'fail',
-          actions: [log()],
-        },
+        onError: 'fail',
       },
     },
     ready: {
-      entry: log(),
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            REVIEW: {
+              target: 'sendingToReview',
+              actions: [
+                assign({
+                  selectedAd: ({ads}, {id}) => ads.find(a => a.id === id),
+                }),
+              ],
+            },
+          },
+        },
+        sendingToReview: {
+          on: {
+            CANCEL: 'idle',
+          },
+        },
+      },
     },
     fail: {},
   },
   on: {
-    'AD.COMMIT': {
-      actions: [
-        assign({
-          ads: ({ads}, e) =>
-            ads.map(ad =>
-              ad.id === e.ad.id ? {...ad, ...e.ad, ref: ad.ref} : ad
-            ),
-        }),
-      ],
-      cond: (_, {ad}) => ad && ad.title,
-    },
     SELECT: {
       actions: [
         assign({
-          selected: ({ads}, {id}) => ads.find(a => a.id === id),
+          selectedAd: ({ads}, {id}) => ads.find(a => a.id === id),
         }),
       ],
     },
@@ -83,10 +87,6 @@ export const adMachine = Machine({
               ...ad,
             })),
           ],
-        },
-        SAVE: {
-          target: 'idle',
-          actions: [sendParent(ad => ({type: 'AD.COMMIT', ad})), log()],
         },
       },
     },

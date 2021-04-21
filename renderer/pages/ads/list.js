@@ -1,12 +1,5 @@
 import React from 'react'
-import {
-  Box,
-  Flex,
-  Stack,
-  MenuDivider,
-  useDisclosure,
-  Link,
-} from '@chakra-ui/core'
+import {Box, Flex, Stack, MenuDivider, Link} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import NextLink from 'next/link'
 import dayjs from 'dayjs'
@@ -22,14 +15,13 @@ import {
 } from '../../screens/ads/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {add} from '../../shared/utils/math'
-import {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../screens/app/components'
 import {SecondaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
 import {createAdDb} from '../../screens/ads/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {toLocaleDna} from '../../shared/utils/utils'
+import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {useChainState} from '../../shared/providers/chain-context'
 import {
   FilterButton,
@@ -46,14 +38,13 @@ import {
   InlineAdGroup,
   InlineAdStat,
   PublishAdDrawer,
+  ReviewAdDrawer,
   SmallInlineAdStat,
 } from '../../screens/ads/containers'
 import {AdStatus} from '../../shared/types'
 
 export default function AdListPage() {
   const {i18n} = useTranslation()
-
-  const {isOpen, onOpen, onClose} = useDisclosure()
 
   const {syncing, offline} = useChainState()
   const {balance} = useIdentityState()
@@ -64,7 +55,7 @@ export default function AdListPage() {
       init: () => createAdDb(epoch?.epoch ?? -1).all(),
     },
   })
-  const {ads, selected} = current.context
+  const {ads, selectedAd} = current.context
 
   const toDna = toLocaleDna(i18n.language)
 
@@ -118,7 +109,7 @@ export default function AdListPage() {
             }) => (
               <AdEntry key={id}>
                 <Stack isInline spacing={5}>
-                  <Stack spacing={3} w={rem(60)}>
+                  <Stack spacing={3} w={60}>
                     <Box position="relative">
                       <AdCoverImage ad={{cover}} alt={title} />
                       {status === AdStatus.Idle && (
@@ -131,7 +122,7 @@ export default function AdListPage() {
                     <Flex>
                       <NextLink href={`/ads/edit?id=${id}`} passHref>
                         <Link
-                          fontSize={rem(14)}
+                          fontSize="mdx"
                           fontWeight={500}
                           _hover={{color: 'muted'}}
                         >
@@ -158,17 +149,27 @@ export default function AdListPage() {
                             </AdMenuItem>
                           </AdMenu>
                         </Box>
-                        <SecondaryButton
-                          onClick={() => {
-                            send('SELECT', {id})
-                            onOpen()
-                          }}
-                        >
-                          Publish
-                        </SecondaryButton>
+                        {status === AdStatus.Approved && (
+                          <SecondaryButton
+                            onClick={() => {
+                              send('SELECT', {id})
+                            }}
+                          >
+                            Publish
+                          </SecondaryButton>
+                        )}
+                        {status === AdStatus.Idle && (
+                          <SecondaryButton
+                            onClick={() => {
+                              send('REVIEW', {id})
+                            }}
+                          >
+                            Review
+                          </SecondaryButton>
+                        )}
                       </Stack>
                     </Flex>
-                    <Stack isInline spacing={rem(58)}>
+                    <Stack isInline spacing={60}>
                       <BlockAdStat label="Spent, 4hrs" value={toDna(spent)} />
                       <BlockAdStat
                         label="Total spent, DNA"
@@ -221,10 +222,19 @@ export default function AdListPage() {
         {current.matches('ready') && ads.length === 0 && <NoAds />}
 
         <PublishAdDrawer
-          isOpen={isOpen}
-          onClose={onClose}
-          size={rem(360)}
-          ad={selected}
+          isOpen={eitherState(current, 'ready.publishing')}
+          onClose={() => {
+            send('CANCEL')
+          }}
+          ad={selectedAd}
+        />
+
+        <ReviewAdDrawer
+          isOpen={eitherState(current, 'ready.sendingToReview')}
+          onClose={() => {
+            send('CANCEL')
+          }}
+          ad={selectedAd}
         />
       </Page>
     </Layout>

@@ -17,7 +17,11 @@ import {
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
-import {IconButton2, PrimaryButton} from '../../shared/components/button'
+import {
+  IconButton2,
+  PrimaryButton,
+  SecondaryButton,
+} from '../../shared/components/button'
 import {
   Drawer,
   DrawerBody,
@@ -88,79 +92,6 @@ export function InlineAdStat({
 
 export function SmallInlineAdStat(props) {
   return <InlineAdStat fontSize="sm" {...props} />
-}
-
-export function PublishAdDrawer({ad, ...props}) {
-  const {i18n} = useTranslation()
-
-  return (
-    <Drawer {...props}>
-      <DrawerHeader>
-        <Stack spacing={4}>
-          <FillCenter
-            alignSelf="flex-start"
-            bg="blue.012"
-            w={12}
-            minH={12}
-            rounded="xl"
-          >
-            <Icon name="ads" size={6} color="brandBlue.500" />
-          </FillCenter>
-          <Heading fontSize="lg" fontWeight={500}>
-            Pay
-          </Heading>
-        </Stack>
-      </DrawerHeader>
-      <DrawerBody overflowY="auto" mx={-6}>
-        <Stack spacing={6} color="brandGray.500" fontSize="md" p={6} pt={0}>
-          <Text>
-            In order to make your ads visible for Idena users you need to burn
-            more coins than competitors targeting the same audience.
-          </Text>
-          <Stack spacing={6} bg="gray.50" p={6} rounded="lg">
-            <Stack isInline spacing={5}>
-              <AdCoverImage ad={ad} />
-              <Text fontWeight={500}>{ad.title}</Text>
-            </Stack>
-            <Stack spacing={3}>
-              <HDivider />
-              <Stack>
-                <InlineAdStat label="Competitors" value={10} />
-                <InlineAdStat
-                  label="Max price"
-                  value={toLocaleDna(i18n.language)(0.22)}
-                />
-              </Stack>
-              <HDivider />
-              <Stack>
-                <SmallInlineAdStat label="Location" value={ad.location} />
-                <SmallInlineAdStat label="Language" value={ad.lang} />
-                <SmallInlineAdStat label="Stake" value={ad.stake} />
-                <SmallInlineAdStat label="Age" value={ad.age} />
-                <SmallInlineAdStat label="OS" value={ad.os} />
-              </Stack>
-            </Stack>
-          </Stack>
-          <FormControl>
-            <FormLabel htmlFor="amount">Amount, DNA</FormLabel>
-            <DnaInput id="amount" />
-          </FormControl>
-        </Stack>
-      </DrawerBody>
-      <DrawerFooter
-        borderTopWidth={1}
-        borderTopColor="gray.300"
-        py={3}
-        px={4}
-        position="absolute"
-        left={0}
-        right={0}
-        bottom={0}
-      >
-        <PrimaryButton>Burn</PrimaryButton>
-      </DrawerFooter>
-    </Drawer>
-  )
 }
 
 export function AdOverlayStatus({status}) {
@@ -399,5 +330,134 @@ export function AdForm({onChange, ...ad}) {
         </Stack>
       </FormSection>
     </Stack>
+  )
+}
+
+export function PublishAdDrawer({ad, ...props}) {
+  const {i18n} = useTranslation()
+
+  return (
+    <Drawer {...props}>
+      <DrawerHeader>
+        <Stack spacing={4}>
+          <FillCenter
+            alignSelf="flex-start"
+            bg="blue.012"
+            w={12}
+            minH={12}
+            rounded="xl"
+          >
+            <Icon name="ads" size={6} color="brandBlue.500" />
+          </FillCenter>
+          <Heading fontSize="lg" fontWeight={500}>
+            Pay
+          </Heading>
+        </Stack>
+      </DrawerHeader>
+      <DrawerBody overflowY="auto" mx={-6}>
+        <Stack spacing={6} color="brandGray.500" fontSize="md" p={6} pt={0}>
+          <Text>
+            In order to make your ads visible for Idena users you need to burn
+            more coins than competitors targeting the same audience.
+          </Text>
+          <Stack spacing={6} bg="gray.50" p={6} rounded="lg">
+            <Stack isInline spacing={5}>
+              <AdCoverImage ad={ad} />
+              <Text fontWeight={500}>{ad.title}</Text>
+            </Stack>
+            <Stack spacing={3}>
+              <HDivider />
+              <Stack>
+                <InlineAdStat label="Competitors" value={10} />
+                <InlineAdStat
+                  label="Max price"
+                  value={toLocaleDna(i18n.language)(0.22)}
+                />
+              </Stack>
+              <HDivider />
+              <Stack>
+                <SmallInlineAdStat label="Location" value={ad.location} />
+                <SmallInlineAdStat label="Language" value={ad.lang} />
+                <SmallInlineAdStat label="Stake" value={ad.stake} />
+                <SmallInlineAdStat label="Age" value={ad.age} />
+                <SmallInlineAdStat label="OS" value={ad.os} />
+              </Stack>
+            </Stack>
+          </Stack>
+          <FormControl>
+            <FormLabel htmlFor="amount">Amount, DNA</FormLabel>
+            <DnaInput id="amount" />
+          </FormControl>
+        </Stack>
+      </DrawerBody>
+      <DrawerFooter
+        borderTopWidth={1}
+        borderTopColor="gray.300"
+        py={3}
+        px={4}
+        position="absolute"
+        left={0}
+        right={0}
+        bottom={0}
+      >
+        <PrimaryButton>Burn</PrimaryButton>
+      </DrawerFooter>
+    </Drawer>
+  )
+}
+
+export function ReviewAdDrawer({onSend, ...props}) {
+  const {t} = useTranslation()
+
+  return (
+    <Drawer {...props}>
+      <DrawerHeader>
+        <Stack spacing={4}>
+          <FillCenter
+            alignSelf="flex-start"
+            bg="blue.012"
+            w={12}
+            minH={12}
+            rounded="xl"
+          >
+            <Icon name="oracle" size={6} color="brandBlue.500" />
+          </FillCenter>
+          <Heading color="brandGray.500" fontSize="lg" fontWeight={500}>
+            {t('Send to Oracle Voting')}
+          </Heading>
+        </Stack>
+      </DrawerHeader>
+      <DrawerBody overflowY="auto" mx={-6}>
+        <Stack spacing={6} color="brandGray.500" fontSize="md" p={6} pt={0}>
+          <Text>
+            Please keep in mind that you will not be able to edit the banner
+            after it has been submitted for verification
+          </Text>
+          <FormControl>
+            <Stack>
+              <FormLabel htmlFor="amount">Review fee, DNA</FormLabel>
+              <DnaInput id="amount" />
+            </Stack>
+          </FormControl>
+        </Stack>
+      </DrawerBody>
+      <DrawerFooter
+        spacing={2}
+        borderTopWidth={1}
+        borderTopColor="gray.300"
+        py={3}
+        px={4}
+        position="absolute"
+        left={0}
+        right={0}
+        bottom={0}
+      >
+        <Stack isInline>
+          {/* eslint-disable-next-line react/destructuring-assignment */}
+          <SecondaryButton onClick={props.onClose}>Not now</SecondaryButton>
+          <PrimaryButton onClick={onSend}>Send</PrimaryButton>
+        </Stack>
+      </DrawerFooter>
+    </Drawer>
   )
 }
