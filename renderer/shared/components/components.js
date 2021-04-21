@@ -47,8 +47,12 @@ import {
   TabPanels,
   TabPanel,
   RadioButtonGroup,
+  Menu as ChakraMenu,
+  MenuButton as ChakraMenuButton,
+  MenuList as ChakraMenuList,
+  MenuItem as ChakraMenuItem,
+  MenuDivider as ChakraMenuDivider,
 } from '@chakra-ui/core'
-import {rem} from '../theme'
 import {IconButton2} from './button'
 
 export const Page = React.forwardRef(function Page(props, ref) {
@@ -182,7 +186,7 @@ export function Textarea(props) {
       borderColor="gray.300"
       p={3}
       pt={2}
-      pr={rem(18)}
+      pr={18}
       _placeholder={{
         color: 'muted',
       }}
@@ -243,7 +247,7 @@ export function ChainedInputAddon({isDisabled, bg = 'white', ...props}) {
 export function Avatar({address, ...props}) {
   return (
     <Image
-      size={rem(80)}
+      size={80}
       src={`https://robohash.idena.io/${address?.toLowerCase()}`}
       bg="gray.50"
       rounded="lg"
@@ -289,10 +293,10 @@ export function Toast({
       fontSize="md"
       pl={4}
       pr={actionContent ? 2 : 5}
-      pt={rem(10)}
+      pt={10}
       pb={3}
       mb={5}
-      minH={rem(44)}
+      minH={44}
       rounded="lg"
       {...props}
     >
@@ -621,3 +625,69 @@ export const FilterButton = React.forwardRef(({isChecked, ...props}, ref) => (
     {...props}
   />
 ))
+
+export function Menu(props) {
+  return (
+    <ChakraMenu autoSelect={false}>
+      <ChakraMenuButton
+        rounded="md"
+        py="3/2"
+        px="1/2"
+        _hover={{bg: 'gray.50'}}
+        _expanded={{bg: 'gray.50'}}
+        _focus={{outline: 0}}
+      >
+        <Icon name="more" size={5} />
+      </ChakraMenuButton>
+      <ChakraMenuList
+        placement="bottom-end"
+        border="none"
+        shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
+        rounded="lg"
+        py={2}
+        minWidth="145px"
+        {...props}
+      />
+    </ChakraMenu>
+  )
+}
+
+export function IconMenuItem({icon, color, children, ...props}) {
+  return (
+    <MenuItem color={color} {...props}>
+      <MenuItemIcon name={icon} color={color} />
+      {children}
+    </MenuItem>
+  )
+}
+
+export function MenuItem(props) {
+  return (
+    <ChakraMenuItem
+      fontWeight={500}
+      lineHeight="shorter"
+      px={3}
+      py="3/2"
+      _hover={{bg: 'gray.50'}}
+      _focus={{bg: 'gray.50'}}
+      _selected={{bg: 'gray.50'}}
+      _active={{bg: 'gray.50'}}
+      {...props}
+    />
+  )
+}
+
+export function MenuItemIcon({color = 'brandBlue.500', ...props}) {
+  return <Icon size={5} mr={3} color={color} {...props} />
+}
+
+export function MenuDivider(props) {
+  return (
+    <ChakraMenuDivider
+      borderColor="gray.100"
+      borderWidth={1}
+      my={2}
+      {...props}
+    />
+  )
+}

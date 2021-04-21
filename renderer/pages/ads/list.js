@@ -1,5 +1,5 @@
 import React from 'react'
-import {Box, Flex, Stack, MenuDivider, Link} from '@chakra-ui/core'
+import {Box, Flex, Stack, Link} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import NextLink from 'next/link'
 import dayjs from 'dayjs'
@@ -7,9 +7,6 @@ import {useTranslation} from 'react-i18next'
 import {
   AdList,
   AdEntry,
-  AdMenu,
-  AdMenuItem,
-  AdMenuItemIcon,
   NoAds,
   AdStatNumber,
 } from '../../screens/ads/components'
@@ -27,6 +24,9 @@ import {
   FilterButton,
   FilterButtonList,
   HDivider,
+  IconMenuItem,
+  MenuDivider,
+  Menu,
   VDivider,
 } from '../../shared/components/components'
 import {IconLink} from '../../shared/components/link'
@@ -131,23 +131,15 @@ export default function AdListPage() {
                       </NextLink>
                       <Stack isInline align="center" spacing={4} ml="auto">
                         <Box>
-                          <AdMenu>
+                          <Menu>
                             <NextLink href={`/ads/edit?id=${id}`}>
-                              <AdMenuItem>
-                                <AdMenuItemIcon name="edit" />
-                                Edit
-                              </AdMenuItem>
+                              <IconMenuItem icon="edit">Edit</IconMenuItem>
                             </NextLink>
-                            <MenuDivider
-                              borderColor="gray.100"
-                              borderWidth="1px"
-                              my={2}
-                            />
-                            <AdMenuItem color="red.500">
-                              <AdMenuItemIcon name="delete" color="red.500" />
+                            <MenuDivider />
+                            <IconMenuItem icon="delete" color="red.500">
                               Delete
-                            </AdMenuItem>
-                          </AdMenu>
+                            </IconMenuItem>
+                          </Menu>
                         </Box>
                         {status === AdStatus.Approved && (
                           <SecondaryButton

@@ -28,7 +28,9 @@ import {
   DrawerHeader,
   FormLabel,
   HDivider,
+  IconMenuItem,
   Input,
+  Menu,
   Textarea,
 } from '../../shared/components/components'
 import {countryCodes, toLocaleDna, urlFromBytes} from '../../shared/utils/utils'
@@ -36,9 +38,6 @@ import {DnaInput, FillCenter} from '../oracles/components'
 import {
   AdFormField,
   AdInput,
-  AdMenu,
-  AdMenuItem,
-  AdMenuItemIcon,
   AdNumberInput,
   AdStatLabel,
   AdStatNumber,
@@ -156,16 +155,10 @@ export function AdBanner({title, cover, owner, url}) {
         </Box>
       </Stack>
       <Box>
-        <AdMenu>
-          <AdMenuItem>
-            <AdMenuItemIcon name="ads" />
-            My Ads
-          </AdMenuItem>
-          <AdMenuItem>
-            <AdMenuItemIcon name="cards" />
-            View all offers
-          </AdMenuItem>
-        </AdMenu>
+        <Menu>
+          <IconMenuItem icon="ads">My Ads</IconMenuItem>
+          <IconMenuItem icon="cards">View all offers</IconMenuItem>
+        </Menu>
       </Box>
     </Flex>
   )
