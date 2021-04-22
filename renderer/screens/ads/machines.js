@@ -4,12 +4,15 @@ import {log} from 'xstate/lib/actions'
 import {AdStatus} from '../../shared/types'
 import {wait} from '../../shared/utils/fn'
 import {byId} from '../../shared/utils/utils'
+import {areSameCaseInsensitive} from '../oracles/utils'
 
 export const adListMachine = Machine({
   id: 'adList',
   context: {
     selectedAd: {},
     ads: [],
+    filteredAds: [],
+    status: AdStatus.Active,
   },
   initial: 'init',
   states: {
@@ -20,11 +23,14 @@ export const adListMachine = Machine({
           target: 'ready',
           actions: [
             assign({
-              ads: (_, {data}) =>
-                data.map(ad => ({
-                  ...ad,
-                  ref: spawn(adMachine.withContext(ad)),
-                })),
+              ads: (_, {data}) => data,
+              filteredAds: ({status}, {data}) =>
+                data
+                  .filter(ad => areSameCaseInsensitive(ad.status, status))
+                  .map(ad => ({
+                    ...ad,
+                    ref: spawn(adMachine.withContext(ad)),
+                  })),
             }),
             log(),
           ],
@@ -37,6 +43,18 @@ export const adListMachine = Machine({
       states: {
         idle: {
           on: {
+            FILTER: {
+              actions: [
+                assign({
+                  status: (_, {value}) => value,
+                  filteredAds: ({ads}, {value}) =>
+                    ads.filter(({status}) =>
+                      areSameCaseInsensitive(status, value)
+                    ),
+                }),
+                log(),
+              ],
+            },
             REVIEW: {
               target: 'sendingToReview',
               actions: [
@@ -54,7 +72,6 @@ export const adListMachine = Machine({
           initial: 'preview',
           states: {
             preview: {
-              entry: [log()],
               on: {
                 SUBMIT: 'submitting',
               },
@@ -78,22 +95,31 @@ export const adListMachine = Machine({
                 MINED: {
                   target: '#adList.ready.idle',
                   actions: [
-                    assign({
-                      ads: ({ads, selectedAd}) =>
-                        ads.map(ad =>
-                          ad.id === selectedAd.id
-                            ? {
-                                status: AdStatus.Reviewing,
-                                ...ad,
-                              }
-                            : ad
-                        ),
-                      selectedAd: ({selectedAd}) => ({
-                        ...selectedAd,
+                    assign(({ads, selectedAd, status}) => {
+                      const applyReviewingStatus = ad => ({
+                        ...ad,
                         status: AdStatus.Reviewing,
-                      }),
+                      })
+
+                      const nextAds = ads.map(ad =>
+                        ad.id === selectedAd.id
+                          ? {
+                              ...applyReviewingStatus(ad),
+                              ref: spawn(
+                                adMachine.withContext(applyReviewingStatus(ad))
+                              ),
+                            }
+                          : ad
+                      )
+
+                      return {
+                        ads: nextAds,
+                        filteredAds: nextAds.filter(ad => ad.status === status),
+                        selectedAd: applyReviewingStatus(selectedAd),
+                      }
                     }),
                     'onSentToReview',
+                    log(),
                   ],
                 },
               },

@@ -54,15 +54,16 @@ export default function AdListPage() {
 
   const [current, send] = useMachine(adListMachine, {
     actions: {
-      onSentToReview: asEffect(({selectedAd: {id, status}}) => {
-        db.put({id, status})
+      // eslint-disable-next-line no-unused-vars
+      onSentToReview: asEffect(({selectedAd: {ref, ...ad}}) => {
+        db.put(ad)
       }),
     },
     services: {
       init: () => db.all(),
     },
   })
-  const {ads, selectedAd} = current.context
+  const {filteredAds, selectedAd, status} = current.context
 
   const toDna = toLocaleDna(i18n.language)
 
@@ -76,21 +77,21 @@ export default function AdListPage() {
           </BlockAdStat>
           <BlockAdStat label="Total spent, 4hrs">
             <AdStatNumber fontSize="lg">
-              {toDna(ads.map(({burnt = 0}) => burnt).reduce(add, 0))}
+              {toDna(filteredAds.map(({burnt = 0}) => burnt).reduce(add, 0))}
             </AdStatNumber>
           </BlockAdStat>
         </Stack>
         <Flex justify="space-between" alignSelf="stretch">
           <FilterButtonList
-            value="active"
+            value={status}
             onChange={value => {
               if (value) send('FILTER', {value})
             }}
           >
-            <FilterButton value="active">Active</FilterButton>
-            <FilterButton value="drafts">Drafts</FilterButton>
-            <FilterButton value="review">On review</FilterButton>
-            <FilterButton value="rejected">Rejected</FilterButton>
+            <FilterButton value={AdStatus.Active}>Active</FilterButton>
+            <FilterButton value={AdStatus.Draft}>Drafts</FilterButton>
+            <FilterButton value={AdStatus.Reviewing}>On review</FilterButton>
+            <FilterButton value={AdStatus.Rejected}>Rejected</FilterButton>
           </FilterButtonList>
           <Stack isInline spacing={1} align="center">
             <VDivider />
@@ -100,7 +101,7 @@ export default function AdListPage() {
           </Stack>
         </Flex>
         <AdList py={4} spacing={4} alignSelf="stretch">
-          {ads.map(
+          {filteredAds.map(
             ({
               id,
               cover,
@@ -112,7 +113,8 @@ export default function AdListPage() {
               stake,
               burnt: spent = 0,
               lastTx = dayjs(),
-              status = AdStatus.Idle,
+              // eslint-disable-next-line no-shadow
+              status,
             }) => (
               <AdEntry key={id}>
                 <Stack isInline spacing={5}>
@@ -126,7 +128,7 @@ export default function AdListPage() {
                     <AdStatusText status={status} />
                   </Stack>
                   <Box flex={1}>
-                    <Flex>
+                    <Flex justify="space-between">
                       <NextLink href={`/ads/edit?id=${id}`} passHref>
                         <Link
                           fontSize="mdx"
@@ -136,7 +138,7 @@ export default function AdListPage() {
                           {title}
                         </Link>
                       </NextLink>
-                      <Stack isInline align="center" spacing={4} ml="auto">
+                      <Stack isInline align="center">
                         <Box>
                           <Menu>
                             <NextLink href={`/ads/edit?id=${id}`}>
@@ -157,7 +159,7 @@ export default function AdListPage() {
                             Publish
                           </SecondaryButton>
                         )}
-                        {status === AdStatus.Idle && (
+                        {status === AdStatus.Active && (
                           <SecondaryButton
                             onClick={() => {
                               send('REVIEW', {id})
@@ -212,13 +214,14 @@ export default function AdListPage() {
                     </Stack>
                   </Box>
                 </Stack>
-                {ads.length > 1 && <HDivider />}
+
+                {filteredAds.length > 1 && <HDivider />}
               </AdEntry>
             )
           )}
         </AdList>
 
-        {current.matches('ready') && ads.length === 0 && <NoAds />}
+        {current.matches('ready') && filteredAds.length === 0 && <NoAds />}
 
         <PublishAdDrawer
           isOpen={eitherState(current, 'ready.publishing')}

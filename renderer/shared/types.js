@@ -78,17 +78,20 @@ export const NodeType = {
 }
 
 export const AdRelevance = {
-  Top: 'Top',
-  Normal: 'Normal',
-  Low: 'Low',
+  Top: 'top',
+  Normal: 'normal',
+  Low: 'low',
 }
 
 export const AdStatus = {
-  Disabled: 'Disabled',
-  Showing: 'Showing',
-  PartiallyShowing: 'Partially showing',
-  NotShowing: 'Not showing',
-  Idle: 'Idle',
-  Reviewing: 'Reviewing',
-  Approved: 'Approved',
+  Disabled: 'disabled',
+  Showing: 'showing',
+  PartiallyShowing: 'partiallyShowing',
+  NotShowing: 'notShowing',
+  Idle: 'idle',
+  Active: 'active',
+  Draft: 'draft',
+  Reviewing: 'reviewing',
+  Approved: 'approved',
+  Rejected: 'rejected',
 }

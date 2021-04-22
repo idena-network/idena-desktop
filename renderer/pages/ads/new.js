@@ -20,6 +20,7 @@ import {
 } from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {AdForm} from '../../screens/ads/containers'
+import {AdStatus} from '../../shared/types'
 
 export default function NewAdPage() {
   const router = useRouter()
@@ -36,7 +37,7 @@ export default function NewAdPage() {
     },
     services: {
       init: () => Promise.resolve(),
-      submit: ctx => db.put(ctx),
+      submit: ctx => db.put({status: AdStatus.Active, ...ctx}),
     },
   })
 
