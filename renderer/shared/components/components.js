@@ -99,13 +99,14 @@ export function Drawer({isCloseable = true, children, ...props}) {
   return (
     <ChakraDrawer {...props}>
       <DrawerOverlay bg="xblack.080" />
-      <DrawerContent px={8} py={12} maxW={360}>
+      <DrawerContent px={8} py={12} maxW="sm">
         {isCloseable && <DrawerCloseButton />}
         {children}
       </DrawerContent>
     </ChakraDrawer>
   )
 }
+
 export function DrawerHeader(props) {
   return <ChakraDrawerHeader p={0} mb={3} {...props} />
 }
@@ -386,6 +387,8 @@ export function SuccessAlert({children, ...props}) {
       bg="green.010"
       borderWidth="1px"
       borderColor="green.050"
+      color="brandGray.500"
+      fontSize="md"
       fontWeight={500}
       rounded="md"
       px={3}

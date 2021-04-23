@@ -3,7 +3,11 @@ import * as React from 'react'
 import {
   Badge,
   Box,
+  Drawer as ChakraDrawer,
+  DrawerCloseButton,
+  DrawerContent,
   DrawerFooter,
+  DrawerOverlay,
   Flex,
   FormControl,
   Heading,
@@ -27,11 +31,13 @@ import {
   Drawer,
   DrawerBody,
   DrawerHeader,
+  ExternalLink,
   FormLabel,
   HDivider,
   IconMenuItem,
   Input,
   Menu,
+  SuccessAlert,
   Textarea,
 } from '../../shared/components/components'
 import {countryCodes, toLocaleDna, urlFromBytes} from '../../shared/utils/utils'
@@ -400,11 +406,11 @@ export function PublishAdDrawer({ad, ...props}) {
   )
 }
 
-export function ReviewAdDrawer({isMining, onSend, ...props}) {
+export function ReviewAdDrawer({ad, isMining, onSend, ...props}) {
   const {t} = useTranslation()
 
   return (
-    <Drawer {...props}>
+    <AdDrawer isMining={isMining} ad={ad} {...props}>
       <DrawerHeader>
         <Stack spacing={4}>
           <FillCenter
@@ -478,6 +484,63 @@ export function ReviewAdDrawer({isMining, onSend, ...props}) {
           </PrimaryButton>
         </Stack>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
+  )
+}
+
+export function AdDrawer({
+  isCloseable = true,
+  isMining = true,
+  ad = {},
+  children,
+  ...props
+}) {
+  const {i18n} = useTranslation()
+  return (
+    <ChakraDrawer {...props}>
+      <DrawerOverlay bg="xblack.080">
+        {isMining && (
+          <FillCenter h="full" pr={360}>
+            <Box
+              bg="white"
+              rounded="lg"
+              px={10}
+              pt={37}
+              pb={44}
+              w={400}
+              h={620}
+            >
+              <Stack spacing={10}>
+                <Stack spacing={4}>
+                  <Stack spacing="3/2">
+                    <Text>{ad.title}</Text>
+                    <ExternalLink href={ad.url}>{ad.url}</ExternalLink>
+                  </Stack>
+                  <Image src={urlFromBytes(ad.cover)} size="xs" />
+                </Stack>
+                <Stack spacing={6}>
+                  <Flex justify="space-between">
+                    <BlockAdStat label="Sponsored by" value={ad.issuer} />
+                    <BlockAdStat
+                      label="Burned for 24hrs"
+                      value={toLocaleDna(i18n.language)(5827.567)}
+                    />
+                  </Flex>
+                  <Box>
+                    <SuccessAlert>
+                      Watching ads makes your coin valuable!
+                    </SuccessAlert>
+                  </Box>
+                </Stack>
+              </Stack>
+            </Box>
+          </FillCenter>
+        )}
+      </DrawerOverlay>
+      <DrawerContent px={8} py={12} maxW="sm">
+        {isCloseable && <DrawerCloseButton />}
+        {children}
+      </DrawerContent>
+    </ChakraDrawer>
   )
 }

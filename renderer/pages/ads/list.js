@@ -234,13 +234,13 @@ export default function AdListPage() {
         <ReviewAdDrawer
           isOpen={eitherState(current, 'ready.sendingToReview')}
           isMining={eitherState(current, 'ready.sendingToReview.mining')}
+          ad={selectedAd}
           onSend={() => {
             send('SUBMIT')
           }}
           onClose={() => {
             send('CANCEL')
           }}
-          ad={selectedAd}
         />
       </Page>
     </Layout>
