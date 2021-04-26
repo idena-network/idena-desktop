@@ -1,5 +1,6 @@
 import {dbProxy, createEpochDb} from '../../shared/utils/db'
 
+export function createAdDb(epoch = -1) {
 export function createAdDb(epoch) {
   const ns = [epoch, 'ads']
 
@@ -11,12 +12,18 @@ export function createAdDb(epoch) {
     async put({cover, ...ad}) {
       const id = await db.put(ad)
       if (cover) await dbProxy.put(id, cover, ...coverDbArgs)
+      return id
     },
     async get(id) {
       return {
         ...(await db.get(id)),
         cover: await dbProxy.get(id, ...coverDbArgs),
       }
+    },
+    async getAsHex(id) {
+      return dbProxy.get(id, ns, {
+        valueEncoding: 'hex',
+      })
     },
     async all() {
       return Promise.all(
@@ -31,4 +38,8 @@ export function createAdDb(epoch) {
       return db.clear()
     },
   }
+}
+
+export function buildProfile({ads}) {
+  return {ads}
 }

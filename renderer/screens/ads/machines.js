@@ -79,8 +79,8 @@ export const adListMachine = Machine({
             submitting: {
               entry: [log()],
               invoke: {
-                src: () => wait(100),
-                onDone: 'mining',
+                src: 'sendToReview',
+                onDone: {target: 'mining', actions: [log()]},
               },
             },
             mining: {

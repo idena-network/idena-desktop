@@ -28,7 +28,9 @@ const resolveDb = (db, ns, opts) => {
 module.exports = function setup() {
   const db = levelup(leveldown('idena.db'))
 
-  ipcMain.handle('DB_GET', (_, [k, ns, opts]) => resolveDb(db, ns, opts).get(k))
+  ipcMain.handle('DB_GET', (_, [k, ns, opts]) =>
+    resolveDb(db, ns, opts).get(k, opts)
+  )
   ipcMain.handle('DB_PUT', (_, [k, v, ns, opts]) =>
     resolveDb(db, ns, opts).put(k, v)
   )

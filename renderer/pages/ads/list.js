@@ -18,7 +18,7 @@ import {SecondaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
 import {createAdDb} from '../../screens/ads/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {eitherState, toLocaleDna} from '../../shared/utils/utils'
+import {callRpc, eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {useChainState} from '../../shared/providers/chain-context'
 import {
   FilterButton,
@@ -42,12 +42,13 @@ import {
   SmallInlineAdStat,
 } from '../../screens/ads/containers'
 import {AdStatus} from '../../shared/types'
+import {hexToObject} from '../../screens/oracles/utils'
 
 export default function AdListPage() {
   const {i18n} = useTranslation()
 
   const {syncing, offline} = useChainState()
-  const {balance} = useIdentityState()
+  const {address, balance} = useIdentityState()
   const epoch = useEpochState()
 
   const db = createAdDb(epoch?.epoch)
@@ -60,7 +61,13 @@ export default function AdListPage() {
       }),
     },
     services: {
-      init: () => db.all(),
+      init: async () => {
+        console.log({
+          profile: hexToObject((await callRpc('dna_profile', address)).info),
+        })
+        return db.all()
+      },
+      sendToReview: async () => Promise.resolve(),
     },
   })
   const {filteredAds, selectedAd, status} = current.context

@@ -5,7 +5,7 @@ import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
-import {createAdDb} from '../../screens/ads/utils'
+import {buildProfile, createAdDb} from '../../screens/ads/utils'
 import {
   AdFooter,
   AdNumberInput,
@@ -21,6 +21,8 @@ import {
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {AdForm} from '../../screens/ads/containers'
 import {AdStatus} from '../../shared/types'
+import {callRpc} from '../../shared/utils/utils'
+import {objectToHex} from '../../screens/oracles/utils'
 
 export default function NewAdPage() {
   const router = useRouter()
@@ -37,7 +39,16 @@ export default function NewAdPage() {
     },
     services: {
       init: () => Promise.resolve(),
-      submit: ctx => db.put({status: AdStatus.Active, ...ctx}),
+      submit: async context => {
+        await db.put({status: AdStatus.Active, ...context})
+
+        await callRpc('dna_changeProfile', {
+          info: `0x${objectToHex(
+            // eslint-disable-next-line no-unused-vars
+            buildProfile({ads: (await db.all()).map(({cover, ...ad}) => ad)})
+          )}`,
+        })
+      },
     },
   })
 
