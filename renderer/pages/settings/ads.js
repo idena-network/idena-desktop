@@ -5,6 +5,7 @@ import {SettingsSection} from '../../screens/settings/components'
 import {PrimaryButton} from '../../shared/components/button'
 import {Toast} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
+import {callRpc} from '../../shared/utils/utils'
 import SettingsLayout from './layout'
 
 export default function AdsSettings() {
@@ -17,29 +18,52 @@ export default function AdsSettings() {
   return (
     <SettingsLayout>
       <Stack spacing={8} mt={8}>
-        {epochState && (
-          <SettingsSection title={t('Ads cache')}>
+        <Stack spacing={10}>
+          {epochState && (
+            <SettingsSection title={t('Ads cache')}>
+              <Stack spacing={4} align="flex-start">
+                <Box color="muted">
+                  <Text>{t('Clear persisted ads.')}</Text>
+                  <Text color="muted">
+                    {t(
+                      'Recommended in some scenarios, e.g. switching accounts.'
+                    )}
+                  </Text>
+                </Box>
+                <PrimaryButton
+                  onClick={async () => {
+                    await createAdDb(epochState.epoch).clear()
+                    toast({
+                      // eslint-disable-next-line react/display-name
+                      render: () => <Toast title={t('Ads removed')} />,
+                    })
+                  }}
+                >
+                  {t('Clear cache')}
+                </PrimaryButton>
+              </Stack>
+            </SettingsSection>
+          )}
+          <SettingsSection title={t('Profile')}>
             <Stack spacing={4} align="flex-start" my={4}>
               <Box color="muted">
-                <Text>{t('Clear persisted ads.')}</Text>
-                <Text color="muted">
-                  {t('Recommended in some scenarios, e.g. switching accounts.')}
-                </Text>
+                <Text>{t('Clear profile.')}</Text>
+                <Text color="muted">{t('Jumpstart with fresh profile.')}</Text>
               </Box>
               <PrimaryButton
                 onClick={async () => {
-                  await createAdDb(epochState.epoch).clear()
+                  await callRpc('dna_changeProfile', {info: '0x'})
                   toast({
                     // eslint-disable-next-line react/display-name
-                    render: () => <Toast title={t('Ads removed')} />,
+                    render: () => <Toast title={t('Profile cleared')} />,
                   })
                 }}
               >
-                {t('Clear cache')}
+                {t('Clear profile')}
               </PrimaryButton>
             </Stack>
           </SettingsSection>
-        )}
+        </Stack>
       </Stack>
     </SettingsLayout>
   )

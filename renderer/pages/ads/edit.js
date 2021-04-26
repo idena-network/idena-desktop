@@ -1,12 +1,19 @@
 import React from 'react'
-import {Stack, TabPanels, TabPanel} from '@chakra-ui/core'
+import {
+  Stack,
+  TabPanels,
+  TabPanel,
+  CloseButton,
+  Flex,
+  useToast,
+} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 import {PrimaryButton} from '../../shared/components/button'
-import {createAdDb} from '../../screens/ads/utils'
+import {buildProfile, createAdDb} from '../../screens/ads/utils'
 import {
   AdFooter,
   AdNumberInput,
@@ -18,15 +25,20 @@ import {
   SimpleTabFilterList,
   SuccessAlert,
   TabFilters,
+  Toast,
 } from '../../shared/components/components'
-import {eitherState} from '../../shared/utils/utils'
+import {callRpc, eitherState} from '../../shared/utils/utils'
 import {AdForm} from '../../screens/ads/containers'
+import {AdStatus} from '../../shared/types'
+import {objectToHex} from '../../screens/oracles/utils'
 
 export default function EditAdPage() {
   const {t} = useTranslation()
 
   const router = useRouter()
   const {id} = router.query
+
+  const toast = useToast()
 
   const epoch = useEpochState()
 
@@ -35,19 +47,48 @@ export default function EditAdPage() {
   const [current, send] = useMachine(editAdMachine, {
     context: {id},
     actions: {
-      onSuccess: () => router.push('/ads/list'),
+      onSuccess: () => {
+        router.push('/ads/list')
+      },
+      onSavedBeforeClose: () => {
+        toast({
+          // eslint-disable-next-line react/display-name
+          render: () => <Toast title={t('Ad has been saved to drafts')} />,
+        })
+        router.push('/ads/list')
+      },
     },
     services: {
       // eslint-disable-next-line no-shadow
       init: ({id}) => db.get(id),
-      submit: ctx => db.put(ctx),
+      submit: async context => {
+        await db.put({...context, status: AdStatus.Active})
+        await callRpc('dna_changeProfile', {
+          info: `0x${objectToHex(
+            // eslint-disable-next-line no-unused-vars
+            buildProfile({ads: (await db.all()).map(({cover, ...ad}) => ad)})
+          )}`,
+        })
+      },
+      saveBeforeClose: context => {
+        const {status = AdStatus.Draft} = context
+        if (status === AdStatus.Draft) return db.put({...context, status})
+        return Promise.resolve()
+      },
     },
   })
 
   return (
     <Layout style={{flex: 1, display: 'flex'}}>
       <Page mb={12}>
-        <PageTitle>Edit ad</PageTitle>
+        <Flex justify="space-between" align="center" alignSelf="stretch" mb={4}>
+          <PageTitle mb={0}>Edit ad</PageTitle>
+          <CloseButton
+            onClick={() => {
+              send('CLOSE')
+            }}
+          />
+        </Flex>
         <TabFilters spacing={6}>
           <SimpleTabFilterList
             filters={[t('Parameters'), t('Publish options')]}

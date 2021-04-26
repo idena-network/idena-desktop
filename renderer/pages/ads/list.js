@@ -67,7 +67,9 @@ export default function AdListPage() {
     },
     services: {
       init: async () => {
-        const {ads} = hexToObject((await callRpc('dna_profile', address)).info)
+        const {ads = []} = hexToObject(
+          (await callRpc('dna_profile', address)).info
+        )
         return mergeById(ads, await db.all())
       },
       sendToReview: async () => Promise.resolve(),

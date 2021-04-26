@@ -1,5 +1,12 @@
 import React from 'react'
-import {Stack, TabPanel, TabPanels} from '@chakra-ui/core'
+import {
+  CloseButton,
+  Flex,
+  Stack,
+  TabPanel,
+  TabPanels,
+  useToast,
+} from '@chakra-ui/core'
 import {useRouter} from 'next/router'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
@@ -17,6 +24,7 @@ import {
   SimpleTabFilterList,
   SuccessAlert,
   TabFilters,
+  Toast,
 } from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {AdForm} from '../../screens/ads/containers'
@@ -29,18 +37,29 @@ export default function NewAdPage() {
 
   const {t} = useTranslation()
 
+  const toast = useToast()
+
   const epoch = useEpochState()
 
   const db = createAdDb(epoch?.epoch ?? -1)
 
   const [current, send] = useMachine(editAdMachine, {
     actions: {
-      onSuccess: () => router.push('/ads/list'),
+      onSuccess: () => {
+        router.push('/ads/list')
+      },
+      onSavedBeforeClose: () => {
+        toast({
+          // eslint-disable-next-line react/display-name
+          render: () => <Toast title={t('Ad has been saved to drafts')} />,
+        })
+        router.push('/ads/list')
+      },
     },
     services: {
       init: () => Promise.resolve(),
       submit: async context => {
-        await db.put({status: AdStatus.Active, ...context})
+        await db.put({...context, status: AdStatus.Active})
         await callRpc('dna_changeProfile', {
           info: `0x${objectToHex(
             // eslint-disable-next-line no-unused-vars
@@ -48,13 +67,25 @@ export default function NewAdPage() {
           )}`,
         })
       },
+      saveBeforeClose: context => {
+        const {status = AdStatus.Draft} = context
+        if (status === AdStatus.Draft) return db.put({...context, status})
+        return Promise.resolve()
+      },
     },
   })
 
   return (
     <Layout style={{flex: 1, display: 'flex'}}>
       <Page mb={12}>
-        <PageTitle>New ad</PageTitle>
+        <Flex justify="space-between" align="center" alignSelf="stretch" mb={4}>
+          <PageTitle mb={0}>New ad</PageTitle>
+          <CloseButton
+            onClick={() => {
+              send('CLOSE')
+            }}
+          />
+        </Flex>
         <TabFilters spacing={6}>
           <SimpleTabFilterList
             filters={[t('Parameters'), t('Publish options')]}

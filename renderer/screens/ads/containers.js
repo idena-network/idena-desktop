@@ -171,7 +171,7 @@ export function AdBanner({title, cover, owner, url}) {
   )
 }
 
-export function AdStatusText({status}) {
+export function AdStatusText({children, status = children}) {
   const statusColor = {
     [AdStatus.Showing]: 'green',
     [AdStatus.NotShowing]: 'red',
@@ -179,7 +179,11 @@ export function AdStatusText({status}) {
   }
 
   return (
-    <Text color={(statusColor ?? 'brandGray')['500']} fontWeight={500}>
+    <Text
+      color={(statusColor ?? 'brandGray')['500']}
+      fontWeight={500}
+      textTransform="capitalize"
+    >
       {status}
     </Text>
   )
@@ -189,7 +193,8 @@ export function AdCoverImage({ad, ...props}) {
   return (
     <Image
       src={urlFromBytes(ad.cover)}
-      fallbackSrc="//placekitten.com/60/60"
+      fallbackSrc="/static/body-medium-pic-icn.svg"
+      bg="gray.50"
       rounded="lg"
       size={60}
       {...props}
@@ -456,7 +461,7 @@ export function ReviewAdDrawer({ad, isMining, onSend, ...props}) {
           <FormControl>
             <Stack>
               <FormLabel htmlFor="amount">Review fee, DNA</FormLabel>
-              <DnaInput id="amount" />
+              <DnaInput id="amount" onChange={() => {}} />
             </Stack>
           </FormControl>
         </Stack>

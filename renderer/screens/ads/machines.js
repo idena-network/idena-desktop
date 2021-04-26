@@ -193,18 +193,7 @@ export const editAdMachine = Machine({
           actions: [assign((ctx, {ad}) => ({...ctx, ...ad})), log()],
         },
         SUBMIT: 'submitting',
-      },
-      initial: 'idle',
-      states: {
-        idle: {},
-        invalid: {},
-      },
-    },
-    validating: {
-      invoke: {
-        src: ({title, cover}) => title && cover,
-        onDone: 'submitting',
-        onError: 'editing.invalid',
+        CLOSE: 'closing',
       },
     },
     submitting: {
@@ -221,8 +210,14 @@ export const editAdMachine = Machine({
       },
     },
     success: {
-      entry: [log(), 'onSuccess'],
+      entry: ['onSuccess', log()],
       type: 'final',
+    },
+    closing: {
+      invoke: {
+        src: 'saveBeforeClose',
+        onDone: {actions: ['onSavedBeforeClose']},
+      },
     },
   },
 })
