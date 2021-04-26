@@ -201,6 +201,7 @@ export function hexToObject(hex) {
       new TextDecoder().decode(Buffer.from(hex.substring(2), 'hex'))
     )
   } catch {
+    global.logger.error('cannot parse hex string', hex)
     return {}
   }
 }

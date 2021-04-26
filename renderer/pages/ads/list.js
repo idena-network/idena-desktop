@@ -18,7 +18,12 @@ import {SecondaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
 import {createAdDb} from '../../screens/ads/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {callRpc, eitherState, toLocaleDna} from '../../shared/utils/utils'
+import {
+  callRpc,
+  eitherState,
+  mergeById,
+  toLocaleDna,
+} from '../../shared/utils/utils'
 import {useChainState} from '../../shared/providers/chain-context'
 import {
   FilterButton,
@@ -62,10 +67,8 @@ export default function AdListPage() {
     },
     services: {
       init: async () => {
-        console.log({
-          profile: hexToObject((await callRpc('dna_profile', address)).info),
-        })
-        return db.all()
+        const {ads} = hexToObject((await callRpc('dna_profile', address)).info)
+        return mergeById(ads, await db.all())
       },
       sendToReview: async () => Promise.resolve(),
     },

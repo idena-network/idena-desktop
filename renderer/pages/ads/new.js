@@ -41,7 +41,6 @@ export default function NewAdPage() {
       init: () => Promise.resolve(),
       submit: async context => {
         await db.put({status: AdStatus.Active, ...context})
-
         await callRpc('dna_changeProfile', {
           info: `0x${objectToHex(
             // eslint-disable-next-line no-unused-vars

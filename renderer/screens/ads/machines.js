@@ -35,7 +35,7 @@ export const adListMachine = Machine({
             log(),
           ],
         },
-        onError: 'fail',
+        onError: {target: 'fail', actions: [log()]},
       },
     },
     ready: {
