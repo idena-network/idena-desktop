@@ -13,6 +13,7 @@ export const adListMachine = Machine({
     ads: [],
     filteredAds: [],
     status: AdStatus.Active,
+    totalSpent: 0,
   },
   initial: 'init',
   states: {
@@ -23,14 +24,15 @@ export const adListMachine = Machine({
           target: 'ready',
           actions: [
             assign({
-              ads: (_, {data}) => data,
-              filteredAds: ({status}, {data}) =>
-                data
+              ads: (_, {data: {ads}}) => ads,
+              filteredAds: ({status}, {data: {ads}}) =>
+                ads
                   .filter(ad => areSameCaseInsensitive(ad.status, status))
                   .map(ad => ({
                     ...ad,
                     ref: spawn(adMachine.withContext(ad)),
                   })),
+              totalSpent: (_, {data: {totalSpent}}) => totalSpent,
             }),
             log(),
           ],
@@ -216,7 +218,7 @@ export const editAdMachine = Machine({
     closing: {
       invoke: {
         src: 'saveBeforeClose',
-        onDone: {actions: ['onSavedBeforeClose']},
+        onDone: {actions: ['onSaveBeforeClose']},
       },
     },
   },

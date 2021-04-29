@@ -11,19 +11,17 @@ import {
   AdStatNumber,
 } from '../../screens/ads/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {add} from '../../shared/utils/math'
 import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../screens/app/components'
 import {SecondaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
-import {createAdDb} from '../../screens/ads/utils'
-import {useEpochState} from '../../shared/providers/epoch-context'
 import {
-  callRpc,
-  eitherState,
-  mergeById,
-  toLocaleDna,
-} from '../../shared/utils/utils'
+  createAdDb,
+  fetchProfileAds,
+  fetchTotalSpent,
+} from '../../screens/ads/utils'
+import {useEpochState} from '../../shared/providers/epoch-context'
+import {eitherState, mergeById, toLocaleDna} from '../../shared/utils/utils'
 import {useChainState} from '../../shared/providers/chain-context'
 import {
   FilterButton,
@@ -36,6 +34,7 @@ import {
 } from '../../shared/components/components'
 import {IconLink} from '../../shared/components/link'
 import {
+  AdBanner,
   AdCoverImage,
   AdOverlayStatus,
   AdStatusText,
@@ -47,7 +46,6 @@ import {
   SmallInlineAdStat,
 } from '../../screens/ads/containers'
 import {AdStatus} from '../../shared/types'
-import {hexToObject} from '../../screens/oracles/utils'
 
 export default function AdListPage() {
   const {i18n} = useTranslation()
@@ -66,21 +64,20 @@ export default function AdListPage() {
       }),
     },
     services: {
-      init: async () => {
-        const {ads = []} = hexToObject(
-          (await callRpc('dna_profile', address)).info
-        )
-        return mergeById(ads, await db.all())
-      },
+      init: async () => ({
+        ads: mergeById(await db.all(), await fetchProfileAds(address)),
+        totalSpent: await fetchTotalSpent(address),
+      }),
       sendToReview: async () => Promise.resolve(),
     },
   })
-  const {filteredAds, selectedAd, status} = current.context
+  const {filteredAds, selectedAd, status, totalSpent} = current.context
 
   const toDna = toLocaleDna(i18n.language)
 
   return (
     <Layout syncing={syncing} offline={offline}>
+      <AdBanner />
       <Page as={Stack} spacing={4}>
         <PageTitle>My Ads</PageTitle>
         <Stack isInline spacing={20}>
@@ -88,9 +85,7 @@ export default function AdListPage() {
             <AdStatNumber fontSize="lg">{toDna(balance)}</AdStatNumber>
           </BlockAdStat>
           <BlockAdStat label="Total spent, 4hrs">
-            <AdStatNumber fontSize="lg">
-              {toDna(filteredAds.map(({burnt = 0}) => burnt).reduce(add, 0))}
-            </AdStatNumber>
+            <AdStatNumber fontSize="lg">{toDna(totalSpent)}</AdStatNumber>
           </BlockAdStat>
         </Stack>
         <Flex justify="space-between" alignSelf="stretch">

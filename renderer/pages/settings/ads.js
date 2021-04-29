@@ -1,9 +1,9 @@
-import {Box, Stack, Text, useToast} from '@chakra-ui/core'
+import {Box, Stack, Text} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {createAdDb} from '../../screens/ads/utils'
 import {SettingsSection} from '../../screens/settings/components'
 import {PrimaryButton} from '../../shared/components/button'
-import {Toast} from '../../shared/components/components'
+import {useSuccessToast} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {callRpc} from '../../shared/utils/utils'
 import SettingsLayout from './layout'
@@ -11,7 +11,7 @@ import SettingsLayout from './layout'
 export default function AdsSettings() {
   const {t} = useTranslation()
 
-  const toast = useToast()
+  const toast = useSuccessToast()
 
   const epochState = useEpochState()
 
@@ -33,10 +33,7 @@ export default function AdsSettings() {
                 <PrimaryButton
                   onClick={async () => {
                     await createAdDb(epochState.epoch).clear()
-                    toast({
-                      // eslint-disable-next-line react/display-name
-                      render: () => <Toast title={t('Ads removed')} />,
-                    })
+                    toast(t('Ads removed'))
                   }}
                 >
                   {t('Clear cache')}
@@ -47,19 +44,17 @@ export default function AdsSettings() {
           <SettingsSection title={t('Profile')}>
             <Stack spacing={4} align="flex-start" my={4}>
               <Box color="muted">
-                <Text>{t('Clear profile.')}</Text>
-                <Text color="muted">{t('Jumpstart with fresh profile.')}</Text>
+                <Text color="muted">
+                  {t('Start over with the fresh profile.')}
+                </Text>
               </Box>
               <PrimaryButton
                 onClick={async () => {
                   await callRpc('dna_changeProfile', {info: '0x'})
-                  toast({
-                    // eslint-disable-next-line react/display-name
-                    render: () => <Toast title={t('Profile cleared')} />,
-                  })
+                  toast(t('Profile reset'))
                 }}
               >
-                {t('Clear profile')}
+                {t('Reset profile')}
               </PrimaryButton>
             </Stack>
           </SettingsSection>

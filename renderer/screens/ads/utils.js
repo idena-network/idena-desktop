@@ -1,7 +1,8 @@
 import {dbProxy, createEpochDb} from '../../shared/utils/db'
+import {callRpc} from '../../shared/utils/utils'
+import {areSameCaseInsensitive, hexToObject} from '../oracles/utils'
 
 export function createAdDb(epoch = -1) {
-export function createAdDb(epoch) {
   const ns = [epoch, 'ads']
 
   const db = createEpochDb(...ns)
@@ -16,8 +17,8 @@ export function createAdDb(epoch) {
     },
     async get(id) {
       return {
-        ...(await db.get(id)),
-        cover: await dbProxy.get(id, ...coverDbArgs),
+        ...(await db.get(id).catch(() => {})),
+        cover: await dbProxy.get(id, ...coverDbArgs).catch(() => null),
       }
     },
     async getAsHex(id) {
@@ -29,7 +30,7 @@ export function createAdDb(epoch) {
       return Promise.all(
         (await db.all()).map(async ({id, ...ad}) => ({
           id,
-          cover: await dbProxy.get(id, ...coverDbArgs),
+          cover: await dbProxy.get(id, ...coverDbArgs).catch(() => null),
           ...ad,
         }))
       )
@@ -42,4 +43,54 @@ export function createAdDb(epoch) {
 
 export function buildProfile({ads}) {
   return {ads}
+}
+
+export function buildTargetKey({locale, age, stake, os = detectOs()}) {
+  return JSON.stringify({locale, age, stake: Math.floor(stake), os})
+}
+
+export const isEligibleAd = (targetKey, key) => {
+  const {
+    locale: keyLocale,
+    age: keyAge,
+    stake: keyStake,
+    os: keyOs,
+  } = JSON.parse(key)
+
+  const {locale, age, stake, os} = JSON.parse(targetKey)
+  return (
+    areSameCaseInsensitive(keyLocale, locale) &&
+    age >= keyAge &&
+    stake >= keyStake &&
+    areSameCaseInsensitive(keyOs, os)
+  )
+}
+
+export async function fetchProfileAds(address) {
+  return hexToObject((await callRpc('dna_profile', address)).info).ads ?? []
+}
+
+export async function fetchTotalSpent(address) {
+  return ((await callRpc('bcn_burntCoins')) ?? []).reduce(
+    (total, {address: issuerAddress, amount}) =>
+      total + areSameCaseInsensitive(issuerAddress, address)
+        ? Number(amount)
+        : 0,
+    0
+  )
+}
+
+export function detectOs() {
+  switch (true) {
+    case navigator.appVersion.includes('Win'):
+      return 'win'
+    case navigator.appVersion.includes('Mac'):
+      return 'mac'
+    case navigator.appVersion.includes('Linux'):
+      return 'linux'
+    case navigator.appVersion.includes('X11'):
+      return 'unix'
+    default:
+      return undefined
+  }
 }

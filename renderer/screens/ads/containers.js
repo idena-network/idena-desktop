@@ -28,6 +28,7 @@ import {
   SecondaryButton,
 } from '../../shared/components/button'
 import {
+  Avatar,
   Drawer,
   DrawerBody,
   DrawerHeader,
@@ -40,7 +41,12 @@ import {
   SuccessAlert,
   Textarea,
 } from '../../shared/components/components'
-import {countryCodes, toLocaleDna, urlFromBytes} from '../../shared/utils/utils'
+import {
+  callRpc,
+  countryCodes,
+  toLocaleDna,
+  urlFromBytes,
+} from '../../shared/utils/utils'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {
   AdFormField,
@@ -56,6 +62,10 @@ import {AdStatus} from '../../shared/types'
 import {adFormMachine} from './machines'
 import {hasImageType} from '../../shared/utils/img'
 import {AVAILABLE_LANGS} from '../../i18n'
+import {buildTargetKey, createAdDb, isEligibleAd} from './utils'
+import {useEpochState} from '../../shared/providers/epoch-context'
+import {useIdentityState} from '../../shared/providers/identity-context'
+import {hexToObject} from '../oracles/utils'
 
 export function BlockAdStat({label, value, children, ...props}) {
   return (
@@ -118,37 +128,82 @@ export function AdOverlayStatus({status}) {
   )
 }
 
-export function AdBanner({title, cover, owner, url}) {
+export function AdBanner({limit = 5, ...props}) {
+  const {i18n} = useTranslation()
+
+  const epoch = useEpochState()
+  const {address, age, stake} = useIdentityState()
+
+  const [showingAd, setShowingAd] = React.useState()
+
+  React.useEffect(() => {
+    if (epoch?.epoch) {
+      const targetKey = buildTargetKey({
+        locale: i18n.language,
+        age,
+        stake,
+      })
+
+      callRpc('bcn_burntCoins').then(result => {
+        if (result) {
+          const targetedAds = result.filter(({key}) =>
+            isEligibleAd(targetKey, key)
+          )
+
+          // eslint-disable-next-line no-shadow
+          targetedAds.slice(0, limit).forEach(async ({address}) => {
+            const res = await callRpc('dna_profile', address)
+            const {ads} = hexToObject(res.info ?? {})
+            if (ads?.length > 0) {
+              const [ad] = ads
+              setShowingAd({
+                ...ad,
+                ...(await createAdDb(epoch?.epoch).get(ad.id)),
+              })
+            }
+          })
+        }
+      })
+    }
+  }, [age, epoch, i18n.language, limit, stake])
+
+  const {
+    title = 'Your tagline here',
+    cover,
+    issuer = address,
+    url = 'https://idena.io',
+  } = showingAd ?? {}
+
   return (
     <Flex
       align="center"
       justify="space-between"
-      bg="white"
-      borderBottom="1px"
-      borderBottomColor="gray.100"
-      color="brandGray.500"
+      borderBottomWidth={1}
+      borderBottomColor="gray.300"
       px={4}
       py={2}
       position="sticky"
       top={0}
       zIndex="banner"
+      {...props}
     >
       <Stack
         isInline
-        spacing={2}
         cursor="pointer"
-        onClick={() => global.openExternal(url)}
+        onClick={() => {
+          global.openExternal(url)
+        }}
       >
-        <AdCoverImage ad={{cover}} size={40} />
-        <Box>
-          <Text>{title}</Text>
+        <AdCoverImage ad={{cover}} size={10} />
+        <Stack spacing={1}>
+          <Text color>{title}</Text>
           <Stack isInline spacing={1}>
-            <Image
-              src={`https://robohash.org/${owner}`}
-              size={4}
-              border="1px"
-              borderColor="brandGray.16"
-              rounded="md"
+            <Avatar
+              address={issuer}
+              size={14}
+              borderWidth={1}
+              borderColor="gray.016"
+              rounded="sm"
             />
             <Text
               color="muted"
@@ -156,10 +211,10 @@ export function AdBanner({title, cover, owner, url}) {
               fontWeight={500}
               lineHeight="base"
             >
-              {owner}
+              {issuer}
             </Text>
           </Stack>
-        </Box>
+        </Stack>
       </Stack>
       <Box>
         <Menu>

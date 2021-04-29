@@ -1,18 +1,11 @@
 import React from 'react'
-import {
-  CloseButton,
-  Flex,
-  Stack,
-  TabPanel,
-  TabPanels,
-  useToast,
-} from '@chakra-ui/core'
+import {CloseButton, Flex, Stack, TabPanel, TabPanels} from '@chakra-ui/core'
 import {useRouter} from 'next/router'
 import {useMachine} from '@xstate/react'
 import {useTranslation} from 'react-i18next'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
-import {buildProfile, createAdDb} from '../../screens/ads/utils'
+import {buildProfile, buildTargetKey, createAdDb} from '../../screens/ads/utils'
 import {
   AdFooter,
   AdNumberInput,
@@ -24,42 +17,50 @@ import {
   SimpleTabFilterList,
   SuccessAlert,
   TabFilters,
-  Toast,
+  useSuccessToast,
 } from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {AdForm} from '../../screens/ads/containers'
 import {AdStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
 import {objectToHex} from '../../screens/oracles/utils'
+import {useIdentityState} from '../../shared/providers/identity-context'
 
 export default function NewAdPage() {
   const router = useRouter()
 
   const {t} = useTranslation()
 
-  const toast = useToast()
+  const toast = useSuccessToast()
 
   const epoch = useEpochState()
+  const {address, age, stake} = useIdentityState()
 
-  const db = createAdDb(epoch?.epoch ?? -1)
+  const db = createAdDb(epoch?.epoch)
 
   const [current, send] = useMachine(editAdMachine, {
     actions: {
       onSuccess: () => {
         router.push('/ads/list')
       },
-      onSavedBeforeClose: () => {
-        toast({
-          // eslint-disable-next-line react/display-name
-          render: () => <Toast title={t('Ad has been saved to drafts')} />,
-        })
+      onSaveBeforeClose: () => {
+        toast(t('Ad has been saved to drafts'))
         router.push('/ads/list')
       },
     },
     services: {
       init: () => Promise.resolve(),
       submit: async context => {
-        await db.put({...context, status: AdStatus.Active})
+        await db.put({
+          ...context,
+          issuer: address,
+          status: AdStatus.Active,
+          key: buildTargetKey({
+            locale: context.lang,
+            age,
+            stake,
+          }),
+        })
         await callRpc('dna_changeProfile', {
           info: `0x${objectToHex(
             // eslint-disable-next-line no-unused-vars

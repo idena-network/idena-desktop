@@ -1,12 +1,5 @@
 import React from 'react'
-import {
-  Stack,
-  TabPanels,
-  TabPanel,
-  CloseButton,
-  Flex,
-  useToast,
-} from '@chakra-ui/core'
+import {Stack, TabPanels, TabPanel, CloseButton, Flex} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
@@ -25,7 +18,7 @@ import {
   SimpleTabFilterList,
   SuccessAlert,
   TabFilters,
-  Toast,
+  useSuccessToast,
 } from '../../shared/components/components'
 import {callRpc, eitherState} from '../../shared/utils/utils'
 import {AdForm} from '../../screens/ads/containers'
@@ -38,11 +31,11 @@ export default function EditAdPage() {
   const router = useRouter()
   const {id} = router.query
 
-  const toast = useToast()
+  const toast = useSuccessToast()
 
   const epoch = useEpochState()
 
-  const db = createAdDb(epoch?.epoch ?? -1)
+  const db = createAdDb(epoch?.epoch)
 
   const [current, send] = useMachine(editAdMachine, {
     context: {id},
@@ -50,11 +43,8 @@ export default function EditAdPage() {
       onSuccess: () => {
         router.push('/ads/list')
       },
-      onSavedBeforeClose: () => {
-        toast({
-          // eslint-disable-next-line react/display-name
-          render: () => <Toast title={t('Ad has been saved to drafts')} />,
-        })
+      onSaveBeforeClose: () => {
+        toast(t('Ad has been saved to drafts'))
         router.push('/ads/list')
       },
     },
