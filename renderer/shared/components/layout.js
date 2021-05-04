@@ -2,7 +2,17 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {Flex, Text, Stack} from '@chakra-ui/core'
+import {
+  Flex,
+  Text,
+  Stack,
+  Image,
+  Box,
+  Heading,
+  List,
+  ListItem,
+  Icon,
+} from '@chakra-ui/core'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
@@ -24,12 +34,14 @@ import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
 } from '../providers/update-context'
-import {PrimaryButton} from './button'
+import {PrimaryButton, SecondaryButton} from './button'
 import {
   LayoutContainer,
   UpdateExternalNodeDialog,
 } from '../../screens/app/components'
 import {EpochPeriod} from '../types'
+import {FillCenter} from '../../screens/oracles/components'
+import {ExternalLink} from './components'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -205,15 +217,50 @@ function HardForkScreen({version, onUpdate}) {
   const {t} = useTranslation()
 
   return (
-    <Flex align="center" justify="center" flex={1} bg="graphite.500">
-      <Stack spacing={5} align="flex-start">
-        <Text color="white" fontSize="lg" fontWeight={500}>
-          {t('Your node is outdated because of the hard fork, please update')}
-        </Text>
-        <PrimaryButton onClick={onUpdate}>
-          {t('Update Node Version')} {version}
-        </PrimaryButton>
+    <FillCenter bg="graphite.500">
+      <Stack spacing={6}>
+        <Stack spacing={8}>
+          <Stack isInline spacing={5} align="center">
+            <Image
+              src="/static/idena_white.svg"
+              alt={t('Idena logo')}
+              size={20}
+            />
+            <Stack spacing={1}>
+              <Heading fontSize="lg" fontWeight={500} color="white">
+                Hard fork update
+              </Heading>
+              <Box>
+                <Text color="muted" fontSize="mdx">
+                  {t('The new node version is available: {{version}}', {
+                    version,
+                    nsSeparator: '!!',
+                  })}
+                </Text>
+                <ExternalLink>{t('See voting stats')}</ExternalLink>
+              </Box>
+            </Stack>
+          </Stack>
+          <Stack spacing={1} color="white">
+            <Text>{t('Changes')}</Text>
+            <List styleType="unordered" bg="xblack.016" rounded="md" p={4}>
+              <ListItem>Improve stake protection for Human status</ListItem>
+              <ListItem>Bug fixes</ListItem>
+            </List>
+          </Stack>
+        </Stack>
+        <Stack isInline justify="flex-end">
+          <SecondaryButton>
+            <Stack isInline align="center">
+              <Icon name="github" size={4} color="blue.500" />
+              <Text>Check on Github</Text>
+            </Stack>
+          </SecondaryButton>
+          <PrimaryButton onClick={onUpdate}>
+            {t('Update Node Version')}
+          </PrimaryButton>
+        </Stack>
       </Stack>
-    </Flex>
+    </FillCenter>
   )
 }
