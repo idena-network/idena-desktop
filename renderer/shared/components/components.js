@@ -690,21 +690,21 @@ export const IconMenuItem = React.forwardRef(
   )
 )
 
-export function MenuItem(props) {
-  return (
-    <ChakraMenuItem
-      fontWeight={500}
-      lineHeight="shorter"
-      px={3}
-      py="3/2"
-      _hover={{bg: 'gray.50'}}
-      _focus={{bg: 'gray.50'}}
-      _selected={{bg: 'gray.50'}}
-      _active={{bg: 'gray.50'}}
-      {...props}
-    />
-  )
-}
+// eslint-disable-next-line react/display-name
+export const MenuItem = React.forwardRef((props, ref) => (
+  <ChakraMenuItem
+    ref={ref}
+    fontWeight={500}
+    lineHeight="shorter"
+    px={3}
+    py="3/2"
+    _hover={{bg: 'gray.50'}}
+    _focus={{bg: 'gray.50'}}
+    _selected={{bg: 'gray.50'}}
+    _active={{bg: 'gray.50'}}
+    {...props}
+  />
+))
 
 export function MenuItemIcon({color = 'brandBlue.500', ...props}) {
   return <Icon size={5} mr={3} color={color} {...props} />

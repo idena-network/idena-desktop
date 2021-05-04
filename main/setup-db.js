@@ -34,6 +34,7 @@ module.exports = function setup() {
   ipcMain.handle('DB_PUT', (_, [k, v, ns, opts]) =>
     resolveDb(db, ns, opts).put(k, v)
   )
+  ipcMain.handle('DB_DEL', (_, [k, ns]) => resolveDb(db, ns).del(k))
   ipcMain.handle('DB_CLEAR', (_, [ns]) => resolveDb(db, ns).clear())
 
   return db

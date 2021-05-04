@@ -7,6 +7,9 @@ export const dbProxy = {
   put(k, v, ns, opts) {
     return global.ipcRenderer.invoke('DB_PUT', [k, v, ns, opts])
   },
+  del(k, ns) {
+    return global.ipcRenderer.invoke('DB_DEL', [k, ns])
+  },
   clear(ns) {
     return global.ipcRenderer.invoke('DB_CLEAR', [ns])
   },
@@ -46,6 +49,14 @@ export function createEpochDb(epoch, dbName, opts = {valueEncoding: 'json'}) {
           ...(await this.get(id)),
         }))
       )
+    },
+    async del(id) {
+      await dbProxy.put(
+        'ids',
+        (await safeReadIds()).filter(currId => currId !== id),
+        ...args
+      )
+      await dbProxy.del(id, ...args)
     },
     clear() {
       return dbProxy.clear(ns)

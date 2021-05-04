@@ -4,6 +4,7 @@ import {VotingStatus} from '../../shared/types'
 import {callRpc, roundToPrecision, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
 import {ContractRpcMode, VotingListFilter} from './types'
+import {createEpochDb} from '../../shared/utils/db'
 
 export const isVotingStatus = targetStatus => ({status}) =>
   areSameCaseInsensitive(status, targetStatus)
@@ -552,3 +553,26 @@ export function minOracleRewardFromEstimates(data) {
 
 export const effectiveBalance = ({balance, ownerFee}) =>
   roundToPrecision(4, balance * (1 - (ownerFee || 0) / 100))
+
+export function createVotingDb(epoch) {
+  const ns = [epoch, 'votings']
+
+  const db = createEpochDb(...ns)
+
+  const normalizeId = id => id.toLowerCase()
+
+  return {
+    async put(ad) {
+      return db.put({...ad, id: normalizeId(ad.id)})
+    },
+    async get(id) {
+      return db.get(normalizeId(id)).catch(() => null)
+    },
+    async all() {
+      return db.all()
+    },
+    clear() {
+      return db.clear()
+    },
+  }
+}

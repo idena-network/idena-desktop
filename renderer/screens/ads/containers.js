@@ -556,6 +556,7 @@ export function AdDrawer({
   ...props
 }) {
   const {i18n} = useTranslation()
+  const totalBurnt = 0
   return (
     <ChakraDrawer {...props}>
       <DrawerOverlay bg="xblack.080">
@@ -576,14 +577,19 @@ export function AdDrawer({
                     <Text>{ad.title}</Text>
                     <ExternalLink href={ad.url}>{ad.url}</ExternalLink>
                   </Stack>
-                  <Image src={urlFromBytes(ad.cover)} size="xs" />
+                  <AdCoverImage ad={ad} size="xs" objectFit="cover" />
                 </Stack>
                 <Stack spacing={6}>
                   <Flex justify="space-between">
-                    <BlockAdStat label="Sponsored by" value={ad.issuer} />
+                    <BlockAdStat
+                      label="Sponsored by"
+                      value={ad.issuer}
+                      wordBreak="break-all"
+                      w={1 / 2}
+                    />
                     <BlockAdStat
                       label="Burned for 24hrs"
-                      value={toLocaleDna(i18n.language)(5827.567)}
+                      value={toLocaleDna(i18n.language)(totalBurnt)}
                     />
                   </Flex>
                   <Box>

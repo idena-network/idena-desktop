@@ -16,12 +16,18 @@ import {Page, PageTitle} from '../../screens/app/components'
 import {SecondaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
 import {
+  buildAdReviewVoting,
   createAdDb,
   fetchProfileAds,
   fetchTotalSpent,
 } from '../../screens/ads/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {eitherState, mergeById, toLocaleDna} from '../../shared/utils/utils'
+import {
+  callRpc,
+  eitherState,
+  mergeById,
+  toLocaleDna,
+} from '../../shared/utils/utils'
 import {useChainState} from '../../shared/providers/chain-context'
 import {
   FilterButton,
@@ -31,6 +37,8 @@ import {
   MenuDivider,
   Menu,
   VDivider,
+  useErrorToast,
+  useSuccessToast,
 } from '../../shared/components/components'
 import {IconLink} from '../../shared/components/link'
 import {
@@ -45,7 +53,17 @@ import {
   ReviewAdDrawer,
   SmallInlineAdStat,
 } from '../../screens/ads/containers'
-import {AdStatus} from '../../shared/types'
+import {AdStatus, VotingStatus} from '../../shared/types'
+import {
+  buildContractDeploymentArgs,
+  createContractCaller,
+  createVotingDb,
+  fetchVoting,
+  mapVoting,
+  votingFinishDate,
+} from '../../screens/oracles/utils'
+import {ContractRpcMode} from '../../screens/oracles/types'
+import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 
 export default function AdListPage() {
   const {i18n} = useTranslation()
@@ -53,6 +71,9 @@ export default function AdListPage() {
   const {syncing, offline} = useChainState()
   const {address, balance} = useIdentityState()
   const epoch = useEpochState()
+
+  const toast = useSuccessToast()
+  const toastError = useErrorToast()
 
   const db = createAdDb(epoch?.epoch)
 
@@ -62,15 +83,132 @@ export default function AdListPage() {
       onSentToReview: asEffect(({selectedAd: {ref, ...ad}}) => {
         db.put(ad)
       }),
+      onError: (_, {data: {message}}) => {
+        toastError(message)
+      },
     },
     services: {
       init: async () => ({
-        ads: mergeById(await db.all(), await fetchProfileAds(address)),
+        ads: mergeById(
+          await db.all(),
+          await fetchProfileAds(address),
+          // eslint-disable-next-line no-shadow
+          (await db.all()).map(({id, status}) => ({id, status}))
+        ),
         totalSpent: await fetchTotalSpent(address),
       }),
-      sendToReview: async () => Promise.resolve(),
+      // eslint-disable-next-line no-shadow
+      sendToReview: async ({selectedAd}, {from = address, stake = 10000}) => {
+        const voting = buildAdReviewVoting(selectedAd)
+
+        const {error, contract: contractHash, gasCost, txFee} = await callRpc(
+          'contract_estimateDeploy',
+          buildContractDeploymentArgs(
+            voting,
+            {from, stake},
+            ContractRpcMode.Estimate
+          )
+        )
+
+        if (error) throw new Error(error)
+
+        const txHash = await callRpc(
+          'contract_deploy',
+          buildContractDeploymentArgs(voting, {
+            from,
+            stake,
+            gasCost,
+            txFee,
+          })
+        )
+
+        const nextVoting = {
+          ...voting,
+          contractHash,
+          issuer: address,
+          createDate: Date.now(),
+          startDate: Date.now(),
+          finishDate: votingFinishDate(voting),
+        }
+
+        await createVotingDb(epoch?.epoch).put({
+          ...nextVoting,
+          id: contractHash,
+          status: VotingStatus.Deploying,
+        })
+
+        await db.put({...selectedAd, contractHash})
+
+        return {txHash, contractHash}
+      },
+      pollDeployVoting: ({txDeployHash}) => cb => {
+        let timeoutId
+
+        const fetchStatus = async () => {
+          try {
+            const result = await callRpc('bcn_transaction', txDeployHash)
+            if (result.blockHash !== HASH_IN_MEMPOOL) cb({type: 'MINED'})
+            else timeoutId = setTimeout(fetchStatus, 10 * 1000)
+          } catch (error) {
+            cb('TX_NULL', {error: error?.message})
+          }
+        }
+
+        timeoutId = setTimeout(fetchStatus, 10 * 1000)
+
+        return () => {
+          clearTimeout(timeoutId)
+        }
+      },
+      startReviewVoting: async ({contractHash}, {amount = 100}) => {
+        let callContract = createContractCaller({
+          contractHash,
+          from: address,
+          amount,
+        })
+
+        const {error, gasCost, txFee} = await callContract(
+          'startVoting',
+          ContractRpcMode.Estimate
+        )
+
+        if (error) throw new Error(error)
+
+        callContract = createContractCaller({
+          contractHash,
+          from: address,
+          amount,
+          gasCost: Number(gasCost),
+          txFee: Number(txFee),
+        })
+
+        return callContract('startVoting')
+      },
+      pollStartVoting: ({txStartHash}) => cb => {
+        let timeoutId
+
+        const fetchStatus = async () => {
+          try {
+            const result = await callRpc('bcn_transaction', txStartHash)
+            if (result.blockHash !== HASH_IN_MEMPOOL) cb({type: 'MINED'})
+            else timeoutId = setTimeout(fetchStatus, 10 * 1000)
+          } catch (error) {
+            cb('TX_NULL', {data: error})
+          }
+        }
+
+        timeoutId = setTimeout(fetchStatus, 10 * 1000)
+
+        return () => {
+          clearTimeout(timeoutId)
+        }
+      },
+    },
+    removeAd: async (_, {id}) => {
+      await db.del(id)
     },
   })
+
   const {filteredAds, selectedAd, status, totalSpent} = current.context
 
   const toDna = toLocaleDna(i18n.language)
@@ -122,6 +260,8 @@ export default function AdListPage() {
               lastTx = dayjs(),
               // eslint-disable-next-line no-shadow
               status,
+              contractHash,
+              issuer,
             }) => (
               <AdEntry key={id}>
                 <Stack isInline spacing={5}>
@@ -152,7 +292,13 @@ export default function AdListPage() {
                               <IconMenuItem icon="edit">Edit</IconMenuItem>
                             </NextLink>
                             <MenuDivider />
-                            <IconMenuItem icon="delete" color="red.500">
+                            <IconMenuItem
+                              icon="delete"
+                              color="red.500"
+                              onClick={() => {
+                                send('REMOVE_AD', {id})
+                              }}
+                            >
                               Delete
                             </IconMenuItem>
                           </Menu>
@@ -173,6 +319,27 @@ export default function AdListPage() {
                             }}
                           >
                             Review
+                          </SecondaryButton>
+                        )}
+                        {status === AdStatus.Reviewing && (
+                          <SecondaryButton
+                            onClick={async () => {
+                              toast(
+                                {
+                                  ...(await createVotingDb(epoch?.epoch).get(
+                                    contractHash
+                                  )),
+                                  ...mapVoting(
+                                    await fetchVoting({
+                                      contractHash,
+                                      address: issuer,
+                                    }).catch(() => ({}))
+                                  ),
+                                }.status
+                              )
+                            }}
+                          >
+                            Check status
                           </SecondaryButton>
                         )}
                       </Stack>
@@ -240,7 +407,12 @@ export default function AdListPage() {
 
         <ReviewAdDrawer
           isOpen={eitherState(current, 'ready.sendingToReview')}
-          isMining={eitherState(current, 'ready.sendingToReview.mining')}
+          isMining={eitherState(
+            current,
+            'ready.sendingToReview.miningDeploy',
+            'ready.sendingToReview.startingVoting',
+            'ready.sendingToReview.miningStartVoting'
+          )}
           ad={selectedAd}
           onSend={() => {
             send('SUBMIT')

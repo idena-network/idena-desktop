@@ -2,7 +2,6 @@
 import {Machine, assign, spawn} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import {AdStatus} from '../../shared/types'
-import {wait} from '../../shared/utils/fn'
 import {byId} from '../../shared/utils/utils'
 import {areSameCaseInsensitive} from '../oracles/utils'
 
@@ -65,6 +64,23 @@ export const adListMachine = Machine({
                 }),
               ],
             },
+            REMOVE_AD: {
+              target: 'removingAd',
+              actions: [
+                assign({
+                  ads: ({ads}, {id}) => ads.filter(ad => ad.id !== id),
+                  filteredAds: ({filteredAds}, {id}) =>
+                    filteredAds.filter(ad => ad.id !== id),
+                }),
+              ],
+            },
+          },
+        },
+        removingAd: {
+          invoke: {
+            src: 'removeAd',
+            onDone: 'idle',
+            onError: {actions: ['onError']},
           },
         },
         sendingToReview: {
@@ -82,17 +98,44 @@ export const adListMachine = Machine({
               entry: [log()],
               invoke: {
                 src: 'sendToReview',
-                onDone: {target: 'mining', actions: [log()]},
+                onDone: {
+                  target: 'miningDeploy',
+                  actions: [
+                    assign({
+                      txDeployHash: (_, {data}) => data.txHash,
+                      contractHash: (_, {data}) => data.contractHash,
+                    }),
+                    log(),
+                  ],
+                },
+                onError: {actions: ['onError']},
               },
             },
-            mining: {
-              invoke: {
-                src: () => cb => {
-                  wait(3000).then(() => {
-                    cb('MINED')
-                  })
+            miningDeploy: {
+              invoke: {src: 'pollDeployVoting'},
+              on: {
+                MINED: {
+                  target: 'startingVoting',
+                  actions: [log()],
                 },
               },
+            },
+            startingVoting: {
+              invoke: {
+                src: 'startReviewVoting',
+                onDone: {
+                  target: 'miningStartVoting',
+                  actions: [
+                    assign({
+                      txStartHash: (_, {data}) => data,
+                    }),
+                    log(),
+                  ],
+                },
+              },
+            },
+            miningStartVoting: {
+              invoke: {src: 'pollStartVoting'},
               on: {
                 MINED: {
                   target: '#adList.ready.idle',
@@ -124,6 +167,7 @@ export const adListMachine = Machine({
                     log(),
                   ],
                 },
+                TX_NULL: {actions: ['onError']},
               },
             },
           },

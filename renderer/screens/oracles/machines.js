@@ -25,11 +25,11 @@ import {
   minOracleRewardFromEstimates,
   fetchLastOpenVotings,
   hasLinklessOptions,
+  createVotingDb,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc, HASH_IN_MEMPOOL} from '../../shared/utils/utils'
-import {epochDb, requestDb} from '../../shared/utils/db'
-
+import {epochDb, dbProxy} from '../../shared/utils/db'
 import {ContractRpcMode, VotingListFilter} from './types'
 
 export const votingListMachine = Machine(
@@ -216,11 +216,15 @@ export const votingListMachine = Machine(
       toggleShowAll: assign({
         showAll: (_, {value}) => value !== 'owned',
       }),
-      persistFilter: ({filter, statuses, showAll}) => {
-        global
-          .sub(requestDb(), 'votings', {valueEncoding: 'json'})
-          .put('filter', {filter, statuses, showAll})
-      },
+      persistFilter: ({filter, statuses, showAll}) =>
+        dbProxy.put(
+          'filter',
+          {filter, statuses, showAll},
+          ['filters', 'votings'],
+          {
+            valueEncoding: 'json',
+          }
+        ),
       setError: assign({
         errorMessage: (_, {data}) => data?.message,
       }),
@@ -251,18 +255,18 @@ export const votingListMachine = Machine(
 
         const knownVotings = (result ?? []).map(mapVoting)
 
-        const db = epochDb('votings', epoch)
+        const db = createVotingDb(epoch)
 
-        await db.batchPut(knownVotings)
+        // await db.batchPut(knownVotings)
 
-        const votingDb = global.sub(requestDb(), 'votings')
+        const tsNs = [['ts', 'votings']]
 
-        const prevLastVotingTimestamp = await (async () => {
+        const {prevLastVotingTimestamp} = await (async () => {
           try {
-            return await votingDb.get('lastVotingTimestamp')
+            return await dbProxy.get('lastVotingTimestamp', ...tsNs)
           } catch (error) {
-            if (error.notFound) {
-              return new Date(0)
+            if (error.notFound || error?.message.includes('NotFoundError')) {
+              return {prevLastVotingTimestamp: new Date(0)}
             }
           }
         })()
@@ -273,14 +277,22 @@ export const votingListMachine = Machine(
             limit: 1,
           })) ?? [{createTime: new Date(0)}]
 
-          await votingDb.put('lastVotingTimestamp', createTime)
-          await votingDb.put('prevLastVotingTimestamp', prevLastVotingTimestamp)
+          await dbProxy.put(
+            'lastVotingTimestamp',
+            {lastVotingTimestamp: createTime},
+            ...tsNs
+          )
+          await dbProxy.put(
+            'prevLastVotingTimestamp',
+            {prevLastVotingTimestamp},
+            ...tsNs
+          )
         }
 
         return {
           votings: await Promise.all(
             knownVotings.map(async ({id, ...voting}) => ({
-              ...(await db.load(id)),
+              ...(await db.get(id)),
               id,
               ...voting,
               isNew:
@@ -293,11 +305,13 @@ export const votingListMachine = Machine(
       },
       preload: async () => {
         try {
-          return JSON.parse(
-            await global.sub(requestDb(), 'votings').get('filter')
-          )
+          const filter = await dbProxy.get('filter', ['filters', 'votings'], {
+            valueEncoding: 'json',
+          })
+          return typeof filter === 'object' ? filter : JSON.parse(filter)
         } catch (error) {
-          if (!error.notFound) throw new Error(error)
+          if (!(error.notFound || error?.message.includes('NotFoundError')))
+            throw new Error(error)
         }
       },
     },
@@ -440,7 +454,7 @@ export const votingMachine = Machine(
       }),
       // eslint-disable-next-line no-shadow
       persist: ({epoch, ...context}) => {
-        epochDb('votings', epoch).put(context)
+        createVotingDb(epoch).put(context)
       },
       applyMinOracleReward: assign({
         minOracleReward: (_, {data}) => data,
@@ -880,7 +894,7 @@ export const createNewVotingMachine = (epoch, address) =>
         setRunning: setVotingStatus(VotingStatus.Open),
         // eslint-disable-next-line no-shadow
         persist: ({epoch, ...context}) => {
-          epochDb('votings', epoch).put(context)
+          createVotingDb(epoch).put(context)
         },
       },
       services: {
@@ -920,7 +934,7 @@ export const createNewVotingMachine = (epoch, address) =>
             finishDate: votingFinishDate(voting),
           }
 
-          await epochDb('votings', epoch).put({
+          await createVotingDb(epoch).put({
             ...nextVoting,
             txHash,
             status: VotingStatus.Deploying,
@@ -950,7 +964,7 @@ export const createNewVotingMachine = (epoch, address) =>
             clearTimeout(timeoutId)
           }
         },
-        persist: context => epochDb('votings', epoch).put(context),
+        persist: context => createVotingDb(epoch).put(context),
       },
       guards: {
         shouldStartImmediately: ({shouldStartImmediately}) =>
@@ -1236,7 +1250,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
         }),
         // eslint-disable-next-line no-shadow
         persist: ({epoch, address, ...context}) => {
-          epochDb('votings', epoch).put(context)
+          createVotingDb(epoch).put(context)
         },
         applyMinOracleReward: assign({
           minOracleReward: (_, {data}) => data,

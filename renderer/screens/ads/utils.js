@@ -35,6 +35,9 @@ export function createAdDb(epoch = -1) {
         }))
       )
     },
+    del(id) {
+      return db.del(id)
+    },
     clear() {
       return db.clear()
     },
@@ -79,6 +82,23 @@ export async function fetchTotalSpent(address) {
     0
   )
 }
+
+export const buildAdReviewVoting = ({title}) => ({
+  title: 'Is this ads propriate?',
+  desc: title,
+  startDate: Date.now(),
+  votingDuration: 4320 * 3,
+  publicVotingDuration: 2160,
+  winnerThreshold: 66,
+  quorum: 1,
+  committeeSize: 100,
+  votingMinPayment: 10,
+  options: [
+    {id: 0, value: 'Approve'},
+    {id: 1, value: 'Reject'},
+  ],
+  ownerFee: 0,
+})
 
 export function detectOs() {
   switch (true) {
