@@ -23,6 +23,7 @@ import {
   mapVoting,
   minOracleRewardFromEstimates,
   fetchLastOpenVotings,
+  hasLinklessOptions,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
@@ -584,7 +585,10 @@ export const createNewVotingMachine = (epoch, address) =>
                     }) => ({
                       type: 'SET_DIRTY',
                       ids: [
-                        hasValuableOptions(options) ? null : 'options',
+                        hasValuableOptions(options) &&
+                        hasLinklessOptions(options)
+                          ? null
+                          : 'options',
                         shouldStartImmediately || startDate
                           ? null
                           : 'startDate',
@@ -911,6 +915,7 @@ export const createNewVotingMachine = (epoch, address) =>
           title &&
           desc &&
           hasValuableOptions(options) &&
+          hasLinklessOptions(options) &&
           (startDate || shouldStartImmediately) &&
           Number(committeeSize) > 0,
       },

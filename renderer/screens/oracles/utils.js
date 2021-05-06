@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import {assign} from 'xstate'
+import getUrls from 'get-urls'
 import {VotingStatus} from '../../shared/types'
 import {callRpc, roundToPrecision, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
@@ -503,7 +504,13 @@ export function stripOptions(options) {
 }
 
 export function hasValuableOptions(options) {
-  return stripOptions(options).length > 0
+  return stripOptions(options).length >= 2
+}
+
+export function hasLinklessOptions(options) {
+  return stripOptions(options).every(
+    ({value}) => getUrls(value, {stripWWW: false}).size === 0
+  )
 }
 
 export const mapVoting = ({
