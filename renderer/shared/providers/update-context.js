@@ -6,6 +6,7 @@ import {useSettingsState} from './settings-context'
 import {useInterval} from '../hooks/use-interval'
 import {fetchNodeVersion} from '../api'
 import {isHardFork} from '../utils/node'
+import {requestDb} from '../utils/db'
 
 export const TOGGLE_NODE_SWITCHER = 'TOGGLE_NODE_SWITCHER'
 export const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
@@ -172,6 +173,16 @@ export function AutoUpdateProvider({children}) {
     true
   )
 
+  const [hardForkVoting, setHardForkVoting] = React.useState('unknown')
+
+  React.useEffect(() => {
+    global
+      .sub(requestDb(), 'updates')
+      .get('hardForkVoting')
+      .then(setHardForkVoting)
+      .catch(() => setHardForkVoting('unknown'))
+  }, [])
+
   const canUpdateClient = state.uiUpdateReady
 
   const canUpdateNode =
@@ -184,6 +195,7 @@ export function AutoUpdateProvider({children}) {
   const mustUpdateNode =
     state.nodeCurrentVersion !== '0.0.1' &&
     canUpdateNode &&
+    hardForkVoting !== 'reject' &&
     isHardFork(state.nodeCurrentVersion, state.nodeRemoteVersion)
 
   const updateClient = () => {
@@ -197,6 +209,20 @@ export function AutoUpdateProvider({children}) {
       global.ipcRenderer.send(AUTO_UPDATE_COMMAND, 'update-node')
       dispatch({type: NODE_UPDATE_START})
     }
+  }
+
+  const onRejectHardFork = () => {
+    global
+      .sub(requestDb(), 'updates')
+      .put('hardForkVoting', 'reject')
+      .then(() => setHardForkVoting('reject'))
+  }
+
+  const onResetHardForkVoing = () => {
+    global
+      .sub(requestDb(), 'updates')
+      .put('hardForkVoting', 'unknown')
+      .then(() => setHardForkVoting('unknown'))
   }
 
   const hideExternalNodeUpdateModal = () => {
@@ -217,6 +243,8 @@ export function AutoUpdateProvider({children}) {
           updateClient,
           updateNode,
           hideExternalNodeUpdateModal,
+          onRejectHardFork,
+          onResetHardForkVoing,
         }}
       >
         {children}

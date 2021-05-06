@@ -99,6 +99,7 @@ export const activateMiningMachine = createMachine({
                 assign({
                   isOnline: true,
                 }),
+                'onChangeMiningStatus',
               ],
             },
           },
