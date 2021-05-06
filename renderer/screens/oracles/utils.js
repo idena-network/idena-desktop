@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
 import {assign} from 'xstate'
-import getUrls from 'get-urls'
 import {VotingStatus} from '../../shared/types'
 import {callRpc, roundToPrecision, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
@@ -508,6 +507,8 @@ export function hasValuableOptions(options) {
 }
 
 export function hasLinklessOptions(options) {
+  // eslint-disable-next-line global-require
+  const getUrls = require('get-urls')
   return stripOptions(options).every(
     ({value}) => getUrls(value, {stripWWW: false}).size === 0
   )
