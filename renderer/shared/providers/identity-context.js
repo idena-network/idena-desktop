@@ -160,6 +160,11 @@ function IdentityProvider({children}) {
         canValidate,
         canMine,
         canTerminate,
+        isValidated: [
+          IdentityStatus.Newbie,
+          IdentityStatus.Verified,
+          IdentityStatus.Human,
+        ].includes(identity?.state),
       }}
     >
       <IdentityDispatchContext.Provider value={{killMe}}>

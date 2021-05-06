@@ -29,7 +29,11 @@ import {
   UserStatLabel,
   ActivateMiningForm,
 } from '../screens/profile/components'
-import {PrimaryButton, IconButton2} from '../shared/components/button'
+import {
+  PrimaryButton,
+  IconButton2,
+  SecondaryButton,
+} from '../shared/components/button'
 import Layout from '../shared/components/layout'
 import {IconLink} from '../shared/components/link'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
@@ -38,8 +42,16 @@ import {
   toLocaleDna,
   callRpc,
   eitherState,
+  buildNextValidationCalendarLink,
 } from '../shared/utils/utils'
-import {ExternalLink, Toast} from '../shared/components/components'
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  ExternalLink,
+  Toast,
+} from '../shared/components/components'
 import KillForm, {
   KillIdentityDrawer,
 } from '../screens/wallets/components/kill-form'
@@ -63,6 +75,7 @@ import {
   activeShowingOnboardingStep,
   onboardingStep,
 } from '../shared/utils/onboarding'
+import {createProfileDb} from '../screens/profile/utils'
 
 export default function ProfilePage() {
   const {
@@ -101,15 +114,22 @@ export default function ProfilePage() {
     online,
     delegatee,
     delegationEpoch,
+    isValidated,
   } = useIdentityState()
 
   const epoch = useEpochState()
 
+  const {
+    isOpen: isOpenNextValidationDialog,
+    onOpen: onOpenNextValidationDialog,
+    onClose: onCloseNextValidationDialog,
+  } = useDisclosure()
+
   const [showValidationResults, setShowValidationResults] = React.useState()
 
   React.useEffect(() => {
-    if (epoch && shouldExpectValidationResults(epoch.epoch)) {
-      const {epoch: epochNumber} = epoch
+    const epochNumber = epoch?.epoch
+    if (epoch && shouldExpectValidationResults(epochNumber)) {
       if (hasPersistedValidationResults(epochNumber)) {
         setShowValidationResults(true)
       } else {
@@ -120,6 +140,21 @@ export default function ProfilePage() {
       }
     }
   }, [epoch])
+
+  const profileDb = createProfileDb(epoch)
+
+  React.useEffect(() => {
+    if (epoch && isValidated) {
+      profileDb
+        .getDidPlanNextValidation()
+        .then(didPlan => {
+          if (!didPlan) onOpenNextValidationDialog()
+        })
+        .catch(error => {
+          if (error?.notFound) onOpenNextValidationDialog()
+        })
+    }
+  }, [epoch, isValidated, onOpenNextValidationDialog, profileDb])
 
   const [currentOnboarding, {done, dismiss, next}] = useOnboarding()
 
@@ -397,6 +432,38 @@ export default function ProfilePage() {
           </Page>
         </Layout>
       </InviteProvider>
+      <Dialog
+        isOpen={isOpenNextValidationDialog}
+        onClose={onCloseNextValidationDialog}
+      >
+        <DialogHeader>
+          {t('Next validation: {{nextValidation}}', {
+            nextValidation: new Date(epoch?.nextValidation).toLocaleString(),
+            nsSeparator: '!!',
+          })}
+        </DialogHeader>
+        <DialogBody>
+          {t(`Add this event to your personal calendar so that you don't miss the
+          next validation`)}
+        </DialogBody>
+        <DialogFooter>
+          <SecondaryButton onClick={onCloseNextValidationDialog}>
+            {t('Cancel')}
+          </SecondaryButton>
+          <PrimaryButton
+            onClick={() => {
+              global.openExternal(
+                buildNextValidationCalendarLink(epoch?.nextValidation)
+              )
+              profileDb
+                .putDidPlanNextValidation(1)
+                .finally(onCloseNextValidationDialog)
+            }}
+          >
+            {t('Add to calendar')}
+          </PrimaryButton>
+        </DialogFooter>
+      </Dialog>
     </>
   )
 }
