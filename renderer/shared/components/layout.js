@@ -21,6 +21,8 @@ import {
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import semver from 'semver'
+import {assign, createMachine} from 'xstate'
+import {log} from 'xstate/lib/actions'
 import Sidebar from './sidebar'
 import Notifications from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
@@ -242,36 +244,81 @@ function HardForkScreen({version, onUpdate, onReject}) {
 
   const identity = useIdentityState()
 
-  const [changes, setChanges] = React.useState([])
-  const [{startActivationDate, endActivationDate}, setTiming] = React.useState(
-    {}
+  const {nodeCurrentVersion} = useAutoUpdateState()
+
+  const [currentHardFork, sendHardFork] = useMachine(
+    createMachine({
+      context: {
+        changes: [],
+        didActivateFork: undefined,
+        startActivationDate: undefined,
+        endActivationDate: undefined,
+        votingOption: 'approve',
+      },
+      initial: 'fetching',
+      states: {
+        fetching: {
+          invoke: {
+            src: async () => {
+              const fetchJsonResult = async (
+                path,
+                base = 'http://135.181.80.24:1235'
+              ) =>
+                (await (await fetch(new URL(`api${path}`, base))).json()).result
+
+              const forkChangelog = await fetchJsonResult(
+                `/node/${version}/forkchangelog`
+              )
+
+              const currentVersionChangelog = await fetchJsonResult(
+                `/node/${nodeCurrentVersion}/forkchangelog`
+              )
+
+              const [{highestUpgrade}] = await fetchJsonResult(
+                '/upgrades?limit=1',
+                'https://api.idena.io'
+              )
+
+              const nextTiming =
+                forkChangelog &&
+                (await fetchJsonResult(`/upgrade/${forkChangelog.Upgrade}`))
+
+              return {
+                changes: forkChangelog?.Changes ?? [],
+                didActivateFork:
+                  currentVersionChangelog === null ||
+                  highestUpgrade >= currentVersionChangelog.Upgrade,
+                ...nextTiming,
+              }
+            },
+            onDone: {
+              target: 'fetched',
+              actions: [
+                assign((context, {data}) => ({
+                  ...context,
+                  ...data,
+                })),
+                log(),
+              ],
+            },
+          },
+        },
+        fetched: {
+          on: {
+            VOTE: {actions: [assign({votingOption: (_, {option}) => option})]},
+          },
+        },
+      },
+    })
   )
-  const [didActivateFork, setDidActivateFork] = React.useState(true)
 
-  React.useEffect(() => {
-    const resolveApiPath = path =>
-      new URL(`api${path}`, 'http://135.181.80.24:1235')
-
-    const fetchJson = path =>
-      fetch(path)
-        .then(resp => resp.json())
-        .catch(error => ({}))
-
-    fetchJson(resolveApiPath(`/node/${version}/forkchangelog`))
-      .then(({result}) => {
-        setChanges(result?.Changes ?? [])
-        // eslint-disable-next-line no-shadow
-        fetchJson(
-          'https://api.idena.io/api/upgrades?limit=10'
-        ).then(({result: [{highestUpgrade}]}) =>
-          setDidActivateFork(highestUpgrade === result?.Upgrade)
-        )
-        return fetchJson(resolveApiPath(`/upgrade/${result?.Upgrade}`))
-      })
-      .then(({result: timing = {}}) => {
-        setTiming(timing)
-      })
-  }, [version])
+  const {
+    changes,
+    startActivationDate,
+    endActivationDate,
+    didActivateFork,
+    votingOption,
+  } = currentHardFork.context
 
   const [showOptions, setShowOptions] = React.useState()
 
@@ -280,8 +327,6 @@ function HardForkScreen({version, onUpdate, onReject}) {
     onOpen: onOpenRejectDialog,
     onClose: onCloseRejectDialog,
   } = useDisclosure()
-
-  const [votingOption, setVotingOption] = React.useState('approve')
 
   const toast = useToast()
 
@@ -321,7 +366,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
   return (
     <>
       <FillCenter bg="graphite.500">
-        <Stack spacing={10} maxW="md">
+        <Stack spacing={10} w="md">
           <Stack spacing={6}>
             <Stack spacing={8}>
               <Stack isInline spacing={5} align="center">
@@ -350,54 +395,58 @@ function HardForkScreen({version, onUpdate, onReject}) {
               <Stack spacing={1} color="xwhite.050">
                 <Text color="white">{t('Details')}</Text>
                 <Skeleton
-                  isLoaded
+                  isLoaded={currentHardFork.matches('fetched')}
                   colorStart={colors.xblack['016']}
                   colorEnd={colors.xblack['016']}
                 >
-                  <Stack
-                    spacing={5}
-                    bg="xblack.016"
-                    rounded="md"
-                    p={4}
-                    minH={70}
-                  >
-                    <Stack spacing={3}>
-                      <Text color="white">{t('Changes')}</Text>
-                      <List styleType="unordered" spacing={2}>
-                        {changes.map(change => (
-                          <ListItem key={change}>{change}</ListItem>
-                        ))}
-                        {changes.length === 0 && <Text>No changes 🤷‍♂️</Text>}
-                      </List>
+                  <Box bg="xblack.016" p={1}>
+                    <Stack
+                      spacing={5}
+                      rounded="md"
+                      p={3}
+                      h={200}
+                      overflowY="auto"
+                    >
+                      <Stack spacing={3}>
+                        <Text color="white">{t('Changes')}</Text>
+                        <List styleType="unordered" spacing={2}>
+                          {changes.map(change => (
+                            <ListItem key={change}>{change}</ListItem>
+                          ))}
+                          {changes.length === 0 && <Text>No changes 🤷‍♂️</Text>}
+                        </List>
+                      </Stack>
+                      <Stack spacing={3}>
+                        <Text color="white">
+                          {t('Hard fork activation schedule')}
+                        </Text>
+                        <List styleType="unordered" spacing={2}>
+                          <ListItem>
+                            {t(
+                              'Hard fork will be activated at any date after {{startActivationDate}}',
+                              {
+                                startActivationDate: startActivationDate
+                                  ? new Date(
+                                      startActivationDate
+                                    ).toLocaleString()
+                                  : 'TBD',
+                              }
+                            )}
+                          </ListItem>
+                          <ListItem>
+                            {t(
+                              'Hard fork will be blocked on {{endActivationDate}} if voting criteria are not met',
+                              {
+                                endActivationDate: endActivationDate
+                                  ? new Date(endActivationDate).toLocaleString()
+                                  : 'TBD',
+                              }
+                            )}
+                          </ListItem>
+                        </List>
+                      </Stack>
                     </Stack>
-                    <Stack spacing={3}>
-                      <Text color="white">
-                        {t('Hard fork activation schedule')}
-                      </Text>
-                      <List styleType="unordered" spacing={2}>
-                        <ListItem>
-                          {t(
-                            'Hard fork will be activated at any date after {{startActivationDate}}',
-                            {
-                              startActivationDate: startActivationDate
-                                ? new Date(startActivationDate).toLocaleString()
-                                : 'TBD',
-                            }
-                          )}
-                        </ListItem>
-                        <ListItem>
-                          {t(
-                            'Hard fork will be blocked on {{endActivationDate}} if voting criteria are not met',
-                            {
-                              endActivationDate: endActivationDate
-                                ? new Date(endActivationDate).toLocaleString()
-                                : 'TBD',
-                            }
-                          )}
-                        </ListItem>
-                      </List>
-                    </Stack>
-                  </Stack>
+                  </Box>
                 </Skeleton>
               </Stack>
             </Stack>
@@ -430,7 +479,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
               </PrimaryButton>
             </Stack>
           </Stack>
-          {shouldActivateMining && (
+          {currentHardFork.matches('fetched') && shouldActivateMining && (
             <Box bg="xwhite.010" rounded="lg" py={4} px={6}>
               <Text color="xwhite.050" fontSize="mdx">
                 {t(`You can not vote for the hard fork update since your mining status is deactivated.
@@ -470,7 +519,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
                 <RadioGroup
                   value={votingOption}
                   onChange={e => {
-                    setVotingOption(e.target.value)
+                    sendHardFork('VOTE', {option: e.target.value})
                   }}
                 >
                   <Radio value="approve">
