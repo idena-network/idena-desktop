@@ -665,7 +665,7 @@ UpdateButton.propTypes = {
 
 export function Version() {
   const autoUpdate = useAutoUpdateState()
-  const {updateClient, updateNode} = useAutoUpdateDispatch()
+  const {updateClient, onResetHardForkVoing} = useAutoUpdateDispatch()
 
   return (
     <>
@@ -718,7 +718,7 @@ export function Version() {
           <UpdateButton
             text="Update Node Version"
             version={autoUpdate.nodeRemoteVersion}
-            onClick={updateNode}
+            onClick={onResetHardForkVoing}
           />
         ) : null}
       </Box>
