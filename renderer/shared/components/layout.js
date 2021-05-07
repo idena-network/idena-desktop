@@ -300,6 +300,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
                 log(),
               ],
             },
+            onError: 'failed',
           },
         },
         fetched: {
@@ -307,6 +308,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
             VOTE: {actions: [assign({votingOption: (_, {option}) => option})]},
           },
         },
+        failed: {},
       },
     })
   )
@@ -318,8 +320,6 @@ function HardForkScreen({version, onUpdate, onReject}) {
     didActivateFork,
     votingOption,
   } = currentHardFork.context
-
-  const [showOptions, setShowOptions] = React.useState()
 
   const {
     isOpen: isOpenRejectDialog,
@@ -344,9 +344,6 @@ function HardForkScreen({version, onUpdate, onReject}) {
             // eslint-disable-next-line react/display-name
             render: () => <Toast title={message} status="error" />,
           })
-        },
-        onChangeMiningStatus: ({isOnline}) => {
-          setShowOptions(isOnline)
         },
       },
     }
@@ -394,7 +391,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
               <Stack spacing={1} color="xwhite.050">
                 <Text color="white">{t('Details')}</Text>
                 <Skeleton
-                  isLoaded={currentHardFork.matches('fetched')}
+                  isLoaded={eitherState(currentHardFork, 'fetched', 'failed')}
                   colorStart={colors.xblack['016']}
                   colorEnd={colors.xblack['016']}
                 >
@@ -403,7 +400,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
                       spacing={5}
                       rounded="md"
                       p={3}
-                      h={200}
+                      h={188}
                       overflowY="auto"
                     >
                       <Stack spacing={3}>
@@ -467,18 +464,17 @@ function HardForkScreen({version, onUpdate, onReject}) {
                   <Text>{t('Check on Github')}</Text>
                 </Stack>
               </SecondaryButton>
-              <PrimaryButton
-                isDisabled={shouldActivateMining}
-                onClick={() => {
-                  if (canVote) setShowOptions(true)
-                  else onUpdate()
-                }}
-              >
-                {t('Update Node Version')}
-              </PrimaryButton>
+              {!canVote && (
+                <PrimaryButton
+                  isDisabled={shouldActivateMining}
+                  onClick={onUpdate}
+                >
+                  {t('Update Node Version')}
+                </PrimaryButton>
+              )}
             </Stack>
           </Stack>
-          {currentHardFork.matches('fetched') && shouldActivateMining && (
+          {eitherState(currentHardFork, 'fetched') && shouldActivateMining && (
             <Box bg="xwhite.010" rounded="lg" py={4} px={6}>
               <Text color="xwhite.050" fontSize="mdx">
                 {t(`You can not vote for the hard fork update since your mining status is deactivated.
@@ -499,7 +495,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
               </PrimaryButton>
             </Box>
           )}
-          {showOptions && (
+          {eitherState(currentHardFork, 'fetched') && canVote && (
             <Stack
               spacing={6}
               bg="xwhite.010"
