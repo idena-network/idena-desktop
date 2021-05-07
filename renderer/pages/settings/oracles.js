@@ -40,15 +40,6 @@ export default function OracleSettings() {
             </Stack>
           </SettingsSection>
         )}
-        <SettingsSection>
-          <PrimaryButton
-            onClick={async () => {
-              await global.sub(requestDb(), 'updates').clear()
-            }}
-          >
-            Clear hf voting
-          </PrimaryButton>
-        </SettingsSection>
       </Stack>
     </SettingsLayout>
   )

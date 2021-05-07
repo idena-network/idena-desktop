@@ -246,15 +246,27 @@ function HardForkScreen({version, onUpdate, onReject}) {
   const [{startActivationDate, endActivationDate}, setTiming] = React.useState(
     {}
   )
+  const [didActivateFork, setDidActivateFork] = React.useState(true)
 
   React.useEffect(() => {
     const resolveApiPath = path =>
       new URL(`api${path}`, 'http://135.181.80.24:1235')
 
-    fetch(resolveApiPath(`/node/${version}/forkchangelog`))
+    const fetchJson = path =>
+      fetch(path)
+        .then(resp => resp.json())
+        .catch(error => ({}))
+
+    fetchJson(resolveApiPath(`/node/${version}/forkchangelog`))
       .then(({result}) => {
         setChanges(result?.Changes ?? [])
-        return fetch(resolveApiPath(`/upgrade/${result?.Upgrade}`))
+        // eslint-disable-next-line no-shadow
+        fetchJson(
+          'https://api.idena.io/api/upgrades?limit=10'
+        ).then(({result: [{highestUpgrade}]}) =>
+          setDidActivateFork(highestUpgrade === result?.Upgrade)
+        )
+        return fetchJson(resolveApiPath(`/upgrade/${result?.Upgrade}`))
       })
       .then(({result: timing = {}}) => {
         setTiming(timing)
@@ -298,9 +310,13 @@ function HardForkScreen({version, onUpdate, onReject}) {
   const {mode} = currentActivateMining.context
 
   const shouldActivateMining =
-    (identity.isValidated || identity.isPool) && !identity.online
+    !didActivateFork &&
+    (identity.isValidated || identity.isPool) &&
+    !identity.online
 
-  const canVote = (identity.isValidated || identity.isPool) && identity.online
+  const canVote =
+    didActivateFork ||
+    ((identity.isValidated || identity.isPool) && identity.online)
 
   return (
     <>
@@ -417,7 +433,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
           {shouldActivateMining && (
             <Box bg="xwhite.010" rounded="lg" py={4} px={6}>
               <Text color="xwhite.050" fontSize="mdx">
-                {t(`You can not vote for the had fork update since your mining status is deactivated.
+                {t(`You can not vote for the hard fork update since your mining status is deactivated.
                 Please activate your minig status to vote or update the node.`)}
               </Text>
               <PrimaryButton
