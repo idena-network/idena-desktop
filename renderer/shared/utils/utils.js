@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import {getRpcParams} from '../api/api-client'
 
 export function createRpcCaller({url, key}) {
@@ -81,4 +82,14 @@ export function ntp(t0, t1, t2, t3) {
     roundTripDelay: t3 - t0 - (t2 - t1),
     offset: (t1 - t0 + (t2 - t3)) / 2,
   }
+}
+
+export function buildNextValidationCalendarLink(nextValidation) {
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${dayjs(
+    nextValidation
+  ).format('YYYYMMDDTHHmmssZ')}%2F${dayjs(nextValidation)
+    .add(30, 'minute')
+    .format(
+      'YYYYMMDDTHHmmssZ'
+    )}&details=Plan%20your%20time%20in%20advance%20to%20take%20part%20in%20the%20validation%20ceremony%21%20Before%20the%20ceremony%2C%20read%20our%20explainer%20of%20how%20to%20get%20validated%3A%20https%3A%2F%2Fmedium.com%2Fidena%2Fhow-to-pass-a-validation-session-in-idena-1724a0203e81&text=Idena%20Validation%20Ceremony`
 }

@@ -6,8 +6,13 @@ import {Trans, useTranslation} from 'react-i18next'
 import {
   Badge,
   Box as ChakraBox,
+  Flex as ChakraFlex,
   Button,
   Icon,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   PopoverTrigger,
   Stack,
   Text as ChakraText,
@@ -41,7 +46,7 @@ import {
   OnboardingPopoverContent,
   OnboardingPopoverContentIconRow,
 } from './onboarding'
-import {eitherState} from '../utils/utils'
+import {buildNextValidationCalendarLink, eitherState} from '../utils/utils'
 
 function Sidebar() {
   return (
@@ -361,9 +366,55 @@ function ActionPanel() {
                 position="relative"
                 zIndex={9}
               >
-                <Block title={t('Next validation')}>
-                  {new Date(nextValidation).toLocaleString()}
-                </Block>
+                <ChakraFlex justify="space-between" align="baseline" pr={1}>
+                  <Block title={t('Next validation')}>
+                    {new Date(nextValidation).toLocaleString()}
+                  </Block>
+                  <Menu autoSelect={false} mr={1}>
+                    <MenuButton
+                      rounded="md"
+                      py="3/2"
+                      px="2px"
+                      mt="-6px"
+                      _expanded={{bg: 'brandGray.500'}}
+                      _focus={{outline: 0}}
+                    >
+                      <Icon name="more" size={5} />
+                    </MenuButton>
+                    <MenuList
+                      placement="bottom-end"
+                      border="none"
+                      shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
+                      rounded="lg"
+                      py={2}
+                      minWidth="145px"
+                    >
+                      <MenuItem
+                        color="brandGray.500"
+                        fontWeight={500}
+                        px={3}
+                        py={2}
+                        _hover={{bg: 'gray.50'}}
+                        _focus={{bg: 'gray.50'}}
+                        _selected={{bg: 'gray.50'}}
+                        _active={{bg: 'gray.50'}}
+                        onClick={() => {
+                          global.openExternal(
+                            buildNextValidationCalendarLink(nextValidation)
+                          )
+                        }}
+                      >
+                        <Icon
+                          name="plus-square"
+                          size={5}
+                          mr={3}
+                          color="brandBlue.500"
+                        />
+                        Add to calendar
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </ChakraFlex>
               </ChakraBox>
             </PopoverTrigger>
             <OnboardingPopoverContent
