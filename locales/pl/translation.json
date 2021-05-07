@@ -622,5 +622,6 @@
   "No, reject node {{version}}": "No, reject node {{version}}",
   "Are you sure you want to reject the hard fork update?": "Are you sure you want to reject the hard fork update?",
   "The mining penalties might be charged if the fork is activated by the\n          network majority.": "The mining penalties might be charged if the fork is activated by the\n          network majority.",
-  "Reject": "Reject"
+  "Reject": "Reject",
+  "Next validation: {{nextValidation}}": "Next validation: {{nextValidation}}"
 }

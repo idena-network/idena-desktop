@@ -438,7 +438,8 @@ export default function ProfilePage() {
       >
         <DialogHeader>
           {t('Next validation: {{nextValidation}}', {
-            nextValidation: new Date(epoch?.nextValidation).toLocaleString(),
+            nextValidation:
+              epoch && new Date(epoch.nextValidation).toLocaleString(),
             nsSeparator: '!!',
           })}
         </DialogHeader>
