@@ -43,6 +43,7 @@ import {
   callRpc,
   eitherState,
   buildNextValidationCalendarLink,
+  formatValidationDate,
 } from '../shared/utils/utils'
 import {
   Dialog,
@@ -262,7 +263,7 @@ export default function ProfilePage() {
                   {epoch && (
                     <SimpleUserStat
                       label={t('Next validation')}
-                      value={new Date(epoch.nextValidation).toLocaleString()}
+                      value={formatValidationDate(epoch.nextValidation)}
                     />
                   )}
 
@@ -438,8 +439,7 @@ export default function ProfilePage() {
       >
         <DialogHeader>
           {t('Next validation: {{nextValidation}}', {
-            nextValidation:
-              epoch && new Date(epoch.nextValidation).toLocaleString(),
+            nextValidation: epoch && formatValidationDate(epoch.nextValidation),
             nsSeparator: '!!',
           })}
         </DialogHeader>

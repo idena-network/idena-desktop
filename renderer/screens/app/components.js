@@ -31,6 +31,7 @@ import {
 import {EpochPeriod, IdentityStatus} from '../../shared/types'
 import {loadValidationState} from '../validation/utils'
 import {pluralize} from '../../shared/utils/string'
+import {formatValidationDate} from '../../shared/utils/utils'
 
 export function LayoutContainer(props) {
   return (
@@ -326,7 +327,7 @@ export function ActionPanel({appService}) {
       {!isValidating && (
         <ActionItem
           title={t('Next validation')}
-          value={new Date(nextValidation).toLocaleString()}
+          value={formatValidationDate(nextValidation)}
           roundedBottom="lg"
         />
       )}

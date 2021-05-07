@@ -93,3 +93,10 @@ export function buildNextValidationCalendarLink(nextValidation) {
       'YYYYMMDDTHHmmssZ'
     )}&details=Plan%20your%20time%20in%20advance%20to%20take%20part%20in%20the%20validation%20ceremony%21%20Before%20the%20ceremony%2C%20read%20our%20explainer%20of%20how%20to%20get%20validated%3A%20https%3A%2F%2Fmedium.com%2Fidena%2Fhow-to-pass-a-validation-session-in-idena-1724a0203e81&text=Idena%20Validation%20Ceremony`
 }
+
+export function formatValidationDate(nextValidation) {
+  return new Date(nextValidation).toLocaleString([], {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  })
+}

@@ -46,7 +46,11 @@ import {
   OnboardingPopoverContent,
   OnboardingPopoverContentIconRow,
 } from './onboarding'
-import {buildNextValidationCalendarLink, eitherState} from '../utils/utils'
+import {
+  buildNextValidationCalendarLink,
+  eitherState,
+  formatValidationDate,
+} from '../utils/utils'
 
 function Sidebar() {
   return (
@@ -368,7 +372,7 @@ function ActionPanel() {
               >
                 <ChakraFlex justify="space-between" align="baseline" pr={1}>
                   <Block title={t('Next validation')}>
-                    {new Date(nextValidation).toLocaleString()}
+                    {formatValidationDate(nextValidation)}
                   </Block>
                   <Menu autoSelect={false} mr={1}>
                     <MenuButton
