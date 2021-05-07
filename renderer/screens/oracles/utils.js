@@ -503,7 +503,15 @@ export function stripOptions(options) {
 }
 
 export function hasValuableOptions(options) {
-  return stripOptions(options).length > 0
+  return stripOptions(options).length >= 2
+}
+
+export function hasLinklessOptions(options) {
+  // eslint-disable-next-line global-require
+  const getUrls = require('get-urls')
+  return stripOptions(options).every(
+    ({value}) => getUrls(value, {stripWWW: false}).size === 0
+  )
 }
 
 export const mapVoting = ({

@@ -48,8 +48,9 @@ import {
   quorumVotesCount,
   viewVotingHref,
   humanError,
-  stripOptions,
   rewardPerOracle,
+  hasLinklessOptions,
+  hasValuableOptions,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -132,10 +133,8 @@ function NewVotingPage() {
   const isInvalid = (field, cond = current.context[field]) =>
     dirtyBag[field] && !cond
 
-  const isInvalidOptions = isInvalid(
-    'options',
-    stripOptions(options).length >= 2
-  )
+  const isInvalidOptions = isInvalid('options', hasValuableOptions(options))
+  const hasLinksInOptions = isInvalid('options', hasLinklessOptions(options))
 
   const handleChange = ({target: {id, value}}) => send('CHANGE', {id, value})
   const dna = toLocaleDna(i18n)
@@ -189,11 +188,17 @@ function NewVotingPage() {
 
               <VotingInlineFormControl
                 label={t('Voting options')}
-                isInvalid={isInvalidOptions}
+                isInvalid={isInvalidOptions || hasLinksInOptions}
               >
                 <Box
-                  borderWidth={isInvalidOptions ? '2px' : 1}
-                  borderColor={isInvalidOptions ? 'red.500' : 'gray.300'}
+                  borderWidth={
+                    isInvalidOptions || hasLinksInOptions ? '2px' : 1
+                  }
+                  borderColor={
+                    isInvalidOptions || hasLinksInOptions
+                      ? 'red.500'
+                      : 'gray.300'
+                  }
                   borderRadius="md"
                   p={1}
                   w="md"
@@ -221,6 +226,13 @@ function NewVotingPage() {
                 {isInvalidOptions && (
                   <FormErrorMessage fontSize="md" mt={1}>
                     {t('You must provide at least 2 options')}
+                  </FormErrorMessage>
+                )}
+                {hasLinksInOptions && (
+                  <FormErrorMessage fontSize="md" mt={1}>
+                    {t(
+                      'Links are not allowed in voting options. Please use Description for links.'
+                    )}
                   </FormErrorMessage>
                 )}
               </VotingInlineFormControl>
