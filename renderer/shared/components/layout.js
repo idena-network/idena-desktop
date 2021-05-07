@@ -262,7 +262,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
             src: async () => {
               const fetchJsonResult = async (
                 path,
-                base = 'http://135.181.80.24:1235'
+                base = 'https://api.idena.io'
               ) =>
                 (await (await fetch(new URL(`api${path}`, base))).json()).result
 
@@ -275,8 +275,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
               )
 
               const [{highestUpgrade}] = await fetchJsonResult(
-                '/upgrades?limit=1',
-                'https://api.idena.io'
+                '/upgrades?limit=1'
               )
 
               const nextTiming =
