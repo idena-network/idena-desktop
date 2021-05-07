@@ -141,7 +141,7 @@ export default function ProfilePage() {
     }
   }, [epoch])
 
-  const profileDb = createProfileDb(epoch)
+  const profileDb = React.useMemo(() => createProfileDb(epoch), [epoch])
 
   React.useEffect(() => {
     if (epoch && isValidated) {
@@ -447,7 +447,13 @@ export default function ProfilePage() {
           next validation`)}
         </DialogBody>
         <DialogFooter>
-          <SecondaryButton onClick={onCloseNextValidationDialog}>
+          <SecondaryButton
+            onClick={() => {
+              profileDb
+                .putDidPlanNextValidation(1)
+                .finally(onCloseNextValidationDialog)
+            }}
+          >
             {t('Cancel')}
           </SecondaryButton>
           <PrimaryButton

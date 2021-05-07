@@ -1,18 +1,19 @@
 import {requestDb} from '../../shared/utils/db'
 
 export function createProfileDb(epoch) {
-  const db = global.sub(requestDb(), 'profile')
-  const planNextValidationkey = `didPlanNextValidation!!${epoch.epoch}`
+  const requestProfileDb = () => global.sub(requestDb(), 'profile')
+
+  const planNextValidationkey = `didPlanNextValidation!!${epoch?.epoch ?? -1}`
 
   return {
     getDidPlanNextValidation() {
-      return db.get(planNextValidationkey)
+      return requestProfileDb().get(planNextValidationkey)
     },
     putDidPlanNextValidation(value) {
-      return db.put(planNextValidationkey, value)
+      return requestProfileDb().put(planNextValidationkey, value)
     },
     clear() {
-      return db.clear()
+      return requestProfileDb().clear()
     },
   }
 }
