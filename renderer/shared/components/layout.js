@@ -395,14 +395,8 @@ function HardForkScreen({version, onUpdate, onReject}) {
                   colorStart={colors.xblack['016']}
                   colorEnd={colors.xblack['016']}
                 >
-                  <Box bg="xblack.016" p={1}>
-                    <Stack
-                      spacing={5}
-                      rounded="md"
-                      p={3}
-                      h={188}
-                      overflowY="auto"
-                    >
+                  <Box bg="xblack.016" rounded="md" p={1}>
+                    <Stack spacing={5} p={3} h={188} overflowY="auto">
                       <Stack spacing={3}>
                         <Text color="white">{t('Changes')}</Text>
                         <List styleType="unordered" spacing={2}>
@@ -465,10 +459,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
                 </Stack>
               </SecondaryButton>
               {!canVote && (
-                <PrimaryButton
-                  isDisabled={shouldActivateMining}
-                  onClick={onUpdate}
-                >
+                <PrimaryButton onClick={onUpdate}>
                   {t('Update Node Version')}
                 </PrimaryButton>
               )}
