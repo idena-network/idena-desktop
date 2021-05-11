@@ -51,6 +51,7 @@ import {
   eitherState,
   formatValidationDate,
 } from '../utils/utils'
+import {isHardFork} from '../utils/node'
 
 function Sidebar() {
   return (
@@ -720,7 +721,11 @@ UpdateButton.propTypes = {
 
 export function Version() {
   const autoUpdate = useAutoUpdateState()
-  const {updateClient, onResetHardForkVoing} = useAutoUpdateDispatch()
+  const {
+    updateClient,
+    updateNode,
+    onResetHardForkVoing,
+  } = useAutoUpdateDispatch()
 
   return (
     <>
@@ -773,7 +778,14 @@ export function Version() {
           <UpdateButton
             text="Update Node Version"
             version={autoUpdate.nodeRemoteVersion}
-            onClick={onResetHardForkVoing}
+            onClick={
+              isHardFork(
+                autoUpdate.nodeCurrentVersion,
+                autoUpdate.nodeRemoteVersion
+              )
+                ? onResetHardForkVoing
+                : updateNode
+            }
           />
         ) : null}
       </Box>

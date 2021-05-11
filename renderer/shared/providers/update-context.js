@@ -173,15 +173,17 @@ export function AutoUpdateProvider({children}) {
     true
   )
 
+  const hardForkVotingKey = version => `hardForkVoting!!${version}`
+
   const [hardForkVoting, setHardForkVoting] = React.useState('unknown')
 
   React.useEffect(() => {
     global
       .sub(requestDb(), 'updates')
-      .get('hardForkVoting')
+      .get(hardForkVotingKey(state.nodeRemoteVersion))
       .then(setHardForkVoting)
       .catch(() => setHardForkVoting('unknown'))
-  }, [])
+  }, [state.nodeRemoteVersion])
 
   const canUpdateClient = state.uiUpdateReady
 
@@ -214,14 +216,14 @@ export function AutoUpdateProvider({children}) {
   const onRejectHardFork = () => {
     global
       .sub(requestDb(), 'updates')
-      .put('hardForkVoting', 'reject')
+      .put(hardForkVotingKey(state.nodeRemoteVersion), 'reject')
       .then(() => setHardForkVoting('reject'))
   }
 
   const onResetHardForkVoing = () => {
     global
       .sub(requestDb(), 'updates')
-      .put('hardForkVoting', 'unknown')
+      .put(hardForkVotingKey(state.nodeRemoteVersion), 'unknown')
       .then(() => setHardForkVoting('unknown'))
   }
 
