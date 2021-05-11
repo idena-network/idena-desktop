@@ -597,11 +597,13 @@ export function ActivateMiningDrawer({
                 >
                   <Text>
                     {t(
-                      'You can lose your stake, all your mining and validation rewards if you delegate your mining status.'
+                      `Please be aware that both mining and validation rewards will go to the pool’s owner address if you delegate your mining status. Your address will get only the part of rewards that goes to your stake. Your identity could be terminated by the pool owner and you can lose your stake.`
                     )}
                   </Text>
                   <Text>
-                    {t('You can disable delegation at the next epoch only.')}
+                    {t(
+                      'Disabling delegation could be done at the next epoch only.'
+                    )}
                   </Text>
                 </AlertDescription>
               </Alert>
@@ -617,8 +619,9 @@ export function ActivateMiningDrawer({
                 {t('Activate mining status')}
               </Heading>
               <Text fontSize="md" color="muted" mb={3}>
-                {t(`Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.
-You can deactivate your online status at any time.`)}
+                {t(
+                  `Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.`
+                )}
               </Text>
               <Text fontSize="md" color="muted">
                 {t('You can deactivate your online status at any time.')}
