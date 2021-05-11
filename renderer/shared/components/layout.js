@@ -274,7 +274,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
                 `/node/${nodeCurrentVersion}/forkchangelog`
               )
 
-              const [{highestUpgrade}] = await fetchJsonResult(
+              const [{upgrade: highestUpgrade}] = await fetchJsonResult(
                 '/upgrades?limit=1'
               )
 
@@ -356,8 +356,9 @@ function HardForkScreen({version, onUpdate, onReject}) {
     !identity.online
 
   const canVote =
-    didActivateFork ||
-    ((identity.isValidated || identity.isPool) && identity.online)
+    !didActivateFork &&
+    (identity.isValidated || identity.isPool) &&
+    identity.online
 
   return (
     <>
