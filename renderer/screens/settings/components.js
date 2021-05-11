@@ -5,12 +5,17 @@ import {
   Flex,
   FormControl,
   Heading,
-  Select,
+  Icon,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Stack,
   Text,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import QRCode from 'qrcode.react'
+import ReactCountryFlag from 'react-country-flag'
 import {
   Dialog,
   DialogBody,
@@ -26,7 +31,7 @@ import {useNotificationDispatch} from '../../shared/providers/notification-conte
 import {useNodeDispatch} from '../../shared/providers/node-context'
 import {importKey} from '../../shared/api'
 import {useSettingsDispatch} from '../../shared/providers/settings-context'
-import {AVAILABLE_LANGS, flagEmojis} from '../../i18n'
+import {AVAILABLE_LANGS, isoLangs, matchCountry} from '../../i18n'
 
 export function ExportPK() {
   const {t} = useTranslation()
@@ -171,24 +176,55 @@ export function LocaleSwitcher() {
   const {i18n} = useTranslation()
   const {changeLanguage} = useSettingsDispatch()
   return (
-    <Box w="xs">
-      <Select
-        name="lng"
-        id="lng"
-        options={AVAILABLE_LANGS}
-        value={i18n.language}
-        onChange={e => {
-          i18n.changeLanguage(e.target.value)
-          changeLanguage(e.target.value)
-        }}
+    <Menu autoSelect={false}>
+      <MenuButton
+        borderColor="gray.300"
+        borderWidth={1}
+        rounded="md"
+        py={2}
+        px={3}
+        w="sm"
+        _focus={{shadow: 'outline', outline: 'none'}}
+      >
+        <Flex justify="space-between">
+          <Box>
+            <ReactCountryFlag countryCode={matchCountry(i18n.language)} />
+            {isoLangs[i18n.language].nativeName} ({i18n.language.toUpperCase()})
+          </Box>
+          <Icon name="chevron-down" />
+        </Flex>
+      </MenuButton>
+      <MenuList
+        placement="auto-end"
+        border="none"
+        shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
+        rounded="lg"
+        py={2}
+        minW={40}
+        h={48}
+        overflowY="auto"
       >
         {AVAILABLE_LANGS.map(lang => (
-          <option key={lang} value={lang}>
-            {flagEmojis[lang]}&nbsp;{lang}
-          </option>
+          <MenuItem
+            key={lang}
+            fontWeight={500}
+            px={3}
+            py="3/2"
+            _hover={{bg: 'gray.50'}}
+            _focus={{bg: 'gray.50'}}
+            _selected={{bg: 'gray.50'}}
+            _active={{bg: 'gray.50'}}
+            onClick={() => {
+              i18n.changeLanguage(lang)
+              changeLanguage(lang)
+            }}
+          >
+            <ReactCountryFlag countryCode={matchCountry(lang)} />{' '}
+            {isoLangs[lang].nativeName} ({lang.toUpperCase()})
+          </MenuItem>
         ))}
-      </Select>
-    </Box>
+      </MenuList>
+    </Menu>
   )
 }
 
