@@ -614,5 +614,9 @@
   "Are you sure you want to reject the hard fork update?": "Are you sure you want to reject the hard fork update?",
   "The mining penalties might be charged if the fork is activated by the\n          network majority.": "The mining penalties might be charged if the fork is activated by the\n          network majority.",
   "Reject": "Reject",
-  "Next validation: {{nextValidation}}": "Next validation: {{nextValidation}}"
+  "Next validation: {{nextValidation}}": "Next validation: {{nextValidation}}",
+  "Please be aware that both mining and validation rewards will go to the pool’s owner address if you delegate your mining status. Your address will get only the part of rewards that goes to your stake. Your identity could be terminated by the pool owner and you can lose your stake.": "Please be aware that both mining and validation rewards will go to the pool’s owner address if you delegate your mining status. Your address will get only the part of rewards that goes to your stake. Your identity could be terminated by the pool owner and you can lose your stake.",
+  "Disabling delegation could be done at the next epoch only.": "Disabling delegation could be done at the next epoch only.",
+  "Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.": "Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.",
+  "You can not vote for the hard fork update since your mining status is deactivated.\n                Please activate your mining status to vote or update the node.": "You can not vote for the hard fork update since your mining status is deactivated.\n                Please activate your mining status to vote or update the node."
 }
