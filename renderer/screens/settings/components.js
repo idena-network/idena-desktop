@@ -189,7 +189,8 @@ export function LocaleSwitcher() {
         <Flex justify="space-between">
           <Box>
             <ReactCountryFlag countryCode={matchCountry(i18n.language)} />
-            {isoLangs[i18n.language].nativeName} ({i18n.language.toUpperCase()})
+            {isoLangs[i18n.language]?.nativeName} (
+            {i18n.language?.toUpperCase()})
           </Box>
           <Icon name="chevron-down" />
         </Flex>
