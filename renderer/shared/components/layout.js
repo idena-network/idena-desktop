@@ -469,7 +469,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
             <Box bg="xwhite.010" rounded="lg" py={4} px={6}>
               <Text color="xwhite.050" fontSize="mdx">
                 {t(`You can not vote for the hard fork update since your mining status is deactivated.
-                Please activate your minig status to vote or update the node.`)}
+                Please activate your mining status to vote or update the node.`)}
               </Text>
               <PrimaryButton
                 variant="link"
