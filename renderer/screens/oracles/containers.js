@@ -30,6 +30,8 @@ import {
   PopoverHeader,
   PopoverBody,
   FormControl,
+  RadioGroup,
+  Radio,
 } from '@chakra-ui/core'
 import dayjs from 'dayjs'
 import getUrls from 'get-urls'
@@ -42,6 +44,10 @@ import {
 import {
   Avatar,
   Debug,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
   Drawer,
   DrawerBody,
   DrawerHeader,
@@ -1561,5 +1567,67 @@ export function Linkify({onClick, children}) {
         )
       )}
     </>
+  )
+}
+
+export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
+  const {t} = useTranslation()
+
+  const [preset, setPreset] = React.useState()
+
+  return (
+    <Dialog size={416} onClose={onCancel} {...props}>
+      <DialogHeader mb={4}>{t('New Oracle voting')}</DialogHeader>
+      <DialogBody>
+        <Stack>
+          <Text color="muted" fontSize="sm">
+            {t('Choose an option to vote')}
+          </Text>
+          <RadioGroup spacing={0} onChange={e => setPreset(e.target.value)}>
+            <Radio value="fact" alignItems="baseline" borderColor="gray.100">
+              <Stack spacing={1} pt={2} pb={3}>
+                <Text>{t('Fact certification')}</Text>
+                <Text color="muted">
+                  {t(
+                    'Oracles who vote against the majority are penalized. Voting will be started in a future date.'
+                  )}
+                </Text>
+              </Stack>
+            </Radio>
+            <Radio value="poll" alignItems="baseline" borderColor="gray.100">
+              <Stack spacing={1} pt={2} pb={3}>
+                <Text>{t('Poll')}</Text>
+                <Text color="muted">
+                  {t(
+                    'Oracles can vote for any option. Rewards will be paid to everyone regardless of the outcome of the vote.'
+                  )}
+                </Text>
+              </Stack>
+            </Radio>
+            <Radio
+              value="decision"
+              alignItems="baseline"
+              borderColor="gray.100"
+            >
+              <Stack spacing={1} pt={2} pb={3}>
+                <Text>{t('Making decision')}</Text>
+                <Text color="muted">
+                  {t('51% consensus is required to make a desision')}
+                </Text>
+              </Stack>
+            </Radio>
+            <Radio value="custom" borderColor="gray.100">
+              {t('Custom')}
+            </Radio>
+          </RadioGroup>
+        </Stack>
+      </DialogBody>
+      <DialogFooter>
+        <SecondaryButton onClick={onCancel}>{t('Cancel')}</SecondaryButton>
+        <PrimaryButton onClick={() => onChoosePreset(preset)}>
+          {t('Continue')}
+        </PrimaryButton>
+      </DialogFooter>
+    </Dialog>
   )
 }
