@@ -100,3 +100,13 @@ export function formatValidationDate(nextValidation) {
     timeStyle: 'short',
   })
 }
+
+export async function loadKeyword(index) {
+  try {
+    const {Name: name, Desc: desc} = await callRpc('bcn_keyWord', index)
+    return {name, desc}
+  } catch (error) {
+    global.logger.error('Unable to receive keyword', index)
+    return {name: '', desc: ''}
+  }
+}

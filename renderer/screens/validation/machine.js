@@ -28,6 +28,7 @@ import {
 } from './utils'
 import {forEachAsync, wait} from '../../shared/utils/fn'
 import {fetchConfirmedKeywordTranslations} from '../flips/utils'
+import {loadKeyword} from '../../shared/utils/utils'
 
 export const createValidationMachine = ({
   epoch,
@@ -599,7 +600,15 @@ export const createValidationMachine = ({
                           Promise.all(
                             filterReadyFlips(longFlips).map(({hash}) =>
                               fetchWords(hash)
-                                .then(({result}) => ({hash, ...result}))
+                                .then(async ({result}) => ({
+                                  hash,
+                                  words: await Promise.all(
+                                    result?.words.map(async id => ({
+                                      id,
+                                      ...(await loadKeyword(id)),
+                                    })) ?? []
+                                  ),
+                                }))
                                 .catch(() => ({hash}))
                             )
                           ),
@@ -608,16 +617,7 @@ export const createValidationMachine = ({
                             '#validation.longSession.fetch.keywords.success',
                           actions: assign({
                             longFlips: ({longFlips}, {data}) =>
-                              mergeFlipsByHash(
-                                longFlips,
-                                data.map(({hash, words = []}) => ({
-                                  hash,
-                                  words: words.map(id => ({
-                                    id,
-                                    ...global.loadKeyword(id),
-                                  })),
-                                }))
-                              ),
+                              mergeFlipsByHash(longFlips, data),
                           }),
                         },
                       },
