@@ -328,9 +328,7 @@ app.on('ready', async () => {
 
     createTray()
 
-    if (isWin) {
-      checkForUpdates()
-    }
+    checkForUpdates()
   })
 })
 
@@ -509,7 +507,8 @@ ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
       break
     }
     case 'update-ui': {
-      autoUpdater.quitAndInstall()
+      if (isWin) autoUpdater.quitAndInstall()
+      else shell.openExternal('https://www.idena.io/download')
       break
     }
     case 'update-node': {
