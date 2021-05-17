@@ -691,7 +691,7 @@ export function WelcomeKeywordsQualificationDialog(props) {
         </Stack>
         <Text>
           {t(
-            `You'll get rewards for reported flips if these flip are also reported by other participants.`
+            `You'll get rewards for reported flips if this flip are also reported by other participants.`
           )}
         </Text>
       </ValidationDialogBody>
