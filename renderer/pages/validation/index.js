@@ -51,6 +51,7 @@ import {
   SubmitFailedDialog,
   FailedFlipAnnotation,
   ReviewValidationDialog,
+  EncourageReportDialog,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {AnswerType} from '../../shared/types'
@@ -144,11 +145,22 @@ function ValidationSession({
     translations,
     reportedFlipsCount,
     longFlips,
+    didReport,
   } = state.context
 
   useEffect(() => {
     persistValidationState(state)
   }, [state])
+
+  const {
+    isOpen: isOpenEncourageReportDialog,
+    onOpen: onOpenEncourageReportDialog,
+    onClose: onCloseEncourageReportDialog,
+  } = useDisclosure()
+
+  React.useEffect(() => {
+    if (didReport) onOpenEncourageReportDialog()
+  }, [didReport, onOpenEncourageReportDialog])
 
   const flips = sessionFlips(state)
   const currentFlip = flips[currentIndex]
@@ -252,7 +264,7 @@ function ValidationSession({
                         })
                       }
                     >
-                      {t('Both relevant')}
+                      {t('Yes')}
                     </QualificationButton>
 
                     <Tooltip
@@ -479,6 +491,11 @@ function ValidationSession({
         onCancel={() => {
           send('CANCEL')
         }}
+      />
+
+      <EncourageReportDialog
+        isOpen={isOpenEncourageReportDialog}
+        onClose={onCloseEncourageReportDialog}
       />
 
       {global.isDev && <FloatDebug>{state.value}</FloatDebug>}

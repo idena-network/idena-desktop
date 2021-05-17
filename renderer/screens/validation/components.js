@@ -27,6 +27,8 @@ import {
   AlertIcon,
   Button,
   useTheme,
+  List,
+  ListItem,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
@@ -663,16 +665,34 @@ export function WelcomeKeywordsQualificationDialog(props) {
   const {t} = useTranslation()
   return (
     <ValidationDialog
-      title={t('Your answers are not yet submitted')}
+      title={t('Check flip quality')}
       submitText={t('Ok, I understand')}
       {...props}
     >
-      <ValidationDialogBody>
+      <ValidationDialogBody spacing={3}>
+        <Stack spacing={1}>
+          <Text>
+            {t('Please report the flip in the following cases:', {
+              nsSeparator: '!!',
+            })}
+          </Text>
+          <List styleType="unordered">
+            <ListItem>{t('You can not find a keyword in the story')}</ListItem>
+            <ListItem>
+              {t('You need to read the text in the flip to solve it')}
+            </ListItem>
+            <ListItem>{t('You see inappropriate content')}</ListItem>
+            <ListItem>
+              {t(
+                'You see numbers or letters or other labels on top of the images showing their order'
+              )}
+            </ListItem>
+          </List>
+        </Stack>
         <Text>
-          {t('Please qualify the keywords relevance and submit the answers.')}
-        </Text>
-        <Text>
-          {t('The flips with irrelevant keywords will be penalized.')}
+          {t(
+            `You'll get rewards for reported flips if these flip are also reported by other participants.`
+          )}
         </Text>
       </ValidationDialogBody>
     </ValidationDialog>
@@ -1077,3 +1097,22 @@ function ReviewValidationDialogLinkButton(props) {
   )
 }
 ReviewValidationDialog.LinkButton = ReviewValidationDialogLinkButton
+
+export function EncourageReportDialog({...props}) {
+  const {t} = useTranslation()
+  return (
+    <ValidationDialog
+      title={t('The flip is reported')}
+      submitText={t('Ok, I understand')}
+      // eslint-disable-next-line react/destructuring-assignment
+      onSubmit={props.onClose}
+      {...props}
+    >
+      <DialogBody>
+        {t(
+          `You'll get a reward if the flip is also reported by other participants (more than 50% of the qualification committee is required).`
+        )}
+      </DialogBody>
+    </ValidationDialog>
+  )
+}
