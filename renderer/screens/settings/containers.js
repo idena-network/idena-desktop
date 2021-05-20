@@ -23,7 +23,6 @@ import QrCode from 'qrcode.react'
 import {useMachine} from '@xstate/react'
 import {createMachine} from 'xstate'
 import {assign} from 'xstate/lib/actions'
-import {FiEye, FiEyeOff} from 'react-icons/fi'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
   Dialog,
@@ -111,7 +110,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
                 />
                 <InputRightElement h="full">
                   <IconButton
-                    icon={revealPassword ? FiEyeOff : FiEye}
+                    icon={revealPassword ? 'eye-off' : 'eye'}
                     size="xs"
                     bg={revealPassword ? 'gray.300' : 'white'}
                     w={8}
@@ -231,6 +230,8 @@ export function ImportPrivateKeyDialog(props) {
     }
   }
 
+  const [revealPassword, setRevealPassword] = React.useState()
+
   return (
     <Dialog title={t('Import private key')} {...props}>
       <DialogBody>
@@ -254,12 +255,26 @@ export function ImportPrivateKeyDialog(props) {
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">{t('Password')}</FormLabel>
-              <Input
-                value={password}
-                type="password"
-                mr={4}
-                onChange={e => setPassword(e.target.value)}
-              />
+              <InputGroup>
+                <Input
+                  id="password"
+                  value={password}
+                  type={revealPassword ? 'text' : 'password'}
+                  onChange={e => setPassword(e.target.value)}
+                />
+                <InputRightElement h="full">
+                  <IconButton
+                    icon={revealPassword ? 'eye-off' : 'eye'}
+                    size="xs"
+                    bg={revealPassword ? 'gray.300' : 'white'}
+                    w={8}
+                    _hover={{
+                      bg: revealPassword ? 'gray.300' : 'white',
+                    }}
+                    onClick={() => setRevealPassword(!revealPassword)}
+                  />
+                </InputRightElement>
+              </InputGroup>
             </FormControl>
           </Stack>
         </form>

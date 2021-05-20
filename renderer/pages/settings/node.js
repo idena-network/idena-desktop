@@ -147,49 +147,51 @@ function NodeSettings() {
   return (
     <SettingsLayout>
       <Stack spacing={8} mt={8}>
-        <Stack isInline spacing={3} align="center">
-          <Box>
-            <Switcher
-              isChecked={settings.runInternalNode}
-              onChange={() => {
-                toggleRunInternalNode(!settings.runInternalNode)
-              }}
-              bgOn={theme.colors.primary}
-            />
-          </Box>
-          <Box>
-            <Text fontWeight={500}>{t('Run built-in node')}</Text>
-            <Text color="muted">
-              {t('Use built-in node to have automatic updates')}
-            </Text>
-          </Box>
-          {settings.runInternalNode && nodeFailed && (
-            <Box mb={3}>
-              <Text color="red.500">{t('Node failed to start')}</Text>
-              <SecondaryButton onClick={() => tryRestartNode()}>
-                {t('Try restart')}
-              </SecondaryButton>
+        <Stack spacing={4}>
+          <Stack isInline spacing={4} align="center">
+            <Box>
+              <Switcher
+                isChecked={settings.runInternalNode}
+                onChange={() => {
+                  toggleRunInternalNode(!settings.runInternalNode)
+                }}
+                bgOn={theme.colors.primary}
+              />
             </Box>
-          )}
-        </Stack>
-        <Stack isInline spacing={3} align="center">
-          <Box>
-            <Switcher
-              isChecked={settings.useExternalNode}
-              onChange={() => {
-                toggleUseExternalNode(!settings.useExternalNode)
-              }}
-              bgOn={theme.colors.primary}
-            />
-          </Box>
-          <Box>
-            <Text fontWeight={500}>{t('Connect to remote node')}</Text>
-            <Text color="muted">
-              {t(
-                'Specify the Node address if you want to connect to remote node'
-              )}
-            </Text>
-          </Box>
+            <Box>
+              <Text fontWeight={500}>{t('Run built-in node')}</Text>
+              <Text color="muted">
+                {t('Use built-in node to have automatic updates')}
+              </Text>
+            </Box>
+            {settings.runInternalNode && nodeFailed && (
+              <Box>
+                <Text color="red.500">{t('Node failed to start')}</Text>
+                <SecondaryButton onClick={() => tryRestartNode()}>
+                  {t('Try restart')}
+                </SecondaryButton>
+              </Box>
+            )}
+          </Stack>
+          <Stack isInline spacing={3} align="center">
+            <Box>
+              <Switcher
+                isChecked={settings.useExternalNode}
+                onChange={() => {
+                  toggleUseExternalNode(!settings.useExternalNode)
+                }}
+                bgOn={theme.colors.primary}
+              />
+            </Box>
+            <Box>
+              <Text fontWeight={500}>{t('Connect to remote node')}</Text>
+              <Text color="muted">
+                {t(
+                  'Specify the Node address if you want to connect to remote node'
+                )}
+              </Text>
+            </Box>
+          </Stack>
         </Stack>
 
         {settings.useExternalNode && (

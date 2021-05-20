@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {Box, FormControl, Heading, Stack} from '@chakra-ui/core'
+import {Box, Button, FormControl, Heading, Stack} from '@chakra-ui/core'
 import {FormLabel} from '../../shared/components/components'
 
 export function SettingsFormControl({children, ...props}) {
@@ -32,4 +32,20 @@ export function SettingsSection({title, children, ...props}) {
 
 export function DevSettingsSection(props) {
   return global.isDev ? <SettingsSection {...props} /> : null
+}
+
+export function SettingsLinkButton(props) {
+  return (
+    <Button
+      variant="link"
+      variantColor="blue"
+      fontWeight={500}
+      _hover={null}
+      _active={null}
+      _disabled={{
+        color: 'muted',
+      }}
+      {...props}
+    />
+  )
 }

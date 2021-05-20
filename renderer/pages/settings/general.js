@@ -3,7 +3,6 @@ import React from 'react'
 import {useTranslation} from 'react-i18next'
 import {
   Box,
-  Button,
   Flex,
   Icon,
   Stack,
@@ -14,10 +13,10 @@ import {
 import SettingsLayout from './layout'
 import {useSettingsState} from '../../shared/providers/settings-context'
 import {archiveFlips} from '../../screens/flips/utils'
-import {PrimaryButton} from '../../shared/components/button'
 import {
   SettingsSection,
   DevSettingsSection,
+  SettingsLinkButton,
 } from '../../screens/settings/components'
 import {
   FormLabel,
@@ -82,49 +81,25 @@ function Settings() {
             <Stack isInline align="center">
               <Box>
                 {runInternalNode && !useExternalNode ? (
-                  <Button
-                    variant="link"
-                    variantColor="blue"
-                    fontWeight={500}
-                    _hover={null}
-                    _active={null}
-                    onClick={onOpenImportPk}
-                  >
+                  <SettingsLinkButton onClick={onOpenImportPk}>
                     {t('Import')}
-                  </Button>
+                  </SettingsLinkButton>
                 ) : (
                   <Tooltip
                     label={t('Import is not available for the external node')}
                     placement="top"
                   >
                     {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
-                    <Button
-                      as={Box}
-                      variant="link"
-                      isDisabled
-                      fontWeight={500}
-                      _hover={null}
-                      _active={null}
-                      _disabled={{
-                        color: 'muted',
-                      }}
-                    >
+                    <SettingsLinkButton as={Box} isDisabled>
                       {t('Import')}
-                    </Button>
+                    </SettingsLinkButton>
                   </Tooltip>
                 )}
               </Box>
               <VDivider h={3} />
-              <Button
-                variant="link"
-                variantColor="blue"
-                fontWeight={500}
-                _hover={null}
-                _active={null}
-                onClick={onOpenExportPk}
-              >
+              <SettingsLinkButton onClick={onOpenExportPk}>
                 {t('Export')}
-              </Button>
+              </SettingsLinkButton>
             </Stack>
           </Flex>
           <HDivider />
@@ -133,38 +108,38 @@ function Settings() {
         <DevSettingsSection title={t('Flips')}>
           <Stack spacing={2}>
             <Box>
-              <PrimaryButton
+              <SettingsLinkButton
                 onClick={() => {
                   clearFlips()
                   showSuccessToast(t('Flips deleted'))
                 }}
               >
                 {t('Clear flips')}
-              </PrimaryButton>
+              </SettingsLinkButton>
             </Box>
             <Box>
-              <PrimaryButton
+              <SettingsLinkButton
                 onClick={() => {
                   archiveFlips()
                   showSuccessToast(t('Flips archived'))
                 }}
               >
                 {t('Archive flips')}
-              </PrimaryButton>
+              </SettingsLinkButton>
             </Box>
           </Stack>
         </DevSettingsSection>
 
         <DevSettingsSection title={t('Invites')}>
           <Box my={4}>
-            <PrimaryButton
+            <SettingsLinkButton
               onClick={() => {
                 inviteDb.clearInvites()
                 showSuccessToast(t('Invites removed'))
               }}
             >
               {t('Clear invites')}
-            </PrimaryButton>
+            </SettingsLinkButton>
           </Box>
         </DevSettingsSection>
       </Stack>
