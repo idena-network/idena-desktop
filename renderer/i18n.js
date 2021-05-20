@@ -70,42 +70,6 @@ export const AVAILABLE_LANGS = [
   'ja',
 ]
 
-export const flagEmojis = {
-  en: '🌐',
-  id: '🇮🇩',
-  fr: '🇫🇷',
-  de: '🇩🇪',
-  es: '🇪🇸',
-  ru: '🇷🇺',
-  zh: '🇨🇳',
-  ko: '🇰🇷',
-  hr: '🇭🇷',
-  hi: '🇮🇳',
-  uk: '🇺🇦',
-  sr: '🇷🇸',
-  ro: '🇷🇴',
-  it: '🇮🇹',
-  pt: '🇵🇹',
-  pl: '🇵🇱',
-  sl: '🇸🇮',
-  tr: '🇹🇷',
-  bg: '🇧🇬',
-  sv: '🇸🇪',
-  ja: '🇯🇵',
-}
-
-export const matchCountry = locale => {
-  const irregular = {
-    en: 'us',
-    zh: 'cn',
-    ko: 'kr',
-    hi: 'in',
-    uk: 'ua',
-    ja: 'jp',
-  }
-  return irregular[locale] ?? locale
-}
-
 export const isoLangs = {
   ab: {
     name: 'Abkhaz',

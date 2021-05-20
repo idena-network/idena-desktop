@@ -1,18 +1,13 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react'
 import {
-  Box,
   Button,
   Flex,
   FormControl,
-  Icon,
   IconButton,
   InputGroup,
   InputRightElement,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
+  Select,
   Stack,
   Text,
   useClipboard,
@@ -296,53 +291,18 @@ export function LocaleSwitcher() {
   const {changeLanguage} = useSettingsDispatch()
 
   return (
-    <Menu autoSelect={false}>
-      <MenuButton
-        borderColor="gray.300"
-        borderWidth={1}
-        rounded="md"
-        py={2}
-        px={3}
-        w="sm"
-        _focus={{shadow: 'outline', outline: 'none'}}
-      >
-        <Flex justify="space-between">
-          <Box>
-            {isoLangs[i18n.language]?.nativeName} (
-            {i18n.language?.toUpperCase()})
-          </Box>
-          <Icon name="chevron-down" />
-        </Flex>
-      </MenuButton>
-      <MenuList
-        placement="auto-end"
-        border="none"
-        shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
-        rounded="lg"
-        py={2}
-        minW={40}
-        h={48}
-        overflowY="auto"
-      >
-        {AVAILABLE_LANGS.map(lang => (
-          <MenuItem
-            key={lang}
-            fontWeight={500}
-            px={3}
-            py="3/2"
-            _hover={{bg: 'gray.50'}}
-            _focus={{bg: 'gray.50'}}
-            _selected={{bg: 'gray.50'}}
-            _active={{bg: 'gray.50'}}
-            onClick={() => {
-              i18n.changeLanguage(lang)
-              changeLanguage(lang)
-            }}
-          >
-            {isoLangs[lang].nativeName} ({lang.toUpperCase()})
-          </MenuItem>
-        ))}
-      </MenuList>
-    </Menu>
+    <Select value={i18n.language} borderColor="gray.300" h={8}>
+      {AVAILABLE_LANGS.map(lang => (
+        <option
+          key={lang}
+          onClick={() => {
+            i18n.changeLanguage(lang)
+            changeLanguage(lang)
+          }}
+        >
+          {isoLangs[lang].nativeName} ({lang.toUpperCase()})
+        </option>
+      ))}
+    </Select>
   )
 }

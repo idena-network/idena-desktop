@@ -62,11 +62,13 @@ function Settings() {
   return (
     <SettingsLayout>
       <Stack spacing={10} mt={8}>
-        <SettingsSection title={t('Language')}>
-          <FormLabel color="muted" fontWeight="normal" w={32}>
-            {t('Language')}
-          </FormLabel>
-          <LocaleSwitcher />
+        <SettingsSection title={t('Interface')}>
+          <Flex align="center">
+            <FormLabel color="muted" fontWeight="normal" w={32}>
+              {t('Language')}
+            </FormLabel>
+            <LocaleSwitcher />
+          </Flex>
         </SettingsSection>
 
         <SettingsSection title={t('Private key')}>
