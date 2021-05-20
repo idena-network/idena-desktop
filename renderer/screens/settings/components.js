@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {Box, FormControl, Heading, Stack} from '@chakra-ui/core'
-import {FormLabel, Input} from '../../shared/components/components'
+import {FormLabel} from '../../shared/components/components'
 
 export function SettingsFormControl({children, ...props}) {
   return (
@@ -14,11 +14,9 @@ export function SettingsFormControl({children, ...props}) {
 }
 
 export function SettingsFormLabel(props) {
-  return <FormLabel color="muted" fontWeight={400} {...props} />
-}
-
-export function SettingsInput(props) {
-  return <Input w="xs" {...props} />
+  return (
+    <FormLabel color="muted" fontWeight={400} minW={40} w={40} {...props} />
+  )
 }
 
 export function SettingsSection({title, children, ...props}) {

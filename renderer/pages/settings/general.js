@@ -28,6 +28,7 @@ import {
 } from '../../shared/components/components'
 import {
   ExportPrivateKeyDialog,
+  ImportPrivateKeyDialog,
   LocaleSwitcher,
 } from '../../screens/settings/containers'
 
@@ -38,7 +39,8 @@ function Settings() {
   const {t} = useTranslation()
 
   const toast = useToast()
-  const toastify = title =>
+
+  const showSuccessToast = title =>
     toast({
       // eslint-disable-next-line react/display-name
       render: () => <Toast title={title} />,
@@ -50,6 +52,12 @@ function Settings() {
     isOpen: isOpenExportPk,
     onOpen: onOpenExportPk,
     onClose: onCloseExportPk,
+  } = useDisclosure()
+
+  const {
+    isOpen: isOpenImportPk,
+    onOpen: onOpenImportPk,
+    onClose: onCloseImportPk,
   } = useDisclosure()
 
   return (
@@ -80,6 +88,7 @@ function Settings() {
                     fontWeight={500}
                     _hover={null}
                     _active={null}
+                    onClick={onOpenImportPk}
                   >
                     {t('Import')}
                   </Button>
@@ -127,7 +136,7 @@ function Settings() {
               <PrimaryButton
                 onClick={() => {
                   clearFlips()
-                  toastify(t('Flips deleted'))
+                  showSuccessToast(t('Flips deleted'))
                 }}
               >
                 {t('Clear flips')}
@@ -137,7 +146,7 @@ function Settings() {
               <PrimaryButton
                 onClick={() => {
                   archiveFlips()
-                  toastify(t('Flips archived'))
+                  showSuccessToast(t('Flips archived'))
                 }}
               >
                 {t('Archive flips')}
@@ -151,7 +160,7 @@ function Settings() {
             <PrimaryButton
               onClick={() => {
                 inviteDb.clearInvites()
-                toastify(t('Invites removed'))
+                showSuccessToast(t('Invites removed'))
               }}
             >
               {t('Clear invites')}
@@ -163,6 +172,11 @@ function Settings() {
       <ExportPrivateKeyDialog
         isOpen={isOpenExportPk}
         onClose={onCloseExportPk}
+      />
+
+      <ImportPrivateKeyDialog
+        isOpen={isOpenImportPk}
+        onClose={onCloseImportPk}
       />
     </SettingsLayout>
   )

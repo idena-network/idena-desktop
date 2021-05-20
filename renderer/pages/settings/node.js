@@ -27,11 +27,10 @@ import {
   useNodeDispatch,
 } from '../../shared/providers/node-context'
 import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
-import {Toast} from '../../shared/components/components'
+import {Input, Toast} from '../../shared/components/components'
 import {
   SettingsFormControl,
   SettingsFormLabel,
-  SettingsInput,
   SettingsSection,
 } from '../../screens/settings/components'
 
@@ -208,7 +207,7 @@ function NodeSettings() {
                 <SettingsFormLabel htmlFor="url">
                   {t('Node address')}
                 </SettingsFormLabel>
-                <SettingsInput
+                <Input
                   id="url"
                   value={state.url}
                   onChange={e =>
@@ -220,8 +219,8 @@ function NodeSettings() {
                 <SettingsFormLabel htmlFor="key">
                   {t('Node api key')}
                 </SettingsFormLabel>
-                <InputGroup>
-                  <SettingsInput
+                <InputGroup w="full">
+                  <Input
                     id="key"
                     value={state.apiKey}
                     type={revealApiKey ? 'text' : 'password'}

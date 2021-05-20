@@ -16,12 +16,13 @@ import {
   Stack,
   Text,
   useClipboard,
+  useToast,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import QrCode from 'qrcode.react'
 import {useMachine} from '@xstate/react'
 import {createMachine} from 'xstate'
-import {assign, log} from 'xstate/lib/actions'
+import {assign} from 'xstate/lib/actions'
 import {FiEye, FiEyeOff} from 'react-icons/fi'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
@@ -30,13 +31,12 @@ import {
   DialogFooter,
   FormLabel,
   Input,
+  Toast,
 } from '../../shared/components/components'
 import {FillCenter} from '../oracles/components'
 import {callRpc, eitherState} from '../../shared/utils/utils'
-import {useNotificationDispatch} from '../../shared/providers/notification-context'
 import {useNodeDispatch} from '../../shared/providers/node-context'
 import {importKey} from '../../shared/api'
-import {SettingsInput} from './components'
 import {useSettingsDispatch} from '../../shared/providers/settings-context'
 import {AVAILABLE_LANGS, isoLangs} from '../../i18n'
 
@@ -60,9 +60,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
           },
         },
         encoding: {
-          entry: [log()],
           invoke: {
-            // eslint-disable-next-line no-shadow
             src: ({password}) => callRpc('dna_exportKey', password),
             onDone: 'encoded',
             onError: 'fail',
@@ -80,13 +78,13 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
     })
   )
 
-  const {password, encodedPrivateKey} = current.context
+  const {encodedPrivateKey} = current.context
 
   const is = state => eitherState(current, state)
 
   const [revealPassword, setRevealPassword] = React.useState()
 
-  const {onCopy} = useClipboard(password)
+  const {onCopy} = useClipboard(encodedPrivateKey)
 
   return (
     <Dialog
@@ -95,7 +93,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
       onClose={onClose}
       {...props}
     >
-      <DialogBody>
+      <DialogBody minH={48}>
         {is('password') && (
           <Stack spacing={5}>
             <Text color="muted" fontSize="mdx">
@@ -174,75 +172,114 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
   )
 }
 
-export function ImportPK() {
-  const {t} = useTranslation('error')
-  const [password, setPassword] = React.useState()
-  const [key, setKey] = React.useState()
-  const {addError, addNotification} = useNotificationDispatch()
+export function ImportPrivateKeyDialog(props) {
+  const {t} = useTranslation()
+
+  const toast = useToast()
+
   const {importNodeKey} = useNodeDispatch()
+
+  const [password, setPassword] = React.useState()
+
+  const [key, setKey] = React.useState()
 
   const submit = async () => {
     try {
       const {error} = await importKey(key, password)
       if (error) {
-        addError({
-          title: t('error:Error while importing key'),
-          body: error.message,
+        toast({
+          status: 'error',
+          // eslint-disable-next-line react/display-name
+          render: () => (
+            <Toast
+              title={t('Error while importing key')}
+              description={error.message}
+              status="error"
+            />
+          ),
         })
       } else {
         importNodeKey()
-        addNotification({
-          title: 'Success',
-          body: t(
-            'translation:Key was imported, please, wait, while node is restarting'
+        toast({
+          // eslint-disable-next-line react/display-name
+          render: () => (
+            <Toast
+              title={t('Success')}
+              description={t(
+                'Key was imported, please, wait, while node is restarting'
+              )}
+            />
           ),
         })
         setKey('')
         setPassword('')
       }
     } catch (e) {
-      addError({
-        title: t('error:Error while importing key'),
-        body: t(
-          'error:Internal node is not available, try again in a few seconds'
+      toast({
+        status: 'error',
+        // eslint-disable-next-line react/display-name
+        render: () => (
+          <Toast
+            title={t('Error while importing key')}
+            description={t(
+              'Internal node is not available, try again in a few seconds'
+            )}
+            status="error"
+          />
         ),
       })
     }
   }
 
   return (
-    <form
-      onSubmit={async e => {
-        e.preventDefault()
-        await submit()
-      }}
-    >
-      <FormLabel htmlFor="key">
-        {t('translation:Encrypted private key')}
-      </FormLabel>
-      <SettingsInput
-        value={key}
-        type="text"
-        mr={4}
-        onChange={e => setKey(e.target.value)}
-      />
-      <FormLabel htmlFor="password">{t('translation:Password')}</FormLabel>
-      <SettingsInput
-        value={password}
-        type="password"
-        mr={4}
-        onChange={e => setPassword(e.target.value)}
-      />
-      <PrimaryButton type="submit" disabled={!password || !key}>
-        {t('translation:Import')}
-      </PrimaryButton>
-    </form>
+    <Dialog title={t('Import private key')} {...props}>
+      <DialogBody>
+        <form
+          onSubmit={async e => {
+            e.preventDefault()
+            await submit()
+          }}
+        >
+          <Stack spacing={5}>
+            <Text color="muted" fontSize="mdx">
+              {t('Create a new password to export your private key')}
+            </Text>
+            <FormControl>
+              <FormLabel htmlFor="key">{t('Encrypted private key')}</FormLabel>
+              <Input
+                value={key}
+                type="text"
+                onChange={e => setKey(e.target.value)}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="password">{t('Password')}</FormLabel>
+              <Input
+                value={password}
+                type="password"
+                mr={4}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </FormControl>
+          </Stack>
+        </form>
+      </DialogBody>
+      <DialogFooter>
+        {/* eslint-disable-next-line react/destructuring-assignment */}
+        <SecondaryButton onClick={props.onClose}>{t('Close')}</SecondaryButton>
+        <PrimaryButton type="submit" disabled={!password || !key}>
+          {t('Import')}
+        </PrimaryButton>
+      </DialogFooter>
+    </Dialog>
   )
 }
 
 export function LocaleSwitcher() {
   const {i18n} = useTranslation()
+
   const {changeLanguage} = useSettingsDispatch()
+
   return (
     <Menu autoSelect={false}>
       <MenuButton
