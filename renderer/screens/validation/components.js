@@ -1122,7 +1122,7 @@ export function EncourageReportDialog({...props}) {
   )
 }
 
-export function BadFlipDialog(props) {
+export function BadFlipDialog({title, subtitle, ...props}) {
   const {t} = useTranslation()
 
   const [setIndex, setSetIndex] = React.useState(0)
@@ -1173,13 +1173,9 @@ export function BadFlipDialog(props) {
             <Stack spacing={4}>
               <ChakraBox>
                 <Heading fontSize="lg" fontWeight={500} lineHeight="32px">
-                  {t('What is bad flip?')}
+                  {title}
                 </Heading>
-                <Text color="muted">
-                  {t(
-                    'Bad flips are reported by consensus and can result in validation reward loss.'
-                  )}
-                </Text>
+                <Text color="muted">{subtitle}</Text>
               </ChakraBox>
               <List as="ul">
                 <BadFlipListItem

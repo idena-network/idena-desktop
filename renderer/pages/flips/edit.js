@@ -1,6 +1,6 @@
 import React from 'react'
 import {useRouter} from 'next/router'
-import {Box, Flex, useToast, Divider} from '@chakra-ui/core'
+import {Box, Flex, useToast, Divider, useDisclosure} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page} from '../../screens/app/components'
@@ -36,6 +36,7 @@ import {
 } from '../../shared/components/button'
 import {FloatDebug, Toast} from '../../shared/components/components'
 import Layout from '../../shared/components/layout'
+import {BadFlipDialog} from '../../screens/validation/components'
 
 export default function EditFlipPage() {
   const {t, i18n} = useTranslation()
@@ -120,6 +121,12 @@ export default function EditFlipPage() {
   const is = state => current?.matches({editing: state})
 
   const isOffline = is('keywords.loaded.fetchTranslationsFailed')
+
+  const {
+    isOpen: isOpenBadFlipDialog,
+    onOpen: onOpenBadFlipDialog,
+    onClose: onCloseBadFlipDialog,
+  } = useDisclosure()
 
   return (
     <Layout syncing={syncing}>
@@ -238,6 +245,9 @@ export default function EditFlipPage() {
                       >
                         {t('Change words')}
                       </IconButton2>
+                      <IconButton2 icon="info" onClick={onOpenBadFlipDialog}>
+                        {t('What is a bad flip')}
+                      </IconButton2>
                     </FlipStoryAside>
                   </FlipStepBody>
                 </FlipStoryStep>
@@ -312,6 +322,16 @@ export default function EditFlipPage() {
             </PrimaryButton>
           )}
         </FlipMasterFooter>
+
+        <BadFlipDialog
+          isOpen={isOpenBadFlipDialog}
+          title={t('What is a bad flip?')}
+          subtitle={t(
+            'Please read the rules carefully. You can lose all your validation rewards if any of your flips is reported.'
+          )}
+          onClose={onCloseBadFlipDialog}
+        />
+
         {global.isDev && <FloatDebug>{current.value}</FloatDebug>}
       </Page>
     </Layout>

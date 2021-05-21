@@ -414,6 +414,10 @@ function ValidationSession({
 
       <BadFlipDialog
         isOpen={isReportDialogOpen}
+        title={t('The flip is to be reported')}
+        subtitle={t(
+          `You'll get rewards for reported flips if these flip are also reported by other participants (more than 50% of qualification committee).`
+        )}
         onClose={onCloseReportDialog}
       />
 
