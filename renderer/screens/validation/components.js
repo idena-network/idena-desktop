@@ -27,8 +27,13 @@ import {
   AlertIcon,
   Button,
   useTheme,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  Image,
   List,
   ListItem,
+  AspectRatioBox,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
@@ -1114,5 +1119,228 @@ export function EncourageReportDialog({...props}) {
         )}
       </DialogBody>
     </ValidationDialog>
+  )
+}
+
+export function BadFlipDialog({title, subtitle, ...props}) {
+  const {t} = useTranslation()
+
+  const [setIndex, setSetIndex] = React.useState(0)
+
+  const dirs = [
+    '1-keywords-vase-coffee',
+    '2-numbers',
+    '3-labels',
+    '4-text',
+    '5-inappropriate-content',
+  ]
+  // eslint-disable-next-line no-shadow
+  const flipUrl = (setIndex, idx) =>
+    `/static/flips/${dirs[setIndex]}/${idx}.jpg`
+
+  return (
+    <Modal isCentered size={664} {...props}>
+      <ModalOverlay bg="xblack.080" />
+      <ModalContent
+        bg="transparent"
+        color="brandGray.500"
+        fontSize="md"
+        rounded="lg"
+      >
+        <Stack isInline spacing={28}>
+          <Stack
+            spacing={0}
+            borderColor="brandGray.016"
+            borderWidth={1}
+            minW={120}
+            position="relative"
+          >
+            <BadFlipPartFrame setIndex={setIndex} />
+            <BadFlipImage src={flipUrl(setIndex, 1)} roundedTop="md" />
+            <BadFlipImage src={flipUrl(setIndex, 2)} />
+            <BadFlipImage src={flipUrl(setIndex, 3)} />
+            <BadFlipImage src={flipUrl(setIndex, 4)} roundedBottom="md" />
+          </Stack>
+          <ChakraFlex
+            direction="column"
+            justify="space-between"
+            spacing={7}
+            bg="white"
+            borderRadius="lg"
+            p={8}
+            w={440}
+          >
+            <Stack spacing={4}>
+              <ChakraBox>
+                <Heading fontSize="lg" fontWeight={500} lineHeight="32px">
+                  {title}
+                </Heading>
+                <Text color="muted">{subtitle}</Text>
+              </ChakraBox>
+              <List as="ul">
+                <BadFlipListItem
+                  setIndex={0}
+                  description={t(
+                    `Vase / Coffee. 'Coffee' keyword can not be found on the images`
+                  )}
+                  isActive={setIndex === 0}
+                  onClick={() => {
+                    setSetIndex(0)
+                  }}
+                >
+                  {t('One of the keywords is not clearly visible in the story')}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  setIndex={1}
+                  isActive={setIndex === 1}
+                  onClick={() => {
+                    setSetIndex(1)
+                  }}
+                >
+                  {t('There are numbers or letters indicating the order')}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  setIndex={2}
+                  isActive={setIndex === 2}
+                  onClick={() => {
+                    setSetIndex(2)
+                  }}
+                >
+                  {t('There are labels indicating the right order')}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  setIndex={3}
+                  description={t(
+                    'Some of the Idena users can not not read your the text in your local language'
+                  )}
+                  isActive={setIndex === 3}
+                  onClick={() => {
+                    setSetIndex(3)
+                  }}
+                >
+                  {t(
+                    'There is text that is necessary to read to solve the flip'
+                  )}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  setIndex={4}
+                  isActive={setIndex === 4}
+                  onClick={() => {
+                    setSetIndex(4)
+                  }}
+                >
+                  {t('There is inappropriate content')}
+                </BadFlipListItem>
+              </List>
+            </Stack>
+            <Stack isInline justify="flex-end">
+              {/* eslint-disable-next-line react/destructuring-assignment */}
+              <SecondaryButton onClick={props.onClose}>
+                {t('Skip')}
+              </SecondaryButton>
+              <PrimaryButton
+                isDisabled={setIndex === dirs.length - 1}
+                onClick={() => setSetIndex(setIndex + 1)}
+              >
+                {t('Next')}
+              </PrimaryButton>
+            </Stack>
+          </ChakraFlex>
+        </Stack>
+      </ModalContent>
+    </Modal>
+  )
+}
+
+function BadFlipImage(props) {
+  return (
+    <AspectRatioBox ratio={4 / 3} h={100}>
+      <Image {...props} />
+    </AspectRatioBox>
+  )
+}
+
+function BadFlipListItem({
+  setIndex,
+  description,
+  isActive,
+  children,
+  ...props
+}) {
+  return (
+    <ListItem py={2} cursor="pointer" {...props}>
+      <Stack isInline>
+        <BadFlipListItemCircle
+          bg={isActive ? 'red.500' : 'red.012'}
+          color={isActive ? 'white' : 'red.500'}
+        >
+          {setIndex + 1}
+        </BadFlipListItemCircle>
+        <Stack spacing={1}>
+          <Text>{children}</Text>
+          {isActive && description && (
+            <Text color="muted" fontSize={12}>
+              {description}
+            </Text>
+          )}
+        </Stack>
+      </Stack>
+    </ListItem>
+  )
+}
+
+function BadFlipListItemCircle(props) {
+  return (
+    <ChakraFlex
+      align="center"
+      justify="center"
+      rounded="full"
+      fontSize={10}
+      fontWeight={500}
+      minW={18}
+      w={18}
+      h={18}
+      {...props}
+    />
+  )
+}
+
+function BadFlipPartFrame({setIndex, ...props}) {
+  const framePosition = [
+    {},
+    {},
+    {top: 100 * 3 - 4, bottom: -4},
+    {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
+    {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
+  ]
+  return (
+    <ChakraBox
+      position="absolute"
+      borderWidth={2}
+      borderColor="red.500"
+      borderRadius="md"
+      boxShadow="0 0 0 4px rgba(255, 102, 102, 0.25)"
+      top={-4}
+      left={-4}
+      right={-4}
+      bottom={-4}
+      {...framePosition[setIndex]}
+      transition="all 0.2s ease-out"
+      zIndex={1}
+      {...props}
+    >
+      <ChakraFlex
+        align="center"
+        justify="center"
+        bg="red.500"
+        borderRadius="full"
+        size={8}
+        position="absolute"
+        right={-20}
+        bottom={-20}
+      >
+        <Icon name="block" size={5} />
+      </ChakraFlex>
+    </ChakraBox>
   )
 }

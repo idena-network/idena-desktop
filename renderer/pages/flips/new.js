@@ -1,6 +1,6 @@
 import React from 'react'
 import {useRouter} from 'next/router'
-import {Box, Flex, useToast, Divider} from '@chakra-ui/core'
+import {Box, Flex, useToast, Divider, useDisclosure} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Page} from '../../screens/app/components'
@@ -42,6 +42,8 @@ import {Toast, FloatDebug} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
+import {BadFlipDialog} from '../../screens/validation/components'
+import {requestDb} from '../../shared/utils/db'
 
 export default function NewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -59,6 +61,17 @@ export default function NewFlipPage() {
     },
     services: {
       prepareFlip: async () => {
+        // eslint-disable-next-line no-shadow
+        let didShowBadFlip
+
+        try {
+          didShowBadFlip = await global
+            .sub(requestDb(), 'flips')
+            .get('didShowBadFlip')
+        } catch {
+          didShowBadFlip = false
+        }
+
         if (
           flipKeyWordPairs === null ||
           flipKeyWordPairs.every(({used}) => used)
@@ -66,6 +79,7 @@ export default function NewFlipPage() {
           return {
             keywordPairId: 0,
             availableKeywords: [getRandomKeywordPair()],
+            didShowBadFlip,
           }
 
         const persistedFlips = global.flipStore?.getFlips()
@@ -78,7 +92,7 @@ export default function NewFlipPage() {
         // eslint-disable-next-line no-shadow
         const [{id: keywordPairId}] = availableKeywords
 
-        return {keywordPairId, availableKeywords}
+        return {keywordPairId, availableKeywords, didShowBadFlip}
       },
       submitFlip: async flip => publishFlip(flip),
     },
@@ -121,12 +135,19 @@ export default function NewFlipPage() {
     order,
     showTranslation,
     isCommunityTranslationsExpanded,
+    didShowBadFlip,
   } = current.context
 
   const not = state => !current.matches({editing: state})
   const is = state => current.matches({editing: state})
 
   const isOffline = is('keywords.loaded.fetchTranslationsFailed')
+
+  const {
+    isOpen: isOpenBadFlipDialog,
+    onOpen: onOpenBadFlipDialog,
+    onClose: onCloseBadFlipDialog,
+  } = useDisclosure()
 
   return (
     <Layout syncing={syncing}>
@@ -251,6 +272,9 @@ export default function NewFlipPage() {
                           ? `(#${keywordPairId + 1})`
                           : null}
                       </IconButton2>
+                      <IconButton2 icon="info" onClick={onOpenBadFlipDialog}>
+                        {t('What is a bad flip')}
+                      </IconButton2>
                     </FlipStoryAside>
                   </FlipStepBody>
                 </FlipStoryStep>
@@ -325,6 +349,20 @@ export default function NewFlipPage() {
             </PrimaryButton>
           )}
         </FlipMasterFooter>
+
+        <BadFlipDialog
+          isOpen={isOpenBadFlipDialog || !didShowBadFlip}
+          title={t('What is a bad flip?')}
+          subtitle={t(
+            'Please read the rules carefully. You can lose all your validation rewards if any of your flips is reported.'
+          )}
+          onClose={async () => {
+            await global.sub(requestDb(), 'flips').put('didShowBadFlip', 1)
+            send('SKIP_BAD_FLIP')
+            onCloseBadFlipDialog()
+          }}
+        />
+
         {global.isDev && (
           <FloatDebug>{JSON.stringify(current.value)}</FloatDebug>
         )}
