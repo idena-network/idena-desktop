@@ -1,16 +1,16 @@
 {
-  "Can not submit flip": "Flip gönderilemiyor",
+  "Can not submit flip": "Anahtarlama gönderilemiyor",
   "Keywords are not specified": "Anahtar kelimeler belirtilmedi",
-  "Error while uploading flip": "Flip karşıya yükleme hatası",
+  "Error while uploading flip": "Anahtarlama karşıya yüklenirken bir hata oluştu",
   "Something went wrong": "Bir şeyler ters gitti",
-  "Maximum image size exceeded": "Resim boyutu en yüksek boyutu geçiyor",
+  "Maximum image size exceeded": "Resim boyutu maksimum boyutu geçiyor",
   "Error while importing key": "Anahtar içe aktarılırken bir hata oluştu",
-  "Internal node is not available, try again in a few seconds": "Yerleşik node bulunamadı, daha sonra tekrar dene",
-  "You can not submit flips having 'Candidate' status": "'Aday' seviyesinde flip gönderemezsin",
-  "You cannot submit more flips until the next validation": "Bir sonraki oturuma kadar daha fazla flip gönderemezsin",
-  "Can not submit flip during the validation session": "Onay oturumu süresince flip gönderilemez",
-  "Error while sending transaction": "İşlem gönderilirken bir hata oluştu",
-  "Transaction sent": "İşlem gönderildi",
-  "Error while deleting flip": "Flip silinirken bir hata oluştu",
-  "It's not allowed to submit flips with your identity status": "Şu andaki seviyende flip göndermek için yetkin bulunmuyor"
+  "Internal node is not available, try again in a few seconds": "Yerleşik düğüm(node) bulunamadı, daha sonra tekrar dene",
+  "You can not submit flips having 'Candidate' status": "'Aday' seviyesinde anahtarlama gönderemezsin",
+  "You cannot submit more flips until the next validation": "Bir sonraki oturuma kadar daha fazla anahtarlama gönderemezsin",
+  "Can not submit flip during the validation session": "Onay oturumu süresince anahtarlama gönderilemez",
+  "Error while sending transaction": "İşlem gerçekleştirilirken bir hata oluştu",
+  "Transaction sent": "İşlem gerçekleştirildi",
+  "Error while deleting flip": "Anahtarlama silinirken bir hata oluştu",
+  "It's not allowed to submit flips with your identity status": "Şu andaki seviyende anahtarlama göndermek için yetkiniz bulunmuyor"
 }
