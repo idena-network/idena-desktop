@@ -1017,6 +1017,7 @@ export const createValidationMachine = ({
                   RelevanceType.Irrelevant
                     ? reportedFlipsCount
                     : reportedFlipsCount + 1,
+                didReport: () => true,
               }),
               log(),
             ],
