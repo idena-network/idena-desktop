@@ -81,7 +81,7 @@ function Settings() {
               </Text>
             </Stack>
             <Stack isInline align="center">
-              <Box>
+              <Flex align="center">
                 {runInternalNode && !useExternalNode ? (
                   <SettingsLinkButton onClick={onOpenImportPk}>
                     {t('Import')}
@@ -90,14 +90,14 @@ function Settings() {
                   <Tooltip
                     label={t('Import is not available for the external node')}
                     placement="top"
+                    shouldWrapChildren
                   >
-                    {/* TODO: pretending to be a Box until https://github.com/chakra-ui/chakra-ui/pull/2272 caused by https://github.com/facebook/react/issues/11972 */}
-                    <SettingsLinkButton as={Box} isDisabled>
+                    <SettingsLinkButton as={Box} d="flex" isDisabled>
                       {t('Import')}
                     </SettingsLinkButton>
                   </Tooltip>
                 )}
-              </Box>
+              </Flex>
               <VDivider h={3} />
               <SettingsLinkButton onClick={onOpenExportPk}>
                 {t('Export')}
