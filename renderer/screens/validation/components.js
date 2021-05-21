@@ -27,6 +27,10 @@ import {
   AlertIcon,
   Button,
   useTheme,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  Image,
   List,
   ListItem,
 } from '@chakra-ui/core'
@@ -1114,5 +1118,176 @@ export function EncourageReportDialog({...props}) {
         )}
       </DialogBody>
     </ValidationDialog>
+  )
+}
+
+export function BadFlipDialog(props) {
+  const {t} = useTranslation()
+
+  const [index, setIndex] = React.useState(0)
+
+  return (
+    <Modal isCentered size={664} {...props}>
+      <ModalOverlay bg="xblack.080" />
+      <ModalContent
+        bg="transparent"
+        color="brandGray.500"
+        fontSize="md"
+        rounded="lg"
+      >
+        <Stack isInline spacing={10}>
+          <Stack isInline spacing={6}>
+            <Stack
+              spacing={0}
+              borderColor="brandGray.016"
+              borderWidth={1}
+              minW={120}
+              position="relative"
+            >
+              <ChakraBox
+                position="absolute"
+                borderWidth={2}
+                borderColor="red.500"
+                borderRadius="md"
+                boxShadow="0 0 0 4px rgba(255, 102, 102, 0.25)"
+                top={0}
+                left={-5}
+                h={98}
+                w={128}
+                zIndex={1}
+                transform={`translateY(${90 * index - 8}px)`}
+                transition="all 0.2s ease-out"
+              />
+              <Image src="https://placekitten.com/120/90" roundedTop="md" />
+              <Image src="https://placekitten.com/120/90" />
+              <Image src="https://placekitten.com/120/90" />
+              <Image src="https://placekitten.com/120/90" roundedBottom="md" />
+            </Stack>
+            <Stack
+              spacing={0}
+              borderColor="brandGray.016"
+              borderWidth={1}
+              minW={120}
+            >
+              <Image src="https://placekitten.com/120/90" roundedTop="md" />
+              <Image src="https://placekitten.com/120/90" />
+              <Image src="https://placekitten.com/120/90" />
+              <Image src="https://placekitten.com/120/90" roundedBottom="md" />
+            </Stack>
+          </Stack>
+          <Stack spacing={7} bg="white" borderRadius="lg" p={8} pt={6}>
+            <Stack spacing={8}>
+              <Stack spacing={4}>
+                <ChakraBox>
+                  <Heading fontSize="lg" fontWeight={500} lineHeight="32px">
+                    {t('What is bad flip?')}
+                  </Heading>
+                  <Text color="muted">
+                    {t(
+                      'Bad flips are reported by consensus and can result in validation reward loss.'
+                    )}
+                  </Text>
+                </ChakraBox>
+                <List as="ul">
+                  <BadFlipListItem
+                    index={0}
+                    explainer={t(
+                      'One of the keywords cannot be found on image'
+                    )}
+                    isActive={index === 0}
+                    onClick={() => {
+                      setIndex(0)
+                    }}
+                  >
+                    {t('Innapropriate content')}
+                  </BadFlipListItem>
+                  <BadFlipListItem
+                    index={1}
+                    explainer={t(
+                      'Some of the Idena users can not not read your the text in your local language'
+                    )}
+                    isActive={index === 1}
+                    onClick={() => {
+                      setIndex(1)
+                    }}
+                  >
+                    {t('Numbers or letters on flip images')}
+                  </BadFlipListItem>
+                  <BadFlipListItem
+                    index={2}
+                    explainer={t(
+                      'Some of the Idena users can not not read your the text in your local language'
+                    )}
+                    isActive={index === 2}
+                    onClick={() => {
+                      setIndex(2)
+                    }}
+                  >
+                    {t('No logical story')}
+                  </BadFlipListItem>
+                  <BadFlipListItem
+                    index={3}
+                    explainer={t(
+                      'Some of the Idena users can not not read your the text in your local language'
+                    )}
+                    isActive={index === 3}
+                    onClick={() => {
+                      setIndex(3)
+                    }}
+                  >
+                    {t('Objects in images in sequence (1-2-3-4)')}
+                  </BadFlipListItem>
+                </List>
+              </Stack>
+              <Flex justify="flex-end">
+                {/* eslint-disable-next-line react/destructuring-assignment */}
+                <PrimaryButton onClick={props.onClose}>
+                  {t('Next')}
+                </PrimaryButton>
+              </Flex>
+            </Stack>
+          </Stack>
+        </Stack>
+      </ModalContent>
+    </Modal>
+  )
+}
+
+function BadFlipListItem({index, explainer, isActive, children, ...props}) {
+  return (
+    <ListItem py={2} cursor="pointer" {...props}>
+      <Stack isInline>
+        <BadFlipListItemCircle
+          bg={isActive ? 'red.500' : 'red.012'}
+          color={isActive ? 'white' : 'red.500'}
+        >
+          {index + 1}
+        </BadFlipListItemCircle>
+        <Stack spacing={1}>
+          <Text>{children}</Text>
+          {isActive && (
+            <Text color="muted" fontSize={12}>
+              {explainer}
+            </Text>
+          )}
+        </Stack>
+      </Stack>
+    </ListItem>
+  )
+}
+
+function BadFlipListItemCircle(props) {
+  return (
+    <ChakraFlex
+      align="center"
+      justify="center"
+      rounded="full"
+      fontSize={10}
+      fontWeight={500}
+      minW={18}
+      w={18}
+      h={18}
+      {...props}
+    />
   )
 }
