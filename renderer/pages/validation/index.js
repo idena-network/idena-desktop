@@ -398,12 +398,6 @@ function ValidationSession({
           onSubmit={() => send('START_LONG_SESSION')}
         />
       )}
-      {state.matches('longSession.solve.answer.finishFlips') && (
-        <WelcomeKeywordsQualificationDialog
-          isOpen
-          onSubmit={() => send('START_KEYWORDS_QUALIFICATION')}
-        />
-      )}
 
       {state.matches('validationFailed') && (
         <ValidationFailedDialog
@@ -413,12 +407,19 @@ function ValidationSession({
       )}
 
       <BadFlipDialog
-        isOpen={isReportDialogOpen}
+        isOpen={
+          isReportDialogOpen ||
+          state.matches('longSession.solve.answer.finishFlips')
+        }
         title={t('The flip is to be reported')}
         subtitle={t(
           `You'll get rewards for reported flips if these flip are also reported by other participants (more than 50% of qualification committee).`
         )}
-        onClose={onCloseReportDialog}
+        onClose={() => {
+          if (state.matches('longSession.solve.answer.finishFlips'))
+            send('START_KEYWORDS_QUALIFICATION')
+          else onCloseReportDialog()
+        }}
       />
 
       <ReviewValidationDialog
