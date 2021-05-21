@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
@@ -5,7 +6,6 @@ import {FlipFilter, FlipFilterOption} from '../../screens/flips/components'
 import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 
-// eslint-disable-next-line react/prop-types
 function SettingsLayout({children}) {
   const router = useRouter()
   const {t} = useTranslation()
@@ -21,8 +21,8 @@ function SettingsLayout({children}) {
           <FlipFilterOption value="/settings/node">
             {t('Node')}
           </FlipFilterOption>
-          <FlipFilterOption value="/settings/oracles">
-            {t('Oracle voting')}
+          <FlipFilterOption value="/settings/advanced">
+            {t('Advanced')}
           </FlipFilterOption>
         </FlipFilter>
         {children}

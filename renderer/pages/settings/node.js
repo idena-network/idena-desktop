@@ -27,11 +27,10 @@ import {
   useNodeDispatch,
 } from '../../shared/providers/node-context'
 import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
-import {Toast} from '../../shared/components/components'
+import {Input, Toast} from '../../shared/components/components'
 import {
   SettingsFormControl,
   SettingsFormLabel,
-  SettingsInput,
   SettingsSection,
 } from '../../screens/settings/components'
 
@@ -148,49 +147,51 @@ function NodeSettings() {
   return (
     <SettingsLayout>
       <Stack spacing={8} mt={8}>
-        <Stack isInline spacing={3} align="center">
-          <Box>
-            <Switcher
-              isChecked={settings.runInternalNode}
-              onChange={() => {
-                toggleRunInternalNode(!settings.runInternalNode)
-              }}
-              bgOn={theme.colors.primary}
-            />
-          </Box>
-          <Box>
-            <Text fontWeight={500}>{t('Run built-in node')}</Text>
-            <Text color="muted">
-              {t('Use built-in node to have automatic updates')}
-            </Text>
-          </Box>
-          {settings.runInternalNode && nodeFailed && (
-            <Box mb={3}>
-              <Text color="red.500">{t('Node failed to start')}</Text>
-              <SecondaryButton onClick={() => tryRestartNode()}>
-                {t('Try restart')}
-              </SecondaryButton>
+        <Stack spacing={4}>
+          <Stack isInline spacing={4} align="center">
+            <Box>
+              <Switcher
+                isChecked={settings.runInternalNode}
+                onChange={() => {
+                  toggleRunInternalNode(!settings.runInternalNode)
+                }}
+                bgOn={theme.colors.primary}
+              />
             </Box>
-          )}
-        </Stack>
-        <Stack isInline spacing={3} align="center">
-          <Box>
-            <Switcher
-              isChecked={settings.useExternalNode}
-              onChange={() => {
-                toggleUseExternalNode(!settings.useExternalNode)
-              }}
-              bgOn={theme.colors.primary}
-            />
-          </Box>
-          <Box>
-            <Text fontWeight={500}>{t('Connect to remote node')}</Text>
-            <Text color="muted">
-              {t(
-                'Specify the Node address if you want to connect to remote node'
-              )}
-            </Text>
-          </Box>
+            <Box>
+              <Text fontWeight={500}>{t('Run built-in node')}</Text>
+              <Text color="muted">
+                {t('Use built-in node to have automatic updates')}
+              </Text>
+            </Box>
+            {settings.runInternalNode && nodeFailed && (
+              <Box>
+                <Text color="red.500">{t('Node failed to start')}</Text>
+                <SecondaryButton onClick={() => tryRestartNode()}>
+                  {t('Try restart')}
+                </SecondaryButton>
+              </Box>
+            )}
+          </Stack>
+          <Stack isInline spacing={3} align="center">
+            <Box>
+              <Switcher
+                isChecked={settings.useExternalNode}
+                onChange={() => {
+                  toggleUseExternalNode(!settings.useExternalNode)
+                }}
+                bgOn={theme.colors.primary}
+              />
+            </Box>
+            <Box>
+              <Text fontWeight={500}>{t('Connect to remote node')}</Text>
+              <Text color="muted">
+                {t(
+                  'Specify the Node address if you want to connect to remote node'
+                )}
+              </Text>
+            </Box>
+          </Stack>
         </Stack>
 
         {settings.useExternalNode && (
@@ -208,7 +209,7 @@ function NodeSettings() {
                 <SettingsFormLabel htmlFor="url">
                   {t('Node address')}
                 </SettingsFormLabel>
-                <SettingsInput
+                <Input
                   id="url"
                   value={state.url}
                   onChange={e =>
@@ -220,8 +221,8 @@ function NodeSettings() {
                 <SettingsFormLabel htmlFor="key">
                   {t('Node api key')}
                 </SettingsFormLabel>
-                <InputGroup>
-                  <SettingsInput
+                <InputGroup w="full">
+                  <Input
                     id="key"
                     value={state.apiKey}
                     type={revealApiKey ? 'text' : 'password'}
