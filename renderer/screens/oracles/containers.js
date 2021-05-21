@@ -1538,8 +1538,6 @@ export function Linkify({onClick, children}) {
   const urls = getUrls(children, {stripWWW: false})
   const parts = urls.size > 0 ? splitMany(children, ...urls) : [children]
 
-  console.log(parts, getUrls(children, {stripWWW: false}))
-
   return (
     <>
       {parts.map(part =>
