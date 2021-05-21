@@ -1122,10 +1122,10 @@ export function EncourageReportDialog({...props}) {
   )
 }
 
-export function BadFlipDialog({title, subtitle, ...props}) {
+export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
   const {t} = useTranslation()
 
-  const [setIndex, setSetIndex] = React.useState(0)
+  const [flipCase, setFlipCase] = React.useState(0)
 
   const dirs = [
     '1-keywords-vase-coffee',
@@ -1135,11 +1135,24 @@ export function BadFlipDialog({title, subtitle, ...props}) {
     '5-inappropriate-content',
   ]
   // eslint-disable-next-line no-shadow
-  const flipUrl = (setIndex, idx) =>
-    `/static/flips/${dirs[setIndex]}/${idx}.jpg`
+  const flipUrl = (flipCase, idx) =>
+    `/static/flips/${dirs[flipCase]}/${idx}.jpg`
+
+  React.useEffect(() => {
+    if (!isOpen) setFlipCase(0)
+  }, [isOpen])
+
+  const nextButtonRef = React.useRef()
 
   return (
-    <Modal isCentered size={664} {...props}>
+    <Modal
+      isOpen={isOpen}
+      isCentered
+      size={664}
+      onClose={onClose}
+      initialFocusRef={nextButtonRef}
+      {...props}
+    >
       <ModalOverlay bg="xblack.080" />
       <ModalContent
         bg="transparent"
@@ -1155,11 +1168,11 @@ export function BadFlipDialog({title, subtitle, ...props}) {
             minW={120}
             position="relative"
           >
-            <BadFlipPartFrame setIndex={setIndex} />
-            <BadFlipImage src={flipUrl(setIndex, 1)} roundedTop="md" />
-            <BadFlipImage src={flipUrl(setIndex, 2)} />
-            <BadFlipImage src={flipUrl(setIndex, 3)} />
-            <BadFlipImage src={flipUrl(setIndex, 4)} roundedBottom="md" />
+            <BadFlipPartFrame flipCase={flipCase} />
+            <BadFlipImage src={flipUrl(flipCase, 1)} roundedTop="md" />
+            <BadFlipImage src={flipUrl(flipCase, 2)} />
+            <BadFlipImage src={flipUrl(flipCase, 3)} />
+            <BadFlipImage src={flipUrl(flipCase, 4)} roundedBottom="md" />
           </Stack>
           <ChakraFlex
             direction="column"
@@ -1179,43 +1192,49 @@ export function BadFlipDialog({title, subtitle, ...props}) {
               </ChakraBox>
               <List as="ul">
                 <BadFlipListItem
-                  setIndex={0}
-                  description={t(
-                    `Vase / Coffee. 'Coffee' keyword can not be found on the images`
-                  )}
-                  isActive={setIndex === 0}
+                  flipCase={0}
+                  description={
+                    <Trans t={t} i18nKey="badFlipKeywordsVaseCoffee">
+                      Vase /{' '}
+                      <Text as="span" color="red.500">
+                        Coffee
+                      </Text>
+                      . 'Coffee' keyword can not be found on the images
+                    </Trans>
+                  }
+                  isActive={flipCase === 0}
                   onClick={() => {
-                    setSetIndex(0)
+                    setFlipCase(0)
                   }}
                 >
                   {t('One of the keywords is not clearly visible in the story')}
                 </BadFlipListItem>
                 <BadFlipListItem
-                  setIndex={1}
-                  isActive={setIndex === 1}
+                  flipCase={1}
+                  isActive={flipCase === 1}
                   onClick={() => {
-                    setSetIndex(1)
+                    setFlipCase(1)
                   }}
                 >
                   {t('There are numbers or letters indicating the order')}
                 </BadFlipListItem>
                 <BadFlipListItem
-                  setIndex={2}
-                  isActive={setIndex === 2}
+                  flipCase={2}
+                  isActive={flipCase === 2}
                   onClick={() => {
-                    setSetIndex(2)
+                    setFlipCase(2)
                   }}
                 >
                   {t('There are labels indicating the right order')}
                 </BadFlipListItem>
                 <BadFlipListItem
-                  setIndex={3}
+                  flipCase={3}
                   description={t(
-                    'Some of the Idena users can not not read your the text in your local language'
+                    'Some of the Idena users can not not read the text in your local language'
                   )}
-                  isActive={setIndex === 3}
+                  isActive={flipCase === 3}
                   onClick={() => {
-                    setSetIndex(3)
+                    setFlipCase(3)
                   }}
                 >
                   {t(
@@ -1223,10 +1242,10 @@ export function BadFlipDialog({title, subtitle, ...props}) {
                   )}
                 </BadFlipListItem>
                 <BadFlipListItem
-                  setIndex={4}
-                  isActive={setIndex === 4}
+                  flipCase={4}
+                  isActive={flipCase === 4}
                   onClick={() => {
-                    setSetIndex(4)
+                    setFlipCase(4)
                   }}
                 >
                   {t('There is inappropriate content')}
@@ -1234,15 +1253,17 @@ export function BadFlipDialog({title, subtitle, ...props}) {
               </List>
             </Stack>
             <Stack isInline justify="flex-end">
-              {/* eslint-disable-next-line react/destructuring-assignment */}
-              <SecondaryButton onClick={props.onClose}>
-                {t('Skip')}
-              </SecondaryButton>
+              <SecondaryButton onClick={onClose}>{t('Skip')}</SecondaryButton>
               <PrimaryButton
-                isDisabled={setIndex === dirs.length - 1}
-                onClick={() => setSetIndex(setIndex + 1)}
+                ref={nextButtonRef}
+                onClick={() => {
+                  if (flipCase === dirs.length - 1) onClose()
+                  else setFlipCase(flipCase + 1)
+                }}
               >
-                {t('Next')}
+                {flipCase === dirs.length - 1
+                  ? t('Ok, I understand')
+                  : t('Next')}
               </PrimaryButton>
             </Stack>
           </ChakraFlex>
@@ -1261,7 +1282,7 @@ function BadFlipImage(props) {
 }
 
 function BadFlipListItem({
-  setIndex,
+  flipCase,
   description,
   isActive,
   children,
@@ -1274,7 +1295,7 @@ function BadFlipListItem({
           bg={isActive ? 'red.500' : 'red.012'}
           color={isActive ? 'white' : 'red.500'}
         >
-          {setIndex + 1}
+          {flipCase + 1}
         </BadFlipListItemCircle>
         <Stack spacing={1}>
           <Text>{children}</Text>
@@ -1305,7 +1326,7 @@ function BadFlipListItemCircle(props) {
   )
 }
 
-function BadFlipPartFrame({setIndex, ...props}) {
+function BadFlipPartFrame({flipCase, ...props}) {
   const framePosition = [
     {},
     {},
@@ -1324,7 +1345,7 @@ function BadFlipPartFrame({setIndex, ...props}) {
       left={-4}
       right={-4}
       bottom={-4}
-      {...framePosition[setIndex]}
+      {...framePosition[flipCase]}
       transition="all 0.2s ease-out"
       zIndex={1}
       {...props}
