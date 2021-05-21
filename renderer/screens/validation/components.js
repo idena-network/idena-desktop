@@ -33,6 +33,7 @@ import {
   Image,
   List,
   ListItem,
+  AspectRatioBox,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
@@ -1124,7 +1125,18 @@ export function EncourageReportDialog({...props}) {
 export function BadFlipDialog(props) {
   const {t} = useTranslation()
 
-  const [index, setIndex] = React.useState(0)
+  const [setIndex, setSetIndex] = React.useState(0)
+
+  const dirs = [
+    '1-keywords-vase-coffee',
+    '2-numbers',
+    '3-labels',
+    '4-text',
+    '5-inappropriate-content',
+  ]
+  // eslint-disable-next-line no-shadow
+  const flipUrl = (setIndex, idx) =>
+    `/static/flips/${dirs[setIndex]}/${idx}.jpg`
 
   return (
     <Modal isCentered size={664} {...props}>
@@ -1135,125 +1147,130 @@ export function BadFlipDialog(props) {
         fontSize="md"
         rounded="lg"
       >
-        <Stack isInline spacing={10}>
-          <Stack isInline spacing={6}>
-            <Stack
-              spacing={0}
-              borderColor="brandGray.016"
-              borderWidth={1}
-              minW={120}
-              position="relative"
-            >
-              <ChakraBox
-                position="absolute"
-                borderWidth={2}
-                borderColor="red.500"
-                borderRadius="md"
-                boxShadow="0 0 0 4px rgba(255, 102, 102, 0.25)"
-                top={0}
-                left={-5}
-                h={98}
-                w={128}
-                zIndex={1}
-                transform={`translateY(${90 * index - 8}px)`}
-                transition="all 0.2s ease-out"
-              />
-              <Image src="https://placekitten.com/120/90" roundedTop="md" />
-              <Image src="https://placekitten.com/120/90" />
-              <Image src="https://placekitten.com/120/90" />
-              <Image src="https://placekitten.com/120/90" roundedBottom="md" />
-            </Stack>
-            <Stack
-              spacing={0}
-              borderColor="brandGray.016"
-              borderWidth={1}
-              minW={120}
-            >
-              <Image src="https://placekitten.com/120/90" roundedTop="md" />
-              <Image src="https://placekitten.com/120/90" />
-              <Image src="https://placekitten.com/120/90" />
-              <Image src="https://placekitten.com/120/90" roundedBottom="md" />
-            </Stack>
+        <Stack isInline spacing={28}>
+          <Stack
+            spacing={0}
+            borderColor="brandGray.016"
+            borderWidth={1}
+            minW={120}
+            position="relative"
+          >
+            <BadFlipPartFrame setIndex={setIndex} />
+            <BadFlipImage src={flipUrl(setIndex, 1)} roundedTop="md" />
+            <BadFlipImage src={flipUrl(setIndex, 2)} />
+            <BadFlipImage src={flipUrl(setIndex, 3)} />
+            <BadFlipImage src={flipUrl(setIndex, 4)} roundedBottom="md" />
           </Stack>
-          <Stack spacing={7} bg="white" borderRadius="lg" p={8} pt={6}>
-            <Stack spacing={8}>
-              <Stack spacing={4}>
-                <ChakraBox>
-                  <Heading fontSize="lg" fontWeight={500} lineHeight="32px">
-                    {t('What is bad flip?')}
-                  </Heading>
-                  <Text color="muted">
-                    {t(
-                      'Bad flips are reported by consensus and can result in validation reward loss.'
-                    )}
-                  </Text>
-                </ChakraBox>
-                <List as="ul">
-                  <BadFlipListItem
-                    index={0}
-                    explainer={t(
-                      'One of the keywords cannot be found on image'
-                    )}
-                    isActive={index === 0}
-                    onClick={() => {
-                      setIndex(0)
-                    }}
-                  >
-                    {t('Innapropriate content')}
-                  </BadFlipListItem>
-                  <BadFlipListItem
-                    index={1}
-                    explainer={t(
-                      'Some of the Idena users can not not read your the text in your local language'
-                    )}
-                    isActive={index === 1}
-                    onClick={() => {
-                      setIndex(1)
-                    }}
-                  >
-                    {t('Numbers or letters on flip images')}
-                  </BadFlipListItem>
-                  <BadFlipListItem
-                    index={2}
-                    explainer={t(
-                      'Some of the Idena users can not not read your the text in your local language'
-                    )}
-                    isActive={index === 2}
-                    onClick={() => {
-                      setIndex(2)
-                    }}
-                  >
-                    {t('No logical story')}
-                  </BadFlipListItem>
-                  <BadFlipListItem
-                    index={3}
-                    explainer={t(
-                      'Some of the Idena users can not not read your the text in your local language'
-                    )}
-                    isActive={index === 3}
-                    onClick={() => {
-                      setIndex(3)
-                    }}
-                  >
-                    {t('Objects in images in sequence (1-2-3-4)')}
-                  </BadFlipListItem>
-                </List>
-              </Stack>
-              <Flex justify="flex-end">
-                {/* eslint-disable-next-line react/destructuring-assignment */}
-                <PrimaryButton onClick={props.onClose}>
-                  {t('Next')}
-                </PrimaryButton>
-              </Flex>
+          <ChakraFlex
+            direction="column"
+            justify="space-between"
+            spacing={7}
+            bg="white"
+            borderRadius="lg"
+            p={8}
+            w={440}
+          >
+            <Stack spacing={4}>
+              <ChakraBox>
+                <Heading fontSize="lg" fontWeight={500} lineHeight="32px">
+                  {t('What is bad flip?')}
+                </Heading>
+                <Text color="muted">
+                  {t(
+                    'Bad flips are reported by consensus and can result in validation reward loss.'
+                  )}
+                </Text>
+              </ChakraBox>
+              <List as="ul">
+                <BadFlipListItem
+                  setIndex={0}
+                  description={t(
+                    `Vase / Coffee. 'Coffee' keyword can not be found on the images`
+                  )}
+                  isActive={setIndex === 0}
+                  onClick={() => {
+                    setSetIndex(0)
+                  }}
+                >
+                  {t('One of the keywords is not clearly visible in the story')}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  setIndex={1}
+                  isActive={setIndex === 1}
+                  onClick={() => {
+                    setSetIndex(1)
+                  }}
+                >
+                  {t('There are numbers or letters indicating the order')}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  setIndex={2}
+                  isActive={setIndex === 2}
+                  onClick={() => {
+                    setSetIndex(2)
+                  }}
+                >
+                  {t('There are labels indicating the right order')}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  setIndex={3}
+                  description={t(
+                    'Some of the Idena users can not not read your the text in your local language'
+                  )}
+                  isActive={setIndex === 3}
+                  onClick={() => {
+                    setSetIndex(3)
+                  }}
+                >
+                  {t(
+                    'There is text that is necessary to read to solve the flip'
+                  )}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  setIndex={4}
+                  isActive={setIndex === 4}
+                  onClick={() => {
+                    setSetIndex(4)
+                  }}
+                >
+                  {t('There is inappropriate content')}
+                </BadFlipListItem>
+              </List>
             </Stack>
-          </Stack>
+            <Stack isInline justify="flex-end">
+              {/* eslint-disable-next-line react/destructuring-assignment */}
+              <SecondaryButton onClick={props.onClose}>
+                {t('Skip')}
+              </SecondaryButton>
+              <PrimaryButton
+                isDisabled={setIndex === dirs.length - 1}
+                onClick={() => setSetIndex(setIndex + 1)}
+              >
+                {t('Next')}
+              </PrimaryButton>
+            </Stack>
+          </ChakraFlex>
         </Stack>
       </ModalContent>
     </Modal>
   )
 }
 
-function BadFlipListItem({index, explainer, isActive, children, ...props}) {
+function BadFlipImage(props) {
+  return (
+    <AspectRatioBox ratio={4 / 3} h={100}>
+      <Image {...props} />
+    </AspectRatioBox>
+  )
+}
+
+function BadFlipListItem({
+  setIndex,
+  description,
+  isActive,
+  children,
+  ...props
+}) {
   return (
     <ListItem py={2} cursor="pointer" {...props}>
       <Stack isInline>
@@ -1261,13 +1278,13 @@ function BadFlipListItem({index, explainer, isActive, children, ...props}) {
           bg={isActive ? 'red.500' : 'red.012'}
           color={isActive ? 'white' : 'red.500'}
         >
-          {index + 1}
+          {setIndex + 1}
         </BadFlipListItemCircle>
         <Stack spacing={1}>
           <Text>{children}</Text>
-          {isActive && (
+          {isActive && description && (
             <Text color="muted" fontSize={12}>
-              {explainer}
+              {description}
             </Text>
           )}
         </Stack>
@@ -1289,5 +1306,45 @@ function BadFlipListItemCircle(props) {
       h={18}
       {...props}
     />
+  )
+}
+
+function BadFlipPartFrame({setIndex, ...props}) {
+  const framePosition = [
+    {},
+    {},
+    {top: 100 * 3 - 4, bottom: -4},
+    {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
+    {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
+  ]
+  return (
+    <ChakraBox
+      position="absolute"
+      borderWidth={2}
+      borderColor="red.500"
+      borderRadius="md"
+      boxShadow="0 0 0 4px rgba(255, 102, 102, 0.25)"
+      top={-4}
+      left={-4}
+      right={-4}
+      bottom={-4}
+      {...framePosition[setIndex]}
+      transition="all 0.2s ease-out"
+      zIndex={1}
+      {...props}
+    >
+      <ChakraFlex
+        align="center"
+        justify="center"
+        bg="red.500"
+        borderRadius="full"
+        size={8}
+        position="absolute"
+        right={-20}
+        bottom={-20}
+      >
+        <Icon name="block" size={5} />
+      </ChakraFlex>
+    </ChakraBox>
   )
 }
