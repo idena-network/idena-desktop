@@ -1524,17 +1524,16 @@ export function TerminateDrawer({
 }
 
 function splitMany(str, ...separators) {
-  return separators.length > 0
-    ? separators.reduce((acc, s, idx) => {
-        const parts = str.split(s)
-        acc.push(parts[0], s)
+  const acc = []
+  let nextStr = str
 
-        if (idx === separators.length - 1 && parts[1]) acc.push(parts[1])
-        // eslint-disable-next-line no-param-reassign
-        else [str] = parts
-        return acc
-      }, [])
-    : [str]
+  for (const s of separators) {
+    const [s1, s2] = nextStr.split(s)
+    acc.push(s1, s)
+    nextStr = s2
+  }
+
+  return acc
 }
 
 export function Linkify({onClick, children}) {
@@ -1542,7 +1541,8 @@ export function Linkify({onClick, children}) {
 
   if (typeof children !== 'string') throw new Error('Only text nodes supported')
 
-  const parts = splitMany(children, ...getUrls(children, {stripWWW: false}))
+  const urls = getUrls(children, {stripWWW: false})
+  const parts = urls.size > 0 ? splitMany(children, ...urls) : [children]
 
   return (
     <>
