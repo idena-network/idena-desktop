@@ -11,7 +11,7 @@ import {
   updateFlipTypeByHash,
   handleOutdatedFlips,
 } from './utils'
-import {callRpc} from '../../shared/utils/utils'
+import {callRpc, loadKeyword} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
 import {FlipType, FlipFilter} from '../../shared/types'
 import {fetchTx, deleteFlip} from '../../shared/api'
@@ -67,14 +67,18 @@ export const flipsMachine = Machine(
             )
 
             if (missingFlips.length) {
-              const keywords = availableKeywords
-                .filter(({id}) =>
-                  persistedFlips.some(({keywordPairId}) => keywordPairId !== id)
-                )
-                .map(({id, words}) => ({
-                  id,
-                  words: words.map(global.loadKeyword),
-                }))
+              const keywords = await Promise.all(
+                availableKeywords
+                  .filter(({id}) =>
+                    persistedFlips.some(
+                      ({keywordPairId}) => keywordPairId !== id
+                    )
+                  )
+                  .map(async ({id, words}) => ({
+                    id,
+                    words: await Promise.all(words.map(loadKeyword)),
+                  }))
+              )
 
               missingFlips = missingFlips.map((hash, idx) => ({
                 hash,
@@ -841,7 +845,9 @@ export const flipMasterMachine = Machine(
     services: {
       loadKeywords: async ({availableKeywords, keywordPairId}) => {
         const {words} = availableKeywords.find(({id}) => id === keywordPairId)
-        return words.map(id => ({id, ...global.loadKeyword(id)}))
+        return Promise.all(
+          words.map(async id => ({id, ...(await loadKeyword(id))}))
+        )
       },
       loadTranslations: async ({availableKeywords, keywordPairId, locale}) => {
         const {words} = availableKeywords.find(({id}) => id === keywordPairId)

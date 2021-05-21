@@ -21,7 +21,6 @@ const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
 const logger = require('./logger')
 const {prepareDb, dbPath} = require('./stores/setup')
-const {loadKeyword} = require('./utils/keywords')
 
 process.once('loaded', () => {
   global.ipcRenderer = ipcRenderer
@@ -30,8 +29,6 @@ process.once('loaded', () => {
   global.flipStore = flips
   global.invitesDb = invites
   global.contactsDb = contacts
-
-  global.loadKeyword = loadKeyword
 
   global.logger = logger
 
