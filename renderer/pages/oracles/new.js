@@ -54,6 +54,7 @@ import {
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
+  NewOraclePresetDialog,
   ReviewVotingDrawer,
   VotingDurationInput,
 } from '../../screens/oracles/containers'
@@ -365,6 +366,7 @@ function NewVotingPage() {
                   />
                   <Checkbox
                     id="isFreeVoting"
+                    isChecked={isFreeVoting}
                     onChange={({target: {id, checked}}) => {
                       send('CHANGE', {id, value: checked})
                     }}
@@ -560,6 +562,12 @@ function NewVotingPage() {
           onConfirm={({from, balance, stake}) =>
             send('CONFIRM', {from, balance, stake})
           }
+        />
+
+        <NewOraclePresetDialog
+          isOpen={eitherState(current, 'choosingPreset')}
+          onChoosePreset={preset => send('CHOOSE_PRESET', {preset})}
+          onCancel={() => send('CANCEL')}
         />
 
         {global.isDev && <FloatDebug>{current.value}</FloatDebug>}

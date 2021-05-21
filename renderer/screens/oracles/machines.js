@@ -1,5 +1,6 @@
 import {Machine, assign, spawn} from 'xstate'
 import {choose, log, send, sendParent} from 'xstate/lib/actions'
+import dayjs from 'dayjs'
 import {
   fetchVotings,
   createContractCaller,
@@ -501,7 +502,7 @@ export const createNewVotingMachine = (epoch, address) =>
                 fetchOracleRewardsEstimates(committeeSize),
               ]),
             onDone: {
-              target: 'editing',
+              target: 'choosingPreset',
               actions: [
                 assign((context, {data: [feePerGas, estimates]}) => {
                   const minOracleReward = minOracleRewardFromEstimates(
@@ -530,6 +531,56 @@ export const createNewVotingMachine = (epoch, address) =>
               },
             },
             late: {},
+          },
+        },
+        choosingPreset: {
+          on: {
+            CHOOSE_PRESET: {
+              target: 'editing',
+              actions: [
+                choose([
+                  {
+                    actions: [
+                      assign({
+                        shouldStartImmediately: false,
+                        winnerThreshold: String(51),
+                        startDate: dayjs()
+                          .add(1, 'w')
+                          .toString(),
+                        quorum: 5,
+                      }),
+                    ],
+                    cond: (_, {preset}) => preset === 'fact',
+                  },
+                  {
+                    actions: [
+                      assign({
+                        shouldStartImmediately: true,
+                        winnerThreshold: String(100),
+                        quorum: 1,
+                        votingMinPayment: 0,
+                        isFreeVoting: true,
+                      }),
+                    ],
+                    cond: (_, {preset}) => preset === 'poll',
+                  },
+                  {
+                    actions: [
+                      assign({
+                        shouldStartImmediately: false,
+                        winnerThreshold: String(51),
+                        quorum: 5,
+                        votingMinPayment: 0,
+                        isFreeVoting: true,
+                      }),
+                    ],
+                    cond: (_, {preset}) => preset === 'decision',
+                  },
+                ]),
+                log(),
+              ],
+            },
+            CANCEL: 'editing',
           },
         },
         editing: {
