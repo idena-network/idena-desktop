@@ -291,15 +291,18 @@ export function LocaleSwitcher() {
   const {changeLanguage} = useSettingsDispatch()
 
   return (
-    <Select value={i18n.language} borderColor="gray.300" h={8}>
+    <Select
+      value={i18n.language}
+      borderColor="gray.300"
+      h={8}
+      onChange={e => {
+        const nextLanguage = e.target.value
+        i18n.changeLanguage(nextLanguage)
+        changeLanguage(nextLanguage)
+      }}
+    >
       {AVAILABLE_LANGS.map(lang => (
-        <option
-          key={lang}
-          onClick={() => {
-            i18n.changeLanguage(lang)
-            changeLanguage(lang)
-          }}
-        >
+        <option key={lang} value={lang}>
           {isoLangs[lang].nativeName} ({lang.toUpperCase()})
         </option>
       ))}
