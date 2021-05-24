@@ -1563,7 +1563,7 @@ export function Linkify({onClick, children}) {
             {part}
           </Button>
         ) : (
-          <Text>{part}</Text>
+          <>{part}</>
         )
       )}
     </>
