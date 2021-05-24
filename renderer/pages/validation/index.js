@@ -41,7 +41,6 @@ import {
   QualificationActions,
   QualificationButton,
   WelcomeQualificationDialog,
-  WelcomeKeywordsQualificationDialog,
   ValidationTimer,
   ValidationFailedDialog,
   SubmitFailedDialog,
