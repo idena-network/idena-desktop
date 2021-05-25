@@ -1533,6 +1533,8 @@ function splitMany(str, ...separators) {
     nextStr = s2
   }
 
+  acc.push(nextStr)
+
   return acc
 }
 
