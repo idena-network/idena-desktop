@@ -229,13 +229,13 @@ export function ImportPrivateKeyDialog(props) {
 
   return (
     <Dialog title={t('Import private key')} {...props}>
-      <DialogBody>
-        <form
-          onSubmit={async e => {
-            e.preventDefault()
-            await submit()
-          }}
-        >
+      <form
+        onSubmit={async e => {
+          e.preventDefault()
+          await submit()
+        }}
+      >
+        <DialogBody>
           <Stack spacing={5}>
             <Text color="muted" fontSize="mdx">
               {t('Create a new password to export your private key')}
@@ -272,15 +272,17 @@ export function ImportPrivateKeyDialog(props) {
               </InputGroup>
             </FormControl>
           </Stack>
-        </form>
-      </DialogBody>
-      <DialogFooter>
-        {/* eslint-disable-next-line react/destructuring-assignment */}
-        <SecondaryButton onClick={props.onClose}>{t('Close')}</SecondaryButton>
-        <PrimaryButton type="submit" disabled={!password || !key}>
-          {t('Import')}
-        </PrimaryButton>
-      </DialogFooter>
+        </DialogBody>
+        <DialogFooter>
+          {/* eslint-disable-next-line react/destructuring-assignment */}
+          <SecondaryButton onClick={props.onClose}>
+            {t('Close')}
+          </SecondaryButton>
+          <PrimaryButton type="submit" disabled={!password || !key}>
+            {t('Import')}
+          </PrimaryButton>
+        </DialogFooter>
+      </form>
     </Dialog>
   )
 }
