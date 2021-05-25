@@ -241,6 +241,7 @@ export function ImportPrivateKeyDialog(props) {
         onSubmit={async e => {
           e.preventDefault()
           await submit()
+          props.onClose()
         }}
       >
         <DialogBody>
@@ -305,7 +306,7 @@ export function ImportPrivateKeyDialog(props) {
         </DialogBody>
         <DialogFooter>
           {/* eslint-disable-next-line react/destructuring-assignment */}
-          <SecondaryButton onClick={props.onClose}>
+          <SecondaryButton type="button" onClick={props.onClose}>
             {t('Close')}
           </SecondaryButton>
           <PrimaryButton type="submit" disabled={!password || !key}>

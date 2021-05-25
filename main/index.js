@@ -471,6 +471,9 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
           logger.info(log)
           node = null
           sendMainWindowMsg(NODE_EVENT, 'node-stopped')
+        })
+        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+        .then(() => {
           sendMainWindowMsg(NODE_EVENT, 'restart-node')
         })
         .catch(e => {
