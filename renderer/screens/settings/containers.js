@@ -246,9 +246,6 @@ export function ImportPrivateKeyDialog(props) {
       >
         <DialogBody>
           <Stack spacing={5}>
-            <Text color="muted" fontSize="mdx">
-              {t('Create a new password to export your private key')}
-            </Text>
             <FormControl>
               <FormLabel htmlFor="key">{t('Encrypted private key')}</FormLabel>
               <Input
