@@ -93,21 +93,21 @@ function SyncingIdentity() {
         <h2>{t('Synchronizing blocks')}</h2>
         <div>
           {highestBlock ? (
-            <h3>
+            <h3 style={{fontVariantNumeric: 'tabular-nums'}}>
               {t('{{numBlocks}} blocks left', {
-                numBlocks: highestBlock - currentBlock,
+                numBlocks: (highestBlock - currentBlock)?.toLocaleString(),
               })}{' '}
               (
               {t('{{currentBlock}} out of {{highestBlock}}', {
-                currentBlock,
-                highestBlock: highestBlock || '...',
+                currentBlock: currentBlock?.toLocaleString(),
+                highestBlock: highestBlock?.toLocaleString() || '...',
               })}
               )
             </h3>
           ) : (
             <h3>
               {t('{{currentBlock}} out of {{highestBlock}}', {
-                currentBlock,
+                currentBlock: currentBlock?.toLocaleString(),
                 highestBlock: '...',
               })}
             </h3>
@@ -119,7 +119,7 @@ function SyncingIdentity() {
         <Progress
           value={currentBlock}
           min={startingBlock}
-          max={highestBlock}
+          max={highestBlock || Number.MAX_SAFE_INTEGER}
           rounded="2px"
           bg="xblack.016"
           color="brandBlue"

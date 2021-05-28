@@ -465,6 +465,23 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
         })
       break
     }
+    case 'restart-node': {
+      stopNode(node)
+        .then(log => {
+          logger.info(log)
+          node = null
+          sendMainWindowMsg(NODE_EVENT, 'node-stopped')
+        })
+        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+        .then(() => {
+          sendMainWindowMsg(NODE_EVENT, 'restart-node')
+        })
+        .catch(e => {
+          sendMainWindowMsg(NODE_EVENT, 'node-failed')
+          logger.error('error while stopping node', e.toString())
+        })
+      break
+    }
     case 'get-last-logs': {
       getLastLogs()
         .then(logs => {

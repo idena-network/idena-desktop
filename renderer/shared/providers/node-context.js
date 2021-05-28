@@ -82,6 +82,7 @@ export function NodeProvider({children}) {
         case 'node-ready':
           dispatch({type: NODE_READY, data})
           break
+        case 'restart-node':
         case 'state-cleaned':
           dispatch({type: NODE_REINIT, data})
           break
@@ -148,8 +149,11 @@ export function NodeProvider({children}) {
     dispatch({type: NODE_REINIT})
   }
 
-  const importNodeKey = () => {
-    global.ipcRenderer.send(NODE_COMMAND, 'clean-state')
+  const importNodeKey = shouldResetNode => {
+    global.ipcRenderer.send(
+      NODE_COMMAND,
+      shouldResetNode ? 'clean-state' : 'restart-node'
+    )
   }
 
   return (

@@ -18,14 +18,20 @@ import QrCode from 'qrcode.react'
 import {useMachine} from '@xstate/react'
 import {createMachine} from 'xstate'
 import {assign} from 'xstate/lib/actions'
-import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
+  InfoButton,
+  PrimaryButton,
+  SecondaryButton,
+} from '../../shared/components/button'
+import {
+  Checkbox,
   Dialog,
   DialogBody,
   DialogFooter,
   FormLabel,
   Input,
   Toast,
+  Tooltip,
 } from '../../shared/components/components'
 import {FillCenter} from '../oracles/components'
 import {callRpc, eitherState} from '../../shared/utils/utils'
@@ -177,6 +183,8 @@ export function ImportPrivateKeyDialog(props) {
 
   const [key, setKey] = React.useState()
 
+  const [shouldResetNode, setShouldResetNode] = React.useState()
+
   const submit = async () => {
     try {
       const {error} = await importKey(key, password)
@@ -193,7 +201,7 @@ export function ImportPrivateKeyDialog(props) {
           ),
         })
       } else {
-        importNodeKey()
+        importNodeKey(shouldResetNode)
         toast({
           // eslint-disable-next-line react/display-name
           render: () => (
@@ -233,13 +241,11 @@ export function ImportPrivateKeyDialog(props) {
         onSubmit={async e => {
           e.preventDefault()
           await submit()
+          props.onClose()
         }}
       >
         <DialogBody>
-          <Stack spacing={5}>
-            <Text color="muted" fontSize="mdx">
-              {t('Create a new password to export your private key')}
-            </Text>
+          <Stack spacing={5} mt={3}>
             <FormControl>
               <FormLabel htmlFor="key">{t('Encrypted private key')}</FormLabel>
               <Input
@@ -266,16 +272,38 @@ export function ImportPrivateKeyDialog(props) {
                     _hover={{
                       bg: revealPassword ? 'gray.300' : 'white',
                     }}
-                    onClick={() => setRevealPassword(!revealPassword)}
+                    onClick={() => {
+                      setRevealPassword(!revealPassword)
+                    }}
                   />
                 </InputRightElement>
               </InputGroup>
+            </FormControl>
+            <FormControl>
+              <Stack isInline>
+                <Checkbox
+                  isChecked={shouldResetNode}
+                  onChange={e => {
+                    setShouldResetNode(e.target.checked)
+                  }}
+                >
+                  {t('Re-sync node from scratch')}
+                </Checkbox>
+                <Tooltip
+                  label={t(
+                    'Please re-sync the node if you want to have an up-to-date transaction history for the new address. It will take some time to re-sync.'
+                  )}
+                  zIndex="tooltip"
+                >
+                  <InfoButton />
+                </Tooltip>
+              </Stack>
             </FormControl>
           </Stack>
         </DialogBody>
         <DialogFooter>
           {/* eslint-disable-next-line react/destructuring-assignment */}
-          <SecondaryButton onClick={props.onClose}>
+          <SecondaryButton type="button" onClick={props.onClose}>
             {t('Close')}
           </SecondaryButton>
           <PrimaryButton type="submit" disabled={!password || !key}>
