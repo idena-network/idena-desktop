@@ -265,6 +265,7 @@ export default function ViewVotingPage() {
                           encodeURIComponent(desc?.replace(/%/g, '%25')),
                           options.map(({value}) => value).join('\n'),
                         ]}
+                        locale={i18n.language}
                         alignSelf="start"
                       />
                       <HDivider />
