@@ -119,7 +119,7 @@ function SyncingIdentity() {
         <Progress
           value={currentBlock}
           min={startingBlock}
-          max={highestBlock}
+          max={highestBlock || Number.MAX_SAFE_INTEGER}
           rounded="2px"
           bg="xblack.016"
           color="brandBlue"

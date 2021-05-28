@@ -245,7 +245,7 @@ export function ImportPrivateKeyDialog(props) {
         }}
       >
         <DialogBody>
-          <Stack spacing={5}>
+          <Stack spacing={5} mt={3}>
             <FormControl>
               <FormLabel htmlFor="key">{t('Encrypted private key')}</FormLabel>
               <Input
