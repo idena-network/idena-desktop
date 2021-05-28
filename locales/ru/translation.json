@@ -660,5 +660,7 @@
   "There is text that is necessary to read to solve the flip": "There is text that is necessary to read to solve the flip",
   "There is inappropriate content": "There is inappropriate content",
   "Skip": "Skip",
-  "Next": "Next"
+  "Next": "Next",
+  "Re-sync node from scratch": "Re-sync node from scratch",
+  "Please re-sync the node if you want to have an up-to-date transaction history for the new address. It will take some time to re-sync.": "Please re-sync the node if you want to have an up-to-date transaction history for the new address. It will take some time to re-sync."
 }

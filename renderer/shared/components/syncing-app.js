@@ -95,19 +95,22 @@ function SyncingIdentity() {
           {highestBlock ? (
             <h3 style={{fontVariantNumeric: 'tabular-nums'}}>
               {t('{{numBlocks}} blocks left', {
-                numBlocks: (highestBlock - currentBlock)?.toLocaleString(),
+                numBlocks:
+                  highestBlock - currentBlock &&
+                  (highestBlock - currentBlock).toLocaleString(),
               })}{' '}
               (
               {t('{{currentBlock}} out of {{highestBlock}}', {
-                currentBlock: currentBlock?.toLocaleString(),
-                highestBlock: highestBlock?.toLocaleString() || '...',
+                currentBlock: currentBlock && currentBlock.toLocaleString(),
+                highestBlock:
+                  (highestBlock && highestBlock.toLocaleString()) || '...',
               })}
               )
             </h3>
           ) : (
             <h3>
               {t('{{currentBlock}} out of {{highestBlock}}', {
-                currentBlock: currentBlock?.toLocaleString(),
+                currentBlock: currentBlock && currentBlock.toLocaleString(),
                 highestBlock: '...',
               })}
             </h3>
