@@ -24,7 +24,7 @@ import semver from 'semver'
 import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import Sidebar from './sidebar'
-import Notifications from './notifications'
+import Notifications, {Snackbar} from './notifications'
 import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {useDebounce} from '../hooks/use-debounce'
 import {useEpochState} from '../providers/epoch-context'
@@ -62,6 +62,7 @@ import {
 import {ActivateMiningDrawer} from '../../screens/profile/components'
 import {activateMiningMachine} from '../../screens/profile/machines'
 import {eitherState} from '../utils/utils'
+import {useTimingState} from '../providers/timing-context'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -131,16 +132,17 @@ export default function Layout({
 }
 
 function NormalApp({children}) {
+  const {t} = useTranslation()
+
   const router = useRouter()
 
   const epoch = useEpochState()
   const identity = useIdentityState()
+  const {wrongClientTime} = useTimingState()
 
   React.useEffect(() => {
     if (shouldStartValidation(epoch, identity)) router.push('/validation')
   }, [epoch, identity, router])
-
-  const {t} = useTranslation()
 
   const [
     validationNotificationEpoch,
@@ -177,6 +179,24 @@ function NormalApp({children}) {
       {children}
 
       {epoch && <ValidationToast epoch={epoch} identity={identity} />}
+
+      {wrongClientTime && (
+        <Snackbar>
+          <Toast
+            status="error"
+            title={t('Please check your local time')}
+            description={t(
+              'The time must be synchronized with internet time for the successful validation'
+            )}
+            actionContent={t('Check')}
+            w="md"
+            mx="auto"
+            onAction={() => {
+              global.openExternal('https://time.is/')
+            }}
+          />
+        </Snackbar>
+      )}
 
       <Notifications />
 
