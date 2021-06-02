@@ -1341,15 +1341,12 @@ export function VotingPhase({service}) {
           <PopoverBody p={0}>
             <Stack spacing="10px" fontSize="sm">
               <VotingPhase.ListItem
-                isActive={eitherIdleState(VotingStatus.Pending)}
+                isActive={false}
                 label={t('Created')}
                 value={new Date(createDate).toLocaleString()}
               />
               <VotingPhase.ListItem
-                isActive={eitherIdleState(
-                  VotingStatus.Pending,
-                  VotingStatus.Open
-                )}
+                isActive={eitherIdleState(VotingStatus.Pending)}
                 label={t('Start voting')}
                 value={
                   eitherIdleState(VotingStatus.Pending)
