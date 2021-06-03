@@ -14,7 +14,6 @@ export function TimingProvider(props) {
     flipLottery: null,
     shortSession: null,
     longSession: null,
-    none: null,
   })
 
   const [interval, setInterval] = React.useState(1000 * 60)

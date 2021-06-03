@@ -18,6 +18,8 @@ import {
   Skeleton,
   useTheme,
   useToast,
+  Alert,
+  Progress,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import semver from 'semver'
@@ -25,7 +27,6 @@ import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import Sidebar from './sidebar'
 import Notifications, {Snackbar} from './notifications'
-import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {useDebounce} from '../hooks/use-debounce'
 import {useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/utils'
@@ -49,9 +50,9 @@ import {
   LayoutContainer,
   UpdateExternalNodeDialog,
 } from '../../screens/app/components'
-import {EpochPeriod} from '../types'
 import {FillCenter} from '../../screens/oracles/components'
 import {
+  Avatar,
   Dialog,
   DialogBody,
   DialogFooter,
@@ -61,8 +62,14 @@ import {
 } from './components'
 import {ActivateMiningDrawer} from '../../screens/profile/components'
 import {activateMiningMachine} from '../../screens/profile/machines'
-import {eitherState} from '../utils/utils'
+import {
+  callRpc,
+  eitherState,
+  shouldShowUpcomingValidationNotification,
+  showWindowNotification,
+} from '../utils/utils'
 import {useTimingState} from '../providers/timing-context'
+import {useChainState} from '../providers/chain-context'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -236,25 +243,355 @@ function NormalApp({children}) {
   )
 }
 
-function shouldShowUpcomingValidationNotification(
-  epoch,
-  upcomingValidationEpoch
-) {
-  if (!epoch) {
-    return false
-  }
-  const isFlipLottery = epoch.currentPeriod === EpochPeriod.FlipLottery
-  const currentEpoch = epoch.epoch
-  const notificationShown = currentEpoch + 1 === upcomingValidationEpoch
-  return isFlipLottery && !notificationShown
+function SyncingApp() {
+  const {t} = useTranslation()
+
+  const {currentBlock, highestBlock, genesisBlock, wrongTime} = useChainState()
+  const {address} = useIdentityState()
+
+  const [current] = useMachine(
+    createMachine({
+      context: {
+        peers: [],
+      },
+      initial: 'loading',
+      states: {
+        loading: {
+          invoke: {
+            src: () => callRpc('net_peers'),
+            onDone: {
+              target: 'done',
+              actions: [assign({peers: (_, {data}) => data})],
+            },
+          },
+        },
+        done: {},
+      },
+    })
+  )
+  const {peers} = current.context
+
+  return (
+    <FillCenter bg="graphite.500" color="white" position="relative">
+      <Flex
+        align="center"
+        justify="center"
+        bg="orange.500"
+        py={3}
+        fontWeight={500}
+        position="absolute"
+        top={0}
+        left={0}
+        w="full"
+      >
+        {t('Synchronizing...')}
+      </Flex>
+      <Stack spacing={10} w="md">
+        <Stack isInline spacing={6} align="center" py={2}>
+          <Avatar address={address} size={20} />
+          <Heading fontSize="lg" fontWeight={500} wordBreak="break-all">
+            {address}
+          </Heading>
+        </Stack>
+        <Stack spacing={3}>
+          <Flex justify="space-between">
+            <Box>
+              <Heading fontSize="lg" fontWeight={500}>
+                {t('Synchronizing blocks')}
+              </Heading>
+              <Box
+                fontSize="mdx"
+                fontWeight={500}
+                color="muted"
+                style={{fontVariantNumeric: 'tabular-nums'}}
+              >
+                {highestBlock ? (
+                  <>
+                    {t('{{numBlocks}} blocks left', {
+                      numBlocks:
+                        highestBlock - currentBlock &&
+                        (highestBlock - currentBlock).toLocaleString(),
+                    })}{' '}
+                    (
+                    {t('{{currentBlock}} out of {{highestBlock}}', {
+                      currentBlock:
+                        currentBlock && currentBlock.toLocaleString(),
+                      highestBlock:
+                        (highestBlock && highestBlock.toLocaleString()) ||
+                        '...',
+                    })}
+                    )
+                  </>
+                ) : (
+                  <>
+                    {t('{{currentBlock}} out of {{highestBlock}}', {
+                      currentBlock:
+                        currentBlock && currentBlock.toLocaleString(),
+                      highestBlock: '...',
+                    })}
+                  </>
+                )}
+              </Box>
+            </Box>
+            <Box>
+              {eitherState(current, 'done') && (
+                <>
+                  <Text as="span" color="muted">
+                    {t('Peers connected')}:{' '}
+                  </Text>
+                  {peers.length}
+                </>
+              )}
+            </Box>
+          </Flex>
+          <Progress
+            value={currentBlock}
+            min={genesisBlock || 0}
+            max={highestBlock || Number.MAX_SAFE_INTEGER}
+            rounded={2}
+            bg="xblack.016"
+            color="brandBlue"
+            h={1}
+          />
+        </Stack>
+        {wrongTime && (
+          <Alert status="error" bg="red.500" borderRadius="lg">
+            {t(
+              'Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers.'
+            )}
+          </Alert>
+        )}
+      </Stack>
+    </FillCenter>
+  )
 }
 
-function showWindowNotification(title, notificationBody, onclick) {
-  const notification = new window.Notification(title, {
-    body: notificationBody,
-  })
-  notification.onclick = onclick
-  return true
+function LoadingApp() {
+  const {t} = useTranslation()
+
+  return <Box>Loading</Box>
+  // return (
+  //   <section>
+  //     <div>
+  //       <h3>{t('Please wait...')}</h3>
+  //     </div>
+  //     <style jsx>{`
+  //       section {
+  //         background: ${theme.colors.darkGraphite};
+  //         color: white;
+  //         display: flex;
+  //         flex-direction: column;
+  //         align-items: center;
+  //         justify-content: center;
+  //         flex: 1;
+  //       }
+  //       section > div {
+  //         display: flex;
+  //         align-items: center;
+  //         justify-content: space-between;
+  //         flex-direction: column;
+  //         width: 50%;
+  //       }
+  //     `}</style>
+  //   </section>
+  // )
+}
+
+function OfflineApp() {
+  return <Box>Offline</Box>
+  // const {nodeReady, nodeFailed} = useNodeState()
+  // const {tryRestartNode} = useNodeDispatch()
+  // const {useExternalNode, runInternalNode} = useSettingsState()
+  // const {nodeProgress} = useAutoUpdateState()
+  // const {toggleRunInternalNode, toggleUseExternalNode} = useSettingsDispatch()
+
+  // const {wrongTime} = useChainState()
+
+  // const {t} = useTranslation()
+
+  // return (
+  //   <section>
+  //     <div>
+  //       {!nodeReady &&
+  //         !useExternalNode &&
+  //         runInternalNode &&
+  //         !nodeFailed &&
+  //         nodeProgress && (
+  //           <>
+  //             <Flex width="100%">
+  //               <img src="/static/idena_white.svg" alt="logo" />
+  //               <Flex direction="column" justify="space-between" flex="1">
+  //                 <h2>{t('Downloading Idena Node...')}</h2>
+
+  //                 <Flex justify="space-between">
+  //                   <div className="gray">
+  //                     {t('Version {{version}}', {
+  //                       version: nodeProgress.version,
+  //                     })}
+  //                   </div>
+  //                   <div>
+  //                     {(
+  //                       nodeProgress.transferred /
+  //                       (1024 * 1024)
+  //                     ).toLocaleString(undefined, {
+  //                       maximumFractionDigits: 2,
+  //                     })}{' '}
+  //                     MB <span className="gray">out of</span>{' '}
+  //                     {(nodeProgress.length / (1024 * 1024)).toLocaleString(
+  //                       undefined,
+  //                       {
+  //                         maximumFractionDigits: 2,
+  //                       }
+  //                     )}{' '}
+  //                     MB
+  //                   </div>
+  //                 </Flex>
+  //               </Flex>
+  //             </Flex>
+  //             <Flex width="100%" css={{marginTop: 10}}>
+  //               <Progress
+  //                 value={nodeProgress.percentage}
+  //                 max={100}
+  //                 rounded="2px"
+  //                 bg="xblack.016"
+  //                 color="brandBlue"
+  //                 h={1}
+  //                 mt="11px"
+  //               />
+  //             </Flex>
+  //           </>
+  //         )}
+  //       {(useExternalNode || !runInternalNode) && (
+  //         <Flex direction="column" css={{}}>
+  //           <SubHeading
+  //             color={theme.colors.white}
+  //             fontSize={rem(18)}
+  //             fontWeight={500}
+  //             css={{
+  //               ...margin(0, 0, rem(20)),
+  //             }}
+  //           >
+  //             {t('Your {{nodeType}} node is offline', {
+  //               nodeType: useExternalNode ? 'external' : '',
+  //             })}
+  //           </SubHeading>
+  //           <Box style={{...margin(0, 0, rem(16))}}>
+  //             <Button
+  //               variant="primary"
+  //               onClick={() => {
+  //                 if (!runInternalNode) {
+  //                   toggleRunInternalNode(true)
+  //                 } else {
+  //                   toggleUseExternalNode(false)
+  //                 }
+  //               }}
+  //             >
+  //               {t('Run the built-in node')}
+  //             </Button>
+  //           </Box>
+  //           <BlockText color={theme.colors.white05} css={{lineHeight: rem(20)}}>
+  //             If you have already node running, please check your connection{' '}
+  //             <Link color={theme.colors.primary} href="/settings/node">
+  //               settings
+  //             </Link>
+  //           </BlockText>
+  //         </Flex>
+  //       )}
+  //       {!useExternalNode &&
+  //         runInternalNode &&
+  //         (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress)) && (
+  //           <h3>{t('Idena Node is starting...')}</h3>
+  //         )}
+  //       {nodeFailed && !useExternalNode && (
+  //         <>
+  //           <h2>{t('Your built-in node is failed')}</h2>
+  //           <br />
+  //           <Box>
+  //             <Button variant="primary" onClick={tryRestartNode}>
+  //               {t('Restart built-in node')}
+  //             </Button>
+  //           </Box>
+  //           <br />
+  //           <BlockText color="white">
+  //             If problem still exists, restart your app or check your connection{' '}
+  //             <Link color={theme.colors.primary} href="/settings/node">
+  //               settings
+  //             </Link>{' '}
+  //           </BlockText>
+  //         </>
+  //       )}
+
+  //       {wrongTime && (
+  //         <Snackbar>
+  //           <Toast
+  //             status="error"
+  //             title={t('Please check your local time')}
+  //             description={t(
+  //               'The time must be synchronized with internet time for the successful validation'
+  //             )}
+  //             actionContent={t('Check')}
+  //             w="md"
+  //             mx="auto"
+  //             onAction={() => {
+  //               global.openExternal('https://time.is/')
+  //             }}
+  //           />
+  //         </Snackbar>
+  //       )}
+  //     </div>
+  //     <style jsx>{`
+  //       section {
+  //         background: ${theme.colors.darkGraphite};
+  //         color: white;
+  //         display: flex;
+  //         flex-direction: column;
+  //         align-items: center;
+  //         justify-content: center;
+  //         flex: 1;
+  //       }
+  //       section > div {
+  //         display: flex;
+  //         align-items: center;
+  //         justify-content: space-between;
+  //         flex-direction: column;
+  //         width: 50%;
+  //       }
+
+  //       img {
+  //         width: ${rem(60)};
+  //         height: ${rem(60)};
+  //         margin-right: ${rem(10)};
+  //       }
+  //       section .gray {
+  //         opacity: 0.5;
+  //       }
+  //       progress {
+  //         width: 100%;
+  //         height: ${rem(4, theme.fontSizes.base)};
+  //         background-color: rgba(0, 0, 0, 0.16);
+  //       }
+  //       progress::-webkit-progress-bar {
+  //         background-color: rgba(0, 0, 0, 0.16);
+  //       }
+  //       progress::-webkit-progress-value {
+  //         background-color: ${theme.colors.primary};
+  //       }
+  //       h2 {
+  //         font-size: ${rem(18, theme.fontSizes.base)};
+  //         font-weight: 500;
+  //         margin: 0;
+  //         word-break: break-all;
+  //       }
+  //       span {
+  //         font-size: ${rem(14, theme.fontSizes.base)};
+  //         line-height: ${rem(20, theme.fontSizes.base)};
+  //       }
+  //       li {
+  //         margin-bottom: ${rem(theme.spacings.small8, theme.fontSizes.base)};
+  //       }
+  //     `}</style>
+  //   </section>
+  // )
 }
 
 function HardForkScreen({version, onUpdate, onReject}) {

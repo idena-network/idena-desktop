@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react'
 import {useInterval} from '../hooks/use-interval'
-import {fetchSync} from '../api'
 import {useSettingsState} from './settings-context'
+import {callRpc} from '../utils/utils'
 
 const FETCH_SYNC_SUCCEEDED = 'FETCH_SYNC_SUCCEEDED'
 const FETCH_SYNC_FAILED = 'FETCH_SYNC_FAILED'
@@ -58,8 +58,10 @@ function ChainProvider({children}) {
   useInterval(
     async () => {
       try {
-        const sync = await fetchSync()
-        dispatch({type: FETCH_SYNC_SUCCEEDED, payload: sync})
+        dispatch({
+          type: FETCH_SYNC_SUCCEEDED,
+          payload: await callRpc('bcn_syncing'),
+        })
       } catch (error) {
         dispatch({type: FETCH_SYNC_FAILED})
       }

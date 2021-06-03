@@ -22,6 +22,7 @@ import {
   AlertIcon,
   AlertDescription,
   useToast,
+  Spinner,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -52,7 +53,6 @@ import {
   useInviteDispatch,
 } from '../../shared/providers/invite-context'
 import {Notification, Snackbar} from '../../shared/components/notifications'
-import {Spinner} from '../../shared/components/spinner'
 import {
   loadPersistentState,
   loadPersistentStateValue,
@@ -351,7 +351,7 @@ export function ValidationResultToast({epoch}) {
           icon={
             <Flex align="center" justify="center" h={5} w={5} mr={3}>
               <Box style={{transform: 'scale(0.35) translateY(-10px)'}}>
-                <Spinner color={colors.brandBlue[500]} />
+                <Spinner size={5} color="blue.500" />
               </Box>
             </Flex>
           }
