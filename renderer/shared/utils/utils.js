@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import {getRpcParams} from '../api/api-client'
+import {EpochPeriod} from '../types'
 
 export function createRpcCaller({url, key}) {
   return async function(method, ...params) {
@@ -112,3 +113,24 @@ export async function loadKeyword(index) {
 }
 
 export const dummyAddress = `0x${'2'.repeat(64)}`
+
+export function showWindowNotification(title, notificationBody, onclick) {
+  const notification = new window.Notification(title, {
+    body: notificationBody,
+  })
+  notification.onclick = onclick
+  return true
+}
+
+export function shouldShowUpcomingValidationNotification(
+  epoch,
+  upcomingValidationEpoch
+) {
+  if (!epoch) {
+    return false
+  }
+  const isFlipLottery = epoch.currentPeriod === EpochPeriod.FlipLottery
+  const currentEpoch = epoch.epoch
+  const notificationShown = currentEpoch + 1 === upcomingValidationEpoch
+  return isFlipLottery && !notificationShown
+}

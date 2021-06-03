@@ -77,12 +77,12 @@ export default function useTx(initialHash) {
     }
   )
 
-  const [{result, error}, fetchTx] = useRpc('bcn_transaction', initialHash)
+  const [{result, error}, callRpc] = useRpc('bcn_transaction', initialHash)
 
   useEffect(() => {
     dispatch({type: 'reset'})
-    fetchTx('bcn_transaction', hash)
-  }, [fetchTx, hash])
+    callRpc('bcn_transaction', hash)
+  }, [callRpc, hash])
 
   useInterval(
     () => {
@@ -99,7 +99,7 @@ export default function useTx(initialHash) {
             type: 'mempool',
             result,
           })
-          fetchTx('bcn_transaction', hash)
+          callRpc('bcn_transaction', hash)
         } else {
           dispatch({
             type: 'mined',

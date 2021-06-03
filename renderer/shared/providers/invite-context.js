@@ -31,8 +31,9 @@ function InviteProvider({children}) {
       const txs = await Promise.all(
         savedInvites
           .filter(({activated, deletedAt}) => !activated && !deletedAt)
-          .map(({hash}) => hash)
-          .map(api.fetchTx)
+          .map(({hash}) =>
+            callRpc('bcn_transaction', hash).then(tx => ({hash, ...tx}))
+          )
       )
 
       const invitedIdentities = await Promise.all(
@@ -51,8 +52,12 @@ function InviteProvider({children}) {
       const terminateTxs = await Promise.all(
         savedInvites
           .filter(({terminateHash, deletedAt}) => terminateHash && !deletedAt)
-          .map(({terminateHash}) => terminateHash)
-          .map(api.fetchTx)
+          .map(({terminateHash}) =>
+            callRpc('bcn_transaction', terminateHash).then(tx => ({
+              hash: terminateHash,
+              ...tx,
+            }))
+          )
       )
 
       const nextInvites = savedInvites.map(invite => {
@@ -131,11 +136,14 @@ function InviteProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [address, invitees])
+  }, [activationTx, address, invitees])
 
   useInterval(
     async () => {
-      const {result, error} = await api.fetchTx(activationTx)
+      const {result, error} = await callRpc(
+        'bcn_transaction',
+        activationTx
+      ).then(tx => ({hash: activationTx, ...tx}))
       if (result) {
         const {blockHash} = result
         if (blockHash && blockHash !== HASH_IN_MEMPOOL) {
@@ -159,8 +167,9 @@ function InviteProvider({children}) {
       const txs = await Promise.all(
         invites
           .filter(({mining}) => mining)
-          .map(({hash}) => hash)
-          .map(api.fetchTx)
+          .map(({hash}) =>
+            callRpc('bcn_transaction', hash).then(tx => ({hash, ...tx}))
+          )
       )
       setInvites(
         await Promise.all(
@@ -192,8 +201,9 @@ function InviteProvider({children}) {
       const txs = await Promise.all(
         invites
           .filter(({terminating}) => terminating)
-          .map(({hash}) => hash)
-          .map(api.fetchTx)
+          .map(({hash}) =>
+            callRpc('bcn_transaction', hash).then(tx => ({hash, ...tx}))
+          )
       )
 
       setInvites(
