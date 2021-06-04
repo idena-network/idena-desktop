@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {useRouter} from 'next/router'
-import {useTranslation} from 'react-i18next'
+import {Trans, useTranslation} from 'react-i18next'
 import {
   Flex,
   Text,
@@ -19,7 +19,6 @@ import {
   useTheme,
   useToast,
   Alert,
-  Progress,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import semver from 'semver'
@@ -31,7 +30,6 @@ import {useDebounce} from '../hooks/use-debounce'
 import {useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/utils'
 import {useIdentityState} from '../providers/identity-context'
-import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {
   DnaSignInDialog,
@@ -58,6 +56,8 @@ import {
   DialogFooter,
   DialogHeader,
   ExternalLink,
+  Progress,
+  TextLink,
   Toast,
 } from './components'
 import {ActivateMiningDrawer} from '../../screens/profile/components'
@@ -70,6 +70,8 @@ import {
 } from '../utils/utils'
 import {useTimingState} from '../providers/timing-context'
 import {useChainState} from '../providers/chain-context'
+import {useNode} from '../providers/node-context'
+import {useSettings} from '../providers/settings-context'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -88,7 +90,24 @@ export default function Layout({
   const [zoomLevel, setZoomLevel] = React.useState(
     () => loadPersistentStateValue('settings', 'zoomLevel') || 0
   )
-  React.useEffect(() => addWheelHandler(setZoomLevel), [])
+
+  React.useEffect(() => {
+    const handleMouseWheel = e => {
+      if (e.ctrlKey) {
+        e.preventDefault()
+        setZoomLevel(level =>
+          Math.min(Math.max(-5, level + e.deltaY * -0.01), 5)
+        )
+      }
+
+      document.addEventListener('wheel', handleMouseWheel)
+
+      return () => {
+        document.removeEventListener('wheel', handleMouseWheel)
+      }
+    }
+  }, [])
+
   React.useEffect(() => {
     if (Number.isFinite(zoomLevel)) {
       global.setZoomLevel(zoomLevel)
@@ -101,11 +120,19 @@ export default function Layout({
   const {nodeRemoteVersion, mustUpdateNode} = useAutoUpdateState()
   const {updateNode, onRejectHardFork} = useAutoUpdateDispatch()
 
+  const isHardFork = !loading && !skipHardForkScreen && mustUpdateNode
+  const isSyncing = !loading && debouncedSyncing && !debouncedOffline
+  const isOffline = !loading && debouncedOffline && !debouncedSyncing
+  const isReady = !loading && !debouncedOffline && !debouncedSyncing
+  const isNotOffline = !debouncedOffline && !loading
+
   return (
     <LayoutContainer>
       <Sidebar />
+
       {loading && <LoadingApp />}
-      {!loading && !skipHardForkScreen && mustUpdateNode ? (
+
+      {isHardFork ? (
         <HardForkScreen
           version={nodeRemoteVersion}
           onUpdate={updateNode}
@@ -113,13 +140,11 @@ export default function Layout({
         />
       ) : (
         <>
-          {!loading && debouncedSyncing && !debouncedOffline && <SyncingApp />}
-          {!loading && debouncedOffline && !debouncedSyncing && <OfflineApp />}
-          {!loading && !debouncedOffline && !debouncedSyncing && (
-            <NormalApp {...props} />
-          )}
+          {isSyncing && <SyncingApp />}
+          {isOffline && <OfflineApp />}
+          {isReady && <NormalApp {...props} />}
 
-          {!debouncedOffline && !loading && (
+          {isNotOffline && (
             <DnaLinkHandler>
               <DnaSignInDialog
                 isOpen={url => new URL(url).pathname.includes('signin')}
@@ -265,7 +290,11 @@ function SyncingApp() {
             },
           },
         },
-        done: {},
+        done: {
+          after: {
+            3000: 'loading',
+          },
+        },
       },
     })
   )
@@ -334,24 +363,16 @@ function SyncingApp() {
               </Box>
             </Box>
             <Box>
-              {eitherState(current, 'done') && (
-                <>
-                  <Text as="span" color="muted">
-                    {t('Peers connected')}:{' '}
-                  </Text>
-                  {peers.length}
-                </>
-              )}
+              <Text as="span" color="muted">
+                {t('Peers connected')}:{' '}
+              </Text>
+              {peers.length}
             </Box>
           </Flex>
           <Progress
             value={currentBlock}
             min={genesisBlock || 0}
             max={highestBlock || Number.MAX_SAFE_INTEGER}
-            rounded={2}
-            bg="xblack.016"
-            color="brandBlue"
-            h={1}
           />
         </Stack>
         {wrongTime && (
@@ -369,229 +390,145 @@ function SyncingApp() {
 function LoadingApp() {
   const {t} = useTranslation()
 
-  return <Box>Loading</Box>
-  // return (
-  //   <section>
-  //     <div>
-  //       <h3>{t('Please wait...')}</h3>
-  //     </div>
-  //     <style jsx>{`
-  //       section {
-  //         background: ${theme.colors.darkGraphite};
-  //         color: white;
-  //         display: flex;
-  //         flex-direction: column;
-  //         align-items: center;
-  //         justify-content: center;
-  //         flex: 1;
-  //       }
-  //       section > div {
-  //         display: flex;
-  //         align-items: center;
-  //         justify-content: space-between;
-  //         flex-direction: column;
-  //         width: 50%;
-  //       }
-  //     `}</style>
-  //   </section>
-  // )
+  return (
+    <FillCenter bg="graphite.500" color="white" fontWeight={500}>
+      {t('Please wait...')}
+    </FillCenter>
+  )
 }
 
 function OfflineApp() {
-  return <Box>Offline</Box>
-  // const {nodeReady, nodeFailed} = useNodeState()
-  // const {tryRestartNode} = useNodeDispatch()
-  // const {useExternalNode, runInternalNode} = useSettingsState()
-  // const {nodeProgress} = useAutoUpdateState()
-  // const {toggleRunInternalNode, toggleUseExternalNode} = useSettingsDispatch()
+  const [{nodeReady, nodeFailed}, {tryRestartNode}] = useNode()
 
-  // const {wrongTime} = useChainState()
+  const [
+    {useExternalNode, runInternalNode},
+    {toggleRunInternalNode, toggleUseExternalNode},
+  ] = useSettings()
 
-  // const {t} = useTranslation()
+  const {nodeProgress} = useAutoUpdateState()
 
-  // return (
-  //   <section>
-  //     <div>
-  //       {!nodeReady &&
-  //         !useExternalNode &&
-  //         runInternalNode &&
-  //         !nodeFailed &&
-  //         nodeProgress && (
-  //           <>
-  //             <Flex width="100%">
-  //               <img src="/static/idena_white.svg" alt="logo" />
-  //               <Flex direction="column" justify="space-between" flex="1">
-  //                 <h2>{t('Downloading Idena Node...')}</h2>
+  const {t} = useTranslation()
 
-  //                 <Flex justify="space-between">
-  //                   <div className="gray">
-  //                     {t('Version {{version}}', {
-  //                       version: nodeProgress.version,
-  //                     })}
-  //                   </div>
-  //                   <div>
-  //                     {(
-  //                       nodeProgress.transferred /
-  //                       (1024 * 1024)
-  //                     ).toLocaleString(undefined, {
-  //                       maximumFractionDigits: 2,
-  //                     })}{' '}
-  //                     MB <span className="gray">out of</span>{' '}
-  //                     {(nodeProgress.length / (1024 * 1024)).toLocaleString(
-  //                       undefined,
-  //                       {
-  //                         maximumFractionDigits: 2,
-  //                       }
-  //                     )}{' '}
-  //                     MB
-  //                   </div>
-  //                 </Flex>
-  //               </Flex>
-  //             </Flex>
-  //             <Flex width="100%" css={{marginTop: 10}}>
-  //               <Progress
-  //                 value={nodeProgress.percentage}
-  //                 max={100}
-  //                 rounded="2px"
-  //                 bg="xblack.016"
-  //                 color="brandBlue"
-  //                 h={1}
-  //                 mt="11px"
-  //               />
-  //             </Flex>
-  //           </>
-  //         )}
-  //       {(useExternalNode || !runInternalNode) && (
-  //         <Flex direction="column" css={{}}>
-  //           <SubHeading
-  //             color={theme.colors.white}
-  //             fontSize={rem(18)}
-  //             fontWeight={500}
-  //             css={{
-  //               ...margin(0, 0, rem(20)),
-  //             }}
-  //           >
-  //             {t('Your {{nodeType}} node is offline', {
-  //               nodeType: useExternalNode ? 'external' : '',
-  //             })}
-  //           </SubHeading>
-  //           <Box style={{...margin(0, 0, rem(16))}}>
-  //             <Button
-  //               variant="primary"
-  //               onClick={() => {
-  //                 if (!runInternalNode) {
-  //                   toggleRunInternalNode(true)
-  //                 } else {
-  //                   toggleUseExternalNode(false)
-  //                 }
-  //               }}
-  //             >
-  //               {t('Run the built-in node')}
-  //             </Button>
-  //           </Box>
-  //           <BlockText color={theme.colors.white05} css={{lineHeight: rem(20)}}>
-  //             If you have already node running, please check your connection{' '}
-  //             <Link color={theme.colors.primary} href="/settings/node">
-  //               settings
-  //             </Link>
-  //           </BlockText>
-  //         </Flex>
-  //       )}
-  //       {!useExternalNode &&
-  //         runInternalNode &&
-  //         (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress)) && (
-  //           <h3>{t('Idena Node is starting...')}</h3>
-  //         )}
-  //       {nodeFailed && !useExternalNode && (
-  //         <>
-  //           <h2>{t('Your built-in node is failed')}</h2>
-  //           <br />
-  //           <Box>
-  //             <Button variant="primary" onClick={tryRestartNode}>
-  //               {t('Restart built-in node')}
-  //             </Button>
-  //           </Box>
-  //           <br />
-  //           <BlockText color="white">
-  //             If problem still exists, restart your app or check your connection{' '}
-  //             <Link color={theme.colors.primary} href="/settings/node">
-  //               settings
-  //             </Link>{' '}
-  //           </BlockText>
-  //         </>
-  //       )}
+  const isDownloadingBuiltinNode =
+    !nodeReady &&
+    !useExternalNode &&
+    runInternalNode &&
+    !nodeFailed &&
+    nodeProgress
 
-  //       {wrongTime && (
-  //         <Snackbar>
-  //           <Toast
-  //             status="error"
-  //             title={t('Please check your local time')}
-  //             description={t(
-  //               'The time must be synchronized with internet time for the successful validation'
-  //             )}
-  //             actionContent={t('Check')}
-  //             w="md"
-  //             mx="auto"
-  //             onAction={() => {
-  //               global.openExternal('https://time.is/')
-  //             }}
-  //           />
-  //         </Snackbar>
-  //       )}
-  //     </div>
-  //     <style jsx>{`
-  //       section {
-  //         background: ${theme.colors.darkGraphite};
-  //         color: white;
-  //         display: flex;
-  //         flex-direction: column;
-  //         align-items: center;
-  //         justify-content: center;
-  //         flex: 1;
-  //       }
-  //       section > div {
-  //         display: flex;
-  //         align-items: center;
-  //         justify-content: space-between;
-  //         flex-direction: column;
-  //         width: 50%;
-  //       }
+  const isNormalOffline = useExternalNode || !runInternalNode
 
-  //       img {
-  //         width: ${rem(60)};
-  //         height: ${rem(60)};
-  //         margin-right: ${rem(10)};
-  //       }
-  //       section .gray {
-  //         opacity: 0.5;
-  //       }
-  //       progress {
-  //         width: 100%;
-  //         height: ${rem(4, theme.fontSizes.base)};
-  //         background-color: rgba(0, 0, 0, 0.16);
-  //       }
-  //       progress::-webkit-progress-bar {
-  //         background-color: rgba(0, 0, 0, 0.16);
-  //       }
-  //       progress::-webkit-progress-value {
-  //         background-color: ${theme.colors.primary};
-  //       }
-  //       h2 {
-  //         font-size: ${rem(18, theme.fontSizes.base)};
-  //         font-weight: 500;
-  //         margin: 0;
-  //         word-break: break-all;
-  //       }
-  //       span {
-  //         font-size: ${rem(14, theme.fontSizes.base)};
-  //         line-height: ${rem(20, theme.fontSizes.base)};
-  //       }
-  //       li {
-  //         margin-bottom: ${rem(theme.spacings.small8, theme.fontSizes.base)};
-  //       }
-  //     `}</style>
-  //   </section>
-  // )
+  const isStartingBuiltinNode =
+    !useExternalNode &&
+    runInternalNode &&
+    (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress))
+
+  const isFailedBuiltinNode = nodeFailed && !useExternalNode
+
+  const toMb = b =>
+    (b / (1024 * 1024)).toLocaleString(undefined, {
+      maximumFractionDigits: 2,
+    })
+
+  return (
+    <FillCenter bg="graphite.500" color="white" position="relative">
+      <Flex
+        align="center"
+        justify="center"
+        bg="red.500"
+        py={3}
+        fontWeight={500}
+        position="absolute"
+        top={0}
+        left={0}
+        w="full"
+      >
+        {t('Offline')}
+      </Flex>
+
+      {isDownloadingBuiltinNode && (
+        <Stack spacing={3} w="md">
+          <Stack isInline spacing={4} align="center">
+            <Image src="/static/idena_white.svg" alt="logo" size={12} />
+            <Stack spacing={1} flex={1}>
+              <Heading fontSize="lg" fontWeight={500}>
+                {t('Downloading Idena Node...')}
+              </Heading>
+              <Flex justify="space-between" alignSelf="stretch">
+                <Text color="xwhite.050">
+                  {t('Version {{version}}', {
+                    version: nodeProgress.version,
+                  })}
+                </Text>
+                <Text>
+                  {toMb(nodeProgress.transferred)} MB{' '}
+                  <Text as="span" color="xwhite.040">
+                    out of
+                  </Text>{' '}
+                  {toMb(nodeProgress.length)} MB
+                </Text>
+              </Flex>
+            </Stack>
+          </Stack>
+          <Progress value={nodeProgress.percentage} max={100} />
+        </Stack>
+      )}
+
+      {isNormalOffline && (
+        <Stack spacing={5} w={416}>
+          <Heading fontSize="lg" fontWeight={500}>
+            {t('Your {{nodeType}} node is offline', {
+              nodeType: useExternalNode ? 'external' : '',
+            })}
+          </Heading>
+          <Stack spacing={4} align="flex-start">
+            <PrimaryButton
+              onClick={() => {
+                if (!runInternalNode) {
+                  toggleRunInternalNode(true)
+                } else {
+                  toggleUseExternalNode(false)
+                }
+              }}
+            >
+              {t('Run the built-in node')}
+            </PrimaryButton>
+            <Text color="xwhite.050" fontSize="mdx">
+              <Trans i18nKey="nodeOfflineCheckSettings" t={t}>
+                If you have already node running, please check your connection{' '}
+                <TextLink href="/settings/node">settings</TextLink>
+              </Trans>
+            </Text>
+          </Stack>
+        </Stack>
+      )}
+
+      {isStartingBuiltinNode && (
+        <Heading fontSize="mdx" fontWeight={500}>
+          {t('Idena Node is starting...')}
+        </Heading>
+      )}
+
+      {isFailedBuiltinNode && (
+        <Stack spacing={5} w={416}>
+          <Heading fontSize="lg" fontWeight={500}>
+            {t('Your built-in node is failed')}
+          </Heading>
+          <Stack spacing={4} align="flex-start">
+            <PrimaryButton onClick={tryRestartNode}>
+              {t('Restart built-in node')}
+            </PrimaryButton>
+            <Text color="xwhite.050" fontSize="mdx">
+              <Trans i18nKey="builtinNodeFailed" t={t}>
+                If problem still exists, restart your app or check your
+                connection <TextLink href="/settings/node">settings</TextLink>
+              </Trans>
+            </Text>
+          </Stack>
+        </Stack>
+      )}
+    </FillCenter>
+  )
 }
 
 function HardForkScreen({version, onUpdate, onReject}) {

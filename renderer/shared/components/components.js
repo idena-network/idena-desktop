@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
+import NextLink from 'next/link'
 import {
   Code,
   Drawer as ChakraDrawer,
@@ -36,6 +37,8 @@ import {
   Icon,
   InputGroup,
   InputRightAddon,
+  Link,
+  Progress as ChakraProgress,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -410,5 +413,27 @@ export function GoogleTranslateButton({
     >
       {children || 'Google Translate'}
     </IconButton2>
+  )
+}
+
+export function TextLink({href, ...props}) {
+  return (
+    <NextLink href={href} passHref>
+      <Link href={href} color="blue.500" {...props}>
+        settings
+      </Link>
+    </NextLink>
+  )
+}
+
+export function Progress(props) {
+  return (
+    <ChakraProgress
+      bg="xblack.016"
+      borderRadius={2}
+      color="blue"
+      h={1}
+      {...props}
+    />
   )
 }

@@ -180,3 +180,7 @@ export function useNodeDispatch() {
   }
   return context
 }
+
+export function useNode() {
+  return [useNodeState(), useNodeDispatch()]
+}
