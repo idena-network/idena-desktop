@@ -272,6 +272,9 @@ function SyncingApp() {
   const {t} = useTranslation()
 
   const {currentBlock, highestBlock, genesisBlock, wrongTime} = useChainState()
+
+  const {wrongClientTime} = useTimingState()
+
   const {address} = useIdentityState()
 
   const [current] = useMachine(
@@ -383,6 +386,24 @@ function SyncingApp() {
           </Alert>
         )}
       </Stack>
+
+      {wrongClientTime && (
+        <Snackbar>
+          <Toast
+            status="error"
+            title={t('Please check your local time')}
+            description={t(
+              'The time must be synchronized with internet time for the successful validation'
+            )}
+            actionContent={t('Check')}
+            w="md"
+            mx="auto"
+            onAction={() => {
+              global.openExternal('https://time.is/')
+            }}
+          />
+        </Snackbar>
+      )}
     </FillCenter>
   )
 }
