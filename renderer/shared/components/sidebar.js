@@ -477,31 +477,53 @@ function ActionPanel() {
 
 function PulseFrame({isActive, children, ...props}) {
   return (
-    <ChakraBox
-      roundedTop="md"
-      shadow={isActive ? 'inset 0 0 0 2px #578fff' : 'none'}
-      {...props}
-    >
+    <ChakraBox roundedTop="md" {...props}>
       {isActive ? (
         <ChakraBox
-          rounded="md"
-          shadow="inset 0 0 0 2px #578fff3d"
-          animation="pulseFrame 1.2s infinite"
+          roundedTop="md"
+          shadow="inset 0 0 0 2px #578fff"
+          animation="pulseFrame1 1.2s infinite"
         >
-          {children}
-          <style jsx global>{`
-            @keyframes pulseFrame {
-              0% {
-                box-shadow: inset 0 0 0 2px #578fff3d;
+          <ChakraBox
+            roundedTop="md"
+            shadow="inset 0 0 0 6px #578fff3d"
+            animation="pulseFrame2 1.2s infinite"
+          >
+            {children}
+            <style jsx global>{`
+              @keyframes pulseFrame1 {
+                0% {
+                  box-shadow: inset 0 0 0 2px #578fff;
+                }
+
+                50% {
+                  box-shadow: inset 0 0 0 2px #578fff;
+                }
+
+                100% {
+                  box-shadow: inset 0 0 0 2px #578fff00;
+                }
               }
-              60% {
-                box-shadow: inset 0 0 0 5px #578fff3d;
+
+              @keyframes pulseFrame2 {
+                0% {
+                  box-shadow: inset 0 0 0 6px #578fff00;
+                }
+
+                50% {
+                  box-shadow: inset 0 0 0 6px #578fff3d;
+                }
+
+                70% {
+                  box-shadow: inset 0 0 0 6px #578fff3d;
+                }
+
+                100% {
+                  box-shadow: inset 0 0 0 6px #578fff00;
+                }
               }
-              100% {
-                box-shadow: inset 0 0 0 5px #578fff00;
-              }
-            }
-          `}</style>
+            `}</style>
+          </ChakraBox>
         </ChakraBox>
       ) : (
         children
