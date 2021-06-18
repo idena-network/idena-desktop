@@ -482,48 +482,32 @@ function PulseFrame({isActive, children, ...props}) {
         <ChakraBox
           roundedTop="md"
           shadow="inset 0 0 0 2px #578fff"
-          animation="pulseFrame1 1.2s infinite"
+          animation="pulseFrame 1.2s infinite"
         >
-          <ChakraBox
-            roundedTop="md"
-            shadow="inset 0 0 0 6px #578fff3d"
-            animation="pulseFrame2 1.2s infinite"
-          >
-            {children}
-            <style jsx global>{`
-              @keyframes pulseFrame1 {
-                0% {
-                  box-shadow: inset 0 0 0 2px #578fff;
-                }
-
-                50% {
-                  box-shadow: inset 0 0 0 2px #578fff;
-                }
-
-                100% {
-                  box-shadow: inset 0 0 0 2px #578fff00;
-                }
+          {children}
+          <style jsx global>{`
+            @keyframes pulseFrame {
+              0% {
+                box-shadow: inset 0 0 0 2px rgba(87, 143, 255, 0),
+                  inset 0 0 0 6px rgba(87, 143, 255, 0);
               }
 
-              @keyframes pulseFrame2 {
-                0% {
-                  box-shadow: inset 0 0 0 6px #578fff00;
-                }
-
-                50% {
-                  box-shadow: inset 0 0 0 6px #578fff3d;
-                }
-
-                70% {
-                  box-shadow: inset 0 0 0 6px #578fff3d;
-                }
-
-                100% {
-                  box-shadow: inset 0 0 0 6px #578fff00;
-                }
+              40% {
+                box-shadow: inset 0 0 0 2px rgba(87, 143, 255, 1),
+                  inset 0 0 0 6px rgba(87, 143, 255, 0.3);
               }
-            `}</style>
-          </ChakraBox>
+
+              50% {
+                box-shadow: inset 0 0 0 2px rgba(87, 143, 255, 1),
+                  inset 0 0 0 6px rgba(87, 143, 255, 0.3);
+              }
+
+              100% {
+                box-shadow: inset 0 0 0 2px rgba(87, 143, 255, 0),
+                  inset 0 0 0 6px rgba(87, 143, 255, 0);
+              }
+            }
+          `}</style>
         </ChakraBox>
       ) : (
         children
