@@ -477,28 +477,34 @@ function ActionPanel() {
 
 function PulseFrame({isActive, children, ...props}) {
   return (
-    <ChakraBox
-      roundedTop="md"
-      shadow={isActive ? 'inset 0 0 0 2px #578fff' : 'none'}
-      {...props}
-    >
+    <ChakraBox roundedTop="md" {...props}>
       {isActive ? (
         <ChakraBox
-          rounded="md"
-          shadow="inset 0 0 0 2px #578fff3d"
+          roundedTop="md"
+          shadow="inset 0 0 0 2px #578fff"
           animation="pulseFrame 1.2s infinite"
         >
           {children}
           <style jsx global>{`
             @keyframes pulseFrame {
               0% {
-                box-shadow: inset 0 0 0 2px #578fff3d;
+                box-shadow: inset 0 0 0 2px rgba(87, 143, 255, 0),
+                  inset 0 0 0 6px rgba(87, 143, 255, 0);
               }
-              60% {
-                box-shadow: inset 0 0 0 5px #578fff3d;
+
+              40% {
+                box-shadow: inset 0 0 0 2px rgba(87, 143, 255, 1),
+                  inset 0 0 0 6px rgba(87, 143, 255, 0.3);
               }
+
+              50% {
+                box-shadow: inset 0 0 0 2px rgba(87, 143, 255, 1),
+                  inset 0 0 0 6px rgba(87, 143, 255, 0.3);
+              }
+
               100% {
-                box-shadow: inset 0 0 0 5px #578fff00;
+                box-shadow: inset 0 0 0 2px rgba(87, 143, 255, 0),
+                  inset 0 0 0 6px rgba(87, 143, 255, 0);
               }
             }
           `}</style>
