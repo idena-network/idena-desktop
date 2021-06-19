@@ -1,9 +1,9 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-nested-ternary */
 import React, {useState} from 'react'
-import PropTypes from 'prop-types'
+import {Box, Stack} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {Drawer, Field} from '../../../shared/components'
-import theme from '../../../shared/theme'
 import {
   useInviteDispatch,
   useInviteState,
@@ -22,7 +22,9 @@ function InviteDetails({dbkey, onClose, onSelect}) {
     t,
     i18n: {language},
   } = useTranslation()
+
   const [showRenameForm, setShowRenameForm] = useState(false)
+
   const [showKillInviteForm, setShowKillInviteForm] = useState(false)
   const {updateInvite, deleteInvite, recoverInvite} = useInviteDispatch()
   const {addNotificationWithAction} = useNotificationDispatch()
@@ -63,32 +65,34 @@ function InviteDetails({dbkey, onClose, onSelect}) {
   const toDna = toLocaleDna(language)
 
   return (
-    <div>
-      <section>
-        <ContactInfo {...invite} address={receiver} showMining={mining} />
+    <>
+      <Stack spacing={6} w="full">
+        <Stack spacing={4}>
+          <ContactInfo {...invite} address={receiver} showMining={mining} />
 
-        <ContactToolbar
-          onRename={() => setShowRenameForm(true)}
-          onDelete={() => {
-            const id = dbkey
-            deleteInvite(id)
-            onClose()
-            addNotificationWithAction({
-              title: t(`Invitation deleted`),
-              action: onDeleteUndo,
-              actionName: 'Undo',
-            })
-          }}
-          onKill={
-            canKill
-              ? () => {
-                  setShowKillInviteForm(true)
-                }
-              : null
-          }
-        />
+          <ContactToolbar
+            onRename={() => setShowRenameForm(true)}
+            onDelete={() => {
+              const id = dbkey
+              deleteInvite(id)
+              onClose()
+              addNotificationWithAction({
+                title: t(`Invitation deleted`),
+                action: onDeleteUndo,
+                actionName: 'Undo',
+              })
+            }}
+            onKill={
+              canKill
+                ? () => {
+                    setShowKillInviteForm(true)
+                  }
+                : null
+            }
+          />
+        </Stack>
 
-        <div>
+        <Box bg="gray.50" px={10} py={8} borderRadius="md">
           <Figure label={t('Status')} value={state} />
           {identity &&
             identity.state !== 'Invite' &&
@@ -105,8 +109,8 @@ function InviteDetails({dbkey, onClose, onSelect}) {
               allowCopy={!activated}
             />
           )}
-        </div>
-      </section>
+        </Box>
+      </Stack>
 
       <Drawer show={showRenameForm} onHide={() => setShowRenameForm(false)}>
         <RenameInvite
@@ -137,33 +141,8 @@ function InviteDetails({dbkey, onClose, onSelect}) {
           }}
         />
       </Drawer>
-
-      <style jsx>{`
-        div {
-          padding: 3em;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-        }
-        section > div {
-          background: ${theme.colors.gray};
-          border-radius: 4px;
-          padding: ${theme.spacings.xlarge};
-        }
-        div > section:nth-child(2) {
-          display: flex;
-          align-items: flex-end;
-          flex: 1;
-        }
-      `}</style>
-    </div>
+    </>
   )
-}
-
-InviteDetails.propTypes = {
-  dbkey: PropTypes.string,
-  onClose: PropTypes.func,
-  onSelect: PropTypes.func,
 }
 
 const WideField = props => <Field {...props} style={{width: '100%'}} />

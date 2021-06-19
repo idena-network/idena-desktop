@@ -24,6 +24,7 @@ import {
   Toast,
 } from '../../../shared/components/components'
 import {PrimaryButton, IconButton2} from '../../../shared/components/button'
+import {dummyAddress} from '../../../shared/utils/utils'
 
 // eslint-disable-next-line react/prop-types
 export function SendInviteDrawer({children, ...props}) {
@@ -31,7 +32,7 @@ export function SendInviteDrawer({children, ...props}) {
   return (
     <Drawer {...props}>
       <DrawerHeader mb={6}>
-        <Avatar address={`0x${'2'.repeat(64)}`} mx="auto" />
+        <Avatar address={dummyAddress} mx="auto" />
         <Heading
           fontSize="lg"
           fontWeight={500}

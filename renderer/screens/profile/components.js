@@ -60,7 +60,7 @@ import {
 import {createTimerMachine} from '../../shared/machines'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 import {activateMiningMachine} from './machines'
-import {eitherState} from '../../shared/utils/utils'
+import {dummyAddress, eitherState} from '../../shared/utils/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 
 export function UserInlineCard({address, status, ...props}) {
@@ -244,7 +244,7 @@ export function SpoilInviteDrawer({children, ...props}) {
   return (
     <Drawer {...props}>
       <DrawerHeader mb={6}>
-        <Avatar address={`0x${'2'.repeat(64)}`} mx="auto" />
+        <Avatar address={dummyAddress} mx="auto" />
         <Heading
           fontSize="lg"
           fontWeight={500}

@@ -197,12 +197,13 @@ export function Avatar({address, ...props}) {
 export function Tooltip(props) {
   return (
     <ChakraTooltip
-      bg="black"
+      bg="graphite.500"
       color="white"
       fontSize="sm"
+      fontWeight={500}
       px={2}
       py={1}
-      rounded="md"
+      borderRadius="sm"
       hasArrow
       {...props}
     />

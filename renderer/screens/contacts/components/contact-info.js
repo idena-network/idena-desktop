@@ -1,28 +1,30 @@
 import React from 'react'
+import {Flex} from '@chakra-ui/core'
 import PropTypes from 'prop-types'
 import {margin, padding, borderRadius, backgrounds} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {SubHeading, FormGroup, Text, Box} from '../../../shared/components'
 import theme, {rem} from '../../../shared/theme'
-import Flex from '../../../shared/components/flex'
 import Avatar from '../../../shared/components/avatar'
 import useUsername from '../../../shared/hooks/use-username'
 
 import useFullName from '../../../shared/hooks/use-full-name'
 
-function ContactInfo({address, firstName, lastName, mining, showMining}) {
+function ContactInfo({
+  address,
+  firstName,
+  lastName,
+  mining,
+  showMining,
+  ...props
+}) {
   const {t} = useTranslation()
 
   const fullName = useFullName({firstName, lastName})
   const username = useUsername({address})
 
   return (
-    <Flex
-      align="center"
-      css={{
-        ...margin(rem(theme.spacings.medium24), 0),
-      }}
-    >
+    <Flex align="center" {...props}>
       <Avatar username={username} />
       <Box my={rem(theme.spacings.medium24)}>
         <SubHeading>{fullName || username}</SubHeading>

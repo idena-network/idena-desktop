@@ -1,23 +1,14 @@
 import React from 'react'
+import {Box} from '@chakra-ui/core'
 import PropTypes from 'prop-types'
-import {padding, margin} from 'polished'
 import {useTranslation} from 'react-i18next'
-import theme, {rem} from '../../../shared/theme'
-import {Box} from '../../../shared/components'
 import Actions from '../../../shared/components/actions'
 import IconLink from '../../../shared/components/icon-link'
 
-export default function ContactToolbar({onRename, onDelete, onKill}) {
+export default function ContactToolbar({onRename, onDelete, onKill, ...props}) {
   const {t} = useTranslation()
   return (
-    <Box
-      py={theme.spacings.large}
-      w={rem(480)}
-      css={{
-        ...padding(rem(theme.spacings.small8), 0),
-        ...margin(rem(theme.spacings.medium16), 0),
-      }}
-    >
+    <Box {...props}>
       <Actions>
         <IconLink disabled={onRename == null} onClick={onRename}>
           {t('Rename')}

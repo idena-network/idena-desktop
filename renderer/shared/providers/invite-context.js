@@ -369,4 +369,8 @@ function useInviteDispatch() {
   return context
 }
 
+export function useInvite() {
+  return [useInviteState(), useInviteDispatch()]
+}
+
 export {InviteProvider, useInviteState, useInviteDispatch}
