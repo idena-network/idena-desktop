@@ -7,6 +7,7 @@ import {
   DrawerContent,
   DrawerCloseButton,
   DrawerHeader as ChakraDrawerHeader,
+  DrawerFooter as ChakraDrawerFooter,
   DrawerBody as ChakraDrawerBody,
   Input as ChakraInput,
   FormLabel as ChakraFormLabel,
@@ -72,6 +73,20 @@ export function DrawerHeader(props) {
 
 export function DrawerBody(props) {
   return <ChakraDrawerBody p={0} {...props} />
+}
+
+export function DrawerFooter(props) {
+  return (
+    <ChakraDrawerFooter
+      mb={-12}
+      mx={-8}
+      px={4}
+      py={3}
+      borderTopColor="gray.300"
+      borderTopWidth={1}
+      {...props}
+    />
+  )
 }
 
 export function FormLabel(props) {
