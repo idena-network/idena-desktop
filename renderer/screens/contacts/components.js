@@ -38,12 +38,17 @@ export function ContactStat({label, value}) {
   )
 }
 
-export function ContactCardMiningBadge({isMining, ...props}) {
+export function ContactCardMiningBadge(props) {
   return (
     <Badge
-      bg={isMining ? 'orange.012' : 'green.500'}
-      color={isMining ? 'orange.500' : 'green.500'}
-      p={2}
+      bg="orange.010"
+      color="orange.500"
+      borderRadius="lg"
+      fontWeight={500}
+      px={2}
+      py={1}
+      alignSelf="start"
+      textTransform="capitalize"
       {...props}
     />
   )

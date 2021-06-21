@@ -110,7 +110,7 @@ export default function ContactsPage() {
                   firstName,
                   lastName,
                 }))
-                successToast(t('Contact updated'))
+                successToast(t('Changes have been saved'))
                 onCloseEditContactDrawer()
               }}
               onClose={onCloseEditContactDrawer}
@@ -122,9 +122,13 @@ export default function ContactsPage() {
               onClose={onCloseKillContactDrawer}
               onKill={() => {
                 successToast('Invite terminated')
+                onCloseKillContactDrawer()
               }}
-              onFail={() => {
-                failToast('Invite termination failed')
+              onFail={error => {
+                failToast({
+                  title: 'Failed to terminate invite',
+                  description: error,
+                })
               }}
             />
           </Page>

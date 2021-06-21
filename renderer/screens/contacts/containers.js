@@ -46,6 +46,7 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {useChainState} from '../../shared/providers/chain-context'
 import {calculateInvitationRewardRatio} from '../profile/utils'
 import {useSuccessToast} from '../../shared/hooks/use-toast'
+import {IdentityStatus} from '../../shared/types'
 
 export function ContactListSidebar({onSelectContact, onNewContact}) {
   const {t} = useTranslation()
@@ -184,7 +185,7 @@ function ContactList({filter, onSelectContact}) {
             isActive={invite.dbkey === selectedInviteId}
             id={invite.dbkey}
             {...invite}
-            state={invite.identity && invite.identity.state}
+            state={invite.identity?.state}
             onClick={() => {
               onSelectContact(invite)
               setSelectedInviteId(invite.dbkey)
@@ -236,7 +237,7 @@ function ContactListItem({
     >
       <ContactAvatar address={receiver} w={8} h={8} borderRadius="lg" />
       <Box fontWeight={500}>
-        <Text isTruncated>{fullName || receiver}</Text>
+        <Text isTruncated>{fullName || receiver || t('...')}</Text>
         <SmallText color="blue.500">{hint}</SmallText>
       </Box>
     </Stack>
@@ -245,7 +246,6 @@ function ContactListItem({
 
 export function ContactCard({
   contact,
-  showMining,
   onEditContact,
   onRemoveContact,
   onRecoverContact,
@@ -277,11 +277,11 @@ export function ContactCard({
   const successToast = useSuccessToast()
 
   const isInviteExpired =
-    state === 'Undefined' && !canKill && !mining && !activated
+    state === IdentityStatus.Undefined && !canKill && !mining && !activated
 
   const status = isInviteExpired
     ? t('Expired invitation')
-    : state === 'Invite'
+    : state === IdentityStatus.Invite
     ? t('Invitation')
     : mining
     ? t('Mining...')
@@ -298,40 +298,60 @@ export function ContactCard({
           <Stack isInline spacing={6} align="center" py={2}>
             <ContactAvatar address={address} h={80} w={80} borderRadius={20} />
             <Stack spacing="3/2" fontWeight={500}>
-              <Text fontSize="lg">{`${firstName} ${lastName}`}</Text>
+              <Stack isInline align="center">
+                <Text fontSize="lg">
+                  {`${firstName} ${lastName}`.trim() || t('...')}
+                </Text>
+                {mining && (
+                  <ContactCardMiningBadge isMining={mining}>
+                    {mining ? t('Mining...') : t('Mined')}
+                  </ContactCardMiningBadge>
+                )}
+              </Stack>
               <Text color="muted" fontSize="mdx" wordBreak="break-all">
                 {address}
               </Text>
-              {showMining && <ContactCardMiningBadge isMining={mining} />}
             </Stack>
           </Stack>
 
-          <Stack isInline align="center" spacing={1}>
+          <Stack isInline align="center" spacing={1} w="full">
             <IconButton2 icon="edit" onClick={onEditContact}>
               {t('Edit')}
             </IconButton2>
             <VDivider />
-            <IconButton2
-              icon="flip-editor-delete"
-              onClick={() => {
-                deleteInvite(dbkey)
-                successToast({
-                  title: t('Contact deleted'),
-                  onAction: () => {
-                    recoverInvite(dbkey)
-                    onRecoverContact(contact)
-                  },
-                  actionContent: t('Undo'),
-                })
-                onRemoveContact()
-              }}
-            >
-              {t('Delete')}
-            </IconButton2>
+            <Tooltip label={t('Remove from device')}>
+              <IconButton2
+                icon="flip-editor-delete"
+                onClick={() => {
+                  deleteInvite(dbkey)
+                  successToast({
+                    title: t('Contact deleted'),
+                    onAction: () => {
+                      recoverInvite(dbkey)
+                      onRecoverContact(contact)
+                    },
+                    actionContent: t('Undo'),
+                  })
+                  onRemoveContact()
+                }}
+              >
+                {t('Delete contact')}
+              </IconButton2>
+            </Tooltip>
             {canKill && (
               <>
                 <VDivider />
-                <IconButton2 icon="delete" onClick={onKillContact}>
+                <IconButton2
+                  icon="delete"
+                  variantColor="red"
+                  _active={{
+                    bg: 'red.012',
+                  }}
+                  _focus={{
+                    boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
+                  }}
+                  onClick={onKillContact}
+                >
                   {t('Kill')}
                 </IconButton2>
               </>
@@ -343,7 +363,7 @@ export function ContactCard({
           <Stack spacing={0}>
             <ContactStat label={t('Status')} value={status} pt={2} pb={3} />
 
-            {state !== 'Invite' && !isInviteExpired && !mining && (
+            {state !== IdentityStatus.Invite && !isInviteExpired && !mining && (
               <ContactStat label={t('Address')} value={receiver} />
             )}
 
@@ -565,7 +585,6 @@ export function KillInviteDrawer({invite, onKill, onKillFail, ...props}) {
             else onKill(result)
           } catch (error) {
             setIsSubmitting(false)
-
             onKillFail(error?.message)
           }
         }}
@@ -581,7 +600,7 @@ export function KillInviteDrawer({invite, onKill, onKillFail, ...props}) {
           </Stack>
         </DrawerBody>
         <DrawerFooter>
-          <PrimaryButton ml="auto" isLoading={isSubmitting}>
+          <PrimaryButton type="submit" ml="auto" isLoading={isSubmitting}>
             {t('Create invitation')}
           </PrimaryButton>
         </DrawerFooter>
