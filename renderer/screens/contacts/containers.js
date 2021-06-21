@@ -237,7 +237,9 @@ function ContactListItem({
     >
       <ContactAvatar address={receiver} w={8} h={8} borderRadius="lg" />
       <Box fontWeight={500}>
-        <Text isTruncated>{fullName || receiver || t('...')}</Text>
+        <Text maxW={180} isTruncated>
+          {fullName || receiver || t('...')}
+        </Text>
         <SmallText color="blue.500">{hint}</SmallText>
       </Box>
     </Stack>
@@ -418,14 +420,14 @@ export function IssueInviteDrawer({onIssue, onIssueFail, ...props}) {
         </ContactDrawerHeader>
       </DrawerHeader>
       <DrawerBody>
-        <Text fontSize="md" mt={6}>
+        <Text color="brandGray.500" fontSize="md" mt={5} mb={6}>
           {t(
             `You can issue the invitation to the specific identity address in Advanced section`
           )}
         </Text>
         <Stack
           as="form"
-          spacing={6}
+          spacing={5}
           onSubmit={async e => {
             e.preventDefault()
 
@@ -590,12 +592,15 @@ export function KillInviteDrawer({invite, onKill, onKillFail, ...props}) {
         }}
       >
         <DrawerBody>
-          <Text mt={5}>{t('Terminate invitation')}</Text>
-          <Stack spacing={6}>
+          <Text color="brandGray.500" fontSize="md" mt={5} mb={6}>
+            {t('Terminate invitation')}
+          </Text>
+          <Stack spacing={5}>
             <ContactStat label={t('Status')} value={status} />
+            <ContactStat label={t('Address')} value={receiver} />
             <ContactStat
               label={t('Stake')}
-              value={toLocaleDna(i18n.language)(stake)}
+              value={toLocaleDna(i18n.language)(stake ?? 0)}
             />
           </Stack>
         </DrawerBody>

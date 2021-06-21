@@ -28,5 +28,5 @@ export function calculateInvitationRewardRatio(
 
   const t = (highestBlock - startBlock) / (endBlock - startBlock)
 
-  return 1 - t ** 4 * 0.5
+  return Math.max(1 - t ** 4 * 0.5, 0)
 }
