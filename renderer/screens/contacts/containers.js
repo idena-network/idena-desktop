@@ -4,14 +4,12 @@ import * as React from 'react'
 import {
   FormControl,
   Stack,
-  useToast,
   Text,
   Flex,
   Button,
   useClipboard,
   Box,
   Icon,
-  Heading,
   useDisclosure,
   Collapse,
   IconButton,
@@ -25,7 +23,6 @@ import {dummyAddress, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
   FormLabel,
   Input,
-  Toast,
   VDivider,
   Drawer,
   DrawerHeader,
@@ -34,32 +31,26 @@ import {
   Tooltip,
 } from '../../shared/components/components'
 import {
-  useInvite,
   useInviteDispatch,
   useInviteState,
 } from '../../shared/providers/invite-context'
 import {PrimaryButton, IconButton2} from '../../shared/components/button'
-import {ContactAvatar, ContactCardMiningBadge, ContactStat} from './components'
-import {useContactState} from '../../shared/providers/contact-context'
+import {
+  ContactAvatar,
+  ContactCardMiningBadge,
+  ContactDrawerHeader,
+  ContactStat,
+} from './components'
 import {SmallText} from '../oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useChainState} from '../../shared/providers/chain-context'
 import {calculateInvitationRewardRatio} from '../profile/utils'
+import {useSuccessToast} from '../../shared/hooks/use-toast'
 
-export function ContactListSidebar({
-  onSelectContact,
-  onSelectInvite,
-  onNewInvite,
-}) {
-  const {contacts} = useContactState()
+export function ContactListSidebar({onSelectContact, onNewContact}) {
+  const {t} = useTranslation()
 
   const [term, setTerm] = React.useState()
-
-  React.useEffect(() => {
-    if (contacts.length) {
-      onSelectContact(contacts[0])
-    }
-  }, [contacts, onSelectContact])
 
   return (
     <Stack
@@ -71,33 +62,32 @@ export function ContactListSidebar({
       overflow="hidden"
       overflowY="auto"
     >
-      <Stack>
-        <ContactListSearch
-          onChange={e => {
-            setTerm(e.target.value)
-          }}
-        />
-        <InviteActionBar onNewInvite={onNewInvite} />
+      <Stack spacing={0}>
+        <Box p={3}>
+          <Input
+            type="search"
+            bg="gray.50"
+            placeholder={t('Search')}
+            _placeholder={{
+              color: 'muted',
+            }}
+            onChange={e => setTerm(e.target.value)}
+          />
+        </Box>
+        <InviteActionBar onNewContact={onNewContact} />
       </Stack>
-      <ContactList filter={term} onSelectInvite={onSelectInvite} />
+      <ContactList filter={term} onSelectContact={onSelectContact} />
     </Stack>
   )
 }
 
-function InviteActionBar({onNewInvite, ...props}) {
+function InviteActionBar({onNewContact}) {
   const {t} = useTranslation()
 
   const {invites: availableInviteCount, canInvite} = useIdentityState()
 
   return (
-    <Flex
-      align="center"
-      justify="space-between"
-      px={4}
-      h={44}
-      w="full"
-      {...props}
-    >
+    <Flex align="center" justify="space-between" px={4} py="3/2" w="full">
       <Stack isInline spacing={3} align="center">
         <IconButton
           icon="plus-solid"
@@ -115,34 +105,17 @@ function InviteActionBar({onNewInvite, ...props}) {
           _active={{
             bg: 'brandBlue.20',
           }}
-          onClick={onNewInvite}
+          onClick={onNewContact}
         />
         <Box fontWeight={500}>
-          <Text>{t('Invite people')}</Text>
-          <SmallText color="blue.500">
+          <Text lineHeight="shorter">{t('Invite people')}</Text>
+          <SmallText color="blue.500" lineHeight={14 / 11}>
             {t('{{availableInviteCount}} invites left', {availableInviteCount})}
           </SmallText>
         </Box>
       </Stack>
       <InvitationRewardRatioInfo />
     </Flex>
-  )
-}
-
-function ContactListSearch({onChange}) {
-  const {t} = useTranslation()
-  return (
-    <Box p={3}>
-      <Input
-        type="search"
-        bg="gray.50"
-        placeholder={t('Search')}
-        _placeholder={{
-          color: 'muted',
-        }}
-        onChange={onChange}
-      />
-    </Box>
   )
 }
 
@@ -172,7 +145,7 @@ function InvitationRewardRatioInfo() {
   )
 }
 
-function ContactList({filter, onSelectInvite}) {
+function ContactList({filter, onSelectContact}) {
   const {t} = useTranslation()
 
   const {invites} = useInviteState()
@@ -212,8 +185,8 @@ function ContactList({filter, onSelectInvite}) {
             id={invite.dbkey}
             {...invite}
             state={invite.identity && invite.identity.state}
-            onSelectInvite={() => {
-              onSelectInvite(invite)
+            onClick={() => {
+              onSelectContact(invite)
               setSelectedInviteId(invite.dbkey)
             }}
           />
@@ -228,10 +201,10 @@ function ContactListItem({
   terminating,
   activated,
   state,
-  onSelectInvite,
   isActive,
   firstName,
   lastName,
+  ...props
 }) {
   const fullName = `${firstName} ${lastName}`.trim()
 
@@ -259,7 +232,7 @@ function ContactListItem({
       h={44}
       px={4}
       cursor="pointer"
-      onClick={onSelectInvite}
+      {...props}
     >
       <ContactAvatar address={receiver} w={8} h={8} borderRadius="lg" />
       <Box fontWeight={500}>
@@ -271,10 +244,11 @@ function ContactListItem({
 }
 
 export function ContactCard({
-  dbkey,
+  contact,
   showMining,
   onEditContact,
   onRemoveContact,
+  onRecoverContact,
   onKillContact,
 }) {
   const {
@@ -282,20 +256,10 @@ export function ContactCard({
     i18n: {language},
   } = useTranslation()
 
-  const [{invites}, {deleteInvite}] = useInvite()
-
-  const invite = invites && invites.find(({id}) => id === dbkey)
-
-  const {onCopy} = useClipboard(invite?.key)
-
-  const identity = invite?.identity
-  const stake = identity?.stake
-
-  if (!invite) {
-    return null
-  }
+  const {deleteInvite, recoverInvite} = useInviteDispatch()
 
   const {
+    dbkey,
     key,
     receiver,
     address = receiver,
@@ -305,20 +269,25 @@ export function ContactCard({
     mining,
     terminating,
     activated,
-  } = invite
+    identity: {stake, state} = {},
+  } = contact
+
+  const {onCopy} = useClipboard(key)
+
+  const successToast = useSuccessToast()
 
   const isInviteExpired =
-    identity?.state === 'Undefined' && !canKill && !mining && !activated
+    state === 'Undefined' && !canKill && !mining && !activated
 
-  const state = isInviteExpired
+  const status = isInviteExpired
     ? t('Expired invitation')
-    : identity?.state === 'Invite'
+    : state === 'Invite'
     ? t('Invitation')
     : mining
     ? t('Mining...')
     : terminating
     ? t('Terminating...')
-    : mapToFriendlyStatus(identity?.state) ?? 'Unknown'
+    : mapToFriendlyStatus(state) ?? 'Unknown'
 
   const toDna = toLocaleDna(language)
 
@@ -346,6 +315,14 @@ export function ContactCard({
               icon="flip-editor-delete"
               onClick={() => {
                 deleteInvite(dbkey)
+                successToast({
+                  title: t('Contact deleted'),
+                  onAction: () => {
+                    recoverInvite(dbkey)
+                    onRecoverContact(contact)
+                  },
+                  actionContent: t('Undo'),
+                })
                 onRemoveContact()
               }}
             >
@@ -364,9 +341,9 @@ export function ContactCard({
 
         <Stack spacing={5} bg="gray.50" px={10} py={8} borderRadius="md">
           <Stack spacing={0}>
-            <ContactStat label={t('Status')} value={state} pt={2} pb={3} />
+            <ContactStat label={t('Status')} value={status} pt={2} pb={3} />
 
-            {identity?.state !== 'Invite' && !isInviteExpired && !mining && (
+            {state !== 'Invite' && !isInviteExpired && !mining && (
               <ContactStat label={t('Address')} value={receiver} />
             )}
 
@@ -401,10 +378,8 @@ export function ContactCard({
   )
 }
 
-export function SendInviteDrawer({onDone, onFail, ...props}) {
+export function IssueInviteDrawer({onIssue, onIssueFail, ...props}) {
   const {t} = useTranslation()
-
-  const toast = useToast()
 
   const {
     isOpen: isOpenAdvancedOptions,
@@ -418,12 +393,9 @@ export function SendInviteDrawer({onDone, onFail, ...props}) {
   return (
     <Drawer {...props}>
       <DrawerHeader>
-        <Stack spacing={4} align="center">
-          <ContactAvatar address={dummyAddress} mx="auto" borderRadius={20} />
-          <Heading fontSize="lg" fontWeight={500} color="brandGray.500">
-            {t('Invite new person')}
-          </Heading>
-        </Stack>
+        <ContactDrawerHeader address={dummyAddress}>
+          {t('Invite new person')}
+        </ContactDrawerHeader>
       </DrawerHeader>
       <DrawerBody>
         <Text fontSize="md" mt={6}>
@@ -445,35 +417,13 @@ export function SendInviteDrawer({onDone, onFail, ...props}) {
 
             try {
               setIsSubmitting(true)
-
               const invite = await addInvite(address, null, firstName, lastName)
-
               setIsSubmitting(false)
 
-              toast({
-                // eslint-disable-next-line react/display-name
-                render: () => (
-                  <Toast
-                    title={t('Invitation code created')}
-                    description={invite.hash}
-                  />
-                ),
-              })
-
-              onDone(invite)
+              onIssue(invite)
             } catch (error) {
               setIsSubmitting(false)
-
-              toast({
-                // eslint-disable-next-line react/display-name
-                render: () => (
-                  <Toast
-                    title={error?.message ?? t('Something went wrong')}
-                    status="error"
-                  />
-                ),
-              })
-              onFail(error?.message)
+              onIssueFail(error?.message)
             }
           }}
         >
@@ -522,7 +472,7 @@ export function SendInviteDrawer({onDone, onFail, ...props}) {
     </Drawer>
   )
 }
-export function EditContactDrawer({contact, onDone, ...props}) {
+export function EditContactDrawer({contact, onRename, ...props}) {
   const {t} = useTranslation()
 
   const {updateInvite} = useInviteDispatch()
@@ -536,49 +486,50 @@ export function EditContactDrawer({contact, onDone, ...props}) {
   return (
     <Drawer {...props}>
       <DrawerHeader>
-        <Stack spacing={4} align="center">
-          <ContactAvatar w={20} h={20} address={receiver} borderRadius={20} />
-          <Heading
-            fontSize="lg"
-            fontWeight={500}
-            color="brandGray.500"
-            wordBreak="break-all"
-          >
-            {contactName}
-          </Heading>
-        </Stack>
+        <ContactDrawerHeader address={receiver} name={contactName} />
       </DrawerHeader>
-      <DrawerBody>
-        <Stack isInline spacing={4} mt={5}>
-          <FormControl>
-            <FormLabel>{t('First name')}</FormLabel>
-            <Input id="firstName" />
-          </FormControl>
-          <FormControl>
-            <FormLabel>{t('Last name')}</FormLabel>
-            <Input id="lastName" />
-          </FormControl>
-        </Stack>
-      </DrawerBody>
-      <DrawerFooter>
-        <PrimaryButton
-          ml="auto"
-          isLoading={isSubmitting}
-          onClick={async () => {
-            setIsSubmitting(true)
-            await updateInvite(id, firstName, lastName)
-            setIsSubmitting(false)
-            onDone()
-          }}
-        >
-          {t('Create invitation')}
-        </PrimaryButton>
-      </DrawerFooter>
+      <Flex
+        as="form"
+        direction="column"
+        flex={1}
+        onSubmit={async e => {
+          e.preventDefault()
+
+          const {
+            firstName: {value: firstNameValue},
+            lastName: {value: lastNameValue},
+          } = e.target.elements
+
+          setIsSubmitting(true)
+          await updateInvite(id, firstNameValue, lastNameValue)
+          setIsSubmitting(false)
+
+          onRename({firstName: firstNameValue, lastName: lastNameValue})
+        }}
+      >
+        <DrawerBody>
+          <Stack isInline spacing={4} mt={5}>
+            <FormControl>
+              <FormLabel>{t('First name')}</FormLabel>
+              <Input id="firstName" defaultValue={firstName} />
+            </FormControl>
+            <FormControl>
+              <FormLabel>{t('Last name')}</FormLabel>
+              <Input id="lastName" defaultValue={lastName} />
+            </FormControl>
+          </Stack>
+        </DrawerBody>
+        <DrawerFooter>
+          <PrimaryButton type="submit" ml="auto" isLoading={isSubmitting}>
+            {t('Create invitation')}
+          </PrimaryButton>
+        </DrawerFooter>
+      </Flex>
     </Drawer>
   )
 }
 
-export function KillInviteDrawer({invite, onDone, onFail, ...props}) {
+export function KillInviteDrawer({invite, onKill, onKillFail, ...props}) {
   const {t, i18n} = useTranslation()
 
   const {address} = useIdentityState()
@@ -594,19 +545,12 @@ export function KillInviteDrawer({invite, onDone, onFail, ...props}) {
   return (
     <Drawer {...props}>
       <DrawerHeader>
-        <Stack spacing={4} align="center">
-          <ContactAvatar address={receiver} w={20} h={20} borderRadius={20} />
-          <Heading
-            fontSize="lg"
-            fontWeight={500}
-            color="brandGray.500"
-            wordBreak="break-all"
-          >
-            {contactName}
-          </Heading>
-        </Stack>
+        <ContactDrawerHeader address={receiver} name={contactName} />
       </DrawerHeader>
-      <form
+      <Flex
+        as="form"
+        direction="column"
+        flex={1}
         onSubmit={async e => {
           e.preventDefault()
 
@@ -617,14 +561,12 @@ export function KillInviteDrawer({invite, onDone, onFail, ...props}) {
 
             setIsSubmitting(false)
 
-            if (error) {
-              onFail(error)
-            } else {
-              onDone(result)
-            }
+            if (error) onKillFail(error)
+            else onKill(result)
           } catch (error) {
             setIsSubmitting(false)
-            onFail(error?.message)
+
+            onKillFail(error?.message)
           }
         }}
       >
@@ -639,16 +581,11 @@ export function KillInviteDrawer({invite, onDone, onFail, ...props}) {
           </Stack>
         </DrawerBody>
         <DrawerFooter>
-          <PrimaryButton
-            ml="auto"
-            type="submit"
-            isLoading={isSubmitting}
-            onClick={async () => {}}
-          >
+          <PrimaryButton ml="auto" isLoading={isSubmitting}>
             {t('Create invitation')}
           </PrimaryButton>
         </DrawerFooter>
-      </form>
+      </Flex>
     </Drawer>
   )
 }

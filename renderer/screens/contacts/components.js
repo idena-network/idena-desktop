@@ -7,6 +7,7 @@ import {
   Badge,
   Icon,
   Text,
+  Heading,
 } from '@chakra-ui/core'
 import {Avatar} from '../../shared/components/components'
 import {dummyAddress} from '../../shared/utils/utils'
@@ -56,5 +57,21 @@ export function NoContactDataPlaceholder({children}) {
         {children}
       </Text>
     </FillCenter>
+  )
+}
+
+export function ContactDrawerHeader({address, name, children = name}) {
+  return (
+    <Stack spacing={4} align="center">
+      <ContactAvatar address={address} w={20} h={20} borderRadius={20} />
+      <Heading
+        fontSize="lg"
+        fontWeight={500}
+        color="brandGray.500"
+        wordBreak="break-all"
+      >
+        {children}
+      </Heading>
+    </Stack>
   )
 }

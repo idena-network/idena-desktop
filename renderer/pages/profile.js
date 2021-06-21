@@ -401,7 +401,7 @@ export default function ProfilePage() {
                       {t('New flip')}
                     </IconLink>
                     <IconLink
-                      href="/contacts/new-invite"
+                      href="/contacts?new"
                       isDisabled={!canInvite}
                       icon={<Icon name="add-user" size={5} />}
                     >

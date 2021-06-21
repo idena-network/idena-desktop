@@ -5,7 +5,7 @@ import {useTranslation} from 'react-i18next'
 import {
   ContactListSidebar,
   ContactCard,
-  SendInviteDrawer,
+  IssueInviteDrawer,
   EditContactDrawer,
   KillInviteDrawer,
 } from '../screens/contacts/containers'
@@ -14,10 +14,8 @@ import Layout from '../shared/components/layout'
 import {useChainState} from '../shared/providers/chain-context'
 import {ContactProvider} from '../shared/providers/contact-context'
 import {NoContactDataPlaceholder} from '../screens/contacts/components'
-import {
-  InviteProvider,
-  useInviteDispatch,
-} from '../shared/providers/invite-context'
+import {InviteProvider} from '../shared/providers/invite-context'
+import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
 
 export default function ContactsPage() {
   const {t} = useTranslation()
@@ -26,10 +24,7 @@ export default function ContactsPage() {
 
   const {syncing, offline, loading} = useChainState()
 
-  const [selectedContact, setSelectedContact] = React.useState({})
-  const [selectedInvite, setSelectedInvite] = React.useState({})
-  const [showInvite, setShowInvite] = React.useState(false)
-  const [showContact] = React.useState(false)
+  const [selectedContact, setSelectedContact] = React.useState(null)
 
   const {
     isOpen: isOpenSendInviteDrawer,
@@ -50,15 +45,11 @@ export default function ContactsPage() {
   } = useDisclosure()
 
   React.useEffect(() => {
-    if (query.new) onOpenSendInviteDrawer()
+    if (query.new !== undefined) onOpenSendInviteDrawer()
   }, [onOpenSendInviteDrawer, query.new])
 
-  // const {recoverInvite} = useInviteDispatch()
-
-  const onUndoRemoveContact = React.useCallback(() => {
-    // recoverInvite(selectedInvite.dbkey)
-    // onSelect(invite)
-  }, [])
+  const successToast = useSuccessToast()
+  const failToast = useFailToast()
 
   return (
     <ContactProvider>
@@ -68,44 +59,22 @@ export default function ContactsPage() {
             <Flex w="full">
               <ContactListSidebar
                 onSelectContact={setSelectedContact}
-                onSelectInvite={invite => {
-                  setSelectedInvite(invite)
-                  setShowInvite(true)
-                }}
-                onNewInvite={onOpenSendInviteDrawer}
+                onNewContact={onOpenSendInviteDrawer}
               />
               <Flex flex={1} py={6} px={20}>
-                {showInvite && (
+                {selectedContact ? (
                   <ContactCard
-                    dbkey={selectedInvite.id}
-                    code={selectedInvite && selectedInvite.key}
+                    contact={selectedContact}
                     onEditContact={onOpenEditContactDrawer}
-                    onKillContact={onOpenKillContactDrawer}
-                    onSelect={invite => {
-                      // setShowInvite(true)
-                      setSelectedInvite(invite)
-                    }}
                     onRemoveContact={() => {
-                      // setShowInvite(false)
-                      setSelectedInvite(null)
-
-                      // toast({
-                      //   // eslint-disable-next-line react/display-name
-                      //   render: () => (
-                      //     <Toast
-                      //       title={t(`Invitation deleted`)}
-                      //       action={onUndoRemoveContact}
-                      //       actionContent={t('Undo')}
-                      //     />
-                      //   ),
-                      // })
+                      setSelectedContact(null)
                     }}
+                    onRecoverContact={contact => {
+                      setSelectedContact(contact)
+                    }}
+                    onKillContact={onOpenKillContactDrawer}
                   />
-                )}
-
-                {/* {showContact && <ContactDetails {...selectedContact} />} */}
-
-                {!showContact && !showInvite && !selectedInvite && (
+                ) : (
                   <NoContactDataPlaceholder>
                     {t('You haven’t selected contacts yet.')}
                   </NoContactDataPlaceholder>
@@ -113,31 +82,49 @@ export default function ContactsPage() {
               </Flex>
             </Flex>
 
-            <SendInviteDrawer
+            <IssueInviteDrawer
               isOpen={isOpenSendInviteDrawer}
               onClose={onCloseNewContactDrawer}
-              onDone={invite => {
+              onIssue={invite => {
+                successToast({
+                  title: t('Invitation code created'),
+                  description: invite.hash,
+                })
+                setSelectedContact(invite)
                 onCloseNewContactDrawer()
-                setSelectedInvite(invite)
-                setShowInvite(true)
               }}
-              onFail={() => {}}
+              onIssueFail={error => {
+                failToast({
+                  title: error ?? t('Something went wrong'),
+                  status: 'error',
+                })
+              }}
             />
 
             <EditContactDrawer
+              contact={selectedContact ?? {}}
               isOpen={isOpenEditContactDrawer}
-              contact={selectedInvite}
+              onRename={({firstName, lastName}) => {
+                setSelectedContact(contact => ({
+                  ...contact,
+                  firstName,
+                  lastName,
+                }))
+                successToast(t('Contact updated'))
+                onCloseEditContactDrawer()
+              }}
               onClose={onCloseEditContactDrawer}
-              onDone={() => {}}
             />
 
             <KillInviteDrawer
+              invite={selectedContact ?? {}}
               isOpen={isOpenKillContactDrawer}
-              invite={selectedInvite}
               onClose={onCloseKillContactDrawer}
-              onDone={() => {}}
+              onKill={() => {
+                successToast('Invite terminated')
+              }}
               onFail={() => {
-                // toast
+                failToast('Invite termination failed')
               }}
             />
           </Page>
