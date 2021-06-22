@@ -57,7 +57,7 @@ export function Debug({children}) {
 
 export function Drawer({isCloseable = true, children, ...props}) {
   return (
-    <ChakraDrawer {...props}>
+    <ChakraDrawer closeOnOverlayClick={false} {...props}>
       <DrawerOverlay bg="xblack.080" />
       <DrawerContent px={8} py={12} maxW={360}>
         {isCloseable && <DrawerCloseButton />}
