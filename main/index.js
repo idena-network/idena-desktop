@@ -16,6 +16,8 @@ const fs = require('fs-extra')
 const i18next = require('i18next')
 // eslint-disable-next-line camelcase
 const {image_search} = require('duckduckgo-images-api')
+const os = require('os')
+const semver = require('semver')
 const {zoomIn, zoomOut, resetZoom} = require('./utils')
 const loadRoute = require('./utils/routes')
 const {getI18nConfig} = require('./language')
@@ -371,6 +373,10 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
 
   switch (command) {
     case 'init-local-node': {
+      if (isMac && semver.lt(os.release, '10.15')) {
+        sendMainWindowMsg(NODE_EVENT, 'unsupported-macos-version')
+        return
+      }
       getCurrentVersion()
         .then(version => {
           sendMainWindowMsg(NODE_EVENT, 'node-ready', version)

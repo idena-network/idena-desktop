@@ -99,12 +99,12 @@ export default function Layout({
           Math.min(Math.max(-5, level + e.deltaY * -0.01), 5)
         )
       }
+    }
 
-      document.addEventListener('wheel', handleMouseWheel)
+    document.addEventListener('wheel', handleMouseWheel)
 
-      return () => {
-        document.removeEventListener('wheel', handleMouseWheel)
-      }
+    return () => {
+      document.removeEventListener('wheel', handleMouseWheel)
     }
   }, [])
 
@@ -419,7 +419,10 @@ function LoadingApp() {
 }
 
 function OfflineApp() {
-  const [{nodeReady, nodeFailed}, {tryRestartNode}] = useNode()
+  const [
+    {nodeReady, nodeFailed, unsupportedMacosVersion},
+    {tryRestartNode},
+  ] = useNode()
 
   const [
     {useExternalNode, runInternalNode},
@@ -437,7 +440,7 @@ function OfflineApp() {
     !nodeFailed &&
     nodeProgress
 
-  const isNormalOffline = useExternalNode || !runInternalNode
+  const isExternalNodeOffline = useExternalNode || !runInternalNode
 
   const isStartingBuiltinNode =
     !useExternalNode &&
@@ -445,6 +448,9 @@ function OfflineApp() {
     (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress))
 
   const isFailedBuiltinNode = nodeFailed && !useExternalNode
+
+  const isUnsupportedMacosVersion =
+    runInternalNode && !useExternalNode && unsupportedMacosVersion
 
   const toMb = b =>
     (b / (1024 * 1024)).toLocaleString(undefined, {
@@ -495,7 +501,7 @@ function OfflineApp() {
         </Stack>
       )}
 
-      {isNormalOffline && (
+      {isExternalNodeOffline && (
         <Stack spacing={5} w={416}>
           <Heading fontSize="lg" fontWeight={500}>
             {t('Your {{nodeType}} node is offline', {
@@ -544,6 +550,21 @@ function OfflineApp() {
                 If problem still exists, restart your app or check your
                 connection <TextLink href="/settings/node">settings</TextLink>
               </Trans>
+            </Text>
+          </Stack>
+        </Stack>
+      )}
+
+      {isUnsupportedMacosVersion && (
+        <Stack spacing={5} w={416}>
+          <Heading fontSize="lg" fontWeight={500}>
+            {t(
+              'Can not start built-in node. The minimum required version is macOS Catalina'
+            )}
+          </Heading>
+          <Stack spacing={4} align="flex-start">
+            <Text color="xwhite.050" fontSize="mdx">
+              {t('Please update your macOS or connect to remote node.')}
             </Text>
           </Stack>
         </Stack>
