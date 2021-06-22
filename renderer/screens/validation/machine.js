@@ -368,9 +368,16 @@ export const createValidationMachine = ({
                       },
                     },
                     submitShortSession: {
-                      initial: 'submitting',
+                      initial: 'confirm',
                       entry: log(),
                       states: {
+                        confirm: {
+                          on: {
+                            SUBMIT: 'submitting',
+                            CANCEL:
+                              '#validation.shortSession.solve.answer.normal',
+                          },
+                        },
                         submitting: {
                           invoke: {
                             // eslint-disable-next-line no-shadow

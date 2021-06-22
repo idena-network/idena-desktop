@@ -48,6 +48,7 @@ import {
   ReviewValidationDialog,
   EncourageReportDialog,
   BadFlipDialog,
+  ReviewShortSessionDialog,
 } from '../../screens/validation/components'
 import theme, {rem} from '../../shared/theme'
 import {AnswerType} from '../../shared/types'
@@ -442,6 +443,22 @@ function ValidationSession({
         }}
       />
 
+      <ReviewShortSessionDialog
+        flips={flips.filter(solvableFlips)}
+        isOpen={[
+          'shortSession.solve.answer.submitShortSession.confirm',
+          'shortSession.solve.answer.submitShortSession.submitting',
+        ].some(state.matches)}
+        isSubmitting={isSubmitting(state)}
+        onSubmit={() => send('SUBMIT')}
+        onClose={() => {
+          send('CANCEL')
+        }}
+        onCancel={() => {
+          send('CANCEL')
+        }}
+      />
+
       <EncourageReportDialog
         isOpen={isOpenEncourageReportDialog}
         onClose={onCloseEncourageReportDialog}
@@ -474,7 +491,7 @@ function isSolving(state) {
 
 function isSubmitting(state) {
   return [
-    'shortSession.solve.answer.submitShortSession',
+    'shortSession.solve.answer.submitShortSession.submitting',
     'longSession.solve.answer.finishFlips',
     'longSession.solve.answer.submitLongSession',
   ].some(state.matches)
