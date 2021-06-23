@@ -445,6 +445,7 @@ function OfflineApp() {
   const isStartingBuiltinNode =
     !useExternalNode &&
     runInternalNode &&
+    !unsupportedMacosVersion &&
     (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress))
 
   const isFailedBuiltinNode = nodeFailed && !useExternalNode
@@ -557,14 +558,20 @@ function OfflineApp() {
 
       {isUnsupportedMacosVersion && (
         <Stack spacing={5} w={416}>
-          <Heading fontSize="lg" fontWeight={500}>
+          <Heading fontSize="mdx" fontWeight={500}>
             {t(
               'Can not start built-in node. The minimum required version is macOS Catalina'
             )}
           </Heading>
           <Stack spacing={4} align="flex-start">
             <Text color="xwhite.050" fontSize="mdx">
-              {t('Please update your macOS or connect to remote node.')}
+              <Trans i18nKey="unsupportedMacosVersion" t={t}>
+                Please update your macOS or{' '}
+                <TextLink href="/settings/node">
+                  connect to remote node
+                </TextLink>
+                .
+              </Trans>
             </Text>
           </Stack>
         </Stack>

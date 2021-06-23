@@ -14,10 +14,8 @@ const isDev = require('electron-is-dev')
 const prepareNext = require('electron-next')
 const fs = require('fs-extra')
 const i18next = require('i18next')
-// eslint-disable-next-line camelcase
-const {image_search} = require('duckduckgo-images-api')
-const os = require('os')
-const semver = require('semver')
+const {image_search: imageSearch} = require('duckduckgo-images-api')
+const macosVersion = require('macos-version')
 const {zoomIn, zoomOut, resetZoom} = require('./utils')
 const loadRoute = require('./utils/routes')
 const {getI18nConfig} = require('./language')
@@ -370,10 +368,9 @@ ipcMain.handleOnce('CHECK_DNA_LINK', () => dnaUrl)
 
 ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
   logger.info(`new node command`, command, data)
-
   switch (command) {
     case 'init-local-node': {
-      if (isMac && semver.lt(os.release, '10.15')) {
+      if (macosVersion.isMacOS && macosVersion.is('<10.15')) {
         sendMainWindowMsg(NODE_EVENT, 'unsupported-macos-version')
         return
       }
@@ -596,7 +593,7 @@ function sendMainWindowMsg(channel, message, data) {
 }
 
 ipcMain.handle('search-image', async (_, query) =>
-  image_search({
+  imageSearch({
     query,
     moderate: true,
   })
