@@ -29,7 +29,6 @@ import {
 } from '../providers/update-context'
 import useRpc from '../hooks/use-rpc'
 import {usePoll} from '../hooks/use-interval'
-import {Tooltip} from './tooltip'
 import {loadValidationState} from '../../screens/validation/utils'
 import {IdentityStatus, EpochPeriod, OnboardingStep} from '../types'
 import {Logo} from '../../screens/app/components'
@@ -52,6 +51,7 @@ import {
   formatValidationDate,
 } from '../utils/utils'
 import {isHardFork} from '../utils/node'
+import {Tooltip} from './components'
 
 function Sidebar() {
   return (
@@ -85,6 +85,8 @@ function Sidebar() {
 }
 
 function NodeStatus() {
+  const {t} = useTranslation()
+
   const {
     loading,
     syncing,
@@ -112,37 +114,45 @@ function NodeStatus() {
   }
 
   return (
-    <Box
+    <ChakraFlex
+      align="center"
       bg={bg}
-      css={{
-        borderRadius: rem(12),
-        ...margin(0, 0, 0, rem(-8)),
-        ...padding(rem(2), rem(12), rem(4), rem(8)),
-      }}
+      borderRadius={12}
+      h={6}
+      ml={-2}
+      pl={2}
+      pr={3}
     >
       <Tooltip
-        content={
-          <div style={{minWidth: rem(90)}}>
-            {offline
-              ? null
-              : [
-                  !offline ? `Peers: ${(peers || []).length}` : '',
-                  syncing
-                    ? `Blocks: ${currentBlock} out of ${highestBlock}`
-                    : `Current block: ${currentBlock}`,
-                ].map((t, idx) => (
-                  <div
-                    key={idx}
-                    style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word'}}
-                  >
-                    {t}
-                  </div>
-                ))}
-          </div>
+        label={
+          offline ? (
+            t('Offline')
+          ) : (
+            <>
+              <ChakraText>
+                {t('Peers: {{peersCount}}', {
+                  peersCount: (peers || []).length,
+                  nsSeparator: '!!',
+                })}
+              </ChakraText>
+              <ChakraText>
+                {syncing
+                  ? t('Blocks: {{currentBlock}} out of {{highestBlock}}', {
+                      currentBlock,
+                      highestBlock,
+                      nsSeparator: '!!',
+                    })
+                  : t('Current block: {{currentBlock}}', {
+                      currentBlock,
+                      nsSeparator: '!!',
+                    })}
+              </ChakraText>
+            </>
+          )
         }
-        placement="bottom"
+        zIndex="tooltip"
       >
-        <Flex align="baseline">
+        <ChakraFlex align="baseline">
           {!offline && (
             <Box css={{...margin(0, rem(4), 0, 0)}}>
               <Bandwidth strength={(peers || []).length} syncing={syncing} />
@@ -152,9 +162,9 @@ function NodeStatus() {
           <Text color={color} fontWeight={500} lineHeight={rem(18)}>
             {text}
           </Text>
-        </Flex>
+        </ChakraFlex>
       </Tooltip>
-    </Box>
+    </ChakraFlex>
   )
 }
 
