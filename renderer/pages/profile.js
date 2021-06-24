@@ -181,6 +181,21 @@ export default function ProfilePage() {
     }
   }, [currentOnboarding, done, next, status])
 
+  React.useEffect(() => {
+    if (
+      isValidated &&
+      eitherState(currentOnboarding, onboardingStep(OnboardingStep.Validate)) &&
+      !eitherState(
+        currentOnboarding,
+        'idle',
+        `${doneOnboardingStep(OnboardingStep.Validate)}.done`
+      )
+    ) {
+      console.log('done validate')
+      done()
+    }
+  }, [currentOnboarding, done, isValidated])
+
   const isShowingActivateInvitePopover = currentOnboarding.matches(
     activeShowingOnboardingStep(OnboardingStep.ActivateInvite)
   )

@@ -10,6 +10,10 @@ import {
   useToast,
   useDisclosure,
   useTheme,
+  PopoverTrigger,
+  Text,
+  Icon,
+  Stack,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {transparentize} from 'polished'
@@ -39,6 +43,7 @@ import {
   FlipType,
   IdentityStatus,
   FlipFilter as FlipFilterType,
+  OnboardingStep,
 } from '../../shared/types'
 import {FloatDebug} from '../../shared/components/components'
 import {flipsMachine} from '../../screens/flips/machines'
@@ -48,6 +53,14 @@ import {NotificationType} from '../../shared/providers/notification-context'
 import {loadPersistentState} from '../../shared/utils/persist'
 import {useChainState} from '../../shared/providers/chain-context'
 import Layout from '../../shared/components/layout'
+import {useOnboarding} from '../../shared/providers/onboarding-context'
+import {
+  OnboardingPopover,
+  OnboardingPopoverContent,
+  TaskConfetti,
+} from '../../shared/components/onboarding'
+import {doneOnboardingStep, onboardingStep} from '../../shared/utils/onboarding'
+import {eitherState} from '../../shared/utils/utils'
 
 export default function FlipListPage() {
   const {t} = useTranslation()
@@ -133,6 +146,23 @@ export default function FlipListPage() {
   const remainingOptionalFlips =
     availableFlipsNumber - Math.max(requiredFlipsNumber, madeFlipsNumber)
 
+  const [
+    currentOnboarding,
+    {done: doneOnboarding, dismiss: dismissOnboarding},
+  ] = useOnboarding()
+
+  const shouldCreateFlips =
+    currentOnboarding.matches(onboardingStep(OnboardingStep.CreateFlips)) &&
+    remainingRequiredFlips > 0
+
+  const didCreateFlips =
+    currentOnboarding.matches(onboardingStep(OnboardingStep.CreateFlips)) &&
+    remainingRequiredFlips <= 0
+
+  React.useEffect(() => {
+    if (didCreateFlips) doneOnboarding()
+  }, [didCreateFlips, doneOnboarding])
+
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
       <Page>
@@ -152,10 +182,52 @@ export default function FlipListPage() {
               {t('Archived')}
             </FlipFilterOption>
           </FlipFilter>
-          <IconLink href="/flips/new" icon="plus-solid">
-            {t('New flip')}
-          </IconLink>
+          <Box>
+            <OnboardingPopover isOpen={shouldCreateFlips}>
+              <PopoverTrigger>
+                <Box>
+                  <IconLink
+                    href="/flips/new"
+                    icon="plus-solid"
+                    bg="white"
+                    position="relative"
+                    zIndex={2}
+                  >
+                    {t('New flip')}
+                  </IconLink>
+                </Box>
+              </PopoverTrigger>
+              <OnboardingPopoverContent
+                title={t('Create flips')}
+                onDismiss={dismissOnboarding}
+              >
+                <Stack>
+                  <Text>
+                    {t(`You need to create at least 3 flips per epoch to participate
+                    in the next validation ceremony. Follow step-by-step
+                    instructions.`)}
+                  </Text>
+                  <Stack isInline align="center">
+                    <Icon name="coins-lg" size={5} />
+                    <Text>
+                      {t(
+                        `You'll get rewarded for every successfully qualified flip.`
+                      )}
+                    </Text>
+                  </Stack>
+                  <Stack isInline align="center">
+                    <Icon name="block" size={5} />
+                    <Text>
+                      {t(`Read carefully "What is a bad flip" rules to avoid
+                      penalty.`)}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </OnboardingPopoverContent>
+            </OnboardingPopover>
+          </Box>
         </Flex>
+
         {current.matches('ready.dirty.active') &&
           canSubmitFlips &&
           (remainingRequiredFlips > 0 || remainingOptionalFlips > 0) && (
@@ -195,16 +267,18 @@ export default function FlipListPage() {
               px={3}
               py={2}
             >
-              <AlertIcon
-                name="info"
-                color="red.500"
-                size={5}
-                mr={3}
-              ></AlertIcon>
+              <AlertIcon name="info" color="red.500" size={5} mr={3} />
               {t('You can not submit flips. Please get validated first. ')}
             </Alert>
           </Box>
         )}
+
+        <TaskConfetti
+          active={eitherState(
+            currentOnboarding,
+            `${doneOnboardingStep(OnboardingStep.CreateFlips)}.salut`
+          )}
+        />
 
         {current.matches('ready.pristine') && (
           <Flex

@@ -84,18 +84,14 @@ export function OnboardingProvider(props) {
             }),
             ...createStep({
               current: OnboardingStep.Validate,
-              next: OnboardingStep.FlipLottery,
-            }),
-            ...createStep({
-              current: OnboardingStep.FlipLottery,
-              next: OnboardingStep.WaitingValidationResults,
-            }),
-            ...createStep({
-              current: OnboardingStep.WaitingValidationResults,
               next: OnboardingStep.CreateFlips,
             }),
             ...createStep({
               current: OnboardingStep.CreateFlips,
+              next: OnboardingStep.ActivateMining,
+            }),
+            ...createStep({
+              current: OnboardingStep.ActivateMining,
               next: '#onboarding.done',
             }),
           },

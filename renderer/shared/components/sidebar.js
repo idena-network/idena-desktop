@@ -55,32 +55,31 @@ import {Tooltip} from './components'
 
 function Sidebar() {
   return (
-    <section>
+    <ChakraFlex
+      as="section"
+      direction="column"
+      justify="space-between"
+      bg="brandGray.500"
+      color="white"
+      px={4}
+      py={2}
+      h="100vh"
+      w={200}
+      minW={200}
+      zIndex={2}
+      position="relative"
+      overflow="hidden"
+    >
       <Flex direction="column" align="flex-start">
         <NodeStatus />
         <Logo />
         <Nav />
         <ActionPanel />
       </Flex>
-      <div>
+      <ChakraBox>
         <Version />
-      </div>
-      <style jsx>{`
-        section {
-          background: ${theme.colors.primary2};
-          color: ${theme.colors.white};
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          height: 100vh;
-          overflow: hidden;
-          padding: ${rem(8)} ${rem(16)};
-          width: ${rem(200)};
-          position: relative;
-          z-index: 2;
-        }
-      `}</style>
-    </section>
+      </ChakraBox>
+    </ChakraFlex>
   )
 }
 
@@ -307,6 +306,10 @@ function ActionPanel() {
     activeOnboardingStep(OnboardingStep.Validate)
   )
 
+  const shouldCreateFlips = currentOnboarding.matches(
+    activeOnboardingStep(OnboardingStep.CreateFlips)
+  )
+
   const isShowingValidateStep = currentOnboarding.matches(
     activeShowingOnboardingStep(OnboardingStep.Validate)
   )
@@ -316,6 +319,7 @@ function ActionPanel() {
   }
 
   const {currentPeriod, nextValidation} = epoch
+
   return (
     <Box
       bg={theme.colors.white01}
@@ -336,7 +340,8 @@ function ActionPanel() {
           eitherState(
             currentOnboarding,
             onboardingStep(OnboardingStep.ActivateInvite),
-            onboardingStep(OnboardingStep.Validate)
+            onboardingStep(OnboardingStep.Validate),
+            onboardingStep(OnboardingStep.CreateFlips)
           )
             ? 'pointer'
             : 'default'
@@ -353,10 +358,16 @@ function ActionPanel() {
                 behavior: 'smooth',
               })
           }
+          if (shouldCreateFlips) {
+            router.push('/flips/list')
+            return
+          }
           showCurrentTask()
         }}
       >
-        <PulseFrame isActive={shouldActivateInvite || shouldValidate}>
+        <PulseFrame
+          isActive={shouldActivateInvite || shouldValidate || shouldCreateFlips}
+        >
           <Block title={t('My current task')}>
             <CurrentTask
               epoch={epoch.epoch}

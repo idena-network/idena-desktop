@@ -581,7 +581,7 @@ export const QualificationButton = React.forwardRef(
   ({isSelected, children, ...props}, ref) => {
     const ButtonVariant = isSelected ? PrimaryButton : SecondaryButton
     return (
-      <ButtonVariant ref={ref} flex={1} maxW={40} {...props}>
+      <ButtonVariant ref={ref} flex={1} maxW={40} overflow="hidden" {...props}>
         <Stack isInline spacing={2} align="center" justify="center">
           {isSelected && <Icon name="tick" size={5} />}
           <Text>{children}</Text>
