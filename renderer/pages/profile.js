@@ -52,6 +52,7 @@ import {
   DialogHeader,
   ExternalLink,
   SuccessAlert,
+  FloatDebug,
   Toast,
 } from '../shared/components/components'
 import KillForm, {
@@ -75,7 +76,7 @@ import {useOnboarding} from '../shared/providers/onboarding-context'
 import {
   doneOnboardingStep,
   activeShowingOnboardingStep,
-  onboardingStep,
+  shouldCompleteOnboardingStep,
 } from '../shared/utils/onboarding'
 import {
   calculateInvitationRewardRatio,
@@ -167,14 +168,9 @@ export default function ProfilePage() {
   React.useEffect(() => {
     if (
       status === IdentityStatus.Candidate &&
-      eitherState(
+      shouldCompleteOnboardingStep(
         currentOnboarding,
-        onboardingStep(OnboardingStep.ActivateInvite)
-      ) &&
-      !eitherState(
-        currentOnboarding,
-        'idle',
-        doneOnboardingStep(OnboardingStep.ActivateInvite)
+        OnboardingStep.ActivateInvite
       )
     ) {
       done()
@@ -184,17 +180,18 @@ export default function ProfilePage() {
   React.useEffect(() => {
     if (
       isValidated &&
-      eitherState(currentOnboarding, onboardingStep(OnboardingStep.Validate)) &&
-      !eitherState(
-        currentOnboarding,
-        'idle',
-        `${doneOnboardingStep(OnboardingStep.Validate)}.done`
-      )
+      shouldCompleteOnboardingStep(currentOnboarding, OnboardingStep.Validate)
     ) {
-      console.log('done validate')
       done()
     }
   }, [currentOnboarding, done, isValidated])
+
+  const shouldActivateMining =
+    canMine &&
+    !online &&
+    currentOnboarding.matches(
+      activeShowingOnboardingStep(OnboardingStep.ActivateMining)
+    )
 
   const isShowingActivateInvitePopover = currentOnboarding.matches(
     activeShowingOnboardingStep(OnboardingStep.ActivateInvite)
@@ -356,32 +353,31 @@ export default function ProfilePage() {
                             {t(`Join the official Idena public Telegram group and follow instructions in the
                 pinned message.`)}
                           </Text>
+                          <OnboardingPopoverContentIconRow icon="telegram">
+                            <Box>
+                              <PrimaryButton
+                                variant="unstyled"
+                                p={0}
+                                onClick={() => {
+                                  global.openExternal(
+                                    'https://t.me/IdenaNetworkPublic'
+                                  )
+                                }}
+                              >
+                                https://t.me/IdenaNetworkPublic
+                              </PrimaryButton>
+                              <Text
+                                fontSize="sm"
+                                color="rgba(255, 255, 255, 0.56)"
+                              >
+                                {t('Official group')}
+                              </Text>
+                            </Box>
+                          </OnboardingPopoverContentIconRow>
                         </Stack>
-                        <OnboardingPopoverContentIconRow icon="telegram">
-                          <Box>
-                            <PrimaryButton
-                              variant="unstyled"
-                              p={0}
-                              onClick={() => {
-                                global.openExternal(
-                                  'https://t.me/IdenaNetworkPublic'
-                                )
-                              }}
-                            >
-                              https://t.me/IdenaNetworkPublic
-                            </PrimaryButton>
-                            <Text
-                              fontSize="sm"
-                              color="rgba(255, 255, 255, 0.56)"
-                            >
-                              {t('Official group')}
-                            </Text>
-                          </Box>
-                        </OnboardingPopoverContentIconRow>
                       </Stack>
                     </OnboardingPopoverContent>
                   </OnboardingPopover>
-
                   <TaskConfetti
                     active={eitherState(
                       currentOnboarding,
@@ -393,12 +389,47 @@ export default function ProfilePage() {
                 </Stack>
                 <Stack spacing={10} w={rem(200)}>
                   <Box minH={62} mt={4}>
-                    {address && canMine && (
-                      <ActivateMiningForm
-                        isOnline={online}
-                        delegatee={delegatee}
-                        delegationEpoch={delegationEpoch}
-                      />
+                    {shouldActivateMining ? (
+                      <OnboardingPopover isOpen>
+                        <PopoverTrigger>
+                          <Box
+                            bg="white"
+                            position="relative"
+                            borderRadius="md"
+                            p={2}
+                            m={-2}
+                            zIndex={2}
+                          >
+                            {address && canMine && (
+                              <ActivateMiningForm
+                                isOnline={online}
+                                delegatee={delegatee}
+                                delegationEpoch={delegationEpoch}
+                              />
+                            )}
+                          </Box>
+                        </PopoverTrigger>
+                        <OnboardingPopoverContent
+                          title={t('Activate mining status')}
+                          onDismiss={done}
+                        >
+                          <Text>
+                            {t(
+                              `To become a validator of Idena blockchain you can activate your mining status. Keep your node online to mine iDNA coins.`
+                            )}
+                          </Text>
+                        </OnboardingPopoverContent>
+                      </OnboardingPopover>
+                    ) : (
+                      <>
+                        {address && canMine && (
+                          <ActivateMiningForm
+                            isOnline={online}
+                            delegatee={delegatee}
+                            delegationEpoch={delegationEpoch}
+                          />
+                        )}
+                      </>
                     )}
                   </Box>
 
@@ -555,6 +586,8 @@ export default function ProfilePage() {
         isOpen={isOpenExportPk}
         onClose={onCloseExportPk}
       />
+
+      {global.isDev && <FloatDebug>{currentOnboarding.value}</FloatDebug>}
     </>
   )
 }

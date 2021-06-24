@@ -1,5 +1,6 @@
 import {State} from 'xstate'
 import {loadPersistentState, persistState} from './persist'
+import {eitherState} from './utils'
 
 export const onboardingStep = step => `onboarding.${step}`
 
@@ -19,3 +20,7 @@ export function loadOnboardingState() {
 export function persistOnboardingState(state) {
   return persistState('onboarding', state)
 }
+
+export const shouldCompleteOnboardingStep = (currentOnboarding, step) =>
+  eitherState(currentOnboarding, onboardingStep(step)) &&
+  !eitherState(currentOnboarding, 'idle', `${doneOnboardingStep(step)}.done`)

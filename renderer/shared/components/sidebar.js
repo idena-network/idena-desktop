@@ -37,7 +37,6 @@ import {useOnboarding} from '../providers/onboarding-context'
 import {
   activeOnboardingStep,
   activeShowingOnboardingStep,
-  onboardingStep,
 } from '../utils/onboarding'
 import {
   OnboardingLinkButton,
@@ -47,7 +46,6 @@ import {
 } from './onboarding'
 import {
   buildNextValidationCalendarLink,
-  eitherState,
   formatValidationDate,
 } from '../utils/utils'
 import {isHardFork} from '../utils/node'
@@ -314,6 +312,10 @@ function ActionPanel() {
     activeShowingOnboardingStep(OnboardingStep.Validate)
   )
 
+  const shouldActivateMining = currentOnboarding.matches(
+    activeOnboardingStep(OnboardingStep.ActivateMining)
+  )
+
   if (syncing || !epoch) {
     return null
   }
@@ -337,12 +339,10 @@ function ActionPanel() {
       <ChakraBox
         roundedTop="md"
         cursor={
-          eitherState(
-            currentOnboarding,
-            onboardingStep(OnboardingStep.ActivateInvite),
-            onboardingStep(OnboardingStep.Validate),
-            onboardingStep(OnboardingStep.CreateFlips)
-          )
+          shouldActivateInvite ||
+          shouldValidate ||
+          shouldCreateFlips ||
+          shouldActivateMining
             ? 'pointer'
             : 'default'
         }
@@ -360,20 +360,26 @@ function ActionPanel() {
           }
           if (shouldCreateFlips) {
             router.push('/flips/list')
-            return
           }
           showCurrentTask()
         }}
       >
         <PulseFrame
-          isActive={shouldActivateInvite || shouldValidate || shouldCreateFlips}
+          isActive={
+            shouldActivateInvite ||
+            shouldValidate ||
+            shouldCreateFlips ||
+            shouldActivateMining
+          }
         >
           <Block title={t('My current task')}>
             <CurrentTask
               epoch={epoch.epoch}
               period={currentPeriod}
               identity={identity}
-            />
+            >
+              {shouldActivateMining && t('Activate mining status')}
+            </CurrentTask>
           </Block>
         </PulseFrame>
       </ChakraBox>
@@ -574,10 +580,12 @@ Block.propTypes = {
   children: PropTypes.node,
 }
 
-function CurrentTask({epoch, period, identity}) {
+function CurrentTask({epoch, period, identity, children}) {
   const {t} = useTranslation()
 
   if (!period || !identity.state) return null
+
+  if (children) return <>{children}</>
 
   switch (period) {
     case EpochPeriod.None: {

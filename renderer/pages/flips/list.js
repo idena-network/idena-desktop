@@ -12,7 +12,6 @@ import {
   useTheme,
   PopoverTrigger,
   Text,
-  Icon,
   Stack,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
@@ -57,9 +56,14 @@ import {useOnboarding} from '../../shared/providers/onboarding-context'
 import {
   OnboardingPopover,
   OnboardingPopoverContent,
+  OnboardingPopoverContentIconRow,
   TaskConfetti,
 } from '../../shared/components/onboarding'
-import {doneOnboardingStep, onboardingStep} from '../../shared/utils/onboarding'
+import {
+  activeShowingOnboardingStep,
+  doneOnboardingStep,
+  shouldCompleteOnboardingStep,
+} from '../../shared/utils/onboarding'
 import {eitherState} from '../../shared/utils/utils'
 
 export default function FlipListPage() {
@@ -151,17 +155,22 @@ export default function FlipListPage() {
     {done: doneOnboarding, dismiss: dismissOnboarding},
   ] = useOnboarding()
 
-  const shouldCreateFlips =
-    currentOnboarding.matches(onboardingStep(OnboardingStep.CreateFlips)) &&
-    remainingRequiredFlips > 0
-
-  const didCreateFlips =
-    currentOnboarding.matches(onboardingStep(OnboardingStep.CreateFlips)) &&
-    remainingRequiredFlips <= 0
+  const shouldPromoteCreateFlips =
+    currentOnboarding.matches(
+      activeShowingOnboardingStep(OnboardingStep.CreateFlips)
+    ) && remainingRequiredFlips > 0
 
   React.useEffect(() => {
-    if (didCreateFlips) doneOnboarding()
-  }, [didCreateFlips, doneOnboarding])
+    if (
+      remainingRequiredFlips <= 0 &&
+      shouldCompleteOnboardingStep(
+        currentOnboarding,
+        OnboardingStep.CreateFlips
+      )
+    ) {
+      doneOnboarding()
+    }
+  }, [currentOnboarding, doneOnboarding, remainingRequiredFlips])
 
   return (
     <Layout syncing={syncing} offline={offline} loading={loading}>
@@ -183,7 +192,7 @@ export default function FlipListPage() {
             </FlipFilterOption>
           </FlipFilter>
           <Box>
-            <OnboardingPopover isOpen={shouldCreateFlips}>
+            <OnboardingPopover isOpen={shouldPromoteCreateFlips}>
               <PopoverTrigger>
                 <Box>
                   <IconLink
@@ -198,7 +207,7 @@ export default function FlipListPage() {
                 </Box>
               </PopoverTrigger>
               <OnboardingPopoverContent
-                title={t('Create flips')}
+                title={t('Create required flips')}
                 onDismiss={dismissOnboarding}
               >
                 <Stack>
@@ -207,21 +216,15 @@ export default function FlipListPage() {
                     in the next validation ceremony. Follow step-by-step
                     instructions.`)}
                   </Text>
-                  <Stack isInline align="center">
-                    <Icon name="coins-lg" size={5} />
-                    <Text>
-                      {t(
-                        `You'll get rewarded for every successfully qualified flip.`
-                      )}
-                    </Text>
-                  </Stack>
-                  <Stack isInline align="center">
-                    <Icon name="block" size={5} />
-                    <Text>
-                      {t(`Read carefully "What is a bad flip" rules to avoid
+                  <OnboardingPopoverContentIconRow icon="reward">
+                    {t(
+                      `You'll get rewarded for every successfully qualified flip.`
+                    )}
+                  </OnboardingPopoverContentIconRow>
+                  <OnboardingPopoverContentIconRow icon="penalty">
+                    {t(`Read carefully "What is a bad flip" rules to avoid
                       penalty.`)}
-                    </Text>
-                  </Stack>
+                  </OnboardingPopoverContentIconRow>
                 </Stack>
               </OnboardingPopoverContent>
             </OnboardingPopover>
