@@ -12,6 +12,7 @@ import {
   StatLabel,
   useToast,
   CloseButton,
+  PseudoBox,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -209,12 +210,28 @@ export default function ViewVotingPage() {
                 <VotingStatusBadge status={status} fontSize="md">
                   {t(mapVotingStatus(status))}
                 </VotingStatusBadge>
-                <VotingBadge bg="gray.300" color="muted" fontSize="md" pl="1/2">
+                <PseudoBox
+                  as={VotingBadge}
+                  bg="gray.300"
+                  color="muted"
+                  fontSize="md"
+                  cursor="pointer"
+                  pl="1/2"
+                  transition="color 0.2s ease"
+                  _hover={{
+                    color: 'brandGray.500',
+                  }}
+                  onClick={() => {
+                    global.openExternal(
+                      `https://scan.idena.io/contract/${contractHash}`
+                    )
+                  }}
+                >
                   <Stack isInline spacing={1} align="center">
                     <Avatar w={5} h={5} address={contractHash} />
                     <Text>{contractHash}</Text>
                   </Stack>
-                </VotingBadge>
+                </PseudoBox>
                 <CloseButton
                   ml="auto"
                   onClick={() => redirect('/oracles/list')}
