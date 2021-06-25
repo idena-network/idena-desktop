@@ -202,9 +202,11 @@ export const SecondaryButton = React.forwardRef((props, ref) => (
   />
 ))
 
-export function IconButton2({icon, children, ...props}) {
-  return (
+// eslint-disable-next-line react/display-name
+export const IconButton2 = React.forwardRef(
+  ({icon, children, ...props}, ref) => (
     <ChakraButton
+      ref={ref}
       variant="ghost"
       variantColor="blue"
       fontWeight={500}
@@ -218,7 +220,7 @@ export function IconButton2({icon, children, ...props}) {
       {children}
     </ChakraButton>
   )
-}
+)
 
 export const InfoButton = React.forwardRef((props, ref) => (
   <ChakraIconButton

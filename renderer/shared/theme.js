@@ -238,6 +238,7 @@ export const uiTheme = {
   },
   radii: {
     ...chakraTheme.radii,
+    sm: '0.25rem',
     md: rem(6),
     xl: '0.75rem',
   },

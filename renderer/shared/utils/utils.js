@@ -110,3 +110,5 @@ export async function loadKeyword(index) {
     return {name: '', desc: ''}
   }
 }
+
+export const dummyAddress = `0x${'2'.repeat(64)}`

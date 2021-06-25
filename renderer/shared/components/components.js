@@ -7,6 +7,7 @@ import {
   DrawerContent,
   DrawerCloseButton,
   DrawerHeader as ChakraDrawerHeader,
+  DrawerFooter as ChakraDrawerFooter,
   DrawerBody as ChakraDrawerBody,
   Input as ChakraInput,
   FormLabel as ChakraFormLabel,
@@ -72,6 +73,20 @@ export function DrawerHeader(props) {
 
 export function DrawerBody(props) {
   return <ChakraDrawerBody p={0} {...props} />
+}
+
+export function DrawerFooter(props) {
+  return (
+    <ChakraDrawerFooter
+      mb={-12}
+      mx={-8}
+      px={4}
+      py={3}
+      borderTopColor="gray.300"
+      borderTopWidth={1}
+      {...props}
+    />
+  )
 }
 
 export function FormLabel(props) {
@@ -197,12 +212,13 @@ export function Avatar({address, ...props}) {
 export function Tooltip(props) {
   return (
     <ChakraTooltip
-      bg="black"
+      bg="graphite.500"
       color="white"
       fontSize="sm"
+      fontWeight={500}
       px={2}
       py={1}
-      rounded="md"
+      borderRadius="sm"
       hasArrow
       {...props}
     />
@@ -240,7 +256,12 @@ export function Toast({
         <AlertTitle fontWeight={500} lineHeight="base">
           {title}
         </AlertTitle>
-        <AlertDescription color="muted" lineHeight="base" textAlign="left">
+        <AlertDescription
+          color="muted"
+          lineHeight="base"
+          textAlign="left"
+          wordBreak="break-all"
+        >
           {description}
         </AlertDescription>
       </Flex>
