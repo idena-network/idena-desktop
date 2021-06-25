@@ -48,7 +48,11 @@ import {calculateInvitationRewardRatio} from '../profile/utils'
 import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {IdentityStatus} from '../../shared/types'
 
-export function ContactListSidebar({onSelectContact, onNewContact}) {
+export function ContactListSidebar({
+  selectedContactId,
+  onSelectContact,
+  onNewContact,
+}) {
   const {t} = useTranslation()
 
   const [term, setTerm] = React.useState()
@@ -77,7 +81,11 @@ export function ContactListSidebar({onSelectContact, onNewContact}) {
         </Box>
         <InviteActionBar onNewContact={onNewContact} />
       </Stack>
-      <ContactList filter={term} onSelectContact={onSelectContact} />
+      <ContactList
+        filter={term}
+        selectedContactId={selectedContactId}
+        onSelectContact={onSelectContact}
+      />
     </Stack>
   )
 }
@@ -138,7 +146,7 @@ function InvitationRewardRatioInfo() {
           ),
         }
       )}
-      placement="right-start"
+      placement="right"
       w={151}
     >
       <Icon name="info" size={5} color="blue.500" />
@@ -146,7 +154,7 @@ function InvitationRewardRatioInfo() {
   )
 }
 
-function ContactList({filter, onSelectContact}) {
+function ContactList({filter, selectedContactId, onSelectContact}) {
   const {t} = useTranslation()
 
   const {invites} = useInviteState()
@@ -167,8 +175,6 @@ function ContactList({filter, onSelectContact}) {
     }
   }, [invites, filter])
 
-  const [selectedInviteId, setSelectedInviteId] = React.useState()
-
   if (filter && filteredInvites.length === 0) {
     return <Text p={4}>{t('No contacts found...')}</Text>
   }
@@ -182,13 +188,12 @@ function ContactList({filter, onSelectContact}) {
         .filter(invite => !invite.deletedAt)
         .map(invite => (
           <ContactListItem
-            isActive={invite.dbkey === selectedInviteId}
-            id={invite.dbkey}
+            isActive={(invite.dbkey || invite.id) === selectedContactId}
+            id={invite.dbkey || invite.id}
             {...invite}
             state={invite.identity?.state}
             onClick={() => {
               onSelectContact(invite)
-              setSelectedInviteId(invite.dbkey)
             }}
           />
         ))}
@@ -261,20 +266,28 @@ export function ContactCard({
   const {deleteInvite, recoverInvite} = useInviteDispatch()
 
   const {
-    dbkey,
+    id,
+    dbkey = id,
     key,
     receiver,
     address = receiver,
     firstName,
     lastName,
     canKill,
-    mining,
+    mining: knownMining,
     terminating,
     activated,
-    identity: {stake, state} = {},
+    identity: {state: knownState, stake} = {},
   } = contact
 
-  const {onCopy} = useClipboard(key)
+  const {invites} = useInviteState()
+
+  const invitee = invites.find(invite => invite.id === id)
+
+  const state = invitee?.identity?.state ?? knownState
+  const mining = invitee?.mining ?? knownMining
+
+  const {onCopy: onCopyKey} = useClipboard(key)
 
   const successToast = useSuccessToast()
 
@@ -305,8 +318,8 @@ export function ContactCard({
                   {`${firstName} ${lastName}`.trim() || t('...')}
                 </Text>
                 {mining && (
-                  <ContactCardMiningBadge isMining={mining}>
-                    {mining ? t('Mining...') : t('Mined')}
+                  <ContactCardMiningBadge isMining>
+                    {t('Mined')}
                   </ContactCardMiningBadge>
                 )}
               </Stack>
@@ -384,7 +397,7 @@ export function ContactCard({
                       fontWeight={500}
                       _hover={null}
                       _active={null}
-                      onClick={onCopy}
+                      onClick={onCopyKey}
                     >
                       {t('Copy')}
                     </Button>
@@ -440,6 +453,7 @@ export function IssueInviteDrawer({onIssue, onIssueFail, ...props}) {
             try {
               setIsSubmitting(true)
               const invite = await addInvite(address, null, firstName, lastName)
+              console.log({invite})
               setIsSubmitting(false)
 
               onIssue(invite)

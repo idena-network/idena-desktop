@@ -6,6 +6,7 @@ import {HASH_IN_MEMPOOL} from '../hooks/use-tx'
 import {useNotificationDispatch, NotificationType} from './notification-context'
 import {useIdentityState} from './identity-context'
 import {IdentityStatus} from '../types'
+import {callRpc} from '../utils/utils'
 
 const db = global.invitesDb || {}
 
@@ -162,20 +163,25 @@ function InviteProvider({children}) {
           .map(api.fetchTx)
       )
       setInvites(
-        invites.map(invite => {
-          const invitedIdentity = api.fetchIdentity(invite.receiver)
+        await Promise.all(
+          invites.map(async invite => {
+            const invitedIdentity = await callRpc(
+              'dna_identity',
+              invite.receiver
+            )
 
-          const tx = txs.find(({hash}) => hash === invite.hash)
-          if (tx) {
-            return {
-              ...invite,
-              identity: invitedIdentity,
-              mining:
-                tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
+            const tx = txs.find(({hash}) => hash === invite.hash)
+            if (tx) {
+              return {
+                ...invite,
+                identity: invitedIdentity,
+                mining:
+                  tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
+              }
             }
-          }
-          return invite
-        })
+            return invite
+          })
+        )
       )
     },
     invites.filter(({mining}) => mining).length ? 1000 * 10 : null
@@ -190,19 +196,24 @@ function InviteProvider({children}) {
           .map(api.fetchTx)
       )
       setInvites(
-        invites.map(invite => {
-          const invitedIdentity = api.fetchIdentity(invite.receiver)
+        await Promise.all(
+          invites.map(async invite => {
+            const invitedIdentity = await callRpc(
+              'dna_identity',
+              invite.receiver
+            )
 
-          const tx = txs.find(({hash}) => hash === invite.hash)
-          if (tx) {
-            return {
-              ...invite,
-              terminating:
-                invitedIdentity && invitedIdentity.state !== 'Undefined',
+            const tx = txs.find(({hash}) => hash === invite.hash)
+            if (tx) {
+              return {
+                ...invite,
+                terminating:
+                  invitedIdentity && invitedIdentity.state !== 'Undefined',
+              }
             }
-          }
-          return invite
-        })
+            return invite
+          })
+        )
       )
     },
     invites.filter(({terminating}) => terminating).length ? 1000 * 10 : null
@@ -211,7 +222,7 @@ function InviteProvider({children}) {
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
     const {result, error} = await api.sendInvite({to, amount})
     if (result) {
-      const saveInvite = {
+      const issuedInvite = {
         amount,
         firstName,
         lastName,
@@ -220,8 +231,8 @@ function InviteProvider({children}) {
         canKill: true,
       }
 
-      const id = db.addInvite(saveInvite)
-      const invite = {...saveInvite, id, mining: true}
+      const id = db.addInvite(issuedInvite)
+      const invite = {...issuedInvite, id, mining: true}
       setInvites([...invites, invite])
 
       return invite
@@ -252,20 +263,13 @@ function InviteProvider({children}) {
   }
 
   const deleteInvite = async id => {
-    const key = id
+    const deletedAt = Date.now()
     setInvites(
-      invites.map(inv => {
-        if (inv.id === id) {
-          return {
-            ...inv,
-            deletedAt: Date.now(),
-          }
-        }
-        return inv
-      })
+      invites.map(currentInvite =>
+        currentInvite.id === id ? {...currentInvite, deletedAt} : currentInvite
+      )
     )
-    const invite = {id: key, deletedAt: Date.now()}
-    db.updateInvite(id, invite)
+    db.updateInvite(id, {id, deletedAt})
   }
 
   const killInvite = async (id, myAddress, inviteeAddress) => {

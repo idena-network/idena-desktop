@@ -58,6 +58,7 @@ export default function ContactsPage() {
           <Page p={0}>
             <Flex w="full">
               <ContactListSidebar
+                selectedContactId={selectedContact?.id}
                 onSelectContact={setSelectedContact}
                 onNewContact={onOpenSendInviteDrawer}
               />
