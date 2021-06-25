@@ -165,6 +165,7 @@ function IdentityProvider({children}) {
           IdentityStatus.Verified,
           IdentityStatus.Human,
         ].includes(identity?.state),
+        canInvite: identity?.invites > 0,
       }}
     >
       <IdentityDispatchContext.Provider value={{killMe}}>

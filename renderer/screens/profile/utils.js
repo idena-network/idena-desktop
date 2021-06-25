@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import {requestDb} from '../../shared/utils/db'
 
 export function createProfileDb(epoch) {
@@ -16,4 +17,16 @@ export function createProfileDb(epoch) {
       return requestProfileDb().clear()
     },
   }
+}
+
+export function calculateInvitationRewardRatio(
+  {startBlock, nextValidation},
+  {highestBlock}
+) {
+  const endBlock =
+    highestBlock + dayjs(nextValidation).diff(dayjs(), 'minute') * 3
+
+  const t = (highestBlock - startBlock) / (endBlock - startBlock)
+
+  return 1 - t ** 4 * 0.5
 }
