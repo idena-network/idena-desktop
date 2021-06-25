@@ -51,6 +51,12 @@ function nodeReducer(state, action) {
         nodeFailed: false,
       }
     }
+    case 'UNSUPPORTED_MACOS_VERSION': {
+      return {
+        ...state,
+        unsupportedMacosVersion: true,
+      }
+    }
     default:
       throw new Error(`Unknown action ${action.type}`)
   }
@@ -85,6 +91,9 @@ export function NodeProvider({children}) {
         case 'restart-node':
         case 'state-cleaned':
           dispatch({type: NODE_REINIT, data})
+          break
+        case 'unsupported-macos-version':
+          dispatch({type: 'UNSUPPORTED_MACOS_VERSION'})
           break
         default:
       }
@@ -179,4 +188,8 @@ export function useNodeDispatch() {
     throw new Error('useNodeState must be used within a NodeDispatchProvider')
   }
   return context
+}
+
+export function useNode() {
+  return [useNodeState(), useNodeDispatch()]
 }

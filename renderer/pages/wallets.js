@@ -2,6 +2,7 @@ import React, {useEffect} from 'react'
 import {FiChevronRight} from 'react-icons/fi'
 import {useTranslation} from 'react-i18next'
 
+import {Spinner} from '@chakra-ui/core'
 import theme, {rem} from '../shared/theme'
 import {Box, Drawer, SubHeading} from '../shared/components'
 import Flex from '../shared/components/flex'
@@ -16,10 +17,10 @@ import ReceiveForm from '../screens/wallets/components/receive-form'
 import KillForm from '../screens/wallets/components/kill-form'
 import {useWallets} from '../shared/hooks/use-wallets'
 import {FlatButton} from '../shared/components/button'
-import {Spinner} from '../shared/components/spinner'
 import {Page, PageTitle} from '../screens/app/components'
 import Layout from '../shared/components/layout'
 import {useChainState} from '../shared/providers/chain-context'
+import {FillCenter} from '../screens/oracles/components'
 
 export default function Index() {
   const {t} = useTranslation()
@@ -51,11 +52,9 @@ export default function Index() {
         <PageTitle>{t('Wallets')}</PageTitle>
         <Box>
           {status === 'fetching' && (
-            <Flex>
-              <Box style={{transform: 'scale(0.35) translateX(24px)'}}>
-                <Spinner color={theme.colors.primary} />
-              </Box>
-            </Flex>
+            <FillCenter>
+              <Spinner color="blue.500" />
+            </FillCenter>
           )}
           {['success', 'polling'].includes(status) && (
             <>

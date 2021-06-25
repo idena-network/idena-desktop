@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {useRouter} from 'next/router'
-import {useTranslation} from 'react-i18next'
+import {Trans, useTranslation} from 'react-i18next'
 import {
   Flex,
   Text,
@@ -18,6 +18,7 @@ import {
   Skeleton,
   useTheme,
   useToast,
+  Alert,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import semver from 'semver'
@@ -25,12 +26,10 @@ import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import Sidebar from './sidebar'
 import Notifications, {Snackbar} from './notifications'
-import SyncingApp, {OfflineApp, LoadingApp} from './syncing-app'
 import {useDebounce} from '../hooks/use-debounce'
 import {useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/utils'
 import {useIdentityState} from '../providers/identity-context'
-import {addWheelHandler} from '../utils/mouse'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {
   DnaSignInDialog,
@@ -49,20 +48,30 @@ import {
   LayoutContainer,
   UpdateExternalNodeDialog,
 } from '../../screens/app/components'
-import {EpochPeriod} from '../types'
 import {FillCenter} from '../../screens/oracles/components'
 import {
+  Avatar,
   Dialog,
   DialogBody,
   DialogFooter,
   DialogHeader,
   ExternalLink,
+  Progress,
+  TextLink,
   Toast,
 } from './components'
 import {ActivateMiningDrawer} from '../../screens/profile/components'
 import {activateMiningMachine} from '../../screens/profile/machines'
-import {eitherState} from '../utils/utils'
+import {
+  callRpc,
+  eitherState,
+  shouldShowUpcomingValidationNotification,
+  showWindowNotification,
+} from '../utils/utils'
 import {useTimingState} from '../providers/timing-context'
+import {useChainState} from '../providers/chain-context'
+import {useNode} from '../providers/node-context'
+import {useSettings} from '../providers/settings-context'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -81,7 +90,24 @@ export default function Layout({
   const [zoomLevel, setZoomLevel] = React.useState(
     () => loadPersistentStateValue('settings', 'zoomLevel') || 0
   )
-  React.useEffect(() => addWheelHandler(setZoomLevel), [])
+
+  React.useEffect(() => {
+    const handleMouseWheel = e => {
+      if (e.ctrlKey) {
+        e.preventDefault()
+        setZoomLevel(level =>
+          Math.min(Math.max(-5, level + e.deltaY * -0.01), 5)
+        )
+      }
+    }
+
+    document.addEventListener('wheel', handleMouseWheel)
+
+    return () => {
+      document.removeEventListener('wheel', handleMouseWheel)
+    }
+  }, [])
+
   React.useEffect(() => {
     if (Number.isFinite(zoomLevel)) {
       global.setZoomLevel(zoomLevel)
@@ -94,11 +120,19 @@ export default function Layout({
   const {nodeRemoteVersion, mustUpdateNode} = useAutoUpdateState()
   const {updateNode, onRejectHardFork} = useAutoUpdateDispatch()
 
+  const isHardFork = !loading && !skipHardForkScreen && mustUpdateNode
+  const isSyncing = !loading && debouncedSyncing && !debouncedOffline
+  const isOffline = !loading && debouncedOffline && !debouncedSyncing
+  const isReady = !loading && !debouncedOffline && !debouncedSyncing
+  const isNotOffline = !debouncedOffline && !loading
+
   return (
     <LayoutContainer>
       <Sidebar />
+
       {loading && <LoadingApp />}
-      {!loading && !skipHardForkScreen && mustUpdateNode ? (
+
+      {isHardFork ? (
         <HardForkScreen
           version={nodeRemoteVersion}
           onUpdate={updateNode}
@@ -106,13 +140,11 @@ export default function Layout({
         />
       ) : (
         <>
-          {!loading && debouncedSyncing && !debouncedOffline && <SyncingApp />}
-          {!loading && debouncedOffline && !debouncedSyncing && <OfflineApp />}
-          {!loading && !debouncedOffline && !debouncedSyncing && (
-            <NormalApp {...props} />
-          )}
+          {isSyncing && <SyncingApp />}
+          {isOffline && <OfflineApp />}
+          {isReady && <NormalApp {...props} />}
 
-          {!debouncedOffline && !loading && (
+          {isNotOffline && (
             <DnaLinkHandler>
               <DnaSignInDialog
                 isOpen={url => new URL(url).pathname.includes('signin')}
@@ -236,25 +268,316 @@ function NormalApp({children}) {
   )
 }
 
-function shouldShowUpcomingValidationNotification(
-  epoch,
-  upcomingValidationEpoch
-) {
-  if (!epoch) {
-    return false
-  }
-  const isFlipLottery = epoch.currentPeriod === EpochPeriod.FlipLottery
-  const currentEpoch = epoch.epoch
-  const notificationShown = currentEpoch + 1 === upcomingValidationEpoch
-  return isFlipLottery && !notificationShown
+function SyncingApp() {
+  const {t} = useTranslation()
+
+  const {currentBlock, highestBlock, genesisBlock, wrongTime} = useChainState()
+
+  const {wrongClientTime} = useTimingState()
+
+  const {address} = useIdentityState()
+
+  const [current] = useMachine(
+    createMachine({
+      context: {
+        peers: [],
+      },
+      initial: 'loading',
+      states: {
+        loading: {
+          invoke: {
+            src: () => callRpc('net_peers'),
+            onDone: {
+              target: 'done',
+              actions: [assign({peers: (_, {data}) => data})],
+            },
+          },
+        },
+        done: {
+          after: {
+            3000: 'loading',
+          },
+        },
+      },
+    })
+  )
+  const {peers} = current.context
+
+  return (
+    <FillCenter bg="graphite.500" color="white" position="relative">
+      <Flex
+        align="center"
+        justify="center"
+        bg="orange.500"
+        py={3}
+        fontWeight={500}
+        position="absolute"
+        top={0}
+        left={0}
+        w="full"
+      >
+        {t('Synchronizing...')}
+      </Flex>
+      <Stack spacing={10} w="md">
+        <Stack isInline spacing={6} align="center" py={2}>
+          <Avatar address={address} size={20} />
+          <Heading fontSize="lg" fontWeight={500} wordBreak="break-all">
+            {address}
+          </Heading>
+        </Stack>
+        <Stack spacing={3}>
+          <Flex justify="space-between">
+            <Box>
+              <Heading fontSize="lg" fontWeight={500}>
+                {t('Synchronizing blocks')}
+              </Heading>
+              <Box
+                fontSize="mdx"
+                fontWeight={500}
+                color="muted"
+                style={{fontVariantNumeric: 'tabular-nums'}}
+              >
+                {highestBlock ? (
+                  <>
+                    {t('{{numBlocks}} blocks left', {
+                      numBlocks:
+                        highestBlock - currentBlock &&
+                        (highestBlock - currentBlock).toLocaleString(),
+                    })}{' '}
+                    (
+                    {t('{{currentBlock}} out of {{highestBlock}}', {
+                      currentBlock:
+                        currentBlock && currentBlock.toLocaleString(),
+                      highestBlock:
+                        (highestBlock && highestBlock.toLocaleString()) ||
+                        '...',
+                    })}
+                    )
+                  </>
+                ) : (
+                  <>
+                    {t('{{currentBlock}} out of {{highestBlock}}', {
+                      currentBlock:
+                        currentBlock && currentBlock.toLocaleString(),
+                      highestBlock: '...',
+                    })}
+                  </>
+                )}
+              </Box>
+            </Box>
+            <Box>
+              <Text as="span" color="muted">
+                {t('Peers connected')}:{' '}
+              </Text>
+              {peers.length}
+            </Box>
+          </Flex>
+          <Progress
+            value={currentBlock}
+            min={genesisBlock || 0}
+            max={highestBlock || Number.MAX_SAFE_INTEGER}
+          />
+        </Stack>
+        {wrongTime && (
+          <Alert status="error" bg="red.500" borderRadius="lg">
+            {t(
+              'Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers.'
+            )}
+          </Alert>
+        )}
+      </Stack>
+
+      {wrongClientTime && (
+        <Snackbar>
+          <Toast
+            status="error"
+            title={t('Please check your local time')}
+            description={t(
+              'The time must be synchronized with internet time for the successful validation'
+            )}
+            actionContent={t('Check')}
+            w="md"
+            mx="auto"
+            onAction={() => {
+              global.openExternal('https://time.is/')
+            }}
+          />
+        </Snackbar>
+      )}
+    </FillCenter>
+  )
 }
 
-function showWindowNotification(title, notificationBody, onclick) {
-  const notification = new window.Notification(title, {
-    body: notificationBody,
-  })
-  notification.onclick = onclick
-  return true
+function LoadingApp() {
+  const {t} = useTranslation()
+
+  return (
+    <FillCenter bg="graphite.500" color="white" fontWeight={500}>
+      {t('Please wait...')}
+    </FillCenter>
+  )
+}
+
+function OfflineApp() {
+  const [
+    {nodeReady, nodeFailed, unsupportedMacosVersion},
+    {tryRestartNode},
+  ] = useNode()
+
+  const [
+    {useExternalNode, runInternalNode},
+    {toggleRunInternalNode, toggleUseExternalNode},
+  ] = useSettings()
+
+  const {nodeProgress} = useAutoUpdateState()
+
+  const {t} = useTranslation()
+
+  const isDownloadingBuiltinNode =
+    !nodeReady &&
+    !useExternalNode &&
+    runInternalNode &&
+    !nodeFailed &&
+    nodeProgress
+
+  const isExternalNodeOffline = useExternalNode || !runInternalNode
+
+  const isStartingBuiltinNode =
+    !useExternalNode &&
+    runInternalNode &&
+    !unsupportedMacosVersion &&
+    (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress))
+
+  const isFailedBuiltinNode = nodeFailed && !useExternalNode
+
+  const isUnsupportedMacosVersion =
+    runInternalNode && !useExternalNode && unsupportedMacosVersion
+
+  const toMb = b =>
+    (b / (1024 * 1024)).toLocaleString(undefined, {
+      maximumFractionDigits: 2,
+    })
+
+  return (
+    <FillCenter bg="graphite.500" color="white" position="relative">
+      <Flex
+        align="center"
+        justify="center"
+        bg="red.500"
+        py={3}
+        fontWeight={500}
+        position="absolute"
+        top={0}
+        left={0}
+        w="full"
+      >
+        {t('Offline')}
+      </Flex>
+
+      {isDownloadingBuiltinNode && (
+        <Stack spacing={3} w="md">
+          <Stack isInline spacing={4} align="center">
+            <Image src="/static/idena_white.svg" alt="logo" size={12} />
+            <Stack spacing={1} flex={1}>
+              <Heading fontSize="lg" fontWeight={500}>
+                {t('Downloading Idena Node...')}
+              </Heading>
+              <Flex justify="space-between" alignSelf="stretch">
+                <Text color="xwhite.050">
+                  {t('Version {{version}}', {
+                    version: nodeProgress.version,
+                  })}
+                </Text>
+                <Text>
+                  {toMb(nodeProgress.transferred)} MB{' '}
+                  <Text as="span" color="xwhite.040">
+                    out of
+                  </Text>{' '}
+                  {toMb(nodeProgress.length)} MB
+                </Text>
+              </Flex>
+            </Stack>
+          </Stack>
+          <Progress value={nodeProgress.percentage} max={100} />
+        </Stack>
+      )}
+
+      {isExternalNodeOffline && (
+        <Stack spacing={5} w={416}>
+          <Heading fontSize="lg" fontWeight={500}>
+            {t('Your {{nodeType}} node is offline', {
+              nodeType: useExternalNode ? 'external' : '',
+            })}
+          </Heading>
+          <Stack spacing={4} align="flex-start">
+            <PrimaryButton
+              onClick={() => {
+                if (!runInternalNode) {
+                  toggleRunInternalNode(true)
+                } else {
+                  toggleUseExternalNode(false)
+                }
+              }}
+            >
+              {t('Run the built-in node')}
+            </PrimaryButton>
+            <Text color="xwhite.050" fontSize="mdx">
+              <Trans i18nKey="nodeOfflineCheckSettings" t={t}>
+                If you have already node running, please check your connection{' '}
+                <TextLink href="/settings/node">settings</TextLink>
+              </Trans>
+            </Text>
+          </Stack>
+        </Stack>
+      )}
+
+      {isStartingBuiltinNode && (
+        <Heading fontSize="mdx" fontWeight={500}>
+          {t('Idena Node is starting...')}
+        </Heading>
+      )}
+
+      {isFailedBuiltinNode && (
+        <Stack spacing={5} w={416}>
+          <Heading fontSize="lg" fontWeight={500}>
+            {t('Your built-in node is failed')}
+          </Heading>
+          <Stack spacing={4} align="flex-start">
+            <PrimaryButton onClick={tryRestartNode}>
+              {t('Restart built-in node')}
+            </PrimaryButton>
+            <Text color="xwhite.050" fontSize="mdx">
+              <Trans i18nKey="builtinNodeFailed" t={t}>
+                If problem still exists, restart your app or check your
+                connection <TextLink href="/settings/node">settings</TextLink>
+              </Trans>
+            </Text>
+          </Stack>
+        </Stack>
+      )}
+
+      {isUnsupportedMacosVersion && (
+        <Stack spacing={5} w={416}>
+          <Heading fontSize="mdx" fontWeight={500}>
+            {t(
+              'Can not start built-in node. The minimum required version is macOS Catalina'
+            )}
+          </Heading>
+          <Stack spacing={4} align="flex-start">
+            <Text color="xwhite.050" fontSize="mdx">
+              <Trans i18nKey="unsupportedMacosVersion" t={t}>
+                Please update your macOS or{' '}
+                <TextLink href="/settings/node">
+                  connect to remote node
+                </TextLink>
+                .
+              </Trans>
+            </Text>
+          </Stack>
+        </Stack>
+      )}
+    </FillCenter>
+  )
 }
 
 function HardForkScreen({version, onUpdate, onReject}) {

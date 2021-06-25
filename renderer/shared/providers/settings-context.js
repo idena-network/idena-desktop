@@ -98,7 +98,7 @@ const SettingsStateContext = React.createContext()
 const SettingsDispatchContext = React.createContext()
 
 // eslint-disable-next-line react/prop-types
-function SettingsProvider({children}) {
+export function SettingsProvider({children}) {
   const [state, dispatch] = usePersistence(
     useLogger(
       React.useReducer(
@@ -161,7 +161,7 @@ function SettingsProvider({children}) {
   )
 }
 
-function useSettingsState() {
+export function useSettingsState() {
   const context = React.useContext(SettingsStateContext)
   if (context === undefined) {
     throw new Error(
@@ -171,7 +171,7 @@ function useSettingsState() {
   return context
 }
 
-function useSettingsDispatch() {
+export function useSettingsDispatch() {
   const context = React.useContext(SettingsDispatchContext)
   if (context === undefined) {
     throw new Error(
@@ -181,4 +181,6 @@ function useSettingsDispatch() {
   return context
 }
 
-export {SettingsProvider, useSettingsState, useSettingsDispatch}
+export function useSettings() {
+  return [useSettingsState(), useSettingsDispatch()]
+}

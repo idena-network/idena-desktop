@@ -14,7 +14,7 @@ import {
 import {callRpc, loadKeyword} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
 import {FlipType, FlipFilter} from '../../shared/types'
-import {fetchTx, deleteFlip} from '../../shared/api'
+import {deleteFlip} from '../../shared/api'
 import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 import {persistState} from '../../shared/utils/persist'
 
@@ -502,7 +502,10 @@ export const flipMachine = Machine(
         let timeoutId
 
         const fetchStatus = async () => {
-          const {result} = await fetchTx(txHash)
+          const {result} = await callRpc(
+            'bcn_transaction',
+            txHash
+          ).then(tx => ({hash: txHash, ...tx}))
           if (result) {
             if (result.blockHash !== HASH_IN_MEMPOOL) cb('MINED')
             else {
