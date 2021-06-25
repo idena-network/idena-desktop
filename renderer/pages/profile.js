@@ -77,6 +77,7 @@ import {
   onboardingStep,
 } from '../shared/utils/onboarding'
 import {createProfileDb} from '../screens/profile/utils'
+import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 
 export default function ProfilePage() {
   const {
@@ -181,6 +182,12 @@ export default function ProfilePage() {
   )
 
   const toDna = toLocaleDna(language)
+
+  const {
+    isOpen: isOpenExportPk,
+    onOpen: onOpenExportPk,
+    onClose: onCloseExportPk,
+  } = useDisclosure()
 
   return (
     <>
@@ -374,6 +381,11 @@ export default function ProfilePage() {
                   <IconButton2 icon="poo" onClick={onOpenSpoilForm}>
                     {t('Spoil invite')}
                   </IconButton2>
+
+                  <IconButton2 icon="key" onClick={onOpenExportPk}>
+                    {t('Backup private key')}
+                  </IconButton2>
+
                   <IconButton2
                     isDisabled={!canTerminate}
                     icon="delete"
@@ -433,6 +445,7 @@ export default function ProfilePage() {
           </Page>
         </Layout>
       </InviteProvider>
+
       <Dialog
         isOpen={isOpenNextValidationDialog}
         onClose={onCloseNextValidationDialog}
@@ -471,6 +484,11 @@ export default function ProfilePage() {
           </PrimaryButton>
         </DialogFooter>
       </Dialog>
+
+      <ExportPrivateKeyDialog
+        isOpen={isOpenExportPk}
+        onClose={onCloseExportPk}
+      />
     </>
   )
 }
