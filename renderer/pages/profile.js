@@ -451,14 +451,38 @@ export default function ProfilePage() {
         onClose={onCloseNextValidationDialog}
       >
         <DialogHeader>
-          {t('Next validation: {{nextValidation}}', {
-            nextValidation: epoch && formatValidationDate(epoch.nextValidation),
-            nsSeparator: '!!',
-          })}
+          {isValidated
+            ? t('Congratulations! You have been successfully validated!')
+            : t('Your status is not validated')}
         </DialogHeader>
         <DialogBody>
-          {t(`Add this event to your personal calendar so that you don't miss the
-          next validation`)}
+          <Stack spacing={1}>
+            <Text>
+              {isValidated
+                ? t(
+                    `Your status is valid till the next validation: {{nextValidation}}.`,
+                    {
+                      nextValidation:
+                        epoch && formatValidationDate(epoch.nextValidation),
+                      nsSeparator: '!!',
+                    }
+                  )
+                : t(
+                    'Please join the next validation ceremony: {{nextValidation}}.',
+                    {
+                      nextValidation:
+                        epoch && formatValidationDate(epoch.nextValidation),
+                      nsSeparator: '!!',
+                    }
+                  )}
+            </Text>
+            <Text>
+              {t(
+                `Add this event to your personal calendar so that you don't miss the next validation.`
+              )}
+            </Text>
+          </Stack>
+          <TaskConfetti active={isValidated} />
         </DialogBody>
         <DialogFooter>
           <SecondaryButton
