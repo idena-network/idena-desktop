@@ -1,10 +1,6 @@
-/* eslint-disable react/prop-types */
-import {useToast} from '@chakra-ui/core'
 import React from 'react'
-import {useTranslation} from 'react-i18next'
 import {apiUrl} from '../../screens/oracles/utils'
 import {fetchCeremonyIntervals} from '../api'
-import {Toast} from '../components/components'
 import {useInterval} from '../hooks/use-interval'
 import {ntp} from '../utils/utils'
 
@@ -13,10 +9,6 @@ const TIME_DRIFT_THRESHOLD = 10 * 1000
 const TimingStateContext = React.createContext()
 
 export function TimingProvider(props) {
-  const {t} = useTranslation()
-
-  const toast = useToast()
-
   const [timing, setTiming] = React.useState({
     validation: null,
     flipLottery: null,
@@ -56,8 +48,6 @@ export function TimingProvider(props) {
     true
   )
 
-  const [wrongClientTime, setWrongClientTime] = React.useState()
-
   useInterval(
     async () => {
       try {
@@ -66,39 +56,19 @@ export function TimingProvider(props) {
         const {result} = await (await fetch(apiUrl('now'))).json()
         const serverTime = new Date(result)
 
-        setWrongClientTime(
-          ntp(requestOriginTime, serverTime, serverTime, Date.now()).offset >
-            TIME_DRIFT_THRESHOLD
-        )
+        setTiming(prevTiming => ({
+          ...prevTiming,
+          wrongClientTime:
+            ntp(requestOriginTime, serverTime, serverTime, Date.now()).offset >
+            TIME_DRIFT_THRESHOLD,
+        }))
       } catch {
         global.logger.error('An error occured while fetching time API')
       }
     },
-    1000 * 60 * 1,
+    1000 * 1 * 1,
     true
   )
-
-  React.useEffect(() => {
-    if (wrongClientTime)
-      toast({
-        duration: null,
-        // eslint-disable-next-line react/display-name
-        render: ({onClose}) => (
-          <Toast
-            status="error"
-            title={t('Please check your local time')}
-            description={t(
-              'The time must be synchronized with internet time for the successful validation'
-            )}
-            actionContent={t('Check')}
-            onAction={() => {
-              onClose()
-              global.openExternal('https://time.is/')
-            }}
-          />
-        ),
-      })
-  }, [t, toast, wrongClientTime])
 
   return <TimingStateContext.Provider value={timing} {...props} />
 }
