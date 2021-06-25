@@ -19,7 +19,12 @@ import {
   mapToFriendlyStatus,
   useIdentityState,
 } from '../../shared/providers/identity-context'
-import {dummyAddress, toLocaleDna, toPercent} from '../../shared/utils/utils'
+import {
+  byId,
+  dummyAddress,
+  toLocaleDna,
+  toPercent,
+} from '../../shared/utils/utils'
 import {
   FormLabel,
   Input,
@@ -31,13 +36,14 @@ import {
   Tooltip,
 } from '../../shared/components/components'
 import {
+  useInvite,
   useInviteDispatch,
   useInviteState,
 } from '../../shared/providers/invite-context'
 import {PrimaryButton, IconButton2} from '../../shared/components/button'
 import {
   ContactAvatar,
-  ContactCardMiningBadge,
+  ContactCardBadge,
   ContactDrawerHeader,
   ContactStat,
 } from './components'
@@ -263,7 +269,9 @@ export function ContactCard({
     i18n: {language},
   } = useTranslation()
 
-  const {deleteInvite, recoverInvite} = useInviteDispatch()
+  const [{invites}, {deleteInvite, recoverInvite}] = useInvite()
+
+  const invitee = invites.find(byId(contact))
 
   const {
     id,
@@ -274,18 +282,11 @@ export function ContactCard({
     firstName,
     lastName,
     canKill,
-    mining: knownMining,
+    mining,
     terminating,
     activated,
-    identity: {state: knownState, stake} = {},
-  } = contact
-
-  const {invites} = useInviteState()
-
-  const invitee = invites.find(invite => invite.id === id)
-
-  const state = invitee?.identity?.state ?? knownState
-  const mining = invitee?.mining ?? knownMining
+    identity: {state, stake} = {},
+  } = {...contact, ...invitee}
 
   const {onCopy: onCopyKey} = useClipboard(key)
 
@@ -296,12 +297,12 @@ export function ContactCard({
 
   const status = isInviteExpired
     ? t('Expired invitation')
-    : state === IdentityStatus.Invite
-    ? t('Invitation')
     : mining
     ? t('Mining...')
     : terminating
     ? t('Terminating...')
+    : state === IdentityStatus.Invite
+    ? t('Invitation')
     : mapToFriendlyStatus(state) ?? 'Unknown'
 
   const toDna = toLocaleDna(language)
@@ -318,9 +319,14 @@ export function ContactCard({
                   {`${firstName} ${lastName}`.trim() || t('...')}
                 </Text>
                 {mining && (
-                  <ContactCardMiningBadge isMining>
-                    {t('Mined')}
-                  </ContactCardMiningBadge>
+                  <ContactCardBadge bg="orange.010" color="orange.500">
+                    {t('Mining...')}
+                  </ContactCardBadge>
+                )}
+                {terminating && (
+                  <ContactCardBadge bg="red.010" color="red.500">
+                    {t('Terminating...')}
+                  </ContactCardBadge>
                 )}
               </Stack>
               <Text color="muted" fontSize="mdx" wordBreak="break-all">
@@ -453,7 +459,6 @@ export function IssueInviteDrawer({onIssue, onIssueFail, ...props}) {
             try {
               setIsSubmitting(true)
               const invite = await addInvite(address, null, firstName, lastName)
-              console.log({invite})
               setIsSubmitting(false)
 
               onIssue(invite)
@@ -557,7 +562,7 @@ export function EditContactDrawer({contact, onRename, ...props}) {
         </DrawerBody>
         <DrawerFooter>
           <PrimaryButton type="submit" ml="auto" isLoading={isSubmitting}>
-            {t('Create invitation')}
+            {t('Save')}
           </PrimaryButton>
         </DrawerFooter>
       </Flex>
@@ -568,20 +573,27 @@ export function EditContactDrawer({contact, onRename, ...props}) {
 export function KillInviteDrawer({invite, onKill, onKillFail, ...props}) {
   const {t, i18n} = useTranslation()
 
-  const {address} = useIdentityState()
-
-  const {killInvite} = useInviteDispatch()
-
   const [isSubmitting, setIsSubmitting] = React.useState()
 
-  const {id, firstName, lastName, receiver, state: status, stake} = invite
+  const {address} = useIdentityState()
+
+  const [{invites}, {killInvite}] = useInvite()
+
+  const invitee = invites.find(byId(invite))
+
+  const {id, firstName, lastName, receiver, state: status, stake} = {
+    ...invite,
+    state: invitee?.identity?.state,
+  }
 
   const contactName = receiver || `${firstName} ${lastName}`.trim()
 
   return (
     <Drawer {...props}>
       <DrawerHeader>
-        <ContactDrawerHeader address={receiver} name={contactName} />
+        <ContactDrawerHeader address={receiver}>
+          {t('Terminate invitation')}
+        </ContactDrawerHeader>
       </DrawerHeader>
       <Flex
         as="form"
@@ -597,7 +609,7 @@ export function KillInviteDrawer({invite, onKill, onKillFail, ...props}) {
 
             setIsSubmitting(false)
 
-            if (error) onKillFail(error)
+            if (error) onKillFail(error?.message)
             else onKill(result)
           } catch (error) {
             setIsSubmitting(false)
@@ -606,12 +618,18 @@ export function KillInviteDrawer({invite, onKill, onKillFail, ...props}) {
         }}
       >
         <DrawerBody>
-          <Text color="brandGray.500" fontSize="md" mt={5} mb={6}>
-            {t('Terminate invitation')}
+          <Text
+            color="brandGray.500"
+            fontSize="md"
+            fontWeight={500}
+            mt={5}
+            mb={6}
+          >
+            {}
           </Text>
-          <Stack spacing={5}>
+          <Stack bg="gray.50" px={6} py={3} borderRadius="lg" spacing={5}>
+            <ContactStat label={t('Address')} value={contactName} />
             <ContactStat label={t('Status')} value={status} />
-            <ContactStat label={t('Address')} value={receiver} />
             <ContactStat
               label={t('Stake')}
               value={toLocaleDna(i18n.language)(stake ?? 0)}

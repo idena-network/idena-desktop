@@ -195,6 +195,7 @@ function InviteProvider({children}) {
           .map(({hash}) => hash)
           .map(api.fetchTx)
       )
+
       setInvites(
         await Promise.all(
           invites.map(async invite => {
@@ -204,14 +205,24 @@ function InviteProvider({children}) {
             )
 
             const tx = txs.find(({hash}) => hash === invite.hash)
-            if (tx) {
-              return {
-                ...invite,
-                terminating:
-                  invitedIdentity && invitedIdentity.state !== 'Undefined',
-              }
-            }
-            return invite
+
+            const isTerminating =
+              invitedIdentity?.state !== IdentityStatus.Undefined
+
+            return tx
+              ? {
+                  ...invite,
+                  identity: invitedIdentity,
+                  state: isTerminating
+                    ? IdentityStatus.Terminating
+                    : invitedIdentity?.state,
+                  terminating: isTerminating,
+                  canKill:
+                    invite &&
+                    invitedIdentity &&
+                    killableIdentities.includes(invitedIdentity.state),
+                }
+              : invite
           })
         )
       )
@@ -272,29 +283,28 @@ function InviteProvider({children}) {
     db.updateInvite(id, {id, deletedAt})
   }
 
-  const killInvite = async (id, myAddress, inviteeAddress) => {
-    const from = myAddress
-    const to = inviteeAddress
-    const resp = await api.killInvitee(from, to)
-    const {result} = resp
+  const killInvite = async (id, from, to) => {
+    const {result, error} = await api.killInvitee(from, to)
 
     if (result) {
-      const key = id
       setInvites(
-        invites.map(inv => {
-          if (inv.id === id) {
-            return {
-              ...inv,
-              terminating: true,
-            }
-          }
-          return inv
-        })
+        // eslint-disable-next-line no-shadow
+        invites.map(invite =>
+          invite.id === id
+            ? {
+                ...invite,
+                terminating: true,
+                state: IdentityStatus.Terminating,
+                canKill: false,
+              }
+            : invite
+        )
       )
-      const invite = {id: key, terminateHash: result, terminatedAt: Date.now()}
+      const invite = {id, terminateHash: result, terminatedAt: Date.now()}
       db.updateInvite(id, invite)
     }
-    return resp
+
+    return {result, error}
   }
 
   const recoverInvite = async id => {

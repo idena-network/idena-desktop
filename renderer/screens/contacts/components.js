@@ -31,24 +31,27 @@ export function ContactStat({label, value}) {
       <StatLabel color="muted" fontSize="md">
         {label}
       </StatLabel>
-      <StatNumber fontSize="md" fontWeight={500}>
+      <StatNumber
+        color="brandGray.500"
+        fontSize="md"
+        fontWeight={500}
+        wordBreak="break-all"
+      >
         {value}
       </StatNumber>
     </Stack>
   )
 }
 
-export function ContactCardMiningBadge(props) {
+export function ContactCardBadge(props) {
   return (
     <Badge
-      bg="orange.010"
-      color="orange.500"
       borderRadius="lg"
       fontWeight={500}
       px={2}
       py={1}
       alignSelf="start"
-      textTransform="capitalize"
+      textTransform="initial"
       {...props}
     />
   )

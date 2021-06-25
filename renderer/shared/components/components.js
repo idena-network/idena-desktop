@@ -256,7 +256,12 @@ export function Toast({
         <AlertTitle fontWeight={500} lineHeight="base">
           {title}
         </AlertTitle>
-        <AlertDescription color="muted" lineHeight="base" textAlign="left">
+        <AlertDescription
+          color="muted"
+          lineHeight="base"
+          textAlign="left"
+          wordBreak="break-all"
+        >
           {description}
         </AlertDescription>
       </Flex>
