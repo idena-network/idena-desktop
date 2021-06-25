@@ -1378,3 +1378,60 @@ function BadFlipPartFrame({flipCase, ...props}) {
     </ChakraBox>
   )
 }
+
+export function ReviewShortSessionDialog({
+  flips,
+  isSubmitting,
+  onSubmit,
+  onCancel,
+  ...props
+}) {
+  const {t} = useTranslation()
+
+  const answeredFlipsCount = flips.filter(({option}) => option > 0).length
+
+  const areFlipsUnanswered = answeredFlipsCount < flips.length
+
+  return (
+    <Dialog title={t('Submit the answers')} onClose={onCancel} {...props}>
+      <ValidationDialogBody>
+        <Stack spacing={6}>
+          <Stack spacing={4}>
+            <Stack spacing={2}>
+              <ReviewValidationDialogStat
+                label={t('Answered')}
+                value={t('{{answeredFlips}} out of {{totalFlips}}', {
+                  answeredFlips: answeredFlipsCount,
+                  totalFlips: flips.length,
+                })}
+              />
+            </Stack>
+            {areFlipsUnanswered && (
+              <Text color="muted">
+                {areFlipsUnanswered && (
+                  <Trans i18nKey="reviewMissingFlips" t={t}>
+                    You need to answer{' '}
+                    <ReviewValidationDialogLinkButton onClick={onCancel}>
+                      all flips
+                    </ReviewValidationDialogLinkButton>{' '}
+                    otherwise you may fail the validation.
+                  </Trans>
+                )}
+              </Text>
+            )}
+          </Stack>
+        </Stack>
+      </ValidationDialogBody>
+      <DialogFooter {...props}>
+        <SecondaryButton onClick={onCancel}>{t('Cancel')}</SecondaryButton>
+        <PrimaryButton
+          isLoading={isSubmitting}
+          loadingText={t('Submitting answers...')}
+          onClick={onSubmit}
+        >
+          {t('Submit answers')}
+        </PrimaryButton>
+      </DialogFooter>
+    </Dialog>
+  )
+}
