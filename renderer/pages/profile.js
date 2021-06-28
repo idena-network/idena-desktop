@@ -28,6 +28,7 @@ import {
   UserStat,
   UserStatLabel,
   ActivateMiningForm,
+  InviteScoreAlert,
 } from '../screens/profile/components'
 import {
   PrimaryButton,
@@ -51,7 +52,6 @@ import {
   DialogFooter,
   DialogHeader,
   ExternalLink,
-  SuccessAlert,
   FloatDebug,
   Toast,
 } from '../shared/components/components'
@@ -78,10 +78,7 @@ import {
   activeShowingOnboardingStep,
   shouldCompleteOnboardingStep,
 } from '../shared/utils/onboarding'
-import {
-  calculateInvitationRewardRatio,
-  createProfileDb,
-} from '../screens/profile/utils'
+import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 
 export default function ProfilePage() {
@@ -214,18 +211,11 @@ export default function ProfilePage() {
               <Stack spacing={6}>
                 <PageTitle mb={6}>{t('Profile')}</PageTitle>
                 {canInvite && (
-                  <SuccessAlert minH={36} w="full">
-                    {t(
-                      'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
-                      {
-                        invitationRewardRatio: toPercent(
-                          calculateInvitationRewardRatio(epoch ?? {}, {
-                            highestBlock,
-                          })
-                        ),
-                      }
-                    )}
-                  </SuccessAlert>
+                  <InviteScoreAlert
+                    epoch={epoch}
+                    identity={{canInvite}}
+                    sync={{highestBlock}}
+                  />
                 )}
               </Stack>
               <Stack isInline spacing={10}>
