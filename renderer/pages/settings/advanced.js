@@ -40,7 +40,7 @@ export default function AdvancedSettings() {
                 })
               }}
             >
-              {t('Clean')}
+              {t('Clear')}
             </SettingsLinkButton>
           </Flex>
           <HDivider />
