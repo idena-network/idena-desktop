@@ -1288,7 +1288,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
 
 function BadFlipImage(props) {
   return (
-    <AspectRatioBox ratio={4 / 3} h={100}>
+    <AspectRatioBox ratio={4 / 3} w={132}>
       <Image {...props} />
     </AspectRatioBox>
   )
@@ -1381,7 +1381,6 @@ function BadFlipPartFrame({flipCase, ...props}) {
 
 export function ReviewShortSessionDialog({
   flips,
-  isSubmitting,
   onSubmit,
   onCancel,
   ...props
@@ -1424,13 +1423,7 @@ export function ReviewShortSessionDialog({
       </ValidationDialogBody>
       <DialogFooter {...props}>
         <SecondaryButton onClick={onCancel}>{t('Cancel')}</SecondaryButton>
-        <PrimaryButton
-          isLoading={isSubmitting}
-          loadingText={t('Submitting answers...')}
-          onClick={onSubmit}
-        >
-          {t('Submit answers')}
-        </PrimaryButton>
+        <PrimaryButton onClick={onSubmit}>{t('Submit answers')}</PrimaryButton>
       </DialogFooter>
     </Dialog>
   )

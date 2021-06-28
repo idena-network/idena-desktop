@@ -2,7 +2,11 @@ import {useMachine} from '@xstate/react'
 import React from 'react'
 import {Machine} from 'xstate'
 import {IdentityStatus, OnboardingStep} from '../types'
-import {loadOnboardingState, persistOnboardingState} from '../utils/onboarding'
+import {
+  loadOnboardingState,
+  onboardingStep,
+  persistOnboardingState,
+} from '../utils/onboarding'
 import {useChainState} from './chain-context'
 import {useEpochState} from './epoch-context'
 import {useIdentityState} from './identity-context'
@@ -12,8 +16,12 @@ const OnboardingDispatchContext = React.createContext()
 
 export function OnboardingProvider(props) {
   const {syncing, offline} = useChainState()
+
   const {epoch} = useEpochState() ?? {epoch: -1}
-  const {state} = useIdentityState()
+
+  const identity = useIdentityState()
+
+  const onboardingStepSelector = step => `#onboarding.${onboardingStep(step)}`
 
   // eslint-disable-next-line no-shadow
   const createStep = ({current, next}) => ({
@@ -44,7 +52,7 @@ export function OnboardingProvider(props) {
             },
             done: {
               after: {
-                300: `#onboarding.onboarding.${next}`,
+                300: next.startsWith('#') ? next : onboardingStepSelector(next),
               },
             },
           },
@@ -72,12 +80,38 @@ export function OnboardingProvider(props) {
       states: {
         idle: {
           on: {
-            START: 'onboarding',
+            START: [
+              {
+                target: onboardingStepSelector(OnboardingStep.ActivateInvite),
+                cond: (_, {identity: {state}}) =>
+                  [IdentityStatus.Undefined, IdentityStatus.Invite].includes(
+                    state
+                  ),
+              },
+              {
+                target: onboardingStepSelector(OnboardingStep.Validate),
+                cond: (_, {identity: {state}}) =>
+                  [IdentityStatus.Candidate, IdentityStatus.Zombie].includes(
+                    state
+                  ),
+              },
+              {
+                target: onboardingStepSelector(OnboardingStep.ActivateMining),
+                cond: (_, {identity: {isValidated, online}}) =>
+                  isValidated && !online,
+              },
+              {
+                target: onboardingStepSelector(OnboardingStep.CreateFlips),
+                cond: (_, {identity: {online, flips, requiredFlips}}) =>
+                  online && requiredFlips - (flips ?? []).length > 0,
+              },
+            ],
           },
         },
         onboarding: {
-          initial: OnboardingStep.ActivateInvite,
+          initial: 'unknown',
           states: {
+            unknown: {},
             ...createStep({
               current: OnboardingStep.ActivateInvite,
               next: OnboardingStep.Validate,
@@ -111,14 +145,8 @@ export function OnboardingProvider(props) {
   )
 
   React.useEffect(() => {
-    if (
-      epoch > 0 &&
-      !syncing &&
-      !offline &&
-      [IdentityStatus.Undefined, IdentityStatus.Invite].includes(state)
-    )
-      send('START')
-  }, [epoch, offline, send, state, syncing])
+    if (epoch > 0 && identity && !syncing && !offline) send('START', {identity})
+  }, [epoch, identity, offline, send, syncing])
 
   React.useEffect(() => {
     if (current.changed) persistOnboardingState(current)

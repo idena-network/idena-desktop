@@ -140,16 +140,12 @@ function InviteProvider({children}) {
 
   useInterval(
     async () => {
-      const {result, error} = await callRpc(
-        'bcn_transaction',
-        activationTx
-      ).then(tx => ({hash: activationTx, ...tx}))
-      if (result) {
-        const {blockHash} = result
+      try {
+        const {blockHash} = await callRpc('bcn_transaction', activationTx)
         if (blockHash && blockHash !== HASH_IN_MEMPOOL) {
           resetActivation()
         }
-      } else {
+      } catch (error) {
         resetActivation()
         addNotification({
           title: error

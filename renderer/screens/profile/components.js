@@ -378,7 +378,12 @@ export function ValidationResultToast({epoch}) {
   ) : null
 }
 
-export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
+export function ActivateMiningForm({
+  isOnline,
+  delegatee,
+  delegationEpoch,
+  onShow,
+}) {
   const toast = useToast()
 
   const epoch = useEpochState()
@@ -414,6 +419,7 @@ export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
         isDelegator={isDelegator}
         onShow={() => {
           send('SHOW')
+          if (onShow) onShow()
         }}
       />
       {isOnline || isDelegator ? (

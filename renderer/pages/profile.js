@@ -160,7 +160,7 @@ export default function ProfilePage() {
     }
   }, [epoch, isValidated, onOpenNextValidationDialog, profileDb])
 
-  const [currentOnboarding, {done, dismiss, next}] = useOnboarding()
+  const [currentOnboarding, {done, dismiss}] = useOnboarding()
 
   React.useEffect(() => {
     if (
@@ -172,7 +172,7 @@ export default function ProfilePage() {
     ) {
       done()
     }
-  }, [currentOnboarding, done, next, status])
+  }, [currentOnboarding, done, status])
 
   React.useEffect(() => {
     if (
@@ -182,6 +182,18 @@ export default function ProfilePage() {
       done()
     }
   }, [currentOnboarding, done, isValidated])
+
+  React.useEffect(() => {
+    if (
+      online &&
+      shouldCompleteOnboardingStep(
+        currentOnboarding,
+        OnboardingStep.ActivateMining
+      )
+    ) {
+      done()
+    }
+  }, [currentOnboarding, done, online])
 
   const shouldActivateMining =
     canMine &&
@@ -379,48 +391,39 @@ export default function ProfilePage() {
                 </Stack>
                 <Stack spacing={10} w={rem(200)}>
                   <Box minH={62} mt={4}>
-                    {shouldActivateMining ? (
-                      <OnboardingPopover isOpen>
-                        <PopoverTrigger>
-                          <Box
-                            bg="white"
-                            position="relative"
-                            borderRadius="md"
-                            p={2}
-                            m={-2}
-                            zIndex={2}
-                          >
-                            {address && canMine && (
-                              <ActivateMiningForm
-                                isOnline={online}
-                                delegatee={delegatee}
-                                delegationEpoch={delegationEpoch}
-                              />
-                            )}
-                          </Box>
-                        </PopoverTrigger>
-                        <OnboardingPopoverContent
-                          title={t('Activate mining status')}
-                          onDismiss={done}
+                    <OnboardingPopover isOpen={shouldActivateMining}>
+                      <PopoverTrigger>
+                        <Box
+                          bg="white"
+                          position={
+                            shouldActivateMining ? 'relative' : 'initial'
+                          }
+                          borderRadius="md"
+                          p={2}
+                          m={-2}
+                          zIndex={2}
                         >
-                          <Text>
-                            {t(
-                              `To become a validator of Idena blockchain you can activate your mining status. Keep your node online to mine iDNA coins.`
-                            )}
-                          </Text>
-                        </OnboardingPopoverContent>
-                      </OnboardingPopover>
-                    ) : (
-                      <>
-                        {address && canMine && (
-                          <ActivateMiningForm
-                            isOnline={online}
-                            delegatee={delegatee}
-                            delegationEpoch={delegationEpoch}
-                          />
-                        )}
-                      </>
-                    )}
+                          {address && canMine && (
+                            <ActivateMiningForm
+                              isOnline={online}
+                              delegatee={delegatee}
+                              delegationEpoch={delegationEpoch}
+                              onShow={dismiss}
+                            />
+                          )}
+                        </Box>
+                      </PopoverTrigger>
+                      <OnboardingPopoverContent
+                        title={t('Activate mining status')}
+                        onDismiss={done}
+                      >
+                        <Text>
+                          {t(
+                            `To become a validator of Idena blockchain you can activate your mining status. Keep your node online to mine iDNA coins.`
+                          )}
+                        </Text>
+                      </OnboardingPopoverContent>
+                    </OnboardingPopover>
                   </Box>
 
                   <Stack spacing={1} align="flex-start">

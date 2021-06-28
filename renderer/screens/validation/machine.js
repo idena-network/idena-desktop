@@ -368,9 +368,32 @@ export const createValidationMachine = ({
                       },
                     },
                     submitShortSession: {
-                      initial: 'confirm',
+                      initial: 'checkAnswers',
                       entry: log(),
                       states: {
+                        checkAnswers: {
+                          on: {
+                            '': [
+                              {
+                                target: 'confirm',
+                                cond: ({shortFlips}) => {
+                                  const solvableFlips = filterRegularFlips(
+                                    shortFlips
+                                  )
+                                  return (
+                                    solvableFlips.length === 0 ||
+                                    solvableFlips.some(
+                                      ({option = 0, decoded, ready, loading}) =>
+                                        (decoded && option === 0) ||
+                                        (ready && loading)
+                                    )
+                                  )
+                                },
+                              },
+                              {target: 'submitting'},
+                            ],
+                          },
+                        },
                         confirm: {
                           on: {
                             SUBMIT: 'submitting',
