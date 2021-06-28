@@ -312,7 +312,7 @@ export default function ProfilePage() {
 
                     {totalQualifiedFlips > 0 && (
                       <AnnotatedUserStat
-                        annotation={t('Total score for all validations')}
+                        annotation={t('Total score for last 10 validations')}
                         label={t('Total score')}
                       >
                         <UserStatValue>
