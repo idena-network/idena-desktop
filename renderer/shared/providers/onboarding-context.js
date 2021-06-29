@@ -2,11 +2,7 @@ import {useMachine} from '@xstate/react'
 import React from 'react'
 import {Machine} from 'xstate'
 import {IdentityStatus, OnboardingStep} from '../types'
-import {
-  loadOnboardingState,
-  onboardingStep,
-  persistOnboardingState,
-} from '../utils/onboarding'
+import {onboardingStep, persistOnboardingState} from '../utils/onboarding'
 import {useChainState} from './chain-context'
 import {useEpochState} from './epoch-context'
 import {useIdentityState} from './identity-context'
@@ -137,7 +133,6 @@ export function OnboardingProvider(props) {
       },
     }),
     {
-      state: loadOnboardingState(),
       logger: global.isDev
         ? console.log
         : (...args) => global.logger.debug(...args),

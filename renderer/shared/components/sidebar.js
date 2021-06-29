@@ -348,7 +348,7 @@ function ActionPanel() {
         }
         onClick={() => {
           if (shouldActivateInvite) {
-            if (!router.pathname.endsWith('/profile')) router.push('/profile')
+            router.push('/profile')
             document
               .querySelectorAll('#__next section')[1]
               .querySelector('div')
@@ -358,9 +358,8 @@ function ActionPanel() {
                 behavior: 'smooth',
               })
           }
-          if (shouldCreateFlips) {
-            router.push('/flips/list')
-          }
+          if (shouldCreateFlips) router.push('/flips/list')
+          if (shouldActivateMining) router.push('/profile')
           showCurrentTask()
         }}
       >
