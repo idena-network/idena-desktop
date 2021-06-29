@@ -1,8 +1,7 @@
 import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
-import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
+import {HASH_IN_MEMPOOL, callRpc} from '../../shared/utils/utils'
 import {NodeType} from '../../shared/types'
-import {callRpc} from '../../shared/utils/utils'
 
 export const activateMiningMachine = createMachine({
   id: 'mining',

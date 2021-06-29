@@ -194,6 +194,7 @@ function ContactList({filter, selectedContactId, onSelectContact}) {
         .filter(invite => !invite.deletedAt)
         .map(invite => (
           <ContactListItem
+            key={invite.id}
             isActive={(invite.dbkey || invite.id) === selectedContactId}
             id={invite.dbkey || invite.id}
             {...invite}

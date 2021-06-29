@@ -2,6 +2,9 @@ import dayjs from 'dayjs'
 import {getRpcParams} from '../api/api-client'
 import {EpochPeriod} from '../types'
 
+export const HASH_IN_MEMPOOL =
+  '0x0000000000000000000000000000000000000000000000000000000000000000'
+
 export function createRpcCaller({url, key}) {
   return async function(method, ...params) {
     const {result, error} = await (
