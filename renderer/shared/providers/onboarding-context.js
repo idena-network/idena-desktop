@@ -140,7 +140,8 @@ export function OnboardingProvider(props) {
   )
 
   React.useEffect(() => {
-    if (epoch > 0 && identity && !syncing && !offline) send('START', {identity})
+    if (epoch >= 0 && identity && !syncing && !offline)
+      send('START', {identity})
   }, [epoch, identity, offline, send, syncing])
 
   React.useEffect(() => {
