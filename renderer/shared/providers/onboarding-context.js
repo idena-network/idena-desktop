@@ -2,7 +2,7 @@ import {useMachine} from '@xstate/react'
 import React from 'react'
 import {Machine} from 'xstate'
 import {IdentityStatus, OnboardingStep} from '../types'
-import {onboardingStep, persistOnboardingState} from '../utils/onboarding'
+import {onboardingStep} from '../utils/onboarding'
 import {useChainState} from './chain-context'
 import {useEpochState} from './epoch-context'
 import {useIdentityState} from './identity-context'
@@ -143,10 +143,6 @@ export function OnboardingProvider(props) {
     if (epoch >= 0 && identity && !syncing && !offline)
       send('START', {identity})
   }, [epoch, identity, offline, send, syncing])
-
-  React.useEffect(() => {
-    if (current.changed) persistOnboardingState(current)
-  }, [current])
 
   return (
     <OnboardingStateContext.Provider value={current}>
