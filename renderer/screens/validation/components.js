@@ -796,10 +796,13 @@ export function ValidationFailedDialog(props) {
     >
       <ValidationDialogBody>
         <Text>
-          {t(`Sorry your answers won’t be submitted since the validation session is
-          over.`)}
+          {t(
+            'You haven’t submitted your answers in time. This validation session is over.'
+          )}
         </Text>
-        <Text>{t('Come back soon!')}</Text>
+        <Text>
+          {t('Come back again to participate in the next validation session.')}
+        </Text>
       </ValidationDialogBody>
     </ValidationDialog>
   )
@@ -946,7 +949,7 @@ export function AfterLongSessionToast() {
         pinned
         type={NotificationType.Info}
         title={t(
-          'Please wait. The network is reaching consensus about validated identities'
+          'Please wait. The network is reaching consensus on validated identities'
         )}
       />
     </Snackbar>

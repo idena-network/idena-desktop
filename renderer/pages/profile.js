@@ -318,7 +318,9 @@ export default function ProfilePage() {
                       />
                     )}
 
-                    {age > 0 && <SimpleUserStat label={t('Age')} value={age} />}
+                    {age >= 0 && (
+                      <SimpleUserStat label={t('Age')} value={age} />
+                    )}
 
                     {epoch && (
                       <SimpleUserStat

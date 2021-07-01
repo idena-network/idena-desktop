@@ -360,14 +360,15 @@ function ActionPanel() {
       >
         <PulseFrame
           isActive={
-            shouldActivateInvite ||
-            (shouldValidate &&
-              [IdentityStatus.Candidate, IdentityStatus.Newbie].includes(
-                identity.state
-              )) ||
-            shouldActivateMining ||
-            (shouldCreateFlips &&
-              [IdentityStatus.Newbie].includes(identity.state))
+            currentPeriod === EpochPeriod.None &&
+            (shouldActivateInvite ||
+              (shouldValidate &&
+                [IdentityStatus.Candidate, IdentityStatus.Newbie].includes(
+                  identity.state
+                )) ||
+              shouldActivateMining ||
+              (shouldCreateFlips &&
+                [IdentityStatus.Newbie].includes(identity.state)))
           }
         >
           <Block title={t('My current task')}>
@@ -473,7 +474,7 @@ function ActionPanel() {
                 </OnboardingPopoverContentIconRow>
                 <OnboardingPopoverContentIconRow icon="sync">
                   {t(
-                    `Keep your node synchronized in 60-30 minutes before the validation starts.`
+                    `Keep your node synchronized in 45-60 minutes before the validation starts.`
                   )}
                 </OnboardingPopoverContentIconRow>
                 <OnboardingPopoverContentIconRow icon="timer">
