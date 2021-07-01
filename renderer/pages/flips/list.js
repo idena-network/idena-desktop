@@ -155,10 +155,9 @@ export default function FlipListPage() {
     {done: doneOnboarding, dismiss: dismissOnboarding},
   ] = useOnboarding()
 
-  const shouldPromoteCreateFlips =
-    currentOnboarding.matches(
-      activeShowingOnboardingStep(OnboardingStep.CreateFlips)
-    ) && remainingRequiredFlips > 0
+  const isShowingCreateFlipsPopover = currentOnboarding.matches(
+    activeShowingOnboardingStep(OnboardingStep.CreateFlips)
+  )
 
   React.useEffect(() => {
     if (
@@ -192,7 +191,7 @@ export default function FlipListPage() {
             </FlipFilterOption>
           </FlipFilter>
           <Box>
-            <OnboardingPopover isOpen={shouldPromoteCreateFlips}>
+            <OnboardingPopover isOpen={isShowingCreateFlipsPopover}>
               <PopoverTrigger>
                 <Box>
                   <IconLink
@@ -277,10 +276,12 @@ export default function FlipListPage() {
         )}
 
         <TaskConfetti
-          active={eitherState(
-            currentOnboarding,
-            `${doneOnboardingStep(OnboardingStep.CreateFlips)}.salut`
-          )}
+          active={
+            eitherState(
+              currentOnboarding,
+              `${doneOnboardingStep(OnboardingStep.CreateFlips)}.salut`
+            ) && status === IdentityStatus.Newbie
+          }
         />
 
         {current.matches('ready.pristine') && (

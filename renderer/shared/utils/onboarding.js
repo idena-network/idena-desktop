@@ -24,3 +24,9 @@ export function persistOnboardingState(state) {
 export const shouldCompleteOnboardingStep = (currentOnboarding, step) =>
   eitherState(currentOnboarding, onboardingStep(step)) &&
   !eitherState(currentOnboarding, 'idle', `${doneOnboardingStep(step)}.done`)
+
+export const shouldTransitionToCreateFlipsStep = ({
+  isValidated,
+  requiredFlips,
+  flips,
+}) => isValidated && requiredFlips - (flips ?? []).length > 0

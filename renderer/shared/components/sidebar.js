@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
@@ -37,6 +38,7 @@ import {useOnboarding} from '../providers/onboarding-context'
 import {
   activeOnboardingStep,
   activeShowingOnboardingStep,
+  onboardingStep,
 } from '../utils/onboarding'
 import {
   OnboardingLinkButton,
@@ -338,14 +340,7 @@ function ActionPanel() {
 
       <ChakraBox
         roundedTop="md"
-        cursor={
-          shouldActivateInvite ||
-          shouldValidate ||
-          shouldCreateFlips ||
-          shouldActivateMining
-            ? 'pointer'
-            : 'default'
-        }
+        cursor={currentOnboarding.matches('done') ? 'default' : 'pointer'}
         onClick={() => {
           if (shouldActivateInvite) {
             router.push('/profile')
@@ -366,9 +361,13 @@ function ActionPanel() {
         <PulseFrame
           isActive={
             shouldActivateInvite ||
-            shouldValidate ||
-            shouldCreateFlips ||
-            shouldActivateMining
+            (shouldValidate &&
+              [IdentityStatus.Candidate, IdentityStatus.Newbie].includes(
+                identity.state
+              )) ||
+            shouldActivateMining ||
+            (shouldCreateFlips &&
+              [IdentityStatus.Newbie].includes(identity.state))
           }
         >
           <Block title={t('My current task')}>
@@ -376,9 +375,7 @@ function ActionPanel() {
               epoch={epoch.epoch}
               period={currentPeriod}
               identity={identity}
-            >
-              {shouldActivateMining && t('Activate mining status')}
-            </CurrentTask>
+            />
           </Block>
         </PulseFrame>
       </ChakraBox>
@@ -542,11 +539,6 @@ function PulseFrame({isActive, children, ...props}) {
   )
 }
 
-PulseFrame.propTypes = {
-  isActive: PropTypes.bool,
-  children: PropTypes.node,
-}
-
 function Block({title, children}) {
   return (
     <Box
@@ -574,17 +566,12 @@ function Block({title, children}) {
   )
 }
 
-Block.propTypes = {
-  title: PropTypes.string,
-  children: PropTypes.node,
-}
-
-function CurrentTask({epoch, period, identity, children}) {
+function CurrentTask({epoch, period, identity}) {
   const {t} = useTranslation()
 
-  if (!period || !identity.state) return null
+  const [onboardingState] = useOnboarding()
 
-  if (children) return <>{children}</>
+  if (!period || !identity.state) return null
 
   switch (period) {
     case EpochPeriod.None: {
@@ -594,6 +581,8 @@ function CurrentTask({epoch, period, identity, children}) {
         availableFlips: availableFlipsNumber,
         state: status,
         canActivateInvite,
+        age,
+        online,
       } = identity
 
       switch (true) {
@@ -603,6 +592,14 @@ function CurrentTask({epoch, period, identity, children}) {
               {t('Activate invite')}
             </Link>
           )
+
+        case age === 1 &&
+          !online &&
+          onboardingState.matches(
+            onboardingStep(OnboardingStep.ActivateMining)
+          ): {
+          return t('Activate mining status')
+        }
 
         case [
           IdentityStatus.Human,

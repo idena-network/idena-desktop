@@ -77,6 +77,7 @@ import {
   doneOnboardingStep,
   activeShowingOnboardingStep,
   shouldCompleteOnboardingStep,
+  shouldTransitionToCreateFlipsStep,
 } from '../shared/utils/onboarding'
 import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
@@ -119,6 +120,8 @@ export default function ProfilePage() {
     delegatee,
     delegationEpoch,
     isValidated,
+    flips,
+    requiredFlips,
   } = useIdentityState()
 
   const epoch = useEpochState()
@@ -160,7 +163,10 @@ export default function ProfilePage() {
     }
   }, [epoch, isValidated, onOpenNextValidationDialog, profileDb])
 
-  const [currentOnboarding, {done, dismiss}] = useOnboarding()
+  const [
+    currentOnboarding,
+    {done: doneStep, dismiss: dismissStep, finish: finishOnboarding},
+  ] = useOnboarding()
 
   React.useEffect(() => {
     if (
@@ -170,18 +176,18 @@ export default function ProfilePage() {
         OnboardingStep.ActivateInvite
       )
     ) {
-      done()
+      doneStep()
     }
-  }, [currentOnboarding, done, status])
+  }, [currentOnboarding, doneStep, status])
 
   React.useEffect(() => {
     if (
       isValidated &&
       shouldCompleteOnboardingStep(currentOnboarding, OnboardingStep.Validate)
     ) {
-      done()
+      doneStep()
     }
-  }, [currentOnboarding, done, isValidated])
+  }, [currentOnboarding, doneStep, isValidated])
 
   React.useEffect(() => {
     if (
@@ -191,16 +197,25 @@ export default function ProfilePage() {
         OnboardingStep.ActivateMining
       )
     ) {
-      done()
+      if (
+        shouldTransitionToCreateFlipsStep({isValidated, requiredFlips, flips})
+      )
+        doneStep()
+      else finishOnboarding()
     }
-  }, [currentOnboarding, done, online])
+  }, [
+    currentOnboarding,
+    doneStep,
+    finishOnboarding,
+    flips,
+    isValidated,
+    online,
+    requiredFlips,
+  ])
 
-  const shouldActivateMining =
-    canMine &&
-    !online &&
-    currentOnboarding.matches(
-      activeShowingOnboardingStep(OnboardingStep.ActivateMining)
-    )
+  const isShowingActivateMiningPopover = currentOnboarding.matches(
+    activeShowingOnboardingStep(OnboardingStep.ActivateMining)
+  )
 
   const isShowingActivateInvitePopover = currentOnboarding.matches(
     activeShowingOnboardingStep(OnboardingStep.ActivateInvite)
@@ -314,7 +329,9 @@ export default function ProfilePage() {
 
                     {totalQualifiedFlips > 0 && (
                       <AnnotatedUserStat
-                        annotation={t('Total score for last 10 validations')}
+                        annotation={t(
+                          'Total score for the last 10 validations'
+                        )}
                         label={t('Total score')}
                       >
                         <UserStatValue>
@@ -342,7 +359,7 @@ export default function ProfilePage() {
                     <OnboardingPopoverContent
                       title={t('Enter invitation code')}
                       zIndex={2}
-                      onDismiss={dismiss}
+                      onDismiss={dismissStep}
                     >
                       <Stack spacing={5}>
                         <Stack>
@@ -381,22 +398,31 @@ export default function ProfilePage() {
                     </OnboardingPopoverContent>
                   </OnboardingPopover>
                   <TaskConfetti
-                    active={eitherState(
-                      currentOnboarding,
-                      `${doneOnboardingStep(
-                        OnboardingStep.ActivateInvite
-                      )}.salut`
-                    )}
+                    active={
+                      eitherState(
+                        currentOnboarding,
+                        `${doneOnboardingStep(
+                          OnboardingStep.ActivateInvite
+                        )}.salut`
+                      ) ||
+                      (eitherState(
+                        currentOnboarding,
+                        `${doneOnboardingStep(OnboardingStep.Validate)}.salut`
+                      ) &&
+                        status === IdentityStatus.Newbie)
+                    }
                   />
                 </Stack>
                 <Stack spacing={10} w={rem(200)}>
                   <Box minH={62} mt={4}>
-                    <OnboardingPopover isOpen={shouldActivateMining}>
+                    <OnboardingPopover isOpen={isShowingActivateMiningPopover}>
                       <PopoverTrigger>
                         <Box
                           bg="white"
                           position={
-                            shouldActivateMining ? 'relative' : 'initial'
+                            isShowingActivateMiningPopover
+                              ? 'relative'
+                              : 'initial'
                           }
                           borderRadius="md"
                           p={2}
@@ -408,14 +434,24 @@ export default function ProfilePage() {
                               isOnline={online}
                               delegatee={delegatee}
                               delegationEpoch={delegationEpoch}
-                              onShow={dismiss}
+                              onShow={dismissStep}
                             />
                           )}
                         </Box>
                       </PopoverTrigger>
                       <OnboardingPopoverContent
                         title={t('Activate mining status')}
-                        onDismiss={done}
+                        onDismiss={() => {
+                          if (
+                            shouldTransitionToCreateFlipsStep({
+                              isValidated,
+                              requiredFlips,
+                              flips,
+                            })
+                          )
+                            doneStep()
+                          else finishOnboarding()
+                        }}
                       >
                         <Text>
                           {t(

@@ -10,7 +10,7 @@ export function loadPersistentState(dbName) {
 }
 
 export function loadPersistentStateValue(dbName, key) {
-  if (!key) {
+  if ((key ?? null) === null) {
     throw new Error('loadItem requires key to be passed')
   }
   const state = loadPersistentState(dbName)
