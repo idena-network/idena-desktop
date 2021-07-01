@@ -81,6 +81,7 @@ import {
 } from '../shared/utils/onboarding'
 import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
+import {FillCenter} from '../screens/oracles/components'
 
 export default function ProfilePage() {
   const {
@@ -399,21 +400,28 @@ export default function ProfilePage() {
                       </Stack>
                     </OnboardingPopoverContent>
                   </OnboardingPopover>
-                  <TaskConfetti
-                    active={
-                      eitherState(
-                        currentOnboarding,
-                        `${doneOnboardingStep(
-                          OnboardingStep.ActivateInvite
-                        )}.salut`
-                      ) ||
-                      (eitherState(
-                        currentOnboarding,
-                        `${doneOnboardingStep(OnboardingStep.Validate)}.salut`
-                      ) &&
-                        status === IdentityStatus.Newbie)
-                    }
-                  />
+                  <FillCenter
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    zIndex={9999}
+                  >
+                    <TaskConfetti
+                      active={
+                        eitherState(
+                          currentOnboarding,
+                          `${doneOnboardingStep(
+                            OnboardingStep.ActivateInvite
+                          )}.salut`
+                        ) ||
+                        (eitherState(
+                          currentOnboarding,
+                          `${doneOnboardingStep(OnboardingStep.Validate)}.salut`
+                        ) &&
+                          status === IdentityStatus.Newbie)
+                      }
+                    />
+                  </FillCenter>
                 </Stack>
                 <Stack spacing={10} w={rem(200)}>
                   <Box minH={62} mt={4}>
@@ -586,7 +594,6 @@ export default function ProfilePage() {
               )}
             </Text>
           </Stack>
-          <TaskConfetti active={isValidated} />
         </DialogBody>
         <DialogFooter>
           <SecondaryButton
