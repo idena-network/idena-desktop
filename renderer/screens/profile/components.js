@@ -301,7 +301,7 @@ export function ValidationResultToast({epoch}) {
   const timerMachine = React.useMemo(
     () =>
       createTimerMachine(
-        dayjs(loadPersistentStateValue('validationResults', epoch).epochStart)
+        dayjs(loadPersistentStateValue('validationResults', epoch)?.epochStart)
           .add(1, 'minute')
           .diff(dayjs(), 'second')
       ),
