@@ -444,7 +444,17 @@ export default function ProfilePage() {
                               isOnline={online}
                               delegatee={delegatee}
                               delegationEpoch={delegationEpoch}
-                              onShow={dismissStep}
+                              onShow={() => {
+                                if (
+                                  shouldTransitionToCreateFlipsStep({
+                                    isValidated,
+                                    requiredFlips,
+                                    flips,
+                                  })
+                                )
+                                  doneStep()
+                                else finishOnboarding()
+                              }}
                             />
                           )}
                         </Box>
