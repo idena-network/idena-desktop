@@ -357,7 +357,7 @@ export const createValidationMachine = ({
                       after: {
                         SHORT_SESSION_AUTO_SUBMIT: [
                           {
-                            target: 'submitShortSession',
+                            target: 'submitShortSession.submitting',
                             cond: ({shortFlips}) =>
                               hasEnoughAnswers(shortFlips),
                           },
@@ -369,7 +369,6 @@ export const createValidationMachine = ({
                     },
                     submitShortSession: {
                       initial: 'checkAnswers',
-                      entry: log(),
                       states: {
                         checkAnswers: {
                           on: {
