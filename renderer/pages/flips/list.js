@@ -57,14 +57,11 @@ import {
   OnboardingPopover,
   OnboardingPopoverContent,
   OnboardingPopoverContentIconRow,
-  TaskConfetti,
 } from '../../shared/components/onboarding'
 import {
   activeShowingOnboardingStep,
-  doneOnboardingStep,
   shouldCompleteOnboardingStep,
 } from '../../shared/utils/onboarding'
-import {eitherState} from '../../shared/utils/utils'
 
 export default function FlipListPage() {
   const {t} = useTranslation()
@@ -198,7 +195,9 @@ export default function FlipListPage() {
                     href="/flips/new"
                     icon="plus-solid"
                     bg="white"
-                    position="relative"
+                    position={
+                      isShowingCreateFlipsPopover ? 'relative' : 'initial'
+                    }
                     zIndex={2}
                   >
                     {t('New flip')}
@@ -274,15 +273,6 @@ export default function FlipListPage() {
             </Alert>
           </Box>
         )}
-
-        <TaskConfetti
-          active={
-            eitherState(
-              currentOnboarding,
-              `${doneOnboardingStep(OnboardingStep.CreateFlips)}.salut`
-            ) && status === IdentityStatus.Newbie
-          }
-        />
 
         {current.matches('ready.pristine') && (
           <Flex
