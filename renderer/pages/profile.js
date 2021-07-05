@@ -230,6 +230,25 @@ export default function ProfilePage() {
     onClose: onCloseExportPk,
   } = useDisclosure()
 
+  const {
+    isOpen: isOpenActivateInvitePopover,
+    onOpen: onOpenActivateInvitePopover,
+    onClose: onCloseActivateInvitePopover,
+  } = useDisclosure()
+
+  React.useLayoutEffect(() => {
+    if (isShowingActivateInvitePopover) {
+      document
+        .querySelectorAll('#__next section')[1]
+        .querySelector('div')
+        .scroll({
+          left: 0,
+          top: 9999,
+        })
+      onOpenActivateInvitePopover()
+    }
+  }, [isShowingActivateInvitePopover, onOpenActivateInvitePopover])
+
   return (
     <>
       <InviteProvider>
@@ -353,7 +372,7 @@ export default function ProfilePage() {
                   </UserStatList>
 
                   <OnboardingPopover
-                    isOpen={isShowingActivateInvitePopover}
+                    isOpen={isOpenActivateInvitePopover}
                     placement="top-start"
                   >
                     <PopoverTrigger>
@@ -362,7 +381,10 @@ export default function ProfilePage() {
                     <OnboardingPopoverContent
                       title={t('Enter invitation code')}
                       zIndex={2}
-                      onDismiss={dismissStep}
+                      onDismiss={() => {
+                        dismissStep()
+                        onCloseActivateInvitePopover()
+                      }}
                     >
                       <Stack spacing={5}>
                         <Stack>

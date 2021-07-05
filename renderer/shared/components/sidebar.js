@@ -342,17 +342,8 @@ function ActionPanel() {
         roundedTop="md"
         cursor={currentOnboarding.matches('done') ? 'default' : 'pointer'}
         onClick={() => {
-          if (shouldActivateInvite) {
-            router.push('/profile')
-            document
-              .querySelectorAll('#__next section')[1]
-              .querySelector('div')
-              .scroll({
-                left: 0,
-                top: 9999,
-                behavior: 'smooth',
-              })
-          }
+          if (shouldActivateInvite) router.push('/profile')
+
           if (shouldCreateFlips) router.push('/flips/list')
           if (shouldActivateMining) router.push('/profile')
           showCurrentTask()
