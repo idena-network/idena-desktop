@@ -246,8 +246,12 @@ export default function ProfilePage() {
           top: 9999,
         })
       onOpenActivateInvitePopover()
-    }
-  }, [isShowingActivateInvitePopover, onOpenActivateInvitePopover])
+    } else onCloseActivateInvitePopover()
+  }, [
+    isShowingActivateInvitePopover,
+    onCloseActivateInvitePopover,
+    onOpenActivateInvitePopover,
+  ])
 
   return (
     <>

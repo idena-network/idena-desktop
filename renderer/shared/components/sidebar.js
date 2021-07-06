@@ -343,7 +343,6 @@ function ActionPanel() {
         cursor={currentOnboarding.matches('done') ? 'default' : 'pointer'}
         onClick={() => {
           if (shouldActivateInvite) router.push('/profile')
-
           if (shouldCreateFlips) router.push('/flips/list')
           if (shouldActivateMining) router.push('/profile')
           showCurrentTask()

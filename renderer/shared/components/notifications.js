@@ -17,11 +17,7 @@ function Notifications() {
   return (
     <Snackbar>
       {notifications.map((notification, idx) => (
-        <Notification
-          key={`notification-${idx}`}
-          wrap="break-all"
-          {...notification}
-        />
+        <Notification key={`notification-${idx}`} {...notification} />
       ))}
     </Snackbar>
   )
@@ -39,7 +35,7 @@ export function Notification({
   iconColor = theme.colors.primary,
   actionColor = theme.colors.primary,
   icon,
-  wrap = 'break-word',
+  wrap = 'normal',
   delay = NOTIFICATION_DELAY,
 }) {
   const [hidden, setHidden] = useState(false)
@@ -79,7 +75,11 @@ export function Notification({
             />
           )}
           <Box style={{lineHeight: rem(20), ...wordWrap(wrap)}}>
-            <Box style={{fontWeight: theme.fontWeights.medium}}>{title}</Box>
+            <Box
+              style={{fontWeight: theme.fontWeights.medium, ...wordWrap(wrap)}}
+            >
+              {title}
+            </Box>
             {body && <Text color={color}>{body}</Text>}
           </Box>
           <Box
