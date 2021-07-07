@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React from 'react'
 import PropTypes from 'prop-types'
 import {useRouter} from 'next/router'
@@ -47,7 +48,6 @@ import {
 } from './onboarding'
 import {
   buildNextValidationCalendarLink,
-  eitherState,
   formatValidationDate,
 } from '../utils/utils'
 import {isHardFork} from '../utils/node'
@@ -55,32 +55,31 @@ import {Tooltip} from './components'
 
 function Sidebar() {
   return (
-    <section>
+    <ChakraFlex
+      as="section"
+      direction="column"
+      justify="space-between"
+      bg="brandGray.500"
+      color="white"
+      px={4}
+      py={2}
+      h="100vh"
+      w={200}
+      minW={200}
+      zIndex={2}
+      position="relative"
+      overflow="hidden"
+    >
       <Flex direction="column" align="flex-start">
         <NodeStatus />
         <Logo />
         <Nav />
         <ActionPanel />
       </Flex>
-      <div>
+      <ChakraBox>
         <Version />
-      </div>
-      <style jsx>{`
-        section {
-          background: ${theme.colors.primary2};
-          color: ${theme.colors.white};
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          height: 100vh;
-          overflow: hidden;
-          padding: ${rem(8)} ${rem(16)};
-          width: ${rem(200)};
-          position: relative;
-          z-index: 2;
-        }
-      `}</style>
-    </section>
+      </ChakraBox>
+    </ChakraFlex>
   )
 }
 
@@ -307,8 +306,16 @@ function ActionPanel() {
     activeOnboardingStep(OnboardingStep.Validate)
   )
 
+  const shouldCreateFlips = currentOnboarding.matches(
+    activeOnboardingStep(OnboardingStep.CreateFlips)
+  )
+
   const isShowingValidateStep = currentOnboarding.matches(
     activeShowingOnboardingStep(OnboardingStep.Validate)
+  )
+
+  const shouldActivateMining = currentOnboarding.matches(
+    activeOnboardingStep(OnboardingStep.ActivateMining)
   )
 
   if (syncing || !epoch) {
@@ -316,6 +323,7 @@ function ActionPanel() {
   }
 
   const {currentPeriod, nextValidation} = epoch
+
   return (
     <Box
       bg={theme.colors.white01}
@@ -332,31 +340,27 @@ function ActionPanel() {
 
       <ChakraBox
         roundedTop="md"
-        cursor={
-          eitherState(
-            currentOnboarding,
-            onboardingStep(OnboardingStep.ActivateInvite),
-            onboardingStep(OnboardingStep.Validate)
-          )
-            ? 'pointer'
-            : 'default'
-        }
+        cursor={currentOnboarding.matches('done') ? 'default' : 'pointer'}
         onClick={() => {
-          if (shouldActivateInvite) {
-            if (!router.pathname.endsWith('/profile')) router.push('/profile')
-            document
-              .querySelectorAll('#__next section')[1]
-              .querySelector('div')
-              .scroll({
-                left: 0,
-                top: 9999,
-                behavior: 'smooth',
-              })
-          }
+          if (shouldActivateInvite) router.push('/profile')
+          if (shouldCreateFlips) router.push('/flips/list')
+          if (shouldActivateMining) router.push('/profile')
           showCurrentTask()
         }}
       >
-        <PulseFrame isActive={shouldActivateInvite || shouldValidate}>
+        <PulseFrame
+          isActive={
+            currentPeriod === EpochPeriod.None &&
+            (shouldActivateInvite ||
+              (shouldValidate &&
+                [IdentityStatus.Candidate, IdentityStatus.Newbie].includes(
+                  identity.state
+                )) ||
+              shouldActivateMining ||
+              (shouldCreateFlips &&
+                [IdentityStatus.Newbie].includes(identity.state)))
+          }
+        >
           <Block title={t('My current task')}>
             <CurrentTask
               epoch={epoch.epoch}
@@ -460,7 +464,7 @@ function ActionPanel() {
                 </OnboardingPopoverContentIconRow>
                 <OnboardingPopoverContentIconRow icon="sync">
                   {t(
-                    `Keep your node synchronized in 60-30 minutes before the validation starts.`
+                    `Keep your node synchronized in 45-60 minutes before the validation starts.`
                   )}
                 </OnboardingPopoverContentIconRow>
                 <OnboardingPopoverContentIconRow icon="timer">
@@ -526,11 +530,6 @@ function PulseFrame({isActive, children, ...props}) {
   )
 }
 
-PulseFrame.propTypes = {
-  isActive: PropTypes.bool,
-  children: PropTypes.node,
-}
-
 function Block({title, children}) {
   return (
     <Box
@@ -558,13 +557,10 @@ function Block({title, children}) {
   )
 }
 
-Block.propTypes = {
-  title: PropTypes.string,
-  children: PropTypes.node,
-}
-
 function CurrentTask({epoch, period, identity}) {
   const {t} = useTranslation()
+
+  const [onboardingState] = useOnboarding()
 
   if (!period || !identity.state) return null
 
@@ -576,6 +572,8 @@ function CurrentTask({epoch, period, identity}) {
         availableFlips: availableFlipsNumber,
         state: status,
         canActivateInvite,
+        age,
+        online,
       } = identity
 
       switch (true) {
@@ -585,6 +583,14 @@ function CurrentTask({epoch, period, identity}) {
               {t('Activate invite')}
             </Link>
           )
+
+        case age === 1 &&
+          !online &&
+          onboardingState.matches(
+            onboardingStep(OnboardingStep.ActivateMining)
+          ): {
+          return t('Activate mining status')
+        }
 
         case [
           IdentityStatus.Human,

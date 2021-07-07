@@ -1,19 +1,26 @@
 import {useMachine} from '@xstate/react'
 import React from 'react'
 import {Machine} from 'xstate'
-import {IdentityStatus, OnboardingStep} from '../types'
-import {loadOnboardingState, persistOnboardingState} from '../utils/onboarding'
+import {OnboardingStep} from '../types'
+import {
+  onboardingStep,
+  shouldTransitionToCreateFlipsStep,
+} from '../utils/onboarding'
 import {useChainState} from './chain-context'
 import {useEpochState} from './epoch-context'
-import {useIdentityState} from './identity-context'
+import {canValidate, useIdentityState} from './identity-context'
 
 const OnboardingStateContext = React.createContext()
 const OnboardingDispatchContext = React.createContext()
 
 export function OnboardingProvider(props) {
   const {syncing, offline} = useChainState()
+
   const {epoch} = useEpochState() ?? {epoch: -1}
-  const {state} = useIdentityState()
+
+  const identity = useIdentityState()
+
+  const onboardingStepSelector = step => `#onboarding.${onboardingStep(step)}`
 
   // eslint-disable-next-line no-shadow
   const createStep = ({current, next}) => ({
@@ -44,7 +51,7 @@ export function OnboardingProvider(props) {
             },
             done: {
               after: {
-                300: `#onboarding.onboarding.${next}`,
+                300: next,
               },
             },
           },
@@ -72,27 +79,44 @@ export function OnboardingProvider(props) {
       states: {
         idle: {
           on: {
-            START: 'onboarding',
+            START: [
+              {
+                target: onboardingStepSelector(OnboardingStep.ActivateInvite),
+                cond: (_, {identity: {canActivateInvite}}) => canActivateInvite,
+              },
+              {
+                target: onboardingStepSelector(OnboardingStep.Validate),
+                // eslint-disable-next-line no-shadow
+                cond: (_, {identity}) => canValidate(identity),
+              },
+              {
+                target: onboardingStepSelector(OnboardingStep.ActivateMining),
+                cond: (_, {identity: {age, online}}) => age === 1 && !online,
+              },
+              {
+                target: onboardingStepSelector(OnboardingStep.CreateFlips),
+                // eslint-disable-next-line no-shadow
+                cond: (_, {identity}) =>
+                  shouldTransitionToCreateFlipsStep(identity),
+              },
+            ],
           },
         },
         onboarding: {
-          initial: OnboardingStep.ActivateInvite,
+          initial: 'unknown',
           states: {
+            unknown: {},
             ...createStep({
               current: OnboardingStep.ActivateInvite,
-              next: OnboardingStep.Validate,
+              next: onboardingStepSelector(OnboardingStep.Validate),
             }),
             ...createStep({
               current: OnboardingStep.Validate,
-              next: OnboardingStep.FlipLottery,
+              next: onboardingStepSelector(OnboardingStep.ActivateMining),
             }),
             ...createStep({
-              current: OnboardingStep.FlipLottery,
-              next: OnboardingStep.WaitingValidationResults,
-            }),
-            ...createStep({
-              current: OnboardingStep.WaitingValidationResults,
-              next: OnboardingStep.CreateFlips,
+              current: OnboardingStep.ActivateMining,
+              next: onboardingStepSelector(OnboardingStep.CreateFlips),
             }),
             ...createStep({
               current: OnboardingStep.CreateFlips,
@@ -107,7 +131,6 @@ export function OnboardingProvider(props) {
       },
     }),
     {
-      state: loadOnboardingState(),
       logger: global.isDev
         ? console.log
         : (...args) => global.logger.debug(...args),
@@ -115,18 +138,10 @@ export function OnboardingProvider(props) {
   )
 
   React.useEffect(() => {
-    if (
-      epoch > 0 &&
-      !syncing &&
-      !offline &&
-      [IdentityStatus.Undefined, IdentityStatus.Invite].includes(state)
-    )
-      send('START')
-  }, [epoch, offline, send, state, syncing])
-
-  React.useEffect(() => {
-    if (current.changed) persistOnboardingState(current)
-  }, [current])
+    if (epoch >= 0 && identity && !syncing && !offline) {
+      send('START', {identity})
+    }
+  }, [epoch, identity, offline, send, syncing])
 
   return (
     <OnboardingStateContext.Provider value={current}>
@@ -140,6 +155,9 @@ export function OnboardingProvider(props) {
           },
           done: React.useCallback(() => {
             send('DONE')
+          }, [send]),
+          finish: React.useCallback(() => {
+            send('FINISH')
           }, [send]),
         }}
         {...props}

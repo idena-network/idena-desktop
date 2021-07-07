@@ -413,7 +413,7 @@ function ValidationSession({
         }
         title={t('The flip is to be reported')}
         subtitle={t(
-          `You'll get rewards for reported flips if these flip are also reported by other participants (more than 50% of qualification committee).`
+          `You'll get rewards for reported flips if they are are also reported by more than 50% of qualification committee.`
         )}
         onClose={() => {
           if (state.matches('longSession.solve.answer.finishFlips'))
@@ -445,11 +445,9 @@ function ValidationSession({
 
       <ReviewShortSessionDialog
         flips={flips.filter(solvableFlips)}
-        isOpen={[
-          'shortSession.solve.answer.submitShortSession.confirm',
-          'shortSession.solve.answer.submitShortSession.submitting',
-        ].some(state.matches)}
-        isSubmitting={isSubmitting(state)}
+        isOpen={state.matches(
+          'shortSession.solve.answer.submitShortSession.confirm'
+        )}
         onSubmit={() => send('SUBMIT')}
         onClose={() => {
           send('CANCEL')

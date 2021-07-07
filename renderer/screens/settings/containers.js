@@ -129,7 +129,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
           <Stack spacing={5}>
             <Text color="muted" fontSize="mdx">
               {t(
-                'Scan QR by your mobile phone or copy code below for export privatekey.'
+                'Scan QR by your mobile phone or copy code below for export private key.'
               )}
             </Text>
             <FillCenter>
@@ -157,7 +157,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
         )}
       </DialogBody>
       <DialogFooter>
-        <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
+        <SecondaryButton onClick={onClose}>{t('Close')}</SecondaryButton>
         {is('password') && (
           <PrimaryButton
             onClick={() => {

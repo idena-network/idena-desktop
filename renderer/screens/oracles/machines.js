@@ -27,9 +27,9 @@ import {
   hasLinklessOptions,
 } from './utils'
 import {VotingStatus} from '../../shared/types'
-import {callRpc} from '../../shared/utils/utils'
+import {callRpc, HASH_IN_MEMPOOL} from '../../shared/utils/utils'
 import {epochDb, requestDb} from '../../shared/utils/db'
-import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
+
 import {ContractRpcMode, VotingListFilter} from './types'
 
 export const votingListMachine = Machine(

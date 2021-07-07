@@ -357,7 +357,7 @@ export const createValidationMachine = ({
                       after: {
                         SHORT_SESSION_AUTO_SUBMIT: [
                           {
-                            target: 'submitShortSession',
+                            target: 'submitShortSession.submitting',
                             cond: ({shortFlips}) =>
                               hasEnoughAnswers(shortFlips),
                           },
@@ -368,9 +368,31 @@ export const createValidationMachine = ({
                       },
                     },
                     submitShortSession: {
-                      initial: 'confirm',
-                      entry: log(),
+                      initial: 'checkAnswers',
                       states: {
+                        checkAnswers: {
+                          on: {
+                            '': [
+                              {
+                                target: 'confirm',
+                                cond: ({shortFlips}) => {
+                                  const solvableFlips = filterRegularFlips(
+                                    shortFlips
+                                  )
+                                  return (
+                                    solvableFlips.length === 0 ||
+                                    solvableFlips.some(
+                                      ({option = 0, decoded, ready, loading}) =>
+                                        (decoded && option === 0) ||
+                                        (ready && loading)
+                                    )
+                                  )
+                                },
+                              },
+                              {target: 'submitting'},
+                            ],
+                          },
+                        },
                         confirm: {
                           on: {
                             SUBMIT: 'submitting',

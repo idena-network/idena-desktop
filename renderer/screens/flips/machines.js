@@ -11,11 +11,10 @@ import {
   updateFlipTypeByHash,
   handleOutdatedFlips,
 } from './utils'
-import {callRpc, loadKeyword} from '../../shared/utils/utils'
+import {callRpc, HASH_IN_MEMPOOL, loadKeyword} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
 import {FlipType, FlipFilter} from '../../shared/types'
 import {deleteFlip} from '../../shared/api'
-import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 import {persistState} from '../../shared/utils/persist'
 
 export const flipsMachine = Machine(
@@ -502,16 +501,15 @@ export const flipMachine = Machine(
         let timeoutId
 
         const fetchStatus = async () => {
-          const {result} = await callRpc(
-            'bcn_transaction',
-            txHash
-          ).then(tx => ({hash: txHash, ...tx}))
-          if (result) {
-            if (result.blockHash !== HASH_IN_MEMPOOL) cb('MINED')
+          try {
+            const {blockHash} = await callRpc('bcn_transaction', txHash)
+            if (blockHash !== HASH_IN_MEMPOOL) cb('MINED')
             else {
               timeoutId = setTimeout(fetchStatus, 10 * 1000)
             }
-          } else cb('TX_NULL')
+          } catch {
+            cb('TX_NULL')
+          }
         }
 
         fetchStatus()

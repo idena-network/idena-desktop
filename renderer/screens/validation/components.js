@@ -581,7 +581,7 @@ export const QualificationButton = React.forwardRef(
   ({isSelected, children, ...props}, ref) => {
     const ButtonVariant = isSelected ? PrimaryButton : SecondaryButton
     return (
-      <ButtonVariant ref={ref} flex={1} maxW={40} {...props}>
+      <ButtonVariant ref={ref} flex={1} maxW={40} overflow="hidden" {...props}>
         <Stack isInline spacing={2} align="center" justify="center">
           {isSelected && <Icon name="tick" size={5} />}
           <Text>{children}</Text>
@@ -796,10 +796,13 @@ export function ValidationFailedDialog(props) {
     >
       <ValidationDialogBody>
         <Text>
-          {t(`Sorry your answers won’t be submitted since the validation session is
-          over.`)}
+          {t(
+            'You haven’t submitted your answers in time. This validation session is over.'
+          )}
         </Text>
-        <Text>{t('Come back soon!')}</Text>
+        <Text>
+          {t('Come back again to participate in the next validation session.')}
+        </Text>
       </ValidationDialogBody>
     </ValidationDialog>
   )
@@ -946,7 +949,7 @@ export function AfterLongSessionToast() {
         pinned
         type={NotificationType.Info}
         title={t(
-          'Please wait. The network is reaching consensus about validated identities'
+          'Please wait. The network is reaching consensus on validated identities'
         )}
       />
     </Snackbar>
@@ -1288,7 +1291,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
 
 function BadFlipImage(props) {
   return (
-    <AspectRatioBox ratio={4 / 3} h={100}>
+    <AspectRatioBox ratio={4 / 3} w={132}>
       <Image {...props} />
     </AspectRatioBox>
   )
@@ -1381,7 +1384,6 @@ function BadFlipPartFrame({flipCase, ...props}) {
 
 export function ReviewShortSessionDialog({
   flips,
-  isSubmitting,
   onSubmit,
   onCancel,
   ...props
@@ -1424,13 +1426,7 @@ export function ReviewShortSessionDialog({
       </ValidationDialogBody>
       <DialogFooter {...props}>
         <SecondaryButton onClick={onCancel}>{t('Cancel')}</SecondaryButton>
-        <PrimaryButton
-          isLoading={isSubmitting}
-          loadingText={t('Submitting answers...')}
-          onClick={onSubmit}
-        >
-          {t('Submit answers')}
-        </PrimaryButton>
+        <PrimaryButton onClick={onSubmit}>{t('Submit answers')}</PrimaryButton>
       </DialogFooter>
     </Dialog>
   )

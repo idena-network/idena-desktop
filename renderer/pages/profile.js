@@ -28,6 +28,7 @@ import {
   UserStat,
   UserStatLabel,
   ActivateMiningForm,
+  InviteScoreAlert,
 } from '../screens/profile/components'
 import {
   PrimaryButton,
@@ -51,7 +52,7 @@ import {
   DialogFooter,
   DialogHeader,
   ExternalLink,
-  SuccessAlert,
+  FloatDebug,
   Toast,
 } from '../shared/components/components'
 import KillForm, {
@@ -75,13 +76,12 @@ import {useOnboarding} from '../shared/providers/onboarding-context'
 import {
   doneOnboardingStep,
   activeShowingOnboardingStep,
-  onboardingStep,
+  shouldCompleteOnboardingStep,
+  shouldTransitionToCreateFlipsStep,
 } from '../shared/utils/onboarding'
-import {
-  calculateInvitationRewardRatio,
-  createProfileDb,
-} from '../screens/profile/utils'
+import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
+import {FillCenter} from '../screens/oracles/components'
 
 export default function ProfilePage() {
   const {
@@ -121,6 +121,8 @@ export default function ProfilePage() {
     delegatee,
     delegationEpoch,
     isValidated,
+    flips,
+    requiredFlips,
   } = useIdentityState()
 
   const epoch = useEpochState()
@@ -162,24 +164,59 @@ export default function ProfilePage() {
     }
   }, [epoch, isValidated, onOpenNextValidationDialog, profileDb])
 
-  const [currentOnboarding, {done, dismiss, next}] = useOnboarding()
+  const [
+    currentOnboarding,
+    {done: doneStep, dismiss: dismissStep, finish: finishOnboarding},
+  ] = useOnboarding()
 
   React.useEffect(() => {
     if (
       status === IdentityStatus.Candidate &&
-      eitherState(
+      shouldCompleteOnboardingStep(
         currentOnboarding,
-        onboardingStep(OnboardingStep.ActivateInvite)
-      ) &&
-      !eitherState(
-        currentOnboarding,
-        'idle',
-        doneOnboardingStep(OnboardingStep.ActivateInvite)
+        OnboardingStep.ActivateInvite
       )
     ) {
-      done()
+      doneStep()
     }
-  }, [currentOnboarding, done, next, status])
+  }, [currentOnboarding, doneStep, status])
+
+  React.useEffect(() => {
+    if (
+      isValidated &&
+      shouldCompleteOnboardingStep(currentOnboarding, OnboardingStep.Validate)
+    ) {
+      doneStep()
+    }
+  }, [currentOnboarding, doneStep, isValidated])
+
+  React.useEffect(() => {
+    if (
+      online &&
+      shouldCompleteOnboardingStep(
+        currentOnboarding,
+        OnboardingStep.ActivateMining
+      )
+    ) {
+      if (
+        shouldTransitionToCreateFlipsStep({isValidated, requiredFlips, flips})
+      )
+        doneStep()
+      else finishOnboarding()
+    }
+  }, [
+    currentOnboarding,
+    doneStep,
+    finishOnboarding,
+    flips,
+    isValidated,
+    online,
+    requiredFlips,
+  ])
+
+  const isShowingActivateMiningPopover = currentOnboarding.matches(
+    activeShowingOnboardingStep(OnboardingStep.ActivateMining)
+  )
 
   const isShowingActivateInvitePopover = currentOnboarding.matches(
     activeShowingOnboardingStep(OnboardingStep.ActivateInvite)
@@ -193,6 +230,29 @@ export default function ProfilePage() {
     onClose: onCloseExportPk,
   } = useDisclosure()
 
+  const {
+    isOpen: isOpenActivateInvitePopover,
+    onOpen: onOpenActivateInvitePopover,
+    onClose: onCloseActivateInvitePopover,
+  } = useDisclosure()
+
+  React.useLayoutEffect(() => {
+    if (isShowingActivateInvitePopover) {
+      document
+        .querySelectorAll('#__next section')[1]
+        .querySelector('div')
+        .scroll({
+          left: 0,
+          top: 9999,
+        })
+      onOpenActivateInvitePopover()
+    } else onCloseActivateInvitePopover()
+  }, [
+    isShowingActivateInvitePopover,
+    onCloseActivateInvitePopover,
+    onOpenActivateInvitePopover,
+  ])
+
   return (
     <>
       <InviteProvider>
@@ -202,18 +262,11 @@ export default function ProfilePage() {
               <Stack spacing={6}>
                 <PageTitle mb={6}>{t('Profile')}</PageTitle>
                 {canInvite && (
-                  <SuccessAlert minH={36} w="full">
-                    {t(
-                      'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
-                      {
-                        invitationRewardRatio: toPercent(
-                          calculateInvitationRewardRatio(epoch ?? {}, {
-                            highestBlock,
-                          })
-                        ),
-                      }
-                    )}
-                  </SuccessAlert>
+                  <InviteScoreAlert
+                    epoch={epoch}
+                    identity={{canInvite}}
+                    sync={{highestBlock}}
+                  />
                 )}
               </Stack>
               <Stack isInline spacing={10}>
@@ -289,7 +342,9 @@ export default function ProfilePage() {
                       />
                     )}
 
-                    {age > 0 && <SimpleUserStat label={t('Age')} value={age} />}
+                    {age >= 0 && (
+                      <SimpleUserStat label={t('Age')} value={age} />
+                    )}
 
                     {epoch && (
                       <SimpleUserStat
@@ -300,7 +355,9 @@ export default function ProfilePage() {
 
                     {totalQualifiedFlips > 0 && (
                       <AnnotatedUserStat
-                        annotation={t('Total score for all validations')}
+                        annotation={t(
+                          'Total score for the last 10 validations'
+                        )}
                         label={t('Total score')}
                       >
                         <UserStatValue>
@@ -319,7 +376,7 @@ export default function ProfilePage() {
                   </UserStatList>
 
                   <OnboardingPopover
-                    isOpen={isShowingActivateInvitePopover}
+                    isOpen={isOpenActivateInvitePopover}
                     placement="top-start"
                   >
                     <PopoverTrigger>
@@ -328,7 +385,10 @@ export default function ProfilePage() {
                     <OnboardingPopoverContent
                       title={t('Enter invitation code')}
                       zIndex={2}
-                      onDismiss={dismiss}
+                      onDismiss={() => {
+                        dismissStep()
+                        onCloseActivateInvitePopover()
+                      }}
                     >
                       <Stack spacing={5}>
                         <Stack>
@@ -341,50 +401,111 @@ export default function ProfilePage() {
                             {t(`Join the official Idena public Telegram group and follow instructions in the
                 pinned message.`)}
                           </Text>
+                          <OnboardingPopoverContentIconRow icon="telegram">
+                            <Box>
+                              <PrimaryButton
+                                variant="unstyled"
+                                p={0}
+                                onClick={() => {
+                                  global.openExternal(
+                                    'https://t.me/IdenaNetworkPublic'
+                                  )
+                                }}
+                              >
+                                https://t.me/IdenaNetworkPublic
+                              </PrimaryButton>
+                              <Text
+                                fontSize="sm"
+                                color="rgba(255, 255, 255, 0.56)"
+                              >
+                                {t('Official group')}
+                              </Text>
+                            </Box>
+                          </OnboardingPopoverContentIconRow>
                         </Stack>
-                        <OnboardingPopoverContentIconRow icon="telegram">
-                          <Box>
-                            <PrimaryButton
-                              variant="unstyled"
-                              p={0}
-                              onClick={() => {
-                                global.openExternal(
-                                  'https://t.me/IdenaNetworkPublic'
-                                )
-                              }}
-                            >
-                              https://t.me/IdenaNetworkPublic
-                            </PrimaryButton>
-                            <Text
-                              fontSize="sm"
-                              color="rgba(255, 255, 255, 0.56)"
-                            >
-                              {t('Official group')}
-                            </Text>
-                          </Box>
-                        </OnboardingPopoverContentIconRow>
                       </Stack>
                     </OnboardingPopoverContent>
                   </OnboardingPopover>
-
-                  <TaskConfetti
-                    active={eitherState(
-                      currentOnboarding,
-                      `${doneOnboardingStep(
-                        OnboardingStep.ActivateInvite
-                      )}.salut`
-                    )}
-                  />
+                  <FillCenter
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    zIndex={9999}
+                  >
+                    <TaskConfetti
+                      active={
+                        eitherState(
+                          currentOnboarding,
+                          `${doneOnboardingStep(
+                            OnboardingStep.ActivateInvite
+                          )}.salut`
+                        ) ||
+                        (eitherState(
+                          currentOnboarding,
+                          `${doneOnboardingStep(OnboardingStep.Validate)}.salut`
+                        ) &&
+                          status === IdentityStatus.Newbie)
+                      }
+                    />
+                  </FillCenter>
                 </Stack>
                 <Stack spacing={10} w={rem(200)}>
                   <Box minH={62} mt={4}>
-                    {address && canMine && (
-                      <ActivateMiningForm
-                        isOnline={online}
-                        delegatee={delegatee}
-                        delegationEpoch={delegationEpoch}
-                      />
-                    )}
+                    <OnboardingPopover isOpen={isShowingActivateMiningPopover}>
+                      <PopoverTrigger>
+                        <Box
+                          bg="white"
+                          position={
+                            isShowingActivateMiningPopover
+                              ? 'relative'
+                              : 'initial'
+                          }
+                          borderRadius="md"
+                          p={2}
+                          m={-2}
+                          zIndex={2}
+                        >
+                          {address && canMine && (
+                            <ActivateMiningForm
+                              isOnline={online}
+                              delegatee={delegatee}
+                              delegationEpoch={delegationEpoch}
+                              onShow={() => {
+                                if (
+                                  shouldTransitionToCreateFlipsStep({
+                                    isValidated,
+                                    requiredFlips,
+                                    flips,
+                                  })
+                                )
+                                  doneStep()
+                                else finishOnboarding()
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </PopoverTrigger>
+                      <OnboardingPopoverContent
+                        title={t('Activate mining status')}
+                        onDismiss={() => {
+                          if (
+                            shouldTransitionToCreateFlipsStep({
+                              isValidated,
+                              requiredFlips,
+                              flips,
+                            })
+                          )
+                            doneStep()
+                          else finishOnboarding()
+                        }}
+                      >
+                        <Text>
+                          {t(
+                            `To become a validator of Idena blockchain you can activate your mining status. Keep your node online to mine iDNA coins.`
+                          )}
+                        </Text>
+                      </OnboardingPopoverContent>
+                    </OnboardingPopover>
                   </Box>
 
                   <Stack spacing={1} align="flex-start">
@@ -509,7 +630,6 @@ export default function ProfilePage() {
               )}
             </Text>
           </Stack>
-          <TaskConfetti active={isValidated} />
         </DialogBody>
         <DialogFooter>
           <SecondaryButton
@@ -540,6 +660,8 @@ export default function ProfilePage() {
         isOpen={isOpenExportPk}
         onClose={onCloseExportPk}
       />
+
+      {global.isDev && <FloatDebug>{currentOnboarding.value}</FloatDebug>}
     </>
   )
 }

@@ -92,6 +92,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
     <Dialog
       size="38rem"
       initialFocusRef={searchInputRef}
+      closeOnOverlayClick={false}
       onClose={onClose}
       {...props}
     >

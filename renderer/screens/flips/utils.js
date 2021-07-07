@@ -229,7 +229,7 @@ export async function publishFlip({
 
 export function formatKeywords(keywords) {
   return keywords
-    .map(({name: [f, ...rest]}) => f.toUpperCase() + rest.join(''))
+    .map(({name: [f, ...rest]}) => f?.toUpperCase() + rest.join(''))
     .join(' / ')
 }
 

@@ -2,11 +2,10 @@
 import React from 'react'
 import * as api from '../api'
 import {useInterval} from '../hooks/use-interval'
-import {HASH_IN_MEMPOOL} from '../hooks/use-tx'
+import {HASH_IN_MEMPOOL, callRpc} from '../utils/utils'
 import {useNotificationDispatch, NotificationType} from './notification-context'
 import {useIdentityState} from './identity-context'
 import {IdentityStatus} from '../types'
-import {callRpc} from '../utils/utils'
 
 const db = global.invitesDb || {}
 
@@ -28,13 +27,13 @@ function InviteProvider({children}) {
     let ignore = false
 
     async function fetchData(savedInvites) {
-      const txs = await Promise.all(
-        savedInvites
-          .filter(({activated, deletedAt}) => !activated && !deletedAt)
-          .map(({hash}) =>
-            callRpc('bcn_transaction', hash).then(tx => ({hash, ...tx}))
-          )
-      )
+      const txs = (
+        await Promise.all(
+          savedInvites
+            .filter(({activated, deletedAt}) => !activated && !deletedAt)
+            .map(({hash}) => callRpc('bcn_transaction', hash).catch(() => null))
+        )
+      ).filter(Boolean)
 
       const invitedIdentities = await Promise.all(
         savedInvites
@@ -43,11 +42,9 @@ function InviteProvider({children}) {
           .map(api.fetchIdentity)
       )
 
-      const inviteesIdentities =
-        invitees &&
-        (await Promise.all(
-          invitees.map(({Address}) => Address).map(api.fetchIdentity)
-        ))
+      const inviteesIdentities = await Promise.all(
+        (invitees ?? []).map(({Address}) => Address).map(api.fetchIdentity)
+      )
 
       const terminateTxs = await Promise.all(
         savedInvites
@@ -65,14 +62,12 @@ function InviteProvider({children}) {
         const tx = txs.find(({hash}) => hash === invite.hash)
 
         // find invitee to kill
-        const invitee =
-          invitees && invitees.find(({TxHash}) => TxHash === invite.hash)
+        const invitee = invitees?.find(({TxHash}) => TxHash === invite.hash)
 
         // find invitee identity
-        const inviteeIdentity =
-          inviteesIdentities &&
-          invitee &&
-          inviteesIdentities.find(({address: addr}) => addr === invitee.Address)
+        const inviteeIdentity = inviteesIdentities?.find(
+          ({address: addr}) => addr === invitee?.Address
+        )
 
         // find all identities/invites
         const invitedIdentity =
@@ -120,9 +115,8 @@ function InviteProvider({children}) {
         }
       })
 
-      const allInvites = nextInvites
       if (!ignore) {
-        setInvites(allInvites)
+        setInvites(nextInvites)
       }
     }
 
@@ -136,20 +130,14 @@ function InviteProvider({children}) {
     return () => {
       ignore = true
     }
-  }, [activationTx, address, invitees])
+  }, [invitees])
 
   useInterval(
     async () => {
-      const {result, error} = await callRpc(
-        'bcn_transaction',
-        activationTx
-      ).then(tx => ({hash: activationTx, ...tx}))
-      if (result) {
-        const {blockHash} = result
-        if (blockHash && blockHash !== HASH_IN_MEMPOOL) {
-          resetActivation()
-        }
-      } else {
+      try {
+        const {blockHash} = await callRpc('bcn_transaction', activationTx)
+        if (blockHash !== HASH_IN_MEMPOOL) resetActivation()
+      } catch (error) {
         resetActivation()
         addNotification({
           title: error

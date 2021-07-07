@@ -36,6 +36,7 @@ import {
   DrawerHeader,
   DrawerBody,
   Toast,
+  SuccessAlert,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
@@ -60,8 +61,9 @@ import {
 import {createTimerMachine} from '../../shared/machines'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 import {activateMiningMachine} from './machines'
-import {dummyAddress, eitherState} from '../../shared/utils/utils'
+import {dummyAddress, eitherState, toPercent} from '../../shared/utils/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
+import {calculateInvitationRewardRatio} from './utils'
 
 export function UserInlineCard({address, status, ...props}) {
   return (
@@ -299,7 +301,7 @@ export function ValidationResultToast({epoch}) {
   const timerMachine = React.useMemo(
     () =>
       createTimerMachine(
-        dayjs(loadPersistentStateValue('validationResults', epoch).epochStart)
+        dayjs(loadPersistentStateValue('validationResults', epoch)?.epochStart)
           .add(1, 'minute')
           .diff(dayjs(), 'second')
       ),
@@ -330,8 +332,6 @@ export function ValidationResultToast({epoch}) {
   ].includes(identityStatus)
 
   const {t} = useTranslation()
-
-  const {colors} = useTheme()
 
   const url = `https://scan.idena.io/identity/${address}/epoch/${epoch}/${
     isValidationSucceeded ? 'rewards' : 'validation'
@@ -378,7 +378,12 @@ export function ValidationResultToast({epoch}) {
   ) : null
 }
 
-export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
+export function ActivateMiningForm({
+  isOnline,
+  delegatee,
+  delegationEpoch,
+  onShow,
+}) {
   const toast = useToast()
 
   const epoch = useEpochState()
@@ -414,6 +419,7 @@ export function ActivateMiningForm({isOnline, delegatee, delegationEpoch}) {
         isDelegator={isDelegator}
         onShow={() => {
           send('SHOW')
+          if (onShow) onShow()
         }}
       />
       {isOnline || isDelegator ? (
@@ -735,4 +741,41 @@ export function DeactivateMiningDrawer({
       </DrawerFooter>
     </Drawer>
   )
+}
+
+export function InviteScoreAlert({
+  sync: {highestBlock},
+  epoch,
+  identity: {canInvite},
+  ...props
+}) {
+  const {t} = useTranslation()
+
+  const [showInviteScore, setShowInviteScore] = React.useState()
+
+  React.useEffect(() => {
+    const hasPendingInvites =
+      (global.invitesDb ?? {})
+        .getInvites()
+        .filter(
+          ({activated, terminatedHash, deletedAt}) =>
+            !activated && !terminatedHash && !deletedAt
+        ).length > 0
+    setShowInviteScore(hasPendingInvites || canInvite)
+  }, [canInvite])
+
+  return showInviteScore ? (
+    <SuccessAlert minH={36} w="full" {...props}>
+      {t(
+        'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
+        {
+          invitationRewardRatio: toPercent(
+            calculateInvitationRewardRatio(epoch ?? {}, {
+              highestBlock,
+            })
+          ),
+        }
+      )}
+    </SuccessAlert>
+  ) : null
 }
