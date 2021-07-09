@@ -65,7 +65,7 @@ export function TimingProvider(props) {
         global.logger.error('An error occured while fetching time API')
       }
     },
-    1000 * 1 * 1,
+    1000 * 60 * 1,
     true
   )
 
