@@ -343,6 +343,10 @@ export function DnaSendDialog({
               .then(hash => {
                 if (isValidUrl(callbackUrl)) {
                   global.logger.info('Received dna://send cb url', callbackUrl)
+                  global.logger.info(
+                    'Append hash to cb url',
+                    appendTxHash(callbackUrl, hash).href
+                  )
                   global.openExternal(appendTxHash(callbackUrl, hash).href)
                 }
                 onDepositSuccess(hash)
