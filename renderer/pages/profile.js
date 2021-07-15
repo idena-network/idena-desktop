@@ -78,6 +78,7 @@ import {
   activeShowingOnboardingStep,
   shouldCompleteOnboardingStep,
   shouldTransitionToCreateFlipsStep,
+  onboardingStep,
 } from '../shared/utils/onboarding'
 import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
@@ -166,7 +167,12 @@ export default function ProfilePage() {
 
   const [
     currentOnboarding,
-    {done: doneStep, dismiss: dismissStep, finish: finishOnboarding},
+    {
+      done: doneStep,
+      dismiss: dismissStep,
+      finish: finishOnboarding,
+      rollback: rollbackStep,
+    },
   ] = useOnboarding()
 
   React.useEffect(() => {
@@ -189,6 +195,16 @@ export default function ProfilePage() {
       doneStep()
     }
   }, [currentOnboarding, doneStep, isValidated])
+
+  React.useEffect(() => {
+    if (
+      !isValidated &&
+      age > 0 &&
+      eitherState(currentOnboarding, onboardingStep(OnboardingStep.Validate))
+    ) {
+      rollbackStep()
+    }
+  }, [age, currentOnboarding, isValidated, rollbackStep])
 
   React.useEffect(() => {
     if (
@@ -236,7 +252,7 @@ export default function ProfilePage() {
     onClose: onCloseActivateInvitePopover,
   } = useDisclosure()
 
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     if (isShowingActivateInvitePopover) {
       document
         .querySelectorAll('#__next section')[1]
@@ -507,7 +523,6 @@ export default function ProfilePage() {
                       </OnboardingPopoverContent>
                     </OnboardingPopover>
                   </Box>
-
                   <Stack spacing={1} align="flex-start">
                     <IconLink
                       href="/oracles/new"

@@ -170,7 +170,6 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
     <Box
       ref={ref}
       as="form"
-      {...props}
       onSubmit={async e => {
         e.preventDefault()
         try {
@@ -181,6 +180,7 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
           })
         }
       }}
+      {...props}
     >
       <Stack spacing={6}>
         <FormControl>

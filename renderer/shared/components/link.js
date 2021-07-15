@@ -62,10 +62,10 @@ export const IconLink = React.forwardRef(
     <NextLink ref={ref} href={href} passHref>
       <ChakraLink
         href={href}
-        display="inline-block"
         color="brandBlue.500"
         rounded="md"
         fontWeight={500}
+        display="inline-block"
         h={8}
         px={2}
         py="3/2"
