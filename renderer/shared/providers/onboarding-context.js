@@ -2,7 +2,9 @@ import {useMachine} from '@xstate/react'
 import React from 'react'
 import {Machine} from 'xstate'
 import {OnboardingStep} from '../types'
+import {requestDb} from '../utils/db'
 import {
+  doneOnboardingStep,
   onboardingStep,
   shouldTransitionToCreateFlipsStep,
 } from '../utils/onboarding'
@@ -42,11 +44,34 @@ export function OnboardingProvider(props) {
           },
         },
         done: {
-          initial: 'salut',
+          initial: 'unknown',
           states: {
+            unknown: {
+              invoke: {
+                src: () =>
+                  global
+                    .sub(requestDb(), 'onboarding')
+                    .get(doneOnboardingStep(current)),
+                onDone: [
+                  {
+                    target: 'done',
+                    cond: (_, {data: didSalut}) => Boolean(didSalut),
+                  },
+                  {target: 'salut'},
+                ],
+                onError: {
+                  target: 'salut',
+                  cond: (_, {data}) => data.notFound,
+                },
+              },
+            },
             salut: {
-              after: {
-                300: 'done',
+              invoke: {
+                src: () =>
+                  global
+                    .sub(requestDb(), 'onboarding')
+                    .put(doneOnboardingStep(current), 1),
+                onDone: 'done',
               },
             },
             done: {
