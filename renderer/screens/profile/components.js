@@ -170,7 +170,6 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
     <Box
       ref={ref}
       as="form"
-      {...props}
       onSubmit={async e => {
         e.preventDefault()
         try {
@@ -181,6 +180,7 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
           })
         }
       }}
+      {...props}
     >
       <Stack spacing={6}>
         <FormControl>
@@ -214,8 +214,9 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
               isDisabled={mining || status === IdentityStatus.Invite}
               minH={rem(50)}
               placeholder={
-                status === IdentityStatus.Invite &&
-                'Click the button to activate invitation'
+                status === IdentityStatus.Invite
+                  ? 'Click the button to activate invitation'
+                  : ''
               }
               resize="none"
               _disabled={{
