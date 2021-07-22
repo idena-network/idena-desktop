@@ -1,223 +1,196 @@
+/* eslint-disable react/prop-types */
 import {useMachine} from '@xstate/react'
 import React from 'react'
-import {Machine} from 'xstate'
-import {OnboardingStep} from '../types'
+import {createMachine} from 'xstate'
+import {assign, choose} from 'xstate/lib/actions'
+import {canValidate} from '../../screens/validation/utils'
+import {IdentityStatus, OnboardingStep} from '../types'
 import {requestDb} from '../utils/db'
-import {
-  doneOnboardingStep,
-  onboardingStep,
-  shouldTransitionToCreateFlipsStep,
-} from '../utils/onboarding'
-import {useChainState} from './chain-context'
+import {rewardWithConfetti, shouldCreateFlips} from '../utils/onboarding'
 import {useEpochState} from './epoch-context'
-import {canValidate, useIdentityState} from './identity-context'
+import {useIdentity} from './identity-context'
 
-const OnboardingStateContext = React.createContext()
-const OnboardingDispatchContext = React.createContext()
+const OnboardingContext = React.createContext()
 
-export function OnboardingProvider(props) {
-  const {syncing, offline} = useChainState()
+export function OnboardingProvider({children}) {
+  const epoch = useEpochState()
 
-  const {epoch} = useEpochState() ?? {epoch: -1}
+  const [identity] = useIdentity()
 
-  const identity = useIdentityState()
-
-  const onboardingStepSelector = step => `#onboarding.${onboardingStep(step)}`
-
-  // eslint-disable-next-line no-shadow
-  const createStep = ({current, next, on}) => ({
-    [current]: {
-      initial: 'active',
+  const createStep = (step, {on, ...config} = {}) => ({
+    [step]: {
+      entry: ['setCurrentStep', 'setIdentity'],
+      initial: 'unknown',
       states: {
-        active: {
-          initial: 'idle',
-          states: {
-            idle: {
-              on: {
-                SHOW: 'showing',
-              },
-            },
-            showing: {},
-          },
+        unknown: {
           on: {
-            DISMISS: 'dismissed',
+            '': [
+              {target: 'dismissed', cond: 'didDismissStep'},
+              {target: 'promoting', cond: 'shouldPromoteStep'},
+            ],
+          },
+          invoke: {
+            src: 'restoreDismissedSteps',
+            onDone: {actions: ['setDismissedSteps']},
+            onError: 'promoting',
           },
         },
-        done: {
-          initial: 'unknown',
-          states: {
-            unknown: {
-              invoke: {
-                src: () =>
-                  global
-                    .sub(requestDb(), 'onboarding')
-                    .get(doneOnboardingStep(current)),
-                onDone: [
-                  {
-                    target: 'done',
-                    cond: (_, {data: didSalut}) => Boolean(didSalut),
-                  },
-                  {target: 'salut'},
-                ],
-                onError: {
-                  target: 'salut',
-                  cond: (_, {data}) => data.notFound,
-                },
-              },
-            },
-            salut: {
-              invoke: {
-                src: () =>
-                  global
-                    .sub(requestDb(), 'onboarding')
-                    .put(doneOnboardingStep(current), 1),
-                onDone: 'done',
-              },
-            },
-            done: {
-              after: {
-                300: next,
-              },
-            },
-          },
-        },
+        promoting: {},
+        showing: {on: {DISMISS: 'dismissed'}},
         dismissed: {
-          on: {
-            SHOW: 'active.showing',
-          },
+          entry: ['addDismissedStep', 'persistDismissedSteps'],
         },
       },
       on: {
-        DONE: '.done',
-        NEXT: next,
+        SHOW: '.showing',
         ...on,
       },
+      ...config,
     },
   })
 
   const [current, send] = useMachine(
-    Machine({
-      id: 'onboarding',
-      context: {
-        currentStep: OnboardingStep.ActivateInvite,
-      },
-      initial: 'idle',
-      states: {
-        idle: {
-          on: {
-            START: [
-              {
-                target: onboardingStepSelector(OnboardingStep.ActivateInvite),
-                cond: (_, {identity: {canActivateInvite}}) => canActivateInvite,
-              },
-              {
-                target: onboardingStepSelector(OnboardingStep.Validate),
-                // eslint-disable-next-line no-shadow
-                cond: (_, {identity}) => canValidate(identity),
-              },
-              {
-                target: onboardingStepSelector(OnboardingStep.ActivateMining),
-                cond: (_, {identity: {age, online}}) => age === 1 && !online,
-              },
-              {
-                target: onboardingStepSelector(OnboardingStep.CreateFlips),
-                // eslint-disable-next-line no-shadow
-                cond: (_, {identity}) =>
-                  shouldTransitionToCreateFlipsStep(identity),
-              },
+    createMachine(
+      {
+        context: {currentStep: null, dismissedSteps: null},
+        initial: 'unknown',
+        states: {
+          unknown: {
+            on: {
+              [OnboardingStep.ActivateInvite]: OnboardingStep.ActivateInvite,
+              [OnboardingStep.Validate]: OnboardingStep.Validate,
+              [OnboardingStep.ActivateMining]: OnboardingStep.ActivateMining,
+              [OnboardingStep.CreateFlips]: OnboardingStep.CreateFlips,
+              UPDATE_IDENTITY: {actions: ['setIdentity']},
+            },
+          },
+          ...createStep(OnboardingStep.ActivateInvite, {
+            on: {[OnboardingStep.Validate]: OnboardingStep.Validate},
+            exit: ['reward'],
+          }),
+          ...createStep(OnboardingStep.Validate, {
+            on: {
+              [OnboardingStep.ActivateMining]: OnboardingStep.ActivateMining,
+            },
+            exit: [
+              choose([
+                {
+                  actions: 'reward',
+                  // eslint-disable-next-line no-shadow
+                  cond: ({identity}) =>
+                    identity.isValidated &&
+                    identity.state === IdentityStatus.Newbie,
+                },
+              ]),
             ],
-          },
+          }),
+          ...createStep(OnboardingStep.ActivateMining, {
+            on: {
+              NEXT: [
+                {
+                  target: OnboardingStep.CreateFlips,
+                  // eslint-disable-next-line no-shadow
+                  cond: ({identity}) => shouldCreateFlips(identity),
+                },
+                'done',
+              ],
+              [OnboardingStep.CreateFlips]: OnboardingStep.CreateFlips,
+            },
+            exit: ['addDismissedStep', 'persistDismissedSteps'],
+          }),
+          ...createStep(OnboardingStep.CreateFlips),
+          done: {},
         },
-        onboarding: {
-          initial: 'unknown',
-          states: {
-            unknown: {},
-            ...createStep({
-              current: OnboardingStep.ActivateInvite,
-              next: onboardingStepSelector(OnboardingStep.Validate),
-            }),
-            ...createStep({
-              current: OnboardingStep.Validate,
-              next: onboardingStepSelector(OnboardingStep.ActivateMining),
-              on: {
-                ROLLBACK: OnboardingStep.ActivateInvite,
-              },
-            }),
-            ...createStep({
-              current: OnboardingStep.ActivateMining,
-              next: onboardingStepSelector(OnboardingStep.CreateFlips),
-            }),
-            ...createStep({
-              current: OnboardingStep.CreateFlips,
-              next: '#onboarding.done',
-            }),
-          },
-          on: {
-            FINISH: 'done',
-          },
-        },
-        done: {},
       },
-    }),
-    {
-      logger: global.isDev
-        ? console.log
-        : (...args) => global.logger.debug(...args),
-    }
+      {
+        actions: {
+          setCurrentStep: assign({currentStep: (_, {type}) => type}),
+          setDismissedSteps: assign({
+            dismissedSteps: (_, {data}) => new Set(data),
+          }),
+          addDismissedStep: assign({
+            dismissedSteps: ({dismissedSteps, currentStep}) =>
+              dismissedSteps.add(currentStep),
+          }),
+          persistDismissedSteps: ({dismissedSteps}) =>
+            global
+              .sub(requestDb(), 'onboarding', {valueEncoding: 'json'})
+              .put('onboardingDismissedSteps', [...dismissedSteps]),
+          setIdentity: assign({
+            // eslint-disable-next-line no-shadow
+            identity: (_, {identity}) => identity,
+          }),
+          reward: () => rewardWithConfetti(),
+        },
+        services: {
+          restoreDismissedSteps: async () => {
+            try {
+              return await global
+                .sub(requestDb(), 'onboarding', {valueEncoding: 'json'})
+                .get('onboardingDismissedSteps')
+            } catch {
+              return null
+            }
+          },
+        },
+        guards: {
+          didDismissStep: ({dismissedSteps, currentStep}) =>
+            dismissedSteps?.has(currentStep),
+          shouldPromoteStep: ({dismissedSteps, currentStep}) =>
+            Boolean(dismissedSteps) && !dismissedSteps.has(currentStep),
+        },
+      }
+    )
   )
 
   React.useEffect(() => {
-    if (epoch >= 0 && identity && !syncing && !offline) {
-      send('START', {identity})
+    if (epoch?.epoch >= 0 && identity) {
+      send(
+        (() => {
+          switch (true) {
+            case identity.canActivateInvite:
+              return OnboardingStep.ActivateInvite
+            case identity.age === 1 && !identity.online:
+              return OnboardingStep.ActivateMining
+            case shouldCreateFlips(identity):
+              return OnboardingStep.CreateFlips
+            case canValidate(identity):
+              return OnboardingStep.Validate
+            default:
+              return 'UPDATE_IDENTITY'
+          }
+        })(),
+        {identity}
+      )
     }
-  }, [epoch, identity, offline, send, syncing])
+  }, [epoch, identity, send])
 
   return (
-    <OnboardingStateContext.Provider value={current}>
-      <OnboardingDispatchContext.Provider
-        value={{
+    <OnboardingContext.Provider
+      value={[
+        current,
+        {
           showCurrentTask() {
             send('SHOW')
           },
-          dismiss() {
+          dismissCurrentTask() {
             send('DISMISS')
           },
-          done: React.useCallback(() => {
-            send('DONE')
-          }, [send]),
-          finish: React.useCallback(() => {
-            send('FINISH')
-          }, [send]),
-          rollback: React.useCallback(() => {
-            send('ROLLBACK')
-          }, [send]),
-        }}
-        {...props}
-      />
-    </OnboardingStateContext.Provider>
+          // eslint-disable-next-line no-shadow
+          next({identity}) {
+            send('NEXT', {identity})
+          },
+        },
+      ]}
+    >
+      {children}
+    </OnboardingContext.Provider>
   )
 }
 
-export function useOnboardingState() {
-  const context = React.useContext(OnboardingStateContext)
-  if (context === undefined) {
-    throw new Error(
-      'useOnboardingState must be used within a OnboardingProvider'
-    )
-  }
-  return context
-}
-
-export function useOnboardingDispatch() {
-  const context = React.useContext(OnboardingDispatchContext)
-  if (context === undefined) {
-    throw new Error(
-      'useOnboardingDispatch must be used within a OnboardingDispatchContext'
-    )
-  }
-  return context
-}
-
 export function useOnboarding() {
-  return [useOnboardingState(), useOnboardingDispatch()]
+  const context = React.useContext(OnboardingContext)
+  if (context === undefined)
+    throw new Error('useOnboarding must be used within a OnboardingProvider')
+  return context
 }
