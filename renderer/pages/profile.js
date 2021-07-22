@@ -7,7 +7,6 @@ import {
   useToast,
   PopoverTrigger,
   Box,
-  ButtonGroup,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {
@@ -77,7 +76,6 @@ import {onboardingShowingStep} from '../shared/utils/onboarding'
 import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 import {useScroll} from '../shared/hooks/use-scroll'
-import {requestDb} from '../shared/utils/db'
 
 export default function ProfilePage() {
   const {
@@ -206,29 +204,6 @@ export default function ProfilePage() {
       <InviteProvider>
         <Layout syncing={syncing} offline={offline}>
           <Page>
-            <ButtonGroup>
-              <PrimaryButton
-                onClick={async () => {
-                  global
-                    .sub(requestDb(), 'onboarding', {valueEncoding: 'json'})
-                    .clear()
-                }}
-              >
-                clear shit
-              </PrimaryButton>
-              <PrimaryButton
-                onClick={() => {
-                  global
-                    .sub(requestDb(), 'onboarding', {valueEncoding: 'json'})
-                    .get('onboardingDismissedSteps')
-                    .then(console.log)
-                    .catch(() => console.log('all cleared sir'))
-                }}
-              >
-                get shit
-              </PrimaryButton>
-              <PrimaryButton>put shit</PrimaryButton>
-            </ButtonGroup>
             <Stack spacing={8}>
               <Stack spacing={6}>
                 <PageTitle mb={6}>{t('Profile')}</PageTitle>
