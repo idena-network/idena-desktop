@@ -33,6 +33,7 @@ import {
   DialogHeader,
   DialogFooter,
   DialogBody,
+  SmallText,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {
@@ -43,7 +44,6 @@ import {
 import {eitherState, toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {
   FillCenter,
-  SmallText,
   VotingBadge,
   VotingOption,
   VotingSkeleton,

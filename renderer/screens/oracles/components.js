@@ -543,7 +543,3 @@ export function ScrollToTop({scrollableRef, children, ...props}) {
     </Button>
   )
 }
-
-export function SmallText(props) {
-  return <Text color="muted" fontSize="sm" {...props} />
-}
