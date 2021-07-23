@@ -13,7 +13,6 @@ import {
   Stack,
   useTheme,
 } from '@chakra-ui/core'
-import Confetti from 'react-dom-confetti'
 import {useTranslation} from 'react-i18next'
 
 export function OnboardingPopover({children, ...props}) {
@@ -96,36 +95,6 @@ export function OnboardingPopoverContentIconRow({icon, children, ...props}) {
       )}
       <Box color="white">{children}</Box>
     </Stack>
-  )
-}
-
-export function TaskConfetti({config, ...props}) {
-  return (
-    <Confetti
-      config={{
-        angle: '70',
-        spread: '35',
-        startVelocity: '70',
-        elementCount: '200',
-        dragFriction: '0.15',
-        duration: '3000',
-        stagger: 4,
-        width: '6px',
-        height: '6px',
-        perspective: '1000px',
-        colors: [
-          '#578fff',
-          '#ff6666',
-          '#27d980',
-          '#ffc969',
-          '#ff74e1',
-          '#c08afa',
-          '#8e62f5',
-        ],
-        ...config,
-      }}
-      {...props}
-    />
   )
 }
 

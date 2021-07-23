@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import {requestDb} from '../../shared/utils/db'
 
 export function createProfileDb(epoch) {
