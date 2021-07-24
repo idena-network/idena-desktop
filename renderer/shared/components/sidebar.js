@@ -310,6 +310,23 @@ function ActionPanel() {
   const eitherOnboardingState = (...states) =>
     eitherState(currentOnboarding, ...states)
 
+  const isPromotingNextOnboardingStep =
+    currentPeriod === EpochPeriod.None &&
+    (eitherOnboardingState(
+      onboardingPromotingStep(OnboardingStep.ActivateInvite),
+      onboardingPromotingStep(OnboardingStep.ActivateMining)
+    ) ||
+      (eitherOnboardingState(
+        onboardingPromotingStep(OnboardingStep.Validate)
+      ) &&
+        [IdentityStatus.Candidate, IdentityStatus.Newbie].includes(
+          identity.state
+        )) ||
+      (eitherOnboardingState(
+        onboardingPromotingStep(OnboardingStep.CreateFlips)
+      ) &&
+        [IdentityStatus.Newbie].includes(identity.state)))
+
   return (
     <Box
       bg={theme.colors.white01}
@@ -326,7 +343,7 @@ function ActionPanel() {
 
       <ChakraBox
         roundedTop="md"
-        cursor="pointer"
+        cursor={isPromotingNextOnboardingStep ? 'pointer' : 'default'}
         onClick={() => {
           if (
             eitherOnboardingState(
@@ -341,25 +358,7 @@ function ActionPanel() {
           showCurrentTask()
         }}
       >
-        <PulseFrame
-          isActive={
-            currentPeriod === EpochPeriod.None &&
-            (eitherOnboardingState(
-              onboardingPromotingStep(OnboardingStep.ActivateInvite),
-              onboardingPromotingStep(OnboardingStep.ActivateMining)
-            ) ||
-              (eitherOnboardingState(
-                onboardingPromotingStep(OnboardingStep.Validate)
-              ) &&
-                [IdentityStatus.Candidate, IdentityStatus.Newbie].includes(
-                  identity.state
-                )) ||
-              (eitherOnboardingState(
-                onboardingPromotingStep(OnboardingStep.CreateFlips)
-              ) &&
-                [IdentityStatus.Newbie].includes(identity.state)))
-          }
-        >
+        <PulseFrame isActive={isPromotingNextOnboardingStep}>
           <Block title={t('My current task')}>
             <CurrentTask
               epoch={epoch.epoch}

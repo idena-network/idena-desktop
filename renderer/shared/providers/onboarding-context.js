@@ -17,7 +17,7 @@ export function OnboardingProvider({children}) {
 
   const [identity] = useIdentity()
 
-  const createStep = (step, {on, ...config} = {}) => ({
+  const createStep = (step, config) => ({
     [step]: {
       entry: ['setCurrentStep', 'setIdentity'],
       initial: 'unknown',
@@ -35,15 +35,11 @@ export function OnboardingProvider({children}) {
             onError: 'promoting',
           },
         },
-        promoting: {},
+        promoting: {on: {SHOW: 'showing'}},
         showing: {on: {DISMISS: 'dismissed'}},
         dismissed: {
           entry: ['addDismissedStep', 'persistDismissedSteps'],
         },
-      },
-      on: {
-        SHOW: '.showing',
-        ...on,
       },
       ...config,
     },
@@ -94,6 +90,7 @@ export function OnboardingProvider({children}) {
                 },
                 'done',
               ],
+              SHOW: '.showing',
               [OnboardingStep.CreateFlips]: OnboardingStep.CreateFlips,
             },
             exit: ['addDismissedStep', 'persistDismissedSteps'],
@@ -176,9 +173,8 @@ export function OnboardingProvider({children}) {
           dismissCurrentTask() {
             send('DISMISS')
           },
-          // eslint-disable-next-line no-shadow
-          next({identity}) {
-            send('NEXT', {identity})
+          next() {
+            send('NEXT')
           },
         },
       ]}
