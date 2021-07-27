@@ -797,7 +797,7 @@ export function ValidationFailedDialog(props) {
       <ValidationDialogBody>
         <Text>
           {t(
-            'You haven’t submitted your answers in time. This validation session is over.'
+            `You haven't submitted your answers in time. This validation session is over.`
           )}
         </Text>
         <Text>

@@ -61,9 +61,13 @@ import {
 import {createTimerMachine} from '../../shared/machines'
 import {usePersistence} from '../../shared/hooks/use-persistent-state'
 import {activateMiningMachine} from './machines'
-import {dummyAddress, eitherState, toPercent} from '../../shared/utils/utils'
+import {
+  calculateInvitationRewardRatio,
+  dummyAddress,
+  eitherState,
+  toPercent,
+} from '../../shared/utils/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {calculateInvitationRewardRatio} from './utils'
 
 export function UserInlineCard({address, status, ...props}) {
   return (

@@ -137,3 +137,15 @@ export function shouldShowUpcomingValidationNotification(
   const notificationShown = currentEpoch + 1 === upcomingValidationEpoch
   return isFlipLottery && !notificationShown
 }
+
+export function calculateInvitationRewardRatio(
+  {startBlock, nextValidation},
+  {highestBlock}
+) {
+  const endBlock =
+    highestBlock + dayjs(nextValidation).diff(dayjs(), 'minute') * 3
+
+  const t = (highestBlock - startBlock) / (endBlock - startBlock)
+
+  return Math.max(1 - t ** 4 * 0.5, 0)
+}

@@ -36,9 +36,8 @@ import {Logo} from '../../screens/app/components'
 import {useVotingNotification} from '../providers/voting-notification-context'
 import {useOnboarding} from '../providers/onboarding-context'
 import {
-  activeOnboardingStep,
-  activeShowingOnboardingStep,
-  onboardingStep,
+  onboardingPromotingStep,
+  onboardingShowingStep,
 } from '../utils/onboarding'
 import {
   OnboardingLinkButton,
@@ -48,6 +47,7 @@ import {
 } from './onboarding'
 import {
   buildNextValidationCalendarLink,
+  eitherState,
   formatValidationDate,
 } from '../utils/utils'
 import {isHardFork} from '../utils/node'
@@ -296,33 +296,36 @@ function ActionPanel() {
   const identity = useIdentityState()
   const epoch = useEpochState()
 
-  const [currentOnboarding, {showCurrentTask, dismiss}] = useOnboarding()
-
-  const shouldActivateInvite = currentOnboarding.matches(
-    activeOnboardingStep(OnboardingStep.ActivateInvite)
-  )
-
-  const shouldValidate = currentOnboarding.matches(
-    activeOnboardingStep(OnboardingStep.Validate)
-  )
-
-  const shouldCreateFlips = currentOnboarding.matches(
-    activeOnboardingStep(OnboardingStep.CreateFlips)
-  )
-
-  const isShowingValidateStep = currentOnboarding.matches(
-    activeShowingOnboardingStep(OnboardingStep.Validate)
-  )
-
-  const shouldActivateMining = currentOnboarding.matches(
-    activeOnboardingStep(OnboardingStep.ActivateMining)
-  )
+  const [
+    currentOnboarding,
+    {showCurrentTask, dismissCurrentTask},
+  ] = useOnboarding()
 
   if (syncing || !epoch) {
     return null
   }
 
   const {currentPeriod, nextValidation} = epoch
+
+  const eitherOnboardingState = (...states) =>
+    eitherState(currentOnboarding, ...states)
+
+  const isPromotingNextOnboardingStep =
+    currentPeriod === EpochPeriod.None &&
+    (eitherOnboardingState(
+      onboardingPromotingStep(OnboardingStep.ActivateInvite),
+      onboardingPromotingStep(OnboardingStep.ActivateMining)
+    ) ||
+      (eitherOnboardingState(
+        onboardingPromotingStep(OnboardingStep.Validate)
+      ) &&
+        [IdentityStatus.Candidate, IdentityStatus.Newbie].includes(
+          identity.state
+        )) ||
+      (eitherOnboardingState(
+        onboardingPromotingStep(OnboardingStep.CreateFlips)
+      ) &&
+        [IdentityStatus.Newbie].includes(identity.state)))
 
   return (
     <Box
@@ -340,32 +343,22 @@ function ActionPanel() {
 
       <ChakraBox
         roundedTop="md"
-        cursor={currentOnboarding.matches('done') ? 'default' : 'pointer'}
+        cursor={isPromotingNextOnboardingStep ? 'pointer' : 'default'}
         onClick={() => {
-          if (shouldActivateInvite) router.push('/profile')
           if (
-            currentOnboarding.matches(
-              onboardingStep(OnboardingStep.CreateFlips)
+            eitherOnboardingState(
+              OnboardingStep.ActivateInvite,
+              OnboardingStep.ActivateMining
             )
           )
+            router.push('/profile')
+          if (eitherOnboardingState(OnboardingStep.CreateFlips))
             router.push('/flips/list')
-          if (shouldActivateMining) router.push('/profile')
+
           showCurrentTask()
         }}
       >
-        <PulseFrame
-          isActive={
-            currentPeriod === EpochPeriod.None &&
-            (shouldActivateInvite ||
-              (shouldValidate &&
-                [IdentityStatus.Candidate, IdentityStatus.Newbie].includes(
-                  identity.state
-                )) ||
-              shouldActivateMining ||
-              (shouldCreateFlips &&
-                [IdentityStatus.Newbie].includes(identity.state)))
-          }
-        >
+        <PulseFrame isActive={isPromotingNextOnboardingStep}>
           <Block title={t('My current task')}>
             <CurrentTask
               epoch={epoch.epoch}
@@ -378,12 +371,19 @@ function ActionPanel() {
 
       {currentPeriod === EpochPeriod.None && (
         <>
-          <OnboardingPopover isOpen={isShowingValidateStep} placement="right">
+          <OnboardingPopover
+            isOpen={eitherOnboardingState(
+              onboardingShowingStep(OnboardingStep.Validate)
+            )}
+            placement="right"
+          >
             <PopoverTrigger>
               <ChakraBox
                 roundedBottom="md"
                 bg={
-                  isShowingValidateStep
+                  eitherOnboardingState(
+                    onboardingShowingStep(OnboardingStep.Validate)
+                  )
                     ? 'rgba(216, 216, 216, .1)'
                     : 'transparent'
                 }
@@ -456,7 +456,7 @@ function ActionPanel() {
                   {t('Read more')}
                 </Button>
               }
-              onDismiss={dismiss}
+              onDismiss={dismissCurrentTask}
             >
               <Stack spacing={5}>
                 <OnboardingPopoverContentIconRow icon="telegram">
@@ -565,7 +565,7 @@ function Block({title, children}) {
 function CurrentTask({epoch, period, identity}) {
   const {t} = useTranslation()
 
-  const [onboardingState] = useOnboarding()
+  const [currentOnboarding] = useOnboarding()
 
   if (!period || !identity.state) return null
 
@@ -577,8 +577,6 @@ function CurrentTask({epoch, period, identity}) {
         availableFlips: availableFlipsNumber,
         state: status,
         canActivateInvite,
-        age,
-        online,
       } = identity
 
       switch (true) {
@@ -589,11 +587,7 @@ function CurrentTask({epoch, period, identity}) {
             </Link>
           )
 
-        case age === 1 &&
-          !online &&
-          onboardingState.matches(
-            onboardingStep(OnboardingStep.ActivateMining)
-          ): {
+        case currentOnboarding.matches(OnboardingStep.ActivateMining): {
           return t('Activate mining status')
         }
 

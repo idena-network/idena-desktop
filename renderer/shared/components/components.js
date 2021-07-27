@@ -347,17 +347,18 @@ export function SuccessAlert({children, ...props}) {
   )
 }
 
-export const VDivider = React.forwardRef((props, ref) => (
-  <Divider
-    ref={ref}
-    orientation="vertical"
-    borderColor="gray.300"
-    h={6}
-    mx={0}
-    {...props}
-  />
-))
-VDivider.displayName = 'VDivider'
+export const VDivider = React.forwardRef(function VDivider(props, ref) {
+  return (
+    <Divider
+      ref={ref}
+      orientation="vertical"
+      borderColor="gray.300"
+      h={6}
+      mx={0}
+      {...props}
+    />
+  )
+})
 
 export const HDivider = React.forwardRef((props, ref) => (
   <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
@@ -431,4 +432,8 @@ export function Progress(props) {
       {...props}
     />
   )
+}
+
+export function SmallText(props) {
+  return <Text color="muted" fontSize="sm" {...props} />
 }

@@ -1,21 +1,16 @@
-import {eitherState} from './utils'
+import confetti from 'canvas-confetti'
 
-export const onboardingStep = step => `onboarding.${step}`
+export const onboardingPromotingStep = step => `${step}.promoting`
+export const onboardingShowingStep = step => `${step}.showing`
 
-export const activeOnboardingStep = step => `onboarding.${step}.active`
-export const activeIdleOnboardingStep = step =>
-  `${activeOnboardingStep(step)}.idle`
-export const activeShowingOnboardingStep = step =>
-  `${activeOnboardingStep(step)}.showing`
+export const shouldCreateFlips = ({isValidated, requiredFlips, flips}) =>
+  isValidated && requiredFlips - (flips ?? []).length > 0
 
-export const doneOnboardingStep = step => `onboarding.${step}.done`
-
-export const shouldCompleteOnboardingStep = (currentOnboarding, step) =>
-  eitherState(currentOnboarding, onboardingStep(step)) &&
-  !eitherState(currentOnboarding, 'idle', `${doneOnboardingStep(step)}.done`)
-
-export const shouldTransitionToCreateFlipsStep = ({
-  isValidated,
-  requiredFlips,
-  flips,
-}) => isValidated && requiredFlips - (flips ?? []).length > 0
+export function rewardWithConfetti(params) {
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: {y: 0.6},
+    ...params,
+  })
+}
