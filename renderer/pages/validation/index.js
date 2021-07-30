@@ -246,13 +246,14 @@ function ValidationSession({
                       isSelected={
                         currentFlip.relevance === RelevanceType.Relevant
                       }
-                      onClick={() =>
+                      onClick={() => {
+                        onCloseExceededTooltip()
                         send({
                           type: 'TOGGLE_WORDS',
                           hash: currentFlip.hash,
                           relevance: RelevanceType.Relevant,
                         })
-                      }
+                      }}
                     >
                       {t('Yes')}
                     </QualificationButton>
