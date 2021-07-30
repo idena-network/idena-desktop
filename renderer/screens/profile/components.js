@@ -180,7 +180,12 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
           await activateInvite(code?.trim())
         } catch ({message}) {
           addError({
-            title: message,
+            // eslint-disable-next-line no-nested-ternary
+            title: message.includes('missing')
+              ? t('Invitation code is not valid')
+              : message.includes('validation ceremony')
+              ? t('Can not activate invitation since the validation is running')
+              : message,
           })
         }
       }}
