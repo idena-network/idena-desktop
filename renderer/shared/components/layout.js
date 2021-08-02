@@ -19,11 +19,13 @@ import {
   useTheme,
   useToast,
   Alert,
+  Link,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import semver from 'semver'
 import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
+import NextLink from 'next/link'
 import Sidebar from './sidebar'
 import Notifications, {Snackbar} from './notifications'
 import {useDebounce} from '../hooks/use-debounce'
@@ -44,10 +46,6 @@ import {
   useAutoUpdateDispatch,
 } from '../providers/update-context'
 import {PrimaryButton, SecondaryButton} from './button'
-import {
-  LayoutContainer,
-  UpdateExternalNodeDialog,
-} from '../../screens/app/components'
 import {FillCenter} from '../../screens/oracles/components'
 import {
   Avatar,
@@ -160,6 +158,19 @@ export default function Layout({
       )}
       <UpdateExternalNodeDialog />
     </LayoutContainer>
+  )
+}
+
+function LayoutContainer(props) {
+  return (
+    <Flex
+      align="stretch"
+      flexWrap="wrap"
+      color="brand.gray"
+      fontSize="md"
+      minH="100vh"
+      {...props}
+    />
   )
 }
 
@@ -916,5 +927,36 @@ function HardForkScreen({version, onUpdate, onReject}) {
         </DialogFooter>
       </Dialog>
     </>
+  )
+}
+
+function UpdateExternalNodeDialog() {
+  const {showExternalUpdateModal} = useAutoUpdateState()
+  const {hideExternalNodeUpdateModal} = useAutoUpdateDispatch()
+
+  const {t} = useTranslation()
+
+  return (
+    <Dialog
+      isOpen={showExternalUpdateModal}
+      onClose={hideExternalNodeUpdateModal}
+    >
+      <DialogHeader>{t('Cannot update remote node')}</DialogHeader>
+      <DialogBody>
+        <Text>
+          Please, run built-in at the{' '}
+          <NextLink href="/settings/node" passHref>
+            <Link onClick={hideExternalNodeUpdateModal}>settings</Link>
+          </NextLink>{' '}
+          page to enjoy automatic updates.
+        </Text>
+        <Text>{t('Otherwise, please update your remote node manually.')}</Text>
+      </DialogBody>
+      <DialogFooter>
+        <PrimaryButton onClick={hideExternalNodeUpdateModal}>
+          {t('Okay, got it')}
+        </PrimaryButton>
+      </DialogFooter>
+    </Dialog>
   )
 }
