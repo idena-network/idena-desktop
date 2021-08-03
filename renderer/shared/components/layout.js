@@ -27,7 +27,7 @@ import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import NextLink from 'next/link'
 import Sidebar from './sidebar'
-import Notifications, {Snackbar} from './notifications'
+import Notifications from './notifications'
 import {useDebounce} from '../hooks/use-debounce'
 import {useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/utils'
@@ -66,7 +66,6 @@ import {
   shouldShowUpcomingValidationNotification,
   showWindowNotification,
 } from '../utils/utils'
-import {useTimingState} from '../providers/timing-context'
 import {useChainState} from '../providers/chain-context'
 import {useNode} from '../providers/node-context'
 import {useSettings} from '../providers/settings-context'
@@ -181,7 +180,6 @@ function NormalApp({children}) {
 
   const epoch = useEpochState()
   const identity = useIdentityState()
-  const {wrongClientTime} = useTimingState()
 
   React.useEffect(() => {
     if (shouldStartValidation(epoch, identity)) router.push('/validation')
@@ -222,24 +220,6 @@ function NormalApp({children}) {
       {children}
 
       {epoch && <ValidationToast epoch={epoch} identity={identity} />}
-
-      {wrongClientTime && (
-        <Snackbar>
-          <Toast
-            status="error"
-            title={t('Please check your local time')}
-            description={t(
-              'The time must be synchronized with internet time for the successful validation'
-            )}
-            actionContent={t('Check')}
-            w="md"
-            mx="auto"
-            onAction={() => {
-              global.openExternal('https://time.is/')
-            }}
-          />
-        </Snackbar>
-      )}
 
       <Notifications />
 
@@ -283,8 +263,6 @@ function SyncingApp() {
   const {t} = useTranslation()
 
   const {currentBlock, highestBlock, genesisBlock, wrongTime} = useChainState()
-
-  const {wrongClientTime} = useTimingState()
 
   const {address} = useIdentityState()
 
@@ -397,24 +375,6 @@ function SyncingApp() {
           </Alert>
         )}
       </Stack>
-
-      {wrongClientTime && (
-        <Snackbar>
-          <Toast
-            status="error"
-            title={t('Please check your local time')}
-            description={t(
-              'The time must be synchronized with internet time for the successful validation'
-            )}
-            actionContent={t('Check')}
-            w="md"
-            mx="auto"
-            onAction={() => {
-              global.openExternal('https://time.is/')
-            }}
-          />
-        </Snackbar>
-      )}
     </FillCenter>
   )
 }
