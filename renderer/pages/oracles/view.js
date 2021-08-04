@@ -81,7 +81,7 @@ import {
   TableCol,
   TableHeaderCol,
   TableRow,
-} from '../../shared/components'
+} from '../../shared/components/table'
 import {
   ContractTransactionType,
   ContractCallMethod,

@@ -1,13 +1,10 @@
 import React, {forwardRef} from 'react'
 import PropTypes from 'prop-types'
 import {borderRadius} from 'polished'
-
-import {Box, Link} from '.'
-import Flex from './flex'
+import {Box, Button, Flex} from '@chakra-ui/core'
 import theme, {rem} from '../theme'
-import {FlatButton} from './button'
-
 import useHover from '../hooks/use-hover'
+import {TextLink} from './components'
 
 // eslint-disable-next-line react/display-name
 export const Menu = forwardRef((props, ref) => (
@@ -19,7 +16,7 @@ export function MenuItems({ref, ...props}) {
     <Box
       bg={theme.colors.white}
       py={theme.spacings.small}
-      css={{
+      style={{
         ...borderRadius('top', '10px'),
         ...borderRadius('bottom', '10px'),
         boxShadow:
@@ -55,9 +52,9 @@ export function MenuItem({
     >
       <Flex align="center" onClick={disabled ? null : onClick}>
         {href ? (
-          <Link href={href} {...props} />
+          <TextLink href={href} {...props} />
         ) : (
-          <FlatButton
+          <Button
             bg={isHovered ? theme.colors.gray : ''}
             disabled={disabled}
             style={{display: 'flex'}}
@@ -82,7 +79,7 @@ export function MenuItem({
             >
               {children}
             </Box>
-          </FlatButton>
+          </Button>
         )}
       </Flex>
     </Box>

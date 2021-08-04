@@ -38,7 +38,16 @@ import {
   SecondaryButton,
 } from '../shared/components/button'
 import Layout from '../shared/components/layout'
-import {IconLink} from '../shared/components/link'
+import {
+  IconLink,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  ExternalLink,
+  FloatDebug,
+  Toast,
+} from '../shared/components/components'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
 import {
   toPercent,
@@ -48,15 +57,7 @@ import {
   buildNextValidationCalendarLink,
   formatValidationDate,
 } from '../shared/utils/utils'
-import {
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  DialogHeader,
-  ExternalLink,
-  FloatDebug,
-  Toast,
-} from '../shared/components/components'
+
 import {
   shouldExpectValidationResults,
   hasPersistedValidationResults,

@@ -1,16 +1,14 @@
 /* eslint-disable react/prop-types */
 import React, {useState} from 'react'
 import {wordWrap, padding, margin, borderRadius} from 'polished'
-import {Text} from '@chakra-ui/core'
-import {Absolute, Box} from '.'
-import Flex from './flex'
+import {Box, Flex, Text} from '@chakra-ui/core'
 import theme, {rem} from '../theme'
 import {
   useNotificationState,
   NotificationType,
   NOTIFICATION_DELAY,
 } from '../providers/notification-context'
-import {IconButton} from './button'
+import {IconButton2} from './button'
 
 function Notifications() {
   const {notifications} = useNotificationState()
@@ -49,7 +47,7 @@ export function Notification({
       >
         <Flex
           align="center"
-          css={{
+          style={{
             background: bg,
             borderRadius: rem(8),
             boxShadow: `0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)`,
@@ -83,13 +81,13 @@ export function Notification({
             {body && <Text color={color}>{body}</Text>}
           </Box>
           <Box
-            css={{
+            style={{
               ...margin(0, 0, 0, 'auto'),
               ...padding(rem(6), rem(12)),
             }}
           >
             {action && (
-              <IconButton
+              <IconButton2
                 style={{
                   color:
                     type === NotificationType.Error
@@ -104,7 +102,7 @@ export function Notification({
                 }}
               >
                 {actionName}
-              </IconButton>
+              </IconButton2>
             )}
           </Box>
           {!pinned && (
@@ -138,7 +136,7 @@ export function Notification({
 }
 
 export function Snackbar(props) {
-  return <Absolute bottom={0} left={0} right={0} {...props} />
+  return <Box position="absolute" bottom={0} left={0} right={0} {...props} />
 }
 
 export default Notifications

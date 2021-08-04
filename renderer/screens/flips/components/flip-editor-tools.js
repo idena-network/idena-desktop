@@ -1,7 +1,5 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, {useRef, useCallback, useEffect, useState} from 'react'
-import PropTypes from 'prop-types'
 import {rem, position} from 'polished'
 import {FaCircle} from 'react-icons/fa'
 import {FiCircle} from 'react-icons/fi'
@@ -11,11 +9,12 @@ import {
   Flex as ChakraFlex,
   Box as ChakraBox,
   Icon,
+  Box,
+  Button,
 } from '@chakra-ui/core'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
-import {IconButton} from '../../../shared/components/button'
-import {Box, Absolute} from '../../../shared/components'
+import {IconButton2} from '../../../shared/components/button'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
 import {VDivider} from '../../../shared/components/components'
@@ -48,6 +47,7 @@ export function Brushes({brush, onChange}) {
 
 export function ColorPicker({visible, color, onChange}) {
   const colorPickerRef = useRef()
+
   const colors = [
     ['ffffff', 'd2d4d9e0', '96999edd', '53565cdd'],
     ['ff6666dd', 'ff60e7dd', 'a066ffdd', '578fffdd'],
@@ -64,8 +64,8 @@ export function ColorPicker({visible, color, onChange}) {
         display: `${visible ? '' : 'none'}`,
       }}
     >
-      <Box css={position('relative')} ref={colorPickerRef}>
-        <Absolute top={0} right={rem(40)} zIndex={100}>
+      <Box position="relative" ref={colorPickerRef}>
+        <Box position="absolute" top={0} right={rem(40)} zIndex={100}>
           <Menu>
             {colors.map((row, i) => (
               <Flex key={i} css={{marginLeft: rem(10), marginRight: rem(10)}}>
@@ -78,7 +78,7 @@ export function ColorPicker({visible, color, onChange}) {
                     fontSize: theme.fontSizes.large,
                   }
                   return (
-                    <IconButton
+                    <IconButton2
                       key={`${j}${j}`}
                       icon={
                         c === 'ffffff' ? (
@@ -92,13 +92,13 @@ export function ColorPicker({visible, color, onChange}) {
                           onChange(c)
                         }
                       }}
-                    ></IconButton>
+                    />
                   )
                 })}
               </Flex>
             ))}
           </Menu>
-        </Absolute>
+        </Box>
       </Box>
     </div>
   )
@@ -109,7 +109,7 @@ export function ArrowHint({hint, leftHanded, visible}) {
     visible && (
       <div>
         <Box css={position('relative')}>
-          <Absolute top={rem(-105)} left={rem(0)} zIndex={90}>
+          <Box position="absolute" top={rem(-105)} left={rem(0)} zIndex={90}>
             {leftHanded && (
               <div>
                 <div
@@ -187,7 +187,7 @@ export function ArrowHint({hint, leftHanded, visible}) {
                 </div>
               </div>
             )}
-          </Absolute>
+          </Box>
         </Box>
       </div>
     )
@@ -216,7 +216,7 @@ export function EditorContextMenu({
       <Flex>
         <Box css={position('relative')}>
           <Box ref={contextMenuRef}>
-            <Absolute top={y} left={x} zIndex={100}>
+            <Box position="absolute" top={y} left={x} zIndex={100}>
               <Menu>
                 <MenuItem
                   disabled={!onCopy}
@@ -281,7 +281,7 @@ export function EditorContextMenu({
                   </MenuItem>
                 )}
               </Menu>
-            </Absolute>
+            </Box>
           </Box>
         </Box>
       </Flex>
@@ -383,7 +383,8 @@ export function ImageEraseEditor({
 
   return (
     <Box css={position('relative')}>
-      <Absolute
+      <Box
+        position="absolute"
         top={0}
         left={0}
         zIndex={100}
@@ -395,7 +396,7 @@ export function ImageEraseEditor({
           overflow: 'hidden',
         }}
       >
-        <div
+        <Box
           style={{
             width: '100%',
             height: '100%',
@@ -415,9 +416,9 @@ export function ImageEraseEditor({
             }}
             ref={canvasRef}
             onMouseMove={e => handleMouseMove(e)}
-          ></canvas>
-        </div>
-      </Absolute>
+          />
+        </Box>
+      </Box>
     </Box>
   )
 }
@@ -436,16 +437,19 @@ export function ApplyChangesBottomPanel({label, onDone, onCancel}) {
     >
       {label}
       <Flex align="center">
-        <IconButton onClick={() => onCancel()}>{t('Cancel')}</IconButton>
+        <Button variant="ghost" onClick={() => onCancel()}>
+          {t('Cancel')}
+        </Button>
 
         <VDivider h={5} />
 
-        <IconButton
+        <Button
+          variant="ghost"
           style={{fontWeight: theme.fontWeights.bold}}
           onClick={() => onDone()}
         >
           {t('Done')}
-        </IconButton>
+        </Button>
       </Flex>
     </Flex>
   )

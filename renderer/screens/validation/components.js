@@ -17,7 +17,7 @@ import {
   FiClock,
 } from 'react-icons/fi'
 import {
-  Box as ChakraBox,
+  Box,
   Flex as ChakraFlex,
   Stack,
   Text,
@@ -40,7 +40,6 @@ import {Trans, useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
 import {State} from 'xstate'
-import {Box, Fill, Absolute} from '../../shared/components'
 import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
 import theme, {rem} from '../../shared/theme'
@@ -62,6 +61,7 @@ import {
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {useInterval} from '../../shared/hooks/use-interval'
+import {FillCenter} from '../oracles/components'
 
 export function ValidationScene(props) {
   return (
@@ -220,9 +220,9 @@ function FlipHolder({css, ...props}) {
 function LoadingFlip() {
   return (
     <FlipHolder css={{cursor: 'not-allowed'}}>
-      <Fill>
+      <FillCenter>
         <ValidationSpinner />
-      </Fill>
+      </FillCenter>
     </FlipHolder>
   )
 }
@@ -524,7 +524,7 @@ export function FlipWords({
   const shouldShowTranslation = showTranslation && hasApprovedTranslation
 
   return (
-    <ChakraBox fontSize="md" color="brandGray.500" ml={rem(32)} w={rem(320)}>
+    <Box fontSize="md" color="brandGray.500" ml={rem(32)} w={rem(320)}>
       <FlipKeywordPanel w={rem(320)} mb={8}>
         {words.length ? (
           <FlipKeywordTranslationSwitch
@@ -568,7 +568,7 @@ export function FlipWords({
         )}
       </FlipKeywordPanel>
       {children}
-    </ChakraBox>
+    </Box>
   )
 }
 
@@ -620,7 +620,8 @@ export function NavButton({type, bg, color, ...props}) {
   // eslint-disable-next-line no-shadow
   const Icon = isPrev ? FiChevronLeft : FiChevronRight
   return (
-    <Absolute
+    <Box
+      position="absolute"
       top="50%"
       left={isPrev && 0}
       right={isPrev || 0}
@@ -663,7 +664,7 @@ export function NavButton({type, bg, color, ...props}) {
           }
         `}</style>
       </div>
-    </Absolute>
+    </Box>
   )
 }
 
@@ -1200,12 +1201,12 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
             w={440}
           >
             <Stack spacing={4}>
-              <ChakraBox>
+              <Box>
                 <Heading fontSize="lg" fontWeight={500} lineHeight="32px">
                   {title}
                 </Heading>
                 <Text color="muted">{subtitle}</Text>
-              </ChakraBox>
+              </Box>
               <List as="ul">
                 <BadFlipListItem
                   flipCase={0}
@@ -1351,7 +1352,7 @@ function BadFlipPartFrame({flipCase, ...props}) {
     {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
   ]
   return (
-    <ChakraBox
+    <Box
       position="absolute"
       borderWidth={2}
       borderColor="red.500"
@@ -1378,7 +1379,7 @@ function BadFlipPartFrame({flipCase, ...props}) {
       >
         <Icon name="block" size={5} />
       </ChakraFlex>
-    </ChakraBox>
+    </Box>
   )
 }
 

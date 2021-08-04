@@ -37,14 +37,13 @@ import {
   FlipOverlayText,
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
-import {IconLink} from '../../shared/components/link'
+import {IconLink, FloatDebug} from '../../shared/components/components'
 import {
   FlipType,
   IdentityStatus,
   FlipFilter as FlipFilterType,
   OnboardingStep,
 } from '../../shared/types'
-import {FloatDebug} from '../../shared/components/components'
 import {flipsMachine} from '../../screens/flips/machines'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {Notification} from '../../shared/components/notifications'

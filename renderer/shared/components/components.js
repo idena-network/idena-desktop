@@ -436,3 +436,30 @@ export function Progress(props) {
 export function SmallText(props) {
   return <Text color="muted" fontSize="sm" {...props} />
 }
+
+// eslint-disable-next-line react/display-name
+export const IconLink = React.forwardRef(
+  ({href, icon, children, ...props}, ref) => (
+    <NextLink ref={ref} href={href} passHref>
+      <Link
+        href={href}
+        color="brandBlue.500"
+        rounded="md"
+        fontWeight={500}
+        display="inline-block"
+        h={8}
+        px={2}
+        py="3/2"
+        _hover={{
+          bg: 'blue.50',
+        }}
+        {...props}
+      >
+        <Stack spacing={2} isInline align="center">
+          {typeof icon === 'string' ? <Icon name={icon} size={4} /> : icon}
+          <Text as="span">{children}</Text>
+        </Stack>
+      </Link>
+    </NextLink>
+  )
+)

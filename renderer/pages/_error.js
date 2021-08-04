@@ -2,10 +2,10 @@ import React from 'react'
 import Error from 'next/error'
 import {useTranslation} from 'react-i18next'
 import {Box, Flex, Heading, Stack} from '@chakra-ui/core'
-import {Button} from '../shared/components'
 import {Page} from '../screens/app/components'
 import {FillCenter} from '../screens/oracles/components'
 import Layout from '../shared/components/layout'
+import {PrimaryButton} from '../shared/components/button'
 
 global.logger = global.logger || {
   error() {},
@@ -43,9 +43,11 @@ function MyError({statusCode, hasGetInitialPropsRun, err}) {
                   : t('An error occurred on client')}
               </Heading>
               <Box>
-                <Button onClick={() => global.ipcRenderer.send('reload')}>
+                <PrimaryButton
+                  onClick={() => global.ipcRenderer.send('reload')}
+                >
                   {t('Go to My Idena')}
-                </Button>
+                </PrimaryButton>
               </Box>
             </Stack>
           </FillCenter>

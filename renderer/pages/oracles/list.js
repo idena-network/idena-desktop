@@ -8,8 +8,8 @@ import {
   FlipFilter as FilterList,
   FlipFilterOption as FilterOption,
 } from '../../screens/flips/components'
-import {IconLink} from '../../shared/components/link'
 import {
+  IconLink,
   FloatDebug,
   HDivider,
   Toast,

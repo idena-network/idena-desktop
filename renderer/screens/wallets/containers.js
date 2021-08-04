@@ -43,7 +43,7 @@ import {
   TableCol,
   TableHeaderCol,
   TableRow,
-} from '../../shared/components'
+} from '../../shared/components/table'
 
 export function TotalAmount({address, amount}) {
   const {t, i18n} = useTranslation()

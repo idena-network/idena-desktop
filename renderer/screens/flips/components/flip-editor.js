@@ -5,7 +5,7 @@ import Jimp from 'jimp'
 import {useTranslation} from 'react-i18next'
 import mousetrap from 'mousetrap'
 import {
-  Box as ChakraBox,
+  Box,
   Stack,
   VisuallyHidden,
   IconButton as ChakraIconButton,
@@ -18,7 +18,6 @@ import {useNotificationDispatch} from '../../../shared/providers/notification-co
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
 import {useInterval} from '../../../shared/hooks/use-interval'
-import {Box, Absolute} from '../../../shared/components'
 import {Toast, Tooltip} from '../../../shared/components/components'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
@@ -687,7 +686,7 @@ export default function FlipEditor({
             />
           )}
 
-          <ChakraBox
+          <Box
             h={rem(IMAGE_HEIGHT)}
             w={rem(IMAGE_WIDTH)}
             border="1px"
@@ -710,7 +709,7 @@ export default function FlipEditor({
               }}
               usageStatistics={false}
             />
-          </ChakraBox>
+          </Box>
 
           {bottomMenuPanel === BottomMenu.Main && (
             <Stack isInline align="center" spacing={3} mt={6}>
@@ -906,7 +905,12 @@ export default function FlipEditor({
               <Box css={position('relative')}>
                 {isInsertImageMenuOpen && (
                   <Box ref={insertMenuRef[idx]}>
-                    <Absolute top="-11.4em" right="-17em" zIndex={100}>
+                    <Box
+                      position="absolute"
+                      top="-11.4em"
+                      right="-17em"
+                      zIndex={100}
+                    >
                       <Menu>
                         <MenuItem
                           onClick={async () => {
@@ -942,7 +946,7 @@ export default function FlipEditor({
                           {t('Paste image')}
                         </MenuItem>
                       </Menu>
-                    </Absolute>
+                    </Box>
                   </Box>
                 )}
               </Box>
@@ -967,7 +971,7 @@ export default function FlipEditor({
 
             {rightMenuPanel === RightMenu.FreeDrawing && (
               <>
-                <ChakraBox
+                <Box
                   bg={`#${brushColor}`}
                   border="1px"
                   borderColor="brandGray.016"
@@ -1032,13 +1036,13 @@ function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
     />
   )
   return (
-    <ChakraBox mr={mr}>
+    <Box mr={mr}>
       {isDisabled ? (
         <Tooltip content={tooltip}>{icon}</Tooltip>
       ) : (
         <Tooltip label={tooltip}>{icon}</Tooltip>
       )}
-    </ChakraBox>
+    </Box>
   )
 }
 
