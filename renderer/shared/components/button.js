@@ -7,9 +7,11 @@ import {
   IconButton as ChakraIconButton,
   PseudoBox,
   Icon,
+  Stack,
+  Text,
 } from '@chakra-ui/core'
 import theme, {rem} from '../theme'
-import {Tooltip} from './tooltip'
+import {Tooltip} from './components'
 
 function Button({size, disabled, danger, variant = 'primary', css, ...props}) {
   const isPrimary = variant === 'primary'
@@ -97,7 +99,7 @@ function IconButton(
 ) {
   const color = danger ? theme.colors.danger : theme.colors.primary
   return (
-    <Tooltip content={tooltip}>
+    <Tooltip label={tooltip}>
       <button type="button" disabled={disabled} ref={ref} {...props}>
         {icon}
         <span>{children}</span>
@@ -216,8 +218,10 @@ export const IconButton2 = React.forwardRef(
       justifyContent="flex-start"
       {...props}
     >
-      <Icon name={icon} size={5} mr={2} />
-      {children}
+      <Stack isInline spacing={2} align="center">
+        {typeof icon === 'string' ? <Icon name={icon} size={5} mr={2} /> : icon}
+        <Text as="span">{children}</Text>
+      </Stack>
     </ChakraButton>
   )
 )

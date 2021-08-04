@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {useRouter} from 'next/router'
-import {Text as ChakraText} from '@chakra-ui/core'
+import {FormControl, Text} from '@chakra-ui/core'
 import {
   margin,
   padding,
@@ -13,7 +13,6 @@ import {
 import {useTranslation} from 'react-i18next'
 import {FiInfo, FiAlertCircle, FiGlobe} from 'react-icons/fi'
 import Box from './box'
-import {Text} from './typo'
 import theme, {rem} from '../theme'
 import {useIdentityState} from '../providers/identity-context'
 import Flex from './flex'
@@ -30,17 +29,16 @@ import {
   Transaction,
   appendTxHash,
 } from '../utils/dna-link'
-import {Input, FormGroup, Label} from './form'
-import Avatar from './avatar'
-import {Tooltip} from './tooltip'
 import {useNotificationDispatch} from '../providers/notification-context'
 import {
+  Avatar,
   Dialog,
   DialogBody,
   DialogFooter,
-  Tooltip as ChakraTooltip,
+  FormLabel,
+  Input,
+  Tooltip,
 } from './components'
-
 import {
   areSameCaseInsensitive,
   viewVotingHref,
@@ -284,7 +282,7 @@ export function DnaSendDialog({
                 >
                   {isExceededBalance && (
                     <Tooltip
-                      content={t('The amount is larger than your balance')}
+                      label={t('The amount is larger than your balance')}
                     >
                       <FiAlertCircle
                         size={rem(16)}
@@ -305,10 +303,10 @@ export function DnaSendDialog({
           <DnaDialogPanel label={t('Comment')} value={comment} />
         </DnaDialogDetails>
         {shouldConfirmTx && (
-          <FormGroup style={{...margin(rem(20), 0, 0)}}>
-            <Label style={{fontWeight: 500}}>
+          <FormControl mt={5}>
+            <FormLabel style={{fontWeight: 500}}>
               {t('Enter amount to confirm transfer')}
-            </Label>
+            </FormLabel>
             <Input
               disabled={isExceededBalance}
               value={confirmAmount}
@@ -319,7 +317,7 @@ export function DnaSendDialog({
                 {t('Entered amount does not match target amount')}
               </AlertText>
             )}
-          </FormGroup>
+          </FormControl>
         )}
       </DnaDialogBody>
       <DnaDialogFooter>
@@ -434,7 +432,7 @@ export function DnaRawTxDialog({
                 >
                   {isExceededBalance && (
                     <Tooltip
-                      content={t('The amount is larger than your balance')}
+                      label={t('The amount is larger than your balance')}
                     >
                       <FiAlertCircle
                         size={rem(16)}
@@ -453,8 +451,8 @@ export function DnaRawTxDialog({
           />
           <DnaDialogPanelDivider />
           <DnaDialogPanel label={t('Transaction details')}>
-            <ChakraTooltip label={rawTx} zIndex="tooltip" wordBreak="break-all">
-              <ChakraText
+            <Tooltip label={rawTx} zIndex="tooltip" wordBreak="break-all">
+              <Text
                 display="-webkit-box"
                 overflow="hidden"
                 style={{
@@ -464,15 +462,15 @@ export function DnaRawTxDialog({
                 wordBreak="break-all"
               >
                 {rawTx}
-              </ChakraText>
-            </ChakraTooltip>
+              </Text>
+            </Tooltip>
           </DnaDialogPanel>
         </DnaDialogDetails>
         {shouldConfirmTx && (
-          <FormGroup style={{...margin(rem(20), 0, 0)}}>
-            <Label style={{fontWeight: 500}}>
+          <FormControl mt={5}>
+            <FormLabel style={{fontWeight: 500}}>
               {t('Enter amount to confirm transfer')}
-            </Label>
+            </FormLabel>
             <Input
               disabled={isExceededBalance}
               value={confirmAmount}
@@ -483,7 +481,7 @@ export function DnaRawTxDialog({
                 {t('Entered amount does not match target amount')}
               </AlertText>
             )}
-          </FormGroup>
+          </FormControl>
         )}
       </DnaDialogBody>
       <DnaDialogFooter>
@@ -530,15 +528,7 @@ function DnaDialog(props) {
 }
 
 function DnaDialogSubtitle(props) {
-  return (
-    <Text
-      css={{
-        display: 'inline-block',
-        ...margin(0, 0, rem(20)),
-      }}
-      {...props}
-    />
-  )
+  return <Text mb={5} {...props} />
 }
 
 function DnaDialogAlert(props) {
@@ -555,7 +545,7 @@ function DnaDialogAlert(props) {
       }}
     >
       <FiInfo size={rem(16)} color={theme.colors.danger} fontWeight={500} />
-      <Text fontWeight={500} css={{...margin(0, 0, 0, rem(8))}} {...props} />
+      <Text fontWeight={500} ml={2} {...props} />
     </Flex>
   )
 }
@@ -595,9 +585,7 @@ function DnaDialogPanel({label, value, children, ...props}) {
 }
 
 function DnaDialogPanelLabel(props) {
-  return (
-    <Text color={theme.colors.muted} css={{lineHeight: rem(18)}} {...props} />
-  )
+  return <Text color="muted" lineHeight="short" {...props} />
 }
 
 function DnaDialogPanelValue(props) {
@@ -650,15 +638,12 @@ function DnaDialogFooter(props) {
 function Address({address}) {
   return (
     <Avatar
-      username={address}
-      size={40}
-      style={{
-        ...backgrounds(theme.colors.white),
-        ...borderRadius('top', rem(6)),
-        ...borderRadius('bottom', rem(6)),
-        border: `solid 1px ${theme.colors.gray2}`,
-        ...margin(0),
-      }}
+      address={address}
+      size={10}
+      bg="white"
+      borderRadius="md"
+      borderWidth={1}
+      borderColor="gray.300"
     />
   )
 }

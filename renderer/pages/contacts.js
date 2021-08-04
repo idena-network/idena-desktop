@@ -95,10 +95,7 @@ export default function ContactsPage() {
                 onCloseNewContactDrawer()
               }}
               onIssueFail={error => {
-                failToast({
-                  title: error ?? t('Something went wrong'),
-                  status: 'error',
-                })
+                failToast(error ?? t('Something went wrong'))
               }}
             />
 

@@ -360,10 +360,9 @@ export const VDivider = React.forwardRef(function VDivider(props, ref) {
   )
 })
 
-export const HDivider = React.forwardRef((props, ref) => (
-  <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
-))
-HDivider.displayName = 'HDivider'
+export const HDivider = React.forwardRef(function HDivider(props, ref) {
+  return <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
+})
 
 export function ExternalLink({href, children, ...props}) {
   return (

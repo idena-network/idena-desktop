@@ -5,10 +5,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import {margin, transparentize} from 'polished'
 import {FiChevronDown} from 'react-icons/fi'
+import {Text} from '@chakra-ui/core'
 import theme, {rem} from '../theme'
 import Box from './box'
 import Flex from './flex'
-import {Text} from './typo'
 import {FlatButton} from './button'
 import useClipboard from '../hooks/use-clipboard'
 
@@ -196,7 +196,7 @@ function Field({label, id, allowCopy, children, textarea, select, ...props}) {
             <Text
               color={theme.colors.success}
               fontSize={theme.fontSizes.small}
-              css={margin(0, rem(theme.spacings.small8), 0)}
+              mb={2}
             >
               {copiedText && 'Copied'}
             </Text>

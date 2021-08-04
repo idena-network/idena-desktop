@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React, {useState} from 'react'
 import {wordWrap, padding, margin, borderRadius} from 'polished'
+import {Text} from '@chakra-ui/core'
 import {Absolute, Box} from '.'
 import Flex from './flex'
 import theme, {rem} from '../theme'
@@ -10,7 +11,6 @@ import {
   NOTIFICATION_DELAY,
 } from '../providers/notification-context'
 import {IconButton} from './button'
-import {Text} from './typo'
 
 function Notifications() {
   const {notifications} = useNotificationState()

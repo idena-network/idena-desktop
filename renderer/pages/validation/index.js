@@ -56,7 +56,6 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {useTimingState} from '../../shared/providers/timing-context'
 import {InfoButton, PrimaryButton} from '../../shared/components/button'
 import {FloatDebug, Tooltip} from '../../shared/components/components'
-import {Tooltip as TooltipLegacy} from '../../shared/components/tooltip'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -322,8 +321,8 @@ function ValidationSession({
         </ActionBarItem>
         <ActionBarItem justify="flex-end">
           {(isShortSession(state) || isLongSessionKeywords(state)) && (
-            <TooltipLegacy
-              content={
+            <Tooltip
+              label={
                 hasAllRelevanceMarks(state) || isLastFlip(state)
                   ? null
                   : t('Go to last flip')
@@ -337,7 +336,7 @@ function ValidationSession({
               >
                 {t('Submit answers')}
               </PrimaryButton>
-            </TooltipLegacy>
+            </Tooltip>
           )}
           {isLongSessionFlips(state) && (
             <PrimaryButton

@@ -1,10 +1,10 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, {useRef, useCallback, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {rem, position} from 'polished'
 import {FaCircle} from 'react-icons/fa'
 import {FiCircle} from 'react-icons/fi'
-
 import {useTranslation} from 'react-i18next'
 import {
   Stack,
@@ -14,12 +14,11 @@ import {
 } from '@chakra-ui/core'
 import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {Menu, MenuItem} from '../../../shared/components/menu'
-
 import {IconButton} from '../../../shared/components/button'
 import {Box, Absolute} from '../../../shared/components'
-import Divider from '../../../shared/components/divider'
 import theme from '../../../shared/theme'
 import Flex from '../../../shared/components/flex'
+import {VDivider} from '../../../shared/components/components'
 
 export function Brushes({brush, onChange}) {
   const brushes = [4, 12, 20, 28, 36]
@@ -45,11 +44,6 @@ export function Brushes({brush, onChange}) {
       ))}
     </Stack>
   )
-}
-
-Brushes.propTypes = {
-  brush: PropTypes.number,
-  onChange: PropTypes.func,
 }
 
 export function ColorPicker({visible, color, onChange}) {
@@ -108,12 +102,6 @@ export function ColorPicker({visible, color, onChange}) {
       </Box>
     </div>
   )
-}
-
-ColorPicker.propTypes = {
-  visible: PropTypes.bool,
-  color: PropTypes.string,
-  onChange: PropTypes.func,
 }
 
 export function ArrowHint({hint, leftHanded, visible}) {
@@ -204,23 +192,6 @@ export function ArrowHint({hint, leftHanded, visible}) {
       </div>
     )
   )
-}
-
-ArrowHint.propTypes = {
-  hint: PropTypes.string,
-  leftHanded: PropTypes.bool,
-  visible: PropTypes.bool,
-}
-
-EditorContextMenu.propTypes = {
-  x: PropTypes.number,
-  y: PropTypes.number,
-  onClose: PropTypes.func.isRequired,
-  onCopy: PropTypes.func,
-  onPaste: PropTypes.func,
-  onDelete: PropTypes.func,
-  onClear: PropTypes.func,
-  onBringOnTop: PropTypes.func,
 }
 
 export function EditorContextMenu({
@@ -450,14 +421,6 @@ export function ImageEraseEditor({
     </Box>
   )
 }
-ImageEraseEditor.propTypes = {
-  url: PropTypes.string,
-  brushWidth: PropTypes.number,
-  imageObjectProps: PropTypes.object,
-  onDone: PropTypes.func,
-  onChanging: PropTypes.func,
-  isDone: PropTypes.bool,
-}
 
 export function ApplyChangesBottomPanel({label, onDone, onCancel}) {
   const {t} = useTranslation()
@@ -475,7 +438,7 @@ export function ApplyChangesBottomPanel({label, onDone, onCancel}) {
       <Flex align="center">
         <IconButton onClick={() => onCancel()}>{t('Cancel')}</IconButton>
 
-        <Divider vertical />
+        <VDivider h={5} />
 
         <IconButton
           style={{fontWeight: theme.fontWeights.bold}}
@@ -486,10 +449,4 @@ export function ApplyChangesBottomPanel({label, onDone, onCancel}) {
       </Flex>
     </Flex>
   )
-}
-
-ApplyChangesBottomPanel.propTypes = {
-  label: PropTypes.string,
-  onDone: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
 }

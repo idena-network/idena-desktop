@@ -42,6 +42,7 @@ import {rem} from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
   mapToFriendlyStatus,
+  useIdentity,
   useIdentityState,
 } from '../../shared/providers/identity-context'
 import {IdentityStatus, NodeType} from '../../shared/types'
@@ -68,6 +69,7 @@ import {
   toPercent,
 } from '../../shared/utils/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
+import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
 
 export function UserInlineCard({address, status, ...props}) {
   return (
@@ -788,4 +790,121 @@ export function InviteScoreAlert({
       )}
     </SuccessAlert>
   ) : null
+}
+
+export function KillIdentityDrawer({address, children, ...props}) {
+  const {t} = useTranslation()
+
+  return (
+    <Drawer {...props}>
+      <DrawerHeader mb={6}>
+        <Avatar address={address} mx="auto" />
+        <Heading
+          fontSize="lg"
+          fontWeight={500}
+          color="brandGray.500"
+          mt={4}
+          mb={0}
+          textAlign="center"
+        >
+          {t('Terminate identity')}
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>
+        <Text fontSize="md" mb={6}>
+          {t(`Terminate your identity and withdraw the stake. Your identity status
+            will be reset to 'Not validated'.`)}
+        </Text>
+        {children}
+      </DrawerBody>
+    </Drawer>
+  )
+}
+
+export function KillForm({onSuccess, onFail}) {
+  const {t} = useTranslation(['translation', 'error'])
+
+  const [{address, stake}, {killMe}] = useIdentity()
+
+  const toastSuccess = useSuccessToast()
+  const toastFail = useFailToast()
+
+  const [submitting, setSubmitting] = React.useState(false)
+
+  return (
+    <Stack
+      as="form"
+      spacing={6}
+      onSubmit={async e => {
+        e.preventDefault()
+
+        try {
+          const to = e.target.elements.to.value
+
+          if (to !== address)
+            throw new Error(t('You must specify your own identity address'))
+
+          setSubmitting(true)
+
+          const {result, error} = await killMe({to})
+
+          setSubmitting(false)
+
+          if (error) {
+            toastFail({
+              title: t('Error while sending transaction'),
+              description: error.message,
+            })
+          } else {
+            toastSuccess(t('Transaction sent'))
+            if (onSuccess) onSuccess(result)
+          }
+        } catch (error) {
+          setSubmitting(false)
+          toastFail(error?.message ?? t('Something went wrong'))
+          if (onFail) onFail(error)
+        }
+      }}
+    >
+      <FormControl>
+        <FormLabel htmlFor="stake">{t('Withraw stake, iDNA')}</FormLabel>
+        <Input
+          id="stake"
+          value={stake}
+          isDisabled
+          _disabled={{
+            bg: 'gray.50',
+          }}
+        />
+      </FormControl>
+
+      <Text fontSize="md" mb={6}>
+        {t(
+          'Please enter your identity address to confirm termination. Stake will be transferred to the identity address.'
+        )}
+      </Text>
+      <FormControl>
+        <FormLabel htmlFor="to">{t('Address')}</FormLabel>
+        <Input id="to" placeholder={t('Your identity address')} />
+      </FormControl>
+
+      <PrimaryButton
+        ml="auto"
+        type="submit"
+        isLoading={submitting}
+        variantColor="red"
+        _hover={{
+          bg: 'rgb(227 60 60)',
+        }}
+        _active={{
+          bg: 'rgb(227 60 60)',
+        }}
+        _focus={{
+          boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
+        }}
+      >
+        {t('Terminate')}
+      </PrimaryButton>
+    </Stack>
+  )
 }

@@ -29,6 +29,8 @@ import {
   UserStatLabel,
   ActivateMiningForm,
   InviteScoreAlert,
+  KillIdentityDrawer,
+  KillForm,
 } from '../screens/profile/components'
 import {
   PrimaryButton,
@@ -55,9 +57,6 @@ import {
   FloatDebug,
   Toast,
 } from '../shared/components/components'
-import KillForm, {
-  KillIdentityDrawer,
-} from '../screens/wallets/components/kill-form'
 import {
   shouldExpectValidationResults,
   hasPersistedValidationResults,

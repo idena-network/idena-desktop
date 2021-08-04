@@ -12,9 +12,8 @@ import {
   IconButton,
   Flex,
   useToast,
+  Switch,
 } from '@chakra-ui/core'
-import {Switcher} from '../../shared/components'
-import theme from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {BASE_API_URL} from '../../shared/api/api-client'
 import SettingsLayout from './layout'
@@ -150,12 +149,11 @@ function NodeSettings() {
         <Stack spacing={4}>
           <Stack isInline spacing={4} align="center">
             <Box>
-              <Switcher
+              <Switch
                 isChecked={settings.runInternalNode}
                 onChange={() => {
                   toggleRunInternalNode(!settings.runInternalNode)
                 }}
-                bgOn={theme.colors.primary}
               />
             </Box>
             <Box>
@@ -175,12 +173,11 @@ function NodeSettings() {
           </Stack>
           <Stack isInline spacing={3} align="center">
             <Box>
-              <Switcher
+              <Switch
                 isChecked={settings.useExternalNode}
                 onChange={() => {
                   toggleUseExternalNode(!settings.useExternalNode)
                 }}
-                bgOn={theme.colors.primary}
               />
             </Box>
             <Box>
@@ -244,10 +241,10 @@ function NodeSettings() {
                   </InputRightElement>
                 </InputGroup>
               </SettingsFormControl>
-
-              <SettingsFormControl mt={3}>
+              <Stack isInline spacing={2} align="center" justify="flex-end">
                 <SecondaryButton
                   ml="auto"
+                  type="button"
                   onClick={() => {
                     dispatch({type: 'SET_URL', data: BASE_API_URL})
                   }}
@@ -255,7 +252,7 @@ function NodeSettings() {
                   {t('Use default')}
                 </SecondaryButton>
                 <PrimaryButton type="submit">{t('Save')}</PrimaryButton>
-              </SettingsFormControl>
+              </Stack>
             </Stack>
           </SettingsSection>
         )}
