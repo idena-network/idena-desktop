@@ -28,7 +28,7 @@ import {
 import {
   ValidationScene,
   ActionBar,
-  Thumbnails,
+  ThumbnailList,
   Header,
   Title,
   FlipChallenge,
@@ -320,14 +320,8 @@ function ValidationSession({
           />
         </ActionBarItem>
         <ActionBarItem justify="flex-end">
-          {(isShortSession(state) || isLongSessionKeywords(state)) && (
-            <Tooltip
-              label={
-                hasAllRelevanceMarks(state) || isLastFlip(state)
-                  ? null
-                  : t('Go to last flip')
-              }
-            >
+          {(isShortSession(state) || isLongSessionKeywords(state)) &&
+            (hasAllRelevanceMarks(state) || isLastFlip(state) ? (
               <PrimaryButton
                 isDisabled={!canSubmit(state)}
                 isLoading={isSubmitting(state)}
@@ -336,8 +330,18 @@ function ValidationSession({
               >
                 {t('Submit answers')}
               </PrimaryButton>
-            </Tooltip>
-          )}
+            ) : (
+              <Tooltip label={t('Go to last flip')}>
+                <PrimaryButton
+                  isDisabled={!canSubmit(state)}
+                  isLoading={isSubmitting(state)}
+                  loadingText={t('Submitting answers...')}
+                  onClick={() => send('SUBMIT')}
+                >
+                  {t('Submit answers')}
+                </PrimaryButton>
+              </Tooltip>
+            ))}
           {isLongSessionFlips(state) && (
             <PrimaryButton
               isDisabled={!canSubmit(state)}
@@ -348,7 +352,8 @@ function ValidationSession({
           )}
         </ActionBarItem>
       </ActionBar>
-      <Thumbnails currentIndex={currentIndex}>
+
+      <ThumbnailList currentIndex={currentIndex}>
         {flips.map((flip, idx) => (
           <Thumbnail
             key={flip.hash}
@@ -357,7 +362,8 @@ function ValidationSession({
             onPick={() => send({type: 'PICK', index: idx})}
           />
         ))}
-      </Thumbnails>
+      </ThumbnailList>
+
       {!isFirstFlip(state) &&
         hasManyFlips(state) &&
         isSolving(state) &&

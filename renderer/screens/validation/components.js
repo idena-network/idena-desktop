@@ -1,23 +1,8 @@
 /* eslint-disable react/prop-types */
 import React, {useMemo} from 'react'
 import {
-  margin,
-  padding,
-  borderRadius,
-  cover,
-  transparentize,
-  rgba,
-} from 'polished'
-import {
-  FiCheck,
-  FiXCircle,
-  FiChevronLeft,
-  FiChevronRight,
-  FiClock,
-} from 'react-icons/fi'
-import {
   Box,
-  Flex as ChakraFlex,
+  Flex,
   Stack,
   Text,
   Heading,
@@ -33,7 +18,8 @@ import {
   List,
   ListItem,
   AspectRatioBox,
-  Flex,
+  PseudoBox,
+  Spinner,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
@@ -64,29 +50,23 @@ import {FillCenter} from '../oracles/components'
 
 export function ValidationScene(props) {
   return (
-    <ChakraFlex
+    <Flex
       direction="column"
       h="100vh"
-      maxW="full"
+      w="full"
       pt={6}
       pb={3}
       pl={10}
       pr={6}
       overflow="hidden"
+      position="relative"
       {...props}
     />
   )
 }
 
 export function Header(props) {
-  return (
-    <ChakraFlex
-      justify="space-between"
-      align="center"
-      mb={rem(55)}
-      {...props}
-    />
-  )
+  return <Flex justify="space-between" align="center" mb={rem(55)} {...props} />
 }
 
 export function Title(props) {
@@ -101,11 +81,11 @@ export function Title(props) {
 }
 
 export function CurrentStep(props) {
-  return <ChakraFlex justify="center" flex={1} mb={6} {...props} />
+  return <Flex justify="center" flex={1} mb={6} {...props} />
 }
 
 export function FlipChallenge(props) {
-  return <ChakraFlex justify="center" align="center" zIndex={1} {...props} />
+  return <Flex justify="center" align="center" zIndex={1} {...props} />
 }
 
 export function Flip({
@@ -120,58 +100,46 @@ export function Flip({
   onChoose,
   onImageFail,
 }) {
+  const {colors} = useTheme()
+
   if ((fetched && !decoded) || failed) return <FailedFlip />
   if (!fetched) return <LoadingFlip />
 
   return (
     <FlipHolder
-      css={
-        // eslint-disable-next-line no-nested-ternary
-        option
-          ? option === variant
-            ? {
-                border: `solid ${rem(2)} ${theme.colors.primary}`,
-                boxShadow: `0 0 ${rem(2)} ${rem(3)} ${transparentize(
-                  0.75,
-                  theme.colors.primary
-                )}`,
-                transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
-              }
-            : {
-                opacity: 0.3,
-                transform: 'scale(0.98)',
-                transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
-                transitionProperty: 'opacity, transform',
-                willChange: 'opacity, transform',
-              }
-          : {}
-      }
+      // eslint-disable-next-line no-nested-ternary
+      {...(option
+        ? option === variant
+          ? {
+              border: `solid 2px ${colors.blue[500]}`,
+              boxShadow: `0 0 2px ${rem(3)} ${colors.blue['025']}`,
+              transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
+            }
+          : {
+              opacity: 0.3,
+              transform: 'scale(0.98)',
+              transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
+              transitionProperty: 'opacity, transform',
+              willChange: 'opacity, transform',
+            }
+        : {})}
     >
       {reorderList(images, orders[variant - 1]).map((src, idx) => (
         <Box
           key={idx}
-          css={{
-            height: 'calc((100vh - 260px) / 4)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
+          height="calc((100vh - 260px) / 4)"
+          position="relative"
+          overflow="hidden"
           onClick={() => onChoose(hash)}
         >
           <FlipBlur src={src} />
           <FlipImage
             src={src}
-            alt="current-flip"
-            height="100%"
-            width="100%"
-            style={{
-              ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
-              ...borderRadius(
-                'bottom',
-                idx === images.length - 1 ? rem(8) : 'none'
-              ),
-              position: 'relative',
-              zIndex: 1,
-            }}
+            objectFit="contain"
+            height="full"
+            width="full"
+            position="relative"
+            zIndex={1}
             onError={onImageFail}
           />
         </Box>
@@ -183,7 +151,7 @@ export function Flip({
 function FlipHolder(props) {
   const {colors} = useTheme()
   return (
-    <ChakraFlex
+    <Flex
       justify="center"
       direction="column"
       borderRadius="lg"
@@ -206,7 +174,7 @@ function LoadingFlip() {
   return (
     <FlipHolder cursor="not-allowed">
       <FillCenter>
-        <ValidationSpinner />
+        <Spinner size="lg" thickness={4} color="blue.500" />
       </FillCenter>
     </FlipHolder>
   )
@@ -217,15 +185,9 @@ const defaultOrder = [1, 2, 3, 4]
 function FailedFlip() {
   const {t} = useTranslation()
   return (
-    <FlipHolder
-      css={{
-        border: 'none',
-        boxShadow: 'none',
-        cursor: 'not-allowed',
-      }}
-    >
+    <FlipHolder border="none" boxShadow="none" cursor="not-allowed">
       {defaultOrder.map((_, idx) => (
-        <ChakraFlex
+        <Flex
           key={`left-${idx}`}
           justify="center"
           align="center"
@@ -247,16 +209,15 @@ function FailedFlip() {
           height="calc((100vh - 260px) / 4)"
           overflow="hidden"
         >
-          <img
+          <Image
             alt={t('Failed flip')}
             src="/static/body-medium-pic-icn.svg"
-            style={{
-              height: rem(40),
-              width: rem(40),
-              opacity: 0.3,
-            }}
+            ignoreFallback
+            h={10}
+            w={10}
+            opacity={0.3}
           />
-        </ChakraFlex>
+        </Flex>
       ))}
     </FlipHolder>
   )
@@ -265,69 +226,51 @@ function FailedFlip() {
 export function FailedFlipAnnotation(props) {
   return (
     <Box
-      style={{
-        background: transparentize(0.17, theme.colors.black),
-        ...padding(rem(16), rem(42)),
-        color: theme.colors.white,
-        fontSize: rem(13),
-        fontWeight: 500,
-        textAlign: 'center',
-        position: 'absolute',
-        top: '50%',
-        left: rem(14),
-        right: rem(14),
-        transform: 'translateY(-50%)',
-        zIndex: 2,
-      }}
+      background="rgb(17 17 17 / 0.17)"
+      px="42px"
+      py={4}
+      color="white"
+      fontSize="md"
+      fontWeight={500}
+      textAlign="center"
+      position="absolute"
+      top="50%"
+      left={14}
+      right={14}
+      transform="translateY(-50%)"
+      zIndex={2}
       {...props}
-    ></Box>
+    />
   )
 }
 
 function FlipBlur({src}) {
   return (
-    <div
+    <Box
+      position="absolute"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
+      background={`center center / cover no-repeat url(${src})`}
+      zIndex={1}
       style={{
-        background: `center center / cover no-repeat url(${src})`,
-        filter: `blur(${rem(6)})`,
-        ...cover(),
-        zIndex: 1,
+        filter: 'blur(6px)',
       }}
     />
   )
 }
 
-function FlipImage({
-  height = 110,
-  width = 147,
-  fit = 'contain',
-  style,
-  ...props
-}) {
-  const normalize = value =>
-    value.toString().endsWith('%') ? value : rem(height)
-  return (
-    // eslint-disable-next-line jsx-a11y/alt-text
-    <img
-      style={{
-        height: normalize(height),
-        width: normalize(width),
-        objectFit: fit,
-        objectPosition: 'center',
-        textAlign: 'center',
-        ...style,
-      }}
-      {...props}
-    />
-  )
+function FlipImage(props) {
+  return <Image ignoreFallback {...props} />
 }
 
 export function ActionBar(props) {
-  return <ChakraFlex justify="space-between" mb={4} {...props} />
+  return <Flex justify="space-between" mb={4} {...props} />
 }
 
 export function ActionBarItem(props) {
-  return <ChakraFlex flex={1} minH={8} zIndex={1} {...props} />
+  return <Flex flex={1} minH={8} zIndex={1} {...props} />
 }
 
 const thumbBorderWidth = 2
@@ -335,16 +278,16 @@ const thumbMargin = 4
 const thumbWidth = 32
 const totalThumbWidth = thumbBorderWidth * 2 + thumbMargin * 2 + thumbWidth
 
-export function Thumbnails({currentIndex, ...props}) {
+export function ThumbnailList({currentIndex, ...props}) {
   return (
-    <ChakraFlex
+    <Flex
       align="center"
       minH={12}
+      position="relative"
+      zIndex={1}
       transform={`translateX(50%) translateX(-${totalThumbWidth *
         (currentIndex + 1 / 2)}px)`}
       transition="transform .3s ease-out"
-      willChange="transform"
-      zIndex={1}
       {...props}
     />
   )
@@ -392,16 +335,11 @@ export function Thumbnail({
           )}
           <FlipImage
             src={images[0]}
-            alt={images[0]}
-            height={32}
-            width={32}
-            fit="cover"
-            style={{
-              borderRadius: rem(12),
-              border: isCurrent
-                ? 'transparent'
-                : 'solid 1px rgb(83 86 92 /0.16)',
-            }}
+            objectFit="cover"
+            border={isCurrent ? 'transparent' : 'solid 1px rgb(83 86 92 /0.16)'}
+            borderRadius="xl"
+            height={8}
+            width={8}
           />
         </>
       )}
@@ -411,7 +349,7 @@ export function Thumbnail({
 
 function ThumbnailHolder({isCurrent, children, ...props}) {
   return (
-    <ChakraFlex
+    <Flex
       justify="center"
       align="center"
       borderWidth={thumbBorderWidth}
@@ -419,20 +357,22 @@ function ThumbnailHolder({isCurrent, children, ...props}) {
       borderRadius="xl"
       {...props}
     >
-      <Box
-        height={rem(thumbWidth)}
-        width={rem(thumbWidth)}
-        margin={rem(thumbMargin)}
+      <Flex
+        justify="center"
+        align="center"
+        h={8}
+        w={8}
+        m={1}
         position="relative"
       >
         {children}
-      </Box>
-    </ChakraFlex>
+      </Flex>
+    </Flex>
   )
 }
 
 function LoadingThumbnail() {
-  return <ValidationSpinner size={24} />
+  return <Spinner color="blue.500" thickness={4} />
 }
 
 function FailedThumbnail() {
@@ -445,10 +385,10 @@ function FailedThumbnail() {
       left={0}
       right={0}
       bottom={0}
-      bg={rgba(89, 89, 89, 0.95)}
+      bg="rgb(89 89 89 / 0.95)"
       borderRadius="xl"
     >
-      <FiXCircle size={rem(20)} color={theme.colors.white} />
+      <Icon name="delete" size={5} color="white" />
     </Flex>
   )
 }
@@ -463,17 +403,18 @@ function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
       left={0}
       right={0}
       bottom={0}
+      zIndex={1}
       bg={
         // eslint-disable-next-line no-nested-ternary
         isQualified
           ? hasIrrelevantWords
-            ? 'red.010'
+            ? 'red.090'
             : 'blue.090'
-          : 'rgba(89 89 89 / 0.95)'
+          : 'rgb(150 153 158 / 0.8)'
       }
       borderRadius="xl"
     >
-      {option && <Icon as={FiCheck} size={5} color="white" />}
+      {option && <Icon name="tick" size={5} color="white" />}
     </Flex>
   )
 }
@@ -511,31 +452,14 @@ export function FlipWords({
           />
         ) : (
           <>
-            <Box
-              style={{
-                color: theme.colors.primary2,
-                fontWeight: 500,
-                lineHeight: rem(20),
-              }}
-            >
+            <Box color="brandGray.500" fontWeight={500}>
               {t(`Getting flip keywords...`)}
             </Box>
-            {[
-              t(
+            <Box color="muted" mt={2}>
+              {t(
                 'Can not load the flip keywords to moderate the story. Please wait or skip this flip.'
-              ),
-            ].map((word, idx) => (
-              <Box
-                key={`desc-${idx}`}
-                style={{
-                  color: theme.colors.muted,
-                  lineHeight: rem(20),
-                  ...margin(rem(theme.spacings.small8), 0, 0),
-                }}
-              >
-                {word}
-              </Box>
-            ))}
+              )}
+            </Box>
           </>
         )}
       </FlipKeywordPanel>
@@ -589,53 +513,41 @@ export function WelcomeQualificationDialog(props) {
 
 export function NavButton({type, bg, color, ...props}) {
   const isPrev = type === 'prev'
-  // eslint-disable-next-line no-shadow
-  const Icon = isPrev ? FiChevronLeft : FiChevronRight
   return (
     <Box
       position="absolute"
       top="50%"
       left={isPrev && 0}
       right={isPrev || 0}
-      width={rem(280)}
+      h={600}
+      w={280}
       zIndex={0}
-      css={{
-        transform: 'translate(0, -50%)',
-        overflow: 'hidden',
-        height: rem(600),
-      }}
+      transform="translate(0, -50%)"
+      overflow="hidden"
       {...props}
     >
-      <div>
+      <PseudoBox
+        borderRadius="full"
+        cursor="pointer"
+        h="full"
+        w={560}
+        position="relative"
+        transform={`translateX(${isPrev ? '-50%' : ''})`}
+        transition="all 0.5s ease-out"
+        _hover={{bg}}
+      >
         <Icon
-          fontSize={rem(20)}
+          name="chevron-down"
+          size={5}
           color={color}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: `translate(-50%, -50%) translateX(${
-              isPrev ? rem(80) : rem(-80)
-            })`,
-          }}
+          position="absolute"
+          top="50%"
+          left="50%"
+          transform={`translate(-50%, -50%) translateX(${
+            isPrev ? '80px' : '-80px'
+          }) rotate(${isPrev ? '' : '-'}90deg)`}
         />
-        <style jsx>{`
-          div {
-            border-radius: 50%;
-            cursor: pointer;
-            height: 100%;
-            width: ${rem(560)};
-            position: relative;
-            transform: translateX(${isPrev ? '-50%' : ''});
-            transition: all 0.5s ease-out;
-            transition-property: background;
-            will-change: background;
-          }
-          div:hover {
-            background: ${bg};
-          }
-        `}</style>
-      </div>
+      </PseudoBox>
     </Box>
   )
 }
@@ -686,25 +598,29 @@ export function ValidationTimer({validationStart, duration}) {
 
   return (
     <Timer>
-      <TimerIcon color={theme.colors.danger} />
-      <TimerClock duration={adjustedDuration} color={theme.colors.danger} />
+      <TimerIcon color="red.500" />
+      <TimerClock duration={adjustedDuration} color="red.500" />
     </Timer>
   )
 }
 
 export function Timer(props) {
-  return <Flex align="center" {...props} />
-}
-
-export function TimerIcon({color}) {
   return (
-    <FiClock
-      size={rem(20)}
-      color={color}
-      style={{marginRight: rem(theme.spacings.small8)}}
-      width={rem(20)}
+    <Stack
+      isInline
+      align="center"
+      bg="red.024"
+      borderRadius={16}
+      px={2}
+      pr={3}
+      py="3/2"
+      {...props}
     />
   )
+}
+
+export function TimerIcon({color, ...props}) {
+  return <Icon name="clock" size={5} color={color} {...props} />
 }
 
 export function TimerClock({duration, color}) {
@@ -720,8 +636,8 @@ export function TimerClock({duration, color}) {
   const remaining = duration - elapsed
 
   return (
-    <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: rem(37)}}>
-      <Text color={color} fontSize={rem(13)} fontWeight={500}>
+    <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: 37}}>
+      <Text color={color} fontSize="md" fontWeight={600}>
         {state.matches('stopped') && '00:00'}
         {state.matches('running') &&
           [Math.floor(remaining / 60), remaining % 60]
@@ -929,38 +845,6 @@ export function AfterLongSessionToast() {
   )
 }
 
-function ValidationSpinner({size = 30}) {
-  return (
-    <div>
-      <style jsx>{`
-        @keyframes donut-spin {
-          0% {
-            transform: translate(-50%, -50%) rotate(0deg);
-          }
-          100% {
-            transform: translate(-50%, -50%) rotate(360deg);
-          }
-        }
-        div {
-          display: inline-block;
-          border: 4px solid rgba(0, 0, 0, 0.1);
-          border-left-color: ${theme.colors.primary};
-          border-radius: 50%;
-          width: ${rem(size)};
-          height: ${rem(size)};
-          animation: donut-spin 1.2s linear infinite;
-
-          left: 50%;
-          position: absolute;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          text-align: center;
-        }
-      `}</style>
-    </div>
-  )
-}
-
 export function ReviewValidationDialog({
   flips,
   reportedFlipsCount,
@@ -1163,7 +1047,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
             <BadFlipImage src={flipUrl(flipCase, 3)} />
             <BadFlipImage src={flipUrl(flipCase, 4)} roundedBottom="md" />
           </Stack>
-          <ChakraFlex
+          <Flex
             direction="column"
             justify="space-between"
             spacing={7}
@@ -1255,7 +1139,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
                   : t('Next')}
               </PrimaryButton>
             </Stack>
-          </ChakraFlex>
+          </Flex>
         </Stack>
       </ModalContent>
     </Modal>
@@ -1301,7 +1185,7 @@ function BadFlipListItem({
 
 function BadFlipListItemCircle(props) {
   return (
-    <ChakraFlex
+    <Flex
       align="center"
       justify="center"
       rounded="full"
@@ -1339,7 +1223,7 @@ function BadFlipPartFrame({flipCase, ...props}) {
       zIndex={1}
       {...props}
     >
-      <ChakraFlex
+      <Flex
         align="center"
         justify="center"
         bg="red.500"
@@ -1350,7 +1234,7 @@ function BadFlipPartFrame({flipCase, ...props}) {
         bottom={-20}
       >
         <Icon name="block" size={5} />
-      </ChakraFlex>
+      </Flex>
     </Box>
   )
 }
