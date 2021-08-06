@@ -1,12 +1,8 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {useRouter} from 'next/router'
-import {Flex, FormControl, Text} from '@chakra-ui/core'
-import {margin, padding, border, wordWrap} from 'polished'
 import {useTranslation} from 'react-i18next'
-import {FiInfo, FiAlertCircle, FiGlobe} from 'react-icons/fi'
-import Box from './box'
-import theme, {rem} from '../theme'
+import {Box, Flex, FormControl, Icon, Image, Stack, Text} from '@chakra-ui/core'
 import {useIdentityState} from '../providers/identity-context'
 import {SecondaryButton, PrimaryButton} from './button'
 import {
@@ -21,13 +17,13 @@ import {
   Transaction,
   appendTxHash,
 } from '../utils/dna-link'
-import {useNotificationDispatch} from '../providers/notification-context'
 import {
   Avatar,
   Dialog,
   DialogBody,
   DialogFooter,
   FormLabel,
+  HDivider,
   Input,
   Tooltip,
 } from './components'
@@ -36,23 +32,24 @@ import {
   viewVotingHref,
 } from '../../screens/oracles/utils'
 import {callRpc} from '../utils/utils'
+import {useFailToast} from '../hooks/use-toast'
 
 export function DnaLinkHandler({children}) {
   const router = useRouter()
 
   const [dnaUrl, setDnaUrl] = React.useState()
 
-  const {addError} = useNotificationDispatch()
+  const toastFail = useFailToast()
 
   const {t} = useTranslation()
 
   React.useEffect(() => {
     if (dnaUrl && !validDnaUrl(dnaUrl))
-      addError({
+      toastFail({
         title: t('Invalid DNA link'),
-        body: t(`You must provide valid URL including protocol version`),
+        description: t(`You must provide valid URL including protocol version`),
       })
-  }, [addError, dnaUrl, t])
+  }, [dnaUrl, t, toastFail])
 
   React.useEffect(() => {
     if (global.isDev) return
@@ -136,17 +133,15 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
               </Box>
               <PanelMediaCell>
                 {callbackFaviconUrl ? (
-                  <img
+                  <Image
                     src={callbackFaviconUrl}
-                    alt={`${callbackHostname} favicon`}
-                    style={{
-                      borderRadius: rem(6),
-                      height: rem(40),
-                      width: rem(40),
-                    }}
+                    ignoreFallback
+                    borderRadius="md"
+                    h={10}
+                    w={10}
                   />
                 ) : (
-                  <FiGlobe color={theme.colors.primary} size={rem(40)} />
+                  <Icon name="globe" color="blue.500" size={10} />
                 )}
               </PanelMediaCell>
             </PanelRow>
@@ -227,6 +222,8 @@ export function DnaSendDialog({
   const areSameAmounts = +confirmAmount === +amount
   const isExceededBalance = +amount > balance
 
+  const [isSubmitting, setIsSubmitting] = React.useState()
+
   return (
     <DnaDialog
       isOpen={url}
@@ -260,26 +257,16 @@ export function DnaSendDialog({
           <DnaDialogPanel>
             <DnaDialogPanelLabel>{t('Amount')}, iDNA</DnaDialogPanelLabel>
             <DnaDialogPanelValue
-              color={
-                isExceededBalance ? theme.colors.danger : theme.colors.text
-              }
+              color={isExceededBalance ? 'red.500' : 'brandGray.500'}
             >
               <PanelRow justify="flex-start">
-                <Box style={{...margin(0, rem(4), 0, 0)}}>{amount}</Box>
-                <Box
-                  style={{
-                    lineHeight: rem(theme.fontSizes.base),
-                    ...margin(rem(2), 0, 0),
-                  }}
-                >
+                <Box mr={1}>{amount}</Box>
+                <Box mt="1/2" lineHeight="shorter">
                   {isExceededBalance && (
                     <Tooltip
                       label={t('The amount is larger than your balance')}
                     >
-                      <FiAlertCircle
-                        size={rem(16)}
-                        color={theme.colors.danger}
-                      />
+                      <Icon name="exclamation-mark" size={4} color="red.500" />
                     </Tooltip>
                   )}
                 </Box>
@@ -316,6 +303,7 @@ export function DnaSendDialog({
         <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
         <PrimaryButton
           isDisabled={isExceededBalance || (shouldConfirmTx && !areSameAmounts)}
+          isLoading={isSubmitting}
           onClick={async () => {
             new Promise((resolve, reject) => {
               if (shouldConfirmTx) {
@@ -329,8 +317,11 @@ export function DnaSendDialog({
               }
               return resolve()
             })
+              .then(() => setIsSubmitting(true))
               .then(() => sendDna({from, to, amount, comment}))
               .then(hash => {
+                setIsSubmitting(false)
+
                 if (isValidUrl(callbackUrl)) {
                   global.logger.info('Received dna://send cb url', callbackUrl)
                   global.logger.info(
@@ -339,9 +330,11 @@ export function DnaSendDialog({
                   )
                   global.openExternal(appendTxHash(callbackUrl, hash).href)
                 }
+
                 onDepositSuccess(hash)
               })
               .catch(({message}) => {
+                setIsSubmitting(false)
                 global.logger.error(message)
                 if (onDepositError) onDepositError(message)
               })
@@ -379,6 +372,8 @@ export function DnaRawTxDialog({
   const areSameAmounts = +confirmAmount === +amount
   const isExceededBalance = +amount > balance
 
+  const [isSubmitting, setIsSubmitting] = React.useState()
+
   return (
     <DnaDialog
       isOpen={url}
@@ -410,26 +405,16 @@ export function DnaRawTxDialog({
           <DnaDialogPanel>
             <DnaDialogPanelLabel>{t('Amount')}, iDNA</DnaDialogPanelLabel>
             <DnaDialogPanelValue
-              color={
-                isExceededBalance ? theme.colors.danger : theme.colors.text
-              }
+              color={isExceededBalance ? 'red.500' : 'brandGray.500'}
             >
               <PanelRow justify="flex-start">
-                <Box style={{...margin(0, rem(4), 0, 0)}}>{amount}</Box>
-                <Box
-                  style={{
-                    lineHeight: rem(theme.fontSizes.base),
-                    ...margin(rem(2), 0, 0),
-                  }}
-                >
+                <Box mr={1}>{amount}</Box>
+                <Box mt="1/2" lineHeight="shorter">
                   {isExceededBalance && (
                     <Tooltip
                       label={t('The amount is larger than your balance')}
                     >
-                      <FiAlertCircle
-                        size={rem(16)}
-                        color={theme.colors.danger}
-                      />
+                      <Icon name="exclamation-mark" size={4} color="red.500" />
                     </Tooltip>
                   )}
                 </Box>
@@ -480,6 +465,7 @@ export function DnaRawTxDialog({
         <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
         <PrimaryButton
           isDisabled={isExceededBalance || (shouldConfirmTx && !areSameAmounts)}
+          isLoading={isSubmitting}
           onClick={async () => {
             new Promise((resolve, reject) => {
               if (shouldConfirmTx) {
@@ -493,8 +479,10 @@ export function DnaRawTxDialog({
               }
               return resolve()
             })
+              .then(() => setIsSubmitting(true))
               .then(() => callRpc('bcn_sendRawTx', rawTx))
               .then(hash => {
+                setIsSubmitting(false)
                 if (isValidUrl(callbackUrl)) {
                   global.logger.info('Received dna://rawTx cb url', callbackUrl)
                   global.openExternal(appendTxHash(callbackUrl, hash).href)
@@ -502,6 +490,7 @@ export function DnaRawTxDialog({
                 onSendSuccess(hash)
               })
               .catch(({message}) => {
+                setIsSubmitting(false)
                 global.logger.error(message)
                 if (onSendError) onSendError(message)
               })
@@ -525,7 +514,8 @@ function DnaDialogSubtitle(props) {
 
 function DnaDialogAlert(props) {
   return (
-    <Flex
+    <Stack
+      isInline
       align="center"
       bg="red.020"
       borderColor="red.500"
@@ -535,9 +525,9 @@ function DnaDialogAlert(props) {
       py={2}
       mb={5}
     >
-      <FiInfo size={rem(16)} color={theme.colors.danger} fontWeight={500} />
-      <Text fontWeight={500} ml={2} {...props} />
-    </Flex>
+      <Icon name="info" size={4} color="red.500" />
+      <Text fontWeight={500} {...props} />
+    </Stack>
   )
 }
 
@@ -546,28 +536,13 @@ function DnaDialogBody(props) {
 }
 
 function DnaDialogDetails(props) {
-  return (
-    <Box
-      bg={theme.colors.gray}
-      css={{
-        borderRadius: rem(8),
-        ...padding(0, rem(20)),
-      }}
-      {...props}
-    />
-  )
+  return <Box bg="gray.50" borderRadius="lg" px={5} {...props} />
 }
 
 // eslint-disable-next-line no-unused-vars
 function DnaDialogPanel({label, value, children, ...props}) {
   return (
-    <Box
-      css={{
-        ...padding(rem(16), 0),
-        ...margin(0, 0, '1px'),
-      }}
-      {...props}
-    >
+    <Box py={4} mb="1px" {...props}>
       {label && <DnaDialogPanelLabel>{label}</DnaDialogPanelLabel>}
       {value && <DnaDialogPanelValue>{value}</DnaDialogPanelValue>}
       {children}
@@ -580,30 +555,11 @@ function DnaDialogPanelLabel(props) {
 }
 
 function DnaDialogPanelValue(props) {
-  return (
-    <Box
-      css={{
-        color: theme.colors.text,
-        fontWeight: 500,
-        lineHeight: rem(20),
-        ...wordWrap('break-all'),
-        minWidth: rem(40),
-      }}
-      {...props}
-    />
-  )
+  return <Box fontWeight={500} wordBreak="break-all" minW={10} {...props} />
 }
 
 function DnaDialogPanelDivider() {
-  return (
-    <hr
-      style={{
-        border: 'none',
-        ...border('top', '1px', 'solid', theme.colors.white),
-        ...margin(0, rem(-20)),
-      }}
-    />
-  )
+  return <HDivider border="none" borderColor="white" mx={-5} />
 }
 
 function PanelRow(props) {
@@ -611,15 +567,7 @@ function PanelRow(props) {
 }
 
 function PanelMediaCell(props) {
-  return (
-    <Box
-      style={{
-        minWidth: rem(40),
-        ...margin(0, 0, 0, rem(16)),
-      }}
-      {...props}
-    />
-  )
+  return <Box minW={10} mb={4} {...props} />
 }
 
 function DnaDialogFooter(props) {
@@ -639,17 +587,8 @@ function Address({address}) {
   )
 }
 
-function AlertText({textAlign = 'initial', ...props}) {
+function AlertText(props) {
   return (
-    <Box
-      color={theme.colors.danger}
-      style={{
-        fontWeight: theme.fontWeights.medium,
-        fontSize: rem(11),
-        ...margin(rem(12), 0, 0),
-        textAlign,
-      }}
-      {...props}
-    />
+    <Box color="red.500" fontWeight={500} fontSize="sm" mt={1} {...props} />
   )
 }
