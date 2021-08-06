@@ -335,3 +335,6 @@ export async function suggestKeywordTranslation({
     desc,
   }
 }
+
+export const colorPickerColor = color =>
+  color.includes('ffffff') ? 'rgb(210 212 217)' : `#${color}`

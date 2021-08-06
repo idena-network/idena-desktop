@@ -239,6 +239,7 @@ export function FlipCardMenuItem(props) {
   return (
     <PseudoBox
       as={MenuItem}
+      color="brandGray.500"
       fontWeight={500}
       px={3}
       py="3/2"
@@ -252,7 +253,7 @@ export function FlipCardMenuItem(props) {
 }
 
 export function FlipCardMenuItemIcon(props) {
-  return <Icon size={5} mr={3} color="brand.blue" {...props} />
+  return <Icon size={5} mr={3} color="blue.500" {...props} />
 }
 
 export function RequiredFlipPlaceholder({title}) {
