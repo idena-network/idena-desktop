@@ -5,15 +5,13 @@ import Head from 'next/head'
 import {ThemeProvider, CSSReset} from '@chakra-ui/core'
 import NProgress from 'nprogress'
 import GoogleFonts from 'next-google-fonts'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import 'tui-image-editor/dist/tui-image-editor.css'
 import '../i18n'
 import {uiTheme} from '../shared/theme'
-import {NotificationProvider} from '../shared/providers/notification-context'
 import {NodeProvider} from '../shared/providers/node-context'
 import {SettingsProvider} from '../shared/providers/settings-context'
 import {AutoUpdateProvider} from '../shared/providers/update-context'
-
-// eslint-disable-next-line import/no-extraneous-dependencies
-import 'tui-image-editor/dist/tui-image-editor.css'
 import {ChainProvider} from '../shared/providers/chain-context'
 import {TimingProvider} from '../shared/providers/timing-context'
 import {EpochProvider} from '../shared/providers/epoch-context'
@@ -46,19 +44,17 @@ function AppProviders(props) {
     <SettingsProvider>
       <AutoUpdateProvider>
         <NodeProvider>
-          <NotificationProvider>
-            <ChainProvider>
-              <TimingProvider>
-                <EpochProvider>
-                  <IdentityProvider>
-                    <OnboardingProvider>
-                      <VotingNotificationProvider {...props} />
-                    </OnboardingProvider>
-                  </IdentityProvider>
-                </EpochProvider>
-              </TimingProvider>
-            </ChainProvider>
-          </NotificationProvider>
+          <ChainProvider>
+            <TimingProvider>
+              <EpochProvider>
+                <IdentityProvider>
+                  <OnboardingProvider>
+                    <VotingNotificationProvider {...props} />
+                  </OnboardingProvider>
+                </IdentityProvider>
+              </EpochProvider>
+            </TimingProvider>
+          </ChainProvider>
         </NodeProvider>
       </AutoUpdateProvider>
     </SettingsProvider>

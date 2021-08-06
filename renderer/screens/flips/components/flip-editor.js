@@ -21,7 +21,6 @@ import {
   Button,
 } from '@chakra-ui/core'
 import {useEpochState} from '../../../shared/providers/epoch-context'
-import {useNotificationDispatch} from '../../../shared/providers/notification-context'
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {
   HDivider,
@@ -37,6 +36,7 @@ import {
 } from '../../../shared/utils/clipboard'
 import {ImageSearchDialog} from './image-search'
 import {colorPickerColor} from '../utils'
+import {useSuccessToast} from '../../../shared/hooks/use-toast'
 
 const ImageEditor =
   typeof window !== 'undefined'
@@ -356,15 +356,13 @@ export default function FlipEditor({
     }
   }
 
-  const {addNotification} = useNotificationDispatch()
+  const successToast = useSuccessToast()
 
   const handleOnCopy = () => {
     const url = activeObjectUrl || (editors[idx] && editors[idx].toDataURL())
     if (url) {
       writeImageURLToClipboard(url)
-      addNotification({
-        title: t('Copied'),
-      })
+      successToast(t('Copied'))
     }
   }
 

@@ -23,7 +23,6 @@ import {
   FlipSubmitStep,
   CommunityTranslationUnavailable,
 } from '../../screens/flips/components'
-import {NotificationType} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine} from '../../screens/flips/machines'
 import {
@@ -31,7 +30,6 @@ import {
   isPendingKeywordPair,
   getRandomKeywordPair,
 } from '../../screens/flips/utils'
-import {Notification} from '../../shared/components/notifications'
 import {Step} from '../../screens/flips/types'
 import {
   IconButton2,
@@ -44,6 +42,7 @@ import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {BadFlipDialog} from '../../screens/validation/components'
 import {requestDb} from '../../shared/utils/db'
+import {useFailToast} from '../../shared/hooks/use-toast'
 
 export default function NewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -54,6 +53,8 @@ export default function NewFlipPage() {
 
   const {syncing} = useChainState()
   const {flipKeyWordPairs} = useIdentityState()
+
+  const failToast = useFailToast()
 
   const [current, send] = useMachine(flipMasterMachine, {
     context: {
@@ -102,26 +103,11 @@ export default function NewFlipPage() {
         _,
         {data, error = data.response?.data?.error ?? data.message}
       ) => {
-        toast({
-          title: error,
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-          // eslint-disable-next-line react/display-name
-          render: () => (
-            <Box fontSize="md">
-              <Notification
-                title={
-                  data.response?.status === 413
-                    ? t('Cannot submit flip, content is too big')
-                    : error
-                }
-                type={NotificationType.Error}
-                delay={5000}
-              />
-            </Box>
-          ),
-        })
+        failToast(
+          data.response?.status === 413
+            ? t('Cannot submit flip, content is too big')
+            : error
+        )
       },
     },
   })

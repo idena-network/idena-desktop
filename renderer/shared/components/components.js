@@ -238,6 +238,7 @@ export function Toast({
   onAction,
   ...props
 }) {
+  const {color} = props
   return (
     <Alert
       status={status}
@@ -252,14 +253,19 @@ export function Toast({
       mb={5}
       minH={rem(44)}
       rounded="lg"
+      w="md"
       {...props}
     >
-      <AlertIcon name={icon} size={5} />
+      <AlertIcon name={icon} size={5} color={color} />
       <Flex direction="column" align="flex-start" maxW="sm">
         <AlertTitle fontWeight={500} lineHeight="base">
           {title}
         </AlertTitle>
-        <AlertDescription color="muted" lineHeight="base" textAlign="left">
+        <AlertDescription
+          color={color || 'muted'}
+          lineHeight="base"
+          textAlign="left"
+        >
           {description}
         </AlertDescription>
       </Flex>
@@ -463,3 +469,17 @@ export const IconLink = React.forwardRef(
     </NextLink>
   )
 )
+
+export function Snackbar(props) {
+  return (
+    <Flex
+      justify="center"
+      position="absolute"
+      bottom={0}
+      left={0}
+      right={0}
+      zIndex="toast"
+      {...props}
+    />
+  )
+}

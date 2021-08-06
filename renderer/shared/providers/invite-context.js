@@ -2,10 +2,10 @@
 import React from 'react'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL, callRpc} from '../utils/utils'
-import {useNotificationDispatch, NotificationType} from './notification-context'
 import {useIdentityState} from './identity-context'
 import {IdentityStatus} from '../types'
 import {fetchIdentity, killInvitee, sendInvite} from '../api/dna'
+import {useFailToast} from '../hooks/use-toast'
 
 const db = global.invitesDb || {}
 
@@ -21,7 +21,6 @@ function InviteProvider({children}) {
   const [activationCode, setActivationCode] = React.useState()
 
   const {address, invitees} = useIdentityState()
-  const {addNotification} = useNotificationDispatch()
 
   React.useEffect(() => {
     let ignore = false
@@ -132,6 +131,8 @@ function InviteProvider({children}) {
     }
   }, [invitees])
 
+  const failToast = useFailToast()
+
   useInterval(
     async () => {
       try {
@@ -139,12 +140,7 @@ function InviteProvider({children}) {
         if (blockHash !== HASH_IN_MEMPOOL) resetActivation()
       } catch (error) {
         resetActivation()
-        addNotification({
-          title: error
-            ? error.message
-            : 'Activation failed. Tx no longer exists',
-          type: NotificationType.Error,
-        })
+        failToast(error?.message ?? 'Activation failed. Tx no longer exists')
       }
     },
     activationTx ? 1000 * 10 : null

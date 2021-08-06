@@ -30,8 +30,6 @@ import {reorderList} from '../../shared/utils/arr'
 import theme, {rem} from '../../shared/theme'
 import {RelevanceType, adjustDuration} from './machine'
 import {loadValidationStateDefinition} from './utils'
-import {Notification, Snackbar} from '../../shared/components/notifications'
-import {NotificationType} from '../../shared/providers/notification-context'
 import {EpochPeriod} from '../../shared/types'
 import {useTimingState} from '../../shared/providers/timing-context'
 import {createTimerMachine} from '../../shared/machines'
@@ -43,6 +41,8 @@ import {
   Dialog,
   DialogBody,
   DialogFooter,
+  Snackbar,
+  Toast,
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {useInterval} from '../../shared/hooks/use-interval'
@@ -760,14 +760,11 @@ export function ValidationSoonToast({validationStart}) {
 
   return (
     <Snackbar>
-      <Notification
-        bg={theme.colors.danger}
-        color={theme.colors.white}
-        iconColor={theme.colors.white}
-        pinned
-        type={NotificationType.Info}
+      <Toast
+        bg="red.500"
+        color="white"
         title={<TimerClock duration={duration} color={theme.colors.white} />}
-        body={t('Idena validation will start soon')}
+        description={t('Idena validation will start soon')}
       />
     </Snackbar>
   )
@@ -807,21 +804,18 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
 
   return (
     <Snackbar>
-      <Notification
-        bg={done ? theme.colors.success : theme.colors.primary}
-        color={theme.colors.white}
-        iconColor={theme.colors.white}
-        actionColor={theme.colors.white}
-        pinned
-        type={NotificationType.Info}
+      <Toast
+        bg={done ? 'green.500' : 'blue.500'}
+        color="white"
+        actionColor="white"
         title={<TimerClock duration={duration} color={theme.colors.white} />}
-        body={
+        description={
           done
-            ? `Waiting for the end of ${currentPeriod}`
-            : `Idena validation is in progress`
+            ? t('Waiting for the end of {{currentPeriod}}', {currentPeriod})
+            : t('Idena validation is in progress')
         }
-        action={done ? null : () => router.push('/validation')}
-        actionName={t('Validate')}
+        onAction={() => router.push('/validation')}
+        actionName={done ? null : t('Validate')}
       />
     </Snackbar>
   )
@@ -831,12 +825,9 @@ export function AfterLongSessionToast() {
   const {t} = useTranslation()
   return (
     <Snackbar>
-      <Notification
-        bg={theme.colors.success}
-        color={theme.colors.white}
-        iconColor={theme.colors.white}
-        pinned
-        type={NotificationType.Info}
+      <Toast
+        bg="green.500"
+        color="white"
         title={t(
           'Please wait. The network is reaching consensus on validated identities'
         )}

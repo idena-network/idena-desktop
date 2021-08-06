@@ -22,7 +22,6 @@ import {
   AlertIcon,
   AlertDescription,
   useToast,
-  Spinner,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -37,6 +36,7 @@ import {
   DrawerBody,
   Toast,
   SuccessAlert,
+  Snackbar,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
@@ -47,14 +47,9 @@ import {
 } from '../../shared/providers/identity-context'
 import {IdentityStatus, NodeType} from '../../shared/types'
 import {
-  useNotificationDispatch,
-  NotificationType,
-} from '../../shared/providers/notification-context'
-import {
   useInviteState,
   useInviteDispatch,
 } from '../../shared/providers/invite-context'
-import {Notification, Snackbar} from '../../shared/components/notifications'
 import {
   loadPersistentState,
   loadPersistentStateValue,
@@ -157,7 +152,7 @@ export function UserStatLabelTooltip(props) {
 export const ActivateInviteForm = React.forwardRef((props, ref) => {
   const {t} = useTranslation()
 
-  const {addError} = useNotificationDispatch()
+  const failToast = useFailToast()
 
   const {activationTx} = useInviteState()
   const {activateInvite} = useInviteDispatch()
@@ -181,14 +176,14 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
         try {
           await activateInvite(code?.trim())
         } catch ({message}) {
-          addError({
+          failToast(
             // eslint-disable-next-line no-nested-ternary
-            title: message.includes('missing')
+            message.includes('missing')
               ? t('Invitation code is not valid')
               : message.includes('validation ceremony')
               ? t('Can not activate invitation since the validation is running')
-              : message,
-          })
+              : message
+          )
         }
       }}
       {...props}
@@ -357,33 +352,23 @@ export function ValidationResultToast({epoch}) {
   return notSeen ? (
     <Snackbar>
       {current.matches('running') && (
-        <Notification
-          pinned
-          type={NotificationType.Info}
-          icon={
-            <Flex align="center" justify="center" h={5} w={5} mr={3}>
-              <Box style={{transform: 'scale(0.35) translateY(-10px)'}}>
-                <Spinner size={5} color="blue.500" />
-              </Box>
-            </Flex>
-          }
+        <Toast
+          icon="spinner"
           title={t('Please wait for the validation report')}
         />
       )}
       {current.matches('stopped') && (
-        <Notification
-          pinned
-          type={NotificationType.Info}
+        <Toast
           title={
             isValidationSucceeded
               ? t('See your validation rewards in the blockchain explorer')
               : t('See your validation results in the blockchain explorer')
           }
-          action={() => {
+          onAction={() => {
             dispatch(true)
             global.openExternal(url)
           }}
-          actionName={t('Open')}
+          actionContent={t('Open')}
         />
       )}
     </Snackbar>

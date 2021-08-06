@@ -53,6 +53,7 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {useChainState} from '../../shared/providers/chain-context'
 import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {IdentityStatus} from '../../shared/types'
+import {VotingSkeleton} from '../oracles/components'
 
 export function ContactListSidebar({
   selectedContactId,
@@ -190,6 +191,13 @@ function ContactList({filter, selectedContactId, onSelectContact}) {
       <Box color="muted" fontWeight={500} px={3} py={2}>
         {t('Contacts')}
       </Box>
+      {filteredInvites.length === 0 && (
+        <Stack px={4}>
+          {[...Array(5)].map(() => (
+            <VotingSkeleton h={6} />
+          ))}
+        </Stack>
+      )}
       {filteredInvites
         .filter(invite => !invite.deletedAt)
         .map(invite => (
