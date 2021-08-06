@@ -35,7 +35,6 @@ import {
   SmallText,
   Page,
 } from '../../shared/components/components'
-import {rem} from '../../shared/theme'
 import {
   PrimaryButton,
   IconButton2,
@@ -252,7 +251,7 @@ export default function ViewVotingPage() {
                       <Stack spacing={4}>
                         <Heading
                           overflow="hidden"
-                          fontSize={rem(21)}
+                          fontSize={21}
                           fontWeight={500}
                           display="-webkit-box"
                           style={{

@@ -281,7 +281,7 @@ export function Toast({
       w="md"
       {...props}
     >
-      <AlertIcon name={icon} size={5} color={color} />
+      <AlertIcon name={icon} size={5} color={color || 'blue.500'} />
       <Flex direction="column" align="flex-start" maxW="sm">
         <AlertTitle fontWeight={500} lineHeight="base">
           {title}

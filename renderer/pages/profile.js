@@ -58,14 +58,12 @@ import {
   buildNextValidationCalendarLink,
   formatValidationDate,
 } from '../shared/utils/utils'
-
 import {
   shouldExpectValidationResults,
   hasPersistedValidationResults,
 } from '../screens/validation/utils'
 import {persistItem} from '../shared/utils/persist'
 import {InviteProvider} from '../shared/providers/invite-context'
-import {rem} from '../shared/theme'
 import {useChainState} from '../shared/providers/chain-context'
 import {
   OnboardingPopover,
@@ -376,7 +374,7 @@ export default function ProfilePage() {
                     </OnboardingPopoverContent>
                   </OnboardingPopover>
                 </Stack>
-                <Stack spacing={10} w={rem(200)}>
+                <Stack spacing={10} w={200}>
                   <Box minH={62} mt={4}>
                     <OnboardingPopover
                       isOpen={eitherOnboardingState(

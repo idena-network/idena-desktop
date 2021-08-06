@@ -1,121 +1,9 @@
 import React from 'react'
 import {theme as chakraTheme} from '@chakra-ui/core'
-import {rem as remp, rgb, margin} from 'polished'
-
-const colors = {
-  primary: 'rgb(87, 143, 255)',
-  primary2: 'rgb(83, 86, 92)',
-  text: 'rgb(83, 86, 92)',
-  muted: 'rgb(150, 153, 158)',
-  gray: 'rgb(245, 246, 247)',
-  gray2: 'rgb(232, 234, 237)',
-  gray3: 'rgba(83, 86, 92, 0.3)',
-  gray4: 'rgb(210, 212, 217)',
-  gray5: rgb(64, 64, 64),
-  white: 'rgb(255, 255, 255)',
-  white05: 'rgba(255, 255, 255, 0.5)',
-  white01: 'rgba(255, 255, 255, 0.1)',
-  danger: 'rgb(255, 102, 102)',
-  danger02: 'rgba(255, 102, 102, 0.2)',
-  warning: 'rgb(255, 163, 102)',
-  warning02: 'rgba(255, 163, 102, 0.2)',
-  warning04: 'rgba(255, 163, 102, 0.4)',
-  success: 'rgb(39, 217, 128)',
-  success02: 'rgba(39, 217, 128, 0.2)',
-  success04: 'rgb(39, 217, 128, 0.4)',
-  black: 'rgb(17,17,17)',
-  black0: 'rgb(0,0,0)',
-  darkGraphite: 'rgb(69 72 77)',
-}
-
-const baseFontSize = 16
-
-const fontSizes = {
-  base: baseFontSize,
-  heading: rem(28),
-  subHeading: rem(18),
-  normal: rem(13),
-  small: '0.72rem',
-  medium: '1.2rem',
-  large: '1.4em',
-}
-
-const fontWeights = {
-  normal: 400,
-  medium: 500,
-  semi: 600,
-  bold: 700,
-}
-
-const spacings = {
-  xxsmall: '0.1em',
-  small: '0.5em',
-  small8: 8,
-  small12: 12,
-  normal: '1em',
-  medium16: 16,
-  medium24: 24,
-  medium32: 32,
-  large: 80,
-  large48: 48,
-  xlarge: '2em',
-  xxlarge: '3em',
-  xxxlarge: '4em',
-}
-
-export default {
-  colors,
-  spacings,
-  fontSizes,
-  fontWeights,
-  Box: {
-    w: '',
-    bg: '',
-  },
-  Flex: {
-    direction: 'initial',
-    justify: 'initial',
-    align: 'initial',
-  },
-  Heading: {
-    color: colors.text,
-    fontSize: fontSizes.heading,
-    fontWeight: 500,
-    lineHeight: rem(32),
-    ...margin(0),
-  },
-  SubHeading: {
-    color: colors.text,
-    fontSize: fontSizes.subHeading,
-    fontWeight: 500,
-    lineHeight: rem(24),
-    ...margin(0),
-  },
-  Text: {
-    color: colors.text,
-    fontSize: fontSizes.normal,
-    fontWeight: fontWeights.normal,
-    lineHeight: rem(20),
-  },
-  Link: {
-    color: colors.text,
-    fontSize: fontSizes.normal,
-    fontWeight: fontWeights.normal,
-    textDecoration: 'none',
-  },
-  Button: {
-    color: colors.text,
-    size: fontSizes.normal,
-  },
-}
-
-export function rem(value) {
-  return remp(value, baseFontSize)
-}
 
 const breakpoints = ['40em', '52em', '64em']
 
-export const uiTheme = {
+export const theme = {
   ...chakraTheme,
   colors: {
     ...chakraTheme.colors,
@@ -874,7 +762,7 @@ export const uiTheme = {
     block: {
       path: (
         <path
-          fill="#FFF"
+          fill="currentColor"
           fillRule="nonzero"
           d="M10 1.5c1.987 0 3.814.681 5.261 1.823l.032-.03.363.362c.243.216.473.446.69.689l.361.363-.03.032C17.819 6.186 18.5 8.013 18.5 10c0 4.694-3.806 8.5-8.5 8.5-1.987 0-3.814-.681-5.261-1.823l-.032.03-.363-.362c-.243-.216-.473-.446-.69-.689l-.361-.363.03-.032C2.181 13.814 1.5 11.987 1.5 10c0-4.694 3.806-8.5 8.5-8.5zm5.25 4.666L6.166 15.25c1.075.786 2.4 1.25 3.834 1.25 3.59 0 6.5-2.91 6.5-6.5 0-1.434-.464-2.759-1.25-3.834zM10 3.5c-3.59 0-6.5 2.91-6.5 6.5 0 1.434.464 2.759 1.25 3.834l9.084-9.084C12.759 3.964 11.434 3.5 10 3.5z"
           transform="translate(-508 -558) translate(375 160) translate(127 392) translate(6 6)"
@@ -955,5 +843,20 @@ export const uiTheme = {
       ),
       viewBox: '0 0 15 15',
     },
+    layers: {
+      path: (
+        <path
+          d="M7.75432 0.819537C7.59742 0.726821 7.4025 0.726821 7.24559 0.819537L1.74559 4.06954C1.59336 4.15949 1.49996 4.32317 1.49996 4.5C1.49996 4.67683 1.59336 4.84051 1.74559 4.93046L7.24559 8.18046C7.4025 8.27318 7.59742 8.27318 7.75432 8.18046L13.2543 4.93046C13.4066 4.84051 13.5 4.67683 13.5 4.5C13.5 4.32317 13.4066 4.15949 13.2543 4.06954L7.75432 0.819537ZM7.49996 7.16923L2.9828 4.5L7.49996 1.83077L12.0171 4.5L7.49996 7.16923ZM1.5695 7.49564C1.70998 7.2579 2.01659 7.17906 2.25432 7.31954L7.49996 10.4192L12.7456 7.31954C12.9833 7.17906 13.2899 7.2579 13.4304 7.49564C13.5709 7.73337 13.4921 8.03998 13.2543 8.18046L7.75432 11.4305C7.59742 11.5232 7.4025 11.5232 7.24559 11.4305L1.74559 8.18046C1.50786 8.03998 1.42901 7.73337 1.5695 7.49564ZM1.56949 10.4956C1.70998 10.2579 2.01658 10.1791 2.25432 10.3195L7.49996 13.4192L12.7456 10.3195C12.9833 10.1791 13.2899 10.2579 13.4304 10.4956C13.5709 10.7334 13.4921 11.04 13.2543 11.1805L7.75432 14.4305C7.59742 14.5232 7.4025 14.5232 7.24559 14.4305L1.74559 11.1805C1.50785 11.04 1.42901 10.7334 1.56949 10.4956Z"
+          fill="currentColor"
+          fillRule="evenodd"
+          clipRule="evenodd"
+        ></path>
+      ),
+      viewBox: '0 0 15 15',
+    },
   },
+}
+
+export function rem(value) {
+  return `${value / 16}rem`
 }

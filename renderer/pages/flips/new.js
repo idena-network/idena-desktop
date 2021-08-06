@@ -36,7 +36,6 @@ import {
   PrimaryButton,
 } from '../../shared/components/button'
 import {Toast, FloatDebug, Page} from '../../shared/components/components'
-import {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {BadFlipDialog} from '../../screens/validation/components'
@@ -142,7 +141,7 @@ export default function NewFlipPage() {
           flex={1}
           alignSelf="stretch"
           px={20}
-          pb={rem(36)}
+          pb={36}
           overflowY="auto"
         >
           <FlipPageTitle

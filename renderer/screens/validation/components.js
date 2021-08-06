@@ -27,7 +27,7 @@ import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
 import {State} from 'xstate'
 import {reorderList} from '../../shared/utils/arr'
-import theme, {rem} from '../../shared/theme'
+import {rem} from '../../shared/theme'
 import {RelevanceType, adjustDuration} from './machine'
 import {loadValidationStateDefinition} from './utils'
 import {EpochPeriod} from '../../shared/types'
@@ -763,7 +763,7 @@ export function ValidationSoonToast({validationStart}) {
       <Toast
         bg="red.500"
         color="white"
-        title={<TimerClock duration={duration} color={theme.colors.white} />}
+        title={<TimerClock duration={duration} color="white" />}
         description={t('Idena validation will start soon')}
       />
     </Snackbar>
@@ -808,7 +808,7 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
         bg={done ? 'green.500' : 'blue.500'}
         color="white"
         actionColor="white"
-        title={<TimerClock duration={duration} color={theme.colors.white} />}
+        title={<TimerClock duration={duration} color="white" />}
         description={
           done
             ? t('Waiting for the end of {{currentPeriod}}', {currentPeriod})

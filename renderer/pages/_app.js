@@ -1,14 +1,12 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import Router from 'next/router'
 import Head from 'next/head'
 import {ThemeProvider, CSSReset} from '@chakra-ui/core'
-import NProgress from 'nprogress'
 import GoogleFonts from 'next-google-fonts'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tui-image-editor/dist/tui-image-editor.css'
 import '../i18n'
-import {uiTheme} from '../shared/theme'
+import {theme} from '../shared/theme'
 import {NodeProvider} from '../shared/providers/node-context'
 import {SettingsProvider} from '../shared/providers/settings-context'
 import {AutoUpdateProvider} from '../shared/providers/update-context'
@@ -28,7 +26,7 @@ export default function App({Component, err, ...pageProps}) {
         <link href="/static/scrollbars.css" rel="stylesheet" />
       </Head>
 
-      <ThemeProvider theme={uiTheme}>
+      <ThemeProvider theme={theme}>
         <CSSReset />
         <AppProviders>
           <Component err={err} {...pageProps} />
@@ -59,7 +57,3 @@ function AppProviders(props) {
     </SettingsProvider>
   )
 }
-
-Router.events.on('routeChangeStart', NProgress.start)
-Router.events.on('routeChangeComplete', NProgress.done)
-Router.events.on('routeChangeError', NProgress.done)

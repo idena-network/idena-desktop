@@ -1,7 +1,6 @@
 import React, {useEffect, useReducer, useRef, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import Ansi from 'ansi-to-react'
-import {FiEye, FiEyeOff} from 'react-icons/fi'
 import {
   Box,
   Text,
@@ -229,9 +228,10 @@ function NodeSettings() {
                   />
                   <InputRightElement h="full">
                     <IconButton
-                      icon={revealApiKey ? FiEyeOff : FiEye}
+                      icon={revealApiKey ? 'eye-off' : 'eye'}
                       size="xs"
                       bg={revealApiKey ? 'gray.300' : 'white'}
+                      fontSize={20}
                       w={8}
                       _hover={{
                         bg: revealApiKey ? 'gray.300' : 'white',

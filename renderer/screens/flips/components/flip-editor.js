@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import React, {createRef, useRef, useCallback, useState} from 'react'
-import {rem} from 'polished'
 import Jimp from 'jimp'
 import {useTranslation} from 'react-i18next'
 import mousetrap from 'mousetrap'
@@ -19,6 +18,7 @@ import {
   Portal,
   IconButton,
   Button,
+  useTheme,
 } from '@chakra-ui/core'
 import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useInterval} from '../../../shared/hooks/use-interval'
@@ -28,7 +28,7 @@ import {
   Tooltip,
   VDivider,
 } from '../../../shared/components/components'
-import theme from '../../../shared/theme'
+import {rem} from '../../../shared/theme'
 import {resizing, imageResize} from '../../../shared/utils/img'
 import {
   getImageURLFromClipboard,
@@ -612,6 +612,8 @@ export default function FlipEditor({
   const leftArrowPortalRef = React.useRef()
   const rightArrowPortalRef = React.useRef()
 
+  const {colors} = useTheme()
+
   return (
     <Box display={visible ? 'initial' : 'none'}>
       <Flex>
@@ -683,10 +685,10 @@ export default function FlipEditor({
                 cornerSize: 8,
                 rotatingPointOffset: 20,
                 lineWidth: '1',
-                cornerColor: theme.colors.white,
-                cornerStrokeColor: theme.colors.primary,
+                cornerColor: colors.white,
+                cornerStrokeColor: colors.blue[500],
                 transparentCorners: false,
-                borderColor: theme.colors.primary,
+                borderColor: colors.blue[500],
               }}
               usageStatistics={false}
             />
@@ -1073,80 +1075,68 @@ function ArrowHint({hint, leftHanded}) {
       <Box position="absolute" bottom="76px" zIndex={90}>
         {leftHanded && (
           <div>
-            <div
-              style={{
-                minWidth: rem(24),
-                minHeight: rem(40),
-                borderLeft: `2px solid ${theme.colors.primary}`,
-                borderTop: `2px solid ${theme.colors.primary}`,
-              }}
+            <Box
+              borderColor="blue.500"
+              borderLeftWidth={2}
+              borderTopWidth={2}
+              minW={6}
+              minH={10}
             />
-            <div
-              style={{
-                position: 'absolute',
-                left: '-5px',
-                width: 0,
-                height: 0,
-                borderTop: `6px solid transparent`,
-                borderLeft: `6px solid transparent`,
-                borderRight: `6px solid transparent`,
-                borderBottom: 0,
-                borderTopColor: `${theme.colors.primary}`,
-              }}
+            <Box
+              borderWidth={6}
+              borderBottom="none"
+              borderColor="transparent"
+              borderTopColor="blue.500"
+              w={0}
+              h={0}
+              position="absolute"
+              left="-5px"
             />
-            <div
-              style={{
-                position: 'absolute',
-                left: '30px',
-                top: '-25px',
-                minWidth: '75px',
-                color: `${theme.colors.muted}`,
-                fontWeight: `${theme.fontWeights.normal}`,
-              }}
+            <Box
+              color="muted"
+              fontWeight={400}
+              minW={75}
+              position="absolute"
+              left="30px"
+              top="-25px"
             >
               {hint}
-            </div>
+            </Box>
           </div>
         )}
 
         {!leftHanded && (
-          <div>
-            <div
-              style={{
-                minWidth: rem(24),
-                minHeight: rem(40),
-                borderRight: `2px solid ${theme.colors.primary}`,
-                borderTop: `2px solid ${theme.colors.primary}`,
-              }}
+          <Box>
+            <Box
+              borderColor="blue.500"
+              borderLeftWidth={2}
+              borderTopWidth={2}
+              minW={6}
+              minH={10}
             />
-            <div
-              style={{
-                position: 'absolute',
-                left: rem(16),
-                width: 0,
-                height: 0,
-                marginLeft: '0px',
-                borderLeft: `6px solid transparent`,
-                borderRight: `6px solid transparent`,
-                borderTop: `6px solid transparent`,
-                borderBottom: 0,
-                borderTopColor: `${theme.colors.primary}`,
-              }}
+            <Box
+              borderWidth={6}
+              borderBottom="none"
+              borderColor="transparent"
+              borderTopColor="blue.500"
+              position="absolute"
+              left={16}
+              w={0}
+              h={0}
+              ml={0}
             />
-            <div
-              style={{
-                position: 'absolute',
-                left: '-58px',
-                top: '-25px',
-                minWidth: rem(52, theme.fontSizes.base),
-                width: rem(52, theme.fontSizes.base),
-                color: `${theme.colors.muted}`,
-                fontWeight: `${theme.fontWeights.normal}`,
-              }}
+            <Box
+              color="muted"
+              fontWeight={400}
+              w={52}
+              minW={52}
+              position="absolute"
+              left="-58px"
+              top="-25px"
             >
               {hint}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
       </Box>
     </Box>

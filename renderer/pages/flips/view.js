@@ -25,7 +25,6 @@ import {
   DeleteFlipDrawer,
 } from '../../screens/flips/components'
 import {createViewFlipMachine} from '../../screens/flips/machines'
-import {rem} from '../../shared/theme'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {
   FloatDebug,
@@ -127,7 +126,7 @@ export default function ViewFlipPage() {
               <FlipMaster>
                 <FlipStepBody minH="180px" my="auto">
                   <Stack isInline spacing={10}>
-                    <FlipKeywordPanel w={rem(320)}>
+                    <FlipKeywordPanel w="xs">
                       {keywords.words.length ? (
                         <FlipKeywordTranslationSwitch
                           keywords={keywords}

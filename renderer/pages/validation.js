@@ -50,7 +50,7 @@ import {
   BadFlipDialog,
   ReviewShortSessionDialog,
 } from '../screens/validation/components'
-import theme, {rem} from '../shared/theme'
+import {rem} from '../shared/theme'
 import {AnswerType} from '../shared/types'
 import {useEpochState} from '../shared/providers/epoch-context'
 import {useTimingState} from '../shared/providers/timing-context'
@@ -155,9 +155,7 @@ function ValidationSession({
   const currentFlip = flips[currentIndex]
 
   return (
-    <ValidationScene
-      bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
-    >
+    <ValidationScene bg={isShortSession(state) ? 'black' : 'white'}>
       <Header>
         <Title color={isShortSession(state) ? 'white' : 'brandGray.500'}>
           {['shortSession', 'longSession'].some(state.matches) &&
@@ -370,12 +368,8 @@ function ValidationSession({
         !isSubmitting(state) && (
           <NavButton
             type="prev"
-            bg={
-              isShortSession(state) ? theme.colors.white01 : theme.colors.gray
-            }
-            color={
-              isShortSession(state) ? theme.colors.white : theme.colors.text
-            }
+            bg={isShortSession(state) ? 'xwhite.010' : 'gray.50'}
+            color={isShortSession(state) ? 'white' : 'brandGray.500'}
             onClick={() => send({type: 'PREV'})}
           />
         )}
@@ -385,12 +379,8 @@ function ValidationSession({
         !isSubmitting(state) && (
           <NavButton
             type="next"
-            bg={
-              isShortSession(state) ? theme.colors.white01 : theme.colors.gray
-            }
-            color={
-              isShortSession(state) ? theme.colors.white : theme.colors.text
-            }
+            bg={isShortSession(state) ? 'xwhite.010' : 'gray.50'}
+            color={isShortSession(state) ? 'white' : 'brandGray.500'}
             onClick={() => send({type: 'NEXT'})}
           />
         )}

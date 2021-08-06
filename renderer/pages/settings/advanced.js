@@ -1,6 +1,5 @@
 import {Flex, Icon, Stack, Text, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {FiLayers} from 'react-icons/fi'
 import {SettingsLinkButton} from '../../screens/settings/components'
 import {HDivider, Toast} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -21,7 +20,7 @@ export default function AdvancedSettings() {
           <HDivider />
           <Flex justify="space-between" align="center" w="md">
             <Stack isInline maxW={288}>
-              <Icon as={FiLayers} size={5} />
+              <Icon name="layers" size={5} />
               <Stack spacing="3/2">
                 <Text fontSize="mdx" fontWeight={500}>
                   {t('Oracle voting cache')}

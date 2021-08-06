@@ -14,7 +14,6 @@ import {
   Stack,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {transparentize} from 'polished'
 import {
   FlipCardTitle,
   FlipCardSubtitle,
@@ -293,13 +292,9 @@ export default function FlipListPage() {
                           backgroundImage={
                             // eslint-disable-next-line no-nested-ternary
                             flip.type === FlipType.Deleting
-                              ? `linear-gradient(to top, ${
-                                  colors.warning[500]
-                                }, ${transparentize(100, colors.warning[500])})`
+                              ? `linear-gradient(to top, ${colors.warning[500]}, transparent)`
                               : flip.type === FlipType.Invalid
-                              ? `linear-gradient(to top, ${
-                                  colors.red[500]
-                                }, ${transparentize(100, colors.red[500])})`
+                              ? `linear-gradient(to top, ${colors.red[500]}, ${colors.red[500]})`
                               : ''
                           }
                         >
