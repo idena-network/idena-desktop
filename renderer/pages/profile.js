@@ -14,7 +14,6 @@ import {
   mapToFriendlyStatus,
 } from '../shared/providers/identity-context'
 import {useEpochState} from '../shared/providers/epoch-context'
-import {Page, PageTitle} from '../screens/app/components'
 import {
   UserInlineCard,
   SimpleUserStat,
@@ -47,6 +46,8 @@ import {
   ExternalLink,
   FloatDebug,
   Toast,
+  Page,
+  PageTitle,
 } from '../shared/components/components'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
 import {

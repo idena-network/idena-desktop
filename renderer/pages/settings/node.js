@@ -16,7 +16,6 @@ import {
 } from '@chakra-ui/core'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {BASE_API_URL} from '../../shared/api/api-client'
-import SettingsLayout from './layout'
 import {
   useSettingsState,
   useSettingsDispatch,
@@ -32,6 +31,7 @@ import {
   SettingsFormLabel,
   SettingsSection,
 } from '../../screens/settings/components'
+import SettingsLayout from '../../screens/settings/layout'
 
 function NodeSettings() {
   const {t} = useTranslation()

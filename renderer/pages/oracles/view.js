@@ -20,7 +20,6 @@ import {useRouter} from 'next/router'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import duration from 'dayjs/plugin/duration'
-import {Page} from '../../screens/app/components'
 import {
   Avatar,
   FloatDebug,
@@ -34,6 +33,7 @@ import {
   DialogFooter,
   DialogBody,
   SmallText,
+  Page,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {

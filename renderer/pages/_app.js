@@ -25,7 +25,6 @@ export default function App({Component, err, ...pageProps}) {
     <>
       <GoogleFonts href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
       <Head>
-        <link href="/static/fonts/icons.css" rel="stylesheet" />
         <link href="/static/scrollbars.css" rel="stylesheet" />
       </Head>
 

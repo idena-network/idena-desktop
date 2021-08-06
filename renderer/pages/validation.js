@@ -14,7 +14,7 @@ import {
 import {
   createValidationMachine,
   RelevanceType,
-} from '../../screens/validation/machine'
+} from '../screens/validation/machine'
 import {
   persistValidationState,
   loadValidationState,
@@ -24,7 +24,7 @@ import {
   decodedWithKeywords,
   availableReportsNumber,
   solvableFlips,
-} from '../../screens/validation/utils'
+} from '../screens/validation/utils'
 import {
   ValidationScene,
   ActionBar,
@@ -49,13 +49,13 @@ import {
   EncourageReportDialog,
   BadFlipDialog,
   ReviewShortSessionDialog,
-} from '../../screens/validation/components'
-import theme, {rem} from '../../shared/theme'
-import {AnswerType} from '../../shared/types'
-import {useEpochState} from '../../shared/providers/epoch-context'
-import {useTimingState} from '../../shared/providers/timing-context'
-import {InfoButton, PrimaryButton} from '../../shared/components/button'
-import {FloatDebug, Tooltip} from '../../shared/components/components'
+} from '../screens/validation/components'
+import theme, {rem} from '../shared/theme'
+import {AnswerType} from '../shared/types'
+import {useEpochState} from '../shared/providers/epoch-context'
+import {useTimingState} from '../shared/providers/timing-context'
+import {InfoButton, PrimaryButton} from '../shared/components/button'
+import {FloatDebug, Tooltip} from '../shared/components/components'
 
 export default function ValidationPage() {
   const epoch = useEpochState()

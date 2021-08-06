@@ -3,10 +3,14 @@ import {useTranslation} from 'react-i18next'
 import {Flex, Stack, Box, Heading, Icon, useDisclosure} from '@chakra-ui/core'
 import {useWallets} from '../shared/hooks/use-wallets'
 import {IconButton2} from '../shared/components/button'
-import {Page, PageTitle} from '../screens/app/components'
 import Layout from '../shared/components/layout'
 import {useChainState} from '../shared/providers/chain-context'
-import {ExternalLink, VDivider} from '../shared/components/components'
+import {
+  ExternalLink,
+  Page,
+  PageTitle,
+  VDivider,
+} from '../shared/components/components'
 import {
   ReceiveDnaDrawer,
   SendDnaDrawer,

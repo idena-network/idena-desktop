@@ -2,10 +2,10 @@ import React from 'react'
 import Error from 'next/error'
 import {useTranslation} from 'react-i18next'
 import {Box, Flex, Heading, Stack} from '@chakra-ui/core'
-import {Page} from '../screens/app/components'
 import {FillCenter} from '../screens/oracles/components'
 import Layout from '../shared/components/layout'
 import {PrimaryButton} from '../shared/components/button'
+import {Page} from '../shared/components/components'
 
 global.logger = global.logger || {
   error() {},

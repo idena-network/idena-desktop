@@ -38,7 +38,6 @@ import {useService} from '@xstate/react'
 import FlipEditor from './components/flip-editor'
 import {Step} from './types'
 import {formatKeywords} from './utils'
-import {PageTitle} from '../app/components'
 import {PrimaryButton, IconButton2} from '../../shared/components/button'
 import {rem} from '../../shared/theme'
 import {capitalize} from '../../shared/utils/string'
@@ -51,6 +50,7 @@ import {
   DrawerBody,
   FormLabel,
   GoogleTranslateButton,
+  PageTitle,
 } from '../../shared/components/components'
 
 export function FlipPageTitle({onClose, ...props}) {

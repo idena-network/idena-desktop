@@ -3,7 +3,6 @@ import {useRouter} from 'next/router'
 import {Box, Flex, useToast, Divider, useDisclosure} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
-import {Page} from '../../screens/app/components'
 import {
   FlipMasterFooter,
   FlipPageTitle,
@@ -36,7 +35,7 @@ import {
   SecondaryButton,
   PrimaryButton,
 } from '../../shared/components/button'
-import {Toast, FloatDebug} from '../../shared/components/components'
+import {Toast, FloatDebug, Page} from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'

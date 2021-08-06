@@ -15,7 +15,6 @@ import {
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {transparentize} from 'polished'
-import {Page, PageTitle} from '../../screens/app/components'
 import {
   FlipCardTitle,
   FlipCardSubtitle,
@@ -36,7 +35,12 @@ import {
   FlipOverlayText,
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
-import {IconLink, FloatDebug} from '../../shared/components/components'
+import {
+  IconLink,
+  FloatDebug,
+  Page,
+  PageTitle,
+} from '../../shared/components/components'
 import {
   FlipType,
   IdentityStatus,

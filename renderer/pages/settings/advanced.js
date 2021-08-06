@@ -5,7 +5,7 @@ import {SettingsLinkButton} from '../../screens/settings/components'
 import {HDivider, Toast} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {requestDb} from '../../shared/utils/db'
-import SettingsLayout from './layout'
+import SettingsLayout from '../../screens/settings/layout'
 
 export default function AdvancedSettings() {
   const {t} = useTranslation()

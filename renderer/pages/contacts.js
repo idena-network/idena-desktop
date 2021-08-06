@@ -9,12 +9,12 @@ import {
   EditContactDrawer,
   KillInviteDrawer,
 } from '../screens/contacts/containers'
-import {Page} from '../screens/app/components'
 import Layout from '../shared/components/layout'
 import {useChainState} from '../shared/providers/chain-context'
 import {NoContactDataPlaceholder} from '../screens/contacts/components'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
+import {Page} from '../shared/components/components'
 
 export default function ContactsPage() {
   const {t} = useTranslation()
