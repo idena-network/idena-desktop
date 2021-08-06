@@ -1,11 +1,11 @@
 /* eslint-disable no-use-before-define */
 import React from 'react'
-import * as api from '../api'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL, callRpc} from '../utils/utils'
 import {useNotificationDispatch, NotificationType} from './notification-context'
 import {useIdentityState} from './identity-context'
 import {IdentityStatus} from '../types'
+import {fetchIdentity, killInvitee, sendInvite} from '../api/dna'
 
 const db = global.invitesDb || {}
 
@@ -39,11 +39,11 @@ function InviteProvider({children}) {
         savedInvites
           .filter(({deletedAt}) => !deletedAt)
           .map(({receiver}) => receiver)
-          .map(api.fetchIdentity)
+          .map(fetchIdentity)
       )
 
       const inviteesIdentities = await Promise.all(
-        (invitees ?? []).map(({Address}) => Address).map(api.fetchIdentity)
+        (invitees ?? []).map(({Address}) => Address).map(fetchIdentity)
       )
 
       const terminateTxs = await Promise.all(
@@ -229,7 +229,7 @@ function InviteProvider({children}) {
   )
 
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
-    const {result, error} = await api.sendInvite({to, amount})
+    const {result, error} = await sendInvite({to, amount})
     if (result) {
       const issuedInvite = {
         amount,
@@ -282,7 +282,7 @@ function InviteProvider({children}) {
   }
 
   const killInvite = async (id, from, to) => {
-    const {result, error} = await api.killInvitee(from, to)
+    const {result, error} = await killInvitee(from, to)
 
     if (result) {
       setInvites(
@@ -324,7 +324,7 @@ function InviteProvider({children}) {
   }
 
   const activateInvite = async code => {
-    const {result, error} = await api.activateInvite(address, code)
+    const {result, error} = await activateInvite(address, code)
     if (result) {
       setActivationTx(result)
       db.setActivationTx(result)

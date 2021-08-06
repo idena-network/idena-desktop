@@ -5,7 +5,6 @@ import {
   padding,
   borderRadius,
   cover,
-  position,
   transparentize,
   rgba,
 } from 'polished'
@@ -34,13 +33,13 @@ import {
   List,
   ListItem,
   AspectRatioBox,
+  Flex,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
 import {State} from 'xstate'
-import Flex from '../../shared/components/flex'
 import {reorderList} from '../../shared/utils/arr'
 import theme, {rem} from '../../shared/theme'
 import {RelevanceType, adjustDuration} from './machine'
@@ -102,18 +101,11 @@ export function Title(props) {
 }
 
 export function CurrentStep(props) {
-  return (
-    <Flex
-      justify="center"
-      flex={1}
-      css={{...margin(0, 0, rem(theme.spacings.medium24))}}
-      {...props}
-    />
-  )
+  return <ChakraFlex justify="center" flex={1} mb={6} {...props} />
 }
 
 export function FlipChallenge(props) {
-  return <Flex justify="center" align="center" css={{zIndex: 1}} {...props} />
+  return <ChakraFlex justify="center" align="center" zIndex={1} {...props} />
 }
 
 export function Flip({
@@ -188,30 +180,23 @@ export function Flip({
   )
 }
 
-function FlipHolder({css, ...props}) {
+function FlipHolder(props) {
+  const {colors} = useTheme()
   return (
-    <Flex
+    <ChakraFlex
       justify="center"
       direction="column"
-      css={{
-        borderRadius: rem(8),
-        border: `solid ${rem(2)} ${transparentize(
-          0.95,
-          theme.colors.primary2
-        )}`,
-        boxShadow: `0 0 ${rem(2)} 0 ${transparentize(
-          0.95,
-          theme.colors.primary2
-        )}`,
-        ...margin(0, rem(10)),
-        ...padding(rem(4)),
-        position: 'relative',
-        transitionProperty: 'opacity, transform',
-        willChange: 'opacity, transform',
-        height: 'calc(100vh - 260px)',
-        width: 'calc((100vh - 240px) / 3)',
-        ...css,
-      }}
+      borderRadius="lg"
+      borderWidth={2}
+      borderColor="brandGray.005"
+      boxShadow={`0 0 2px 0 ${colors['005']}`}
+      mx="10px"
+      p={1}
+      position="relative"
+      transitionProperty="opacity, transform"
+      willChange="opacity, transform"
+      height="calc(100vh - 260px)"
+      width="calc((100vh - 240px) / 3)"
       {...props}
     />
   )
@@ -219,7 +204,7 @@ function FlipHolder({css, ...props}) {
 
 function LoadingFlip() {
   return (
-    <FlipHolder css={{cursor: 'not-allowed'}}>
+    <FlipHolder cursor="not-allowed">
       <FillCenter>
         <ValidationSpinner />
       </FillCenter>
@@ -240,25 +225,27 @@ function FailedFlip() {
       }}
     >
       {defaultOrder.map((_, idx) => (
-        <Flex
+        <ChakraFlex
           key={`left-${idx}`}
           justify="center"
           align="center"
-          css={{
-            background: transparentize(0.16, theme.colors.gray5),
-            border: 'solid 1px rgba(210, 212, 217, 0.16)',
-            borderBottom:
-              idx !== defaultOrder.length - 1
-                ? 'none'
-                : 'solid 1px rgba(210, 212, 217, 0.16)',
-            ...borderRadius('top', idx === 0 ? rem(8) : 'none'),
-            ...borderRadius(
-              'bottom',
-              idx === defaultOrder.length - 1 ? rem(8) : 'none'
-            ),
-            height: 'calc((100vh - 260px) / 4)',
-            overflow: 'hidden',
-          }}
+          background="rgb(64 64 64 / 0.84)"
+          border="solid 1px rgba(210, 212, 217, 0.16)"
+          borderBottom={
+            idx !== defaultOrder.length - 1
+              ? 'none'
+              : 'solid 1px rgba(210, 212, 217, 0.16)'
+          }
+          borderTopLeftRadius={idx === 0 ? 'lg' : 'none'}
+          borderTopRightRadius={idx === 0 ? 'lg' : 'none'}
+          borderBottomLeftRadius={
+            idx === defaultOrder.length - 1 ? 'lg' : 'none'
+          }
+          borderBottomRightRadius={
+            idx === defaultOrder.length - 1 ? 'lg' : 'none'
+          }
+          height="calc((100vh - 260px) / 4)"
+          overflow="hidden"
         >
           <img
             alt={t('Failed flip')}
@@ -269,7 +256,7 @@ function FailedFlip() {
               opacity: 0.3,
             }}
           />
-        </Flex>
+        </ChakraFlex>
       ))}
     </FlipHolder>
   )
@@ -336,19 +323,11 @@ function FlipImage({
 }
 
 export function ActionBar(props) {
-  return (
-    <Flex
-      justify="space-between"
-      css={{
-        ...margin(0, 0, rem(theme.spacings.medium16)),
-      }}
-      {...props}
-    />
-  )
+  return <ChakraFlex justify="space-between" mb={4} {...props} />
 }
 
 export function ActionBarItem(props) {
-  return <Flex flex={1} css={{minHeight: rem(32), zIndex: 1}} {...props} />
+  return <ChakraFlex flex={1} minH={8} zIndex={1} {...props} />
 }
 
 const thumbBorderWidth = 2
@@ -358,17 +337,14 @@ const totalThumbWidth = thumbBorderWidth * 2 + thumbMargin * 2 + thumbWidth
 
 export function Thumbnails({currentIndex, ...props}) {
   return (
-    <Flex
+    <ChakraFlex
       align="center"
-      css={{
-        minHeight: rem(48),
-        transform: `translateX(50%) translateX(-${rem(
-          totalThumbWidth * (currentIndex + 1 / 2)
-        )})`,
-        transition: 'transform .3s ease-out',
-        willChange: 'transform',
-        zIndex: 1,
-      }}
+      minH={12}
+      transform={`translateX(50%) translateX(-${totalThumbWidth *
+        (currentIndex + 1 / 2)}px)`}
+      transition="transform .3s ease-out"
+      willChange="transform"
+      zIndex={1}
       {...props}
     />
   )
@@ -390,19 +366,17 @@ export function Thumbnail({
   return (
     <ThumbnailHolder
       isCurrent={isCurrent}
-      css={{
-        border: `solid ${rem(thumbBorderWidth)} ${
-          // eslint-disable-next-line no-nested-ternary
-          isCurrent
-            ? // eslint-disable-next-line no-nested-ternary
-              isQualified
-              ? hasIrrelevantWords
-                ? theme.colors.danger
-                : rgba(87, 143, 255, 0.9)
-              : theme.colors.primary
-            : 'transparent'
-        }`,
-      }}
+      borderColor={
+        // eslint-disable-next-line no-nested-ternary
+        isCurrent
+          ? // eslint-disable-next-line no-nested-ternary
+            isQualified
+            ? hasIrrelevantWords
+              ? 'red.500'
+              : 'rgb(87 143 255 / 0.9)'
+            : 'blue.500'
+          : 'transparent'
+      }
       onClick={onPick}
     >
       {((fetched && !decoded) || failed) && <FailedThumbnail />}
@@ -435,31 +409,25 @@ export function Thumbnail({
   )
 }
 
-function ThumbnailHolder({isCurrent, css, children, ...props}) {
+function ThumbnailHolder({isCurrent, children, ...props}) {
   return (
-    <Flex
+    <ChakraFlex
       justify="center"
       align="center"
-      css={{
-        border: `solid ${rem(thumbBorderWidth)} ${
-          isCurrent ? theme.colors.primary : 'transparent'
-        }`,
-        borderRadius: rem(12),
-        ...css,
-      }}
+      borderWidth={thumbBorderWidth}
+      borderColor={isCurrent ? 'blue.500' : 'transparent'}
+      borderRadius="xl"
       {...props}
     >
       <Box
-        css={{
-          height: rem(thumbWidth),
-          width: rem(thumbWidth),
-          margin: rem(thumbMargin),
-          ...position('relative'),
-        }}
+        height={rem(thumbWidth)}
+        width={rem(thumbWidth)}
+        margin={rem(thumbMargin)}
+        position="relative"
       >
         {children}
       </Box>
-    </Flex>
+    </ChakraFlex>
   )
 }
 
@@ -469,40 +437,44 @@ function LoadingThumbnail() {
 
 function FailedThumbnail() {
   return (
-    <Fill
+    <Flex
+      justify="center"
+      align="center"
+      position="absolute"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
       bg={rgba(89, 89, 89, 0.95)}
-      css={{
-        borderRadius: rem(12),
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
+      borderRadius="xl"
     >
       <FiXCircle size={rem(20)} color={theme.colors.white} />
-    </Fill>
+    </Flex>
   )
 }
 
 function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
   return (
-    <Fill
+    <Flex
+      justify="center"
+      align="center"
+      position="absolute"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
       bg={
         // eslint-disable-next-line no-nested-ternary
         isQualified
           ? hasIrrelevantWords
-            ? transparentize(0.1, theme.colors.danger)
-            : rgba(87, 143, 255, 0.9)
-          : rgba(89, 89, 89, 0.95)
+            ? 'red.010'
+            : 'blue.090'
+          : 'rgba(89 89 89 / 0.95)'
       }
-      css={{
-        borderRadius: rem(12),
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
+      borderRadius="xl"
     >
-      {option && <FiCheck size={rem(20)} color={theme.colors.white} />}
-    </Fill>
+      {option && <Icon as={FiCheck} size={5} color="white" />}
+    </Flex>
   )
 }
 

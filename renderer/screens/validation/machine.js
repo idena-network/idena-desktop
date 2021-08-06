@@ -8,7 +8,7 @@ import {
   submitLongAnswers,
 } from '../../shared/api/validation'
 import {SessionType} from '../../shared/types'
-import {fetchFlip} from '../../shared/api'
+import {fetchFlip} from '../../shared/api/dna'
 import apiClient from '../../shared/api/api-client'
 import {
   filterRegularFlips,

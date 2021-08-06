@@ -1,21 +1,13 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {useRouter} from 'next/router'
-import {FormControl, Text} from '@chakra-ui/core'
-import {
-  margin,
-  padding,
-  backgrounds,
-  borderRadius,
-  border,
-  wordWrap,
-} from 'polished'
+import {Flex, FormControl, Text} from '@chakra-ui/core'
+import {margin, padding, border, wordWrap} from 'polished'
 import {useTranslation} from 'react-i18next'
 import {FiInfo, FiAlertCircle, FiGlobe} from 'react-icons/fi'
 import Box from './box'
 import theme, {rem} from '../theme'
 import {useIdentityState} from '../providers/identity-context'
-import Flex from './flex'
 import {SecondaryButton, PrimaryButton} from './button'
 import {
   startSession,
@@ -535,14 +527,13 @@ function DnaDialogAlert(props) {
   return (
     <Flex
       align="center"
-      css={{
-        ...backgrounds(theme.colors.danger02),
-        ...border('1px', 'solid', theme.colors.danger),
-        ...borderRadius('top', rem(6)),
-        ...borderRadius('bottom', rem(6)),
-        ...padding(rem(8), rem(12)),
-        ...margin(0, 0, rem(20), 0),
-      }}
+      bg="red.020"
+      borderColor="red.500"
+      borderWidth={1}
+      borderRadius="md"
+      px={3}
+      py={2}
+      mb={5}
     >
       <FiInfo size={rem(16)} color={theme.colors.danger} fontWeight={500} />
       <Text fontWeight={500} ml={2} {...props} />

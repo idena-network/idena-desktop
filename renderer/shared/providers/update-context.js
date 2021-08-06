@@ -4,7 +4,7 @@ import {node} from 'prop-types'
 import {AUTO_UPDATE_EVENT, AUTO_UPDATE_COMMAND} from '../../../main/channels'
 import {useSettingsState} from './settings-context'
 import {useInterval} from '../hooks/use-interval'
-import {fetchNodeVersion} from '../api'
+import {fetchNodeVersion} from '../api/dna'
 import {isHardFork} from '../utils/node'
 import {requestDb} from '../utils/db'
 

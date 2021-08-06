@@ -22,7 +22,6 @@ import {
 } from '@chakra-ui/core'
 import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useNotificationDispatch} from '../../../shared/providers/notification-context'
-import useClickOutside from '../../../shared/hooks/use-click-outside'
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {
   HDivider,
@@ -83,16 +82,9 @@ export default function FlipEditor({
 
   const toast = useToast()
 
-  // Button menu
-  const [isInsertImageMenuOpen, setInsertImageMenuOpen] = useState(false)
-  const insertMenuRef = [useRef(), useRef(), useRef(), useRef()]
   // Context menu
   const [showContextMenu, setShowContextMenu] = useState(false)
   const [contextMenuCursor, setContextMenuCursor] = useState({x: 0, y: 0})
-
-  useClickOutside(insertMenuRef[idx], () => {
-    setInsertImageMenuOpen(false)
-  })
 
   const [bottomMenuPanel, setBottomMenuPanel] = useState(BottomMenu.Main)
   const [rightMenuPanel, setRightMenuPanel] = useState(RightMenu.None)
@@ -760,14 +752,12 @@ export default function FlipEditor({
                       }
                       editors[idx].stopDrawingMode()
                       setRightMenuPanel(RightMenu.None)
-                      setInsertImageMenuOpen(!isInsertImageMenuOpen)
                     }}
                   />
                 </MenuButton>
                 <FlipEditorMenuList zIndex="popover">
                   <FlipEditorMenuItem
                     onClick={async () => {
-                      setInsertImageMenuOpen(false)
                       setInsertImageMode(INSERT_OBJECT_IMAGE)
                       setShowImageSearch(true)
                     }}
@@ -777,7 +767,6 @@ export default function FlipEditor({
                   </FlipEditorMenuItem>
                   <FlipEditorMenuItem
                     onClick={async () => {
-                      setInsertImageMenuOpen(false)
                       setInsertImageMode(INSERT_OBJECT_IMAGE)
                       uploaderRef.current.click()
                     }}
@@ -787,7 +776,6 @@ export default function FlipEditor({
                   </FlipEditorMenuItem>
                   <FlipEditorMenuItem
                     onClick={async () => {
-                      setInsertImageMenuOpen(false)
                       handleImageFromClipboard(INSERT_OBJECT_IMAGE)
                     }}
                   >
@@ -1177,9 +1165,6 @@ function EditorContextMenu({
   ...props
 }) {
   const {t} = useTranslation()
-
-  const contextMenuRef = useRef()
-  useClickOutside(contextMenuRef, () => {})
 
   return (
     <Menu {...props}>
