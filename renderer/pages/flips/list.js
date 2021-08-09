@@ -120,6 +120,7 @@ export default function FlipListPage() {
       case FlipType.Draft:
         return flips
           .filter(({type}) => type === FlipType.Draft)
+          .slice()
           .sort((d1, d2) =>
             dayjs(d2.modifiedAt ?? d2.createdAt).isAfter(
               d1.modifiedAt ?? d1.createdAt
