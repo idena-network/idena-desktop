@@ -4,7 +4,6 @@ import NextLink from 'next/link'
 import {useRouter} from 'next/router'
 import {Trans, useTranslation} from 'react-i18next'
 import {
-  Badge,
   Box,
   Flex,
   Button,
@@ -50,6 +49,7 @@ import {
 import {isHardFork} from '../utils/node'
 import {ExternalLink, Tooltip} from './components'
 import {useTimingState} from '../providers/timing-context'
+import {TodoVotingCountBadge} from '../../screens/oracles/components'
 
 export default function Sidebar() {
   return (
@@ -279,25 +279,16 @@ function Navbar() {
         {t('Contacts')}
       </NavItem>
       <NavItem href="/oracles/list" icon="oracle">
-        <Flex flex={1} align="center" justify="space-between">
-          <Text as="span">{t('Oracle voting')}</Text>
-          {todoCount > 0 ? (
-            <Badge
-              bg="blue.500"
-              color="white"
-              fontSize={8}
-              fontWeight={700}
-              textAlign="center"
-              rounded={4}
-              px={1}
-              py="3px"
-              lineHeight="short"
-              minW={4}
-            >
+        {todoCount > 0 ? (
+          <Flex flex={1} align="center" justify="space-between">
+            <Text as="span">{t('Oracle voting')}</Text>
+            <TodoVotingCountBadge>
               {todoCount > 10 ? '10+' : todoCount}
-            </Badge>
-          ) : null}
-        </Flex>
+            </TodoVotingCountBadge>
+          </Flex>
+        ) : (
+          t('Oracle voting')
+        )}
       </NavItem>
       <NavItem href="/settings/general" icon="settings">
         {t('Settings')}
