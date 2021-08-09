@@ -14,6 +14,7 @@ import {
   Stack,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
+import dayjs from 'dayjs'
 import {
   FlipCardTitle,
   FlipCardSubtitle,
@@ -117,7 +118,15 @@ export default function FlipListPage() {
           ].includes(type)
         )
       case FlipType.Draft:
-        return flips.filter(({type}) => type === FlipType.Draft)
+        return flips
+          .filter(({type}) => type === FlipType.Draft)
+          .sort((d1, d2) =>
+            dayjs(d2.modifiedAt ?? d2.createdAt).isAfter(
+              d1.modifiedAt ?? d1.createdAt
+            )
+              ? 1
+              : -1
+          )
       case FlipType.Archived:
         return flips.filter(({type}) =>
           [FlipType.Archived, FlipType.Deleted].includes(type)

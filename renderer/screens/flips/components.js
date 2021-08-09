@@ -69,7 +69,15 @@ export function FlipCard({flipService, onDelete}) {
   const {t} = useTranslation()
 
   const [current, send] = useService(flipService)
-  const {id, keywords, originalOrder, images, type, createdAt} = current.context
+  const {
+    id,
+    keywords,
+    originalOrder,
+    images,
+    type,
+    createdAt,
+    modifiedAt = createdAt,
+  } = current.context
 
   const {colors} = useTheme()
 
@@ -120,7 +128,7 @@ export function FlipCard({flipService, onDelete}) {
               : t('Missing keywords')}
           </FlipCardTitle>
           <FlipCardSubtitle>
-            {new Date(createdAt).toLocaleString()}
+            {new Date(modifiedAt).toLocaleString()}
           </FlipCardSubtitle>
         </Box>
         {isActionable && (
