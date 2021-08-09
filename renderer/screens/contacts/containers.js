@@ -193,7 +193,7 @@ function ContactList({filter, selectedContactId, onSelectContact}) {
       </Box>
       {filteredInvites.length === 0 && (
         <Stack px={4}>
-          {[...Array(5)].map(() => (
+          {[...Array(10)].map(() => (
             <VotingSkeleton h={6} />
           ))}
         </Stack>

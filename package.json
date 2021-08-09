@@ -117,7 +117,7 @@
     "macos-version": "^5.2.1",
     "mousetrap": "^1.6.3",
     "nanoid": "^2.0.1",
-    "next": "^9.5.5",
+    "next": "^9.5.1",
     "next-google-fonts": "^1.2.1",
     "pino": "^5.13.2",
     "progress-stream": "^2.0.0",
