@@ -96,6 +96,14 @@ export function useValidationReportSummary() {
                 )
               ).json()
 
+              const {result: reportRewards} = await (
+                await fetch(
+                  apiMethod(
+                    `epoch/${epochNumber}/identity/${address}/reportRewards`
+                  )
+                )
+              ).json()
+
               return {
                 rewardsSummary,
                 identityRewards,
@@ -104,6 +112,7 @@ export function useValidationReportSummary() {
                 rewardedInvites,
                 savedInvites,
                 availableInvites,
+                reportRewards,
               }
             },
             onDone: 'fetched',
@@ -128,6 +137,7 @@ export function useValidationReportSummary() {
                     rewardedInvites,
                     savedInvites,
                     availableInvites,
+                    reportRewards,
                   },
                 }
               ) => {
@@ -161,6 +171,13 @@ export function useValidationReportSummary() {
                         rewardsSummary.validationShare
                       : 0
 
+                  const isValidatedIdentity = ({state}) =>
+                    [
+                      IdentityStatus.Newbie,
+                      IdentityStatus.Verified,
+                      IdentityStatus.Human,
+                    ].includes(state)
+
                   const getRewardedData = (
                     // eslint-disable-next-line no-shadow
                     epoch,
@@ -184,13 +201,6 @@ export function useValidationReportSummary() {
                         // eslint-disable-next-line no-shadow
                         let isValidated = false
                         let result = '-'
-
-                        const isValidatedIdentity = ({state}) =>
-                          [
-                            IdentityStatus.Newbie,
-                            IdentityStatus.Verified,
-                            IdentityStatus.Human,
-                          ].includes(state)
 
                         if (item.state) {
                           if (isValidatedIdentity(item)) {
@@ -294,6 +304,7 @@ export function useValidationReportSummary() {
                     // eslint-disable-next-line no-shadow
                     epoch,
                     back,
+                    // eslint-disable-next-line no-shadow
                     availableInvites,
                     // eslint-disable-next-line no-shadow
                     rewardedInvites,
@@ -368,24 +379,67 @@ export function useValidationReportSummary() {
                     0
                   )
 
-                  // const reportRewardsData = getReportRewardsData(
-                  //   reportRewards,
-                  //   rewardsSummary,
-                  //   validationPenalty,
-                  //   identityInfo
-                  // )
+                  const reportRewardData = (
+                    // eslint-disable-next-line no-shadow
+                    reportRewards,
+                    // eslint-disable-next-line no-shadow
+                    rewardsSummary,
+                    // eslint-disable-next-line no-shadow
+                    validationPenalty,
+                    // eslint-disable-next-line no-shadow
+                    identity
+                  ) => {
+                    if (!reportRewards || !rewardsSummary || !identity) {
+                      return []
+                    }
+                    return reportRewards.map(item => {
+                      const reward = item.balance * 1 + item.stake * 1
+                      let missingReward = 0
+                      let details = '-'
+                      if (!(reward && reward > 0)) {
+                        missingReward = rewardsSummary.flipsShare / 5.0
+                        if (validationPenalty) {
+                          details = 'Validation penalty'
+                        } else if (!isValidatedIdentity(identity)) {
+                          details = 'My validation failed'
+                        } else if (item.grade === 1) {
+                          details = 'Flip with no reward'
+                        } else {
+                          details = 'Did not report'
+                        }
+                      }
 
-                  // const missedReportReward = reportRewardsData.reduce(
-                  //   (prev, cur) => prev + cur.missingReward,
-                  //   0
-                  // )
+                      return {
+                        cid: item.cid,
+                        author: item.author,
+                        icon: item.icon,
+                        reward,
+                        missingReward,
+                        details,
+                        words: item.words,
+                      }
+                    })
+                  }
+
+                  const reportRewardsData = reportRewardData(
+                    reportRewards,
+                    rewardsSummary,
+                    validationPenalty,
+                    {state: identityStatus}
+                  )
+
+                  const missedReportReward = reportRewardsData.reduce(
+                    (prev, cur) => prev + cur.missingReward,
+                    0
+                  )
 
                   const earningsScore =
                     earnings /
                     (earnings +
                       missedFlipReward +
                       missedValidationReward +
-                      missedInvitationReward)
+                      missedInvitationReward +
+                      missedReportReward)
 
                   return {
                     ...context,
