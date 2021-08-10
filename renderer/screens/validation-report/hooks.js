@@ -1,4 +1,7 @@
+import {useMachine} from '@xstate/react'
 import React from 'react'
+import {assign, createMachine} from 'xstate'
+import {log} from 'xstate/lib/actions'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useIdentity} from '../../shared/providers/identity-context'
 import {apiMethod} from '../../shared/utils/utils'
@@ -15,56 +18,89 @@ export function useValidationReportSummary() {
 
   const score = useValidationScore()
 
-  const [earnings, setEarnings] = React.useState()
+  const [current, send] = useMachine(
+    createMachine({
+      context: {
+        earnings: 0,
+        missedRewards: 0,
+        earningsScore: 0,
+      },
+      initial: 'idle',
+      states: {
+        idle: {on: {FETCH: 'fetching'}},
+        fetching: {
+          invoke: {
+            // eslint-disable-next-line no-shadow
+            src: async (_, {epoch, address}) => {
+              const {result: rewardsSummary} = await (
+                await fetch(apiMethod(`epoch/${epoch}/rewardsSummary`))
+              ).json()
+
+              const {result: identityRewards} = await (
+                await fetch(
+                  apiMethod(`epoch/${epoch}/identity/${address}/rewards`)
+                )
+              ).json()
+
+              return {rewardsSummary, identityRewards}
+            },
+            onDone: 'fetched',
+          },
+        },
+        fetched: {
+          entry: [
+            log(),
+            assign((context, ev) => {
+              console.log({ev})
+              const {
+                data: {rewardsSummary, identityRewards},
+              } = ev
+              if (identityRewards !== null) {
+                // eslint-disable-next-line no-shadow
+                const earnings = (identityRewards ?? []).reduce(
+                  (acc, curr) =>
+                    acc + Number(curr.balance) + Number(curr.stake),
+                  0
+                )
+
+                const flipRewards = identityRewards.find(
+                  r => r.type === 'Flips'
+                )
+
+                // eslint-disable-next-line no-shadow
+                const missedRewards =
+                  rewardsSummary.flipsShare * availableFlips -
+                  (Number(flipRewards.balance) + Number(flipRewards.stake))
+
+                const earningsScore = earnings / (earnings + missedRewards)
+
+                return {
+                  ...context,
+                  earnings,
+                  missedRewards,
+                  earningsScore,
+                }
+              }
+              return {
+                ...context,
+                earnings: 0,
+                missedRewards: rewardsSummary.flipsShare * availableFlips,
+                earningsScore: 0.05,
+              }
+            }),
+          ],
+        },
+      },
+    })
+  )
 
   React.useEffect(() => {
-    if (epoch?.epoch && address) {
-      fetch(
-        apiMethod(
-          `epoch/${71 ||
-            epoch?.epoch}/identity/${'0x8b8C0607c9AE92B567ADef452e79DC673C3c180D' ||
-            address}/rewards`
-        )
-      )
-        .then(r => r.json())
-        .then(({result}) =>
-          result.reduce(
-            (acc, curr) => acc + Number(curr.balance) + Number(curr.stake),
-            0
-          )
-        )
-        .then(setEarnings)
-    }
-  }, [address, epoch])
+    if (epoch?.epoch && address) send('FETCH', {epoch: epoch?.epoch, address})
+  }, [address, epoch, send])
 
-  const [missedRewards, setMissedRewards] = React.useState()
-
-  React.useEffect(() => {
-    async function fetchData() {
-      const {result: rewardsSummary} = await (
-        await fetch(apiMethod(`epoch/${71 || epoch?.epoch}/rewardsSummary`))
-      ).json()
-
-      const {result: rewards} = await (
-        await fetch(
-          apiMethod(
-            `epoch/${71 ||
-              epoch?.epoch}/identity/${'0x8b8C0607c9AE92B567ADef452e79DC673C3c180D' ||
-              address}/rewards`
-          )
-        )
-      ).json()
-
-      const flipRewards = rewards.find(r => r.type === 'Flips')
-
-      const missedFlipRewards =
-        rewardsSummary.flipsShare * (5 || availableFlips) -
-        (Number(flipRewards.balance) + Number(flipRewards.stake))
-
-      setMissedRewards(missedFlipRewards)
-    }
-    if (epoch?.epoch && address) fetchData()
-  }, [address, availableFlips, epoch])
-
-  return {score, earnings, earningsScore: earnings / (earnings + missedRewards)}
+  return {
+    ...current.context,
+    score,
+    isLoading: current.matches('fetching'),
+  }
 }
