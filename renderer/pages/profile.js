@@ -75,6 +75,7 @@ import {onboardingShowingStep} from '../shared/utils/onboarding'
 import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 import {useScroll} from '../shared/hooks/use-scroll'
+import {ValidationReportAlert} from '../screens/validation-report/components'
 
 export default function ProfilePage() {
   const {
@@ -217,6 +218,11 @@ export default function ProfilePage() {
               <Stack isInline spacing={10}>
                 <Stack spacing={6} w="md">
                   <UserInlineCard address={address} status={status} h={24} />
+
+                  <ValidationReportAlert
+                    status={isValidated ? 'success' : 'error'}
+                  />
+
                   <UserStatList>
                     <UserStat>
                       <UserStatLabel>{t('Address')}</UserStatLabel>
@@ -319,7 +325,6 @@ export default function ProfilePage() {
                       </AnnotatedUserStat>
                     )}
                   </UserStatList>
-
                   <OnboardingPopover
                     isOpen={isOpenActivateInvitePopover}
                     placement="top-start"
