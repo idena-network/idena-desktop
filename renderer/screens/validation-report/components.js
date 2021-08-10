@@ -19,6 +19,8 @@ import {useValidationReportSummary} from './hooks'
 export function ValidationReportAlert(props) {
   const {t, i18n} = useTranslation()
 
+  const {colors} = useTheme()
+
   const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
 
   const {score, earnings, earningsScore} = useValidationReportSummary()
@@ -46,14 +48,23 @@ export function ValidationReportAlert(props) {
                 value={toPercent(score)}
                 percentValue={score * 100}
                 icon="timer"
-                color="green.500"
+                color={colors[score <= 0.75 ? 'red' : 'green'][500]}
               />
               <Gauge
                 label={t('Earnings')}
                 value={dna(earnings)}
                 percentValue={earningsScore * 100}
                 icon="send-out"
-                color="orange.500"
+                color={
+                  colors[
+                    // eslint-disable-next-line no-nested-ternary
+                    earningsScore <= 0.5
+                      ? 'red'
+                      : score < 0.75
+                      ? 'orange'
+                      : 'green'
+                  ][500]
+                }
               />
             </Flex>
             <Flex justify="space-between">
@@ -82,11 +93,11 @@ export function ValidationReportAlert(props) {
   )
 }
 
-function Gauge({label, value, percentValue, icon}) {
+function Gauge({label, value, percentValue, icon, color = 'gray'}) {
   return (
     <Stack spacing={0} align="center">
       <Box h={103} pos="relative">
-        <GaugeBar percent={percentValue} />
+        <GaugeBar percent={percentValue} color={color} />
         <Box
           bg="gray.50"
           p="10px"
@@ -111,12 +122,8 @@ function Gauge({label, value, percentValue, icon}) {
   )
 }
 
-function GaugeBar({percent}) {
+function GaugeBar({percent, color}) {
   const {colors} = useTheme()
-
-  const color =
-    // eslint-disable-next-line no-nested-ternary
-    percent <= 25 ? 'red' : percent <= 75 ? 'orange' : 'green'
 
   const radius = 84
   const innerRadius = 80
@@ -153,7 +160,7 @@ function GaugeBar({percent}) {
         cy={radius}
         fill="transparent"
         r={innerRadius}
-        stroke={colors[color][500]}
+        stroke={color}
         strokeWidth={4}
         strokeDasharray={dashArray}
         strokeDashoffset={offset}
