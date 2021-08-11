@@ -8,11 +8,14 @@ import {
   Flex,
   Icon,
   Stack,
+  Stat,
+  StatLabel,
+  StatNumber,
   Text,
   useTheme,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {TextLink} from '../../shared/components/components'
+import {SmallText, TextLink} from '../../shared/components/components'
 import {toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {useValidationReportSummary} from './hooks'
 
@@ -43,14 +46,14 @@ export function ValidationReportAlert(props) {
         <AlertDescription>
           <Stack spacing={10}>
             <Flex justify="space-between">
-              <Gauge
+              <ValidationReportGauge
                 label={t('Score')}
                 value={toPercent(score)}
                 percentValue={score * 100}
                 icon="timer"
                 color={colors[score <= 0.75 ? 'red' : 'green'][500]}
               />
-              <Gauge
+              <ValidationReportGauge
                 label={t('Earnings')}
                 value={dna(earnings)}
                 percentValue={earningsScore * 100}
@@ -93,22 +96,27 @@ export function ValidationReportAlert(props) {
   )
 }
 
-function Gauge({label, value, percentValue, icon, color = 'gray'}) {
+export function ValidationReportGauge({
+  label,
+  value,
+  percentValue,
+  icon,
+  color = 'gray',
+  placeholderColor,
+}) {
   return (
     <Stack spacing={0} align="center">
       <Box h={103} pos="relative">
-        <GaugeBar percent={percentValue} color={color} />
-        <Box
-          bg="gray.50"
-          p="10px"
-          borderRadius="lg"
-          pos="absolute"
-          bottom={4}
-          left="50%"
-          transform="translateX(-50%)"
-        >
-          <Icon name={icon} size={5} color="muted" />
-        </Box>
+        <GaugeBar
+          percent={percentValue}
+          color={color}
+          placeholderColor={placeholderColor}
+        />
+        {typeof icon === 'string' ? (
+          <ValidationReportGaugeIcon icon={icon} />
+        ) : (
+          icon
+        )}
       </Box>
       <Stack spacing={1} align="center">
         <Box fontSize="lg" fontWeight={500}>
@@ -122,7 +130,7 @@ function Gauge({label, value, percentValue, icon, color = 'gray'}) {
   )
 }
 
-function GaugeBar({percent, color}) {
+function GaugeBar({percent, color, placeholderColor}) {
   const {colors} = useTheme()
 
   const radius = 84
@@ -149,7 +157,7 @@ function GaugeBar({percent, color}) {
         cy={radius}
         fill="transparent"
         r={innerRadius}
-        stroke={colors.gray[50]}
+        stroke={placeholderColor || colors.gray[50]}
         strokeWidth={4}
         strokeDasharray={dashArray}
         strokeLinecap="round"
@@ -168,5 +176,48 @@ function GaugeBar({percent, color}) {
         transform={transform}
       />
     </svg>
+  )
+}
+
+export function ValidationReportGaugeIcon({icon, bg = 'gray.50', ...props}) {
+  return (
+    <Box
+      bg={bg}
+      p="10px"
+      borderRadius="lg"
+      pos="absolute"
+      bottom={4}
+      left="50%"
+      transform="translateX(-50%)"
+      {...props}
+    >
+      <Icon name={icon} size={5} color="muted" />
+    </Box>
+  )
+}
+
+export function ValidationReportBlockOverview(props) {
+  return <Box flex={1} bg="gray.50" borderRadius="md" p={10} {...props} />
+}
+
+export function ValidationReportStat({label, value, ...props}) {
+  return (
+    <Stat {...props}>
+      <StatLabel color="muted" fontSize="md" fontWeight={400}>
+        {label}
+      </StatLabel>
+      <StatNumber fontSize="md" fontWeight={500}>
+        {value}
+      </StatNumber>
+    </Stat>
+  )
+}
+
+export function ValidationReportCategoryLabel({label, description, ...props}) {
+  return (
+    <Box fontWeight={500} {...props}>
+      {label}
+      <SmallText>{description}</SmallText>
+    </Box>
   )
 }

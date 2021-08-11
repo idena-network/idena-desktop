@@ -7,7 +7,7 @@ import {useIdentity} from '../../shared/providers/identity-context'
 import {IdentityStatus} from '../../shared/types'
 import {apiMethod} from '../../shared/utils/utils'
 
-function useValidationScore() {
+export function useValidationScore() {
   const [{totalShortFlipPoints, totalQualifiedFlips}] = useIdentity()
   return Math.min(totalShortFlipPoints / totalQualifiedFlips, 1)
 }
@@ -48,61 +48,40 @@ export function useValidationReportSummary() {
           invoke: {
             // eslint-disable-next-line no-shadow
             src: async ({epochNumber, identity: {address}}) => {
-              const {result: rewardsSummary} = await (
-                await fetch(apiMethod(`epoch/${epochNumber}/rewardsSummary`))
-              ).json()
+              const fetchJson = async url =>
+                (await (await fetch(apiMethod(url))).json()).result
 
-              const {result: identityRewards} = await (
-                await fetch(
-                  apiMethod(`epoch/${epochNumber}/identity/${address}/rewards`)
-                )
-              ).json()
+              const rewardsSummary = await fetchJson(
+                `epoch/${epochNumber}/rewardsSummary`
+              )
 
-              const {result: epochIdentity} = await (
-                await fetch(
-                  apiMethod(`epoch/${epochNumber}/identity/${address}`)
-                )
-              ).json()
+              const identityRewards = await fetchJson(
+                `epoch/${epochNumber}/identity/${address}/rewards`
+              )
 
-              const {result: validationPenalty} = await (
-                await fetch(
-                  apiMethod(
-                    `epoch/${epochNumber}/identity/${address}/authors/bad`
-                  )
-                )
-              ).json()
+              const epochIdentity = await fetchJson(
+                `epoch/${epochNumber}/identity/${address}`
+              )
 
-              const {result: rewardedInvites} = await (
-                await fetch(
-                  apiMethod(
-                    `epoch/${epochNumber}/identity/${address}/rewardedInvites`
-                  )
-                )
-              ).json()
+              const validationPenalty = await fetchJson(
+                `epoch/${epochNumber}/identity/${address}/authors/bad`
+              )
 
-              const {result: savedInvites} = await (
-                await fetch(
-                  apiMethod(
-                    `epoch/${epochNumber}/identity/${address}/savedInviteRewards`
-                  )
-                )
-              ).json()
+              const rewardedInvites = await fetchJson(
+                `epoch/${epochNumber}/identity/${address}/rewardedInvites`
+              )
 
-              const {result: availableInvites} = await (
-                await fetch(
-                  apiMethod(
-                    `epoch/${epochNumber}/identity/${address}/availableInvites`
-                  )
-                )
-              ).json()
+              const savedInvites = await fetchJson(
+                `epoch/${epochNumber}/identity/${address}/savedInviteRewards`
+              )
 
-              const {result: reportRewards} = await (
-                await fetch(
-                  apiMethod(
-                    `epoch/${epochNumber}/identity/${address}/reportRewards`
-                  )
-                )
-              ).json()
+              const availableInvites = await fetchJson(
+                `epoch/${epochNumber}/identity/${address}/availableInvites`
+              )
+
+              const reportRewards = await fetchJson(
+                `epoch/${epochNumber}/identity/${address}/reportRewards`
+              )
 
               return {
                 rewardsSummary,
@@ -444,7 +423,6 @@ export function useValidationReportSummary() {
                   return {
                     ...context,
                     earnings,
-                    missedRewards: missedFlipReward,
                     earningsScore,
                   }
                 }
@@ -452,7 +430,6 @@ export function useValidationReportSummary() {
                 return {
                   ...context,
                   earnings: 0,
-                  missedRewards: rewardsSummary.flipsShare * availableFlips,
                   earningsScore: 0.02,
                 }
               }

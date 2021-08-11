@@ -378,6 +378,25 @@ export function SuccessAlert({children, ...props}) {
   )
 }
 
+export function FailAlert({children, ...props}) {
+  return (
+    <Alert
+      status="error"
+      bg="red.010"
+      borderWidth="1px"
+      borderColor="red.050"
+      fontWeight={500}
+      rounded="md"
+      px={3}
+      py={2}
+      {...props}
+    >
+      <AlertIcon name="info" color="red.500" size={5} mr={3} />
+      {children}
+    </Alert>
+  )
+}
+
 export const VDivider = React.forwardRef(function VDivider(props, ref) {
   return (
     <Divider
