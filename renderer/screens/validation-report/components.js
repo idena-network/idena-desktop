@@ -16,17 +16,21 @@ import {
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {SmallText, TextLink} from '../../shared/components/components'
+import {TableCol} from '../../shared/components/table'
+import {useIdentity} from '../../shared/providers/identity-context'
 import {toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {useValidationReportSummary} from './hooks'
 
-export function ValidationReportAlert(props) {
+export function ValidationReportSummary(props) {
   const {t, i18n} = useTranslation()
 
   const {colors} = useTheme()
 
-  const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
+  const [{isValidated}] = useIdentity()
 
   const {score, earnings, earningsScore} = useValidationReportSummary()
+
+  const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
 
   return (
     <Alert
@@ -41,7 +45,7 @@ export function ValidationReportAlert(props) {
       <CloseButton w={6} h={6} pos="absolute" top={3} right={3} />
       <Stack spacing={6} w="full">
         <AlertTitle fontSize="lg" fontWeight={500}>
-          {t('Successfully validated')}
+          {isValidated ? t('Successfully validated') : t('Validation failed')}
         </AlertTitle>
         <AlertDescription>
           <Stack spacing={10}>
@@ -51,7 +55,12 @@ export function ValidationReportAlert(props) {
                 value={toPercent(score)}
                 percentValue={score * 100}
                 icon="timer"
-                color={colors[score <= 0.75 ? 'red' : 'green'][500]}
+                color={
+                  colors[
+                    // eslint-disable-next-line no-nested-ternary
+                    score <= 0.75 ? 'red' : isValidated ? 'green' : 'orange'
+                  ][500]
+                }
               />
               <ValidationReportGauge
                 label={t('Earnings')}
@@ -211,6 +220,10 @@ export function ValidationReportStat({label, value, ...props}) {
       </StatNumber>
     </Stat>
   )
+}
+
+export function ValidationReportColumn(props) {
+  return <Box as={TableCol} fontWeight={500} {...props} />
 }
 
 export function ValidationReportCategoryLabel({label, description, ...props}) {

@@ -1,9 +1,18 @@
-import {Box, CloseButton, Flex, Heading, Stack, useTheme} from '@chakra-ui/core'
+import {
+  Box,
+  CloseButton,
+  Flex,
+  Heading,
+  Stack,
+  Text,
+  useTheme,
+} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {UserInlineCard} from '../screens/profile/components'
 import {
   ValidationReportBlockOverview,
   ValidationReportCategoryLabel,
+  ValidationReportColumn,
   ValidationReportGauge,
   ValidationReportGaugeIcon,
   ValidationReportStat,
@@ -16,7 +25,7 @@ import {
   SuccessAlert,
 } from '../shared/components/components'
 import Layout from '../shared/components/layout'
-import {Table, TableCol, TableHeaderCol} from '../shared/components/table'
+import {Table, TableHeaderCol} from '../shared/components/table'
 import {useEpochState} from '../shared/providers/epoch-context'
 import {useIdentity} from '../shared/providers/identity-context'
 import {toLocaleDna, toPercent} from '../shared/utils/utils'
@@ -31,9 +40,25 @@ export default function ValidationReport() {
 
   const {address, state, isValidated} = identity
 
-  const {score, earnings, earningsScore} = useValidationReportSummary()
+  const {
+    score,
+    earnings,
+    earningsScore,
+    validationReward,
+    missedValidationReward,
+    invitationReward,
+    missedInvitationReward,
+    flipReward,
+    missedFlipReward,
+    flipReportReward,
+    missedFlipReportReward,
+  } = useValidationReportSummary()
 
   const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
+  const rawDna = amount =>
+    !amount || Number.isNaN(amount)
+      ? '–'
+      : amount.toLocaleString(i18n.language, {maximumFractionDigits: 3})
 
   return (
     <Layout>
@@ -71,7 +96,13 @@ export default function ValidationReport() {
                         bg="brandGray.006"
                       />
                     }
-                    color={colors[score <= 0.75 ? 'red' : 'green'][500]}
+                    color={
+                      colors[
+                        // eslint-disable-next-line no-nested-ternary
+                        score <= 0.75 ? 'red' : isValidated ? 'green' : 'orange'
+                      ][500]
+                    }
+                    placeholderColor={colors.brandGray['005']}
                   />
                 </Box>
                 <Stack spacing={4}>
@@ -88,7 +119,7 @@ export default function ValidationReport() {
                   <Flex justify="space-between">
                     <ValidationReportStat
                       label={t('Total score')}
-                      value={score}
+                      value={toPercent(score)}
                     />
                   </Flex>
                 </Stack>
@@ -117,23 +148,24 @@ export default function ValidationReport() {
                           : 'green'
                       ][500]
                     }
+                    placeholderColor={colors.brandGray['005']}
                   />
                 </Box>
                 <Stack spacing={4}>
                   <Flex justify="space-between">
                     <ValidationReportStat
-                      label={t('Short session')}
-                      value="100% (5 out of 5)"
+                      label={t('Missed invitation earnings')}
+                      value={dna(missedInvitationReward)}
                     />
                     <ValidationReportStat
-                      label={t('Long session')}
-                      value="92% (15 out of 16)"
+                      label={t('Missed reporting earnings')}
+                      value={dna(missedFlipReportReward)}
                     />
                   </Flex>
                   <Flex justify="space-between">
                     <ValidationReportStat
-                      label={t('Short session')}
-                      value={1}
+                      label={t('Missed flip earnings')}
+                      value={dna(missedFlipReward)}
                     />
                   </Flex>
                 </Stack>
@@ -144,12 +176,12 @@ export default function ValidationReport() {
             <Heading color="brandGray.500" fontSize="lg" fontWeight={500}>
               {t('Earnings summary')}
             </Heading>
-            <Table>
+            <Table fontWeight={500}>
               <thead>
                 <tr>
                   <TableHeaderCol>{t('Category')}</TableHeaderCol>
-                  <TableHeaderCol>{t('Earned, iDNA')}</TableHeaderCol>
-                  <TableHeaderCol>{t('Missed, iDNA')}</TableHeaderCol>
+                  <TableHeaderCol>{t('Earned')}</TableHeaderCol>
+                  <TableHeaderCol>{t('Missed reward')}</TableHeaderCol>
                   <TableHeaderCol>
                     {t('How to get maximum reward')}
                   </TableHeaderCol>
@@ -157,64 +189,100 @@ export default function ValidationReport() {
               </thead>
               <tbody>
                 <tr>
-                  <TableCol>
+                  <ValidationReportColumn>
                     <ValidationReportCategoryLabel
                       label={t('Validation')}
                       description={t('Rewards for the successfull validation')}
                     />
-                  </TableCol>
-                  <TableCol>1</TableCol>
-                  <TableCol>2</TableCol>
-                  <TableCol>
-                    <Box fontWeight={500}>
-                      {t('Attend every validation to get a higher reward')}
-                    </Box>
-                  </TableCol>
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {rawDna(validationReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {rawDna(missedValidationReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {missedValidationReward ? (
+                      t('Attend every validation to get a higher reward')
+                    ) : (
+                      <Text color="green.500">
+                        {t('You are at maximum level')}
+                      </Text>
+                    )}
+                  </ValidationReportColumn>
                 </tr>
                 <tr>
-                  <TableCol>
+                  <ValidationReportColumn>
                     <ValidationReportCategoryLabel
                       label={t('Flips')}
-                      description={t('Rewards for the successfull validation')}
+                      description={t(
+                        'Rewards for submitted and qualified flips'
+                      )}
                     />
-                  </TableCol>
-                  <TableCol>1</TableCol>
-                  <TableCol>2</TableCol>
-                  <TableCol>
-                    <Box fontWeight={500}>{t('Make flips carefully')}</Box>
-                  </TableCol>
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {rawDna(flipReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {rawDna(missedFlipReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {missedFlipReward ? (
+                      t('Make flips carefully')
+                    ) : (
+                      <Text color="green.500">
+                        {t('You are at maximum level')}
+                      </Text>
+                    )}
+                  </ValidationReportColumn>
                 </tr>
                 <tr>
-                  <TableCol>
+                  <ValidationReportColumn>
                     <ValidationReportCategoryLabel
                       label={t('Invitations')}
-                      description={t('Rewards for the successfull validation')}
+                      description={t('Rewards for invitee validation')}
                     />
-                  </TableCol>
-                  <TableCol></TableCol>
-                  <TableCol></TableCol>
-                  <TableCol>
-                    <Box fontWeight={500}>
-                      {t(
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {rawDna(invitationReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {rawDna(missedInvitationReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {missedFlipReward ? (
+                      t(
                         'Invite your friends and help them to pass the first three validations'
-                      )}
-                    </Box>
-                  </TableCol>
+                      )
+                    ) : (
+                      <Text color="green.500">
+                        {t('You are at maximum level')}
+                      </Text>
+                    )}
+                  </ValidationReportColumn>
                 </tr>
                 <tr>
-                  <TableCol>
+                  <ValidationReportColumn>
                     <ValidationReportCategoryLabel
                       label={t('Flip reports')}
-                      description={t('Rewards for the successfull validation')}
+                      description={t('Rewards for reporting bad flips')}
                     />
-                  </TableCol>
-                  <TableCol></TableCol>
-                  <TableCol></TableCol>
-                  <TableCol>
-                    <Box fontWeight={500}>
-                      {t('Report all flips that break the rules')}
-                    </Box>
-                  </TableCol>
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {rawDna(flipReportReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {rawDna(missedFlipReportReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {missedFlipReportReward ? (
+                      t('Report all flips that break the rules')
+                    ) : (
+                      <Text color="green.500">
+                        {t('You are at maximum level')}
+                      </Text>
+                    )}
+                  </ValidationReportColumn>
                 </tr>
               </tbody>
             </Table>

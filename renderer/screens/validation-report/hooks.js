@@ -134,7 +134,7 @@ export function useValidationReportSummary() {
                   )
 
                   const rewardByType = type => {
-                    const {balance, stake} = identityRewardMap[type]
+                    const {balance, stake} = identityRewardMap[type] ?? {}
                     return Number(balance) + Number(stake)
                   }
 
@@ -400,17 +400,19 @@ export function useValidationReportSummary() {
                     })
                   }
 
-                  const reportRewardsData = reportRewardData(
+                  const flipReportReward = reportRewardData(
                     reportRewards,
                     rewardsSummary,
                     validationPenalty,
                     {state: identityStatus}
-                  )
+                  ).reduce((prev, cur) => prev + cur.reward, 0)
 
-                  const missedReportReward = reportRewardsData.reduce(
-                    (prev, cur) => prev + cur.missingReward,
-                    0
-                  )
+                  const missedFlipReportReward = reportRewardData(
+                    reportRewards,
+                    rewardsSummary,
+                    validationPenalty,
+                    {state: identityStatus}
+                  ).reduce((prev, cur) => prev + cur.missingReward, 0)
 
                   const earningsScore =
                     earnings /
@@ -418,12 +420,25 @@ export function useValidationReportSummary() {
                       missedFlipReward +
                       missedValidationReward +
                       missedInvitationReward +
-                      missedReportReward)
+                      missedFlipReportReward)
 
                   return {
                     ...context,
                     earnings,
                     earningsScore,
+                    validationReward: rewardByType('Validation'),
+                    missedValidationReward,
+                    invitationReward:
+                      rewardByType('Invitations') +
+                      rewardByType('Invitations2') +
+                      rewardByType('Invitations3') +
+                      rewardByType('SavedInvite') +
+                      rewardByType('SavedInviteWin'),
+                    missedInvitationReward,
+                    flipReward: rewardByType('Flips'),
+                    missedFlipReward,
+                    flipReportReward,
+                    missedFlipReportReward,
                   }
                 }
 
