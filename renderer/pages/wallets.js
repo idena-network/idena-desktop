@@ -73,6 +73,7 @@ export default function WalletsPage() {
           <Stack isInline spacing={6}>
             {wallets.map(wallet => (
               <WalletCard
+                key={wallet.address + wallet.name}
                 wallet={wallet}
                 isSelected={areSameCaseInsensitive(wallet.name, 'main')}
                 onSend={onOpenSendDnaDrawer}

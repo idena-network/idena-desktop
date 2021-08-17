@@ -7,12 +7,10 @@ import {
   useToast,
   PopoverTrigger,
   Box,
+  Heading,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {
-  useIdentityState,
-  mapToFriendlyStatus,
-} from '../shared/providers/identity-context'
+import {useIdentityState} from '../shared/providers/identity-context'
 import {useEpochState} from '../shared/providers/epoch-context'
 import {
   UserInlineCard,
@@ -112,6 +110,7 @@ export default function ProfilePage() {
     delegatee,
     delegationEpoch,
     isValidated,
+    canActivateInvite,
   } = useIdentityState()
 
   const epoch = useEpochState()
@@ -221,8 +220,30 @@ export default function ProfilePage() {
                 )}
               </Stack>
               <Stack isInline spacing={10}>
-                <Stack spacing={6} w="md">
+                <Stack spacing={8} w="md">
                   <UserInlineCard address={address} status={status} h={24} />
+                  <Stack
+                    spacing={6}
+                    borderRadius="lg"
+                    boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
+                    px={10}
+                    py={8}
+                  >
+                    <Stack>
+                      <Heading as="h3" fontWeight={500} fontSize="lg">
+                        {t('Join the upcoming validation')}
+                      </Heading>
+                      <Text color="muted">
+                        {t(`To quickly get an invite code, we recommend that you get
+a certificate of trust by passing a test validation`)}
+                      </Text>
+                    </Stack>
+                    {canActivateInvite && (
+                      <Box>
+                        <ActivateInviteForm ref={activateInviteRef} />
+                      </Box>
+                    )}
+                  </Stack>
 
                   {showValidationResults && (
                     <Box>
@@ -232,37 +253,7 @@ export default function ProfilePage() {
                     </Box>
                   )}
 
-                  <UserStatList>
-                    <UserStat>
-                      <UserStatLabel>{t('Address')}</UserStatLabel>
-                      <UserStatValue>{address}</UserStatValue>
-                      <ExternalLink
-                        href={`https://scan.idena.io/address/${address}`}
-                      >
-                        {t('Open in blockhain explorer')}
-                      </ExternalLink>
-                    </UserStat>
-
-                    {status === IdentityStatus.Newbie ? (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          'Solve more than 12 flips to become Verified'
-                        )}
-                        label={t('Status')}
-                        value={mapToFriendlyStatus(status)}
-                      />
-                    ) : (
-                      <SimpleUserStat
-                        label={t('Status')}
-                        value={mapToFriendlyStatus(status)}
-                      />
-                    )}
-
-                    <SimpleUserStat
-                      label={t('Balance')}
-                      value={toDna(balance)}
-                    />
-
+                  <UserStatList title={t('Profile')}>
                     {stake > 0 && status === IdentityStatus.Newbie && (
                       <Stack spacing={4}>
                         <AnnotatedUserStat
@@ -306,13 +297,6 @@ export default function ProfilePage() {
                       <SimpleUserStat label={t('Age')} value={age} />
                     )}
 
-                    {epoch && (
-                      <SimpleUserStat
-                        label={t('Next validation')}
-                        value={formatValidationDate(epoch.nextValidation)}
-                      />
-                    )}
-
                     {totalQualifiedFlips > 0 && (
                       <AnnotatedUserStat
                         annotation={t(
@@ -336,13 +320,46 @@ export default function ProfilePage() {
                       </AnnotatedUserStat>
                     )}
                   </UserStatList>
+
+                  <UserStatList title={t('Wallets')}>
+                    <UserStat>
+                      <UserStatLabel>{t('Address')}</UserStatLabel>
+                      <UserStatValue>{address}</UserStatValue>
+                      <ExternalLink
+                        href={`https://scan.idena.io/address/${address}`}
+                      >
+                        {t('Open in blockhain explorer')}
+                      </ExternalLink>
+                    </UserStat>
+
+                    <UserStat>
+                      <UserStatLabel>{t('Balance')}</UserStatLabel>
+                      <UserStatValue>{toDna(balance)}</UserStatValue>
+                      <TextLink href="/wallets">
+                        <Stack
+                          isInline
+                          spacing={0}
+                          align="center"
+                          fontWeight={500}
+                        >
+                          <Text as="span">{t('Send')}</Text>
+                          <Icon
+                            name="chevron-down"
+                            size={4}
+                            transform="rotate(-90deg)"
+                          />
+                        </Stack>
+                      </TextLink>
+                    </UserStat>
+                  </UserStatList>
+
                   <OnboardingPopover
                     isOpen={isOpenActivateInvitePopover}
                     placement="top-start"
                   >
                     <PopoverTrigger>
                       <Box zIndex={2}>
-                        <ActivateInviteForm ref={activateInviteRef} />
+                        {/* <ActivateInviteForm ref={activateInviteRef} /> */}
                       </Box>
                     </PopoverTrigger>
                     <OnboardingPopoverContent
@@ -473,6 +490,7 @@ export default function ProfilePage() {
                 </Stack>
               </Stack>
             </Stack>
+
             <KillIdentityDrawer
               address={address}
               isOpen={isOpenKillForm}
