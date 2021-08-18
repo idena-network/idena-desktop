@@ -222,28 +222,81 @@ export default function ProfilePage() {
               <Stack isInline spacing={10}>
                 <Stack spacing={8} w="md">
                   <UserInlineCard address={address} status={status} h={24} />
-                  <Stack
-                    spacing={6}
-                    borderRadius="lg"
-                    boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
-                    px={10}
-                    py={8}
-                  >
-                    <Stack>
-                      <Heading as="h3" fontWeight={500} fontSize="lg">
-                        {t('Join the upcoming validation')}
-                      </Heading>
-                      <Text color="muted">
-                        {t(`To quickly get an invite code, we recommend that you get
+
+                  {canActivateInvite && (
+                    <Box>
+                      <OnboardingPopover
+                        isOpen={isOpenActivateInvitePopover}
+                        placement="top-start"
+                      >
+                        <PopoverTrigger>
+                          <Stack
+                            spacing={6}
+                            borderRadius="lg"
+                            boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
+                            px={10}
+                            py={8}
+                          >
+                            <Stack>
+                              <Heading as="h3" fontWeight={500} fontSize="lg">
+                                {t('Join the upcoming validation')}
+                              </Heading>
+                              <Text color="muted">
+                                {t(`To quickly get an invite code, we recommend that you get
 a certificate of trust by passing a test validation`)}
-                      </Text>
-                    </Stack>
-                    {canActivateInvite && (
-                      <Box>
-                        <ActivateInviteForm ref={activateInviteRef} />
-                      </Box>
-                    )}
-                  </Stack>
+                              </Text>
+                            </Stack>
+                            <Box>
+                              <ActivateInviteForm ref={activateInviteRef} />
+                            </Box>
+                          </Stack>
+                        </PopoverTrigger>
+                        <OnboardingPopoverContent
+                          title={t('Enter invitation code')}
+                          zIndex={2}
+                          onDismiss={() => {
+                            dismissCurrentTask()
+                            onCloseActivateInvitePopover()
+                          }}
+                        >
+                          <Stack spacing={5}>
+                            <Stack>
+                              <Text>
+                                {t(
+                                  `An invitation can be provided by validated participants.`
+                                )}
+                              </Text>
+                              <Text>
+                                {t(`Join the official Idena public Telegram group and follow instructions in the
+                pinned message.`)}
+                              </Text>
+                              <OnboardingPopoverContentIconRow icon="telegram">
+                                <Box>
+                                  <PrimaryButton
+                                    variant="unstyled"
+                                    p={0}
+                                    onClick={() => {
+                                      global.openExternal(
+                                        'https://t.me/IdenaNetworkPublic'
+                                      )
+                                    }}
+                                  >
+                                    https://t.me/IdenaNetworkPublic
+                                  </PrimaryButton>
+                                  <Text
+                                    fontSize="sm"
+                                    color="rgba(255, 255, 255, 0.56)"
+                                  >
+                                    {t('Official group')}
+                                  </Text>
+                                </Box>
+                              </OnboardingPopoverContentIconRow>
+                            </Stack>
+                          </Stack>
+                        </OnboardingPopoverContent>
+                      </OnboardingPopover>
+                    </Box>
+                  )}
 
                   {showValidationResults && (
                     <Box>
@@ -254,33 +307,8 @@ a certificate of trust by passing a test validation`)}
                   )}
 
                   <UserStatList title={t('Profile')}>
-                    {stake > 0 && status === IdentityStatus.Newbie && (
-                      <Stack spacing={4}>
-                        <AnnotatedUserStat
-                          annotation={t(
-                            'You need to get Verified status to be able to terminate your identity and withdraw the stake'
-                          )}
-                          label={t('Stake')}
-                          value={toDna(stake * 0.25)}
-                        />
-                        <AnnotatedUserStat
-                          annotation={t(
-                            'You need to get Verified status to get the locked funds into the normal wallet'
-                          )}
-                          label={t('Locked')}
-                          value={toDna(stake * 0.75)}
-                        />
-                      </Stack>
-                    )}
-
-                    {stake > 0 && status !== IdentityStatus.Newbie && (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          'In order to withdraw the stake you have to terminate your identity'
-                        )}
-                        label={t('Stake')}
-                        value={toDna(stake)}
-                      />
+                    {age >= 0 && (
+                      <SimpleUserStat label={t('Age')} value={age} />
                     )}
 
                     {penalty > 0 && (
@@ -291,10 +319,6 @@ a certificate of trust by passing a test validation`)}
                         label={t('Mining penalty')}
                         value={toDna(penalty)}
                       />
-                    )}
-
-                    {age >= 0 && (
-                      <SimpleUserStat label={t('Age')} value={age} />
                     )}
 
                     {totalQualifiedFlips > 0 && (
@@ -351,61 +375,29 @@ a certificate of trust by passing a test validation`)}
                         </Stack>
                       </TextLink>
                     </UserStat>
-                  </UserStatList>
 
-                  <OnboardingPopover
-                    isOpen={isOpenActivateInvitePopover}
-                    placement="top-start"
-                  >
-                    <PopoverTrigger>
-                      <Box zIndex={2}>
-                        {/* <ActivateInviteForm ref={activateInviteRef} /> */}
-                      </Box>
-                    </PopoverTrigger>
-                    <OnboardingPopoverContent
-                      title={t('Enter invitation code')}
-                      zIndex={2}
-                      onDismiss={() => {
-                        dismissCurrentTask()
-                        onCloseActivateInvitePopover()
-                      }}
-                    >
-                      <Stack spacing={5}>
-                        <Stack>
-                          <Text>
-                            {t(
-                              `An invitation can be provided by validated participants.`
-                            )}
-                          </Text>
-                          <Text>
-                            {t(`Join the official Idena public Telegram group and follow instructions in the
-                pinned message.`)}
-                          </Text>
-                          <OnboardingPopoverContentIconRow icon="telegram">
-                            <Box>
-                              <PrimaryButton
-                                variant="unstyled"
-                                p={0}
-                                onClick={() => {
-                                  global.openExternal(
-                                    'https://t.me/IdenaNetworkPublic'
-                                  )
-                                }}
-                              >
-                                https://t.me/IdenaNetworkPublic
-                              </PrimaryButton>
-                              <Text
-                                fontSize="sm"
-                                color="rgba(255, 255, 255, 0.56)"
-                              >
-                                {t('Official group')}
-                              </Text>
-                            </Box>
-                          </OnboardingPopoverContentIconRow>
-                        </Stack>
-                      </Stack>
-                    </OnboardingPopoverContent>
-                  </OnboardingPopover>
+                    {stake > 0 && (
+                      <AnnotatedUserStat
+                        annotation={t(
+                          'You need to get Verified status to be able to terminate your identity and withdraw the stake'
+                        )}
+                        label={t('Stake')}
+                        value={toDna(
+                          stake * (status === IdentityStatus.Newbie ? 0.25 : 1)
+                        )}
+                      />
+                    )}
+
+                    {stake > 0 && status === IdentityStatus.Newbie && (
+                      <AnnotatedUserStat
+                        annotation={t(
+                          'You need to get Verified status to get the locked funds into the normal wallet'
+                        )}
+                        label={t('Locked')}
+                        value={toDna(stake * 0.75)}
+                      />
+                    )}
+                  </UserStatList>
                 </Stack>
                 <Stack spacing={10} w={200}>
                   <Box minH={62} mt={4}>
