@@ -266,27 +266,24 @@ export function ReceiveDnaDrawer({address, ...props}) {
 }
 
 export function WalletTransactionList({txs = []}) {
-  const {t} = useTranslation(['translation', 'error'])
+  const {t, i18n} = useTranslation(['translation', 'error'])
+
+  const signedDna = toLocaleDna(i18n.language, {
+    signDisplay: 'exceptZero',
+  })
+
+  const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
+
   return (
     <Table>
       <thead>
         <TableRow>
-          <TableHeaderCol
-            style={{
-              minWidth: '130px',
-            }}
-          >
+          <TableHeaderCol style={{width: '210px'}}>
             {t('Transaction')}
           </TableHeaderCol>
           <TableHeaderCol>{t('Address')}</TableHeaderCol>
-          <TableHeaderCol className="text-right">
-            {t('Amount, iDNA')}
-          </TableHeaderCol>
-          <TableHeaderCol className="text-right">
-            {t('Fee, iDNA')}
-          </TableHeaderCol>
+          <TableHeaderCol className="text-right">{t('Amount')}</TableHeaderCol>
           <TableHeaderCol>{t('Date')}</TableHeaderCol>
-          <TableHeaderCol>{t('Blockchain transaction ID')}</TableHeaderCol>
         </TableRow>
       </thead>
       <tbody>
@@ -305,7 +302,7 @@ export function WalletTransactionList({txs = []}) {
                     borderColor="brandGray.016"
                     borderWidth={1}
                   />
-                  <Box>
+                  <Box w={60}>
                     <Text fontWeight={500} whiteSpace="nowrap">
                       {tx.direction === 'Sent' ? t('To') : t('From')}{' '}
                       {/* eslint-disable-next-line no-nested-ternary */}
@@ -315,89 +312,52 @@ export function WalletTransactionList({txs = []}) {
                         ? t('smart contract')
                         : t('address')}
                     </Text>
-                    <SmallText fontWeight={500}>{tx.counterParty}</SmallText>
+                    <SmallText fontWeight={500} isTruncated>
+                      {tx.counterParty}
+                    </SmallText>
                   </Box>
                 </Stack>
               )}
             </TableCol>
 
             <TableCol className="text-right">
-              <Box
-                fontWeight={500}
+              <Text
                 color={tx.signAmount < 0 ? 'red.500' : 'brandGray.500'}
+                overflowWrap="break-word"
               >
-                {(tx.type === 'kill' && t('See in Explorer...')) ||
-                  (tx.amount === '0' ? '\u2013' : tx.signAmount)}
+                {/* eslint-disable-next-line no-nested-ternary */}
+                {tx.type === 'kill'
+                  ? t('See in Explorer...')
+                  : Number(tx.amount) === 0
+                  ? '\u2013'
+                  : signedDna(tx.amount)}
+              </Text>
+
+              <Box fontWeight={500}>
+                {!tx.isMining || tx.maxFee === '0' ? (
+                  <>
+                    {Number(tx.usedFee) > 0 && (
+                      <>
+                        <SmallText>{t('Fee')}</SmallText>
+                        <SmallText>{dna(tx.usedFee)}</SmallText>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <SmallText>{t('Fee limit')}</SmallText>
+                    <SmallText>{dna(tx.maxFee)}</SmallText>
+                  </>
+                )}
               </Box>
             </TableCol>
 
-            <TableCol className="text-right">
-              {((!tx.isMining || tx.maxFee === '0') &&
-                (tx.usedFee === '0' ? '\u2013' : tx.usedFee)) || (
-                <Box>
-                  <Box>{tx.maxFee}</Box>
-                  <SmallText as="span" fontWeight={500}>
-                    {t('Fee limit')}
-                  </SmallText>
-                </Box>
-              )}
-            </TableCol>
             <TableCol>
               <Text as="span" fontWeight={500}>
                 {!tx.timestamp
                   ? '\u2013'
                   : new Date(tx.timestamp * 1000).toLocaleString()}
               </Text>
-            </TableCol>
-            <TableCol>
-              {tx.isMining ? (
-                t('Mining...')
-              ) : (
-                <Box fontWeight={500}>
-                  <Stack isInline spacing={1} align="center">
-                    {tx.receipt?.error && (
-                      <Tooltip
-                        label={`${t('Smart contract failed')}: ${
-                          tx.receipt?.error
-                        }`}
-                      >
-                        <Icon
-                          name="exclamation-mark"
-                          color="red.500"
-                          size={5}
-                        />
-                      </Tooltip>
-                    )}
-                    <Text as="span">{t('Confirmed')}</Text>
-                  </Stack>
-                  <Button
-                    variant="link"
-                    variantColor="brandBlue"
-                    fontWeight={500}
-                    fontSize="sm"
-                    alignItems="center"
-                    alignSelf="flex-start"
-                    _hover={{background: 'transparent'}}
-                    _focus={{
-                      outline: 'none',
-                    }}
-                    onClick={() => {
-                      global.openExternal(
-                        `https://scan.idena.io/transaction/${tx.hash}`
-                      )
-                    }}
-                  >
-                    <Text as="span" w={40} isTruncated>
-                      {tx.isMining ? '' : tx.hash}
-                    </Text>
-                    <Icon
-                      name="chevron-down"
-                      size={4}
-                      transform="rotate(-90deg)"
-                    />
-                  </Button>
-                </Box>
-              )}
             </TableCol>
           </TableRow>
         ))}
@@ -406,7 +366,11 @@ export function WalletTransactionList({txs = []}) {
   )
 }
 
-function WalletTxStatus({tx: {direction, isMining, typeName, wallet}}) {
+function WalletTxStatus({
+  tx: {hash, direction, isMining, typeName, wallet, receipt},
+}) {
+  const {t} = useTranslation()
+
   const txColorAccent = direction === 'Sent' ? 'red' : 'blue'
 
   return (
@@ -414,6 +378,7 @@ function WalletTxStatus({tx: {direction, isMining, typeName, wallet}}) {
       <Flex
         align="center"
         justify="center"
+        alignSelf="center"
         bg={isMining ? 'muted' : `${txColorAccent}.012`}
         color={isMining ? 'muted' : `${txColorAccent}.500`}
         borderRadius="lg"
@@ -422,13 +387,49 @@ function WalletTxStatus({tx: {direction, isMining, typeName, wallet}}) {
       >
         <Icon name={`arrow-${direction === 'Sent' ? 'up' : 'down'}`} size={5} />
       </Flex>
-      <Box isTruncated>
+      <Box>
         <Text color="brandGray.500" fontWeight={500}>
           {typeName}
         </Text>
-        <Text color="blue.500" fontSize="sm" fontWeight={500} isTruncated>
-          {wallet?.name}
-        </Text>
+        <SmallText fontWeight={500}>{wallet?.name}</SmallText>
+        <Box fontWeight={500}>
+          {isMining ? (
+            t('Mining...')
+          ) : (
+            <Stack isInline spacing={1} align="center">
+              {receipt?.error && (
+                <Tooltip
+                  label={`${t('Smart contract failed')}: ${receipt?.error}`}
+                >
+                  <Icon name="exclamation-mark" color="red.500" size={5} />
+                </Tooltip>
+              )}
+
+              <Button
+                variant="link"
+                variantColor="brandBlue"
+                fontWeight={500}
+                fontSize="sm"
+                alignItems="center"
+                textAlign="left"
+                _hover={{background: 'transparent'}}
+                _focus={{
+                  outline: 'none',
+                }}
+                onClick={() => {
+                  global.openExternal(
+                    `https://scan.idena.io/transaction/${hash}`
+                  )
+                }}
+              >
+                <Text as="span" w={32} isTruncated>
+                  {hash}
+                </Text>
+                <Icon name="chevron-down" size={4} transform="rotate(-90deg)" />
+              </Button>
+            </Stack>
+          )}
+        </Box>
       </Box>
     </Stack>
   )
