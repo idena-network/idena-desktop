@@ -597,11 +597,7 @@ function CurrentTask({epoch, period, identity}) {
 
       switch (true) {
         case canActivateInvite:
-          return (
-            <CurrentTaskLink href="/profile">
-              {t('Activate invite')}
-            </CurrentTaskLink>
-          )
+          return t('Activate invite')
 
         case currentOnboarding.matches(OnboardingStep.ActivateMining): {
           return t('Activate mining status')
@@ -718,7 +714,7 @@ function CurrentTask({epoch, period, identity}) {
 function CurrentTaskLink({href, ...props}) {
   return (
     <NextLink href={href} passHref>
-      <Link color="white" {...props} />
+      <Link color="white" _hover={{textDecoration: 'none'}} {...props} />
     </NextLink>
   )
 }

@@ -220,7 +220,7 @@ export default function ProfilePage() {
                 )}
               </Stack>
               <Stack isInline spacing={10}>
-                <Stack spacing={8} w="md">
+                <Stack spacing={8} w="md" ref={activateInviteRef}>
                   <UserInlineCard address={address} status={status} h={24} />
 
                   {canActivateInvite && (
@@ -232,10 +232,13 @@ export default function ProfilePage() {
                         <PopoverTrigger>
                           <Stack
                             spacing={6}
+                            bg="white"
                             borderRadius="lg"
                             boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
                             px={10}
                             py={8}
+                            pos="relative"
+                            zIndex="docked"
                           >
                             <Stack>
                               <Heading as="h3" fontWeight={500} fontSize="lg">
@@ -247,11 +250,12 @@ a certificate of trust by passing a test validation`)}
                               </Text>
                             </Stack>
                             <Box>
-                              <ActivateInviteForm ref={activateInviteRef} />
+                              <ActivateInviteForm />
                             </Box>
                           </Stack>
                         </PopoverTrigger>
                         <OnboardingPopoverContent
+                          gutter={10}
                           title={t('Enter invitation code')}
                           zIndex={2}
                           onDismiss={() => {
@@ -275,6 +279,8 @@ a certificate of trust by passing a test validation`)}
                                   <PrimaryButton
                                     variant="unstyled"
                                     p={0}
+                                    py={0}
+                                    h={18}
                                     onClick={() => {
                                       global.openExternal(
                                         'https://t.me/IdenaNetworkPublic'
