@@ -245,13 +245,20 @@ export default function ProfilePage() {
                                 {t('Join the upcoming validation')}
                               </Heading>
                               <Text color="muted">
-                                {t(`To quickly get an invite code, we recommend that you get
-a certificate of trust by passing a test validation`)}
+                                {status === IdentityStatus.Invite
+                                  ? t(
+                                      'You have been invited to join the upcoming validation ceremony. Click the button below to accept the invitation.'
+                                    )
+                                  : t(
+                                      'To quickly get an invite code, we recommend that you get a certificate of trust by passing a test validation'
+                                    )}
                               </Text>
                             </Stack>
-                            <Box>
-                              <ActivateInviteForm />
-                            </Box>
+                            {status === IdentityStatus.Undefined && (
+                              <Box>
+                                <ActivateInviteForm />
+                              </Box>
+                            )}
                           </Stack>
                         </PopoverTrigger>
                         <OnboardingPopoverContent
