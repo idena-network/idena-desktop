@@ -186,48 +186,50 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
       {...props}
     >
       <Stack spacing={6}>
-        <FormControl>
-          <Stack spacing={3}>
-            <Flex justify="space-between" align="center">
-              <FormLabel htmlFor="code" p={0}>
-                {t('Invitation code')}
-              </FormLabel>
-              <Button
-                variant="ghost"
+        {status === IdentityStatus.Undefined && (
+          <FormControl>
+            <Stack spacing={3}>
+              <Flex justify="space-between" align="center">
+                <FormLabel htmlFor="code" p={0}>
+                  {t('Invitation code')}
+                </FormLabel>
+                <Button
+                  variant="ghost"
+                  isDisabled={mining || status === IdentityStatus.Invite}
+                  bg="unset"
+                  color="muted"
+                  fontWeight={500}
+                  h="unset"
+                  p={0}
+                  _hover={{bg: 'unset'}}
+                  _active={{bg: 'unset'}}
+                  _focus={{boxShadow: 'none'}}
+                  onClick={() => setCode(global.clipboard.readText())}
+                >
+                  {t('Paste')}
+                </Button>
+              </Flex>
+              <Input
+                id="code"
+                value={code}
                 isDisabled={mining || status === IdentityStatus.Invite}
-                bg="unset"
-                color="muted"
-                fontWeight={500}
-                h="unset"
-                p={0}
-                _hover={{bg: 'unset'}}
-                _active={{bg: 'unset'}}
-                _focus={{boxShadow: 'none'}}
-                onClick={() => setCode(global.clipboard.readText())}
-              >
-                {t('Paste')}
-              </Button>
-            </Flex>
-            <Input
-              id="code"
-              value={code}
-              isDisabled={mining || status === IdentityStatus.Invite}
-              placeholder={
-                status === IdentityStatus.Invite
-                  ? 'Click the button to activate invitation'
-                  : ''
-              }
-              resize="none"
-              _disabled={{
-                bg: 'gray.50',
-              }}
-              _placeholder={{
-                color: 'muted',
-              }}
-              onChange={e => setCode(e.target.value)}
-            />
-          </Stack>
-        </FormControl>
+                placeholder={
+                  status === IdentityStatus.Invite
+                    ? 'Click the button to activate invitation'
+                    : ''
+                }
+                resize="none"
+                _disabled={{
+                  bg: 'gray.50',
+                }}
+                _placeholder={{
+                  color: 'muted',
+                }}
+                onChange={e => setCode(e.target.value)}
+              />
+            </Stack>
+          </FormControl>
+        )}
         <PrimaryButton
           isLoading={mining}
           loadingText={t('Mining...')}

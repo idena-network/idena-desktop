@@ -254,11 +254,9 @@ export default function ProfilePage() {
                                     )}
                               </Text>
                             </Stack>
-                            {status === IdentityStatus.Undefined && (
-                              <Box>
-                                <ActivateInviteForm />
-                              </Box>
-                            )}
+                            <Box>
+                              <ActivateInviteForm />
+                            </Box>
                           </Stack>
                         </PopoverTrigger>
                         <OnboardingPopoverContent
