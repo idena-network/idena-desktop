@@ -317,44 +317,50 @@ export default function ProfilePage() {
                     </Box>
                   )}
 
-                  <UserStatList title={t('Profile')}>
-                    {age >= 0 && (
-                      <SimpleUserStat label={t('Age')} value={age} />
-                    )}
+                  {![
+                    IdentityStatus.Undefined,
+                    IdentityStatus.Invite,
+                    IdentityStatus.Candidate,
+                  ].includes(status) && (
+                    <UserStatList title={t('Profile')}>
+                      {age >= 0 && (
+                        <SimpleUserStat label={t('Age')} value={age} />
+                      )}
 
-                    {penalty > 0 && (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          "Your node was offline more than 1 hour. The penalty will be charged automatically. Once it's fully paid you'll continue to mine coins."
-                        )}
-                        label={t('Mining penalty')}
-                        value={toDna(penalty)}
-                      />
-                    )}
+                      {penalty > 0 && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            "Your node was offline more than 1 hour. The penalty will be charged automatically. Once it's fully paid you'll continue to mine coins."
+                          )}
+                          label={t('Mining penalty')}
+                          value={toDna(penalty)}
+                        />
+                      )}
 
-                    {totalQualifiedFlips > 0 && (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          'Total score for the last 10 validations'
-                        )}
-                        label={t('Total score')}
-                      >
-                        <UserStatValue>
-                          {t('{{point}} out of {{flipCount}} ({{score}})', {
-                            point: Math.min(
-                              totalShortFlipPoints,
-                              totalQualifiedFlips
-                            ),
-                            flipCount: totalQualifiedFlips,
-                            score: toPercent(totalScore),
-                          })}
-                        </UserStatValue>
-                        <TextLink href="/validation-report" fontWeight={500}>
-                          {t('View validation report')}
-                        </TextLink>
-                      </AnnotatedUserStat>
-                    )}
-                  </UserStatList>
+                      {totalQualifiedFlips > 0 && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            'Total score for the last 10 validations'
+                          )}
+                          label={t('Total score')}
+                        >
+                          <UserStatValue>
+                            {t('{{point}} out of {{flipCount}} ({{score}})', {
+                              point: Math.min(
+                                totalShortFlipPoints,
+                                totalQualifiedFlips
+                              ),
+                              flipCount: totalQualifiedFlips,
+                              score: toPercent(totalScore),
+                            })}
+                          </UserStatValue>
+                          <TextLink href="/validation-report" fontWeight={500}>
+                            {t('View validation report')}
+                          </TextLink>
+                        </AnnotatedUserStat>
+                      )}
+                    </UserStatList>
+                  )}
 
                   <UserStatList title={t('Wallets')}>
                     <UserStat>
