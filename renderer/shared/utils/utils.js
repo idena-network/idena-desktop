@@ -32,7 +32,7 @@ export function callRpc(method, ...params) {
 }
 
 export function toPercent(value) {
-  return value.toLocaleString(undefined, {
+  return value?.toLocaleString(undefined, {
     style: 'percent',
     maximumSignificantDigits: 4,
   })

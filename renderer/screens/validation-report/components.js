@@ -21,67 +21,130 @@ import {useIdentity} from '../../shared/providers/identity-context'
 import {toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {useValidationReportSummary} from './hooks'
 
-export function ValidationReportSummary(props) {
+export function ValidationReportSummary() {
   const {t, i18n} = useTranslation()
 
   const {colors} = useTheme()
 
   const [{isValidated}] = useIdentity()
 
-  const {score, earnings, earningsScore} = useValidationReportSummary()
+  const {
+    lastValidationScore,
+    totalScore,
+    earnings,
+    earningsScore,
+    totalMissedReward,
+    didMissValidation,
+  } = useValidationReportSummary()
+
+  const {
+    short: {score: shortScore, options: shortAnswersCount},
+  } = lastValidationScore
+
+  // eslint-disable-next-line no-nested-ternary
+  const validationFailReason = didMissValidation
+    ? shortAnswersCount
+      ? t('Late submission')
+      : t('Missed validation')
+    : t('Wrong answers')
 
   const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
 
   return (
     <Alert
+      status={isValidated ? 'success' : 'error'}
       variant="top-accent"
       bg="white"
       boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
       borderRadius="md"
       px={8}
       py={6}
-      {...props}
     >
       <CloseButton w={6} h={6} pos="absolute" top={3} right={3} />
       <Stack spacing={6} w="full">
         <AlertTitle fontSize="lg" fontWeight={500}>
-          {isValidated ? t('Successfully validated') : t('Validation failed')}
+          {isValidated ? t('Successfully validated') : t('Not validated')}
         </AlertTitle>
         <AlertDescription>
           <Stack spacing={10}>
-            <Flex justify="space-between">
-              <ValidationReportGauge
-                label={t('Score')}
-                value={toPercent(score)}
-                percentValue={score * 100}
-                icon="timer"
-                color={
-                  colors[
-                    // eslint-disable-next-line no-nested-ternary
-                    score <= 0.75 ? 'red' : isValidated ? 'green' : 'orange'
-                  ][500]
-                }
-              />
-              <ValidationReportGauge
-                label={t('Earnings')}
-                value={dna(earnings)}
-                percentValue={earningsScore * 100}
-                icon="send-out"
-                color={
-                  colors[
-                    // eslint-disable-next-line no-nested-ternary
-                    earningsScore <= 0.5
-                      ? 'red'
-                      : score < 0.75
-                      ? 'orange'
-                      : 'green'
-                  ][500]
-                }
-              />
+            <Flex justify="space-between" px={2}>
+              <ValidationReportGauge>
+                <ValidationReportGaugeBox>
+                  {isValidated ? (
+                    <ValidationReportGaugeBar
+                      value={totalScore * 100}
+                      color={
+                        totalScore <= 0.75 ? colors.red[500] : colors.green[500]
+                      }
+                    />
+                  ) : (
+                    <ValidationReportGaugeBar
+                      value={shortScore || 2}
+                      color={colors.red[500]}
+                    />
+                  )}
+                  <ValidationReportGaugeIcon icon="timer" />
+                </ValidationReportGaugeBox>
+                <ValidationReportGaugeStat>
+                  {isValidated ? (
+                    <ValidationReportGaugeStatValue>
+                      {toPercent(totalScore)}
+                    </ValidationReportGaugeStatValue>
+                  ) : (
+                    <ValidationReportGaugeStatValue color="red.500">
+                      {t('Failed')}
+                    </ValidationReportGaugeStatValue>
+                  )}
+                  <ValidationReportGaugeStatLabel>
+                    {isValidated ? t('Score') : validationFailReason}
+                  </ValidationReportGaugeStatLabel>
+                </ValidationReportGaugeStat>
+              </ValidationReportGauge>
+              <ValidationReportGauge>
+                <ValidationReportGaugeBox>
+                  {isValidated ? (
+                    <ValidationReportGaugeBar
+                      value={earningsScore * 100}
+                      color={
+                        // eslint-disable-next-line no-nested-ternary
+                        totalScore <= 0.5
+                          ? colors.red[500]
+                          : totalScore <= 0.75
+                          ? colors.orange[500]
+                          : colors.green[500]
+                      }
+                    />
+                  ) : (
+                    <ValidationReportGaugeBar
+                      value={2}
+                      color={colors.red[500]}
+                    />
+                  )}
+                  <ValidationReportGaugeIcon icon="send-out" />
+                </ValidationReportGaugeBox>
+                <ValidationReportGaugeStat>
+                  {isValidated ? (
+                    <ValidationReportGaugeStatValue>
+                      {dna(earnings)}
+                    </ValidationReportGaugeStatValue>
+                  ) : (
+                    <ValidationReportGaugeStatValue color="red.500">
+                      {dna(totalMissedReward)}
+                    </ValidationReportGaugeStatValue>
+                  )}
+                  <ValidationReportGaugeStatLabel>
+                    {t('Earnings')}
+                  </ValidationReportGaugeStatLabel>
+                </ValidationReportGaugeStat>
+              </ValidationReportGauge>
             </Flex>
             <Flex justify="space-between">
               <Box>
-                <TextLink href="/validation-report" fontWeight={500}>
+                <TextLink
+                  href="/validation-report"
+                  fontWeight={500}
+                  display="inline-block"
+                >
                   <Stack isInline spacing={0} align="center">
                     <Text as="span">{t('More details')}</Text>
                     <Icon
@@ -105,41 +168,27 @@ export function ValidationReportSummary(props) {
   )
 }
 
-export function ValidationReportGauge({
-  label,
-  value,
-  percentValue,
-  icon,
-  color = 'gray',
-  placeholderColor,
-}) {
-  return (
-    <Stack spacing={0} align="center">
-      <Box h={103} pos="relative">
-        <GaugeBar
-          percent={percentValue}
-          color={color}
-          placeholderColor={placeholderColor}
-        />
-        {typeof icon === 'string' ? (
-          <ValidationReportGaugeIcon icon={icon} />
-        ) : (
-          icon
-        )}
-      </Box>
-      <Stack spacing={1} align="center">
-        <Box fontSize="lg" fontWeight={500}>
-          {value}
-        </Box>
-        <Box color="muted" fontSize="mdx">
-          {label}
-        </Box>
-      </Stack>
-    </Stack>
-  )
+export function ValidationReportGauge(props) {
+  return <Stack spacing={0} align="center" {...props} />
 }
 
-function GaugeBar({percent, color, placeholderColor}) {
+export function ValidationReportGaugeBox(props) {
+  return <Box h={103} position="relative" {...props} />
+}
+
+export function ValidationReportGaugeStat(props) {
+  return <Stack as={Stat} spacing={1} align="center" pr={0} {...props} />
+}
+
+export function ValidationReportGaugeStatLabel(props) {
+  return <StatLabel color="muted" fontSize="mdx" fontWeight={500} {...props} />
+}
+
+export function ValidationReportGaugeStatValue(props) {
+  return <StatNumber fontSize="lg" fontWeight={500} {...props} />
+}
+
+export function ValidationReportGaugeBar({value, bg, color}) {
   const {colors} = useTheme()
 
   const radius = 84
@@ -152,7 +201,7 @@ function GaugeBar({percent, color, placeholderColor}) {
   const transform = `rotate(${180 -
     Math.max(angle - 180, 0) / 2}, ${radius}, ${radius})`
 
-  const percentNormalized = Math.min(Math.max(percent, 0), 100)
+  const percentNormalized = Math.min(Math.max(value, 0), 100)
   const offset = arc - (percentNormalized / 100) * arc
 
   return (
@@ -166,7 +215,7 @@ function GaugeBar({percent, color, placeholderColor}) {
         cy={radius}
         fill="transparent"
         r={innerRadius}
-        stroke={placeholderColor || colors.gray[50]}
+        stroke={bg || colors.gray[50]}
         strokeWidth={4}
         strokeDasharray={dashArray}
         strokeLinecap="round"
@@ -188,7 +237,12 @@ function GaugeBar({percent, color, placeholderColor}) {
   )
 }
 
-export function ValidationReportGaugeIcon({icon, bg = 'gray.50', ...props}) {
+export function ValidationReportGaugeIcon({
+  icon,
+  bg = 'gray.50',
+  color = 'muted',
+  ...props
+}) {
   return (
     <Box
       bg={bg}
@@ -200,7 +254,7 @@ export function ValidationReportGaugeIcon({icon, bg = 'gray.50', ...props}) {
       transform="translateX(-50%)"
       {...props}
     >
-      <Icon name={icon} size={5} color="muted" />
+      <Icon name={icon} size={5} color={color} />
     </Box>
   )
 }

@@ -3,13 +3,49 @@ import React from 'react'
 import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {useIdentity} from '../../shared/providers/identity-context'
+import {
+  useIdentity,
+  useIdentityState,
+} from '../../shared/providers/identity-context'
 import {IdentityStatus} from '../../shared/types'
 import {apiMethod} from '../../shared/utils/utils'
 
-export function useValidationScore() {
+export function useTotalValidationScore() {
   const [{totalShortFlipPoints, totalQualifiedFlips}] = useIdentity()
   return Math.min(totalShortFlipPoints / totalQualifiedFlips, 1)
+}
+
+export function useLastValidationScore() {
+  const epoch = useEpochState()
+
+  const {address} = useIdentityState()
+
+  const [score, setScore] = React.useState({short: {}, long: {}})
+
+  React.useEffect(() => {
+    const epochNumber = Number(epoch?.epoch)
+    if (Boolean(address) && epochNumber > 0)
+      fetch(apiMethod(`epoch/${epochNumber - 1}/identity/${address}`))
+        .then(resp => resp.json())
+        .then(({result}) => {
+          const {shortAnswers, longAnswers} = result
+
+          const flipScore = ({point, flipsCount}) => point / flipsCount
+
+          setScore({
+            short: {
+              ...shortAnswers,
+              score: flipScore(shortAnswers),
+            },
+            long: {
+              ...longAnswers,
+              score: flipScore(longAnswers),
+            },
+          })
+        })
+  }, [address, epoch])
+
+  return score
 }
 
 export function useValidationReportSummary() {
@@ -17,7 +53,8 @@ export function useValidationReportSummary() {
 
   const epoch = useEpochState()
 
-  const score = useValidationScore()
+  const lastValidationScore = useLastValidationScore()
+  const totalScore = useTotalValidationScore()
 
   const [current, send] = useMachine(
     createMachine({
@@ -111,7 +148,7 @@ export function useValidationReportSummary() {
                   data: {
                     rewardsSummary,
                     identityRewards,
-                    epochIdentity: {birthEpoch, state: identityStatus},
+                    epochIdentity: {birthEpoch, state: identityStatus, missed},
                     validationPenalty,
                     rewardedInvites,
                     savedInvites,
@@ -414,13 +451,14 @@ export function useValidationReportSummary() {
                     {state: identityStatus}
                   ).reduce((prev, cur) => prev + cur.missingReward, 0)
 
+                  const totalMissedReward =
+                    missedFlipReward +
+                    missedValidationReward +
+                    missedInvitationReward +
+                    missedFlipReportReward
+
                   const earningsScore =
-                    earnings /
-                    (earnings +
-                      missedFlipReward +
-                      missedValidationReward +
-                      missedInvitationReward +
-                      missedFlipReportReward)
+                    earnings / (earnings + totalMissedReward)
 
                   return {
                     ...context,
@@ -439,6 +477,8 @@ export function useValidationReportSummary() {
                     missedFlipReward,
                     flipReportReward,
                     missedFlipReportReward,
+                    didMissValidation: missed,
+                    totalMissedReward,
                   }
                 }
 
@@ -462,7 +502,8 @@ export function useValidationReportSummary() {
 
   return {
     ...current.context,
-    score,
+    lastValidationScore,
+    totalScore,
     isLoading: current.matches('fetching'),
   }
 }

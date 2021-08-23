@@ -76,6 +76,7 @@ import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 import {useScroll} from '../shared/hooks/use-scroll'
 import {ValidationReportSummary} from '../screens/validation-report/components'
+import {useTotalValidationScore} from '../screens/validation-report/hooks'
 
 export default function ProfilePage() {
   const {
@@ -199,6 +200,8 @@ export default function ProfilePage() {
     scrollToActivateInvite,
   ])
 
+  const totalScore = useTotalValidationScore()
+
   return (
     <>
       <InviteProvider>
@@ -219,9 +222,9 @@ export default function ProfilePage() {
                 <Stack spacing={6} w="md">
                   <UserInlineCard address={address} status={status} h={24} />
 
-                  <ValidationReportSummary
-                    status={isValidated ? 'success' : 'error'}
-                  />
+                  <Box>
+                    <ValidationReportSummary />
+                  </Box>
 
                   <UserStatList>
                     <UserStat>
@@ -312,15 +315,14 @@ export default function ProfilePage() {
                         label={t('Total score')}
                       >
                         <UserStatValue>
-                          {Math.min(totalShortFlipPoints, totalQualifiedFlips)}{' '}
-                          out of {totalQualifiedFlips} (
-                          {toPercent(
-                            Math.min(
-                              totalShortFlipPoints / totalQualifiedFlips,
-                              1
-                            )
-                          )}
-                          )
+                          {t('{{point}} out of {{flipCount}} ({{score}})', {
+                            point: Math.min(
+                              totalShortFlipPoints,
+                              totalQualifiedFlips
+                            ),
+                            flipCount: totalQualifiedFlips,
+                            score: toPercent(totalScore),
+                          })}
                         </UserStatValue>
                       </AnnotatedUserStat>
                     )}
