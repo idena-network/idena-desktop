@@ -7,6 +7,7 @@ import {
   CloseButton,
   Flex,
   Icon,
+  Skeleton,
   Stack,
   Stat,
   StatLabel,
@@ -20,6 +21,7 @@ import {TableCol} from '../../shared/components/table'
 import {useIdentity} from '../../shared/providers/identity-context'
 import {toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {useValidationReportSummary} from './hooks'
+import {ValidationFailReason} from './types'
 
 export function ValidationReportSummary() {
   const {t, i18n} = useTranslation()
@@ -35,6 +37,8 @@ export function ValidationReportSummary() {
     earningsScore,
     totalMissedReward,
     didMissValidation,
+    validationPenalty,
+    isLoading,
   } = useValidationReportSummary()
 
   const {
@@ -44,9 +48,9 @@ export function ValidationReportSummary() {
   // eslint-disable-next-line no-nested-ternary
   const validationFailReason = didMissValidation
     ? shortAnswersCount
-      ? t('Late submission')
-      : t('Missed validation')
-    : t('Wrong answers')
+      ? ValidationFailReason.LateSubmission
+      : ValidationFailReason.MissedValidation
+    : ValidationFailReason.WrongAnswers
 
   const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
 
@@ -62,9 +66,21 @@ export function ValidationReportSummary() {
     >
       <CloseButton w={6} h={6} pos="absolute" top={3} right={3} />
       <Stack spacing={6} w="full">
-        <AlertTitle fontSize="lg" fontWeight={500}>
-          {isValidated ? t('Successfully validated') : t('Not validated')}
-        </AlertTitle>
+        <Skeleton
+          isLoaded={!isLoading}
+          colorStart={colors.gray[50]}
+          colorEnd={colors.gray[300]}
+          alignSelf="start"
+        >
+          <AlertTitle fontSize="lg" fontWeight={500}>
+            {/* eslint-disable-next-line no-nested-ternary */}
+            {isValidated
+              ? validationPenalty
+                ? t('Validated')
+                : t('Successfully validated')
+              : t('Validation failed')}
+          </AlertTitle>
+        </Skeleton>
         <AlertDescription>
           <Stack spacing={10}>
             <Flex justify="space-between" px={2}>
@@ -74,7 +90,12 @@ export function ValidationReportSummary() {
                     <ValidationReportGaugeBar
                       value={totalScore * 100}
                       color={
-                        totalScore <= 0.75 ? colors.red[500] : colors.green[500]
+                        // eslint-disable-next-line no-nested-ternary
+                        totalScore <= 0.75
+                          ? colors.red[500]
+                          : totalScore <= 0.9
+                          ? colors.orange[500]
+                          : colors.green[500]
                       }
                     />
                   ) : (
@@ -96,7 +117,20 @@ export function ValidationReportSummary() {
                     </ValidationReportGaugeStatValue>
                   )}
                   <ValidationReportGaugeStatLabel>
-                    {isValidated ? t('Score') : validationFailReason}
+                    {isValidated
+                      ? t('Score')
+                      : (() => {
+                          switch (validationFailReason) {
+                            case ValidationFailReason.LateSubmission:
+                              return t('Late submission')
+                            case ValidationFailReason.MissedValidation:
+                              return t('Missed validation')
+                            case ValidationFailReason.WrongAnswers:
+                              return t('Wrong answers')
+                            default:
+                              return ''
+                          }
+                        })()}
                   </ValidationReportGaugeStatLabel>
                 </ValidationReportGaugeStat>
               </ValidationReportGauge>
@@ -104,12 +138,12 @@ export function ValidationReportSummary() {
                 <ValidationReportGaugeBox>
                   {isValidated ? (
                     <ValidationReportGaugeBar
-                      value={earningsScore * 100}
+                      value={earningsScore * 100 || 2}
                       color={
                         // eslint-disable-next-line no-nested-ternary
-                        totalScore <= 0.5
+                        earningsScore <= 0.5
                           ? colors.red[500]
-                          : totalScore <= 0.75
+                          : earningsScore <= 0.75
                           ? colors.orange[500]
                           : colors.green[500]
                       }
