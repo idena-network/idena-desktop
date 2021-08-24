@@ -59,8 +59,16 @@ export function ValidationReportSummary() {
       status={isValidated ? 'success' : 'error'}
       variant="top-accent"
       bg="white"
-      boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
+      borderTopColor={
+        // eslint-disable-next-line no-nested-ternary
+        isValidated
+          ? validationPenalty
+            ? 'orange.500'
+            : 'green.500'
+          : 'red.500'
+      }
       borderRadius="md"
+      boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
       px={8}
       py={6}
     >
