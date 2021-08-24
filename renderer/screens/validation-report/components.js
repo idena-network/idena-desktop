@@ -265,7 +265,7 @@ export function ValidationReportBlockOverview(props) {
 
 export function ValidationReportStat({label, value, ...props}) {
   return (
-    <Stat {...props}>
+    <Stat pr={0} {...props}>
       <StatLabel color="muted" fontSize="md" fontWeight={400}>
         {label}
       </StatLabel>

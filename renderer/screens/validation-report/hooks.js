@@ -139,16 +139,17 @@ export function useValidationReportSummary() {
             log(),
             assign(
               (
-                {
-                  epochNumber,
-                  identity: {availableFlips, isValidated},
-                  ...context
-                },
+                {epochNumber, identity: {isValidated}, ...context},
                 {
                   data: {
                     rewardsSummary,
                     identityRewards,
-                    epochIdentity: {birthEpoch, state: identityStatus, missed},
+                    epochIdentity: {
+                      birthEpoch,
+                      state: identityStatus,
+                      availableFlips,
+                      missed,
+                    },
                     validationPenalty,
                     rewardedInvites,
                     savedInvites,
