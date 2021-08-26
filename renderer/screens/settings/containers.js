@@ -133,7 +133,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
               )}
             </Text>
             <FillCenter>
-              <QrCode value="pk" />
+              <QrCode value={encodedPrivateKey} />
             </FillCenter>
             <FormControl>
               <Stack spacing={1}>
