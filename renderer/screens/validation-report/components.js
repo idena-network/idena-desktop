@@ -23,7 +23,7 @@ import {toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {useValidationReportSummary} from './hooks'
 import {ValidationFailReason} from './types'
 
-export function ValidationReportSummary() {
+export function ValidationReportSummary({onClose}) {
   const {t, i18n} = useTranslation()
 
   const {colors} = useTheme()
@@ -72,7 +72,14 @@ export function ValidationReportSummary() {
       px={8}
       py={6}
     >
-      <CloseButton w={6} h={6} pos="absolute" top={3} right={3} />
+      <CloseButton
+        w={6}
+        h={6}
+        pos="absolute"
+        top={3}
+        right={3}
+        onClick={onClose}
+      />
       <Stack spacing={6} w="full">
         <Skeleton
           isLoaded={!isLoading}

@@ -23,7 +23,6 @@ import {
   SpoilInviteDrawer,
   SpoilInviteForm,
   ActivateInviteForm,
-  ValidationResultToast,
   UserStat,
   UserStatLabel,
   ActivateMiningForm,
@@ -58,11 +57,7 @@ import {
   buildNextValidationCalendarLink,
   formatValidationDate,
 } from '../shared/utils/utils'
-import {
-  shouldExpectValidationResults,
-  hasPersistedValidationResults,
-} from '../screens/validation/utils'
-import {persistItem} from '../shared/utils/persist'
+import {shouldExpectValidationResults} from '../screens/validation/utils'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {useChainState} from '../shared/providers/chain-context'
 import {
@@ -126,23 +121,28 @@ export default function ProfilePage() {
     onClose: onCloseNextValidationDialog,
   } = useDisclosure()
 
+  const profileDb = React.useMemo(() => createProfileDb(epoch), [epoch])
+
   const [showValidationResults, setShowValidationResults] = React.useState()
 
   React.useEffect(() => {
     const epochNumber = epoch?.epoch
     if (epoch && shouldExpectValidationResults(epochNumber)) {
-      if (hasPersistedValidationResults(epochNumber)) {
-        setShowValidationResults(true)
-      } else {
-        persistItem('validationResults', epochNumber, {
-          epochStart: new Date().toISOString(),
+      profileDb
+        .getDidShowValidationResults()
+        .then(seen => {
+          setShowValidationResults(!seen)
         })
-        setShowValidationResults(hasPersistedValidationResults(epochNumber))
-      }
+        .catch(() => {
+          setShowValidationResults(true)
+        })
     }
-  }, [epoch])
+  }, [epoch, profileDb])
 
-  const profileDb = React.useMemo(() => createProfileDb(epoch), [epoch])
+  React.useEffect(() => {
+    if (showValidationResults === false)
+      profileDb.putDidShowValidationResults(1)
+  }, [profileDb, showValidationResults])
 
   React.useEffect(() => {
     if (epoch && isValidated) {
@@ -210,6 +210,7 @@ export default function ProfilePage() {
             <Stack spacing={8}>
               <Stack spacing={6}>
                 <PageTitle mb={6}>{t('Profile')}</PageTitle>
+
                 {canInvite && (
                   <InviteScoreAlert
                     epoch={epoch}
@@ -222,9 +223,13 @@ export default function ProfilePage() {
                 <Stack spacing={6} w="md">
                   <UserInlineCard address={address} status={status} h={24} />
 
-                  <Box>
-                    <ValidationReportSummary />
-                  </Box>
+                  {showValidationResults && (
+                    <Box>
+                      <ValidationReportSummary
+                        onClose={() => setShowValidationResults(false)}
+                      />
+                    </Box>
+                  )}
 
                   <UserStatList>
                     <UserStat>
@@ -505,10 +510,6 @@ export default function ProfilePage() {
                 }}
               />
             </SpoilInviteDrawer>
-
-            {showValidationResults && (
-              <ValidationResultToast epoch={epoch.epoch} />
-            )}
           </Page>
         </Layout>
       </InviteProvider>
