@@ -25,6 +25,7 @@ import {
 } from '../screens/validation-report/components'
 import {useValidationReportSummary} from '../screens/validation-report/hooks'
 import {
+  ExternalLink,
   FailAlert,
   Page,
   PageTitle,
@@ -252,9 +253,18 @@ export default function ValidationReport() {
             </ValidationReportBlockOverview>
           </Stack>
           <Stack spacing={5}>
-            <Heading color="brandGray.500" fontSize="lg" fontWeight={500}>
-              {t('Earnings summary')}
-            </Heading>
+            <Box>
+              <Heading color="brandGray.500" fontSize="lg" fontWeight={500}>
+                {t('Earnings summary')}
+              </Heading>
+              <ExternalLink
+                href={`https://scan.idena.io/identity/${address}/epoch/${
+                  epoch?.epoch
+                }/${isValidated ? 'rewards' : 'validation'}`}
+              >
+                {t('See the full report in blockchain explorer')}
+              </ExternalLink>
+            </Box>
             <Table fontWeight={500}>
               <thead>
                 <tr>
