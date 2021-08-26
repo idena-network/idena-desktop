@@ -929,8 +929,7 @@ export default function ViewVotingPage() {
       <TerminateDrawer
         isOpen={eitherState(
           current,
-          `idle.${VotingStatus.Archived}.terminate`,
-          `idle.${VotingStatus.Counting}.terminate`,
+          `idle.terminating`,
           `mining.${VotingStatus.Terminating}`
         )}
         onClose={() => {
