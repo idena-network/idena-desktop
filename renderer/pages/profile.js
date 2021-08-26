@@ -47,6 +47,7 @@ import {
   Toast,
   Page,
   PageTitle,
+  TextLink,
 } from '../shared/components/components'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
 import {
@@ -329,6 +330,9 @@ export default function ProfilePage() {
                             score: toPercent(totalScore),
                           })}
                         </UserStatValue>
+                        <TextLink href="/validation-report" fontWeight={500}>
+                          {t('View validation report')}
+                        </TextLink>
                       </AnnotatedUserStat>
                     )}
                   </UserStatList>
