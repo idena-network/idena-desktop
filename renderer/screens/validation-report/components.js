@@ -7,6 +7,7 @@ import {
   CloseButton,
   Flex,
   Icon,
+  IconButton,
   Skeleton,
   Stack,
   Stat,
@@ -205,9 +206,23 @@ export function ValidationReportSummary({onClose}) {
                 </TextLink>
               </Box>
               <Stack isInline color="muted">
-                <Icon name="twitter" size={4} />
-                <Icon name="telegram" size={4} />
-                <Icon name="github" size={4} />
+                <IconButton
+                  icon="twitter"
+                  size="xs"
+                  variant="ghost"
+                  color="blue.500"
+                  fontSize={16}
+                  _hover={{bg: 'blue.50'}}
+                  onClick={() => {
+                    global.openExternal(`
+                    https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                      `I've earned ${earnings.toLocaleString(i18n.language, {
+                        maximumFractionDigits: 3,
+                      })} $IDNA`
+                    )}&url=https://idena.io/join-idena&hashtags=Idena,ubi,blockchain,mining
+                  `)
+                  }}
+                />
               </Stack>
             </Flex>
           </Stack>
