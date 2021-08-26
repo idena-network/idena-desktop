@@ -176,18 +176,27 @@ export default function ViewVotingPage() {
 
   const didDetermineWinner = hasWinner({
     votes,
-    votesCount,
+    votesCount: voteProofsCount,
     winnerThreshold,
     quorum,
     committeeSize,
     finishCountingDate,
   })
 
-  const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
+  const didReachQuorum = hasQuorum({
+    votesCount: voteProofsCount,
+    quorum,
+    committeeSize,
+  })
 
   const canFinish =
     didDetermineWinner ||
     (dayjs().isAfter(finishCountingDate) && didReachQuorum)
+
+  console.log({
+    didDetermineWinner,
+    didReachQuorum,
+  })
 
   const canProlong =
     committeeEpoch !== epoch ||

@@ -319,7 +319,7 @@ export function VotingCard({votingRef, ...props}) {
                   name={
                     hasWinner({
                       votes,
-                      votesCount,
+                      votesCount: voteProofsCount,
                       winnerThreshold,
                       quorum,
                       committeeSize,
@@ -960,7 +960,7 @@ export function VotingResult({votingService, ...props}) {
   const {
     options,
     votes = options.map(({id}) => ({option: id, count: 0})),
-    votesCount,
+    voteProofsCount,
     winnerThreshold,
     committeeSize,
     quorum,
@@ -970,7 +970,7 @@ export function VotingResult({votingService, ...props}) {
 
   const didDetermineWinner = hasWinner({
     votes,
-    votesCount,
+    votesCount: voteProofsCount,
     winnerThreshold,
     quorum,
     committeeSize,
@@ -992,7 +992,7 @@ export function VotingResult({votingService, ...props}) {
             isMine={id === selectedOption}
             didVote={selectedOption > -1}
             isWinner={didDetermineWinner && currentValue === max}
-            votesCount={votesCount}
+            votesCount={voteProofsCount}
           />
         )
       })}
@@ -1236,6 +1236,7 @@ export function VotingPhase({service}) {
     finishCountingDate,
     votes = [],
     votesCount,
+    voteProofsCount,
     winnerThreshold,
     quorum,
     committeeSize,
@@ -1249,7 +1250,7 @@ export function VotingPhase({service}) {
 
   const didDetermineWinner = hasWinner({
     votes,
-    votesCount,
+    votesCount: voteProofsCount,
     winnerThreshold,
     quorum,
     committeeSize,
