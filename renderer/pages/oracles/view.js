@@ -159,6 +159,7 @@ export default function ViewVotingPage() {
     estimatedTerminationTime,
     minOracleReward,
     estimatedTotalReward,
+    epochWithoutGrowth,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -193,16 +194,13 @@ export default function ViewVotingPage() {
     didDetermineWinner ||
     (dayjs().isAfter(finishCountingDate) && didReachQuorum)
 
-  console.log({
-    didDetermineWinner,
-    didReachQuorum,
-  })
-
   const canProlong =
-    committeeEpoch !== epoch ||
-    (!didDetermineWinner &&
-      !didReachQuorum &&
-      dayjs().isAfter(finishCountingDate))
+    epochWithoutGrowth < 3 &&
+    (committeeEpoch !== epoch ||
+      (!didDetermineWinner &&
+        !didReachQuorum &&
+        dayjs().isAfter(finishCountingDate)) ||
+      (!didReachQuorum && dayjs().isAfter(finishDate)))
 
   const shouldTerminate = isAllowedToTerminate({estimatedTerminationTime})
 
