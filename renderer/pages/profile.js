@@ -23,7 +23,6 @@ import {
   SpoilInviteDrawer,
   SpoilInviteForm,
   ActivateInviteForm,
-  ValidationResultToast,
   UserStat,
   UserStatLabel,
   ActivateMiningForm,
@@ -48,6 +47,7 @@ import {
   Toast,
   Page,
   PageTitle,
+  TextLink,
 } from '../shared/components/components'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
 import {
@@ -58,11 +58,7 @@ import {
   buildNextValidationCalendarLink,
   formatValidationDate,
 } from '../shared/utils/utils'
-import {
-  shouldExpectValidationResults,
-  hasPersistedValidationResults,
-} from '../screens/validation/utils'
-import {persistItem} from '../shared/utils/persist'
+import {shouldExpectValidationResults} from '../screens/validation/utils'
 import {InviteProvider} from '../shared/providers/invite-context'
 import {useChainState} from '../shared/providers/chain-context'
 import {
@@ -75,6 +71,8 @@ import {onboardingShowingStep} from '../shared/utils/onboarding'
 import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 import {useScroll} from '../shared/hooks/use-scroll'
+import {ValidationReportSummary} from '../screens/validation-report/components'
+import {useTotalValidationScore} from '../screens/validation-report/hooks'
 
 export default function ProfilePage() {
   const {
@@ -124,23 +122,28 @@ export default function ProfilePage() {
     onClose: onCloseNextValidationDialog,
   } = useDisclosure()
 
+  const profileDb = React.useMemo(() => createProfileDb(epoch), [epoch])
+
   const [showValidationResults, setShowValidationResults] = React.useState()
 
   React.useEffect(() => {
     const epochNumber = epoch?.epoch
     if (epoch && shouldExpectValidationResults(epochNumber)) {
-      if (hasPersistedValidationResults(epochNumber)) {
-        setShowValidationResults(true)
-      } else {
-        persistItem('validationResults', epochNumber, {
-          epochStart: new Date().toISOString(),
+      profileDb
+        .getDidShowValidationResults()
+        .then(seen => {
+          setShowValidationResults(!seen)
         })
-        setShowValidationResults(hasPersistedValidationResults(epochNumber))
-      }
+        .catch(() => {
+          setShowValidationResults(true)
+        })
     }
-  }, [epoch])
+  }, [epoch, profileDb])
 
-  const profileDb = React.useMemo(() => createProfileDb(epoch), [epoch])
+  React.useEffect(() => {
+    if (showValidationResults === false)
+      profileDb.putDidShowValidationResults(1)
+  }, [profileDb, showValidationResults])
 
   React.useEffect(() => {
     if (epoch && isValidated) {
@@ -198,6 +201,8 @@ export default function ProfilePage() {
     scrollToActivateInvite,
   ])
 
+  const totalScore = useTotalValidationScore()
+
   return (
     <>
       <InviteProvider>
@@ -206,6 +211,7 @@ export default function ProfilePage() {
             <Stack spacing={8}>
               <Stack spacing={6}>
                 <PageTitle mb={6}>{t('Profile')}</PageTitle>
+
                 {canInvite && (
                   <InviteScoreAlert
                     epoch={epoch}
@@ -217,6 +223,15 @@ export default function ProfilePage() {
               <Stack isInline spacing={10}>
                 <Stack spacing={6} w="md">
                   <UserInlineCard address={address} status={status} h={24} />
+
+                  {showValidationResults && (
+                    <Box>
+                      <ValidationReportSummary
+                        onClose={() => setShowValidationResults(false)}
+                      />
+                    </Box>
+                  )}
+
                   <UserStatList>
                     <UserStat>
                       <UserStatLabel>{t('Address')}</UserStatLabel>
@@ -306,20 +321,21 @@ export default function ProfilePage() {
                         label={t('Total score')}
                       >
                         <UserStatValue>
-                          {Math.min(totalShortFlipPoints, totalQualifiedFlips)}{' '}
-                          out of {totalQualifiedFlips} (
-                          {toPercent(
-                            Math.min(
-                              totalShortFlipPoints / totalQualifiedFlips,
-                              1
-                            )
-                          )}
-                          )
+                          {t('{{point}} out of {{flipCount}} ({{score}})', {
+                            point: Math.min(
+                              totalShortFlipPoints,
+                              totalQualifiedFlips
+                            ),
+                            flipCount: totalQualifiedFlips,
+                            score: toPercent(totalScore),
+                          })}
                         </UserStatValue>
+                        <TextLink href="/validation-report" fontWeight={500}>
+                          {t('View validation report')}
+                        </TextLink>
                       </AnnotatedUserStat>
                     )}
                   </UserStatList>
-
                   <OnboardingPopover
                     isOpen={isOpenActivateInvitePopover}
                     placement="top-start"
@@ -498,10 +514,6 @@ export default function ProfilePage() {
                 }}
               />
             </SpoilInviteDrawer>
-
-            {showValidationResults && (
-              <ValidationResultToast epoch={epoch.epoch} />
-            )}
           </Page>
         </Layout>
       </InviteProvider>
