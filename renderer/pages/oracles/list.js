@@ -24,6 +24,7 @@ import {
   FillCenter,
   OutlineButton,
   ScrollToTop,
+  TodoVotingCountBadge,
 } from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {
@@ -81,6 +82,8 @@ function VotingListPage() {
     startingVotingRef,
   } = current.context
 
+  const [{todoCount}] = useVotingNotification()
+
   return (
     <Layout syncing={syncing} offline={offline}>
       <Page ref={pageRef}>
@@ -97,7 +100,14 @@ function VotingListPage() {
                 }}
               >
                 <FilterOption value={VotingListFilter.Todo}>
-                  {t('To Do')}
+                  {todoCount > 0 ? (
+                    <Stack isInline spacing={1} align="center">
+                      <Text as="span">{t('To Do')}</Text>
+                      <TodoVotingCountBadge>{todoCount}</TodoVotingCountBadge>
+                    </Stack>
+                  ) : (
+                    t('To Do')
+                  )}
                 </FilterOption>
                 <FilterOption value={VotingListFilter.Voting}>
                   {t('Running')}
