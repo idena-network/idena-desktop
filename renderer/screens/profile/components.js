@@ -23,7 +23,6 @@ import {
   useToast,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import dayjs from 'dayjs'
 import {useMachine} from '@xstate/react'
 import {
   Avatar,
@@ -35,7 +34,6 @@ import {
   DrawerBody,
   Toast,
   SuccessAlert,
-  Snackbar,
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
@@ -45,12 +43,6 @@ import {
 } from '../../shared/providers/identity-context'
 import {IdentityStatus, NodeType} from '../../shared/types'
 import {useInvite} from '../../shared/providers/invite-context'
-import {
-  loadPersistentState,
-  loadPersistentStateValue,
-} from '../../shared/utils/persist'
-import {createTimerMachine} from '../../shared/machines'
-import {usePersistence} from '../../shared/hooks/use-persistent-state'
 import {activateMiningMachine} from './machines'
 import {
   calculateInvitationRewardRatio,
@@ -297,77 +289,6 @@ export function SpoilInviteForm({onSpoil}) {
       </PrimaryButton>
     </Stack>
   )
-}
-
-export function ValidationResultToast({epoch}) {
-  const timerMachine = React.useMemo(
-    () =>
-      createTimerMachine(
-        dayjs(loadPersistentStateValue('validationResults', epoch)?.epochStart)
-          .add(1, 'minute')
-          .diff(dayjs(), 'second')
-      ),
-    [epoch]
-  )
-  const [current] = useMachine(timerMachine)
-
-  const [state, dispatch] = usePersistence(
-    React.useReducer(
-      (prevState, seen) => ({
-        ...prevState,
-        [epoch]: {
-          ...prevState[epoch],
-          seen,
-        },
-      }),
-      loadPersistentState('validationResults') || {}
-    ),
-    'validationResults'
-  )
-
-  const {address, state: identityStatus} = useIdentityState()
-
-  const isValidationSucceeded = [
-    IdentityStatus.Newbie,
-    IdentityStatus.Verified,
-    IdentityStatus.Human,
-  ].includes(identityStatus)
-
-  const {t} = useTranslation()
-
-  const url = `https://scan.idena.io/identity/${address}/epoch/${epoch}/${
-    isValidationSucceeded ? 'rewards' : 'validation'
-  }`
-
-  const notSeen =
-    typeof state[epoch] === 'boolean'
-      ? !state[epoch]
-      : state[epoch] && !state[epoch].seen
-
-  return notSeen ? (
-    <Snackbar>
-      {current.matches('running') && (
-        <Toast
-          icon="spinner"
-          title={t('Please wait for the validation report')}
-        />
-      )}
-      {current.matches('stopped') && (
-        <Toast
-          title={
-            isValidationSucceeded
-              ? t('See your validation rewards in the blockchain explorer')
-              : t('See your validation results in the blockchain explorer')
-          }
-          onAction={() => {
-            dispatch(true)
-            global.openExternal(url)
-          }}
-          actionContent={t('Open')}
-        />
-      )}
-    </Snackbar>
-  ) : null
 }
 
 export function ActivateMiningForm({
