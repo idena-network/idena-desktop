@@ -2,7 +2,7 @@
 import React, {useCallback} from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
-import {fetchIdentity, killIdentity} from '../api'
+import {fetchIdentity, killIdentity} from '../api/dna'
 import useRpc from '../hooks/use-rpc'
 import {IdentityStatus} from '../types'
 

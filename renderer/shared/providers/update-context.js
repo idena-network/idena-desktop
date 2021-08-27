@@ -1,10 +1,8 @@
 import React, {useEffect} from 'react'
-
-import {node} from 'prop-types'
 import {AUTO_UPDATE_EVENT, AUTO_UPDATE_COMMAND} from '../../../main/channels'
 import {useSettingsState} from './settings-context'
 import {useInterval} from '../hooks/use-interval'
-import {fetchNodeVersion} from '../api'
+import {fetchNodeVersion} from '../api/dna'
 import {isHardFork} from '../utils/node'
 import {requestDb} from '../utils/db'
 
@@ -122,7 +120,7 @@ export function AutoUpdateProvider({children}) {
         case 'node-update-ready':
           if (
             !state.nodeUpdateReady &&
-            data.version !== node.nodeCurrentVersion
+            data.version !== state.nodeCurrentVersion
           )
             dispatch({type: NODE_UPDATE_READY, data: data.version})
           break

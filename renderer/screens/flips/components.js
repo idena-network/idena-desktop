@@ -33,12 +33,10 @@ import {
 } from '@chakra-ui/core'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
-import {transparentize} from 'polished'
 import {useService} from '@xstate/react'
 import FlipEditor from './components/flip-editor'
 import {Step} from './types'
 import {formatKeywords} from './utils'
-import {PageTitle} from '../app/components'
 import {PrimaryButton, IconButton2} from '../../shared/components/button'
 import {rem} from '../../shared/theme'
 import {capitalize} from '../../shared/utils/string'
@@ -51,6 +49,7 @@ import {
   DrawerBody,
   FormLabel,
   GoogleTranslateButton,
+  PageTitle,
 } from '../../shared/components/components'
 
 export function FlipPageTitle({onClose, ...props}) {
@@ -95,14 +94,9 @@ export function FlipCard({flipService, onDelete}) {
             backgroundImage={
               // eslint-disable-next-line no-nested-ternary
               [FlipType.Publishing, FlipType.Deleting].some(x => x === type)
-                ? `linear-gradient(to top, ${
-                    colors.warning[500]
-                  }, ${transparentize(100, colors.warning[500])})`
+                ? `linear-gradient(to top, ${colors.warning[500]}, transparent)`
                 : type === FlipType.Invalid
-                ? `linear-gradient(to top, ${colors.red[500]}, ${transparentize(
-                    100,
-                    colors.red[500]
-                  )})`
+                ? `linear-gradient(to top, ${colors.red[500]}, transparent)`
                 : ''
             }
           >
@@ -239,6 +233,7 @@ export function FlipCardMenuItem(props) {
   return (
     <PseudoBox
       as={MenuItem}
+      color="brandGray.500"
       fontWeight={500}
       px={3}
       py="3/2"
@@ -252,7 +247,7 @@ export function FlipCardMenuItem(props) {
 }
 
 export function FlipCardMenuItemIcon(props) {
-  return <Icon size={5} mr={3} color="brand.blue" {...props} />
+  return <Icon size={5} mr={3} color="blue.500" {...props} />
 }
 
 export function RequiredFlipPlaceholder({title}) {

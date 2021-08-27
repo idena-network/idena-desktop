@@ -14,7 +14,6 @@ import {
   mapToFriendlyStatus,
 } from '../shared/providers/identity-context'
 import {useEpochState} from '../shared/providers/epoch-context'
-import {Page, PageTitle} from '../screens/app/components'
 import {
   UserInlineCard,
   SimpleUserStat,
@@ -29,6 +28,8 @@ import {
   UserStatLabel,
   ActivateMiningForm,
   InviteScoreAlert,
+  KillIdentityDrawer,
+  KillForm,
 } from '../screens/profile/components'
 import {
   PrimaryButton,
@@ -36,7 +37,18 @@ import {
   SecondaryButton,
 } from '../shared/components/button'
 import Layout from '../shared/components/layout'
-import {IconLink} from '../shared/components/link'
+import {
+  IconLink,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  ExternalLink,
+  FloatDebug,
+  Toast,
+  Page,
+  PageTitle,
+} from '../shared/components/components'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
 import {
   toPercent,
@@ -47,24 +59,11 @@ import {
   formatValidationDate,
 } from '../shared/utils/utils'
 import {
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  DialogHeader,
-  ExternalLink,
-  FloatDebug,
-  Toast,
-} from '../shared/components/components'
-import KillForm, {
-  KillIdentityDrawer,
-} from '../screens/wallets/components/kill-form'
-import {
   shouldExpectValidationResults,
   hasPersistedValidationResults,
 } from '../screens/validation/utils'
 import {persistItem} from '../shared/utils/persist'
 import {InviteProvider} from '../shared/providers/invite-context'
-import {rem} from '../shared/theme'
 import {useChainState} from '../shared/providers/chain-context'
 import {
   OnboardingPopover,
@@ -375,7 +374,7 @@ export default function ProfilePage() {
                     </OnboardingPopoverContent>
                   </OnboardingPopover>
                 </Stack>
-                <Stack spacing={10} w={rem(200)}>
+                <Stack spacing={10} w={200}>
                   <Box minH={62} mt={4}>
                     <OnboardingPopover
                       isOpen={eitherOnboardingState(

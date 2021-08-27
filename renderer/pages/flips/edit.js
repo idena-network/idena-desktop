@@ -3,7 +3,6 @@ import {useRouter} from 'next/router'
 import {Box, Flex, useToast, Divider, useDisclosure} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
-import {Page} from '../../screens/app/components'
 import {
   FlipMaster,
   FlipMasterFooter,
@@ -23,20 +22,19 @@ import {
   FlipSubmitStep,
   CommunityTranslationUnavailable,
 } from '../../screens/flips/components'
-import {NotificationType} from '../../shared/providers/notification-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine} from '../../screens/flips/machines'
 import {publishFlip, isPendingKeywordPair} from '../../screens/flips/utils'
-import {Notification} from '../../shared/components/notifications'
 import {Step} from '../../screens/flips/types'
 import {
   IconButton2,
   SecondaryButton,
   PrimaryButton,
 } from '../../shared/components/button'
-import {FloatDebug, Toast} from '../../shared/components/components'
+import {FloatDebug, Page, Toast} from '../../shared/components/components'
 import Layout from '../../shared/components/layout'
 import {BadFlipDialog} from '../../screens/validation/components'
+import {useFailToast} from '../../shared/hooks/use-toast'
 
 export default function EditFlipPage() {
   const {t, i18n} = useTranslation()
@@ -49,6 +47,8 @@ export default function EditFlipPage() {
 
   const {syncing} = useIdentityState()
   const {flipKeyWordPairs} = useIdentityState()
+
+  const failToast = useFailToast()
 
   const [current, send] = useMachine(flipMasterMachine, {
     context: {
@@ -87,23 +87,7 @@ export default function EditFlipPage() {
       onError: (
         _,
         {data, error = data.response?.data?.error ?? data.message}
-      ) =>
-        toast({
-          title: error,
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-          // eslint-disable-next-line react/display-name
-          render: () => (
-            <Box fontSize="md">
-              <Notification
-                title={error}
-                type={NotificationType.Error}
-                delay={5000}
-              />
-            </Box>
-          ),
-        }),
+      ) => failToast(error),
     },
   })
 

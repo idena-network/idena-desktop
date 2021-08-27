@@ -1,7 +1,7 @@
-/* eslint-disable react/jsx-curly-brace-presence */
+/* eslint-disable react/prop-types */
 import React from 'react'
-import PropTypes from 'prop-types'
-import theme, {rem} from '../theme'
+import {Box, useTheme} from '@chakra-ui/core'
+import {rem} from '../theme'
 
 export function Table({children, ...props}) {
   return (
@@ -15,10 +15,6 @@ export function Table({children, ...props}) {
   )
 }
 
-Table.propTypes = {
-  children: PropTypes.node,
-}
-
 export function TableRow({children, ...props}) {
   return (
     <tr {...props}>
@@ -30,11 +26,9 @@ export function TableRow({children, ...props}) {
   )
 }
 
-TableRow.propTypes = {
-  children: PropTypes.node,
-}
-
 export function TableCol({children, color, ...props}) {
+  const {colors} = useTheme()
+
   return (
     <td {...props}>
       {children}
@@ -42,7 +36,7 @@ export function TableCol({children, color, ...props}) {
         td {
           padding: ${rem(8)} ${rem(12)};
           color: ${color || 'inherit'};
-          border-bottom: 1px solid ${theme.colors.gray2};
+          border-bottom: 1px solid ${colors.gray[300]};
         }
 
         td.text-right {
@@ -53,20 +47,16 @@ export function TableCol({children, color, ...props}) {
   )
 }
 
-TableCol.propTypes = {
-  children: PropTypes.node,
-  color: PropTypes.string,
-}
-
 export function TableHeaderCol({children, ...props}) {
+  const {colors} = useTheme()
   return (
     <th {...props}>
       {children}
       <style jsx>{`
         th {
-          color: ${theme.colors.muted};
+          color: ${colors.muted};
           font-weight: normal;
-          background-color: ${theme.colors.gray};
+          background-color: ${colors.gray[50]};
           padding: ${rem(7)} ${rem(12)};
           text-align: left;
         }
@@ -84,25 +74,6 @@ export function TableHeaderCol({children, ...props}) {
   )
 }
 
-TableHeaderCol.propTypes = {
-  children: PropTypes.node,
-}
-
-export function TableHint({children, ...props}) {
-  return (
-    <div {...props}>
-      {children}
-      <style jsx>{`
-        div {
-          color: ${theme.colors.muted};
-          font-size: ${rem(13)};
-          font-weight: 500;
-        }
-      `}</style>
-    </div>
-  )
-}
-
-TableHint.propTypes = {
-  children: PropTypes.node,
+export function TableHint(props) {
+  return <Box color="muted" fontSize="md" fontWeight={500} {...props} />
 }

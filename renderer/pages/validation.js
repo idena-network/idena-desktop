@@ -14,7 +14,7 @@ import {
 import {
   createValidationMachine,
   RelevanceType,
-} from '../../screens/validation/machine'
+} from '../screens/validation/machine'
 import {
   persistValidationState,
   loadValidationState,
@@ -24,11 +24,11 @@ import {
   decodedWithKeywords,
   availableReportsNumber,
   solvableFlips,
-} from '../../screens/validation/utils'
+} from '../screens/validation/utils'
 import {
   ValidationScene,
   ActionBar,
-  Thumbnails,
+  ThumbnailList,
   Header,
   Title,
   FlipChallenge,
@@ -49,14 +49,13 @@ import {
   EncourageReportDialog,
   BadFlipDialog,
   ReviewShortSessionDialog,
-} from '../../screens/validation/components'
-import theme, {rem} from '../../shared/theme'
-import {AnswerType} from '../../shared/types'
-import {useEpochState} from '../../shared/providers/epoch-context'
-import {useTimingState} from '../../shared/providers/timing-context'
-import {InfoButton, PrimaryButton} from '../../shared/components/button'
-import {FloatDebug, Tooltip} from '../../shared/components/components'
-import {Tooltip as TooltipLegacy} from '../../shared/components/tooltip'
+} from '../screens/validation/components'
+import {rem} from '../shared/theme'
+import {AnswerType} from '../shared/types'
+import {useEpochState} from '../shared/providers/epoch-context'
+import {useTimingState} from '../shared/providers/timing-context'
+import {InfoButton, PrimaryButton} from '../shared/components/button'
+import {FloatDebug, Tooltip} from '../shared/components/components'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -156,9 +155,7 @@ function ValidationSession({
   const currentFlip = flips[currentIndex]
 
   return (
-    <ValidationScene
-      bg={isShortSession(state) ? theme.colors.black : theme.colors.white}
-    >
+    <ValidationScene bg={isShortSession(state) ? 'black' : 'white'}>
       <Header>
         <Title color={isShortSession(state) ? 'white' : 'brandGray.500'}>
           {['shortSession', 'longSession'].some(state.matches) &&
@@ -321,14 +318,8 @@ function ValidationSession({
           />
         </ActionBarItem>
         <ActionBarItem justify="flex-end">
-          {(isShortSession(state) || isLongSessionKeywords(state)) && (
-            <TooltipLegacy
-              content={
-                hasAllRelevanceMarks(state) || isLastFlip(state)
-                  ? null
-                  : t('Go to last flip')
-              }
-            >
+          {(isShortSession(state) || isLongSessionKeywords(state)) &&
+            (hasAllRelevanceMarks(state) || isLastFlip(state) ? (
               <PrimaryButton
                 isDisabled={!canSubmit(state)}
                 isLoading={isSubmitting(state)}
@@ -337,8 +328,18 @@ function ValidationSession({
               >
                 {t('Submit answers')}
               </PrimaryButton>
-            </TooltipLegacy>
-          )}
+            ) : (
+              <Tooltip label={t('Go to last flip')}>
+                <PrimaryButton
+                  isDisabled={!canSubmit(state)}
+                  isLoading={isSubmitting(state)}
+                  loadingText={t('Submitting answers...')}
+                  onClick={() => send('SUBMIT')}
+                >
+                  {t('Submit answers')}
+                </PrimaryButton>
+              </Tooltip>
+            ))}
           {isLongSessionFlips(state) && (
             <PrimaryButton
               isDisabled={!canSubmit(state)}
@@ -349,7 +350,8 @@ function ValidationSession({
           )}
         </ActionBarItem>
       </ActionBar>
-      <Thumbnails currentIndex={currentIndex}>
+
+      <ThumbnailList currentIndex={currentIndex}>
         {flips.map((flip, idx) => (
           <Thumbnail
             key={flip.hash}
@@ -358,19 +360,16 @@ function ValidationSession({
             onPick={() => send({type: 'PICK', index: idx})}
           />
         ))}
-      </Thumbnails>
+      </ThumbnailList>
+
       {!isFirstFlip(state) &&
         hasManyFlips(state) &&
         isSolving(state) &&
         !isSubmitting(state) && (
           <NavButton
             type="prev"
-            bg={
-              isShortSession(state) ? theme.colors.white01 : theme.colors.gray
-            }
-            color={
-              isShortSession(state) ? theme.colors.white : theme.colors.text
-            }
+            bg={isShortSession(state) ? 'xwhite.010' : 'gray.50'}
+            color={isShortSession(state) ? 'white' : 'brandGray.500'}
             onClick={() => send({type: 'PREV'})}
           />
         )}
@@ -380,12 +379,8 @@ function ValidationSession({
         !isSubmitting(state) && (
           <NavButton
             type="next"
-            bg={
-              isShortSession(state) ? theme.colors.white01 : theme.colors.gray
-            }
-            color={
-              isShortSession(state) ? theme.colors.white : theme.colors.text
-            }
+            bg={isShortSession(state) ? 'xwhite.010' : 'gray.50'}
+            color={isShortSession(state) ? 'white' : 'brandGray.500'}
             onClick={() => send({type: 'NEXT'})}
           />
         )}

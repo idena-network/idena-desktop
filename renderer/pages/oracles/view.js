@@ -20,7 +20,6 @@ import {useRouter} from 'next/router'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import duration from 'dayjs/plugin/duration'
-import {Page} from '../../screens/app/components'
 import {
   Avatar,
   FloatDebug,
@@ -34,8 +33,8 @@ import {
   DialogFooter,
   DialogBody,
   SmallText,
+  Page,
 } from '../../shared/components/components'
-import {rem} from '../../shared/theme'
 import {
   PrimaryButton,
   IconButton2,
@@ -81,7 +80,7 @@ import {
   TableCol,
   TableHeaderCol,
   TableRow,
-} from '../../shared/components'
+} from '../../shared/components/table'
 import {
   ContractTransactionType,
   ContractCallMethod,
@@ -252,7 +251,7 @@ export default function ViewVotingPage() {
                       <Stack spacing={4}>
                         <Heading
                           overflow="hidden"
-                          fontSize={rem(21)}
+                          fontSize={21}
                           fontWeight={500}
                           display="-webkit-box"
                           style={{

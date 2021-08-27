@@ -1,24 +1,20 @@
 import {useToast} from '@chakra-ui/core'
 import {Toast} from '../components/components'
 
-const resolveToastParams = params =>
-  typeof params === 'string' ? {title: params} : params
+export const useSuccessToast = () => useStatusToast()
 
-export function useSuccessToast() {
+export const useFailToast = () => useStatusToast('error')
+
+export function useStatusToast(status) {
   const toast = useToast()
+
+  const resolveToastParams = params =>
+    typeof params === 'string' ? {title: params} : params
+
   return params =>
     toast({
+      status,
       // eslint-disable-next-line react/display-name
-      render: () => <Toast {...resolveToastParams(params)} />,
-    })
-}
-
-export function useFailToast() {
-  const toast = useToast()
-  return params =>
-    toast({
-      status: 'error',
-      // eslint-disable-next-line react/display-name
-      render: () => <Toast status="error" {...resolveToastParams(params)} />,
+      render: () => <Toast status={status} {...resolveToastParams(params)} />,
     })
 }

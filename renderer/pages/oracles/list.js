@@ -3,17 +3,18 @@ import NextLink from 'next/link'
 import {Box, Icon, Stack, Text, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
-import {Page, PageTitle} from '../../screens/app/components'
 import {
   FlipFilter as FilterList,
   FlipFilterOption as FilterOption,
 } from '../../screens/flips/components'
-import {IconLink} from '../../shared/components/link'
 import {
+  IconLink,
   FloatDebug,
   HDivider,
   Toast,
   VDivider,
+  Page,
+  PageTitle,
 } from '../../shared/components/components'
 import {votingListMachine} from '../../screens/oracles/machines'
 import {

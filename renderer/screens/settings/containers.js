@@ -36,7 +36,7 @@ import {
 import {FillCenter} from '../oracles/components'
 import {callRpc, eitherState} from '../../shared/utils/utils'
 import {useNodeDispatch} from '../../shared/providers/node-context'
-import {importKey} from '../../shared/api'
+import {importKey} from '../../shared/api/dna'
 import {useSettingsDispatch} from '../../shared/providers/settings-context'
 import {AVAILABLE_LANGS, isoLangs} from '../../i18n'
 

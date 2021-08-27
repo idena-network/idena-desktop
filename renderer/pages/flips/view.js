@@ -9,7 +9,6 @@ import {
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
-import {Page, PageTitle} from '../../screens/app/components'
 import {
   FlipMaster,
   FlipStepBody,
@@ -26,9 +25,13 @@ import {
   DeleteFlipDrawer,
 } from '../../screens/flips/components'
 import {createViewFlipMachine} from '../../screens/flips/machines'
-import {rem} from '../../shared/theme'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {FloatDebug, Toast} from '../../shared/components/components'
+import {
+  FloatDebug,
+  Page,
+  PageTitle,
+  Toast,
+} from '../../shared/components/components'
 import {FlipType} from '../../shared/types'
 import {DEFAULT_FLIP_ORDER} from '../../screens/flips/utils'
 import Layout from '../../shared/components/layout'
@@ -123,7 +126,7 @@ export default function ViewFlipPage() {
               <FlipMaster>
                 <FlipStepBody minH="180px" my="auto">
                   <Stack isInline spacing={10}>
-                    <FlipKeywordPanel w={rem(320)}>
+                    <FlipKeywordPanel w="xs">
                       {keywords.words.length ? (
                         <FlipKeywordTranslationSwitch
                           keywords={keywords}

@@ -22,7 +22,6 @@ import {
   AlertIcon,
   AlertDescription,
   useToast,
-  Spinner,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -37,23 +36,20 @@ import {
   DrawerBody,
   Toast,
   SuccessAlert,
+  Snackbar,
 } from '../../shared/components/components'
 import {rem} from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
   mapToFriendlyStatus,
+  useIdentity,
   useIdentityState,
 } from '../../shared/providers/identity-context'
 import {IdentityStatus, NodeType} from '../../shared/types'
 import {
-  useNotificationDispatch,
-  NotificationType,
-} from '../../shared/providers/notification-context'
-import {
   useInviteState,
   useInviteDispatch,
 } from '../../shared/providers/invite-context'
-import {Notification, Snackbar} from '../../shared/components/notifications'
 import {
   loadPersistentState,
   loadPersistentStateValue,
@@ -68,6 +64,7 @@ import {
   toPercent,
 } from '../../shared/utils/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
+import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
 
 export function UserInlineCard({address, status, ...props}) {
   return (
@@ -155,7 +152,7 @@ export function UserStatLabelTooltip(props) {
 export const ActivateInviteForm = React.forwardRef((props, ref) => {
   const {t} = useTranslation()
 
-  const {addError} = useNotificationDispatch()
+  const failToast = useFailToast()
 
   const {activationTx} = useInviteState()
   const {activateInvite} = useInviteDispatch()
@@ -179,14 +176,14 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
         try {
           await activateInvite(code?.trim())
         } catch ({message}) {
-          addError({
+          failToast(
             // eslint-disable-next-line no-nested-ternary
-            title: message.includes('missing')
+            message.includes('missing')
               ? t('Invitation code is not valid')
               : message.includes('validation ceremony')
               ? t('Can not activate invitation since the validation is running')
-              : message,
-          })
+              : message
+          )
         }
       }}
       {...props}
@@ -355,33 +352,23 @@ export function ValidationResultToast({epoch}) {
   return notSeen ? (
     <Snackbar>
       {current.matches('running') && (
-        <Notification
-          pinned
-          type={NotificationType.Info}
-          icon={
-            <Flex align="center" justify="center" h={5} w={5} mr={3}>
-              <Box style={{transform: 'scale(0.35) translateY(-10px)'}}>
-                <Spinner size={5} color="blue.500" />
-              </Box>
-            </Flex>
-          }
+        <Toast
+          icon="spinner"
           title={t('Please wait for the validation report')}
         />
       )}
       {current.matches('stopped') && (
-        <Notification
-          pinned
-          type={NotificationType.Info}
+        <Toast
           title={
             isValidationSucceeded
               ? t('See your validation rewards in the blockchain explorer')
               : t('See your validation results in the blockchain explorer')
           }
-          action={() => {
+          onAction={() => {
             dispatch(true)
             global.openExternal(url)
           }}
-          actionName={t('Open')}
+          actionContent={t('Open')}
         />
       )}
     </Snackbar>
@@ -788,4 +775,121 @@ export function InviteScoreAlert({
       )}
     </SuccessAlert>
   ) : null
+}
+
+export function KillIdentityDrawer({address, children, ...props}) {
+  const {t} = useTranslation()
+
+  return (
+    <Drawer {...props}>
+      <DrawerHeader mb={6}>
+        <Avatar address={address} mx="auto" />
+        <Heading
+          fontSize="lg"
+          fontWeight={500}
+          color="brandGray.500"
+          mt={4}
+          mb={0}
+          textAlign="center"
+        >
+          {t('Terminate identity')}
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>
+        <Text fontSize="md" mb={6}>
+          {t(`Terminate your identity and withdraw the stake. Your identity status
+            will be reset to 'Not validated'.`)}
+        </Text>
+        {children}
+      </DrawerBody>
+    </Drawer>
+  )
+}
+
+export function KillForm({onSuccess, onFail}) {
+  const {t} = useTranslation(['translation', 'error'])
+
+  const [{address, stake}, {killMe}] = useIdentity()
+
+  const toastSuccess = useSuccessToast()
+  const toastFail = useFailToast()
+
+  const [submitting, setSubmitting] = React.useState(false)
+
+  return (
+    <Stack
+      as="form"
+      spacing={6}
+      onSubmit={async e => {
+        e.preventDefault()
+
+        try {
+          const to = e.target.elements.to.value
+
+          if (to !== address)
+            throw new Error(t('You must specify your own identity address'))
+
+          setSubmitting(true)
+
+          const {result, error} = await killMe({to})
+
+          setSubmitting(false)
+
+          if (error) {
+            toastFail({
+              title: t('Error while sending transaction'),
+              description: error.message,
+            })
+          } else {
+            toastSuccess(t('Transaction sent'))
+            if (onSuccess) onSuccess(result)
+          }
+        } catch (error) {
+          setSubmitting(false)
+          toastFail(error?.message ?? t('Something went wrong'))
+          if (onFail) onFail(error)
+        }
+      }}
+    >
+      <FormControl>
+        <FormLabel htmlFor="stake">{t('Withraw stake, iDNA')}</FormLabel>
+        <Input
+          id="stake"
+          value={stake}
+          isDisabled
+          _disabled={{
+            bg: 'gray.50',
+          }}
+        />
+      </FormControl>
+
+      <Text fontSize="md" mb={6}>
+        {t(
+          'Please enter your identity address to confirm termination. Stake will be transferred to the identity address.'
+        )}
+      </Text>
+      <FormControl>
+        <FormLabel htmlFor="to">{t('Address')}</FormLabel>
+        <Input id="to" placeholder={t('Your identity address')} />
+      </FormControl>
+
+      <PrimaryButton
+        ml="auto"
+        type="submit"
+        isLoading={submitting}
+        variantColor="red"
+        _hover={{
+          bg: 'rgb(227 60 60)',
+        }}
+        _active={{
+          bg: 'rgb(227 60 60)',
+        }}
+        _focus={{
+          boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
+        }}
+      >
+        {t('Terminate')}
+      </PrimaryButton>
+    </Stack>
+  )
 }

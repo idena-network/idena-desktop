@@ -2,11 +2,11 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {FlipFilter, FlipFilterOption} from '../../screens/flips/components'
-import {Page, PageTitle} from '../../screens/app/components'
+import {FlipFilter, FlipFilterOption} from '../flips/components'
 import Layout from '../../shared/components/layout'
+import {Page, PageTitle} from '../../shared/components/components'
 
-function SettingsLayout({children}) {
+export default function SettingsLayout({children}) {
   const router = useRouter()
   const {t} = useTranslation()
 
@@ -30,5 +30,3 @@ function SettingsLayout({children}) {
     </Layout>
   )
 }
-
-export default SettingsLayout
