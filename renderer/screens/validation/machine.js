@@ -418,18 +418,25 @@ export const createValidationMachine = ({
                               target: '#validation.longSession',
                               actions: [log()],
                             },
-                            onError: {
-                              target: 'fail',
-                              actions: [
-                                assign({
-                                  errorMessage: (_, {data}) => data,
-                                }),
-                                log(
-                                  (context, event) => ({context, event}),
-                                  'Short session submit failed'
-                                ),
-                              ],
-                            },
+                            onError: [
+                              {
+                                target: '#validation.longSession',
+                                cond: (_, {data}) =>
+                                  data === 'tx with same hash already exists',
+                              },
+                              {
+                                target: 'fail',
+                                actions: [
+                                  assign({
+                                    errorMessage: (_, {data}) => data,
+                                  }),
+                                  log(
+                                    (context, event) => ({context, event}),
+                                    'Short session submit failed'
+                                  ),
+                                ],
+                              },
+                            ],
                           },
                         },
                         fail: {
@@ -885,18 +892,25 @@ export const createValidationMachine = ({
                             onDone: {
                               target: '#validation.validationSucceeded',
                             },
-                            onError: {
-                              target: 'fail',
-                              actions: [
-                                assign({
-                                  errorMessage: (_, {data}) => data,
-                                }),
-                                log(
-                                  (context, event) => ({context, event}),
-                                  'Long session submit failed'
-                                ),
-                              ],
-                            },
+                            onError: [
+                              {
+                                target: '#validation.validationSucceeded',
+                                cond: (_, {data}) =>
+                                  data === 'tx with same hash already exists',
+                              },
+                              {
+                                target: 'fail',
+                                actions: [
+                                  assign({
+                                    errorMessage: (_, {data}) => data,
+                                  }),
+                                  log(
+                                    (context, event) => ({context, event}),
+                                    'Long session submit failed'
+                                  ),
+                                ],
+                              },
+                            ],
                           },
                         },
                         fail: {
