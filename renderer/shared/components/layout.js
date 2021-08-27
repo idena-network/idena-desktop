@@ -315,9 +315,12 @@ function SyncingApp() {
                 {highestBlock ? (
                   <>
                     {t('{{numBlocks}} blocks left', {
-                      numBlocks:
-                        highestBlock - currentBlock &&
-                        (highestBlock - currentBlock).toLocaleString(),
+                      numBlocks: Number.isNaN(highestBlock - currentBlock)
+                        ? '...'
+                        : Math.max(
+                            highestBlock - currentBlock,
+                            0
+                          ).toLocaleString(),
                     })}{' '}
                     (
                     {t('{{currentBlock}} out of {{highestBlock}}', {
