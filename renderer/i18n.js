@@ -45,6 +45,8 @@ import sv_translation from '../locales/sv/translation.json'
 import sv_error from '../locales/sv/error.json'
 import ja_translation from '../locales/ja/translation.json'
 import ja_error from '../locales/ja/error.json'
+import el_translation from '../locales/el/translation.json'
+import el_error from '../locales/el/error.json'
 
 export const AVAILABLE_LANGS = [
   'en',
@@ -68,6 +70,7 @@ export const AVAILABLE_LANGS = [
   'bg',
   'sv',
   'ja',
+  'el',
 ]
 
 export const isoLangs = {
@@ -826,6 +829,7 @@ i18n.use(initReactI18next).init({
     bg: {translation: bg_translation, error: bg_error},
     sv: {translation: sv_translation, error: sv_error},
     ja: {translation: ja_translation, error: ja_error},
+    el: {translation: el_translation, error: el_error},
   },
   lng: loadPersistentStateValue('settings', 'lng'),
   fallbackLng: 'en',

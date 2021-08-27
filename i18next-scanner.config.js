@@ -20,6 +20,7 @@ const AVAILABLE_LANGS = [
   'bg',
   'sv',
   'ja',
+  'el',
 ]
 
 module.exports = {
