@@ -1,0 +1,16 @@
+{
+  "Can not submit flip": "Μη δυνατή η υποβολή του φλιπ",
+  "Keywords are not specified": "Οι λέξεις-κλειδιά δεν έχουν οριστεί",
+  "Error while uploading flip": "Σφάλμα κατά την υποβολή του φλιπ",
+  "Something went wrong": "Κάτι πήγε στραβά",
+  "Maximum image size exceeded": "Ξεπεράσατε το μέγιστο επιτρεπόμενο μέγεθος αρχείου εικόνας",
+  "Error while importing key": "Σφάλμα κατά την εισαγωγή κλειδιού ασφαλείας",
+  "Internal node is not available, try again in a few seconds": "Μη διαθέσιμος ο εσωτερικός κόμβος, ξαναπροσπαθήστε σε λίγα δευτερόλεπτα",
+  "You can not submit flips having 'Candidate' status": "Δε μπορείτε να υποβάλλετε φλιπ εφόσον φέρετε τον ρόλο του 'Υποψηφίου'",
+  "You cannot submit more flips until the next validation": "Δε μπορείτε να υποβάλλετε φλιπ μέχρι την επόμενη επικύρωση",
+  "Can not submit flip during the validation session": "Μη δυνατή η υποβολή φλιπ κατά τη διάρκεια της συνεδρίας επικύρωσης",
+  "Error while sending transaction": "Σφάλμα κατά την αποστολή συναλλαγής",
+  "Transaction sent": "Συναλλαγή απεστάλη",
+  "Error while deleting flip": "Σφάλμα κατά τη διαγραφή του φλιπ",
+  "It's not allowed to submit flips with your identity status": "Δεν επιτρέπεται η υποβολή φλιπ με τον τρέχον ρόλο σας."
+}
