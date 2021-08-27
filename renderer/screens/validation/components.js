@@ -994,7 +994,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
   const dirs = [
     '1-keywords-vase-coffee',
     '2-numbers',
-    '3-labels',
+    '3-enums',
     '4-text',
     '5-inappropriate-content',
   ]
@@ -1089,7 +1089,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
                     setFlipCase(2)
                   }}
                 >
-                  {t('There are labels indicating the right order')}
+                  {t('There is a sequence of enumerated objects')}
                 </BadFlipListItem>
                 <BadFlipListItem
                   flipCase={3}
@@ -1194,7 +1194,7 @@ function BadFlipPartFrame({flipCase, ...props}) {
   const framePosition = [
     {},
     {},
-    {top: 100 * 3 - 4, bottom: -4},
+    {},
     {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
     {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
   ]
