@@ -464,7 +464,7 @@ export function GoogleTranslateButton({
 export function TextLink({href, children, ...props}) {
   return (
     <NextLink href={href} passHref>
-      <Link href={href} color="blue.500" {...props}>
+      <Link color="blue.500" {...props}>
         {children}
       </Link>
     </NextLink>

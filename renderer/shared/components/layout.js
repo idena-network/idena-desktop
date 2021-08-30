@@ -270,7 +270,7 @@ function SyncingApp() {
         },
         done: {
           after: {
-            3000: 'loading',
+            5000: 'loading',
           },
         },
       },

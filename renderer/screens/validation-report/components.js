@@ -22,7 +22,7 @@ import {TableCol} from '../../shared/components/table'
 import {useIdentity} from '../../shared/providers/identity-context'
 import {toLocaleDna, toPercent} from '../../shared/utils/utils'
 import {useValidationReportSummary} from './hooks'
-import {ValidationFailReason} from './types'
+import {ValidationResult} from './types'
 
 export function ValidationReportSummary({onClose}) {
   const {t, i18n} = useTranslation()
@@ -37,21 +37,13 @@ export function ValidationReportSummary({onClose}) {
     earnings,
     earningsScore,
     totalMissedReward,
-    didMissValidation,
-    validationPenalty,
+    validationResult,
     isLoading,
   } = useValidationReportSummary()
 
   const {
-    short: {score: shortScore, options: shortAnswersCount},
+    short: {score: shortScore},
   } = lastValidationScore
-
-  // eslint-disable-next-line no-nested-ternary
-  const validationFailReason = didMissValidation
-    ? shortAnswersCount
-      ? ValidationFailReason.LateSubmission
-      : ValidationFailReason.MissedValidation
-    : ValidationFailReason.WrongAnswers
 
   const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
 
@@ -63,7 +55,7 @@ export function ValidationReportSummary({onClose}) {
       borderTopColor={
         // eslint-disable-next-line no-nested-ternary
         isValidated
-          ? validationPenalty
+          ? validationResult === ValidationResult.Penalty
             ? 'orange.500'
             : 'green.500'
           : 'red.500'
@@ -89,12 +81,16 @@ export function ValidationReportSummary({onClose}) {
           alignSelf="start"
         >
           <AlertTitle fontSize="lg" fontWeight={500}>
-            {/* eslint-disable-next-line no-nested-ternary */}
-            {isValidated
-              ? validationPenalty
-                ? t('Validated')
-                : t('Successfully validated')
-              : t('Validation failed')}
+            {(() => {
+              switch (validationResult) {
+                case ValidationResult.Success:
+                  return t('Successfully validated')
+                case ValidationResult.Penalty:
+                  return t('Validated')
+                default:
+                  return t('Validation failed')
+              }
+            })()}
           </AlertTitle>
         </Skeleton>
         <AlertDescription>
@@ -133,20 +129,14 @@ export function ValidationReportSummary({onClose}) {
                     </ValidationReportGaugeStatValue>
                   )}
                   <ValidationReportGaugeStatLabel>
-                    {isValidated
-                      ? t('Score')
-                      : (() => {
-                          switch (validationFailReason) {
-                            case ValidationFailReason.LateSubmission:
-                              return t('Late submission')
-                            case ValidationFailReason.MissedValidation:
-                              return t('Missed validation')
-                            case ValidationFailReason.WrongAnswers:
-                              return t('Wrong answers')
-                            default:
-                              return ''
-                          }
-                        })()}
+                    {validationResult === ValidationResult.Success &&
+                      t('Score')}
+                    {validationResult === ValidationResult.LateSubmission &&
+                      t('Late submission')}
+                    {validationResult === ValidationResult.MissedValidation &&
+                      t('Missed validation')}
+                    {validationResult === ValidationResult.WrongAnswers &&
+                      t('Wrong answers')}
                   </ValidationReportGaugeStatLabel>
                 </ValidationReportGaugeStat>
               </ValidationReportGauge>
@@ -173,15 +163,21 @@ export function ValidationReportSummary({onClose}) {
                   <ValidationReportGaugeIcon icon="send-out" />
                 </ValidationReportGaugeBox>
                 <ValidationReportGaugeStat>
-                  {isValidated ? (
-                    <ValidationReportGaugeStatValue>
-                      {dna(earnings)}
-                    </ValidationReportGaugeStatValue>
-                  ) : (
-                    <ValidationReportGaugeStatValue color="red.500">
-                      {dna(totalMissedReward)}
-                    </ValidationReportGaugeStatValue>
-                  )}
+                  <Skeleton
+                    isLoaded={!isLoading}
+                    colorStart={colors.gray[50]}
+                    colorEnd={colors.gray[300]}
+                  >
+                    {isValidated ? (
+                      <ValidationReportGaugeStatValue>
+                        {dna(earnings)}
+                      </ValidationReportGaugeStatValue>
+                    ) : (
+                      <ValidationReportGaugeStatValue color="red.500">
+                        {dna(totalMissedReward)}
+                      </ValidationReportGaugeStatValue>
+                    )}
+                  </Skeleton>
                   <ValidationReportGaugeStatLabel>
                     {t('Earnings')}
                   </ValidationReportGaugeStatLabel>
@@ -211,7 +207,7 @@ export function ValidationReportSummary({onClose}) {
                   size="xs"
                   variant="ghost"
                   color="blue.500"
-                  fontSize={16}
+                  fontSize={20}
                   _hover={{bg: 'blue.50'}}
                   onClick={() => {
                     global.openExternal(`

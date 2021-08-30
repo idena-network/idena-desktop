@@ -128,6 +128,8 @@ export function WalletCard({
           top={-4}
           right={-4}
           bottom={-4}
+          minH="full"
+          minW="full"
           borderColor="blue.500"
           borderWidth={2}
           borderRadius="xl"
