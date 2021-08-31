@@ -418,7 +418,7 @@ export default function ProfilePage() {
                   </UserStatList>
                 </Stack>
                 <Stack spacing={10} w={200}>
-                  <Box minH={62} mt={4}>
+                  <Box minH={62} mt={6}>
                     <OnboardingPopover
                       isOpen={eitherOnboardingState(
                         onboardingShowingStep(OnboardingStep.ActivateMining)
