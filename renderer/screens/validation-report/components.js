@@ -49,12 +49,14 @@ export function ValidationReportSummary({onClose}) {
 
   return (
     <Alert
-      status={isValidated ? 'success' : 'error'}
       variant="top-accent"
       bg="white"
       borderTopColor={
         // eslint-disable-next-line no-nested-ternary
-        isValidated
+        isLoading
+          ? 'transparent'
+          : // eslint-disable-next-line no-nested-ternary
+          isValidated
           ? validationResult === ValidationResult.Penalty
             ? 'orange.500'
             : 'green.500'
@@ -129,8 +131,10 @@ export function ValidationReportSummary({onClose}) {
                     </ValidationReportGaugeStatValue>
                   )}
                   <ValidationReportGaugeStatLabel>
-                    {validationResult === ValidationResult.Success &&
-                      t('Score')}
+                    {[
+                      ValidationResult.Success,
+                      ValidationResult.Penalty,
+                    ].includes(validationResult) && t('Score')}
                     {validationResult === ValidationResult.LateSubmission &&
                       t('Late submission')}
                     {validationResult === ValidationResult.MissedValidation &&
@@ -168,13 +172,13 @@ export function ValidationReportSummary({onClose}) {
                     colorStart={colors.gray[50]}
                     colorEnd={colors.gray[300]}
                   >
-                    {isValidated ? (
+                    {validationResult === ValidationResult.Success ? (
                       <ValidationReportGaugeStatValue>
                         {dna(earnings)}
                       </ValidationReportGaugeStatValue>
                     ) : (
                       <ValidationReportGaugeStatValue color="red.500">
-                        {dna(totalMissedReward)}
+                        {dna(-totalMissedReward)}
                       </ValidationReportGaugeStatValue>
                     )}
                   </Skeleton>

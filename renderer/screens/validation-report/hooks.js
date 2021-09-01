@@ -159,13 +159,14 @@ export function useValidationReportSummary() {
                   },
                 }
               ) => {
-                const identityRewardMap = identityRewards?.reduce(
-                  (acc, {type, balance, stake}) => ({
-                    ...acc,
-                    [type]: Number(balance) + Number(stake),
-                  }),
-                  {}
-                )
+                const identityRewardMap =
+                  identityRewards?.reduce(
+                    (acc, {type, balance, stake}) => ({
+                      ...acc,
+                      [type]: Number(balance) + Number(stake),
+                    }),
+                    {}
+                  ) ?? {}
 
                 const flipRewards = identityRewardMap.Flips
 
@@ -455,7 +456,8 @@ export function useValidationReportSummary() {
 
                 const earnings = maybePenaltyReward(
                   Object.values(identityRewardMap).reduce(
-                    (acc, curr) => acc + curr
+                    (acc, curr) => acc + curr,
+                    0
                   )
                 )
 
