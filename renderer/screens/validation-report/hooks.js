@@ -168,12 +168,12 @@ export function useValidationReportSummary() {
                     {}
                   ) ?? {}
 
-                const flipRewards = identityRewardMap.Flips
+                const flipRewards = identityRewardMap.Flips ?? 0
 
                 // eslint-disable-next-line no-shadow
                 const missedFlipReward =
-                  rewardsSummary.flipsShare * availableFlips -
-                  (validationPenalty ? 0 : flipRewards)
+                  Number(rewardsSummary.flipsShare) * availableFlips -
+                  flipRewards
 
                 const missedValidationReward =
                   !isValidated || Boolean(validationPenalty)
@@ -454,16 +454,12 @@ export function useValidationReportSummary() {
                 const maybePenaltyReward = (cond => plannedReward =>
                   cond ? 0 : plannedReward)(Boolean(validationPenalty))
 
-                const earnings = maybePenaltyReward(
-                  Object.values(identityRewardMap).reduce(
-                    (acc, curr) => acc + curr,
-                    0
-                  )
+                const earnings = Object.values(identityRewardMap).reduce(
+                  (acc, curr) => acc + curr,
+                  0
                 )
 
-                const earningsScore = maybePenaltyReward(
-                  earnings / (earnings + totalMissedReward)
-                )
+                const earningsScore = earnings / (earnings + totalMissedReward)
 
                 const {
                   short: {options: shortAnswersCount},
@@ -485,9 +481,7 @@ export function useValidationReportSummary() {
                   ...context,
                   earnings,
                   earningsScore,
-                  validationReward: maybePenaltyReward(
-                    identityRewardMap.Validation
-                  ),
+                  validationReward: identityRewardMap.Validation,
                   missedValidationReward,
                   invitationReward: maybePenaltyReward(
                     identityRewardMap.Invitations +
@@ -497,7 +491,7 @@ export function useValidationReportSummary() {
                       identityRewardMap.SavedInviteWin
                   ),
                   missedInvitationReward,
-                  flipReward: maybePenaltyReward(identityRewardMap.Flips),
+                  flipReward: identityRewardMap.Flips,
                   missedFlipReward,
                   flipReportReward,
                   missedFlipReportReward,
@@ -514,7 +508,10 @@ export function useValidationReportSummary() {
 
   React.useEffect(() => {
     if (epoch && identity?.address)
-      send('FETCH', {epochNumber: epoch?.epoch - 1, identity})
+      send('FETCH', {
+        epochNumber: epoch?.epoch - 1,
+        identity,
+      })
   }, [epoch, identity, send])
 
   return {

@@ -278,7 +278,6 @@ export function Toast({
       mb={5}
       minH={rem(44)}
       rounded="lg"
-      w="md"
       {...props}
     >
       <AlertIcon name={icon} size={5} color={color || 'blue.500'} />
@@ -290,6 +289,8 @@ export function Toast({
           color={color || 'muted'}
           lineHeight="base"
           textAlign="left"
+          w="full"
+          isTruncated
         >
           {description}
         </AlertDescription>
