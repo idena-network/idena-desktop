@@ -647,7 +647,7 @@ export function KillInviteDrawer({invite, onKill, onKillFail, ...props}) {
         </DrawerBody>
         <DrawerFooter>
           <PrimaryButton type="submit" ml="auto" isLoading={isSubmitting}>
-            {t('Create invitation')}
+            {t('Terminate invitation')}
           </PrimaryButton>
         </DrawerFooter>
       </Flex>
