@@ -323,29 +323,6 @@ export default function ProfilePage() {
                     IdentityStatus.Candidate,
                   ].includes(status) && (
                     <UserStatList title={t('Profile')}>
-                      {stake > 0 && (
-                        <AnnotatedUserStat
-                          annotation={t(
-                            'You need to get Verified status to be able to terminate your identity and withdraw the stake'
-                          )}
-                          label={t('Stake')}
-                          value={toDna(
-                            stake *
-                              (status === IdentityStatus.Newbie ? 0.25 : 1)
-                          )}
-                        />
-                      )}
-
-                      {stake > 0 && status === IdentityStatus.Newbie && (
-                        <AnnotatedUserStat
-                          annotation={t(
-                            'You need to get Verified status to get the locked funds into the normal wallet'
-                          )}
-                          label={t('Locked')}
-                          value={toDna(stake * 0.75)}
-                        />
-                      )}
-
                       {age >= 0 && (
                         <SimpleUserStat label={t('Age')} value={age} />
                       )}
@@ -381,6 +358,29 @@ export default function ProfilePage() {
                             {t('View validation report')}
                           </TextLink>
                         </AnnotatedUserStat>
+                      )}
+
+                      {stake > 0 && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            'You need to get Verified status to be able to terminate your identity and withdraw the stake'
+                          )}
+                          label={t('Stake')}
+                          value={toDna(
+                            stake *
+                              (status === IdentityStatus.Newbie ? 0.25 : 1)
+                          )}
+                        />
+                      )}
+
+                      {stake > 0 && status === IdentityStatus.Newbie && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            'You need to get Verified status to get the locked funds into the normal wallet'
+                          )}
+                          label={t('Locked')}
+                          value={toDna(stake * 0.75)}
+                        />
                       )}
                     </UserStatList>
                   )}
