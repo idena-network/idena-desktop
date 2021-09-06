@@ -250,7 +250,7 @@ export default function ProfilePage() {
                                       'You have been invited to join the upcoming validation ceremony. Click the button below to accept the invitation.'
                                     )
                                   : t(
-                                      'To quickly get an invite code, we recommend that you get a certificate of trust by passing a test validation'
+                                      'An invitation can be provided by validated participants'
                                     )}
                               </Text>
                             </Stack>
@@ -359,6 +359,29 @@ export default function ProfilePage() {
                           </TextLink>
                         </AnnotatedUserStat>
                       )}
+
+                      {stake > 0 && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            'You need to get Verified status to be able to terminate your identity and withdraw the stake'
+                          )}
+                          label={t('Stake')}
+                          value={toDna(
+                            stake *
+                              (status === IdentityStatus.Newbie ? 0.25 : 1)
+                          )}
+                        />
+                      )}
+
+                      {stake > 0 && status === IdentityStatus.Newbie && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            'You need to get Verified status to get the locked funds into the normal wallet'
+                          )}
+                          label={t('Locked')}
+                          value={toDna(stake * 0.75)}
+                        />
+                      )}
                     </UserStatList>
                   )}
 
@@ -392,32 +415,10 @@ export default function ProfilePage() {
                         </Stack>
                       </TextLink>
                     </UserStat>
-
-                    {stake > 0 && (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          'You need to get Verified status to be able to terminate your identity and withdraw the stake'
-                        )}
-                        label={t('Stake')}
-                        value={toDna(
-                          stake * (status === IdentityStatus.Newbie ? 0.25 : 1)
-                        )}
-                      />
-                    )}
-
-                    {stake > 0 && status === IdentityStatus.Newbie && (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          'You need to get Verified status to get the locked funds into the normal wallet'
-                        )}
-                        label={t('Locked')}
-                        value={toDna(stake * 0.75)}
-                      />
-                    )}
                   </UserStatList>
                 </Stack>
                 <Stack spacing={10} w={200}>
-                  <Box minH={62} mt={4}>
+                  <Box minH={62} mt={6}>
                     <OnboardingPopover
                       isOpen={eitherOnboardingState(
                         onboardingShowingStep(OnboardingStep.ActivateMining)

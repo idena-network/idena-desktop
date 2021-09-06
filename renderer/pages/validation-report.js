@@ -8,6 +8,7 @@ import {
   Text,
   useTheme,
 } from '@chakra-ui/core'
+import router from 'next/router'
 import {useTranslation} from 'react-i18next'
 import {UserInlineCard} from '../screens/profile/components'
 import {
@@ -24,6 +25,7 @@ import {
   ValidationReportStat,
 } from '../screens/validation-report/components'
 import {useValidationReportSummary} from '../screens/validation-report/hooks'
+import {ValidationResult} from '../screens/validation-report/types'
 import {
   ExternalLink,
   FailAlert,
@@ -61,29 +63,21 @@ export default function ValidationReport() {
     flipReportReward,
     missedFlipReportReward,
     totalMissedReward,
-    didMissValidation,
-    validationPenalty,
+    validationResult,
     isLoading,
   } = useValidationReportSummary()
 
   const {
-    short: {score: shortScore, options: shortAnswersCount, ...shortResults},
+    short: {score: shortScore, ...shortResults},
     long: {score: longScore, ...longResults},
   } = lastValidationScore
 
   const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
 
-  const rawDna = amount =>
+  const maybeDna = amount =>
     !amount || Number.isNaN(amount)
       ? '–'
       : amount.toLocaleString(i18n.language, {maximumFractionDigits: 3})
-
-  // eslint-disable-next-line no-nested-ternary
-  const validationFailReason = didMissValidation
-    ? shortAnswersCount
-      ? t('Late submission')
-      : t('Missed validation')
-    : t('Wrong answers')
 
   return (
     <Layout>
@@ -94,7 +88,7 @@ export default function ValidationReport() {
               epochNumber: epoch?.epoch,
             })}
           </PageTitle>
-          <CloseButton />
+          <CloseButton onClick={() => router.push('/profile')} />
         </Flex>
         <Stack spacing={6} w="full">
           <Box>
@@ -106,9 +100,10 @@ export default function ValidationReport() {
             >
               {isValidated ? (
                 <SuccessAlert>
-                  {validationPenalty
-                    ? t('Validated')
-                    : t('Successfully validated')}
+                  {validationResult === ValidationResult.Success &&
+                    t('Successfully validated')}
+                  {validationResult === ValidationResult.Penalty &&
+                    t('Validated')}
                 </SuccessAlert>
               ) : (
                 <FailAlert>{t('Validation failed')}</FailAlert>
@@ -147,43 +142,79 @@ export default function ValidationReport() {
                       <ValidationReportGaugeIcon icon="timer" />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
-                      {isValidated ? (
-                        <ValidationReportGaugeStatValue>
-                          {toPercent(totalScore)}
-                        </ValidationReportGaugeStatValue>
-                      ) : (
-                        <ValidationReportGaugeStatValue color="red.500">
-                          {t('Failed')}
-                        </ValidationReportGaugeStatValue>
-                      )}
-                      <ValidationReportGaugeStatLabel>
-                        {isValidated ? t('Score') : validationFailReason}
-                      </ValidationReportGaugeStatLabel>
+                      <Skeleton
+                        isLoaded={!isLoading}
+                        colorStart={colors.brandGray['005']}
+                        colorEnd={colors.gray[300]}
+                      >
+                        {isValidated ? (
+                          <ValidationReportGaugeStatValue>
+                            {toPercent(totalScore)}
+                          </ValidationReportGaugeStatValue>
+                        ) : (
+                          <ValidationReportGaugeStatValue color="red.500">
+                            {t('Failed')}
+                          </ValidationReportGaugeStatValue>
+                        )}
+                      </Skeleton>
+                      <Skeleton
+                        isLoaded={!isLoading}
+                        colorStart={colors.brandGray['005']}
+                        colorEnd={colors.gray[300]}
+                      >
+                        <ValidationReportGaugeStatLabel>
+                          {isValidated && t('Total score')}
+                          {validationResult ===
+                            ValidationResult.LateSubmission &&
+                            t('Late submission')}
+                          {validationResult ===
+                            ValidationResult.MissedValidation &&
+                            t('Missed validation')}
+                          {validationResult === ValidationResult.WrongAnswers &&
+                            t('Wrong answers')}
+                        </ValidationReportGaugeStatLabel>
+                      </Skeleton>
                     </ValidationReportGaugeStat>
                   </ValidationReportGauge>
                 </Box>
                 <Stack spacing={4}>
                   <Flex justify="space-between">
-                    <ValidationReportStat
-                      label={t('Short session')}
-                      value={t('{{score}} ({{point}} out of {{flipsCount}})', {
-                        score: toPercent(shortScore),
-                        ...shortResults,
-                      })}
-                    />
-                    <ValidationReportStat
-                      label={t('Long session')}
-                      value={t('{{score}} ({{point}} out of {{flipsCount}})', {
-                        score: toPercent(longScore),
-                        ...longResults,
-                      })}
-                    />
+                    <Skeleton
+                      isLoaded={!isLoading}
+                      colorStart={colors.brandGray['005']}
+                      colorEnd={colors.gray[300]}
+                    >
+                      <ValidationReportStat
+                        label={t('Short session')}
+                        value={
+                          validationResult === ValidationResult.MissedValidation
+                            ? '–'
+                            : t('{{score}} ({{point}} out of {{flipsCount}})', {
+                                score: toPercent(shortScore),
+                                ...shortResults,
+                              })
+                        }
+                      />
+                    </Skeleton>
                   </Flex>
                   <Flex justify="space-between">
-                    <ValidationReportStat
-                      label={t('Total score')}
-                      value={toPercent(totalScore)}
-                    />
+                    <Skeleton
+                      isLoaded={!isLoading}
+                      colorStart={colors.brandGray['005']}
+                      colorEnd={colors.gray[300]}
+                    >
+                      <ValidationReportStat
+                        label={t('Long session')}
+                        value={
+                          validationResult === ValidationResult.MissedValidation
+                            ? '–'
+                            : t('{{score}} ({{point}} out of {{flipsCount}})', {
+                                score: toPercent(longScore),
+                                ...longResults,
+                              })
+                        }
+                      />
+                    </Skeleton>
                   </Flex>
                 </Stack>
               </Stack>
@@ -216,39 +247,51 @@ export default function ValidationReport() {
                       <ValidationReportGaugeIcon icon="send-out" />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
-                      {isValidated ? (
-                        <ValidationReportGaugeStatValue>
-                          {dna(earnings)}
-                        </ValidationReportGaugeStatValue>
-                      ) : (
-                        <ValidationReportGaugeStatValue color="red.500">
-                          {dna(-totalMissedReward)}
-                        </ValidationReportGaugeStatValue>
-                      )}
+                      <Skeleton
+                        isLoaded={!isLoading}
+                        colorStart={colors.brandGray['005']}
+                        colorEnd={colors.gray[300]}
+                      >
+                        {validationResult === ValidationResult.Success ? (
+                          <ValidationReportGaugeStatValue>
+                            {dna(earnings)}
+                          </ValidationReportGaugeStatValue>
+                        ) : (
+                          <ValidationReportGaugeStatValue color="red.500">
+                            {dna(-totalMissedReward)}
+                          </ValidationReportGaugeStatValue>
+                        )}
+                      </Skeleton>
                       <ValidationReportGaugeStatLabel>
                         {t('Earnings')}
                       </ValidationReportGaugeStatLabel>
                     </ValidationReportGaugeStat>
                   </ValidationReportGauge>
                 </Box>
-                <Stack spacing={4}>
-                  <Flex justify="space-between">
-                    <ValidationReportStat
-                      label={t('Missed invitation earnings')}
-                      value={dna(missedInvitationReward)}
-                    />
-                    <ValidationReportStat
-                      label={t('Missed reporting earnings')}
-                      value={dna(missedFlipReportReward)}
-                    />
-                  </Flex>
-                  <Flex justify="space-between">
-                    <ValidationReportStat
-                      label={t('Missed flip earnings')}
-                      value={dna(missedFlipReward)}
-                    />
-                  </Flex>
-                </Stack>
+                <Skeleton
+                  isLoaded={!isLoading}
+                  colorStart={colors.brandGray['005']}
+                  colorEnd={colors.gray[300]}
+                >
+                  <Stack spacing={4}>
+                    <Flex justify="space-between">
+                      <ValidationReportStat
+                        label={t('Missed invitation earnings')}
+                        value={dna(missedInvitationReward)}
+                      />
+                      <ValidationReportStat
+                        label={t('Missed reporting earnings')}
+                        value={dna(missedFlipReportReward)}
+                      />
+                    </Flex>
+                    <Flex justify="space-between">
+                      <ValidationReportStat
+                        label={t('Missed flip earnings')}
+                        value={dna(missedFlipReward)}
+                      />
+                    </Flex>
+                  </Stack>
+                </Skeleton>
               </Stack>
             </ValidationReportBlockOverview>
           </Stack>
@@ -285,22 +328,21 @@ export default function ValidationReport() {
                     />
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {rawDna(validationReward)}
+                    {maybeDna(validationReward)}
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {rawDna(missedValidationReward)}
+                    <Text color={missedValidationReward > 0 ? 'red.500' : ''}>
+                      {maybeDna(missedValidationReward)}
+                    </Text>
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {/* eslint-disable-next-line no-nested-ternary */}
-                    {validationPenalty ? (
+                    {validationResult === ValidationResult.Penalty ? (
                       <Text color="red.500">
-                        {t('Your flips were reported. Make flips carefully')}
+                        {t('Your flips were reported.')}
                       </Text>
-                    ) : missedValidationReward ? (
-                      t('Attend every validation to get a higher reward')
                     ) : (
-                      <Text color="green.500">
-                        {t('Great job! You have earned maximum reward')}
+                      <Text color={missedValidationReward > 0 ? 'red.500' : ''}>
+                        {t('Attend every validation to get a higher reward')}
                       </Text>
                     )}
                   </ValidationReportColumn>
@@ -315,23 +357,30 @@ export default function ValidationReport() {
                     />
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {rawDna(flipReward)}
+                    {maybeDna(flipReward)}
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {rawDna(missedFlipReward)}
+                    <Text color={missedFlipReward > 0 ? 'red.500' : ''}>
+                      {maybeDna(missedFlipReward)}
+                    </Text>
                   </ValidationReportColumn>
                   <ValidationReportColumn>
                     {/* eslint-disable-next-line no-nested-ternary */}
-                    {validationPenalty ? (
+                    {validationResult === ValidationResult.Penalty ? (
                       <Text color="red.500">
-                        {t('Your flips were reported. Make flips carefully')}
+                        {t('Your flips were reported.')}
                       </Text>
-                    ) : missedFlipReward ? (
-                      t('Make flips carefully')
-                    ) : (
+                    ) : // eslint-disable-next-line no-nested-ternary
+                    missedFlipReward > 0 ? (
+                      <Text color="red.500">
+                        {t('Make all flips carefully')}
+                      </Text>
+                    ) : flipReward ? (
                       <Text color="green.500">
                         {t('Great job! You have earned maximum reward')}
                       </Text>
+                    ) : (
+                      '–'
                     )}
                   </ValidationReportColumn>
                 </tr>
@@ -343,25 +392,32 @@ export default function ValidationReport() {
                     />
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {rawDna(invitationReward)}
+                    {maybeDna(invitationReward)}
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {rawDna(missedInvitationReward)}
+                    <Text color={missedInvitationReward > 0 ? 'red.500' : ''}>
+                      {maybeDna(missedInvitationReward)}
+                    </Text>
                   </ValidationReportColumn>
                   <ValidationReportColumn>
                     {/* eslint-disable-next-line no-nested-ternary */}
-                    {validationPenalty ? (
+                    {validationResult === ValidationResult.Penalty ? (
                       <Text color="red.500">
-                        {t('Your flips were reported. Make flips carefully')}
+                        {t('Your flips were reported.')}
                       </Text>
-                    ) : missedFlipReward ? (
-                      t(
-                        'Invite your friends and help them to pass the first 3 validations'
-                      )
-                    ) : (
+                    ) : // eslint-disable-next-line no-nested-ternary
+                    missedInvitationReward > 0 ? (
+                      <Text color="red.500">
+                        {t(
+                          'Invite your friends and help them to pass the first 3 validations'
+                        )}
+                      </Text>
+                    ) : invitationReward ? (
                       <Text color="green.500">
                         {t('Great job! You have earned maximum reward')}
                       </Text>
+                    ) : (
+                      '–'
                     )}
                   </ValidationReportColumn>
                 </tr>
@@ -373,23 +429,28 @@ export default function ValidationReport() {
                     />
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {rawDna(flipReportReward)}
+                    {maybeDna(flipReportReward)}
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {rawDna(missedFlipReportReward)}
+                    {maybeDna(missedFlipReportReward)}
                   </ValidationReportColumn>
                   <ValidationReportColumn>
                     {/* eslint-disable-next-line no-nested-ternary */}
-                    {validationPenalty ? (
+                    {validationResult === ValidationResult.Penalty ? (
                       <Text color="red.500">
-                        {t('Your flips were reported. Make flips carefully')}
+                        {t('Your flips were reported.')}
                       </Text>
-                    ) : missedFlipReportReward ? (
-                      t('Report all flips that break the rules')
-                    ) : (
+                    ) : // eslint-disable-next-line no-nested-ternary
+                    missedFlipReportReward > 0 ? (
+                      <Text color="red.500">
+                        {t('Report all flips that break the rules')}
+                      </Text>
+                    ) : flipReportReward ? (
                       <Text color="green.500">
                         {t('Great job! You have earned maximum reward')}
                       </Text>
+                    ) : (
+                      t('Report all flips that break the rules')
                     )}
                   </ValidationReportColumn>
                 </tr>

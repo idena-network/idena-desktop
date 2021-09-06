@@ -1109,7 +1109,7 @@ function ArrowHint({hint, leftHanded}) {
           <Box>
             <Box
               borderColor="blue.500"
-              borderLeftWidth={2}
+              borderRightWidth={2}
               borderTopWidth={2}
               minW={6}
               minH={10}
@@ -1120,10 +1120,9 @@ function ArrowHint({hint, leftHanded}) {
               borderColor="transparent"
               borderTopColor="blue.500"
               position="absolute"
-              left={16}
+              right={-5}
               w={0}
               h={0}
-              ml={0}
             />
             <Box
               color="muted"

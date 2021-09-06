@@ -28,6 +28,7 @@ export function WalletCardMenu({children, ...props}) {
         mr={-2}
         _expanded={{bg: 'gray.100'}}
         _focus={{outline: 0}}
+        zIndex="dropdown"
       >
         <Flex align="center" justify="center" w={3}>
           <Icon name="more" size={5} />

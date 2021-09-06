@@ -1219,6 +1219,7 @@ function BadFlipPartFrame({flipCase, ...props}) {
         justify="center"
         bg="red.500"
         borderRadius="full"
+        color="white"
         size={8}
         position="absolute"
         right={-20}

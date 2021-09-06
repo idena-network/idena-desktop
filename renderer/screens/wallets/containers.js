@@ -128,10 +128,11 @@ export function WalletCard({
           top={-4}
           right={-4}
           bottom={-4}
+          minH="full"
+          minW="full"
           borderColor="blue.500"
           borderWidth={2}
           borderRadius="xl"
-          zIndex="hide"
           _before={{
             content: `""`,
             position: 'absolute',
@@ -208,7 +209,11 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
           </Stack>
         </DrawerBody>
         <DrawerFooter>
-          <PrimaryButton isLoading={isSubmitting} loadingText={t('Sending')}>
+          <PrimaryButton
+            type="submit"
+            isLoading={isSubmitting}
+            loadingText={t('Sending')}
+          >
             {t('Send')}
           </PrimaryButton>
         </DrawerFooter>

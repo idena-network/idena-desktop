@@ -9,6 +9,7 @@ import {
 } from '../../shared/providers/identity-context'
 import {IdentityStatus} from '../../shared/types'
 import {apiMethod} from '../../shared/utils/utils'
+import {ValidationResult} from './types'
 
 export function useTotalValidationScore() {
   const [{totalShortFlipPoints, totalQualifiedFlips}] = useIdentity()
@@ -158,29 +159,21 @@ export function useValidationReportSummary() {
                   },
                 }
               ) => {
-                // eslint-disable-next-line no-shadow
-                const earnings = (identityRewards ?? []).reduce(
-                  (acc, curr) =>
-                    acc + Number(curr.balance) + Number(curr.stake),
-                  0
-                )
+                const identityRewardMap =
+                  identityRewards?.reduce(
+                    (acc, {type, balance, stake}) => ({
+                      ...acc,
+                      [type]: Number(balance) + Number(stake),
+                    }),
+                    {}
+                  ) ?? {}
 
-                const identityRewardMap = identityRewards?.reduce(
-                  (acc, curr) => ({...acc, [curr.type]: curr}),
-                  {}
-                )
-
-                const rewardByType = type => {
-                  const {balance, stake} = identityRewardMap?.[type] ?? {}
-                  return Number(balance) + Number(stake)
-                }
-
-                const flipRewards = rewardByType('Flips')
+                const flipRewards = identityRewardMap.Flips ?? 0
 
                 // eslint-disable-next-line no-shadow
                 const missedFlipReward =
-                  rewardsSummary.flipsShare * availableFlips -
-                  (validationPenalty ? 0 : flipRewards)
+                  Number(rewardsSummary.flipsShare) * availableFlips -
+                  flipRewards
 
                 const missedValidationReward =
                   !isValidated || Boolean(validationPenalty)
@@ -364,26 +357,26 @@ export function useValidationReportSummary() {
 
                 const invitationRewards = [
                   ...getRewardedData(
-                    epochNumber - 1,
+                    epochNumber,
                     rewardsSummary,
                     rewardedInvites,
                     validationPenalty,
                     {state: identityStatus}
                   ),
                   ...getCurrentEpochSavedInvites(
-                    epoch - 1,
+                    epochNumber,
                     savedInvites,
                     rewardsSummary
                   ),
                   ...getPreviousEpochSavedInvites(
-                    epoch - 1,
+                    epochNumber,
                     1,
                     availableInvites,
                     rewardedInvites,
                     rewardsSummary
                   ),
                   ...getPreviousEpochSavedInvites(
-                    epoch - 1,
+                    epochNumber,
                     2,
                     availableInvites,
                     rewardedInvites,
@@ -392,7 +385,7 @@ export function useValidationReportSummary() {
                 ]
 
                 const missedInvitationReward = invitationRewards.reduce(
-                  (prev, cur) => prev + cur.missingInvitationReward,
+                  (prev, curr) => prev + curr.missingInvitationReward,
                   0
                 )
 
@@ -458,28 +451,52 @@ export function useValidationReportSummary() {
                   missedInvitationReward +
                   missedFlipReportReward
 
+                const maybePenaltyReward = (cond => plannedReward =>
+                  cond ? 0 : plannedReward)(Boolean(validationPenalty))
+
+                const earnings = Object.values(identityRewardMap).reduce(
+                  (acc, curr) => acc + curr,
+                  0
+                )
+
                 const earningsScore = earnings / (earnings + totalMissedReward)
+
+                const {
+                  short: {options: shortAnswersCount},
+                } = lastValidationScore
+
+                // eslint-disable-next-line no-nested-ternary
+                const validationResult = isValidated
+                  ? validationPenalty
+                    ? ValidationResult.Penalty
+                    : ValidationResult.Success
+                  : // eslint-disable-next-line no-nested-ternary
+                  missed
+                  ? shortAnswersCount
+                    ? ValidationResult.LateSubmission
+                    : ValidationResult.MissedValidation
+                  : ValidationResult.WrongAnswers
 
                 return {
                   ...context,
                   earnings,
                   earningsScore,
-                  validationReward: rewardByType('Validation'),
+                  validationReward: identityRewardMap.Validation,
                   missedValidationReward,
-                  invitationReward:
-                    rewardByType('Invitations') +
-                    rewardByType('Invitations2') +
-                    rewardByType('Invitations3') +
-                    rewardByType('SavedInvite') +
-                    rewardByType('SavedInviteWin'),
+                  invitationReward: maybePenaltyReward(
+                    identityRewardMap.Invitations +
+                      identityRewardMap.Invitations2 +
+                      identityRewardMap.Invitations3 +
+                      identityRewardMap.SavedInvite +
+                      identityRewardMap.SavedInviteWin
+                  ),
                   missedInvitationReward,
-                  flipReward: rewardByType('Flips'),
+                  flipReward: identityRewardMap.Flips,
                   missedFlipReward,
                   flipReportReward,
                   missedFlipReportReward,
-                  didMissValidation: missed,
                   totalMissedReward,
-                  validationPenalty,
+                  validationResult,
                 }
               }
             ),
@@ -491,7 +508,10 @@ export function useValidationReportSummary() {
 
   React.useEffect(() => {
     if (epoch && identity?.address)
-      send('FETCH', {epochNumber: epoch?.epoch - 1, identity})
+      send('FETCH', {
+        epochNumber: epoch?.epoch - 1,
+        identity,
+      })
   }, [epoch, identity, send])
 
   return {
