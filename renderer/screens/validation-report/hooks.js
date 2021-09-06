@@ -159,11 +159,13 @@ export function useValidationReportSummary() {
                   },
                 }
               ) => {
+                const safeNumber = num => Number(num ?? 0)
+
                 const identityRewardMap =
                   identityRewards?.reduce(
                     (acc, {type, balance, stake}) => ({
                       ...acc,
-                      [type]: Number(balance) + Number(stake),
+                      [type]: safeNumber(balance) + safeNumber(stake),
                     }),
                     {}
                   ) ?? {}
@@ -172,7 +174,7 @@ export function useValidationReportSummary() {
 
                 // eslint-disable-next-line no-shadow
                 const missedFlipReward =
-                  Number(rewardsSummary.flipsShare) * availableFlips -
+                  safeNumber(rewardsSummary.flipsShare) * availableFlips -
                   flipRewards
 
                 const missedValidationReward =
@@ -484,11 +486,11 @@ export function useValidationReportSummary() {
                   validationReward: identityRewardMap.Validation,
                   missedValidationReward,
                   invitationReward: maybePenaltyReward(
-                    identityRewardMap.Invitations +
-                      identityRewardMap.Invitations2 +
-                      identityRewardMap.Invitations3 +
-                      identityRewardMap.SavedInvite +
-                      identityRewardMap.SavedInviteWin
+                    safeNumber(identityRewardMap.Invitations) +
+                      safeNumber(identityRewardMap.Invitations2) +
+                      safeNumber(identityRewardMap.Invitations3) +
+                      safeNumber(identityRewardMap.SavedInvite) +
+                      safeNumber(identityRewardMap.SavedInviteWin)
                   ),
                   missedInvitationReward,
                   flipReward: identityRewardMap.Flips,
