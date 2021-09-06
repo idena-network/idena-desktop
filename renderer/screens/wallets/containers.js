@@ -399,7 +399,9 @@ function WalletTxStatus({
         <SmallText fontWeight={500}>{wallet?.name}</SmallText>
         <Box fontWeight={500}>
           {isMining ? (
-            t('Mining...')
+            <SmallText color="orange.500" fontWeight={500}>
+              {t('Mining...')}
+            </SmallText>
           ) : (
             <Stack isInline spacing={1} align="center">
               {receipt?.error && (
