@@ -10,7 +10,11 @@ import {strip} from '../utils/obj'
 
 const db = global.invitesDb || {}
 
-const killableIdentities = [IdentityStatus.Newbie, IdentityStatus.Candidate]
+const killableIdentities = [
+  IdentityStatus.Newbie,
+  IdentityStatus.Candidate,
+  IdentityStatus.Invite,
+]
 
 const InviteStateContext = React.createContext()
 const InviteDispatchContext = React.createContext()
