@@ -768,7 +768,7 @@ export function KillForm({onSuccess, onFail}) {
       }}
     >
       <FormControl>
-        <FormLabel htmlFor="stake">{t('Withraw stake, iDNA')}</FormLabel>
+        <FormLabel htmlFor="stake">{t('Withdraw stake, iDNA')}</FormLabel>
         <Input
           id="stake"
           value={stake}
