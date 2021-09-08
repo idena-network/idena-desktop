@@ -588,8 +588,8 @@ function HardForkScreen({version, onUpdate, onReject}) {
               return {
                 changes: forkChangelog?.Changes ?? [],
                 didActivateFork:
-                  currentVersionChangelog === null ||
-                  highestUpgrade >= currentVersionChangelog.Upgrade,
+                  forkChangelog === null ||
+                  highestUpgrade >= forkChangelog.Upgrade,
                 ...nextTiming,
               }
             },
