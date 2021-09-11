@@ -60,7 +60,6 @@ const NodeUpdater = require('./node-updater')
 let mainWindow
 let node
 let nodeDownloadPromise = null
-let searchWindow
 let tray
 
 const nodeUpdater = new NodeUpdater(logger)
@@ -349,11 +348,20 @@ app.on('will-finish-launching', function() {
   })
 })
 
-app.on('before-quit', () => {
-  if (searchWindow && !searchWindow.isDestroyed()) {
-    searchWindow.destroy()
+let didConfirmQuit = false
+
+app.on('before-quit', e => {
+  if (didConfirmQuit) {
+    mainWindow.forceClose = true
+  } else {
+    e.preventDefault()
+    sendMainWindowMsg('confirm-quit')
   }
-  mainWindow.forceClose = true
+})
+
+ipcMain.on('confirm-quit', () => {
+  didConfirmQuit = true
+  app.quit()
 })
 
 app.on('activate', showMainWindow)
