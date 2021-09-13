@@ -7,14 +7,9 @@ import {IdentityStatus} from '../types'
 import {fetchIdentity, killInvitee, sendInvite} from '../api/dna'
 import {useFailToast} from '../hooks/use-toast'
 import {strip} from '../utils/obj'
+import {canKill} from '../../screens/contacts/utils'
 
 const db = global.invitesDb || {}
-
-const killableIdentities = [
-  IdentityStatus.Newbie,
-  IdentityStatus.Candidate,
-  IdentityStatus.Invite,
-]
 
 const InviteStateContext = React.createContext()
 const InviteDispatchContext = React.createContext()
@@ -37,15 +32,14 @@ export function InviteProvider({children}) {
         )
       ).filter(Boolean)
 
-      const invitedIdentities = await Promise.all(
+      const persistedInvitedIdentities = await Promise.all(
         savedInvites
           .filter(({deletedAt}) => !deletedAt)
-          .map(({receiver}) => receiver)
-          .map(fetchIdentity)
+          .map(({receiver}) => fetchIdentity(receiver))
       )
 
-      const inviteesIdentities = await Promise.all(
-        (invitees ?? []).map(({Address}) => Address).map(fetchIdentity)
+      const knownInvitedIdentities = await Promise.all(
+        (invitees ?? []).map(({Address}) => fetchIdentity(Address))
       )
 
       const terminateTxs = await Promise.all(
@@ -66,23 +60,17 @@ export function InviteProvider({children}) {
         // find invitee to kill
         const invitee = invitees?.find(({TxHash}) => TxHash === invite.hash)
 
-        // find invitee identity
-        const inviteeIdentity = inviteesIdentities?.find(
-          ({address: addr}) => addr === invitee?.Address
-        )
-
         // find all identities/invites
         const invitedIdentity =
-          inviteeIdentity ||
-          invitedIdentities.find(({address: addr}) => addr === invite.receiver)
+          knownInvitedIdentities?.find(
+            identity => identity.address === invitee?.Address
+          ) ||
+          persistedInvitedIdentities.find(
+            identity => identity.address === invite.receiver
+          )
 
         // becomes activated once invitee is found
         const isNewInviteActivated = !!invitee
-
-        const canKill =
-          !!invitee &&
-          !!invitedIdentity &&
-          killableIdentities.includes(invitedIdentity.state)
 
         const isMining =
           tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL
@@ -99,7 +87,7 @@ export function InviteProvider({children}) {
         const nextInvite = {
           ...invite,
           activated: invite.activated || isNewInviteActivated,
-          canKill,
+          canKill: canKill(invitee, invitedIdentity),
           receiver: isNewInviteActivated ? invitee.Address : invite.receiver,
         }
 
@@ -218,10 +206,7 @@ export function InviteProvider({children}) {
                     ? IdentityStatus.Terminating
                     : invitedIdentity?.state,
                   terminating: isTerminating,
-                  canKill:
-                    invite &&
-                    invitedIdentity &&
-                    killableIdentities.includes(invitedIdentity.state),
+                  canKill: canKill(invite, invitedIdentity),
                 }
               : invite
           })
