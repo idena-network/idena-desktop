@@ -143,97 +143,112 @@ export function UserStatLabelTooltip(props) {
 }
 
 // eslint-disable-next-line react/display-name
-export const ActivateInviteForm = React.forwardRef((props, ref) => {
-  const {t} = useTranslation()
+export const ActivateInviteForm = React.forwardRef(
+  ({onHowToGetInvitation, ...props}, ref) => {
+    const {t} = useTranslation()
 
-  const failToast = useFailToast()
+    const failToast = useFailToast()
 
-  const [{activationTx}, {activateInvite}] = useInvite()
+    const [{activationTx}, {activateInvite}] = useInvite()
 
-  const {state: status} = useIdentityState()
+    const {state: status} = useIdentityState()
 
-  const [code, setCode] = React.useState()
+    const [code, setCode] = React.useState()
 
-  const mining = !!activationTx
+    const mining = !!activationTx
 
-  return (
-    <Box
-      ref={ref}
-      as="form"
-      onSubmit={async e => {
-        e.preventDefault()
-        try {
-          await activateInvite(code?.trim())
-        } catch ({message}) {
-          failToast(
-            // eslint-disable-next-line no-nested-ternary
-            message.includes('missing')
-              ? t('Invitation code is not valid')
-              : message.includes('validation ceremony')
-              ? t('Can not activate invitation since the validation is running')
-              : message
-          )
-        }
-      }}
-      {...props}
-    >
-      <Stack spacing={6}>
-        {status === IdentityStatus.Undefined && (
-          <FormControl>
-            <Stack spacing={3}>
-              <Flex justify="space-between" align="center">
-                <FormLabel htmlFor="code" p={0}>
-                  {t('Invitation code')}
-                </FormLabel>
-                <Button
-                  variant="ghost"
+    return (
+      <Box
+        ref={ref}
+        as="form"
+        onSubmit={async e => {
+          e.preventDefault()
+          try {
+            await activateInvite(code?.trim())
+          } catch ({message}) {
+            failToast(
+              // eslint-disable-next-line no-nested-ternary
+              message.includes('missing')
+                ? t('Invitation code is not valid')
+                : message.includes('validation ceremony')
+                ? t(
+                    'Can not activate invitation since the validation is running'
+                  )
+                : message
+            )
+          }
+        }}
+        {...props}
+      >
+        <Stack spacing={6}>
+          {status === IdentityStatus.Undefined && (
+            <FormControl>
+              <Stack spacing={3}>
+                <Flex justify="space-between" align="center">
+                  <FormLabel htmlFor="code" p={0}>
+                    {t('Invitation code')}
+                  </FormLabel>
+                  <Button
+                    variant="ghost"
+                    isDisabled={mining || status === IdentityStatus.Invite}
+                    bg="unset"
+                    color="muted"
+                    fontWeight={500}
+                    h="unset"
+                    p={0}
+                    _hover={{bg: 'unset'}}
+                    _active={{bg: 'unset'}}
+                    _focus={{boxShadow: 'none'}}
+                    onClick={() => setCode(global.clipboard.readText())}
+                  >
+                    {t('Paste')}
+                  </Button>
+                </Flex>
+                <Input
+                  id="code"
+                  value={code}
                   isDisabled={mining || status === IdentityStatus.Invite}
-                  bg="unset"
-                  color="muted"
-                  fontWeight={500}
-                  h="unset"
-                  p={0}
-                  _hover={{bg: 'unset'}}
-                  _active={{bg: 'unset'}}
-                  _focus={{boxShadow: 'none'}}
-                  onClick={() => setCode(global.clipboard.readText())}
-                >
-                  {t('Paste')}
-                </Button>
-              </Flex>
-              <Input
-                id="code"
-                value={code}
-                isDisabled={mining || status === IdentityStatus.Invite}
-                placeholder={
-                  status === IdentityStatus.Invite
-                    ? 'Click the button to activate invitation'
-                    : ''
-                }
-                resize="none"
-                _disabled={{
-                  bg: 'gray.50',
-                }}
-                _placeholder={{
-                  color: 'muted',
-                }}
-                onChange={e => setCode(e.target.value)}
-              />
-            </Stack>
-          </FormControl>
-        )}
-        <PrimaryButton
-          isLoading={mining}
-          loadingText={t('Mining...')}
-          type="submit"
-          ml="auto"
-        >
-          {t('Activate invite')}
-        </PrimaryButton>
-      </Stack>
-    </Box>
-  )
-})
+                  placeholder={
+                    status === IdentityStatus.Invite
+                      ? 'Click the button to activate invitation'
+                      : ''
+                  }
+                  resize="none"
+                  _disabled={{
+                    bg: 'gray.50',
+                  }}
+                  _placeholder={{
+                    color: 'muted',
+                  }}
+                  onChange={e => setCode(e.target.value)}
+                />
+              </Stack>
+            </FormControl>
+          )}
+          <Stack spacing={4} isInline align="center" justify="flex-end">
+            <Button
+              variant="link"
+              variantColor="blue"
+              fontWeight={500}
+              _hover={null}
+              _active={null}
+              onClick={onHowToGetInvitation}
+            >
+              {t('How to get an invitation')}
+            </Button>
+            <PrimaryButton
+              isLoading={mining}
+              loadingText={t('Mining...')}
+              type="submit"
+            >
+              {t('Activate invite')}
+            </PrimaryButton>
+          </Stack>
+        </Stack>
+      </Box>
+    )
+  }
+)
 
 export function SpoilInviteDrawer({children, ...props}) {
   const {t} = useTranslation()
