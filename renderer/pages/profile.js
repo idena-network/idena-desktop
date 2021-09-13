@@ -185,6 +185,7 @@ export default function ProfilePage() {
 
   React.useEffect(() => {
     if (
+      isOpenActivateInvitePopover ||
       eitherState(
         currentOnboarding,
         onboardingShowingStep(OnboardingStep.ActivateInvite)
@@ -195,6 +196,7 @@ export default function ProfilePage() {
     } else onCloseActivateInvitePopover()
   }, [
     currentOnboarding,
+    isOpenActivateInvitePopover,
     onCloseActivateInvitePopover,
     onOpenActivateInvitePopover,
     scrollToActivateInvite,
@@ -250,18 +252,22 @@ export default function ProfilePage() {
                                       'You have been invited to join the upcoming validation ceremony. Click the button below to accept the invitation.'
                                     )
                                   : t(
-                                      'An invitation can be provided by validated participants'
+                                      'To take part in the validation, you need an invitation code. Invitations can be provided by validated identities.'
                                     )}
                               </Text>
                             </Stack>
                             <Box>
-                              <ActivateInviteForm />
+                              <ActivateInviteForm
+                                onHowToGetInvitation={
+                                  onOpenActivateInvitePopover
+                                }
+                              />
                             </Box>
                           </Stack>
                         </PopoverTrigger>
                         <OnboardingPopoverContent
                           gutter={10}
-                          title={t('Enter invitation code')}
+                          title={t('How to get an invitation code')}
                           zIndex={2}
                           onDismiss={() => {
                             dismissCurrentTask()
@@ -270,11 +276,6 @@ export default function ProfilePage() {
                         >
                           <Stack spacing={5}>
                             <Stack>
-                              <Text>
-                                {t(
-                                  `An invitation can be provided by validated participants.`
-                                )}
-                              </Text>
                               <Text>
                                 {t(`Join the official Idena public Telegram group and follow instructions in the
                 pinned message.`)}
