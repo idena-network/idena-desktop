@@ -467,31 +467,39 @@ export default function ProfilePage() {
                     <IconLink
                       href="/oracles/new"
                       icon={<Icon name="oracle" size={5} />}
+                      maxW={200}
                     >
                       {t('New voting')}
                     </IconLink>
                     <IconLink
                       href="/flips/new"
                       icon={<Icon name="photo" size={5} />}
+                      maxW={200}
                     >
                       {t('New flip')}
                     </IconLink>
                     <IconLink
                       href="/contacts?new"
                       isDisabled={!canInvite}
+                      maxW={200}
                       icon={<Icon name="add-user" size={5} />}
                     >
                       {t('Invite')}
                     </IconLink>
-                    <IconButton2 icon="poo" onClick={onOpenSpoilForm}>
+                    <IconButton2
+                      icon="poo"
+                      maxW={200}
+                      onClick={onOpenSpoilForm}
+                    >
                       {t('Spoil invite')}
                     </IconButton2>
-                    <IconButton2 icon="key" onClick={onOpenExportPk}>
+                    <IconButton2 icon="key" maxW={200} onClick={onOpenExportPk}>
                       {t('Backup private key')}
                     </IconButton2>
                     <IconButton2
                       isDisabled={!canTerminate}
                       icon="delete"
+                      maxW={200}
                       onClick={onOpenKillForm}
                     >
                       {t('Terminate')}

@@ -79,9 +79,11 @@ export const IconButton2 = React.forwardRef(
       justifyContent="flex-start"
       {...props}
     >
-      <Stack isInline spacing={2} align="center">
+      <Stack isInline spacing={2} align="center" w="full">
         {typeof icon === 'string' ? <Icon name={icon} size={5} mr={2} /> : icon}
-        <Text as="span">{children}</Text>
+        <Text as="span" isTruncated>
+          {children}
+        </Text>
       </Stack>
     </ChakraButton>
   )
