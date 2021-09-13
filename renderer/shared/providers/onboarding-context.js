@@ -61,12 +61,16 @@ export function OnboardingProvider({children}) {
             },
           },
           ...createStep(OnboardingStep.ActivateInvite, {
-            on: {[OnboardingStep.Validate]: OnboardingStep.Validate},
+            on: {
+              [OnboardingStep.Validate]: OnboardingStep.Validate,
+              SHOW: '.showing',
+            },
             exit: ['reward'],
           }),
           ...createStep(OnboardingStep.Validate, {
             on: {
               [OnboardingStep.ActivateMining]: OnboardingStep.ActivateMining,
+              SHOW: '.showing',
             },
             exit: [
               choose([

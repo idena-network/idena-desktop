@@ -12,6 +12,15 @@ export function createProfileDb(epoch) {
     putDidPlanNextValidation(value) {
       return requestProfileDb().put(planNextValidationkey, value)
     },
+    getDidShowValidationResults() {
+      return requestProfileDb().get(`didShowValidationResults!!${epoch?.epoch}`)
+    },
+    putDidShowValidationResults() {
+      return requestProfileDb().put(
+        `didShowValidationResults!!${epoch?.epoch}`,
+        1
+      )
+    },
     clear() {
       return requestProfileDb().clear()
     },

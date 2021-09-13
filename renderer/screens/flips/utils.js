@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import {loadPersistentStateValue, persistItem} from '../../shared/utils/persist'
 import {FlipType} from '../../shared/types'
 import {areSame, areEual} from '../../shared/utils/arr'
-import {submitFlip} from '../../shared/api'
+import {submitFlip} from '../../shared/api/dna'
 import {signNonce} from '../../shared/utils/dna-link'
 import i18n from '../../i18n'
 
@@ -335,3 +335,6 @@ export async function suggestKeywordTranslation({
     desc,
   }
 }
+
+export const colorPickerColor = color =>
+  color.includes('ffffff') ? 'rgb(210 212 217)' : `#${color}`

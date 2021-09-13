@@ -7,14 +7,11 @@ import {
   useToast,
   PopoverTrigger,
   Box,
+  Heading,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {
-  useIdentityState,
-  mapToFriendlyStatus,
-} from '../shared/providers/identity-context'
+import {useIdentityState} from '../shared/providers/identity-context'
 import {useEpochState} from '../shared/providers/epoch-context'
-import {Page, PageTitle} from '../screens/app/components'
 import {
   UserInlineCard,
   SimpleUserStat,
@@ -24,11 +21,12 @@ import {
   SpoilInviteDrawer,
   SpoilInviteForm,
   ActivateInviteForm,
-  ValidationResultToast,
   UserStat,
   UserStatLabel,
   ActivateMiningForm,
   InviteScoreAlert,
+  KillIdentityDrawer,
+  KillForm,
 } from '../screens/profile/components'
 import {
   PrimaryButton,
@@ -36,7 +34,19 @@ import {
   SecondaryButton,
 } from '../shared/components/button'
 import Layout from '../shared/components/layout'
-import {IconLink} from '../shared/components/link'
+import {
+  IconLink,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+  ExternalLink,
+  FloatDebug,
+  Toast,
+  Page,
+  PageTitle,
+  TextLink,
+} from '../shared/components/components'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
 import {
   toPercent,
@@ -46,25 +56,8 @@ import {
   buildNextValidationCalendarLink,
   formatValidationDate,
 } from '../shared/utils/utils'
-import {
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  DialogHeader,
-  ExternalLink,
-  FloatDebug,
-  Toast,
-} from '../shared/components/components'
-import KillForm, {
-  KillIdentityDrawer,
-} from '../screens/wallets/components/kill-form'
-import {
-  shouldExpectValidationResults,
-  hasPersistedValidationResults,
-} from '../screens/validation/utils'
-import {persistItem} from '../shared/utils/persist'
+import {shouldExpectValidationResults} from '../screens/validation/utils'
 import {InviteProvider} from '../shared/providers/invite-context'
-import {rem} from '../shared/theme'
 import {useChainState} from '../shared/providers/chain-context'
 import {
   OnboardingPopover,
@@ -76,6 +69,8 @@ import {onboardingShowingStep} from '../shared/utils/onboarding'
 import {createProfileDb} from '../screens/profile/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 import {useScroll} from '../shared/hooks/use-scroll'
+import {ValidationReportSummary} from '../screens/validation-report/components'
+import {useTotalValidationScore} from '../screens/validation-report/hooks'
 
 export default function ProfilePage() {
   const {
@@ -115,6 +110,7 @@ export default function ProfilePage() {
     delegatee,
     delegationEpoch,
     isValidated,
+    canActivateInvite,
   } = useIdentityState()
 
   const epoch = useEpochState()
@@ -125,23 +121,28 @@ export default function ProfilePage() {
     onClose: onCloseNextValidationDialog,
   } = useDisclosure()
 
+  const profileDb = React.useMemo(() => createProfileDb(epoch), [epoch])
+
   const [showValidationResults, setShowValidationResults] = React.useState()
 
   React.useEffect(() => {
     const epochNumber = epoch?.epoch
     if (epoch && shouldExpectValidationResults(epochNumber)) {
-      if (hasPersistedValidationResults(epochNumber)) {
-        setShowValidationResults(true)
-      } else {
-        persistItem('validationResults', epochNumber, {
-          epochStart: new Date().toISOString(),
+      profileDb
+        .getDidShowValidationResults()
+        .then(seen => {
+          setShowValidationResults(!seen)
         })
-        setShowValidationResults(hasPersistedValidationResults(epochNumber))
-      }
+        .catch(() => {
+          setShowValidationResults(true)
+        })
     }
-  }, [epoch])
+  }, [epoch, profileDb])
 
-  const profileDb = React.useMemo(() => createProfileDb(epoch), [epoch])
+  React.useEffect(() => {
+    if (showValidationResults === false)
+      profileDb.putDidShowValidationResults(1)
+  }, [profileDb, showValidationResults])
 
   React.useEffect(() => {
     if (epoch && isValidated) {
@@ -199,6 +200,8 @@ export default function ProfilePage() {
     scrollToActivateInvite,
   ])
 
+  const totalScore = useTotalValidationScore()
+
   return (
     <>
       <InviteProvider>
@@ -207,6 +210,7 @@ export default function ProfilePage() {
             <Stack spacing={8}>
               <Stack spacing={6}>
                 <PageTitle mb={6}>{t('Profile')}</PageTitle>
+
                 {canInvite && (
                   <InviteScoreAlert
                     epoch={epoch}
@@ -216,9 +220,172 @@ export default function ProfilePage() {
                 )}
               </Stack>
               <Stack isInline spacing={10}>
-                <Stack spacing={6} w="md">
+                <Stack spacing={8} w="md" ref={activateInviteRef}>
                   <UserInlineCard address={address} status={status} h={24} />
-                  <UserStatList>
+
+                  {canActivateInvite && (
+                    <Box>
+                      <OnboardingPopover
+                        isOpen={isOpenActivateInvitePopover}
+                        placement="top-start"
+                      >
+                        <PopoverTrigger>
+                          <Stack
+                            spacing={6}
+                            bg="white"
+                            borderRadius="lg"
+                            boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
+                            px={10}
+                            py={8}
+                            pos="relative"
+                            zIndex="docked"
+                          >
+                            <Stack>
+                              <Heading as="h3" fontWeight={500} fontSize="lg">
+                                {t('Join the upcoming validation')}
+                              </Heading>
+                              <Text color="muted">
+                                {status === IdentityStatus.Invite
+                                  ? t(
+                                      'You have been invited to join the upcoming validation ceremony. Click the button below to accept the invitation.'
+                                    )
+                                  : t(
+                                      'An invitation can be provided by validated participants'
+                                    )}
+                              </Text>
+                            </Stack>
+                            <Box>
+                              <ActivateInviteForm />
+                            </Box>
+                          </Stack>
+                        </PopoverTrigger>
+                        <OnboardingPopoverContent
+                          gutter={10}
+                          title={t('Enter invitation code')}
+                          zIndex={2}
+                          onDismiss={() => {
+                            dismissCurrentTask()
+                            onCloseActivateInvitePopover()
+                          }}
+                        >
+                          <Stack spacing={5}>
+                            <Stack>
+                              <Text>
+                                {t(
+                                  `An invitation can be provided by validated participants.`
+                                )}
+                              </Text>
+                              <Text>
+                                {t(`Join the official Idena public Telegram group and follow instructions in the
+                pinned message.`)}
+                              </Text>
+                              <OnboardingPopoverContentIconRow icon="telegram">
+                                <Box>
+                                  <PrimaryButton
+                                    variant="unstyled"
+                                    p={0}
+                                    py={0}
+                                    h={18}
+                                    onClick={() => {
+                                      global.openExternal(
+                                        'https://t.me/IdenaNetworkPublic'
+                                      )
+                                    }}
+                                  >
+                                    https://t.me/IdenaNetworkPublic
+                                  </PrimaryButton>
+                                  <Text
+                                    fontSize="sm"
+                                    color="rgba(255, 255, 255, 0.56)"
+                                  >
+                                    {t('Official group')}
+                                  </Text>
+                                </Box>
+                              </OnboardingPopoverContentIconRow>
+                            </Stack>
+                          </Stack>
+                        </OnboardingPopoverContent>
+                      </OnboardingPopover>
+                    </Box>
+                  )}
+
+                  {showValidationResults && (
+                    <Box>
+                      <ValidationReportSummary
+                        onClose={() => setShowValidationResults(false)}
+                      />
+                    </Box>
+                  )}
+
+                  {![
+                    IdentityStatus.Undefined,
+                    IdentityStatus.Invite,
+                    IdentityStatus.Candidate,
+                  ].includes(status) && (
+                    <UserStatList title={t('Profile')}>
+                      {age >= 0 && (
+                        <SimpleUserStat label={t('Age')} value={age} />
+                      )}
+
+                      {penalty > 0 && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            "Your node was offline more than 1 hour. The penalty will be charged automatically. Once it's fully paid you'll continue to mine coins."
+                          )}
+                          label={t('Mining penalty')}
+                          value={toDna(penalty)}
+                        />
+                      )}
+
+                      {totalQualifiedFlips > 0 && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            'Total score for the last 10 validations'
+                          )}
+                          label={t('Total score')}
+                        >
+                          <UserStatValue>
+                            {t('{{point}} out of {{flipCount}} ({{score}})', {
+                              point: Math.min(
+                                totalShortFlipPoints,
+                                totalQualifiedFlips
+                              ),
+                              flipCount: totalQualifiedFlips,
+                              score: toPercent(totalScore),
+                            })}
+                          </UserStatValue>
+                          <TextLink href="/validation-report" fontWeight={500}>
+                            {t('View validation report')}
+                          </TextLink>
+                        </AnnotatedUserStat>
+                      )}
+
+                      {stake > 0 && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            'You need to get Verified status to be able to terminate your identity and withdraw the stake'
+                          )}
+                          label={t('Stake')}
+                          value={toDna(
+                            stake *
+                              (status === IdentityStatus.Newbie ? 0.25 : 1)
+                          )}
+                        />
+                      )}
+
+                      {stake > 0 && status === IdentityStatus.Newbie && (
+                        <AnnotatedUserStat
+                          annotation={t(
+                            'You need to get Verified status to get the locked funds into the normal wallet'
+                          )}
+                          label={t('Locked')}
+                          value={toDna(stake * 0.75)}
+                        />
+                      )}
+                    </UserStatList>
+                  )}
+
+                  <UserStatList title={t('Wallets')}>
                     <UserStat>
                       <UserStatLabel>{t('Address')}</UserStatLabel>
                       <UserStatValue>{address}</UserStatValue>
@@ -229,154 +396,29 @@ export default function ProfilePage() {
                       </ExternalLink>
                     </UserStat>
 
-                    {status === IdentityStatus.Newbie ? (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          'Solve more than 12 flips to become Verified'
-                        )}
-                        label={t('Status')}
-                        value={mapToFriendlyStatus(status)}
-                      />
-                    ) : (
-                      <SimpleUserStat
-                        label={t('Status')}
-                        value={mapToFriendlyStatus(status)}
-                      />
-                    )}
-
-                    <SimpleUserStat
-                      label={t('Balance')}
-                      value={toDna(balance)}
-                    />
-
-                    {stake > 0 && status === IdentityStatus.Newbie && (
-                      <Stack spacing={4}>
-                        <AnnotatedUserStat
-                          annotation={t(
-                            'You need to get Verified status to be able to terminate your identity and withdraw the stake'
-                          )}
-                          label={t('Stake')}
-                          value={toDna(stake * 0.25)}
-                        />
-                        <AnnotatedUserStat
-                          annotation={t(
-                            'You need to get Verified status to get the locked funds into the normal wallet'
-                          )}
-                          label={t('Locked')}
-                          value={toDna(stake * 0.75)}
-                        />
-                      </Stack>
-                    )}
-
-                    {stake > 0 && status !== IdentityStatus.Newbie && (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          'In order to withdraw the stake you have to terminate your identity'
-                        )}
-                        label={t('Stake')}
-                        value={toDna(stake)}
-                      />
-                    )}
-
-                    {penalty > 0 && (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          "Your node was offline more than 1 hour. The penalty will be charged automatically. Once it's fully paid you'll continue to mine coins."
-                        )}
-                        label={t('Mining penalty')}
-                        value={toDna(penalty)}
-                      />
-                    )}
-
-                    {age >= 0 && (
-                      <SimpleUserStat label={t('Age')} value={age} />
-                    )}
-
-                    {epoch && (
-                      <SimpleUserStat
-                        label={t('Next validation')}
-                        value={formatValidationDate(epoch.nextValidation)}
-                      />
-                    )}
-
-                    {totalQualifiedFlips > 0 && (
-                      <AnnotatedUserStat
-                        annotation={t(
-                          'Total score for the last 10 validations'
-                        )}
-                        label={t('Total score')}
-                      >
-                        <UserStatValue>
-                          {Math.min(totalShortFlipPoints, totalQualifiedFlips)}{' '}
-                          out of {totalQualifiedFlips} (
-                          {toPercent(
-                            Math.min(
-                              totalShortFlipPoints / totalQualifiedFlips,
-                              1
-                            )
-                          )}
-                          )
-                        </UserStatValue>
-                      </AnnotatedUserStat>
-                    )}
-                  </UserStatList>
-
-                  <OnboardingPopover
-                    isOpen={isOpenActivateInvitePopover}
-                    placement="top-start"
-                  >
-                    <PopoverTrigger>
-                      <Box zIndex={2}>
-                        <ActivateInviteForm ref={activateInviteRef} />
-                      </Box>
-                    </PopoverTrigger>
-                    <OnboardingPopoverContent
-                      title={t('Enter invitation code')}
-                      zIndex={2}
-                      onDismiss={() => {
-                        dismissCurrentTask()
-                        onCloseActivateInvitePopover()
-                      }}
-                    >
-                      <Stack spacing={5}>
-                        <Stack>
-                          <Text>
-                            {t(
-                              `An invitation can be provided by validated participants.`
-                            )}
-                          </Text>
-                          <Text>
-                            {t(`Join the official Idena public Telegram group and follow instructions in the
-                pinned message.`)}
-                          </Text>
-                          <OnboardingPopoverContentIconRow icon="telegram">
-                            <Box>
-                              <PrimaryButton
-                                variant="unstyled"
-                                p={0}
-                                onClick={() => {
-                                  global.openExternal(
-                                    'https://t.me/IdenaNetworkPublic'
-                                  )
-                                }}
-                              >
-                                https://t.me/IdenaNetworkPublic
-                              </PrimaryButton>
-                              <Text
-                                fontSize="sm"
-                                color="rgba(255, 255, 255, 0.56)"
-                              >
-                                {t('Official group')}
-                              </Text>
-                            </Box>
-                          </OnboardingPopoverContentIconRow>
+                    <UserStat>
+                      <UserStatLabel>{t('Balance')}</UserStatLabel>
+                      <UserStatValue>{toDna(balance)}</UserStatValue>
+                      <TextLink href="/wallets">
+                        <Stack
+                          isInline
+                          spacing={0}
+                          align="center"
+                          fontWeight={500}
+                        >
+                          <Text as="span">{t('Send')}</Text>
+                          <Icon
+                            name="chevron-down"
+                            size={4}
+                            transform="rotate(-90deg)"
+                          />
                         </Stack>
-                      </Stack>
-                    </OnboardingPopoverContent>
-                  </OnboardingPopover>
+                      </TextLink>
+                    </UserStat>
+                  </UserStatList>
                 </Stack>
-                <Stack spacing={10} w={rem(200)}>
-                  <Box minH={62} mt={4}>
+                <Stack spacing={10} w={200}>
+                  <Box minH={62} mt={6}>
                     <OnboardingPopover
                       isOpen={eitherOnboardingState(
                         onboardingShowingStep(OnboardingStep.ActivateMining)
@@ -458,6 +500,7 @@ export default function ProfilePage() {
                 </Stack>
               </Stack>
             </Stack>
+
             <KillIdentityDrawer
               address={address}
               isOpen={isOpenKillForm}
@@ -499,10 +542,6 @@ export default function ProfilePage() {
                 }}
               />
             </SpoilInviteDrawer>
-
-            {showValidationResults && (
-              <ValidationResultToast epoch={epoch.epoch} />
-            )}
           </Page>
         </Layout>
       </InviteProvider>

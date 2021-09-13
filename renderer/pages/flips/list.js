@@ -7,7 +7,6 @@ import {
   Alert,
   AlertIcon,
   Image,
-  useToast,
   useDisclosure,
   useTheme,
   PopoverTrigger,
@@ -15,8 +14,7 @@ import {
   Stack,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import {transparentize} from 'polished'
-import {Page, PageTitle} from '../../screens/app/components'
+import dayjs from 'dayjs'
 import {
   FlipCardTitle,
   FlipCardSubtitle,
@@ -37,18 +35,20 @@ import {
   FlipOverlayText,
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
-import {IconLink} from '../../shared/components/link'
+import {
+  IconLink,
+  FloatDebug,
+  Page,
+  PageTitle,
+} from '../../shared/components/components'
 import {
   FlipType,
   IdentityStatus,
   FlipFilter as FlipFilterType,
   OnboardingStep,
 } from '../../shared/types'
-import {FloatDebug} from '../../shared/components/components'
 import {flipsMachine} from '../../screens/flips/machines'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {Notification} from '../../shared/components/notifications'
-import {NotificationType} from '../../shared/providers/notification-context'
 import {loadPersistentState} from '../../shared/utils/persist'
 import {useChainState} from '../../shared/providers/chain-context'
 import Layout from '../../shared/components/layout'
@@ -60,11 +60,10 @@ import {
 } from '../../shared/components/onboarding'
 import {onboardingShowingStep} from '../../shared/utils/onboarding'
 import {eitherState} from '../../shared/utils/utils'
+import {useFailToast} from '../../shared/hooks/use-toast'
 
 export default function FlipListPage() {
   const {t} = useTranslation()
-
-  const toast = useToast()
 
   const {
     isOpen: isOpenDeleteForm,
@@ -91,6 +90,8 @@ export default function FlipListPage() {
     IdentityStatus.Newbie,
   ].includes(status)
 
+  const failToast = useFailToast()
+
   const [current, send] = useMachine(flipsMachine, {
     context: {
       knownFlips: knownFlips || [],
@@ -99,19 +100,7 @@ export default function FlipListPage() {
       canSubmitFlips,
     },
     actions: {
-      onError: (_, {error}) =>
-        toast({
-          title: error,
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-          // eslint-disable-next-line react/display-name
-          render: () => (
-            <Box fontSize="md">
-              <Notification title={error} type={NotificationType.Error} />
-            </Box>
-          ),
-        }),
+      onError: (_, {error}) => failToast(error),
     },
   })
 
@@ -129,7 +118,16 @@ export default function FlipListPage() {
           ].includes(type)
         )
       case FlipType.Draft:
-        return flips.filter(({type}) => type === FlipType.Draft)
+        return flips
+          .filter(({type}) => type === FlipType.Draft)
+          .slice()
+          .sort((d1, d2) =>
+            dayjs(d2.modifiedAt ?? d2.createdAt).isAfter(
+              d1.modifiedAt ?? d1.createdAt
+            )
+              ? 1
+              : -1
+          )
       case FlipType.Archived:
         return flips.filter(({type}) =>
           [FlipType.Archived, FlipType.Deleted].includes(type)
@@ -304,13 +302,9 @@ export default function FlipListPage() {
                           backgroundImage={
                             // eslint-disable-next-line no-nested-ternary
                             flip.type === FlipType.Deleting
-                              ? `linear-gradient(to top, ${
-                                  colors.warning[500]
-                                }, ${transparentize(100, colors.warning[500])})`
+                              ? `linear-gradient(to top, ${colors.warning[500]}, transparent)`
                               : flip.type === FlipType.Invalid
-                              ? `linear-gradient(to top, ${
-                                  colors.red[500]
-                                }, ${transparentize(100, colors.red[500])})`
+                              ? `linear-gradient(to top, ${colors.red[500]}, ${colors.red[500]})`
                               : ''
                           }
                         >

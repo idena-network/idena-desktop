@@ -39,9 +39,34 @@ import {
   InputRightAddon,
   Link,
   Progress as ChakraProgress,
+  Heading,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 import {IconButton2} from './button'
+
+export const Page = React.forwardRef(function Page(props, ref) {
+  return (
+    <Flex
+      ref={ref}
+      flexDirection="column"
+      align="flex-start"
+      flexBasis={0}
+      flexGrow={999}
+      maxH="100vh"
+      minW="50%"
+      px={20}
+      py={6}
+      overflowY="auto"
+      {...props}
+    />
+  )
+})
+
+export function PageTitle(props) {
+  return (
+    <Heading as="h1" fontSize="xl" fontWeight={500} py={2} mb={4} {...props} />
+  )
+}
 
 export function FloatDebug({children, ...props}) {
   return (
@@ -61,7 +86,7 @@ export function Debug({children}) {
 
 export function Drawer({isCloseable = true, children, ...props}) {
   return (
-    <ChakraDrawer closeOnOverlayClick={false} {...props}>
+    <ChakraDrawer {...props}>
       <DrawerOverlay bg="xblack.080" />
       <DrawerContent px={8} py={12} maxW={360}>
         {isCloseable && <DrawerCloseButton />}
@@ -238,6 +263,7 @@ export function Toast({
   onAction,
   ...props
 }) {
+  const {color} = props
   return (
     <Alert
       status={status}
@@ -254,12 +280,18 @@ export function Toast({
       rounded="lg"
       {...props}
     >
-      <AlertIcon name={icon} size={5} />
+      <AlertIcon name={icon} size={5} color={color || 'blue.500'} />
       <Flex direction="column" align="flex-start" maxW="sm">
         <AlertTitle fontWeight={500} lineHeight="base">
           {title}
         </AlertTitle>
-        <AlertDescription color="muted" lineHeight="base" textAlign="left">
+        <AlertDescription
+          color={color || 'muted'}
+          lineHeight="base"
+          textAlign="left"
+          w="full"
+          isTruncated
+        >
           {description}
         </AlertDescription>
       </Flex>
@@ -347,6 +379,25 @@ export function SuccessAlert({children, ...props}) {
   )
 }
 
+export function FailAlert({children, ...props}) {
+  return (
+    <Alert
+      status="error"
+      bg="red.010"
+      borderWidth="1px"
+      borderColor="red.050"
+      fontWeight={500}
+      rounded="md"
+      px={3}
+      py={2}
+      {...props}
+    >
+      <AlertIcon name="info" color="red.500" size={5} mr={3} />
+      {children}
+    </Alert>
+  )
+}
+
 export const VDivider = React.forwardRef(function VDivider(props, ref) {
   return (
     <Divider
@@ -360,10 +411,9 @@ export const VDivider = React.forwardRef(function VDivider(props, ref) {
   )
 })
 
-export const HDivider = React.forwardRef((props, ref) => (
-  <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
-))
-HDivider.displayName = 'HDivider'
+export const HDivider = React.forwardRef(function HDivider(props, ref) {
+  return <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
+})
 
 export function ExternalLink({href, children, ...props}) {
   return (
@@ -415,7 +465,7 @@ export function GoogleTranslateButton({
 export function TextLink({href, children, ...props}) {
   return (
     <NextLink href={href} passHref>
-      <Link href={href} color="blue.500" {...props}>
+      <Link color="blue.500" {...props}>
         {children}
       </Link>
     </NextLink>
@@ -436,4 +486,45 @@ export function Progress(props) {
 
 export function SmallText(props) {
   return <Text color="muted" fontSize="sm" {...props} />
+}
+
+// eslint-disable-next-line react/display-name
+export const IconLink = React.forwardRef(
+  ({href, icon, children, ...props}, ref) => (
+    <NextLink ref={ref} href={href} passHref>
+      <Link
+        href={href}
+        color="brandBlue.500"
+        rounded="md"
+        fontWeight={500}
+        display="inline-block"
+        h={8}
+        px={2}
+        py="3/2"
+        _hover={{
+          bg: 'blue.50',
+        }}
+        {...props}
+      >
+        <Stack spacing={2} isInline align="center">
+          {typeof icon === 'string' ? <Icon name={icon} size={4} /> : icon}
+          <Text as="span">{children}</Text>
+        </Stack>
+      </Link>
+    </NextLink>
+  )
+)
+
+export function Snackbar(props) {
+  return (
+    <Flex
+      justify="center"
+      position="absolute"
+      bottom={0}
+      left={0}
+      right={0}
+      zIndex="toast"
+      {...props}
+    />
+  )
 }

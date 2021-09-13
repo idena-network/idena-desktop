@@ -11,15 +11,6 @@ export async function sendInvite({to, amount}) {
   return data
 }
 
-export async function activateInvite(to, key) {
-  const {data} = await api().post('/', {
-    method: 'dna_activateInvite',
-    params: [strip({to, key})],
-    id: 1,
-  })
-  return data
-}
-
 export async function fetchIdentities() {
   const {data} = await api().post('/', {
     method: 'dna_identities',

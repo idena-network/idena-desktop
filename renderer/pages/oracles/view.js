@@ -20,7 +20,6 @@ import {useRouter} from 'next/router'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import duration from 'dayjs/plugin/duration'
-import {Page} from '../../screens/app/components'
 import {
   Avatar,
   FloatDebug,
@@ -34,8 +33,8 @@ import {
   DialogFooter,
   DialogBody,
   SmallText,
+  Page,
 } from '../../shared/components/components'
-import {rem} from '../../shared/theme'
 import {
   PrimaryButton,
   IconButton2,
@@ -81,7 +80,7 @@ import {
   TableCol,
   TableHeaderCol,
   TableRow,
-} from '../../shared/components'
+} from '../../shared/components/table'
 import {
   ContractTransactionType,
   ContractCallMethod,
@@ -160,6 +159,7 @@ export default function ViewVotingPage() {
     estimatedTerminationTime,
     minOracleReward,
     estimatedTotalReward,
+    epochWithoutGrowth,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -177,24 +177,30 @@ export default function ViewVotingPage() {
 
   const didDetermineWinner = hasWinner({
     votes,
-    votesCount,
+    votesCount: voteProofsCount,
     winnerThreshold,
     quorum,
     committeeSize,
     finishCountingDate,
   })
 
-  const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
+  const didReachQuorum = hasQuorum({
+    votesCount: voteProofsCount,
+    quorum,
+    committeeSize,
+  })
 
   const canFinish =
     didDetermineWinner ||
     (dayjs().isAfter(finishCountingDate) && didReachQuorum)
 
   const canProlong =
-    committeeEpoch !== epoch ||
-    (!didDetermineWinner &&
-      !didReachQuorum &&
-      dayjs().isAfter(finishCountingDate))
+    epochWithoutGrowth < 3 &&
+    (committeeEpoch !== epoch ||
+      (!didDetermineWinner &&
+        !didReachQuorum &&
+        dayjs().isAfter(finishCountingDate)) ||
+      (!didReachQuorum && dayjs().isAfter(finishDate)))
 
   const shouldTerminate = isAllowedToTerminate({estimatedTerminationTime})
 
@@ -252,7 +258,7 @@ export default function ViewVotingPage() {
                       <Stack spacing={4}>
                         <Heading
                           overflow="hidden"
-                          fontSize={rem(21)}
+                          fontSize={21}
                           fontWeight={500}
                           display="-webkit-box"
                           style={{
@@ -923,8 +929,7 @@ export default function ViewVotingPage() {
       <TerminateDrawer
         isOpen={eitherState(
           current,
-          `idle.${VotingStatus.Archived}.terminate`,
-          `idle.${VotingStatus.Counting}.terminate`,
+          `idle.terminating`,
           `mining.${VotingStatus.Terminating}`
         )}
         onClose={() => {

@@ -1088,7 +1088,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
                 idle: {
                   on: {
                     FINISH: 'finish',
-                    TERMINATE: 'terminate',
                   },
                 },
                 finish: {
@@ -1099,41 +1098,22 @@ export const createViewVotingMachine = (id, epoch, address) =>
                     },
                   },
                 },
-                terminate: {
-                  on: {
-                    TERMINATE: {
-                      target: `#viewVoting.mining.${VotingStatus.Terminating}`,
-                      actions: ['setTerminating', 'persist'],
-                    },
-                  },
-                },
               },
               on: {
                 CANCEL: '.idle',
               },
             },
-            [VotingStatus.Archived]: {
-              initial: 'idle',
-              states: {
-                idle: {
-                  on: {
-                    TERMINATE: 'terminate',
-                  },
-                },
-                terminate: {
-                  on: {
-                    TERMINATE: {
-                      target: `#viewVoting.mining.${VotingStatus.Terminating}`,
-                      actions: ['setTerminating', 'persist'],
-                    },
-                  },
-                },
-              },
-              on: {
-                CANCEL: '.idle',
-              },
-            },
+            [VotingStatus.Archived]: {},
             [VotingStatus.Terminated]: {},
+            terminating: {
+              on: {
+                TERMINATE: {
+                  target: `#viewVoting.mining.${VotingStatus.Terminating}`,
+                  actions: ['setTerminating', 'persist'],
+                },
+                CANCEL: 'hist',
+              },
+            },
             redirecting: {
               entry: [
                 assign({
@@ -1174,6 +1154,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
                 target: 'review',
               },
             ],
+            TERMINATE: '.terminating',
             REFRESH: 'loading',
             ERROR: {
               actions: ['onError'],
@@ -1264,7 +1245,9 @@ export const createViewVotingMachine = (id, epoch, address) =>
       services: {
         // eslint-disable-next-line no-shadow
         loadVoting: async ({epoch, address, id}) => ({
-          ...(await epochDb('votings', epoch).load(id)),
+          ...(await epochDb('votings', epoch)
+            .load(id)
+            .catch(() => null)),
           ...mapVoting(await fetchVoting({id, address})),
           id,
           balanceUpdates: await fetchContractBalanceUpdates({

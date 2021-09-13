@@ -11,7 +11,6 @@ import {
   Text,
   Box,
   Flex,
-  Textarea,
   Button,
   RadioButtonGroup,
   Radio,
@@ -22,10 +21,8 @@ import {
   AlertIcon,
   AlertDescription,
   useToast,
-  Spinner,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
-import dayjs from 'dayjs'
 import {useMachine} from '@xstate/react'
 import {
   Avatar,
@@ -38,28 +35,14 @@ import {
   Toast,
   SuccessAlert,
 } from '../../shared/components/components'
-import {rem} from '../../shared/theme'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
   mapToFriendlyStatus,
+  useIdentity,
   useIdentityState,
 } from '../../shared/providers/identity-context'
 import {IdentityStatus, NodeType} from '../../shared/types'
-import {
-  useNotificationDispatch,
-  NotificationType,
-} from '../../shared/providers/notification-context'
-import {
-  useInviteState,
-  useInviteDispatch,
-} from '../../shared/providers/invite-context'
-import {Notification, Snackbar} from '../../shared/components/notifications'
-import {
-  loadPersistentState,
-  loadPersistentStateValue,
-} from '../../shared/utils/persist'
-import {createTimerMachine} from '../../shared/machines'
-import {usePersistence} from '../../shared/hooks/use-persistent-state'
+import {useInvite} from '../../shared/providers/invite-context'
 import {activateMiningMachine} from './machines'
 import {
   calculateInvitationRewardRatio,
@@ -68,6 +51,7 @@ import {
   toPercent,
 } from '../../shared/utils/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
+import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
 
 export function UserInlineCard({address, status, ...props}) {
   return (
@@ -91,9 +75,16 @@ export function UserInlineCard({address, status, ...props}) {
   )
 }
 
-export function UserStatList(props) {
+export function UserStatList({title, children, ...props}) {
   return (
-    <Stack spacing={4} bg="gray.50" px={10} py={8} rounded="lg" {...props} />
+    <Stack spacing={4} {...props}>
+      <Heading as="h4" fontSize="lg" fontWeight={500}>
+        {title}
+      </Heading>
+      <Stack spacing={4} bg="gray.50" px={10} py={8} rounded="lg">
+        {children}
+      </Stack>
+    </Stack>
   )
 }
 
@@ -155,18 +146,13 @@ export function UserStatLabelTooltip(props) {
 export const ActivateInviteForm = React.forwardRef((props, ref) => {
   const {t} = useTranslation()
 
-  const {addError} = useNotificationDispatch()
+  const failToast = useFailToast()
 
-  const {activationTx} = useInviteState()
-  const {activateInvite} = useInviteDispatch()
+  const [{activationTx}, {activateInvite}] = useInvite()
 
-  const {canActivateInvite, state: status} = useIdentityState()
+  const {state: status} = useIdentityState()
 
   const [code, setCode] = React.useState()
-
-  if (!canActivateInvite) {
-    return null
-  }
 
   const mining = !!activationTx
 
@@ -179,60 +165,63 @@ export const ActivateInviteForm = React.forwardRef((props, ref) => {
         try {
           await activateInvite(code?.trim())
         } catch ({message}) {
-          addError({
-            title: message,
-          })
+          failToast(
+            // eslint-disable-next-line no-nested-ternary
+            message.includes('missing')
+              ? t('Invitation code is not valid')
+              : message.includes('validation ceremony')
+              ? t('Can not activate invitation since the validation is running')
+              : message
+          )
         }
       }}
       {...props}
     >
       <Stack spacing={6}>
-        <FormControl>
-          <Stack spacing={2}>
-            <Flex justify="space-between" align="center">
-              <FormLabel htmlFor="code" color="muted">
-                {t('Invitation code')}
-              </FormLabel>
-              <Button
-                variant="ghost"
+        {status === IdentityStatus.Undefined && (
+          <FormControl>
+            <Stack spacing={3}>
+              <Flex justify="space-between" align="center">
+                <FormLabel htmlFor="code" p={0}>
+                  {t('Invitation code')}
+                </FormLabel>
+                <Button
+                  variant="ghost"
+                  isDisabled={mining || status === IdentityStatus.Invite}
+                  bg="unset"
+                  color="muted"
+                  fontWeight={500}
+                  h="unset"
+                  p={0}
+                  _hover={{bg: 'unset'}}
+                  _active={{bg: 'unset'}}
+                  _focus={{boxShadow: 'none'}}
+                  onClick={() => setCode(global.clipboard.readText())}
+                >
+                  {t('Paste')}
+                </Button>
+              </Flex>
+              <Input
+                id="code"
+                value={code}
                 isDisabled={mining || status === IdentityStatus.Invite}
-                bg="unset"
-                color="muted"
-                h="unset"
-                p={0}
-                _hover={{bg: 'unset'}}
-                _active={{bg: 'unset'}}
-                _focus={{boxShadow: 'none'}}
-                onClick={() => setCode(global.clipboard.readText())}
-              >
-                {t('Paste')}
-              </Button>
-            </Flex>
-            <Textarea
-              id="code"
-              value={code}
-              borderColor="gray.300"
-              px={3}
-              pt="3/2"
-              pb={2}
-              isDisabled={mining || status === IdentityStatus.Invite}
-              minH={rem(50)}
-              placeholder={
-                status === IdentityStatus.Invite
-                  ? 'Click the button to activate invitation'
-                  : ''
-              }
-              resize="none"
-              _disabled={{
-                bg: 'gray.50',
-              }}
-              _placeholder={{
-                color: 'muted',
-              }}
-              onChange={e => setCode(e.target.value)}
-            />
-          </Stack>
-        </FormControl>
+                placeholder={
+                  status === IdentityStatus.Invite
+                    ? 'Click the button to activate invitation'
+                    : ''
+                }
+                resize="none"
+                _disabled={{
+                  bg: 'gray.50',
+                }}
+                _placeholder={{
+                  color: 'muted',
+                }}
+                onChange={e => setCode(e.target.value)}
+              />
+            </Stack>
+          </FormControl>
+        )}
         <PrimaryButton
           isLoading={mining}
           loadingText={t('Mining...')}
@@ -300,87 +289,6 @@ export function SpoilInviteForm({onSpoil}) {
       </PrimaryButton>
     </Stack>
   )
-}
-
-export function ValidationResultToast({epoch}) {
-  const timerMachine = React.useMemo(
-    () =>
-      createTimerMachine(
-        dayjs(loadPersistentStateValue('validationResults', epoch)?.epochStart)
-          .add(1, 'minute')
-          .diff(dayjs(), 'second')
-      ),
-    [epoch]
-  )
-  const [current] = useMachine(timerMachine)
-
-  const [state, dispatch] = usePersistence(
-    React.useReducer(
-      (prevState, seen) => ({
-        ...prevState,
-        [epoch]: {
-          ...prevState[epoch],
-          seen,
-        },
-      }),
-      loadPersistentState('validationResults') || {}
-    ),
-    'validationResults'
-  )
-
-  const {address, state: identityStatus} = useIdentityState()
-
-  const isValidationSucceeded = [
-    IdentityStatus.Newbie,
-    IdentityStatus.Verified,
-    IdentityStatus.Human,
-  ].includes(identityStatus)
-
-  const {t} = useTranslation()
-
-  const url = `https://scan.idena.io/identity/${address}/epoch/${epoch}/${
-    isValidationSucceeded ? 'rewards' : 'validation'
-  }`
-
-  const notSeen =
-    typeof state[epoch] === 'boolean'
-      ? !state[epoch]
-      : state[epoch] && !state[epoch].seen
-
-  return notSeen ? (
-    <Snackbar>
-      {current.matches('running') && (
-        <Notification
-          pinned
-          type={NotificationType.Info}
-          icon={
-            <Flex align="center" justify="center" h={5} w={5} mr={3}>
-              <Box style={{transform: 'scale(0.35) translateY(-10px)'}}>
-                <Spinner size={5} color="blue.500" />
-              </Box>
-            </Flex>
-          }
-          title={t('Please wait for the validation report')}
-        />
-      )}
-      {current.matches('stopped') && (
-        <Notification
-          pinned
-          type={NotificationType.Info}
-          title={
-            isValidationSucceeded
-              ? t('See your validation rewards in the blockchain explorer')
-              : t('See your validation results in the blockchain explorer')
-          }
-          action={() => {
-            dispatch(true)
-            global.openExternal(url)
-          }}
-          actionName={t('Open')}
-        />
-      )}
-    </Snackbar>
-  ) : null
 }
 
 export function ActivateMiningForm({
@@ -783,4 +691,121 @@ export function InviteScoreAlert({
       )}
     </SuccessAlert>
   ) : null
+}
+
+export function KillIdentityDrawer({address, children, ...props}) {
+  const {t} = useTranslation()
+
+  return (
+    <Drawer {...props}>
+      <DrawerHeader mb={6}>
+        <Avatar address={address} mx="auto" />
+        <Heading
+          fontSize="lg"
+          fontWeight={500}
+          color="brandGray.500"
+          mt={4}
+          mb={0}
+          textAlign="center"
+        >
+          {t('Terminate identity')}
+        </Heading>
+      </DrawerHeader>
+      <DrawerBody>
+        <Text fontSize="md" mb={6}>
+          {t(`Terminate your identity and withdraw the stake. Your identity status
+            will be reset to 'Not validated'.`)}
+        </Text>
+        {children}
+      </DrawerBody>
+    </Drawer>
+  )
+}
+
+export function KillForm({onSuccess, onFail}) {
+  const {t} = useTranslation(['translation', 'error'])
+
+  const [{address, stake}, {killMe}] = useIdentity()
+
+  const toastSuccess = useSuccessToast()
+  const toastFail = useFailToast()
+
+  const [submitting, setSubmitting] = React.useState(false)
+
+  return (
+    <Stack
+      as="form"
+      spacing={6}
+      onSubmit={async e => {
+        e.preventDefault()
+
+        try {
+          const to = e.target.elements.to.value
+
+          if (to !== address)
+            throw new Error(t('You must specify your own identity address'))
+
+          setSubmitting(true)
+
+          const {result, error} = await killMe({to})
+
+          setSubmitting(false)
+
+          if (error) {
+            toastFail({
+              title: t('Error while sending transaction'),
+              description: error.message,
+            })
+          } else {
+            toastSuccess(t('Transaction sent'))
+            if (onSuccess) onSuccess(result)
+          }
+        } catch (error) {
+          setSubmitting(false)
+          toastFail(error?.message ?? t('Something went wrong'))
+          if (onFail) onFail(error)
+        }
+      }}
+    >
+      <FormControl>
+        <FormLabel htmlFor="stake">{t('Withdraw stake, iDNA')}</FormLabel>
+        <Input
+          id="stake"
+          value={stake}
+          isDisabled
+          _disabled={{
+            bg: 'gray.50',
+          }}
+        />
+      </FormControl>
+
+      <Text fontSize="md" mb={6}>
+        {t(
+          'Please enter your identity address to confirm termination. Stake will be transferred to the identity address.'
+        )}
+      </Text>
+      <FormControl>
+        <FormLabel htmlFor="to">{t('Address')}</FormLabel>
+        <Input id="to" placeholder={t('Your identity address')} />
+      </FormControl>
+
+      <PrimaryButton
+        ml="auto"
+        type="submit"
+        isLoading={submitting}
+        variantColor="red"
+        _hover={{
+          bg: 'rgb(227 60 60)',
+        }}
+        _active={{
+          bg: 'rgb(227 60 60)',
+        }}
+        _focus={{
+          boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
+        }}
+      >
+        {t('Terminate')}
+      </PrimaryButton>
+    </Stack>
+  )
 }

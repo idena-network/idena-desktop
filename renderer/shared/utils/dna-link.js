@@ -1,6 +1,6 @@
 import axios from 'axios'
 import apiClient from '../api/api-client'
-import {sendTransaction} from '../api'
+import {sendTransaction} from '../api/dna'
 import {bufferToHex} from './string'
 import messages from '../proto/models_pb'
 import {toBuffer, hexToUint8Array, toHexString, bufferToInt} from './buffers'

@@ -19,13 +19,14 @@ import {
   useTheme,
   useToast,
   Alert,
+  Link,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import semver from 'semver'
 import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
+import NextLink from 'next/link'
 import Sidebar from './sidebar'
-import Notifications, {Snackbar} from './notifications'
 import {useDebounce} from '../hooks/use-debounce'
 import {useEpochState} from '../providers/epoch-context'
 import {shouldStartValidation} from '../../screens/validation/utils'
@@ -37,17 +38,12 @@ import {
   DnaLinkHandler,
   DnaRawTxDialog,
 } from './dna-link'
-import {useNotificationDispatch} from '../providers/notification-context'
 import {ValidationToast} from '../../screens/validation/components'
 import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
 } from '../providers/update-context'
 import {PrimaryButton, SecondaryButton} from './button'
-import {
-  LayoutContainer,
-  UpdateExternalNodeDialog,
-} from '../../screens/app/components'
 import {FillCenter} from '../../screens/oracles/components'
 import {
   Avatar,
@@ -68,10 +64,10 @@ import {
   shouldShowUpcomingValidationNotification,
   showWindowNotification,
 } from '../utils/utils'
-import {useTimingState} from '../providers/timing-context'
 import {useChainState} from '../providers/chain-context'
 import {useNode} from '../providers/node-context'
 import {useSettings} from '../providers/settings-context'
+import {useFailToast, useSuccessToast} from '../hooks/use-toast'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -115,7 +111,7 @@ export default function Layout({
     }
   }, [zoomLevel])
 
-  const {addError} = useNotificationDispatch()
+  const failToast = useFailToast()
 
   const {nodeRemoteVersion, mustUpdateNode} = useAutoUpdateState()
   const {updateNode, onRejectHardFork} = useAutoUpdateDispatch()
@@ -148,11 +144,7 @@ export default function Layout({
             <DnaLinkHandler>
               <DnaSignInDialog
                 isOpen={url => new URL(url).pathname.includes('signin')}
-                onSigninError={error =>
-                  addError({
-                    title: error,
-                  })
-                }
+                onSigninError={failToast}
               />
             </DnaLinkHandler>
           )}
@@ -163,6 +155,19 @@ export default function Layout({
   )
 }
 
+function LayoutContainer(props) {
+  return (
+    <Flex
+      align="stretch"
+      flexWrap="wrap"
+      color="brand.gray"
+      fontSize="md"
+      minH="100vh"
+      {...props}
+    />
+  )
+}
+
 function NormalApp({children}) {
   const {t} = useTranslation()
 
@@ -170,7 +175,6 @@ function NormalApp({children}) {
 
   const epoch = useEpochState()
   const identity = useIdentityState()
-  const {wrongClientTime} = useTimingState()
 
   React.useEffect(() => {
     if (shouldStartValidation(epoch, identity)) router.push('/validation')
@@ -204,7 +208,8 @@ function NormalApp({children}) {
     persistItem('validationNotification', 'epoch', newEpoch)
   }, [epoch, validationNotificationEpoch, setValidationNotificationEpoch, t])
 
-  const {addNotification, addError} = useNotificationDispatch()
+  const successToast = useSuccessToast()
+  const failToast = useFailToast()
 
   return (
     <Flex as="section" direction="column" flex={1} h="100vh" overflowY="auto">
@@ -212,56 +217,28 @@ function NormalApp({children}) {
 
       {epoch && <ValidationToast epoch={epoch} identity={identity} />}
 
-      {wrongClientTime && (
-        <Snackbar>
-          <Toast
-            status="error"
-            title={t('Please check your local time')}
-            description={t(
-              'The time must be synchronized with internet time for the successful validation'
-            )}
-            actionContent={t('Check')}
-            w="md"
-            mx="auto"
-            onAction={() => {
-              global.openExternal('https://time.is/')
-            }}
-          />
-        </Snackbar>
-      )}
-
-      <Notifications />
-
       <DnaLinkHandler>
         <DnaSendDialog
           isOpen={url => new URL(url).pathname.includes('send')}
           onDepositSuccess={hash =>
-            addNotification({
+            successToast({
               title: t('Transaction sent'),
-              body: hash,
+              description: hash,
             })
           }
-          onDepositError={error =>
-            addError({
-              title: error,
-            })
-          }
+          onDepositError={failToast}
         />
       </DnaLinkHandler>
       <DnaLinkHandler>
         <DnaRawTxDialog
           isOpen={url => new URL(url).pathname.includes('raw')}
           onSendSuccess={hash =>
-            addNotification({
+            successToast({
               title: t('Transaction sent'),
-              body: hash,
+              description: hash,
             })
           }
-          onSendError={error =>
-            addError({
-              title: error,
-            })
-          }
+          onSendError={failToast}
         />
       </DnaLinkHandler>
     </Flex>
@@ -272,8 +249,6 @@ function SyncingApp() {
   const {t} = useTranslation()
 
   const {currentBlock, highestBlock, genesisBlock, wrongTime} = useChainState()
-
-  const {wrongClientTime} = useTimingState()
 
   const {address} = useIdentityState()
 
@@ -295,7 +270,7 @@ function SyncingApp() {
         },
         done: {
           after: {
-            3000: 'loading',
+            5000: 'loading',
           },
         },
       },
@@ -340,9 +315,12 @@ function SyncingApp() {
                 {highestBlock ? (
                   <>
                     {t('{{numBlocks}} blocks left', {
-                      numBlocks:
-                        highestBlock - currentBlock &&
-                        (highestBlock - currentBlock).toLocaleString(),
+                      numBlocks: Number.isNaN(highestBlock - currentBlock)
+                        ? '...'
+                        : Math.max(
+                            highestBlock - currentBlock,
+                            0
+                          ).toLocaleString(),
                     })}{' '}
                     (
                     {t('{{currentBlock}} out of {{highestBlock}}', {
@@ -386,24 +364,6 @@ function SyncingApp() {
           </Alert>
         )}
       </Stack>
-
-      {wrongClientTime && (
-        <Snackbar>
-          <Toast
-            status="error"
-            title={t('Please check your local time')}
-            description={t(
-              'The time must be synchronized with internet time for the successful validation'
-            )}
-            actionContent={t('Check')}
-            w="md"
-            mx="auto"
-            onAction={() => {
-              global.openExternal('https://time.is/')
-            }}
-          />
-        </Snackbar>
-      )}
     </FillCenter>
   )
 }
@@ -628,8 +588,8 @@ function HardForkScreen({version, onUpdate, onReject}) {
               return {
                 changes: forkChangelog?.Changes ?? [],
                 didActivateFork:
-                  currentVersionChangelog === null ||
-                  highestUpgrade >= currentVersionChangelog.Upgrade,
+                  forkChangelog === null ||
+                  highestUpgrade >= forkChangelog.Upgrade,
                 ...nextTiming,
               }
             },
@@ -916,5 +876,36 @@ function HardForkScreen({version, onUpdate, onReject}) {
         </DialogFooter>
       </Dialog>
     </>
+  )
+}
+
+function UpdateExternalNodeDialog() {
+  const {showExternalUpdateModal} = useAutoUpdateState()
+  const {hideExternalNodeUpdateModal} = useAutoUpdateDispatch()
+
+  const {t} = useTranslation()
+
+  return (
+    <Dialog
+      isOpen={showExternalUpdateModal}
+      onClose={hideExternalNodeUpdateModal}
+    >
+      <DialogHeader>{t('Cannot update remote node')}</DialogHeader>
+      <DialogBody>
+        <Text>
+          Please, run built-in at the{' '}
+          <NextLink href="/settings/node" passHref>
+            <Link onClick={hideExternalNodeUpdateModal}>settings</Link>
+          </NextLink>{' '}
+          page to enjoy automatic updates.
+        </Text>
+        <Text>{t('Otherwise, please update your remote node manually.')}</Text>
+      </DialogBody>
+      <DialogFooter>
+        <PrimaryButton onClick={hideExternalNodeUpdateModal}>
+          {t('Okay, got it')}
+        </PrimaryButton>
+      </DialogFooter>
+    </Dialog>
   )
 }

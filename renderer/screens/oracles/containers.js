@@ -50,6 +50,7 @@ import {
   DialogHeader,
   Drawer,
   DrawerBody,
+  DrawerFooter,
   DrawerHeader,
   FormLabel,
   Input,
@@ -318,7 +319,7 @@ export function VotingCard({votingRef, ...props}) {
                   name={
                     hasWinner({
                       votes,
-                      votesCount,
+                      votesCount: voteProofsCount,
                       winnerThreshold,
                       quorum,
                       committeeSize,
@@ -488,48 +489,50 @@ export function VoteDrawer({
       <OracleDrawerHeader icon="send-out" variantColor="blue">
         {t('Voting')}: {option}
       </OracleDrawerHeader>
-      <OracleDrawerBody>
-        <OracleFormControl label={t('Transfer from')}>
-          <Input defaultValue={from} isDisabled />
-          <OracleFormHelper label={t('Available')} value={toDna(balance)} />
-        </OracleFormControl>
-        <OracleFormControl label="To address">
-          <Input isDisabled value={to} />
-        </OracleFormControl>
-        <OracleFormControl label={t('Voting Deposit, iDNA')}>
-          <Input isDisabled value={deposit} />
-        </OracleFormControl>
-        <Stack spacing={2} bg="gray.50" borderRadius="md" py={5} px={6}>
-          <OracleFormHelperSmall
-            label={t('Vote counting')}
-            value={t('About {{duration}}', {
-              duration: humanizeDuration(publicVotingDuration),
-            })}
-          />
-          <OracleFormHelperSmall
-            label={t('Start counting')}
-            value={new Date(finishDate).toLocaleString()}
-          />
-          <OracleFormHelperSmall
-            label={t('End counting')}
-            value={new Date(finishCountingDate).toLocaleString()}
-          />
-        </Stack>
-        <OracleFormHelperText mt={0}>
-          {t(
-            'To get a reward for the voting you must be online at least once during the period of vote counting'
-          )}
-        </OracleFormHelperText>
+      <Box flex={1} overflowY="auto" mx={-30} px={30}>
+        <OracleDrawerBody>
+          <OracleFormControl label={t('Transfer from')}>
+            <Input defaultValue={from} isDisabled />
+            <OracleFormHelper label={t('Available')} value={toDna(balance)} />
+          </OracleFormControl>
+          <OracleFormControl label="To address">
+            <Input isDisabled value={to} />
+          </OracleFormControl>
+          <OracleFormControl label={t('Voting Deposit, iDNA')}>
+            <Input isDisabled value={deposit} />
+          </OracleFormControl>
+          <Stack spacing={2} bg="gray.50" borderRadius="md" py={5} px={6}>
+            <OracleFormHelperSmall
+              label={t('Vote counting')}
+              value={t('About {{duration}}', {
+                duration: humanizeDuration(publicVotingDuration),
+              })}
+            />
+            <OracleFormHelperSmall
+              label={t('Start counting')}
+              value={new Date(finishDate).toLocaleString()}
+            />
+            <OracleFormHelperSmall
+              label={t('End counting')}
+              value={new Date(finishCountingDate).toLocaleString()}
+            />
+          </Stack>
+          <OracleFormHelperText mt={0}>
+            {t(
+              'To get a reward for the voting you must be online at least once during the period of vote counting'
+            )}
+          </OracleFormHelperText>
+        </OracleDrawerBody>
+      </Box>
+      <DrawerFooter>
         <PrimaryButton
-          mt={3}
-          ml="auto"
           isLoading={isLoading}
           loadingText={t('Publishing')}
           onClick={onVote}
         >
           {t('Send')}
         </PrimaryButton>
-      </OracleDrawerBody>
+      </DrawerFooter>
     </Drawer>
   )
 }
@@ -957,7 +960,7 @@ export function VotingResult({votingService, ...props}) {
   const {
     options,
     votes = options.map(({id}) => ({option: id, count: 0})),
-    votesCount,
+    voteProofsCount,
     winnerThreshold,
     committeeSize,
     quorum,
@@ -967,7 +970,7 @@ export function VotingResult({votingService, ...props}) {
 
   const didDetermineWinner = hasWinner({
     votes,
-    votesCount,
+    votesCount: voteProofsCount,
     winnerThreshold,
     quorum,
     committeeSize,
@@ -989,7 +992,7 @@ export function VotingResult({votingService, ...props}) {
             isMine={id === selectedOption}
             didVote={selectedOption > -1}
             isWinner={didDetermineWinner && currentValue === max}
-            votesCount={votesCount}
+            votesCount={voteProofsCount}
           />
         )
       })}
@@ -1233,6 +1236,7 @@ export function VotingPhase({service}) {
     finishCountingDate,
     votes = [],
     votesCount,
+    voteProofsCount,
     winnerThreshold,
     quorum,
     committeeSize,
@@ -1246,7 +1250,7 @@ export function VotingPhase({service}) {
 
   const didDetermineWinner = hasWinner({
     votes,
-    votesCount,
+    votesCount: voteProofsCount,
     winnerThreshold,
     quorum,
     committeeSize,

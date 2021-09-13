@@ -9,15 +9,6 @@ import {strip} from '../utils/obj'
  */
 export async function fetchAccountList(address) {
   return [{address}, {address, isStake: true}]
-  /*
-  const {data} = await api().post('/', {
-    method: `account_list`,
-    params: [],
-    id: 1,
-  })
-  const {result} = data
-  return result
-  */
 }
 
 /**

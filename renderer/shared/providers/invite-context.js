@@ -1,11 +1,12 @@
-/* eslint-disable no-use-before-define */
+/* eslint-disable react/prop-types */
 import React from 'react'
-import * as api from '../api'
 import {useInterval} from '../hooks/use-interval'
 import {HASH_IN_MEMPOOL, callRpc} from '../utils/utils'
-import {useNotificationDispatch, NotificationType} from './notification-context'
 import {useIdentityState} from './identity-context'
 import {IdentityStatus} from '../types'
+import {fetchIdentity, killInvitee, sendInvite} from '../api/dna'
+import {useFailToast} from '../hooks/use-toast'
+import {strip} from '../utils/obj'
 
 const db = global.invitesDb || {}
 
@@ -14,14 +15,11 @@ const killableIdentities = [IdentityStatus.Newbie, IdentityStatus.Candidate]
 const InviteStateContext = React.createContext()
 const InviteDispatchContext = React.createContext()
 
-// eslint-disable-next-line react/prop-types
-function InviteProvider({children}) {
+export function InviteProvider({children}) {
   const [invites, setInvites] = React.useState([])
   const [activationTx, setActivationTx] = React.useState()
-  const [activationCode, setActivationCode] = React.useState()
 
   const {address, invitees} = useIdentityState()
-  const {addNotification} = useNotificationDispatch()
 
   React.useEffect(() => {
     let ignore = false
@@ -39,11 +37,11 @@ function InviteProvider({children}) {
         savedInvites
           .filter(({deletedAt}) => !deletedAt)
           .map(({receiver}) => receiver)
-          .map(api.fetchIdentity)
+          .map(fetchIdentity)
       )
 
       const inviteesIdentities = await Promise.all(
-        (invitees ?? []).map(({Address}) => Address).map(api.fetchIdentity)
+        (invitees ?? []).map(({Address}) => Address).map(fetchIdentity)
       )
 
       const terminateTxs = await Promise.all(
@@ -125,26 +123,27 @@ function InviteProvider({children}) {
     })
 
     setActivationTx(db.getActivationTx())
-    setActivationCode(db.getActivationCode())
 
     return () => {
       ignore = true
     }
   }, [invitees])
 
+  const failToast = useFailToast()
+
   useInterval(
     async () => {
+      function resetActivation() {
+        setActivationTx('')
+        db.clearActivationTx()
+      }
+
       try {
         const {blockHash} = await callRpc('bcn_transaction', activationTx)
         if (blockHash !== HASH_IN_MEMPOOL) resetActivation()
       } catch (error) {
         resetActivation()
-        addNotification({
-          title: error
-            ? error.message
-            : 'Activation failed. Tx no longer exists',
-          type: NotificationType.Error,
-        })
+        failToast(error?.message ?? 'Activation failed. Tx no longer exists')
       }
     },
     activationTx ? 1000 * 10 : null
@@ -229,7 +228,7 @@ function InviteProvider({children}) {
   )
 
   const addInvite = async (to, amount, firstName = '', lastName = '') => {
-    const {result, error} = await api.sendInvite({to, amount})
+    const {result, error} = await sendInvite({to, amount})
     if (result) {
       const issuedInvite = {
         amount,
@@ -282,7 +281,7 @@ function InviteProvider({children}) {
   }
 
   const killInvite = async (id, from, to) => {
-    const {result, error} = await api.killInvitee(from, to)
+    const {result, error} = await killInvitee(from, to)
 
     if (result) {
       setInvites(
@@ -324,30 +323,16 @@ function InviteProvider({children}) {
   }
 
   const activateInvite = async code => {
-    const {result, error} = await api.activateInvite(address, code)
-    if (result) {
-      setActivationTx(result)
-      db.setActivationTx(result)
-      if (code) {
-        setActivationCode(code)
-        db.setActivationCode(code)
-      }
-    } else {
-      throw new Error(error.message)
-    }
-  }
-
-  const resetActivation = () => {
-    setActivationTx('')
-    db.clearActivationTx()
-    setActivationCode('')
-    db.clearActivationCode()
+    const result = await callRpc(
+      'dna_activateInvite',
+      strip({to: address, key: code})
+    )
+    setActivationTx(result)
+    db.setActivationTx(result)
   }
 
   return (
-    <InviteStateContext.Provider
-      value={{invites, activationTx, activationCode}}
-    >
+    <InviteStateContext.Provider value={{invites, activationTx}}>
       <InviteDispatchContext.Provider
         value={{
           addInvite,
@@ -355,7 +340,6 @@ function InviteProvider({children}) {
           deleteInvite,
           recoverInvite,
           activateInvite,
-          resetActivation,
           killInvite,
         }}
       >
@@ -365,7 +349,7 @@ function InviteProvider({children}) {
   )
 }
 
-function useInviteState() {
+export function useInviteState() {
   const context = React.useContext(InviteStateContext)
   if (context === undefined) {
     throw new Error('useInviteState must be used within a InviteProvider')
@@ -373,7 +357,7 @@ function useInviteState() {
   return context
 }
 
-function useInviteDispatch() {
+export function useInviteDispatch() {
   const context = React.useContext(InviteDispatchContext)
   if (context === undefined) {
     throw new Error('useInviteDispatch must be used within a InviteProvider')
@@ -384,5 +368,3 @@ function useInviteDispatch() {
 export function useInvite() {
   return [useInviteState(), useInviteDispatch()]
 }
-
-export {InviteProvider, useInviteState, useInviteDispatch}

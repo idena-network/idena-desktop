@@ -10,7 +10,7 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/core'
-import SettingsLayout from './layout'
+import SettingsLayout from '../../screens/settings/layout'
 import {useSettingsState} from '../../shared/providers/settings-context'
 import {archiveFlips} from '../../screens/flips/utils'
 import {

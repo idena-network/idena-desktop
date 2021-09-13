@@ -32,7 +32,7 @@ export function callRpc(method, ...params) {
 }
 
 export function toPercent(value) {
-  return value.toLocaleString(undefined, {
+  return value?.toLocaleString(undefined, {
     style: 'percent',
     maximumSignificantDigits: 4,
   })
@@ -149,3 +149,5 @@ export function calculateInvitationRewardRatio(
 
   return Math.max(1 - t ** 4 * 0.5, 0)
 }
+
+export const apiMethod = m => new URL(m, new URL('https://api.idena.io/api/'))

@@ -16,7 +16,6 @@ import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
-import {Page, PageTitle} from '../../screens/app/components'
 import {
   Checkbox,
   FloatDebug,
@@ -24,6 +23,8 @@ import {
   SuccessAlert,
   Textarea,
   Toast,
+  Page,
+  PageTitle,
 } from '../../shared/components/components'
 import {PrimaryButton} from '../../shared/components/button'
 import {createNewVotingMachine} from '../../screens/oracles/machines'

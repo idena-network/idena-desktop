@@ -543,3 +543,22 @@ export function ScrollToTop({scrollableRef, children, ...props}) {
     </Button>
   )
 }
+
+export function TodoVotingCountBadge(props) {
+  return (
+    <Flex
+      as={Badge}
+      align="center"
+      justify="center"
+      bg="blue.500"
+      color="white"
+      fontSize={8}
+      fontWeight={700}
+      rounded={4}
+      px={1}
+      h={4}
+      minW={4}
+      {...props}
+    />
+  )
+}

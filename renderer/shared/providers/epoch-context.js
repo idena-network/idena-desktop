@@ -1,7 +1,7 @@
 import React from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
-import {fetchEpoch} from '../api'
+import {fetchEpoch} from '../api/dna'
 import {
   didValidate,
   shouldExpectValidationResults,

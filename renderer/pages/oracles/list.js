@@ -3,17 +3,18 @@ import NextLink from 'next/link'
 import {Box, Icon, Stack, Text, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
-import {Page, PageTitle} from '../../screens/app/components'
 import {
   FlipFilter as FilterList,
   FlipFilterOption as FilterOption,
 } from '../../screens/flips/components'
-import {IconLink} from '../../shared/components/link'
 import {
+  IconLink,
   FloatDebug,
   HDivider,
   Toast,
   VDivider,
+  Page,
+  PageTitle,
 } from '../../shared/components/components'
 import {votingListMachine} from '../../screens/oracles/machines'
 import {
@@ -23,6 +24,7 @@ import {
   FillCenter,
   OutlineButton,
   ScrollToTop,
+  TodoVotingCountBadge,
 } from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {
@@ -80,6 +82,8 @@ function VotingListPage() {
     startingVotingRef,
   } = current.context
 
+  const [{todoCount}] = useVotingNotification()
+
   return (
     <Layout syncing={syncing} offline={offline}>
       <Page ref={pageRef}>
@@ -96,7 +100,14 @@ function VotingListPage() {
                 }}
               >
                 <FilterOption value={VotingListFilter.Todo}>
-                  {t('To Do')}
+                  {todoCount > 0 ? (
+                    <Stack isInline spacing={1} align="center">
+                      <Text as="span">{t('To Do')}</Text>
+                      <TodoVotingCountBadge>{todoCount}</TodoVotingCountBadge>
+                    </Stack>
+                  ) : (
+                    t('To Do')
+                  )}
                 </FilterOption>
                 <FilterOption value={VotingListFilter.Voting}>
                   {t('Running')}

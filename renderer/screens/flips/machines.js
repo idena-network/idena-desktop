@@ -14,7 +14,7 @@ import {
 import {callRpc, HASH_IN_MEMPOOL, loadKeyword} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
 import {FlipType, FlipFilter} from '../../shared/types'
-import {deleteFlip} from '../../shared/api'
+import {deleteFlip} from '../../shared/api/dna'
 import {persistState} from '../../shared/utils/persist'
 
 export const flipsMachine = Machine(
