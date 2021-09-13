@@ -506,9 +506,11 @@ export const IconLink = React.forwardRef(
         }}
         {...props}
       >
-        <Stack spacing={2} isInline align="center">
+        <Stack spacing={2} isInline align="center" w="full">
           {typeof icon === 'string' ? <Icon name={icon} size={4} /> : icon}
-          <Text as="span">{children}</Text>
+          <Text as="span" isTruncated>
+            {children}
+          </Text>
         </Stack>
       </Link>
     </NextLink>
