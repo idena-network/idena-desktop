@@ -20,6 +20,12 @@ import {
   useToast,
   Alert,
   Link,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import semver from 'semver'
@@ -122,6 +128,32 @@ export default function Layout({
   const isReady = !loading && !debouncedOffline && !debouncedSyncing
   const isNotOffline = !debouncedOffline && !loading
 
+  const {
+    isOpen: isOpenConfirmQuit,
+    onOpen: onOpenConfirmQuit,
+    onClose: onCloseConfirmQuit,
+  } = useDisclosure()
+
+  const [{runInternalNode}] = useSettings()
+
+  React.useEffect(() => {
+    const handleRequestQuit = async () => {
+      const {online} = await callRpc('dna_identity')
+
+      if (online && runInternalNode && isReady) {
+        onOpenConfirmQuit()
+      } else {
+        global.ipcRenderer.send('confirm-quit')
+      }
+    }
+
+    global.ipcRenderer.on('confirm-quit', handleRequestQuit)
+
+    return () => {
+      global.ipcRenderer.removeListener('confirm-quit', handleRequestQuit)
+    }
+  }, [isReady, onOpenConfirmQuit, runInternalNode])
+
   return (
     <LayoutContainer>
       <Sidebar />
@@ -150,7 +182,13 @@ export default function Layout({
           )}
         </>
       )}
+
       <UpdateExternalNodeDialog />
+
+      <ConfirmQuitDialog
+        isOpen={isOpenConfirmQuit}
+        onClose={onCloseConfirmQuit}
+      />
     </LayoutContainer>
   )
 }
@@ -174,6 +212,7 @@ function NormalApp({children}) {
   const router = useRouter()
 
   const epoch = useEpochState()
+
   const identity = useIdentityState()
 
   React.useEffect(() => {
@@ -547,8 +586,6 @@ function HardForkScreen({version, onUpdate, onReject}) {
 
   const identity = useIdentityState()
 
-  const {nodeCurrentVersion} = useAutoUpdateState()
-
   const [currentHardFork, sendHardFork] = useMachine(
     createMachine({
       context: {
@@ -571,10 +608,6 @@ function HardForkScreen({version, onUpdate, onReject}) {
 
               const forkChangelog = await fetchJsonResult(
                 `/node/${version}/forkchangelog`
-              )
-
-              const currentVersionChangelog = await fetchJsonResult(
-                `/node/${nodeCurrentVersion}/forkchangelog`
               )
 
               const [{upgrade: highestUpgrade}] = await fetchJsonResult(
@@ -907,5 +940,65 @@ function UpdateExternalNodeDialog() {
         </PrimaryButton>
       </DialogFooter>
     </Dialog>
+  )
+}
+
+function ConfirmQuitDialog({onClose, onError, ...props}) {
+  const {t} = useTranslation()
+
+  const stopMiningAndQuitRef = React.useRef()
+
+  return (
+    <AlertDialog
+      isCentered
+      leastDestructiveRef={stopMiningAndQuitRef}
+      onClose={onClose}
+      {...props}
+    >
+      <AlertDialogOverlay bg="xblack.080" />
+      <AlertDialogContent
+        bg="white"
+        color="brandGray.500"
+        fontSize="md"
+        p={8}
+        pt={6}
+        rounded="lg"
+      >
+        <AlertDialogHeader fontSize="lg" fontWeight={500} p={0} mb={4}>
+          {t('Are you sure you want to exit?')}
+        </AlertDialogHeader>
+
+        <AlertDialogBody p={0} mb={8}>
+          {t(`Your mining status is active. Closing the app may cause the mining
+      penalty.`)}
+        </AlertDialogBody>
+
+        <AlertDialogFooter p={0}>
+          <Stack isInline justify="flex-end">
+            <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
+            <SecondaryButton
+              onClick={() => {
+                global.ipcRenderer.send('confirm-quit')
+              }}
+            >
+              {t('Exit')}
+            </SecondaryButton>
+            <PrimaryButton
+              ref={stopMiningAndQuitRef}
+              onClick={async () => {
+                try {
+                  await callRpc('dna_becomeOffline', {})
+                  global.ipcRenderer.send('confirm-quit')
+                } catch (error) {
+                  onError(error?.message)
+                }
+              }}
+            >
+              {t('Stop mining and exit')}
+            </PrimaryButton>
+          </Stack>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
