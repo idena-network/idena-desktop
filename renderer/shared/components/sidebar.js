@@ -331,7 +331,10 @@ function NavItem({href, icon, children}) {
 }
 
 function ActionPanel() {
-  const {t} = useTranslation()
+  const {
+    t,
+    i18n: {language},
+  } = useTranslation()
 
   const router = useRouter()
 
@@ -425,7 +428,7 @@ function ActionPanel() {
                   zIndex={9}
                 >
                   <ActionItem title={t('Next validation')}>
-                    {formatValidationDate(nextValidation)}
+                    {formatValidationDate(nextValidation, language)}
                   </ActionItem>
                 </Box>
               </PopoverTrigger>
