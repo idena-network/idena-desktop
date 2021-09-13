@@ -563,7 +563,8 @@ export default function ProfilePage() {
                     `Your status is valid till the next validation: {{nextValidation}}.`,
                     {
                       nextValidation:
-                        epoch && formatValidationDate(epoch.nextValidation),
+                        epoch &&
+                        formatValidationDate(epoch.nextValidation, language),
                       nsSeparator: '!!',
                     }
                   )
@@ -571,7 +572,8 @@ export default function ProfilePage() {
                     'Please join the next validation ceremony: {{nextValidation}}.',
                     {
                       nextValidation:
-                        epoch && formatValidationDate(epoch.nextValidation),
+                        epoch &&
+                        formatValidationDate(epoch.nextValidation, language),
                       nsSeparator: '!!',
                     }
                   )}
