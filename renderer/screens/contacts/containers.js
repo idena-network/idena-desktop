@@ -368,7 +368,7 @@ export function ContactCard({
                 {t('Delete contact')}
               </IconButton2>
             </Tooltip>
-            {canKill && (
+            {canKill && !terminating && !mining && (
               <>
                 <VDivider />
                 <IconButton2
