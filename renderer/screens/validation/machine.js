@@ -616,7 +616,25 @@ export const createValidationMachine = ({
                           longFlips: ({longFlips}) =>
                             mergeFlipsByHash(
                               longFlips,
-                              longFlips.filter(failedFlip).map(flip => ({
+                              longFlips
+                                .filter(({ready}) => !ready)
+                                .map(flip => ({
+                                  ...flip,
+                                  failed: true,
+                                }))
+                            ),
+                        }),
+                        log(),
+                      ],
+                    },
+                    FINALIZE_ALL_LONG_FLIPS: {
+                      target: '.done',
+                      actions: [
+                        assign({
+                          longFlips: ({longFlips}) =>
+                            mergeFlipsByHash(
+                              longFlips,
+                              longFlips.map(flip => ({
                                 ...flip,
                                 failed: true,
                               }))
@@ -1009,7 +1027,17 @@ export const createValidationMachine = ({
           Math.max(
             adjustDuration(
               validationStart,
-              shortSessionDuration + (global.env.FINALIZE_LONG_FLIPS || 120)
+              shortSessionDuration + (global.env.FINALIZE_LONG_FLIPS || 4 * 60)
+            ),
+            5
+          ) * 1000,
+        // eslint-disable-next-line no-shadow
+        FINALIZE_ALL_LONG_FLIPS: ({validationStart, shortSessionDuration}) =>
+          Math.max(
+            adjustDuration(
+              validationStart,
+              shortSessionDuration +
+                (global.env.FINALIZE_ALL_LONG_FLIPS || 25 * 60)
             ),
             5
           ) * 1000,
