@@ -35,6 +35,7 @@ import {FloatDebug, Page, Toast} from '../../shared/components/components'
 import Layout from '../../shared/components/layout'
 import {BadFlipDialog} from '../../screens/validation/components'
 import {useFailToast} from '../../shared/hooks/use-toast'
+import {useChainState} from '../../shared/providers/chain-context'
 
 export default function EditFlipPage() {
   const {t, i18n} = useTranslation()
@@ -45,7 +46,8 @@ export default function EditFlipPage() {
 
   const toast = useToast()
 
-  const {syncing} = useIdentityState()
+  const {syncing, offline} = useChainState()
+
   const {flipKeyWordPairs} = useIdentityState()
 
   const failToast = useFailToast()
@@ -113,7 +115,7 @@ export default function EditFlipPage() {
   } = useDisclosure()
 
   return (
-    <Layout syncing={syncing}>
+    <Layout>
       <Page p={0}>
         <Flex
           direction="column"
@@ -300,7 +302,17 @@ export default function EditFlipPage() {
               isDisabled={is('submit.submitting')}
               isLoading={is('submit.submitting')}
               loadingText={t('Publishing')}
-              onClick={() => send('SUBMIT')}
+              onClick={() => {
+                if (syncing) {
+                  failToast('Can not submit flip while node is synchronizing')
+                  return
+                }
+                if (offline) {
+                  failToast('Can not submit flip. Node is offline')
+                  return
+                }
+                send('SUBMIT')
+              }}
             >
               {t('Submit')}
             </PrimaryButton>
