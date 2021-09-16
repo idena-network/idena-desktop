@@ -763,5 +763,15 @@
   "An invitation can be provided by validated participants": "An invitation can be provided by validated participants",
   "Your flips were reported.": "Your flips were reported.",
   "Make all flips carefully": "Make all flips carefully",
-  "Withdraw stake, iDNA": "Withdraw stake, iDNA"
+  "Withdraw stake, iDNA": "Withdraw stake, iDNA",
+  "To take part in the validation, you need an invitation code. Invitations can be provided by validated identities.": "To take part in the validation, you need an invitation code. Invitations can be provided by validated identities.",
+  "How to get an invitation code": "How to get an invitation code",
+  "Successfully sent": "Successfully sent",
+  "Tx hash": "Tx hash",
+  "How to get an invitation": "How to get an invitation",
+  "Are you sure you want to exit?": "Are you sure you want to exit?",
+  "Your mining status is active. Closing the app may cause the mining\n      penalty.": "Your mining status is active. Closing the app may cause the mining\n      penalty.",
+  "Exit": "Exit",
+  "Stop mining and exit": "Stop mining and exit",
+  "Update Client Version": "Update Client Version"
 }

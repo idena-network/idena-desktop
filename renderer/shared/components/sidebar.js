@@ -744,10 +744,11 @@ export function Version() {
         )}
         {autoUpdate.canUpdateClient ? (
           <UpdateButton
-            text="Update Client Version"
             version={autoUpdate.uiRemoteVersion}
             onClick={updateClient}
-          />
+          >
+            {t('Update Client Version')}
+          </UpdateButton>
         ) : null}
         {!autoUpdate.canUpdateClient &&
         autoUpdate.canUpdateNode &&
