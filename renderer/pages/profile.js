@@ -229,7 +229,7 @@ export default function ProfilePage() {
                     <Box>
                       <OnboardingPopover
                         isOpen={isOpenActivateInvitePopover}
-                        placement="top-start"
+                        placement="bottom"
                       >
                         <PopoverTrigger>
                           <Stack
