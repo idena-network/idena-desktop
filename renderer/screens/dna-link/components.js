@@ -2,9 +2,20 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {Box, Flex, FormControl, Icon, Image, Stack, Text} from '@chakra-ui/core'
-import {useIdentityState} from '../providers/identity-context'
-import {SecondaryButton, PrimaryButton} from './button'
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  Flex,
+  FormControl,
+  Icon,
+  Image,
+  Stack,
+  Text,
+} from '@chakra-ui/core'
+import {useIdentityState} from '../../shared/providers/identity-context'
+import {SecondaryButton, PrimaryButton} from '../../shared/components/button'
 import {
   startSession,
   authenticate,
@@ -16,23 +27,22 @@ import {
   validDnaUrl,
   Transaction,
   appendTxHash,
-} from '../utils/dna-link'
+  handleCallbackUrl,
+} from './utils'
 import {
   Avatar,
   Dialog,
   DialogBody,
   DialogFooter,
+  ExternalLink,
   FormLabel,
   HDivider,
   Input,
   Tooltip,
-} from './components'
-import {
-  areSameCaseInsensitive,
-  viewVotingHref,
-} from '../../screens/oracles/utils'
-import {callRpc} from '../utils/utils'
-import {useFailToast} from '../hooks/use-toast'
+} from '../../shared/components/components'
+import {areSameCaseInsensitive, viewVotingHref} from '../oracles/utils'
+import {callRpc} from '../../shared/utils/utils'
+import {useFailToast} from '../../shared/hooks/use-toast'
 
 export function DnaLinkHandler({children}) {
   const router = useRouter()
@@ -205,15 +215,20 @@ export function DnaSendDialog({
   onHide,
   onDepositSuccess,
   onDepositError,
+  onSendTxFailed,
   ...props
 }) {
   const {t} = useTranslation()
 
   const {address: from, balance} = useIdentityState()
 
-  const {address: to, amount, comment, callback_url: callbackUrl} = parseQuery(
-    url
-  )
+  const {
+    address: to,
+    amount,
+    comment,
+    callback_url: callbackUrl,
+    callback_format: callbackFormat,
+  } = parseQuery(url)
 
   const shouldConfirmTx = amount / balance > DNA_SEND_CONFIRM_TRESHOLD
 
@@ -319,24 +334,45 @@ export function DnaSendDialog({
             })
               .then(() => setIsSubmitting(true))
               .then(() => sendDna({from, to, amount, comment}))
-              .then(hash => {
-                setIsSubmitting(false)
-
+              .then(async hash => {
                 if (isValidUrl(callbackUrl)) {
+                  const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
+
                   global.logger.info('Received dna://send cb url', callbackUrl)
                   global.logger.info(
                     'Append hash to cb url',
-                    appendTxHash(callbackUrl, hash).href
+                    callbackUrlWithHash.href
                   )
-                  global.openExternal(appendTxHash(callbackUrl, hash).href)
-                }
 
-                onDepositSuccess(hash)
+                  await handleCallbackUrl(callbackUrlWithHash, callbackFormat, {
+                    // eslint-disable-next-line no-shadow
+                    onJson: ({success, error, url}) => {
+                      if (success) {
+                        onDepositSuccess({hash, url})
+                      } else {
+                        onDepositError({error, url})
+                      }
+                    },
+                    // eslint-disable-next-line no-shadow
+                    onHtml: ({url}) => onDepositSuccess({hash, url}),
+                  })
+                    .catch(error => {
+                      global.logger.error(error)
+                      onDepositError({
+                        error: error?.message,
+                        url: callbackUrlWithHash.href,
+                      })
+                    })
+                    .finally(() => setIsSubmitting(false))
+                } else {
+                  setIsSubmitting(false)
+                  global.logger.error('Invalid dna://send cb url', callbackUrl)
+                }
               })
               .catch(({message}) => {
                 setIsSubmitting(false)
                 global.logger.error(message)
-                if (onDepositError) onDepositError(message)
+                onSendTxFailed(message)
               })
               .finally(onHide)
           }}
@@ -353,13 +389,18 @@ export function DnaRawTxDialog({
   onHide,
   onSendSuccess,
   onSendError,
+  onSendRawTxFailed,
   ...props
 }) {
   const {t} = useTranslation()
 
   const {balance} = useIdentityState()
 
-  const {tx: rawTx, callback_url: callbackUrl} = parseQuery(url)
+  const {
+    tx: rawTx,
+    callback_url: callbackUrl,
+    callback_format: callbackFormat,
+  } = parseQuery(url)
 
   const {amount: rawAmount, to} = new Transaction().fromHex(rawTx)
 
@@ -481,18 +522,45 @@ export function DnaRawTxDialog({
             })
               .then(() => setIsSubmitting(true))
               .then(() => callRpc('bcn_sendRawTx', rawTx))
-              .then(hash => {
-                setIsSubmitting(false)
+              .then(async hash => {
                 if (isValidUrl(callbackUrl)) {
+                  const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
+
                   global.logger.info('Received dna://rawTx cb url', callbackUrl)
-                  global.openExternal(appendTxHash(callbackUrl, hash).href)
+                  global.logger.info(
+                    'Append hash to cb url',
+                    callbackUrlWithHash.href
+                  )
+
+                  await handleCallbackUrl(callbackUrlWithHash, callbackFormat, {
+                    // eslint-disable-next-line no-shadow
+                    onJson: ({success, error, url}) => {
+                      if (success) {
+                        onSendSuccess({hash, url})
+                      } else {
+                        onSendError({error, url})
+                      }
+                    },
+                    // eslint-disable-next-line no-shadow
+                    onHtml: ({url}) => onSendSuccess({hash, url}),
+                  })
+                    .catch(error => {
+                      global.logger.error(error)
+                      onSendError({
+                        error: error?.message,
+                        url: callbackUrlWithHash.href,
+                      })
+                    })
+                    .finally(() => setIsSubmitting(false))
+                } else {
+                  setIsSubmitting(false)
+                  global.logger.error('Invalid dna://send cb url', callbackUrl)
                 }
-                onSendSuccess(hash)
               })
               .catch(({message}) => {
                 setIsSubmitting(false)
                 global.logger.error(message)
-                if (onSendError) onSendError(message)
+                onSendRawTxFailed(message)
               })
               .finally(onHide)
           }}
@@ -590,5 +658,92 @@ function Address({address}) {
 function AlertText(props) {
   return (
     <Box color="red.500" fontWeight={500} fontSize="sm" mt={1} {...props} />
+  )
+}
+
+export function DnaSendSucceededDialog({hash, url, ...props}) {
+  const {t} = useTranslation()
+  return (
+    <Dialog {...props}>
+      <DialogBody color="brandGray.500">
+        <Stack spacing={5}>
+          <Alert
+            status="success"
+            bg="green.010"
+            borderRadius="lg"
+            flexDirection="column"
+            justifyContent="center"
+            height={132}
+          >
+            <Stack spacing={2} align="center">
+              <AlertIcon size={8} mr={0} />
+              <AlertTitle fontSize="lg" fontWeight={500}>
+                {t('Successfully sent')}
+              </AlertTitle>
+            </Stack>
+          </Alert>
+          <Stack spacing={1}>
+            <Stack spacing={1} py={2}>
+              <Box color="muted">{t('Tx hash')}</Box>
+              <Box wordBreak="break-all" fontWeight={500}>
+                {hash}
+              </Box>
+            </Stack>
+            <ExternalLink href={`https://scan.idena.io/transaction/${hash}`}>
+              {t('Open in blockchain explorer')}
+            </ExternalLink>
+          </Stack>
+        </Stack>
+      </DialogBody>
+      <DialogFooter>
+        <PrimaryButton
+          onClick={() => {
+            global.openExternal(url)
+          }}
+        >
+          {t('Continue')}
+        </PrimaryButton>
+      </DialogFooter>
+    </Dialog>
+  )
+}
+
+export function DnaSendFailedDialog({error, url, ...props}) {
+  const {t} = useTranslation()
+  return (
+    <Dialog {...props}>
+      <DialogBody>
+        <Stack spacing={5}>
+          <Alert
+            status="error"
+            bg="red.010"
+            borderRadius="lg"
+            flexDirection="column"
+            justifyContent="center"
+            textAlign="center"
+            height={132}
+          >
+            <Stack align="center">
+              <AlertIcon size={8} mr={0} />
+              <Stack spacing={1}>
+                <AlertTitle fontSize="lg" fontWeight={500}>
+                  {t('Something went wrong')}
+                </AlertTitle>
+                <Box color="muted">{error}</Box>
+              </Stack>
+            </Stack>
+          </Alert>
+        </Stack>
+      </DialogBody>
+      <DialogFooter>
+        <PrimaryButton
+          onClick={() => {
+            global.openExternal(url)
+          }}
+        >
+          {t('Continue')}
+        </PrimaryButton>
+      </DialogFooter>
+    </Dialog>
   )
 }

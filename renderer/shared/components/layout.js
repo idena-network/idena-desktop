@@ -43,7 +43,9 @@ import {
   DnaSendDialog,
   DnaLinkHandler,
   DnaRawTxDialog,
-} from './dna-link'
+  DnaSendFailedDialog,
+  DnaSendSucceededDialog,
+} from '../../screens/dna-link/components'
 import {ValidationToast} from '../../screens/validation/components'
 import {
   useAutoUpdateState,
@@ -73,7 +75,7 @@ import {
 import {useChainState} from '../providers/chain-context'
 import {useNode} from '../providers/node-context'
 import {useSettings} from '../providers/settings-context'
-import {useFailToast, useSuccessToast} from '../hooks/use-toast'
+import {useFailToast} from '../hooks/use-toast'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -247,8 +249,13 @@ function NormalApp({children}) {
     persistItem('validationNotification', 'epoch', newEpoch)
   }, [epoch, validationNotificationEpoch, setValidationNotificationEpoch, t])
 
-  const successToast = useSuccessToast()
   const failToast = useFailToast()
+
+  const dnaSendSucceededDisclosure = useDisclosure()
+
+  const dnaSendFailedDisclosure = useDisclosure()
+
+  const [dnaSendResponse, setDnaSendResponse] = React.useState()
 
   return (
     <Flex as="section" direction="column" flex={1} h="100vh" overflowY="auto">
@@ -259,27 +266,39 @@ function NormalApp({children}) {
       <DnaLinkHandler>
         <DnaSendDialog
           isOpen={url => new URL(url).pathname.includes('send')}
-          onDepositSuccess={hash =>
-            successToast({
-              title: t('Transaction sent'),
-              description: hash,
-            })
-          }
-          onDepositError={failToast}
+          onDepositSuccess={({hash, url}) => {
+            setDnaSendResponse({hash, url})
+            dnaSendSucceededDisclosure.onOpen()
+          }}
+          onDepositError={({error, url}) => {
+            setDnaSendResponse({error, url})
+            dnaSendFailedDisclosure.onOpen()
+          }}
+          onSendTxFailed={failToast}
         />
       </DnaLinkHandler>
+
       <DnaLinkHandler>
         <DnaRawTxDialog
           isOpen={url => new URL(url).pathname.includes('raw')}
-          onSendSuccess={hash =>
-            successToast({
-              title: t('Transaction sent'),
-              description: hash,
-            })
-          }
-          onSendError={failToast}
+          onSendSuccess={({hash, url}) => {
+            setDnaSendResponse({hash, url})
+            dnaSendSucceededDisclosure.onOpen()
+          }}
+          onSendError={({error, url}) => {
+            setDnaSendResponse({error, url})
+            dnaSendFailedDisclosure.onOpen()
+          }}
+          onSendRawTxFailed={failToast}
         />
       </DnaLinkHandler>
+
+      <DnaSendSucceededDialog
+        {...dnaSendResponse}
+        {...dnaSendSucceededDisclosure}
+      />
+
+      <DnaSendFailedDialog {...dnaSendResponse} {...dnaSendFailedDisclosure} />
     </Flex>
   )
 }

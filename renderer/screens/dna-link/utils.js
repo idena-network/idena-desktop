@@ -1,9 +1,14 @@
 import axios from 'axios'
-import apiClient from '../api/api-client'
-import {sendTransaction} from '../api/dna'
-import {bufferToHex} from './string'
-import messages from '../proto/models_pb'
-import {toBuffer, hexToUint8Array, toHexString, bufferToInt} from './buffers'
+import apiClient from '../../shared/api/api-client'
+import {sendTransaction} from '../../shared/api/dna'
+import {bufferToHex} from '../../shared/utils/string'
+import messages from '../../shared/proto/models_pb'
+import {
+  toBuffer,
+  hexToUint8Array,
+  toHexString,
+  bufferToInt,
+} from '../../shared/utils/buffers'
 
 export const DNA_LINK_VERSION = `v1`
 export const DNA_NONCE_PREFIX = 'signin-'
@@ -180,5 +185,34 @@ export class Transaction {
     }
 
     return data
+  }
+}
+
+export async function handleCallbackUrl(
+  callbackUrl,
+  callbackFormat,
+  {onJson, onHtml}
+) {
+  switch (callbackFormat) {
+    case 'json': {
+      onJson(
+        await (
+          await fetch(callbackUrl, {
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+          })
+        ).json()
+      )
+      break
+    }
+
+    default:
+    case 'html':
+      onHtml({
+        url: typeof callbackUrl === 'string' ? callbackUrl : callbackUrl.href,
+      })
+      break
   }
 }
