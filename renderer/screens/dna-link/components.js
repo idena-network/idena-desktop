@@ -664,7 +664,7 @@ function AlertText(props) {
 export function DnaSendSucceededDialog({hash, url, ...props}) {
   const {t} = useTranslation()
   return (
-    <Dialog {...props}>
+    <Dialog closeOnOverlayClick={false} closeOnEsc={false} {...props}>
       <DialogBody color="brandGray.500">
         <Stack spacing={5}>
           <Alert
@@ -699,6 +699,7 @@ export function DnaSendSucceededDialog({hash, url, ...props}) {
         <PrimaryButton
           onClick={() => {
             global.openExternal(url)
+            props.onClose()
           }}
         >
           {t('Continue')}
@@ -711,7 +712,7 @@ export function DnaSendSucceededDialog({hash, url, ...props}) {
 export function DnaSendFailedDialog({error, url, ...props}) {
   const {t} = useTranslation()
   return (
-    <Dialog {...props}>
+    <Dialog closeOnOverlayClick={false} closeOnEsc={false} {...props}>
       <DialogBody>
         <Stack spacing={5}>
           <Alert
@@ -739,6 +740,7 @@ export function DnaSendFailedDialog({error, url, ...props}) {
         <PrimaryButton
           onClick={() => {
             global.openExternal(url)
+            props.onClose()
           }}
         >
           {t('Continue')}
