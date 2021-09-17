@@ -99,7 +99,7 @@ export function buildNextValidationCalendarLink(nextValidation) {
 }
 
 export function formatValidationDate(nextValidation, locale) {
-  return new Date(nextValidation).toLocaleString([locale], {
+  return new Date(nextValidation).toLocaleString(locale, {
     dateStyle: 'short',
     timeStyle: 'short',
   })
