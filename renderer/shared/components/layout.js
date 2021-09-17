@@ -864,10 +864,10 @@ function HardForkScreen({version, onUpdate, onReject}) {
                     sendHardFork('VOTE', {option: e.target.value})
                   }}
                 >
-                  <Radio value="approve">
+                  <Radio value="approve" borderColor="gray.100">
                     {t('Yes, use node version {{version}}', {version})}
                   </Radio>
-                  <Radio value="reject">
+                  <Radio value="reject" borderColor="gray.100">
                     {t('No, reject node {{version}}', {version})}
                   </Radio>
                 </RadioGroup>
