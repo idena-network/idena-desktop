@@ -638,7 +638,7 @@ export const flipMasterMachine = Machine(
                               translations: data,
                             }),
                             showTranslation: ({locale}, {data}) =>
-                              locale.toLowerCase() !== 'en' &&
+                              locale?.toLowerCase() !== 'en' &&
                               data?.every(w => w?.some(t => t?.confirmed)),
                           }),
                           log(),
