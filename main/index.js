@@ -351,7 +351,7 @@ app.on('will-finish-launching', function() {
 let didConfirmQuit = false
 
 app.on('before-quit', e => {
-  if (didConfirmQuit) {
+  if (didConfirmQuit || isDev) {
     mainWindow.forceClose = true
   } else {
     e.preventDefault()
@@ -535,8 +535,12 @@ ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
       break
     }
     case 'update-ui': {
-      if (isWin) autoUpdater.quitAndInstall()
-      else shell.openExternal('https://www.idena.io/download')
+      if (isWin) {
+        didConfirmQuit = true
+        autoUpdater.quitAndInstall()
+      } else {
+        shell.openExternal('https://www.idena.io/download')
+      }
       break
     }
     case 'update-node': {
