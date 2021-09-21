@@ -335,7 +335,7 @@ export function WalletTransactionList({txs = []}) {
                   ? t('See in Explorer...')
                   : Number(tx.amount) === 0
                   ? '\u2013'
-                  : signedDna(tx.amount)}
+                  : signedDna(tx.direction === 'Sent' ? -tx.amount : tx.amount)}
               </Text>
 
               <Box fontWeight={500}>
