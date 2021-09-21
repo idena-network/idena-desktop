@@ -351,7 +351,7 @@ app.on('will-finish-launching', function() {
 let didConfirmQuit = false
 
 app.on('before-quit', e => {
-  if (didConfirmQuit) {
+  if (didConfirmQuit || isDev) {
     mainWindow.forceClose = true
   } else {
     e.preventDefault()
@@ -519,6 +519,8 @@ nodeUpdater.on('update-downloaded', info => {
   sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-ready', info)
 })
 
+autoUpdater.allowPrerelease = true
+
 autoUpdater.on('download-progress', info => {
   sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-download-progress', info)
 })
@@ -535,8 +537,12 @@ ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
       break
     }
     case 'update-ui': {
-      if (isWin) autoUpdater.quitAndInstall()
-      else shell.openExternal('https://www.idena.io/download')
+      if (isWin) {
+        didConfirmQuit = true
+        autoUpdater.quitAndInstall()
+      } else {
+        shell.openExternal('https://www.idena.io/download')
+      }
       break
     }
     case 'update-node': {
