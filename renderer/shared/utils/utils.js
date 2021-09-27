@@ -150,4 +150,5 @@ export function calculateInvitationRewardRatio(
   return Math.max(1 - t ** 4 * 0.5, 0)
 }
 
-export const apiMethod = m => new URL(m, new URL('https://api.idena.io/api/'))
+export const apiMethod = method =>
+  new URL(method, new URL('https://api.idena.io/api/'))
