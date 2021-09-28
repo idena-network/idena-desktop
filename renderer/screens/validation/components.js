@@ -1280,3 +1280,47 @@ export function ReviewShortSessionDialog({
     </Dialog>
   )
 }
+
+export function SynchronizingValidationAlert({children, ...props}) {
+  return (
+    <NotSyncedAlert
+      status="warning"
+      boxShadow="0 3px 12px 0 rgb(255 163 102 /0.1), 0 2px 3px 0 rgb(255 163 102 /0.2)"
+      {...props}
+    >
+      <Stack isInline align="center">
+        <AlertIcon name="spinner" size={4} />
+        <Text>{children}</Text>
+      </Stack>
+    </NotSyncedAlert>
+  )
+}
+
+export function OfflineValidationAlert(props) {
+  return (
+    <NotSyncedAlert
+      status="error"
+      boxShadow="0 3px 12px 0 rgb(255 102 102 /0.1), 0 2px 3px 0 rgb(255 102 102 /0.2)"
+      {...props}
+    />
+  )
+}
+
+function NotSyncedAlert(props) {
+  return (
+    <Alert
+      variant="solid"
+      justifyContent="center"
+      color="white"
+      fontWeight={500}
+      fontSize="md"
+      rounded="md"
+      p={3}
+      position="absolute"
+      top={2}
+      left={2}
+      right={2}
+      {...props}
+    />
+  )
+}
