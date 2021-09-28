@@ -603,6 +603,10 @@ function HardForkScreen({version, onUpdate, onReject}) {
 
   const {colors} = useTheme()
 
+  const {syncing, offline} = useChainState()
+
+  const isSynchronized = !syncing && !offline
+
   const identity = useIdentityState()
 
   const [currentHardFork, sendHardFork] = useMachine(
@@ -814,13 +818,14 @@ function HardForkScreen({version, onUpdate, onReject}) {
                   <Text>{t('Check on Github')}</Text>
                 </Stack>
               </SecondaryButton>
-              {!canVote && (
+              {!canVote && isSynchronized && (
                 <PrimaryButton onClick={onUpdate}>
                   {t('Update Node Version')}
                 </PrimaryButton>
               )}
             </Stack>
           </Stack>
+
           {eitherState(currentHardFork, 'fetched') && shouldActivateMining && (
             <Box bg="xwhite.010" rounded="lg" py={4} px={6}>
               <Text color="xwhite.050" fontSize="mdx">
@@ -842,50 +847,54 @@ function HardForkScreen({version, onUpdate, onReject}) {
               </PrimaryButton>
             </Box>
           )}
-          {eitherState(currentHardFork, 'fetched') && canVote && (
-            <Stack
-              spacing={6}
-              bg="xwhite.010"
-              color="white"
-              rounded="lg"
-              px={10}
-              py={8}
-            >
-              <Heading as="h4" fontSize="lg" fontWeight={500}>
-                {t('Do you support upcoming changes?')}
-              </Heading>
-              <Stack spacing={3}>
-                <Text color="xwhite.050" fontSize="sm">
-                  {t('Choose an option to vote')}
-                </Text>
-                <RadioGroup
-                  value={votingOption}
-                  onChange={e => {
-                    sendHardFork('VOTE', {option: e.target.value})
-                  }}
-                >
-                  <Radio value="approve" borderColor="gray.100">
-                    {t('Yes, use node version {{version}}', {version})}
-                  </Radio>
-                  <Radio value="reject" borderColor="gray.100">
-                    {t('No, reject node {{version}}', {version})}
-                  </Radio>
-                </RadioGroup>
+
+          {eitherState(currentHardFork, 'fetched') &&
+            canVote &&
+            isSynchronized && (
+              <Stack
+                spacing={6}
+                bg="xwhite.010"
+                color="white"
+                rounded="lg"
+                px={10}
+                py={8}
+              >
+                <Heading as="h4" fontSize="lg" fontWeight={500}>
+                  {t('Do you support upcoming changes?')}
+                </Heading>
+                <Stack spacing={3}>
+                  <Text color="xwhite.050" fontSize="sm">
+                    {t('Choose an option to vote')}
+                  </Text>
+                  <RadioGroup
+                    value={votingOption}
+                    onChange={e => {
+                      sendHardFork('VOTE', {option: e.target.value})
+                    }}
+                  >
+                    <Radio value="approve" borderColor="gray.100">
+                      {t('Yes, use node version {{version}}', {version})}
+                    </Radio>
+                    <Radio value="reject" borderColor="gray.100">
+                      {t('No, reject node {{version}}', {version})}
+                    </Radio>
+                  </RadioGroup>
+                </Stack>
+                <Box alignSelf="flex-end">
+                  <PrimaryButton
+                    onClick={() => {
+                      if (votingOption === 'approve') onUpdate()
+                      else onOpenRejectDialog()
+                    }}
+                  >
+                    {t('Vote')}
+                  </PrimaryButton>
+                </Box>
               </Stack>
-              <Box alignSelf="flex-end">
-                <PrimaryButton
-                  onClick={() => {
-                    if (votingOption === 'approve') onUpdate()
-                    else onOpenRejectDialog()
-                  }}
-                >
-                  {t('Vote')}
-                </PrimaryButton>
-              </Box>
-            </Stack>
-          )}
+            )}
         </Stack>
       </FillCenter>
+
       {identity.address && (
         <ActivateMiningDrawer
           mode={mode}
@@ -904,6 +913,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
           }}
         />
       )}
+
       <Dialog isOpen={isOpenRejectDialog} onClose={onCloseRejectDialog}>
         <DialogHeader>
           {t('Are you sure you want to reject the hard fork update?')}
