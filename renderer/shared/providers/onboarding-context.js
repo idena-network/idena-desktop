@@ -102,6 +102,9 @@ export function OnboardingProvider({children}) {
           ...createStep(OnboardingStep.CreateFlips),
           done: {},
         },
+        on: {
+          RESET: '.unknown',
+        },
       },
       {
         actions: {
@@ -143,6 +146,10 @@ export function OnboardingProvider({children}) {
       }
     )
   )
+
+  React.useEffect(() => {
+    if (identity.address) send('RESET')
+  }, [identity.address, send])
 
   React.useEffect(() => {
     if (epoch?.epoch >= 0 && identity) {
