@@ -696,14 +696,19 @@ export function DnaSendSucceededDialog({hash, url, ...props}) {
         </Stack>
       </DialogBody>
       <DialogFooter>
-        <PrimaryButton
-          onClick={() => {
-            global.openExternal(url)
-            props.onClose()
-          }}
-        >
-          {t('Continue')}
-        </PrimaryButton>
+        {url ? (
+          <PrimaryButton
+            onClick={() => {
+              global.openExternal(url)
+              props.onClose()
+            }}
+          >
+            {t('Continue')}
+          </PrimaryButton>
+        ) : (
+          // eslint-disable-next-line react/destructuring-assignment
+          <PrimaryButton onClick={props.onClose}>{t('Close')}</PrimaryButton>
+        )}
       </DialogFooter>
     </Dialog>
   )
