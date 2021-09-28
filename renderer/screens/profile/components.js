@@ -157,6 +157,8 @@ export const ActivateInviteForm = React.forwardRef(
 
     const mining = !!activationTx
 
+    const hasBeenInvited = status === IdentityStatus.Invite
+
     return (
       <Box
         ref={ref}
@@ -180,8 +182,18 @@ export const ActivateInviteForm = React.forwardRef(
         }}
         {...props}
       >
-        <Stack spacing={6}>
-          {status === IdentityStatus.Undefined && (
+        {hasBeenInvited ? (
+          <Flex justify="flex-end">
+            <PrimaryButton
+              isLoading={mining}
+              loadingText={t('Mining...')}
+              type="submit"
+            >
+              {t('Accept invitation')}
+            </PrimaryButton>
+          </Flex>
+        ) : (
+          <Stack spacing={6}>
             <FormControl>
               <Stack spacing={3}>
                 <Flex justify="space-between" align="center">
@@ -190,7 +202,7 @@ export const ActivateInviteForm = React.forwardRef(
                   </FormLabel>
                   <Button
                     variant="ghost"
-                    isDisabled={mining || status === IdentityStatus.Invite}
+                    isDisabled={mining}
                     bg="unset"
                     color="muted"
                     fontWeight={500}
@@ -207,12 +219,7 @@ export const ActivateInviteForm = React.forwardRef(
                 <Input
                   id="code"
                   value={code}
-                  isDisabled={mining || status === IdentityStatus.Invite}
-                  placeholder={
-                    status === IdentityStatus.Invite
-                      ? 'Click the button to activate invitation'
-                      : ''
-                  }
+                  isDisabled={mining}
                   resize="none"
                   _disabled={{
                     bg: 'gray.50',
@@ -224,27 +231,27 @@ export const ActivateInviteForm = React.forwardRef(
                 />
               </Stack>
             </FormControl>
-          )}
-          <Stack spacing={4} isInline align="center" justify="flex-end">
-            <Button
-              variant="link"
-              variantColor="blue"
-              fontWeight={500}
-              _hover={null}
-              _active={null}
-              onClick={onHowToGetInvitation}
-            >
-              {t('How to get an invitation')}
-            </Button>
-            <PrimaryButton
-              isLoading={mining}
-              loadingText={t('Mining...')}
-              type="submit"
-            >
-              {t('Activate invite')}
-            </PrimaryButton>
+            <Stack spacing={4} isInline align="center" justify="flex-end">
+              <Button
+                variant="link"
+                variantColor="blue"
+                fontWeight={500}
+                _hover={null}
+                _active={null}
+                onClick={onHowToGetInvitation}
+              >
+                {t('How to get an invitation')}
+              </Button>
+              <PrimaryButton
+                isLoading={mining}
+                loadingText={t('Mining...')}
+                type="submit"
+              >
+                {t('Activate invite')}
+              </PrimaryButton>
+            </Stack>
           </Stack>
-        </Stack>
+        )}
       </Box>
     )
   }
