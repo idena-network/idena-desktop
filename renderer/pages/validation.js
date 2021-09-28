@@ -49,6 +49,8 @@ import {
   EncourageReportDialog,
   BadFlipDialog,
   ReviewShortSessionDialog,
+  SynchronizingValidationAlert,
+  OfflineValidationAlert,
 } from '../screens/validation/components'
 import {rem} from '../shared/theme'
 import {AnswerType} from '../shared/types'
@@ -56,6 +58,7 @@ import {useEpochState} from '../shared/providers/epoch-context'
 import {useTimingState} from '../shared/providers/timing-context'
 import {InfoButton, PrimaryButton} from '../shared/components/button'
 import {FloatDebug, Tooltip} from '../shared/components/components'
+import {useChainState} from '../shared/providers/chain-context'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -151,11 +154,23 @@ function ValidationSession({
     if (didReport) onOpenEncourageReportDialog()
   }, [didReport, onOpenEncourageReportDialog])
 
+  const {syncing, offline} = useChainState()
+
   const flips = sessionFlips(state)
   const currentFlip = flips[currentIndex]
 
   return (
     <ValidationScene bg={isShortSession(state) ? 'black' : 'white'}>
+      {syncing && (
+        <SynchronizingValidationAlert>
+          {t('Synchronizing...')}
+        </SynchronizingValidationAlert>
+      )}
+
+      {offline && (
+        <OfflineValidationAlert>{t('Offline')}</OfflineValidationAlert>
+      )}
+
       <Header>
         <Title color={isShortSession(state) ? 'white' : 'brandGray.500'}>
           {['shortSession', 'longSession'].some(state.matches) &&
