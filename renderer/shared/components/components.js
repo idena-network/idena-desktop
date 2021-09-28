@@ -526,6 +526,7 @@ export function Snackbar(props) {
       left={0}
       right={0}
       zIndex="toast"
+      pointerEvents="none"
       {...props}
     />
   )
