@@ -65,7 +65,6 @@ export function useValidationReportSummary() {
                     shortAnswers,
                     longAnswers,
                     shortAnswersCount,
-
                     penalized,
                     missed,
                     rewards,

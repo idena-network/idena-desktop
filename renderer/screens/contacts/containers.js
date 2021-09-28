@@ -141,17 +141,15 @@ function InvitationRewardRatioInfo() {
   const epoch = useEpochState()
   const {highestBlock} = useChainState()
 
+  const invitationRewardRatio = toPercent(
+    calculateInvitationRewardRatio(epoch ?? {}, {highestBlock})
+  )
+
   return (
     <Tooltip
       label={t(
         'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
-        {
-          invitationRewardRatio: toPercent(
-            calculateInvitationRewardRatio(epoch ?? {}, {
-              highestBlock,
-            })
-          ),
-        }
+        {invitationRewardRatio}
       )}
       placement="right"
       w={151}

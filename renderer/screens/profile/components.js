@@ -699,17 +699,15 @@ export function InviteScoreAlert({
     setShowInviteScore(hasPendingInvites || canInvite)
   }, [canInvite])
 
+  const invitationRewardRatio = toPercent(
+    calculateInvitationRewardRatio(epoch ?? {}, {highestBlock})
+  )
+
   return showInviteScore ? (
     <SuccessAlert minH={36} w="full" {...props}>
       {t(
         'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
-        {
-          invitationRewardRatio: toPercent(
-            calculateInvitationRewardRatio(epoch ?? {}, {
-              highestBlock,
-            })
-          ),
-        }
+        {invitationRewardRatio}
       )}
     </SuccessAlert>
   ) : null
