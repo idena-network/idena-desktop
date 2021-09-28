@@ -79,14 +79,14 @@ export default function ValidationReport() {
       ? '–'
       : amount.toLocaleString(i18n.language, {maximumFractionDigits: 3})
 
+  const epochNumber = epoch?.epoch
+
   return (
     <Layout>
       <Page as={Stack} spacing={8}>
         <Flex justify="space-between" align="center" w="full">
           <PageTitle m={0}>
-            {t('Epoch #{{epochNumber}} validation report', {
-              epochNumber: epoch?.epoch,
-            })}
+            {t('Epoch #{{epochNumber}} validation report', {epochNumber})}
           </PageTitle>
           <CloseButton onClick={() => router.push('/profile')} />
         </Flex>
@@ -191,7 +191,8 @@ export default function ValidationReport() {
                             ? '–'
                             : t('{{score}} ({{point}} out of {{flipsCount}})', {
                                 score: toPercent(shortScore),
-                                ...shortResults,
+                                point: shortResults.point,
+                                flipsCount: shortResults.flipsCount,
                               })
                         }
                       />
@@ -210,7 +211,8 @@ export default function ValidationReport() {
                             ? '–'
                             : t('{{score}} ({{point}} out of {{flipsCount}})', {
                                 score: toPercent(longScore),
-                                ...longResults,
+                                point: longResults.point,
+                                flipsCount: longResults.flipsCount,
                               })
                         }
                       />

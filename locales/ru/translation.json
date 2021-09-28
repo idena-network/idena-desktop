@@ -767,5 +767,7 @@
   "Your mining status is active. Closing the app may cause the mining\n      penalty.": "Ваш статус майнинга активен. Закрытие приложения может привести к штрафу.",
   "Exit": "Выйти",
   "Stop mining and exit": "Остановить майнинг и выйти",
-  "Update Client Version": "Обновить версию Клиента"
+  "Update Client Version": "Обновить версию Клиента",
+  "Congratulations!": "Congratulations!",
+  "Accept invitation": "Accept invitation"
 }

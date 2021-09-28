@@ -765,5 +765,7 @@
   "Your mining status is active. Closing the app may cause the mining\n      penalty.": "Your mining status is active. Closing the app may cause the mining\n      penalty.",
   "Exit": "Exit",
   "Stop mining and exit": "Stop mining and exit",
-  "Update Client Version": "Update Client Version"
+  "Update Client Version": "Update Client Version",
+  "Congratulations!": "Congratulations!",
+  "Accept invitation": "Accept invitation"
 }
