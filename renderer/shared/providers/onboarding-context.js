@@ -158,7 +158,8 @@ export function OnboardingProvider({children}) {
           switch (true) {
             case identity.canActivateInvite:
               return OnboardingStep.ActivateInvite
-            case identity.age === 1 && !identity.online:
+            case identity.age === 1 &&
+              !(identity.online || Boolean(identity.delegatee)):
               return OnboardingStep.ActivateMining
             case shouldCreateFlips(identity):
               return OnboardingStep.CreateFlips
