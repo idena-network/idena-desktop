@@ -47,7 +47,9 @@ import {useFailToast} from '../../shared/hooks/use-toast'
 export function DnaLinkHandler({children}) {
   const router = useRouter()
 
-  const [dnaUrl, setDnaUrl] = React.useState()
+  const [dnaUrl, setDnaUrl] = React.useState(
+    `dna://send/v1?address=0x98D16d7021930b788135dD834983394fF2De9869&amount=100.00000000&comment=BSCADDRESS0xe34c6adfebd4671ba9585ccc2bed36c6f459cd0b&callback_url=http://localhost:5555&callback_format=json`
+  )
 
   const toastFail = useFailToast()
 
@@ -545,7 +547,14 @@ export function DnaRawTxDialog({
                       if (success) {
                         onSendSuccess({hash, url})
                       } else {
-                        onSendError({error, url})
+                        onSendError({
+                          error:
+                            error ??
+                            t('{{url}} responded with an unknown format', {
+                              url: callbackUrlWithHash.href,
+                            }),
+                          url: url ?? callbackUrlWithHash,
+                        })
                       }
                     },
                     // eslint-disable-next-line no-shadow
