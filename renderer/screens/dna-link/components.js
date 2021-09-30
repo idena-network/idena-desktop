@@ -47,7 +47,9 @@ import {useFailToast} from '../../shared/hooks/use-toast'
 export function DnaLinkHandler({children}) {
   const router = useRouter()
 
-  const [dnaUrl, setDnaUrl] = React.useState()
+  const [dnaUrl, setDnaUrl] = React.useState(
+    `dna://send/v1?address=0x98D16d7021930b788135dD834983394fF2De9869&amount=100.00000000&comment=BSCADDRESS0xe34c6adfebd4671ba9585ccc2bed36c6f459cd0b&callback_url=http://localhost:5555&callback_format=json`
+  )
 
   const toastFail = useFailToast()
 
@@ -350,7 +352,14 @@ export function DnaSendDialog({
                       if (success) {
                         onDepositSuccess({hash, url})
                       } else {
-                        onDepositError({error, url})
+                        onDepositError({
+                          error:
+                            error ??
+                            t('{{url}} responded with an unknown format', {
+                              url: callbackUrlWithHash.href,
+                            }),
+                          url: url ?? callbackUrlWithHash,
+                        })
                       }
                     },
                     // eslint-disable-next-line no-shadow
@@ -714,7 +723,13 @@ export function DnaSendSucceededDialog({hash, url, ...props}) {
   )
 }
 
-export function DnaSendFailedDialog({error, url, ...props}) {
+export function DnaSendFailedDialog({
+  error,
+  url,
+  onRetrySucceeded,
+  onRetryFailed,
+  ...props
+}) {
   const {t} = useTranslation()
   return (
     <Dialog closeOnOverlayClick={false} closeOnEsc={false} {...props}>
@@ -727,28 +742,63 @@ export function DnaSendFailedDialog({error, url, ...props}) {
             flexDirection="column"
             justifyContent="center"
             textAlign="center"
-            height={132}
+            minH={132}
           >
-            <Stack align="center">
-              <AlertIcon size={8} mr={0} />
+            <Stack align="center" spacing={1}>
+              <AlertIcon name="delete" size={10} mr={0} />
               <Stack spacing={1}>
                 <AlertTitle fontSize="lg" fontWeight={500}>
                   {t('Something went wrong')}
                 </AlertTitle>
-                <Box color="muted">{error}</Box>
+                <Text color="muted" wordBreak="break-all">
+                  {error}
+                </Text>
               </Stack>
             </Stack>
           </Alert>
         </Stack>
       </DialogBody>
       <DialogFooter>
-        <PrimaryButton
-          onClick={() => {
-            global.openExternal(url)
-            props.onClose()
+        <SecondaryButton
+          onClick={async () => {
+            const requestedUrl = new URL(url)
+            await handleCallbackUrl(url, 'json', {
+              // eslint-disable-next-line no-shadow
+              onJson: ({success, error, url}) => {
+                if (success) {
+                  onRetrySucceeded({
+                    hash: requestedUrl.searchParams.get('tx'),
+                    url,
+                  })
+                } else {
+                  onRetryFailed({
+                    error:
+                      error ??
+                      t('{{url}} responded with an unknown format', {
+                        url: requestedUrl.href,
+                      }),
+                    url,
+                  })
+                }
+              },
+            }).catch(error => {
+              global.logger.error(error)
+              onRetryFailed({
+                error: error?.message,
+                url,
+              })
+            })
           }}
         >
-          {t('Continue')}
+          {t('Retry')}
+        </SecondaryButton>
+        <PrimaryButton
+          onClick={() => {
+            props.onClose()
+            global.openExternal(url)
+          }}
+        >
+          {t('Open in browser')}
         </PrimaryButton>
       </DialogFooter>
     </Dialog>
