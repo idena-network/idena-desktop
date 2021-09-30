@@ -782,7 +782,7 @@ export function DnaSendFailedDialog({
                       t('{{url}} responded with an unknown format', {
                         url: requestedUrl.href,
                       }),
-                    url: url ?? requestedUrl.href,
+                    url: url ?? requestedUrl,
                   })
                 }
               },
