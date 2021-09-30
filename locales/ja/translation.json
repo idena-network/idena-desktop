@@ -764,5 +764,7 @@
   "Stop mining and exit": "Stop mining and exit",
   "Update Client Version": "Update Client Version",
   "Congratulations!": "Congratulations!",
-  "Accept invitation": "Accept invitation"
+  "Accept invitation": "Accept invitation",
+  "{{url}} responded with an unknown format": "{{url}} responded with an unknown format",
+  "Open in browser": "Open in browser"
 }

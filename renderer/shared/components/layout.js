@@ -298,7 +298,18 @@ function NormalApp({children}) {
         {...dnaSendSucceededDisclosure}
       />
 
-      <DnaSendFailedDialog {...dnaSendResponse} {...dnaSendFailedDisclosure} />
+      <DnaSendFailedDialog
+        onRetrySucceeded={({hash, url}) => {
+          setDnaSendResponse({hash, url})
+          dnaSendFailedDisclosure.onClose()
+          dnaSendSucceededDisclosure.onOpen()
+        }}
+        onRetryFailed={({error, url}) => {
+          setDnaSendResponse({error, url})
+        }}
+        {...dnaSendResponse}
+        {...dnaSendFailedDisclosure}
+      />
     </Flex>
   )
 }

@@ -350,7 +350,14 @@ export function DnaSendDialog({
                       if (success) {
                         onDepositSuccess({hash, url})
                       } else {
-                        onDepositError({error, url})
+                        onDepositError({
+                          error:
+                            error ??
+                            t('{{url}} responded with an unknown format', {
+                              url: callbackUrlWithHash.href,
+                            }),
+                          url: url ?? callbackUrlWithHash,
+                        })
                       }
                     },
                     // eslint-disable-next-line no-shadow
@@ -538,7 +545,14 @@ export function DnaRawTxDialog({
                       if (success) {
                         onSendSuccess({hash, url})
                       } else {
-                        onSendError({error, url})
+                        onSendError({
+                          error:
+                            error ??
+                            t('{{url}} responded with an unknown format', {
+                              url: callbackUrlWithHash.href,
+                            }),
+                          url: url ?? callbackUrlWithHash,
+                        })
                       }
                     },
                     // eslint-disable-next-line no-shadow
@@ -714,7 +728,13 @@ export function DnaSendSucceededDialog({hash, url, ...props}) {
   )
 }
 
-export function DnaSendFailedDialog({error, url, ...props}) {
+export function DnaSendFailedDialog({
+  error,
+  url,
+  onRetrySucceeded,
+  onRetryFailed,
+  ...props
+}) {
   const {t} = useTranslation()
   return (
     <Dialog closeOnOverlayClick={false} closeOnEsc={false} {...props}>
@@ -727,28 +747,63 @@ export function DnaSendFailedDialog({error, url, ...props}) {
             flexDirection="column"
             justifyContent="center"
             textAlign="center"
-            height={132}
+            minH={132}
           >
-            <Stack align="center">
-              <AlertIcon size={8} mr={0} />
+            <Stack align="center" spacing={1}>
+              <AlertIcon name="delete" size={10} mr={0} />
               <Stack spacing={1}>
                 <AlertTitle fontSize="lg" fontWeight={500}>
                   {t('Something went wrong')}
                 </AlertTitle>
-                <Box color="muted">{error}</Box>
+                <Text color="muted" wordBreak="break-all">
+                  {error}
+                </Text>
               </Stack>
             </Stack>
           </Alert>
         </Stack>
       </DialogBody>
       <DialogFooter>
-        <PrimaryButton
-          onClick={() => {
-            global.openExternal(url)
-            props.onClose()
+        <SecondaryButton
+          onClick={async () => {
+            const requestedUrl = new URL(url)
+            await handleCallbackUrl(url, 'json', {
+              // eslint-disable-next-line no-shadow
+              onJson: ({success, error, url}) => {
+                if (success) {
+                  onRetrySucceeded({
+                    hash: requestedUrl.searchParams.get('tx'),
+                    url: url ?? requestedUrl.href,
+                  })
+                } else {
+                  onRetryFailed({
+                    error:
+                      error ??
+                      t('{{url}} responded with an unknown format', {
+                        url: requestedUrl.href,
+                      }),
+                    url: url ?? requestedUrl,
+                  })
+                }
+              },
+            }).catch(error => {
+              global.logger.error(error)
+              onRetryFailed({
+                error: error?.message,
+                url,
+              })
+            })
           }}
         >
-          {t('Continue')}
+          {t('Retry')}
+        </SecondaryButton>
+        <PrimaryButton
+          onClick={() => {
+            props.onClose()
+            global.openExternal(url)
+          }}
+        >
+          {t('Open in browser')}
         </PrimaryButton>
       </DialogFooter>
     </Dialog>
