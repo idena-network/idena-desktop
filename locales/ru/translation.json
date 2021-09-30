@@ -769,5 +769,7 @@
   "Stop mining and exit": "Остановить майнинг и выйти",
   "Update Client Version": "Обновить версию Клиента",
   "Congratulations!": "Congratulations!",
-  "Accept invitation": "Accept invitation"
+  "Accept invitation": "Accept invitation",
+  "{{url}} responded with an unknown format": "{{url}} responded with an unknown format",
+  "Open in browser": "Open in browser"
 }
