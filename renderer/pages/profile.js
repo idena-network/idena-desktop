@@ -379,7 +379,7 @@ export default function ProfilePage() {
                       {stake > 0 && status === IdentityStatus.Newbie && (
                         <AnnotatedUserStat
                           annotation={t(
-                            'You need to get Verified status to get the locked funds into the normal wallet'
+                            'You need to terminate your identity to withdraw the stake'
                           )}
                           label={t('Locked')}
                           value={toDna(stake * 0.75)}
