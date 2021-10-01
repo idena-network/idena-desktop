@@ -312,7 +312,7 @@ function NavItem({href, icon, children}) {
         borderRadius="md"
         color={isActive ? 'white' : 'xwhite.050'}
         fontWeight={500}
-        height={8}
+        minH={8}
         px={2}
         py="3/2"
         _hover={{bg: isActive ? 'xblack.016' : 'gray.10', color: 'white'}}
