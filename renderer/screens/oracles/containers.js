@@ -1615,7 +1615,7 @@ export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
               <Stack spacing={1} pt={2} pb={3}>
                 <Text>{t('Making decision')}</Text>
                 <Text color="muted">
-                  {t('51% consensus is required to make a desision')}
+                  {t('51% consensus is required to make a decision')}
                 </Text>
               </Stack>
             </Radio>
