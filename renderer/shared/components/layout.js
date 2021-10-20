@@ -126,20 +126,21 @@ export default function Layout({
 
   const failToast = useFailToast()
 
-  const {canUpdateNode} = useAutoUpdateState()
+  const {nodeRemoteVersion, canUpdateNode} = useAutoUpdateState()
   const {updateNode} = useAutoUpdateDispatch()
 
   const [
     {
       details: forkDetails,
-      isWaiting: isForkWaiting,
+      isAvailable: isForkAvailable,
       didActivate: didActivateFork,
+      didReject: didRejectFork,
     },
     {vote, reject, resetVoting},
   ] = useFork()
 
   const isFork =
-    !loading && !skipHardForkScreen && canUpdateNode && isForkWaiting
+    !loading && !skipHardForkScreen && canUpdateNode && isForkAvailable
 
   const isSyncing = !loading && debouncedSyncing && !debouncedOffline
   const isOffline = !loading && debouncedOffline && !debouncedSyncing
@@ -195,16 +196,18 @@ export default function Layout({
   return (
     <LayoutContainer>
       <Sidebar
-        isForkWaiting={isForkWaiting}
+        isForkAvailable={isForkAvailable}
         didActivateFork={didActivateFork}
         onResetForkVoting={resetVoting}
+        didRejectFork={didRejectFork}
       />
 
       {loading && <LoadingApp />}
 
-      {isFork && (
+      {((isFork && !isSyncing) || (isFork && isSyncing && didActivateFork)) && (
         <ForkScreen
           {...forkDetails}
+          version={nodeRemoteVersion}
           didActivateFork={didActivateFork}
           onVote={vote}
           onUpdate={updateNode}

@@ -51,8 +51,9 @@ import {useTimingState} from '../providers/timing-context'
 import {TodoVotingCountBadge} from '../../screens/oracles/components'
 
 export default function Sidebar({
-  isForkWaiting,
+  isForkAvailable,
   didActivateFork,
+  didRejectFork,
   onResetForkVoting,
 }) {
   return (
@@ -79,8 +80,9 @@ export default function Sidebar({
       </Flex>
       <Box>
         <Version
-          isForkWaiting={isForkWaiting}
+          isForkAvailable={isForkAvailable}
           didActivateFork={didActivateFork}
+          didRejectFork={didRejectFork}
           onResetForkVoting={onResetForkVoting}
         />
       </Box>
@@ -731,7 +733,12 @@ function CurrentTaskLink({href, ...props}) {
   )
 }
 
-export function Version({isForkWaiting, didActivateFork, onResetForkVoting}) {
+export function Version({
+  isForkAvailable,
+  didActivateFork,
+  didRejectFork,
+  onResetForkVoting,
+}) {
   const {t} = useTranslation()
 
   const [
@@ -751,11 +758,15 @@ export function Version({isForkWaiting, didActivateFork, onResetForkVoting}) {
     <Stack spacing={3}>
       <Stack spacing="1px" m={2}>
         <VersionText>
-          {t('Client version: {{version}}', {version: global.appVersion})}
+          {t('Client version: {{version}}', {
+            version: global.appVersion,
+            nsSeparator: '!!',
+          })}
         </VersionText>
         <VersionText>
           {t('Node version: {{version}}', {
             version: nodeCurrentVersion,
+            nsSeparator: '!!',
           })}
         </VersionText>
       </Stack>
@@ -776,9 +787,9 @@ export function Version({isForkWaiting, didActivateFork, onResetForkVoting}) {
         canUpdateNode &&
         (!nodeProgress || nodeProgress.percentage === 100) ? (
           <>
-            {isForkWaiting ? (
+            {isForkAvailable ? (
               <>
-                {didActivateFork ? null : (
+                {didActivateFork || !didRejectFork ? null : (
                   <UpdateButton
                     version={nodeRemoteVersion}
                     onClick={onResetForkVoting}

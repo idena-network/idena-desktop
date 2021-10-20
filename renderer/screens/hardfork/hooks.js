@@ -51,6 +51,7 @@ export function useFork() {
           votingOption: undefined,
           votingStatus: HardforkVotingStatus.Unknown,
           isReady: false,
+          isAvailable: false,
         },
         initial: 'idle',
         states: {
@@ -154,6 +155,9 @@ export function useFork() {
       isWaiting:
         eitherState(current, 'fetched') &&
         current.context.votingStatus !== HardforkVotingStatus.Reject,
+      isAvailable: eitherState(current, 'fetched'),
+      didRejectUpdate:
+        current.context.votingStatus === HardforkVotingStatus.Reject,
     },
     {
       vote: option => send('VOTE', {option}),
