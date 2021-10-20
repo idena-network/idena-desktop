@@ -2,7 +2,7 @@ import * as React from 'react'
 import {assign, createMachine} from 'xstate'
 import {useMachine} from '@xstate/react'
 import {log} from 'xstate/lib/actions'
-import {eitherState} from '../../shared/utils/utils'
+import {eitherState, skipSSR} from '../../shared/utils/utils'
 import {useAutoUpdateState} from '../../shared/providers/update-context'
 import {requestDb} from '../../shared/utils/db'
 import {isFork} from '../../shared/utils/node'
@@ -12,8 +12,13 @@ function createVotingStatusDb(version) {
   const key = `hardForkVoting!!${version}`
 
   return {
-    get() {
-      return db.get(key)
+    async get() {
+      try {
+        return await db.get(key)
+      } catch (error) {
+        if (error.notFound) return null
+        throw error
+      }
     },
     set(status) {
       return db.put(key, status)
@@ -31,7 +36,7 @@ export function useFork() {
   const {nodeCurrentVersion, nodeRemoteVersion} = useAutoUpdateState()
 
   const statusDb = React.useMemo(
-    () => createVotingStatusDb(nodeRemoteVersion),
+    () => skipSSR(() => createVotingStatusDb(nodeRemoteVersion)),
     [nodeRemoteVersion]
   )
 
