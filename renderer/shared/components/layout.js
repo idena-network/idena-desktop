@@ -130,7 +130,11 @@ export default function Layout({
   const {updateNode} = useAutoUpdateDispatch()
 
   const [
-    {isWaiting: isForkWaiting, didActivate: didActivateFork},
+    {
+      details: forkDetails,
+      isWaiting: isForkWaiting,
+      didActivate: didActivateFork,
+    },
     {vote, reject, resetVoting},
   ] = useFork()
 
@@ -200,6 +204,7 @@ export default function Layout({
 
       {isFork && (
         <ForkScreen
+          {...forkDetails}
           didActivateFork={didActivateFork}
           onVote={vote}
           onUpdate={updateNode}
@@ -209,7 +214,7 @@ export default function Layout({
 
       {isSyncing && <SyncingApp />}
       {isOffline && <OfflineApp />}
-      {isReady && <NormalApp {...props} />}
+      {isReady && !isFork && <NormalApp {...props} />}
 
       {Boolean(authenticationEndpoint) && (
         <DnaSignInDialog
