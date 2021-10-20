@@ -15,8 +15,6 @@ import {
   useDisclosure,
   RadioGroup,
   Radio,
-  Skeleton,
-  useTheme,
   useToast,
   Alert,
   Link,
@@ -30,7 +28,6 @@ import {
 import {useMachine} from '@xstate/react'
 import semver from 'semver'
 import {assign, createMachine} from 'xstate'
-import {log} from 'xstate/lib/actions'
 import NextLink from 'next/link'
 import Sidebar from './sidebar'
 import {useDebounce} from '../hooks/use-debounce'
@@ -81,6 +78,7 @@ import {
   useDnaLinkRedirect,
 } from '../../screens/dna/hooks'
 import {viewVotingHref} from '../../screens/oracles/utils'
+import {useFork} from '../../screens/hardfork/hooks'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -128,13 +126,21 @@ export default function Layout({
 
   const failToast = useFailToast()
 
-  const {nodeRemoteVersion, mustUpdateNode} = useAutoUpdateState()
-  const {updateNode, onRejectHardFork} = useAutoUpdateDispatch()
+  const {canUpdateNode} = useAutoUpdateState()
+  const {updateNode} = useAutoUpdateDispatch()
 
-  const isHardFork = !loading && !skipHardForkScreen && mustUpdateNode
+  const [
+    {isWaiting: isForkWaiting, didActivate: didActivateFork},
+    {vote, reject, resetVoting},
+  ] = useFork()
+
+  const isFork =
+    !loading && !skipHardForkScreen && canUpdateNode && isForkWaiting
+
   const isSyncing = !loading && debouncedSyncing && !debouncedOffline
   const isOffline = !loading && debouncedOffline && !debouncedSyncing
   const isReady = !loading && !debouncedOffline && !debouncedSyncing
+
   const isNotOffline = !debouncedOffline && !loading
 
   const confirmQuitDisclosure = useDisclosure()
@@ -184,23 +190,26 @@ export default function Layout({
 
   return (
     <LayoutContainer>
-      <Sidebar />
+      <Sidebar
+        isForkWaiting={isForkWaiting}
+        didActivateFork={didActivateFork}
+        onResetForkVoting={resetVoting}
+      />
 
       {loading && <LoadingApp />}
 
-      {isHardFork ? (
-        <HardForkScreen
-          version={nodeRemoteVersion}
+      {isFork && (
+        <ForkScreen
+          didActivateFork={didActivateFork}
+          onVote={vote}
           onUpdate={updateNode}
-          onReject={onRejectHardFork}
+          onReject={reject}
         />
-      ) : (
-        <>
-          {isSyncing && <SyncingApp />}
-          {isOffline && <OfflineApp />}
-          {isReady && <NormalApp {...props} />}
-        </>
       )}
+
+      {isSyncing && <SyncingApp />}
+      {isOffline && <OfflineApp />}
+      {isReady && <NormalApp {...props} />}
 
       {Boolean(authenticationEndpoint) && (
         <DnaSignInDialog
@@ -669,87 +678,20 @@ function OfflineApp() {
   )
 }
 
-function HardForkScreen({version, onUpdate, onReject}) {
+function ForkScreen({
+  version,
+  changes,
+  didActivateFork,
+  startActivationDate,
+  endActivationDate,
+  votingOption,
+  onVote,
+  onUpdate,
+  onReject,
+}) {
   const {t} = useTranslation()
 
-  const {colors} = useTheme()
-
-  const {syncing, offline} = useChainState()
-
-  const isSynchronized = !syncing && !offline
-
   const identity = useIdentityState()
-
-  const [currentHardFork, sendHardFork] = useMachine(
-    createMachine({
-      context: {
-        changes: [],
-        didActivateFork: undefined,
-        startActivationDate: undefined,
-        endActivationDate: undefined,
-        votingOption: 'approve',
-      },
-      initial: 'fetching',
-      states: {
-        fetching: {
-          invoke: {
-            src: async () => {
-              const fetchJsonResult = async (
-                path,
-                base = 'https://api.idena.io'
-              ) =>
-                (await (await fetch(new URL(`api${path}`, base))).json()).result
-
-              const forkChangelog = await fetchJsonResult(
-                `/node/${version}/forkchangelog`
-              )
-
-              const [{upgrade: highestUpgrade}] = await fetchJsonResult(
-                '/upgrades?limit=1'
-              )
-
-              const nextTiming =
-                forkChangelog &&
-                (await fetchJsonResult(`/upgrade/${forkChangelog.Upgrade}`))
-
-              return {
-                changes: forkChangelog?.Changes ?? [],
-                didActivateFork:
-                  forkChangelog === null ||
-                  highestUpgrade >= forkChangelog.Upgrade,
-                ...nextTiming,
-              }
-            },
-            onDone: {
-              target: 'fetched',
-              actions: [
-                assign((context, {data}) => ({
-                  ...context,
-                  ...data,
-                })),
-                log(),
-              ],
-            },
-            onError: 'failed',
-          },
-        },
-        fetched: {
-          on: {
-            VOTE: {actions: [assign({votingOption: (_, {option}) => option})]},
-          },
-        },
-        failed: {},
-      },
-    })
-  )
-
-  const {
-    changes,
-    startActivationDate,
-    endActivationDate,
-    didActivateFork,
-    votingOption,
-  } = currentHardFork.context
 
   const {
     isOpen: isOpenRejectDialog,
@@ -821,54 +763,46 @@ function HardForkScreen({version, onUpdate, onReject}) {
               </Stack>
               <Stack spacing={1} color="xwhite.050">
                 <Text color="white">{t('Details')}</Text>
-                <Skeleton
-                  isLoaded={eitherState(currentHardFork, 'fetched', 'failed')}
-                  colorStart={colors.xblack['016']}
-                  colorEnd={colors.xblack['016']}
-                >
-                  <Box bg="xblack.016" rounded="md" p={1}>
-                    <Stack spacing={5} p={3} h={188} overflowY="auto">
-                      <Stack spacing={3}>
-                        <Text color="white">{t('Changes')}</Text>
-                        <List styleType="unordered" spacing={2}>
-                          {changes.map(change => (
-                            <ListItem key={change}>{change}</ListItem>
-                          ))}
-                          {changes.length === 0 && <Text>No changes 🤷‍♂️</Text>}
-                        </List>
-                      </Stack>
-                      <Stack spacing={3}>
-                        <Text color="white">
-                          {t('Hard fork activation schedule')}
-                        </Text>
-                        <List styleType="unordered" spacing={2}>
-                          <ListItem>
-                            {t(
-                              'Hard fork will be activated at any date after {{startActivationDate}}',
-                              {
-                                startActivationDate: startActivationDate
-                                  ? new Date(
-                                      startActivationDate
-                                    ).toLocaleString()
-                                  : 'TBD',
-                              }
-                            )}
-                          </ListItem>
-                          <ListItem>
-                            {t(
-                              'Hard fork will be blocked on {{endActivationDate}} if voting criteria are not met',
-                              {
-                                endActivationDate: endActivationDate
-                                  ? new Date(endActivationDate).toLocaleString()
-                                  : 'TBD',
-                              }
-                            )}
-                          </ListItem>
-                        </List>
-                      </Stack>
+                <Box bg="xblack.016" rounded="md" p={1}>
+                  <Stack spacing={5} p={3} h={188} overflowY="auto">
+                    <Stack spacing={3}>
+                      <Text color="white">{t('Changes')}</Text>
+                      <List styleType="unordered" spacing={2}>
+                        {changes.map(change => (
+                          <ListItem key={change}>{change}</ListItem>
+                        ))}
+                        {changes.length === 0 && <Text>No changes 🤷‍♂️</Text>}
+                      </List>
                     </Stack>
-                  </Box>
-                </Skeleton>
+                    <Stack spacing={3}>
+                      <Text color="white">
+                        {t('Hard fork activation schedule')}
+                      </Text>
+                      <List styleType="unordered" spacing={2}>
+                        <ListItem>
+                          {t(
+                            'Hard fork will be activated at any date after {{startActivationDate}}',
+                            {
+                              startActivationDate: new Date(
+                                startActivationDate
+                              ).toLocaleString(),
+                            }
+                          )}
+                        </ListItem>
+                        <ListItem>
+                          {t(
+                            'Hard fork will be blocked on {{endActivationDate}} if voting criteria are not met',
+                            {
+                              endActivationDate: new Date(
+                                endActivationDate
+                              ).toLocaleString(),
+                            }
+                          )}
+                        </ListItem>
+                      </List>
+                    </Stack>
+                  </Stack>
+                </Box>
               </Stack>
             </Stack>
             <Stack isInline justify="flex-end">
@@ -889,7 +823,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
                   <Text>{t('Check on Github')}</Text>
                 </Stack>
               </SecondaryButton>
-              {!canVote && isSynchronized && (
+              {!canVote && (
                 <PrimaryButton onClick={onUpdate}>
                   {t('Update Node Version')}
                 </PrimaryButton>
@@ -897,7 +831,7 @@ function HardForkScreen({version, onUpdate, onReject}) {
             </Stack>
           </Stack>
 
-          {eitherState(currentHardFork, 'fetched') && shouldActivateMining && (
+          {shouldActivateMining && (
             <Box bg="xwhite.010" rounded="lg" py={4} px={6}>
               <Text color="xwhite.050" fontSize="mdx">
                 {t(`You can not vote for the hard fork update since your mining status is deactivated.
@@ -919,50 +853,46 @@ function HardForkScreen({version, onUpdate, onReject}) {
             </Box>
           )}
 
-          {eitherState(currentHardFork, 'fetched') &&
-            canVote &&
-            isSynchronized && (
-              <Stack
-                spacing={6}
-                bg="xwhite.010"
-                color="white"
-                rounded="lg"
-                px={10}
-                py={8}
-              >
-                <Heading as="h4" fontSize="lg" fontWeight={500}>
-                  {t('Do you support upcoming changes?')}
-                </Heading>
-                <Stack spacing={3}>
-                  <Text color="xwhite.050" fontSize="sm">
-                    {t('Choose an option to vote')}
-                  </Text>
-                  <RadioGroup
-                    value={votingOption}
-                    onChange={e => {
-                      sendHardFork('VOTE', {option: e.target.value})
-                    }}
-                  >
-                    <Radio value="approve" borderColor="gray.100">
-                      {t('Yes, use node version {{version}}', {version})}
-                    </Radio>
-                    <Radio value="reject" borderColor="gray.100">
-                      {t('No, reject node {{version}}', {version})}
-                    </Radio>
-                  </RadioGroup>
-                </Stack>
-                <Box alignSelf="flex-end">
-                  <PrimaryButton
-                    onClick={() => {
-                      if (votingOption === 'approve') onUpdate()
-                      else onOpenRejectDialog()
-                    }}
-                  >
-                    {t('Vote')}
-                  </PrimaryButton>
-                </Box>
+          {canVote && (
+            <Stack
+              spacing={6}
+              bg="xwhite.010"
+              color="white"
+              rounded="lg"
+              px={10}
+              py={8}
+            >
+              <Heading as="h4" fontSize="lg" fontWeight={500}>
+                {t('Do you support upcoming changes?')}
+              </Heading>
+              <Stack spacing={3}>
+                <Text color="xwhite.050" fontSize="sm">
+                  {t('Choose an option to vote')}
+                </Text>
+                <RadioGroup
+                  value={votingOption}
+                  onChange={e => onVote(e.target.value)}
+                >
+                  <Radio value="approve" borderColor="gray.100">
+                    {t('Yes, use node version {{version}}', {version})}
+                  </Radio>
+                  <Radio value="reject" borderColor="gray.100">
+                    {t('No, reject node {{version}}', {version})}
+                  </Radio>
+                </RadioGroup>
               </Stack>
-            )}
+              <Box alignSelf="flex-end">
+                <PrimaryButton
+                  onClick={() => {
+                    if (votingOption === 'approve') onUpdate()
+                    else onOpenRejectDialog()
+                  }}
+                >
+                  {t('Vote')}
+                </PrimaryButton>
+              </Box>
+            </Stack>
+          )}
         </Stack>
       </FillCenter>
 
