@@ -269,7 +269,11 @@ export default function ProfilePage() {
                         </PopoverTrigger>
                         <OnboardingPopoverContent
                           gutter={10}
-                          title={t('How to get an invitation code')}
+                          title={
+                            status === IdentityStatus.Invite
+                              ? t('Accept invitation')
+                              : t('How to get an invitation code')
+                          }
                           zIndex={2}
                           onDismiss={() => {
                             dismissCurrentTask()
@@ -277,35 +281,43 @@ export default function ProfilePage() {
                           }}
                         >
                           <Stack spacing={5}>
-                            <Stack>
-                              <Text>
-                                {t(`Join the official Idena public Telegram group and follow instructions in the
+                            {status === IdentityStatus.Invite ? (
+                              <Box>
+                                {t(
+                                  'You are invited to join the upcoming validation. Please accept the invitation.'
+                                )}
+                              </Box>
+                            ) : (
+                              <Stack>
+                                <Text>
+                                  {t(`Join the official Idena public Telegram group and follow instructions in the
                 pinned message.`)}
-                              </Text>
-                              <OnboardingPopoverContentIconRow icon="telegram">
-                                <Box>
-                                  <PrimaryButton
-                                    variant="unstyled"
-                                    p={0}
-                                    py={0}
-                                    h={18}
-                                    onClick={() => {
-                                      global.openExternal(
-                                        'https://t.me/IdenaNetworkPublic'
-                                      )
-                                    }}
-                                  >
-                                    https://t.me/IdenaNetworkPublic
-                                  </PrimaryButton>
-                                  <Text
-                                    fontSize="sm"
-                                    color="rgba(255, 255, 255, 0.56)"
-                                  >
-                                    {t('Official group')}
-                                  </Text>
-                                </Box>
-                              </OnboardingPopoverContentIconRow>
-                            </Stack>
+                                </Text>
+                                <OnboardingPopoverContentIconRow icon="telegram">
+                                  <Box>
+                                    <PrimaryButton
+                                      variant="unstyled"
+                                      p={0}
+                                      py={0}
+                                      h={18}
+                                      onClick={() => {
+                                        global.openExternal(
+                                          'https://t.me/IdenaNetworkPublic'
+                                        )
+                                      }}
+                                    >
+                                      https://t.me/IdenaNetworkPublic
+                                    </PrimaryButton>
+                                    <Text
+                                      fontSize="sm"
+                                      color="rgba(255, 255, 255, 0.56)"
+                                    >
+                                      {t('Official group')}
+                                    </Text>
+                                  </Box>
+                                </OnboardingPopoverContentIconRow>
+                              </Stack>
+                            )}
                           </Stack>
                         </OnboardingPopoverContent>
                       </OnboardingPopover>
