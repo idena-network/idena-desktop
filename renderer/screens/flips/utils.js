@@ -21,7 +21,7 @@ export function getRandomKeywordPair() {
     return Math.floor(Math.random() * (max - min)) + min
   }
 
-  return {id: 0, words: [getRandomInt(0, 3407), getRandomInt(0, 3407)]}
+  return {id: 0, words: [getRandomInt(3300, 3939), getRandomInt(3300, 3939)]}
 }
 
 export function isPendingKeywordPair(flips, id) {
