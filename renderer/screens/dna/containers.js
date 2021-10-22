@@ -11,7 +11,9 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/core'
+import semver from 'semver'
 import {useIdentityState} from '../../shared/providers/identity-context'
+import {useAutoUpdateState} from '../../shared/providers/update-context'
 import {SecondaryButton, PrimaryButton} from '../../shared/components/button'
 import {
   DnaDialog,
@@ -45,6 +47,7 @@ import {
   FormControlWithLabel,
 } from '../../shared/components/components'
 import {callRpc, toLocaleDna} from '../../shared/utils/utils'
+import {bufferToHex} from '../../shared/utils/string'
 
 export function DnaSignInDialog({
   token,
@@ -185,6 +188,10 @@ export function DnaSendDialog({
 
   const [isSubmitting, setIsSubmitting] = React.useState()
 
+  const {nodeCurrentVersion} = useAutoUpdateState()
+
+  const isEstimateTxAvailable = semver.gte(nodeCurrentVersion, '0.27.2')
+
   const dna = toLocaleDna(language)
 
   return (
@@ -263,8 +270,17 @@ export function DnaSendDialog({
               return resolve()
             })
               .then(() => setIsSubmitting(true))
-              .then(() => sendDna({from, to, amount, comment}))
-              .then(async hash => {
+              .then(() =>
+                isEstimateTxAvailable
+                  ? callRpc('bcn_estimateTx', {
+                      to,
+                      from,
+                      amount,
+                      payload: bufferToHex(new TextEncoder().encode(comment)),
+                    })
+                  : sendDna({from, to, amount, comment})
+              )
+              .then(async ({txHash: hash}) => {
                 if (isValidUrl(callbackUrl)) {
                   const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
 
@@ -275,8 +291,10 @@ export function DnaSendDialog({
                   )
 
                   await handleCallbackUrl(callbackUrlWithHash, callbackFormat, {
-                    onJson: ({success, error, url}) => {
+                    onJson: async ({success, error, url}) => {
                       if (success) {
+                        if (isEstimateTxAvailable)
+                          await sendDna({from, to, amount, comment})
                         onDepositSuccess({hash, url})
                       } else {
                         onDepositError({
