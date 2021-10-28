@@ -24,7 +24,7 @@ export function isValidUrl(string) {
   }
 }
 
-export function validDnaUrl(url) {
+export function isValidDnaUrl(url) {
   try {
     const parsedUrl = new URL(url)
     const endsWithVersion = /v\d{1,3}$/.test(parsedUrl.pathname)
@@ -32,6 +32,10 @@ export function validDnaUrl(url) {
   } catch {
     return false
   }
+}
+
+export function dnaLinkMethod(dnaUrl) {
+  return new URL(dnaUrl).pathname.slice(2).split('/')[0]
 }
 
 export function parseQuery(url) {

@@ -76,6 +76,7 @@ import {useChainState} from '../providers/chain-context'
 import {useNode} from '../providers/node-context'
 import {useSettings} from '../providers/settings-context'
 import {useFailToast} from '../hooks/use-toast'
+import {useDnaLink} from '../../screens/dna-link/hooks'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -88,6 +89,8 @@ export default function Layout({
   skipHardForkScreen = false,
   ...props
 }) {
+  const {t} = useTranslation()
+
   const debouncedSyncing = useDebounce(syncing, AVAILABLE_TIMEOUT)
   const debouncedOffline = useDebounce(offline, AVAILABLE_TIMEOUT)
 
@@ -130,11 +133,7 @@ export default function Layout({
   const isReady = !loading && !debouncedOffline && !debouncedSyncing
   const isNotOffline = !debouncedOffline && !loading
 
-  const {
-    isOpen: isOpenConfirmQuit,
-    onOpen: onOpenConfirmQuit,
-    onClose: onCloseConfirmQuit,
-  } = useDisclosure()
+  const confirmQuitDisclosure = useDisclosure()
 
   const [{runInternalNode}] = useSettings()
 
@@ -143,7 +142,7 @@ export default function Layout({
       const {online} = await callRpc('dna_identity')
 
       if (online && runInternalNode && isReady) {
-        onOpenConfirmQuit()
+        confirmQuitDisclosure.onOpen()
       } else {
         global.ipcRenderer.send('confirm-quit')
       }
@@ -154,7 +153,23 @@ export default function Layout({
     return () => {
       global.ipcRenderer.removeListener('confirm-quit', handleRequestQuit)
     }
-  }, [isReady, onOpenConfirmQuit, runInternalNode])
+  }, [confirmQuitDisclosure, isReady, runInternalNode])
+
+  const {url: dnaUrl, method: dnaLinkMethod} = useDnaLink({
+    onInvalidLink: () => {
+      failToast({
+        title: t('Invalid DNA link'),
+        description: t(`You must provide valid URL including protocol version`),
+      })
+    },
+  })
+
+  const dnaSigninDisclosure = useDisclosure()
+  const {onOpen} = dnaSigninDisclosure
+
+  React.useEffect(() => {
+    if (isNotOffline && dnaLinkMethod === 'signin') onOpen()
+  }, [dnaLinkMethod, isNotOffline, onOpen])
 
   return (
     <LayoutContainer>
@@ -173,24 +188,20 @@ export default function Layout({
           {isSyncing && <SyncingApp />}
           {isOffline && <OfflineApp />}
           {isReady && <NormalApp {...props} />}
-
-          {isNotOffline && (
-            <DnaLinkHandler>
-              <DnaSignInDialog
-                isOpen={url => new URL(url).pathname.includes('signin')}
-                onSigninError={failToast}
-              />
-            </DnaLinkHandler>
-          )}
         </>
+      )}
+
+      {dnaUrl && (
+        <DnaSignInDialog
+          url={dnaUrl}
+          onSigninError={failToast}
+          {...dnaSigninDisclosure}
+        />
       )}
 
       <UpdateExternalNodeDialog />
 
-      <ConfirmQuitDialog
-        isOpen={isOpenConfirmQuit}
-        onClose={onCloseConfirmQuit}
-      />
+      <ConfirmQuitDialog {...confirmQuitDisclosure} />
     </LayoutContainer>
   )
 }

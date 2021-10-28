@@ -24,7 +24,7 @@ import {
   parseQuery,
   sendDna,
   DNA_SEND_CONFIRM_TRESHOLD,
-  validDnaUrl,
+  isValidDnaUrl,
   Transaction,
   appendTxHash,
   handleCallbackUrl,
@@ -54,7 +54,7 @@ export function DnaLinkHandler({children}) {
   const {t} = useTranslation()
 
   React.useEffect(() => {
-    if (dnaUrl && !validDnaUrl(dnaUrl))
+    if (dnaUrl && !isValidDnaUrl(dnaUrl))
       toastFail({
         title: t('Invalid DNA link'),
         description: t(`You must provide valid URL including protocol version`),
@@ -74,7 +74,7 @@ export function DnaLinkHandler({children}) {
     }
   }, [])
 
-  if (validDnaUrl(dnaUrl) && new URL(dnaUrl).pathname.includes('vote')) {
+  if (isValidDnaUrl(dnaUrl) && new URL(dnaUrl).pathname.includes('vote')) {
     const {address} = parseQuery(dnaUrl)
     if (!areSameCaseInsensitive(router.asPath, viewVotingHref(address))) {
       router.push(viewVotingHref(address))
@@ -82,53 +82,69 @@ export function DnaLinkHandler({children}) {
     }
   }
 
-  return validDnaUrl(dnaUrl) &&
+  return isValidDnaUrl(dnaUrl) &&
     React.Children.only(children).props.isOpen(dnaUrl)
     ? React.cloneElement(children, {url: dnaUrl, onHide: () => setDnaUrl(null)})
     : null
 }
 
-export function DnaSignInDialog({url, onHide, onSigninError}) {
+export function DnaSignInDialog({url, onSigninError, ...props}) {
   const {t} = useTranslation()
 
   const initialRef = React.useRef()
 
   const {address} = useIdentityState()
 
-  const {
-    callback_url: callbackUrl,
-    token,
-    nonce_endpoint: nonceEndpoint,
-    authentication_endpoint: authenticationEndpoint,
-    favicon_url: faviconUrl,
-  } = parseQuery(url)
+  const [dnaSigninParams, setDnaSigninParams] = React.useState({})
 
-  let callbackHostname = callbackUrl
-  let callbackFaviconUrl
+  React.useEffect(() => {
+    if (url) {
+      const {
+        callback_url: callbackUrl,
+        token,
+        nonce_endpoint: nonceEndpoint,
+        authentication_endpoint: authenticationEndpoint,
+        favicon_url: faviconUrl,
+      } = parseQuery(url)
 
-  if (isValidUrl(callbackUrl)) {
-    const parsedCallbackUrl = new URL(callbackUrl)
-    callbackHostname = parsedCallbackUrl.hostname || callbackUrl
-    try {
-      callbackFaviconUrl =
-        faviconUrl || new URL('favicon.ico', parsedCallbackUrl.origin)
-    } catch {
-      global.logger.error(
-        'Failed to construct favicon url from callback url',
+      let callbackHostname = callbackUrl
+      let callbackFaviconUrl
+
+      const parsedCallbackUrl = new URL(callbackUrl)
+
+      callbackHostname = parsedCallbackUrl.hostname || callbackUrl
+
+      try {
+        callbackFaviconUrl =
+          faviconUrl || new URL('favicon.ico', parsedCallbackUrl.origin)
+      } catch {
+        global.logger.error(
+          'Failed to construct favicon url from callback url',
+          callbackUrl,
+          parsedCallbackUrl
+        )
+      }
+
+      setDnaSigninParams({
+        token,
+        authenticationEndpoint,
+        nonceEndpoint,
         callbackUrl,
-        parsedCallbackUrl
-      )
+        callbackHostname,
+        callbackFaviconUrl,
+      })
     }
-  }
+  }, [url])
+
+  const {onClose} = props
 
   return (
-    <DnaDialog
-      isOpen={url}
-      onClose={onHide}
+    <Dialog
       initialFocusRef={initialRef}
       title={t('Login confirmation')}
+      {...props}
     >
-      <DnaDialogBody>
+      <DialogBody>
         <DnaDialogSubtitle>
           {t(
             'Please confirm that you want to use your public address for the website login'
@@ -139,12 +155,14 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
             <PanelRow>
               <Box>
                 <DnaDialogPanelLabel>{t('Website')}</DnaDialogPanelLabel>
-                <DnaDialogPanelValue>{callbackHostname}</DnaDialogPanelValue>
+                <DnaDialogPanelValue>
+                  {dnaSigninParams.callbackHostname}
+                </DnaDialogPanelValue>
               </Box>
               <PanelMediaCell>
-                {callbackFaviconUrl ? (
+                {dnaSigninParams.callbackFaviconUrl ? (
                   <Image
-                    src={callbackFaviconUrl}
+                    src={dnaSigninParams.callbackFaviconUrl}
                     ignoreFallback
                     borderRadius="md"
                     h={10}
@@ -169,11 +187,11 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
             </PanelRow>
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
-          <DnaDialogPanel label={t('Token')} value={token} />
+          <DnaDialogPanel label={t('Token')} value={dnaSigninParams.token} />
         </DnaDialogDetails>
-      </DnaDialogBody>
+      </DialogBody>
       <DnaDialogFooter>
-        <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
+        <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
         <PrimaryButton
           maxH={8}
           maxW={48}
@@ -181,6 +199,13 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
           wordBreak="break-all"
           ref={initialRef}
           onClick={async () => {
+            const {
+              token,
+              authenticationEndpoint,
+              nonceEndpoint,
+              callbackUrl,
+            } = dnaSigninParams
+
             startSession(nonceEndpoint, {
               token,
               address,
@@ -200,13 +225,13 @@ export function DnaSignInDialog({url, onHide, onSigninError}) {
                 global.logger.error(message)
                 if (onSigninError) onSigninError(message)
               })
-              .finally(onHide)
+              .finally(onClose)
           }}
         >
           {t('Confirm')}
         </PrimaryButton>
       </DnaDialogFooter>
-    </DnaDialog>
+    </Dialog>
   )
 }
 
@@ -240,14 +265,14 @@ export function DnaSendDialog({
   const [isSubmitting, setIsSubmitting] = React.useState()
 
   return (
-    <DnaDialog
+    <Dialog
       isOpen={url}
       onClose={onHide}
       m={0}
       title={t('Confirm transfer')}
       {...props}
     >
-      <DnaDialogBody>
+      <DialogBody>
         <DnaDialogSubtitle>
           {t(
             `You’re about to send iDNA from your wallet to the following address`
@@ -313,7 +338,7 @@ export function DnaSendDialog({
             )}
           </FormControl>
         )}
-      </DnaDialogBody>
+      </DialogBody>
       <DnaDialogFooter>
         <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
         <PrimaryButton
@@ -387,7 +412,7 @@ export function DnaSendDialog({
           {t('Confirm')}
         </PrimaryButton>
       </DnaDialogFooter>
-    </DnaDialog>
+    </Dialog>
   )
 }
 
@@ -423,14 +448,14 @@ export function DnaRawTxDialog({
   const [isSubmitting, setIsSubmitting] = React.useState()
 
   return (
-    <DnaDialog
+    <Dialog
       isOpen={url}
       onClose={onHide}
       m={0}
       title={t('Confirm transaction')}
       {...props}
     >
-      <DnaDialogBody>
+      <DialogBody>
         <DnaDialogSubtitle>
           {t('You’re about to sign and send tx from your wallet')}
         </DnaDialogSubtitle>
@@ -508,7 +533,7 @@ export function DnaRawTxDialog({
             )}
           </FormControl>
         )}
-      </DnaDialogBody>
+      </DialogBody>
       <DnaDialogFooter>
         <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
         <PrimaryButton
@@ -582,12 +607,8 @@ export function DnaRawTxDialog({
           {t('Confirm')}
         </PrimaryButton>
       </DnaDialogFooter>
-    </DnaDialog>
+    </Dialog>
   )
-}
-
-function DnaDialog(props) {
-  return <Dialog {...props} />
 }
 
 function DnaDialogSubtitle(props) {
@@ -611,10 +632,6 @@ function DnaDialogAlert(props) {
       <Text fontWeight={500} {...props} />
     </Stack>
   )
-}
-
-function DnaDialogBody(props) {
-  return <DialogBody {...props} />
 }
 
 function DnaDialogDetails(props) {
