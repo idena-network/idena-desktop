@@ -52,7 +52,7 @@ export function useDnaLink({onInvalidLink}) {
   }, [url])
 
   React.useEffect(() => {
-    if (!isValidDnaUrl(url)) {
+    if (url && !isValidDnaUrl(url)) {
       global.logger.error('Receieved invalid dna url', url)
       if (onInvalidLink) onInvalidLink(url)
     }
