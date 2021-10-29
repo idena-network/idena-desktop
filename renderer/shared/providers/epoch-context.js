@@ -2,18 +2,13 @@ import React from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
 import {fetchEpoch} from '../api/dna'
-import {
-  didValidate,
-  shouldExpectValidationResults,
-  hasPersistedValidationResults,
-} from '../../screens/validation/utils'
+import {didValidate} from '../../screens/validation/utils'
 import {
   didArchiveFlips,
   markFlipsArchived,
   archiveFlips,
   handleOutdatedFlips,
 } from '../../screens/flips/utils'
-import {persistItem} from '../utils/persist'
 
 export const EpochPeriod = {
   FlipLottery: 'FlipLottery',
@@ -75,18 +70,6 @@ export function EpochProvider({children}) {
       archiveFlips()
       handleOutdatedFlips()
       markFlipsArchived(epoch.epoch)
-    }
-  }, [epoch])
-
-  React.useEffect(() => {
-    if (
-      epoch &&
-      shouldExpectValidationResults(epoch.epoch) &&
-      !hasPersistedValidationResults(epoch.epoch)
-    ) {
-      persistItem('validationResults', epoch.epoch, {
-        epochStart: new Date().toISOString(),
-      })
     }
   }, [epoch])
 

@@ -38,10 +38,10 @@ export function dnaLinkMethod(dnaUrl) {
   return new URL(dnaUrl).pathname.slice(2).split('/')[0]
 }
 
-export function parseQuery(url) {
+export function extractQueryParams(url) {
   const {searchParams} = typeof url === 'string' ? new URL(url) : url
 
-  return Array.from(searchParams.entries()).reduce(
+  return Array.from(searchParams).reduce(
     (acc, [k, v]) => ({...acc, [k]: decodeURIComponent(v)}),
     {}
   )

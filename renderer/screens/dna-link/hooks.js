@@ -1,17 +1,22 @@
 import * as React from 'react'
-import {useRouter} from 'next/router'
-import {areSameCaseInsensitive, viewVotingHref} from '../oracles/utils'
-import {dnaLinkMethod, isValidDnaUrl, parseQuery} from './utils'
+import {dnaLinkMethod, extractQueryParams, isValidDnaUrl} from './utils'
+
+export const DnaLinkMethod = {
+  SignIn: 'signin',
+  Send: 'send',
+  RawTx: 'raw',
+  Vote: 'vote',
+  Invite: 'invite',
+}
 
 export function useDnaLink({onInvalidLink}) {
   const [url, setUrl] = React.useState()
 
   React.useEffect(() => {
-    if (url && !isValidDnaUrl(url)) onInvalidLink(url)
-  }, [onInvalidLink, url])
-
-  React.useEffect(() => {
-    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(setUrl)
+    if (!sessionStorage.getItem('didCheckDnaLink')) {
+      global.ipcRenderer.invoke('CHECK_DNA_LINK').then(setUrl)
+      sessionStorage.setItem('didCheckDnaLink', 1)
+    }
   }, [])
 
   React.useEffect(() => {
@@ -24,21 +29,47 @@ export function useDnaLink({onInvalidLink}) {
     }
   }, [])
 
-  return {url, method: url && dnaLinkMethod(url)}
-}
+  const [method, setMethod] = React.useState()
 
-export function useDnaVoteUrl() {
-  const {url, method} = useDnaLink()
-
-  const router = useRouter()
+  const [params, setParams] = React.useState()
 
   React.useEffect(() => {
-    if (method === 'vote') {
-      const {address} = parseQuery(url)
-      if (!areSameCaseInsensitive(router.asPath, viewVotingHref(address))) {
-        router.push(viewVotingHref(address))
-        return null
-      }
+    if (isValidDnaUrl(url)) {
+      setMethod(dnaLinkMethod(url))
+
+      const {
+        callback_url: callbackUrl,
+        callback_format: callbackFormat,
+        ...dnaQueryParams
+      } = extractQueryParams(url)
+
+      setParams({
+        ...dnaQueryParams,
+        callbackUrl,
+        callbackFormat,
+      })
     }
-  }, [method, router, url])
+  }, [url])
+
+  React.useEffect(() => {
+    if (!isValidDnaUrl(url)) {
+      global.logger.error('Receieved invalid dna url', url)
+      if (onInvalidLink) onInvalidLink(url)
+    }
+  }, [onInvalidLink, url])
+
+  return {url, method, params}
+}
+
+export function useDnaLinkMethod(method, {onReceive, onInvalidLink}) {
+  const dnaLink = useDnaLink({onInvalidLink})
+  const {method: currentMethod} = dnaLink
+
+  React.useEffect(() => {
+    if (currentMethod === method) {
+      if (onReceive) onReceive(dnaLink.url)
+    }
+  }, [currentMethod, dnaLink.url, method, onReceive])
+
+  return dnaLink
 }

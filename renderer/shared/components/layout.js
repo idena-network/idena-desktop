@@ -41,7 +41,6 @@ import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {
   DnaSignInDialog,
   DnaSendDialog,
-  DnaLinkHandler,
   DnaRawTxDialog,
   DnaSendFailedDialog,
   DnaSendSucceededDialog,
@@ -76,7 +75,7 @@ import {useChainState} from '../providers/chain-context'
 import {useNode} from '../providers/node-context'
 import {useSettings} from '../providers/settings-context'
 import {useFailToast} from '../hooks/use-toast'
-import {useDnaLink} from '../../screens/dna-link/hooks'
+import {DnaLinkMethod, useDnaLinkMethod} from '../../screens/dna-link/hooks'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -155,7 +154,14 @@ export default function Layout({
     }
   }, [confirmQuitDisclosure, isReady, runInternalNode])
 
-  const {url: dnaUrl, method: dnaLinkMethod} = useDnaLink({
+  const {onOpen: onOpenSignInDialog, ...dnaSignInDisclosure} = useDisclosure()
+
+  const handleReceiveDnaSignInLink = React.useCallback(() => {
+    if (isNotOffline) onOpenSignInDialog()
+  }, [isNotOffline, onOpenSignInDialog])
+
+  const {params: dnaSignInParams} = useDnaLinkMethod(DnaLinkMethod.SignIn, {
+    onReceive: handleReceiveDnaSignInLink,
     onInvalidLink: () => {
       failToast({
         title: t('Invalid DNA link'),
@@ -163,13 +169,6 @@ export default function Layout({
       })
     },
   })
-
-  const dnaSigninDisclosure = useDisclosure()
-  const {onOpen} = dnaSigninDisclosure
-
-  React.useEffect(() => {
-    if (isNotOffline && dnaLinkMethod === 'signin') onOpen()
-  }, [dnaLinkMethod, isNotOffline, onOpen])
 
   return (
     <LayoutContainer>
@@ -191,13 +190,11 @@ export default function Layout({
         </>
       )}
 
-      {dnaUrl && (
-        <DnaSignInDialog
-          url={dnaUrl}
-          onSigninError={failToast}
-          {...dnaSigninDisclosure}
-        />
-      )}
+      <DnaSignInDialog
+        {...dnaSignInParams}
+        {...dnaSignInDisclosure}
+        onSignInError={failToast}
+      />
 
       <UpdateExternalNodeDialog />
 
@@ -268,41 +265,60 @@ function NormalApp({children}) {
 
   const [dnaSendResponse, setDnaSendResponse] = React.useState()
 
+  const handleInvalidDnaLink = React.useCallback(() => {
+    failToast({
+      title: t('Invalid DNA link'),
+      description: t(`You must provide valid URL including protocol version`),
+    })
+  }, [failToast, t])
+
+  const dnaSendDisclosure = useDisclosure()
+
+  const {params: dnaSendParams} = useDnaLinkMethod(DnaLinkMethod.Send, {
+    onReceive: dnaSendDisclosure.onOpen,
+    onInvalidLink: handleInvalidDnaLink,
+  })
+
+  const dnaRawTxDisclosure = useDisclosure()
+
+  const {params: dnaRawTxParams} = useDnaLinkMethod(DnaLinkMethod.RawTx, {
+    onReceive: dnaRawTxDisclosure.onOpen,
+    onInvalidLink: handleInvalidDnaLink,
+  })
+
   return (
     <Flex as="section" direction="column" flex={1} h="100vh" overflowY="auto">
       {children}
 
       {epoch && <ValidationToast epoch={epoch} identity={identity} />}
 
-      <DnaLinkHandler>
-        <DnaSendDialog
-          isOpen={url => new URL(url).pathname.includes('send')}
-          onDepositSuccess={({hash, url}) => {
-            setDnaSendResponse({hash, url})
-            dnaSendSucceededDisclosure.onOpen()
-          }}
-          onDepositError={({error, url}) => {
-            setDnaSendResponse({error, url})
-            dnaSendFailedDisclosure.onOpen()
-          }}
-          onSendTxFailed={failToast}
-        />
-      </DnaLinkHandler>
+      <DnaSendDialog
+        {...dnaSendParams}
+        {...dnaSendDisclosure}
+        onDepositSuccess={({hash, url}) => {
+          setDnaSendResponse({hash, url})
+          dnaSendSucceededDisclosure.onOpen()
+        }}
+        onDepositError={({error, url}) => {
+          setDnaSendResponse({error, url})
+          dnaSendFailedDisclosure.onOpen()
+        }}
+        onSendTxFailed={failToast}
+      />
 
-      <DnaLinkHandler>
-        <DnaRawTxDialog
-          isOpen={url => new URL(url).pathname.includes('raw')}
-          onSendSuccess={({hash, url}) => {
-            setDnaSendResponse({hash, url})
-            dnaSendSucceededDisclosure.onOpen()
-          }}
-          onSendError={({error, url}) => {
-            setDnaSendResponse({error, url})
-            dnaSendFailedDisclosure.onOpen()
-          }}
-          onSendRawTxFailed={failToast}
-        />
-      </DnaLinkHandler>
+      <DnaRawTxDialog
+        {...dnaRawTxParams}
+        {...dnaRawTxDisclosure}
+        onSendSuccess={({hash, url}) => {
+          setDnaSendResponse({hash, url})
+          dnaSendSucceededDisclosure.onOpen()
+        }}
+        onSendError={({error, url}) => {
+          setDnaSendResponse({error, url})
+          dnaSendFailedDisclosure.onOpen()
+        }}
+        onSendRawTxFailed={failToast}
+      />
 
       <DnaSendSucceededDialog
         {...dnaSendResponse}

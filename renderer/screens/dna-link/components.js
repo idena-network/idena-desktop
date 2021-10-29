@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
 import {
   Alert,
@@ -21,10 +20,8 @@ import {
   authenticate,
   signNonce,
   isValidUrl,
-  parseQuery,
   sendDna,
   DNA_SEND_CONFIRM_TRESHOLD,
-  isValidDnaUrl,
   Transaction,
   appendTxHash,
   handleCallbackUrl,
@@ -40,108 +37,38 @@ import {
   Input,
   Tooltip,
 } from '../../shared/components/components'
-import {areSameCaseInsensitive, viewVotingHref} from '../oracles/utils'
 import {callRpc} from '../../shared/utils/utils'
-import {useFailToast} from '../../shared/hooks/use-toast'
 
-export function DnaLinkHandler({children}) {
-  const router = useRouter()
-
-  const [dnaUrl, setDnaUrl] = React.useState()
-
-  const toastFail = useFailToast()
-
-  const {t} = useTranslation()
-
-  React.useEffect(() => {
-    if (dnaUrl && !isValidDnaUrl(dnaUrl))
-      toastFail({
-        title: t('Invalid DNA link'),
-        description: t(`You must provide valid URL including protocol version`),
-      })
-  }, [dnaUrl, t, toastFail])
-
-  React.useEffect(() => {
-    if (global.isDev) return
-    global.ipcRenderer.invoke('CHECK_DNA_LINK').then(setDnaUrl)
-  }, [])
-
-  React.useEffect(() => {
-    const handleDnaLink = (_, e) => setDnaUrl(e)
-    global.ipcRenderer.on('DNA_LINK', handleDnaLink)
-    return () => {
-      global.ipcRenderer.removeListener('DNA_LINK', handleDnaLink)
-    }
-  }, [])
-
-  if (isValidDnaUrl(dnaUrl) && new URL(dnaUrl).pathname.includes('vote')) {
-    const {address} = parseQuery(dnaUrl)
-    if (!areSameCaseInsensitive(router.asPath, viewVotingHref(address))) {
-      router.push(viewVotingHref(address))
-      return null
-    }
-  }
-
-  return isValidDnaUrl(dnaUrl) &&
-    React.Children.only(children).props.isOpen(dnaUrl)
-    ? React.cloneElement(children, {url: dnaUrl, onHide: () => setDnaUrl(null)})
-    : null
-}
-
-export function DnaSignInDialog({url, onSigninError, ...props}) {
+export function DnaSignInDialog({
+  callback_url: callbackUrl = 'https://idena.io',
+  token,
+  nonce_endpoint: nonceEndpoint,
+  authentication_endpoint: authenticationEndpoint,
+  favicon_url: faviconUrl,
+  onSignInError,
+  onClose,
+  ...props
+}) {
   const {t} = useTranslation()
 
   const initialRef = React.useRef()
 
   const {address} = useIdentityState()
 
-  const [dnaSigninParams, setDnaSigninParams] = React.useState({})
+  const callbackUrlObject = React.useMemo(() => new URL(callbackUrl), [
+    callbackUrl,
+  ])
 
-  React.useEffect(() => {
-    if (url) {
-      const {
-        callback_url: callbackUrl,
-        token,
-        nonce_endpoint: nonceEndpoint,
-        authentication_endpoint: authenticationEndpoint,
-        favicon_url: faviconUrl,
-      } = parseQuery(url)
-
-      let callbackHostname = callbackUrl
-      let callbackFaviconUrl
-
-      const parsedCallbackUrl = new URL(callbackUrl)
-
-      callbackHostname = parsedCallbackUrl.hostname || callbackUrl
-
-      try {
-        callbackFaviconUrl =
-          faviconUrl || new URL('favicon.ico', parsedCallbackUrl.origin)
-      } catch {
-        global.logger.error(
-          'Failed to construct favicon url from callback url',
-          callbackUrl,
-          parsedCallbackUrl
-        )
-      }
-
-      setDnaSigninParams({
-        token,
-        authenticationEndpoint,
-        nonceEndpoint,
-        callbackUrl,
-        callbackHostname,
-        callbackFaviconUrl,
-      })
-    }
-  }, [url])
-
-  const {onClose} = props
+  const callbackFaviconUrl = React.useMemo(
+    () => faviconUrl || new URL('favicon.ico', callbackUrlObject.origin),
+    [callbackUrlObject.origin, faviconUrl]
+  )
 
   return (
     <Dialog
       initialFocusRef={initialRef}
       title={t('Login confirmation')}
+      onClose={onClose}
       {...props}
     >
       <DialogBody>
@@ -156,13 +83,13 @@ export function DnaSignInDialog({url, onSigninError, ...props}) {
               <Box>
                 <DnaDialogPanelLabel>{t('Website')}</DnaDialogPanelLabel>
                 <DnaDialogPanelValue>
-                  {dnaSigninParams.callbackHostname}
+                  {callbackUrlObject.hostname || callbackUrl}
                 </DnaDialogPanelValue>
               </Box>
               <PanelMediaCell>
-                {dnaSigninParams.callbackFaviconUrl ? (
+                {callbackFaviconUrl ? (
                   <Image
-                    src={dnaSigninParams.callbackFaviconUrl}
+                    src={callbackFaviconUrl}
                     ignoreFallback
                     borderRadius="md"
                     h={10}
@@ -187,7 +114,7 @@ export function DnaSignInDialog({url, onSigninError, ...props}) {
             </PanelRow>
           </DnaDialogPanel>
           <DnaDialogPanelDivider />
-          <DnaDialogPanel label={t('Token')} value={dnaSigninParams.token} />
+          <DnaDialogPanel label={t('Token')} value={token} />
         </DnaDialogDetails>
       </DialogBody>
       <DnaDialogFooter>
@@ -199,13 +126,6 @@ export function DnaSignInDialog({url, onSigninError, ...props}) {
           wordBreak="break-all"
           ref={initialRef}
           onClick={async () => {
-            const {
-              token,
-              authenticationEndpoint,
-              nonceEndpoint,
-              callbackUrl,
-            } = dnaSigninParams
-
             startSession(nonceEndpoint, {
               token,
               address,
@@ -219,11 +139,11 @@ export function DnaSignInDialog({url, onSigninError, ...props}) {
               )
               .then(() => {
                 if (isValidUrl(callbackUrl)) global.openExternal(callbackUrl)
-                else onSigninError('Invalid callback URL')
+                else onSignInError('Invalid callback URL')
               })
               .catch(({message}) => {
                 global.logger.error(message)
-                if (onSigninError) onSigninError(message)
+                if (onSignInError) onSignInError(message)
               })
               .finally(onClose)
           }}
@@ -236,42 +156,42 @@ export function DnaSignInDialog({url, onSigninError, ...props}) {
 }
 
 export function DnaSendDialog({
-  url,
-  onHide,
+  address: to,
+  amount,
+  comment,
+  callbackUrl,
+  callbackFormat,
   onDepositSuccess,
   onDepositError,
   onSendTxFailed,
+  onClose,
   ...props
 }) {
   const {t} = useTranslation()
 
   const {address: from, balance} = useIdentityState()
 
-  const {
-    address: to,
+  const shouldConfirmTx = React.useMemo(
+    () => amount / balance > DNA_SEND_CONFIRM_TRESHOLD,
+    [amount, balance]
+  )
+
+  const [confirmationAmount, setConfirmationAmount] = React.useState()
+
+  const areSameAmounts = React.useMemo(() => +confirmationAmount === +amount, [
     amount,
-    comment,
-    callback_url: callbackUrl,
-    callback_format: callbackFormat,
-  } = parseQuery(url)
+    confirmationAmount,
+  ])
 
-  const shouldConfirmTx = amount / balance > DNA_SEND_CONFIRM_TRESHOLD
-
-  const [confirmAmount, setConfirmAmount] = React.useState()
-
-  const areSameAmounts = +confirmAmount === +amount
-  const isExceededBalance = +amount > balance
+  const isExceededBalance = React.useMemo(() => +amount > balance, [
+    amount,
+    balance,
+  ])
 
   const [isSubmitting, setIsSubmitting] = React.useState()
 
   return (
-    <Dialog
-      isOpen={url}
-      onClose={onHide}
-      m={0}
-      title={t('Confirm transfer')}
-      {...props}
-    >
+    <Dialog title={t('Confirm transfer')} onClose={onClose} {...props}>
       <DialogBody>
         <DnaDialogSubtitle>
           {t(
@@ -328,10 +248,10 @@ export function DnaSendDialog({
             </FormLabel>
             <Input
               disabled={isExceededBalance}
-              value={confirmAmount}
-              onChange={e => setConfirmAmount(e.target.value)}
+              value={confirmationAmount}
+              onChange={e => setConfirmationAmount(e.target.value)}
             />
-            {Number.isFinite(+confirmAmount) && !areSameAmounts && (
+            {Number.isFinite(+confirmationAmount) && !areSameAmounts && (
               <AlertText>
                 {t('Entered amount does not match target amount')}
               </AlertText>
@@ -340,7 +260,7 @@ export function DnaSendDialog({
         )}
       </DialogBody>
       <DnaDialogFooter>
-        <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
+        <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
         <PrimaryButton
           isDisabled={isExceededBalance || (shouldConfirmTx && !areSameAmounts)}
           isLoading={isSubmitting}
@@ -370,7 +290,6 @@ export function DnaSendDialog({
                   )
 
                   await handleCallbackUrl(callbackUrlWithHash, callbackFormat, {
-                    // eslint-disable-next-line no-shadow
                     onJson: ({success, error, url}) => {
                       if (success) {
                         onDepositSuccess({hash, url})
@@ -385,7 +304,6 @@ export function DnaSendDialog({
                         })
                       }
                     },
-                    // eslint-disable-next-line no-shadow
                     onHtml: ({url}) => onDepositSuccess({hash, url}),
                   })
                     .catch(error => {
@@ -406,7 +324,7 @@ export function DnaSendDialog({
                 global.logger.error(message)
                 onSendTxFailed(message)
               })
-              .finally(onHide)
+              .finally(onClose)
           }}
         >
           {t('Confirm')}
@@ -417,8 +335,10 @@ export function DnaSendDialog({
 }
 
 export function DnaRawTxDialog({
-  url,
-  onHide,
+  tx,
+  callbackUrl,
+  callbackFormat,
+  onClose,
   onSendSuccess,
   onSendError,
   onSendRawTxFailed,
@@ -428,33 +348,35 @@ export function DnaRawTxDialog({
 
   const {balance} = useIdentityState()
 
-  const {
-    tx: rawTx,
-    callback_url: callbackUrl,
-    callback_format: callbackFormat,
-  } = parseQuery(url)
+  const {amount, to} = React.useMemo(() => {
+    if (tx) {
+      const {amount: txAmount, ...restTx} = new Transaction().fromHex(tx)
+      return {amount: +txAmount / 10 ** 18, ...restTx}
+    }
+    return {amount: null, to: null}
+  }, [tx])
 
-  const {amount: rawAmount, to} = new Transaction().fromHex(rawTx)
+  const [confirmationAmount, setConfirmationAmount] = React.useState()
 
-  const amount = rawAmount / 10 ** 18
+  const shouldConfirmTx = React.useMemo(
+    () => amount / balance > DNA_SEND_CONFIRM_TRESHOLD,
+    [amount, balance]
+  )
 
-  const shouldConfirmTx = amount / balance > DNA_SEND_CONFIRM_TRESHOLD
+  const didConfirmAmount = React.useMemo(
+    () => +confirmationAmount === +amount,
+    [amount, confirmationAmount]
+  )
 
-  const [confirmAmount, setConfirmAmount] = React.useState()
-
-  const areSameAmounts = +confirmAmount === +amount
-  const isExceededBalance = +amount > balance
+  const isExceededBalance = React.useMemo(() => +amount > balance, [
+    amount,
+    balance,
+  ])
 
   const [isSubmitting, setIsSubmitting] = React.useState()
 
   return (
-    <Dialog
-      isOpen={url}
-      onClose={onHide}
-      m={0}
-      title={t('Confirm transaction')}
-      {...props}
-    >
+    <Dialog m={0} title={t('Confirm transaction')} onClose={onClose} {...props}>
       <DialogBody>
         <DnaDialogSubtitle>
           {t('You’re about to sign and send tx from your wallet')}
@@ -501,7 +423,7 @@ export function DnaRawTxDialog({
           />
           <DnaDialogPanelDivider />
           <DnaDialogPanel label={t('Transaction details')}>
-            <Tooltip label={rawTx} zIndex="tooltip" wordBreak="break-all">
+            <Tooltip label={tx} zIndex="tooltip" wordBreak="break-all">
               <Text
                 display="-webkit-box"
                 overflow="hidden"
@@ -511,7 +433,7 @@ export function DnaRawTxDialog({
                 }}
                 wordBreak="break-all"
               >
-                {rawTx}
+                {tx}
               </Text>
             </Tooltip>
           </DnaDialogPanel>
@@ -523,10 +445,10 @@ export function DnaRawTxDialog({
             </FormLabel>
             <Input
               disabled={isExceededBalance}
-              value={confirmAmount}
-              onChange={e => setConfirmAmount(e.target.value)}
+              value={confirmationAmount}
+              onChange={e => setConfirmationAmount(e.target.value)}
             />
-            {Number.isFinite(+confirmAmount) && !areSameAmounts && (
+            {Number.isFinite(+confirmationAmount) && !didConfirmAmount && (
               <AlertText>
                 {t('Entered amount does not match target amount')}
               </AlertText>
@@ -535,14 +457,16 @@ export function DnaRawTxDialog({
         )}
       </DialogBody>
       <DnaDialogFooter>
-        <SecondaryButton onClick={onHide}>{t('Cancel')}</SecondaryButton>
+        <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
         <PrimaryButton
-          isDisabled={isExceededBalance || (shouldConfirmTx && !areSameAmounts)}
+          isDisabled={
+            isExceededBalance || (shouldConfirmTx && !didConfirmAmount)
+          }
           isLoading={isSubmitting}
           onClick={async () => {
             new Promise((resolve, reject) => {
               if (shouldConfirmTx) {
-                return areSameAmounts
+                return didConfirmAmount
                   ? resolve()
                   : reject(
                       new Error(
@@ -553,7 +477,7 @@ export function DnaRawTxDialog({
               return resolve()
             })
               .then(() => setIsSubmitting(true))
-              .then(() => callRpc('bcn_sendRawTx', rawTx))
+              .then(() => callRpc('bcn_sendRawTx', tx))
               .then(async hash => {
                 if (isValidUrl(callbackUrl)) {
                   const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
@@ -601,7 +525,7 @@ export function DnaRawTxDialog({
                 global.logger.error(message)
                 onSendRawTxFailed(message)
               })
-              .finally(onHide)
+              .finally(onClose)
           }}
         >
           {t('Confirm')}
