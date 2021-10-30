@@ -218,7 +218,7 @@
   "Please check your local clock. The time must be synchronized with internet time in order to have connections with other peers.": "Пожалуйста проверьте точность локальных часов. Время должно быть синхронизировано со временем в интернете, для возможности связи с другими узлами.",
   "Active": "Активные",
   "Drafts": "В черновиках",
-  "Archived": "В архвиве",
+  "Archived": "В архиве",
   "Add flip": "Добавить флип",
   "Please submit required flips.": "Пожалуйста, отправьте {{remainingRequiredFlips}} требуемый/ых флипа",
   "You can also submit optional flips if you want.": "Вы также можете отправить  {{remainingOptionalFlips}} дополнительные флипы, если хотите.",
