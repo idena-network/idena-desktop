@@ -681,7 +681,7 @@
   "Kill": "無効化",
   "Terminate invitation": "招待を取り消す",
   "Scan QR by your mobile phone or copy code below for export private key.": "携帯電話でQRを読み取るか、下記のコードをコピーして秘密鍵をエクスポートしてください。",
-  "You haven’t submitted your answers in time. This validation session is over.": "回答の提出が間に合っていません。この認証セッションは終了です。",
+  "You haven’t submitted your answers in time. This validation session is over.": "回答の提出が間に合いませんでした。この認証セッションは終了です。",
   "Come back again to participate in the next validation session.": "次の認証セッションに参加するために、もう一度戻ってきてください。",
   "Please wait. The network is reaching consensus on validated identities": "お待ちください。ネットワークは有効なIDのコンセンサスに達しています",
   "Can not start built-in node. The minimum required version is macOS Catalina": "内蔵ノードを起動できません。最小限必要なバージョンはmacOS Catalinaです。",
