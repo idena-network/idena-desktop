@@ -157,10 +157,14 @@ export default function Layout({
   React.useEffect(() => {
     const handleRequestQuit = async () => {
       if (isReady) {
-        const {online} = await callRpc('dna_identity')
-        if (online && runInternalNode && isReady) {
-          onOpenConfirmQuit()
-        } else {
+        try {
+          const {online} = await callRpc('dna_identity')
+          if (online && runInternalNode && isReady) {
+            onOpenConfirmQuit()
+          } else {
+            sendConfirmQuit()
+          }
+        } catch {
           sendConfirmQuit()
         }
       } else {
