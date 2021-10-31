@@ -63,13 +63,13 @@ export function useDnaLink({onInvalidLink}) {
 
 export function useDnaLinkMethod(method, {onReceive, onInvalidLink}) {
   const dnaLink = useDnaLink({onInvalidLink})
-  const {method: currentMethod} = dnaLink
+  const {url, method: currentMethod} = dnaLink
 
   React.useEffect(() => {
     if (currentMethod === method) {
-      if (onReceive) onReceive(dnaLink.url)
+      if (onReceive) onReceive(url)
     }
-  }, [currentMethod, dnaLink.url, method, onReceive])
+  }, [currentMethod, method, onReceive, url])
 
   return dnaLink
 }
