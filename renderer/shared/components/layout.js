@@ -75,7 +75,12 @@ import {useChainState} from '../providers/chain-context'
 import {useNode} from '../providers/node-context'
 import {useSettings} from '../providers/settings-context'
 import {useFailToast} from '../hooks/use-toast'
-import {DnaLinkMethod, useDnaLinkMethod} from '../../screens/dna-link/hooks'
+import {
+  DnaLinkMethod,
+  useDnaLinkMethod,
+  useDnaLinkRedirect,
+} from '../../screens/dna-link/hooks'
+import {viewVotingHref} from '../../screens/oracles/utils'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -285,6 +290,22 @@ function NormalApp({children}) {
     onReceive: dnaRawTxDisclosure.onOpen,
     onInvalidLink: handleInvalidDnaLink,
   })
+
+  useDnaLinkRedirect(
+    DnaLinkMethod.Invite,
+    ({address}) => `/contacts?new&address=${address}`,
+    {
+      onInvalidLink: handleInvalidDnaLink,
+    }
+  )
+
+  useDnaLinkRedirect(
+    DnaLinkMethod.Vote,
+    ({address}) => viewVotingHref(address),
+    {
+      onInvalidLink: handleInvalidDnaLink,
+    }
+  )
 
   return (
     <Flex as="section" direction="column" flex={1} h="100vh" overflowY="auto">
