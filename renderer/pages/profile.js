@@ -204,6 +204,12 @@ export default function ProfilePage() {
 
   const totalScore = useTotalValidationScore()
 
+  const canSubmitFlips = [
+    IdentityStatus.Verified,
+    IdentityStatus.Human,
+    IdentityStatus.Newbie,
+  ].includes(status)
+
   return (
     <>
       <InviteProvider>
@@ -477,6 +483,7 @@ export default function ProfilePage() {
                     <IconLink
                       href="/flips/new"
                       icon={<Icon name="photo" size={5} />}
+                      isDisabled={!canSubmitFlips}
                       maxW={200}
                     >
                       {t('New flip')}
