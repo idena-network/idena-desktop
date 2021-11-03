@@ -44,7 +44,7 @@ import {
   DnaRawDialog,
   DnaSendFailedDialog,
   DnaSendSucceededDialog,
-} from '../../screens/dna-link/containers'
+} from '../../screens/dna/containers'
 import {ValidationToast} from '../../screens/validation/components'
 import {
   useAutoUpdateState,
@@ -79,7 +79,7 @@ import {
   DnaLinkMethod,
   useDnaLinkMethod,
   useDnaLinkRedirect,
-} from '../../screens/dna-link/hooks'
+} from '../../screens/dna/hooks'
 import {viewVotingHref} from '../../screens/oracles/utils'
 
 global.getZoomLevel = global.getZoomLevel || {}

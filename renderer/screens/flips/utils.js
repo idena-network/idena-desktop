@@ -6,7 +6,7 @@ import {loadPersistentStateValue, persistItem} from '../../shared/utils/persist'
 import {FlipType} from '../../shared/types'
 import {areSame, areEual} from '../../shared/utils/arr'
 import {submitFlip} from '../../shared/api/dna'
-import {signNonce} from '../dna-link/utils'
+import {signNonce} from '../dna/utils'
 import i18n from '../../i18n'
 
 export const FLIP_LENGTH = 4
