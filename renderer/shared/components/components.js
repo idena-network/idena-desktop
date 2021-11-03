@@ -40,6 +40,7 @@ import {
   Link,
   Progress as ChakraProgress,
   Heading,
+  FormControl,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -119,6 +120,15 @@ export function DrawerFooter(props) {
 
 export function FormLabel(props) {
   return <ChakraFormLabel fontWeight={500} color="brandGray.500" {...props} />
+}
+
+export function FormControlWithLabel({label, children, ...props}) {
+  return (
+    <FormControl {...props}>
+      <FormLabel mb={2}>{label}</FormLabel>
+      {children}
+    </FormControl>
+  )
 }
 
 // eslint-disable-next-line react/display-name

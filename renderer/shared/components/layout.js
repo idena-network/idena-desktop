@@ -41,10 +41,10 @@ import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {
   DnaSignInDialog,
   DnaSendDialog,
-  DnaRawTxDialog,
+  DnaRawDialog,
   DnaSendFailedDialog,
   DnaSendSucceededDialog,
-} from '../../screens/dna-link/components'
+} from '../../screens/dna-link/containers'
 import {ValidationToast} from '../../screens/validation/components'
 import {
   useAutoUpdateState,
@@ -165,7 +165,14 @@ export default function Layout({
     if (isNotOffline) onOpenSignInDialog()
   }, [isNotOffline, onOpenSignInDialog])
 
-  const {params: dnaSignInParams} = useDnaLinkMethod(DnaLinkMethod.SignIn, {
+  const {
+    params: {
+      nonce_endpoint: nonceEndpoint,
+      authentication_endpoint: authenticationEndpoint,
+      favicon_url: faviconUrl,
+      ...dnaSignInParams
+    },
+  } = useDnaLinkMethod(DnaLinkMethod.SignIn, {
     onReceive: handleReceiveDnaSignInLink,
     onInvalidLink: () => {
       failToast({
@@ -195,11 +202,16 @@ export default function Layout({
         </>
       )}
 
-      <DnaSignInDialog
-        {...dnaSignInParams}
-        {...dnaSignInDisclosure}
-        onSignInError={failToast}
-      />
+      {Boolean(authenticationEndpoint) && (
+        <DnaSignInDialog
+          authenticationEndpoint={authenticationEndpoint}
+          nonceEndpoint={nonceEndpoint}
+          faviconUrl={faviconUrl}
+          {...dnaSignInParams}
+          {...dnaSignInDisclosure}
+          onSignInError={failToast}
+        />
+      )}
 
       <UpdateExternalNodeDialog />
 
@@ -327,7 +339,7 @@ function NormalApp({children}) {
         onSendTxFailed={failToast}
       />
 
-      <DnaRawTxDialog
+      <DnaRawDialog
         {...dnaRawTxParams}
         {...dnaRawTxDisclosure}
         onSendSuccess={({hash, url}) => {

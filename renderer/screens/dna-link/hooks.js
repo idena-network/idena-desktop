@@ -33,7 +33,7 @@ export function useDnaLink({onInvalidLink}) {
 
   const [method, setMethod] = React.useState()
 
-  const [params, setParams] = React.useState()
+  const [params, setParams] = React.useState({})
 
   React.useEffect(() => {
     if (isValidDnaUrl(url)) {
