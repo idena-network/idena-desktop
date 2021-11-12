@@ -600,7 +600,9 @@ function CurrentTask({epoch, period, identity}) {
 
       switch (true) {
         case canActivateInvite:
-          return t('Activate invite')
+          return status === IdentityStatus.Invite
+            ? t('Accept invitation')
+            : t('Activate invitation')
 
         case currentOnboarding.matches(OnboardingStep.ActivateMining): {
           return t('Activate mining status')
