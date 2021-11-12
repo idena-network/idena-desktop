@@ -426,13 +426,18 @@ export function ContactCard({
   )
 }
 
-export function IssueInviteDrawer({onIssue, onIssueFail, ...props}) {
+export function IssueInviteDrawer({
+  inviteeAddress,
+  onIssue,
+  onIssueFail,
+  ...props
+}) {
   const {t} = useTranslation()
 
   const {
     isOpen: isOpenAdvancedOptions,
     onToggle: onToggleAdvancedOptions,
-  } = useDisclosure()
+  } = useDisclosure(Boolean(inviteeAddress))
 
   const {addInvite} = useInviteDispatch()
 
@@ -508,7 +513,11 @@ export function IssueInviteDrawer({onIssue, onIssueFail, ...props}) {
             <Collapse isOpen={isOpenAdvancedOptions} mt={4}>
               <FormControl>
                 <FormLabel htmlFor="address">{t('Address')}</FormLabel>
-                <Input id="address" placeholder="Invitee address" />
+                <Input
+                  id="address"
+                  defaultValue={inviteeAddress}
+                  placeholder="Invitee address"
+                />
               </FormControl>
             </Collapse>
           </Box>
