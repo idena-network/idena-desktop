@@ -84,6 +84,8 @@ global.getZoomLevel = global.getZoomLevel || {}
 
 const AVAILABLE_TIMEOUT = global.isDev || global.isTest ? 0 : 1000 * 5
 
+const sendConfirmQuit = () => global.ipcRenderer.send('confirm-quit')
+
 export default function Layout({
   loading,
   syncing,
@@ -148,18 +150,25 @@ export default function Layout({
 
   const isNotOffline = !debouncedOffline && !loading
 
-  const confirmQuitDisclosure = useDisclosure()
+  const {onOpen: onOpenConfirmQuit, ...confirmQuitDisclosure} = useDisclosure()
 
   const [{runInternalNode}] = useSettings()
 
   React.useEffect(() => {
     const handleRequestQuit = async () => {
-      const {online} = await callRpc('dna_identity')
-
-      if (online && runInternalNode && isReady) {
-        confirmQuitDisclosure.onOpen()
+      if (isReady) {
+        try {
+          const {online} = await callRpc('dna_identity')
+          if (online && runInternalNode && isReady) {
+            onOpenConfirmQuit()
+          } else {
+            sendConfirmQuit()
+          }
+        } catch {
+          sendConfirmQuit()
+        }
       } else {
-        global.ipcRenderer.send('confirm-quit')
+        sendConfirmQuit()
       }
     }
 
@@ -168,7 +177,7 @@ export default function Layout({
     return () => {
       global.ipcRenderer.removeListener('confirm-quit', handleRequestQuit)
     }
-  }, [confirmQuitDisclosure, isReady, runInternalNode])
+  }, [isReady, onOpenConfirmQuit, runInternalNode])
 
   const {onOpen: onOpenSignInDialog, ...dnaSignInDisclosure} = useDisclosure()
 
@@ -1014,11 +1023,7 @@ function ConfirmQuitDialog({onClose, onError, ...props}) {
         <AlertDialogFooter p={0}>
           <Stack isInline justify="flex-end">
             <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
-            <SecondaryButton
-              onClick={() => {
-                global.ipcRenderer.send('confirm-quit')
-              }}
-            >
+            <SecondaryButton onClick={sendConfirmQuit}>
               {t('Exit')}
             </SecondaryButton>
             <PrimaryButton
@@ -1026,7 +1031,7 @@ function ConfirmQuitDialog({onClose, onError, ...props}) {
               onClick={async () => {
                 try {
                   await callRpc('dna_becomeOffline', {})
-                  global.ipcRenderer.send('confirm-quit')
+                  sendConfirmQuit()
                 } catch (error) {
                   onError(error?.message)
                 }
