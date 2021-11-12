@@ -110,8 +110,17 @@ export function InviteProvider({children}) {
       }
     }
 
-    fetchData(db.getInvites()).catch(e => {
-      global.logger.error('An error occured while fetching identity', e.message)
+    fetchData([
+      ...db.getInvites(),
+      ...(invitees ?? []).map(({Address, TxHash}) => ({
+        hash: TxHash,
+        receiver: Address,
+      })),
+    ]).catch(e => {
+      global.logger.error(
+        'An error occured while processing invitations',
+        e.message
+      )
     })
 
     setActivationTx(db.getActivationTx())
