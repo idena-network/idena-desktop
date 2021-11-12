@@ -3,8 +3,6 @@ import {AUTO_UPDATE_EVENT, AUTO_UPDATE_COMMAND} from '../../../main/channels'
 import {useSettingsState} from './settings-context'
 import {useInterval} from '../hooks/use-interval'
 import {fetchNodeVersion} from '../api/dna'
-import {isHardFork} from '../utils/node'
-import {requestDb} from '../utils/db'
 
 export const TOGGLE_NODE_SWITCHER = 'TOGGLE_NODE_SWITCHER'
 export const SAVE_EXTERNAL_URL = 'SAVE_EXTERNAL_URL'
@@ -171,18 +169,6 @@ export function AutoUpdateProvider({children}) {
     true
   )
 
-  const hardForkVotingKey = version => `hardForkVoting!!${version}`
-
-  const [hardForkVoting, setHardForkVoting] = React.useState('unknown')
-
-  React.useEffect(() => {
-    global
-      .sub(requestDb(), 'updates')
-      .get(hardForkVotingKey(state.nodeRemoteVersion))
-      .then(setHardForkVoting)
-      .catch(() => setHardForkVoting('unknown'))
-  }, [state.nodeRemoteVersion])
-
   const canUpdateClient = state.uiUpdateReady
 
   const canUpdateNode =
@@ -191,12 +177,6 @@ export function AutoUpdateProvider({children}) {
       state.nodeUpdateReady &&
       state.nodeRemoteVersion !== state.nodeCurrentVersion) ||
       (settings.useExternalNode && state.nodeUpdateAvailable))
-
-  const mustUpdateNode =
-    state.nodeCurrentVersion !== '0.0.1' &&
-    canUpdateNode &&
-    hardForkVoting !== 'reject' &&
-    isHardFork(state.nodeCurrentVersion, state.nodeRemoteVersion)
 
   const updateClient = () => {
     global.ipcRenderer.send(AUTO_UPDATE_COMMAND, 'update-ui')
@@ -211,20 +191,6 @@ export function AutoUpdateProvider({children}) {
     }
   }
 
-  const onRejectHardFork = () => {
-    global
-      .sub(requestDb(), 'updates')
-      .put(hardForkVotingKey(state.nodeRemoteVersion), 'reject')
-      .then(() => setHardForkVoting('reject'))
-  }
-
-  const onResetHardForkVoing = () => {
-    global
-      .sub(requestDb(), 'updates')
-      .put(hardForkVotingKey(state.nodeRemoteVersion), 'unknown')
-      .then(() => setHardForkVoting('unknown'))
-  }
-
   const hideExternalNodeUpdateModal = () => {
     dispatch({type: HIDE_EXTERNAL_UPDATE_MODAL})
   }
@@ -235,7 +201,6 @@ export function AutoUpdateProvider({children}) {
         ...state,
         canUpdateClient,
         canUpdateNode,
-        mustUpdateNode,
       }}
     >
       <AutoUpdateDispatchContext.Provider
@@ -243,8 +208,6 @@ export function AutoUpdateProvider({children}) {
           updateClient,
           updateNode,
           hideExternalNodeUpdateModal,
-          onRejectHardFork,
-          onResetHardForkVoing,
         }}
       >
         {children}

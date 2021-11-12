@@ -152,3 +152,12 @@ export function calculateInvitationRewardRatio(
 
 export const apiMethod = method =>
   new URL(method, new URL('https://api.idena.io/api/'))
+
+export function skipSSR(expr) {
+  // eslint-disable-next-line no-nested-ternary
+  return typeof window === 'undefined'
+    ? null
+    : typeof expr === 'function'
+    ? expr()
+    : expr
+}

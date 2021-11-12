@@ -46,12 +46,16 @@ import {
   eitherState,
   formatValidationDate,
 } from '../utils/utils'
-import {isHardFork} from '../utils/node'
 import {ExternalLink, Tooltip} from './components'
 import {useTimingState} from '../providers/timing-context'
 import {TodoVotingCountBadge} from '../../screens/oracles/components'
 
-export default function Sidebar() {
+export default function Sidebar({
+  isForkAvailable,
+  didActivateFork,
+  didRejectFork,
+  onResetForkVoting,
+}) {
   return (
     <Flex
       as="section"
@@ -75,7 +79,12 @@ export default function Sidebar() {
         <ActionPanel />
       </Flex>
       <Box>
-        <Version />
+        <Version
+          isForkAvailable={isForkAvailable}
+          didActivateFork={didActivateFork}
+          didRejectFork={didRejectFork}
+          onResetForkVoting={onResetForkVoting}
+        />
       </Box>
     </Flex>
   )
@@ -724,52 +733,76 @@ function CurrentTaskLink({href, ...props}) {
   )
 }
 
-export function Version() {
+export function Version({
+  isForkAvailable,
+  didActivateFork,
+  didRejectFork,
+  onResetForkVoting,
+}) {
   const {t} = useTranslation()
 
   const [
-    autoUpdate,
-    {updateClient, updateNode, onResetHardForkVoing},
+    {
+      nodeCurrentVersion,
+      nodeRemoteVersion,
+      nodeUpdating,
+      nodeProgress,
+      canUpdateNode,
+      canUpdateClient,
+      uiRemoteVersion,
+    },
+    {updateClient, updateNode},
   ] = useAutoUpdate()
 
   return (
     <Stack spacing={3}>
       <Stack spacing="1px" m={2}>
-        <VersionText>Client version: {global.appVersion}</VersionText>
-        <VersionText>Node version: {autoUpdate.nodeCurrentVersion}</VersionText>
+        <VersionText>
+          {t('Client version: {{version}}', {
+            version: global.appVersion,
+            nsSeparator: '!!',
+          })}
+        </VersionText>
+        <VersionText>
+          {t('Node version: {{version}}', {
+            version: nodeCurrentVersion,
+            nsSeparator: '!!',
+          })}
+        </VersionText>
       </Stack>
       <Box>
-        {autoUpdate.nodeUpdating && (
+        {nodeUpdating && (
           <Text color="xwhite.050" mx={2}>
             {t('Updating Node...')}
           </Text>
         )}
-        {autoUpdate.canUpdateClient ? (
-          <UpdateButton
-            version={autoUpdate.uiRemoteVersion}
-            onClick={updateClient}
-          >
+
+        {canUpdateClient ? (
+          <UpdateButton version={uiRemoteVersion} onClick={updateClient}>
             {t('Update Client Version')}
           </UpdateButton>
         ) : null}
-        {!autoUpdate.canUpdateClient &&
-        autoUpdate.canUpdateNode &&
-        (!autoUpdate.nodeProgress ||
-          autoUpdate.nodeProgress.percentage === 100) ? (
+
+        {!canUpdateClient &&
+        canUpdateNode &&
+        (!nodeProgress || nodeProgress.percentage === 100) ? (
           <>
-            <UpdateButton
-              version={autoUpdate.nodeRemoteVersion}
-              onClick={
-                isHardFork(
-                  autoUpdate.nodeCurrentVersion,
-                  autoUpdate.nodeRemoteVersion
-                )
-                  ? onResetHardForkVoing
-                  : updateNode
-              }
-            >
-              {t('Update Node Version')}
-            </UpdateButton>
+            {isForkAvailable ? (
+              <>
+                {didActivateFork || !didRejectFork ? null : (
+                  <UpdateButton
+                    version={nodeRemoteVersion}
+                    onClick={onResetForkVoting}
+                  >
+                    {t('Update Node Version')}
+                  </UpdateButton>
+                )}
+              </>
+            ) : (
+              <UpdateButton version={nodeRemoteVersion} onClick={updateNode}>
+                {t('Update Node Version')}
+              </UpdateButton>
+            )}
           </>
         ) : null}
       </Box>
