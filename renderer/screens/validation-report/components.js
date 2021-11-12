@@ -178,7 +178,7 @@ export function ValidationReportSummary({onClose}) {
                       </ValidationReportGaugeStatValue>
                     ) : (
                       <ValidationReportGaugeStatValue color="red.500">
-                        {dna(-totalMissedReward)}
+                        {dna(totalMissedReward)}
                       </ValidationReportGaugeStatValue>
                     )}
                   </Skeleton>

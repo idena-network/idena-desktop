@@ -260,7 +260,7 @@ export default function ValidationReport() {
                           </ValidationReportGaugeStatValue>
                         ) : (
                           <ValidationReportGaugeStatValue color="red.500">
-                            {dna(-totalMissedReward)}
+                            {dna(totalMissedReward)}
                           </ValidationReportGaugeStatValue>
                         )}
                       </Skeleton>
