@@ -138,11 +138,15 @@ export default function Layout({
       didActivate: didActivateFork,
       didReject: didRejectFork,
     },
-    {vote, reject, resetVoting},
+    {reject: rejectFork, reset: resetForkVoting},
   ] = useFork()
 
   const isFork =
-    !loading && !skipHardForkScreen && canUpdateNode && isForkAvailable
+    !loading &&
+    !skipHardForkScreen &&
+    canUpdateNode &&
+    isForkAvailable &&
+    !didRejectFork
 
   const isSyncing = !loading && debouncedSyncing && !debouncedOffline
   const isOffline = !loading && debouncedOffline && !debouncedSyncing
@@ -207,8 +211,8 @@ export default function Layout({
       <Sidebar
         isForkAvailable={isForkAvailable}
         didActivateFork={didActivateFork}
-        onResetForkVoting={resetVoting}
         didRejectFork={didRejectFork}
+        onResetForkVoting={resetForkVoting}
       />
 
       {loading && <LoadingApp />}
@@ -218,9 +222,8 @@ export default function Layout({
           {...forkDetails}
           version={nodeRemoteVersion}
           didActivateFork={didActivateFork}
-          onVote={vote}
           onUpdate={updateNode}
-          onReject={reject}
+          onReject={rejectFork}
         />
       )}
 
@@ -701,8 +704,6 @@ function ForkScreen({
   didActivateFork,
   startActivationDate,
   endActivationDate,
-  votingOption,
-  onVote,
   onUpdate,
   onReject,
 }) {
@@ -871,44 +872,45 @@ function ForkScreen({
           )}
 
           {canVote && (
-            <Stack
-              spacing={6}
-              bg="xwhite.010"
-              color="white"
-              rounded="lg"
-              px={10}
-              py={8}
+            <form
+              onSubmit={e => {
+                e.preventDefault()
+
+                const {votingOption} = e.target.elements
+
+                if (votingOption.value === 'approve') onUpdate()
+                else onOpenRejectDialog()
+              }}
             >
-              <Heading as="h4" fontSize="lg" fontWeight={500}>
-                {t('Do you support upcoming changes?')}
-              </Heading>
-              <Stack spacing={3}>
-                <Text color="xwhite.050" fontSize="sm">
-                  {t('Choose an option to vote')}
-                </Text>
-                <RadioGroup
-                  value={votingOption}
-                  onChange={e => onVote(e.target.value)}
-                >
-                  <Radio value="approve" borderColor="gray.100">
-                    {t('Yes, use node version {{version}}', {version})}
-                  </Radio>
-                  <Radio value="reject" borderColor="gray.100">
-                    {t('No, reject node {{version}}', {version})}
-                  </Radio>
-                </RadioGroup>
+              <Stack
+                spacing={6}
+                bg="xwhite.010"
+                color="white"
+                rounded="lg"
+                px={10}
+                py={8}
+              >
+                <Heading as="h4" fontSize="lg" fontWeight={500}>
+                  {t('Do you support upcoming changes?')}
+                </Heading>
+                <Stack spacing={3}>
+                  <Text color="xwhite.050" fontSize="sm">
+                    {t('Choose an option to vote')}
+                  </Text>
+                  <RadioGroup name="votingOption">
+                    <Radio value="approve" borderColor="gray.100">
+                      {t('Yes, use node version {{version}}', {version})}
+                    </Radio>
+                    <Radio value="reject" borderColor="gray.100">
+                      {t('No, reject node {{version}}', {version})}
+                    </Radio>
+                  </RadioGroup>
+                </Stack>
+                <Box alignSelf="flex-end">
+                  <PrimaryButton type="submit">{t('Vote')}</PrimaryButton>
+                </Box>
               </Stack>
-              <Box alignSelf="flex-end">
-                <PrimaryButton
-                  onClick={() => {
-                    if (votingOption === 'approve') onUpdate()
-                    else onOpenRejectDialog()
-                  }}
-                >
-                  {t('Vote')}
-                </PrimaryButton>
-              </Box>
-            </Stack>
+            </form>
           )}
         </Stack>
       </FillCenter>

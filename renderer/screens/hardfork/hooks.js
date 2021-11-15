@@ -48,7 +48,6 @@ export function useFork() {
           didActivate: undefined,
           startActivationDate: undefined,
           endActivationDate: undefined,
-          votingOption: undefined,
           votingStatus: HardforkVotingStatus.Unknown,
           isReady: false,
           isAvailable: false,
@@ -105,9 +104,6 @@ export function useFork() {
           fetched: {
             entry: [assign({isReady: true})],
             on: {
-              VOTE: {
-                actions: [assign({votingOption: (_, {option}) => option})],
-              },
               REJECT: {
                 actions: [
                   assign({votingStatus: HardforkVotingStatus.Reject}),
@@ -115,7 +111,10 @@ export function useFork() {
                 ],
               },
               RESET: {
-                actions: [assign({votingStatus: null}), 'persist'],
+                actions: [
+                  assign({votingStatus: HardforkVotingStatus.Unknown}),
+                  'persist',
+                ],
               },
             },
           },
@@ -124,6 +123,7 @@ export function useFork() {
       },
       {
         actions: {
+          // eslint-disable-next-line no-shadow
           persist: ({votingStatus}) => statusDb.set(votingStatus),
         },
       }
@@ -140,7 +140,7 @@ export function useFork() {
     startActivationDate,
     endActivationDate,
     didActivate,
-    votingOption,
+    votingStatus,
   } = current.context
 
   return [
@@ -150,19 +150,14 @@ export function useFork() {
         startActivationDate,
         endActivationDate,
       },
-      didActivate,
-      votingOption,
-      isWaiting:
-        eitherState(current, 'fetched') &&
-        current.context.votingStatus !== HardforkVotingStatus.Reject,
+      votingStatus,
       isAvailable: eitherState(current, 'fetched'),
-      didRejectUpdate:
-        current.context.votingStatus === HardforkVotingStatus.Reject,
+      didActivate,
+      didReject: current.context.votingStatus === HardforkVotingStatus.Reject,
     },
     {
-      vote: option => send('VOTE', {option}),
       reject: () => send('REJECT'),
-      resetVoting: () => send('RESET_VOTING'),
+      reset: () => send('RESET'),
     },
   ]
 }
