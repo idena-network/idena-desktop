@@ -351,6 +351,11 @@ app.on('will-finish-launching', function() {
 let didConfirmQuit = false
 
 app.on('before-quit', e => {
+  if (mainWindow) {
+    mainWindow.show()
+    mainWindow.focus()
+  }
+
   if (didConfirmQuit || isDev) {
     mainWindow.forceClose = true
   } else {
