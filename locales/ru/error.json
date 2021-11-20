@@ -7,7 +7,7 @@
   "Error while importing key": "Ошибка во время импорта ключа",
   "Internal node is not available, try again in a few seconds": "Встроенная нода (узел) не доступна, попробуйте снова через несколько секунд",
   "You can not submit flips having 'Candidate' status": "Вы не можете предлагать флипы имея статус 'Кандидат'",
-  "You cannot submit more flips until the next validation": "Вы сможете предложить больше флипов только после следующей валидации",
+  "You cannot submit more flips until the next validation": "Вы не можете предложить больше флипов до следующей валидации",
   "Can not submit flip during the validation session": "Нельзя предлагать флипы непосредственно во время валидации",
   "Error while sending transaction": "Ошибка при отправке транзакции",
   "Transaction sent": "Транзакция отправлена",
