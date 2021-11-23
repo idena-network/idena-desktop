@@ -318,6 +318,8 @@ export function DnaSendDialog({
                     })
                     .finally(() => setIsSubmitting(false))
                 } else {
+                  if (isEstimateTxAvailable)
+                    await sendDna({from, to, amount, comment})
                   setIsSubmitting(false)
                   global.logger.error('Invalid dna://send cb url', callbackUrl)
                 }
