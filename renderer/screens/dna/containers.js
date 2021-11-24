@@ -11,9 +11,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/core'
-import semver from 'semver'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {useAutoUpdateState} from '../../shared/providers/update-context'
 import {SecondaryButton, PrimaryButton} from '../../shared/components/button'
 import {
   DnaDialog,
@@ -188,10 +186,6 @@ export function DnaSendDialog({
 
   const [isSubmitting, setIsSubmitting] = React.useState()
 
-  const {nodeCurrentVersion} = useAutoUpdateState()
-
-  const isEstimateTxAvailable = semver.gte(nodeCurrentVersion, '0.27.2')
-
   const dna = toLocaleDna(language)
 
   return (
@@ -270,19 +264,15 @@ export function DnaSendDialog({
               return resolve()
             })
               .then(() => setIsSubmitting(true))
-              .then(async () =>
-                isEstimateTxAvailable
-                  ? (
-                      await callRpc('bcn_estimateTx', {
-                        to,
-                        from,
-                        amount,
-                        payload: bufferToHex(new TextEncoder().encode(comment)),
-                      })
-                    ).txHash
-                  : sendDna({from, to, amount, comment})
+              .then(() =>
+                callRpc('bcn_estimateTx', {
+                  to,
+                  from,
+                  amount,
+                  payload: bufferToHex(new TextEncoder().encode(comment)),
+                })
               )
-              .then(async hash => {
+              .then(async ({txHash: hash}) => {
                 if (isValidUrl(callbackUrl)) {
                   const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
 
@@ -295,8 +285,8 @@ export function DnaSendDialog({
                   await handleCallbackUrl(callbackUrlWithHash, callbackFormat, {
                     onJson: async ({success, error, url}) => {
                       if (success) {
-                        if (isEstimateTxAvailable)
-                          await sendDna({from, to, amount, comment})
+                        await sendDna({from, to, amount, comment})
+
                         onDepositSuccess({hash, url})
                       } else {
                         onDepositError({
@@ -320,8 +310,7 @@ export function DnaSendDialog({
                     })
                     .finally(() => setIsSubmitting(false))
                 } else {
-                  if (isEstimateTxAvailable)
-                    await sendDna({from, to, amount, comment})
+                  await sendDna({from, to, amount, comment})
                   setIsSubmitting(false)
                   global.logger.error('Invalid dna://send cb url', callbackUrl)
                 }
