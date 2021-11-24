@@ -286,7 +286,6 @@ export function DnaSendDialog({
                     onJson: async ({success, error, url}) => {
                       if (success) {
                         await sendDna({from, to, amount, comment})
-
                         onDepositSuccess({hash, url})
                       } else {
                         onDepositError({
@@ -309,10 +308,13 @@ export function DnaSendDialog({
                       })
                     })
                     .finally(() => setIsSubmitting(false))
+                } else if (callbackUrl) {
+                  setIsSubmitting(false)
+                  global.logger.error('Invalid dna://send cb url', callbackUrl)
                 } else {
                   await sendDna({from, to, amount, comment})
                   setIsSubmitting(false)
-                  global.logger.error('Invalid dna://send cb url', callbackUrl)
+                  onDepositSuccess({hash})
                 }
               })
               .catch(({message}) => {
