@@ -270,17 +270,19 @@ export function DnaSendDialog({
               return resolve()
             })
               .then(() => setIsSubmitting(true))
-              .then(() =>
+              .then(async () =>
                 isEstimateTxAvailable
-                  ? callRpc('bcn_estimateTx', {
-                      to,
-                      from,
-                      amount,
-                      payload: bufferToHex(new TextEncoder().encode(comment)),
-                    })
+                  ? (
+                      await callRpc('bcn_estimateTx', {
+                        to,
+                        from,
+                        amount,
+                        payload: bufferToHex(new TextEncoder().encode(comment)),
+                      })
+                    ).txHash
                   : sendDna({from, to, amount, comment})
               )
-              .then(async ({txHash: hash}) => {
+              .then(async hash => {
                 if (isValidUrl(callbackUrl)) {
                   const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
 
