@@ -424,7 +424,7 @@ function ValidationSession({
         }
         title={t('The flip is to be reported')}
         subtitle={t(
-          `You'll get rewards for reported flips if they are are also reported by more than 50% of qualification committee.`
+          `You'll get rewards for reported flips if they are also reported by more than 50% of qualification committee.`
         )}
         onClose={() => {
           if (state.matches('longSession.solve.answer.finishFlips'))

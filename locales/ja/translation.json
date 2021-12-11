@@ -670,7 +670,7 @@
   "Your status is valid till the next validation: {{nextValidation}}.": "あなたのステータスは次のバリデーションまで有効です： {{nextValidation}}.",
   "Please join the next validation ceremony: {{nextValidation}}.": "次回の認証式に参加してください： {{nextValidation}}.",
   "Add this event to your personal calendar so that you don't miss the next validation.": "このイベントを個人のカレンダーに追加して、次の認証を見逃さないようにしましょう。",
-  "You'll get rewards for reported flips if they are are also reported by more than 50% of qualification committee.": "報告されたフリップが、資格審査委員会の50％以上からも報告されていれば、報酬を得ることができます。",
+  "You'll get rewards for reported flips if they are also reported by more than 50% of qualification committee.": "報告されたフリップが、資格審査委員会の50％以上からも報告されていれば、報酬を得ることができます。",
   "Invite people": "人を招待する",
   "{{availableInviteCount}} invites left": "{{availableInviteCount}} 件の招待状が残っています",
   "You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now": "招待状を今有効にすると、{{invitationRewardRatio}}招待報酬のを受けとれます。",

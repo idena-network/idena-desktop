@@ -678,7 +678,7 @@
   "Your status is valid till the next validation: {{nextValidation}}.": "Ο ρόλος σου είναι έγκυρος μέχρι την επόμενη επικύρωση στις: {{nextValidation}}.",
   "Please join the next validation ceremony: {{nextValidation}}.": "Παρακαλούμε να συμμετάσχεις στην επόμενη τελετή επικύρωσης στις: {{nextValidation}}.",
   "Add this event to your personal calendar so that you don't miss the next validation.": "Πρόσθεσε το γεγονός στο προσωπικό σου ημερολόγιο ώστε να μη χάσεις την επόμενη επικύρωση.",
-  "You'll get rewards for reported flips if they are are also reported by more than 50% of qualification committee.": "Θα λάβετε ανταμοιβές για καταγγελθέντα φλιπ εάν αυτά τα φλιπ τα έχουν καταγγείλει κι άλλοι συμμετέχοντες, σε ποσοστό περισσότερο του 50% της προκριματικής επιτροπής",
+  "You'll get rewards for reported flips if they are also reported by more than 50% of qualification committee.": "Θα λάβετε ανταμοιβές για καταγγελθέντα φλιπ εάν αυτά τα φλιπ τα έχουν καταγγείλει κι άλλοι συμμετέχοντες, σε ποσοστό περισσότερο του 50% της προκριματικής επιτροπής",
   "Invite people": "Προσκαλέστε άτομα",
   "{{availableInviteCount}} invites left": "Απέμειναν {{availableInviteCount}} προσκλήσεις",
   "You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now": "Ομοίως θα λάβεις το {{invitationRewardRatio}} των ανταμοιβών του προσκαλούμενου εάν αυτός ενεργοποιήσει το λογαριασμό του τώρα",

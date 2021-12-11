@@ -676,7 +676,7 @@
   "Your status is valid till the next validation: {{nextValidation}}.": "Ваш статус действителен до следующей проверки: {{nextValidation}}.",
   "Please join the next validation ceremony: {{nextValidation}}.": "Пожалуйста, присоединяйтесь к следующей церемонии подтверждения: {{nextValidation}}.",
   "Add this event to your personal calendar so that you don't miss the next validation.": "Добавьте это событие в свой личный календарь, чтобы не пропустить следующую проверку.",
-  "You'll get rewards for reported flips if they are are also reported by more than 50% of qualification committee.": "Вы получите вознаграждение за сообщенные флипы, если о них также сообщат более 50% членов квалификационной комиссии.",
+  "You'll get rewards for reported flips if they are also reported by more than 50% of qualification committee.": "Вы получите вознаграждение за сообщенные флипы, если о них также сообщат более 50% членов квалификационной комиссии.",
   "Invite people": "Пригласить людей",
   "{{availableInviteCount}} invites left": "{{availableInviteCount}} приглашений осталось",
   "You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now": "Вы получите {{invitationRewardRatio}} вознаграждения за приглашение, если ваше приглашение активировано сейчас",

@@ -674,7 +674,7 @@
   "Your status is valid till the next validation: {{nextValidation}}.": "Your status is valid till the next validation: {{nextValidation}}.",
   "Please join the next validation ceremony: {{nextValidation}}.": "Please join the next validation ceremony: {{nextValidation}}.",
   "Add this event to your personal calendar so that you don't miss the next validation.": "Add this event to your personal calendar so that you don't miss the next validation.",
-  "You'll get rewards for reported flips if they are are also reported by more than 50% of qualification committee.": "You'll get rewards for reported flips if they are are also reported by more than 50% of qualification committee.",
+  "You'll get rewards for reported flips if they are also reported by more than 50% of qualification committee.": "You'll get rewards for reported flips if they are are also reported by more than 50% of qualification committee.",
   "Invite people": "Invite people",
   "{{availableInviteCount}} invites left": "{{availableInviteCount}} invites left",
   "You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now": "You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now",
