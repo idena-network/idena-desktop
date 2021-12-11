@@ -689,7 +689,7 @@
   "Scan QR by your mobile phone or copy code below for export private key.": "Отсканируйте QR-код с помощью своего мобильного телефона или скопируйте код ниже для экспорта закрытого ключа.",
   "You haven’t submitted your answers in time. This validation session is over.": "Вы не представили свои ответы вовремя. Этот сеанс проверки закончен.",
   "Come back again to participate in the next validation session.": "Вернитесь еще раз, чтобы принять участие в следующем сеансе проверки.",
-  "Please wait. The network is reaching consensus on validated identities": "Пожалуйста, подождите. Сеть достигает консенсуса по подтвержденным удостоверениям личности",
+  "Please wait. The network is reaching consensus on validated identities": "Пожалуйста, подождите. Сеть в процессе достижения консенсуса о подтверждённых личностях",
   "Can not start built-in node. The minimum required version is macOS Catalina": "Не удается запустить встроенный узел. Минимально необходимая версия - macOS Catalina",
   "Peers: {{peersCount}}": "Пиры: {{peersCount}}",
   "Blocks: {{currentBlock}} out of {{highestBlock}}": "Блоки: {{currentBlock}} из {{highestBlock}}",
