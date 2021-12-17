@@ -298,7 +298,11 @@ export function DnaSendDialog({
                         })
                       }
                     },
-                    onHtml: ({url}) => onDepositSuccess({hash, url}),
+                    onHtml: ({url}) => {
+                      sendDna({from, to, amount, comment}).then(() => {
+                        onDepositSuccess({hash, url})
+                      })
+                    },
                   })
                     .catch(error => {
                       global.logger.error(error)
