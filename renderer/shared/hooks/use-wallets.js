@@ -27,7 +27,7 @@ function transactionType(tx) {
     return `Mining status ${payload === '0x' ? 'Off' : 'On'}`
 
   if (type === 'deployContract') return 'Deploy'
-  if (type === 'terminateContract') return 'Deploy'
+  if (type === 'terminateContract') return 'Terminate'
   if (type === 'callContract') {
     const method = receipt ? receipt.method : 'unknown'
     if (method === 'sendVote') return 'Send public vote'
