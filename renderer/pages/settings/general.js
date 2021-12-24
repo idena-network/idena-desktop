@@ -10,7 +10,6 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/core'
-import SettingsLayout from '../../screens/settings/layout'
 import {useSettingsState} from '../../shared/providers/settings-context'
 import {archiveFlips} from '../../screens/flips/utils'
 import {
@@ -30,6 +29,7 @@ import {
   ImportPrivateKeyDialog,
   LocaleSwitcher,
 } from '../../screens/settings/containers'
+import SettingsLayout from '../../screens/settings/layout'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}

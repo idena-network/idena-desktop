@@ -2,11 +2,11 @@ import {Box, Stack, Text} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {createAdDb} from '../../screens/ads/utils'
 import {SettingsSection} from '../../screens/settings/components'
+import SettingsLayout from '../../screens/settings/layout'
 import {PrimaryButton} from '../../shared/components/button'
 import {useSuccessToast} from '../../shared/components/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {callRpc} from '../../shared/utils/utils'
-import SettingsLayout from './layout'
 
 export default function AdsSettings() {
   const {t} = useTranslation()

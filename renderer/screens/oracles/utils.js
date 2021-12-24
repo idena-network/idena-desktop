@@ -4,7 +4,7 @@ import {VotingStatus} from '../../shared/types'
 import {callRpc, roundToPrecision, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
 import {ContractRpcMode, VotingListFilter} from './types'
-import {createEpochDb} from '../../shared/utils/db'
+import {epochDb} from '../../shared/utils/db'
 
 export const isVotingStatus = targetStatus => ({status}) =>
   areSameCaseInsensitive(status, targetStatus)
@@ -557,7 +557,7 @@ export const effectiveBalance = ({balance, ownerFee}) =>
 export function createVotingDb(epoch) {
   const ns = [epoch, 'votings']
 
-  const db = createEpochDb(...ns)
+  const db = epochDb(...ns)
 
   const normalizeId = id => id.toLowerCase()
 

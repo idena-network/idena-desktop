@@ -3,8 +3,6 @@ import NextLink from 'next/link'
 import {Box, Icon, Stack, Text, useToast} from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
-import {Page, PageTitle} from '../../screens/app/components'
-import {IconLink} from '../../shared/components/link'
 import {
   FilterButton,
   FilterButtonList,
@@ -14,6 +12,7 @@ import {
   VDivider,
   Page,
   PageTitle,
+  IconLink,
 } from '../../shared/components/components'
 import {votingListMachine} from '../../screens/oracles/machines'
 import {

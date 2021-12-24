@@ -38,6 +38,8 @@ import {
   FloatDebug,
   Page,
   PageTitle,
+  FilterButton,
+  FilterButtonList,
 } from '../../shared/components/components'
 import {
   FlipType,
@@ -45,11 +47,6 @@ import {
   FlipFilter as FlipFilterType,
   OnboardingStep,
 } from '../../shared/types'
-import {
-  FilterButton,
-  FilterButtonList,
-  FloatDebug,
-} from '../../shared/components/components'
 import {flipsMachine} from '../../screens/flips/machines'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {loadPersistentState} from '../../shared/utils/persist'

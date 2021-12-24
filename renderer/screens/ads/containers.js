@@ -57,7 +57,6 @@ import {
   FormSection,
   FormSectionTitle,
 } from './components'
-import {Fill} from '../../shared/components'
 import {AdStatus} from '../../shared/types'
 import {adFormMachine} from './machines'
 import {hasImageType} from '../../shared/utils/img'
@@ -121,7 +120,12 @@ export function AdOverlayStatus({status}) {
   const startColor = colors[statusColor[status]]?.['500'] ?? 'transparent'
 
   return (
-    <Fill
+    <Box
+      position="absolute"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
       rounded="lg"
       backgroundImage={`linear-gradient(to top, ${startColor}, transparent)`}
     />

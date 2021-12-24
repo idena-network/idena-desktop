@@ -2,7 +2,7 @@
 import React from 'react'
 import Head from 'next/head'
 import {ThemeProvider, CSSReset} from '@chakra-ui/core'
-import GoogleFonts from 'next-google-fonts'
+import {GoogleFonts} from 'next-google-fonts'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tui-image-editor/dist/tui-image-editor.css'
 import '../i18n'

@@ -3,7 +3,6 @@ import {Stack, TabPanels, TabPanel, CloseButton, Flex} from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 import {PrimaryButton} from '../../shared/components/button'
 import {buildProfile, createAdDb} from '../../screens/ads/utils'
@@ -15,6 +14,8 @@ import {
 import {editAdMachine} from '../../screens/ads/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {
+  Page,
+  PageTitle,
   SimpleTabFilterList,
   SuccessAlert,
   TabFilters,

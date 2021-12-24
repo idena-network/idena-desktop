@@ -1,6 +1,6 @@
 import React from 'react'
 import {Box, Flex, Stack, Link} from '@chakra-ui/core'
-import {useMachine, asEffect} from '@xstate/react'
+import {useMachine} from '@xstate/react'
 import NextLink from 'next/link'
 import dayjs from 'dayjs'
 import {useTranslation} from 'react-i18next'
@@ -12,7 +12,6 @@ import {
 } from '../../screens/ads/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import Layout from '../../shared/components/layout'
-import {Page, PageTitle} from '../../screens/app/components'
 import {SecondaryButton} from '../../shared/components/button'
 import {adListMachine} from '../../screens/ads/machines'
 import {
@@ -25,6 +24,7 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {
   callRpc,
   eitherState,
+  HASH_IN_MEMPOOL,
   mergeById,
   toLocaleDna,
 } from '../../shared/utils/utils'
@@ -39,8 +39,10 @@ import {
   VDivider,
   useErrorToast,
   useSuccessToast,
+  Page,
+  PageTitle,
+  IconLink,
 } from '../../shared/components/components'
-import {IconLink} from '../../shared/components/link'
 import {
   AdBanner,
   AdCoverImage,
@@ -63,7 +65,6 @@ import {
   votingFinishDate,
 } from '../../screens/oracles/utils'
 import {ContractRpcMode} from '../../screens/oracles/types'
-import {HASH_IN_MEMPOOL} from '../../shared/hooks/use-tx'
 
 export default function AdListPage() {
   const {i18n} = useTranslation()
@@ -80,9 +81,9 @@ export default function AdListPage() {
   const [current, send] = useMachine(adListMachine, {
     actions: {
       // eslint-disable-next-line no-unused-vars
-      onSentToReview: asEffect(({selectedAd: {ref, ...ad}}) => {
+      onSentToReview: ({selectedAd: {ref, ...ad}}) => {
         db.put(ad)
-      }),
+      },
       onError: (_, {data: {message}}) => {
         toastError(message)
       },

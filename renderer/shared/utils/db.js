@@ -64,20 +64,20 @@ export function createEpochDb(epoch, dbName, opts = {valueEncoding: 'json'}) {
   }
 }
 
-// const {levelup, leveldown, dbPath, sub} = global
+const {levelup, leveldown, dbPath, sub} = global
 
-const idenaDb = {}
+let idenaDb = null
 
 export function requestDb(name = 'db') {
-  // if (idenaDb === null) {
-  //   idenaDb = levelup(leveldown(dbPath(name)))
+  if (idenaDb === null) {
+    idenaDb = levelup(leveldown(dbPath(name)))
 
-  //   if (typeof window !== 'undefined') {
-  //     window.addEventListener('beforeunload', async () => {
-  //       if (idenaDb?.isOpen()) await idenaDb.close()
-  //     })
-  //   }
-  // }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', async () => {
+        if (idenaDb?.isOpen()) await idenaDb.close()
+      })
+    }
+  }
   return idenaDb
 }
 
@@ -91,12 +91,12 @@ export const epochDb = (db, epoch, options) => {
 
   let targetDb
 
-  switch (typeof dbProxy) {
+  switch (typeof db) {
     case 'string':
-      // targetDb = sub(sub(requestDb(), db), epochPrefix, nextOptions)
+      targetDb = sub(sub(requestDb(), db), epochPrefix, nextOptions)
       break
     case 'object':
-      // targetDb = sub(db, epochPrefix, nextOptions)
+      targetDb = sub(db, epochPrefix, nextOptions)
       break
     default:
       throw new Error('db should be either string or Level instance')
@@ -174,10 +174,7 @@ export async function loadPersistedItems(db) {
   )
 }
 
-export async function addPersistedItem(
-  db,
-  {id = normalizeId(nanoid()), ...item}
-) {
+export async function addPersistedItem(db, {id = nanoid(), ...item}) {
   const ids = [...(await safeReadIds(db)), id]
 
   await db

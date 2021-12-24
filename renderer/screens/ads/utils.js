@@ -1,13 +1,13 @@
-import {dbProxy, createEpochDb} from '../../shared/utils/db'
+import {dbProxy, epochDb} from '../../shared/utils/db'
 import {callRpc} from '../../shared/utils/utils'
 import {areSameCaseInsensitive, hexToObject} from '../oracles/utils'
 
 export function createAdDb(epoch = -1) {
-  const ns = [epoch, 'ads']
+  const ns = [epoch, 'ads'].join('@')
 
-  const db = createEpochDb(...ns)
+  const db = epochDb(ns)
 
-  const coverDbArgs = [['covers', ...ns], {valueEncoding: 'binary'}]
+  const coverDbArgs = [`covers@${ns}`, {valueEncoding: 'binary'}]
 
   return {
     async put({cover, ...ad}) {

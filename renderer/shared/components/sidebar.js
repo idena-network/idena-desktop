@@ -299,6 +299,9 @@ function Navbar() {
           t('Oracle voting')
         )}
       </NavItem>
+      <NavItem href="/ads/list" icon="ads">
+        {t('Ads')}
+      </NavItem>
       <NavItem href="/settings/general" icon="settings">
         {t('Settings')}
       </NavItem>

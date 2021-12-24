@@ -12,6 +12,10 @@ const {
 
 const isDev = require('electron-is-dev')
 
+const levelup = require('levelup')
+const leveldown = require('leveldown')
+const sub = require('subleveldown')
+
 const flips = require('./stores/flips')
 const invites = require('./stores/invites')
 const contacts = require('./stores/contacts')
@@ -54,6 +58,11 @@ process.once('loaded', () => {
     const currentWindow = electron.remote.getCurrentWindow()
     currentWindow.setFullScreen(!currentWindow.isFullScreen())
   }
+
+  global.levelup = levelup
+  global.leveldown = leveldown
+  global.dbPath = dbPath
+  global.sub = sub
 
   // eslint-disable-next-line global-require
   global.Buffer = require('buffer').Buffer
