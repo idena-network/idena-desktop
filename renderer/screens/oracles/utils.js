@@ -371,6 +371,15 @@ export function votingMinBalance({
   return roundToPrecision(4, Number(minOracleReward) * committeeSize)
 }
 
+export function votingBalance({
+  // eslint-disable-next-line no-shadow
+  oracleReward,
+  // eslint-disable-next-line no-shadow
+  committeeSize,
+}) {
+  return roundToPrecision(4, Number(oracleReward) * committeeSize)
+}
+
 function dnaFeePerGas(value) {
   return value * 10 ** -18
 }

@@ -43,7 +43,6 @@ import {
   NumberInput,
 } from '../../screens/oracles/components'
 import {
-  votingMinBalance,
   votingMinStake,
   durationPreset,
   quorumVotesCount,
@@ -52,6 +51,7 @@ import {
   rewardPerOracle,
   hasLinklessOptions,
   hasValuableOptions,
+  votingBalance,
 } from '../../screens/oracles/utils'
 import {eitherState, toLocaleDna} from '../../shared/utils/utils'
 import {
@@ -546,10 +546,7 @@ function NewVotingPage() {
           onClose={() => send('CANCEL')}
           from={address}
           available={balance}
-          minBalance={votingMinBalance({
-            minOracleReward,
-            committeeSize,
-          })}
+          balance={votingBalance({oracleReward, committeeSize})}
           minStake={votingMinStake(feePerGas)}
           votingDuration={votingDuration}
           publicVotingDuration={publicVotingDuration}

@@ -540,7 +540,7 @@ export function VoteDrawer({
 export function ReviewVotingDrawer({
   from,
   available,
-  minBalance,
+  balance,
   minStake,
   ownerFee,
   isLoading,
@@ -552,7 +552,7 @@ export function ReviewVotingDrawer({
   const {t, i18n} = useTranslation()
 
   const oracleAmount = effectiveBalance({
-    balance: minBalance,
+    balance,
     ownerFee,
   })
 
@@ -598,14 +598,14 @@ export function ReviewVotingDrawer({
               </Text>
             </Tooltip>
           </FormLabel>
-          <DnaInput name="balanceInput" defaultValue={minBalance} isDisabled />
+          <DnaInput name="balanceInput" defaultValue={balance} isDisabled />
           <OracleFormHelper
             label={t('Paid to oracles')}
             value={toDna(oracleAmount)}
           />
           <OracleFormHelper
             label={t('Paid to owner')}
-            value={toDna(minBalance - oracleAmount)}
+            value={toDna(balance - oracleAmount)}
           />
         </FormControl>
         <FormControl>
@@ -645,7 +645,7 @@ export function ReviewVotingDrawer({
         <Box>
           <OracleFormHelper
             label={t('Total amount')}
-            value={toLocaleDna(i18n.language)(minBalance + minStake)}
+            value={toLocaleDna(i18n.language)(balance + minStake)}
           />
         </Box>
         <PrimaryButton
