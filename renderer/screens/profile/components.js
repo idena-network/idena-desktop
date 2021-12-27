@@ -538,7 +538,7 @@ export function ActivateMiningDrawer({
                 >
                   <Text>
                     {t(
-                      `Please be aware that both mining and validation rewards will go to the pool’s owner address if you delegate your mining status. Your address will get only the part of rewards that goes to your stake. Your identity could be terminated by the pool owner and you can lose your stake.`
+                      'You can lose your stake, all your mining and validation rewards if you delegate your mining status.'
                     )}
                   </Text>
                   <Text>
