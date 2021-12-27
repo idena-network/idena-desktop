@@ -434,7 +434,9 @@ export default function ValidationReport() {
                     {maybeDna(flipReportReward)}
                   </ValidationReportColumn>
                   <ValidationReportColumn>
-                    {maybeDna(missedFlipReportReward)}
+                    <Text color={missedFlipReportReward > 0 ? 'red.500' : ''}>
+                      {maybeDna(missedFlipReportReward)}
+                    </Text>
                   </ValidationReportColumn>
                   <ValidationReportColumn>
                     {/* eslint-disable-next-line no-nested-ternary */}
