@@ -26,3 +26,24 @@ export function createProfileDb(epoch) {
     },
   }
 }
+
+export function validateInvitationCode(code) {
+  try {
+    const raw = stripHexPrefix(code)
+    const re = /[0-9A-Fa-f]{64}/g
+    const match = raw.match(re)
+    return match?.length && match[0] === raw
+  } catch {
+    return false
+  }
+}
+
+export function stripHexPrefix(str) {
+  if (typeof str !== 'string') {
+    return str
+  }
+  // eslint-disable-next-line no-use-before-define
+  return isHexPrefixed(str) ? str.slice(2) : str
+}
+
+const isHexPrefixed = str => str.slice(0, 2) === '0x'

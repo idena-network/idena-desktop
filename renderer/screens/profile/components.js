@@ -52,6 +52,7 @@ import {
 } from '../../shared/utils/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
+import {validateInvitationCode} from './utils'
 
 export function UserInlineCard({address, status, ...props}) {
   return (
@@ -166,11 +167,20 @@ export const ActivateInviteForm = React.forwardRef(
         onSubmit={async e => {
           e.preventDefault()
           try {
-            await activateInvite(code?.trim())
+            const trimmedCode = code?.trim()
+
+            if (trimmedCode) {
+              if (!validateInvitationCode(trimmedCode))
+                throw new Error('invalid')
+            }
+
+            await activateInvite(trimmedCode)
           } catch ({message}) {
             failToast(
               // eslint-disable-next-line no-nested-ternary
-              message.includes('missing')
+              ['missing', 'invalid'].some(errorCode =>
+                message.includes(errorCode)
+              )
                 ? t('Invitation code is not valid')
                 : message.includes('validation ceremony')
                 ? t(
