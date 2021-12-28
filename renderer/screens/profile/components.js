@@ -883,6 +883,7 @@ export function MyIdenaBotAlert() {
       <Alert
         variant="solid"
         justifyContent="center"
+        flexShrink={0}
         boxShadow="0 3px 12px 0 rgb(255 163 102 /0.1), 0 2px 3px 0 rgb(255 163 102 /0.2)"
         color="white"
         cursor="pointer"
@@ -891,6 +892,7 @@ export function MyIdenaBotAlert() {
         p={3}
         mt={2}
         mx={2}
+        w="auto"
         onClick={myIdenaBotDisclosure.onOpen}
       >
         {t(`Subscribe to @MyIdenaBot to get personalized notifications based on

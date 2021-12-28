@@ -216,6 +216,7 @@ export default function ProfilePage() {
       <InviteProvider>
         <Layout syncing={syncing} offline={offline}>
           <MyIdenaBotAlert />
+
           <Page>
             <Stack spacing={8}>
               <Stack spacing={6}>
