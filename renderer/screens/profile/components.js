@@ -1007,7 +1007,7 @@ function IdenaBotFeatureList({features, listSeparator = ';'}) {
   return (
     <List spacing={1} styleType="'- '">
       {features.map((feature, idx) => (
-        <ListItem textTransform="lowercase">
+        <ListItem key={feature} textTransform="lowercase">
           {feature}
           {idx < features.length - 1 ? listSeparator : '.'}
         </ListItem>
