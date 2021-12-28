@@ -374,6 +374,7 @@ export function SuccessAlert({children, ...props}) {
   return (
     <Alert
       status="success"
+      flexShrink={0}
       bg="green.010"
       borderWidth="1px"
       borderColor="green.050"
@@ -393,6 +394,7 @@ export function FailAlert({children, ...props}) {
   return (
     <Alert
       status="error"
+      flexShrink={0}
       bg="red.010"
       borderWidth="1px"
       borderColor="red.050"
