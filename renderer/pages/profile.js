@@ -72,6 +72,7 @@ import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 import {useScroll} from '../shared/hooks/use-scroll'
 import {ValidationReportSummary} from '../screens/validation-report/components'
 import {useTotalValidationScore} from '../screens/validation-report/hooks'
+import {useIdenaBot} from '../screens/profile/hooks'
 
 export default function ProfilePage() {
   const {
@@ -211,11 +212,15 @@ export default function ProfilePage() {
     IdentityStatus.Newbie,
   ].includes(status)
 
+  const [didConnectIdenaBot, connectIdenaBot] = useIdenaBot()
+
   return (
     <>
       <InviteProvider>
         <Layout syncing={syncing} offline={offline}>
-          <MyIdenaBotAlert />
+          {!didConnectIdenaBot && (
+            <MyIdenaBotAlert onConnect={connectIdenaBot} />
+          )}
 
           <Page>
             <Stack spacing={8}>
