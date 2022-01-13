@@ -105,7 +105,7 @@
     "electron-updater": "^4.0.14",
     "emotion-theming": "^10.0.27",
     "express": "^4.17.1",
-    "follow-redirects": "^1.9.0",
+    "follow-redirects": "^1.14.7",
     "fs-extra": "^8.1.0",
     "get-urls": "^10.0.0",
     "google-protobuf": "^3.14.0",
