@@ -116,7 +116,7 @@
     "lowdb": "^1.0.0",
     "macos-version": "^5.2.1",
     "mousetrap": "^1.6.3",
-    "nanoid": "^2.0.1",
+    "nanoid": "^3.1.31",
     "next": "^9.5.1",
     "next-google-fonts": "^1.2.1",
     "pino": "^5.13.2",
