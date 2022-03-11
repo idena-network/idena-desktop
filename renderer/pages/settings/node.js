@@ -43,6 +43,7 @@ function NodeSettings() {
     toggleUseExternalNode,
     toggleRunInternalNode,
     setConnectionDetails,
+    toggleAutoActivateMining,
   } = useSettingsDispatch()
 
   const {nodeFailed} = useNodeState()
@@ -145,7 +146,7 @@ function NodeSettings() {
   return (
     <SettingsLayout>
       <Stack spacing={8} mt={8}>
-        <Stack spacing={4}>
+        <Stack spacing={4} maxW="md">
           <Stack isInline spacing={4} align="center">
             <Box>
               <Switch
@@ -184,6 +185,28 @@ function NodeSettings() {
               <Text color="muted">
                 {t(
                   'Specify the Node address if you want to connect to remote node'
+                )}
+              </Text>
+            </Box>
+          </Stack>
+          <Stack isInline spacing={3} align="center">
+            <Box>
+              <Switch
+                isChecked={settings.autoActivateMining}
+                isDisabled={!settings.runInternalNode}
+                onChange={() => {
+                  toggleAutoActivateMining()
+                  global.ipcRenderer.send(NODE_COMMAND, 'restart-node')
+                }}
+              />
+            </Box>
+            <Box>
+              <Text fontWeight={500}>
+                {t('Activate mining status automatically')}
+              </Text>
+              <Text color="muted">
+                {t(
+                  'If your identity status is validated the mining will be activated automatically once the node is synchronized'
                 )}
               </Text>
             </Box>

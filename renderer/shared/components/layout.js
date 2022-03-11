@@ -406,7 +406,13 @@ function NormalApp({children}) {
 function SyncingApp() {
   const {t} = useTranslation()
 
-  const {currentBlock, highestBlock, genesisBlock, wrongTime} = useChainState()
+  const {
+    currentBlock,
+    highestBlock,
+    genesisBlock,
+    wrongTime,
+    message,
+  } = useChainState()
 
   const {address} = useIdentityState()
 
@@ -514,6 +520,20 @@ function SyncingApp() {
             max={highestBlock || Number.MAX_SAFE_INTEGER}
           />
         </Stack>
+        <Text color="xwhite.040">
+          <Trans i18nKey="autoActivateMining" t={t}>
+            If your identity status is validated the mining will be activated
+            automatically once the node is synchronized. Please change{' '}
+            <TextLink href="/settings/node">settings</TextLink>
+          </Trans>
+        </Text>
+
+        {message && (
+          <Alert status="error" bg="red.500" borderRadius="lg">
+            {message}
+          </Alert>
+        )}
+
         {wrongTime && (
           <Alert status="error" bg="red.500" borderRadius="lg">
             {t(
