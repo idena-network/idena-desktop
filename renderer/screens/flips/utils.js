@@ -13,15 +13,15 @@ export const FLIP_LENGTH = 4
 export const DEFAULT_FLIP_ORDER = [0, 1, 2, 3]
 
 export function getRandomKeywordPair() {
-  function getRandomInt(min, max) {
-    // eslint-disable-next-line no-param-reassign
-    min = Math.ceil(min)
-    // eslint-disable-next-line no-param-reassign
-    max = Math.floor(max)
-    return Math.floor(Math.random() * (max - min)) + min
-  }
-
   return {id: 0, words: [getRandomInt(3300, 3939), getRandomInt(3300, 3939)]}
+}
+
+export function getRandomInt(min, max) {
+  // eslint-disable-next-line no-param-reassign
+  min = Math.ceil(min)
+  // eslint-disable-next-line no-param-reassign
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min)) + min
 }
 
 export function isPendingKeywordPair(flips, id) {

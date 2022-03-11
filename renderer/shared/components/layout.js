@@ -79,6 +79,8 @@ import {
 } from '../../screens/dna/hooks'
 import {viewVotingHref} from '../../screens/oracles/utils'
 import {useFork} from '../../screens/hardfork/hooks'
+import {AdBanner} from '../../screens/ads/containers'
+import {useAdRotation} from '../../screens/ads/hooks'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -348,8 +350,14 @@ function NormalApp({children}) {
     }
   )
 
+  const ads = useAdRotation()
+
+  const hasRotatingAds = ads.length > 0
+
   return (
     <Flex as="section" direction="column" flex={1} h="100vh" overflowY="auto">
+      {hasRotatingAds && <AdBanner />}
+
       {children}
 
       {epoch && <ValidationToast epoch={epoch} identity={identity} />}

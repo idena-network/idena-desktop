@@ -3,6 +3,7 @@ import React from 'react'
 import Head from 'next/head'
 import {ThemeProvider, CSSReset} from '@chakra-ui/core'
 import GoogleFonts from 'next-google-fonts'
+import {QueryClientProvider, QueryClient} from 'react-query'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tui-image-editor/dist/tui-image-editor.css'
 import '../i18n'
@@ -36,24 +37,28 @@ export default function App({Component, err, ...pageProps}) {
   )
 }
 
+const queryClient = new QueryClient()
+
 function AppProviders(props) {
   return (
-    <SettingsProvider>
-      <AutoUpdateProvider>
-        <NodeProvider>
-          <ChainProvider>
-            <TimingProvider>
-              <EpochProvider>
-                <IdentityProvider>
-                  <OnboardingProvider>
-                    <VotingNotificationProvider {...props} />
-                  </OnboardingProvider>
-                </IdentityProvider>
-              </EpochProvider>
-            </TimingProvider>
-          </ChainProvider>
-        </NodeProvider>
-      </AutoUpdateProvider>
-    </SettingsProvider>
+    <QueryClientProvider client={queryClient}>
+      <SettingsProvider>
+        <AutoUpdateProvider>
+          <NodeProvider>
+            <ChainProvider>
+              <TimingProvider>
+                <EpochProvider>
+                  <IdentityProvider>
+                    <OnboardingProvider>
+                      <VotingNotificationProvider {...props} />
+                    </OnboardingProvider>
+                  </IdentityProvider>
+                </EpochProvider>
+              </TimingProvider>
+            </ChainProvider>
+          </NodeProvider>
+        </AutoUpdateProvider>
+      </SettingsProvider>
+    </QueryClientProvider>
   )
 }

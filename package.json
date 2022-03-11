@@ -125,6 +125,7 @@
     "react": "^16.8.4",
     "react-beautiful-dnd": "^10.0.4",
     "react-i18next": "^11.2.5",
+    "react-query": "^3.34.16",
     "reverse-line-reader": "^0.2.6",
     "rlp": "^2.2.2",
     "semver": "^6.3.0",

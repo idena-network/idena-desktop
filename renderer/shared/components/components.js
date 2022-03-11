@@ -1,5 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import ReactDOM from 'react-dom'
 import NextLink from 'next/link'
 import {
   Code,
@@ -41,6 +43,10 @@ import {
   Progress as ChakraProgress,
   Heading,
   FormControl,
+  Menu as ChakraMenu,
+  MenuButton,
+  MenuList,
+  Skeleton as ChakraSkeleton,
 } from '@chakra-ui/core'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -86,16 +92,51 @@ export function Debug({children}) {
 }
 
 export function Drawer({isCloseable = true, children, ...props}) {
+  const drawerPromotion = React.useState()
+
   return (
-    <ChakraDrawer {...props}>
-      <DrawerOverlay bg="xblack.080" />
-      <DrawerContent px={8} py={12} maxW={360}>
-        {isCloseable && <DrawerCloseButton />}
-        {children}
-      </DrawerContent>
-    </ChakraDrawer>
+    <DrawerPromotionContext.Provider value={drawerPromotion}>
+      <ChakraDrawer {...props}>
+        <DrawerOverlay bg="xblack.080" />
+        <DrawerContent px={8} py={12} maxW={360}>
+          {isCloseable && <DrawerCloseButton />}
+          {children}
+        </DrawerContent>
+        <DrawerPromotion pr="sm" />
+      </ChakraDrawer>
+    </DrawerPromotionContext.Provider>
   )
 }
+
+const DrawerPromotionContext = React.createContext([])
+
+export function DrawerPromotion(props) {
+  const [, setDrawerPromotion] = React.useContext(DrawerPromotionContext)
+
+  return (
+    <Flex
+      ref={setDrawerPromotion}
+      align="center"
+      justify="center"
+      position="absolute"
+      top={0}
+      left={0}
+      w="full"
+      h="full"
+      zIndex="overlay"
+      {...props}
+    />
+  )
+}
+
+export function DrawerPromotionPortal({children}) {
+  const [drawerPromotion] = React.useContext(DrawerPromotionContext)
+
+  return drawerPromotion
+    ? ReactDOM.createPortal(children, drawerPromotion)
+    : null
+}
+
 export function DrawerHeader(props) {
   return <ChakraDrawerHeader p={0} mb={3} {...props} />
 }
@@ -541,5 +582,20 @@ export function Snackbar(props) {
       pointerEvents="none"
       {...props}
     />
+  )
+}
+
+export function Skeleton(props) {
+  return <ChakraSkeleton startColor="gray.50" endColor="gray.100" {...props} />
+}
+
+export function Menu({children, ...props}) {
+  return (
+    <ChakraMenu autoSelect={false} placement="bottom-end" {...props}>
+      <MenuButton>
+        <Icon name="more" boxSize={5} color="muted" />
+      </MenuButton>
+      <MenuList>{children}</MenuList>
+    </ChakraMenu>
   )
 }
