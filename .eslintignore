@@ -1,4 +1,4 @@
 renderer/.next
 renderer/out
 **/dist
-shared/models/proto/**
+renderer/shared/models/proto/**
