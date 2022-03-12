@@ -54,6 +54,7 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {IdentityStatus} from '../../shared/types'
 import {VotingSkeleton} from '../oracles/components'
+import {AdDrawer} from '../ads/containers'
 
 export function ContactListSidebar({
   selectedContactId,
@@ -200,7 +201,7 @@ function ContactList({filter, selectedContactId, onSelectContact}) {
         .filter(invite => !invite.deletedAt)
         .map(invite => (
           <ContactListItem
-            key={invite.id}
+            key={invite.id + invite.dbkey}
             isActive={(invite.dbkey || invite.id) === selectedContactId}
             id={invite.dbkey || invite.id}
             {...invite}
@@ -270,6 +271,7 @@ export function ContactCard({
   onRemoveContact,
   onRecoverContact,
   onKillContact,
+  onInviteMined,
 }) {
   const {
     t,
@@ -298,6 +300,12 @@ export function ContactCard({
   const {onCopy: onCopyKey} = useClipboard(key)
 
   const successToast = useSuccessToast()
+
+  React.useEffect(() => {
+    if (state === IdentityStatus.Invite) {
+      onInviteMined()
+    }
+  }, [onInviteMined, state])
 
   const isInviteExpired =
     state === IdentityStatus.Undefined && !canKill && !mining && !activated
@@ -428,6 +436,7 @@ export function ContactCard({
 
 export function IssueInviteDrawer({
   inviteeAddress,
+  isMining,
   onIssue,
   onIssueFail,
   ...props
@@ -444,7 +453,7 @@ export function IssueInviteDrawer({
   const [isSubmitting, setIsSubmitting] = React.useState()
 
   return (
-    <Drawer {...props}>
+    <AdDrawer isMining={isMining} {...props}>
       <DrawerHeader>
         <ContactDrawerHeader address={dummyAddress}>
           {t('Invite new person')}
@@ -458,6 +467,7 @@ export function IssueInviteDrawer({
         </Text>
         <Stack
           as="form"
+          id="issueInvite"
           spacing={5}
           onSubmit={async e => {
             e.preventDefault()
@@ -470,7 +480,9 @@ export function IssueInviteDrawer({
 
             try {
               setIsSubmitting(true)
+
               const invite = await addInvite(address, null, firstName, lastName)
+
               setIsSubmitting(false)
 
               onIssue(invite)
@@ -521,12 +533,19 @@ export function IssueInviteDrawer({
               </FormControl>
             </Collapse>
           </Box>
-          <PrimaryButton ml="auto" type="submit" isLoading={isSubmitting}>
-            {t('Create invitation')}
-          </PrimaryButton>
         </Stack>
       </DrawerBody>
-    </Drawer>
+      <DrawerFooter>
+        <PrimaryButton
+          type="submit"
+          form="issueInvite"
+          isLoading={isSubmitting || isMining}
+          loadingText={t('Mining...')}
+        >
+          {t('Create invitation')}
+        </PrimaryButton>
+      </DrawerFooter>
+    </AdDrawer>
   )
 }
 export function EditContactDrawer({contact, onRename, ...props}) {

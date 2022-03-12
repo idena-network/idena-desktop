@@ -102,7 +102,7 @@ export function Drawer({isCloseable = true, children, ...props}) {
           {isCloseable && <DrawerCloseButton />}
           {children}
         </DrawerContent>
-        <DrawerPromotion pr="sm" />
+        <DrawerPromotion pr={360} />
       </ChakraDrawer>
     </DrawerPromotionContext.Provider>
   )
@@ -148,12 +148,15 @@ export function DrawerBody(props) {
 export function DrawerFooter(props) {
   return (
     <ChakraDrawerFooter
-      mb={-12}
-      mx={-8}
-      px={4}
-      py={3}
       borderTopColor="gray.300"
       borderTopWidth={1}
+      py={3}
+      paddingX={4}
+      justifyContent="flex-end"
+      position="absolute"
+      left={0}
+      right={0}
+      bottom={0}
       {...props}
     />
   )

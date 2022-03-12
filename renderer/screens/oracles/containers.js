@@ -57,7 +57,6 @@ import {
   Tooltip,
 } from '../../shared/components/components'
 import {VotingStatus} from '../../shared/types'
-
 import {
   VotingBadge,
   OracleDrawerHeader,
@@ -93,6 +92,7 @@ import {
   mapVotingStatus,
   effectiveBalance,
 } from './utils'
+import {AdDrawer} from '../ads/containers'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -407,7 +407,7 @@ export function AddFundDrawer({
   })
 
   return (
-    <Drawer {...props}>
+    <AdDrawer isMining={isLoading} {...props}>
       <OracleDrawerHeader icon="add-fund">{t('Add fund')}</OracleDrawerHeader>
       <Box
         as="form"
@@ -462,7 +462,7 @@ export function AddFundDrawer({
           </PrimaryButton>
         </OracleDrawerBody>
       </Box>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -485,7 +485,7 @@ export function VoteDrawer({
   const toDna = toLocaleDna(i18n.language)
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="send-out" variantColor="blue">
         {t('Voting')}: {option}
       </OracleDrawerHeader>
@@ -533,7 +533,7 @@ export function VoteDrawer({
           {t('Send')}
         </PrimaryButton>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -559,7 +559,7 @@ export function ReviewVotingDrawer({
   const toDna = toLocaleDna(i18n.language)
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
         {t('Create Oracle Voting')}
       </OracleDrawerHeader>
@@ -658,7 +658,7 @@ export function ReviewVotingDrawer({
           {t('Confirm')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -1084,7 +1084,7 @@ export function LaunchDrawer({
   })
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
         {t('Launch Oracle Voting')}
       </OracleDrawerHeader>
@@ -1137,7 +1137,7 @@ export function LaunchDrawer({
           {t('Launch')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -1151,7 +1151,7 @@ export function ProlongDrawer({
   const {t, i18n} = useTranslation()
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
         {t('Prolong Oracle Voting')}
       </OracleDrawerHeader>
@@ -1187,7 +1187,7 @@ export function ProlongDrawer({
           {t('Prolong')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -1438,7 +1438,7 @@ export function FinishDrawer({
   const {t, i18n} = useTranslation()
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
         {hasWinner ? t('Distribute rewards') : t('Refund Oracle Voting')}
       </OracleDrawerHeader>
@@ -1476,7 +1476,7 @@ export function FinishDrawer({
           {hasWinner ? t('Distribute rewards') : t('Refund')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -1489,7 +1489,7 @@ export function TerminateDrawer({
   const {t} = useTranslation()
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon="oracle">
         {t('Terminate Oracle Voting')}
       </OracleDrawerHeader>
@@ -1520,7 +1520,7 @@ export function TerminateDrawer({
           {t('Terminate')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 

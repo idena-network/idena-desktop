@@ -25,11 +25,7 @@ export default function ContactsPage() {
 
   const [selectedContact, setSelectedContact] = React.useState(null)
 
-  const {
-    isOpen: isOpenSendInviteDrawer,
-    onOpen: onOpenSendInviteDrawer,
-    onClose: onCloseNewContactDrawer,
-  } = useDisclosure()
+  const sendInviteDisclosure = useDisclosure()
 
   const {
     isOpen: isOpenEditContactDrawer,
@@ -43,12 +39,19 @@ export default function ContactsPage() {
     onClose: onCloseKillContactDrawer,
   } = useDisclosure()
 
-  React.useEffect(() => {
-    if (query.new !== undefined) onOpenSendInviteDrawer()
-  }, [onOpenSendInviteDrawer, query.new])
+  // React.useEffect(() => {
+  //   if (query.new !== undefined) sendInviteDisclosure.onOpen()
+  // }, [query.new, sendInviteDisclosure])
 
   const successToast = useSuccessToast()
   const failToast = useFailToast()
+
+  const [isMining, setIsMining] = React.useState(false)
+
+  const handleInviteMined = React.useCallback(() => {
+    setIsMining(false)
+    sendInviteDisclosure.onClose()
+  }, [sendInviteDisclosure])
 
   return (
     <InviteProvider>
@@ -58,7 +61,7 @@ export default function ContactsPage() {
             <ContactListSidebar
               selectedContactId={selectedContact?.id}
               onSelectContact={setSelectedContact}
-              onNewContact={onOpenSendInviteDrawer}
+              onNewContact={sendInviteDisclosure.onOpen}
             />
             <Flex flex={1} py={6} px={20}>
               {selectedContact ? (
@@ -72,6 +75,7 @@ export default function ContactsPage() {
                     setSelectedContact(contact)
                   }}
                   onKillContact={onOpenKillContactDrawer}
+                  onInviteMined={handleInviteMined}
                 />
               ) : (
                 <NoContactDataPlaceholder>
@@ -82,16 +86,12 @@ export default function ContactsPage() {
           </Flex>
 
           <IssueInviteDrawer
+            {...sendInviteDisclosure}
             inviteeAddress={query.address}
-            isOpen={isOpenSendInviteDrawer}
-            onClose={onCloseNewContactDrawer}
+            isMining={isMining}
             onIssue={invite => {
-              successToast({
-                title: t('Invitation code created'),
-                description: invite.hash,
-              })
               setSelectedContact(invite)
-              onCloseNewContactDrawer()
+              setIsMining(true)
             }}
             onIssueFail={error => {
               failToast(error ?? t('Something went wrong'))

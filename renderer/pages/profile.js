@@ -26,7 +26,6 @@ import {
   ActivateMiningForm,
   InviteScoreAlert,
   KillIdentityDrawer,
-  KillForm,
   MyIdenaBotAlert,
 } from '../screens/profile/components'
 import {
@@ -540,12 +539,11 @@ export default function ProfilePage() {
             </Stack>
 
             <KillIdentityDrawer
-              address={address}
               isOpen={isOpenKillForm}
+              onKill={onCloseKillForm}
+              onKillFailed={onCloseKillForm}
               onClose={onCloseKillForm}
-            >
-              <KillForm onSuccess={onCloseKillForm} onFail={onCloseKillForm} />
-            </KillIdentityDrawer>
+            />
 
             <SpoilInviteDrawer
               isOpen={isOpenSpoilForm}
