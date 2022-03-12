@@ -48,7 +48,6 @@ import {
   DialogBody,
   DialogFooter,
   DialogHeader,
-  Drawer,
   DrawerBody,
   DrawerFooter,
   DrawerHeader,

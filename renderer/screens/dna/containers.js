@@ -31,7 +31,6 @@ import {
   isValidUrl,
   sendDna,
   DNA_SEND_CONFIRM_TRESHOLD,
-  Transaction,
   appendTxHash,
   handleCallbackUrl,
 } from './utils'
@@ -46,6 +45,7 @@ import {
 } from '../../shared/components/components'
 import {callRpc, toLocaleDna} from '../../shared/utils/utils'
 import {bufferToHex} from '../../shared/utils/string'
+import {Transaction} from '../../shared/models/transaction'
 
 export function DnaSignInDialog({
   token,
