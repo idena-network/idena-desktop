@@ -35,8 +35,7 @@ jobs:
           choco install -y gtk-runtime libjpeg-turbo 7zip curl
           curl -LO http://ftp.gnome.org/pub/GNOME/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip
           7z x gtk+-bundle_2.22.1-20101229_win64.zip -y -oC:\GTK
-          npm config set msvs_version 2019
-          npm config set msbuild_path "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
+          npm install --g windows-build-tools
 
       - name: Install macOS canvas deps
         if: matrix.os == 'macos-latest'
