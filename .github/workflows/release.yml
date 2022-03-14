@@ -32,10 +32,10 @@ jobs:
       - name: Install Windows canvas deps
         if: matrix.os == 'windows-latest'
         run: |
-          choco install -y gtk-runtime libjpeg-turbo 7zip curl
+          choco install -y gtk-runtime libjpeg-turbo 7zip curl visualstudio2019-workload-vctools
+          # npm config set msvs_version 2019
           curl -LO http://ftp.gnome.org/pub/GNOME/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip
           7z x gtk+-bundle_2.22.1-20101229_win64.zip -y -oC:\GTK
-          npm install --g windows-build-tools
 
       - name: Install macOS canvas deps
         if: matrix.os == 'macos-latest'
