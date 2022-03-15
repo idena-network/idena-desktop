@@ -471,7 +471,14 @@ export const HDivider = React.forwardRef(function HDivider(props, ref) {
   return <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
 })
 
-export function ExternalLink({href, children, ...props}) {
+export function ExternalLink({
+  href,
+  w,
+  width = w,
+  isTruncated,
+  children,
+  ...props
+}) {
   return (
     <Button
       variant="link"
@@ -487,10 +494,14 @@ export function ExternalLink({href, children, ...props}) {
       }}
       {...props}
     >
-      <Text as="span" lineHeight="short" mt="-2px">
+      <Text as="span" width={width} isTruncated={isTruncated}>
         {children || href}
       </Text>
-      <Icon name="chevron-down" size={4} transform="rotate(-90deg)" />
+      <Icon
+        name="chevron-down"
+        size={4}
+        transform="translateY(1px) rotate(-90deg)"
+      />
     </Button>
   )
 }
