@@ -70,7 +70,7 @@ import {
 } from '../utils/utils'
 import {useChainState} from '../providers/chain-context'
 import {useNode} from '../providers/node-context'
-import {useSettings} from '../providers/settings-context'
+import {useSettings, useSettingsState} from '../providers/settings-context'
 import {useFailToast} from '../hooks/use-toast'
 import {
   DnaLinkMethod,
@@ -450,6 +450,8 @@ function SyncingApp() {
   )
   const {peers} = current.context
 
+  const {runInternalNode, useExternalNode} = useSettingsState()
+
   return (
     <FillCenter bg="graphite.500" color="white" position="relative">
       <Flex
@@ -528,13 +530,16 @@ function SyncingApp() {
             max={highestBlock || Number.MAX_SAFE_INTEGER}
           />
         </Stack>
-        <Text color="xwhite.040">
-          <Trans i18nKey="autoActivateMining" t={t}>
-            If your identity status is validated the mining will be activated
-            automatically once the node is synchronized. Please change{' '}
-            <TextLink href="/settings/node">settings</TextLink>
-          </Trans>
-        </Text>
+
+        {runInternalNode && !useExternalNode && (
+          <Text color="xwhite.040">
+            <Trans i18nKey="autoActivateMining" t={t}>
+              If your identity status is validated the mining will be activated
+              automatically once the node is synchronized. Please change{' '}
+              <TextLink href="/settings/node">settings</TextLink>
+            </Trans>
+          </Text>
+        )}
 
         {message && (
           <Alert status="error" bg="red.500" borderRadius="lg">
