@@ -24,7 +24,7 @@ import {
   useNodeDispatch,
 } from '../../shared/providers/node-context'
 import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
-import {Input, Toast} from '../../shared/components/components'
+import {HDivider, Input, Toast} from '../../shared/components/components'
 import {
   SettingsFormControl,
   SettingsFormLabel,
@@ -171,24 +171,7 @@ function NodeSettings() {
               </Box>
             )}
           </Stack>
-          <Stack isInline spacing={3} align="center">
-            <Box>
-              <Switch
-                isChecked={settings.useExternalNode}
-                onChange={() => {
-                  toggleUseExternalNode(!settings.useExternalNode)
-                }}
-              />
-            </Box>
-            <Box>
-              <Text fontWeight={500}>{t('Connect to remote node')}</Text>
-              <Text color="muted">
-                {t(
-                  'Specify the Node address if you want to connect to remote node'
-                )}
-              </Text>
-            </Box>
-          </Stack>
+
           <Stack isInline spacing={3} align="center">
             <Box>
               <Switch
@@ -207,6 +190,27 @@ function NodeSettings() {
               <Text color="muted">
                 {t(
                   'If your identity status is validated the mining will be activated automatically once the node is synchronized'
+                )}
+              </Text>
+            </Box>
+          </Stack>
+
+          <HDivider />
+
+          <Stack isInline spacing={3} align="center">
+            <Box>
+              <Switch
+                isChecked={settings.useExternalNode}
+                onChange={() => {
+                  toggleUseExternalNode(!settings.useExternalNode)
+                }}
+              />
+            </Box>
+            <Box>
+              <Text fontWeight={500}>{t('Connect to remote node')}</Text>
+              <Text color="muted">
+                {t(
+                  'Specify the Node address if you want to connect to remote node'
                 )}
               </Text>
             </Box>
