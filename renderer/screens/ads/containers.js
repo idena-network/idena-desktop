@@ -35,7 +35,13 @@ export function AdBanner() {
 
   const ads = useAdRotation()
 
-  const ad = ads[getRandomInt(0, ads?.length)]
+  const adLength = ads?.length
+
+  const activeAdIndex = React.useMemo(() => getRandomInt(0, adLength), [
+    adLength,
+  ])
+
+  const activeAd = ads[activeAdIndex]
 
   return (
     <Flex
@@ -46,7 +52,7 @@ export function AdBanner() {
       px={4}
       py={2}
     >
-      <AdBannerActiveAd {...ad} />
+      <AdBannerActiveAd {...activeAd} />
       {false && (
         <Menu>
           <MenuItem
@@ -127,7 +133,15 @@ export function PlainAdCoverImage(props) {
 export function AdDrawer({isMining = true, children, ...props}) {
   const ads = useAdRotation()
 
-  const hasRotatingAds = ads?.length > 0
+  const adLength = ads?.length
+
+  const hasRotatingAds = adLength > 0
+
+  const activeAdIndex = React.useMemo(() => getRandomInt(0, adLength), [
+    adLength,
+  ])
+
+  const activeAd = ads[activeAdIndex]
 
   return (
     <Drawer {...props}>
@@ -135,7 +149,7 @@ export function AdDrawer({isMining = true, children, ...props}) {
 
       {isMining && hasRotatingAds && (
         <DrawerPromotionPortal>
-          <AdPromotion {...ads[getRandomInt(0, ads?.length)]} />
+          <AdPromotion {...activeAd} />
         </DrawerPromotionPortal>
       )}
     </Drawer>
