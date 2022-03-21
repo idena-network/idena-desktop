@@ -39,9 +39,14 @@ export default function ContactsPage() {
     onClose: onCloseKillContactDrawer,
   } = useDisclosure()
 
-  // React.useEffect(() => {
-  //   if (query.new !== undefined) sendInviteDisclosure.onOpen()
-  // }, [query.new, sendInviteDisclosure])
+  const didOpenInviteDrawerRef = React.useRef()
+
+  React.useEffect(() => {
+    if (query.new !== undefined && !didOpenInviteDrawerRef.current) {
+      sendInviteDisclosure.onOpen()
+      didOpenInviteDrawerRef.current = true
+    }
+  }, [query.new, sendInviteDisclosure])
 
   const successToast = useSuccessToast()
   const failToast = useFailToast()
