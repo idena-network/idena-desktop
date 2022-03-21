@@ -6,9 +6,11 @@ import {Ad} from '../../shared/models/ad'
 import {AdKey} from '../../shared/models/adKey'
 import {Profile} from '../../shared/models/profile'
 import {useIdentity} from '../../shared/providers/identity-context'
+import {VotingStatus} from '../../shared/types'
 import {callRpc} from '../../shared/utils/utils'
 import {areSameCaseInsensitive} from '../oracles/utils'
-import {currentOs} from './utils'
+import {AdVotingOption, AdVotingOptionId} from './types'
+import {currentOs, fetchAdVoting, isSameAdKey} from './utils'
 
 export function useAdRotation(limit = 5) {
   const {i18n} = useTranslation()
@@ -31,25 +33,25 @@ export function useAdRotation(limit = 5) {
     limit
   )
 
-  const uniqueCompetitorAds = [
+  const competingIdentities = [
     ...new Set(competitorAds?.map(burn => burn.address) ?? []),
   ]
 
   const competingProfileHashQueries = useQueries(
-    uniqueCompetitorAds.map(address => ({
+    competingIdentities.map(address => ({
       queryKey: ['dna_identity', address],
       queryFn: rpcFetcher,
       select: selectProfileHash,
     })) ?? []
   )
 
-  const {decodeProfile, decodeAd} = useProtoProfileDecoder()
+  const {decodeProfile, decodeAd, decodeAdKey} = useProtoProfileDecoder()
 
-  const nonNullableCompetingProfileHashes =
+  const competingProfileHashes =
     competingProfileHashQueries?.filter(query => Boolean(query.data)) ?? []
 
   const decodedProfiles = useQueries(
-    nonNullableCompetingProfileHashes.map(({data}) => ({
+    competingProfileHashes.map(({data}) => ({
       queryKey: ['ipfs_get', data],
       queryFn: rpcFetcher,
       enabled: Boolean(data),
@@ -58,16 +60,43 @@ export function useAdRotation(limit = 5) {
     }))
   )
 
-  const profileAdHashes = decodedProfiles
+  const competingProfileAds = decodedProfiles
     .map(({data}) => data?.ads)
     .flat()
-    .map(ad => ad?.cid)
+    .filter(profileAd =>
+      (competitorAds ?? []).some(burningAd =>
+        isSameAdKey(decodeAdKey(burningAd.key), profileAd?.key ?? {})
+      )
+    )
+
+  const approvedProfileAds = useQueries(
+    competingProfileAds.map(profileAd => ({
+      queryKey: ['profileAd', profileAd?.votingAddress],
+      queryFn: async ({queryKey: [, votingAddress]}) => {
+        if (votingAddress) {
+          const voting = await fetchAdVoting(votingAddress)
+          return {
+            ...profileAd,
+            voting,
+          }
+        }
+      },
+      enabled: Boolean(profileAd?.votingAddress),
+    }))
+  ).filter(({data}) => {
+    const voting = data?.voting
+    return (
+      voting?.adCid === data?.cid &&
+      voting?.status === VotingStatus.Archived &&
+      voting?.result === AdVotingOptionId[AdVotingOption.Approve]
+    )
+  })
 
   const decodedProfileAds = useQueries(
-    profileAdHashes.map(hash => ({
-      queryKey: ['ipfs_get', hash],
+    approvedProfileAds.map(({data: ad}) => ({
+      queryKey: ['ipfs_get', ad.cid],
       queryFn: rpcFetcher,
-      enabled: Boolean(hash),
+      enabled: Boolean(ad.cid),
       select: decodeAd,
       staleTime: Infinity,
     }))
