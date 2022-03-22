@@ -81,3 +81,17 @@ export const NodeType = {
   Miner: 'miner',
   Delegator: 'delegator',
 }
+
+export const RelevanceType = {
+  Relevant: 1,
+  Irrelevant: 2,
+}
+
+export const FlipGrade = {
+  None: 0,
+  Reported: 1,
+  GradeD: 2,
+  GradeC: 3,
+  GradeB: 4,
+  GradeA: 5,
+}

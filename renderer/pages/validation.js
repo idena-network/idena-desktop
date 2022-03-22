@@ -11,10 +11,7 @@ import {
   Stack,
   useDisclosure,
 } from '@chakra-ui/core'
-import {
-  createValidationMachine,
-  RelevanceType,
-} from '../screens/validation/machine'
+import {createValidationMachine} from '../screens/validation/machine'
 import {
   persistValidationState,
   loadValidationState,
@@ -53,7 +50,7 @@ import {
   OfflineValidationAlert,
 } from '../screens/validation/components'
 import {rem} from '../shared/theme'
-import {AnswerType} from '../shared/types'
+import {AnswerType, RelevanceType} from '../shared/types'
 import {useEpochState} from '../shared/providers/epoch-context'
 import {useTimingState} from '../shared/providers/timing-context'
 import {InfoButton, PrimaryButton} from '../shared/components/button'
