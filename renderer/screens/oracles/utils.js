@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import {assign} from 'xstate'
+import urlRegex from 'url-regex-safe'
 import {VotingStatus} from '../../shared/types'
 import {callRpc, roundToPrecision, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
@@ -516,8 +517,6 @@ export function hasValuableOptions(options) {
 }
 
 export function hasLinklessOptions(options) {
-  // eslint-disable-next-line global-require
-  const getUrls = require('get-urls')
   return stripOptions(options).every(
     ({value}) => getUrls(value, {stripWWW: false}).size === 0
   )
@@ -560,3 +559,7 @@ export function minOracleRewardFromEstimates(data) {
 
 export const effectiveBalance = ({balance, ownerFee}) =>
   roundToPrecision(4, balance * (1 - (ownerFee || 0) / 100))
+
+export function getUrls(text) {
+  return text.match(urlRegex()) || []
+}
