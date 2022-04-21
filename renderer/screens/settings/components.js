@@ -6,7 +6,7 @@ import {FormLabel} from '../../shared/components/components'
 export function SettingsFormControl({children, ...props}) {
   return (
     <FormControl {...props}>
-      <Stack isInline spacing={2} justify="space-between" align="center">
+      <Stack isInline spacing={2} justify="space-between" align="center" w="md">
         {children}
       </Stack>
     </FormControl>

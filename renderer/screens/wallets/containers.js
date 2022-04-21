@@ -271,13 +271,7 @@ export function ReceiveDnaDrawer({address, ...props}) {
 }
 
 export function WalletTransactionList({txs = []}) {
-  const {t, i18n} = useTranslation(['translation', 'error'])
-
-  const signedDna = toLocaleDna(i18n.language, {
-    signDisplay: 'exceptZero',
-  })
-
-  const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
+  const {t} = useTranslation(['translation', 'error'])
 
   return (
     <Table>
@@ -286,8 +280,10 @@ export function WalletTransactionList({txs = []}) {
           <TableHeaderCol style={{width: '210px'}}>
             {t('Transaction')}
           </TableHeaderCol>
-          <TableHeaderCol>{t('Address')}</TableHeaderCol>
-          <TableHeaderCol className="text-right">{t('Amount')}</TableHeaderCol>
+          <TableHeaderCol style={{width: '210px'}}>
+            {t('Address')}
+          </TableHeaderCol>
+          <TableHeaderCol>{t('Amount, iDNA')}</TableHeaderCol>
           <TableHeaderCol>{t('Date')}</TableHeaderCol>
         </TableRow>
       </thead>
@@ -325,34 +321,36 @@ export function WalletTransactionList({txs = []}) {
               )}
             </TableCol>
 
-            <TableCol className="text-right">
+            <TableCol>
               <Text
                 color={tx.signAmount < 0 ? 'red.500' : 'brandGray.500'}
+                fontWeight={500}
                 overflowWrap="break-word"
               >
                 {/* eslint-disable-next-line no-nested-ternary */}
                 {tx.type === 'kill'
                   ? t('See in Explorer...')
-                  : Number(tx.amount) === 0
+                  : // eslint-disable-next-line no-nested-ternary
+                  Number(tx.amount) === 0
                   ? '\u2013'
-                  : signedDna(tx.direction === 'Sent' ? -tx.amount : tx.amount)}
+                  : tx.direction === 'Sent'
+                  ? -tx.amount
+                  : tx.amount}
               </Text>
 
               <Box fontWeight={500}>
                 {!tx.isMining || tx.maxFee === '0' ? (
                   <>
                     {Number(tx.usedFee) > 0 && (
-                      <>
-                        <SmallText>{t('Fee')}</SmallText>
-                        <SmallText>{dna(tx.usedFee)}</SmallText>
-                      </>
+                      <SmallText>
+                        {t('Fee')} {tx.usedFee}
+                      </SmallText>
                     )}
                   </>
                 ) : (
-                  <>
-                    <SmallText>{t('Fee limit')}</SmallText>
-                    <SmallText>{dna(tx.maxFee)}</SmallText>
-                  </>
+                  <SmallText>
+                    {t('Fee limit')} {tx.maxFee}
+                  </SmallText>
                 )}
               </Box>
             </TableCol>
@@ -361,8 +359,22 @@ export function WalletTransactionList({txs = []}) {
               <Text as="span" fontWeight={500}>
                 {!tx.timestamp
                   ? '\u2013'
-                  : new Date(tx.timestamp * 1000).toLocaleString()}
+                  : new Date(tx.timestamp * 1000).toLocaleString([], {
+                      dateStyle: 'short',
+                      timeStyle: 'short',
+                    })}
               </Text>
+              <SmallText>
+                {t('Transaction')}:
+                <ExternalLink
+                  href={`https://scan.idena.io/transaction/${tx.hash}`}
+                  fontSize="sm"
+                  isTruncated
+                  w={16}
+                >
+                  {tx.hash}
+                </ExternalLink>
+              </SmallText>
             </TableCol>
           </TableRow>
         ))}
@@ -372,7 +384,7 @@ export function WalletTransactionList({txs = []}) {
 }
 
 function WalletTxStatus({
-  tx: {hash, direction, isMining, typeName, wallet, receipt},
+  tx: {direction, isMining, typeName, wallet, receipt},
 }) {
   const {t} = useTranslation()
 
@@ -411,29 +423,6 @@ function WalletTxStatus({
                   <Icon name="exclamation-mark" color="red.500" size={5} />
                 </Tooltip>
               )}
-
-              <Button
-                variant="link"
-                variantColor="brandBlue"
-                fontWeight={500}
-                fontSize="sm"
-                alignItems="center"
-                textAlign="left"
-                _hover={{background: 'transparent'}}
-                _focus={{
-                  outline: 'none',
-                }}
-                onClick={() => {
-                  global.openExternal(
-                    `https://scan.idena.io/transaction/${hash}`
-                  )
-                }}
-              >
-                <Text as="span" w={32} isTruncated>
-                  {hash}
-                </Text>
-                <Icon name="chevron-down" size={4} transform="rotate(-90deg)" />
-              </Button>
             </Stack>
           )}
         </Box>

@@ -143,33 +143,40 @@ export function InviteProvider({children}) {
 
   useInterval(
     async () => {
-      const txs = await Promise.all(
-        invites
-          .filter(({mining}) => mining)
-          .map(({hash}) =>
-            callRpc('bcn_transaction', hash).then(tx => ({hash, ...tx}))
-          )
-      )
-      setInvites(
-        await Promise.all(
-          invites.map(async invite => {
-            const invitedIdentity = await callRpc(
-              'dna_identity',
-              invite.receiver
-            )
+      const miningInvites = invites.filter(({mining}) => mining)
 
-            const tx = txs.find(({hash}) => hash === invite.hash)
-            if (tx) {
-              return {
-                ...invite,
-                identity: invitedIdentity,
-                mining:
-                  tx && tx.result && tx.result.blockHash === HASH_IN_MEMPOOL,
-              }
-            }
-            return invite
-          })
+      const txs = await Promise.all(
+        miningInvites.map(({hash}) =>
+          callRpc('bcn_transaction', hash)
+            .then(tx => ({
+              hash,
+              mining: tx?.blockHash === HASH_IN_MEMPOOL,
+            }))
+            .catch(() => null)
         )
+      )
+
+      const identities = await Promise.all(
+        miningInvites.map(async invite => {
+          const invitedIdentity = await callRpc('dna_identity', invite.receiver)
+
+          return {
+            hash: invite.hash,
+            identity: invitedIdentity,
+          }
+        })
+      )
+
+      setInvites(
+        invites.map(invite => {
+          const tx = txs.find(x => x.hash === invite.hash)
+          const identity = identities.find(x => x.hash === invite.hash)
+          return {
+            ...invite,
+            ...tx,
+            ...identity,
+          }
+        })
       )
     },
     invites.filter(({mining}) => mining).length ? 1000 * 10 : null

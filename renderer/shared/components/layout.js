@@ -70,7 +70,7 @@ import {
 } from '../utils/utils'
 import {useChainState} from '../providers/chain-context'
 import {useNode} from '../providers/node-context'
-import {useSettings} from '../providers/settings-context'
+import {useSettings, useSettingsState} from '../providers/settings-context'
 import {useFailToast} from '../hooks/use-toast'
 import {
   DnaLinkMethod,
@@ -442,6 +442,8 @@ function SyncingApp() {
   )
   const {peers} = current.context
 
+  const {runInternalNode, useExternalNode} = useSettingsState()
+
   return (
     <FillCenter bg="graphite.500" color="white" position="relative">
       <Flex
@@ -458,12 +460,14 @@ function SyncingApp() {
         {t('Synchronizing...')}
       </Flex>
       <Stack spacing={10} w="md">
-        <Stack isInline spacing={6} align="center" py={2}>
-          <Avatar address={address} size={20} />
-          <Heading fontSize="lg" fontWeight={500} wordBreak="break-all">
-            {address}
-          </Heading>
-        </Stack>
+        {Boolean(address) && (
+          <Stack isInline spacing={6} align="center" py={2}>
+            <Avatar address={address} size={20} />
+            <Heading fontSize="lg" fontWeight={500} wordBreak="break-all">
+              {address}
+            </Heading>
+          </Stack>
+        )}
         <Stack spacing={3}>
           <Flex justify="space-between">
             <Box>
@@ -520,13 +524,16 @@ function SyncingApp() {
             max={highestBlock || Number.MAX_SAFE_INTEGER}
           />
         </Stack>
-        <Text color="xwhite.040">
-          <Trans i18nKey="autoActivateMining" t={t}>
-            If your identity status is validated the mining will be activated
-            automatically once the node is synchronized. Please change{' '}
-            <TextLink href="/settings/node">settings</TextLink>
-          </Trans>
-        </Text>
+
+        {runInternalNode && !useExternalNode && (
+          <Text color="xwhite.040">
+            <Trans i18nKey="autoActivateMining" t={t}>
+              If your identity status is validated the mining will be activated
+              automatically once the node is synchronized. Please change{' '}
+              <TextLink href="/settings/node">settings</TextLink>
+            </Trans>
+          </Text>
+        )}
 
         {message && (
           <Alert status="error" bg="red.500" borderRadius="lg">
