@@ -34,7 +34,6 @@ import {
   Radio,
 } from '@chakra-ui/core'
 import dayjs from 'dayjs'
-import getUrls from 'get-urls'
 import {
   toLocaleDna,
   eitherState,
@@ -92,6 +91,7 @@ import {
   hasQuorum,
   mapVotingStatus,
   effectiveBalance,
+  getUrls,
 } from './utils'
 
 export function VotingCard({votingRef, ...props}) {
