@@ -270,16 +270,16 @@ export function Toast({
   status = 'info',
   actionContent,
   actionColor = status === 'error' ? 'red.500' : 'brandBlue.500',
+  color,
   onAction,
   ...props
 }) {
-  const {color} = props
   return (
     <Alert
       status={status}
       bg="white"
       boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
-      color="brandGray.500"
+      color={color || 'brandGray.500'}
       fontSize="md"
       pl={4}
       pr={actionContent ? 2 : 5}
@@ -290,7 +290,11 @@ export function Toast({
       rounded="lg"
       {...props}
     >
-      <AlertIcon name={icon} size={5} color={color || 'blue.500'} />
+      <AlertIcon
+        name={icon}
+        size={5}
+        color={color || (status === 'error' ? 'red.500' : 'blue.500')}
+      />
       <Flex direction="column" align="flex-start" maxW="sm">
         <AlertTitle fontWeight={500} lineHeight="base">
           {title}
