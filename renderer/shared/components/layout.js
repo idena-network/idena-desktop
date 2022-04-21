@@ -460,12 +460,14 @@ function SyncingApp() {
         {t('Synchronizing...')}
       </Flex>
       <Stack spacing={10} w="md">
-        <Stack isInline spacing={6} align="center" py={2}>
-          <Avatar address={address} size={20} />
-          <Heading fontSize="lg" fontWeight={500} wordBreak="break-all">
-            {address}
-          </Heading>
-        </Stack>
+        {Boolean(address) && (
+          <Stack isInline spacing={6} align="center" py={2}>
+            <Avatar address={address} size={20} />
+            <Heading fontSize="lg" fontWeight={500} wordBreak="break-all">
+              {address}
+            </Heading>
+          </Stack>
+        )}
         <Stack spacing={3}>
           <Flex justify="space-between">
             <Box>
