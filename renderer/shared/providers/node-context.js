@@ -123,6 +123,7 @@ export function NodeProvider({children}) {
         tcpPort: settings.tcpPort,
         ipfsPort: settings.ipfsPort,
         apiKey: settings.internalApiKey,
+        autoActivateMining: settings.autoActivateMining,
       })
     }
   }, [
@@ -134,6 +135,7 @@ export function NodeProvider({children}) {
     settings.ipfsPort,
     state.nodeFailed,
     settings.internalApiKey,
+    settings.autoActivateMining,
   ])
 
   useEffect(() => {

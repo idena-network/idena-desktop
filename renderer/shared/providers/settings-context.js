@@ -12,6 +12,7 @@ const TOGGLE_RUN_INTERNAL_NODE = 'TOGGLE_RUN_INTERNL_NODE'
 const UPDATE_UI_VERSION = 'UPDATE_UI_VERSION'
 const SET_INTERNAL_KEY = 'SET_INTERNAL_KEY'
 const SET_CONNECTION_DETAILS = 'SET_CONNECTION_DETAILS'
+const TOGGLE_AUTO_ACTIVATE_MINING = 'TOGGLE_AUTO_ACTIVATE_MINING'
 
 const randomKey = () =>
   Math.random()
@@ -37,6 +38,7 @@ const initialState = {
   internalApiKey: randomKey(),
   externalApiKey: '',
   lng: AVAILABLE_LANGS[0],
+  autoActivateMining: true,
 }
 
 if (global.env && global.env.NODE_ENV === 'e2e') {
@@ -89,6 +91,12 @@ function settingsReducer(state, action) {
         lng: action.lng,
       }
     }
+    case TOGGLE_AUTO_ACTIVATE_MINING: {
+      return {
+        ...state,
+        autoActivateMining: !state.autoActivateMining,
+      }
+    }
     default:
       return state
   }
@@ -101,10 +109,10 @@ const SettingsDispatchContext = React.createContext()
 export function SettingsProvider({children}) {
   const [state, dispatch] = usePersistence(
     useLogger(
-      React.useReducer(
-        settingsReducer,
-        loadPersistentState('settings') || initialState
-      )
+      React.useReducer(settingsReducer, {
+        autoActivateMining: initialState.autoActivateMining,
+        ...(loadPersistentState('settings') || initialState),
+      })
     ),
     'settings'
   )
@@ -143,6 +151,10 @@ export function SettingsProvider({children}) {
 
   const changeLanguage = lng => dispatch({type: CHANGE_LANGUAGE, lng})
 
+  function toggleAutoActivateMining() {
+    dispatch({type: TOGGLE_AUTO_ACTIVATE_MINING})
+  }
+
   return (
     <SettingsStateContext.Provider value={state}>
       <SettingsDispatchContext.Provider
@@ -153,6 +165,7 @@ export function SettingsProvider({children}) {
           setConnectionDetails({url, apiKey}) {
             dispatch({type: SET_CONNECTION_DETAILS, url, apiKey})
           },
+          toggleAutoActivateMining,
         }}
       >
         {children}

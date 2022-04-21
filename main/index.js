@@ -424,6 +424,7 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
         data.tcpPort,
         data.ipfsPort,
         data.apiKey,
+        data.autoActivateMining,
         isDev,
         log => {
           sendMainWindowMsg(NODE_EVENT, 'node-log', log)

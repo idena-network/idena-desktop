@@ -117,11 +117,12 @@ async function startNode(
   tcpPort,
   ipfsPort,
   apiKey,
+  autoActivateMining,
   useLogging = true,
   onLog,
   onExit
 ) {
-  const paramters = [
+  const parameters = [
     '--datadir',
     getNodeDataDir(),
     '--rpcport',
@@ -130,18 +131,23 @@ async function startNode(
     tcpPort,
     '--ipfsport',
     ipfsPort,
+    '--autoonline',
+    autoActivateMining,
   ]
+
   const version = await getCurrentVersion(false)
   if (version > '0.14.3') {
-    paramters.push('--apikey')
-    paramters.push(apiKey)
+    parameters.push('--apikey')
+    parameters.push(apiKey)
   }
+
   const configFile = getNodeConfigFile()
   if (fs.existsSync(configFile)) {
-    paramters.push('--config')
-    paramters.push(configFile)
+    parameters.push('--config')
+    parameters.push(configFile)
   }
-  const idenaNode = spawn(getNodeFile(), paramters)
+
+  const idenaNode = spawn(getNodeFile(), parameters)
 
   idenaNode.stdout.on('data', data => {
     const str = data.toString()
