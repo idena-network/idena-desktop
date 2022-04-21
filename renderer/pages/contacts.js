@@ -25,11 +25,7 @@ export default function ContactsPage() {
 
   const [selectedContact, setSelectedContact] = React.useState(null)
 
-  const {
-    isOpen: isOpenSendInviteDrawer,
-    onOpen: onOpenSendInviteDrawer,
-    onClose: onCloseNewContactDrawer,
-  } = useDisclosure()
+  const sendInviteDisclosure = useDisclosure()
 
   const {
     isOpen: isOpenEditContactDrawer,
@@ -50,7 +46,7 @@ export default function ContactsPage() {
       sendInviteDisclosure.onOpen()
       didOpenInviteDrawerRef.current = true
     }
-  }, [query.new])
+  }, [query.new, sendInviteDisclosure])
 
   const successToast = useSuccessToast()
   const failToast = useFailToast()
@@ -63,7 +59,7 @@ export default function ContactsPage() {
             <ContactListSidebar
               selectedContactId={selectedContact?.id}
               onSelectContact={setSelectedContact}
-              onNewContact={onOpenSendInviteDrawer}
+              onNewContact={sendInviteDisclosure.onOpen}
             />
             <Flex flex={1} py={6} px={20}>
               {selectedContact ? (
@@ -88,15 +84,14 @@ export default function ContactsPage() {
 
           <IssueInviteDrawer
             inviteeAddress={query.address}
-            isOpen={isOpenSendInviteDrawer}
-            onClose={onCloseNewContactDrawer}
+            {...sendInviteDisclosure}
             onIssue={invite => {
               successToast({
                 title: t('Invitation code created'),
                 description: invite.hash,
               })
               setSelectedContact(invite)
-              onCloseNewContactDrawer()
+              sendInviteDisclosure.onClose()
             }}
             onIssueFail={error => {
               failToast(error ?? t('Something went wrong'))
