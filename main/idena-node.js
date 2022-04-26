@@ -131,6 +131,8 @@ async function startNode(
     tcpPort,
     '--ipfsport',
     ipfsPort,
+    '--apikey',
+    apiKey,
   ]
 
   const version = await getCurrentVersion(false)
