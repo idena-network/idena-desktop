@@ -131,14 +131,12 @@ async function startNode(
     tcpPort,
     '--ipfsport',
     ipfsPort,
-    '--autoonline',
-    autoActivateMining,
   ]
 
   const version = await getCurrentVersion(false)
-  if (version > '0.14.3') {
-    parameters.push('--apikey')
-    parameters.push(apiKey)
+
+  if (autoActivateMining && semver.gt(version, '0.28.3')) {
+    parameters.push('--autoonline')
   }
 
   const configFile = getNodeConfigFile()
