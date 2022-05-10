@@ -517,9 +517,7 @@ export function hasValuableOptions(options) {
 }
 
 export function hasLinklessOptions(options) {
-  return stripOptions(options).every(
-    ({value}) => getUrls(value, {stripWWW: false}).size === 0
-  )
+  return stripOptions(options).every(({value}) => getUrls(value).length === 0)
 }
 
 export const mapVoting = ({
