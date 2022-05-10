@@ -33,7 +33,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           choco install -y gtk-runtime libjpeg-turbo 7zip curl visualstudio2019-workload-vctools
-          npm config set msvs_version 2017
+          # npm config set msvs_version 2017
+          npm install --global node-gyp@latest
+          npm prefix -g | % {npm config set node_gyp "$_\node_modules\node-gyp\bin\node-gyp.js"}
           curl -LO http://ftp.gnome.org/pub/GNOME/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip
           7z x gtk+-bundle_2.22.1-20101229_win64.zip -y -oC:\GTK
 
