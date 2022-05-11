@@ -36,10 +36,9 @@ jobs:
           # visualstudio2019-workload-vctools
           # npm config set msvs_version 2017
           cd C:\hostedtoolcache\windows\node\12.22.12\x64\
-          dir
-          dir npm
-          dir node_modules
-          dir node_modules\npm
+          # dir
+          # dir node_modules
+          dir node_modules\npm\node_modules
           # cd npm\node_modules\@npmcli\run-script
           # npm install node-gyp@latest
           # cd "/c/hostedtoolcache/windows/node/12.22.12/x64/node_modules/npm/node_modules/npm-lifecycle"
