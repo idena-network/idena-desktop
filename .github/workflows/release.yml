@@ -54,6 +54,6 @@ jobs:
         #   github_token: ${{ secrets.github_token }}
         #   release: true
       - name: Release
-        env:
-          GH_TOKEN: ${{ secrets.github_token }}
-        run: npx --no-install electron-builder --publish onTag
+        # env:
+        #   GH_TOKEN: ${{ secrets.github_token }}
+        run: npx --no-install electron-builder --publish always
