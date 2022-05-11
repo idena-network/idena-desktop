@@ -20,10 +20,10 @@ jobs:
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
         shell: bash
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v1
+      #   with:
+      #     node-version: 16
 
       - name: Install Linux canvas deps
         if: matrix.os == 'ubuntu-latest'
@@ -33,10 +33,6 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           choco install -y gtk-runtime libjpeg-turbo curl visualstudio2019-workload-vctools
-          # npm config set msvs_version 2017
-          # cd C:\hostedtoolcache\windows\node\12.22.12\x64\
-          # cd node_modules\npm\node_modules\npm-lifecycle
-          # npm install node-gyp@latest
           curl -LO http://ftp.gnome.org/pub/GNOME/binaries/win64/gtk+/2.22/gtk+-bundle_2.22.1-20101229_win64.zip
           7z x gtk+-bundle_2.22.1-20101229_win64.zip -y -oC:\GTK
 
