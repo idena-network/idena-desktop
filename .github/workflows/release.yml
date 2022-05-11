@@ -44,7 +44,8 @@ jobs:
         run: npm --no-git-tag-version version ${{ steps.refs.outputs.tag }}
 
       - name: Build & release
-        uses: samuelmeuli/action-electron-builder@v1.6.0
-        with:
-          github_token: ${{ secrets.github_token }}
-          release: true
+        run: npm run dist
+        # uses: samuelmeuli/action-electron-builder@v1.6.0
+        # with:
+        #   github_token: ${{ secrets.github_token }}
+        #   release: true
