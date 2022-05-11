@@ -20,10 +20,10 @@ jobs:
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
         shell: bash
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: 16
 
       - name: Install Linux canvas deps
         if: matrix.os == 'ubuntu-latest'
