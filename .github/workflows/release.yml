@@ -21,7 +21,7 @@ jobs:
         shell: bash
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v1
         with:
           node-version: 16
 
@@ -54,4 +54,4 @@ jobs:
         #   github_token: ${{ secrets.github_token }}
         #   release: true
       - name: Release
-        run: npx --no-install electron-builder
+        run: npx --no-install electron-builder --publish onTag
