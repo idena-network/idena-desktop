@@ -54,4 +54,4 @@ jobs:
         #   github_token: ${{ secrets.github_token }}
         #   release: true
       - name: Release
-        run: electron-builder
+        run: npx --no-install electron-builder
