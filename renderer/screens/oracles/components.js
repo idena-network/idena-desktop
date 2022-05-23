@@ -237,7 +237,8 @@ export function NumberInput({
       onChange={e => {
         if (preventInvalidInput) {
           if (e.target.checkValidity()) onChange(e)
-        } else onChange(e)
+          // eslint-disable-next-line no-unused-expressions
+        } else onChange?.(e)
       }}
       {...props}
     />

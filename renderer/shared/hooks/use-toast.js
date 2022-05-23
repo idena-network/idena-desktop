@@ -9,7 +9,12 @@ export function useStatusToast(status) {
   const toast = useToast()
 
   const resolveToastParams = params =>
-    typeof params === 'string' ? {title: params} : params
+    // eslint-disable-next-line no-nested-ternary
+    typeof params === 'string'
+      ? {title: params}
+      : params instanceof Error
+      ? {title: params?.message}
+      : params
 
   return params =>
     toast({

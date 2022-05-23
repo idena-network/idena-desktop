@@ -131,7 +131,7 @@ export function IdentityProvider({children}) {
     <IdentityStateContext.Provider
       value={{
         ...identity,
-        balance: balanceResult && balanceResult.balance,
+        ...balanceResult,
         canActivateInvite,
         canSubmitFlip,
         canMine,
