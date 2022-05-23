@@ -1061,22 +1061,31 @@ export function ProfileTagList() {
       {Number.isFinite(score) && (
         <Popover placement="top" arrowShadowColor="transparent">
           <PopoverTrigger>
-            <ProfileTag cursor="help">
-              <Stack isInline spacing="1" w="full">
-                <Text>{t('Score')}</Text>
-                <Text>{toPercent(score)}</Text>
-              </Stack>
-            </ProfileTag>
+            <Box>
+              <ProfileTag cursor="help">
+                <Stack isInline spacing="1" w="full">
+                  <Text>{t('Score')}</Text>
+                  <Text>{toPercent(score)}</Text>
+                </Stack>
+              </ProfileTag>
+            </Box>
           </PopoverTrigger>
-          <PopoverContent border="none" fontSize="sm" w="max-content">
+          <PopoverContent
+            border="none"
+            fontSize="sm"
+            w="max-content"
+            _focus={{
+              outline: 'none',
+            }}
+          >
             <PopoverArrow bg="graphite.500" />
             <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
               <Stack>
-                <Stack spacing="0.5">
+                <Stack spacing="2px">
                   <Text color="muted" lineHeight="shorter">
                     {t('Total score')}
                   </Text>
-                  <Text color="white" lineHeight="4">
+                  <Text color="white" lineHeight="base">
                     {t(
                       `{{totalShortFlipPoints}} out of {{totalQualifiedFlips}}`,
                       {
@@ -1086,7 +1095,7 @@ export function ProfileTagList() {
                     )}
                   </Text>
                 </Stack>
-                <Stack spacing="0.5">
+                <Stack spacing="2px">
                   <Text color="muted" lineHeight="shorter">
                     {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
                   </Text>
@@ -1125,7 +1134,7 @@ export const ProfileTag = React.forwardRef(function ProfileTag(props, ref) {
       borderRadius="xl"
       fontSize="sm"
       px="3"
-      py={0}
+      minH="6"
       {...props}
     />
   )
