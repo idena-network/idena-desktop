@@ -19,7 +19,6 @@ import {
   Alert,
   AlertIcon,
   AlertDescription,
-  useToast,
   List,
   ListItem,
   useDisclosure,
@@ -43,7 +42,6 @@ import {
   DrawerHeader,
   DrawerBody,
   DrawerFooter,
-  Toast,
   SuccessAlert,
   Checkbox,
   DialogFooter,
@@ -77,23 +75,35 @@ import {useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {useTotalValidationScore} from '../validation-report/hooks'
 
-export function UserInlineCard({identity: {address, state}, ...props}) {
+export function UserInlineCard({
+  identity: {address, state},
+  children,
+  ...props
+}) {
   return (
     <Stack isInline spacing={6} align="center" {...props}>
-      <Avatar address={address} />
-      <Stack spacing={1}>
-        <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
-          {mapToFriendlyStatus(state)}
-        </Heading>
-        <Heading
-          as="h3"
-          fontSize="mdx"
-          fontWeight="normal"
-          color="muted"
-          lineHeight="shorter"
-        >
-          {address}
-        </Heading>
+      <Avatar
+        address={address}
+        bg="white"
+        borderWidth={1}
+        borderColor="gray.016"
+      />
+      <Stack spacing="3/2" w="full">
+        <Stack spacing={1}>
+          <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
+            {mapToFriendlyStatus(state)}
+          </Heading>
+          <Heading
+            as="h3"
+            fontSize="mdx"
+            fontWeight="normal"
+            color="muted"
+            lineHeight="shorter"
+          >
+            {address}
+          </Heading>
+        </Stack>
+        {children}
       </Stack>
     </Stack>
   )
@@ -131,7 +141,11 @@ export function AnnotatedUserStat({
   const {colors} = useTheme()
   return (
     <UserStat {...props}>
-      <UserStatLabel borderBottom={`dotted 1px ${colors.muted}`} cursor="help">
+      <UserStatLabel
+        borderBottom={`dotted 1px ${colors.muted}`}
+        cursor="help"
+        fontWeight={500}
+      >
         <UserStatLabelTooltip label={annotation}>{label}</UserStatLabelTooltip>
       </UserStatLabel>
       {value && <UserStatValue>{value}</UserStatValue>}
@@ -141,7 +155,7 @@ export function AnnotatedUserStat({
 }
 
 export function UserStat(props) {
-  return <Stat as={Stack} spacing="2px" {...props} />
+  return <Stat as={Stack} spacing="3px" {...props} />
 }
 
 export function UserStatLabel(props) {
@@ -350,9 +364,10 @@ export function ActivateMiningForm({
   isOnline,
   delegatee,
   delegationEpoch,
+  pendingUndelegation,
   onShow,
 }) {
-  const toast = useToast()
+  const failToast = useFailToast()
 
   const epoch = useEpochState()
 
@@ -363,13 +378,7 @@ export function ActivateMiningForm({
       delegationEpoch,
     },
     actions: {
-      onError: (_, {data: {message}}) => {
-        toast({
-          status: 'error',
-          // eslint-disable-next-line react/display-name
-          render: () => <Toast title={message} status="error" />,
-        })
-      },
+      onError: (_, {data}) => failToast(data?.message),
     },
   })
   const {mode} = current.context
@@ -409,6 +418,9 @@ export function ActivateMiningForm({
       ) : (
         <ActivateMiningDrawer
           mode={mode}
+          delegationEpoch={delegationEpoch}
+          pendingUndelegation={pendingUndelegation}
+          currentEpoch={epoch?.epoch}
           isOpen={eitherState(current, 'showing')}
           isCloseable={false}
           isLoading={eitherState(current, 'showing.mining')}
@@ -478,6 +490,9 @@ export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
 
 export function ActivateMiningDrawer({
   mode,
+  delegationEpoch,
+  pendingUndelegation,
+  currentEpoch,
   isLoading,
   onChangeMode,
   onActivate,
@@ -489,6 +504,11 @@ export function ActivateMiningDrawer({
   const delegateeInputRef = React.useRef()
 
   const willDelegate = mode === NodeType.Delegator
+
+  const waitForDelegationEpochs =
+    3 - (currentEpoch - delegationEpoch) <= 0
+      ? 3
+      : 3 - (currentEpoch - delegationEpoch)
 
   return (
     <Drawer onClose={onClose} {...props}>
@@ -552,23 +572,22 @@ export function ActivateMiningDrawer({
             <Stack spacing={5}>
               <FormControl as={Stack} spacing={3}>
                 <FormLabel>{t('Delegation address')}</FormLabel>
-                <Input ref={delegateeInputRef} />
+                <Input
+                  ref={delegateeInputRef}
+                  defaultValue={pendingUndelegation}
+                  isDisabled={Boolean(pendingUndelegation)}
+                />
               </FormControl>
-              <Alert
-                status="error"
-                rounded="md"
-                bg="red.010"
-                borderColor="red.050"
-                borderWidth={1}
-              >
-                <AlertIcon name="info" alignSelf="flex-start" color="red.500" />
-                <AlertDescription
-                  as={Stack}
-                  spacing={3}
-                  color="brandGray.500"
-                  fontSize="md"
-                  fontWeight={500}
-                >
+
+              {pendingUndelegation ? (
+                <FailAlert>
+                  {t(
+                    'You have recently disabled delegation. You need to wait for {{count}} epochs to delegate to a new address.',
+                    {count: waitForDelegationEpochs}
+                  )}
+                </FailAlert>
+              ) : (
+                <FailAlert>
                   <Text>
                     {t(
                       'You can lose your stake, all your mining and validation rewards if you delegate your mining status.'
@@ -579,8 +598,8 @@ export function ActivateMiningDrawer({
                       'Disabling delegation could be done at the next epoch only.'
                     )}
                   </Text>
-                </AlertDescription>
-              </Alert>
+                </FailAlert>
+              )}
             </Stack>
           ) : (
             <Box bg="gray.50" p={6} py={4}>
@@ -604,7 +623,7 @@ export function ActivateMiningDrawer({
           )}
         </Stack>
       </DrawerBody>
-      <DrawerFooter px={0}>
+      <DrawerFooter>
         <Stack isInline>
           <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
           <PrimaryButton
@@ -694,7 +713,7 @@ export function DeactivateMiningDrawer({
           )}
         </Stack>
       </DrawerBody>
-      <DrawerFooter px={0}>
+      <DrawerFooter>
         <Stack isInline>
           <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
           <PrimaryButton
@@ -1029,12 +1048,12 @@ export function ProfileTagList() {
   const formatDna = toLocaleDna(i18n.language, {maximumFractionDigits: 5})
 
   return (
-    <Stack spacing={[0, '1']} direction={['column', 'row']} w={['full']}>
+    <Stack isInline spacing="1" w="full">
       {age > 0 && (
         <ProfileTag>
-          <Stack direction={['column', 'row']} spacing={['1.5', '1']}>
+          <Stack isInline spacing="1">
             <Text>{t('Age')}</Text>
-            <Text color={['muted', 'inherit']}>{age}</Text>
+            <Text>{age}</Text>
           </Stack>
         </ProfileTag>
       )}
@@ -1043,13 +1062,9 @@ export function ProfileTagList() {
         <Popover placement="top" arrowShadowColor="transparent">
           <PopoverTrigger>
             <ProfileTag cursor="help">
-              <Stack
-                direction={['column', 'row']}
-                spacing={['1.5', '1']}
-                w="full"
-              >
+              <Stack isInline spacing="1" w="full">
                 <Text>{t('Score')}</Text>
-                <Text color={['muted', 'inherit']}>{toPercent(score)}</Text>
+                <Text>{toPercent(score)}</Text>
               </Stack>
             </ProfileTag>
           </PopoverTrigger>
@@ -1078,7 +1093,7 @@ export function ProfileTagList() {
                   <TextLink
                     href="/validation-report"
                     color="white"
-                    lineHeight="4"
+                    lineHeight="base"
                   >
                     {t('Validation report')}
                     <Icon name="chevron-down" transform="rotate(-90deg)" />
@@ -1091,8 +1106,8 @@ export function ProfileTagList() {
       )}
 
       {penalty > 0 && (
-        <ProfileTag bg={[null, 'red.012']} color="red.500">
-          <Stack direction={['column', 'row']} spacing={['1.5', '1']}>
+        <ProfileTag bg="red.012" color="red.500">
+          <Stack isInline spacing="1">
             <Text>{t('Mining penalty')}</Text>
             <Text color={['inherit']}>{formatDna(penalty)}</Text>
           </Stack>
@@ -1106,14 +1121,11 @@ export const ProfileTag = React.forwardRef(function ProfileTag(props, ref) {
   return (
     <Tag
       ref={ref}
-      bg={[null, 'gray.016']}
-      borderRadius={[null, 'xl']}
-      borderBottomWidth={[1, 0]}
-      borderBottomColor="gray.100"
-      fontSize={['base', 'sm']}
-      px={[null, '3']}
-      pt={['2', 0]}
-      pb={['2.5', 0]}
+      bg="gray.016"
+      borderRadius="xl"
+      fontSize="sm"
+      px="3"
+      py={0}
       {...props}
     />
   )
