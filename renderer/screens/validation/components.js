@@ -854,6 +854,15 @@ export function ReviewValidationDialog({
   const areFlipsUnanswered = answeredFlipsCount < flips.length
   const areReportsMissing = reportedFlipsCount < availableReportsCount
 
+  const approvedCount = flips.filter(
+    flip => flip.relevance === RelevanceType.Relevant
+  ).length
+
+  const abstainedCount = flips.filter(
+    flip =>
+      (flip.relevance ?? RelevanceType.Abstained) === RelevanceType.Abstained
+  ).length
+
   return (
     <Dialog title={t('Submit the answers')} onClose={onCancel} {...props}>
       <ValidationDialogBody>
@@ -868,42 +877,55 @@ export function ReviewValidationDialog({
                 })}
               />
               <ReviewValidationDialog.Stat
-                label={t('Flips reported')}
-                value={t(
-                  '{{reportedFlipsCount}} out of {{availableReportsCount}}',
-                  {
-                    reportedFlipsCount,
-                    availableReportsCount,
-                  }
-                )}
+                label={t('Approved')}
+                value={approvedCount}
               />
+              <ReviewValidationDialog.Stat
+                label={t('Reported')}
+                value={reportedFlipsCount}
+              />
+              {availableReportsCount - reportedFlipsCount > 0 ? (
+                <ReviewValidationDialog.Stat
+                  label={t('Unused reports')}
+                  value={availableReportsCount - reportedFlipsCount}
+                />
+              ) : (
+                <ReviewValidationDialog.Stat
+                  label={t('Abstained')}
+                  value={abstainedCount}
+                />
+              )}
             </Stack>
             {(areFlipsUnanswered || areReportsMissing) && (
-              <Text color="muted">
+              <Stack>
                 {areFlipsUnanswered && (
-                  <Trans i18nKey="reviewMissingFlips" t={t}>
-                    You need to answer{' '}
-                    <ReviewValidationDialog.LinkButton
-                      onClick={onMisingAnswers}
-                    >
-                      all flips
-                    </ReviewValidationDialog.LinkButton>{' '}
-                    otherwise you may fail the validation.
-                  </Trans>
-                )}{' '}
-                {areReportsMissing && (
-                  <Trans i18nKey="reviewMissingReports" t={t}>
-                    In order to get maximum rewards use{' '}
-                    <ReviewValidationDialog.LinkButton
-                      variant="link"
-                      onClick={onMisingReports}
-                    >
-                      all available reports
-                    </ReviewValidationDialog.LinkButton>
-                    for the worst flips.
-                  </Trans>
+                  <Text color="muted">
+                    <Trans i18nKey="reviewMissingFlips" t={t}>
+                      You need to answer{' '}
+                      <ReviewValidationDialog.LinkButton
+                        onClick={onMisingAnswers}
+                      >
+                        all flips
+                      </ReviewValidationDialog.LinkButton>{' '}
+                      otherwise you may fail the validation.
+                    </Trans>
+                  </Text>
                 )}
-              </Text>
+                {areReportsMissing && (
+                  <Text color="muted">
+                    <Trans i18nKey="reviewMissingReports" t={t}>
+                      Use{' '}
+                      <ReviewValidationDialog.LinkButton
+                        variant="link"
+                        onClick={onMisingReports}
+                      >
+                        all available reports
+                      </ReviewValidationDialog.LinkButton>
+                      to get maximum rewards.
+                    </Trans>
+                  </Text>
+                )}
+              </Stack>
             )}
           </Stack>
           {areReportsMissing && (
