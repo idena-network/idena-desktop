@@ -1030,12 +1030,14 @@ export function ProfileTagList() {
 
   return (
     <Stack spacing={[0, '1']} direction={['column', 'row']} w={['full']}>
-      <ProfileTag>
-        <Stack direction={['column', 'row']} spacing={['1.5', '1']}>
-          <Text>{t('Age')}</Text>
-          <Text color={['muted', 'inherit']}>{age}</Text>
-        </Stack>
-      </ProfileTag>
+      {age > 0 && (
+        <ProfileTag>
+          <Stack direction={['column', 'row']} spacing={['1.5', '1']}>
+            <Text>{t('Age')}</Text>
+            <Text color={['muted', 'inherit']}>{age}</Text>
+          </Stack>
+        </ProfileTag>
+      )}
 
       {Number.isFinite(score) && (
         <Popover placement="top" arrowShadowColor="transparent">
@@ -1147,7 +1149,7 @@ export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
     <Drawer {...props}>
       <DrawerHeader>
         <Stack spacing="4">
-          <FillCenter bg="blue.012" h="48px" minH="48px" w="48px" rounded="xl">
+          <FillCenter bg="blue.012" h={12} minH={12} w={12} rounded="xl">
             <Icon name="wallet" size="6" color="blue.500" />
           </FillCenter>
           <Heading
