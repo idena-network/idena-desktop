@@ -475,7 +475,9 @@ export function DnaRawDialog({
               return resolve()
             })
               .then(() => setIsSubmitting(true))
-              .then(() => callRpc('bcn_sendRawTx', tx))
+              .then(() =>
+                callRpc('dna_sendTransaction', new Transaction().fromHex(tx))
+              )
               .then(async hash => {
                 if (isValidUrl(callbackUrl)) {
                   const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
