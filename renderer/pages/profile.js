@@ -116,8 +116,6 @@ export default function ProfilePage() {
     pendingUndelegation,
   } = identity
 
-  console.log({identity})
-
   const epoch = useEpochState()
 
   const {
