@@ -132,7 +132,7 @@ function ValidationSession({
   const {
     currentIndex,
     translations,
-    reportedFlipsCount,
+    reports,
     longFlips,
     didReport,
   } = state.context
@@ -258,13 +258,12 @@ function ValidationSession({
                       onClick={() => {
                         onCloseExceededTooltip()
                         send({
-                          type: 'TOGGLE_WORDS',
+                          type: 'APPROVE_WORDS',
                           hash: currentFlip.hash,
-                          relevance: RelevanceType.Relevant,
                         })
                       }}
                     >
-                      {t('Yes')}
+                      {t('Approve')}
                     </QualificationButton>
 
                     <Tooltip
@@ -297,17 +296,15 @@ function ValidationSession({
                         }}
                         onClick={() =>
                           send({
-                            type: 'TOGGLE_WORDS',
+                            type: 'REPORT_WORDS',
                             hash: currentFlip.hash,
-                            relevance: RelevanceType.Irrelevant,
                           })
                         }
                       >
                         {t('Report')}{' '}
                         {t('({{count}} left)', {
                           count:
-                            availableReportsNumber(longFlips) -
-                            reportedFlipsCount,
+                            availableReportsNumber(longFlips) - reports.size,
                         })}
                       </QualificationButton>
                     </Tooltip>
@@ -432,7 +429,7 @@ function ValidationSession({
 
       <ReviewValidationDialog
         flips={flips.filter(solvableFlips)}
-        reportedFlipsCount={reportedFlipsCount}
+        reportedFlipsCount={reports.size}
         availableReportsCount={availableReportsNumber(longFlips)}
         isOpen={state.matches('longSession.solve.answer.review')}
         isSubmitting={isSubmitting(state)}

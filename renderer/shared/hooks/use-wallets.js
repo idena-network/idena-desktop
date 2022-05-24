@@ -39,6 +39,8 @@ function transactionType(tx) {
 
     return `Call ${method}`
   }
+
+  if (type === 'replenishStake') return 'Replenish stake'
   return type
 }
 
