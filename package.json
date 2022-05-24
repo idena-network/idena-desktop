@@ -94,7 +94,7 @@
     "@toast-ui/react-image-editor": "^1.2.0",
     "@xstate/react": "^0.8.1",
     "ansi-to-react": "^6.0.5",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "canvas-confetti": "^1.4.0",
     "dayjs": "^1.9.6",
     "dequal": "^1.0.0",
