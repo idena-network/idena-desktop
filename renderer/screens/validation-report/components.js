@@ -352,3 +352,25 @@ export function ValidationReportCategoryLabel({label, description, ...props}) {
     </Box>
   )
 }
+
+export function TableValidationDesc({
+  validationResult,
+  missedValidationReward,
+  t,
+}) {
+  return validationResult === ValidationResult.Penalty ? (
+    <TableDescText color="red.500">
+      {t('Your flips were reported.')}
+    </TableDescText>
+  ) : (
+    <TableDescText color={missedValidationReward > 0 ? 'red.500' : ''}>
+      {missedValidationReward > 0
+        ? t('Attend every validation to get a higher reward')
+        : t(`Great job! You have earned maximum reward`)}
+    </TableDescText>
+  )
+}
+
+export function TableDescText(props) {
+  return <Text fontSize={['base', 'md']} {...props} />
+}

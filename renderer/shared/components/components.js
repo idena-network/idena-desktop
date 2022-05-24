@@ -402,6 +402,8 @@ export function FailAlert({children, ...props}) {
       bg="red.010"
       borderWidth="1px"
       borderColor="red.050"
+      color="brandGray.500"
+      fontSize="md"
       fontWeight={500}
       rounded="md"
       px={3}

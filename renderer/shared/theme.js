@@ -23,6 +23,7 @@ export const theme = {
     },
     gray: {
       ...chakraTheme.colors.gray,
+      '016': 'rgb(83 86 92 /0.16)',
       10: 'rgba(255,255,255,0.1)',
       50: 'rgb(245, 246, 247)',
       100: 'rgb(210, 212, 217)',

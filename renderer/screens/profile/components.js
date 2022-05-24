@@ -14,19 +14,25 @@ import {
   Button,
   RadioButtonGroup,
   Radio,
-  DrawerFooter,
   Icon,
   Switch,
   Alert,
   AlertIcon,
   AlertDescription,
-  useToast,
   List,
   ListItem,
   useDisclosure,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverBody,
+  Tag,
+  FormHelperText,
 } from '@chakra-ui/core'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
+import {useQuery} from 'react-query'
 import {
   Avatar,
   Tooltip,
@@ -35,12 +41,14 @@ import {
   Drawer,
   DrawerHeader,
   DrawerBody,
-  Toast,
+  DrawerFooter,
   SuccessAlert,
   Checkbox,
   DialogFooter,
   DialogBody,
   Dialog,
+  FailAlert,
+  TextLink,
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
@@ -53,31 +61,49 @@ import {useInvite} from '../../shared/providers/invite-context'
 import {activateMiningMachine} from './machines'
 import {
   calculateInvitationRewardRatio,
+  callRpc,
   dummyAddress,
   eitherState,
+  toLocaleDna,
   toPercent,
 } from '../../shared/utils/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
 import {validateInvitationCode} from './utils'
+import {BLOCK_TIME} from '../oracles/utils'
+import {useReplenishStake, useStakingAlert} from './hooks'
+import {DnaInput, FillCenter} from '../oracles/components'
+import {useTotalValidationScore} from '../validation-report/hooks'
 
-export function UserInlineCard({address, status, ...props}) {
+export function UserInlineCard({
+  identity: {address, state},
+  children,
+  ...props
+}) {
   return (
     <Stack isInline spacing={6} align="center" {...props}>
-      <Avatar address={address} />
-      <Stack spacing={1}>
-        <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
-          {mapToFriendlyStatus(status)}
-        </Heading>
-        <Heading
-          as="h3"
-          fontSize="mdx"
-          fontWeight="normal"
-          color="muted"
-          lineHeight="shorter"
-        >
-          {address}
-        </Heading>
+      <Avatar
+        address={address}
+        bg="white"
+        borderWidth={1}
+        borderColor="gray.016"
+      />
+      <Stack spacing="3/2" w="full">
+        <Stack spacing={1}>
+          <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
+            {mapToFriendlyStatus(state)}
+          </Heading>
+          <Heading
+            as="h3"
+            fontSize="mdx"
+            fontWeight="normal"
+            color="muted"
+            lineHeight="shorter"
+          >
+            {address}
+          </Heading>
+        </Stack>
+        {children}
       </Stack>
     </Stack>
   )
@@ -115,7 +141,11 @@ export function AnnotatedUserStat({
   const {colors} = useTheme()
   return (
     <UserStat {...props}>
-      <UserStatLabel borderBottom={`dotted 1px ${colors.muted}`} cursor="help">
+      <UserStatLabel
+        borderBottom={`dotted 1px ${colors.muted}`}
+        cursor="help"
+        fontWeight={500}
+      >
         <UserStatLabelTooltip label={annotation}>{label}</UserStatLabelTooltip>
       </UserStatLabel>
       {value && <UserStatValue>{value}</UserStatValue>}
@@ -125,7 +155,7 @@ export function AnnotatedUserStat({
 }
 
 export function UserStat(props) {
-  return <Stat as={Stack} spacing="2px" {...props} />
+  return <Stat as={Stack} spacing="3px" {...props} />
 }
 
 export function UserStatLabel(props) {
@@ -334,9 +364,10 @@ export function ActivateMiningForm({
   isOnline,
   delegatee,
   delegationEpoch,
+  pendingUndelegation,
   onShow,
 }) {
-  const toast = useToast()
+  const failToast = useFailToast()
 
   const epoch = useEpochState()
 
@@ -347,13 +378,7 @@ export function ActivateMiningForm({
       delegationEpoch,
     },
     actions: {
-      onError: (_, {data: {message}}) => {
-        toast({
-          status: 'error',
-          // eslint-disable-next-line react/display-name
-          render: () => <Toast title={message} status="error" />,
-        })
-      },
+      onError: (_, {data}) => failToast(data?.message),
     },
   })
   const {mode} = current.context
@@ -393,6 +418,9 @@ export function ActivateMiningForm({
       ) : (
         <ActivateMiningDrawer
           mode={mode}
+          delegationEpoch={delegationEpoch}
+          pendingUndelegation={pendingUndelegation}
+          currentEpoch={epoch?.epoch}
           isOpen={eitherState(current, 'showing')}
           isCloseable={false}
           isLoading={eitherState(current, 'showing.mining')}
@@ -462,6 +490,9 @@ export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
 
 export function ActivateMiningDrawer({
   mode,
+  delegationEpoch,
+  pendingUndelegation,
+  currentEpoch,
   isLoading,
   onChangeMode,
   onActivate,
@@ -473,6 +504,11 @@ export function ActivateMiningDrawer({
   const delegateeInputRef = React.useRef()
 
   const willDelegate = mode === NodeType.Delegator
+
+  const waitForDelegationEpochs =
+    3 - (currentEpoch - delegationEpoch) <= 0
+      ? 3
+      : 3 - (currentEpoch - delegationEpoch)
 
   return (
     <Drawer onClose={onClose} {...props}>
@@ -536,23 +572,22 @@ export function ActivateMiningDrawer({
             <Stack spacing={5}>
               <FormControl as={Stack} spacing={3}>
                 <FormLabel>{t('Delegation address')}</FormLabel>
-                <Input ref={delegateeInputRef} />
+                <Input
+                  ref={delegateeInputRef}
+                  defaultValue={pendingUndelegation}
+                  isDisabled={Boolean(pendingUndelegation)}
+                />
               </FormControl>
-              <Alert
-                status="error"
-                rounded="md"
-                bg="red.010"
-                borderColor="red.050"
-                borderWidth={1}
-              >
-                <AlertIcon name="info" alignSelf="flex-start" color="red.500" />
-                <AlertDescription
-                  as={Stack}
-                  spacing={3}
-                  color="brandGray.500"
-                  fontSize="md"
-                  fontWeight={500}
-                >
+
+              {pendingUndelegation ? (
+                <FailAlert>
+                  {t(
+                    'You have recently disabled delegation. You need to wait for {{count}} epochs to delegate to a new address.',
+                    {count: waitForDelegationEpochs}
+                  )}
+                </FailAlert>
+              ) : (
+                <FailAlert>
                   <Text>
                     {t(
                       'You can lose your stake, all your mining and validation rewards if you delegate your mining status.'
@@ -563,8 +598,8 @@ export function ActivateMiningDrawer({
                       'Disabling delegation could be done at the next epoch only.'
                     )}
                   </Text>
-                </AlertDescription>
-              </Alert>
+                </FailAlert>
+              )}
             </Stack>
           ) : (
             <Box bg="gray.50" p={6} py={4}>
@@ -588,7 +623,7 @@ export function ActivateMiningDrawer({
           )}
         </Stack>
       </DrawerBody>
-      <DrawerFooter px={0}>
+      <DrawerFooter>
         <Stack isInline>
           <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
           <PrimaryButton
@@ -678,7 +713,7 @@ export function DeactivateMiningDrawer({
           )}
         </Stack>
       </DrawerBody>
-      <DrawerFooter px={0}>
+      <DrawerFooter>
         <Stack isInline>
           <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
           <PrimaryButton
@@ -997,4 +1032,247 @@ function IdenaBotFeatureList({features, listSeparator = ';'}) {
       ))}
     </List>
   )
+}
+
+export function ProfileTagList() {
+  const {t, i18n} = useTranslation()
+
+  const [
+    {age, penalty, totalShortFlipPoints, totalQualifiedFlips},
+  ] = useIdentity()
+
+  const epoch = useEpochState()
+
+  const score = useTotalValidationScore()
+
+  const formatDna = toLocaleDna(i18n.language, {maximumFractionDigits: 5})
+
+  return (
+    <Stack isInline spacing="1" w="full">
+      {age > 0 && (
+        <ProfileTag>
+          <Stack isInline spacing="1">
+            <Text>{t('Age')}</Text>
+            <Text>{age}</Text>
+          </Stack>
+        </ProfileTag>
+      )}
+
+      {Number.isFinite(score) && (
+        <Popover placement="top" arrowShadowColor="transparent">
+          <PopoverTrigger>
+            <Box>
+              <ProfileTag cursor="help">
+                <Stack isInline spacing="1" w="full">
+                  <Text>{t('Score')}</Text>
+                  <Text>{toPercent(score)}</Text>
+                </Stack>
+              </ProfileTag>
+            </Box>
+          </PopoverTrigger>
+          <PopoverContent
+            border="none"
+            fontSize="sm"
+            w="max-content"
+            _focus={{
+              outline: 'none',
+            }}
+          >
+            <PopoverArrow bg="graphite.500" />
+            <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
+              <Stack>
+                <Stack spacing="2px">
+                  <Text color="muted" lineHeight="shorter">
+                    {t('Total score')}
+                  </Text>
+                  <Text color="white" lineHeight="base">
+                    {t(
+                      `{{totalShortFlipPoints}} out of {{totalQualifiedFlips}}`,
+                      {
+                        totalShortFlipPoints,
+                        totalQualifiedFlips,
+                      }
+                    )}
+                  </Text>
+                </Stack>
+                <Stack spacing="2px">
+                  <Text color="muted" lineHeight="shorter">
+                    {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
+                  </Text>
+                  <TextLink
+                    href="/validation-report"
+                    color="white"
+                    lineHeight="base"
+                  >
+                    {t('Validation report')}
+                    <Icon name="chevron-down" transform="rotate(-90deg)" />
+                  </TextLink>
+                </Stack>
+              </Stack>
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {penalty > 0 && (
+        <ProfileTag bg="red.012" color="red.500">
+          <Stack isInline spacing="1">
+            <Text>{t('Mining penalty')}</Text>
+            <Text color={['inherit']}>{formatDna(penalty)}</Text>
+          </Stack>
+        </ProfileTag>
+      )}
+    </Stack>
+  )
+}
+
+export const ProfileTag = React.forwardRef(function ProfileTag(props, ref) {
+  return (
+    <Tag
+      ref={ref}
+      bg="gray.016"
+      borderRadius="xl"
+      fontSize="sm"
+      px="3"
+      minH="6"
+      {...props}
+    />
+  )
+})
+
+export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
+  const {t, i18n} = useTranslation()
+
+  const {address, state} = useIdentityState()
+
+  const {data: balanceData} = useQuery({
+    queryKey: ['get-balance', address],
+    // eslint-disable-next-line no-shadow
+    queryFn: ({queryKey: [, address]}) => callRpc('dna_getBalance', address),
+    enabled: Boolean(address),
+    staleTime: (BLOCK_TIME / 2) * 1000,
+    notifyOnChangeProps: 'tracked',
+  })
+
+  const {submit} = useReplenishStake({onSuccess, onError})
+
+  const formatDna = toLocaleDna(i18n.language, {
+    maximumFractionDigits: 5,
+  })
+
+  const isRisky = [
+    IdentityStatus.Candidate,
+    IdentityStatus.Newbie,
+    IdentityStatus.Verified,
+  ].includes(state)
+
+  return (
+    <Drawer {...props}>
+      <DrawerHeader>
+        <Stack spacing="4">
+          <FillCenter bg="blue.012" h={12} minH={12} w={12} rounded="xl">
+            <Icon name="wallet" size="6" color="blue.500" />
+          </FillCenter>
+          <Heading
+            color="brandGray.500"
+            fontSize="lg"
+            fontWeight={500}
+            lineHeight="base"
+          >
+            {t('Add stake')}
+          </Heading>
+        </Stack>
+      </DrawerHeader>
+      <DrawerBody fontSize="md">
+        <Stack spacing={30}>
+          <Stack>
+            <Text>
+              {t(
+                'Get quadratic staking rewards for locking iDNA in your identity stake.'
+              )}
+            </Text>
+            <Text>
+              {t('Current stake amount: {{amount}}', {
+                amount: formatDna(balanceData?.stake),
+                nsSeparator: '!!',
+              })}
+            </Text>
+          </Stack>
+          <Stack spacing="2.5">
+            <form
+              id="replenishStake"
+              onSubmit={e => {
+                e.preventDefault()
+
+                const formData = new FormData(e.target)
+
+                const amount = formData.get('amount')
+
+                submit({amount})
+              }}
+            >
+              <FormControl>
+                <FormLabel mx={0} mb="3">
+                  {t('Amount')}
+                </FormLabel>
+                <DnaInput name="amount" />
+                <FormHelperText fontSize="md">
+                  <Flex justify="space-between">
+                    <Box as="span" color="muted">
+                      {t('Available')}
+                    </Box>
+                    <Box as="span" color="brandGray.500">
+                      {formatDna(balanceData?.balance)}
+                    </Box>
+                  </Flex>
+                </FormHelperText>
+              </FormControl>
+            </form>
+          </Stack>
+          {isRisky && (
+            <FailAlert>
+              {state === IdentityStatus.Verified
+                ? t(
+                    'You will lose 100% of the Stake if you fail the upcoming validation'
+                  )
+                : t(
+                    'You will lose 100% of the Stake if you fail or miss the upcoming validation'
+                  )}
+            </FailAlert>
+          )}
+        </Stack>
+      </DrawerBody>
+      <DrawerFooter>
+        <Stack isInline>
+          {/* eslint-disable-next-line react/destructuring-assignment */}
+          <SecondaryButton onClick={props.onClose}>
+            {t('Not now')}
+          </SecondaryButton>
+          <PrimaryButton form="replenishStake" type="submit">
+            {t('Add stake')}
+          </PrimaryButton>
+        </Stack>
+      </DrawerFooter>
+    </Drawer>
+  )
+}
+
+export function StakingAlert(props) {
+  const warning = useStakingAlert()
+
+  return warning ? (
+    <FailAlert {...props}>
+      {Array.isArray(warning) ? (
+        <Stack spacing={0}>
+          {warning.map((message, idx) => (
+            <Text key={idx} as="span">
+              {message}
+            </Text>
+          ))}
+        </Stack>
+      ) : (
+        warning
+      )}
+    </FailAlert>
+  ) : null
 }
