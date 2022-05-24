@@ -11,6 +11,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/core'
+import {Transaction, dnaToFloat} from 'idena-sdk-js'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {SecondaryButton, PrimaryButton} from '../../shared/components/button'
 import {
@@ -31,7 +32,6 @@ import {
   isValidUrl,
   sendDna,
   DNA_SEND_CONFIRM_TRESHOLD,
-  Transaction,
   appendTxHash,
   handleCallbackUrl,
 } from './utils'
@@ -475,9 +475,16 @@ export function DnaRawDialog({
               return resolve()
             })
               .then(() => setIsSubmitting(true))
-              .then(() =>
-                callRpc('dna_sendTransaction', new Transaction().fromHex(tx))
-              )
+              .then(() => {
+                const decodedTx = new Transaction().fromHex(tx)
+
+                return callRpc('dna_sendTransaction', {
+                  ...decodedTx,
+                  amount: dnaToFloat(decodedTx.amount),
+                  maxFee: dnaToFloat(decodedTx.maxFee),
+                  tips: dnaToFloat(decodedTx.tips),
+                })
+              })
               .then(async hash => {
                 if (isValidUrl(callbackUrl)) {
                   const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
