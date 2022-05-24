@@ -11,6 +11,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/core'
+import {Transaction, dnaToFloatString, toHexString} from 'idena-sdk-js'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {SecondaryButton, PrimaryButton} from '../../shared/components/button'
 import {
@@ -31,7 +32,6 @@ import {
   isValidUrl,
   sendDna,
   DNA_SEND_CONFIRM_TRESHOLD,
-  Transaction,
   appendTxHash,
   handleCallbackUrl,
 } from './utils'
@@ -337,7 +337,7 @@ export function DnaSendDialog({
 }
 
 export function DnaRawDialog({
-  tx,
+  tx: rawTx,
   callbackUrl,
   callbackFormat,
   onClose,
@@ -351,31 +351,41 @@ export function DnaRawDialog({
     i18n: {language},
   } = useTranslation()
 
-  const {balance} = useIdentityState()
+  const {address, balance} = useIdentityState()
 
-  const {amount, to} = React.useMemo(() => {
-    if (tx) {
-      const {amount: txAmount, ...restTx} = new Transaction().fromHex(tx)
-      return {amount: +txAmount / 10 ** 18, ...restTx}
+  const tx = React.useMemo(() => {
+    if (rawTx) {
+      const decodedTx = Transaction.fromHex(rawTx)
+
+      return {
+        type: decodedTx.type,
+        from: address,
+        to: decodedTx.to,
+        amount: dnaToFloatString(decodedTx.amount),
+        maxFee: dnaToFloatString(decodedTx.maxFee),
+        tips: dnaToFloatString(decodedTx.tips),
+        nonce: decodedTx.nonce,
+        epoch: decodedTx.epoch,
+        payload: toHexString(decodedTx.payload, true),
+      }
     }
-    return {amount: null, to: null}
-  }, [tx])
+  }, [address, rawTx])
 
   const [confirmationAmount, setConfirmationAmount] = React.useState()
 
   const shouldConfirmTx = React.useMemo(
-    () => amount / balance > DNA_SEND_CONFIRM_TRESHOLD,
-    [amount, balance]
+    () => tx?.amount / balance > DNA_SEND_CONFIRM_TRESHOLD,
+    [balance, tx]
   )
 
   const didConfirmAmount = React.useMemo(
-    () => +confirmationAmount === +amount,
-    [amount, confirmationAmount]
+    () => +confirmationAmount === +tx?.amount,
+    [confirmationAmount, tx]
   )
 
-  const isExceededBalance = React.useMemo(() => +amount > balance, [
-    amount,
+  const isExceededBalance = React.useMemo(() => +tx?.amount > balance, [
     balance,
+    tx,
   ])
 
   const [isSubmitting, setIsSubmitting] = React.useState()
@@ -391,8 +401,8 @@ export function DnaRawDialog({
             {t('Attention! This is irreversible operation')}
           </DnaDialogAlert>
           <Stack spacing="px" borderRadius="lg" overflow="hidden">
-            <MediaDnaDialogStat label={t('To')} value={to}>
-              <DnaDialogAvatar address={to} />
+            <MediaDnaDialogStat label={t('To')} value={tx?.to}>
+              <DnaDialogAvatar address={tx?.to} />
             </MediaDnaDialogStat>
             <DnaDialogStat>
               <DnaDialogStatLabel>{t('Amount')}</DnaDialogStatLabel>
@@ -401,7 +411,7 @@ export function DnaRawDialog({
               >
                 {isExceededBalance ? (
                   <Stack isInline spacing={1}>
-                    <Text as="span">{dna(amount)}</Text>
+                    <Text as="span">{dna(tx?.amount)}</Text>
                     <Tooltip
                       label={t('The amount is larger than your balance')}
                     >
@@ -409,7 +419,7 @@ export function DnaRawDialog({
                     </Tooltip>
                   </Stack>
                 ) : (
-                  dna(amount)
+                  dna(tx?.amount)
                 )}
               </DnaDialogStatValue>
             </DnaDialogStat>
@@ -422,7 +432,7 @@ export function DnaRawDialog({
                 {t('Transaction details')}
               </DnaDialogStatLabel>
               <DnaDialogStatValue>
-                <Tooltip label={tx} zIndex="tooltip" wordBreak="break-all">
+                <Tooltip label={rawTx} zIndex="tooltip" wordBreak="break-all">
                   <Text
                     display="-webkit-box"
                     overflow="hidden"
@@ -432,7 +442,7 @@ export function DnaRawDialog({
                     }}
                     wordBreak="break-all"
                   >
-                    {tx}
+                    {rawTx}
                   </Text>
                 </Tooltip>
               </DnaDialogStatValue>
@@ -475,7 +485,7 @@ export function DnaRawDialog({
               return resolve()
             })
               .then(() => setIsSubmitting(true))
-              .then(() => callRpc('bcn_sendRawTx', tx))
+              .then(() => callRpc('dna_sendTransaction', tx))
               .then(async hash => {
                 if (isValidUrl(callbackUrl)) {
                   const callbackUrlWithHash = appendTxHash(callbackUrl, hash)

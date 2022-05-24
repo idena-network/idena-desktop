@@ -109,6 +109,7 @@
     "fs-extra": "^8.1.0",
     "google-protobuf": "^3.14.0",
     "i18next": "^19.0.1",
+    "idena-sdk-js": "0.0.8",
     "jimp": "^0.9.6",
     "leveldown": "^5.6.0",
     "levelup": "^4.4.0",
