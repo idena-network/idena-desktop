@@ -11,7 +11,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/core'
-import {Transaction, dnaToFloat} from 'idena-sdk-js'
+import {Transaction, dnaToFloat, toHexString} from 'idena-sdk-js'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {SecondaryButton, PrimaryButton} from '../../shared/components/button'
 import {
@@ -483,6 +483,7 @@ export function DnaRawDialog({
                   amount: dnaToFloat(decodedTx.amount),
                   maxFee: dnaToFloat(decodedTx.maxFee),
                   tips: dnaToFloat(decodedTx.tips),
+                  payload: toHexString(decodedTx.payload),
                 })
               })
               .then(async hash => {
