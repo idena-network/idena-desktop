@@ -351,7 +351,7 @@ export function DnaRawDialog({
     i18n: {language},
   } = useTranslation()
 
-  const {balance} = useIdentityState()
+  const {address, balance} = useIdentityState()
 
   const {amount, to} = React.useMemo(() => {
     if (tx) {
@@ -479,10 +479,14 @@ export function DnaRawDialog({
                 const decodedTx = new Transaction().fromHex(tx)
 
                 return callRpc('dna_sendTransaction', {
-                  ...decodedTx,
+                  type: decodedTx.type,
+                  from: address,
+                  to: decodedTx.to,
                   amount: dnaToFloat(decodedTx.amount),
                   maxFee: dnaToFloat(decodedTx.maxFee),
                   tips: dnaToFloat(decodedTx.tips),
+                  nonce: decodedTx.nonce,
+                  epoch: decodedTx.epoch,
                   payload: toHexString(decodedTx.payload),
                 })
               })
