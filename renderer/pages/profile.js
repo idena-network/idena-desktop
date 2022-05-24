@@ -490,7 +490,7 @@ export default function ProfilePage() {
                       </UserStatList>
                     )}
                   </Stack>
-                  <StakingAlert mt="2" />
+                  <StakingAlert mt="2" w="md" />
                 </Box>
                 <Stack spacing={10} w={200}>
                   <Box minH={62} mt={6}>
