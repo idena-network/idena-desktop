@@ -550,7 +550,9 @@ export function FlipKeywordTranslationSwitch({
               />
             ) : null}
             <GoogleTranslateButton
-              phrases={keywords.words.map(({name, desc}) => `${name}\n${desc}`)}
+              phrases={keywords.words.map(({name, desc}) =>
+                [name, desc].filter(Boolean).join('\n')
+              )}
               locale={locale}
             />
           </>

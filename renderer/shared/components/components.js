@@ -470,7 +470,7 @@ export function ExternalLink({
 
 export function GoogleTranslateButton({
   phrases = [],
-  text = encodeURIComponent(phrases.join('\n\n')),
+  text = encodeURIComponent(phrases.filter(Boolean).join('\n\n')),
   locale = global.locale,
   children,
   ...props
