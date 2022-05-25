@@ -326,7 +326,6 @@ export function DnaSendDialog({
                 global.logger.error(message)
                 onSendTxFailed(message)
               })
-              .finally(onClose)
           }}
         >
           {t('Confirm')}
