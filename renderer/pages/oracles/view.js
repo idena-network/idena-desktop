@@ -206,6 +206,9 @@ export default function ViewVotingPage() {
 
   const isMaxWinnerThreshold = winnerThreshold === 100
 
+  const accountableVoteCount =
+    votes?.reduce((agg, curr) => agg + curr?.count, 0) ?? 0
+
   return (
     <>
       <Layout syncing={syncing} offline={offline}>
@@ -530,7 +533,7 @@ export default function ViewVotingPage() {
                           />
                           <Text as="span">
                             {t('{{count}} votes', {
-                              count: votesCount || voteProofsCount,
+                              count: accountableVoteCount || voteProofsCount,
                             })}{' '}
                             {eitherIdleState(VotingStatus.Counting) &&
                               t('out of {{count}}', {count: voteProofsCount})}

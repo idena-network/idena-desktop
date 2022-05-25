@@ -979,6 +979,9 @@ export function VotingResult({votingService, ...props}) {
 
   const max = Math.max(...votes.map(({count}) => count))
 
+  const accountableVoteCount =
+    votes?.reduce((agg, curr) => agg + curr?.count, 0) ?? 0
+
   return (
     <Stack {...props}>
       {options.map(({id, value}) => {
@@ -992,7 +995,7 @@ export function VotingResult({votingService, ...props}) {
             isMine={id === selectedOption}
             didVote={selectedOption > -1}
             isWinner={didDetermineWinner && currentValue === max}
-            votesCount={voteProofsCount}
+            votesCount={accountableVoteCount}
           />
         )
       })}
