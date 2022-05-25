@@ -48,6 +48,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
       initial: 'password',
       states: {
         password: {
+          entry: [assign({password: ''})],
           on: {
             CHANGE_PASSWORD: {
               actions: [
@@ -61,6 +62,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
         },
         encoding: {
           invoke: {
+            // eslint-disable-next-line no-shadow
             src: ({password}) => callRpc('dna_exportKey', password),
             onDone: 'encoded',
             onError: 'fail',
@@ -72,13 +74,16 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
               encodedPrivateKey: (_, {data}) => data,
             }),
           ],
+          on: {
+            RESET: 'password',
+          },
         },
         fail: {},
       },
     })
   )
 
-  const {encodedPrivateKey} = current.context
+  const {password, encodedPrivateKey} = current.context
 
   const is = state => eitherState(current, state)
 
@@ -99,12 +104,13 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
             <Text color="muted" fontSize="mdx">
               {t('Create a new password to export your private key')}
             </Text>
-            <FormControl>
+            <FormControl isRequired>
               <FormLabel>{t('New password')}</FormLabel>
               <InputGroup>
                 <Input
                   id="password"
                   type={revealPassword ? 'text' : 'password'}
+                  value={password}
                   onChange={e => {
                     send('CHANGE_PASSWORD', {value: e.target.value})
                   }}
@@ -157,9 +163,17 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
         )}
       </DialogBody>
       <DialogFooter>
-        <SecondaryButton onClick={onClose}>{t('Close')}</SecondaryButton>
+        <SecondaryButton
+          onClick={() => {
+            send('RESET')
+            onClose()
+          }}
+        >
+          {t('Close')}
+        </SecondaryButton>
         {is('password') && (
           <PrimaryButton
+            isDisabled={!password}
             onClick={() => {
               send('ENCODE')
             }}
