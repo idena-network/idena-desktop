@@ -363,10 +363,8 @@ export default function FlipListPage() {
                 {Array.from({length: remainingOptionalFlips}, (flip, idx) => (
                   <OptionalFlipPlaceholder
                     key={idx}
-                    title={`Flip #${madeFlipsNumber +
-                      remainingRequiredFlips +
-                      idx +
-                      1}`}
+                    title={`Flip #${availableFlipsNumber -
+                      (remainingOptionalFlips - idx - 1)}`}
                     {...flip}
                     isDisabled={remainingRequiredFlips > 0}
                   />
