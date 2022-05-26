@@ -117,7 +117,6 @@ export function VotingCard({votingRef, ...props}) {
     }),
     votes = [],
     voteProofsCount,
-    votesCount,
     prevStatus,
     votingMinPayment,
     winnerThreshold,
@@ -147,6 +146,9 @@ export function VotingCard({votingRef, ...props}) {
     VotingStatus.Archived,
     VotingStatus.Terminated
   )
+
+  const accountableVoteCount =
+    votes?.reduce((agg, curr) => agg + curr?.count, 0) ?? 0
 
   return (
     <Box position="relative" {...props}>
@@ -214,8 +216,8 @@ export function VotingCard({votingRef, ...props}) {
             <Text color="muted" fontSize="sm">
               {t('Results')}
             </Text>
-            {votesCount ? (
-              <VotingResult votingService={votingRef} {...current.context} />
+            <VotingResult votingService={votingRef} {...current.context} />
+            {/* {votesCount ? (
             ) : (
               // eslint-disable-next-line no-shadow
               <Text
@@ -227,7 +229,7 @@ export function VotingCard({votingRef, ...props}) {
               >
                 {t('No votes')}
               </Text>
-            )}
+            )} */}
           </Stack>
         )}
         <Stack
@@ -333,7 +335,11 @@ export function VotingCard({votingRef, ...props}) {
                   h={4}
                 />
                 <Text as="span">
-                  {t('{{count}} votes', {count: votesCount || voteProofsCount})}{' '}
+                  {t('{{count}} votes', {
+                    count: eitherIdleState(VotingStatus.Open)
+                      ? voteProofsCount
+                      : accountableVoteCount,
+                  })}{' '}
                   {eitherIdleState(VotingStatus.Counting) &&
                     t('out of {{count}}', {count: voteProofsCount})}
                 </Text>
