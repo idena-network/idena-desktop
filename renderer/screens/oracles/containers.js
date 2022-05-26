@@ -1547,8 +1547,8 @@ export function Linkify({onClick, children}) {
 
   if (typeof children !== 'string') throw new Error('Only text nodes supported')
 
-  const urls = getUrls(children, {stripWWW: false})
-  const parts = urls.size > 0 ? splitMany(children, ...urls) : [children]
+  const urls = getUrls(children)
+  const parts = urls.length > 0 ? splitMany(children, ...urls) : [children]
 
   return (
     <>
