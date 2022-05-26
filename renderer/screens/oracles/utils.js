@@ -126,13 +126,8 @@ export async function fetchContractBalanceUpdates({
 }
 
 export async function fetchNetworkSize() {
-  const {result, error} = await (
-    await fetch(apiUrl('onlineidentities/count'))
-  ).json()
-
-  if (error) throw new Error(error.message)
-
-  return result
+  const {networkSize} = await callRpc('dna_globalState')
+  return networkSize
 }
 
 export async function fetchVoting({id, contractHash = id, address}) {
@@ -353,10 +348,6 @@ export function hasWinner({
     : votes.some(
         ({count}) => count >= requiredVotesCountByVotes && didReachQuorum
       )
-}
-
-export function minOracleReward(feePerGas) {
-  return dnaFeePerGas(feePerGas) * 100 * 100
 }
 
 export function votingMinStake(feePerGas) {
