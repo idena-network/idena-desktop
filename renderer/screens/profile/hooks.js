@@ -210,25 +210,6 @@ export function useInviteScore() {
 
   const {canInvite} = useIdentityState()
 
-  // const [showInviteScore, setShowInviteScore] = React.useState()
-
-  // React.useEffect(() => {
-  //   const hasPendingInvites =
-  //     (global.invitesDb ?? {})
-  //       .getInvites()
-  //       .filter(
-  //         ({activated, terminatedHash, deletedAt}) =>
-  //           !activated && !terminatedHash && !deletedAt
-  //       ).length > 0
-  //   setShowInviteScore(hasPendingInvites || canInvite)
-  // }, [canInvite])
-
-  // const invitationRewardRatio = calculateInvitationRewardRatio(epoch ?? {}, {
-  //   highestBlock,
-  // })
-
-  // return showInviteScore ? invitationRewardRatio : null
-
   return React.useMemo(() => {
     const pendingInvites =
       global.invitesDb
