@@ -1107,7 +1107,7 @@ export function ProfileTagList() {
                       : // eslint-disable-next-line no-nested-ternary
                       inviteScore < 0.75
                       ? 'orange.010'
-                      : inviteScore < 1
+                      : inviteScore <= 1
                       ? 'green.010'
                       : 'gray.016'
                   }
@@ -1118,13 +1118,13 @@ export function ProfileTagList() {
                       : // eslint-disable-next-line no-nested-ternary
                       inviteScore < 0.75
                       ? 'orange.500'
-                      : inviteScore < 1
+                      : inviteScore <= 1
                       ? 'green.500'
                       : 'brandGray.500'
                   }
                 >
                   <Stack isInline spacing="1" w="full">
-                    <Text>{t('Invite score')}</Text>
+                    <Text>{t('Invitation rewards')}</Text>
                     <Text>{toPercent(inviteScore)}</Text>
                   </Stack>
                 </ProfileTag>
