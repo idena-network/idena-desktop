@@ -23,7 +23,6 @@ import {
   UserStat,
   UserStatLabel,
   ActivateMiningForm,
-  InviteScoreAlert,
   KillIdentityDrawer,
   KillForm,
   MyIdenaBotAlert,
@@ -95,7 +94,7 @@ export default function ProfilePage() {
     onClose: onCloseSpoilForm,
   } = useDisclosure()
 
-  const {syncing, offline, highestBlock} = useChainState()
+  const {syncing, offline} = useChainState()
 
   const identity = useIdentityState()
 
@@ -246,14 +245,6 @@ export default function ProfilePage() {
               <Stack isInline spacing={10}>
                 <Box>
                   <Stack spacing={8} w="md" ref={activateInviteRef}>
-                    {canInvite && (
-                      <InviteScoreAlert
-                        epoch={epoch}
-                        identity={{canInvite}}
-                        sync={{highestBlock}}
-                      />
-                    )}
-
                     <UserInlineCard identity={identity} h={24}>
                       <ProfileTagList />
                     </UserInlineCard>

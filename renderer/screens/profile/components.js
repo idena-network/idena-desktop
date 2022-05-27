@@ -42,7 +42,6 @@ import {
   DrawerHeader,
   DrawerBody,
   DrawerFooter,
-  SuccessAlert,
   Checkbox,
   DialogFooter,
   DialogBody,
@@ -60,7 +59,6 @@ import {IdentityStatus, NodeType} from '../../shared/types'
 import {useInvite} from '../../shared/providers/invite-context'
 import {activateMiningMachine} from './machines'
 import {
-  calculateInvitationRewardRatio,
   callRpc,
   dummyAddress,
   eitherState,
@@ -71,7 +69,7 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
 import {validateInvitationCode} from './utils'
 import {BLOCK_TIME} from '../oracles/utils'
-import {useReplenishStake, useStakingAlert} from './hooks'
+import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {useTotalValidationScore} from '../validation-report/hooks'
 
@@ -88,7 +86,7 @@ export function UserInlineCard({
         borderWidth={1}
         borderColor="gray.016"
       />
-      <Stack spacing="3/2" w="full">
+      <Stack spacing={0} w="full">
         <Stack spacing={1}>
           <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
             {mapToFriendlyStatus(state)}
@@ -730,41 +728,6 @@ export function DeactivateMiningDrawer({
   )
 }
 
-export function InviteScoreAlert({
-  sync: {highestBlock},
-  epoch,
-  identity: {canInvite},
-  ...props
-}) {
-  const {t} = useTranslation()
-
-  const [showInviteScore, setShowInviteScore] = React.useState()
-
-  React.useEffect(() => {
-    const hasPendingInvites =
-      (global.invitesDb ?? {})
-        .getInvites()
-        .filter(
-          ({activated, terminatedHash, deletedAt}) =>
-            !activated && !terminatedHash && !deletedAt
-        ).length > 0
-    setShowInviteScore(hasPendingInvites || canInvite)
-  }, [canInvite])
-
-  const invitationRewardRatio = toPercent(
-    calculateInvitationRewardRatio(epoch ?? {}, {highestBlock})
-  )
-
-  return showInviteScore ? (
-    <SuccessAlert minH={36} w="full" {...props}>
-      {t(
-        'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
-        {invitationRewardRatio}
-      )}
-    </SuccessAlert>
-  ) : null
-}
-
 export function KillIdentityDrawer({address, children, ...props}) {
   const {t} = useTranslation()
 
@@ -1045,10 +1008,12 @@ export function ProfileTagList() {
 
   const score = useTotalValidationScore()
 
+  const inviteScore = useInviteScore()
+
   const formatDna = toLocaleDna(i18n.language, {maximumFractionDigits: 5})
 
   return (
-    <Stack isInline spacing="1" w="full">
+    <Stack isInline spacing="1" w="full" flexWrap="wrap">
       {age > 0 && (
         <ProfileTag>
           <Stack isInline spacing="1">
@@ -1059,68 +1024,137 @@ export function ProfileTagList() {
       )}
 
       {Number.isFinite(score) && (
-        <Popover placement="top" arrowShadowColor="transparent">
-          <PopoverTrigger>
-            <Box>
-              <ProfileTag cursor="help">
-                <Stack isInline spacing="1" w="full">
-                  <Text>{t('Score')}</Text>
-                  <Text>{toPercent(score)}</Text>
+        <Box>
+          <Popover placement="top" arrowShadowColor="transparent">
+            <PopoverTrigger>
+              <Box>
+                <ProfileTag cursor="help">
+                  <Stack isInline spacing="1" w="full">
+                    <Text>{t('Score')}</Text>
+                    <Text>{toPercent(score)}</Text>
+                  </Stack>
+                </ProfileTag>
+              </Box>
+            </PopoverTrigger>
+            <PopoverContent
+              border="none"
+              fontSize="sm"
+              w="max-content"
+              zIndex="popover"
+              _focus={{
+                outline: 'none',
+              }}
+            >
+              <PopoverArrow bg="graphite.500" />
+              <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
+                <Stack>
+                  <Stack spacing="2px">
+                    <Text color="muted" lineHeight="shorter">
+                      {t('Total score')}
+                    </Text>
+                    <Text color="white" lineHeight="base">
+                      {t(
+                        `{{totalShortFlipPoints}} out of {{totalQualifiedFlips}}`,
+                        {
+                          totalShortFlipPoints,
+                          totalQualifiedFlips,
+                        }
+                      )}
+                    </Text>
+                  </Stack>
+                  <Stack spacing="2px">
+                    <Text color="muted" lineHeight="shorter">
+                      {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
+                    </Text>
+                    <TextLink
+                      href="/validation-report"
+                      color="white"
+                      lineHeight="base"
+                    >
+                      {t('Validation report')}
+                      <Icon name="chevron-down" transform="rotate(-90deg)" />
+                    </TextLink>
+                  </Stack>
                 </Stack>
-              </ProfileTag>
-            </Box>
-          </PopoverTrigger>
-          <PopoverContent
-            border="none"
-            fontSize="sm"
-            w="max-content"
-            _focus={{
-              outline: 'none',
-            }}
-          >
-            <PopoverArrow bg="graphite.500" />
-            <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
-              <Stack>
-                <Stack spacing="2px">
-                  <Text color="muted" lineHeight="shorter">
-                    {t('Total score')}
-                  </Text>
-                  <Text color="white" lineHeight="base">
-                    {t(
-                      `{{totalShortFlipPoints}} out of {{totalQualifiedFlips}}`,
-                      {
-                        totalShortFlipPoints,
-                        totalQualifiedFlips,
-                      }
-                    )}
-                  </Text>
-                </Stack>
-                <Stack spacing="2px">
-                  <Text color="muted" lineHeight="shorter">
-                    {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
-                  </Text>
-                  <TextLink
-                    href="/validation-report"
-                    color="white"
-                    lineHeight="base"
-                  >
-                    {t('Validation report')}
-                    <Icon name="chevron-down" transform="rotate(-90deg)" />
-                  </TextLink>
-                </Stack>
-              </Stack>
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
+        </Box>
       )}
 
       {penalty > 0 && (
-        <ProfileTag bg="red.012" color="red.500">
-          <Stack isInline spacing="1">
-            <Text>{t('Mining penalty')}</Text>
-            <Text color={['inherit']}>{formatDna(penalty)}</Text>
-          </Stack>
-        </ProfileTag>
+        <Box>
+          <ProfileTag bg="red.012" color="red.500">
+            <Stack isInline spacing="1">
+              <Text>{t('Mining penalty')}</Text>
+              <Text color={['inherit']}>{formatDna(penalty)}</Text>
+            </Stack>
+          </ProfileTag>
+        </Box>
+      )}
+
+      {inviteScore && (
+        <Box>
+          <Popover placement="top" arrowShadowColor="transparent">
+            <PopoverTrigger>
+              <Box>
+                <ProfileTag
+                  cursor="help"
+                  bg={
+                    // eslint-disable-next-line no-nested-ternary
+                    inviteScore < 0.5
+                      ? 'red.012'
+                      : // eslint-disable-next-line no-nested-ternary
+                      inviteScore < 0.75
+                      ? 'orange.010'
+                      : inviteScore < 1
+                      ? 'green.010'
+                      : 'gray.016'
+                  }
+                  color={
+                    // eslint-disable-next-line no-nested-ternary
+                    inviteScore < 0.5
+                      ? 'red.500'
+                      : // eslint-disable-next-line no-nested-ternary
+                      inviteScore < 0.75
+                      ? 'orange.500'
+                      : inviteScore < 1
+                      ? 'green.500'
+                      : 'brandGray.500'
+                  }
+                >
+                  <Stack isInline spacing="1" w="full">
+                    <Text>{t('Invite score')}</Text>
+                    <Text>{toPercent(inviteScore)}</Text>
+                  </Stack>
+                </ProfileTag>
+              </Box>
+            </PopoverTrigger>
+            <PopoverContent
+              border="none"
+              fontSize="sm"
+              w={40}
+              zIndex="popover"
+              _focus={{
+                outline: 'none',
+              }}
+            >
+              <PopoverArrow bg="graphite.500" />
+              <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
+                <Stack>
+                  <Stack spacing="2px">
+                    <Text color="white" lineHeight="base">
+                      {t(
+                        'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
+                        {invitationRewardRatio: toPercent(inviteScore)}
+                      )}
+                    </Text>
+                  </Stack>
+                </Stack>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
+        </Box>
       )}
     </Stack>
   )
@@ -1135,6 +1169,7 @@ export const ProfileTag = React.forwardRef(function ProfileTag(props, ref) {
       fontSize="sm"
       px="3"
       minH="6"
+      mt="3/2"
       {...props}
     />
   )

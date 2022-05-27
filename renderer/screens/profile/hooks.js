@@ -5,10 +5,15 @@ import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useMutation, useQuery} from 'react-query'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {callRpc, toPercent} from '../../shared/utils/utils'
+import {
+  calculateInvitationRewardRatio,
+  callRpc,
+  toPercent,
+} from '../../shared/utils/utils'
 import {IdentityStatus, TxType} from '../../shared/types'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {apiUrl} from '../oracles/utils'
+import {useChainState} from '../../shared/providers/chain-context'
 
 export function useIdenaBot() {
   const [current, send] = useMachine(
@@ -196,4 +201,47 @@ export function useStakingApy() {
       return (epy / epochDays) * 366
     }
   }, [epoch, prevEpochData, stake, stakingData, validationRewardsSummaryData])
+}
+
+export function useInviteScore() {
+  const {highestBlock} = useChainState()
+
+  const epoch = useEpochState()
+
+  const {canInvite} = useIdentityState()
+
+  // const [showInviteScore, setShowInviteScore] = React.useState()
+
+  // React.useEffect(() => {
+  //   const hasPendingInvites =
+  //     (global.invitesDb ?? {})
+  //       .getInvites()
+  //       .filter(
+  //         ({activated, terminatedHash, deletedAt}) =>
+  //           !activated && !terminatedHash && !deletedAt
+  //       ).length > 0
+  //   setShowInviteScore(hasPendingInvites || canInvite)
+  // }, [canInvite])
+
+  // const invitationRewardRatio = calculateInvitationRewardRatio(epoch ?? {}, {
+  //   highestBlock,
+  // })
+
+  // return showInviteScore ? invitationRewardRatio : null
+
+  return React.useMemo(() => {
+    const pendingInvites =
+      global.invitesDb
+        ?.getInvites()
+        .filter(
+          ({activated, terminatedHash, deletedAt}) =>
+            !activated && !terminatedHash && !deletedAt
+        ) ?? []
+
+    const hasPendingInvites = canInvite || pendingInvites.length > 0
+
+    if (epoch && highestBlock && hasPendingInvites) {
+      return calculateInvitationRewardRatio(epoch, {highestBlock})
+    }
+  }, [canInvite, epoch, highestBlock])
 }
