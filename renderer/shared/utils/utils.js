@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import i18n from '../../i18n'
 import {getRpcParams} from '../api/api-client'
 import {EpochPeriod} from '../types'
 
@@ -31,8 +32,8 @@ export function callRpc(method, ...params) {
   return createRpcCaller(getRpcParams())(method, ...params)
 }
 
-export function toPercent(value) {
-  return value?.toLocaleString(undefined, {
+export function toPercent(value, locale) {
+  return value?.toLocaleString(locale ?? i18n.language, {
     style: 'percent',
     maximumSignificantDigits: 4,
   })
