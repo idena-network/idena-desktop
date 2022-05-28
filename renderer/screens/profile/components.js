@@ -1080,28 +1080,8 @@ export function ProfileTagList() {
                 label={t('Invitation rewards')}
                 value={toPercent(inviteScore)}
                 cursor="help"
-                bg={
-                  // eslint-disable-next-line no-nested-ternary
-                  inviteScore < 0.5
-                    ? 'red.012'
-                    : // eslint-disable-next-line no-nested-ternary
-                    inviteScore < 0.75
-                    ? 'orange.010'
-                    : inviteScore <= 1
-                    ? 'green.010'
-                    : 'gray.016'
-                }
-                color={
-                  // eslint-disable-next-line no-nested-ternary
-                  inviteScore < 0.5
-                    ? 'red.500'
-                    : // eslint-disable-next-line no-nested-ternary
-                    inviteScore < 0.75
-                    ? 'orange.500'
-                    : inviteScore <= 1
-                    ? 'green.500'
-                    : 'brandGray.500'
-                }
+                bg={inviteScore < 0.75 ? 'orange.010' : 'green.010'}
+                color={inviteScore < 0.75 ? 'orange.500' : 'green.500'}
               />
             </ProfileTagPopoverTrigger>
             <ProfileTagPopoverContent>
