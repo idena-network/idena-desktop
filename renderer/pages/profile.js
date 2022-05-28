@@ -222,7 +222,7 @@ export default function ProfilePage() {
   React.useEffect(() => {
     if (Object.keys(router.query).find(q => q === 'replenishStake')) {
       onOpenReplenishStakeDisclosure()
-      router.push('/home')
+      router.push('/profile')
     }
   }, [onOpenReplenishStakeDisclosure, router])
 
