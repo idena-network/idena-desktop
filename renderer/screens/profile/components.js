@@ -1086,7 +1086,7 @@ export function ProfileTagList() {
             </ProfileTagPopoverTrigger>
             <ProfileTagPopoverContent>
               <Stack spacing="2px" w={40}>
-                <Text color="muted" lineHeight="base">
+                <Text color="xwhite.040" lineHeight="base">
                   {t(
                     'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
                     {invitationRewardRatio: toPercent(inviteScore)}
