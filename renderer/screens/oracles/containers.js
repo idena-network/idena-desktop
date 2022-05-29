@@ -216,7 +216,7 @@ export function VotingCard({votingRef, ...props}) {
             <Text color="muted" fontSize="sm">
               {t('Results')}
             </Text>
-            <VotingResult votingService={votingRef} {...current.context} />
+            <VotingResult votingService={votingRef} />
           </Stack>
         )}
         <Stack
