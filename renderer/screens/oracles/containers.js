@@ -217,19 +217,6 @@ export function VotingCard({votingRef, ...props}) {
               {t('Results')}
             </Text>
             <VotingResult votingService={votingRef} {...current.context} />
-            {/* {votesCount ? (
-            ) : (
-              // eslint-disable-next-line no-shadow
-              <Text
-                bg="gray.50"
-                borderRadius="md"
-                p={2}
-                color="muted"
-                fontSize="sm"
-              >
-                {t('No votes')}
-              </Text>
-            )} */}
           </Stack>
         )}
         <Stack
