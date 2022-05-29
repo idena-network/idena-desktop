@@ -73,6 +73,7 @@ import {
   isAllowedToTerminate,
   mapVotingStatus,
   quorumVotesCount,
+  sumAccountableVotes,
   votingMinBalance,
 } from '../../screens/oracles/utils'
 import {
@@ -204,9 +205,6 @@ export default function ViewVotingPage() {
   const shouldTerminate = isAllowedToTerminate({estimatedTerminationTime})
 
   const isMaxWinnerThreshold = winnerThreshold === 100
-
-  const accountableVoteCount =
-    votes?.reduce((agg, curr) => agg + curr?.count, 0) ?? 0
 
   return (
     <>
@@ -522,7 +520,7 @@ export default function ViewVotingPage() {
                             {t('{{count}} published votes', {
                               count: eitherIdleState(VotingStatus.Open)
                                 ? voteProofsCount
-                                : accountableVoteCount,
+                                : sumAccountableVotes(votes),
                             })}{' '}
                             {eitherIdleState(VotingStatus.Counting) &&
                               t('out of {{count}}', {count: voteProofsCount})}

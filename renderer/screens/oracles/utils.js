@@ -561,3 +561,6 @@ export const effectiveBalance = ({balance, ownerFee}) =>
 export function getUrls(text) {
   return text.match(urlRegex()) || []
 }
+
+export const sumAccountableVotes = votes =>
+  votes?.reduce((agg, curr) => agg + curr?.count, 0) ?? 0
