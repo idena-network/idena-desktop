@@ -399,7 +399,7 @@ export default function ValidationReport() {
                         />
                       </ValidationReportColumn>
                       <ValidationReportColumn display={['none', 'table-cell']}>
-                        <TextLink href="/home?replenishStake">
+                        <TextLink href="/profile?replenishStake">
                           {t('Add stake')}
                           <Icon
                             name="chevron-down"

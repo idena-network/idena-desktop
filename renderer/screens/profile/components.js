@@ -42,7 +42,6 @@ import {
   DrawerHeader,
   DrawerBody,
   DrawerFooter,
-  SuccessAlert,
   Checkbox,
   DialogFooter,
   DialogBody,
@@ -60,7 +59,6 @@ import {IdentityStatus, NodeType} from '../../shared/types'
 import {useInvite} from '../../shared/providers/invite-context'
 import {activateMiningMachine} from './machines'
 import {
-  calculateInvitationRewardRatio,
   callRpc,
   dummyAddress,
   eitherState,
@@ -71,7 +69,7 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
 import {validateInvitationCode} from './utils'
 import {BLOCK_TIME} from '../oracles/utils'
-import {useReplenishStake, useStakingAlert} from './hooks'
+import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {useTotalValidationScore} from '../validation-report/hooks'
 
@@ -88,7 +86,7 @@ export function UserInlineCard({
         borderWidth={1}
         borderColor="gray.016"
       />
-      <Stack spacing="3/2" w="full">
+      <Stack spacing={0} w="full">
         <Stack spacing={1}>
           <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
             {mapToFriendlyStatus(state)}
@@ -730,41 +728,6 @@ export function DeactivateMiningDrawer({
   )
 }
 
-export function InviteScoreAlert({
-  sync: {highestBlock},
-  epoch,
-  identity: {canInvite},
-  ...props
-}) {
-  const {t} = useTranslation()
-
-  const [showInviteScore, setShowInviteScore] = React.useState()
-
-  React.useEffect(() => {
-    const hasPendingInvites =
-      (global.invitesDb ?? {})
-        .getInvites()
-        .filter(
-          ({activated, terminatedHash, deletedAt}) =>
-            !activated && !terminatedHash && !deletedAt
-        ).length > 0
-    setShowInviteScore(hasPendingInvites || canInvite)
-  }, [canInvite])
-
-  const invitationRewardRatio = toPercent(
-    calculateInvitationRewardRatio(epoch ?? {}, {highestBlock})
-  )
-
-  return showInviteScore ? (
-    <SuccessAlert minH={36} w="full" {...props}>
-      {t(
-        'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
-        {invitationRewardRatio}
-      )}
-    </SuccessAlert>
-  ) : null
-}
-
 export function KillIdentityDrawer({address, children, ...props}) {
   const {t} = useTranslation()
 
@@ -1045,41 +1008,27 @@ export function ProfileTagList() {
 
   const score = useTotalValidationScore()
 
+  const inviteScore = useInviteScore()
+
   const formatDna = toLocaleDna(i18n.language, {maximumFractionDigits: 5})
 
   return (
-    <Stack isInline spacing="1" w="full">
-      {age > 0 && (
-        <ProfileTag>
-          <Stack isInline spacing="1">
-            <Text>{t('Age')}</Text>
-            <Text>{age}</Text>
-          </Stack>
-        </ProfileTag>
-      )}
+    <Stack isInline spacing="1" w="full" flexWrap="wrap">
+      {age > 0 && <ProfileTag label={t('Age')} value={age} />}
 
       {Number.isFinite(score) && (
-        <Popover placement="top" arrowShadowColor="transparent">
-          <PopoverTrigger>
-            <Box>
-              <ProfileTag cursor="help">
-                <Stack isInline spacing="1" w="full">
-                  <Text>{t('Score')}</Text>
-                  <Text>{toPercent(score)}</Text>
-                </Stack>
-              </ProfileTag>
-            </Box>
-          </PopoverTrigger>
-          <PopoverContent
-            border="none"
-            fontSize="sm"
-            w="max-content"
-            _focus={{
-              outline: 'none',
-            }}
-          >
-            <PopoverArrow bg="graphite.500" />
-            <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
+        <Box>
+          <Popover placement="top" arrowShadowColor="transparent">
+            <PopoverTrigger>
+              <Box>
+                <ProfileTag
+                  label={t('Score')}
+                  value={toPercent(score)}
+                  cursor="help"
+                />
+              </Box>
+            </PopoverTrigger>
+            <ProfileTagPopoverContent>
               <Stack>
                 <Stack spacing="2px">
                   <Text color="muted" lineHeight="shorter">
@@ -1109,24 +1058,71 @@ export function ProfileTagList() {
                   </TextLink>
                 </Stack>
               </Stack>
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
+            </ProfileTagPopoverContent>
+          </Popover>
+        </Box>
       )}
 
       {penalty > 0 && (
-        <ProfileTag bg="red.012" color="red.500">
-          <Stack isInline spacing="1">
-            <Text>{t('Mining penalty')}</Text>
-            <Text color={['inherit']}>{formatDna(penalty)}</Text>
-          </Stack>
-        </ProfileTag>
+        <ProfileTag
+          label={t('Mining penalty')}
+          value={formatDna(penalty)}
+          bg="red.012"
+          color="red.500"
+        />
+      )}
+
+      {inviteScore && (
+        <Box>
+          <ProfileTagPopover>
+            <ProfileTagPopoverTrigger>
+              <ProfileTag
+                label={t('Invitation rewards')}
+                value={toPercent(inviteScore)}
+                cursor="help"
+                bg={
+                  // eslint-disable-next-line no-nested-ternary
+                  inviteScore < 0.75
+                    ? 'red.010'
+                    : inviteScore < 0.99
+                    ? 'orange.010'
+                    : 'green.010'
+                }
+                color={
+                  // eslint-disable-next-line no-nested-ternary
+                  inviteScore < 0.75
+                    ? 'red.500'
+                    : inviteScore < 0.99
+                    ? 'orange.500'
+                    : 'green.500'
+                }
+              />
+            </ProfileTagPopoverTrigger>
+            <ProfileTagPopoverContent>
+              <Stack spacing="2px" w={40}>
+                <Text color="xwhite.040" lineHeight="base">
+                  {t(
+                    'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
+                    {invitationRewardRatio: toPercent(inviteScore)}
+                  )}
+                </Text>
+                <TextLink href="/contacts" color="white" lineHeight="base">
+                  {t('Check invites')}
+                  <Icon name="chevron-down" transform="rotate(-90deg)" />
+                </TextLink>
+              </Stack>
+            </ProfileTagPopoverContent>
+          </ProfileTagPopover>
+        </Box>
       )}
     </Stack>
   )
 }
 
-export const ProfileTag = React.forwardRef(function ProfileTag(props, ref) {
+export const ProfileTag = React.forwardRef(function ProfileTag(
+  {label, value, ...props},
+  ref
+) {
   return (
     <Tag
       ref={ref}
@@ -1135,10 +1131,47 @@ export const ProfileTag = React.forwardRef(function ProfileTag(props, ref) {
       fontSize="sm"
       px="3"
       minH="6"
+      mt="3/2"
       {...props}
-    />
+    >
+      <Stack isInline spacing="1">
+        <Text>{label}</Text>
+        <Text>{value}</Text>
+      </Stack>
+    </Tag>
   )
 })
+
+export function ProfileTagPopover(props) {
+  return <Popover placement="top" arrowShadowColor="transparent" {...props} />
+}
+
+function ProfileTagPopoverTrigger({children}) {
+  return (
+    <PopoverTrigger>
+      <Box>{children}</Box>
+    </PopoverTrigger>
+  )
+}
+
+function ProfileTagPopoverContent({children}) {
+  return (
+    <PopoverContent
+      border="none"
+      fontSize="sm"
+      w="fit-content"
+      zIndex="popover"
+      _focus={{
+        outline: 'none',
+      }}
+    >
+      <PopoverArrow bg="graphite.500" />
+      <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
+        {children}
+      </PopoverBody>
+    </PopoverContent>
+  )
+}
 
 export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
   const {t, i18n} = useTranslation()

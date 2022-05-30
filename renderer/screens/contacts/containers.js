@@ -54,6 +54,7 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {IdentityStatus} from '../../shared/types'
 import {VotingSkeleton} from '../oracles/components'
+import {useInviteScore} from '../profile/hooks'
 
 export function ContactListSidebar({
   selectedContactId,
@@ -138,18 +139,13 @@ function InviteActionBar({onNewContact}) {
 function InvitationRewardRatioInfo() {
   const {t} = useTranslation()
 
-  const epoch = useEpochState()
-  const {highestBlock} = useChainState()
-
-  const invitationRewardRatio = toPercent(
-    calculateInvitationRewardRatio(epoch ?? {}, {highestBlock})
-  )
+  const inviteScore = useInviteScore()
 
   return (
     <Tooltip
       label={t(
         'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
-        {invitationRewardRatio}
+        {invitationRewardRatio: toPercent(inviteScore)}
       )}
       placement="right"
       w={151}
