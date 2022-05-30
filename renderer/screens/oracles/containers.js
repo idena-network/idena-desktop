@@ -92,6 +92,7 @@ import {
   mapVotingStatus,
   effectiveBalance,
   getUrls,
+  sumAccountableVotes,
 } from './utils'
 
 export function VotingCard({votingRef, ...props}) {
@@ -117,7 +118,6 @@ export function VotingCard({votingRef, ...props}) {
     }),
     votes = [],
     voteProofsCount,
-    votesCount,
     prevStatus,
     votingMinPayment,
     winnerThreshold,
@@ -214,20 +214,7 @@ export function VotingCard({votingRef, ...props}) {
             <Text color="muted" fontSize="sm">
               {t('Results')}
             </Text>
-            {votesCount ? (
-              <VotingResult votingService={votingRef} {...current.context} />
-            ) : (
-              // eslint-disable-next-line no-shadow
-              <Text
-                bg="gray.50"
-                borderRadius="md"
-                p={2}
-                color="muted"
-                fontSize="sm"
-              >
-                {t('No votes')}
-              </Text>
-            )}
+            <VotingResult votingService={votingRef} />
           </Stack>
         )}
         <Stack
@@ -307,7 +294,12 @@ export function VotingCard({votingRef, ...props}) {
                 <Text as="span" color="muted">
                   {t('Deadline')}:
                 </Text>{' '}
-                <Text as="span">{new Date(finishDate).toLocaleString()}</Text>
+                <Text as="span">
+                  {new Date(finishDate).toLocaleString(i18n.language, {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  })}
+                </Text>
               </Text>
               <Divider
                 orientation="vertical"
@@ -333,7 +325,11 @@ export function VotingCard({votingRef, ...props}) {
                   h={4}
                 />
                 <Text as="span">
-                  {t('{{count}} votes', {count: votesCount || voteProofsCount})}{' '}
+                  {t('{{count}} votes', {
+                    count: eitherIdleState(VotingStatus.Open)
+                      ? voteProofsCount
+                      : sumAccountableVotes(votes),
+                  })}{' '}
                   {eitherIdleState(VotingStatus.Counting) &&
                     t('out of {{count}}', {count: voteProofsCount})}
                 </Text>
@@ -979,9 +975,6 @@ export function VotingResult({votingService, ...props}) {
 
   const max = Math.max(...votes.map(({count}) => count))
 
-  const accountableVoteCount =
-    votes?.reduce((agg, curr) => agg + curr?.count, 0) ?? 0
-
   return (
     <Stack {...props}>
       {options.map(({id, value}) => {
@@ -995,7 +988,7 @@ export function VotingResult({votingService, ...props}) {
             isMine={id === selectedOption}
             didVote={selectedOption > -1}
             isWinner={didDetermineWinner && currentValue === max}
-            votesCount={accountableVoteCount}
+            votesCount={sumAccountableVotes(votes)}
           />
         )
       })}
@@ -1547,8 +1540,8 @@ export function Linkify({onClick, children}) {
 
   if (typeof children !== 'string') throw new Error('Only text nodes supported')
 
-  const urls = getUrls(children, {stripWWW: false})
-  const parts = urls.size > 0 ? splitMany(children, ...urls) : [children]
+  const urls = getUrls(children)
+  const parts = urls.length > 0 ? splitMany(children, ...urls) : [children]
 
   return (
     <>
