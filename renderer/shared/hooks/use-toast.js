@@ -1,4 +1,4 @@
-import {useToast} from '@chakra-ui/core'
+import {useToast} from '@chakra-ui/react'
 import {Toast} from '../components/components'
 
 export const useSuccessToast = () => useStatusToast()

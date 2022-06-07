@@ -8,7 +8,7 @@ import {
   StatLabel,
   StatNumber,
   Icon,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {Avatar, Dialog} from '../../shared/components/components'
 
 export function DnaDialog(props) {
@@ -28,7 +28,7 @@ export function DnaDialogAlert({children, ...props}) {
       py={2}
       {...props}
     >
-      <Icon name="info" size={4} color="red.500" />
+      <Icon name="info" w="4" h="4" color="red.500" />
       <Text fontWeight={500}>{children}</Text>
     </Stack>
   )
@@ -44,7 +44,8 @@ export function DnaDialogAvatar({address}) {
   return (
     <Avatar
       address={address}
-      size={10}
+      w="10"
+      h="10"
       bg="white"
       borderRadius="md"
       borderWidth={1}

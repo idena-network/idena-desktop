@@ -12,7 +12,7 @@ import {
   Flex,
   useToast,
   Switch,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {BASE_API_URL} from '../../shared/api/api-client'
 import {
@@ -31,6 +31,7 @@ import {
   SettingsSection,
 } from '../../screens/settings/components'
 import SettingsLayout from '../../screens/settings/layout'
+import {KeyIcon} from '../../shared/components/icons'
 
 function NodeSettings() {
   const {t} = useTranslation()
@@ -255,7 +256,7 @@ function NodeSettings() {
                   />
                   <InputRightElement h="full">
                     <IconButton
-                      icon={revealApiKey ? 'eye-off' : 'eye'}
+                      icon={revealApiKey ? <KeyIcon /> : <KeyIcon />}
                       size="xs"
                       bg={revealApiKey ? 'gray.300' : 'white'}
                       fontSize={20}

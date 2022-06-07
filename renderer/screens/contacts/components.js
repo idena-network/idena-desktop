@@ -8,7 +8,7 @@ import {
   Icon,
   Text,
   Heading,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {Avatar} from '../../shared/components/components'
 import {dummyAddress} from '../../shared/utils/utils'
 import {FillCenter} from '../oracles/components'
@@ -60,7 +60,7 @@ export function ContactCardBadge(props) {
 export function NoContactDataPlaceholder({children}) {
   return (
     <FillCenter as={Stack} spacing={4}>
-      <Icon name="contacts" size={16} color="gray.300" />
+      <Icon name="contacts" w="16" h="16" color="gray.300" />
       <Text fontWeight={500} color="muted">
         {children}
       </Text>

@@ -17,8 +17,8 @@ import {
   Divider,
   Button,
   IconButton,
-  RadioButtonGroup,
-} from '@chakra-ui/core'
+  RadioGroup,
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {
   DrawerHeader,
@@ -30,10 +30,11 @@ import {
   Tooltip,
 } from '../../shared/components/components'
 import {clampValue} from '../../shared/utils/utils'
+import {CrossSmallIcon} from '../../shared/components/icons'
 
 export function OracleDrawerHeader({
   icon,
-  variantColor = 'blue',
+  colorScheme = 'blue',
   children,
   ...props
 }) {
@@ -42,12 +43,12 @@ export function OracleDrawerHeader({
       <Flex
         align="center"
         justify="center"
-        bg={`${variantColor}.012`}
+        bg={`${colorScheme}.012`}
         h={12}
         w={12}
         rounded="xl"
       >
-        <Icon name={icon} w={6} h={6} color={`${variantColor}.500`} />
+        <Icon name={icon} w={6} h={6} color={`${colorScheme}.500`} />
       </Flex>
       <Heading
         color="brandGray.500"
@@ -293,7 +294,7 @@ export function VotingOptionInput({
           />
         </Stack>
         <IconButton
-          icon="cross-small"
+          icon={<CrossSmallIcon />}
           isDisabled={isDisabled}
           bg="unset"
           color="muted"
@@ -433,7 +434,7 @@ export function PresetFormControl({tooltip, children, ...props}) {
 
 // eslint-disable-next-line react/display-name
 export const PresetFormControlOptionList = React.forwardRef((props, ref) => (
-  <RadioButtonGroup ref={ref} isInline {...props} />
+  <RadioGroup ref={ref} isInline {...props} />
 ))
 
 // eslint-disable-next-line react/display-name
@@ -538,7 +539,7 @@ export function ScrollToTop({scrollableRef, children, ...props}) {
       {...props}
     >
       <Stack isInline spacing={1} align="center">
-        <Icon name="arrow-up" size={5} />
+        <Icon name="arrow-up" w="5" h="5" />
         <Text as="span">{children}</Text>
       </Stack>
     </Button>

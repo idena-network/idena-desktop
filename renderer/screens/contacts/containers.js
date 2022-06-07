@@ -13,7 +13,7 @@ import {
   useDisclosure,
   Collapse,
   IconButton,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {
   mapToFriendlyStatus,
@@ -21,7 +21,6 @@ import {
 } from '../../shared/providers/identity-context'
 import {
   byId,
-  calculateInvitationRewardRatio,
   dummyAddress,
   toLocaleDna,
   toPercent,
@@ -49,12 +48,11 @@ import {
   ContactDrawerHeader,
   ContactStat,
 } from './components'
-import {useEpochState} from '../../shared/providers/epoch-context'
-import {useChainState} from '../../shared/providers/chain-context'
 import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {IdentityStatus} from '../../shared/types'
 import {VotingSkeleton} from '../oracles/components'
 import {useInviteScore} from '../profile/hooks'
+import {PlusSolidIcon} from '../../shared/components/icons'
 
 export function ContactListSidebar({
   selectedContactId,
@@ -107,8 +105,8 @@ function InviteActionBar({onNewContact}) {
     <Flex align="center" justify="space-between" px={4} py="3/2" w="full">
       <Stack isInline spacing={3} align="center">
         <IconButton
-          icon="plus-solid"
-          variantColor="blue"
+          icon={<PlusSolidIcon />}
+          colorScheme="blue"
           bg="blue.012"
           color="blue.500"
           fontSize="base"
@@ -150,7 +148,7 @@ function InvitationRewardRatioInfo() {
       placement="right"
       w={151}
     >
-      <Icon name="info" size={5} color="blue.500" />
+      <Icon name="info" w="5" h="5" color="blue.500" />
     </Tooltip>
   )
 }
@@ -367,7 +365,7 @@ export function ContactCard({
                 <VDivider />
                 <IconButton2
                   icon="delete"
-                  variantColor="red"
+                  colorScheme="red"
                   _active={{
                     bg: 'red.012',
                   }}
@@ -402,7 +400,7 @@ export function ContactCard({
                   {!activated && (
                     <Button
                       variant="link"
-                      variantColor="blue"
+                      colorScheme="blue"
                       fontWeight={500}
                       _hover={null}
                       _active={null}
@@ -433,7 +431,7 @@ export function IssueInviteDrawer({
   const {
     isOpen: isOpenAdvancedOptions,
     onToggle: onToggleAdvancedOptions,
-  } = useDisclosure(Boolean(inviteeAddress))
+  } = useDisclosure({isOpen: Boolean(inviteeAddress)})
 
   const {addInvite} = useInviteDispatch()
 
@@ -498,7 +496,8 @@ export function IssueInviteDrawer({
             >
               {t('Advanced')}
               <Icon
-                size={5}
+                w="5"
+                h="5"
                 name="chevron-down"
                 color="muted"
                 ml={2}
@@ -506,7 +505,7 @@ export function IssueInviteDrawer({
                 transition="all 0.2s ease-in-out"
               />
             </Button>
-            <Collapse isOpen={isOpenAdvancedOptions} mt={4}>
+            <Collapse in={isOpenAdvancedOptions} mt={4}>
               <FormControl>
                 <FormLabel htmlFor="address">{t('Address')}</FormLabel>
                 <Input

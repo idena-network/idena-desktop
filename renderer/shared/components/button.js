@@ -3,12 +3,12 @@ import React from 'react'
 import {
   Button as ChakraButton,
   IconButton as ChakraIconButton,
-  PseudoBox,
   Icon,
   Stack,
   Text,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {rem} from '../theme'
+import {InfoIcon} from './icons'
 
 const BaseButton = React.forwardRef((props, ref) => (
   <ChakraButton
@@ -28,15 +28,14 @@ const BaseButton = React.forwardRef((props, ref) => (
 BaseButton.displayName = 'BaseButton'
 
 export const PrimaryButton = React.forwardRef((props, ref) => (
-  <BaseButton ref={ref} variantColor="brandBlue" color="white" {...props} />
+  <BaseButton ref={ref} colorScheme="brandBlue" color="white" {...props} />
 ))
 PrimaryButton.displayName = 'PrimaryButton'
 
 // eslint-disable-next-line react/display-name
 export const SecondaryButton = React.forwardRef((props, ref) => (
-  <PseudoBox
+  <BaseButton
     ref={ref}
-    as="button"
     bg="brandBlue.10"
     color="brandBlue.500"
     fontSize="md"
@@ -71,7 +70,7 @@ export const IconButton2 = React.forwardRef(
     <ChakraButton
       ref={ref}
       variant="ghost"
-      variantColor="blue"
+      colorScheme="blue"
       fontWeight={500}
       h={8}
       px={2}
@@ -80,7 +79,11 @@ export const IconButton2 = React.forwardRef(
       {...props}
     >
       <Stack isInline spacing={2} align="center" w="full">
-        {typeof icon === 'string' ? <Icon name={icon} size={5} mr={2} /> : icon}
+        {typeof icon === 'string' ? (
+          <Icon name={icon} w="5" h="5" mr={2} />
+        ) : (
+          icon
+        )}
         <Text as="span" isTruncated>
           {children}
         </Text>
@@ -92,7 +95,7 @@ export const IconButton2 = React.forwardRef(
 export const InfoButton = React.forwardRef((props, ref) => (
   <ChakraIconButton
     ref={ref}
-    icon="info"
+    icon={<InfoIcon />}
     color="brandBlue.500"
     bg="unset"
     fontSize={rem(20)}

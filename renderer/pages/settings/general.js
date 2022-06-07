@@ -9,7 +9,7 @@ import {
   Text,
   useDisclosure,
   useToast,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import SettingsLayout from '../../screens/settings/layout'
 import {useSettingsState} from '../../shared/providers/settings-context'
 import {archiveFlips} from '../../screens/flips/utils'
@@ -75,7 +75,7 @@ function Settings() {
           <HDivider />
           <Flex justify="space-between" align="center" py={6}>
             <Stack isInline spacing={3} align="center">
-              <Icon name="key" size={5} />
+              <Icon name="key" w="5" h="5" />
               <Text fontSize="mdx" fontWeight={500}>
                 {t('My private key')}
               </Text>

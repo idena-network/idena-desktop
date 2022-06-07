@@ -6,7 +6,7 @@ import {
   useDisclosure,
   CloseButton,
   useToast,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {
@@ -183,7 +183,8 @@ export default function ViewFlipPage() {
                 >
                   <FlipCardMenuItemIcon
                     name="delete"
-                    size={5}
+                    w="5"
+                    h="5"
                     mr={2}
                     color="red.500"
                   />

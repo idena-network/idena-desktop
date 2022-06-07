@@ -20,7 +20,11 @@ import {
   PopoverArrow,
   PopoverBody,
   Link,
-} from '@chakra-ui/core'
+  Image,
+  LinkBox,
+  LinkOverlay,
+  HStack,
+} from '@chakra-ui/react'
 import {useIdentityState} from '../providers/identity-context'
 import {useEpochState} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
@@ -49,6 +53,17 @@ import {
 import {ExternalLink, Tooltip} from './components'
 import {useTimingState} from '../providers/timing-context'
 import {TodoVotingCountBadge} from '../../screens/oracles/components'
+import {
+  ClockIcon,
+  ContactsIcon,
+  GalleryIcon,
+  MoreIcon,
+  OracleIcon,
+  PlusIcon,
+  ProfileIcon,
+  SettingsIcon,
+  WalletIcon,
+} from './icons'
 
 export default function Sidebar({
   isForkAvailable,
@@ -95,7 +110,7 @@ function Status() {
 
   const {loading, syncing, offline} = useChainState()
 
-  const {wrongClientTime} = useTimingState()
+  const {wrongClientTime} = {wrongClientTime: true} // useTimingState()
 
   switch (true) {
     case loading:
@@ -127,22 +142,27 @@ function Status() {
     case wrongClientTime:
       return (
         <StatusContent bg="red.020">
-          <Popover trigger="hover" usePortal>
-            <PopoverTrigger>
-              <Stack isInline align="center" spacing={1} color="red.500">
-                <Icon name="clock" size={5} />
-                <Text fontWeight={500}>{t('Wrong time')}</Text>
-              </Stack>
-            </PopoverTrigger>
+          <Popover
+            trigger="hover"
+            arrowShadowColor="transparent"
+            offset={[0, 12]}
+          >
+            <HStack align="center" spacing="1.5" color="red.500">
+              <ClockIcon w="5" h="5" />
+              <PopoverTrigger>
+                <Text fontWeight={500} cursor="help" lineHeight="4">
+                  {t('Wrong time')}
+                </Text>
+              </PopoverTrigger>
+            </HStack>
             <PopoverContent
-              gutter={10}
+              offs={10}
               bg="graphite.500"
               border="none"
               boxShadow="none"
-              w={205}
-              zIndex="popover"
+              w="min-content"
             >
-              <PopoverArrow border="none" boxShadow="none" />
+              <PopoverArrow bg="graphite.500" border="none" boxShadow="none" />
               <PopoverBody fontSize="sm" p={2} pb={3}>
                 <Stack spacing={1}>
                   <Text color="muted">
@@ -265,7 +285,16 @@ function BandwidthItem(props) {
 }
 
 export function Logo() {
-  return <Icon name="logo" size="56px" mx="auto" my={8} />
+  return (
+    <Box my={8} alignSelf="center">
+      <Image
+        src="/static/logo.svg"
+        alt="Idena logo"
+        w={['88px', 14]}
+        ignoreFallback
+      />
+    </Box>
+  )
 }
 
 function Navbar() {
@@ -275,19 +304,19 @@ function Navbar() {
 
   return (
     <Nav>
-      <NavItem href="/profile" icon="profile">
+      <NavItem href="/profile" icon={<ProfileIcon />}>
         {t('My Idena')}
       </NavItem>
-      <NavItem href="/wallets" icon="wallet">
+      <NavItem href="/wallets" icon={<WalletIcon />}>
         {t('Wallets')}
       </NavItem>
-      <NavItem href="/flips/list" icon="gallery">
+      <NavItem href="/flips/list" icon={<GalleryIcon />}>
         {t('Flips')}
       </NavItem>
-      <NavItem href="/contacts" icon="contacts">
+      <NavItem href="/contacts" icon={<ContactsIcon />}>
         {t('Contacts')}
       </NavItem>
-      <NavItem href="/oracles/list" icon="oracle">
+      <NavItem href="/oracles/list" icon={<OracleIcon />}>
         {todoCount > 0 ? (
           <Flex flex={1} align="center" justify="space-between">
             <Text as="span">{t('Oracle voting')}</Text>
@@ -299,7 +328,7 @@ function Navbar() {
           t('Oracle voting')
         )}
       </NavItem>
-      <NavItem href="/settings/general" icon="settings">
+      <NavItem href="/settings/general" icon={<SettingsIcon />}>
         {t('Settings')}
       </NavItem>
     </Nav>
@@ -315,27 +344,30 @@ function NavItem({href, icon, children}) {
   const isActive = pathname.startsWith(href)
 
   return (
-    <NextLink href={href} passHref>
-      <Link
-        bg={isActive ? 'xblack.016' : 'transparent'}
-        borderRadius="md"
-        color={isActive ? 'white' : 'xwhite.050'}
-        fontWeight={500}
-        minH={8}
-        px={2}
-        py="3/2"
-        _hover={{bg: isActive ? 'xblack.016' : 'gray.10', color: 'white'}}
-        _active={{
-          bg: 'xblack.016',
-        }}
-        _focus={{outline: 'none'}}
-      >
-        <Stack isInline spacing={2}>
-          <Icon name={icon} size={5} />
-          <Flex flex={1}>{children}</Flex>
-        </Stack>
-      </Link>
-    </NextLink>
+    <LinkBox
+      as={HStack}
+      spacing="2"
+      align="center"
+      bg={isActive ? 'xblack.016' : 'transparent'}
+      borderRadius="md"
+      color={isActive ? 'white' : 'xwhite.050'}
+      fontWeight={500}
+      minH={8}
+      px={2}
+      py="1.5"
+      _hover={{bg: isActive ? 'xblack.016' : 'gray.10', color: 'white'}}
+      _active={{
+        bg: 'xblack.016',
+      }}
+      _focus={{outline: 'none'}}
+    >
+      {React.cloneElement(icon, {w: '5', h: '5'})}
+      <Flex flex={1}>
+        <NextLink href={href} passHref>
+          <LinkOverlay>{children}</LinkOverlay>
+        </NextLink>
+      </Flex>
+    </LinkBox>
   )
 }
 
@@ -436,8 +468,51 @@ function ActionPanel() {
                   position="relative"
                   zIndex={9}
                 >
-                  <ActionItem title={t('Next validation')}>
+                  <ActionItem title={t('Next validation')} position="relative">
                     {formatValidationDate(nextValidation, language)}
+                    <Menu autoSelect={false}>
+                      <MenuButton
+                        rounded="md"
+                        p="1.5"
+                        position="absolute"
+                        top="0.5"
+                        right="0.5"
+                        zIndex="popover"
+                        _expanded={{bg: 'gray.500'}}
+                        _focus={{outline: 0}}
+                      >
+                        <Box overflow="hidden" w="3">
+                          <MoreIcon h="5" w="5" ml="-1" />
+                        </Box>
+                      </MenuButton>
+                      <MenuList
+                        placement="bottom-end"
+                        border="none"
+                        shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
+                        rounded="lg"
+                        py={2}
+                        minWidth="145px"
+                      >
+                        <MenuItem
+                          color="brandGray.500"
+                          fontWeight={500}
+                          px={3}
+                          py={2}
+                          _hover={{bg: 'gray.50'}}
+                          _focus={{bg: 'gray.50'}}
+                          _selected={{bg: 'gray.50'}}
+                          _active={{bg: 'gray.50'}}
+                          onClick={() => {
+                            global.openExternal(
+                              buildNextValidationCalendarLink(nextValidation)
+                            )
+                          }}
+                        >
+                          <PlusIcon w="5" h="5" mr={3} color="brandBlue.500" />
+                          Add to calendar
+                        </MenuItem>
+                      </MenuList>
+                    </Menu>
                   </ActionItem>
                 </Box>
               </PopoverTrigger>
@@ -491,51 +566,6 @@ function ActionPanel() {
           </>
         )}
       </Stack>
-
-      {currentPeriod === EpochPeriod.None && (
-        <Menu autoSelect={false}>
-          <MenuButton
-            rounded="md"
-            py="3/2"
-            px="2px"
-            position="absolute"
-            bottom={6}
-            right="1/2"
-            zIndex="popover"
-            _expanded={{bg: 'brandGray.500'}}
-            _focus={{outline: 0}}
-          >
-            <Icon name="more" size={5} />
-          </MenuButton>
-          <MenuList
-            placement="bottom-end"
-            border="none"
-            shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
-            rounded="lg"
-            py={2}
-            minWidth="145px"
-          >
-            <MenuItem
-              color="brandGray.500"
-              fontWeight={500}
-              px={3}
-              py={2}
-              _hover={{bg: 'gray.50'}}
-              _focus={{bg: 'gray.50'}}
-              _selected={{bg: 'gray.50'}}
-              _active={{bg: 'gray.50'}}
-              onClick={() => {
-                global.openExternal(
-                  buildNextValidationCalendarLink(nextValidation)
-                )
-              }}
-            >
-              <Icon name="plus-square" size={5} mr={3} color="brandBlue.500" />
-              Add to calendar
-            </MenuItem>
-          </MenuList>
-        </Menu>
-      )}
     </Box>
   )
 }

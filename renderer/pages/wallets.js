@@ -1,6 +1,6 @@
 import React from 'react'
 import {useTranslation} from 'react-i18next'
-import {Flex, Stack, Box, Heading, Icon, useDisclosure} from '@chakra-ui/core'
+import {Flex, Stack, Box, Heading, Icon, useDisclosure} from '@chakra-ui/react'
 import {useWallets} from '../shared/hooks/use-wallets'
 import {IconButton2} from '../shared/components/button'
 import Layout from '../shared/components/layout'
@@ -59,7 +59,9 @@ export default function WalletsPage() {
             <Stack isInline spacing={1} align="center" pt={2}>
               <VDivider />
               <IconButton2
-                icon={<Icon name="send-out" size={5} transform="scaleX(-1)" />}
+                icon={
+                  <Icon name="send-out" w="5" h="5" transform="scaleX(-1)" />
+                }
                 onClick={onOpenSendDnaDrawer}
               >
                 {t('Send')}

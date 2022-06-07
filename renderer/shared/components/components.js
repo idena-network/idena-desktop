@@ -41,9 +41,11 @@ import {
   Progress as ChakraProgress,
   Heading,
   FormControl,
-} from '@chakra-ui/core'
+  HStack,
+} from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
+import {ChevronRightIcon} from './icons'
 
 export const Page = React.forwardRef(function Page(props, ref) {
   return (
@@ -237,7 +239,8 @@ export function ChainedInputAddon({isDisabled, bg = 'white', ...props}) {
 export function Avatar({address, ...props}) {
   return (
     <Image
-      size={rem(80)}
+      w="20"
+      h="20"
       src={`https://robohash.idena.io/${address?.toLowerCase()}`}
       bg="gray.50"
       rounded="lg"
@@ -292,7 +295,8 @@ export function Toast({
     >
       <AlertIcon
         name={icon}
-        size={5}
+        w="5"
+        h="5"
         color={color || (status === 'error' ? 'red.500' : 'blue.500')}
       />
       <Flex direction="column" align="flex-start" maxW="sm">
@@ -337,7 +341,7 @@ export function Dialog({
   ...props
 }) {
   return (
-    <Modal isCentered size="sm" {...props}>
+    <Modal isCentered w="sm" {...props}>
       <ModalOverlay bg="xblack.080" />
       <ModalContent
         bg="white"
@@ -388,7 +392,7 @@ export function SuccessAlert({children, ...props}) {
       py={2}
       {...props}
     >
-      <AlertIcon name="info" color="green.500" size={5} mr={3} />
+      <AlertIcon name="info" color="green.500" w="5" h="5" mr={3} />
       {children}
     </Alert>
   )
@@ -410,7 +414,7 @@ export function FailAlert({children, ...props}) {
       py={2}
       {...props}
     >
-      <AlertIcon name="info" color="red.500" size={5} mr={3} />
+      <AlertIcon name="info" color="red.500" w="5" h="5" mr={3} />
       {children}
     </Alert>
   )
@@ -444,7 +448,6 @@ export function ExternalLink({
   return (
     <Button
       variant="link"
-      variantColor="brandBlue"
       fontWeight={500}
       alignSelf="flex-start"
       _hover={{background: 'transparent'}}
@@ -456,14 +459,12 @@ export function ExternalLink({
       }}
       {...props}
     >
-      <Text as="span" width={width} isTruncated={isTruncated}>
-        {children || href}
-      </Text>
-      <Icon
-        name="chevron-down"
-        size={4}
-        transform="translateY(1px) rotate(-90deg)"
-      />
+      <HStack align="center" spacing={0}>
+        <Text as="span" width={width} isTruncated={isTruncated}>
+          {children || href}
+        </Text>
+        <ChevronRightIcon />
+      </HStack>
     </Button>
   )
 }
@@ -536,7 +537,7 @@ export const IconLink = React.forwardRef(
         {...props}
       >
         <Stack spacing={2} isInline align="center" w="full">
-          {typeof icon === 'string' ? <Icon name={icon} size={4} /> : icon}
+          {typeof icon === 'string' ? <Icon name={icon} w="4" h="4" /> : icon}
           <Text as="span" isTruncated>
             {children}
           </Text>

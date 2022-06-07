@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {Box, Button, FormControl, Heading, Stack} from '@chakra-ui/core'
+import {Box, Button, FormControl, Heading, Stack} from '@chakra-ui/react'
 import {FormLabel} from '../../shared/components/components'
 
 export function SettingsFormControl({children, ...props}) {
@@ -38,7 +38,7 @@ export function SettingsLinkButton(props) {
   return (
     <Button
       variant="link"
-      variantColor="blue"
+      colorScheme="blue"
       fontWeight={500}
       _hover={null}
       _active={null}

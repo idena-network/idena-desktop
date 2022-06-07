@@ -1,6 +1,6 @@
 import React from 'react'
 import NextLink from 'next/link'
-import {Box, Icon, Stack, Text, useToast} from '@chakra-ui/core'
+import {Box, Icon, Stack, Text, useToast} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {
@@ -119,7 +119,7 @@ function VotingListPage() {
                 <VDivider />
                 <FilterOption value="own">
                   <Stack isInline>
-                    <Icon name="user" size={4} />
+                    <Icon name="user" w="4" h="4" />
                     <Text>{t('My votings')}</Text>
                   </Stack>
                 </FilterOption>

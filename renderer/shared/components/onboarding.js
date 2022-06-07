@@ -12,7 +12,7 @@ import {
   PopoverHeader,
   Stack,
   useTheme,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 
 export function OnboardingPopover({children, ...props}) {
@@ -89,7 +89,7 @@ export function OnboardingPopoverContentIconRow({icon, children, ...props}) {
   return (
     <Stack isInline spacing={4} align="center" {...props}>
       {typeof icon === 'string' ? (
-        <Icon name={icon} size={5} />
+        <Icon name={icon} w="5" h="5" />
       ) : (
         <Box>{icon}</Box>
       )}

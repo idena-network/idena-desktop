@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
   Text,
   Stack,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {
@@ -231,7 +231,7 @@ export default function FlipListPage() {
                 px={3}
                 py={2}
               >
-                <AlertIcon name="info" color="green.500" size={5} mr={3} />
+                <AlertIcon name="info" color="green.500" w="5" h="5" mr={3} />
                 {remainingRequiredFlips > 0
                   ? t(`Please submit required flips.`, {remainingRequiredFlips})
                   : null}{' '}
@@ -256,7 +256,7 @@ export default function FlipListPage() {
               px={3}
               py={2}
             >
-              <AlertIcon name="info" color="red.500" size={5} mr={3} />
+              <AlertIcon name="info" color="red.500" w="5" h="5" mr={3} />
               {t('You can not submit flips. Please get validated first. ')}
             </Alert>
           </Box>
@@ -343,7 +343,8 @@ export default function FlipListPage() {
                         >
                           <FlipCardMenuItemIcon
                             name="delete"
-                            size={5}
+                            w="5"
+                            h="5"
                             mr={2}
                             color="red.500"
                           />

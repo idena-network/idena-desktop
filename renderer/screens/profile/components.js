@@ -29,7 +29,7 @@ import {
   PopoverBody,
   Tag,
   FormHelperText,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useQuery} from 'react-query'
@@ -279,7 +279,7 @@ export const ActivateInviteForm = React.forwardRef(
             <Stack spacing={4} isInline align="center" justify="flex-end">
               <Button
                 variant="link"
-                variantColor="blue"
+                colorScheme="blue"
                 fontWeight={500}
                 _hover={null}
                 _active={null}
@@ -828,7 +828,7 @@ export function KillForm({onSuccess, onFail}) {
         ml="auto"
         type="submit"
         isLoading={submitting}
-        variantColor="red"
+        colorScheme="red"
         _hover={{
           bg: 'rgb(227 60 60)',
         }}
@@ -1018,7 +1018,7 @@ export function ProfileTagList() {
 
       {Number.isFinite(score) && (
         <Box>
-          <Popover placement="top" arrowShadowColor="transparent">
+          <ProfileTagPopover>
             <PopoverTrigger>
               <Box>
                 <ProfileTag
@@ -1059,7 +1059,7 @@ export function ProfileTagList() {
                 </Stack>
               </Stack>
             </ProfileTagPopoverContent>
-          </Popover>
+          </ProfileTagPopover>
         </Box>
       )}
 
@@ -1204,7 +1204,7 @@ export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
       <DrawerHeader>
         <Stack spacing="4">
           <FillCenter bg="blue.012" h={12} minH={12} w={12} rounded="xl">
-            <Icon name="wallet" size="6" color="blue.500" />
+            <Icon name="wallet" w="6" h="6" color="blue.500" />
           </FillCenter>
           <Heading
             color="brandGray.500"

@@ -8,7 +8,7 @@ import {
   Box,
   Heading,
   Button,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useRouter} from 'next/router'
 import {useIdentityState} from '../shared/providers/identity-context'
@@ -383,7 +383,8 @@ export default function ProfilePage() {
                               <Text as="span">{t('Send')}</Text>
                               <Icon
                                 name="chevron-down"
-                                size={4}
+                                w={4}
+                                h={4}
                                 transform="rotate(-90deg)"
                               />
                             </Stack>
@@ -431,7 +432,8 @@ export default function ProfilePage() {
                                   <Icon
                                     name="chevron-down"
                                     transform="rotate(-90deg)"
-                                    size="4"
+                                    w="4"
+                                    h="4"
                                   />
                                 </Button>
                               </UserStatValue>
@@ -531,14 +533,14 @@ export default function ProfilePage() {
                   <Stack spacing={1} align="flex-start">
                     <IconLink
                       href="/oracles/new"
-                      icon={<Icon name="oracle" size={5} />}
+                      icon={<Icon name="oracle" w="5" h="5" />}
                       maxW={200}
                     >
                       {t('New voting')}
                     </IconLink>
                     <IconLink
                       href="/flips/new"
-                      icon={<Icon name="photo" size={5} />}
+                      icon={<Icon name="photo" w="5" h="5" />}
                       isDisabled={!canSubmitFlip}
                       maxW={200}
                     >
@@ -548,7 +550,7 @@ export default function ProfilePage() {
                       href="/contacts?new"
                       isDisabled={!canInvite}
                       maxW={200}
-                      icon={<Icon name="add-user" size={5} />}
+                      icon={<Icon name="add-user" w="5" h="5" />}
                     >
                       {t('Invite')}
                     </IconLink>

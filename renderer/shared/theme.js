@@ -1,5 +1,5 @@
 import React from 'react'
-import {theme as chakraTheme} from '@chakra-ui/core'
+import {theme as chakraTheme} from '@chakra-ui/react'
 
 const breakpoints = ['40em', '52em', '64em']
 
@@ -23,14 +23,18 @@ export const theme = {
     },
     gray: {
       ...chakraTheme.colors.gray,
+      '005': 'rgb(83 86 92 /0.05)',
+      '006': 'rgb(83 86 92 /0.06)',
       '016': 'rgb(83 86 92 /0.16)',
+      '060': 'rgb(83 86 92 /0.6)',
+      '080': 'rgb(83 86 92 /0.8)',
       10: 'rgba(255,255,255,0.1)',
       50: 'rgb(245, 246, 247)',
       100: 'rgb(210, 212, 217)',
       200: '#53565c',
       300: 'rgb(232, 234, 237)',
       400: 'rgb(232, 234, 237)',
-      500: 'rgb(232, 234, 237)',
+      500: 'rgb(83, 86, 92)',
     },
     red: {
       ...chakraTheme.colors.red,

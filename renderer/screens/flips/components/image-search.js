@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {
-  AspectRatioBox,
+  AspectRatio,
   Box,
   Icon,
   Image,
@@ -11,7 +11,7 @@ import {
   Spinner,
   Stack,
   Text,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {Machine} from 'xstate'
@@ -90,7 +90,8 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
 
   return (
     <Dialog
-      size="38rem"
+      w="38rem"
+      h="38rem"
       initialFocusRef={searchInputRef}
       closeOnOverlayClick={false}
       onClose={onClose}
@@ -108,7 +109,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
           >
             <InputGroup w="full">
               <InputLeftElement w={5} h={5} top="3/2" left={3}>
-                <Icon name="search" size={3} color="gray.100" />
+                <Icon name="search" w="3" h="3" color="gray.100" />
               </InputLeftElement>
               <Input
                 ref={searchInputRef}
@@ -128,7 +129,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
             <FillCenter>
               <Stack spacing={4} align="center" w="3xs">
                 <Box p={3}>
-                  <Icon name="search" size="56px" color="gray.300" />
+                  <Icon name="search" w="14" h="14" color="gray.300" />
                 </Box>
                 <Text color="muted" textAlign="center" w="full">
                   {t(
@@ -141,7 +142,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
           {eitherState(current, 'done') && (
             <SimpleGrid columns={4} spacing={2} overflow="auto" mx={-6} px={6}>
               {images.map(({thumbnail, image}, idx) => (
-                <AspectRatioBox
+                <AspectRatio
                   key={`${image}-${idx}`}
                   ratio={1}
                   w={32}
@@ -171,7 +172,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
                     borderWidth={1}
                     borderRadius="md"
                   />
-                </AspectRatioBox>
+                </AspectRatio>
               ))}
             </SimpleGrid>
           )}

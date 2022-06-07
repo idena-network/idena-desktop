@@ -11,7 +11,7 @@ import {
   MenuItem,
   MenuList,
   Stack,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {
   Drawer,
   DrawerHeader,
@@ -31,7 +31,7 @@ export function WalletCardMenu({children, ...props}) {
         zIndex="dropdown"
       >
         <Flex align="center" justify="center" w={3}>
-          <Icon name="more" size={5} />
+          <Icon name="more" w="5" h="5" />
         </Flex>
       </MenuButton>
       <MenuList
@@ -71,7 +71,7 @@ export function WalletCardMenuItem({children, ...props}) {
 }
 
 export function WalletCardMenuItemIcon(props) {
-  return <Icon size={5} color="blue.500" {...props} />
+  return <Icon w="5" h="5" color="blue.500" {...props} />
 }
 
 export function WalletDrawer({title, icon, color, children, ...props}) {
@@ -107,7 +107,8 @@ export function WalletDrawerHeaderIconBox({icon, color, children, ...props}) {
       justify="center"
       bg={`${color}.012`}
       borderRadius="xl"
-      size={12}
+      w="12"
+      h="12"
       {...props}
     >
       {typeof icon === 'string' && (
@@ -119,7 +120,7 @@ export function WalletDrawerHeaderIconBox({icon, color, children, ...props}) {
 }
 
 export function WalletDrawerHeaderIcon({color, ...props}) {
-  return <Icon size={6} color={`${color}.500`} {...props} />
+  return <Icon w="6" h="6" color={`${color}.500`} {...props} />
 }
 
 export function WalletDrawerForm(props) {

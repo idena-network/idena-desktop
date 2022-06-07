@@ -5,14 +5,13 @@ import {
   Button,
   Flex,
   Icon,
-  PseudoBox,
   Stack,
   Stat,
   StatLabel,
   StatNumber,
   Text,
   useClipboard,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import QrCode from 'qrcode.react'
 import {PrimaryButton} from '../../shared/components/button'
@@ -96,7 +95,7 @@ export function WalletCard({
         <Flex justify="space-between" align="center">
           <Box fontWeight={500}>{name}</Box>
           {isStake ? (
-            <Icon name="lock" size={4} color="muted" />
+            <Icon name="lock" w="4" h="4" color="muted" />
           ) : (
             <WalletCardMenu>
               <WalletCardMenuItem onClick={onSend}>
@@ -122,7 +121,7 @@ export function WalletCard({
         <Box fontWeight={500}>{toLocaleDna(i18n.language)(balance)}</Box>
       </Stack>
       {isSelected && (
-        <PseudoBox
+        <Box
           position="absolute"
           left={-4}
           top={-4}
@@ -248,7 +247,7 @@ export function ReceiveDnaDrawer({address, ...props}) {
               <FormLabel p={0}>{t('From')}</FormLabel>
               <Button
                 variant="link"
-                variantColor="blue"
+                colorScheme="blue"
                 fontWeight={500}
                 _hover={null}
                 _active={null}
@@ -298,7 +297,8 @@ export function WalletTransactionList({txs = []}) {
                 <Stack isInline spacing={3} align="center">
                   <Avatar
                     address={tx.counterParty}
-                    size={8}
+                    w="8"
+                    h="8"
                     bg="white"
                     borderColor="brandGray.016"
                     borderWidth={1}
@@ -402,7 +402,11 @@ function WalletTxStatus({
         minH={8}
         minW={8}
       >
-        <Icon name={`arrow-${direction === 'Sent' ? 'up' : 'down'}`} size={5} />
+        <Icon
+          name={`arrow-${direction === 'Sent' ? 'up' : 'down'}`}
+          w="5"
+          h="5"
+        />
       </Flex>
       <Box>
         <Text color="brandGray.500" fontWeight={500}>
@@ -420,7 +424,7 @@ function WalletTxStatus({
                 <Tooltip
                   label={`${t('Smart contract failed')}: ${receipt?.error}`}
                 >
-                  <Icon name="exclamation-mark" color="red.500" size={5} />
+                  <Icon name="exclamation-mark" color="red.500" w="5" h="5" />
                 </Tooltip>
               )}
             </Stack>

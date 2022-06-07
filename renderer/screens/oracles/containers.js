@@ -32,7 +32,7 @@ import {
   FormControl,
   RadioGroup,
   Radio,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import dayjs from 'dayjs'
 import {
   toLocaleDna,
@@ -94,6 +94,7 @@ import {
   getUrls,
   sumAccountableVotes,
 } from './utils'
+import {ChevronDownIcon, InfoIcon} from '../../shared/components/icons'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -229,7 +230,7 @@ export function VotingCard({votingRef, ...props}) {
           px={3}
           mb={6}
         >
-          <Icon name="star" size={5} color="white" />
+          <Icon name="star" w="5" h="5" color="white" />
           <Text fontWeight={500}>
             {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
             {toDna(isClosed ? totalReward : estimatedTotalReward)}
@@ -482,7 +483,7 @@ export function VoteDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="send-out" variantColor="blue">
+      <OracleDrawerHeader icon="send-out" colorScheme="blue">
         {t('Voting')}: {option}
       </OracleDrawerHeader>
       <Box flex={1} overflowY="auto" mx={-30} px={30}>
@@ -681,9 +682,9 @@ export function VotingInspector({onTerminate, ...contract}) {
     <>
       <Button
         bg="blue.50"
-        rightIcon="info"
+        rightIcon={<InfoIcon />}
         variant="ghost"
-        variantColor="blue"
+        colorScheme="blue"
         onClick={onOpen}
       >
         Open inspector
@@ -705,14 +706,14 @@ export function VotingInspector({onTerminate, ...contract}) {
                     Contract
                   </Heading>
                   <IconButton
-                    icon="chevron-down"
+                    icon={<ChevronDownIcon />}
                     size="sm"
                     fontSize="lg"
                     ml={1}
                     onClick={onToggleContract}
                   />
                 </Flex>
-                <Collapse isOpen={isOpenContract}>
+                <Collapse in={isOpenContract}>
                   <Debug>{contract}</Debug>
                 </Collapse>
                 <Box mt={2}>
@@ -855,7 +856,7 @@ export function VotingInspector({onTerminate, ...contract}) {
                   </Stack>
                 </Box>
                 <Box ml="auto" mt={6}>
-                  <PrimaryButton variantColor="red" onClick={onTerminate}>
+                  <PrimaryButton colorScheme="red" onClick={onTerminate}>
                     Terminate contact
                   </PrimaryButton>
                 </Box>
@@ -929,7 +930,7 @@ export const VotingFilter = React.forwardRef(
     >
       <Stack isInline spacing={1}>
         {isChecked && (
-          <Icon name="tick" size={4} animation="0.3s both zoomIn" />
+          <Icon name="tick" w="4" h="4" animation="0.3s both zoomIn" />
         )}
         <Text>{children}</Text>
       </Stack>
@@ -1043,7 +1044,7 @@ function VotingResultBar({
             w={4}
             h={4}
           >
-            {isMine && <Icon name="ok" size={3} />}
+            {isMine && <Icon name="ok" w="3" h="3" />}
           </Flex>
         )}
         <Text isTruncated maxW="sm" title={label.length > 50 ? label : ''}>
@@ -1549,7 +1550,7 @@ export function Linkify({onClick, children}) {
         part.startsWith('http') ? (
           <Button
             variant="link"
-            variantColor="brandBlue"
+            colorScheme="brandBlue"
             fontWeight={500}
             _hover={{background: 'transparent'}}
             _focus={{
@@ -1575,7 +1576,7 @@ export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
   const [preset, setPreset] = React.useState()
 
   return (
-    <Dialog size={416} onClose={onCancel} {...props}>
+    <Dialog w="416px" h="416px" onClose={onCancel} {...props}>
       <DialogHeader mb={4}>{t('New Oracle voting')}</DialogHeader>
       <DialogBody>
         <Stack>
