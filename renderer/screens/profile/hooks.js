@@ -203,7 +203,7 @@ export function useStakingApy() {
   }, [epoch, prevEpochData, stake, stakingData, validationRewardsSummaryData])
 }
 
-export function useInviteScore() {
+export function useInvitationRewardRatio() {
   const {highestBlock} = useChainState()
 
   const epoch = useEpochState()
@@ -225,4 +225,35 @@ export function useInviteScore() {
       return calculateInvitationRewardRatio(epoch, {highestBlock})
     }
   }, [canInvite, epoch, highestBlock])
+}
+
+export function useInvitationRewardRatioProps() {
+  const invitationRewardRatio = useInvitationRewardRatio()
+
+  return React.useMemo(() => {
+    const bg = {
+      low: 'red.010',
+      mid: 'orange.010',
+      high: 'green.010',
+    }
+
+    const color = {
+      low: 'red.500',
+      mid: 'orange.500',
+      high: 'green.500',
+    }
+
+    const level =
+      // eslint-disable-next-line no-nested-ternary
+      invitationRewardRatio < 0.75
+        ? 'low'
+        : invitationRewardRatio < 0.99
+        ? 'mid'
+        : 'high'
+
+    return {
+      bg: bg[level],
+      color: color[level],
+    }
+  }, [invitationRewardRatio])
 }

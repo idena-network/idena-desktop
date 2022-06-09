@@ -17,7 +17,7 @@ import {
   useTheme,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
-import {SmallText, TextLink} from '../../shared/components/components'
+import {ArrowTextLink, SmallText} from '../../shared/components/components'
 import {TwitterIcon} from '../../shared/components/icons'
 import {TableCol} from '../../shared/components/table'
 import {useIdentity} from '../../shared/providers/identity-context'
@@ -65,8 +65,8 @@ export function ValidationReportSummary({onClose}) {
       }
       borderRadius="md"
       boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
-      px={8}
-      py={6}
+      px="8"
+      paddingY="6"
     >
       <CloseButton
         w={6}
@@ -76,7 +76,7 @@ export function ValidationReportSummary({onClose}) {
         right={3}
         onClick={onClose}
       />
-      <Stack spacing={6} w="full">
+      <Stack spacing="6" w="full">
         <Skeleton
           isLoaded={!isLoading}
           startColor={colors.gray[50]}
@@ -191,21 +191,9 @@ export function ValidationReportSummary({onClose}) {
             </Flex>
             <Flex justify="space-between">
               <Box>
-                <TextLink
-                  href="/validation-report"
-                  fontWeight={500}
-                  display="inline-block"
-                >
-                  <Stack isInline spacing={0} align="center">
-                    <Text as="span">{t('More details')}</Text>
-                    <Icon
-                      name="chevron-down"
-                      w="4"
-                      h="4"
-                      transform="rotate(-90deg)"
-                    />
-                  </Stack>
-                </TextLink>
+                <ArrowTextLink href="/validation-report">
+                  {t('More details')}
+                </ArrowTextLink>
               </Box>
               <Stack isInline color="muted">
                 <IconButton

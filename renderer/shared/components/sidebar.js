@@ -7,7 +7,6 @@ import {
   Box,
   Flex,
   Button,
-  Icon,
   Menu,
   MenuButton,
   MenuItem,
@@ -62,8 +61,11 @@ import {
   PlusIcon,
   ProfileIcon,
   SettingsIcon,
+  SyncIcon,
+  TelegramIcon,
   WalletIcon,
 } from './icons'
+import {TimerIcon} from '../../screens/validation/components'
 
 export default function Sidebar({
   isForkAvailable,
@@ -110,7 +112,7 @@ function Status() {
 
   const {loading, syncing, offline} = useChainState()
 
-  const {wrongClientTime} = {wrongClientTime: true} // useTimingState()
+  const {wrongClientTime} = useTimingState()
 
   switch (true) {
     case loading:
@@ -238,27 +240,22 @@ function ConnectionBandwidth() {
       }
       zIndex="tooltip"
     >
-      <Stack isInline spacing={1}>
-        <Bandwidth peersCount={(peers || []).length} isSyncing={syncing} />
+      <HStack spacing="1">
+        <Bandwidth peersCount={peers?.length ?? 0} isSyncing={syncing} />
         {syncing ? (
           <StatusText color="orange.500">{t('Synchronizing')}</StatusText>
         ) : (
           <StatusText color="green.500">{t('Synchronized')}</StatusText>
         )}
-      </Stack>
+      </HStack>
     </Tooltip>
   )
 }
 
 function Bandwidth({peersCount, isSyncing, ...props}) {
   return (
-    <Box pt="1/2" px="1px" pb="3px" h={4} w={4} {...props}>
-      <Stack
-        isInline
-        spacing="1/2"
-        justify="space-between"
-        alignItems="flex-end"
-      >
+    <Box pt="0.5" px="px" pb="3px" h="4" w="4" {...props}>
+      <HStack spacing="0.5" justify="space-between" alignItems="flex-end">
         {Array.from({length: 4}).map((_, idx) => (
           <BandwidthItem
             key={idx}
@@ -268,7 +265,7 @@ function Bandwidth({peersCount, isSyncing, ...props}) {
             height={`${(idx + 1) * 3}px`}
           />
         ))}
-      </Stack>
+      </HStack>
     </Box>
   )
 }
@@ -276,8 +273,8 @@ function Bandwidth({peersCount, isSyncing, ...props}) {
 function BandwidthItem(props) {
   return (
     <Box
-      borderRadius="1px"
-      w="2px"
+      borderRadius="px"
+      w="0.5"
       transition="background 0.3s ease"
       {...props}
     />
@@ -287,12 +284,7 @@ function BandwidthItem(props) {
 export function Logo() {
   return (
     <Box my={8} alignSelf="center">
-      <Image
-        src="/static/logo.svg"
-        alt="Idena logo"
-        w={['88px', 14]}
-        ignoreFallback
-      />
+      <Image src="/static/logo.svg" alt="Idena logo" w="14" ignoreFallback />
     </Box>
   )
 }
@@ -355,7 +347,7 @@ function NavItem({href, icon, children}) {
       minH={8}
       px={2}
       py="1.5"
-      _hover={{bg: isActive ? 'xblack.016' : 'gray.10', color: 'white'}}
+      _hover={{bg: isActive ? 'xblack.016' : 'white.010', color: 'white'}}
       _active={{
         bg: 'xblack.016',
       }}
@@ -534,7 +526,7 @@ function ActionPanel() {
                 onDismiss={dismissCurrentTask}
               >
                 <Stack spacing={5}>
-                  <OnboardingPopoverContentIconRow icon="telegram">
+                  <OnboardingPopoverContentIconRow icon={<TelegramIcon />}>
                     <Trans i18nKey="onboardingValidateSubscribe" t={t}>
                       <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
                         Subscribe
@@ -542,17 +534,17 @@ function ActionPanel() {
                       to the Idena Announcements (important updates only)
                     </Trans>
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="sync">
+                  <OnboardingPopoverContentIconRow icon={<SyncIcon />}>
                     {t(
                       `Keep your node synchronized in 45-60 minutes before the validation starts.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="timer">
+                  <OnboardingPopoverContentIconRow icon={<TimerIcon />}>
                     {t(
                       `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="gallery">
+                  <OnboardingPopoverContentIconRow icon={<GalleryIcon />}>
                     <Trans i18nKey="onboardingValidateTest" t={t}>
                       <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
                         Test yourself
@@ -613,7 +605,7 @@ function PulseFrame({isActive, children, ...props}) {
 
 function ActionItem({title, children, value = children, ...props}) {
   return (
-    <Box bg="gray.10" fontWeight={500} p={3} pt={2} {...props}>
+    <Box bg="xwhite.010" fontWeight={500} p={3} pt={2} {...props}>
       <Text color="xwhite.050">{title}</Text>
       <Box color="white">{value}</Box>
     </Box>

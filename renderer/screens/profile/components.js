@@ -12,13 +12,10 @@ import {
   Box,
   Flex,
   Button,
-  RadioButtonGroup,
   Radio,
   Icon,
   Switch,
   Alert,
-  AlertIcon,
-  AlertDescription,
   List,
   ListItem,
   useDisclosure,
@@ -29,10 +26,22 @@ import {
   PopoverBody,
   Tag,
   FormHelperText,
+  HStack,
+  Wrap,
+  WrapItem,
+  StatHelpText,
+  Center,
+  RadioGroup,
+  InputGroup,
+  InputRightElement,
+  IconButton,
+  useBoolean,
+  useClipboard,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useQuery} from 'react-query'
+import QrCode from 'qrcode.react'
 import {
   Avatar,
   Tooltip,
@@ -47,7 +56,8 @@ import {
   DialogBody,
   Dialog,
   FailAlert,
-  TextLink,
+  IconDrawerHeader,
+  ArrowTextLink,
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
@@ -69,9 +79,20 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
 import {validateInvitationCode} from './utils'
 import {BLOCK_TIME} from '../oracles/utils'
-import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
+import {
+  useInvitationRewardRatio,
+  useInvitationRewardRatioProps,
+  useReplenishStake,
+  useStakingAlert,
+} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {useTotalValidationScore} from '../validation-report/hooks'
+import {
+  EyeIcon,
+  EyeOffIcon,
+  PrivateKeyIcon,
+  UserIcon,
+} from '../../shared/components/icons'
 
 export function UserInlineCard({
   identity: {address, state},
@@ -79,16 +100,16 @@ export function UserInlineCard({
   ...props
 }) {
   return (
-    <Stack isInline spacing={6} align="center" {...props}>
+    <HStack spacing="6" align="center" {...props}>
       <Avatar
         address={address}
         bg="white"
-        borderWidth={1}
+        border="solid 1px"
         borderColor="gray.016"
       />
-      <Stack spacing={0} w="full">
-        <Stack spacing={1}>
-          <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
+      <Stack spacing="1.5">
+        <Stack spacing="1">
+          <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="shorter">
             {mapToFriendlyStatus(state)}
           </Heading>
           <Heading
@@ -96,26 +117,26 @@ export function UserInlineCard({
             fontSize="mdx"
             fontWeight="normal"
             color="muted"
-            lineHeight="shorter"
+            lineHeight="5"
           >
             {address}
           </Heading>
         </Stack>
         {children}
       </Stack>
-    </Stack>
+    </HStack>
   )
 }
 
 export function UserStatList({title, children, ...props}) {
   return (
-    <Stack spacing={4} {...props}>
-      <Heading as="h4" fontSize="lg" fontWeight={500}>
+    <Stack spacing="4" {...props}>
+      <Heading as="h4" fontSize="lg" fontWeight={500} lineHeight="6">
         {title}
       </Heading>
-      <Stack spacing={4} bg="gray.50" px={10} py={8} rounded="lg">
+      <Box bg="gray.50" borderRadius="lg" px="10" py="6">
         {children}
-      </Stack>
+      </Box>
     </Stack>
   )
 }
@@ -152,30 +173,47 @@ export function AnnotatedUserStat({
   )
 }
 
-export function UserStat(props) {
-  return <Stat as={Stack} spacing="3px" {...props} />
+export function UserStat({children, ...props}) {
+  return (
+    <Stat pt="2" pb="3" {...props}>
+      <Stack spacing="1">{children}</Stack>
+    </Stat>
+  )
 }
 
 export function UserStatLabel(props) {
   return (
-    <StatLabel
-      color="muted"
-      alignSelf="flex-start"
-      fontSize="md"
-      lineHeight="short"
-      {...props}
-    />
+    <StatLabel color="muted" fontSize="md" lineHeight="4" minH="4" {...props} />
   )
 }
 
 export function UserStatValue(props) {
   return (
-    <StatNumber fontSize="md" fontWeight={500} lineHeight="base" {...props} />
+    <StatNumber
+      fontSize="md"
+      fontWeight={500}
+      lineHeight="4"
+      minH="4"
+      {...props}
+    />
   )
 }
 
 export function UserStatLabelTooltip(props) {
   return <Tooltip placement="top" zIndex="tooltip" {...props} />
+}
+
+export function UserStatHelpText(props) {
+  return (
+    <StatHelpText
+      fontSize="md"
+      fontWeight={500}
+      lineHeight="4"
+      opacity={1}
+      minH="4"
+      {...props}
+    />
+  )
 }
 
 // eslint-disable-next-line react/display-name
@@ -242,9 +280,7 @@ export const ActivateInviteForm = React.forwardRef(
             <FormControl>
               <Stack spacing={3}>
                 <Flex justify="space-between" align="center">
-                  <FormLabel htmlFor="code" p={0}>
-                    {t('Invitation code')}
-                  </FormLabel>
+                  <FormLabel htmlFor="code">{t('Invitation code')}</FormLabel>
                   <Button
                     variant="ghost"
                     isDisabled={mining}
@@ -307,53 +343,54 @@ export function SpoilInviteDrawer({children, ...props}) {
   return (
     <Drawer {...props}>
       <DrawerHeader mb={6}>
-        <Avatar address={dummyAddress} mx="auto" />
-        <Heading
-          fontSize="lg"
-          fontWeight={500}
-          color="brandGray.500"
-          mt={4}
-          mb={0}
-          textAlign="center"
-        >
-          {t('Spoil invitation code')}
-        </Heading>
+        <Center as={Stack} spacing="4">
+          <Avatar address={dummyAddress} />
+          <Heading fontSize="lg" fontWeight={500}>
+            {t('Spoil invitation code')}
+          </Heading>
+        </Center>
       </DrawerHeader>
       <DrawerBody>
-        <Text fontSize="md" mb={6}>
+        <Text fontSize="md" mb="6">
           {t(
             `Spoil invitations that are shared publicly. This will encourage people to share invitations privately and prevent bots from collecting invitation codes.`
           )}
         </Text>
         {children}
       </DrawerBody>
+      <DrawerFooter>
+        <PrimaryButton type="submit" form="spoilInvite">
+          {t('Spoil invite')}
+        </PrimaryButton>
+      </DrawerFooter>
     </Drawer>
   )
 }
 
 export function SpoilInviteForm({onSpoil}) {
   const {t} = useTranslation()
+
   return (
-    <Stack
-      as="form"
-      spacing={6}
-      onSubmit={e => {
-        e.preventDefault()
-        onSpoil(e.target.elements.key.value)
-      }}
-    >
-      <FormControl>
-        <FormLabel htmlFor="key">Invitation code</FormLabel>
-        <Input id="key" placeholder={t('Invitation code to spoil')} />
-      </FormControl>
-      <Text fontSize="md">
+    <Stack spacing="6">
+      <form
+        id="spoilInvite"
+        onSubmit={e => {
+          e.preventDefault()
+          onSpoil(e.target.elements.key.value)
+        }}
+      >
+        <FormControl>
+          <Stack spacing="3">
+            <FormLabel htmlFor="key">{t('Invitation code')}</FormLabel>
+            <Input id="key" placeholder={t('Invitation code to spoil')} />
+          </Stack>
+        </FormControl>
+      </form>
+      <Text>
         {t(
           `When you click 'Spoil' the invitation code will be activated by a random address and wasted.`
         )}
       </Text>
-      <PrimaryButton ml="auto" type="submit">
-        {t('Spoil invite')}
-      </PrimaryButton>
     </Stack>
   )
 }
@@ -441,47 +478,43 @@ export function ActivateMiningForm({
 export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
   const {t} = useTranslation()
 
-  const {colors} = useTheme()
-
-  const accentColor = isOnline ? 'blue' : 'red'
-
   return (
     <Stack spacing={3}>
-      <Text fontWeight={500} h={18}>
+      <Text fontWeight={500} h="4.5" lineHeight="4.5">
         {t('Status')}
       </Text>
-      <Flex
-        align="center"
-        justify="space-between"
+      <FormControl
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
         borderColor="gray.300"
         borderWidth={1}
-        rounded="md"
-        h={8}
-        px={3}
+        borderRadius="md"
+        px="3"
+        h="8"
+        w="full"
       >
-        <FormLabel htmlFor="mining" fontWeight="normal" pb={0}>
+        <FormLabel htmlFor="mining" fontWeight="normal">
           {isDelegator ? t('Delegation') : t('Mining')}
         </FormLabel>
-        <Stack isInline align="center">
-          <Text color={`${accentColor}.500`} fontWeight={500}>
+        <HStack align="center">
+          <Text color={isOnline ? 'blue.500' : 'red.500'} fontWeight={500}>
             {isOnline ? t('On') : t('Off')}
           </Text>
           <Switch
             id="mining"
             size="sm"
             isChecked={isOnline}
-            color={accentColor}
-            h={4}
-            className="toggle"
+            h="4"
+            sx={{
+              '& > input:not(:checked) + span': {
+                background: 'red.500',
+              },
+            }}
             onChange={onShow}
           />
-          <style jsx global>{`
-            .toggle > input[type='checkbox']:not(:checked) + div {
-              background: ${colors.red[500]};
-            }
-          `}</style>
-        </Stack>
-      </Flex>
+        </HStack>
+      </FormControl>
     </Stack>
   )
 }
@@ -510,65 +543,22 @@ export function ActivateMiningDrawer({
 
   return (
     <Drawer onClose={onClose} {...props}>
-      <DrawerHeader>
-        <Flex
-          align="center"
-          justify="center"
-          bg="blue.012"
-          h={12}
-          w={12}
-          rounded="xl"
-        >
-          <Icon name="user" w={6} h={6} color="blue.500" />
-        </Flex>
-        <Heading
-          color="brandGray.500"
-          fontSize="lg"
-          fontWeight={500}
-          lineHeight="base"
-          mt={4}
-        >
-          {t('Miner status')}
-        </Heading>
-      </DrawerHeader>
+      <IconDrawerHeader icon={<UserIcon />}>
+        {t('Miner status')}
+      </IconDrawerHeader>
       <DrawerBody>
-        <Stack spacing={6} mt={30}>
-          <FormControl as={Stack} spacing={3}>
-            <FormLabel p={0}>{t('Type')}</FormLabel>
-            <RadioButtonGroup
-              spacing={2}
-              isInline
-              d="flex"
-              value={mode}
-              onChange={onChangeMode}
-            >
-              <Radio
-                value={NodeType.Miner}
-                flex={1}
-                borderColor="gray.300"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-                px={3}
-              >
-                {t('Mining')}
-              </Radio>
-              <Radio
-                value={NodeType.Delegator}
-                flex={1}
-                borderColor="gray.300"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-                px={3}
-              >
-                {t('Delegation')}
-              </Radio>
-            </RadioButtonGroup>
+        <Stack spacing="6">
+          <FormControl as={Stack} spacing="3">
+            <FormLabel>{t('Type')}</FormLabel>
+            <ActivateMiningRadioGroup value={mode} onChange={onChangeMode}>
+              <Radio value={NodeType.Miner}>{t('Mining')}</Radio>
+              <Radio value={NodeType.Delegator}>{t('Delegation')}</Radio>
+            </ActivateMiningRadioGroup>
           </FormControl>
+
           {willDelegate ? (
-            <Stack spacing={5}>
-              <FormControl as={Stack} spacing={3}>
+            <Stack spacing="5">
+              <FormControl as={Stack} spacing="3">
                 <FormLabel>{t('Delegation address')}</FormLabel>
                 <Input
                   ref={delegateeInputRef}
@@ -600,24 +590,21 @@ export function ActivateMiningDrawer({
               )}
             </Stack>
           ) : (
-            <Box bg="gray.50" p={6} py={4}>
-              <Heading
-                color="brandGray.500"
-                fontSize="base"
-                fontWeight={500}
-                mb={2}
-              >
+            <Stack bg="gray.50" p="6" pt="4.5">
+              <Heading fontSize="base" fontWeight={500} lineHeight="6" h="6">
                 {t('Activate mining status')}
               </Heading>
-              <Text fontSize="md" color="muted" mb={3}>
-                {t(
-                  `Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.`
-                )}
-              </Text>
-              <Text fontSize="md" color="muted">
-                {t('You can deactivate your online status at any time.')}
-              </Text>
-            </Box>
+              <Stack spacing="1">
+                <Text color="muted">
+                  {t(
+                    `Submit the form to start mining. Your node has to be online unless you deactivate your status. Otherwise penalties might be charged after being offline more than 1 hour.`
+                  )}
+                </Text>
+                <Text color="muted">
+                  {t('You can deactivate your online status at any time.')}
+                </Text>
+              </Stack>
+            </Stack>
           )}
         </Stack>
       </DrawerBody>
@@ -653,61 +640,32 @@ export function DeactivateMiningDrawer({
 
   return (
     <Drawer onClose={onClose} {...props}>
-      <DrawerHeader>
-        <Flex
-          align="center"
-          justify="center"
-          bg="blue.012"
-          h={12}
-          w={12}
-          rounded="xl"
-        >
-          <Icon name="user" w={6} h={6} color="blue.500" />
-        </Flex>
-        <Heading
-          color="brandGray.500"
-          fontSize="lg"
-          fontWeight={500}
-          lineHeight="base"
-          mt={4}
-        >
-          {isDelegator
-            ? t('Deactivate delegation status')
-            : t('Deactivate mining status')}
-        </Heading>
-      </DrawerHeader>
-      <DrawerBody>
-        <Stack spacing={6} mt={30}>
-          <Text fontSize="md">
+      <IconDrawerHeader icon={<UserIcon />}>
+        {isDelegator
+          ? t('Deactivate delegation status')
+          : t('Deactivate mining status')}
+      </IconDrawerHeader>
+      <DrawerBody mt="6">
+        <Stack spacing="6">
+          <Text color="gray.500" fontSize="md">
             {isDelegator
               ? t(`Submit the form to deactivate your delegation status.`)
               : t(
                   `Submit the form to deactivate your mining status. You can activate it again afterwards.`
                 )}
           </Text>
+
           {isDelegator && (
             <FormControl as={Stack} spacing={3}>
               <FormLabel>{t('Delegation address')}</FormLabel>
               <Input defaultValue={delegatee} isDisabled />
             </FormControl>
           )}
+
           {isDelegator && !canUndelegate && (
-            <Alert
-              status="error"
-              rounded="md"
-              bg="red.010"
-              borderColor="red.050"
-              borderWidth={1}
-            >
-              <AlertIcon name="info" alignSelf="flex-start" color="red.500" />
-              <AlertDescription
-                color="brandGray.500"
-                fontSize="md"
-                fontWeight={500}
-              >
-                {t('You can disable delegation at the next epoch only')}
-              </AlertDescription>
-            </Alert>
+            <FailAlert>
+              {t('You can disable delegation at the next epoch only')}
+            </FailAlert>
           )}
         </Stack>
       </DrawerBody>
@@ -725,6 +683,27 @@ export function DeactivateMiningDrawer({
         </Stack>
       </DrawerFooter>
     </Drawer>
+  )
+}
+
+function ActivateMiningRadioGroup({children, ...props}) {
+  return (
+    <RadioGroup {...props}>
+      <HStack w="full">
+        {React.Children.map(children, child => (
+          <Box
+            flex={1}
+            borderWidth={1}
+            borderColor="gray.300"
+            borderRadius="md"
+            px="3"
+            py="2"
+          >
+            {child}
+          </Box>
+        ))}
+      </HStack>
+    </RadioGroup>
   )
 }
 
@@ -870,9 +849,9 @@ export function MyIdenaBotAlert({onConnect}) {
         cursor="pointer"
         fontWeight={500}
         rounded="md"
-        p={3}
-        mt={2}
-        mx={2}
+        p="3"
+        mt="2"
+        mx="2"
         w="auto"
         onClick={myIdenaBotDisclosure.onOpen}
       >
@@ -1008,13 +987,19 @@ export function ProfileTagList() {
 
   const score = useTotalValidationScore()
 
-  const inviteScore = useInviteScore()
+  const invitationRewardRatio = useInvitationRewardRatio()
+
+  const invitationRewardRatioProps = useInvitationRewardRatioProps()
 
   const formatDna = toLocaleDna(i18n.language, {maximumFractionDigits: 5})
 
   return (
-    <Stack isInline spacing="1" w="full" flexWrap="wrap">
+    <Wrap spacing="1">
       {age > 0 && <ProfileTag label={t('Age')} value={age} />}
+
+      {/* <ProfileTag label={t('Age')} value={age} />
+      <ProfileTag label={t('Age')} value={age} />
+      <ProfileTag label={t('Age')} value={age} /> */}
 
       {Number.isFinite(score) && (
         <Box>
@@ -1048,14 +1033,14 @@ export function ProfileTagList() {
                   <Text color="muted" lineHeight="shorter">
                     {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
                   </Text>
-                  <TextLink
+                  <ArrowTextLink
                     href="/validation-report"
                     color="white"
-                    lineHeight="base"
+                    fontSize="sm"
+                    lineHeight="4"
                   >
                     {t('Validation report')}
-                    <Icon name="chevron-down" transform="rotate(-90deg)" />
-                  </TextLink>
+                  </ArrowTextLink>
                 </Stack>
               </Stack>
             </ProfileTagPopoverContent>
@@ -1072,75 +1057,63 @@ export function ProfileTagList() {
         />
       )}
 
-      {inviteScore && (
+      {invitationRewardRatio && (
         <Box>
           <ProfileTagPopover>
             <ProfileTagPopoverTrigger>
               <ProfileTag
                 label={t('Invitation rewards')}
-                value={toPercent(inviteScore)}
+                value={toPercent(invitationRewardRatio)}
                 cursor="help"
-                bg={
-                  // eslint-disable-next-line no-nested-ternary
-                  inviteScore < 0.75
-                    ? 'red.010'
-                    : inviteScore < 0.99
-                    ? 'orange.010'
-                    : 'green.010'
-                }
-                color={
-                  // eslint-disable-next-line no-nested-ternary
-                  inviteScore < 0.75
-                    ? 'red.500'
-                    : inviteScore < 0.99
-                    ? 'orange.500'
-                    : 'green.500'
-                }
+                {...invitationRewardRatioProps}
               />
             </ProfileTagPopoverTrigger>
             <ProfileTagPopoverContent>
-              <Stack spacing="2px" w={40}>
-                <Text color="xwhite.040" lineHeight="base">
+              <Stack spacing="0.5" w="40">
+                <Text color="xwhite.040" lineHeight="4">
                   {t(
                     'You will get {{invitationRewardRatio}} of the invitation rewards if your invite is activated now',
-                    {invitationRewardRatio: toPercent(inviteScore)}
+                    {invitationRewardRatio: toPercent(invitationRewardRatio)}
                   )}
                 </Text>
-                <TextLink href="/contacts" color="white" lineHeight="base">
-                  {t('Check invites')}
-                  <Icon name="chevron-down" transform="rotate(-90deg)" />
-                </TextLink>
+                <Box>
+                  <ArrowTextLink
+                    href="/contacts"
+                    color="white"
+                    fontSize="sm"
+                    lineHeight="4"
+                  >
+                    {t('Check invites')}
+                  </ArrowTextLink>
+                </Box>
               </Stack>
             </ProfileTagPopoverContent>
           </ProfileTagPopover>
         </Box>
       )}
-    </Stack>
+    </Wrap>
   )
 }
 
-export const ProfileTag = React.forwardRef(function ProfileTag(
-  {label, value, ...props},
-  ref
-) {
+export function ProfileTag({label, value, ...props}) {
   return (
-    <Tag
-      ref={ref}
-      bg="gray.016"
-      borderRadius="xl"
-      fontSize="sm"
-      px="3"
-      minH="6"
-      mt="3/2"
-      {...props}
-    >
-      <Stack isInline spacing="1">
-        <Text>{label}</Text>
-        <Text>{value}</Text>
-      </Stack>
-    </Tag>
+    <WrapItem>
+      <Tag
+        bg="gray.016"
+        borderRadius="xl"
+        fontSize="sm"
+        px="3"
+        minH="6"
+        {...props}
+      >
+        <HStack spacing="1">
+          <Text>{label}</Text>
+          <Text>{value}</Text>
+        </HStack>
+      </Tag>
+    </WrapItem>
   )
-})
+}
 
 export function ProfileTagPopover(props) {
   return <Popover placement="top" arrowShadowColor="transparent" {...props} />
@@ -1245,9 +1218,7 @@ export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
               }}
             >
               <FormControl>
-                <FormLabel mx={0} mb="3">
-                  {t('Amount')}
-                </FormLabel>
+                <FormLabel mb="3">{t('Amount')}</FormLabel>
                 <DnaInput name="amount" />
                 <FormHelperText fontSize="md">
                   <Flex justify="space-between">
@@ -1308,4 +1279,125 @@ export function StakingAlert(props) {
       )}
     </FailAlert>
   ) : null
+}
+
+export function ExportPrivateKeyDrawer(props) {
+  const {t} = useTranslation()
+
+  const [step, setStep] = React.useState('passphrase')
+
+  const [revealPassword, setRevealPassword] = useBoolean()
+
+  const [encodedKey, setEncodedKey] = React.useState()
+
+  const clipboard = useClipboard(encodedKey)
+
+  return (
+    <Drawer {...props}>
+      <IconDrawerHeader icon={<PrivateKeyIcon />}>
+        {t('Export private key')}
+      </IconDrawerHeader>
+
+      <DrawerBody>
+        <Stack spacing="5">
+          {step === 'passphrase' ? (
+            <>
+              <Text>
+                {t('Create a new password to export your private key')}
+              </Text>
+              <form
+                id="exportPrivateKey"
+                onSubmit={async e => {
+                  e.preventDefault()
+
+                  setEncodedKey(
+                    await callRpc(
+                      'dna_exportKey',
+                      new FormData(e.target).get('password')
+                    )
+                  )
+
+                  setStep('encodedPrivateKey')
+                }}
+              >
+                <FormControl isRequired>
+                  <Stack>
+                    <FormLabel>{t('New password')}</FormLabel>
+                    <InputGroup>
+                      <Input
+                        name="password"
+                        type={revealPassword ? 'text' : 'password'}
+                      />
+                      <InputRightElement>
+                        <IconButton
+                          variant="unstyled"
+                          icon={
+                            revealPassword ? (
+                              <EyeIcon boxSize="4" />
+                            ) : (
+                              <EyeOffIcon boxSize="4" />
+                            )
+                          }
+                          size="xs"
+                          onClick={setRevealPassword.toggle}
+                        />
+                      </InputRightElement>
+                    </InputGroup>
+                  </Stack>
+                </FormControl>
+              </form>
+            </>
+          ) : (
+            <>
+              <Text>
+                {t(
+                  'Scan QR by your mobile phone or copy code below for export private key.'
+                )}
+              </Text>
+              <Center>
+                <Box borderRadius="md" boxShadow="md" p="2">
+                  <QrCode value="encodedPrivateKey" />
+                </Box>
+              </Center>
+              <FormControl>
+                <Stack spacing="1">
+                  <Flex justify="space-between" align="center">
+                    <FormLabel>{t('Encrypted private key')}</FormLabel>
+                    <Button
+                      variant="link"
+                      colorScheme="blue"
+                      _hover={{
+                        textDecoration: 'none',
+                      }}
+                      onClick={clipboard.onCopy}
+                    >
+                      {t('Copy')}
+                    </Button>
+                  </Flex>
+                  <Input type="password" value={encodedKey} isDisabled />
+                </Stack>
+              </FormControl>
+            </>
+          )}
+        </Stack>
+      </DrawerBody>
+
+      <DrawerFooter>
+        {step === 'passphrase' ? (
+          <PrimaryButton type="submit" form="exportPrivateKey">
+            {t('Export')}
+          </PrimaryButton>
+        ) : (
+          <PrimaryButton
+            onClick={() => {
+              props.onClose()
+              setStep('passphrase')
+            }}
+          >
+            {t('Close')}
+          </PrimaryButton>
+        )}
+      </DrawerFooter>
+    </Drawer>
+  )
 }

@@ -34,14 +34,13 @@ import {
   Checkbox as ChakraCheckbox,
   Divider,
   Text,
-  Icon,
   InputGroup,
   InputRightAddon,
-  Link,
   Progress as ChakraProgress,
   Heading,
   FormControl,
-  HStack,
+  Center,
+  Square,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -91,7 +90,7 @@ export function Drawer({isCloseable = true, children, ...props}) {
   return (
     <ChakraDrawer {...props}>
       <DrawerOverlay bg="xblack.080" />
-      <DrawerContent px={8} py={12} maxW={360}>
+      <DrawerContent color="gray.500" fontSize="md" px={8} py={12} maxW={360}>
         {isCloseable && <DrawerCloseButton />}
         {children}
       </DrawerContent>
@@ -99,11 +98,30 @@ export function Drawer({isCloseable = true, children, ...props}) {
   )
 }
 export function DrawerHeader(props) {
-  return <ChakraDrawerHeader p={0} mb={3} {...props} />
+  return <ChakraDrawerHeader p={0} {...props} />
+}
+
+export function IconDrawerHeader({icon, children, ...props}) {
+  return (
+    <DrawerHeader as={Stack} spacing="4" {...props}>
+      <Center as={Square} size="12" bg="blue.012" borderRadius="xl">
+        {React.cloneElement(icon, {w: '6', h: '6', color: 'blue.500'})}
+      </Center>
+      <Heading
+        color="gray.500"
+        fontSize="lg"
+        fontWeight={500}
+        lineHeight="6"
+        h="6"
+      >
+        {children}
+      </Heading>
+    </DrawerHeader>
+  )
 }
 
 export function DrawerBody(props) {
-  return <ChakraDrawerBody p={0} {...props} />
+  return <ChakraDrawerBody p={0} mt="6" {...props} />
 }
 
 export function DrawerFooter(props) {
@@ -239,12 +257,12 @@ export function ChainedInputAddon({isDisabled, bg = 'white', ...props}) {
 export function Avatar({address, ...props}) {
   return (
     <Image
-      w="20"
-      h="20"
       src={`https://robohash.idena.io/${address?.toLowerCase()}`}
-      bg="gray.50"
-      rounded="lg"
       ignoreFallback
+      bg="gray.50"
+      borderRadius="lg"
+      h="20"
+      w="20"
       {...props}
     />
   )
@@ -341,7 +359,7 @@ export function Dialog({
   ...props
 }) {
   return (
-    <Modal isCentered w="sm" {...props}>
+    <Modal isCentered {...props}>
       <ModalOverlay bg="xblack.080" />
       <ModalContent
         bg="white"
@@ -437,34 +455,19 @@ export const HDivider = React.forwardRef(function HDivider(props, ref) {
   return <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
 })
 
-export function ExternalLink({
-  href,
-  w,
-  width = w,
-  isTruncated,
-  children,
-  ...props
-}) {
+export function ExternalLink({href, children, ...props}) {
   return (
     <Button
       variant="link"
-      fontWeight={500}
-      alignSelf="flex-start"
-      _hover={{background: 'transparent'}}
-      _focus={{
-        outline: 'none',
-      }}
+      colorScheme="blue"
+      rightIcon={<ChevronRightIcon boxSize="2" />}
+      iconSpacing="1"
       onClick={() => {
         global.openExternal(href)
       }}
       {...props}
     >
-      <HStack align="center" spacing={0}>
-        <Text as="span" width={width} isTruncated={isTruncated}>
-          {children || href}
-        </Text>
-        <ChevronRightIcon />
-      </HStack>
+      {children}
     </Button>
   )
 }
@@ -495,9 +498,23 @@ export function GoogleTranslateButton({
 export function TextLink({href, children, ...props}) {
   return (
     <NextLink href={href} passHref>
-      <Link color="blue.500" {...props}>
+      <Button variant="link" colorScheme="blue" iconSpacing="1" {...props}>
         {children}
-      </Link>
+      </Button>
+    </NextLink>
+  )
+}
+
+export function ArrowTextLink({href, ...props}) {
+  return (
+    <NextLink href={href} passHref>
+      <Button
+        variant="link"
+        colorScheme="blue"
+        rightIcon={<ChevronRightIcon boxSize="2" />}
+        iconSpacing="1"
+        {...props}
+      />
     </NextLink>
   )
 }
@@ -518,34 +535,21 @@ export function SmallText(props) {
   return <Text color="muted" fontSize="sm" {...props} />
 }
 
-// eslint-disable-next-line react/display-name
-export const IconLink = React.forwardRef(
-  ({href, icon, children, ...props}, ref) => (
-    <NextLink ref={ref} href={href} passHref>
-      <Link
-        href={href}
-        color="brandBlue.500"
-        rounded="md"
-        fontWeight={500}
-        display="inline-block"
-        h={8}
-        px={2}
-        py="3/2"
-        _hover={{
-          bg: 'blue.50',
-        }}
+export function IconLink({href, icon, children, ...props}) {
+  return (
+    <NextLink href={href} passHref>
+      <Button
+        variant="ghost"
+        colorScheme="blue"
+        leftIcon={React.cloneElement(icon, {boxSize: '5'})}
+        isFullWidth
         {...props}
       >
-        <Stack spacing={2} isInline align="center" w="full">
-          {typeof icon === 'string' ? <Icon name={icon} w="4" h="4" /> : icon}
-          <Text as="span" isTruncated>
-            {children}
-          </Text>
-        </Stack>
-      </Link>
+        {children}
+      </Button>
     </NextLink>
   )
-)
+}
 
 export function Snackbar(props) {
   return (

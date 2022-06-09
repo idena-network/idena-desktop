@@ -3,7 +3,6 @@ import React from 'react'
 import {
   Box,
   Button,
-  Icon,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -56,7 +55,7 @@ export function OnboardingPopoverContent({
       zIndex="popover"
       {...props}
     >
-      <PopoverArrow />
+      <PopoverArrow bg="blue.500" />
       <Box p={2}>
         <Stack spacing={3}>
           <PopoverHeader
@@ -88,11 +87,7 @@ export function OnboardingPopoverContent({
 export function OnboardingPopoverContentIconRow({icon, children, ...props}) {
   return (
     <Stack isInline spacing={4} align="center" {...props}>
-      {typeof icon === 'string' ? (
-        <Icon name={icon} w="5" h="5" />
-      ) : (
-        <Box>{icon}</Box>
-      )}
+      <Box>{React.cloneElement(icon, {boxSize: '5'})}</Box>
       <Box color="white">{children}</Box>
     </Stack>
   )

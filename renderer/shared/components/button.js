@@ -3,9 +3,6 @@ import React from 'react'
 import {
   Button as ChakraButton,
   IconButton as ChakraIconButton,
-  Icon,
-  Stack,
-  Text,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {InfoIcon} from './icons'
@@ -65,32 +62,23 @@ export const SecondaryButton = React.forwardRef((props, ref) => (
 ))
 
 // eslint-disable-next-line react/display-name
-export const IconButton2 = React.forwardRef(
-  ({icon, children, ...props}, ref) => (
+export const IconButton2 = React.forwardRef(function IconButton2(
+  {icon, children, ...props},
+  ref
+) {
+  return (
     <ChakraButton
       ref={ref}
       variant="ghost"
       colorScheme="blue"
-      fontWeight={500}
-      h={8}
-      px={2}
-      py="3/2"
-      justifyContent="flex-start"
+      leftIcon={React.cloneElement(icon, {boxSize: '5'})}
+      isFullWidth
       {...props}
     >
-      <Stack isInline spacing={2} align="center" w="full">
-        {typeof icon === 'string' ? (
-          <Icon name={icon} w="5" h="5" mr={2} />
-        ) : (
-          icon
-        )}
-        <Text as="span" isTruncated>
-          {children}
-        </Text>
-      </Stack>
+      {children}
     </ChakraButton>
   )
-)
+})
 
 export const InfoButton = React.forwardRef((props, ref) => (
   <ChakraIconButton

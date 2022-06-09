@@ -28,7 +28,6 @@ export const theme = {
       '016': 'rgb(83 86 92 /0.16)',
       '060': 'rgb(83 86 92 /0.6)',
       '080': 'rgb(83 86 92 /0.8)',
-      10: 'rgba(255,255,255,0.1)',
       50: 'rgb(245, 246, 247)',
       100: 'rgb(210, 212, 217)',
       200: '#53565c',
@@ -124,18 +123,19 @@ export const theme = {
     sm: '11px',
     md: '13px',
     mdx: '14px',
-    base: '16px',
+    base: '1rem',
     lg: '18px',
     xl: '28px',
   },
+  lineHeights: {
+    '4.5': '1.125rem',
+  },
   breakpoints,
   space: {
-    ...chakraTheme.space,
-    '1/2': '2px',
-    '3/2': '6px',
+    '4.5': '1.125rem',
   },
   sizes: {
-    ...chakraTheme.sizes,
+    '4.5': '1.125rem',
     sm: rem(360),
     md: rem(480),
   },
@@ -144,6 +144,123 @@ export const theme = {
     sm: '0.25rem',
     md: rem(6),
     xl: '0.75rem',
+  },
+  components: {
+    Button: {
+      baseStyle: {
+        fontWeight: 500,
+      },
+      variants: {
+        link: {
+          lineHeight: '4',
+          alignItems: 'baseline',
+          _active: {
+            color: 'blue.500',
+          },
+        },
+        ghost: {
+          color: 'blue.500',
+          justifyContent: 'start',
+          h: '8',
+          px: '2',
+        },
+      },
+    },
+    Radio: {
+      baseStyle: {
+        control: {
+          borderColor: 'gray.100',
+        },
+      },
+      variants: {
+        bordered: {
+          container: {
+            borderColor: 'gray.100',
+            borderWidth: 1,
+            borderRadius: 'md',
+          },
+        },
+        dark: {
+          container: {
+            borderColor: 'white',
+            _checked: {
+              bg: 'gray.500',
+            },
+            _disabled: {
+              bg: 'none',
+              borderColor: 'gray.300',
+            },
+          },
+        },
+      },
+    },
+    FormLabel: {
+      baseStyle: {
+        mb: 0,
+        mr: 0,
+        h: '4.5',
+        lineHeight: '4.5',
+      },
+    },
+    Input: {
+      sizes: {
+        md: {
+          field: {
+            h: '8',
+            px: '3',
+            borderRadius: 'md',
+            fontSize: 'md',
+          },
+          addon: {
+            h: '8',
+            w: '8',
+          },
+        },
+      },
+      variants: {
+        outline: {
+          field: {
+            borderColor: 'gray.100',
+            _hover: {
+              borderColor: 'gray.100',
+            },
+            _placeholder: {
+              color: 'muted',
+            },
+            _disabled: {
+              bg: 'gray.50',
+              color: 'muted',
+              '-webkit-text-fill-color': '#96999E',
+              opacity: 1,
+            },
+          },
+        },
+      },
+    },
+    Modal: {
+      baseStyle: {
+        overlay: {
+          bg: 'xblack.080',
+        },
+      },
+      sizes: {
+        sm: {
+          dialog: {
+            maxW: 360,
+          },
+        },
+        mdx: {
+          dialog: {
+            maxW: '400px',
+          },
+        },
+        md: {
+          dialog: {
+            maxW: '480px',
+          },
+        },
+      },
+    },
   },
   icons: {
     ...chakraTheme.icons,
