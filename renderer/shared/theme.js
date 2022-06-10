@@ -164,6 +164,18 @@ export const theme = {
           h: '8',
           px: '2',
         },
+        danger: {
+          bg: 'red.500',
+          _hover: {
+            bg: 'rgb(227 60 60)',
+          },
+          _active: {
+            bg: 'rgb(227 60 60)',
+          },
+          _focus: {
+            boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
+          },
+        },
       },
     },
     Radio: {

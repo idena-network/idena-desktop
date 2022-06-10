@@ -2,7 +2,7 @@
 import React, {useCallback} from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
-import {fetchIdentity, killIdentity} from '../api/dna'
+import {fetchIdentity} from '../api/dna'
 import useRpc from '../hooks/use-rpc'
 import {IdentityStatus} from '../types'
 
@@ -115,16 +115,17 @@ export function IdentityProvider({children}) {
 
   const killMe = useCallback(
     async ({to}) => {
-      const resp = await killIdentity(identity.address, to)
-      const {result} = resp
+      const result = await callRpc('dna_sendTransaction', {
+        type: 3,
+        from: identity.address,
+        to,
+      })
 
-      if (result) {
-        setIdentity({...identity, state: IdentityStatus.Terminating})
-        return result
-      }
-      return resp
+      setIdentity({...identity, state: IdentityStatus.Terminating})
+
+      return result
     },
-    [identity]
+    [callRpc, identity]
   )
 
   return (

@@ -23,8 +23,8 @@ import {
   UserStat,
   UserStatLabel,
   ActivateMiningForm,
-  KillIdentityDrawer,
-  KillForm,
+  TerminateIdentityDrawer,
+  TerminateIdentityForm,
   MyIdenaBotAlert,
   StakingAlert,
   ProfileTagList,
@@ -567,13 +567,16 @@ export default function ProfilePage() {
             />
           </SpoilInviteDrawer>
 
-          <KillIdentityDrawer
+          <TerminateIdentityDrawer
             address={address}
             isOpen={isOpenKillForm}
             onClose={onCloseKillForm}
           >
-            <KillForm onSuccess={onCloseKillForm} onFail={onCloseKillForm} />
-          </KillIdentityDrawer>
+            <TerminateIdentityForm
+              onSuccess={onCloseKillForm}
+              onFail={onCloseKillForm}
+            />
+          </TerminateIdentityDrawer>
 
           <ReplenishStakeDrawer
             {...replenishStakeDisclosure}

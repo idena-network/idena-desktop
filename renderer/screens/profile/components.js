@@ -707,36 +707,44 @@ function ActivateMiningRadioGroup({children, ...props}) {
   )
 }
 
-export function KillIdentityDrawer({address, children, ...props}) {
+export function TerminateIdentityDrawer({address, children, ...props}) {
   const {t} = useTranslation()
 
   return (
     <Drawer {...props}>
-      <DrawerHeader mb={6}>
-        <Avatar address={address} mx="auto" />
-        <Heading
-          fontSize="lg"
-          fontWeight={500}
-          color="brandGray.500"
-          mt={4}
-          mb={0}
-          textAlign="center"
-        >
-          {t('Terminate identity')}
-        </Heading>
+      <DrawerHeader>
+        <Center as={Stack} spacing="4">
+          <Avatar address={address} />
+          <Heading fontSize="lg" fontWeight={500}>
+            {t('Terminate identity')}
+          </Heading>
+        </Center>
       </DrawerHeader>
       <DrawerBody>
-        <Text fontSize="md" mb={6}>
-          {t(`Terminate your identity and withdraw the stake. Your identity status
+        <Stack spacing="6">
+          <Text>
+            {t(`Terminate your identity and withdraw the stake. Your identity status
             will be reset to 'Not validated'.`)}
-        </Text>
-        {children}
+          </Text>
+          {children}
+        </Stack>
       </DrawerBody>
+      <DrawerFooter>
+        <PrimaryButton
+          type="submit"
+          form="terminateIdentity"
+          // isLoading={submitting}
+          variant="danger"
+          colorScheme="red"
+        >
+          {t('Terminate')}
+        </PrimaryButton>
+      </DrawerFooter>
     </Drawer>
   )
 }
 
-export function KillForm({onSuccess, onFail}) {
+export function TerminateIdentityForm({onSuccess, onFail}) {
   const {t} = useTranslation(['translation', 'error'])
 
   const [{address, stake}, {killMe}] = useIdentity()
@@ -744,82 +752,55 @@ export function KillForm({onSuccess, onFail}) {
   const toastSuccess = useSuccessToast()
   const toastFail = useFailToast()
 
-  const [submitting, setSubmitting] = React.useState(false)
-
   return (
-    <Stack
-      as="form"
-      spacing={6}
-      onSubmit={async e => {
-        e.preventDefault()
-
-        try {
-          const to = e.target.elements.to.value
-
-          if (to !== address)
-            throw new Error(t('You must specify your own identity address'))
-
-          setSubmitting(true)
-
-          const {result, error} = await killMe({to})
-
-          setSubmitting(false)
-
-          if (error) {
-            toastFail({
-              title: t('Error while sending transaction'),
-              description: error.message,
-            })
-          } else {
-            toastSuccess(t('Transaction sent'))
-            if (onSuccess) onSuccess(result)
-          }
-        } catch (error) {
-          setSubmitting(false)
-          toastFail(error?.message ?? t('Something went wrong'))
-          if (onFail) onFail(error)
-        }
-      }}
-    >
+    <Stack spacing={6}>
       <FormControl>
-        <FormLabel htmlFor="stake">{t('Withdraw stake, iDNA')}</FormLabel>
-        <Input
-          id="stake"
-          value={stake}
-          isDisabled
-          _disabled={{
-            bg: 'gray.50',
-          }}
-        />
+        <Stack spacing="3">
+          <FormLabel>{t('Withdraw stake, iDNA')}</FormLabel>
+          <Input defaultValue={stake} isDisabled />
+        </Stack>
       </FormControl>
 
-      <Text fontSize="md" mb={6}>
+      <Text>
         {t(
           'Please enter your identity address to confirm termination. Stake will be transferred to the identity address.'
         )}
       </Text>
-      <FormControl>
-        <FormLabel htmlFor="to">{t('Address')}</FormLabel>
-        <Input id="to" placeholder={t('Your identity address')} />
-      </FormControl>
 
-      <PrimaryButton
-        ml="auto"
-        type="submit"
-        isLoading={submitting}
-        colorScheme="red"
-        _hover={{
-          bg: 'rgb(227 60 60)',
-        }}
-        _active={{
-          bg: 'rgb(227 60 60)',
-        }}
-        _focus={{
-          boxShadow: '0 0 0 3px rgb(255 102 102 /0.50)',
+      <form
+        id="terminateIdentity"
+        onSubmit={async e => {
+          e.preventDefault()
+
+          try {
+            const to = new FormData(e.target).get('address')
+
+            if (to !== address)
+              throw new Error(t('You must specify your own identity address'))
+
+            const hash = await killMe({to})
+
+            toastSuccess(t('Transaction sent'))
+
+            // eslint-disable-next-line no-unused-expressions
+            onSuccess?.(hash)
+          } catch (error) {
+            toastFail({
+              title: t('Error while sending transaction'),
+              description: error.message,
+            })
+            // eslint-disable-next-line no-unused-expressions
+            onFail?.(error)
+          }
         }}
       >
-        {t('Terminate')}
-      </PrimaryButton>
+        <FormControl>
+          <Stack spacing="3">
+            <FormLabel>{t('Address')}</FormLabel>
+            <Input name="address" placeholder={t('Your identity address')} />
+          </Stack>
+        </FormControl>
+      </form>
     </Stack>
   )
 }
