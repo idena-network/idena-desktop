@@ -41,7 +41,9 @@ import {
   FormControl,
   Center,
   Square,
+  Th,
 } from '@chakra-ui/react'
+import QrCodePrimitive from 'qrcode.react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
 import {ChevronRightIcon} from './icons'
@@ -90,7 +92,7 @@ export function Drawer({isCloseable = true, children, ...props}) {
   return (
     <ChakraDrawer {...props}>
       <DrawerOverlay bg="xblack.080" />
-      <DrawerContent color="gray.500" fontSize="md" px={8} py={12} maxW={360}>
+      <DrawerContent color="gray.500" fontSize="md" px="8" py="12" maxW={360}>
         {isCloseable && <DrawerCloseButton />}
         {children}
       </DrawerContent>
@@ -112,7 +114,7 @@ export function IconDrawerHeader({icon, children, ...props}) {
         fontSize="lg"
         fontWeight={500}
         lineHeight="6"
-        h="6"
+        minH="6"
       >
         {children}
       </Heading>
@@ -444,7 +446,7 @@ export const VDivider = React.forwardRef(function VDivider(props, ref) {
       ref={ref}
       orientation="vertical"
       borderColor="gray.300"
-      h={6}
+      h="6"
       mx={0}
       {...props}
     />
@@ -563,5 +565,48 @@ export function Snackbar(props) {
       pointerEvents="none"
       {...props}
     />
+  )
+}
+
+export function RoundedTh({isLeft, isRight, children, ...props}) {
+  return (
+    <Th
+      bg="none"
+      borderBottom="none"
+      color="muted"
+      fontSize="md"
+      fontWeight={400}
+      textTransform="none"
+      py="2"
+      px="3"
+      letterSpacing={0}
+      position="relative"
+      {...props}
+    >
+      {children}
+      <Box
+        position="absolute"
+        inset={0}
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        bg="gray.50"
+        w="full"
+        zIndex="hide"
+        borderLeftRadius={isLeft ? 'md' : 'none'}
+        borderRightRadius={isRight ? 'md' : 'none'}
+      />
+    </Th>
+  )
+}
+
+export function QrCode({value, ...props}) {
+  return (
+    <Center>
+      <Box borderRadius="md" boxShadow="md" p="2" {...props}>
+        <QrCodePrimitive value={value} />
+      </Box>
+    </Center>
   )
 }

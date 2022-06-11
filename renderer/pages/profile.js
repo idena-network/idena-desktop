@@ -445,7 +445,7 @@ export default function ProfilePage() {
                     <Stack spacing="2">
                       <UserStatList title={t('Stake')}>
                         <Stack isInline spacing={0}>
-                          <Stack spacing="3" flex={1}>
+                          <Stack spacing="3" flex={1} align="start">
                             <UserStat>
                               <UserStatLabel
                                 color="muted"

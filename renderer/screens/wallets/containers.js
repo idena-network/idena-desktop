@@ -3,54 +3,56 @@ import * as React from 'react'
 import {
   Box,
   Button,
+  Center,
   Flex,
+  FormControl,
+  FormHelperText,
+  HStack,
   Icon,
+  MenuItem,
   Stack,
   Stat,
   StatLabel,
   StatNumber,
+  Table,
+  Tbody,
   Text,
+  Thead,
+  Tr,
   useClipboard,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
-import QrCode from 'qrcode.react'
 import {PrimaryButton} from '../../shared/components/button'
 import {
   Avatar,
+  Drawer,
   DrawerBody,
   DrawerFooter,
   ExternalLink,
   FormLabel,
+  IconDrawerHeader,
   Input,
+  QrCode,
+  RoundedTh,
   SmallText,
   Tooltip,
 } from '../../shared/components/components'
-import {
-  WalletCardMenu,
-  WalletCardMenuItem,
-  WalletCardMenuItemIcon,
-  WalletDrawer,
-  WalletDrawerForm,
-  WalletDrawerFormControl,
-  WalletDrawerHeader,
-  WalletDrawerHeaderIcon,
-  WalletDrawerHeaderIconBox,
-} from './components'
+import {WalletCardMenu, WalletListTd} from './components'
 import {callRpc, toLocaleDna} from '../../shared/utils/utils'
 import {
-  Table,
-  TableCol,
-  TableHeaderCol,
-  TableRow,
-} from '../../shared/components/table'
+  ArrowDownIcon,
+  ArrowUpIcon,
+  LockIcon,
+  SendOutIcon,
+} from '../../shared/components/icons'
 
 export function TotalAmount({address, amount}) {
   const {t, i18n} = useTranslation()
 
   return (
-    <Stack spacing={1}>
-      <Stat as={Stack} spacing="1px">
-        <StatLabel color="muted" fontSize="md">
+    <Stack spacing="2" align="flex-start">
+      <Stat>
+        <StatLabel color="muted" fontSize="md" h="4.5" lineHeight="4.5">
           {t('Total amount')}
         </StatLabel>
         <StatNumber
@@ -71,7 +73,6 @@ export function TotalAmount({address, amount}) {
 
 export function WalletCard({
   wallet: {name, balance, address, isStake},
-  isSelected,
   onSend,
   onReceive,
   ...props
@@ -79,193 +80,173 @@ export function WalletCard({
   const {t, i18n} = useTranslation()
 
   return (
-    <Flex
-      direction="column"
-      justify="space-between"
-      bg="gray.50"
-      borderRadius="lg"
-      p={4}
-      pl={5}
-      h={32}
-      w={56}
-      position="relative"
-      {...props}
-    >
-      <Stack spacing={1}>
-        <Flex justify="space-between" align="center">
+    <Box position="relative">
+      <Stack
+        spacing="4"
+        bg="gray.50"
+        borderRadius="lg"
+        p="4"
+        pl="5"
+        w="56"
+        {...props}
+      >
+        <Stack spacing="1">
           <Box fontWeight={500}>{name}</Box>
-          {isStake ? (
-            <Icon name="lock" w="4" h="4" color="muted" />
-          ) : (
-            <WalletCardMenu>
-              <WalletCardMenuItem onClick={onSend}>
-                <WalletCardMenuItemIcon
-                  name="send-out"
-                  transform="scaleX(-1)"
-                />
-                {t('Send')}
-              </WalletCardMenuItem>
-              <WalletCardMenuItem onClick={onReceive}>
-                <WalletCardMenuItemIcon name="send-out" />
-                {t('Receive')}
-              </WalletCardMenuItem>
-            </WalletCardMenu>
-          )}
-        </Flex>
-        <Box color="muted" isTruncated>
-          {address}
-        </Box>
+          <Box color="muted" isTruncated>
+            {address}
+          </Box>
+        </Stack>
+        <Stack spacing="1">
+          <Box color="muted">{t('Balance')}</Box>
+          <Box fontWeight={500}>{toLocaleDna(i18n.language)(balance)}</Box>
+        </Stack>
       </Stack>
-      <Stack spacing={1}>
-        <Box color="muted">{t('Balance')}</Box>
-        <Box fontWeight={500}>{toLocaleDna(i18n.language)(balance)}</Box>
-      </Stack>
-      {isSelected && (
+      {!isStake && (
         <Box
           position="absolute"
-          left={-4}
-          top={-4}
-          right={-4}
-          bottom={-4}
-          minH="full"
-          minW="full"
-          borderColor="blue.500"
-          borderWidth={2}
+          top="-1"
+          left="-1"
+          bottom="-1"
+          right="-1"
+          boxShadow="0 0 0 4px rgba(87, 143, 255, 0.25), 0 0 0 1px rgb(87, 143, 255), inset 0 0 0 1px rgb(87, 143, 255)"
           borderRadius="xl"
-          _before={{
-            content: `""`,
-            position: 'absolute',
-            left: '-6px',
-            top: '-6px',
-            right: '-6px',
-            bottom: '-6px',
-            borderColor: 'blue.025',
-            borderWidth: 4,
-            borderRadius: 16,
-          }}
+          zIndex="hide"
         />
       )}
-    </Flex>
+      <Box position="absolute" top="4" right="4">
+        {isStake ? (
+          <LockIcon boxSize="5" color="muted" />
+        ) : (
+          <WalletCardMenu>
+            <MenuItem
+              icon={
+                <SendOutIcon
+                  boxSize="5"
+                  transform="scaleX(-1)"
+                  color="blue.500"
+                />
+              }
+              onClick={onSend}
+            >
+              {t('Send')}
+            </MenuItem>
+            <MenuItem
+              icon={<SendOutIcon boxSize="5" color="blue.500" />}
+              onClick={onReceive}
+            >
+              {t('Receive')}
+            </MenuItem>
+          </WalletCardMenu>
+        )}
+      </Box>
+    </Box>
   )
 }
 
-export function SendDnaDrawer({address, onSend, onFail, ...props}) {
+export function SendDrawer({address, onSend, onFail, ...props}) {
   const {t} = useTranslation()
 
   const [isSubmitting, setIsSubmitting] = React.useState()
 
   return (
-    <WalletDrawer {...props}>
-      <WalletDrawerHeader title={t('Send iDNA')}>
-        <WalletDrawerHeaderIconBox color="red">
-          <WalletDrawerHeaderIcon
-            name="send-out"
-            color="red"
-            transform="scaleX(-1)"
-          />
-        </WalletDrawerHeaderIconBox>
-      </WalletDrawerHeader>
-      <WalletDrawerForm
-        onSubmit={async e => {
-          e.preventDefault()
+    <Drawer {...props}>
+      <IconDrawerHeader icon={<SendOutIcon boxSize="5" />}>
+        {t('Send iDNA')}
+      </IconDrawerHeader>
+      <DrawerBody>
+        <form
+          id="send"
+          onSubmit={async e => {
+            e.preventDefault()
 
-          const {
-            from: {value: from},
-            to: {value: to},
-            amount: {value: amount},
-          } = e.target.elements
+            const {from, to, amount} = Object.fromEntries(
+              new FormData(e.target)
+            )
 
-          try {
-            setIsSubmitting(true)
-            const result = await callRpc('dna_sendTransaction', {
-              to,
-              from,
-              amount,
-            })
-            onSend(result)
-            setIsSubmitting(false)
-          } catch (error) {
-            setIsSubmitting(false)
-            onFail({
-              title: t('Error while sending transaction'),
-              body: error.message,
-            })
-            onFail(error)
-          }
-        }}
-      >
-        <DrawerBody>
-          <Stack spacing={6}>
-            <WalletDrawerFormControl label={t('From')}>
-              <Input id="from" value={address} isDisabled />
-            </WalletDrawerFormControl>
-            <WalletDrawerFormControl label={t('To')}>
-              <Input id="to" placeholder={t('Enter address')} />
-            </WalletDrawerFormControl>
-            <WalletDrawerFormControl label={t('Amount, iDNA')} id="amount">
-              <Input id="amount" placeholder={t('Enter amount')} />
-            </WalletDrawerFormControl>
+            try {
+              setIsSubmitting(true)
+              const result = await callRpc('dna_sendTransaction', {
+                to,
+                from,
+                amount,
+              })
+              onSend(result)
+              setIsSubmitting(false)
+            } catch (error) {
+              setIsSubmitting(false)
+              onFail({
+                title: t('Error while sending transaction'),
+                body: error.message,
+              })
+              onFail(error)
+            }
+          }}
+        >
+          <Stack spacing="5">
+            <FormControl as={Stack} spacing={3}>
+              <FormLabel>{t('From')}</FormLabel>
+              <Input name="from" value={address} isDisabled />
+            </FormControl>
+            <FormControl as={Stack} spacing={3}>
+              <FormLabel>{t('To')}</FormLabel>
+              <Input name="to" placeholder={t('Enter address')} />
+            </FormControl>
+            <FormControl as={Stack} spacing={3}>
+              <FormLabel>{t('Amount, iDNA')}</FormLabel>
+              <Input
+                name="amount"
+                type="number"
+                step="any"
+                placeholder={t('Enter amount')}
+              />
+            </FormControl>
           </Stack>
-        </DrawerBody>
-        <DrawerFooter>
-          <PrimaryButton
-            type="submit"
-            isLoading={isSubmitting}
-            loadingText={t('Sending')}
-          >
-            {t('Send')}
-          </PrimaryButton>
-        </DrawerFooter>
-      </WalletDrawerForm>
-    </WalletDrawer>
+        </form>
+      </DrawerBody>
+      <DrawerFooter>
+        <PrimaryButton
+          type="submit"
+          form="send"
+          isLoading={isSubmitting}
+          loadingText={t('Sending')}
+        >
+          {t('Send')}
+        </PrimaryButton>
+      </DrawerFooter>
+    </Drawer>
   )
 }
 
-export function ReceiveDnaDrawer({address, ...props}) {
+export function ReceiveDrawer({address, ...props}) {
   const {t} = useTranslation()
 
   const {onCopy} = useClipboard(address)
 
   return (
-    <WalletDrawer
-      title={t('Receive iDNA')}
-      icon="send-out"
-      color="blue"
-      {...props}
-    >
+    <Drawer {...props}>
+      <IconDrawerHeader icon={<SendOutIcon color="blue" />}>
+        {t('Receive iDNA')}
+      </IconDrawerHeader>
       <DrawerBody mt={5}>
         <Stack spacing={10}>
-          <Box
-            boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
-            p={2}
-            mx="auto"
-          >
-            <QrCode value={address} style={{width: 144, height: 144}} />
-          </Box>
-          <WalletDrawerFormControl>
-            <Flex align="center" justify="space-between">
+          <QrCode value={address} />
+          <FormControl>
+            <Flex align="center" justify="space-between" mb="3">
               <FormLabel p={0}>{t('From')}</FormLabel>
-              <Button
-                variant="link"
-                colorScheme="blue"
-                fontWeight={500}
-                _hover={null}
-                _active={null}
-                onClick={onCopy}
-              >
+              <Button variant="link" colorScheme="blue" onClick={onCopy}>
                 {t('Copy')}
               </Button>
             </Flex>
             <Input value={address} isDisabled />
-            <Text color="muted" fontSize="md">
+            <FormHelperText color="muted" fontSize="md">
               {t(
                 'Wallet will be updated after transaction is confirmed in the blockchain.'
               )}
-            </Text>
-          </WalletDrawerFormControl>
+            </FormHelperText>
+          </FormControl>
         </Stack>
       </DrawerBody>
-    </WalletDrawer>
+    </Drawer>
   )
 }
 
@@ -273,38 +254,34 @@ export function WalletTransactionList({txs = []}) {
   const {t} = useTranslation(['translation', 'error'])
 
   return (
-    <Table>
-      <thead>
-        <TableRow>
-          <TableHeaderCol style={{width: '210px'}}>
-            {t('Transaction')}
-          </TableHeaderCol>
-          <TableHeaderCol style={{width: '210px'}}>
-            {t('Address')}
-          </TableHeaderCol>
-          <TableHeaderCol>{t('Amount, iDNA')}</TableHeaderCol>
-          <TableHeaderCol>{t('Date')}</TableHeaderCol>
-        </TableRow>
-      </thead>
-      <tbody>
-        {txs.map((tx, k) => (
-          <TableRow key={k}>
-            <TableCol>
+    <Table color="gray.500" sx={{tableLayout: 'fixed'}}>
+      <Thead>
+        <Tr>
+          <RoundedTh isLeft>{t('Transaction')}</RoundedTh>
+          <RoundedTh>{t('Address')}</RoundedTh>
+          <RoundedTh>{t('Amount, iDNA')}</RoundedTh>
+          <RoundedTh isRight>{t('Date')}</RoundedTh>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {txs.map(tx => (
+          <Tr key={tx}>
+            <WalletListTd>
               <WalletTxStatus tx={tx} />
-            </TableCol>
-            <TableCol>
-              {(!tx.to && '\u2013') || (
-                <Stack isInline spacing={3} align="center">
+            </WalletListTd>
+            <WalletListTd>
+              {tx.to ? (
+                <HStack spacing={3} align="center">
                   <Avatar
                     address={tx.counterParty}
+                    bg="white"
+                    border="solid 1px"
+                    borderColor="gray.016"
                     w="8"
                     h="8"
-                    bg="white"
-                    borderColor="brandGray.016"
-                    borderWidth={1}
                   />
-                  <Box w={60}>
-                    <Text fontWeight={500} whiteSpace="nowrap">
+                  <Box maxW="32">
+                    <Text fontWeight={500} isTruncated>
                       {tx.direction === 'Sent' ? t('To') : t('From')}{' '}
                       {/* eslint-disable-next-line no-nested-ternary */}
                       {tx.counterPartyWallet
@@ -317,22 +294,23 @@ export function WalletTransactionList({txs = []}) {
                       {tx.counterParty}
                     </SmallText>
                   </Box>
-                </Stack>
+                </HStack>
+              ) : (
+                '--'
               )}
-            </TableCol>
+            </WalletListTd>
 
-            <TableCol>
+            <WalletListTd>
               <Text
-                color={tx.signAmount < 0 ? 'red.500' : 'brandGray.500'}
+                color={tx.signAmount < 0 ? 'red.500' : 'gray.500'}
                 fontWeight={500}
-                overflowWrap="break-word"
               >
                 {/* eslint-disable-next-line no-nested-ternary */}
                 {tx.type === 'kill'
                   ? t('See in Explorer...')
                   : // eslint-disable-next-line no-nested-ternary
                   Number(tx.amount) === 0
-                  ? '\u2013'
+                  ? '--'
                   : tx.direction === 'Sent'
                   ? -tx.amount
                   : tx.amount}
@@ -353,32 +331,36 @@ export function WalletTransactionList({txs = []}) {
                   </SmallText>
                 )}
               </Box>
-            </TableCol>
-
-            <TableCol>
+            </WalletListTd>
+            <WalletListTd>
               <Text as="span" fontWeight={500}>
-                {!tx.timestamp
-                  ? '\u2013'
-                  : new Date(tx.timestamp * 1000).toLocaleString([], {
+                {tx.timestamp
+                  ? new Date(tx.timestamp * 1000).toLocaleString([], {
                       dateStyle: 'short',
                       timeStyle: 'short',
-                    })}
+                    })
+                  : '--'}
               </Text>
-              <SmallText>
-                {t('Transaction')}:
-                <ExternalLink
-                  href={`https://scan.idena.io/transaction/${tx.hash}`}
-                  fontSize="sm"
-                  isTruncated
-                  w={16}
+              <HStack spacing="1">
+                <SmallText>{t('Transaction')}:</SmallText>
+                <SmallText
+                  color="blue.500"
+                  fontWeight={500}
+                  cursor="pointer"
+                  noOfLines={1}
+                  onClick={() => {
+                    global.openExternal(
+                      `https://scan.idena.io/transaction/${tx.hash}`
+                    )
+                  }}
                 >
                   {tx.hash}
-                </ExternalLink>
-              </SmallText>
-            </TableCol>
-          </TableRow>
+                </SmallText>
+              </HStack>
+            </WalletListTd>
+          </Tr>
         ))}
-      </tbody>
+      </Tbody>
     </Table>
   )
 }
@@ -388,28 +370,24 @@ function WalletTxStatus({
 }) {
   const {t} = useTranslation()
 
-  const txColorAccent = direction === 'Sent' ? 'red' : 'blue'
+  const accentColor = direction === 'Sent' ? 'red' : 'blue'
 
   return (
     <Stack isInline>
-      <Flex
-        align="center"
-        justify="center"
-        alignSelf="center"
-        bg={isMining ? 'muted' : `${txColorAccent}.012`}
-        color={isMining ? 'muted' : `${txColorAccent}.500`}
+      <Center
+        bg={isMining ? 'muted' : `${accentColor}.012`}
+        color={isMining ? 'muted' : `${accentColor}.500`}
         borderRadius="lg"
-        minH={8}
-        minW={8}
+        p="1.5"
       >
-        <Icon
-          name={`arrow-${direction === 'Sent' ? 'up' : 'down'}`}
-          w="5"
-          h="5"
-        />
-      </Flex>
+        {direction === 'Sent' ? (
+          <ArrowUpIcon boxSize="5" />
+        ) : (
+          <ArrowDownIcon boxSize="5" />
+        )}
+      </Center>
       <Box>
-        <Text color="brandGray.500" fontWeight={500}>
+        <Text color="gray.500" fontWeight={500}>
           {typeName}
         </Text>
         <SmallText fontWeight={500}>{wallet?.name}</SmallText>
@@ -419,7 +397,7 @@ function WalletTxStatus({
               {t('Mining...')}
             </SmallText>
           ) : (
-            <Stack isInline spacing={1} align="center">
+            <HStack spacing="1" align="center">
               {receipt?.error && (
                 <Tooltip
                   label={`${t('Smart contract failed')}: ${receipt?.error}`}
@@ -427,7 +405,7 @@ function WalletTxStatus({
                   <Icon name="exclamation-mark" color="red.500" w="5" h="5" />
                 </Tooltip>
               )}
-            </Stack>
+            </HStack>
           )}
         </Box>
       </Box>

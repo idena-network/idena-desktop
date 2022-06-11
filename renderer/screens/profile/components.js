@@ -41,7 +41,6 @@ import {
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useQuery} from 'react-query'
-import QrCode from 'qrcode.react'
 import {
   Avatar,
   Tooltip,
@@ -58,6 +57,7 @@ import {
   FailAlert,
   IconDrawerHeader,
   ArrowTextLink,
+  QrCode,
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
@@ -164,6 +164,7 @@ export function AnnotatedUserStat({
         borderBottom={`dotted 1px ${colors.muted}`}
         cursor="help"
         fontWeight={500}
+        w="fit-content"
       >
         <UserStatLabelTooltip label={annotation}>{label}</UserStatLabelTooltip>
       </UserStatLabel>
@@ -439,8 +440,8 @@ export function ActivateMiningForm({
           delegatee={delegatee}
           canUndelegate={epoch?.epoch > delegationEpoch}
           isOpen={eitherState(current, 'showing')}
-          isCloseable={false}
           isLoading={eitherState(current, 'showing.mining')}
+          isCloseable={!eitherState(current, 'showing.mining')}
           onDeactivate={() => {
             send('DEACTIVATE', {
               mode: isDelegator ? NodeType.Delegator : NodeType.Miner,
@@ -457,8 +458,8 @@ export function ActivateMiningForm({
           pendingUndelegation={pendingUndelegation}
           currentEpoch={epoch?.epoch}
           isOpen={eitherState(current, 'showing')}
-          isCloseable={false}
           isLoading={eitherState(current, 'showing.mining')}
+          isCloseable={!eitherState(current, 'showing.mining')}
           onChangeMode={value => {
             send({type: 'CHANGE_MODE', mode: value})
           }}
@@ -527,7 +528,6 @@ export function ActivateMiningDrawer({
   isLoading,
   onChangeMode,
   onActivate,
-  onClose,
   ...props
 }) {
   const {t} = useTranslation()
@@ -542,7 +542,7 @@ export function ActivateMiningDrawer({
       : 3 - (currentEpoch - delegationEpoch)
 
   return (
-    <Drawer onClose={onClose} {...props}>
+    <Drawer {...props}>
       <IconDrawerHeader icon={<UserIcon />}>
         {t('Miner status')}
       </IconDrawerHeader>
@@ -609,18 +609,15 @@ export function ActivateMiningDrawer({
         </Stack>
       </DrawerBody>
       <DrawerFooter>
-        <Stack isInline>
-          <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
-          <PrimaryButton
-            isLoading={isLoading}
-            onClick={() => {
-              onActivate({delegatee: delegateeInputRef.current?.value})
-            }}
-            loadingText={t('Waiting...')}
-          >
-            {t('Submit')}
-          </PrimaryButton>
-        </Stack>
+        <PrimaryButton
+          isLoading={isLoading}
+          loadingText={t('Waiting...')}
+          onClick={() => {
+            onActivate({delegatee: delegateeInputRef.current?.value})
+          }}
+        >
+          {t('Submit')}
+        </PrimaryButton>
       </DrawerFooter>
     </Drawer>
   )
@@ -631,7 +628,6 @@ export function DeactivateMiningDrawer({
   delegatee,
   canUndelegate,
   onDeactivate,
-  onClose,
   ...props
 }) {
   const {t} = useTranslation()
@@ -639,7 +635,7 @@ export function DeactivateMiningDrawer({
   const isDelegator = typeof delegatee === 'string'
 
   return (
-    <Drawer onClose={onClose} {...props}>
+    <Drawer {...props}>
       <IconDrawerHeader icon={<UserIcon />}>
         {isDelegator
           ? t('Deactivate delegation status')
@@ -670,17 +666,14 @@ export function DeactivateMiningDrawer({
         </Stack>
       </DrawerBody>
       <DrawerFooter>
-        <Stack isInline>
-          <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
-          <PrimaryButton
-            isDisabled={isDelegator && !canUndelegate}
-            isLoading={isLoading}
-            onClick={onDeactivate}
-            loadingText={t('Waiting...')}
-          >
-            {t('Submit')}
-          </PrimaryButton>
-        </Stack>
+        <PrimaryButton
+          isDisabled={isDelegator && !canUndelegate}
+          isLoading={isLoading}
+          loadingText={t('Waiting...')}
+          onClick={onDeactivate}
+        >
+          {t('Submit')}
+        </PrimaryButton>
       </DrawerFooter>
     </Drawer>
   )
@@ -1335,11 +1328,7 @@ export function ExportPrivateKeyDrawer(props) {
                   'Scan QR by your mobile phone or copy code below for export private key.'
                 )}
               </Text>
-              <Center>
-                <Box borderRadius="md" boxShadow="md" p="2">
-                  <QrCode value="encodedPrivateKey" />
-                </Box>
-              </Center>
+              <QrCode value={encodedKey} />
               <FormControl>
                 <Stack spacing="1">
                   <Flex justify="space-between" align="center">

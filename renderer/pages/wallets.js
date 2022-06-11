@@ -1,6 +1,14 @@
 import React from 'react'
 import {useTranslation} from 'react-i18next'
-import {Flex, Stack, Box, Heading, Icon, useDisclosure} from '@chakra-ui/react'
+import {
+  Flex,
+  Stack,
+  Box,
+  Heading,
+  useDisclosure,
+  HStack,
+  Center,
+} from '@chakra-ui/react'
 import {useWallets} from '../shared/hooks/use-wallets'
 import {IconButton2} from '../shared/components/button'
 import Layout from '../shared/components/layout'
@@ -12,16 +20,15 @@ import {
   VDivider,
 } from '../shared/components/components'
 import {
-  ReceiveDnaDrawer,
-  SendDnaDrawer,
+  ReceiveDrawer,
+  SendDrawer,
   TotalAmount,
   WalletCard,
   WalletTransactionList,
 } from '../screens/wallets/containers'
 import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
 import {useIdentityState} from '../shared/providers/identity-context'
-import {areSameCaseInsensitive} from '../screens/oracles/utils'
-import {FillPlaceholder} from '../screens/oracles/components'
+import {SendOutIcon} from '../shared/components/icons'
 
 export default function WalletsPage() {
   const {t} = useTranslation(['translation', 'error'])
@@ -51,42 +58,45 @@ export default function WalletsPage() {
     <Layout syncing={syncing} offline={offline}>
       <Page>
         <PageTitle>{t('Wallets')}</PageTitle>
-        <Stack spacing={8} w="full">
+        <Stack spacing="8" w="full">
           <Flex justify="space-between" align="flex-start">
-            <Box pt="1/2" pb={2}>
+            <Box py="1">
               <TotalAmount address={address} amount={totalAmount} />
             </Box>
-            <Stack isInline spacing={1} align="center" pt={2}>
+            <HStack spacing="1" align="center" pt="1">
               <VDivider />
               <IconButton2
-                icon={
-                  <Icon name="send-out" w="5" h="5" transform="scaleX(-1)" />
-                }
+                icon={<SendOutIcon transform="scaleX(-1)" />}
                 onClick={onOpenSendDnaDrawer}
               >
                 {t('Send')}
               </IconButton2>
               <VDivider />
-              <IconButton2 icon="send-out" onClick={onOpenReceiveDnaDrawer}>
+              <IconButton2
+                icon={<SendOutIcon />}
+                onClick={onOpenReceiveDnaDrawer}
+              >
                 {t('Receive')}
               </IconButton2>
-            </Stack>
+            </HStack>
           </Flex>
-          <Stack isInline spacing={6}>
+
+          <HStack spacing="6">
             {wallets.map(wallet => (
               <WalletCard
-                key={wallet.address + wallet.name}
+                key={`${wallet.name}@${wallet.address}`}
                 wallet={wallet}
-                isSelected={areSameCaseInsensitive(wallet.name, 'main')}
                 onSend={onOpenSendDnaDrawer}
                 onReceive={onOpenReceiveDnaDrawer}
               />
             ))}
-          </Stack>
-          <Stack spacing={4}>
-            <Stack spacing="1px" mb={5}>
+          </HStack>
+
+          <Stack spacing="5">
+            <Box pb="0.5">
               <Heading
                 as="h2"
+                color="gray.500"
                 fontSize="lg"
                 fontWeight={500}
                 lineHeight="short"
@@ -98,19 +108,20 @@ export default function WalletsPage() {
               >
                 {t('See Explorer for rewards and penalties')}
               </ExternalLink>
-            </Stack>
+            </Box>
             <Box>
-              <WalletTransactionList txs={txs} />
-              {txs?.length === 0 && (
-                <FillPlaceholder mt={24}>
+              {txs?.length > 0 ? (
+                <WalletTransactionList txs={txs} />
+              ) : (
+                <Center mt="24" color="muted">
                   {t(`You don't have any transactions yet`)}
-                </FillPlaceholder>
+                </Center>
               )}
             </Box>
           </Stack>
         </Stack>
 
-        <SendDnaDrawer
+        <SendDrawer
           address={address}
           isOpen={isOpenSendDnaDrawer}
           onClose={onCloseSendDnaDrawer}
@@ -130,7 +141,7 @@ export default function WalletsPage() {
           }}
         />
 
-        <ReceiveDnaDrawer
+        <ReceiveDrawer
           address={address}
           isOpen={isOpenReceiveDnaDrawer}
           onClose={onCloseReceiveDnaDrawer}

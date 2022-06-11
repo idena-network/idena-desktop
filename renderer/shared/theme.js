@@ -12,6 +12,7 @@ export const theme = {
       ...chakraTheme.colors.blue,
       '010': 'rgb(87 143 255 / 0.1)',
       '012': 'rgb(87 143 255 / 0.12)',
+      '016': 'rgb(87 143 255 / 0.16)',
       '020': 'rgb(87 143 255 / 0.2)',
       '025': 'rgb(87 143 255 / 0.25)',
       '030': 'rgb(87 143 255 / 0.3)',
@@ -73,10 +74,6 @@ export const theme = {
       400: 'rgb(39, 217, 128)',
     },
     muted: 'rgb(150, 153, 158)',
-    brand: {
-      gray: 'rgb(83, 86, 92)',
-      blue: 'rgb(87, 143, 255)',
-    },
     brandGray: {
       '005': 'rgb(83 86 92 /0.05)',
       '006': 'rgb(83 86 92 /0.06)',
@@ -178,6 +175,27 @@ export const theme = {
         },
       },
     },
+    IconButton: {
+      variants: {
+        menu: {
+          borderRadius: 'md',
+          color: 'muted',
+          _hover: {
+            bg: 'gray.100',
+          },
+          _expanded: {
+            bg: 'gray.100',
+          },
+        },
+      },
+      sizes: {
+        menu: {
+          h: '5',
+          w: '3',
+          minW: '3',
+        },
+      },
+    },
     Radio: {
       baseStyle: {
         control: {
@@ -269,6 +287,28 @@ export const theme = {
         md: {
           dialog: {
             maxW: '480px',
+          },
+        },
+      },
+    },
+    Menu: {
+      baseStyle: {
+        item: {
+          fontWeight: 500,
+          py: '2',
+          px: '3',
+          _focus: {
+            bg: 'gray.50',
+          },
+          _active: {
+            bG: 'gray.50',
+          },
+          _expanded: {
+            bg: 'gray.50',
+          },
+          _disabled: {
+            opacity: 0.4,
+            cursor: 'not-allowed',
           },
         },
       },
