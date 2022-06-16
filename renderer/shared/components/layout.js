@@ -250,16 +250,7 @@ export default function Layout({
 }
 
 function LayoutContainer(props) {
-  return (
-    <Flex
-      align="stretch"
-      flexWrap="wrap"
-      color="brand.gray"
-      fontSize="md"
-      minH="100vh"
-      {...props}
-    />
-  )
+  return <Flex align="stretch" flexWrap="wrap" minH="100vh" {...props} />
 }
 
 function NormalApp({children}) {

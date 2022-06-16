@@ -165,7 +165,7 @@ export function DnaInput(props) {
 
   return (
     <ChainedInputGroup>
-      <ChainedNumberInput min={0} {...props} />
+      <ChainedNumberInput min={0} step="any" {...props} />
       <ChainedInputAddon isDisabled={isDisabled}>iDNA</ChainedInputAddon>
     </ChainedInputGroup>
   )

@@ -591,7 +591,7 @@ export function ActivateMiningDrawer({
             </Stack>
           ) : (
             <Stack bg="gray.50" p="6" pt="4.5">
-              <Heading fontSize="base" fontWeight={500} lineHeight="6" h="6">
+              <Heading fontSize="base" fontWeight={500} lineHeight="6" minH="6">
                 {t('Activate mining status')}
               </Heading>
               <Stack spacing="1">

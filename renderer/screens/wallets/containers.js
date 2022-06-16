@@ -45,6 +45,7 @@ import {
   LockIcon,
   SendOutIcon,
 } from '../../shared/components/icons'
+import {DnaInput} from '../oracles/components'
 
 export function TotalAmount({address, amount}) {
   const {t, i18n} = useTranslation()
@@ -193,12 +194,7 @@ export function SendDrawer({address, onSend, onFail, ...props}) {
             </FormControl>
             <FormControl as={Stack} spacing={3}>
               <FormLabel>{t('Amount, iDNA')}</FormLabel>
-              <Input
-                name="amount"
-                type="number"
-                step="any"
-                placeholder={t('Enter amount')}
-              />
+              <DnaInput name="amount" placeholder={t('Enter amount')} />
             </FormControl>
           </Stack>
         </form>
