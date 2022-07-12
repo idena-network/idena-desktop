@@ -6,6 +6,7 @@ import {
   AlertIcon,
   AlertTitle,
   Box,
+  Flex,
   Icon,
   Image,
   Stack,
@@ -46,6 +47,8 @@ import {
 } from '../../shared/components/components'
 import {callRpc, toLocaleDna} from '../../shared/utils/utils'
 import {bufferToHex} from '../../shared/utils/string'
+import {useFormatDna} from '../../shared/hooks/hooks'
+import {TxType} from '../../shared/types'
 
 export function DnaSignInDialog({
   token,
@@ -346,14 +349,11 @@ export function DnaRawDialog({
   onSendRawTxFailed,
   ...props
 }) {
-  const {
-    t,
-    i18n: {language},
-  } = useTranslation()
+  const {t} = useTranslation()
 
   const {address, balance} = useIdentityState()
 
-  const tx = React.useMemo(() => {
+  const parsedTx = React.useMemo(() => {
     if (rawTx) {
       const decodedTx = Transaction.fromHex(rawTx)
 
@@ -369,99 +369,133 @@ export function DnaRawDialog({
         payload: toHexString(decodedTx.payload, true),
       }
     }
+    return {type: 0, amount: null, to: null, maxFee: null}
   }, [address, rawTx])
+
+  const {type, to, amount, maxFee} = parsedTx
 
   const [confirmationAmount, setConfirmationAmount] = React.useState()
 
   const shouldConfirmTx = React.useMemo(
-    () => tx?.amount / balance > DNA_SEND_CONFIRM_TRESHOLD,
-    [balance, tx]
+    () => amount / balance > DNA_SEND_CONFIRM_TRESHOLD,
+    [amount, balance]
   )
 
   const didConfirmAmount = React.useMemo(
-    () => +confirmationAmount === +tx?.amount,
-    [confirmationAmount, tx]
+    () => +confirmationAmount === +amount,
+    [amount, confirmationAmount]
   )
 
-  const isExceededBalance = React.useMemo(() => +tx?.amount > balance, [
+  const isExceededBalance = React.useMemo(() => +amount > balance, [
+    amount,
     balance,
-    tx,
   ])
 
   const [isSubmitting, setIsSubmitting] = React.useState()
 
-  const dna = toLocaleDna(language)
+  const formatDna = useFormatDna({maximumFractionDigits: 5})
 
   return (
     <DnaDialog title={t('Confirm transaction')} onClose={onClose} {...props}>
       <DialogBody>
-        <Stack spacing={5}>
-          <Text>{t('You’re about to sign and send tx from your wallet')}</Text>
-          <DnaDialogAlert>
-            {t('Attention! This is irreversible operation')}
-          </DnaDialogAlert>
-          <Stack spacing="px" borderRadius="lg" overflow="hidden">
-            <MediaDnaDialogStat label={t('To')} value={tx?.to}>
-              <DnaDialogAvatar address={tx?.to} />
-            </MediaDnaDialogStat>
-            <DnaDialogStat>
-              <DnaDialogStatLabel>{t('Amount')}</DnaDialogStatLabel>
-              <DnaDialogStatValue
-                color={isExceededBalance ? 'red.500' : 'brandGray.500'}
-              >
-                {isExceededBalance ? (
-                  <Stack isInline spacing={1}>
-                    <Text as="span">{dna(tx?.amount)}</Text>
-                    <Tooltip
-                      label={t('The amount is larger than your balance')}
+        <Stack spacing="5">
+          <Stack spacing="4">
+            <Text>
+              {t('You’re about to sign and send tx from your wallet')}
+            </Text>
+            <Stack spacing="3">
+              <DnaDialogAlert>
+                {t('Attention! This is irreversible operation')}
+              </DnaDialogAlert>
+              <Stack spacing="px" borderRadius="lg" overflow="hidden">
+                <SimpleDnaDialogStat
+                  label={t('Transaction type')}
+                  value={Object.entries(TxType).find(([, v]) => v === type)[0]}
+                />
+
+                {to && <SimpleDnaDialogStat label={t('To')} value={to} />}
+
+                <Flex align="center" justify="space-between">
+                  <DnaDialogStat>
+                    <DnaDialogStatLabel>{t('Amount')}</DnaDialogStatLabel>
+                    <DnaDialogStatValue
+                      color={isExceededBalance ? 'red.500' : 'brandGray.500'}
                     >
-                      <Icon name="exclamation-mark" size={4} color="red.500" />
+                      {isExceededBalance ? (
+                        <Stack isInline spacing={1}>
+                          <Text as="span">{formatDna(amount)}</Text>
+                          <Tooltip
+                            label={t('The amount is larger than your balance')}
+                          >
+                            <Icon
+                              name="exclamation-mark"
+                              color="red.500"
+                              size={4}
+                            />
+                          </Tooltip>
+                        </Stack>
+                      ) : (
+                        formatDna(amount)
+                      )}
+                    </DnaDialogStatValue>
+                  </DnaDialogStat>
+
+                  <SimpleDnaDialogStat
+                    h="full"
+                    label={t('Max fee')}
+                    value={formatDna(maxFee)}
+                  />
+                </Flex>
+
+                <DnaDialogStat>
+                  <DnaDialogStatLabel>
+                    {t('Transaction details')}
+                  </DnaDialogStatLabel>
+                  <DnaDialogStatValue>
+                    <Tooltip
+                      label={rawTx}
+                      zIndex="tooltip"
+                      wordBreak="break-all"
+                    >
+                      <Text
+                        display="-webkit-box"
+                        overflow="hidden"
+                        style={{
+                          '-webkit-box-orient': 'vertical',
+                          '-webkit-line-clamp': '2',
+                        }}
+                        wordBreak="break-all"
+                      >
+                        {rawTx}
+                      </Text>
                     </Tooltip>
-                  </Stack>
-                ) : (
-                  dna(tx?.amount)
-                )}
-              </DnaDialogStatValue>
-            </DnaDialogStat>
-            <SimpleDnaDialogStat
-              label={t('Available balance')}
-              value={dna(balance)}
-            />
-            <DnaDialogStat>
-              <DnaDialogStatLabel>
-                {t('Transaction details')}
-              </DnaDialogStatLabel>
-              <DnaDialogStatValue>
-                <Tooltip label={rawTx} zIndex="tooltip" wordBreak="break-all">
-                  <Text
-                    display="-webkit-box"
-                    overflow="hidden"
-                    style={{
-                      '-webkit-box-orient': 'vertical',
-                      '-webkit-line-clamp': '2',
-                    }}
-                    wordBreak="break-all"
-                  >
-                    {rawTx}
-                  </Text>
-                </Tooltip>
-              </DnaDialogStatValue>
-            </DnaDialogStat>
+                  </DnaDialogStatValue>
+                </DnaDialogStat>
+              </Stack>
+            </Stack>
           </Stack>
-          {shouldConfirmTx && (
-            <FormControlWithLabel label={t('Enter amount to confirm transfer')}>
-              <Input
-                isDisabled={isExceededBalance}
-                value={confirmationAmount}
-                onChange={e => setConfirmationAmount(e.target.value)}
-              />
-              {Number.isFinite(+confirmationAmount) && !didConfirmAmount && (
-                <DnaDialogAlertText>
-                  {t('Entered amount does not match target amount')}
-                </DnaDialogAlertText>
-              )}
-            </FormControlWithLabel>
-          )}
+          <Stack spacing="2">
+            {shouldConfirmTx && (
+              <FormControlWithLabel
+                label={t('Enter amount to confirm transfer')}
+              >
+                <Input
+                  isDisabled={isExceededBalance}
+                  value={confirmationAmount}
+                  onChange={e => setConfirmationAmount(e.target.value)}
+                />
+                {Number.isFinite(+confirmationAmount) && !didConfirmAmount && (
+                  <DnaDialogAlertText>
+                    {t('Entered amount does not match target amount')}
+                  </DnaDialogAlertText>
+                )}
+              </FormControlWithLabel>
+            )}
+            <Flex justify="space-between">
+              <Text color="muted">{t('Available balance')}</Text>
+              <Text>{formatDna(balance)}</Text>
+            </Flex>
+          </Stack>
         </Stack>
       </DialogBody>
       <DialogFooter>
@@ -485,7 +519,7 @@ export function DnaRawDialog({
               return resolve()
             })
               .then(() => setIsSubmitting(true))
-              .then(() => callRpc('dna_sendTransaction', tx))
+              .then(() => callRpc('dna_sendTransaction', parsedTx))
               .then(async hash => {
                 if (isValidUrl(callbackUrl)) {
                   const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
