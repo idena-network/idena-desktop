@@ -845,7 +845,7 @@ export function KillForm({onSuccess, onFail}) {
   )
 }
 
-export function MyIdenaBotAlert({onConnect}) {
+export function MyIdenaBotAlert({onConnect, onSkip}) {
   const {t} = useTranslation()
 
   const {state} = useIdentityState()
@@ -870,14 +870,39 @@ export function MyIdenaBotAlert({onConnect}) {
         cursor="pointer"
         fontWeight={500}
         rounded="md"
-        p={3}
+        h={10}
         mt={2}
         mx={2}
         w="auto"
         onClick={myIdenaBotDisclosure.onOpen}
       >
-        {t(`Subscribe to @MyIdenaBot to get personalized notifications based on
+        <Flex flexGrow={1}>
+          <Flex flexGrow={1} alignItems="center" justifyContent="center">
+            <Box ml={6}>
+              <Icon name="telegram" boxSize={6} mr={1} />
+              {t(`Subscribe to @MyIdenaBot to get personalized notifications based on
         your status`)}
+            </Box>
+          </Flex>
+          <Flex ml="auto">
+            <Button
+              variant="link"
+              variantColor="white"
+              width={12}
+              pl={2}
+              height={10}
+              fontWeight={500}
+              _hover={null}
+              _active={null}
+              onClick={e => {
+                e.stopPropagation()
+                onSkip()
+              }}
+            >
+              {t('Close')}
+            </Button>
+          </Flex>
+        </Flex>
       </Alert>
 
       <Dialog

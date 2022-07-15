@@ -616,3 +616,8 @@ ipcMain.handle('search-image', async (_, query) =>
     moderate: true,
   })
 )
+
+const KEY_VALUE = {}
+
+ipcMain.handle('get-data', async (_, key) => KEY_VALUE[key])
+ipcMain.on('set-data', (_, key, value) => (KEY_VALUE[key] = value))

@@ -210,7 +210,10 @@ export default function ProfilePage() {
     IdentityStatus.Newbie,
   ].includes(status)
 
-  const [didConnectIdenaBot, connectIdenaBot] = useIdenaBot()
+  const [
+    didConnectIdenaBot,
+    {persist: persistIdenaBot, skip: skipIdenaBot},
+  ] = useIdenaBot()
 
   const replenishStakeDisclosure = useDisclosure()
 
@@ -237,7 +240,10 @@ export default function ProfilePage() {
       <InviteProvider>
         <Layout syncing={syncing} offline={offline}>
           {!didConnectIdenaBot && (
-            <MyIdenaBotAlert onConnect={connectIdenaBot} />
+            <MyIdenaBotAlert
+              onConnect={persistIdenaBot}
+              onSkip={skipIdenaBot}
+            />
           )}
 
           <Page>
