@@ -1,6 +1,4 @@
-import React from 'react'
-import {useMachine} from '@xstate/react'
-import {assign, createMachine} from 'xstate'
+import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useMutation, useQuery} from 'react-query'
@@ -16,54 +14,32 @@ import {apiUrl} from '../oracles/utils'
 import {useChainState} from '../../shared/providers/chain-context'
 
 export function useIdenaBot() {
-  const [current, send] = useMachine(
-    createMachine({
-      context: {
-        connected: undefined,
-      },
-      initial: 'loading',
-      states: {
-        loading: {
-          invoke: {
-            src: 'loadConnectionStatus',
-          },
-          on: {
-            CONNECTED: 'connected',
-            DISCONNECTED: 'disconnected',
-          },
-        },
-        connected: {
-          entry: [assign({connected: true}), 'persist'],
-        },
-        disconnected: {
-          on: {CONNECT: 'connected'},
-        },
-      },
-    }),
-    {
-      services: {
-        loadConnectionStatus: () => cb => {
-          try {
-            cb(
-              JSON.parse(localStorage.getItem('connectIdenaBot'))
-                ? 'CONNECTED'
-                : 'DISCONNECTED'
-            )
-          } catch (e) {
-            console.error(e)
-            cb('DISCONNECTED')
-          }
-        },
-      },
-      actions: {
-        persist: ({connected}) => {
-          localStorage.setItem('connectIdenaBot', connected)
-        },
-      },
-    }
-  )
+  const [connected, setConnected] = useState(true)
 
-  return [current.context.connected, () => send('CONNECT')]
+  useEffect(() => {
+    global.ipcRenderer
+      .invoke('get-data', 'idena-bot')
+      .then(data => {
+        setConnected(
+          data || JSON.parse(localStorage.getItem('connectIdenaBot')) || false
+        )
+      })
+      .catch(() => {})
+  }, [])
+
+  return [
+    connected,
+    {
+      persist: () => {
+        localStorage.setItem('connectIdenaBot', true)
+        setConnected(true)
+      },
+      skip: () => {
+        global.ipcRenderer.send('set-data', 'idena-bot', true)
+        setConnected(true)
+      },
+    },
+  ]
 }
 
 export function useReplenishStake({onSuccess, onError}) {
