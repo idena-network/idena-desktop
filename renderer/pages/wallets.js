@@ -120,7 +120,6 @@ export default function WalletsPage() {
             })
           }}
           onFail={error => {
-            onCloseSendDnaDrawer()
             failToast({
               title: t('Error while sending transaction'),
               description: error,

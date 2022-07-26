@@ -76,7 +76,7 @@ export function WalletCardMenuItemIcon(props) {
 
 export function WalletDrawer({title, icon, color, children, ...props}) {
   return (
-    <Drawer {...props}>
+    <Drawer {...props} closeOnOverlayClick={false}>
       {title && (
         <WalletDrawerHeader title={title}>
           <WalletDrawerHeaderIconBox icon={icon} color={color} />
