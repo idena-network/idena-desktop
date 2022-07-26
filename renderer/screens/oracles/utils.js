@@ -402,7 +402,11 @@ export function votingStatuses(filter) {
     case VotingListFilter.Todo:
       return [VotingStatus.Pending, VotingStatus.Open]
     case VotingListFilter.Voting:
-      return [VotingStatus.Voted, VotingStatus.Counting]
+      return [
+        VotingStatus.Voted,
+        VotingStatus.Counting,
+        VotingStatus.CanBeProlonged,
+      ]
     case VotingListFilter.Closed:
       return [VotingStatus.Archived, VotingStatus.Terminated]
     case VotingListFilter.All:
@@ -412,6 +416,7 @@ export function votingStatuses(filter) {
         VotingStatus.Open,
         VotingStatus.Voted,
         VotingStatus.Counting,
+        VotingStatus.CanBeProlonged,
         VotingStatus.Archived,
         VotingStatus.Terminated,
       ]
@@ -539,7 +544,10 @@ export const mapVoting = ({
 })
 
 export function mapVotingStatus(status) {
-  return areSameCaseInsensitive(status, VotingStatus.Voted) ? 'Voting' : status
+  if (areSameCaseInsensitive(status, VotingStatus.CanBeProlonged))
+    return 'Prolongation'
+  if (areSameCaseInsensitive(status, VotingStatus.Voted)) return 'Voting'
+  return status
 }
 
 export function minOracleRewardFromEstimates(data) {

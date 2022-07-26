@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React from 'react'
 import {
   Stack,
@@ -158,7 +159,6 @@ export default function ViewVotingPage() {
     balanceUpdates,
     ownerFee,
     totalReward,
-    committeeEpoch,
     estimatedOracleReward,
     estimatedMaxOracleReward = estimatedOracleReward,
     isOracle,
@@ -415,7 +415,7 @@ export default function ViewVotingPage() {
                     </VotingSkeleton>
                   )}
 
-                  <VotingSkeleton isLoaded={isLoaded}>
+                  <VotingSkeleton isLoaded={!actionsIsFetching}>
                     <Flex justify="space-between" align="center">
                       <Stack isInline spacing={2}>
                         {eitherIdleState(VotingStatus.Pending) && (
@@ -549,7 +549,8 @@ export default function ViewVotingPage() {
                             h={4}
                           />
                           <Text as="span">
-                            {eitherIdleState(VotingStatus.Counting) ? (
+                            {eitherIdleState(VotingStatus.Counting) &&
+                            !isVotingFailed ? (
                               <>
                                 {t('{{count}} published votes', {
                                   count: accountableVoteCount,
@@ -558,11 +559,20 @@ export default function ViewVotingPage() {
                                   count: voteProofsCount,
                                 })}
                               </>
-                            ) : (
+                            ) : eitherIdleState(
+                                VotingStatus.Pending,
+                                VotingStatus.Open,
+                                VotingStatus.Voting,
+                                VotingStatus.Voted,
+                                VotingStatus.Counting,
+                                VotingStatus.CanBeProlonged
+                              ) ? (
                               t('{{count}} votes', {
-                                count: eitherIdleState(VotingStatus.Open)
-                                  ? voteProofsCount
-                                  : accountableVoteCount,
+                                count: voteProofsCount,
+                              })
+                            ) : (
+                              t('{{count}} published votes', {
+                                count: accountableVoteCount,
                               })
                             )}
                           </Text>
@@ -719,6 +729,7 @@ export default function ViewVotingPage() {
                       _focus={null}
                       onClick={() => {
                         send('REFRESH')
+                        refetchActions()
                       }}
                     >
                       {t('Refresh')}
@@ -925,7 +936,7 @@ export default function ViewVotingPage() {
       <FinishDrawer
         isOpen={eitherState(
           current,
-          `idle.${VotingStatus.Counting}.finish`,
+          `finish`,
           `mining.${VotingStatus.Finishing}`
         )}
         onClose={() => {
