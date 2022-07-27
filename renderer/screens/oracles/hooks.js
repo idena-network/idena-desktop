@@ -19,19 +19,25 @@ async function loadActions(id, from) {
     contractHash: id,
   })
 
+  const canFinish = await checkAction(
+    callContract('finishVoting', ContractRpcMode.Estimate)
+  )
+
+  const canProlong = await checkAction(
+    callContract('prolongVoting', ContractRpcMode.Estimate)
+  )
+
+  const canTerminate = await checkAction(
+    callRpc('contract_estimateTerminate', {
+      from,
+      contract: id,
+    })
+  )
+
   return {
-    canFinish: await checkAction(
-      callContract('finishVoting', ContractRpcMode.Estimate)
-    ),
-    canProlong: await checkAction(
-      callContract('prolongVoting', ContractRpcMode.Estimate)
-    ),
-    canTerminate: await checkAction(
-      callRpc('contract_estimateTerminate', {
-        from,
-        contract: id,
-      })
-    ),
+    canFinish,
+    canProlong: canFinish ? false : canProlong,
+    canTerminate,
   }
 }
 

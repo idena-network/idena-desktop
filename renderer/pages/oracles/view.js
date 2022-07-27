@@ -293,6 +293,7 @@ export default function ViewVotingPage() {
                       <HDivider />
                       {isLoaded && (
                         <VotingPhase
+                          canFinish={canFinish}
                           canProlong={canProlong}
                           canTerminate={canTerminate}
                           service={service}
@@ -461,16 +462,16 @@ export default function ViewVotingPage() {
                               isLoading={current.matches(
                                 `mining.${VotingStatus.Finishing}`
                               )}
-                              loadingText={t('Finishing')}
+                              loadingText={t('Claiming')}
                               onClick={() =>
                                 send('REVIEW_FINISH_VOTING', {
                                   from: identity.address,
                                 })
                               }
                             >
-                              {didDetermineWinner
-                                ? t('Distribute rewards')
-                                : t('Refund')}
+                              {isVotingFailed
+                                ? t('Claim refunds')
+                                : t('Claim rewards')}
                             </PrimaryButton>
                           )}
 
@@ -543,7 +544,14 @@ export default function ViewVotingPage() {
                         <VDivider />
                         <Stack isInline spacing={2} align="center">
                           <Icon
-                            name={didDetermineWinner ? 'user-tick' : 'user'}
+                            name={
+                              eitherIdleState(
+                                VotingStatus.Archived,
+                                VotingStatus.Terminated
+                              ) && didDetermineWinner
+                                ? 'user-tick'
+                                : 'user'
+                            }
                             color="muted"
                             w={4}
                             h={4}
@@ -949,6 +957,7 @@ export default function ViewVotingPage() {
           send('FINISH', {from})
         }}
         hasWinner={didDetermineWinner}
+        isVotingFailed={isVotingFailed}
       />
 
       <ProlongDrawer

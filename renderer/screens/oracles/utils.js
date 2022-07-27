@@ -329,25 +329,18 @@ export function hasWinner({
   winnerThreshold,
   quorum,
   committeeSize,
-  finishCountingDate,
 }) {
   const requiredVotesCountByVotes = winnerVotesCount({
     winnerThreshold,
-    votesCount,
-  })
-
-  const requiredVotesCountByCommittee = winnerVotesCount({
-    winnerThreshold,
-    votesCount: committeeSize,
+    votesCount: votes.reduce((prev, cur) => prev + cur.count, 0),
   })
 
   const didReachQuorum = hasQuorum({votesCount, quorum, committeeSize})
 
-  return dayjs().isBefore(finishCountingDate)
-    ? votes.some(({count}) => count >= requiredVotesCountByCommittee)
-    : votes.some(
-        ({count}) => count >= requiredVotesCountByVotes && didReachQuorum
-      )
+  return (
+    didReachQuorum &&
+    votes.some(({count}) => count >= requiredVotesCountByVotes)
+  )
 }
 
 export function votingMinStake(feePerGas) {
