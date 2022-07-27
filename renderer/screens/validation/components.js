@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, {useMemo} from 'react'
+import React, {useMemo, useRef} from 'react'
 import {
   Box,
   Flex,
@@ -20,12 +20,16 @@ import {
   AspectRatioBox,
   PseudoBox,
   Spinner,
+  useDisclosure,
+  Tooltip,
+  ModalBody,
 } from '@chakra-ui/core'
 import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
 import {State} from 'xstate'
+import useHover from '@react-hook/hover'
 import {reorderList} from '../../shared/utils/arr'
 import {rem} from '../../shared/theme'
 import {adjustDuration} from './machine'
@@ -34,6 +38,7 @@ import {EpochPeriod, RelevanceType} from '../../shared/types'
 import {useTimingState} from '../../shared/providers/timing-context'
 import {createTimerMachine} from '../../shared/machines'
 import {
+  EmptyFlipImage,
   FlipKeywordPanel,
   FlipKeywordTranslationSwitch,
 } from '../flips/components'
@@ -47,6 +52,12 @@ import {
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {useInterval} from '../../shared/hooks/use-interval'
 import {FillCenter} from '../oracles/components'
+
+const Scroll = require('react-scroll')
+
+const {ScrollElement} = Scroll
+const {scroller} = Scroll
+const ElementFlipImage = ScrollElement(AspectRatioBox)
 
 export function ValidationScene(props) {
   return (
@@ -99,74 +110,228 @@ export function Flip({
   variant,
   onChoose,
   onImageFail,
+  timerDetails,
 }) {
   const {colors} = useTheme()
+
+  const refContainer = useRef(null)
+  const refFlipHover = useRef(null)
+  const refZoomIconHover = useRef(null)
+  const isFlipHovered = useHover(refFlipHover.current)
+  const isZoomIconHovered = useHover(refZoomIconHover.current)
+  const initialRef = useRef(null)
+
+  const {
+    isOpen: isOpenFlipZoom,
+    onOpen: onOpenFlipZoom,
+    onClose: onCloseFlipZoom,
+  } = useDisclosure()
+
+  const scrollToZoomedFlip = flipId => {
+    scroller.scrollTo(`flipId-${flipId}`, {
+      container: refContainer.current?.firstChild,
+      horizontal: false,
+      offset: -120,
+    })
+  }
 
   if ((fetched && !decoded) || failed) return <FailedFlip />
   if (!fetched) return <LoadingFlip />
 
   return (
-    <FlipHolder
-      // eslint-disable-next-line no-nested-ternary
-      {...(option
-        ? option === variant
-          ? {
-              border: `solid 2px ${colors.blue[500]}`,
-              boxShadow: `0 0 2px ${rem(3)} ${colors.blue['025']}`,
-              transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
-            }
-          : {
-              opacity: 0.3,
-              transform: 'scale(0.98)',
-              transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
-              transitionProperty: 'opacity, transform',
-              willChange: 'opacity, transform',
-            }
-        : {})}
-    >
-      {reorderList(images, orders[variant - 1]).map((src, idx) => (
-        <Box
-          key={idx}
-          height="calc((100vh - 260px) / 4)"
-          position="relative"
-          overflow="hidden"
-          onClick={() => onChoose(hash)}
-        >
-          <FlipBlur src={src} />
-          <FlipImage
-            src={src}
-            objectFit="contain"
-            height="full"
-            width="full"
+    <Box ref={refFlipHover}>
+      <FlipHolder
+        isZoomHovered={isZoomIconHovered}
+        // eslint-disable-next-line no-nested-ternary
+        {...(option
+          ? option === variant
+            ? {
+                border: `solid 2px ${colors.blue[500]}`,
+                boxShadow: `0 0 2px ${rem(3)} ${colors.blue['025']}`,
+                transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
+              }
+            : {
+                opacity: 0.3,
+                transform: 'scale(0.98)',
+                transition: 'all .3s cubic-bezier(.5, 0, .5, 1)',
+                transitionProperty: 'opacity, transform',
+                willChange: 'opacity, transform',
+              }
+          : {})}
+      >
+        {reorderList(images, orders[variant - 1]).map((src, idx) => (
+          <Box
+            key={idx}
+            height="calc((100vh - 260px) / 4)"
             position="relative"
-            zIndex={1}
-            onError={onImageFail}
-          />
-        </Box>
-      ))}
-    </FlipHolder>
+            overflow="hidden"
+            onClick={e => {
+              if (e.ctrlKey || e.metaKey) {
+                onOpenFlipZoom()
+                setTimeout(() => scrollToZoomedFlip(idx), 100)
+              } else {
+                onChoose(hash)
+              }
+            }}
+          >
+            {idx === 0 && (
+              <div ref={refZoomIconHover}>
+                <Flex
+                  display={isFlipHovered ? 'flex' : 'none'}
+                  align="center"
+                  justify="center"
+                  borderRadius="8px"
+                  backgroundColor="rgba(17, 17, 17, 0.5)"
+                  position="absolute"
+                  top={1}
+                  right={1}
+                  h={8}
+                  w={8}
+                  opacity={0.5}
+                  _hover={{opacity: 1}}
+                  zIndex={2}
+                  onClick={e => {
+                    e.stopPropagation()
+                    onOpenFlipZoom()
+                  }}
+                >
+                  <Icon name="zoom-flip" size={5} />
+                </Flex>
+              </div>
+            )}
+            <FlipBlur src={src} />
+            <FlipImage
+              src={src}
+              objectFit="contain"
+              height="full"
+              width="full"
+              position="relative"
+              zIndex={1}
+              onError={onImageFail}
+            />
+          </Box>
+        ))}
+        <Modal
+          initialFocusRef={initialRef}
+          id="zoomedFlips"
+          size="30%"
+          isOpen={isOpenFlipZoom}
+          onClose={onCloseFlipZoom}
+        >
+          <ModalOverlay />
+          <Flex
+            ref={initialRef}
+            zIndex={1401}
+            position="fixed"
+            top={0}
+            left={0}
+            right={0}
+            h={20}
+            justify="center"
+            align="center"
+            backgroundColor="gray.980"
+          >
+            <Box />
+            <Flex zIndex={2} justify="center">
+              <ValidationTimer
+                key={timerDetails.isShortSession ? 'short-timer' : 'long-timer'}
+                validationStart={timerDetails.validationStart}
+                duration={
+                  timerDetails.shortSessionDuration -
+                  (timerDetails.isShortSession
+                    ? 0
+                    : timerDetails.longSessionDuration)
+                }
+                color="white"
+              />
+            </Flex>
+            <Icon
+              position="absolute"
+              right={6}
+              top={6}
+              name="cross-small"
+              color="white"
+              size={8}
+              onClick={onCloseFlipZoom}
+            />
+          </Flex>
+          <Box marginTop="80px" ref={refContainer}>
+            <ModalContent bg="transparent" border="none" boxShadow="none">
+              <ModalBody py={6}>
+                <Flex h="100%" w="100%" direction="column" align="center">
+                  <Box w="100%">
+                    {reorderList(images, orders[variant - 1]).map(
+                      (src, idx) => (
+                        <ElementFlipImage
+                          name={`flipId-${idx}`}
+                          ratio={4 / 3}
+                          bg="gray.50"
+                        >
+                          {src ? (
+                            <Box position="relative">
+                              <Box
+                                style={{
+                                  background: `center center / cover no-repeat url(${src})`,
+                                  filter: `blur(${rem(24)})`,
+                                  zIndex: 1,
+                                }}
+                              />
+                              <FlipImage
+                                src={src}
+                                alt="current-flip"
+                                height="100%"
+                                width="100%"
+                                style={{
+                                  position: 'relative',
+                                  zIndex: 1,
+                                }}
+                                onError={onImageFail}
+                              />
+                            </Box>
+                          ) : (
+                            <EmptyFlipImage />
+                          )}
+                        </ElementFlipImage>
+                      )
+                    )}
+                  </Box>
+                </Flex>
+              </ModalBody>
+            </ModalContent>
+          </Box>
+        </Modal>
+      </FlipHolder>
+    </Box>
   )
 }
 
-function FlipHolder(props) {
+function FlipHolder({isZoomHovered = false, ...props}) {
   const {colors} = useTheme()
   return (
-    <Flex
-      justify="center"
-      direction="column"
-      borderRadius="lg"
-      borderWidth={2}
-      borderColor="brandGray.005"
-      boxShadow={`0 0 2px 0 ${colors['005']}`}
-      mx="10px"
-      p={1}
-      position="relative"
-      transitionProperty="opacity, transform"
-      willChange="opacity, transform"
-      height="calc(100vh - 260px)"
-      width="calc((100vh - 240px) / 3)"
-      {...props}
-    />
+    <Tooltip
+      isOpen={isZoomHovered}
+      label="Ctrl+Click to zoom"
+      placement="top"
+      zIndex="tooltip"
+      bg="graphite.500"
+    >
+      <Flex
+        justify="center"
+        direction="column"
+        borderRadius="lg"
+        borderWidth={2}
+        borderColor="brandGray.005"
+        boxShadow={`0 0 2px 0 ${colors['005']}`}
+        mx="10px"
+        p={1}
+        position="relative"
+        transitionProperty="opacity, transform"
+        willChange="opacity, transform"
+        height="calc(100vh - 260px)"
+        width="calc((100vh - 240px) / 3)"
+        {...props}
+      />
+    </Tooltip>
   )
 }
 
@@ -590,7 +755,7 @@ export function WelcomeKeywordsQualificationDialog(props) {
   )
 }
 
-export function ValidationTimer({validationStart, duration}) {
+export function ValidationTimer({validationStart, duration, color}) {
   const adjustedDuration = useMemo(
     () => adjustDuration(validationStart, duration),
     [duration, validationStart]
@@ -599,7 +764,7 @@ export function ValidationTimer({validationStart, duration}) {
   return (
     <Timer>
       <TimerIcon color="red.500" />
-      <TimerClock duration={adjustedDuration} color="red.500" />
+      <TimerClock duration={adjustedDuration} color={color || 'red.500'} />
     </Timer>
   )
 }
