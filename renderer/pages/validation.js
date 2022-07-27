@@ -156,6 +156,13 @@ function ValidationSession({
   const flips = sessionFlips(state)
   const currentFlip = flips[currentIndex]
 
+  const flipTimerDetails = {
+    isShortSession: isShortSession(state),
+    validationStart,
+    shortSessionDuration,
+    longSessionDuration,
+  }
+
   return (
     <ValidationScene bg={isShortSession(state) ? 'black' : 'white'}>
       {syncing && (
@@ -214,6 +221,7 @@ function ValidationSession({
             <Flip
               {...currentFlip}
               variant={AnswerType.Left}
+              timerDetails={flipTimerDetails}
               onChoose={hash =>
                 send({
                   type: 'ANSWER',
@@ -225,6 +233,7 @@ function ValidationSession({
             <Flip
               {...currentFlip}
               variant={AnswerType.Right}
+              timerDetails={flipTimerDetails}
               onChoose={hash =>
                 send({
                   type: 'ANSWER',
