@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React from 'react'
 import {
   Stack,
@@ -88,6 +89,7 @@ import {
 } from '../../screens/oracles/types'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
+import {useOracleActions} from '../../screens/oracles/hooks'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -129,6 +131,11 @@ export default function ViewVotingPage() {
     send('RELOAD', {id, epoch, address: identity.address})
   }, [epoch, id, identity.address, send])
 
+  const [
+    {canProlong, canFinish, canTerminate, isFetching: actionsIsFetching},
+    refetchActions,
+  ] = useOracleActions(id)
+
   const toDna = toLocaleDna(i18n.language)
 
   const {
@@ -152,7 +159,6 @@ export default function ViewVotingPage() {
     balanceUpdates,
     ownerFee,
     totalReward,
-    committeeEpoch,
     estimatedOracleReward,
     estimatedMaxOracleReward = estimatedOracleReward,
     isOracle,
@@ -190,17 +196,8 @@ export default function ViewVotingPage() {
     committeeSize,
   })
 
-  const canFinish =
-    didDetermineWinner ||
-    (dayjs().isAfter(finishCountingDate) && didReachQuorum)
-
-  const canProlong =
-    epochWithoutGrowth < 3 &&
-    (committeeEpoch !== epoch ||
-      (!didDetermineWinner &&
-        !didReachQuorum &&
-        dayjs().isAfter(finishCountingDate)) ||
-      (!didReachQuorum && dayjs().isAfter(finishDate)))
+  const isVotingFailed =
+    !didReachQuorum && epochWithoutGrowth >= 3 && !canProlong
 
   const shouldTerminate = isAllowedToTerminate({estimatedTerminationTime})
 
@@ -294,7 +291,13 @@ export default function ViewVotingPage() {
                         alignSelf="start"
                       />
                       <HDivider />
-                      {isLoaded && <VotingPhase service={service} />}
+                      {isLoaded && (
+                        <VotingPhase
+                          canProlong={canProlong}
+                          canTerminate={canTerminate}
+                          service={service}
+                        />
+                      )}
                     </Stack>
                   </VotingSkeleton>
 
@@ -304,14 +307,18 @@ export default function ViewVotingPage() {
                     VotingStatus.Open,
                     VotingStatus.Voting,
                     VotingStatus.Voted,
-                    VotingStatus.Prolonging
+                    VotingStatus.Prolonging,
+                    VotingStatus.CanBeProlonged
                   ) && (
                     <VotingSkeleton isLoaded={isLoaded}>
                       <Box>
                         <Text color="muted" fontSize="sm" mb={3}>
                           {t('Choose an option to vote')}
                         </Text>
-                        {eitherIdleState(VotingStatus.Voted) ? (
+                        {eitherIdleState(
+                          VotingStatus.Voted,
+                          VotingStatus.CanBeProlonged
+                        ) ? (
                           <Stack spacing={3}>
                             {/* eslint-disable-next-line no-shadow */}
                             {options.map(({id, value}) => {
@@ -408,7 +415,7 @@ export default function ViewVotingPage() {
                     </VotingSkeleton>
                   )}
 
-                  <VotingSkeleton isLoaded={isLoaded}>
+                  <VotingSkeleton isLoaded={!actionsIsFetching}>
                     <Flex justify="space-between" align="center">
                       <Stack isInline spacing={2}>
                         {eitherIdleState(VotingStatus.Pending) && (
@@ -445,27 +452,34 @@ export default function ViewVotingPage() {
                             </Box>
                           ))}
 
-                        {eitherIdleState(VotingStatus.Counting) && canFinish && (
-                          <PrimaryButton
-                            isLoading={current.matches(
-                              `mining.${VotingStatus.Finishing}`
-                            )}
-                            loadingText={t('Finishing')}
-                            onClick={() =>
-                              send('FINISH', {from: identity.address})
-                            }
-                          >
-                            {didDetermineWinner
-                              ? t('Distribute rewards')
-                              : t('Refund')}
-                          </PrimaryButton>
-                        )}
+                        {eitherIdleState(
+                          VotingStatus.Counting,
+                          VotingStatus.CanBeProlonged
+                        ) &&
+                          canFinish && (
+                            <PrimaryButton
+                              isLoading={current.matches(
+                                `mining.${VotingStatus.Finishing}`
+                              )}
+                              loadingText={t('Finishing')}
+                              onClick={() =>
+                                send('REVIEW_FINISH_VOTING', {
+                                  from: identity.address,
+                                })
+                              }
+                            >
+                              {didDetermineWinner
+                                ? t('Distribute rewards')
+                                : t('Refund')}
+                            </PrimaryButton>
+                          )}
 
                         {eitherIdleState(
                           VotingStatus.Open,
                           VotingStatus.Voting,
                           VotingStatus.Voted,
-                          VotingStatus.Counting
+                          VotingStatus.Counting,
+                          VotingStatus.CanBeProlonged
                         ) &&
                           canProlong && (
                             <PrimaryButton
@@ -481,7 +495,8 @@ export default function ViewVotingPage() {
                         ) ||
                           (eitherIdleState(VotingStatus.Counting) &&
                             !canProlong &&
-                            !canFinish)) && (
+                            !canFinish &&
+                            !canTerminate)) && (
                           <PrimaryButton as={Box} isDisabled>
                             {t('Vote')}
                           </PrimaryButton>
@@ -510,6 +525,21 @@ export default function ViewVotingPage() {
                               {t('No winner selected')}
                             </Text>
                           )}
+
+                        {eitherIdleState(VotingStatus.CanBeProlonged) &&
+                          !didReachQuorum && (
+                            <Text color="red.500">
+                              {t('Quorum is not reached')}
+                            </Text>
+                          )}
+                        {eitherIdleState(VotingStatus.Counting) &&
+                          isVotingFailed && (
+                            <Text color="red.500">
+                              {t(
+                                'No winner selected as the quorum is not reached'
+                              )}
+                            </Text>
+                          )}
                         <VDivider />
                         <Stack isInline spacing={2} align="center">
                           <Icon
@@ -519,7 +549,8 @@ export default function ViewVotingPage() {
                             h={4}
                           />
                           <Text as="span">
-                            {eitherIdleState(VotingStatus.Counting) ? (
+                            {eitherIdleState(VotingStatus.Counting) &&
+                            !isVotingFailed ? (
                               <>
                                 {t('{{count}} published votes', {
                                   count: accountableVoteCount,
@@ -528,11 +559,20 @@ export default function ViewVotingPage() {
                                   count: voteProofsCount,
                                 })}
                               </>
-                            ) : (
+                            ) : eitherIdleState(
+                                VotingStatus.Pending,
+                                VotingStatus.Open,
+                                VotingStatus.Voting,
+                                VotingStatus.Voted,
+                                VotingStatus.Counting,
+                                VotingStatus.CanBeProlonged
+                              ) ? (
                               t('{{count}} votes', {
-                                count: eitherIdleState(VotingStatus.Open)
-                                  ? voteProofsCount
-                                  : accountableVoteCount,
+                                count: voteProofsCount,
+                              })
+                            ) : (
+                              t('{{count}} published votes', {
+                                count: accountableVoteCount,
                               })
                             )}
                           </Text>
@@ -689,6 +729,7 @@ export default function ViewVotingPage() {
                       _focus={null}
                       onClick={() => {
                         send('REFRESH')
+                        refetchActions()
                       }}
                     >
                       {t('Refresh')}
@@ -895,7 +936,7 @@ export default function ViewVotingPage() {
       <FinishDrawer
         isOpen={eitherState(
           current,
-          `idle.${VotingStatus.Counting}.finish`,
+          `finish`,
           `mining.${VotingStatus.Finishing}`
         )}
         onClose={() => {

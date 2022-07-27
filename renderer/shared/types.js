@@ -51,6 +51,7 @@ export const VotingStatus = {
   Open: 'open',
   Voted: 'voted',
   Counting: 'counting',
+  CanBeProlonged: 'canbeprolonged',
   Archived: 'archive',
   Terminated: 'terminated',
   Deploying: 'deploying',

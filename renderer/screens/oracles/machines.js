@@ -344,6 +344,10 @@ export const votingMachine = Machine(
                   cond: 'isCounting',
                 },
                 {
+                  target: VotingStatus.CanBeProlonged,
+                  cond: 'isCanBeProlonged',
+                },
+                {
                   target: VotingStatus.Archived,
                   cond: 'isArchived',
                 },
@@ -387,6 +391,7 @@ export const votingMachine = Machine(
           [VotingStatus.Open]: {},
           [VotingStatus.Voted]: {},
           [VotingStatus.Counting]: {},
+          [VotingStatus.CanBeProlonged]: {},
           [VotingStatus.Archived]: {},
           [VotingStatus.Terminated]: {},
           hist: {
@@ -1045,6 +1050,10 @@ export const createViewVotingMachine = (id, epoch, address) =>
                     cond: 'isCounting',
                   },
                   {
+                    target: VotingStatus.CanBeProlonged,
+                    cond: 'isCanBeProlonged',
+                  },
+                  {
                     target: VotingStatus.Archived,
                     cond: 'isArchived',
                   },
@@ -1082,27 +1091,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
             },
             [VotingStatus.Open]: {},
             [VotingStatus.Voted]: {},
-            [VotingStatus.Counting]: {
-              initial: 'idle',
-              states: {
-                idle: {
-                  on: {
-                    FINISH: 'finish',
-                  },
-                },
-                finish: {
-                  on: {
-                    FINISH: {
-                      target: `#viewVoting.mining.${VotingStatus.Finishing}`,
-                      actions: ['setFinishing', 'persist'],
-                    },
-                  },
-                },
-              },
-              on: {
-                CANCEL: '.idle',
-              },
-            },
+            [VotingStatus.Counting]: {},
+            [VotingStatus.CanBeProlonged]: {},
             [VotingStatus.Archived]: {},
             [VotingStatus.Terminated]: {},
             terminating: {
@@ -1160,6 +1150,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
               actions: ['onError'],
             },
             REVIEW_PROLONG_VOTING: 'prolong',
+            REVIEW_FINISH_VOTING: 'finish',
             FOLLOW_LINK: '.redirecting',
           },
         },
@@ -1186,6 +1177,15 @@ export const createViewVotingMachine = (id, epoch, address) =>
             PROLONG_VOTING: {
               target: `#viewVoting.mining.${VotingStatus.Prolonging}`,
               actions: ['setProlonging', 'persist'],
+            },
+            CANCEL: 'idle',
+          },
+        },
+        finish: {
+          on: {
+            FINISH: {
+              target: `#viewVoting.mining.${VotingStatus.Finishing}`,
+              actions: ['setFinishing', 'persist'],
             },
             CANCEL: 'idle',
           },
@@ -1874,6 +1874,7 @@ function votingStatusGuards() {
     isRunning: isVotingStatus(VotingStatus.Open),
     isVoted: isVotingStatus(VotingStatus.Voted),
     isCounting: isVotingStatus(VotingStatus.Counting),
+    isCanBeProlonged: isVotingStatus(VotingStatus.CanBeProlonged),
     isVoting: isVotingStatus(VotingStatus.Voting),
     isFinishing: isVotingStatus(VotingStatus.Finishing),
     isArchived: isVotingStatus(VotingStatus.Archived),
