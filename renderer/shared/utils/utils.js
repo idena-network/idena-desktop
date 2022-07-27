@@ -162,3 +162,6 @@ export function skipSSR(expr) {
     ? expr()
     : expr
 }
+
+export const isAddress = address =>
+  address.length === 42 && address.substr(0, 2) === '0x'

@@ -37,7 +37,7 @@ import {
   WalletDrawerHeaderIcon,
   WalletDrawerHeaderIconBox,
 } from './components'
-import {callRpc, toLocaleDna} from '../../shared/utils/utils'
+import {callRpc, isAddress, toLocaleDna} from '../../shared/utils/utils'
 import {
   Table,
   TableCol,
@@ -176,6 +176,14 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
             amount: {value: amount},
           } = e.target.elements
 
+          if (!isAddress(to)) {
+            return onFail(`Incorrect 'To' address: ${to}`)
+          }
+
+          if (amount <= 0) {
+            return onFail(`Incorrect Amount: ${amount}`)
+          }
+
           try {
             setIsSubmitting(true)
             const result = await callRpc('dna_sendTransaction', {
@@ -187,11 +195,7 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
             setIsSubmitting(false)
           } catch (error) {
             setIsSubmitting(false)
-            onFail({
-              title: t('Error while sending transaction'),
-              body: error.message,
-            })
-            onFail(error)
+            onFail(error.message)
           }
         }}
       >
@@ -204,7 +208,13 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
               <Input id="to" placeholder={t('Enter address')} />
             </WalletDrawerFormControl>
             <WalletDrawerFormControl label={t('Amount, iDNA')} id="amount">
-              <Input id="amount" placeholder={t('Enter amount')} />
+              <Input
+                type="number"
+                min={0}
+                step="any"
+                id="amount"
+                placeholder={t('Enter amount')}
+              />
             </WalletDrawerFormControl>
           </Stack>
         </DrawerBody>
