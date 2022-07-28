@@ -748,7 +748,7 @@
   "Wallet will be updated after transaction is confirmed in the blockchain.": "Cüzdan, blok zincirinde işlem onaylandıktan sonra güncellenecektir..",
   "Getting node status...": "Düğüm(Node) durumu...",
   "Your node is either offline or unreachable": "Düğümünüz çevrimdışı veya erişilemiyor",
-  "Wrong time": "Yanlış Zaman Dilimi"
+  "Wrong time": "Yanlış Zaman Dilimi",
   "Check immediately": "Derhal kontrol edin",
   "Synchronizing": "Senkronize Ediliyor",
   "Synchronized": "Senkronize Edildi",
