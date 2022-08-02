@@ -238,6 +238,7 @@ export function Flip({
                 validationStart={timerDetails.validationStart}
                 duration={
                   timerDetails.shortSessionDuration -
+                  10 +
                   (timerDetails.isShortSession
                     ? 0
                     : timerDetails.longSessionDuration)
@@ -314,6 +315,9 @@ function FlipHolder({isZoomHovered = false, ...props}) {
       placement="top"
       zIndex="tooltip"
       bg="graphite.500"
+      hasArrow
+      py="3/2"
+      borderRadius="md"
     >
       <Flex
         justify="center"
