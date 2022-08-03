@@ -58,6 +58,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
               ],
             },
             ENCODE: 'encoding',
+            RESET: 'password',
           },
         },
         encoding: {
@@ -104,7 +105,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
             <Text color="muted" fontSize="mdx">
               {t('Create a new password to export your private key')}
             </Text>
-            <FormControl isRequired>
+            <FormControl>
               <FormLabel>{t('New password')}</FormLabel>
               <InputGroup>
                 <Input
@@ -120,6 +121,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
                     icon={revealPassword ? 'eye-off' : 'eye'}
                     size="xs"
                     bg={revealPassword ? 'gray.300' : 'white'}
+                    fontSize={20}
                     w={8}
                     _hover={{
                       bg: revealPassword ? 'gray.300' : 'white',
