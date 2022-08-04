@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, {useMemo, useRef} from 'react'
+import React, {useEffect, useMemo, useRef, useState} from 'react'
 import {
   Box,
   Flex,
@@ -30,9 +30,9 @@ import dayjs from 'dayjs'
 import {useRouter} from 'next/router'
 import {State} from 'xstate'
 import useHover from '@react-hook/hover'
+import mousetrap from 'mousetrap'
 import {reorderList} from '../../shared/utils/arr'
 import {rem} from '../../shared/theme'
-import {adjustDuration} from './machine'
 import {loadValidationStateDefinition} from './utils'
 import {EpochPeriod, RelevanceType} from '../../shared/types'
 import {useTimingState} from '../../shared/providers/timing-context'
@@ -127,6 +127,18 @@ export function Flip({
     onClose: onCloseFlipZoom,
   } = useDisclosure()
 
+  useEffect(() => {
+    mousetrap.bind(
+      'esc',
+      () => {
+        if (isOpenFlipZoom) onCloseFlipZoom()
+      },
+      'keyup'
+    )
+
+    return () => mousetrap.unbind('esc', 'keyup')
+  }, [isOpenFlipZoom, onCloseFlipZoom])
+
   const scrollToZoomedFlip = flipId => {
     scroller.scrollTo(`flipId-${flipId}`, {
       container: refContainer.current?.firstChild,
@@ -213,7 +225,6 @@ export function Flip({
         ))}
         <Modal
           initialFocusRef={initialRef}
-          id="zoomedFlips"
           size="30%"
           isOpen={isOpenFlipZoom}
           onClose={onCloseFlipZoom}
@@ -234,7 +245,6 @@ export function Flip({
             <Box />
             <Flex zIndex={2} justify="center">
               <ValidationTimer
-                key={timerDetails.isShortSession ? 'short-timer' : 'long-timer'}
                 validationStart={timerDetails.validationStart}
                 duration={
                   timerDetails.shortSessionDuration -
@@ -760,15 +770,15 @@ export function WelcomeKeywordsQualificationDialog(props) {
 }
 
 export function ValidationTimer({validationStart, duration, color}) {
-  const adjustedDuration = useMemo(
-    () => adjustDuration(validationStart, duration),
-    [duration, validationStart]
-  )
+  const endTime = useMemo(() => dayjs(validationStart).add(duration, 's'), [
+    duration,
+    validationStart,
+  ])
 
   return (
     <Timer>
       <TimerIcon color="red.500" />
-      <TimerClock duration={adjustedDuration} color={color || 'red.500'} />
+      <TimerClock2 endTime={endTime} color={color || 'red.500'} />
     </Timer>
   )
 }
@@ -810,6 +820,30 @@ export function TimerClock({duration, color}) {
         {state.matches('stopped') && '00:00'}
         {state.matches('running') &&
           [Math.floor(remaining / 60), remaining % 60]
+            .map(t => t.toString().padStart(2, 0))
+            .join(':')}
+      </Text>
+    </Box>
+  )
+}
+
+export function TimerClock2({endTime, color}) {
+  const [state, setState] = useState(0)
+
+  useInterval(
+    () => {
+      setState(dayjs(endTime).diff(dayjs(), 's'))
+    },
+    state >= 0 ? 1000 : null,
+    true
+  )
+
+  return (
+    <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: 37}}>
+      <Text color={color} fontSize="md" fontWeight={600}>
+        {state <= 0 && '00:00'}
+        {state > 0 &&
+          [Math.floor(state / 60), state % 60]
             .map(t => t.toString().padStart(2, 0))
             .join(':')}
       </Text>
