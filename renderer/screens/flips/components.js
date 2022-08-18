@@ -34,6 +34,7 @@ import {
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
 import {useService} from '@xstate/react'
+import Jimp from 'jimp'
 import FlipEditor from './components/flip-editor'
 import {Step} from './types'
 import {formatKeywords, protectFlipImage} from './utils'
@@ -770,7 +771,7 @@ export function FlipProtectStep({
     }
 
     protectImages()
-  }, [images])
+  }, [images, onProtectImages, onProtecting])
 
   return (
     <FlipStep>

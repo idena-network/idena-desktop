@@ -1,6 +1,10 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable block-scoped-var */
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-shadow */
 import {encode} from 'rlp'
 import axios from 'axios'
-import Jimp from 'jimp'
 import dayjs from 'dayjs'
 import {loadPersistentStateValue, persistItem} from '../../shared/utils/persist'
 import {FlipType} from '../../shared/types'
@@ -341,6 +345,7 @@ export async function protectFlipImage(imgSrc) {
     // eslint-disable-next-line global-require
     const extractColors = require('extract-colors').default
     palette = await extractColors(imgSrc)
+    // eslint-disable-next-line no-empty
   } catch (e) {}
   const getImageData = image => {
     const vMin = 0
@@ -377,6 +382,7 @@ export async function protectFlipImage(imgSrc) {
     const iDelta = 255 / (iVMax - iVMin)
 
     let gray
+    // eslint-disable-next-line no-plusplus
     for (let i = 0, j = 0; i < len; i++, j += 4) {
       gray = (inData[i] - iVMin) * iDelta
 
@@ -502,20 +508,20 @@ export async function protectFlipImage(imgSrc) {
 
     /** ** Global variables *** */
     const WSHED = 0
-    var MAXBASINS = 20000 // you can increase this number
+    const MAXBASINS = 20000 // you can increase this number
     const stack = [] // the queue
     let levels = 0 // the number of gray levels
     let nx
     let ny
-    var stop = false
-    var maxSizeStack = 0
+    let stop = false
+    let maxSizeStack = 0
     let outPixels = []
 
     /*
      *	creates histogram of image
      *	result in array h
      */
-    var hist = function(image, h) {
+    const hist = function(image, h) {
       let v
 
       for (let i = 0; i <= 255; i++) {
@@ -540,12 +546,13 @@ export async function protectFlipImage(imgSrc) {
      *	result in arrays frq, pos, hmin, hmax,
      *
      */
-    var frqfunc = function(h, frq, pos) {
+    const frqfunc = function(h, frq, pos) {
       levels = 0
       frq[0] = h[0]
       if (h[0] !== 0) {
         levels++
       }
+      // eslint-disable-next-line no-var,vars-on-top
       for (var i = 1; i < 256; i++) {
         frq[i] = h[i] + frq[i - 1]
         if (h[i] !== 0) {
@@ -565,11 +572,9 @@ export async function protectFlipImage(imgSrc) {
      *		needed (calculated by frqfunc)
      *	results stored in arrays: PixelValue, pixelX, pixelY, pixelPos
      */
-    var sort = function(image, pos, pixelValue, pixelX, pixelY, pixelPos) {
+    const sort = function(image, pos, pixelValue, pixelX, pixelY, pixelPos) {
       let v
-      let len
-
-      len = pos.length
+      const len = pos.length
       const position = []
 
       for (let i = 0; i < len; i++) {
@@ -591,7 +596,7 @@ export async function protectFlipImage(imgSrc) {
     /*
      *	THE ACTUAL WATERSHED 4-connected
      */
-    var flooding4 = function(
+    const flooding4 = function(
       input,
       h,
       pos,
@@ -612,13 +617,14 @@ export async function protectFlipImage(imgSrc) {
       const neigh = []
       let gray = Math.floor(pixelValue[0]) // the (first) gray value to consider
       let flag = false
-      let current_label = 10.0
+      let currentLabel = 10.0
 
       // lookup table neighbors
       const xx = [0, -1, 1, 0, 0]
       const yy = [-1, 0, 0, 1, 4]
 
       outPixels = output.data
+      // eslint-disable-next-line no-var,vars-on-top
       for (var i = 0; i < size; i++) {
         outPixels[i] = fINIT
       }
@@ -632,13 +638,15 @@ export async function protectFlipImage(imgSrc) {
 
         // the first run over all pixels of the current gray level
         // marks as MASK or eventually INQUEUE (if 'dangerous' pixel)
+        // eslint-disable-next-line no-var,vars-on-top
         for (var j = 0; j < h[gray]; j++) {
           // flood all the pixels of the same value
           pgray = pos[gray] + j
           xp = pixelX[pgray]
           yp = pixelY[pgray]
           outPixels[xp + nx * yp] = fMASK
-          getNeighborhood3_4connect(xp, yp, neigh)
+          getNeighborhood34connect(xp, yp, neigh)
+          // eslint-disable-next-line no-var,vars-on-top
           for (var n = 0; n < 4; n++) {
             if (neigh[n] > 4.0 || neigh[n] === fWSHED) {
               outPixels[xp + nx * yp] = fINQUEUE
@@ -649,7 +657,7 @@ export async function protectFlipImage(imgSrc) {
 
         // the second run
         // checks all the pixels INQUEUE (which are also in the FIFO)
-        var p // pixel position in pixelValue, pixelX, pixelY
+        let p // pixel position in pixelValue, pixelX, pixelY
         while (stack.length) {
           // check the pixels inqueue untill empty
           p = stack[0]
@@ -657,7 +665,7 @@ export async function protectFlipImage(imgSrc) {
           stack.shift()
           xp = pixelX[p]
           yp = pixelY[p]
-          getNeighborhood3_4connect(xp, yp, neigh)
+          getNeighborhood34connect(xp, yp, neigh)
           for (n = 0; n < 4; n++) {
             if (neigh[n] > 9.0) {
               if (neigh[4] === fINQUEUE || (neigh[4] === fWSHED && flag)) {
@@ -691,19 +699,19 @@ export async function protectFlipImage(imgSrc) {
           xp = pixelX[pgray]
           yp = pixelY[pgray]
           if (outPixels[xp + nx * yp] === fMASK) {
-            stop = current_label++ > MAXBASINS
+            stop = currentLabel++ > MAXBASINS
             stack.push(pgray)
-            outPixels[xp + nx * yp] = current_label
+            outPixels[xp + nx * yp] = currentLabel
             while (stack.length && !stop) {
               p = stack[0]
               stack.shift()
-              getNeighborhood3_4connect(pixelX[p], pixelY[p], neigh)
+              getNeighborhood34connect(pixelX[p], pixelY[p], neigh)
               for (n = 0; n < 4; n++) {
                 if (neigh[n] === fMASK) {
                   xp = pixelX[p] + xx[n]
                   yp = pixelY[p] + yy[n]
                   stack.push(pixelPos[xp][yp])
-                  outPixels[xp + nx * yp] = current_label
+                  outPixels[xp + nx * yp] = currentLabel
                 }
               }
             } // while
@@ -736,7 +744,7 @@ export async function protectFlipImage(imgSrc) {
      *	In neigh[3] there is the pixel(x, y+1)
      *	In neigh[4] there is the pixel(x, y)	// central point
      */
-    var getNeighborhood3_4connect = function(x, y, neigh) {
+    const getNeighborhood34connect = function(x, y, neigh) {
       let index = x + (y - 1) * nx
       neigh[0] = outPixels[index]
       index += nx - 1
@@ -800,7 +808,7 @@ export async function protectFlipImage(imgSrc) {
 
   const protectedImage = getImageFromImageData(resultImageData)
   await new Promise(resolve => (protectedImage.onload = resolve))
-  const flip = Math.floor(Math.random() * 2) == 0
+  const flip = Math.floor(Math.random() * 2) === 0
   resultCanvasContext.scale(flip ? -1 : 1, 1)
   resultCanvasContext.drawImage(
     protectedImage,
