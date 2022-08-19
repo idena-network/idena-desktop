@@ -206,7 +206,6 @@ export async function publishFlip({
   if (publicHex.length + privateHex.length > 2 * 1024 * 1024)
     throw new Error(i18n.t('Cannot submit flip, content is too big'))
 
-  debugger
   const {result, error} = await submitFlip(publicHex, privateHex, keywordPairId)
 
   if (error) {
@@ -221,6 +220,8 @@ export async function publishFlip({
       throw new Error(
         i18n.t(`Can not submit flip during the validation session`)
       )
+
+    throw new Error(message)
   }
   return result
 }
