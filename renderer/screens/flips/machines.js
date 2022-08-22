@@ -765,15 +765,6 @@ export const flipMasterMachine = Machine(
                   log(),
                 ],
               },
-              SAVE_PROTECTED: {
-                target: '.idle',
-                actions: [
-                  assign({
-                    protectedImages: (_, {images}) => images,
-                  }),
-                  log(),
-                ],
-              },
               PROTECTING: '.protecting',
               NEXT: 'shuffle',
               PREV: 'images',
@@ -781,17 +772,16 @@ export const flipMasterMachine = Machine(
             initial: 'idle',
             states: {
               idle: {},
-              protecting: {},
-              persisting: {
+              protecting: {
                 invoke: {
-                  id: 'persistFlip',
-                  src: 'persistFlip',
-                },
-                on: {
-                  PERSISTED: {
+                  src: 'protectFlip',
+                  onDone: {
                     target: 'idle',
                     actions: [
-                      assign((context, {flip}) => ({...context, ...flip})),
+                      assign((context, {data: {protectedImages}}) => ({
+                        ...context,
+                        protectedImages,
+                      })),
                       log(),
                     ],
                   },

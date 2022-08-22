@@ -74,7 +74,7 @@ export function FlipCard({flipService, onDelete}) {
     id,
     keywords,
     originalOrder,
-    protectedImages,
+    images,
     type,
     createdAt,
     modifiedAt = createdAt,
@@ -119,9 +119,7 @@ export function FlipCard({flipService, onDelete}) {
             </FlipOverlayStatus>
           </FlipOverlay>
         )}
-        <FlipCardImage
-          src={protectedImages[originalOrder ? originalOrder[0] : 0]}
-        />
+        <FlipCardImage src={images[originalOrder ? originalOrder[0] : 0]} />
       </FlipCardImageBox>
       <Flex justifyContent="space-between" alignItems="flex-start" mt={4}>
         <Box>
@@ -717,7 +715,6 @@ export function FlipProtectStep({
   protectedImages,
   onProtecting,
   onProtectImage,
-  onProtectImages,
 }) {
   const {t} = useTranslation()
   const BLANK_IMAGE_DATAURL =
@@ -743,35 +740,7 @@ export function FlipProtectStep({
 
   useEffect(() => {
     onProtecting()
-    const protectedFlips = []
-    const protectImages = async () => {
-      const compressedImages = await Promise.all(
-        images.map(image =>
-          image
-            ? Jimp.read(image).then(raw =>
-                raw
-                  .resize(240, 180)
-                  .quality(60) // jpeg quality
-                  .getBase64Async('image/jpeg')
-              )
-            : image
-        )
-      )
-
-      // eslint-disable-next-line no-plusplus
-      for (let i = 0; i < images.length; i++) {
-        if (compressedImages[i]) {
-          const protectedImageSrc = await protectFlipImage(compressedImages[i])
-          protectedFlips[i] = protectedImageSrc
-        } else {
-          protectedFlips[i] = compressedImages[i]
-        }
-      }
-      onProtectImages(protectedFlips)
-    }
-
-    protectImages()
-  }, [images, onProtectImages, onProtecting])
+  }, [])
 
   return (
     <FlipStep>

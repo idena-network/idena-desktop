@@ -29,6 +29,7 @@ import {
   publishFlip,
   isPendingKeywordPair,
   getRandomKeywordPair,
+  protectFlip,
 } from '../../screens/flips/utils'
 import {Step} from '../../screens/flips/types'
 import {
@@ -95,6 +96,7 @@ export default function NewFlipPage() {
 
         return {keywordPairId, availableKeywords, didShowBadFlip}
       },
+      protectFlip: async flip => protectFlip(flip),
       submitFlip: async flip => publishFlip(flip),
     },
     actions: {
@@ -305,9 +307,6 @@ export default function NewFlipPage() {
                   onProtectImage={(image, currentIndex) =>
                     send('CHANGE_PROTECTED_IMAGES', {image, currentIndex})
                   }
-                  onProtectImages={protectedImgs => {
-                    send('SAVE_PROTECTED', {images: protectedImgs})
-                  }}
                 />
               )}
               {is('shuffle') && (

@@ -6,6 +6,7 @@
 import {encode} from 'rlp'
 import axios from 'axios'
 import dayjs from 'dayjs'
+import Jimp from 'jimp'
 import {loadPersistentStateValue, persistItem} from '../../shared/utils/persist'
 import {FlipType} from '../../shared/types'
 import {areSame, areEual} from '../../shared/utils/arr'
@@ -819,4 +820,31 @@ export async function protectFlipImage(imgSrc) {
     resultImageData.height
   )
   return resultCanvas.toDataURL()
+}
+
+export async function protectFlip({images}) {
+  const protectedFlips = []
+  const compressedImages = await Promise.all(
+    images.map(image =>
+      image
+        ? Jimp.read(image).then(raw =>
+            raw
+              .resize(240, 180)
+              .quality(60) // jpeg quality
+              .getBase64Async('image/jpeg')
+          )
+        : image
+    )
+  )
+
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < images.length; i++) {
+    if (compressedImages[i]) {
+      const protectedImageSrc = await protectFlipImage(compressedImages[i])
+      protectedFlips[i] = protectedImageSrc
+    } else {
+      protectedFlips[i] = compressedImages[i]
+    }
+  }
+  return {protectedImages: protectedFlips}
 }

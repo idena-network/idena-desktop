@@ -25,7 +25,11 @@ import {
 } from '../../screens/flips/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine} from '../../screens/flips/machines'
-import {publishFlip, isPendingKeywordPair} from '../../screens/flips/utils'
+import {
+  publishFlip,
+  isPendingKeywordPair,
+  protectFlip,
+} from '../../screens/flips/utils'
 import {Step} from '../../screens/flips/types'
 import {
   IconButton2,
@@ -83,6 +87,7 @@ export default function EditFlipPage() {
 
         return {...flip, images, keywordPairId, availableKeywords, hint}
       },
+      protectFlip: async flip => protectFlip(flip),
       submitFlip: async flip => publishFlip(flip),
     },
     actions: {
@@ -279,9 +284,6 @@ export default function EditFlipPage() {
                   onProtectImage={(image, currentIndex) =>
                     send('CHANGE_PROTECTED_IMAGES', {image, currentIndex})
                   }
-                  onProtectImages={protectedImgs => {
-                    send('SAVE_PROTECTED', {images: protectedImgs})
-                  }}
                 />
               )}
               {is('shuffle') && (
