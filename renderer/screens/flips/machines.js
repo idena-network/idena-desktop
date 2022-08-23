@@ -769,7 +769,7 @@ export const flipMasterMachine = Machine(
               NEXT: 'shuffle',
               PREV: 'images',
             },
-            initial: 'idle',
+            initial: 'protecting',
             states: {
               idle: {},
               protecting: {
