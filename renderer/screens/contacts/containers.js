@@ -376,7 +376,7 @@ export function ContactCard({
                   }}
                   onClick={onKillContact}
                 >
-                  {t('Kill')}
+                  {t('Terminate invitation')}
                 </IconButton2>
               </>
             )}
