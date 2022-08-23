@@ -47,6 +47,7 @@ import {
   FloatDebug,
   Page,
   TextLink,
+  Tooltip,
 } from '../shared/components/components'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
 import {
@@ -401,7 +402,7 @@ export default function ProfilePage() {
                     {Boolean(status) && status !== IdentityStatus.Undefined && (
                       <UserStatList title={t('Stake')}>
                         <Stack isInline spacing={0}>
-                          <Stack spacing="3" flex={1}>
+                          <Stack spacing={1} flex={1}>
                             <UserStat>
                               <UserStatLabel
                                 color="muted"
@@ -454,7 +455,7 @@ export default function ProfilePage() {
                               />
                             )}
                           </Stack>
-                          <Stack spacing="3" flex={1}>
+                          <Stack spacing={1} flex={1}>
                             <UserStat>
                               <UserStatLabel
                                 color="muted"
@@ -468,6 +469,26 @@ export default function ProfilePage() {
                                   {stakingApy > 0
                                     ? toPercent(stakingApy)
                                     : '--'}
+                                  {canMine && !online && (
+                                    <Tooltip
+                                      shouldWrapChildren
+                                      bg="graphite.500"
+                                      placement="top"
+                                      hasArrow
+                                      label={t(
+                                        'Please activate your mining status to earn the staking rewards'
+                                      )}
+                                      w="130px"
+                                    >
+                                      <Icon
+                                        name="info"
+                                        size={4}
+                                        color="red.500"
+                                        ml={1}
+                                        mt="-2px"
+                                      />
+                                    </Tooltip>
+                                  )}
                                 </Text>
                                 <ExternalLink
                                   href={`https://idena.io/staking?amount=${Math.floor(
