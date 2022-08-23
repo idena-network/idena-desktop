@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, {useEffect} from 'react'
 import NextLink from 'next/link'
 import {
   SimpleGrid,
-  Image,
+  Image as ChakraImage,
   Text,
   Box,
   Flex,
@@ -32,9 +32,10 @@ import {
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
 import {useService} from '@xstate/react'
+import Jimp from 'jimp'
 import FlipEditor from './components/flip-editor'
 import {Step} from './types'
-import {formatKeywords} from './utils'
+import {formatKeywords, protectFlipImage} from './utils'
 import {PrimaryButton, IconButton2} from '../../shared/components/button'
 import {rem} from '../../shared/theme'
 import {capitalize} from '../../shared/utils/string'
@@ -199,7 +200,7 @@ export function FlipCard({flipService, onDelete}) {
 
 export function FlipCardImage(props) {
   return (
-    <Image
+    <ChakraImage
       objectFit="cover"
       borderWidth="1px"
       borderColor="brandGray.016"
@@ -692,6 +693,95 @@ export function FlipEditorStep({
   )
 }
 
+export function FlipProtectStep({
+  originalOrder,
+  images,
+  protectedImages,
+  onProtecting,
+  onProtectImage,
+}) {
+  const {t} = useTranslation()
+  const BLANK_IMAGE_DATAURL =
+    'data:image/png;base64,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'
+
+  const [currentIndex, setCurrentIdx] = React.useState(0)
+
+  const regenerateImage = async () => {
+    onProtecting()
+    const compressedImage = await new Promise(resolve =>
+      resolve(
+        Jimp.read(images[originalOrder[currentIndex]]).then(raw =>
+          raw
+            .resize(240, 180)
+            .quality(60) // jpeg quality
+            .getBase64Async('image/jpeg')
+        )
+      )
+    )
+    const protectedImageSrc = await protectFlipImage(compressedImage)
+    onProtectImage(protectedImageSrc, originalOrder[currentIndex])
+  }
+
+  useEffect(() => {
+    onProtecting()
+  }, [])
+
+  return (
+    <FlipStep>
+      <FlipStepHeader>
+        <FlipStepTitle>
+          {t('Protect your images with adversarial noise')}
+        </FlipStepTitle>
+        <FlipStepSubtitle>
+          {t(`Adversarial noise makes your flip more AI-resistant`)}
+        </FlipStepSubtitle>
+      </FlipStepHeader>
+      <Stack isInline spacing={10}>
+        <FlipImageList>
+          {originalOrder.map((num, idx) => (
+            <SelectableItem
+              isActive={idx === currentIndex}
+              isFirst={idx === 0}
+              isLast={idx === images.length - 1}
+              onClick={() => setCurrentIdx(idx)}
+            >
+              <FlipImageListItem
+                key={num}
+                src={protectedImages[num]}
+                isFirst={idx === 0}
+                isLast={idx === images.length - 1}
+                onClick={() => setCurrentIdx(idx)}
+              />
+            </SelectableItem>
+          ))}
+        </FlipImageList>
+        <Box>
+          <ChakraImage
+            h="330px"
+            w="440px"
+            borderRadius="8px"
+            border="solid 1px rgba(83, 86, 92, 0.16)"
+            src={
+              protectedImages[originalOrder[currentIndex]] ||
+              BLANK_IMAGE_DATAURL
+            }
+          />
+          <Box mt={2}>
+            <Tooltip label={t('Regenerate adversarial noise')}>
+              <IconButton2
+                icon="cycle"
+                boxSize={5}
+                color="blue.500"
+                onClick={regenerateImage}
+              />
+            </Tooltip>
+          </Box>
+        </Box>
+      </Stack>
+    </FlipStep>
+  )
+}
+
 export function FlipEditorIcon(props) {
   return (
     <Box as={Icon} boxSize={5} _hover={{color: 'brandBlue.500'}} {...props} />
@@ -969,7 +1059,7 @@ export function FlipImage({
       {...props}
     >
       {src ? (
-        <Image
+        <ChakraImage
           src={src}
           objectFit={objectFit}
           fallbackSrc="/static/flips-cant-icn.svg"
