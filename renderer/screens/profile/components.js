@@ -62,6 +62,7 @@ import {
   callRpc,
   dummyAddress,
   eitherState,
+  humanizeDuration,
   toLocaleDna,
   toPercent,
 } from '../../shared/utils/utils'
@@ -1026,7 +1027,7 @@ export function ProfileTagList() {
   const {t, i18n} = useTranslation()
 
   const [
-    {age, penalty, totalShortFlipPoints, totalQualifiedFlips},
+    {age, penalty, penaltySeconds, totalShortFlipPoints, totalQualifiedFlips},
   ] = useIdentity()
 
   const epoch = useEpochState()
@@ -1088,6 +1089,7 @@ export function ProfileTagList() {
         </Box>
       )}
 
+      {/* TODO: remove after fork 0.30.0 */}
       {penalty > 0 && (
         <ProfileTag
           label={t('Mining penalty')}
@@ -1097,7 +1099,16 @@ export function ProfileTagList() {
         />
       )}
 
-      {inviteScore && (
+      {penaltySeconds > 0 && (
+        <ProfileTag
+          label={t('Mining penalty')}
+          value={humanizeDuration(penaltySeconds)}
+          bg="red.012"
+          color="red.500"
+        />
+      )}
+
+      {inviteScore > 0 && (
         <Box>
           <ProfileTagPopover>
             <ProfileTagPopoverTrigger>

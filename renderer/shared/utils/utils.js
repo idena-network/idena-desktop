@@ -1,7 +1,12 @@
 import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import i18n from '../../i18n'
 import {getRpcParams} from '../api/api-client'
 import {EpochPeriod} from '../types'
+
+dayjs.extend(duration)
+dayjs.extend(relativeTime)
 
 export const HASH_IN_MEMPOOL =
   '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -162,3 +167,6 @@ export function skipSSR(expr) {
 
 export const isAddress = address =>
   address.length === 42 && address.substr(0, 2) === '0x'
+
+export const humanizeDuration = (d, unit = 's') =>
+  dayjs.duration(d, unit).humanize()
