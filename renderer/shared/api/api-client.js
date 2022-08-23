@@ -25,7 +25,6 @@ export function getRpcParams() {
 }
 
 export const apiUrl = path => {
-  debugger
   const state = loadPersistentState('settings')
   if (state?.apiUrl) return new URL(path, state?.apiUrl)
   return new URL(path, global.env.INDEXER_URL || 'https://api.idena.io/api/')
