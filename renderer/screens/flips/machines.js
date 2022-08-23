@@ -767,7 +767,10 @@ export const flipMasterMachine = Machine(
               },
               PROTECTING: '.protecting',
               NEXT: 'shuffle',
-              PREV: 'images',
+              PREV: {
+                target: 'images',
+                actions: [assign({protectedImages: Array.from({length: 4})})],
+              },
             },
             initial: 'protecting',
             states: {
