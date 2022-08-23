@@ -769,12 +769,26 @@ export const flipMasterMachine = Machine(
               NEXT: 'shuffle',
               PREV: {
                 target: 'images',
-                actions: [assign({protectedImages: Array.from({length: 4})})],
+                actions: [
+                  assign({
+                    protectedImages: Array.from({length: 4}),
+                  }),
+                ],
               },
             },
-            initial: 'protecting',
+            initial: 'idle',
             states: {
-              idle: {},
+              idle: {
+                on: {
+                  '': [
+                    {
+                      target: 'protecting',
+                      cond: ({protectedImages}) =>
+                        !protectedImages.some(x => x),
+                    },
+                  ],
+                },
+              },
               protecting: {
                 invoke: {
                   src: 'protectFlip',
