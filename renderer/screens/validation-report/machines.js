@@ -1,6 +1,6 @@
 import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
-import {apiMethod} from '../../shared/utils/utils'
+import {apiUrl} from '../../shared/api/api-client'
 import {ValidationResult} from './types'
 
 export const validationReportMachine = createMachine({
@@ -27,7 +27,7 @@ export const validationReportMachine = createMachine({
           const validationSummary = await (
             await (
               await fetch(
-                apiMethod(
+                apiUrl(
                   `Epoch/${epochNumber}/Identity/${address}/ValidationSummary`
                 )
               )

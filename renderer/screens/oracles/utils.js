@@ -5,6 +5,7 @@ import {VotingStatus} from '../../shared/types'
 import {callRpc, roundToPrecision, toLocaleDna} from '../../shared/utils/utils'
 import {strip} from '../../shared/utils/obj'
 import {ContractRpcMode, VotingListFilter} from './types'
+import {apiUrl} from '../../shared/api/api-client'
 
 export const isVotingStatus = targetStatus => ({status}) =>
   areSameCaseInsensitive(status, targetStatus)
@@ -20,10 +21,6 @@ export const setVotingStatus = status =>
     prevStatus: ({status: currentStatus}) => currentStatus,
     status,
   })
-
-export function apiUrl(path) {
-  return `https://api.idena.io/api/${path}`
-}
 
 export async function fetchVotings({
   all = false,

@@ -17,7 +17,7 @@ export function requestDb(name = 'db') {
   return idenaDb
 }
 
-export const epochDb = (db, epoch, options) => {
+export const epochDb = (db, epoch = 0, options) => {
   const epochPrefix = `epoch${epoch}`
 
   const nextOptions = {
