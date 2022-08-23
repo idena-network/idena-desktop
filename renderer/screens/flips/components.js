@@ -722,10 +722,6 @@ export function FlipProtectStep({
     onProtectImage(protectedImageSrc, originalOrder[currentIndex])
   }
 
-  useEffect(() => {
-    onProtecting()
-  }, [])
-
   return (
     <FlipStep>
       <FlipStepHeader>
