@@ -780,10 +780,11 @@ export function FlipProtectStep({
           />
           <Box mt={2}>
             <Tooltip label={t('Regenerate adversarial noise')}>
-              <IconButton2
-                icon="cycle"
-                boxSize={5}
+              <Icon
                 color="blue.500"
+                name="cycle"
+                size={5}
+                mr={2}
                 onClick={regenerateImage}
               />
             </Tooltip>
