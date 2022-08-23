@@ -142,9 +142,12 @@ export default function FlipEditor({
 
   const [insertImageMode, setInsertImageMode] = useState(0)
 
+  const epoch = useEpochState()
+  const bottomWatermark = epoch && `${epoch.nextValidation.substr(5, 5)}`
+
   const setImageUrl = useCallback(
     (data, onDone = null) => {
-      const {url, insertMode, customEditor} = data
+      const {url, insertMode, customEditor, watermark} = data
       const nextInsertMode = insertMode || insertImageMode
       const editor = customEditor || editors[idx]
 
@@ -233,6 +236,64 @@ export default function FlipEditor({
                   scaleY: newHeight / height,
                 })
 
+                if (watermark) {
+                  const {id: shadowId2} = await editor.addImageObject(
+                    SHADOW_IMAGE_DATAURL
+                  )
+                  editor.setObjectPropertiesQuietly(shadowId2, {
+                    left: IMAGE_WIDTH / 2,
+                    top: IMAGE_HEIGHT / 2,
+                    scaleX: IMAGE_WIDTH,
+                    scaleY: IMAGE_HEIGHT,
+                  })
+
+                  const xPos = IMAGE_WIDTH / 2 + Math.random() * 30 - 15
+                  const yPos = IMAGE_HEIGHT / 2 + Math.random() * 40 - 20
+                  const anglePos = Math.random() * 70 - 35
+
+                  const angleRad = (Math.PI * anglePos) / 180
+                  const xPos2 = xPos - 80 * Math.sin(angleRad)
+                  const yPos2 = yPos + 80 * Math.abs(Math.cos(angleRad))
+
+                  const {id: textOjectId} = await editor.addText(watermark, {
+                    styles: {
+                      fill: '#ffffff35',
+                      fontFamily: 'Inter',
+                      fontSize: 170,
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                    },
+                    position: {
+                      x: xPos,
+                      y: yPos,
+                    },
+                  })
+
+                  editor.setObjectPropertiesQuietly(textOjectId, {
+                    angle: anglePos,
+                  })
+
+                  const {id: textOjectId1} = await editor.addText(
+                    'www.idena.io',
+                    {
+                      styles: {
+                        fill: '#ffffff35',
+                        fontFamily: 'Inter',
+                        fontSize: 40,
+                        fontWeight: 'normal',
+                        textAlign: 'center',
+                      },
+                      position: {
+                        x: xPos2,
+                        y: yPos2,
+                      },
+                    }
+                  )
+
+                  editor.setObjectPropertiesQuietly(textOjectId1, {
+                    angle: anglePos,
+                  })
+                }
                 await editor.loadImageFromURL(editor.toDataURL(), 'Bkgd')
                 editor.clearUndoStack()
                 editor.clearRedoStack()
@@ -262,7 +323,7 @@ export default function FlipEditor({
     reader.addEventListener('loadend', re => {
       const img = global.nativeImage.createFromDataURL(re.target.result)
       const url = imageResize(img, IMAGE_WIDTH, IMAGE_HEIGHT)
-      setImageUrl({url})
+      setImageUrl({url, watermark: bottomWatermark})
       setInsertImageMode(0)
     })
     reader.readAsDataURL(file)
@@ -285,6 +346,7 @@ export default function FlipEditor({
           } else {
             setImageUrl({
               url,
+              watermark: bottomWatermark,
               insertMode: INSERT_OBJECT_IMAGE,
             })
           }
@@ -967,7 +1029,7 @@ export default function FlipEditor({
         isOpen={showImageSearch}
         onPick={url => {
           if (visible) {
-            setImageUrl({url})
+            setImageUrl({url, watermark: bottomWatermark})
           }
           setInsertImageMode(0)
           setShowImageSearch(false)
