@@ -52,6 +52,7 @@ process.once('loaded', () => {
     NODE_MOCK: process.env.NODE_MOCK,
     BUMP_EXTRA_FLIPS: process.env.BUMP_EXTRA_FLIPS,
     FINALIZE_FLIPS: process.env.FINALIZE_FLIPS,
+    INDEXER_URL: process.env.INDEXER_URL,
   }
 
   global.toggleFullScreen = () => {

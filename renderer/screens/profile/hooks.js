@@ -10,8 +10,8 @@ import {
 } from '../../shared/utils/utils'
 import {IdentityStatus, TxType} from '../../shared/types'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {apiUrl} from '../oracles/utils'
 import {useChainState} from '../../shared/providers/chain-context'
+import {apiUrl} from '../../shared/api/api-client'
 
 export function useIdenaBot() {
   const [connected, setConnected] = useState(true)

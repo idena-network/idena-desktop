@@ -24,6 +24,12 @@ export function getRpcParams() {
   }
 }
 
+export const apiUrl = path => {
+  const state = loadPersistentState('settings')
+  if (state?.apiUrl) return new URL(path, state?.apiUrl)
+  return new URL(path, global.env.INDEXER_URL || 'https://api.idena.io/api/')
+}
+
 export default function createApiClient() {
   const params = getRpcParams()
   const instance = axios.create({

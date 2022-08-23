@@ -6,6 +6,7 @@ import {eitherState, skipSSR} from '../../shared/utils/utils'
 import {useAutoUpdateState} from '../../shared/providers/update-context'
 import {requestDb} from '../../shared/utils/db'
 import {isFork} from '../../shared/utils/node'
+import {apiUrl} from '../../shared/api/api-client'
 
 function createVotingStatusDb(version) {
   const db = global.sub(requestDb(), 'updates')
@@ -60,24 +61,20 @@ export function useFork() {
           fetching: {
             invoke: {
               src: async (_, {version}) => {
-                const fetchJsonResult = async (
-                  path,
-                  base = 'https://api.idena.io'
-                ) =>
-                  (await (await fetch(new URL(`api${path}`, base))).json())
-                    .result
+                const fetchJsonResult = async path =>
+                  (await (await fetch(apiUrl(path))).json()).result
 
                 const forkChangelog = await fetchJsonResult(
-                  `/node/${version}/forkchangelog`
+                  `node/${version}/forkchangelog`
                 )
 
                 const [{upgrade: highestUpgrade}] = await fetchJsonResult(
-                  '/upgrades?limit=1'
+                  'upgrades?limit=1'
                 )
 
                 const nextTiming =
                   forkChangelog &&
-                  (await fetchJsonResult(`/upgrade/${forkChangelog.Upgrade}`))
+                  (await fetchJsonResult(`upgrade/${forkChangelog.Upgrade}`))
 
                 return {
                   changes: forkChangelog?.Changes ?? [],

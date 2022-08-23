@@ -1,5 +1,5 @@
 import React from 'react'
-import {apiUrl} from '../../screens/oracles/utils'
+import {apiUrl} from '../api/api-client'
 import {fetchCeremonyIntervals} from '../api/dna'
 import {useInterval} from '../hooks/use-interval'
 import {ntp} from '../utils/utils'

@@ -6,7 +6,7 @@
   "repository": "idena-network/idena-desktop",
   "license": "MIT",
   "scripts": {
-    "start": "electron .",
+    "start": "dotenv -e .env.local electron .",
     "build": "next build renderer && next export renderer",
     "dist": "npm run build && electron-builder",
     "dist:win": "npm run build && electron-builder --win --publish onTag",

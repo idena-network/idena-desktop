@@ -226,13 +226,7 @@ export const votingListMachine = Machine(
       }),
     },
     services: {
-      loadVotings: async ({
-        epoch,
-        address,
-        filter,
-        statuses,
-        continuationToken,
-      }) => {
+      loadVotings: async ({address, filter, statuses, continuationToken}) => {
         const {
           result,
           continuationToken: nextContinuationToken,
@@ -251,7 +245,7 @@ export const votingListMachine = Machine(
 
         const knownVotings = (result ?? []).map(mapVoting)
 
-        const db = epochDb('votings', epoch)
+        const db = epochDb('votings')
 
         await db.batchPut(knownVotings)
 
@@ -444,8 +438,8 @@ export const votingMachine = Machine(
         miningStatus: null,
       }),
       // eslint-disable-next-line no-shadow
-      persist: ({epoch, ...context}) => {
-        epochDb('votings', epoch).put(context)
+      persist: context => {
+        epochDb('votings').put(context)
       },
       applyMinOracleReward: assign({
         minOracleReward: (_, {data}) => data,
@@ -884,8 +878,8 @@ export const createNewVotingMachine = (epoch, address) =>
         setPending: setVotingStatus(VotingStatus.Pending),
         setRunning: setVotingStatus(VotingStatus.Open),
         // eslint-disable-next-line no-shadow
-        persist: ({epoch, ...context}) => {
-          epochDb('votings', epoch).put(context)
+        persist: context => {
+          epochDb('votings').put(context)
         },
       },
       services: {
@@ -904,7 +898,7 @@ export const createNewVotingMachine = (epoch, address) =>
         },
         deployContract: async (
           // eslint-disable-next-line no-shadow
-          {epoch, address, ...voting},
+          {address, ...voting},
           {data: {contract, from, balance, stake, gasCost, txFee}}
         ) => {
           const txHash = await callRpc(
@@ -925,7 +919,7 @@ export const createNewVotingMachine = (epoch, address) =>
             finishDate: votingFinishDate(voting),
           }
 
-          await epochDb('votings', epoch).put({
+          await epochDb('votings').put({
             ...nextVoting,
             txHash,
             status: VotingStatus.Deploying,
@@ -955,7 +949,7 @@ export const createNewVotingMachine = (epoch, address) =>
             clearTimeout(timeoutId)
           }
         },
-        persist: context => epochDb('votings', epoch).put(context),
+        persist: context => epochDb('votings').put(context),
       },
       guards: {
         shouldStartImmediately: ({shouldStartImmediately}) =>
@@ -1235,8 +1229,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
           selectedOption: (_, {option}) => option,
         }),
         // eslint-disable-next-line no-shadow
-        persist: ({epoch, address, ...context}) => {
-          epochDb('votings', epoch).put(context)
+        persist: context => {
+          epochDb('votings').put(context)
         },
         applyMinOracleReward: assign({
           minOracleReward: (_, {data}) => data,
@@ -1244,8 +1238,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
       },
       services: {
         // eslint-disable-next-line no-shadow
-        loadVoting: async ({epoch, address, id}) => ({
-          ...(await epochDb('votings', epoch)
+        loadVoting: async ({address, id}) => ({
+          ...(await epochDb('votings')
             .load(id)
             .catch(() => null)),
           ...mapVoting(await fetchVoting({id, address})),
