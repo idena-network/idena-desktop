@@ -74,7 +74,6 @@ import {
   mapVotingStatus,
   quorumVotesCount,
   sumAccountableVotes,
-  votingMinBalance,
 } from '../../screens/oracles/utils'
 import {
   Table,
@@ -161,7 +160,8 @@ export default function ViewVotingPage() {
     estimatedOracleReward,
     estimatedMaxOracleReward = estimatedOracleReward,
     isOracle,
-    minOracleReward,
+    ownerDeposit,
+    rewardsFund,
     estimatedTotalReward,
     epochWithoutGrowth,
   } = current.context
@@ -908,6 +908,9 @@ export default function ViewVotingPage() {
         to={contractHash}
         available={identity.balance}
         ownerFee={ownerFee}
+        ownerDeposit={Number(ownerDeposit)}
+        rewardsFund={Number(rewardsFund)}
+        balance={contractBalance}
         isLoading={current.matches(`mining.${VotingStatus.Funding}`)}
         onAddFund={({amount, from}) => {
           send('ADD_FUND', {amount, from})
@@ -924,17 +927,16 @@ export default function ViewVotingPage() {
           send('CANCEL')
         }}
         balance={contractBalance}
-        requiredBalance={votingMinBalance({
-          minOracleReward,
-          committeeSize,
-        })}
         ownerFee={ownerFee}
+        ownerDeposit={Number(ownerDeposit)}
+        rewardsFund={Number(rewardsFund)}
         from={identity.address}
         available={identity.balance}
         isLoading={current.matches(`mining.${VotingStatus.Starting}`)}
         onLaunch={e => {
           send('START_VOTING', e)
         }}
+        onError={e => send('ERROR', e)}
       />
 
       <FinishDrawer

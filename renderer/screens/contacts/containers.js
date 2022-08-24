@@ -21,7 +21,6 @@ import {
 } from '../../shared/providers/identity-context'
 import {
   byId,
-  calculateInvitationRewardRatio,
   dummyAddress,
   toLocaleDna,
   toPercent,
@@ -49,8 +48,6 @@ import {
   ContactDrawerHeader,
   ContactStat,
 } from './components'
-import {useEpochState} from '../../shared/providers/epoch-context'
-import {useChainState} from '../../shared/providers/chain-context'
 import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {IdentityStatus} from '../../shared/types'
 import {VotingSkeleton} from '../oracles/components'

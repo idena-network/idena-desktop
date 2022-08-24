@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
@@ -87,10 +87,8 @@ import {
   humanizeDuration,
   viewVotingHref,
   votingFinishDate,
-  votingMinBalance,
   hasQuorum,
   mapVotingStatus,
-  effectiveBalance,
   getUrls,
   sumAccountableVotes,
   areSameCaseInsensitive,
@@ -406,16 +404,26 @@ export function AddFundDrawer({
   ownerFee,
   isLoading,
   onAddFund,
+  ownerDeposit,
+  rewardsFund,
+  balance,
   ...props
 }) {
   const {t, i18n} = useTranslation()
 
-  const toDna = toLocaleDna(i18n.language)
+  const toDna = toLocaleDna(i18n.language, {maximumFractionDigits: 4})
 
-  const [{oracleAmount, ownerAmount}, setAmount] = React.useState({
-    oracleAmount: 0,
-    ownerAmount: 0,
-  })
+  const [amount, setAmount] = React.useState(0)
+
+  const rewardGap = Math.max(0, ownerDeposit + rewardsFund - balance)
+
+  const cleanRewards = Math.min(amount, rewardGap)
+
+  const currentOwnerFee = (Math.max(0, amount - cleanRewards) * ownerFee) / 100
+
+  const dirtyRewards = Math.max(0, amount - cleanRewards - currentOwnerFee)
+
+  const currentOracleRewards = cleanRewards + dirtyRewards
 
   return (
     <Drawer {...props}>
@@ -424,13 +432,12 @@ export function AddFundDrawer({
         as="form"
         onSubmit={e => {
           e.preventDefault()
-          const {amountInput, fromInput} = e.target.elements
-          onAddFund({amount: Number(amountInput.value), from: fromInput.value})
+          onAddFund({amount, from})
         }}
       >
         <OracleDrawerBody>
           <OracleFormControl label={t('Transfer from')}>
-            <Input name="fromInput" defaultValue={from} />
+            <Input name="fromInput" defaultValue={from} isDisabled />
             <OracleFormHelper label={t('Available')} value={toDna(available)} />
           </OracleFormControl>
           <OracleFormControl label="To address">
@@ -440,26 +447,16 @@ export function AddFundDrawer({
             <DnaInput
               name="amountInput"
               onChange={e => {
-                // eslint-disable-next-line no-shadow
-                const amount = Number(e.target.value)
-                // eslint-disable-next-line no-shadow
-                const oracleAmount = effectiveBalance({
-                  balance: amount,
-                  ownerFee,
-                })
-                setAmount({
-                  oracleAmount,
-                  ownerAmount: amount - oracleAmount,
-                })
+                setAmount(Number(e.target.value))
               }}
             />
             <OracleFormHelper
-              label={t('Paid to oracles')}
-              value={toDna(oracleAmount)}
+              label={t('Oracle rewards')}
+              value={toDna(currentOracleRewards)}
             />
             <OracleFormHelper
-              label={t('Paid to owner')}
-              value={toDna(ownerAmount)}
+              label={t('Owner fee')}
+              value={toDna(currentOwnerFee)}
             />
           </OracleFormControl>
           <PrimaryButton
@@ -493,7 +490,7 @@ export function VoteDrawer({
 
   const {balance} = useIdentityState()
 
-  const toDna = toLocaleDna(i18n.language)
+  const toDna = toLocaleDna(i18n.language, {maximumFractionDigits: 4})
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
@@ -551,26 +548,42 @@ export function VoteDrawer({
 export function ReviewVotingDrawer({
   from,
   available,
-  balance,
   minStake,
   ownerFee,
+  ownerDeposit,
+  rewardsFund,
   isLoading,
   votingDuration,
   publicVotingDuration,
+  shouldStartImmediately,
+  ownerAddress,
+  isCustomOwnerAddress,
   onConfirm,
+  onError,
+  isOpen,
   ...props
 }) {
   const {t, i18n} = useTranslation()
 
-  const oracleAmount = effectiveBalance({
-    balance,
-    ownerFee,
-  })
+  const [sendAmount, setSendAmount] = useState()
 
-  const toDna = toLocaleDna(i18n.language)
+  const hasRequiredAmount = !isCustomOwnerAddress && shouldStartImmediately
+
+  useEffect(() => {
+    if (hasRequiredAmount) setSendAmount(ownerDeposit + rewardsFund)
+    else setSendAmount(0)
+  }, [ownerDeposit, rewardsFund, isOpen, hasRequiredAmount])
+
+  const toDna = toLocaleDna(i18n.language, {maximumFractionDigits: 4})
+
+  const ownerRefund =
+    Math.min(sendAmount, ownerDeposit) +
+    Math.max(0, ((sendAmount - ownerDeposit - rewardsFund) * ownerFee) / 100)
+
+  const oraclesReward = Math.max(0, sendAmount - ownerRefund)
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
       <OracleDrawerHeader icon="oracle">
         {t('Create Oracle Voting')}
       </OracleDrawerHeader>
@@ -578,47 +591,44 @@ export function ReviewVotingDrawer({
         as="form"
         onSubmit={e => {
           e.preventDefault()
-          const {fromInput, balanceInput, stakeInput} = e.target.elements
+          if (hasRequiredAmount && sendAmount < ownerDeposit) {
+            return onError({
+              data: {message: 'Insufficient funds to start the voting'},
+            })
+          }
+
           onConfirm({
-            from: fromInput.value,
-            balance: Number(balanceInput.value),
-            stake: Number(stakeInput.value),
+            from,
+            balance: sendAmount,
+            stake: minStake,
           })
         }}
       >
         <OracleFormControl label={t('Transfer from')}>
           <Input name="fromInput" defaultValue={from} isDisabled />
+          <OracleFormHelper label={t('Available')} value={toDna(available)} />
+        </OracleFormControl>
+        <OracleFormControl label={t('Send')}>
+          <DnaInput
+            name="balanceInput"
+            value={sendAmount}
+            onChange={e => setSendAmount(Number(e.target.value))}
+            isInvalid={hasRequiredAmount && sendAmount < ownerDeposit}
+          />
           <OracleFormHelper
-            label={t('Available')}
-            value={toLocaleDna(i18n.language)(available)}
+            label={t('Required to launch')}
+            value={toDna(ownerDeposit)}
+          />
+          <OracleFormHelper
+            mt={4}
+            label={t('Oracles rewards')}
+            value={toDna(oraclesReward)}
+          />
+          <OracleFormHelper
+            label={t('Owner refund')}
+            value={toDna(ownerRefund)}
           />
         </OracleFormControl>
-        <FormControl>
-          <FormLabel mb={2}>
-            <Tooltip
-              label={t(`Rewards will be paid to Oracles`)}
-              placement="top"
-              zIndex="tooltip"
-            >
-              <Text
-                borderBottom="dotted 1px"
-                borderBottomColor="muted"
-                cursor="help"
-              >
-                {t('Rewards')}
-              </Text>
-            </Tooltip>
-          </FormLabel>
-          <DnaInput name="balanceInput" defaultValue={balance} isDisabled />
-          <OracleFormHelper
-            label={t('Paid to oracles')}
-            value={toDna(oracleAmount)}
-          />
-          <OracleFormHelper
-            label={t('Paid to owner')}
-            value={toDna(balance - oracleAmount)}
-          />
-        </FormControl>
         <FormControl>
           <FormLabel mb={2}>
             <Tooltip
@@ -639,7 +649,7 @@ export function ReviewVotingDrawer({
           </FormLabel>
           <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
         </FormControl>
-        <Box>
+        <OracleFormControl>
           <OracleFormHelper
             label={t('Secret voting')}
             value={t('About {{duration}}', {
@@ -652,13 +662,12 @@ export function ReviewVotingDrawer({
               duration: humanizeDuration(publicVotingDuration),
             })}
           />
-        </Box>
-        <Box>
           <OracleFormHelper
+            mt={4}
             label={t('Total amount')}
-            value={toLocaleDna(i18n.language)(balance + minStake)}
+            value={toDna(sendAmount + minStake)}
           />
-        </Box>
+        </OracleFormControl>
         <PrimaryButton
           isLoading={isLoading}
           loadingText={t('Publishing')}
@@ -1086,25 +1095,35 @@ function VotingResultBar({
 
 export function LaunchDrawer({
   balance,
-  requiredBalance,
   available,
   from,
   ownerFee,
   isLoading,
+  ownerDeposit,
+  rewardsFund,
   onLaunch,
+  onError,
+  isOpen,
   ...props
 }) {
   const {t, i18n} = useTranslation()
 
-  const dna = toLocaleDna(i18n.language)
+  const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 4})
 
-  const oracleAmount = effectiveBalance({
-    balance: requiredBalance - balance,
-    ownerFee,
-  })
+  const [sendAmount, setSendAmount] = useState()
+
+  useEffect(() => {
+    setSendAmount(Math.max(0, ownerDeposit + rewardsFund - balance))
+  }, [balance, ownerDeposit, rewardsFund, isOpen])
+
+  const ownerRefund =
+    Math.min(sendAmount, ownerDeposit) +
+    Math.max(0, ((sendAmount - ownerDeposit - rewardsFund) * ownerFee) / 100)
+
+  const oraclesReward = Math.max(0, sendAmount - ownerRefund)
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
       <OracleDrawerHeader icon="oracle">
         {t('Launch Oracle Voting')}
       </OracleDrawerHeader>
@@ -1112,10 +1131,15 @@ export function LaunchDrawer({
         as="form"
         onSubmit={e => {
           e.preventDefault()
-          const {balanceInput, fromInput} = e.target.elements
+
+          if (sendAmount < Math.max(0, ownerDeposit - balance)) {
+            return onError({
+              data: {message: 'Insufficient funds to start the voting'},
+            })
+          }
+
           onLaunch({
-            amount: Number(balanceInput.value),
-            from: fromInput.value,
+            amount: sendAmount,
           })
         }}
       >
@@ -1126,27 +1150,27 @@ export function LaunchDrawer({
         <OracleFormControl label={t('Send')}>
           <DnaInput
             name="balanceInput"
-            defaultValue={Math.max(requiredBalance - balance, 0)}
-            step="any"
+            onChange={e => setSendAmount(Number(e.target.value))}
+            value={sendAmount}
+            isInvalid={sendAmount < Math.max(0, ownerDeposit - balance)}
           />
           <OracleFormHelper
             label={t('Minimum deposit required')}
-            value={dna(requiredBalance)}
+            value={dna(Math.max(0, ownerDeposit - balance))}
           />
           <OracleFormHelper
             label={t('Current contract balance')}
             value={dna(balance)}
           />
           <OracleFormHelper
-            label={t('Paid to oracles')}
-            value={dna(oracleAmount)}
+            label={t('Oracles rewards')}
+            value={dna(oraclesReward)}
           />
           <OracleFormHelper
-            label={t('Paid to owner')}
-            value={dna(requiredBalance - balance - oracleAmount)}
+            label={t('Owner refund')}
+            value={dna(ownerRefund)}
           />
         </OracleFormControl>
-        )
         <PrimaryButton
           isLoading={isLoading}
           loadingText={t('Launching')}
@@ -1216,7 +1240,7 @@ export function LaunchVotingDrawer({votingService}) {
 
   const [current, send] = useService(votingService)
 
-  const {balance, minOracleReward, committeeSize, ownerFee} = current.context
+  const {balance, ownerDeposit, rewardsFund, ownerFee} = current.context
 
   return (
     <LaunchDrawer
@@ -1229,17 +1253,16 @@ export function LaunchVotingDrawer({votingService}) {
         send('CANCEL')
       }}
       balance={Number(balance)}
-      requiredBalance={votingMinBalance({
-        minOracleReward,
-        committeeSize,
-      })}
       ownerFee={ownerFee}
+      ownerDeposit={Number(ownerDeposit)}
+      rewardsFund={Number(rewardsFund)}
       from={identity.address}
       available={identity.balance}
       isLoading={current.matches(`mining.${VotingStatus.Starting}`)}
       onLaunch={e => {
         send('START_VOTING', e)
       }}
+      onError={e => send('ERROR', e)}
     />
   )
 }

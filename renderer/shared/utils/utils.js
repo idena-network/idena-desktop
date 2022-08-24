@@ -166,7 +166,7 @@ export function skipSSR(expr) {
 }
 
 export const isAddress = address =>
-  address.length === 42 && address.substr(0, 2) === '0x'
+  address && address.length === 42 && address.substr(0, 2) === '0x'
 
 export const humanizeDuration = (d, unit = 's') =>
   dayjs.duration(d, unit).humanize()
