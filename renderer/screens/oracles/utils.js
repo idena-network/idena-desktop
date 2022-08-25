@@ -433,6 +433,7 @@ export const humanError = (
     minOracleReward,
     committeeSize,
     votingMinPayment,
+    ownerDeposit,
   },
   locale = global.locale
 ) => {
@@ -454,6 +455,11 @@ export const humanError = (
       })
       return `Insufficient funds to start the voting. Minimum deposit is required: ${dna(
         requiredBalance
+      )}. Current balance: ${dna(balance)}.`
+    }
+    case 'contract balance is less than minimal deposit': {
+      return `Insufficient funds to start the voting. Minimum deposit is required: ${dna(
+        ownerDeposit
       )}. Current balance: ${dna(balance)}.`
     }
     case 'sender is not identity':
