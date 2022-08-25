@@ -143,11 +143,9 @@ export function useStakingApy() {
     notifyOnChangeProps: 'tracked',
   })
 
-  const {data: validationRewardsSummaryData} = useQuery({
-    queryKey: ['epoch', epoch?.epoch - 1, 'rewardsSummary'],
+  const {data: onlineMinersCount} = useQuery({
+    queryKey: ['onlineminers', 'count'],
     queryFn: fetcher,
-    enabled: Boolean(epoch),
-    staleTime: Infinity,
     notifyOnChangeProps: 'tracked',
   })
 
@@ -155,28 +153,57 @@ export function useStakingApy() {
     queryKey: ['epoch', epoch?.epoch - 1],
     queryFn: fetcher,
     staleTime: Infinity,
+    enabled: Boolean(epoch),
     notifyOnChangeProps: 'tracked',
   })
 
   return React.useMemo(() => {
-    if (stakingData && validationRewardsSummaryData && epoch && prevEpochData) {
-      const {weight} = stakingData
-      const {validation, staking} = validationRewardsSummaryData
+    if (stakingData && onlineMinersCount && prevEpochData) {
+      const {averageMinerWeight} = stakingData
 
-      const epochStakingRewardFund = Number(staking) || 0.9 * Number(validation)
+      const myStakeWeight = stake ** 0.9
 
-      const epochReward = (stake ** 0.9 / weight) * epochStakingRewardFund
+      const proposerOnlyReward =
+        (6 * myStakeWeight * 20) /
+        (myStakeWeight * 20 + averageMinerWeight * 100)
 
-      const epy = epochReward / stake
+      const committeeOnlyReward =
+        (6 * myStakeWeight) / (myStakeWeight + averageMinerWeight * 199)
+
+      const proposerAndCommitteeReward =
+        (6 * myStakeWeight * 21) /
+        (myStakeWeight * 21 + averageMinerWeight * 99)
+
+      const proposerProbability = 1 / onlineMinersCount
+
+      const committeeProbability =
+        Math.min(100, onlineMinersCount) / onlineMinersCount
+
+      const proposerOnlyProbability =
+        proposerProbability * (1 - committeeProbability)
+
+      const committeeOnlyProbability =
+        committeeProbability * (1 - proposerProbability)
+
+      const proposerAndCommitteeProbability =
+        proposerOnlyProbability * committeeOnlyProbability
+
+      const estimatedReward =
+        85000 *
+        (proposerProbability * proposerOnlyReward +
+          committeeOnlyProbability * committeeOnlyReward +
+          proposerAndCommitteeProbability * proposerAndCommitteeReward)
+
+      const epy = estimatedReward / stake
 
       const epochDays = dayjs(epoch?.nextValidation).diff(
         prevEpochData?.validationTime,
         'day'
       )
 
-      return (epy / epochDays) * 366
+      return (epy / Math.max(1, epochDays)) * 366
     }
-  }, [epoch, prevEpochData, stake, stakingData, validationRewardsSummaryData])
+  }, [epoch, onlineMinersCount, prevEpochData, stake, stakingData])
 }
 
 export function useInviteScore() {
