@@ -217,7 +217,8 @@ export default function Layout({
 
       {loading && <LoadingApp />}
 
-      {((isFork && !isSyncing) || (isFork && isSyncing && didActivateFork)) && (
+      {((isFork && !isSyncing && !isOffline) ||
+        (isFork && isSyncing && didActivateFork)) && (
         <ForkScreen
           {...forkDetails}
           version={nodeRemoteVersion}
