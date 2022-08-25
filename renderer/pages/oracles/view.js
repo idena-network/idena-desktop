@@ -71,7 +71,6 @@ import {
   hasQuorum,
   hasWinner,
   humanError,
-  isAllowedToTerminate,
   mapVotingStatus,
   quorumVotesCount,
   sumAccountableVotes,
@@ -162,7 +161,6 @@ export default function ViewVotingPage() {
     estimatedOracleReward,
     estimatedMaxOracleReward = estimatedOracleReward,
     isOracle,
-    estimatedTerminationTime,
     minOracleReward,
     estimatedTotalReward,
     epochWithoutGrowth,
@@ -198,8 +196,6 @@ export default function ViewVotingPage() {
 
   const isVotingFailed =
     !didReachQuorum && epochWithoutGrowth >= 3 && !canProlong
-
-  const shouldTerminate = isAllowedToTerminate({estimatedTerminationTime})
 
   const isMaxWinnerThreshold = winnerThreshold === 100
 
@@ -507,7 +503,7 @@ export default function ViewVotingPage() {
                           VotingStatus.Terminated,
                           VotingStatus.Terminating
                         ) &&
-                          shouldTerminate && (
+                          canTerminate && (
                             <PrimaryButton
                               variantColor="red"
                               onClick={() => send('TERMINATE')}

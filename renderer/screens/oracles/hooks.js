@@ -8,7 +8,7 @@ async function loadActions(id, from) {
   async function checkAction(fn) {
     try {
       const result = await fn
-      return !!result?.receipt?.success
+      return !!result?.success
     } catch (e) {
       return false
     }
