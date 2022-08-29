@@ -31,7 +31,7 @@ import {
   Tooltip,
 } from '../../shared/components/components'
 import {clampValue} from '../../shared/utils/utils'
-import {CrossSmallIcon} from '../../shared/components/icons'
+import {ArrowUpIcon, CrossSmallIcon} from '../../shared/components/icons'
 
 export function OracleDrawerHeader({
   icon,
@@ -490,7 +490,7 @@ export const OutlineButton = React.forwardRef((props, ref) => (
 ))
 OutlineButton.displayName = 'OutlineButton'
 
-export function ScrollToTop({scrollableRef, children, ...props}) {
+export function ScrollToTop({scrollableRef, ...props}) {
   const [opacity, setOpacity] = React.useState(0)
   const lastOpacity = React.useRef(Number.EPSILON)
 
@@ -535,6 +535,7 @@ export function ScrollToTop({scrollableRef, children, ...props}) {
       p={4}
       py={0}
       opacity={opacity}
+      leftIcon={<ArrowUpIcon boxSize="5" />}
       _focus={{
         boxShadow: 'md',
       }}
@@ -542,12 +543,7 @@ export function ScrollToTop({scrollableRef, children, ...props}) {
         scrollableElement.scrollTo({top: 0, left: 0, behavior: 'smooth'})
       }}
       {...props}
-    >
-      <Stack isInline spacing={1} align="center">
-        <Icon name="arrow-up" boxSize={5} />
-        <Text as="span">{children}</Text>
-      </Stack>
-    </Button>
+    />
   )
 }
 

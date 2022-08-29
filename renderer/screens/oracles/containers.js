@@ -99,6 +99,9 @@ import {
   InfoIcon,
   OracleIcon,
   SendOutIcon,
+  StarIcon,
+  UserIcon,
+  UserTickIcon,
 } from '../../shared/components/icons'
 
 export function VotingCard({votingRef, ...props}) {
@@ -234,7 +237,7 @@ export function VotingCard({votingRef, ...props}) {
           px={3}
           mb={6}
         >
-          <Icon name="star" boxSize={5} color="white" />
+          <StarIcon boxSize="5" color="white" />
           <Text fontWeight={500}>
             {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
             {toDna(isClosed ? totalReward : estimatedTotalReward)}
@@ -313,26 +316,22 @@ export function VotingCard({votingRef, ...props}) {
                 borderLeft="1px"
               />
               <Stack isInline spacing={2} align="center">
-                <Icon
-                  name={
-                    eitherIdleState(
-                      VotingStatus.Archived,
-                      VotingStatus.Terminated
-                    ) &&
-                    hasWinner({
-                      votes,
-                      votesCount: voteProofsCount,
-                      winnerThreshold,
-                      quorum,
-                      committeeSize,
-                    })
-                      ? 'user-tick'
-                      : 'user'
-                  }
-                  color="muted"
-                  w={4}
-                  h={4}
-                />
+                {eitherIdleState(
+                  VotingStatus.Archived,
+                  VotingStatus.Terminated
+                ) &&
+                hasWinner({
+                  votes,
+                  votesCount: voteProofsCount,
+                  winnerThreshold,
+                  quorum,
+                  committeeSize,
+                }) ? (
+                  <UserTickIcon boxSize="4" color="muted" />
+                ) : (
+                  <UserIcon boxSize="4" color="muted" />
+                )}
+
                 <Text as="span">
                   {t('{{count}} votes', {
                     count: eitherIdleState(
