@@ -1,6 +1,6 @@
 import React from 'react'
 import NextLink from 'next/link'
-import {Box, Icon, Stack, Text, useToast} from '@chakra-ui/core'
+import {Box, Icon, Stack, Text, useToast} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {

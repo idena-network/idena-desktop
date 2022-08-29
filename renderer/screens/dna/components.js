@@ -8,7 +8,7 @@ import {
   StatLabel,
   StatNumber,
   Icon,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {Avatar, Dialog} from '../../shared/components/components'
 
 export function DnaDialog(props) {

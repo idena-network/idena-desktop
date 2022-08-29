@@ -41,7 +41,7 @@ import {
   Progress as ChakraProgress,
   Heading,
   FormControl,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
 

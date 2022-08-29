@@ -7,7 +7,7 @@ import {
   Icon,
   Stack,
   Text,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {rem} from '../theme'
 
 const BaseButton = React.forwardRef((props, ref) => (

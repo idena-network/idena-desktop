@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {Box, Button, FormControl, Heading, Stack} from '@chakra-ui/core'
+import {Box, Button, FormControl, Heading, Stack} from '@chakra-ui/react'
 import {FormLabel} from '../../shared/components/components'
 
 export function SettingsFormControl({children, ...props}) {

@@ -1,5 +1,5 @@
 import React from 'react'
-import {theme as chakraTheme} from '@chakra-ui/core'
+import {theme as chakraTheme} from '@chakra-ui/react'
 
 const breakpoints = ['40em', '52em', '64em']
 

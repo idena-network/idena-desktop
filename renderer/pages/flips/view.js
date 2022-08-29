@@ -6,7 +6,7 @@ import {
   useDisclosure,
   CloseButton,
   useToast,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {

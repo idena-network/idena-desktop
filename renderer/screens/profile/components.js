@@ -29,7 +29,7 @@ import {
   PopoverBody,
   Tag,
   FormHelperText,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useQuery} from 'react-query'

@@ -8,7 +8,7 @@ import {
   Stack,
   Text,
   useTheme,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import router from 'next/router'
 import {useTranslation} from 'react-i18next'
 import {UserInlineCard} from '../screens/profile/components'

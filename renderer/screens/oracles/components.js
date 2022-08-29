@@ -18,7 +18,7 @@ import {
   Button,
   IconButton,
   RadioButtonGroup,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {
   DrawerHeader,

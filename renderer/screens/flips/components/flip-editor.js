@@ -19,7 +19,7 @@ import {
   IconButton,
   Button,
   useTheme,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {

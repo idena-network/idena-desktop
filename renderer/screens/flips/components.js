@@ -30,7 +30,7 @@ import {
   MenuDivider,
   Alert,
   AlertIcon,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
 import {useService} from '@xstate/react'

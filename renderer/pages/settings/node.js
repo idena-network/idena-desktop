@@ -12,7 +12,7 @@ import {
   Flex,
   useToast,
   Switch,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {BASE_API_URL} from '../../shared/api/api-client'
 import {

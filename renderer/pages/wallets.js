@@ -1,6 +1,6 @@
 import React from 'react'
 import {useTranslation} from 'react-i18next'
-import {Flex, Stack, Box, Heading, Icon, useDisclosure} from '@chakra-ui/core'
+import {Flex, Stack, Box, Heading, Icon, useDisclosure} from '@chakra-ui/react'
 import {useWallets} from '../shared/hooks/use-wallets'
 import {IconButton2} from '../shared/components/button'
 import Layout from '../shared/components/layout'

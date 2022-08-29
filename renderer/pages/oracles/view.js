@@ -14,7 +14,7 @@ import {
   useToast,
   CloseButton,
   PseudoBox,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'

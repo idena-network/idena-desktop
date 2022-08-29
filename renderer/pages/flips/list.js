@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
   Text,
   Stack,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {

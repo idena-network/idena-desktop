@@ -33,7 +33,7 @@ import {
   FormControl,
   RadioGroup,
   Radio,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import dayjs from 'dayjs'
 import {
   toLocaleDna,

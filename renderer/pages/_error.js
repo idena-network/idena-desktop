@@ -1,7 +1,7 @@
 import React from 'react'
 import Error from 'next/error'
 import {useTranslation} from 'react-i18next'
-import {Box, Flex, Heading, Stack} from '@chakra-ui/core'
+import {Box, Flex, Heading, Stack} from '@chakra-ui/react'
 import {FillCenter} from '../screens/oracles/components'
 import Layout from '../shared/components/layout'
 import {PrimaryButton} from '../shared/components/button'

@@ -15,7 +15,7 @@ import {
   StatNumber,
   Text,
   useTheme,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {SmallText, TextLink} from '../../shared/components/components'
 import {TableCol} from '../../shared/components/table'

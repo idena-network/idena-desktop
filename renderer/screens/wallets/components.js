@@ -11,7 +11,7 @@ import {
   MenuItem,
   MenuList,
   Stack,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {
   Drawer,
   DrawerHeader,

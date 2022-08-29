@@ -12,7 +12,7 @@ import {
   StatNumber,
   Text,
   useClipboard,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import QrCode from 'qrcode.react'
 import {PrimaryButton} from '../../shared/components/button'

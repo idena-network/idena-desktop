@@ -1,4 +1,4 @@
-import {Flex, Icon, Stack, Text, useToast} from '@chakra-ui/core'
+import {Flex, Icon, Stack, Text, useToast} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {SettingsLinkButton} from '../../screens/settings/components'
 import {HDivider, Toast} from '../../shared/components/components'

@@ -23,7 +23,7 @@ import {
   useDisclosure,
   Tooltip,
   ModalBody,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'

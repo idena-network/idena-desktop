@@ -10,7 +10,7 @@ import {
   Heading,
   Stack,
   useDisclosure,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {createValidationMachine} from '../screens/validation/machine'
 import {
   persistValidationState,

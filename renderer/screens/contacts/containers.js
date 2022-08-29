@@ -13,7 +13,7 @@ import {
   useDisclosure,
   Collapse,
   IconButton,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {
   mapToFriendlyStatus,

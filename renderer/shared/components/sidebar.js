@@ -20,7 +20,7 @@ import {
   PopoverArrow,
   PopoverBody,
   Link,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useIdentityState} from '../providers/identity-context'
 import {useEpochState} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'

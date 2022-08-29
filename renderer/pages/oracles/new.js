@@ -10,7 +10,7 @@ import {
   Flex,
   CloseButton,
   FormErrorMessage,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useMachine} from '@xstate/react'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
