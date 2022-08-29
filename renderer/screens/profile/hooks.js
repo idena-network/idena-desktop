@@ -123,9 +123,7 @@ export function useCalculateStakeLoss() {
 }
 
 export function useStakingApy() {
-  // const {stake} = useIdentityState()
-
-  const stake = 48411
+  const {stake} = useIdentityState()
 
   const epoch = useEpochState()
 
