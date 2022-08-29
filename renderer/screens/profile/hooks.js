@@ -123,7 +123,9 @@ export function useCalculateStakeLoss() {
 }
 
 export function useStakingApy() {
-  const {stake} = useIdentityState()
+  // const {stake} = useIdentityState()
+
+  const stake = 48411
 
   const epoch = useEpochState()
 
@@ -157,10 +159,29 @@ export function useStakingApy() {
     notifyOnChangeProps: 'tracked',
   })
 
-  return React.useMemo(() => {
-    if (stakingData && onlineMinersCount && prevEpochData) {
-      const {averageMinerWeight} = stakingData
+  const {data: validationRewardsSummaryData} = useQuery({
+    queryKey: ['epoch', epoch?.epoch - 1, 'rewardsSummary'],
+    queryFn: fetcher,
+    enabled: Boolean(epoch),
+    staleTime: Infinity,
+    notifyOnChangeProps: 'tracked',
+  })
 
+  return React.useMemo(() => {
+    if (
+      stakingData &&
+      onlineMinersCount &&
+      prevEpochData &&
+      validationRewardsSummaryData
+    ) {
+      const {weight, averageMinerWeight} = stakingData
+      const {validation, staking} = validationRewardsSummaryData
+
+      // epoch staking
+      const epochStakingRewardFund = Number(staking) || 0.9 * Number(validation)
+      const epochReward = (stake ** 0.9 / weight) * epochStakingRewardFund
+
+      // mining staking
       const myStakeWeight = stake ** 0.9
 
       const proposerOnlyReward =
@@ -168,7 +189,7 @@ export function useStakingApy() {
         (myStakeWeight * 20 + averageMinerWeight * 100)
 
       const committeeOnlyReward =
-        (6 * myStakeWeight) / (myStakeWeight + averageMinerWeight * 199)
+        (6 * myStakeWeight) / (myStakeWeight + averageMinerWeight * 119)
 
       const proposerAndCommitteeReward =
         (6 * myStakeWeight * 21) /
@@ -194,7 +215,7 @@ export function useStakingApy() {
           committeeOnlyProbability * committeeOnlyReward +
           proposerAndCommitteeProbability * proposerAndCommitteeReward)
 
-      const epy = estimatedReward / stake
+      const epy = (estimatedReward + epochReward) / stake
 
       const epochDays = dayjs(epoch?.nextValidation).diff(
         prevEpochData?.validationTime,
@@ -203,7 +224,14 @@ export function useStakingApy() {
 
       return (epy / Math.max(1, epochDays)) * 366
     }
-  }, [epoch, onlineMinersCount, prevEpochData, stake, stakingData])
+  }, [
+    epoch,
+    onlineMinersCount,
+    prevEpochData,
+    stake,
+    stakingData,
+    validationRewardsSummaryData,
+  ])
 }
 
 export function useInviteScore() {
