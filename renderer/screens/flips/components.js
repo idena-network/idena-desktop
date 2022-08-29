@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, {useEffect} from 'react'
+import React from 'react'
 import NextLink from 'next/link'
 import {
   SimpleGrid,
