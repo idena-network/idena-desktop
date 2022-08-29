@@ -5,7 +5,6 @@ import {
   Flex,
   FormControl,
   Heading,
-  Icon,
   Menu,
   MenuButton,
   MenuItem,
@@ -17,6 +16,7 @@ import {
   DrawerHeader,
   FormLabel,
 } from '../../shared/components/components'
+import {MoreIcon} from '../../shared/components/icons'
 
 export function WalletCardMenu({children, ...props}) {
   return (
@@ -31,7 +31,7 @@ export function WalletCardMenu({children, ...props}) {
         zIndex="dropdown"
       >
         <Flex align="center" justify="center" w={3}>
-          <Icon name="more" boxSize={5} />
+          <MoreIcon boxSize="5" />
         </Flex>
       </MenuButton>
       <MenuList
@@ -69,10 +69,6 @@ export function WalletCardMenuItem({children, ...props}) {
   )
 }
 
-export function WalletCardMenuItemIcon(props) {
-  return <Icon boxSize={5} color="blue.500" {...props} />
-}
-
 export function WalletDrawer({title, icon, color, children, ...props}) {
   return (
     <Drawer {...props} closeOnOverlayClick={false}>
@@ -99,26 +95,17 @@ export function WalletDrawerHeader({title, children, ...props}) {
   )
 }
 
-export function WalletDrawerHeaderIconBox({icon, color, children, ...props}) {
+export function WalletDrawerHeaderIconBox({colorScheme, ...props}) {
   return (
     <Flex
       align="center"
       justify="center"
-      bg={`${color}.012`}
+      bg={`${colorScheme}.012`}
       borderRadius="xl"
       boxSize={12}
       {...props}
-    >
-      {typeof icon === 'string' && (
-        <WalletDrawerHeaderIcon name={icon} color={color} />
-      )}
-      {children}
-    </Flex>
+    />
   )
-}
-
-export function WalletDrawerHeaderIcon({color, ...props}) {
-  return <Icon boxSize={6} color={`${color}.500`} {...props} />
 }
 
 export function WalletDrawerForm(props) {

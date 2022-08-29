@@ -28,12 +28,10 @@ import {
 import {
   WalletCardMenu,
   WalletCardMenuItem,
-  WalletCardMenuItemIcon,
   WalletDrawer,
   WalletDrawerForm,
   WalletDrawerFormControl,
   WalletDrawerHeader,
-  WalletDrawerHeaderIcon,
   WalletDrawerHeaderIconBox,
 } from './components'
 import {callRpc, isAddress, toLocaleDna} from '../../shared/utils/utils'
@@ -43,7 +41,13 @@ import {
   TableHeaderCol,
   TableRow,
 } from '../../shared/components/table'
-import {SendOutIcon} from '../../shared/components/icons'
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  LockIcon,
+  ReceiveIcon,
+  SendOutIcon,
+} from '../../shared/components/icons'
 
 export function TotalAmount({address, amount}) {
   const {t, i18n} = useTranslation()
@@ -85,10 +89,10 @@ export function WalletCard({
       justify="space-between"
       bg="gray.50"
       borderRadius="lg"
-      p={4}
-      pl={5}
-      h={32}
-      w={56}
+      p="4"
+      pl="5"
+      h="32"
+      w="56"
       position="relative"
       {...props}
     >
@@ -96,18 +100,15 @@ export function WalletCard({
         <Flex justify="space-between" align="center">
           <Box fontWeight={500}>{name}</Box>
           {isStake ? (
-            <Icon name="lock" boxSize={4} color="muted" />
+            <LockIcon boxSize="4" color="muted" />
           ) : (
             <WalletCardMenu>
               <WalletCardMenuItem onClick={onSend}>
-                <WalletCardMenuItemIcon
-                  name="send-out"
-                  transform="scaleX(-1)"
-                />
+                <SendOutIcon />
                 {t('Send')}
               </WalletCardMenuItem>
               <WalletCardMenuItem onClick={onReceive}>
-                <WalletCardMenuItemIcon name="send-out" />
+                <ReceiveIcon />
                 {t('Receive')}
               </WalletCardMenuItem>
             </WalletCardMenu>
@@ -124,26 +125,12 @@ export function WalletCard({
       {isSelected && (
         <Box
           position="absolute"
-          left={-4}
-          top={-4}
-          right={-4}
-          bottom={-4}
-          minH="full"
-          minW="full"
-          borderColor="blue.500"
-          borderWidth={2}
+          left={-1}
+          top={-1}
+          right={-1}
+          bottom={-1}
+          boxShadow="0 0 0 4px rgba(87, 143, 255, 0.25), 0 0 0 1px rgb(87, 143, 255), inset 0 0 0 1px rgb(87, 143, 255);"
           borderRadius="xl"
-          _before={{
-            content: `""`,
-            position: 'absolute',
-            left: '-6px',
-            top: '-6px',
-            right: '-6px',
-            bottom: '-6px',
-            borderColor: 'blue.025',
-            borderWidth: 4,
-            borderRadius: 16,
-          }}
         />
       )}
     </Flex>
@@ -158,12 +145,8 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
   return (
     <WalletDrawer {...props}>
       <WalletDrawerHeader title={t('Send iDNA')}>
-        <WalletDrawerHeaderIconBox color="red">
-          <WalletDrawerHeaderIcon
-            name="send-out"
-            color="red"
-            transform="scaleX(-1)"
-          />
+        <WalletDrawerHeaderIconBox colorScheme="red">
+          <SendOutIcon color="red.500" />
         </WalletDrawerHeaderIconBox>
       </WalletDrawerHeader>
       <WalletDrawerForm
@@ -238,12 +221,12 @@ export function ReceiveDnaDrawer({address, ...props}) {
   const {onCopy} = useClipboard(address)
 
   return (
-    <WalletDrawer
-      title={t('Receive iDNA')}
-      icon={<SendOutIcon />}
-      color="blue"
-      {...props}
-    >
+    <WalletDrawer {...props}>
+      <WalletDrawerHeader title={t('Receive iDNA')}>
+        <WalletDrawerHeaderIconBox colorScheme="blue">
+          <ReceiveIcon color="blue.500" />
+        </WalletDrawerHeaderIconBox>
+      </WalletDrawerHeader>
       <DrawerBody mt={5}>
         <Stack spacing={10}>
           <Box
@@ -412,10 +395,11 @@ function WalletTxStatus({
         minH={8}
         minW={8}
       >
-        <Icon
-          name={`arrow-${direction === 'Sent' ? 'up' : 'down'}`}
-          boxSize={5}
-        />
+        {direction === 'Sent' ? (
+          <ArrowDownIcon boxSize="5" />
+        ) : (
+          <ArrowUpIcon boxSize="5" />
+        )}
       </Flex>
       <Box>
         <Text color="brandGray.500" fontWeight={500}>
