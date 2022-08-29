@@ -245,7 +245,7 @@ function NodeSettings() {
                 <SettingsFormLabel htmlFor="key">
                   {t('Node api key')}
                 </SettingsFormLabel>
-                <InputGroup w="full">
+                <InputGroup>
                   <Input
                     id="key"
                     value={state.apiKey}
@@ -254,13 +254,12 @@ function NodeSettings() {
                       dispatch({type: 'SET_API_KEY', data: e.target.value})
                     }
                   />
-                  <InputRightElement h="full">
+                  <InputRightElement w="6" h="6" m="1">
                     <IconButton
+                      size="xs"
                       icon={revealApiKey ? <EyeOffIcon /> : <EyeIcon />}
-                      boxSize="xs"
                       bg={revealApiKey ? 'gray.300' : 'white'}
                       fontSize={20}
-                      w={8}
                       _hover={{
                         bg: revealApiKey ? 'gray.300' : 'white',
                       }}

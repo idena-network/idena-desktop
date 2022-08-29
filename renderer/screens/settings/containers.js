@@ -95,7 +95,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
 
   return (
     <Dialog
-      size={400}
+      size="mdx"
       title={t('Export private key')}
       onClose={onClose}
       {...props}

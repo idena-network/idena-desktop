@@ -642,7 +642,7 @@ export function DeactivateMiningDrawer({
           w={12}
           rounded="xl"
         >
-          <Icon name="user" w={6} h={6} color="blue.500" />
+          <UserIcon boxSize="6" color="blue.500" />
         </Flex>
         <Heading
           color="brandGray.500"

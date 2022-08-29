@@ -967,6 +967,7 @@ export function ValidationSoonToast({validationStart}) {
         color="white"
         title={<TimerClock duration={duration} color="white" />}
         description={t('Idena validation will start soon')}
+        duration={null}
       />
     </Snackbar>
   )
@@ -1018,6 +1019,7 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
         }
         onAction={() => router.push('/validation')}
         actionName={done ? null : t('Validate')}
+        duration={null}
       />
     </Snackbar>
   )
@@ -1033,6 +1035,7 @@ export function AfterLongSessionToast() {
         title={t(
           'Please wait. The network is reaching consensus on validated identities'
         )}
+        duration={null}
       />
     </Snackbar>
   )

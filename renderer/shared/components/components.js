@@ -296,6 +296,7 @@ export function Toast({
       mb={5}
       minH={rem(44)}
       rounded="lg"
+      w="fit-content"
       {...props}
     >
       <InfoIcon
@@ -333,16 +334,18 @@ export function Toast({
           {actionContent}
         </Button>
       )}
-      <Box
-        bg="gray.300"
-        height="3px"
-        roundedBottom={2}
-        pos="absolute"
-        bottom={0}
-        left={0}
-        right={0}
-        animation={`${escape} ${duration}ms linear forwards`}
-      />
+      {duration !== null && (
+        <Box
+          bg="gray.300"
+          height="3px"
+          roundedBottom={2}
+          pos="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          animation={`${escape} ${duration}ms linear forwards`}
+        />
+      )}
     </Alert>
   )
 }

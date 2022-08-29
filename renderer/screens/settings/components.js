@@ -22,7 +22,7 @@ export function SettingsNavLink({href, ...props}) {
 export function SettingsFormControl({children, ...props}) {
   return (
     <FormControl {...props}>
-      <Stack isInline spacing={2} justify="space-between" align="center" w="md">
+      <Stack isInline spacing="2" justify="space-between" align="center">
         {children}
       </Stack>
     </FormControl>
@@ -31,7 +31,7 @@ export function SettingsFormControl({children, ...props}) {
 
 export function SettingsFormLabel(props) {
   return (
-    <FormLabel color="muted" fontWeight={400} minW={40} w={40} {...props} />
+    <FormLabel color="muted" fontWeight={400} minW="40" w="40" {...props} />
   )
 }
 
