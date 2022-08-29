@@ -42,6 +42,7 @@ import {
   LinkBox,
   LinkOverlay,
   HStack,
+  keyframes,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -265,6 +266,11 @@ export function Tooltip(props) {
   )
 }
 
+const escape = keyframes`
+  from { right: 0; }
+  to { right: 100%; }
+`
+
 export function Toast({
   title,
   description,
@@ -272,6 +278,7 @@ export function Toast({
   actionContent,
   actionColor = status === 'error' ? 'red.500' : 'brandBlue.500',
   color,
+  duration = 5000,
   onAction,
   ...props
 }) {
@@ -326,6 +333,16 @@ export function Toast({
           {actionContent}
         </Button>
       )}
+      <Box
+        bg="gray.300"
+        height="3px"
+        roundedBottom={2}
+        pos="absolute"
+        bottom={0}
+        left={0}
+        right={0}
+        animation={`${escape} ${duration}ms linear forwards`}
+      />
     </Alert>
   )
 }

@@ -19,8 +19,8 @@ export default function SettingsLayout({children}) {
           <SettingsNavLink href="/settings/general">
             {t('General')}
           </SettingsNavLink>
-          <SettingsNavLink value="/settings/node">{t('Node')}</SettingsNavLink>
-          <SettingsNavLink value="/settings/advanced">
+          <SettingsNavLink href="/settings/node">{t('Node')}</SettingsNavLink>
+          <SettingsNavLink href="/settings/advanced">
             {t('Advanced')}
           </SettingsNavLink>
         </HStack>
