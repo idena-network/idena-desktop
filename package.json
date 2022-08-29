@@ -88,9 +88,10 @@
     "testcafe-react-selectors": "^4.0.0"
   },
   "dependencies": {
-    "@chakra-ui/core": "^0.8.0",
-    "@emotion/core": "^10.0.28",
-    "@emotion/styled": "^10.0.27",
+    "@chakra-ui/react": "^1.0.0",
+    "framer-motion": "^4.0.0",
+    "@emotion/react": "^11.0.0",
+    "@emotion/styled": "^11.0.0",
     "@react-hook/hover": "^4.0.0",
     "@toast-ui/react-image-editor": "^1.2.0",
     "@xstate/react": "^0.8.1",
@@ -104,7 +105,6 @@
     "electron-next": "^3.1.5",
     "electron-store": "^3.2.0",
     "electron-updater": "^4.0.14",
-    "emotion-theming": "^10.0.27",
     "express": "^4.17.1",
     "follow-redirects": "^1.9.0",
     "fs-extra": "^8.1.0",
