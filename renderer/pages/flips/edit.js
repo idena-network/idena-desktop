@@ -36,6 +36,7 @@ import Layout from '../../shared/components/layout'
 import {BadFlipDialog} from '../../screens/validation/components'
 import {useFailToast} from '../../shared/hooks/use-toast'
 import {useChainState} from '../../shared/providers/chain-context'
+import {InfoIcon, RefreshIcon} from '../../shared/components/icons'
 
 export default function EditFlipPage() {
   const {t, i18n} = useTranslation()
@@ -225,13 +226,16 @@ export default function EditFlipPage() {
                     </Box>
                     <FlipStoryAside>
                       <IconButton2
-                        icon="refresh"
+                        icon={<RefreshIcon />}
                         isDisabled={availableKeywords.length === 0}
                         onClick={() => send('CHANGE_KEYWORDS')}
                       >
                         {t('Change words')}
                       </IconButton2>
-                      <IconButton2 icon="info" onClick={onOpenBadFlipDialog}>
+                      <IconButton2
+                        icon={<InfoIcon />}
+                        onClick={onOpenBadFlipDialog}
+                      >
                         {t('What is a bad flip')}
                       </IconButton2>
                     </FlipStoryAside>

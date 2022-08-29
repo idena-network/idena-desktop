@@ -44,6 +44,7 @@ import {
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
+import {GtranslateIcon} from './icons'
 
 export const Page = React.forwardRef(function Page(props, ref) {
   return (
@@ -477,7 +478,7 @@ export function GoogleTranslateButton({
 }) {
   return (
     <IconButton2
-      icon="gtranslate"
+      icon={<GtranslateIcon />}
       _hover={{background: 'transparent'}}
       onClick={() => {
         global.openExternal(

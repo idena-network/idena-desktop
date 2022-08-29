@@ -44,6 +44,7 @@ import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {IdentityStatus} from '../../shared/types'
 import {useVotingNotification} from '../../shared/providers/voting-notification-context'
+import {PlusSolidIcon} from '../../shared/components/icons'
 
 function VotingListPage() {
   const {t} = useTranslation()
@@ -185,7 +186,7 @@ function VotingListPage() {
           </Stack>
           <VotingSkeleton isLoaded={!current.matches('preload')}>
             <Stack spacing={8} align="flex-start" w={48}>
-              <IconLink href="/oracles/new" icon="plus-solid" ml={-2}>
+              <IconLink href="/oracles/new" icon={<PlusSolidIcon />} ml={-2}>
                 {t('New voting')}
               </IconLink>
               <Stack>

@@ -43,6 +43,7 @@ import {
   TableHeaderCol,
   TableRow,
 } from '../../shared/components/table'
+import {SendOutIcon} from '../../shared/components/icons'
 
 export function TotalAmount({address, amount}) {
   const {t, i18n} = useTranslation()
@@ -239,7 +240,7 @@ export function ReceiveDnaDrawer({address, ...props}) {
   return (
     <WalletDrawer
       title={t('Receive iDNA')}
-      icon="send-out"
+      icon={<SendOutIcon />}
       color="blue"
       {...props}
     >

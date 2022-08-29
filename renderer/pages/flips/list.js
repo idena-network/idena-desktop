@@ -61,6 +61,11 @@ import {
 import {onboardingShowingStep} from '../../shared/utils/onboarding'
 import {eitherState} from '../../shared/utils/utils'
 import {useFailToast} from '../../shared/hooks/use-toast'
+import {
+  PenaltyIcon,
+  PlusSolidIcon,
+  RewardIcon,
+} from '../../shared/components/icons'
 
 export default function FlipListPage() {
   const {t} = useTranslation()
@@ -177,7 +182,7 @@ export default function FlipListPage() {
                 <Box>
                   <IconLink
                     href="/flips/new"
-                    icon="plus-solid"
+                    icon={<PlusSolidIcon />}
                     bg="white"
                     position={
                       eitherOnboardingState(
@@ -202,12 +207,12 @@ export default function FlipListPage() {
                     in the next validation ceremony. Follow step-by-step
                     instructions.`)}
                   </Text>
-                  <OnboardingPopoverContentIconRow icon="reward">
+                  <OnboardingPopoverContentIconRow icon={<RewardIcon />}>
                     {t(
                       `You'll get rewarded for every successfully qualified flip.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="penalty">
+                  <OnboardingPopoverContentIconRow icon={<PenaltyIcon />}>
                     {t(`Read carefully "What is a bad flip" rules to avoid
                       penalty.`)}
                   </OnboardingPopoverContentIconRow>

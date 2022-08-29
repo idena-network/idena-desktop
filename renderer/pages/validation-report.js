@@ -36,6 +36,7 @@ import {
   SuccessAlert,
   TextLink,
 } from '../shared/components/components'
+import {SendOutIcon, TimerIcon} from '../shared/components/icons'
 import Layout from '../shared/components/layout'
 import {Table, TableHeaderCol} from '../shared/components/table'
 import {useEpochState} from '../shared/providers/epoch-context'
@@ -148,7 +149,7 @@ export default function ValidationReport() {
                           bg={colors.brandGray['005']}
                         />
                       )}
-                      <ValidationReportGaugeIcon icon="timer" />
+                      <ValidationReportGaugeIcon icon={<TimerIcon />} />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
                       <Skeleton
@@ -255,7 +256,7 @@ export default function ValidationReport() {
                           bg={colors.brandGray['005']}
                         />
                       )}
-                      <ValidationReportGaugeIcon icon="send-out" />
+                      <ValidationReportGaugeIcon icon={<SendOutIcon />} />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
                       <Skeleton

@@ -31,6 +31,7 @@ import {
   SettingsSection,
 } from '../../screens/settings/components'
 import SettingsLayout from '../../screens/settings/layout'
+import {EyeIcon, EyeOffIcon} from '../../shared/components/icons'
 
 function NodeSettings() {
   const {t} = useTranslation()
@@ -255,7 +256,7 @@ function NodeSettings() {
                   />
                   <InputRightElement h="full">
                     <IconButton
-                      icon={revealApiKey ? 'eye-off' : 'eye'}
+                      icon={revealApiKey ? <EyeOffIcon /> : <EyeIcon />}
                       boxSize="xs"
                       bg={revealApiKey ? 'gray.300' : 'white'}
                       fontSize={20}

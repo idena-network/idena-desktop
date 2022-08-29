@@ -50,6 +50,13 @@ import {
   GoogleTranslateButton,
   PageTitle,
 } from '../../shared/components/components'
+import {
+  CommunityIcon,
+  CycleIcon,
+  SwitchIcon,
+  UndoIcon,
+  UpvoteIcon,
+} from '../../shared/components/icons'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -529,7 +536,7 @@ export function FlipKeywordTranslationSwitch({
       <Stack isInline spacing={1} align="center">
         {hasBothTranslations && (
           <IconButton2
-            icon="switch"
+            icon={<SwitchIcon />}
             _hover={{background: 'transparent'}}
             onClick={onSwitchLocale}
           >
@@ -797,10 +804,10 @@ export function FlipShuffleStep({
           </FlipImageList>
         </Stack>
         <Stack spacing={1}>
-          <IconButton2 icon="cycle" onClick={onShuffle}>
+          <IconButton2 icon={<CycleIcon />} onClick={onShuffle}>
             {t('Shuffle images')}
           </IconButton2>
-          <IconButton2 icon="undo" onClick={onReset}>
+          <IconButton2 icon={<UndoIcon />} onClick={onReset}>
             {t('Reset to default')}
           </IconButton2>
         </Stack>
@@ -1031,7 +1038,7 @@ export function CommunityTranslations({
   return (
     <Stack spacing={isOpen ? 8 : 0}>
       <IconButton2
-        icon="community"
+        icon={<CommunityIcon />}
         color="brandGray.500"
         px={0}
         _hover={{background: 'transparent'}}
@@ -1057,7 +1064,7 @@ export function CommunityTranslations({
               </FlipKeyword>
               <Stack isInline spacing={2} align="center">
                 <VoteButton
-                  icon="upvote"
+                  icon={<UpvoteIcon />}
                   onClick={() => onVote({id, up: true})}
                 />
                 <Flex
@@ -1074,7 +1081,7 @@ export function CommunityTranslations({
                   {score}
                 </Flex>
                 <VoteButton
-                  icon="upvote"
+                  icon={<UpvoteIcon />}
                   color="muted"
                   transform="rotate(180deg)"
                   onClick={() => onVote({id, up: false})}

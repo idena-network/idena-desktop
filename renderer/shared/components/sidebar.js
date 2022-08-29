@@ -49,6 +49,17 @@ import {
 import {ExternalLink, Tooltip} from './components'
 import {useTimingState} from '../providers/timing-context'
 import {TodoVotingCountBadge} from '../../screens/oracles/components'
+import {
+  ContactsIcon,
+  GalleryIcon,
+  OracleIcon,
+  ProfileIcon,
+  SettingsIcon,
+  SyncIcon,
+  TelegramIcon,
+  TimerIcon,
+  WalletIcon,
+} from './icons'
 
 export default function Sidebar({
   isForkAvailable,
@@ -275,19 +286,19 @@ function Navbar() {
 
   return (
     <Nav>
-      <NavItem href="/profile" icon="profile">
+      <NavItem href="/profile" icon={<ProfileIcon />}>
         {t('My Idena')}
       </NavItem>
-      <NavItem href="/wallets" icon="wallet">
+      <NavItem href="/wallets" icon={<WalletIcon />}>
         {t('Wallets')}
       </NavItem>
-      <NavItem href="/flips/list" icon="gallery">
+      <NavItem href="/flips/list" icon={<GalleryIcon />}>
         {t('Flips')}
       </NavItem>
-      <NavItem href="/contacts" icon="contacts">
+      <NavItem href="/contacts" icon={<ContactsIcon />}>
         {t('Contacts')}
       </NavItem>
-      <NavItem href="/oracles/list" icon="oracle">
+      <NavItem href="/oracles/list" icon={<OracleIcon />}>
         {todoCount > 0 ? (
           <Flex flex={1} align="center" justify="space-between">
             <Text as="span">{t('Oracle voting')}</Text>
@@ -299,7 +310,7 @@ function Navbar() {
           t('Oracle voting')
         )}
       </NavItem>
-      <NavItem href="/settings/general" icon="settings">
+      <NavItem href="/settings/general" icon={<SettingsIcon />}>
         {t('Settings')}
       </NavItem>
     </Nav>
@@ -459,7 +470,7 @@ function ActionPanel() {
                 onDismiss={dismissCurrentTask}
               >
                 <Stack spacing={5}>
-                  <OnboardingPopoverContentIconRow icon="telegram">
+                  <OnboardingPopoverContentIconRow icon={<TelegramIcon />}>
                     <Trans i18nKey="onboardingValidateSubscribe" t={t}>
                       <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
                         Subscribe
@@ -467,17 +478,17 @@ function ActionPanel() {
                       to the Idena Announcements (important updates only)
                     </Trans>
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="sync">
+                  <OnboardingPopoverContentIconRow icon={<SyncIcon />}>
                     {t(
                       `Keep your node synchronized in 45-60 minutes before the validation starts.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="timer">
+                  <OnboardingPopoverContentIconRow icon={<TimerIcon />}>
                     {t(
                       `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="gallery">
+                  <OnboardingPopoverContentIconRow icon={<GalleryIcon />}>
                     <Trans i18nKey="onboardingValidateTest" t={t}>
                       <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
                         Test yourself

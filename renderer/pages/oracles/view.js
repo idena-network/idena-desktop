@@ -87,6 +87,7 @@ import {
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {useOracleActions} from '../../screens/oracles/hooks'
+import {AddFundIcon, RefreshIcon, StarIcon} from '../../shared/components/icons'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -726,7 +727,7 @@ export default function ViewVotingPage() {
                 <Box mt={3}>
                   <Box mt={-2} mb={4}>
                     <IconButton2
-                      icon="refresh"
+                      icon={<RefreshIcon />}
                       px={1}
                       pr={3}
                       _focus={null}
@@ -742,7 +743,7 @@ export default function ViewVotingPage() {
                     <Stat mb={8}>
                       <StatLabel as="div" color="muted" fontSize="md">
                         <Stack isInline spacing={2} align="center">
-                          <Icon name="star" boxSize={4} color="white" />
+                          <Icon name={<StarIcon />} boxSize={4} color="white" />
                           <Text fontWeight={500}>{t('Prize pool')}</Text>
                         </Stack>
                       </StatLabel>
@@ -751,7 +752,7 @@ export default function ViewVotingPage() {
                       </StatNumber>
                       <Box mt={1}>
                         <IconButton2
-                          icon="add-fund"
+                          icon={<AddFundIcon />}
                           onClick={() => {
                             send('ADD_FUND')
                           }}

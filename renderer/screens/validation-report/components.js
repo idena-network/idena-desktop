@@ -18,6 +18,11 @@ import {
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {SmallText, TextLink} from '../../shared/components/components'
+import {
+  SendOutIcon,
+  TimerIcon,
+  TwitterIcon,
+} from '../../shared/components/icons'
 import {TableCol} from '../../shared/components/table'
 import {useIdentity} from '../../shared/providers/identity-context'
 import {toLocaleDna, toPercent} from '../../shared/utils/utils'
@@ -118,7 +123,7 @@ export function ValidationReportSummary({onClose}) {
                       color={colors.red[500]}
                     />
                   )}
-                  <ValidationReportGaugeIcon icon="timer" />
+                  <ValidationReportGaugeIcon icon={<TimerIcon />} />
                 </ValidationReportGaugeBox>
                 <ValidationReportGaugeStat>
                   {isValidated ? (
@@ -164,7 +169,7 @@ export function ValidationReportSummary({onClose}) {
                       color={colors.red[500]}
                     />
                   )}
-                  <ValidationReportGaugeIcon icon="send-out" />
+                  <ValidationReportGaugeIcon icon={<SendOutIcon />} />
                 </ValidationReportGaugeBox>
                 <ValidationReportGaugeStat>
                   <Skeleton
@@ -207,7 +212,7 @@ export function ValidationReportSummary({onClose}) {
               </Box>
               <Stack isInline color="muted">
                 <IconButton
-                  icon="twitter"
+                  icon={<TwitterIcon />}
                   size="xs"
                   variant="ghost"
                   color="blue.500"

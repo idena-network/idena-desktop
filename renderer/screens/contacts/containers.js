@@ -52,6 +52,12 @@ import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {IdentityStatus} from '../../shared/types'
 import {VotingSkeleton} from '../oracles/components'
 import {useInviteScore} from '../profile/hooks'
+import {
+  BasketIcon,
+  DeleteIcon,
+  EditIcon,
+  PlusSolidIcon,
+} from '../../shared/components/icons'
 
 export function ContactListSidebar({
   selectedContactId,
@@ -104,7 +110,7 @@ function InviteActionBar({onNewContact}) {
     <Flex align="center" justify="space-between" px={4} py="3/2" w="full">
       <Stack isInline spacing={3} align="center">
         <IconButton
-          icon="plus-solid"
+          icon={<PlusSolidIcon />}
           colorScheme="blue"
           bg="blue.012"
           color="blue.500"
@@ -336,13 +342,13 @@ export function ContactCard({
           </Stack>
 
           <Stack isInline align="center" spacing={1} w="full">
-            <IconButton2 icon="edit" onClick={onEditContact}>
+            <IconButton2 icon={<EditIcon />} onClick={onEditContact}>
               {t('Edit')}
             </IconButton2>
             <VDivider />
             <Tooltip label={t('Remove from device')}>
               <IconButton2
-                icon="flip-editor-delete"
+                icon={<BasketIcon />}
                 onClick={() => {
                   deleteInvite(dbkey)
                   successToast({
@@ -363,7 +369,7 @@ export function ContactCard({
               <>
                 <VDivider />
                 <IconButton2
-                  icon="delete"
+                  icon={<DeleteIcon />}
                   colorScheme="red"
                   _active={{
                     bg: 'red.012',

@@ -93,6 +93,13 @@ import {
   sumAccountableVotes,
   areSameCaseInsensitive,
 } from './utils'
+import {
+  AddFundIcon,
+  ChevronDownIcon,
+  InfoIcon,
+  OracleIcon,
+  SendOutIcon,
+} from '../../shared/components/icons'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -427,7 +434,9 @@ export function AddFundDrawer({
 
   return (
     <Drawer {...props}>
-      <OracleDrawerHeader icon="add-fund">{t('Add fund')}</OracleDrawerHeader>
+      <OracleDrawerHeader icon={<AddFundIcon />}>
+        {t('Add fund')}
+      </OracleDrawerHeader>
       <Box
         as="form"
         onSubmit={e => {
@@ -494,7 +503,7 @@ export function VoteDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="send-out" colorScheme="blue">
+      <OracleDrawerHeader icon={<SendOutIcon />} colorScheme="blue">
         {t('Voting')}: {option}
       </OracleDrawerHeader>
       <Box flex={1} overflowY="auto" mx={-30} px={30}>
@@ -584,7 +593,7 @@ export function ReviewVotingDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={<OracleIcon />}>
         {t('Create Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -705,7 +714,7 @@ export function VotingInspector({onTerminate, ...contract}) {
     <>
       <Button
         bg="blue.50"
-        rightIcon="info"
+        rightIcon={<InfoIcon />}
         variant="ghost"
         colorScheme="blue"
         onClick={onOpen}
@@ -729,7 +738,7 @@ export function VotingInspector({onTerminate, ...contract}) {
                     Contract
                   </Heading>
                   <IconButton
-                    icon="chevron-down"
+                    icon={<ChevronDownIcon />}
                     boxSize="sm"
                     fontSize="lg"
                     ml={1}
@@ -1124,7 +1133,7 @@ export function LaunchDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={<OracleIcon />}>
         {t('Launch Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1196,7 +1205,7 @@ export function ProlongDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={<OracleIcon />}>
         {t('Prolong Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1486,7 +1495,7 @@ export function FinishDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={<OracleIcon />}>
         {isVotingFailed ? t('Claim refunds') : t('Claim rewards')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1541,7 +1550,7 @@ export function TerminateDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={<OracleIcon />}>
         {t('Terminate Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody

@@ -56,6 +56,7 @@ import {useTimingState} from '../shared/providers/timing-context'
 import {InfoButton, PrimaryButton} from '../shared/components/button'
 import {FloatDebug, Tooltip} from '../shared/components/components'
 import {useChainState} from '../shared/providers/chain-context'
+import {FullscreenIcon} from '../shared/components/icons'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
@@ -194,7 +195,7 @@ function ValidationSession({
           </Title>
 
           <IconButton
-            icon="fullscreen"
+            icon={<FullscreenIcon />}
             bg={isShortSession(state) ? 'brandGray.060' : 'gray.300'}
             color={isShortSession(state) ? 'white' : 'brandGray.500'}
             borderRadius="lg"

@@ -30,6 +30,7 @@ import {
   Tooltip,
 } from '../../shared/components/components'
 import {clampValue} from '../../shared/utils/utils'
+import {CrossSmallIcon} from '../../shared/components/icons'
 
 export function OracleDrawerHeader({
   icon,
@@ -293,7 +294,7 @@ export function VotingOptionInput({
           />
         </Stack>
         <IconButton
-          icon="cross-small"
+          icon={<CrossSmallIcon />}
           isDisabled={isDisabled}
           bg="unset"
           color="muted"

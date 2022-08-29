@@ -39,6 +39,7 @@ import {useNodeDispatch} from '../../shared/providers/node-context'
 import {importKey} from '../../shared/api/dna'
 import {useSettingsDispatch} from '../../shared/providers/settings-context'
 import {AVAILABLE_LANGS, isoLangs} from '../../i18n'
+import {EyeIcon, EyeOffIcon} from '../../shared/components/icons'
 
 export function ExportPrivateKeyDialog({onClose, ...props}) {
   const {t} = useTranslation()
@@ -118,7 +119,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
                 />
                 <InputRightElement h="full">
                   <IconButton
-                    icon={revealPassword ? 'eye-off' : 'eye'}
+                    icon={revealPassword ? <EyeOffIcon /> : <EyeIcon />}
                     size="xs"
                     bg={revealPassword ? 'gray.300' : 'white'}
                     fontSize={20}
@@ -281,7 +282,7 @@ export function ImportPrivateKeyDialog(props) {
                 />
                 <InputRightElement h="full">
                   <IconButton
-                    icon={revealPassword ? 'eye-off' : 'eye'}
+                    icon={revealPassword ? <EyeOffIcon /> : <EyeIcon />}
                     size="xs"
                     bg={revealPassword ? 'gray.300' : 'white'}
                     w={8}

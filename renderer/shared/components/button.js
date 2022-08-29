@@ -9,6 +9,7 @@ import {
   Box,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
+import {InfoIcon} from './icons'
 
 const BaseButton = React.forwardRef((props, ref) => (
   <ChakraButton
@@ -83,7 +84,7 @@ export const IconButton2 = React.forwardRef(
         {typeof icon === 'string' ? (
           <Icon name={icon} boxSize={5} mr={2} />
         ) : (
-          icon
+          React.cloneElement(icon, {w: '5', h: '5', ...icon.props})
         )}
         <Text as="span" isTruncated>
           {children}
@@ -96,7 +97,7 @@ export const IconButton2 = React.forwardRef(
 export const InfoButton = React.forwardRef((props, ref) => (
   <ChakraIconButton
     ref={ref}
-    icon="info"
+    icon={<InfoIcon />}
     color="brandBlue.500"
     bg="unset"
     fontSize={rem(20)}

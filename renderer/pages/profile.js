@@ -74,6 +74,15 @@ import {useScroll} from '../shared/hooks/use-scroll'
 import {ValidationReportSummary} from '../screens/validation-report/components'
 import {useIdenaBot, useStakingApy} from '../screens/profile/hooks'
 import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
+import {
+  AddUserIcon,
+  DeleteIcon,
+  KeyIcon,
+  OracleIcon,
+  PhotoIcon,
+  PooIcon,
+  TelegramIcon,
+} from '../shared/components/icons'
 
 export default function ProfilePage() {
   const {
@@ -324,7 +333,9 @@ export default function ProfilePage() {
                                     {t(`Join the official Idena public Telegram group and follow instructions in the
                 pinned message.`)}
                                   </Text>
-                                  <OnboardingPopoverContentIconRow icon="telegram">
+                                  <OnboardingPopoverContentIconRow
+                                    icon={<TelegramIcon />}
+                                  >
                                     <Box>
                                       <PrimaryButton
                                         variant="unstyled"
@@ -558,14 +569,14 @@ export default function ProfilePage() {
                   <Stack spacing={1} align="flex-start">
                     <IconLink
                       href="/oracles/new"
-                      icon={<Icon name="oracle" boxSize={5} />}
+                      icon={<OracleIcon boxSize={5} />}
                       maxW={200}
                     >
                       {t('New voting')}
                     </IconLink>
                     <IconLink
                       href="/flips/new"
-                      icon={<Icon name="photo" boxSize={5} />}
+                      icon={<PhotoIcon boxSize={5} />}
                       isDisabled={!canSubmitFlip}
                       maxW={200}
                     >
@@ -575,23 +586,27 @@ export default function ProfilePage() {
                       href="/contacts?new"
                       isDisabled={!canInvite}
                       maxW={200}
-                      icon={<Icon name="add-user" boxSize={5} />}
+                      icon={<AddUserIcon boxSize={5} />}
                     >
                       {t('Invite')}
                     </IconLink>
                     <IconButton2
-                      icon="poo"
+                      icon={<PooIcon />}
                       maxW={200}
                       onClick={onOpenSpoilForm}
                     >
                       {t('Spoil invite')}
                     </IconButton2>
-                    <IconButton2 icon="key" maxW={200} onClick={onOpenExportPk}>
+                    <IconButton2
+                      icon={<KeyIcon />}
+                      maxW={200}
+                      onClick={onOpenExportPk}
+                    >
                       {t('Backup private key')}
                     </IconButton2>
                     <IconButton2
                       isDisabled={!canTerminate}
-                      icon="delete"
+                      icon={<DeleteIcon />}
                       maxW={200}
                       onClick={onOpenKillForm}
                     >
