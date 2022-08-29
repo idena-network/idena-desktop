@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {
-  AspectRatioBox,
+  AspectRatio,
   Box,
   Icon,
   Image,
@@ -141,7 +141,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
           {eitherState(current, 'done') && (
             <SimpleGrid columns={4} spacing={2} overflow="auto" mx={-6} px={6}>
               {images.map(({thumbnail, image}, idx) => (
-                <AspectRatioBox
+                <AspectRatio
                   key={`${image}-${idx}`}
                   ratio={1}
                   w={32}
@@ -171,7 +171,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
                     borderWidth={1}
                     borderRadius="md"
                   />
-                </AspectRatioBox>
+                </AspectRatio>
               ))}
             </SimpleGrid>
           )}

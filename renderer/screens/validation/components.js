@@ -17,7 +17,7 @@ import {
   Image,
   List,
   ListItem,
-  AspectRatioBox,
+  AspectRatio,
   Spinner,
   useDisclosure,
   Tooltip,
@@ -56,7 +56,7 @@ const Scroll = require('react-scroll')
 
 const {ScrollElement} = Scroll
 const {scroller} = Scroll
-const ElementFlipImage = ScrollElement(AspectRatioBox)
+const ElementFlipImage = ScrollElement(AspectRatio)
 
 export function ValidationScene(props) {
   return (
@@ -1363,9 +1363,9 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
 
 function BadFlipImage(props) {
   return (
-    <AspectRatioBox ratio={4 / 3} w={132}>
+    <AspectRatio ratio={4 / 3} w={132}>
       <Image {...props} />
-    </AspectRatioBox>
+    </AspectRatio>
   )
 }
 

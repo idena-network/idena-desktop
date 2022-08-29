@@ -17,7 +17,7 @@ import {
   Stack,
   useTheme,
   Heading,
-  AspectRatioBox,
+  AspectRatio,
   Divider,
   CloseButton,
   IconButton,
@@ -196,9 +196,9 @@ export function FlipCardImage(props) {
 
 export function FlipCardImageBox({children, ...props}) {
   return (
-    <AspectRatioBox h={150} w={150} position="relative" {...props}>
+    <AspectRatio h={150} w={150} position="relative" {...props}>
       <Box>{children}</Box>
-    </AspectRatioBox>
+    </AspectRatio>
   )
 }
 
@@ -972,7 +972,7 @@ export function FlipImage({
   ...props
 }) {
   return (
-    <AspectRatioBox
+    <AspectRatio
       ratio={4 / 3}
       bg="gray.50"
       border="1px"
@@ -992,7 +992,7 @@ export function FlipImage({
       ) : (
         <EmptyFlipImage />
       )}
-    </AspectRatioBox>
+    </AspectRatio>
   )
 }
 
