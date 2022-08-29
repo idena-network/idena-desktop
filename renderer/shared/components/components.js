@@ -41,10 +41,13 @@ import {
   Progress as ChakraProgress,
   Heading,
   FormControl,
+  LinkBox,
+  LinkOverlay,
+  HStack,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
-import {GtranslateIcon} from './icons'
+import {ChevronDownIcon, ChevronRightIcon, GtranslateIcon} from './icons'
 
 export const Page = React.forwardRef(function Page(props, ref) {
   return (
@@ -460,11 +463,7 @@ export function ExternalLink({
       <Text as="span" width={width} isTruncated={isTruncated}>
         {children || href}
       </Text>
-      <Icon
-        name="chevron-down"
-        boxSize={4}
-        transform="translateY(1px) rotate(-90deg)"
-      />
+      <ChevronRightIcon boxSize="4" />
     </Button>
   )
 }
@@ -521,29 +520,27 @@ export function SmallText(props) {
 // eslint-disable-next-line react/display-name
 export const IconLink = React.forwardRef(
   ({href, icon, children, ...props}, ref) => (
-    <NextLink ref={ref} href={href} passHref>
-      <Link
-        href={href}
-        color="brandBlue.500"
-        rounded="md"
-        fontWeight={500}
-        display="inline-block"
-        h={8}
-        px={2}
-        py="3/2"
-        _hover={{
-          bg: 'blue.50',
-        }}
-        {...props}
-      >
-        <Stack spacing={2} isInline align="center" w="full">
-          {typeof icon === 'string' ? <Icon name={icon} boxSize={4} /> : icon}
-          <Text as="span" isTruncated>
-            {children}
-          </Text>
-        </Stack>
-      </Link>
-    </NextLink>
+    <LinkBox
+      as={HStack}
+      spacing="2"
+      alignItems="center"
+      color="brandBlue.500"
+      borderRadius="md"
+      fontWeight={500}
+      display="inline-block"
+      h="8"
+      px="2"
+      py="1.5"
+      _hover={{
+        bg: 'blue.50',
+      }}
+      {...props}
+    >
+      {icon}
+      <NextLink ref={ref} href={href} passHref>
+        <LinkOverlay>{children}</LinkOverlay>
+      </NextLink>
+    </LinkBox>
   )
 )
 

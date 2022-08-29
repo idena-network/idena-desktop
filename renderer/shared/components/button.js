@@ -67,32 +67,20 @@ export const SecondaryButton = React.forwardRef((props, ref) => (
 ))
 
 // eslint-disable-next-line react/display-name
-export const IconButton2 = React.forwardRef(
-  ({icon, children, ...props}, ref) => (
-    <ChakraButton
-      ref={ref}
-      variant="ghost"
-      colorScheme="blue"
-      fontWeight={500}
-      h={8}
-      px={2}
-      py="3/2"
-      justifyContent="flex-start"
-      {...props}
-    >
-      <Stack isInline spacing={2} align="center" w="full">
-        {typeof icon === 'string' ? (
-          <Icon name={icon} boxSize={5} mr={2} />
-        ) : (
-          React.cloneElement(icon, {w: '5', h: '5', ...icon.props})
-        )}
-        <Text as="span" isTruncated>
-          {children}
-        </Text>
-      </Stack>
-    </ChakraButton>
-  )
-)
+export const IconButton2 = React.forwardRef(({icon, ...props}, ref) => (
+  <ChakraButton
+    ref={ref}
+    variant="ghost"
+    colorScheme="blue"
+    fontWeight={500}
+    alignItems="center"
+    justifyContent="flex-start"
+    h="8"
+    px="2"
+    leftIcon={React.cloneElement(icon, {boxSize: '5'})}
+    {...props}
+  />
+))
 
 export const InfoButton = React.forwardRef((props, ref) => (
   <ChakraIconButton

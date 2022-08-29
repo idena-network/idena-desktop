@@ -74,6 +74,7 @@ import {BLOCK_TIME} from '../oracles/utils'
 import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {useTotalValidationScore} from '../validation-report/hooks'
+import {ChevronRightIcon} from '../../shared/components/icons'
 
 export function UserInlineCard({
   identity: {address, state},
@@ -443,12 +444,8 @@ export function ActivateMiningForm({
 export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
   const {t} = useTranslation()
 
-  const {colors} = useTheme()
-
-  const accentColor = isOnline ? 'blue' : 'red'
-
   return (
-    <Stack spacing={3}>
+    <Stack spacing="3">
       <Text fontWeight={500} h={18}>
         {t('Status')}
       </Text>
@@ -458,30 +455,28 @@ export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
         borderColor="gray.300"
         borderWidth={1}
         rounded="md"
-        h={8}
+        h="8"
         px={3}
       >
-        <FormLabel htmlFor="mining" fontWeight="normal" pb={0}>
+        <FormLabel htmlFor="mining" fontWeight="normal" mb={0}>
           {isDelegator ? t('Delegation') : t('Mining')}
         </FormLabel>
-        <Stack isInline align="center">
-          <Text color={`${accentColor}.500`} fontWeight={500}>
+        <Stack direction="row" align="center">
+          <Text color={isOnline ? 'blue.500' : 'red.500'} fontWeight={500}>
             {isOnline ? t('On') : t('Off')}
           </Text>
           <Switch
             id="mining"
             size="sm"
             isChecked={isOnline}
-            color={accentColor}
-            h={4}
-            className="toggle"
+            h="4"
+            sx={{
+              '& > input:not(:checked) + span': {
+                background: 'red.500',
+              },
+            }}
             onChange={onShow}
           />
-          <style jsx global>{`
-            .toggle > input[type='checkbox']:not(:checked) + div {
-              background: ${colors.red[500]};
-            }
-          `}</style>
         </Stack>
       </Flex>
     </Stack>
@@ -1036,7 +1031,7 @@ export function ProfileTagList() {
   const formatDna = toLocaleDna(i18n.language, {maximumFractionDigits: 5})
 
   return (
-    <Stack isInline spacing="1" w="full" flexWrap="wrap">
+    <Stack direction="row" spacing="1" w="full" flexWrap="wrap">
       {age > 0 && <ProfileTag label={t('Age')} value={age} />}
 
       {Number.isFinite(score) && (
@@ -1077,7 +1072,7 @@ export function ProfileTagList() {
                     lineHeight="base"
                   >
                     {t('Validation report')}
-                    <Icon name="chevron-down" transform="rotate(-90deg)" />
+                    <ChevronRightIcon />
                   </TextLink>
                 </Stack>
               </Stack>
@@ -1141,7 +1136,7 @@ export function ProfileTagList() {
                 </Text>
                 <TextLink href="/contacts" color="white" lineHeight="base">
                   {t('Check invites')}
-                  <Icon name="chevron-down" transform="rotate(-90deg)" />
+                  <ChevronRightIcon />
                 </TextLink>
               </Stack>
             </ProfileTagPopoverContent>
@@ -1164,7 +1159,7 @@ export const ProfileTag = React.forwardRef(function ProfileTag(
       fontSize="sm"
       px="3"
       minH="6"
-      mt="3/2"
+      mt="1.5"
       {...props}
     >
       <Stack isInline spacing="1">

@@ -20,6 +20,9 @@ import {
   PopoverArrow,
   PopoverBody,
   Link,
+  LinkOverlay,
+  LinkBox,
+  Image,
 } from '@chakra-ui/react'
 import {useIdentityState} from '../providers/identity-context'
 import {useEpochState} from '../providers/epoch-context'
@@ -52,6 +55,7 @@ import {TodoVotingCountBadge} from '../../screens/oracles/components'
 import {
   ContactsIcon,
   GalleryIcon,
+  MoreIcon,
   OracleIcon,
   ProfileIcon,
   SettingsIcon,
@@ -243,10 +247,10 @@ function ConnectionBandwidth() {
 
 function Bandwidth({peersCount, isSyncing, ...props}) {
   return (
-    <Box pt="1/2" px="1px" pb="3px" h={4} w={4} {...props}>
+    <Box pt="0.5" px="px" pb="3px" h="4" w="4" {...props}>
       <Stack
         isInline
-        spacing="1/2"
+        spacing="0.5"
         justify="space-between"
         alignItems="flex-end"
       >
@@ -268,7 +272,7 @@ function BandwidthItem(props) {
   return (
     <Box
       borderRadius="1px"
-      w="2px"
+      w="0.5"
       transition="background 0.3s ease"
       {...props}
     />
@@ -276,7 +280,9 @@ function BandwidthItem(props) {
 }
 
 export function Logo() {
-  return <Icon name="logo" boxSize="56px" mx="auto" my={8} />
+  return (
+    <Image src="/static/logo.svg" alt="Idena logo" w="14" my="8" mx="auto" />
+  )
 }
 
 function Navbar() {
@@ -326,27 +332,28 @@ function NavItem({href, icon, children}) {
   const isActive = pathname.startsWith(href)
 
   return (
-    <NextLink href={href} passHref>
-      <Link
-        bg={isActive ? 'xblack.016' : 'transparent'}
-        borderRadius="md"
-        color={isActive ? 'white' : 'xwhite.050'}
-        fontWeight={500}
-        minH={8}
-        px={2}
-        py="3/2"
-        _hover={{bg: isActive ? 'xblack.016' : 'gray.10', color: 'white'}}
-        _active={{
-          bg: 'xblack.016',
-        }}
-        _focus={{outline: 'none'}}
-      >
-        <Stack isInline spacing={2}>
-          <Icon name={icon} boxSize={5} />
-          <Flex flex={1}>{children}</Flex>
-        </Stack>
-      </Link>
-    </NextLink>
+    <LinkBox
+      as={Stack}
+      direction="row"
+      spacing="2"
+      alignItems="center"
+      bg={isActive ? 'xblack.016' : 'transparent'}
+      borderRadius="md"
+      color={isActive ? 'white' : 'xwhite.050'}
+      fontWeight={500}
+      minH={8}
+      px={2}
+      _hover={{bg: isActive ? 'xblack.016' : 'gray.10', color: 'white'}}
+      _active={{
+        bg: 'xblack.016',
+      }}
+      _focus={{outline: 'none'}}
+    >
+      {React.cloneElement(icon, {boxSize: '5'})}
+      <NextLink href={href} passHref>
+        <LinkOverlay>{children}</LinkOverlay>
+      </NextLink>
+    </LinkBox>
   )
 }
 
@@ -507,16 +514,16 @@ function ActionPanel() {
         <Menu autoSelect={false} placement="bottom-end">
           <MenuButton
             rounded="md"
-            py="3/2"
-            px="2px"
+            py="1.5"
+            px="0.5"
             position="absolute"
-            bottom={6}
-            right="1/2"
+            bottom="6"
+            right="1"
             zIndex="popover"
             _expanded={{bg: 'brandGray.500'}}
             _focus={{outline: 0}}
           >
-            <Icon name="more" boxSize={5} />
+            <MoreIcon boxSize="5" />
           </MenuButton>
           <MenuList
             border="none"

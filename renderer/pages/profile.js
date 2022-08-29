@@ -2,7 +2,6 @@ import React from 'react'
 import {
   Stack,
   Text,
-  Icon,
   useDisclosure,
   PopoverTrigger,
   Box,
@@ -76,11 +75,13 @@ import {useIdenaBot, useStakingApy} from '../screens/profile/hooks'
 import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
 import {
   AddUserIcon,
+  ChevronRightIcon,
   DeleteIcon,
-  KeyIcon,
+  InfoIcon,
   OracleIcon,
   PhotoIcon,
   PooIcon,
+  PrivateKeyIcon,
   TelegramIcon,
 } from '../shared/components/icons'
 
@@ -399,11 +400,7 @@ export default function ProfilePage() {
                               fontWeight={500}
                             >
                               <Text as="span">{t('Send')}</Text>
-                              <Icon
-                                name="chevron-down"
-                                boxSize={4}
-                                transform="rotate(-90deg)"
-                              />
+                              <ChevronRightIcon boxSize={4} />
                             </Stack>
                           </TextLink>
                         </UserStatValue>
@@ -446,11 +443,7 @@ export default function ProfilePage() {
                                   onClick={replenishStakeDisclosure.onOpen}
                                 >
                                   {t('Add stake')}
-                                  <Icon
-                                    name="chevron-down"
-                                    transform="rotate(-90deg)"
-                                    boxSize="4"
-                                  />
+                                  <ChevronRightIcon boxSize="4" />
                                 </Button>
                               </UserStatValue>
                             </UserStat>
@@ -491,12 +484,11 @@ export default function ProfilePage() {
                                       )}
                                       w="130px"
                                     >
-                                      <Icon
-                                        name="info"
-                                        boxSize={4}
+                                      <InfoIcon
+                                        boxSize="4"
                                         color="red.500"
-                                        ml={1}
-                                        mt="-2px"
+                                        ml="1"
+                                        mt="-0.5"
                                       />
                                     </Tooltip>
                                   )}
@@ -545,7 +537,7 @@ export default function ProfilePage() {
                         >
                           {address && canMine && (
                             <ActivateMiningForm
-                              isOnline={online}
+                              isOnline={false && online}
                               delegatee={delegatee}
                               delegationEpoch={delegationEpoch}
                               pendingUndelegation={pendingUndelegation}
@@ -598,7 +590,7 @@ export default function ProfilePage() {
                       {t('Spoil invite')}
                     </IconButton2>
                     <IconButton2
-                      icon={<KeyIcon />}
+                      icon={<PrivateKeyIcon />}
                       maxW={200}
                       onClick={onOpenExportPk}
                     >
