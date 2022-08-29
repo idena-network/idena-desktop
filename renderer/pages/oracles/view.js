@@ -87,7 +87,14 @@ import {
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {useOracleActions} from '../../screens/oracles/hooks'
-import {AddFundIcon, RefreshIcon, StarIcon} from '../../shared/components/icons'
+import {
+  AddFundIcon,
+  CoinsLgIcon,
+  RefreshIcon,
+  StarIcon,
+  UserIcon,
+  UserTickIcon,
+} from '../../shared/components/icons'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -207,37 +214,36 @@ export default function ViewVotingPage() {
         <Page pt={8}>
           <Stack spacing={10}>
             <VotingSkeleton isLoaded={isLoaded} h={6}>
-              <Stack isInline spacing={2} align="center">
-                <VotingStatusBadge status={status} fontSize="md">
-                  {t(mapVotingStatus(status))}
-                </VotingStatusBadge>
-                <Box
-                  as={VotingBadge}
-                  bg="gray.300"
-                  color="muted"
-                  fontSize="md"
-                  cursor="pointer"
-                  pl="1/2"
-                  transition="color 0.2s ease"
-                  _hover={{
-                    color: 'brandGray.500',
-                  }}
-                  onClick={() => {
-                    global.openExternal(
-                      `https://scan.idena.io/contract/${contractHash}`
-                    )
-                  }}
-                >
-                  <Stack isInline spacing={1} align="center">
-                    <Avatar w={5} h={5} address={contractHash} />
-                    <Text>{contractHash}</Text>
-                  </Stack>
-                </Box>
-                <CloseButton
-                  ml="auto"
-                  onClick={() => redirect('/oracles/list')}
-                />
-              </Stack>
+              <Flex align="center" justify="space-between">
+                <Stack isInline spacing={2} align="center">
+                  <VotingStatusBadge status={status} fontSize="md">
+                    {t(mapVotingStatus(status))}
+                  </VotingStatusBadge>
+                  <Box
+                    as={VotingBadge}
+                    bg="gray.300"
+                    color="muted"
+                    fontSize="md"
+                    cursor="pointer"
+                    pl="1/2"
+                    transition="color 0.2s ease"
+                    _hover={{
+                      color: 'brandGray.500',
+                    }}
+                    onClick={() => {
+                      global.openExternal(
+                        `https://scan.idena.io/contract/${contractHash}`
+                      )
+                    }}
+                  >
+                    <Stack isInline spacing={1} align="center">
+                      <Avatar w={5} h={5} address={contractHash} />
+                      <Text>{contractHash}</Text>
+                    </Stack>
+                  </Box>
+                </Stack>
+                <CloseButton onClick={() => redirect('/oracles/list')} />
+              </Flex>
             </VotingSkeleton>
             <Stack isInline spacing={10} w="full">
               <Box minWidth="lg" maxW="lg">
@@ -539,19 +545,15 @@ export default function ViewVotingPage() {
                           )}
                         <VDivider />
                         <Stack isInline spacing={2} align="center">
-                          <Icon
-                            name={
-                              eitherIdleState(
-                                VotingStatus.Archived,
-                                VotingStatus.Terminated
-                              ) && didDetermineWinner
-                                ? 'user-tick'
-                                : 'user'
-                            }
-                            color="muted"
-                            w={4}
-                            h={4}
-                          />
+                          {eitherIdleState(
+                            VotingStatus.Archived,
+                            VotingStatus.Terminated
+                          ) && didDetermineWinner ? (
+                            <UserTickIcon boxSize="4" color="muted" />
+                          ) : (
+                            <UserIcon boxSize="4" color="muted" />
+                          )}
+
                           <Text as="span">
                             {eitherIdleState(VotingStatus.Counting) &&
                             !isVotingFailed ? (
@@ -704,9 +706,8 @@ export default function ViewVotingPage() {
                               <td colSpan={3}>
                                 <FillCenter py={12}>
                                   <Stack spacing={4} align="center">
-                                    <Icon
-                                      name="coins-lg"
-                                      boxSize={20}
+                                    <CoinsLgIcon
+                                      boxSize="20"
                                       color="gray.300"
                                     />
                                     <Text color="muted">
