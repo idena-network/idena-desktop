@@ -165,6 +165,22 @@ export const theme = {
         },
       },
     },
+    Radio: {
+      sizes: {
+        lg: {
+          h: '14',
+        },
+      },
+      variants: {
+        bordered: {
+          container: {
+            borderColor: 'gray.300',
+            borderWidth: 1,
+            borderRadius: 'md',
+          },
+        },
+      },
+    },
   },
 }
 

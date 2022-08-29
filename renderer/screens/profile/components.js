@@ -74,7 +74,7 @@ import {BLOCK_TIME} from '../oracles/utils'
 import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {useTotalValidationScore} from '../validation-report/hooks'
-import {ChevronRightIcon} from '../../shared/components/icons'
+import {ChevronRightIcon, UserIcon} from '../../shared/components/icons'
 
 export function UserInlineCard({
   identity: {address, state},
@@ -516,7 +516,7 @@ export function ActivateMiningDrawer({
           w={12}
           rounded="xl"
         >
-          <Icon name="user" w={6} h={6} color="blue.500" />
+          <UserIcon boxSize="6" color="blue.500" />
         </Flex>
         <Heading
           color="brandGray.500"
@@ -534,25 +534,14 @@ export function ActivateMiningDrawer({
             <FormLabel p={0}>{t('Type')}</FormLabel>
             <RadioGroup value={mode} onChange={onChangeMode}>
               <HStack spacing="2">
-                <Radio
-                  value={NodeType.Miner}
-                  flex={1}
-                  borderColor="gray.300"
-                  borderWidth={1}
-                  borderRadius="md"
-                  p={2}
-                  px={3}
-                >
+                <Radio value={NodeType.Miner} variant="bordered" px={3} py={2}>
                   {t('Mining')}
                 </Radio>
                 <Radio
                   value={NodeType.Delegator}
-                  flex={1}
-                  borderColor="gray.300"
-                  borderWidth={1}
-                  borderRadius="md"
-                  p={2}
+                  variant="bordered"
                   px={3}
+                  py={2}
                 >
                   {t('Delegation')}
                 </Radio>
