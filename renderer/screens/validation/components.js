@@ -8,7 +8,6 @@ import {
   Heading,
   Icon,
   Alert,
-  AlertIcon,
   Button,
   useTheme,
   Modal,
@@ -51,6 +50,7 @@ import {
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {useInterval} from '../../shared/hooks/use-interval'
 import {FillCenter} from '../oracles/components'
+import {InfoIcon} from '../../shared/components/icons'
 
 const Scroll = require('react-scroll')
 
@@ -1141,7 +1141,7 @@ export function ReviewValidationDialog({
               px={3}
               py={2}
             >
-              <AlertIcon name="info" color="red.500" boxSize={5} mr={3} />
+              <InfoIcon color="red.500" boxSize={5} mr={3} />
               {t('You may lose rewards. Are you sure?')}
             </Alert>
           )}
@@ -1513,7 +1513,7 @@ export function SynchronizingValidationAlert({children, ...props}) {
       {...props}
     >
       <Stack isInline align="center">
-        <AlertIcon name="spinner" boxSize={4} />
+        <Spinner boxSize={4} />
         <Text>{children}</Text>
       </Stack>
     </NotSyncedAlert>

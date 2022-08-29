@@ -36,6 +36,7 @@ import {FlipType} from '../../shared/types'
 import {DEFAULT_FLIP_ORDER} from '../../screens/flips/utils'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
+import {DeleteIcon} from '../../shared/components/icons'
 
 export default function ViewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -182,9 +183,8 @@ export default function ViewFlipPage() {
                   }}
                 >
                   <FlipCardMenuItemIcon
-                    name="delete"
-                    boxSize={5}
-                    mr={2}
+                    icon={DeleteIcon}
+                    mr="2"
                     color="red.500"
                   />
                   {t('Delete flip')}

@@ -5,21 +5,20 @@ import {
   Flex,
   Box,
   Alert,
-  AlertIcon,
   Image,
   useDisclosure,
   useTheme,
   PopoverTrigger,
   Text,
   Stack,
+  HStack,
+  Button,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {
   FlipCardTitle,
   FlipCardSubtitle,
-  FlipFilter,
-  FlipFilterOption,
   RequiredFlipPlaceholder,
   OptionalFlipPlaceholder,
   FlipCardList,
@@ -31,7 +30,6 @@ import {
   FlipCardMenuItemIcon,
   FlipOverlay,
   FlipOverlayStatus,
-  FlipOverlayIcon,
   FlipOverlayText,
 } from '../../screens/flips/components'
 import {formatKeywords} from '../../screens/flips/utils'
@@ -62,6 +60,9 @@ import {onboardingShowingStep} from '../../shared/utils/onboarding'
 import {eitherState} from '../../shared/utils/utils'
 import {useFailToast} from '../../shared/hooks/use-toast'
 import {
+  DeleteIcon,
+  InfoIcon,
+  InfoSolidIcon,
   PenaltyIcon,
   PlusSolidIcon,
   RewardIcon,
@@ -157,22 +158,31 @@ export default function FlipListPage() {
     <Layout syncing={syncing} offline={offline} loading={loading}>
       <Page>
         <PageTitle>{t('My Flips')}</PageTitle>
-        <Flex justify="space-between" align="center" alignSelf="stretch" mb={8}>
-          <FlipFilter
-            value={filter}
-            onChange={value => send('FILTER', {filter: value})}
-          >
-            <FlipFilterOption value={FlipFilterType.Active}>
+        <Flex justify="space-between" align="center" alignSelf="stretch" mb="8">
+          <HStack spacing="2">
+            <Button
+              variant="tab"
+              onClick={() => send('FILTER', {filter: FlipFilterType.Active})}
+              isActive={filter === FlipFilterType.Active}
+            >
               {t('Active')}
-            </FlipFilterOption>
-            <FlipFilterOption value={FlipFilterType.Draft}>
+            </Button>
+            <Button
+              variant="tab"
+              onClick={() => send('FILTER', {filter: FlipFilterType.Draft})}
+              isActive={filter === FlipFilterType.Draft}
+            >
               {t('Drafts')}
-            </FlipFilterOption>
-            <FlipFilterOption value={FlipFilterType.Archived}>
+            </Button>
+            <Button
+              variant="tab"
+              onClick={() => send('FILTER', {filter: FlipFilterType.Archived})}
+              isActive={filter === FlipFilterType.Archived}
+            >
               {t('Archived')}
-            </FlipFilterOption>
-          </FlipFilter>
-          <Box>
+            </Button>
+          </HStack>
+          <Box alignSelf="flex-end">
             <OnboardingPopover
               isOpen={eitherOnboardingState(
                 onboardingShowingStep(OnboardingStep.CreateFlips)
@@ -182,15 +192,9 @@ export default function FlipListPage() {
                 <Box>
                   <IconLink
                     href="/flips/new"
-                    icon={<PlusSolidIcon />}
+                    icon={<PlusSolidIcon boxSize="5" />}
                     bg="white"
-                    position={
-                      eitherOnboardingState(
-                        onboardingShowingStep(OnboardingStep.CreateFlips)
-                      )
-                        ? 'relative'
-                        : 'initial'
-                    }
+                    position="relative"
                     zIndex={2}
                   >
                     {t('New flip')}
@@ -236,7 +240,7 @@ export default function FlipListPage() {
                 px={3}
                 py={2}
               >
-                <AlertIcon name="info" color="green.500" boxSize={5} mr={3} />
+                <InfoIcon color="green.500" boxSize={5} mr={3} />
                 {remainingRequiredFlips > 0
                   ? t(`Please submit required flips.`, {remainingRequiredFlips})
                   : null}{' '}
@@ -261,7 +265,7 @@ export default function FlipListPage() {
               px={3}
               py={2}
             >
-              <AlertIcon name="info" color="red.500" boxSize={5} mr={3} />
+              <InfoIcon color="red.500" boxSize={5} mr={3} />
               {t('You can not submit flips. Please get validated first. ')}
             </Alert>
           </Box>
@@ -314,7 +318,7 @@ export default function FlipListPage() {
                           }
                         >
                           <FlipOverlayStatus>
-                            <FlipOverlayIcon name="info-solid" />
+                            <InfoSolidIcon boxSize="5" />
                             <FlipOverlayText>
                               {flip.type === FlipType.Deleting &&
                                 t('Deleting...')}
@@ -347,9 +351,8 @@ export default function FlipListPage() {
                           }}
                         >
                           <FlipCardMenuItemIcon
-                            name="delete"
-                            boxSize={5}
-                            mr={2}
+                            icon={DeleteIcon}
+                            mr="2"
                             color="red.500"
                           />
                           {t('Delete flip')}

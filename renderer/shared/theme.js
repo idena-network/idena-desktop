@@ -183,6 +183,31 @@ export const theme = {
         },
       },
     },
+    Button: {
+      baseStyle: {
+        fontWeight: 500,
+      },
+      variants: {
+        tab: {
+          color: 'muted',
+          borderRadius: '6',
+          h: '8',
+          px: '4',
+          _hover: {
+            bg: 'gray.50',
+            color: 'blue.500',
+          },
+          _selected: {
+            bg: 'gray.50',
+            color: 'blue.500',
+          },
+          _active: {
+            bg: 'gray.50',
+            color: 'blue.500',
+          },
+        },
+      },
+    },
   },
 }
 

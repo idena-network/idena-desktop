@@ -16,7 +16,6 @@ import {
   Icon,
   Switch,
   Alert,
-  AlertIcon,
   AlertDescription,
   List,
   ListItem,
@@ -74,7 +73,11 @@ import {BLOCK_TIME} from '../oracles/utils'
 import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {useTotalValidationScore} from '../validation-report/hooks'
-import {ChevronRightIcon, UserIcon} from '../../shared/components/icons'
+import {
+  ChevronRightIcon,
+  InfoIcon,
+  UserIcon,
+} from '../../shared/components/icons'
 
 export function UserInlineCard({
   identity: {address, state},
@@ -676,7 +679,7 @@ export function DeactivateMiningDrawer({
               borderColor="red.050"
               borderWidth={1}
             >
-              <AlertIcon name="info" alignSelf="flex-start" color="red.500" />
+              <InfoIcon alignSelf="flex-start" color="red.500" />
               <AlertDescription
                 color="brandGray.500"
                 fontSize="md"

@@ -3,7 +3,6 @@ import React from 'react'
 import {useTranslation} from 'react-i18next'
 import {
   Alert,
-  AlertIcon,
   AlertTitle,
   Box,
   Flex,
@@ -49,6 +48,7 @@ import {callRpc, toLocaleDna} from '../../shared/utils/utils'
 import {bufferToHex} from '../../shared/utils/string'
 import {useFormatDna} from '../../shared/hooks/hooks'
 import {TxType} from '../../shared/types'
+import {DeleteIcon, InfoIcon} from '../../shared/components/icons'
 
 export function DnaSignInDialog({
   token,
@@ -596,7 +596,7 @@ export function DnaSendSucceededDialog({hash, url, ...props}) {
             height={132}
           >
             <Stack spacing={2} align="center">
-              <AlertIcon boxSize={8} mr={0} />
+              <InfoIcon boxSize={8} mr={0} />
               <AlertTitle fontSize="lg" fontWeight={500}>
                 {t('Successfully sent')}
               </AlertTitle>
@@ -656,7 +656,7 @@ export function DnaSendFailedDialog({
             minH={132}
           >
             <Stack align="center" spacing={1}>
-              <AlertIcon name="delete" boxSize={10} mr={0} />
+              <DeleteIcon boxSize={10} mr={0} />
               <Stack spacing={1}>
                 <AlertTitle fontSize="lg" fontWeight={500}>
                   {t('Something went wrong')}

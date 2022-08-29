@@ -628,7 +628,7 @@ export default function FlipEditor({
   return (
     <Box display={visible ? 'initial' : 'none'}>
       <Flex>
-        <Box>
+        <Box position="relative">
           {(bottomMenuPanel === BottomMenu.Erase ||
             rightMenuPanel === RightMenu.Erase) && (
             <ImageEraseEditor
@@ -1022,6 +1022,7 @@ export default function FlipEditor({
             />
           </Stack>
         )}
+
         {rightMenuPanel === RightMenu.Erase && (
           <Box ml={6}>
             <Brushes
@@ -1346,9 +1347,9 @@ function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
       bg={isActive ? 'gray.50' : 'unset'}
       color={isActive ? 'brandBlue.500' : 'unset'}
       fontSize={20}
-      boxSize={6}
+      size="6"
       rounded="md"
-      p="1/2"
+      p="0.5"
       _hover={{color: isDisabled ? 'inherit' : 'brandBlue.500'}}
       _active={{bg: 'transparent'}}
       {...props}
@@ -1356,11 +1357,9 @@ function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
   )
   return (
     <Box mr={mr}>
-      {isDisabled ? (
-        <Tooltip content={tooltip}>{icon}</Tooltip>
-      ) : (
-        <Tooltip label={tooltip}>{icon}</Tooltip>
-      )}
+      <Tooltip label={tooltip} shouldWrapChildren>
+        {icon}
+      </Tooltip>
     </Box>
   )
 }

@@ -9,10 +9,8 @@ import {
   Flex,
   Menu,
   MenuButton,
-  Icon,
   MenuItem,
   MenuList,
-  Button,
   Stack,
   useTheme,
   Heading,
@@ -27,9 +25,9 @@ import {
   Link,
   MenuDivider,
   Alert,
-  AlertIcon,
   RadioGroup,
   HStack,
+  Icon,
 } from '@chakra-ui/react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
@@ -52,10 +50,22 @@ import {
   PageTitle,
 } from '../../shared/components/components'
 import {
+  ChevronDownIcon,
   CommunityIcon,
   CycleIcon,
+  DeleteIcon,
+  EditIcon,
+  EyeIcon,
+  InfoIcon,
+  InfoSolidIcon,
+  MoreIcon,
+  MoveIcon,
+  OkIcon,
+  PicIcon,
+  PlusSolidIcon,
   SwitchIcon,
   UndoIcon,
+  UploadIcon,
   UpvoteIcon,
 } from '../../shared/components/icons'
 
@@ -116,7 +126,7 @@ export function FlipCard({flipService, onDelete}) {
             }
           >
             <FlipOverlayStatus>
-              <FlipOverlayIcon name="info-solid" />
+              <InfoSolidIcon boxSize="5" />
               <FlipOverlayText>
                 {type === FlipType.Publishing && t('Mining...')}
                 {type === FlipType.Deleting && t('Deleting...')}
@@ -142,7 +152,7 @@ export function FlipCard({flipService, onDelete}) {
           <FlipCardMenu>
             {isSubmittable && (
               <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
-                <FlipCardMenuItemIcon name="upload" boxSize={5} mr={2} />
+                <FlipCardMenuItemIcon icon={UploadIcon} mr={2} />
                 {t('Submit flip')}
               </FlipCardMenuItem>
             )}
@@ -150,7 +160,7 @@ export function FlipCard({flipService, onDelete}) {
               <FlipCardMenuItem>
                 <NextLink href={`/flips/view?id=${id}`}>
                   <Flex>
-                    <FlipCardMenuItemIcon name="view" boxSize={5} mr={2} />
+                    <FlipCardMenuItemIcon icon={EyeIcon} mr={2} />
                     {t('View flip')}
                   </Flex>
                 </NextLink>
@@ -160,7 +170,7 @@ export function FlipCard({flipService, onDelete}) {
               <FlipCardMenuItem>
                 <NextLink href={`/flips/edit?id=${id}`}>
                   <Flex>
-                    <FlipCardMenuItemIcon name="edit" boxSize={5} mr={2} />
+                    <FlipCardMenuItemIcon icon={EditIcon} mr={2} />
                     {t('Edit flip')}
                   </Flex>
                 </NextLink>
@@ -173,8 +183,7 @@ export function FlipCard({flipService, onDelete}) {
             {isDeletable && (
               <FlipCardMenuItem onClick={onDelete}>
                 <FlipCardMenuItemIcon
-                  name="delete"
-                  boxSize={5}
+                  icon={DeleteIcon}
                   mr={2}
                   color="red.500"
                 />
@@ -223,19 +232,19 @@ export function FlipCardMenu(props) {
     <Menu autoSelect={false} placement="bottom-end">
       <MenuButton
         rounded="md"
-        py="3/2"
-        px="2px"
-        mt="-6px"
+        py="1.5"
+        px="0.5"
+        mt="-1.5"
         _expanded={{bg: 'gray.50'}}
         _focus={{outline: 0}}
       >
-        <Icon name="more" boxSize={5} />
+        <MoreIcon boxSize={5} />
       </MenuButton>
       <MenuList
         border="none"
         shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
         rounded="lg"
-        py={2}
+        py="2"
         minWidth="145px"
         {...props}
       />
@@ -260,8 +269,8 @@ export function FlipCardMenuItem(props) {
   )
 }
 
-export function FlipCardMenuItemIcon(props) {
-  return <Icon boxSize={5} mr={3} color="blue.500" {...props} />
+export function FlipCardMenuItemIcon({icon: MenuIcon, ...props}) {
+  return <MenuIcon boxSize="5" mr="3" color="blue.500" {...props} />
 }
 
 export function RequiredFlipPlaceholder({title}) {
@@ -339,7 +348,7 @@ export function EmptyFlipBox(props) {
 }
 
 export function FlipPlaceholder(props) {
-  return <Icon name="plus-solid" boxSize={8} {...props} />
+  return <PlusSolidIcon boxSize={8} {...props} />
 }
 
 export function FlipOverlay(props) {
@@ -373,41 +382,9 @@ export function FlipOverlayStatus(props) {
   )
 }
 
-export function FlipOverlayIcon(props) {
-  return <Icon size={5} {...props} />
-}
-
 export function FlipOverlayText(props) {
   return <Text fontWeight={500} {...props} />
 }
-
-export function FlipFilter({children, ...props}) {
-  return (
-    <RadioGroup {...props}>
-      <HStack>{children}</HStack>
-    </RadioGroup>
-  )
-}
-
-export const FlipFilterOption = React.forwardRef(
-  ({isChecked, ...props}, ref) => (
-    <Button
-      ref={ref}
-      isActive={isChecked}
-      aria-checked={isChecked}
-      role="radio"
-      bg="white"
-      color="muted"
-      fontWeight={500}
-      boxSize="sm"
-      fontSize="md"
-      _active={{bg: 'gray.50', color: 'brand.blue'}}
-      _hover={{bg: 'gray.50', color: 'brand.blue'}}
-      {...props}
-    />
-  )
-)
-FlipFilterOption.displayName = 'FlipFilterOption'
 
 export function FlipMaster({children}) {
   return children
@@ -463,9 +440,8 @@ function FlipMasterNavbarItemIcon({step, ...props}) {
       transition="all 0.2s ease"
       {...props}
     >
-      <Icon
-        name="ok"
-        boxSize={3}
+      <OkIcon
+        boxSize="3"
         opacity={step === Step.Completed ? 1 : 0}
         transition="all 0.2s ease"
       />
@@ -790,7 +766,7 @@ export function FlipShuffleStep({
                             right={1}
                             zIndex={1}
                           >
-                            <Icon name="move" boxSize={5} color="white" />
+                            <MoveIcon boxSize="5" color="white" />
                           </Flex>
                           <FlipImageListItem
                             isFirst={idx === 0}
@@ -1010,7 +986,7 @@ export function FlipImage({
 export function EmptyFlipImage(props) {
   return (
     <Flex align="center" justify="center" px={10} py={6} {...props}>
-      <Icon name="pic" boxSize={10} color="gray.100" />
+      <PicIcon boxSize="10" color="gray.100" />
     </Flex>
   )
 }
@@ -1049,14 +1025,14 @@ export function CommunityTranslations({
         onClick={onToggle}
       >
         {t('Community translation')}
-        <Icon boxSize={5} name="chevron-down" color="muted" ml={2}></Icon>
+        <ChevronDownIcon boxSize="5" color="muted" ml="2" />
       </IconButton2>
       <Collapse in={isOpen}>
         <Stack spacing={8}>
           <RadioGroup value={wordIdx} onChange={setWordIdx}>
             <HStack>
               {keywords.words.map(({id, name}, i) => (
-                <FlipKeywordRadio key={id} value={i}>
+                <FlipKeywordRadio key={id} value={i} isChecked={i === wordIdx}>
                   {name && capitalize(name)}
                 </FlipKeywordRadio>
               ))}
@@ -1181,7 +1157,7 @@ export function CommunityTranslations({
 export const FlipKeywordRadio = React.forwardRef(
   ({isChecked, ...props}, ref) => {
     const stateProps = {
-      bg: isChecked ? 'brandBlue.500' : 'transparent',
+      bg: isChecked ? 'blue.500' : 'transparent',
       color: isChecked ? 'white' : 'brandGray.500',
     }
 
@@ -1232,7 +1208,7 @@ export function CommunityTranslationUnavailable() {
         px={3}
         py={2}
       >
-        <AlertIcon name="info" color="red.500" boxSize={5} mr={3} />
+        <InfoIcon color="red.500" boxSize={5} mr={3} />
         {t('Community translation is not available')}
       </Alert>
     </Box>
@@ -1252,7 +1228,7 @@ export function DeleteFlipDrawer({hash, cover, isMissing, onDelete, ...props}) {
           w={12}
           rounded="xl"
         >
-          <Icon name="delete" boxSize={6} color="red.500" />
+          <DeleteIcon boxSize="6" color="red.500" />
         </Flex>
         <Heading fontSize="lg" fontWeight={500} color="brandGray.500" mt={4}>
           {t('Delete flip')}

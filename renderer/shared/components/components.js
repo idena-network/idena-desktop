@@ -18,7 +18,6 @@ import {
   Alert,
   AlertTitle,
   AlertDescription,
-  AlertIcon,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -34,7 +33,6 @@ import {
   Checkbox as ChakraCheckbox,
   Divider,
   Text,
-  Icon,
   InputGroup,
   InputRightAddon,
   Link,
@@ -47,7 +45,7 @@ import {
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
-import {ChevronDownIcon, ChevronRightIcon, GtranslateIcon} from './icons'
+import {ChevronRightIcon, GtranslateIcon, InfoIcon} from './icons'
 
 export const Page = React.forwardRef(function Page(props, ref) {
   return (
@@ -270,7 +268,6 @@ export function Tooltip(props) {
 export function Toast({
   title,
   description,
-  icon = 'info',
   status = 'info',
   actionContent,
   actionColor = status === 'error' ? 'red.500' : 'brandBlue.500',
@@ -294,10 +291,10 @@ export function Toast({
       rounded="lg"
       {...props}
     >
-      <AlertIcon
-        name={icon}
-        boxSize={5}
+      <InfoIcon
+        boxSize="5"
         color={color || (status === 'error' ? 'red.500' : 'blue.500')}
+        mr="2"
       />
       <Flex direction="column" align="flex-start" maxW="sm">
         <AlertTitle fontWeight={500} lineHeight="base">
@@ -392,7 +389,7 @@ export function SuccessAlert({children, ...props}) {
       py={2}
       {...props}
     >
-      <AlertIcon name="info" color="green.500" boxSize={5} mr={3} />
+      <InfoIcon color="green.500" boxSize="5" mr="3" />
       {children}
     </Alert>
   )
@@ -414,7 +411,7 @@ export function FailAlert({children, ...props}) {
       py={2}
       {...props}
     >
-      <AlertIcon name="info" color="red.500" boxSize={5} mr={3} />
+      <InfoIcon color="red.500" boxSize="5" mr="3" />
       {children}
     </Alert>
   )

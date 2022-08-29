@@ -1,7 +1,23 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {Box, Button, FormControl, Heading, Stack} from '@chakra-ui/react'
+import {useRouter} from 'next/router'
 import {FormLabel} from '../../shared/components/components'
+
+export function SettingsNavLink({href, ...props}) {
+  const router = useRouter()
+
+  return (
+    <Button
+      variant="tab"
+      onClick={() => {
+        router.push(href)
+      }}
+      isActive={router.pathname === href}
+      {...props}
+    />
+  )
+}
 
 export function SettingsFormControl({children, ...props}) {
   return (
