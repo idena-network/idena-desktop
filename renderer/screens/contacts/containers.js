@@ -56,6 +56,7 @@ import {
   BasketIcon,
   DeleteIcon,
   EditIcon,
+  InfoIcon,
   PlusSolidIcon,
 } from '../../shared/components/icons'
 
@@ -153,7 +154,7 @@ function InvitationRewardRatioInfo() {
       placement="right"
       w={151}
     >
-      <Icon name="info" boxSize={5} color="blue.500" />
+      <InfoIcon boxSize="5" color="blue.500" />
     </Tooltip>
   )
 }
@@ -247,12 +248,12 @@ function ContactListItem({
       spacing={3}
       align="center"
       bg={isActive ? 'gray.50' : ''}
-      h={44}
       px={4}
+      py="1.5"
       cursor="pointer"
       {...props}
     >
-      <ContactAvatar address={receiver} w={8} h={8} borderRadius="lg" />
+      <ContactAvatar address={receiver} w="8" h="8" borderRadius="lg" />
       <Box fontWeight={500}>
         <Text maxW={180} isTruncated>
           {fullName || receiver || t('...')}
@@ -318,8 +319,8 @@ export function ContactCard({
       <Stack spacing={6} w="full">
         <Stack spacing={4}>
           <Stack isInline spacing={6} align="center" py={2}>
-            <ContactAvatar address={address} h={80} w={80} borderRadius={20} />
-            <Stack spacing="3/2" fontWeight={500}>
+            <ContactAvatar address={address} h="20" w="20" borderRadius={20} />
+            <Stack spacing="1.5" fontWeight={500}>
               <Stack isInline align="center">
                 <Text fontSize="lg">
                   {`${firstName} ${lastName}`.trim() || t('...')}
