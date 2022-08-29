@@ -745,7 +745,7 @@ export function VotingInspector({onTerminate, ...contract}) {
                     onClick={onToggleContract}
                   />
                 </Flex>
-                <Collapse isOpen={isOpenContract}>
+                <Collapse in={isOpenContract}>
                   <Debug>{contract}</Debug>
                 </Collapse>
                 <Box mt={2}>
@@ -1646,7 +1646,7 @@ export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
           <Text color="muted" fontSize="sm">
             {t('Choose an option to vote')}
           </Text>
-          <RadioGroup spacing={0} onChange={e => setPreset(e.target.value)}>
+          <RadioGroup spacing={0} onChange={setPreset}>
             <Radio value="fact" alignItems="baseline" borderColor="gray.100">
               <Stack spacing={1} pt={2} pb={3}>
                 <Text>{t('Fact certification')}</Text>

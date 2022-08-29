@@ -12,7 +12,6 @@ import {
   Box,
   Flex,
   Button,
-  RadioButtonGroup,
   Radio,
   Icon,
   Switch,
@@ -29,6 +28,8 @@ import {
   PopoverBody,
   Tag,
   FormHelperText,
+  RadioGroup,
+  HStack,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -536,36 +537,32 @@ export function ActivateMiningDrawer({
         <Stack spacing={6} mt={30}>
           <FormControl as={Stack} spacing={3}>
             <FormLabel p={0}>{t('Type')}</FormLabel>
-            <RadioButtonGroup
-              spacing={2}
-              isInline
-              d="flex"
-              value={mode}
-              onChange={onChangeMode}
-            >
-              <Radio
-                value={NodeType.Miner}
-                flex={1}
-                borderColor="gray.300"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-                px={3}
-              >
-                {t('Mining')}
-              </Radio>
-              <Radio
-                value={NodeType.Delegator}
-                flex={1}
-                borderColor="gray.300"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-                px={3}
-              >
-                {t('Delegation')}
-              </Radio>
-            </RadioButtonGroup>
+            <RadioGroup value={mode} onChange={onChangeMode}>
+              <HStack spacing="2">
+                <Radio
+                  value={NodeType.Miner}
+                  flex={1}
+                  borderColor="gray.300"
+                  borderWidth={1}
+                  borderRadius="md"
+                  p={2}
+                  px={3}
+                >
+                  {t('Mining')}
+                </Radio>
+                <Radio
+                  value={NodeType.Delegator}
+                  flex={1}
+                  borderColor="gray.300"
+                  borderWidth={1}
+                  borderRadius="md"
+                  p={2}
+                  px={3}
+                >
+                  {t('Delegation')}
+                </Radio>
+              </HStack>
+            </RadioGroup>
           </FormControl>
           {willDelegate ? (
             <Stack spacing={5}>

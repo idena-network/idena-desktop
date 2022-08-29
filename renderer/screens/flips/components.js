@@ -13,7 +13,6 @@ import {
   MenuItem,
   MenuList,
   Button,
-  RadioButtonGroup,
   Stack,
   useTheme,
   Heading,
@@ -29,6 +28,8 @@ import {
   MenuDivider,
   Alert,
   AlertIcon,
+  RadioGroup,
+  HStack,
 } from '@chakra-ui/react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
@@ -219,7 +220,7 @@ export function FlipCardSubtitle(props) {
 
 export function FlipCardMenu(props) {
   return (
-    <Menu autoSelect={false}>
+    <Menu autoSelect={false} placement="bottom-end">
       <MenuButton
         rounded="md"
         py="3/2"
@@ -231,7 +232,6 @@ export function FlipCardMenu(props) {
         <Icon name="more" boxSize={5} />
       </MenuButton>
       <MenuList
-        placement="bottom-end"
         border="none"
         shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
         rounded="lg"
@@ -381,8 +381,12 @@ export function FlipOverlayText(props) {
   return <Text fontWeight={500} {...props} />
 }
 
-export function FlipFilter(props) {
-  return <RadioButtonGroup isInline spacing={2} {...props} />
+export function FlipFilter({children, ...props}) {
+  return (
+    <RadioGroup {...props}>
+      <HStack>{children}</HStack>
+    </RadioGroup>
+  )
 }
 
 export const FlipFilterOption = React.forwardRef(
@@ -1047,15 +1051,17 @@ export function CommunityTranslations({
         {t('Community translation')}
         <Icon boxSize={5} name="chevron-down" color="muted" ml={2}></Icon>
       </IconButton2>
-      <Collapse isOpen={isOpen}>
+      <Collapse in={isOpen}>
         <Stack spacing={8}>
-          <RadioButtonGroup isInline value={wordIdx} onChange={setWordIdx}>
-            {keywords.words.map(({id, name}, i) => (
-              <FlipKeywordRadio key={id} value={i}>
-                {name && capitalize(name)}
-              </FlipKeywordRadio>
-            ))}
-          </RadioButtonGroup>
+          <RadioGroup value={wordIdx} onChange={setWordIdx}>
+            <HStack>
+              {keywords.words.map(({id, name}, i) => (
+                <FlipKeywordRadio key={id} value={i}>
+                  {name && capitalize(name)}
+                </FlipKeywordRadio>
+              ))}
+            </HStack>
+          </RadioGroup>
           {translations.map(({id, name, desc, score}) => (
             <Flex key={id} justify="space-between">
               <FlipKeyword>

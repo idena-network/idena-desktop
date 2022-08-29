@@ -941,7 +941,7 @@ export default function FlipEditor({
         {rightMenuPanel === RightMenu.FreeDrawing && (
           <Stack align="center" ml={6}>
             <Box>
-              <Menu autoSelect={false}>
+              <Menu autoSelect={false} placement="left-start">
                 <MenuButton
                   bg={`#${brushColor}`}
                   borderWidth={1}
@@ -951,7 +951,7 @@ export default function FlipEditor({
                   h={4}
                   outline="none"
                 />
-                <FlipEditorMenuList placement="left-start" px={2}>
+                <FlipEditorMenuList px={2}>
                   <SimpleGrid columns={4} spacing={1}>
                     {[
                       'ffffff',

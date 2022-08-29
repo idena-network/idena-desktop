@@ -224,7 +224,7 @@ export function Flip({
         ))}
         <Modal
           initialFocusRef={initialRef}
-          size="30%"
+          size="xl"
           isOpen={isOpenFlipZoom}
           onClose={onCloseFlipZoom}
         >
@@ -1236,12 +1236,12 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
     <Modal
       isOpen={isOpen}
       isCentered
-      size={664}
+      size="664"
       onClose={onClose}
       initialFocusRef={nextButtonRef}
       {...props}
     >
-      <ModalOverlay bg="xblack.080" />
+      <ModalOverlay />
       <ModalContent
         bg="transparent"
         color="brandGray.500"

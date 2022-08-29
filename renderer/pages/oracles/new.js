@@ -425,7 +425,7 @@ function NewVotingPage() {
                 />
               </NewVotingFormSubtitle>
 
-              <Collapse isOpen={isOpenAdvanced} mt={2}>
+              <Collapse in={isOpenAdvanced} mt={2}>
                 <Stack spacing={3}>
                   <VotingInlineFormControl
                     pt={1 / 2}

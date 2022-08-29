@@ -436,7 +436,7 @@ export function IssueInviteDrawer({
   const {
     isOpen: isOpenAdvancedOptions,
     onToggle: onToggleAdvancedOptions,
-  } = useDisclosure(Boolean(inviteeAddress))
+  } = useDisclosure({defaultIsOpen: Boolean(inviteeAddress)})
 
   const {addInvite} = useInviteDispatch()
 
@@ -509,7 +509,7 @@ export function IssueInviteDrawer({
                 transition="all 0.2s ease-in-out"
               />
             </Button>
-            <Collapse isOpen={isOpenAdvancedOptions} mt={4}>
+            <Collapse in={isOpenAdvancedOptions} mt={4}>
               <FormControl>
                 <FormLabel htmlFor="address">{t('Address')}</FormLabel>
                 <Input

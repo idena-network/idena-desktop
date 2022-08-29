@@ -362,9 +362,9 @@ export default function ViewVotingPage() {
                         ) : (
                           <RadioGroup
                             value={String(selectedOption)}
-                            onChange={e => {
+                            onChange={value => {
                               send('SELECT_OPTION', {
-                                option: Number(e.target.value),
+                                option: Number(value),
                               })
                             }}
                           >

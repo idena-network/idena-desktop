@@ -134,6 +134,37 @@ export const theme = {
     md: rem(6),
     xl: '0.75rem',
   },
+  components: {
+    Modal: {
+      baseStyle: {
+        overlay: {
+          bg: 'xblack.080',
+        },
+      },
+      sizes: {
+        mdx: {
+          dialog: {
+            maxW: '400px',
+          },
+        },
+        md: {
+          dialog: {
+            maxW: '480px',
+          },
+        },
+        '664': {
+          dialog: {
+            maxW: '664px',
+          },
+        },
+        xl: {
+          dialog: {
+            maxW: '30%',
+          },
+        },
+      },
+    },
+  },
 }
 
 export function rem(value) {

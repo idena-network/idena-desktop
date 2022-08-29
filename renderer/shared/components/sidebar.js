@@ -504,7 +504,7 @@ function ActionPanel() {
       </Stack>
 
       {currentPeriod === EpochPeriod.None && (
-        <Menu autoSelect={false}>
+        <Menu autoSelect={false} placement="bottom-end">
           <MenuButton
             rounded="md"
             py="3/2"
@@ -519,7 +519,6 @@ function ActionPanel() {
             <Icon name="more" boxSize={5} />
           </MenuButton>
           <MenuList
-            placement="bottom-end"
             border="none"
             shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
             rounded="lg"

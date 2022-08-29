@@ -339,7 +339,7 @@ export function Dialog({
 }) {
   return (
     <Modal isCentered size="sm" {...props}>
-      <ModalOverlay bg="xblack.080" />
+      <ModalOverlay />
       <ModalContent
         bg="white"
         color="brandGray.500"

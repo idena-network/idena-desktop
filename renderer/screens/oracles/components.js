@@ -17,7 +17,8 @@ import {
   Divider,
   Button,
   IconButton,
-  RadioButtonGroup,
+  HStack,
+  RadioGroup,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {
@@ -433,9 +434,13 @@ export function PresetFormControl({tooltip, children, ...props}) {
 }
 
 // eslint-disable-next-line react/display-name
-export const PresetFormControlOptionList = React.forwardRef((props, ref) => (
-  <RadioButtonGroup ref={ref} isInline {...props} />
-))
+export const PresetFormControlOptionList = React.forwardRef(
+  ({children, ...props}, ref) => (
+    <RadioGroup ref={ref} isInline {...props}>
+      <HStack>{children}</HStack>
+    </RadioGroup>
+  )
+)
 
 // eslint-disable-next-line react/display-name
 export const PresetFormControlOption = React.forwardRef(

@@ -20,7 +20,7 @@ import {
 
 export function WalletCardMenu({children, ...props}) {
   return (
-    <Menu autoSelect={false} {...props}>
+    <Menu autoSelect={false} placement="bottom-end" {...props}>
       <MenuButton
         rounded="md"
         p="3/2"
@@ -35,7 +35,6 @@ export function WalletCardMenu({children, ...props}) {
         </Flex>
       </MenuButton>
       <MenuList
-        placement="bottom-end"
         border="none"
         shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
         rounded="lg"
