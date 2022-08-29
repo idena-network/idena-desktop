@@ -22,32 +22,11 @@ import {
   PageTitle,
 } from '../../shared/components/components'
 import {votingListMachine} from '../../screens/oracles/machines'
-import {
-  VotingCardSkeleton,
-  VotingSkeleton,
-  FillPlaceholder,
-  FillCenter,
-  OutlineButton,
-  ScrollToTop,
-  TodoVotingCountBadge,
-} from '../../screens/oracles/components'
 import {useEpochState} from '../../shared/providers/epoch-context'
-import {
-  VotingCard,
-  VotingFilter,
-  LaunchVotingDrawer,
-} from '../../screens/oracles/containers'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {eitherState} from '../../shared/utils/utils'
-import {VotingListFilter} from '../../screens/oracles/types'
-import {
-  humanError,
-  mapVotingStatus,
-  votingStatuses,
-} from '../../screens/oracles/utils'
+import {humanError} from '../../screens/oracles/utils'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
-import {IdentityStatus} from '../../shared/types'
 import {useVotingNotification} from '../../shared/providers/voting-notification-context'
 import {PlusSolidIcon, UserIcon} from '../../shared/components/icons'
 
