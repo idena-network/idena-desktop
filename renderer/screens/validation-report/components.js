@@ -83,8 +83,8 @@ export function ValidationReportSummary({onClose}) {
       <Stack spacing={6} w="full">
         <Skeleton
           isLoaded={!isLoading}
-          colorStart={colors.gray[50]}
-          colorEnd={colors.gray[300]}
+          startColor={colors.gray[50]}
+          endColor={colors.gray[300]}
           alignSelf="start"
         >
           <AlertTitle fontSize="lg" fontWeight={500}>
@@ -174,8 +174,8 @@ export function ValidationReportSummary({onClose}) {
                 <ValidationReportGaugeStat>
                   <Skeleton
                     isLoaded={!isLoading}
-                    colorStart={colors.gray[50]}
-                    colorEnd={colors.gray[300]}
+                    startColor={colors.gray[50]}
+                    endColor={colors.gray[300]}
                   >
                     {validationResult === ValidationResult.Success ? (
                       <ValidationReportGaugeStatValue>

@@ -345,8 +345,8 @@ export function VotingSkeleton(props) {
   const {colors} = useTheme()
   return (
     <FullSkeleton
-      colorStart={colors.gray[50]}
-      colorEnd={colors.gray[300]}
+      startColor={colors.gray[50]}
+      endColor={colors.gray[300]}
       {...props}
     />
   )
