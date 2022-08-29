@@ -46,7 +46,7 @@ import {
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
-import {ChevronRightIcon, GtranslateIcon, InfoIcon} from './icons'
+import {GtranslateIcon} from './icons'
 
 export const Page = React.forwardRef(function Page(props, ref) {
   return (

@@ -537,7 +537,7 @@ export default function ProfilePage() {
                         >
                           {address && canMine && (
                             <ActivateMiningForm
-                              isOnline={online}
+                              isOnline={false && online}
                               delegatee={delegatee}
                               delegationEpoch={delegationEpoch}
                               pendingUndelegation={pendingUndelegation}
