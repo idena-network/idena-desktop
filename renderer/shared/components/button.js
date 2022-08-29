@@ -3,10 +3,10 @@ import React from 'react'
 import {
   Button as ChakraButton,
   IconButton as ChakraIconButton,
-  PseudoBox,
   Icon,
   Stack,
   Text,
+  Box,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 
@@ -28,13 +28,13 @@ const BaseButton = React.forwardRef((props, ref) => (
 BaseButton.displayName = 'BaseButton'
 
 export const PrimaryButton = React.forwardRef((props, ref) => (
-  <BaseButton ref={ref} variantColor="brandBlue" color="white" {...props} />
+  <BaseButton ref={ref} colorScheme="brandBlue" color="white" {...props} />
 ))
 PrimaryButton.displayName = 'PrimaryButton'
 
 // eslint-disable-next-line react/display-name
 export const SecondaryButton = React.forwardRef((props, ref) => (
-  <PseudoBox
+  <Box
     ref={ref}
     as="button"
     bg="brandBlue.10"
@@ -71,7 +71,7 @@ export const IconButton2 = React.forwardRef(
     <ChakraButton
       ref={ref}
       variant="ghost"
-      variantColor="blue"
+      colorScheme="blue"
       fontWeight={500}
       h={8}
       px={2}
@@ -80,7 +80,11 @@ export const IconButton2 = React.forwardRef(
       {...props}
     >
       <Stack isInline spacing={2} align="center" w="full">
-        {typeof icon === 'string' ? <Icon name={icon} size={5} mr={2} /> : icon}
+        {typeof icon === 'string' ? (
+          <Icon name={icon} boxSize={5} mr={2} />
+        ) : (
+          icon
+        )}
         <Text as="span" isTruncated>
           {children}
         </Text>

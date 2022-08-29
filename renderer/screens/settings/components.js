@@ -38,7 +38,7 @@ export function SettingsLinkButton(props) {
   return (
     <Button
       variant="link"
-      variantColor="blue"
+      colorScheme="blue"
       fontWeight={500}
       _hover={null}
       _active={null}

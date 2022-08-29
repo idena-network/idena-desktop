@@ -89,7 +89,7 @@ export function OnboardingPopoverContentIconRow({icon, children, ...props}) {
   return (
     <Stack isInline spacing={4} align="center" {...props}>
       {typeof icon === 'string' ? (
-        <Icon name={icon} size={5} />
+        <Icon name={icon} boxSize={5} />
       ) : (
         <Box>{icon}</Box>
       )}

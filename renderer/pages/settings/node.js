@@ -256,7 +256,7 @@ function NodeSettings() {
                   <InputRightElement h="full">
                     <IconButton
                       icon={revealApiKey ? 'eye-off' : 'eye'}
-                      size="xs"
+                      boxSize="xs"
                       bg={revealApiKey ? 'gray.300' : 'white'}
                       fontSize={20}
                       w={8}

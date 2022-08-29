@@ -60,7 +60,7 @@ export function ContactCardBadge(props) {
 export function NoContactDataPlaceholder({children}) {
   return (
     <FillCenter as={Stack} spacing={4}>
-      <Icon name="contacts" size={16} color="gray.300" />
+      <Icon name="contacts" boxSize={16} color="gray.300" />
       <Text fontWeight={500} color="muted">
         {children}
       </Text>

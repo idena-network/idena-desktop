@@ -183,7 +183,7 @@ export default function ViewFlipPage() {
                 >
                   <FlipCardMenuItemIcon
                     name="delete"
-                    size={5}
+                    boxSize={5}
                     mr={2}
                     color="red.500"
                   />

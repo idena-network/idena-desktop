@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import Head from 'next/head'
-import {ThemeProvider, CSSReset} from '@chakra-ui/react'
+import {ChakraProvider, extendTheme} from '@chakra-ui/react'
 import GoogleFonts from 'next-google-fonts'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tui-image-editor/dist/tui-image-editor.css'
@@ -27,12 +27,11 @@ export default function App({Component, err, ...pageProps}) {
         <link href="/static/scrollbars.css" rel="stylesheet" />
       </Head>
 
-      <ThemeProvider theme={theme}>
-        <CSSReset />
+      <ChakraProvider theme={extendTheme(theme)}>
         <AppProviders>
           <Component err={err} {...pageProps} />
         </AppProviders>
-      </ThemeProvider>
+      </ChakraProvider>
     </>
   )
 }

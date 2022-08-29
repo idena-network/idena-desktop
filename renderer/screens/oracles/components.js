@@ -33,7 +33,7 @@ import {clampValue} from '../../shared/utils/utils'
 
 export function OracleDrawerHeader({
   icon,
-  variantColor = 'blue',
+  colorScheme = 'blue',
   children,
   ...props
 }) {
@@ -42,12 +42,12 @@ export function OracleDrawerHeader({
       <Flex
         align="center"
         justify="center"
-        bg={`${variantColor}.012`}
+        bg={`${colorScheme}.012`}
         h={12}
         w={12}
         rounded="xl"
       >
-        <Icon name={icon} w={6} h={6} color={`${variantColor}.500`} />
+        <Icon name={icon} w={6} h={6} color={`${colorScheme}.500`} />
       </Flex>
       <Heading
         color="brandGray.500"
@@ -538,7 +538,7 @@ export function ScrollToTop({scrollableRef, children, ...props}) {
       {...props}
     >
       <Stack isInline spacing={1} align="center">
-        <Icon name="arrow-up" size={5} />
+        <Icon name="arrow-up" boxSize={5} />
         <Text as="span">{children}</Text>
       </Stack>
     </Button>

@@ -103,7 +103,7 @@ export function DnaSignInDialog({
                   w={10}
                 />
               ) : (
-                <Icon name="globe" color="blue.500" size={10} />
+                <Icon name="globe" color="blue.500" boxSize={10} />
               )}
             </MediaDnaDialogStat>
             <MediaDnaDialogStat label={t('My address')} value={address}>
@@ -218,7 +218,11 @@ export function DnaSendDialog({
                     <Tooltip
                       label={t('The amount is larger than your balance')}
                     >
-                      <Icon name="exclamation-mark" size={4} color="red.500" />
+                      <Icon
+                        name="exclamation-mark"
+                        boxSize={4}
+                        color="red.500"
+                      />
                     </Tooltip>
                   </Stack>
                 ) : (
@@ -430,7 +434,7 @@ export function DnaRawDialog({
                             <Icon
                               name="exclamation-mark"
                               color="red.500"
-                              size={4}
+                              boxSize={4}
                             />
                           </Tooltip>
                         </Stack>
@@ -592,7 +596,7 @@ export function DnaSendSucceededDialog({hash, url, ...props}) {
             height={132}
           >
             <Stack spacing={2} align="center">
-              <AlertIcon size={8} mr={0} />
+              <AlertIcon boxSize={8} mr={0} />
               <AlertTitle fontSize="lg" fontWeight={500}>
                 {t('Successfully sent')}
               </AlertTitle>
@@ -652,7 +656,7 @@ export function DnaSendFailedDialog({
             minH={132}
           >
             <Stack align="center" spacing={1}>
-              <AlertIcon name="delete" size={10} mr={0} />
+              <AlertIcon name="delete" boxSize={10} mr={0} />
               <Stack spacing={1}>
                 <AlertTitle fontSize="lg" fontWeight={500}>
                   {t('Something went wrong')}

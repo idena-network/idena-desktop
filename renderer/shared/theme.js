@@ -1,15 +1,17 @@
 import React from 'react'
-import {theme as chakraTheme} from '@chakra-ui/react'
+import {theme as defaultTheme} from '@chakra-ui/react'
 
-const breakpoints = ['40em', '52em', '64em']
+const breakpoints = {
+  sm: '30em',
+  md: '40em',
+  lg: '52em',
+  xl: '64em',
+}
 
 export const theme = {
-  ...chakraTheme,
   colors: {
-    ...chakraTheme.colors,
     black: '#16161D',
     blue: {
-      ...chakraTheme.colors.blue,
       '010': 'rgb(87 143 255 / 0.1)',
       '012': 'rgb(87 143 255 / 0.12)',
       '020': 'rgb(87 143 255 / 0.2)',
@@ -22,7 +24,6 @@ export const theme = {
       500: 'rgb(87, 143, 255)',
     },
     gray: {
-      ...chakraTheme.colors.gray,
       '016': 'rgb(83 86 92 /0.16)',
       10: 'rgba(255,255,255,0.1)',
       50: 'rgb(245, 246, 247)',
@@ -34,7 +35,6 @@ export const theme = {
       980: 'rgba(17 17 17 /0.80)',
     },
     red: {
-      ...chakraTheme.colors.red,
       '010': 'rgb(255 102 102 /0.10)',
       '012': 'rgb(255 102 102 /0.12)',
       '020': 'rgb(255 102 102 /0.20)',
@@ -44,7 +44,6 @@ export const theme = {
       500: 'rgb(255, 102, 102)',
     },
     green: {
-      ...chakraTheme.colors.green,
       '010': 'rgb(39 217 128 /.1)',
       '020': 'rgb(39 217 128 /.2)',
       '040': 'rgb(39 217 128 /.4)',
@@ -52,7 +51,6 @@ export const theme = {
       500: 'rgb(39 217 128)',
     },
     orange: {
-      ...chakraTheme.colors.orange,
       '010': 'rgb(255 163 102 /0.1)',
       '020': 'rgb(255 163 102 /0.2)',
       '040': 'rgb(255 163 102 /0.5)',
@@ -112,12 +110,10 @@ export const theme = {
     },
   },
   fonts: {
-    ...chakraTheme.fonts,
-    body: ['Inter', chakraTheme.fonts.body].join(', '),
-    heading: ['Inter', chakraTheme.fonts.heading].join(', '),
+    body: ['Inter', defaultTheme.fonts.body].join(', '),
+    heading: ['Inter', defaultTheme.fonts.heading].join(', '),
   },
   fontSizes: {
-    ...chakraTheme.fontSizes,
     sm: '11px',
     md: '13px',
     mdx: '14px',
@@ -127,23 +123,19 @@ export const theme = {
   },
   breakpoints,
   space: {
-    ...chakraTheme.space,
     '1/2': '2px',
     '3/2': '6px',
   },
   sizes: {
-    ...chakraTheme.sizes,
     sm: rem(360),
     md: rem(480),
   },
   radii: {
-    ...chakraTheme.radii,
     sm: '0.25rem',
     md: rem(6),
     xl: '0.75rem',
   },
   icons: {
-    ...chakraTheme.icons,
     logo: {
       path: (
         <svg xmlns="http://www.w3.org/2000/svg" width="58" height="58">

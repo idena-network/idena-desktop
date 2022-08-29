@@ -1059,10 +1059,14 @@ function Brushes({brush, onChange}) {
           justify="center"
           bg={brush === b ? 'gray.50' : 'none'}
           borderRadius="sm"
-          size={6}
+          boxSize={6}
           onClick={() => onChange(b)}
         >
-          <Box bg="brandGray.500" borderRadius="full" size={rem((i + 1) * 2)} />
+          <Box
+            bg="brandGray.500"
+            borderRadius="full"
+            boxSize={rem((i + 1) * 2)}
+          />
         </Flex>
       ))}
     </Stack>
@@ -1331,7 +1335,7 @@ function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
       bg={isActive ? 'gray.50' : 'unset'}
       color={isActive ? 'brandBlue.500' : 'unset'}
       fontSize={20}
-      size={6}
+      boxSize={6}
       rounded="md"
       p="1/2"
       _hover={{color: isDisabled ? 'inherit' : 'brandBlue.500'}}
@@ -1386,14 +1390,14 @@ function FlipEditorMenuItem({children, ...props}) {
 }
 
 function FlipEditorMenuItemIcon(props) {
-  return <Icon size={5} color="blue.500" {...props} />
+  return <Icon boxSize={5} color="blue.500" {...props} />
 }
 
 function DrawingToolbarButton(props) {
   return (
     <Button
       variant="link"
-      variantColor="blue"
+      colorScheme="blue"
       fontWeight={500}
       _hover={null}
       _active={null}

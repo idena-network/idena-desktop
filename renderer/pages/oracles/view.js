@@ -13,7 +13,6 @@ import {
   StatLabel,
   useToast,
   CloseButton,
-  PseudoBox,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -211,7 +210,7 @@ export default function ViewVotingPage() {
                 <VotingStatusBadge status={status} fontSize="md">
                   {t(mapVotingStatus(status))}
                 </VotingStatusBadge>
-                <PseudoBox
+                <Box
                   as={VotingBadge}
                   bg="gray.300"
                   color="muted"
@@ -232,7 +231,7 @@ export default function ViewVotingPage() {
                     <Avatar w={5} h={5} address={contractHash} />
                     <Text>{contractHash}</Text>
                   </Stack>
-                </PseudoBox>
+                </Box>
                 <CloseButton
                   ml="auto"
                   onClick={() => redirect('/oracles/list')}
@@ -345,7 +344,7 @@ export default function ViewVotingPage() {
                                     w={4}
                                     h={4}
                                   >
-                                    {isMine && <Icon name="ok" size={3} />}
+                                    {isMine && <Icon name="ok" boxSize={3} />}
                                   </Flex>
 
                                   <Text
@@ -505,7 +504,7 @@ export default function ViewVotingPage() {
                         ) &&
                           canTerminate && (
                             <PrimaryButton
-                              variantColor="red"
+                              colorScheme="red"
                               onClick={() => send('TERMINATE')}
                             >
                               {t('Terminate')}
@@ -652,7 +651,7 @@ export default function ViewVotingPage() {
                                           name={`arrow-${
                                             isSender ? 'up' : 'down'
                                           }`}
-                                          size={5}
+                                          boxSize={5}
                                         />
                                       </Flex>
                                       <Box isTruncated>
@@ -706,7 +705,7 @@ export default function ViewVotingPage() {
                                   <Stack spacing={4} align="center">
                                     <Icon
                                       name="coins-lg"
-                                      size={20}
+                                      boxSize={20}
                                       color="gray.300"
                                     />
                                     <Text color="muted">
@@ -743,7 +742,7 @@ export default function ViewVotingPage() {
                     <Stat mb={8}>
                       <StatLabel as="div" color="muted" fontSize="md">
                         <Stack isInline spacing={2} align="center">
-                          <Icon name="star" size={4} color="white" />
+                          <Icon name="star" boxSize={4} color="white" />
                           <Text fontWeight={500}>{t('Prize pool')}</Text>
                         </Stack>
                       </StatLabel>

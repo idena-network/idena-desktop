@@ -18,7 +18,6 @@ import {
   List,
   ListItem,
   AspectRatioBox,
-  PseudoBox,
   Spinner,
   useDisclosure,
   Tooltip,
@@ -207,7 +206,7 @@ export function Flip({
                     onOpenFlipZoom()
                   }}
                 >
-                  <Icon name="zoom-flip" size={5} />
+                  <Icon name="zoom-flip" boxSize={5} />
                 </Flex>
               </div>
             )}
@@ -262,7 +261,7 @@ export function Flip({
               top={6}
               name="cross-small"
               color="white"
-              size={8}
+              boxSize={8}
               onClick={onCloseFlipZoom}
             />
           </Flex>
@@ -567,7 +566,7 @@ function FailedThumbnail() {
       bg="rgb(89 89 89 / 0.95)"
       borderRadius="xl"
     >
-      <Icon name="delete" size={5} color="white" />
+      <Icon name="delete" boxSize={5} color="white" />
     </Flex>
   )
 }
@@ -593,7 +592,7 @@ function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
       }
       borderRadius="xl"
     >
-      {option && <Icon name="tick" size={5} color="white" />}
+      {option && <Icon name="tick" boxSize={5} color="white" />}
     </Flex>
   )
 }
@@ -658,7 +657,7 @@ export const QualificationButton = React.forwardRef(
     return (
       <ButtonVariant ref={ref} flex={1} maxW={40} overflow="hidden" {...props}>
         <Stack isInline spacing={2} align="center" justify="center">
-          {isSelected && <Icon name="tick" size={5} />}
+          {isSelected && <Icon name="tick" boxSize={5} />}
           <Text>{children}</Text>
         </Stack>
       </ButtonVariant>
@@ -705,7 +704,7 @@ export function NavButton({type, bg, color, ...props}) {
       overflow="hidden"
       {...props}
     >
-      <PseudoBox
+      <Box
         borderRadius="full"
         cursor="pointer"
         h="full"
@@ -717,7 +716,7 @@ export function NavButton({type, bg, color, ...props}) {
       >
         <Icon
           name="chevron-down"
-          size={5}
+          boxSize={5}
           color={color}
           position="absolute"
           top="50%"
@@ -726,7 +725,7 @@ export function NavButton({type, bg, color, ...props}) {
             isPrev ? '80px' : '-80px'
           }) rotate(${isPrev ? '' : '-'}90deg)`}
         />
-      </PseudoBox>
+      </Box>
     </Box>
   )
 }
@@ -799,7 +798,7 @@ export function Timer(props) {
 }
 
 export function TimerIcon({color, ...props}) {
-  return <Icon name="clock" size={5} color={color} {...props} />
+  return <Icon name="clock" boxSize={5} color={color} {...props} />
 }
 
 export function TimerClock({duration, color}) {
@@ -1142,7 +1141,7 @@ export function ReviewValidationDialog({
               px={3}
               py={2}
             >
-              <AlertIcon name="info" color="red.500" size={5} mr={3} />
+              <AlertIcon name="info" color="red.500" boxSize={5} mr={3} />
               {t('You may lose rewards. Are you sure?')}
             </Alert>
           )}
@@ -1445,12 +1444,12 @@ function BadFlipPartFrame({flipCase, ...props}) {
         bg="red.500"
         borderRadius="full"
         color="white"
-        size={8}
+        boxSize={8}
         position="absolute"
         right={-20}
         bottom={-20}
       >
-        <Icon name="block" size={5} />
+        <Icon name="block" boxSize={5} />
       </Flex>
     </Box>
   )
@@ -1514,7 +1513,7 @@ export function SynchronizingValidationAlert({children, ...props}) {
       {...props}
     >
       <Stack isInline align="center">
-        <AlertIcon name="spinner" size={4} />
+        <AlertIcon name="spinner" boxSize={4} />
         <Text>{children}</Text>
       </Stack>
     </NotSyncedAlert>

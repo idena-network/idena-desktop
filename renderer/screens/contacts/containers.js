@@ -105,7 +105,7 @@ function InviteActionBar({onNewContact}) {
       <Stack isInline spacing={3} align="center">
         <IconButton
           icon="plus-solid"
-          variantColor="blue"
+          colorScheme="blue"
           bg="blue.012"
           color="blue.500"
           fontSize="base"
@@ -147,7 +147,7 @@ function InvitationRewardRatioInfo() {
       placement="right"
       w={151}
     >
-      <Icon name="info" size={5} color="blue.500" />
+      <Icon name="info" boxSize={5} color="blue.500" />
     </Tooltip>
   )
 }
@@ -364,7 +364,7 @@ export function ContactCard({
                 <VDivider />
                 <IconButton2
                   icon="delete"
-                  variantColor="red"
+                  colorScheme="red"
                   _active={{
                     bg: 'red.012',
                   }}
@@ -399,7 +399,7 @@ export function ContactCard({
                   {!activated && (
                     <Button
                       variant="link"
-                      variantColor="blue"
+                      colorScheme="blue"
                       fontWeight={500}
                       _hover={null}
                       _active={null}
@@ -495,7 +495,7 @@ export function IssueInviteDrawer({
             >
               {t('Advanced')}
               <Icon
-                size={5}
+                boxSize={5}
                 name="chevron-down"
                 color="muted"
                 ml={2}

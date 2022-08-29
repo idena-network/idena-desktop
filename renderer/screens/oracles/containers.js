@@ -227,7 +227,7 @@ export function VotingCard({votingRef, ...props}) {
           px={3}
           mb={6}
         >
-          <Icon name="star" size={5} color="white" />
+          <Icon name="star" boxSize={5} color="white" />
           <Text fontWeight={500}>
             {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
             {toDna(isClosed ? totalReward : estimatedTotalReward)}
@@ -494,7 +494,7 @@ export function VoteDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="send-out" variantColor="blue">
+      <OracleDrawerHeader icon="send-out" colorScheme="blue">
         {t('Voting')}: {option}
       </OracleDrawerHeader>
       <Box flex={1} overflowY="auto" mx={-30} px={30}>
@@ -707,7 +707,7 @@ export function VotingInspector({onTerminate, ...contract}) {
         bg="blue.50"
         rightIcon="info"
         variant="ghost"
-        variantColor="blue"
+        colorScheme="blue"
         onClick={onOpen}
       >
         Open inspector
@@ -730,7 +730,7 @@ export function VotingInspector({onTerminate, ...contract}) {
                   </Heading>
                   <IconButton
                     icon="chevron-down"
-                    size="sm"
+                    boxSize="sm"
                     fontSize="lg"
                     ml={1}
                     onClick={onToggleContract}
@@ -879,7 +879,7 @@ export function VotingInspector({onTerminate, ...contract}) {
                   </Stack>
                 </Box>
                 <Box ml="auto" mt={6}>
-                  <PrimaryButton variantColor="red" onClick={onTerminate}>
+                  <PrimaryButton colorScheme="red" onClick={onTerminate}>
                     Terminate contact
                   </PrimaryButton>
                 </Box>
@@ -953,7 +953,7 @@ export const VotingFilter = React.forwardRef(
     >
       <Stack isInline spacing={1}>
         {isChecked && (
-          <Icon name="tick" size={4} animation="0.3s both zoomIn" />
+          <Icon name="tick" boxSize={4} animation="0.3s both zoomIn" />
         )}
         <Text>{children}</Text>
       </Stack>
@@ -1076,7 +1076,7 @@ function VotingResultBar({
             w={4}
             h={4}
           >
-            {isMine && <Icon name="ok" size={3} />}
+            {isMine && <Icon name="ok" boxSize={3} />}
           </Flex>
         )}
         <Text isTruncated maxW="sm" title={label.length > 50 ? label : ''}>
@@ -1604,7 +1604,7 @@ export function Linkify({onClick, children}) {
         part.startsWith('http') ? (
           <Button
             variant="link"
-            variantColor="brandBlue"
+            colorScheme="brandBlue"
             fontWeight={500}
             _hover={{background: 'transparent'}}
             _focus={{

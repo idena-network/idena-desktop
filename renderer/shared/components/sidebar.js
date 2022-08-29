@@ -130,7 +130,7 @@ function Status() {
           <Popover trigger="hover" usePortal>
             <PopoverTrigger>
               <Stack isInline align="center" spacing={1} color="red.500">
-                <Icon name="clock" size={5} />
+                <Icon name="clock" boxSize={5} />
                 <Text fontWeight={500}>{t('Wrong time')}</Text>
               </Stack>
             </PopoverTrigger>
@@ -265,7 +265,7 @@ function BandwidthItem(props) {
 }
 
 export function Logo() {
-  return <Icon name="logo" size="56px" mx="auto" my={8} />
+  return <Icon name="logo" boxSize="56px" mx="auto" my={8} />
 }
 
 function Navbar() {
@@ -331,7 +331,7 @@ function NavItem({href, icon, children}) {
         _focus={{outline: 'none'}}
       >
         <Stack isInline spacing={2}>
-          <Icon name={icon} size={5} />
+          <Icon name={icon} boxSize={5} />
           <Flex flex={1}>{children}</Flex>
         </Stack>
       </Link>
@@ -505,7 +505,7 @@ function ActionPanel() {
             _expanded={{bg: 'brandGray.500'}}
             _focus={{outline: 0}}
           >
-            <Icon name="more" size={5} />
+            <Icon name="more" boxSize={5} />
           </MenuButton>
           <MenuList
             placement="bottom-end"
@@ -530,7 +530,12 @@ function ActionPanel() {
                 )
               }}
             >
-              <Icon name="plus-square" size={5} mr={3} color="brandBlue.500" />
+              <Icon
+                name="plus-square"
+                boxSize={5}
+                mr={3}
+                color="brandBlue.500"
+              />
               Add to calendar
             </MenuItem>
           </MenuList>

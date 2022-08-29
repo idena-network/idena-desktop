@@ -108,7 +108,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
           >
             <InputGroup w="full">
               <InputLeftElement w={5} h={5} top="3/2" left={3}>
-                <Icon name="search" size={3} color="gray.100" />
+                <Icon name="search" boxSize={3} color="gray.100" />
               </InputLeftElement>
               <Input
                 ref={searchInputRef}
@@ -128,7 +128,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
             <FillCenter>
               <Stack spacing={4} align="center" w="3xs">
                 <Box p={3}>
-                  <Icon name="search" size="56px" color="gray.300" />
+                  <Icon name="search" boxSize="56px" color="gray.300" />
                 </Box>
                 <Text color="muted" textAlign="center" w="full">
                   {t(

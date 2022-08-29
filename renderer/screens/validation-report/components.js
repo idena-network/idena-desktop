@@ -199,7 +199,7 @@ export function ValidationReportSummary({onClose}) {
                     <Text as="span">{t('More details')}</Text>
                     <Icon
                       name="chevron-down"
-                      size={4}
+                      boxSize={4}
                       transform="rotate(-90deg)"
                     />
                   </Stack>
@@ -318,7 +318,7 @@ export function ValidationReportGaugeIcon({
       transform="translateX(-50%)"
       {...props}
     >
-      <Icon name={icon} size={5} color={color} />
+      <Icon name={icon} boxSize={5} color={color} />
     </Box>
   )
 }

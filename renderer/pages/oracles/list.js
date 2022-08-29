@@ -119,7 +119,7 @@ function VotingListPage() {
                 <VDivider />
                 <FilterOption value="own">
                   <Stack isInline>
-                    <Icon name="user" size={4} />
+                    <Icon name="user" boxSize={4} />
                     <Text>{t('My votings')}</Text>
                   </Stack>
                 </FilterOption>

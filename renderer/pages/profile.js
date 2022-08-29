@@ -390,7 +390,7 @@ export default function ProfilePage() {
                               <Text as="span">{t('Send')}</Text>
                               <Icon
                                 name="chevron-down"
-                                size={4}
+                                boxSize={4}
                                 transform="rotate(-90deg)"
                               />
                             </Stack>
@@ -438,7 +438,7 @@ export default function ProfilePage() {
                                   <Icon
                                     name="chevron-down"
                                     transform="rotate(-90deg)"
-                                    size="4"
+                                    boxSize="4"
                                   />
                                 </Button>
                               </UserStatValue>
@@ -482,7 +482,7 @@ export default function ProfilePage() {
                                     >
                                       <Icon
                                         name="info"
-                                        size={4}
+                                        boxSize={4}
                                         color="red.500"
                                         ml={1}
                                         mt="-2px"
@@ -558,14 +558,14 @@ export default function ProfilePage() {
                   <Stack spacing={1} align="flex-start">
                     <IconLink
                       href="/oracles/new"
-                      icon={<Icon name="oracle" size={5} />}
+                      icon={<Icon name="oracle" boxSize={5} />}
                       maxW={200}
                     >
                       {t('New voting')}
                     </IconLink>
                     <IconLink
                       href="/flips/new"
-                      icon={<Icon name="photo" size={5} />}
+                      icon={<Icon name="photo" boxSize={5} />}
                       isDisabled={!canSubmitFlip}
                       maxW={200}
                     >
@@ -575,7 +575,7 @@ export default function ProfilePage() {
                       href="/contacts?new"
                       isDisabled={!canInvite}
                       maxW={200}
-                      icon={<Icon name="add-user" size={5} />}
+                      icon={<Icon name="add-user" boxSize={5} />}
                     >
                       {t('Invite')}
                     </IconLink>

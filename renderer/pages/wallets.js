@@ -59,7 +59,9 @@ export default function WalletsPage() {
             <Stack isInline spacing={1} align="center" pt={2}>
               <VDivider />
               <IconButton2
-                icon={<Icon name="send-out" size={5} transform="scaleX(-1)" />}
+                icon={
+                  <Icon name="send-out" boxSize={5} transform="scaleX(-1)" />
+                }
                 onClick={onOpenSendDnaDrawer}
               >
                 {t('Send')}

@@ -75,7 +75,7 @@ function Settings() {
           <HDivider />
           <Flex justify="space-between" align="center" py={6}>
             <Stack isInline spacing={3} align="center">
-              <Icon name="key" size={5} />
+              <Icon name="key" boxSize={5} />
               <Text fontSize="mdx" fontWeight={500}>
                 {t('My private key')}
               </Text>

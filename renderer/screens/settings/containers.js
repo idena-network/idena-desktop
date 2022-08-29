@@ -149,7 +149,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
                   <FormLabel>{t('Encrypted private key')}</FormLabel>
                   <Button
                     variant="link"
-                    variantColor="blue"
+                    colorScheme="blue"
                     fontWeight={500}
                     _hover={null}
                     _active={null}

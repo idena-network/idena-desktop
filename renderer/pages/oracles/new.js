@@ -416,7 +416,7 @@ function NewVotingPage() {
               >
                 {t('Advanced settings')}
                 <Icon
-                  size={5}
+                  boxSize={5}
                   name="chevron-down"
                   color="muted"
                   ml={1}
