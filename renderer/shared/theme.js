@@ -177,6 +177,8 @@ export const theme = {
             borderColor: 'gray.300',
             borderWidth: 1,
             borderRadius: 'md',
+            px: '3',
+            py: '2',
           },
         },
       },

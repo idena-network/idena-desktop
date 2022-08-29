@@ -534,15 +534,10 @@ export function ActivateMiningDrawer({
             <FormLabel p={0}>{t('Type')}</FormLabel>
             <RadioGroup value={mode} onChange={onChangeMode}>
               <HStack spacing="2">
-                <Radio value={NodeType.Miner} variant="bordered" px={3} py={2}>
+                <Radio value={NodeType.Miner} variant="bordered" flex={1}>
                   {t('Mining')}
                 </Radio>
-                <Radio
-                  value={NodeType.Delegator}
-                  variant="bordered"
-                  px={3}
-                  py={2}
-                >
+                <Radio value={NodeType.Delegator} variant="bordered" flex={1}>
                   {t('Delegation')}
                 </Radio>
               </HStack>
