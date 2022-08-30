@@ -2,7 +2,6 @@
 import React from 'react'
 import {
   Flex,
-  Icon,
   Heading,
   Stack,
   FormControl,
@@ -34,7 +33,7 @@ import {clampValue} from '../../shared/utils/utils'
 import {ArrowUpIcon, CrossSmallIcon} from '../../shared/components/icons'
 
 export function OracleDrawerHeader({
-  icon,
+  icon: DrawerIcon,
   colorScheme = 'blue',
   children,
   ...props
@@ -49,7 +48,7 @@ export function OracleDrawerHeader({
         w={12}
         rounded="xl"
       >
-        <Icon name={icon} w={6} h={6} color={`${colorScheme}.500`} />
+        <DrawerIcon w="6" h="6" color={`${colorScheme}.500`} />
       </Flex>
       <Heading
         color="brandGray.500"

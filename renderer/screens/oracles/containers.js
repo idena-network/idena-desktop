@@ -433,7 +433,7 @@ export function AddFundDrawer({
 
   return (
     <Drawer {...props}>
-      <OracleDrawerHeader icon={<AddFundIcon />}>
+      <OracleDrawerHeader icon={AddFundIcon}>
         {t('Add fund')}
       </OracleDrawerHeader>
       <Box
@@ -502,7 +502,7 @@ export function VoteDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon={<SendOutIcon />} colorScheme="blue">
+      <OracleDrawerHeader icon={SendOutIcon} colorScheme="blue">
         {t('Voting')}: {option}
       </OracleDrawerHeader>
       <Box flex={1} overflowY="auto" mx={-30} px={30}>
@@ -592,7 +592,7 @@ export function ReviewVotingDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
-      <OracleDrawerHeader icon={<OracleIcon />}>
+      <OracleDrawerHeader icon={OracleIcon}>
         {t('Create Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -650,6 +650,7 @@ export function ReviewVotingDrawer({
                 borderBottom="dotted 1px"
                 borderBottomColor="muted"
                 cursor="help"
+                w="fit-content"
               >
                 {t('Stake')}
               </Text>
@@ -657,7 +658,7 @@ export function ReviewVotingDrawer({
           </FormLabel>
           <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
         </FormControl>
-        <OracleFormControl>
+        <FormControl>
           <OracleFormHelper
             label={t('Secret voting')}
             value={t('About {{duration}}', {
@@ -671,11 +672,11 @@ export function ReviewVotingDrawer({
             })}
           />
           <OracleFormHelper
-            mt={4}
+            mt="4"
             label={t('Total amount')}
             value={toDna(sendAmount + minStake)}
           />
-        </OracleFormControl>
+        </FormControl>
         <PrimaryButton
           isLoading={isLoading}
           loadingText={t('Publishing')}
@@ -1132,7 +1133,7 @@ export function LaunchDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
-      <OracleDrawerHeader icon={<OracleIcon />}>
+      <OracleDrawerHeader icon={OracleIcon}>
         {t('Launch Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1204,7 +1205,7 @@ export function ProlongDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon={<OracleIcon />}>
+      <OracleDrawerHeader icon={OracleIcon}>
         {t('Prolong Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1494,7 +1495,7 @@ export function FinishDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon={<OracleIcon />}>
+      <OracleDrawerHeader icon={OracleIcon}>
         {isVotingFailed ? t('Claim refunds') : t('Claim rewards')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1549,7 +1550,7 @@ export function TerminateDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon={<OracleIcon />}>
+      <OracleDrawerHeader icon={OracleIcon}>
         {t('Terminate Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1638,7 +1639,7 @@ export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
   const [preset, setPreset] = React.useState()
 
   return (
-    <Dialog size={416} onClose={onCancel} {...props}>
+    <Dialog size="416" onClose={onCancel} {...props}>
       <DialogHeader mb={4}>{t('New Oracle voting')}</DialogHeader>
       <DialogBody>
         <Stack>
