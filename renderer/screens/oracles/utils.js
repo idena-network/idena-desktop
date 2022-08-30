@@ -528,7 +528,8 @@ export function getUrls(text) {
 export const sumAccountableVotes = votes =>
   votes?.reduce((agg, curr) => agg + curr?.count, 0) ?? 0
 
-export const minOwnerDeposit = (networkSize, commiteeSize) => {
-  if (networkSize === commiteeSize) return 5000
-  return (Math.ceil((5000 / networkSize) * 10000) / 10000) * commiteeSize
-}
+export const minOwnerDeposit = (networkSize, commiteeSize) =>
+  Math.min(
+    5000,
+    (Math.ceil((5000 / networkSize) * 10000) / 10000) * commiteeSize
+  )
