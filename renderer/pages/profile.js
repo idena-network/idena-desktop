@@ -469,7 +469,7 @@ export default function ProfilePage() {
                                   {stakingApy > 0
                                     ? toPercent(stakingApy)
                                     : '--'}
-                                  {canMine && !online && (
+                                  {canMine && !online && !delegatee && (
                                     <Tooltip
                                       shouldWrapChildren
                                       bg="graphite.500"
