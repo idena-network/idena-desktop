@@ -374,27 +374,31 @@ export default function ViewVotingPage() {
                               })
                             }}
                           >
-                            {/* eslint-disable-next-line no-shadow */}
-                            {options.map(({id, value}) => (
-                              <VotingOption
-                                key={id}
-                                value={String(id)}
-                                isDisabled={eitherIdleState(
-                                  VotingStatus.Pending,
-                                  VotingStatus.Starting,
-                                  VotingStatus.Voted
-                                )}
-                                annotation={
-                                  isMaxWinnerThreshold
-                                    ? null
-                                    : t('{{count}} min. votes required', {
-                                        count: toPercent(winnerThreshold / 100),
-                                      })
-                                }
-                              >
-                                {value}
-                              </VotingOption>
-                            ))}
+                            <Stack spacing="2">
+                              {/* eslint-disable-next-line no-shadow */}
+                              {options.map(({id, value}) => (
+                                <VotingOption
+                                  key={id}
+                                  value={String(id)}
+                                  isDisabled={eitherIdleState(
+                                    VotingStatus.Pending,
+                                    VotingStatus.Starting,
+                                    VotingStatus.Voted
+                                  )}
+                                  annotation={
+                                    isMaxWinnerThreshold
+                                      ? null
+                                      : t('{{count}} min. votes required', {
+                                          count: toPercent(
+                                            winnerThreshold / 100
+                                          ),
+                                        })
+                                  }
+                                >
+                                  {value}
+                                </VotingOption>
+                              ))}
+                            </Stack>
                           </RadioGroup>
                         )}
                       </Box>
@@ -744,7 +748,7 @@ export default function ViewVotingPage() {
                     <Stat mb={8}>
                       <StatLabel as="div" color="muted" fontSize="md">
                         <Stack isInline spacing={2} align="center">
-                          <Icon name={<StarIcon />} boxSize={4} color="white" />
+                          <StarIcon boxSize="4" color="white" />
                           <Text fontWeight={500}>{t('Prize pool')}</Text>
                         </Stack>
                       </StatLabel>
