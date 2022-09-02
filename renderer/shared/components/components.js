@@ -1,5 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import ReactDOM from 'react-dom'
 import NextLink from 'next/link'
 import {
   Code,
@@ -43,10 +45,23 @@ import {
   LinkOverlay,
   HStack,
   keyframes,
+  Skeleton as ChakraSkeleton,
+  Center,
+  MenuButton,
+  MenuList,
+  Menu as ChakraMenu,
+  useToken,
+  Select as ChakraSelect,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
-import {ChevronRightIcon, GtranslateIcon, InfoIcon} from './icons'
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  GtranslateIcon,
+  InfoIcon,
+  MoreIcon,
+} from './icons'
 
 export const Page = React.forwardRef(function Page(props, ref) {
   return (
@@ -119,6 +134,32 @@ export function DrawerFooter(props) {
       {...props}
     />
   )
+}
+
+const DrawerPromotionContext = React.createContext([])
+
+export function DrawerPromotion(props) {
+  const [, setDrawerPromotion] = React.useContext(DrawerPromotionContext)
+
+  return (
+    <Center
+      ref={setDrawerPromotion}
+      position="absolute"
+      top="50%"
+      left="50%"
+      transform="translate(-50%,-50%)"
+      zIndex="modal"
+      {...props}
+    />
+  )
+}
+
+export function DrawerPromotionPortal({children}) {
+  const [drawerPromotion] = React.useContext(DrawerPromotionContext)
+
+  return drawerPromotion
+    ? ReactDOM.createPortal(children, drawerPromotion)
+    : null
 }
 
 export function FormLabel(props) {
@@ -571,6 +612,110 @@ export function Snackbar(props) {
       right={0}
       zIndex="toast"
       pointerEvents="none"
+      {...props}
+    />
+  )
+}
+
+export function Skeleton(props) {
+  return (
+    <ChakraSkeleton
+      startColor="gray.50"
+      endColor="gray.100"
+      w="full"
+      {...props}
+    />
+  )
+}
+
+export function FillCenter(props) {
+  return (
+    <Flex
+      direction="column"
+      flex={1}
+      align="center"
+      justify="center"
+      {...props}
+    />
+  )
+}
+
+export function Menu({children, zIndex, ...props}) {
+  return (
+    <ChakraMenu autoSelect={false} placement="bottom-end" {...props}>
+      <MenuButton>
+        <MoreIcon boxSize={5} color="muted" />
+      </MenuButton>
+      <MenuList zIndex={zIndex}>{children}</MenuList>
+    </ChakraMenu>
+  )
+}
+
+export function Select(props) {
+  const iconSize = useToken('space', '5')
+  return (
+    <ChakraSelect
+      icon={<ChevronDownIcon />}
+      iconColor="muted"
+      iconSize={iconSize}
+      borderColor="gray.300"
+      fontSize="md"
+      lineHeight="short"
+      h={8}
+      _placeholder={{
+        color: 'muted',
+      }}
+      _disabled={{
+        bg: 'gray.300',
+        color: 'muted',
+      }}
+      {...props}
+    />
+  )
+}
+
+export function Fill(props) {
+  return (
+    <Flex
+      position="absolute"
+      top={0}
+      left={0}
+      bottom={0}
+      right={0}
+      zIndex={1}
+      justify="center"
+      align="center"
+      {...props}
+    />
+  )
+}
+
+const FilterContext = React.createContext()
+
+export function FilterButtonList({value, onChange, children, ...props}) {
+  return (
+    <HStack {...props}>
+      <FilterContext.Provider value={{value, onChange}}>
+        {children}
+      </FilterContext.Provider>
+    </HStack>
+  )
+}
+
+export function FilterButton({value, onClick, ...props}) {
+  const {
+    value: currentValue,
+    onChange: onChangeCurrentValue,
+  } = React.useContext(FilterContext)
+
+  return (
+    <Button
+      variant="tab"
+      isActive={value === currentValue}
+      onClick={e => {
+        onChangeCurrentValue(value)
+        if (onClick) onClick(e)
+      }}
       {...props}
     />
   )

@@ -53,6 +53,7 @@ import {ExternalLink, Tooltip} from './components'
 import {useTimingState} from '../providers/timing-context'
 import {TodoVotingCountBadge} from '../../screens/oracles/components'
 import {
+  AdsIcon,
   ContactsIcon,
   GalleryIcon,
   MoreIcon,
@@ -315,6 +316,9 @@ function Navbar() {
         ) : (
           t('Oracle voting')
         )}
+      </NavItem>
+      <NavItem href="/adn/list" icon={<AdsIcon />}>
+        {t('Ads')}
       </NavItem>
       <NavItem href="/settings/general" icon={<SettingsIcon />}>
         {t('Settings')}

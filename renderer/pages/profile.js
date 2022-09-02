@@ -75,6 +75,7 @@ import {useIdenaBot, useStakingApy} from '../screens/profile/hooks'
 import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
 import {
   AddUserIcon,
+  AdsIcon,
   ChevronRightIcon,
   DeleteIcon,
   InfoIcon,
@@ -565,6 +566,13 @@ export default function ProfilePage() {
                       maxW={200}
                     >
                       {t('New voting')}
+                    </IconLink>
+                    <IconLink
+                      href="/adn/new"
+                      icon={<AdsIcon boxSize="5" />}
+                      maxW={200}
+                    >
+                      {t('New ad')}
                     </IconLink>
                     <IconLink
                       href="/flips/new"

@@ -369,6 +369,10 @@ export const ChevronDownIcon = createIcon({
   ),
 })
 
+export const ChevronUpIcon = props => (
+  <ChevronDownIcon transform="rotate(180deg)" {...props} />
+)
+
 export const ChevronRightIcon = props => (
   <ChevronDownIcon transform="rotate(-90deg)" {...props} />
 )
@@ -543,6 +547,18 @@ export const ArrowUpIcon = createIcon({
 export const ArrowDownIcon = props => (
   <ArrowUpIcon transform="rotate(180deg)" {...props} />
 )
+
+export const ArrowRightIcon = createIcon({
+  displayName: 'ArrowRightIcon',
+  viewBox: '0 0 20 20',
+  path: <path fill="currentColor" d="M14 10l-6 5V5z" fillRule="nonzero" />,
+})
+
+export const ArrowLeftIcon = createIcon({
+  displayName: 'ArrowLeftIcon',
+  viewBox: '0 0 20 20',
+  path: <path fill="currentColor" d="M6 10l6 5V5z" fillRule="nonzero" />,
+})
 
 export const ArrowBackIcon = createIcon({
   displayName: 'ArrowBackIcon',

@@ -54,6 +54,8 @@ import {VotingSkeleton} from '../oracles/components'
 import {useInviteScore} from '../profile/hooks'
 import {
   BasketIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
   DeleteIcon,
   EditIcon,
   InfoIcon,
@@ -369,8 +371,9 @@ export function ContactCard({
             {canKill && !terminating && !mining && (
               <>
                 <VDivider />
-                <IconButton2
-                  icon={<DeleteIcon />}
+                <Button
+                  variant="ghost"
+                  leftIcon={<DeleteIcon />}
                   colorScheme="red"
                   _active={{
                     bg: 'red.012',
@@ -381,7 +384,7 @@ export function ContactCard({
                   onClick={onKillContact}
                 >
                   {t('Terminate invitation')}
-                </IconButton2>
+                </Button>
               </>
             )}
           </Stack>
@@ -501,14 +504,11 @@ export function IssueInviteDrawer({
               onClick={onToggleAdvancedOptions}
             >
               {t('Advanced')}
-              <Icon
-                boxSize={5}
-                name="chevron-down"
-                color="muted"
-                ml={2}
-                transform={isOpenAdvancedOptions ? 'rotate(180deg)' : ''}
-                transition="all 0.2s ease-in-out"
-              />
+              {isOpenAdvancedOptions ? (
+                <ChevronUpIcon boxSize="5" color="muted" ml={2} />
+              ) : (
+                <ChevronDownIcon boxSize="5" color="muted" ml={2} />
+              )}
             </Button>
             <Collapse in={isOpenAdvancedOptions} mt={4}>
               <FormControl>
