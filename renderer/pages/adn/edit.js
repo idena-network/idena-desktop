@@ -2,8 +2,6 @@ import * as React from 'react'
 import {Box, HStack, Text, useDisclosure} from '@chakra-ui/react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {TriangleUpIcon} from '@chakra-ui/icons'
-import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 import {AdForm, AdPreview} from '../../screens/ads/containers'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
@@ -12,9 +10,11 @@ import {
   PageCloseButton,
   PageFooter,
 } from '../../screens/ads/components'
-import db from '../../shared/utils/db'
 import {useCoinbase, usePersistedAd} from '../../screens/ads/hooks'
 import {isValidImage} from '../../screens/ads/utils'
+import {Page, PageTitle} from '../../shared/components/components'
+import {dexieDb} from '../../shared/utils/dexieDb'
+import {ArrowRightIcon} from '../../shared/components/icons'
 
 export default function EditAdPage() {
   const {t} = useTranslation()
@@ -45,7 +45,7 @@ export default function EditAdPage() {
             id="adForm"
             ad={ad}
             onSubmit={async nextAd => {
-              await db.table('ads').update(ad.id, nextAd)
+              await dexieDb.table('ads').update(ad.id, nextAd)
               router.push('/adn/list')
             }}
           />
@@ -74,7 +74,7 @@ export default function EditAdPage() {
             }}
           >
             <HStack>
-              <TriangleUpIcon boxSize="3" transform="rotate(90deg)" />
+              <ArrowRightIcon boxSize="5" />
               <Text>{t('Show preview')}</Text>
             </HStack>
           </SecondaryButton>

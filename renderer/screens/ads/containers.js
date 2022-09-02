@@ -114,13 +114,11 @@ import {
 } from './utils'
 import {AdRotationStatus, AdStatus} from './types'
 import {viewVotingHref} from '../oracles/utils'
-// import db from '../../shared/utils/db'
 import {AdTarget} from '../../shared/models/adKey'
 import {AdBurnKey} from '../../shared/models/adBurnKey'
 import {useIdentity} from '../../shared/providers/identity-context'
 import {pick} from '../../shared/utils/utils'
-
-const db = {}
+import {dexieDb} from '../../shared/utils/dexieDb'
 
 export function AdBanner() {
   const {t} = useTranslation()
@@ -167,7 +165,7 @@ export function AdBanner() {
 function AdBannerContent({ad}) {
   return (
     <LinkBox as={HStack} spacing={2}>
-      <AdImage src={ad?.thumb} w={10} />
+      <AdImage src={ad?.thumb} w="10" />
       <Stack spacing="0.5" fontWeight={500} maxW={['2xs', 'lg']}>
         <LinkOverlay href={ad?.url} target="_blank">
           <Text lineHeight={4} isTruncated>
@@ -193,7 +191,7 @@ function AdBannerAuthor({ad, ...props}) {
         <HStack spacing="1">
           <Avatar
             address={ad?.author}
-            size={4}
+            boxSize="4"
             borderWidth={1}
             borderColor="gray.016"
             rounded="sm"
@@ -498,11 +496,11 @@ function AdPromotion({cid, title, desc, url, media, author}) {
       spacing="10"
       bg="white"
       rounded="lg"
-      px={10}
-      pt={37}
-      pb={44}
-      w={400}
-      h={660}
+      px="10"
+      py="4"
+      // pb="10"
+      // w="sm"
+      h="xl"
     >
       <Stack spacing="4">
         <Stack spacing="2">
@@ -544,7 +542,7 @@ function AdPromotion({cid, title, desc, url, media, author}) {
 
         <LinkBox>
           <LinkOverlay href={url} isExternal>
-            <AdImage src={media} w={320} />
+            <AdImage src={media} w="280px" />
           </LinkOverlay>
         </LinkBox>
       </Stack>
@@ -620,7 +618,9 @@ export const AdForm = React.forwardRef(function AdForm(
 
         const formAd = Object.fromEntries(new FormData(e.target).entries())
 
-        const maybePersistedAd = ad ? await db.table('ads').get(ad.id) : null
+        const maybePersistedAd = ad
+          ? await dexieDb.table('ads').get(ad.id)
+          : null
 
         const nextAd = {
           ...formAd,
@@ -925,7 +925,7 @@ export function ReviewAdDrawer({
             onSubmit={async e => {
               e.preventDefault()
 
-              const {thumb, media} = await db.table('ads').get(ad.id)
+              const {thumb, media} = await dexieDb.table('ads').get(ad.id)
 
               const errors = validateAd({...ad, thumb, media})
 
@@ -1526,7 +1526,7 @@ export function AdPreview({ad, ...props}) {
   return (
     <Modal isCentered {...props}>
       <ModalOverlay />
-      <ModalContent w={400} mb={0} mt="14">
+      <ModalContent w="sm" mb={0} mt="14">
         <Portal>
           <Box
             bg="white"

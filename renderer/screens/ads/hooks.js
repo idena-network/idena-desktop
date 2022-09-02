@@ -51,8 +51,7 @@ import {
 // import {BurnAttachment} from '../../shared/models/burnAttachment'
 import {AdBurnKey} from '../../shared/models/adBurnKey'
 import {useLanguage} from '../../shared/hooks/use-language'
-
-const db = {}
+import {dexieDb} from '../../shared/utils/dexieDb'
 
 export function useRotatingAds(limit = 3) {
   const rpcFetcher = useRpcFetcher()
@@ -373,7 +372,7 @@ export function usePersistedAds(options) {
   return useQuery(
     'usePersistedAds',
     async () => {
-      const ads = await db
+      const ads = await dexieDb
         .table('ads')
         .where({author: coinbase})
         .toArray()
