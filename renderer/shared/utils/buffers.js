@@ -2,7 +2,7 @@ function isHexPrefixed(str) {
   return str.slice(0, 2) === '0x'
 }
 
-function stripHexPrefix(str) {
+export function stripHexPrefix(str) {
   if (typeof str !== 'string') {
     return str
   }

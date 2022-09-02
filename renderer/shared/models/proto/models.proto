@@ -1,0 +1,146 @@
+syntax = "proto3";
+package models;
+
+//protoc --js_out=import_style=commonjs,binary:./ shared/models/proto/models.proto
+
+message ProtoTransaction {
+    message Data {
+        uint32 nonce = 1;
+        uint32 epoch = 2;
+        uint32 type = 3;
+        bytes to = 4;
+        bytes amount = 5;
+        bytes maxFee = 6;
+        bytes tips = 7;
+        bytes payload = 8;
+    }
+    Data data = 1;
+    bytes signature = 2;
+    bool useRlp = 3;
+}
+
+message ProtoFlipPrivateKeys {
+    repeated bytes keys = 1;
+}
+
+message ProtoPrivateFlipKeysPackage {
+    message Data {
+        bytes package = 1;
+        uint32 epoch = 2;
+    }
+
+    Data data = 1;
+    bytes signature = 2;
+}
+
+message ProtoFlipKey {
+    message Data {
+        bytes key = 1;
+        uint32 epoch = 2;
+    }
+
+    Data data = 1;
+    bytes signature = 2;
+}
+
+message ProtoShortAnswerAttachment {
+    bytes answers = 1;
+    uint64 rnd = 2 [jstype = JS_STRING];
+    uint32 clientType = 3;
+}
+
+message ProtoLongAnswerAttachment {
+    bytes answers = 1;
+    bytes proof = 2;
+    bytes key = 3;
+    bytes salt = 4;
+}
+
+message ProtoIpfsFlip {
+    bytes pubKey = 1;
+    bytes publicPart = 2;
+    bytes privatePart = 3;
+}
+
+message ProtoFlipSubmitAttachment {
+    bytes cid = 1;
+    uint32 pair = 2;
+}
+
+message ProtoDeleteFlipAttachment {
+    bytes cid = 1;
+}
+
+message ProtoOnlineStatusAttachment {
+    bool online = 1;
+}
+
+message ProtoDeployContractAttachment {
+    bytes CodeHash = 1;
+    repeated bytes args = 2;
+    uint32 clientType = 3;
+}
+
+message ProtoCallContractAttachment {
+    string method = 1;
+    repeated bytes args = 2;
+    uint32 clientType = 3;
+}
+
+message ProtoTerminateContractAttachment {
+    repeated bytes args = 1;
+    uint32 clientType = 2;
+}
+
+message ProtoProfile {
+  message ProtoProfileAd {
+    string cid = 1;
+    string target = 2;
+    string contract = 3;
+    string author = 4;
+  }
+  
+  repeated ProtoProfileAd ads = 1;
+}
+
+message ProtoAd {
+  string title = 1;
+  string desc = 2;
+  string url = 3;
+  bytes thumb = 4;
+  bytes media = 5;
+  uint32 version = 6;
+  ProtoAdVotingParams votingParams = 7;
+}
+
+message ProtoAdVotingParams {
+  uint32 votingDuration = 1;
+  uint32 publicVotingDuration = 2;
+  uint32 quorum = 3;
+  uint32 committeeSize = 4;
+}
+
+message ProtoAdTarget {
+  string language = 1;
+  int32 age = 2;
+  string os = 3;
+  int32 stake = 4;
+}
+
+message ProtoAdBurnKey {
+  string cid = 1;
+  string target = 2;
+}
+
+message ProtoStoreToIpfsAttachment {
+  bytes cid = 1;
+  uint32 size = 2;
+}
+
+message ProtoChangeProfileAttachment {
+  bytes cid = 1;
+}
+
+message ProtoBurnAttachment {
+  string key = 1;
+}
