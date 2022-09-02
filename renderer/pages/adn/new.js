@@ -11,13 +11,11 @@ import {
   PageCloseButton,
   PageFooter,
 } from '../../screens/ads/components'
-// import db from '../../shared/utils/db'
 import {AdStatus} from '../../screens/ads/types'
 import {useCoinbase} from '../../screens/ads/hooks'
 import {ArrowRightIcon} from '../../shared/components/icons'
 import {Page, PageTitle} from '../../shared/components/components'
-
-const db = {}
+import {dexieDb} from '../../shared/utils/dexieDb'
 
 export default function NewAdPage() {
   const {t} = useTranslation()
@@ -45,7 +43,7 @@ export default function NewAdPage() {
             ref={adFormRef}
             id="adForm"
             onSubmit={async ad => {
-              await db.table('ads').add({
+              await dexieDb.table('ads').add({
                 ...ad,
                 id: nanoid(),
                 status: AdStatus.Draft,
