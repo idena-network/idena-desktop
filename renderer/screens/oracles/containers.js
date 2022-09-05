@@ -163,10 +163,10 @@ export function VotingCard({votingRef, ...props}) {
           bg="gray.50"
           rounded="lg"
           position="absolute"
-          top={-16}
-          left={-16}
-          right={-16}
-          bottom={-16}
+          top="-4"
+          left="-4"
+          right="-4"
+          bottom="-4"
           opacity={0.5}
           zIndex="base"
         />

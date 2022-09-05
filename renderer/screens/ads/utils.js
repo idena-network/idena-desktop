@@ -1,18 +1,10 @@
 /* eslint-disable no-use-before-define */
 import Jimp from 'jimp'
-import {bytes, CID} from 'multiformats'
 import i18n from '../../i18n'
-// import {
-//   estimateRawTx,
-//   fetchNetworkSize,
-//   getRawTx,
-//   sendRawTx,
-// } from '../../shared/api'
+import {fetchNetworkSize} from '../../shared/api/dna'
 import {Profile} from '../../shared/models/profile'
-import {StoreToIpfsAttachment} from '../../shared/models/storeToIpfsAttachment'
-// import {Transaction} from '../../shared/models/transaction'
-import {TxType, VotingStatus} from '../../shared/types'
-// import db from '../../shared/utils/db'
+import {VotingStatus} from '../../shared/types'
+import {dexieDb} from '../../shared/utils/dexieDb'
 import {
   areSameCaseInsensitive,
   callRpc,
@@ -22,12 +14,6 @@ import {
 } from '../../shared/utils/utils'
 import {isValidUrl} from '../dna/utils'
 import {AdVotingOption, AdVotingOptionId} from './types'
-
-const fetchNetworkSize = () => -1
-
-const getRawTx = () => Promise.resolve({})
-
-const db = {}
 
 export const OS = {
   Windows: 'windows',
@@ -88,7 +74,7 @@ export const compareNullish = (field, targetField, condition) =>
 export const selectProfileHash = data => data.profileHash
 
 export async function getAdVoting(address) {
-  const persistedAdVoting = await db
+  const persistedAdVoting = await dexieDb
     .table('adVotings')
     .get(address)
     .catch(() => null)
@@ -100,7 +86,7 @@ export async function getAdVoting(address) {
   const voting = await fetchAdVoting(address)
 
   if (isFinalVoting(voting) && voting?.isFetched) {
-    await db.table('adVotings').put({...voting, address})
+    await dexieDb.table('adVotings').put({...voting, address})
   }
 
   return voting
@@ -319,69 +305,18 @@ export const isMiningTx = txData =>
 export const isMinedTx = txData =>
   (txData?.blockHash ?? HASH_IN_MEMPOOL) !== HASH_IN_MEMPOOL
 
-export async function sendSignedTx(
-  {type, from, to, amount, maxFee, payload, tips},
-  privateKey
-) {
-  return Promise.resolve('hash')
-  // const rawTx = await getRawTx(type, from, to, amount, maxFee, payload, tips)
-
-  // const signedRawTx = new Transaction()
-  //   .fromHex(rawTx)
-  //   .sign(privateKey)
-  //   .toHex()
-
-  // return sendRawTx(prependHex(signedRawTx))
+export async function sendTx(params) {
+  return callRpc('dna_sendTransaction', params)
 }
 
-export async function estimateSignedTx(
-  {type, from, to, amount, maxFee, payload, tips},
-  privateKey
-) {
-  return Promise.resolve('hash')
-  // const rawTx = await getRawTx(type, from, to, amount, maxFee, payload, tips)
-
-  // const signedRawTx = new Transaction()
-  //   .fromHex(rawTx)
-  //   .sign(privateKey)
-  //   .toHex()
-
-  // const result = await estimateRawTx(prependHex(signedRawTx))
-
-  // if (result.receipt?.error) {
-  //   throw new Error(result.receipt.error)
-  // }
-
-  // return result
+export async function estimateTx(params) {
+  return callRpc('bcn_estimateTx', params)
 }
 
-export async function sendToIpfs(hex, {from, privateKey}) {
-  const cid = await callRpc('ipfs_cid', prependHex(hex))
+export async function sendToIpfs(hex) {
+  const cid = await callRpc('ipfs_add', prependHex(hex), true)
 
-  const sendToIpfsRawTx = await getRawTx(
-    TxType.StoreToIpfsTx,
-    from,
-    null,
-    null,
-    null,
-    prependHex(
-      new StoreToIpfsAttachment({
-        size: bytes.fromHex(hex).byteLength,
-        cid: CID.parse(cid).bytes,
-      }).toHex()
-    )
-  )
-
-  const signedSendToIpfsRawTx = '0x'
-  // new Transaction()
-  //   .fromHex(sendToIpfsRawTx)
-  //   .sign(privateKey)
-  //   .toHex()
-
-  const hash = await callRpc('dna_sendToIpfs', {
-    tx: prependHex(signedSendToIpfsRawTx),
-    data: prependHex(hex),
-  })
+  const hash = await callRpc('dna_storeToIpfs', {cid})
 
   return {
     cid,

@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import api from './api-client'
 import {strip} from '../utils/obj'
+import {callRpc} from '../utils/utils'
 
 export async function sendInvite({to, amount}) {
   const {data} = await api().post('/', {
@@ -226,4 +227,9 @@ export async function importKey(key, password) {
     id: 1,
   })
   return data
+}
+
+export async function fetchNetworkSize() {
+  const {networkSize} = await callRpc('dna_globalState')
+  return networkSize
 }

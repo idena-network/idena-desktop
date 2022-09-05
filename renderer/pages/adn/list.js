@@ -1,13 +1,5 @@
 import React from 'react'
-import {
-  Flex,
-  Stack,
-  HStack,
-  useDisclosure,
-  Box,
-  IconButton,
-  Button,
-} from '@chakra-ui/react'
+import {Flex, Stack, HStack, useDisclosure, Box, Button} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useRouter} from 'next/router'
 import NextLink from 'next/link'
@@ -47,14 +39,11 @@ import {
   PageTitle,
   Skeleton,
   VDivider,
-  IconLink,
 } from '../../shared/components/components'
 import {PlusSolidIcon, RefreshIcon} from '../../shared/components/icons'
-// import db from '../../shared/utils/db'
-import {SecondaryButton} from '../../shared/components/button'
+import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {useClosableToast, useFailToast} from '../../shared/hooks/use-toast'
-
-const db = {}
+import {dexieDb} from '../../shared/utils/dexieDb'
 
 export default function AdListPage() {
   const {t} = useTranslation()
@@ -117,7 +106,7 @@ export default function AdListPage() {
 
   const handlePublish = React.useCallback(async () => {
     try {
-      await db.table('ads').update(selectedAd.id, {
+      await dexieDb.table('ads').update(selectedAd.id, {
         status: AdStatus.Published,
       })
 
@@ -143,7 +132,7 @@ export default function AdListPage() {
   const handleStartVoting = React.useCallback(
     async ({cid, contract}) => {
       try {
-        await db.table('ads').update(selectedAd.id, {
+        await dexieDb.table('ads').update(selectedAd.id, {
           status: AdStatus.Reviewing,
           cid,
           contract,
@@ -159,8 +148,11 @@ export default function AdListPage() {
             closeToast()
           },
         })
-      } catch {
-        console.error('Error updating persisted ads', {id: selectedAd?.id})
+      } catch (e) {
+        console.error(e)
+        console.error('Error updating persisted ads', {
+          id: selectedAd?.id,
+        })
       } finally {
         onCloseReviewDisclosure()
       }
@@ -195,7 +187,7 @@ export default function AdListPage() {
 
   const handleDeployContract = React.useCallback(
     ({cid, contract}) => {
-      db.table('ads').update(selectedAd?.id, {
+      dexieDb.table('ads').update(selectedAd?.id, {
         cid,
         contract,
         author: coinbase,
@@ -210,9 +202,9 @@ export default function AdListPage() {
     async ad => {
       try {
         if (ad.id) {
-          await db.table('ads').delete(ad.id)
+          await dexieDb.table('ads').delete(ad.id)
         } else {
-          await db
+          await dexieDb
             .table('ads')
             .where({cid: ad.cid})
             .delete()

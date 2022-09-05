@@ -123,17 +123,7 @@ export function DrawerBody(props) {
 }
 
 export function DrawerFooter(props) {
-  return (
-    <ChakraDrawerFooter
-      mb={-12}
-      mx={-8}
-      px={4}
-      py={3}
-      borderTopColor="gray.300"
-      borderTopWidth={1}
-      {...props}
-    />
-  )
+  return <ChakraDrawerFooter {...props} />
 }
 
 const DrawerPromotionContext = React.createContext([])

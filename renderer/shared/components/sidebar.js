@@ -305,7 +305,7 @@ function Navbar() {
       <NavItem href="/contacts" icon={<ContactsIcon />}>
         {t('Contacts')}
       </NavItem>
-      <NavItem href="/oracles/list" icon={<OracleIcon />}>
+      <NavItem href="/oracles/list" icon={<OracleIcon />} display>
         {todoCount > 0 ? (
           <Flex flex={1} align="center" justify="space-between">
             <Text as="span">{t('Oracle voting')}</Text>
@@ -355,7 +355,9 @@ function NavItem({href, icon, children}) {
     >
       {React.cloneElement(icon, {boxSize: '5'})}
       <NextLink href={href} passHref>
-        <LinkOverlay>{children}</LinkOverlay>
+        <LinkOverlay display="block" w="full">
+          {children}
+        </LinkOverlay>
       </NextLink>
     </LinkBox>
   )

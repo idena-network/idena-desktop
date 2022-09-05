@@ -3,7 +3,7 @@ import {useToken, useInterval} from '@chakra-ui/react'
 import React from 'react'
 import {useTranslation} from 'react-i18next'
 import {useMutation, useQueries, useQuery, useQueryClient} from 'react-query'
-import {CID, bytes} from 'multiformats'
+import {CID} from 'multiformats'
 import {Ad} from '../../shared/models/ad'
 import {AdTarget} from '../../shared/models/adKey'
 import {Profile} from '../../shared/models/profile'
@@ -23,7 +23,6 @@ import {
   areCompetingAds,
   buildAdReviewVoting,
   currentOs,
-  estimateSignedTx,
   getAdVoting,
   fetchProfileAds,
   isApprovedVoting,
@@ -31,27 +30,25 @@ import {
   isValidImage,
   calculateMinOracleReward,
   selectProfileHash,
-  sendSignedTx,
   sendToIpfs,
   adVotingDefaults,
   isTargetedAd,
+  sendTx,
 } from './utils'
 import {TxType} from '../../shared/types'
 import {capitalize} from '../../shared/utils/string'
 import {
-  // argsToSlice,
   BLOCK_TIME,
   buildContractDeploymentArgs,
+  createContractCaller,
   votingMinStake,
 } from '../oracles/utils'
-// import {DeployContractAttachment} from '../../shared/models/deployContractAttachment'
-// import {CallContractAttachment} from '../../shared/models/callContractAttachment'
-// import db from '../../shared/utils/db'
-// import {ChangeProfileAttachment} from '../../shared/models/changeProfileAttachment'
-// import {BurnAttachment} from '../../shared/models/burnAttachment'
+import {ChangeProfileAttachment} from '../../shared/models/changeProfileAttachment'
+import {BurnAttachment} from '../../shared/models/burnAttachment'
 import {AdBurnKey} from '../../shared/models/adBurnKey'
 import {useLanguage} from '../../shared/hooks/use-language'
 import {dexieDb} from '../../shared/utils/dexieDb'
+import {ContractRpcMode} from '../oracles/types'
 
 export function useRotatingAds(limit = 3) {
   const rpcFetcher = useRpcFetcher()
@@ -362,7 +359,8 @@ export function useProfileAds() {
   return {
     data: profileAds.map(({data}) => data) ?? [],
     status,
-    refetch: forceIdentityUpdate,
+    // TODO: update refetch logic
+    refetch: () => {},
   }
 }
 
@@ -472,8 +470,6 @@ function useDeployAdContract({onBeforeSubmit, onSubmit, onError}) {
 
   const coinbase = useCoinbase()
 
-  const privateKey = usePrivateKey()
-
   const {data: deployAmount} = useDeployContractAmount()
 
   return useMutation(
@@ -485,11 +481,7 @@ function useDeployAdContract({onBeforeSubmit, onSubmit, onError}) {
           ...ad,
           version: 0,
           votingParams: unpublishedVoting,
-        }),
-        {
-          from: coinbase,
-          privateKey,
-        }
+        })
       )
 
       const voting = {
@@ -497,41 +489,30 @@ function useDeployAdContract({onBeforeSubmit, onSubmit, onError}) {
         adCid: cid,
       }
 
-      const deployPayload = prependHex(
-        bytes.toHex(
-          []
-          // new DeployContractAttachment(
-          //   bytes.fromHex('0x02'),
-          //   argsToSlice(buildContractDeploymentArgs(voting)),
-          //   3
-          // ).toBytes()
+      const {error, ...estimateResult} = await callRpc(
+        'contract_estimateDeploy',
+        buildContractDeploymentArgs(
+          voting,
+          {from: coinbase, stake: deployAmount},
+          ContractRpcMode.Estimate
         )
       )
 
-      const estimateDeployResult = await estimateSignedTx(
-        {
-          type: TxType.DeployContractTx,
-          from: coinbase,
-          amount: deployAmount,
-          payload: deployPayload,
-        },
-        privateKey
-      )
+      if (error) throw new Error(error)
 
-      const hash = await sendSignedTx(
-        {
-          type: TxType.DeployContractTx,
+      const hash = await callRpc(
+        'contract_deploy',
+        buildContractDeploymentArgs(voting, {
           from: coinbase,
-          amount: deployAmount,
-          payload: deployPayload,
-          maxFee: Number(estimateDeployResult.txFee) * 1.1,
-        },
-        privateKey
+          stake: deployAmount,
+          gasCost: estimateResult?.gasCost,
+          txFee: estimateResult?.txFee,
+        })
       )
 
       return {
         cid,
-        contract: estimateDeployResult.receipt?.contract,
+        contract: estimateResult?.contract,
         hash,
         voting,
       }
@@ -547,45 +528,38 @@ function useDeployAdContract({onBeforeSubmit, onSubmit, onError}) {
 function useStartAdVoting({onError}) {
   const coinbase = useCoinbase()
 
-  const privateKey = usePrivateKey()
-
   const {data: startAmount} = useStartAdVotingAmount()
 
   return useMutation(
     async startParams => {
-      const payload = prependHex(
-        []
-        // bytes.toHex(
-        //   new CallContractAttachment(
-        //     'startVoting',
-        //     argsToSlice(buildContractDeploymentArgs(startParams?.voting)),
-        //     3
-        //   ).toBytes()
-        // )
-      )
+      const callerArgs = {
+        contractHash: startParams?.contract,
+        from: coinbase,
+        amount: startAmount,
+      }
 
-      const estimateResult = await estimateSignedTx(
-        {
-          type: TxType.CallContractTx,
-          from: coinbase,
-          to: startParams?.contract,
-          amount: startAmount,
-          payload,
-        },
-        privateKey
-      )
+      let callContract = createContractCaller(callerArgs)
 
-      return sendSignedTx(
-        {
-          type: TxType.CallContractTx,
-          from: coinbase,
-          to: startParams?.contract,
-          amount: startAmount,
-          payload,
-          maxFee: Number(estimateResult.txFee) * 1.1,
-        },
-        privateKey
+      const {error, gasCost, txFee, ...result} = await callContract(
+        'startVoting',
+        ContractRpcMode.Estimate
       )
+      if (error) throw new Error(error)
+
+      callContract = createContractCaller({
+        ...callerArgs,
+        gasCost: Number(gasCost),
+        txFee: Number(txFee),
+      })
+
+      console.log({
+        error,
+        gasCost,
+        txFee,
+        result,
+      })
+
+      return callContract('startVoting')
     },
     {onError}
   )
@@ -595,8 +569,6 @@ export function usePublishAd({onBeforeSubmit, onMined, onError}) {
   const {encodeAdTarget, encodeProfile} = useProtoProfileEncoder()
 
   const coinbase = useCoinbase()
-
-  const privateKey = usePrivateKey()
 
   const {data, mutate} = useMutation(
     async ad => {
@@ -615,26 +587,18 @@ export function usePublishAd({onBeforeSubmit, onMined, onError}) {
       })
 
       const {cid: profileCid, hash: sendToIpfsHash} = await sendToIpfs(
-        encodedProfile,
-        {
-          from: coinbase,
-          privateKey,
-        }
+        encodedProfile
       )
 
-      const changeProfileHash = await sendSignedTx(
-        {
-          type: TxType.ChangeProfileTx,
-          from: coinbase,
-          payload: prependHex(
-            '0x'
-            // new ChangeProfileAttachment({
-            //   cid: CID.parse(profileCid).bytes,
-            // }).toHex()
-          ),
-        },
-        privateKey
-      )
+      const changeProfileHash = await sendTx({
+        type: TxType.ChangeProfileTx,
+        from: coinbase,
+        payload: prependHex(
+          new ChangeProfileAttachment({
+            cid: CID.parse(profileCid).bytes,
+          }).toHex()
+        ),
+      })
 
       return {
         profileCid,
@@ -662,27 +626,21 @@ export function useBurnAd({onBeforeSubmit, onMined, onError}) {
 
   const coinbase = useCoinbase()
 
-  const privateKey = usePrivateKey()
-
   const {data: hash, mutate, reset} = useMutation(
     async ({ad, amount}) =>
-      sendSignedTx(
-        {
-          type: TxType.BurnTx,
-          from: coinbase,
-          amount,
-          payload: prependHex(
-            '0x'
-            // new BurnAttachment({
-            //   key: new AdBurnKey({
-            //     cid: ad.cid,
-            //     target: encodeAdTarget(ad),
-            //   }).toHex(),
-            // }).toHex()
-          ),
-        },
-        privateKey
-      ),
+      sendTx({
+        type: TxType.BurnTx,
+        from: coinbase,
+        amount,
+        payload: prependHex(
+          new BurnAttachment({
+            key: new AdBurnKey({
+              cid: ad.cid,
+              target: encodeAdTarget(ad),
+            }).toHex(),
+          }).toHex()
+        ),
+      }),
     {
       onBeforeSubmit,
       onError,
@@ -772,10 +730,6 @@ export function useBalance(address) {
   })
 
   return data?.balance
-}
-
-function usePrivateKey() {
-  return 'privateKey'
 }
 
 export function useDeployContractAmount() {
