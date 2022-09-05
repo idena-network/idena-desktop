@@ -89,6 +89,8 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {useOracleActions} from '../../screens/oracles/hooks'
 import {
   AddFundIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
   CoinsLgIcon,
   RefreshIcon,
   StarIcon,
@@ -654,12 +656,11 @@ export default function ViewVotingPage() {
                                         minH={8}
                                         minW={8}
                                       >
-                                        <Icon
-                                          name={`arrow-${
-                                            isSender ? 'up' : 'down'
-                                          }`}
-                                          boxSize={5}
-                                        />
+                                        {isSender ? (
+                                          <ArrowUpIcon boxSize={5} />
+                                        ) : (
+                                          <ArrowDownIcon boxSize="5" />
+                                        )}
                                       </Flex>
                                       <Box isTruncated>
                                         {contractCallMethod ? (

@@ -54,7 +54,7 @@ export function AdList(props) {
   return (
     <Stack
       spacing="8"
-      divider={<StackDivider borderColor="gray.100" />}
+      divider={<StackDivider borderColor="gray.300" />}
       {...props}
     />
   )

@@ -108,11 +108,6 @@ export async function fetchContractBalanceUpdates({
   )
 }
 
-export async function fetchNetworkSize() {
-  const {networkSize} = await callRpc('dna_globalState')
-  return networkSize
-}
-
 export async function fetchVoting({id, contractHash = id, address}) {
   const {result, error} = await (
     await fetch(
@@ -212,7 +207,7 @@ export function buildContractDeploymentArgs(
     amount: stake,
     maxFee:
       mode === ContractRpcMode.Call ? contractMaxFee(gasCost, txFee) : null,
-    args: buildDynamicArgs(
+    args: buildDynamicArgs([
       {
         value: `0x${objectToHex({
           title,
@@ -235,12 +230,12 @@ export function buildContractDeploymentArgs(
       },
       {value: ownerFee, format: 'byte'},
       {value: rewardsFund, format: 'dna'},
-      {value: isCustomOwnerAddress ? ownerAddress : null}
-    ),
+      {value: isCustomOwnerAddress ? ownerAddress : null},
+    ]),
   })
 }
 
-export function buildDynamicArgs(...args) {
+export function buildDynamicArgs(args = []) {
   return args
     .map(({format = 'hex', value}, index) => ({
       index,
