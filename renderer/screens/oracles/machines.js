@@ -1378,7 +1378,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           const payload = {
             from,
             contract: contractHash,
-            args: buildDynamicArgs({value: issuer}),
+            args: buildDynamicArgs([{value: issuer}]),
           }
 
           const {error, gasCost, txFee} = await callRpc(

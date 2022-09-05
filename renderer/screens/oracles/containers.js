@@ -33,6 +33,7 @@ import {
   FormControl,
   RadioGroup,
   Radio,
+  HStack,
 } from '@chakra-ui/react'
 import dayjs from 'dayjs'
 import {
@@ -52,6 +53,7 @@ import {
   DrawerBody,
   DrawerFooter,
   DrawerHeader,
+  ExternalLink,
   FormLabel,
   Input,
   Tooltip,
@@ -97,12 +99,15 @@ import {
   AddFundIcon,
   ChevronDownIcon,
   InfoIcon,
+  OkIcon,
   OracleIcon,
   SendOutIcon,
   StarIcon,
+  TickIcon,
   UserIcon,
   UserTickIcon,
 } from '../../shared/components/icons'
+import {AdImage} from '../ads/components'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -961,9 +966,7 @@ export const VotingFilter = React.forwardRef(
       {...props}
     >
       <Stack isInline spacing={1}>
-        {isChecked && (
-          <Icon name="tick" boxSize={4} animation="0.3s both zoomIn" />
-        )}
+        {isChecked && <TickIcon boxSize="4" animation="0.3s both zoomIn" />}
         <Text>{children}</Text>
       </Stack>
       <style jsx global>{`
@@ -1085,7 +1088,7 @@ function VotingResultBar({
             w={4}
             h={4}
           >
-            {isMine && <Icon name="ok" boxSize={3} />}
+            {isMine && <OkIcon boxSize="3" />}
           </Flex>
         )}
         <Text isTruncated maxW="sm" title={label.length > 50 ? label : ''}>
@@ -1692,5 +1695,64 @@ export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
         </PrimaryButton>
       </DialogFooter>
     </Dialog>
+  )
+}
+
+export function OracleAdDescription({ad}) {
+  const {t} = useTranslation()
+
+  return (
+    <Stack spacing="7" bg="white" rounded="lg" p="6" pt="4">
+      <Stack spacing="2">
+        <Stack spacing="1">
+          <Text fontWeight={500}>{ad.title}</Text>
+          <Text color="muted">{ad.desc}</Text>
+        </Stack>
+        <Stack alignItems="flex-start" spacing={4}>
+          <ExternalLink
+            href={ad.url}
+            fontWeight={500}
+            withArrow={false}
+            textProps={{wordBreak: 'break-all', whiteSpace: 'normal'}}
+          >
+            {ad.url}
+          </ExternalLink>
+        </Stack>
+      </Stack>
+      <HStack spacing="6">
+        <HStack spacing="4">
+          <AdImage src={ad.media} w="10" objectFit="cover" />
+          <Box>
+            <Text>{t('Media')}</Text>
+            <Text fontSize="sm" color="muted">
+              {t('640x640px')}
+            </Text>
+          </Box>
+        </HStack>
+        <HStack spacing="4">
+          <AdImage src={ad.thumb} w="10" objectFit="cover" />
+          <Box>
+            <Text>{t('Thumbnail')}</Text>
+            <Text fontSize="sm" color="muted">
+              {t('80x80 px')}
+            </Text>
+          </Box>
+        </HStack>
+      </HStack>
+    </Stack>
+  )
+}
+
+export function MaliciousAdOverlay({children}) {
+  return (
+    <Box position="relative" filter="blur(2px)">
+      <Box
+        position="absolute"
+        inset={0}
+        backdropFilter="blur(2px)"
+        zIndex="banner"
+      />
+      {children}
+    </Box>
   )
 }

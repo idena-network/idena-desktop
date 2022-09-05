@@ -79,6 +79,8 @@ import {
 } from '../../screens/dna/hooks'
 import {viewVotingHref} from '../../screens/oracles/utils'
 import {useFork} from '../../screens/hardfork/hooks'
+import {AdBanner} from '../../screens/ads/containers'
+import {useRotatingAds} from '../../screens/ads/hooks'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -263,7 +265,7 @@ function LayoutContainer(props) {
   )
 }
 
-function NormalApp({children}) {
+function NormalApp({skipBanner, children}) {
   const {t} = useTranslation()
 
   const router = useRouter()
@@ -349,8 +351,13 @@ function NormalApp({children}) {
     }
   )
 
+  const ads = useRotatingAds()
+  const hasRotatingAds = ads?.length > 0
+
   return (
     <Flex as="section" direction="column" flex={1} h="100vh" overflowY="auto">
+      {hasRotatingAds && !skipBanner && <AdBanner />}
+
       {children}
 
       {epoch && <ValidationToast epoch={epoch} identity={identity} />}
