@@ -7,12 +7,14 @@ import {
   Heading,
   RadioGroup,
   Flex,
-  Icon,
   Stat,
   StatNumber,
   StatLabel,
   useToast,
   CloseButton,
+  useDisclosure,
+  IconButton,
+  Button,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -20,6 +22,7 @@ import {useRouter} from 'next/router'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import duration from 'dayjs/plugin/duration'
+import {useQuery} from 'react-query'
 import {
   Avatar,
   FloatDebug,
@@ -60,6 +63,8 @@ import {
   TerminateDrawer,
   FinishDrawer,
   Linkify,
+  MaliciousAdOverlay,
+  OracleAdDescription,
 } from '../../screens/oracles/containers'
 import {createViewVotingMachine} from '../../screens/oracles/machines'
 import {useEpochState} from '../../shared/providers/epoch-context'
@@ -89,14 +94,26 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {useOracleActions} from '../../screens/oracles/hooks'
 import {
   AddFundIcon,
+  AdsIcon,
   ArrowDownIcon,
   ArrowUpIcon,
   CoinsLgIcon,
+  EyeIcon,
+  OkIcon,
   RefreshIcon,
   StarIcon,
   UserIcon,
   UserTickIcon,
 } from '../../shared/components/icons'
+import {useIpfsAd} from '../../screens/ads/hooks'
+import {AdPreview, CreateCampaignDrawer} from '../../screens/ads/containers'
+import {
+  getAdVoting,
+  isApprovedVoting,
+  validateAdVoting,
+} from '../../screens/ads/utils'
+import {useSuccessToast} from '../../shared/hooks/use-toast'
+import {AdStatus} from '../../screens/ads/types'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -173,6 +190,8 @@ export default function ViewVotingPage() {
     rewardsFund,
     estimatedTotalReward,
     epochWithoutGrowth,
+    adCid,
+    issuer,
   } = current.context
 
   const isLoaded = !current.matches('loading')
@@ -209,6 +228,43 @@ export default function ViewVotingPage() {
   const isMaxWinnerThreshold = winnerThreshold === 100
 
   const accountableVoteCount = sumAccountableVotes(votes)
+
+  const {data: ad} = useIpfsAd(adCid)
+
+  const adPreviewDisclosure = useDisclosure()
+
+  const isMaliciousAdVoting = React.useMemo(() => {
+    if (ad) {
+      return validateAdVoting({ad, voting: current.context}) === false
+    }
+  }, [ad, current.context])
+
+  const createCampaignDisclosure = useDisclosure()
+
+  const {data: adVoting} = useQuery({
+    queryKey: ['adVoting', contractHash],
+    queryFn: () => {
+      if (contractHash) {
+        return getAdVoting(contractHash)
+      }
+    },
+  })
+
+  const successToast = useSuccessToast()
+
+  const {onClose: onCloseCampaignDisclosure} = createCampaignDisclosure
+
+  const handleCreateCampaign = React.useCallback(() => {
+    onCloseCampaignDisclosure()
+
+    successToast({
+      title: t('Ad campaign is successfully created'),
+      actionContent: t(`View 'Campaigns'`),
+      onAction: () => {
+        redirect(`/adn/list?filter=${AdStatus.Published}`)
+      },
+    })
+  }, [onCloseCampaignDisclosure, redirect, successToast, t])
 
   return (
     <>
@@ -259,41 +315,79 @@ export default function ViewVotingPage() {
                       px={10}
                     >
                       <Stack spacing={4}>
-                        <Heading
-                          overflow="hidden"
-                          fontSize={21}
-                          fontWeight={500}
-                          display="-webkit-box"
-                          style={{
-                            '-webkit-box-orient': 'vertical',
-                            '-webkit-line-clamp': '2',
-                          }}
-                        >
-                          {title}
+                        <Heading fontSize={21} fontWeight={500} noOfLines={2}>
+                          {isMaliciousAdVoting
+                            ? t('Please reject malicious ad')
+                            : title}
                         </Heading>
-                        <Text
-                          isTruncated
-                          lineHeight="tall"
-                          whiteSpace="pre-wrap"
-                        >
-                          <Linkify
-                            onClick={url => {
-                              send('FOLLOW_LINK', {url})
-                            }}
+                        {ad ? (
+                          <>
+                            {isMaliciousAdVoting ? (
+                              <MaliciousAdOverlay>
+                                <OracleAdDescription ad={ad} />
+                              </MaliciousAdOverlay>
+                            ) : (
+                              <OracleAdDescription ad={ad} />
+                            )}
+                          </>
+                        ) : (
+                          <Text
+                            noOfLines={1}
+                            lineHeight="tall"
+                            whiteSpace="pre-wrap"
                           >
-                            {desc}
-                          </Linkify>
-                        </Text>
+                            <Linkify
+                              onClick={url => {
+                                send('FOLLOW_LINK', {url})
+                              }}
+                            >
+                              {desc}
+                            </Linkify>
+                          </Text>
+                        )}
                       </Stack>
-                      <GoogleTranslateButton
-                        phrases={[
-                          title,
-                          encodeURIComponent(desc?.replace(/%/g, '%25')),
-                          options.map(({value}) => value).join('\n'),
-                        ]}
-                        locale={i18n.language}
-                        alignSelf="start"
-                      />
+                      <Flex align="center">
+                        {adCid && (
+                          <Button
+                            variant="ghost"
+                            colorScheme="blue"
+                            leftIcon={<EyeIcon boxSize={4} />}
+                            px="1"
+                            _hover={{}}
+                            _active={{}}
+                            onClick={adPreviewDisclosure.onOpen}
+                          >
+                            {t('Preview')}
+                          </Button>
+                        )}
+                        <GoogleTranslateButton
+                          phrases={[
+                            title,
+                            encodeURIComponent(desc?.replace(/%/g, '%25')),
+                            options.map(({value}) => value).join('\n'),
+                          ]}
+                          locale={i18n.language}
+                          alignSelf="start"
+                        />
+                        {areSameCaseInsensitive(issuer, identity.address) &&
+                          !isMaliciousAdVoting &&
+                          isApprovedVoting(adVoting) && (
+                            <>
+                              <VDivider />
+                              <Button
+                                variant="ghost"
+                                colorScheme="blue"
+                                leftIcon={<AdsIcon boxSize="4" />}
+                                px="1"
+                                _hover={{}}
+                                _active={{}}
+                                onClick={createCampaignDisclosure.onOpen}
+                              >
+                                {t('Create campaign')}
+                              </Button>
+                            </>
+                          )}
+                      </Flex>
                       <HDivider />
                       {isLoaded && (
                         <VotingPhase
@@ -353,7 +447,7 @@ export default function ViewVotingPage() {
                                     w={4}
                                     h={4}
                                   >
-                                    {isMine && <Icon name="ok" boxSize={3} />}
+                                    {isMine && <OkIcon boxSize="3" />}
                                   </Flex>
 
                                   <Text
@@ -439,6 +533,7 @@ export default function ViewVotingPage() {
                             {t('Launch')}
                           </PrimaryButton>
                         )}
+
                         {eitherIdleState(VotingStatus.Open) &&
                           (isOracle ? (
                             <PrimaryButton onClick={() => send('REVIEW')}>
@@ -997,14 +1092,22 @@ export default function ViewVotingPage() {
         }}
       />
 
+      {adCid && (
+        <AdPreview
+          ad={{...ad, author: issuer}}
+          isMalicious={isMaliciousAdVoting}
+          {...adPreviewDisclosure}
+        />
+      )}
+
       <Dialog
         isOpen={eitherIdleState('redirecting')}
         onClose={() => send('CANCEL')}
       >
         <DialogHeader>{t('Leaving Idena')}</DialogHeader>
         <DialogBody>
-          <Text>You're about to leave Idena.</Text>
-          <Text>Are you sure?</Text>
+          <Text>{t(`You're about to leave Idena.`)}</Text>
+          <Text>{t(`Are you sure?`)}</Text>
         </DialogBody>
         <DialogFooter>
           <SecondaryButton onClick={() => send('CANCEL')}>
@@ -1015,6 +1118,12 @@ export default function ViewVotingPage() {
           </PrimaryButton>
         </DialogFooter>
       </Dialog>
+
+      <CreateCampaignDrawer
+        ad={{...ad, cid: adCid, contract: contractHash}}
+        onSuccess={handleCreateCampaign}
+        {...createCampaignDisclosure}
+      />
 
       {global.isDev && (
         <>

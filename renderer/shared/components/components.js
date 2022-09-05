@@ -52,6 +52,7 @@ import {
   Menu as ChakraMenu,
   useToken,
   Select as ChakraSelect,
+  Th,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -355,8 +356,8 @@ export function Toast({
           color={actionColor}
           fontWeight={500}
           lineHeight="base"
-          px={3}
-          py="3/2"
+          px="3"
+          py="1.5"
           _hover={{bg: 'unset'}}
           _active={{bg: 'unset'}}
           _focus={{boxShadow: 'none'}}
@@ -708,5 +709,34 @@ export function FilterButton({value, onClick, ...props}) {
       }}
       {...props}
     />
+  )
+}
+
+export function RoundedTh({isLeft, isRight, children, ...props}) {
+  return (
+    <Th
+      textTransform="none"
+      fontSize="md"
+      fontWeight={400}
+      bg="none"
+      color="muted"
+      py={2}
+      px={3}
+      borderBottom="none"
+      letterSpacing={0}
+      position="relative"
+      {...props}
+    >
+      {children}
+      <Box
+        position="absolute"
+        inset={0}
+        bg="gray.50"
+        w="full"
+        zIndex="hide"
+        borderLeftRadius={isLeft ? 'md' : 'none'}
+        borderRightRadius={isRight ? 'md' : 'none'}
+      />
+    </Th>
   )
 }

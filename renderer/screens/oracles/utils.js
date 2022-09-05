@@ -137,7 +137,7 @@ export const createContractCaller = ({
     maxFee: isCalling ? contractMaxFee(gasCost, txFee) : null,
     amount: isCalling && method === 'sendVote' ? null : amount,
     broadcastBlock: isCalling && method === 'sendVote' ? broadcastBlock : null,
-    args: buildDynamicArgs(...args),
+    args: buildDynamicArgs(args),
   })
 
   return callRpc(isCalling ? 'contract_call' : 'contract_estimateCall', payload)
@@ -154,7 +154,7 @@ export const createContractReadonlyCaller = ({contractHash}) => (
       contract: contractHash,
       method,
       format,
-      args: buildDynamicArgs(...args),
+      args: buildDynamicArgs(args),
     })
   )
 
@@ -197,6 +197,7 @@ export function buildContractDeploymentArgs(
     isCustomOwnerAddress,
     ownerAddress,
     rewardsFund,
+    adCid,
   },
   {from, stake, gasCost, txFee},
   mode = ContractRpcMode.Call
@@ -213,6 +214,7 @@ export function buildContractDeploymentArgs(
           title,
           desc,
           options: stripOptions(options),
+          adCid,
         })}`,
       },
       {

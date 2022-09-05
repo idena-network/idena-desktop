@@ -373,8 +373,9 @@ export function ContactCard({
                 <VDivider />
                 <Button
                   variant="ghost"
-                  leftIcon={<DeleteIcon />}
                   colorScheme="red"
+                  leftIcon={<DeleteIcon />}
+                  px="1"
                   _active={{
                     bg: 'red.012',
                   }}

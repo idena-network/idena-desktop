@@ -3,11 +3,10 @@ import React from 'react'
 import {useTranslation} from 'react-i18next'
 import {useQueryClient} from 'react-query'
 import {useApprovedBurntCoins} from '../../screens/ads/hooks'
-import {Page, PageTitle} from '../../screens/app/components'
-import {RoundedTh} from '../../shared/components/components'
 import Layout from '../../shared/components/layout'
 import {PageHeader, PageCloseButton} from '../../screens/ads/components'
 import {AdOfferListItem, BurnDrawer} from '../../screens/ads/containers'
+import {Page, PageTitle, RoundedTh} from '../../shared/components/components'
 
 export default function AdOfferList() {
   const {t} = useTranslation()

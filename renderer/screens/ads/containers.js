@@ -164,19 +164,23 @@ export function AdBanner() {
 
 function AdBannerContent({ad}) {
   return (
-    <LinkBox as={HStack} spacing={2}>
+    <HStack
+      spacing={2}
+      cursor="pointer"
+      onClick={() => {
+        global.openExternal(ad?.url)
+      }}
+    >
       <AdImage src={ad?.thumb} w="10" />
       <Stack spacing="0.5" fontWeight={500} maxW={['2xs', 'lg']}>
-        <LinkOverlay href={ad?.url} target="_blank">
-          <Text lineHeight={4} isTruncated>
-            {ad?.title}
-          </Text>
-        </LinkOverlay>
+        <Text lineHeight="4" noOfLines={1}>
+          {ad?.title}
+        </Text>
         <Text fontSize="sm" color="muted" lineHeight={4} isTruncated>
           {ad?.desc}
         </Text>
       </Stack>
-    </LinkBox>
+    </HStack>
   )
 }
 
@@ -541,7 +545,13 @@ function AdPromotion({cid, title, desc, url, media, author}) {
         </Stack>
 
         <LinkBox>
-          <LinkOverlay href={url} isExternal>
+          <LinkOverlay
+            href="#"
+            isExternal
+            onClick={() => {
+              global.openExternal(url)
+            }}
+          >
             <AdImage src={media} w="280px" />
           </LinkOverlay>
         </LinkBox>
@@ -1700,8 +1710,8 @@ export function AdOfferListItem({
   }
 
   return (
-    <Tr fontWeight={500}>
-      <Td>
+    <Tr fontWeight={500} borderColor="red.200">
+      <Td borderColor="gray.300">
         <HStack>
           <AdImage src={adImageThumbSrc(ad)} boxSize="10" />
           <Stack spacing="1.5">
@@ -1728,14 +1738,12 @@ export function AdOfferListItem({
           </Stack>
         </HStack>
       </Td>
-      <Td>
-        <NextLink href={String(ad.url)} passHref>
-          <Link target="_blank" color="blue.500">
-            {ad.url}
-          </Link>
-        </NextLink>
+      <Td borderColor="gray.300">
+        <Link target="_blank" color="blue.500">
+          {ad.url}
+        </Link>
       </Td>
-      <Td>
+      <Td borderColor="gray.300">
         {targetValues.some(Boolean) ? (
           <>
             {t('Set')}{' '}
@@ -1778,8 +1786,8 @@ export function AdOfferListItem({
           t('Not set')
         )}
       </Td>
-      <Td>{formatDna(amount)}</Td>
-      <Td>
+      <Td borderColor="gray.300">{formatDna(amount)}</Td>
+      <Td borderColor="gray.300">
         {isSelfAuthor ? (
           <SecondaryButton
             onClick={() => {
