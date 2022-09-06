@@ -132,7 +132,7 @@ export function AdBanner() {
       align="center"
       justify="space-between"
       borderBottomWidth={1}
-      borderBottomColor="gray.100"
+      borderBottomColor="gray.300"
       p="2"
       pr="4"
       h="14"

@@ -29,6 +29,7 @@ import {
   FormHelperText,
   RadioGroup,
   HStack,
+  useBoolean,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -68,7 +69,7 @@ import {
 } from '../../shared/utils/utils'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
-import {validateInvitationCode} from './utils'
+import {getStakingWarning, validateInvitationCode} from './utils'
 import {BLOCK_TIME} from '../oracles/utils'
 import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
@@ -77,8 +78,10 @@ import {
   ChevronRightIcon,
   InfoIcon,
   UserIcon,
+  WalletIcon,
 } from '../../shared/components/icons'
 import {AdDrawer} from '../ads/containers'
+import {useTrackTx} from '../ads/hooks'
 
 export function UserInlineCard({
   identity: {address, state},
@@ -1189,10 +1192,10 @@ function ProfileTagPopoverContent({children}) {
   )
 }
 
-export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
+export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
   const {t, i18n} = useTranslation()
 
-  const {address, state} = useIdentityState()
+  const {address, state, age} = useIdentityState()
 
   const {data: balanceData} = useQuery({
     queryKey: ['get-balance', address],
@@ -1203,24 +1206,66 @@ export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
     notifyOnChangeProps: 'tracked',
   })
 
-  const {submit} = useReplenishStake({onSuccess, onError})
+  const [sendValue, setSendValue] = React.useState('')
+
+  const [isMining, setIsMining] = useBoolean()
+  const {off: setIsMiningOff} = setIsMining
+
+  const {data: hash, submit} = useReplenishStake({
+    onSuccess,
+    onError: React.useCallback(
+      e => {
+        setIsMiningOff()
+        onError(e)
+      },
+      [onError, setIsMiningOff]
+    ),
+  })
+
+  useTrackTx(hash, {
+    onMined: React.useCallback(() => {
+      setIsMiningOff()
+      onMined()
+    }, [onMined, setIsMiningOff]),
+  })
 
   const formatDna = toLocaleDna(i18n.language, {
     maximumFractionDigits: 5,
   })
 
-  const isRisky = [
-    IdentityStatus.Candidate,
-    IdentityStatus.Newbie,
-    IdentityStatus.Verified,
-  ].includes(state)
+  const [checkboxes, setCheckboxes] = React.useState({
+    cb1: {show: false, value: false},
+    cb2: {show: false, value: false},
+    cb3: {show: false, value: false},
+    cb4: {show: false, value: false},
+  })
+
+  React.useEffect(() => {
+    setCheckboxes({
+      cb1: {show: true, value: false},
+      cb2: {
+        show: [IdentityStatus.Candidate, IdentityStatus.Newbie].includes(state),
+        value: false,
+      },
+      cb3: {
+        show: state === IdentityStatus.Candidate,
+        value: false,
+      },
+      cb4: {show: !!getStakingWarning(t, state, age), value: false},
+    })
+  }, [age, state, t])
+
+  const allChecked = Object.entries(checkboxes).reduce(
+    (prev, current) => prev && (current[1].show ? current[1].value : true),
+    true
+  )
 
   return (
-    <Drawer {...props}>
+    <AdDrawer isMining={isMining} {...props}>
       <DrawerHeader>
         <Stack spacing="4">
           <FillCenter bg="blue.012" h={12} minH={12} w={12} rounded="xl">
-            <Icon name="wallet" boxSize="6" color="blue.500" />
+            <WalletIcon boxSize="6" color="blue.500" />
           </FillCenter>
           <Heading
             color="brandGray.500"
@@ -1253,18 +1298,19 @@ export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
               onSubmit={e => {
                 e.preventDefault()
 
-                const formData = new FormData(e.target)
+                setIsMining.on()
 
-                const amount = formData.get('amount')
-
-                submit({amount})
+                submit({amount: sendValue})
               }}
             >
               <FormControl>
                 <FormLabel mx={0} mb="3">
                   {t('Amount')}
                 </FormLabel>
-                <DnaInput name="amount" />
+                <DnaInput
+                  value={sendValue}
+                  onChange={e => setSendValue(Number(e.target.value))}
+                />
                 <FormHelperText fontSize="md">
                   <Flex justify="space-between">
                     <Box as="span" color="muted">
@@ -1276,19 +1322,110 @@ export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
                   </Flex>
                 </FormHelperText>
               </FormControl>
+              <Stack mt={4} spacing={2}>
+                <FormControl>
+                  <Checkbox
+                    alignItems="flex-start"
+                    sx={{
+                      '& input+span': {
+                        marginTop: '2px',
+                      },
+                    }}
+                    isChecked={checkboxes.cb1.value}
+                    onChange={e =>
+                      setCheckboxes(prev => ({
+                        ...prev,
+                        cb1: {
+                          ...prev.cb1,
+                          value: e.target.checked,
+                        },
+                      }))
+                    }
+                  >
+                    {t(
+                      'I understand that I can only withdraw my stake by terminating my identity'
+                    )}
+                  </Checkbox>
+                </FormControl>
+                {checkboxes.cb2.show && (
+                  <FormControl>
+                    <Checkbox
+                      alignItems="flex-start"
+                      sx={{
+                        '& input+span': {
+                          marginTop: '2px',
+                        },
+                      }}
+                      isChecked={checkboxes.cb2.value}
+                      onChange={e =>
+                        setCheckboxes(prev => ({
+                          ...prev,
+                          cb2: {
+                            ...prev.cb2,
+                            value: e.target.checked,
+                          },
+                        }))
+                      }
+                    >
+                      {t(
+                        'I understand that I can not terminate my identity until I get Verified or Human status'
+                      )}
+                    </Checkbox>
+                  </FormControl>
+                )}
+                {checkboxes.cb3.show && (
+                  <FormControl>
+                    <Checkbox
+                      alignItems="flex-start"
+                      sx={{
+                        '& input+span': {
+                          marginTop: '2px',
+                        },
+                      }}
+                      isChecked={checkboxes.cb3.value}
+                      onChange={e =>
+                        setCheckboxes(prev => ({
+                          ...prev,
+                          cb3: {
+                            ...prev.cb3,
+                            value: e.target.checked,
+                          },
+                        }))
+                      }
+                    >
+                      {t(
+                        'I understand that inviter can terminate my identity and burn my stake until I get validated'
+                      )}
+                    </Checkbox>
+                  </FormControl>
+                )}
+                {checkboxes.cb4.show && (
+                  <FormControl>
+                    <Checkbox
+                      alignItems="flex-start"
+                      sx={{
+                        '& input+span': {
+                          marginTop: '2px',
+                        },
+                      }}
+                      isChecked={checkboxes.cb4.value}
+                      onChange={e =>
+                        setCheckboxes(prev => ({
+                          ...prev,
+                          cb4: {
+                            ...prev.cb4,
+                            value: e.target.checked,
+                          },
+                        }))
+                      }
+                    >
+                      {getStakingWarning(t, state, age)}
+                    </Checkbox>
+                  </FormControl>
+                )}
+              </Stack>
             </form>
           </Stack>
-          {isRisky && (
-            <FailAlert>
-              {state === IdentityStatus.Verified
-                ? t(
-                    'You will lose 100% of the Stake if you fail the upcoming validation'
-                  )
-                : t(
-                    'You will lose 100% of the Stake if you fail or miss the upcoming validation'
-                  )}
-            </FailAlert>
-          )}
         </Stack>
       </DrawerBody>
       <DrawerFooter>
@@ -1297,12 +1434,18 @@ export function ReplenishStakeDrawer({onSuccess, onError, ...props}) {
           <SecondaryButton onClick={props.onClose}>
             {t('Not now')}
           </SecondaryButton>
-          <PrimaryButton form="replenishStake" type="submit">
+          <PrimaryButton
+            form="replenishStake"
+            type="submit"
+            isDisabled={!allChecked || !sendValue}
+            isLoading={isMining}
+            loadingText={t('Mining...')}
+          >
             {t('Add stake')}
           </PrimaryButton>
         </Stack>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
