@@ -48,6 +48,7 @@ import {
   ReceiveIcon,
   SendOutIcon,
 } from '../../shared/components/icons'
+import {useTrackTx} from '../ads/hooks'
 
 export function TotalAmount({address, amount}) {
   const {t, i18n} = useTranslation()
@@ -140,10 +141,59 @@ export function WalletCard({
 export function SendDnaDrawer({address, onSend, onFail, ...props}) {
   const {t} = useTranslation()
 
-  const [isSubmitting, setIsSubmitting] = React.useState()
+  const [state, dispatch] = React.useReducer(
+    (prevState, action) => {
+      const {type = typeof action === 'string' && action} = action
+
+      switch (type) {
+        case 'submit':
+        case 'mine': {
+          return {
+            ...prevState,
+            ...action,
+            status: 'pending',
+          }
+        }
+        case 'done':
+          return {
+            ...prevState,
+            hash: null,
+            amount: null,
+            to: null,
+            status: 'done',
+          }
+        case 'error':
+          return {...prevState, error: action.error, status: 'error'}
+
+        default:
+          return prevState
+      }
+    },
+    {
+      status: 'idle',
+    }
+  )
+
+  const {onClose} = props
+
+  useTrackTx(state.hash, {
+    onMined: React.useCallback(() => {
+      dispatch('done')
+      onClose()
+    }, [onClose]),
+  })
+
+  const isPending = state.status === 'pending'
 
   return (
-    <WalletDrawer {...props}>
+    <WalletDrawer
+      isMining={isPending}
+      onClose={() => {
+        dispatch('done')
+        props.onClose()
+      }}
+      {...props}
+    >
       <WalletDrawerHeader title={t('Send iDNA')}>
         <WalletDrawerHeaderIconBox colorScheme="red">
           <SendOutIcon color="red.500" />
@@ -152,6 +202,8 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
       <WalletDrawerForm
         onSubmit={async e => {
           e.preventDefault()
+
+          dispatch('submit')
 
           const {
             from: {value: from},
@@ -168,16 +220,15 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
           }
 
           try {
-            setIsSubmitting(true)
             const result = await callRpc('dna_sendTransaction', {
               to,
               from,
               amount,
             })
             onSend(result)
-            setIsSubmitting(false)
+            dispatch({type: 'submit', to, amount, hash: result})
           } catch (error) {
-            setIsSubmitting(false)
+            dispatch({type: 'error', error: error.message})
             onFail(error.message)
           }
         }}
@@ -204,7 +255,7 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
         <DrawerFooter>
           <PrimaryButton
             type="submit"
-            isLoading={isSubmitting}
+            isLoading={isPending}
             loadingText={t('Sending')}
           >
             {t('Send')}

@@ -108,6 +108,7 @@ import {
   UserTickIcon,
 } from '../../shared/components/icons'
 import {AdImage} from '../ads/components'
+import {AdDrawer} from '../ads/containers'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -437,7 +438,7 @@ export function AddFundDrawer({
   const currentOracleRewards = cleanRewards + dirtyRewards
 
   return (
-    <Drawer {...props}>
+    <AdDrawer isMining={isLoading} {...props}>
       <OracleDrawerHeader icon={AddFundIcon}>
         {t('Add fund')}
       </OracleDrawerHeader>
@@ -483,7 +484,7 @@ export function AddFundDrawer({
           </PrimaryButton>
         </OracleDrawerBody>
       </Box>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -506,7 +507,7 @@ export function VoteDrawer({
   const toDna = toLocaleDna(i18n.language, {maximumFractionDigits: 4})
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon={SendOutIcon} colorScheme="blue">
         {t('Voting')}: {option}
       </OracleDrawerHeader>
@@ -554,7 +555,7 @@ export function VoteDrawer({
           {t('Send')}
         </PrimaryButton>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -596,7 +597,12 @@ export function ReviewVotingDrawer({
   const oraclesReward = Math.max(0, sendAmount - ownerRefund)
 
   return (
-    <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
+    <AdDrawer
+      isMining={isLoading}
+      isCloseable={!isLoading}
+      isOpen={isOpen}
+      {...props}
+    >
       <OracleDrawerHeader icon={OracleIcon}>
         {t('Create Oracle Voting')}
       </OracleDrawerHeader>
@@ -692,7 +698,7 @@ export function ReviewVotingDrawer({
           {t('Confirm')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -1135,7 +1141,12 @@ export function LaunchDrawer({
   const oraclesReward = Math.max(0, sendAmount - ownerRefund)
 
   return (
-    <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
+    <AdDrawer
+      isMining={isLoading}
+      isCloseable={!isLoading}
+      isOpen={isOpen}
+      {...props}
+    >
       <OracleDrawerHeader icon={OracleIcon}>
         {t('Launch Oracle Voting')}
       </OracleDrawerHeader>
@@ -1193,7 +1204,7 @@ export function LaunchDrawer({
           {t('Launch')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -1207,7 +1218,7 @@ export function ProlongDrawer({
   const {t, i18n} = useTranslation()
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon={OracleIcon}>
         {t('Prolong Oracle Voting')}
       </OracleDrawerHeader>
@@ -1243,7 +1254,7 @@ export function ProlongDrawer({
           {t('Prolong')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -1497,7 +1508,7 @@ export function FinishDrawer({
   const {t, i18n} = useTranslation()
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon={OracleIcon}>
         {isVotingFailed ? t('Claim refunds') : t('Claim rewards')}
       </OracleDrawerHeader>
@@ -1539,7 +1550,7 @@ export function FinishDrawer({
           {isVotingFailed ? t('Claim refunds') : t('Claim rewards')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -1552,7 +1563,7 @@ export function TerminateDrawer({
   const {t} = useTranslation()
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon={OracleIcon}>
         {t('Terminate Oracle Voting')}
       </OracleDrawerHeader>
@@ -1583,7 +1594,7 @@ export function TerminateDrawer({
           {t('Terminate')}
         </PrimaryButton>
       </OracleDrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 

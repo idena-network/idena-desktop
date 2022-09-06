@@ -1,4 +1,4 @@
-import {Flex, useDisclosure} from '@chakra-ui/react'
+import {Flex, useBoolean, useDisclosure} from '@chakra-ui/react'
 import {useRouter} from 'next/router'
 import * as React from 'react'
 import {useTranslation} from 'react-i18next'
@@ -19,13 +19,18 @@ import {Page} from '../shared/components/components'
 export default function ContactsPage() {
   const {t} = useTranslation()
 
-  const {query} = useRouter()
+  const router = useRouter()
+  const {query} = router
 
   const {syncing, offline, loading} = useChainState()
 
   const [selectedContact, setSelectedContact] = React.useState(null)
 
   const sendInviteDisclosure = useDisclosure()
+  const {
+    onOpen: onOpenInviteDrawer,
+    onClose: onCloseInviteDrawer,
+  } = sendInviteDisclosure
 
   const {
     isOpen: isOpenEditContactDrawer,
@@ -51,6 +56,16 @@ export default function ContactsPage() {
   const successToast = useSuccessToast()
   const failToast = useFailToast()
 
+  const [isMining, setIsMining] = useBoolean()
+
+  const handleInviteMined = React.useCallback(() => {
+    if (router.query.new !== undefined) {
+      router.push('/contacts')
+    }
+    onCloseInviteDrawer()
+    setIsMining.off()
+  }, [onCloseInviteDrawer, router, setIsMining])
+
   return (
     <InviteProvider>
       <Layout syncing={syncing} offline={offline} loading={loading}>
@@ -59,7 +74,7 @@ export default function ContactsPage() {
             <ContactListSidebar
               selectedContactId={selectedContact?.id}
               onSelectContact={setSelectedContact}
-              onNewContact={sendInviteDisclosure.onOpen}
+              onNewContact={onOpenInviteDrawer}
             />
             <Flex flex={1} py={6} px={20}>
               {selectedContact ? (
@@ -73,6 +88,7 @@ export default function ContactsPage() {
                     setSelectedContact(contact)
                   }}
                   onKillContact={onOpenKillContactDrawer}
+                  onInviteMined={handleInviteMined}
                 />
               ) : (
                 <NoContactDataPlaceholder>
@@ -84,6 +100,7 @@ export default function ContactsPage() {
 
           <IssueInviteDrawer
             inviteeAddress={query.address}
+            isMining={isMining}
             {...sendInviteDisclosure}
             onIssue={invite => {
               successToast({

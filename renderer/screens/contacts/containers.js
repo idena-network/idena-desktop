@@ -9,7 +9,6 @@ import {
   Button,
   useClipboard,
   Box,
-  Icon,
   useDisclosure,
   Collapse,
   IconButton,
@@ -61,6 +60,7 @@ import {
   InfoIcon,
   PlusSolidIcon,
 } from '../../shared/components/icons'
+import {AdDrawer} from '../ads/containers'
 
 export function ContactListSidebar({
   selectedContactId,
@@ -272,6 +272,7 @@ export function ContactCard({
   onRemoveContact,
   onRecoverContact,
   onKillContact,
+  onInviteMined,
 }) {
   const {
     t,
@@ -300,6 +301,12 @@ export function ContactCard({
   const {onCopy: onCopyKey} = useClipboard(key)
 
   const successToast = useSuccessToast()
+
+  React.useEffect(() => {
+    if (state === IdentityStatus.Invite) {
+      onInviteMined()
+    }
+  }, [onInviteMined, state])
 
   const isInviteExpired =
     state === IdentityStatus.Undefined && !canKill && !mining && !activated
@@ -432,6 +439,7 @@ export function ContactCard({
 
 export function IssueInviteDrawer({
   inviteeAddress,
+  isMining,
   onIssue,
   onIssueFail,
   ...props
@@ -448,7 +456,7 @@ export function IssueInviteDrawer({
   const [isSubmitting, setIsSubmitting] = React.useState()
 
   return (
-    <Drawer {...props}>
+    <AdDrawer isMining={isMining} {...props}>
       <DrawerHeader>
         <ContactDrawerHeader address={dummyAddress}>
           {t('Invite new person')}
@@ -527,7 +535,7 @@ export function IssueInviteDrawer({
           </PrimaryButton>
         </Stack>
       </DrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 export function EditContactDrawer({contact, onRename, ...props}) {
