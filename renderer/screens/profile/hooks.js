@@ -60,6 +60,7 @@ export function useReplenishStake({onSuccess, onError}) {
   )
 
   return {
+    data: mutation.data,
     submit: mutation.mutate,
   }
 }

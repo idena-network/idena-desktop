@@ -29,6 +29,7 @@ import {
   FormHelperText,
   RadioGroup,
   HStack,
+  useBoolean,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -77,8 +78,10 @@ import {
   ChevronRightIcon,
   InfoIcon,
   UserIcon,
+  WalletIcon,
 } from '../../shared/components/icons'
 import {AdDrawer} from '../ads/containers'
+import {useTrackTx} from '../ads/hooks'
 
 export function UserInlineCard({
   identity: {address, state},
@@ -1189,7 +1192,7 @@ function ProfileTagPopoverContent({children}) {
   )
 }
 
-export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
+export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
   const {t, i18n} = useTranslation()
 
   const {address, state, age} = useIdentityState()
@@ -1203,22 +1206,41 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
     notifyOnChangeProps: 'tracked',
   })
 
-  const [sendValue, setSendValue] = useState('')
+  const [sendValue, setSendValue] = React.useState('')
 
-  const {submit} = useReplenishStake({onSuccess, onError})
+  const [isMining, setIsMining] = useBoolean()
+  const {off: setIsMiningOff} = setIsMining
+
+  const {data: hash, submit} = useReplenishStake({
+    onSuccess,
+    onError: React.useCallback(
+      e => {
+        setIsMiningOff()
+        onError(e)
+      },
+      [onError, setIsMiningOff]
+    ),
+  })
+
+  useTrackTx(hash, {
+    onMined: React.useCallback(() => {
+      setIsMiningOff()
+      onMined()
+    }, [onMined, setIsMiningOff]),
+  })
 
   const formatDna = toLocaleDna(i18n.language, {
     maximumFractionDigits: 5,
   })
 
-  const [checkboxes, setCheckboxes] = useState({
+  const [checkboxes, setCheckboxes] = React.useState({
     cb1: {show: false, value: false},
     cb2: {show: false, value: false},
     cb3: {show: false, value: false},
     cb4: {show: false, value: false},
   })
 
-  useEffect(() => {
+  React.useEffect(() => {
     setCheckboxes({
       cb1: {show: true, value: false},
       cb2: {
@@ -1231,7 +1253,7 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
       },
       cb4: {show: !!getStakingWarning(t, state, age), value: false},
     })
-  }, [age, state, isOpen, t])
+  }, [age, state, t])
 
   const allChecked = Object.entries(checkboxes).reduce(
     (prev, current) => prev && (current[1].show ? current[1].value : true),
@@ -1239,11 +1261,11 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
   )
 
   return (
-    <Drawer isOpen={isOpen} {...props}>
+    <AdDrawer isMining={isMining} {...props}>
       <DrawerHeader>
         <Stack spacing="4">
           <FillCenter bg="blue.012" h={12} minH={12} w={12} rounded="xl">
-            <Icon name="wallet" boxSize="6" color="blue.500" />
+            <WalletIcon boxSize="6" color="blue.500" />
           </FillCenter>
           <Heading
             color="brandGray.500"
@@ -1276,6 +1298,8 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
               onSubmit={e => {
                 e.preventDefault()
 
+                setIsMining.on()
+
                 submit({amount: sendValue})
               }}
             >
@@ -1284,7 +1308,7 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                   {t('Amount')}
                 </FormLabel>
                 <DnaInput
-                  name="amount"
+                  value={sendValue}
                   onChange={e => setSendValue(Number(e.target.value))}
                 />
                 <FormHelperText fontSize="md">
@@ -1301,18 +1325,22 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
               <Stack mt={4} spacing={2}>
                 <FormControl>
                   <Checkbox
-                    className="custom-checkbox"
                     alignItems="flex-start"
+                    sx={{
+                      '& input+span': {
+                        marginTop: '2px',
+                      },
+                    }}
                     isChecked={checkboxes.cb1.value}
-                    onChange={e => {
-                      setCheckboxes({
-                        ...checkboxes,
+                    onChange={e =>
+                      setCheckboxes(prev => ({
+                        ...prev,
                         cb1: {
-                          ...checkboxes.cb1,
+                          ...prev.cb1,
                           value: e.target.checked,
                         },
-                      })
-                    }}
+                      }))
+                    }
                   >
                     {t(
                       'I understand that I can only withdraw my stake by terminating my identity'
@@ -1322,17 +1350,21 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                 {checkboxes.cb2.show && (
                   <FormControl>
                     <Checkbox
-                      className="custom-checkbox"
                       alignItems="flex-start"
+                      sx={{
+                        '& input+span': {
+                          marginTop: '2px',
+                        },
+                      }}
                       isChecked={checkboxes.cb2.value}
                       onChange={e =>
-                        setCheckboxes({
-                          ...checkboxes,
+                        setCheckboxes(prev => ({
+                          ...prev,
                           cb2: {
-                            ...checkboxes.cb2,
+                            ...prev.cb2,
                             value: e.target.checked,
                           },
-                        })
+                        }))
                       }
                     >
                       {t(
@@ -1344,17 +1376,21 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                 {checkboxes.cb3.show && (
                   <FormControl>
                     <Checkbox
-                      className="custom-checkbox"
                       alignItems="flex-start"
+                      sx={{
+                        '& input+span': {
+                          marginTop: '2px',
+                        },
+                      }}
                       isChecked={checkboxes.cb3.value}
                       onChange={e =>
-                        setCheckboxes({
-                          ...checkboxes,
+                        setCheckboxes(prev => ({
+                          ...prev,
                           cb3: {
-                            ...checkboxes.cb3,
+                            ...prev.cb3,
                             value: e.target.checked,
                           },
-                        })
+                        }))
                       }
                     >
                       {t(
@@ -1366,17 +1402,21 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                 {checkboxes.cb4.show && (
                   <FormControl>
                     <Checkbox
-                      className="custom-checkbox"
                       alignItems="flex-start"
+                      sx={{
+                        '& input+span': {
+                          marginTop: '2px',
+                        },
+                      }}
                       isChecked={checkboxes.cb4.value}
                       onChange={e =>
-                        setCheckboxes({
-                          ...checkboxes,
+                        setCheckboxes(prev => ({
+                          ...prev,
                           cb4: {
-                            ...checkboxes.cb4,
+                            ...prev.cb4,
                             value: e.target.checked,
                           },
-                        })
+                        }))
                       }
                     >
                       {getStakingWarning(t, state, age)}
@@ -1384,11 +1424,6 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                   </FormControl>
                 )}
               </Stack>
-              <style jsx global>{`
-                .custom-checkbox > input + div {
-                  margin-top: 2px;
-                }
-              `}</style>
             </form>
           </Stack>
         </Stack>
@@ -1403,12 +1438,14 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
             form="replenishStake"
             type="submit"
             isDisabled={!allChecked || !sendValue}
+            isLoading={isMining}
+            loadingText={t('Mining...')}
           >
             {t('Add stake')}
           </PrimaryButton>
         </Stack>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 

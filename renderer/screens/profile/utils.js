@@ -1,3 +1,4 @@
+import {IdentityStatus} from '../../shared/types'
 import {requestDb} from '../../shared/utils/db'
 import {IdentityStatus} from '../../shared/types'
 
