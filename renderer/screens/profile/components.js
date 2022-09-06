@@ -78,6 +78,7 @@ import {
   InfoIcon,
   UserIcon,
 } from '../../shared/components/icons'
+import {AdDrawer} from '../ads/containers'
 
 export function UserInlineCard({
   identity: {address, state},
@@ -509,7 +510,7 @@ export function ActivateMiningDrawer({
       : 3 - (currentEpoch - delegationEpoch)
 
   return (
-    <Drawer onClose={onClose} {...props}>
+    <AdDrawer isMining={isLoading} onClose={onClose} {...props}>
       <DrawerHeader>
         <Flex
           align="center"
@@ -615,7 +616,7 @@ export function ActivateMiningDrawer({
           </PrimaryButton>
         </Stack>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -632,7 +633,7 @@ export function DeactivateMiningDrawer({
   const isDelegator = typeof delegatee === 'string'
 
   return (
-    <Drawer onClose={onClose} {...props}>
+    <AdDrawer isMining={isLoading} onClose={onClose} {...props}>
       <DrawerHeader>
         <Flex
           align="center"
@@ -704,7 +705,7 @@ export function DeactivateMiningDrawer({
           </PrimaryButton>
         </Stack>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 

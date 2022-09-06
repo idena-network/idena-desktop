@@ -53,6 +53,7 @@ import {
   useToken,
   Select as ChakraSelect,
   Th,
+  useBreakpointValue,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -105,14 +106,23 @@ export function Debug({children}) {
 }
 
 export function Drawer({isCloseable = true, children, ...props}) {
+  const drawerPromotion = React.useState()
+
+  const maxWidth = useBreakpointValue(['auto', 360])
+
   return (
-    <ChakraDrawer {...props}>
-      <DrawerOverlay bg="xblack.080" />
-      <DrawerContent px={8} py={12} maxW={360}>
-        {isCloseable && <DrawerCloseButton />}
-        {children}
-      </DrawerContent>
-    </ChakraDrawer>
+    <DrawerPromotionContext.Provider value={drawerPromotion}>
+      <ChakraDrawer placement="right" {...props}>
+        <DrawerOverlay />
+        <DrawerContent px="8" py="12" maxW="360">
+          {isCloseable && <DrawerCloseButton />}
+          {children}
+        </DrawerContent>
+        <DrawerPromotion
+          left={maxWidth > 0 ? `calc(50% - ${maxWidth / 2}px)` : '50%'}
+        />
+      </ChakraDrawer>
+    </DrawerPromotionContext.Provider>
   )
 }
 export function DrawerHeader(props) {

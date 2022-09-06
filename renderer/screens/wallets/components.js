@@ -17,6 +17,7 @@ import {
   FormLabel,
 } from '../../shared/components/components'
 import {MoreIcon} from '../../shared/components/icons'
+import {AdDrawer} from '../ads/containers'
 
 export function WalletCardMenu({children, ...props}) {
   return (
@@ -71,14 +72,14 @@ export function WalletCardMenuItem({children, ...props}) {
 
 export function WalletDrawer({title, icon, color, children, ...props}) {
   return (
-    <Drawer {...props} closeOnOverlayClick={false}>
+    <AdDrawer {...props} closeOnOverlayClick={false}>
       {title && (
         <WalletDrawerHeader title={title}>
           <WalletDrawerHeaderIconBox icon={icon} color={color} />
         </WalletDrawerHeader>
       )}
       {children}
-    </Drawer>
+    </AdDrawer>
   )
 }
 
