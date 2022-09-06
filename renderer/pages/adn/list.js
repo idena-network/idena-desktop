@@ -41,7 +41,7 @@ import {
   VDivider,
 } from '../../shared/components/components'
 import {PlusSolidIcon, RefreshIcon} from '../../shared/components/icons'
-import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
+import {SecondaryButton} from '../../shared/components/button'
 import {useClosableToast, useFailToast} from '../../shared/hooks/use-toast'
 import {dexieDb} from '../../shared/utils/dexieDb'
 

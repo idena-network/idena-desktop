@@ -11,11 +11,7 @@ import {
   MenuList,
   Stack,
 } from '@chakra-ui/react'
-import {
-  Drawer,
-  DrawerHeader,
-  FormLabel,
-} from '../../shared/components/components'
+import {DrawerHeader, FormLabel} from '../../shared/components/components'
 import {MoreIcon} from '../../shared/components/icons'
 import {AdDrawer} from '../ads/containers'
 

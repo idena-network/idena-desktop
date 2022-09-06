@@ -292,7 +292,7 @@ export function useApprovedBurntCoins() {
 export function useProfileAds() {
   const rpcFetcher = useRpcFetcher()
 
-  const [{profileHash}, {forceUpdate: forceIdentityUpdate}] = useIdentity()
+  const [{profileHash}] = useIdentity()
 
   const {decodeProfile, decodeAd, decodeAdTarget} = useProtoProfileDecoder()
 
