@@ -13,7 +13,6 @@ import {
   useToast,
   CloseButton,
   useDisclosure,
-  IconButton,
   Button,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'

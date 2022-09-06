@@ -2,8 +2,6 @@ import * as React from 'react'
 import {Box, Flex, HStack, Stack, Text, useDisclosure} from '@chakra-ui/react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {TriangleUpIcon} from '@chakra-ui/icons'
-import {Page, PageTitle} from '../../screens/app/components'
 import Layout from '../../shared/components/layout'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {
@@ -13,8 +11,9 @@ import {
   AdImage,
 } from '../../screens/ads/components'
 import {useCoinbase, useIpfsAd} from '../../screens/ads/hooks'
-import {ExternalLink} from '../../shared/components/components'
+import {ExternalLink, Page, PageTitle} from '../../shared/components/components'
 import {AdPreview} from '../../screens/ads/containers'
+import {ArrowUpIcon} from '../../shared/components/icons'
 
 export default function ViewAdPage() {
   const {t} = useTranslation()
@@ -84,7 +83,7 @@ export default function ViewAdPage() {
           </SecondaryButton>
           <PrimaryButton onClick={adPreviewDisclosure.onOpen}>
             <HStack>
-              <TriangleUpIcon boxSize="3" transform="rotate(90deg)" />
+              <ArrowUpIcon boxSize="3" transform="rotate(90deg)" />
               <Text>{t('Show preview')}</Text>
             </HStack>
           </PrimaryButton>
