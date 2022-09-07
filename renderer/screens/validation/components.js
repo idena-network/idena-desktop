@@ -8,7 +8,6 @@ import {
   Heading,
   Icon,
   Alert,
-  AlertIcon,
   Button,
   useTheme,
   Modal,
@@ -17,13 +16,12 @@ import {
   Image,
   List,
   ListItem,
-  AspectRatioBox,
-  PseudoBox,
+  AspectRatio,
   Spinner,
   useDisclosure,
   Tooltip,
   ModalBody,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
@@ -52,12 +50,13 @@ import {
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {useInterval} from '../../shared/hooks/use-interval'
 import {FillCenter} from '../oracles/components'
+import {InfoIcon} from '../../shared/components/icons'
 
 const Scroll = require('react-scroll')
 
 const {ScrollElement} = Scroll
 const {scroller} = Scroll
-const ElementFlipImage = ScrollElement(AspectRatioBox)
+const ElementFlipImage = ScrollElement(AspectRatio)
 
 export function ValidationScene(props) {
   return (
@@ -207,7 +206,7 @@ export function Flip({
                     onOpenFlipZoom()
                   }}
                 >
-                  <Icon name="zoom-flip" size={5} />
+                  <Icon name="zoom-flip" boxSize={5} />
                 </Flex>
               </div>
             )}
@@ -225,7 +224,7 @@ export function Flip({
         ))}
         <Modal
           initialFocusRef={initialRef}
-          size="30%"
+          size="xl"
           isOpen={isOpenFlipZoom}
           onClose={onCloseFlipZoom}
         >
@@ -262,7 +261,7 @@ export function Flip({
               top={6}
               name="cross-small"
               color="white"
-              size={8}
+              boxSize={8}
               onClick={onCloseFlipZoom}
             />
           </Flex>
@@ -567,7 +566,7 @@ function FailedThumbnail() {
       bg="rgb(89 89 89 / 0.95)"
       borderRadius="xl"
     >
-      <Icon name="delete" size={5} color="white" />
+      <Icon name="delete" boxSize={5} color="white" />
     </Flex>
   )
 }
@@ -593,7 +592,7 @@ function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
       }
       borderRadius="xl"
     >
-      {option && <Icon name="tick" size={5} color="white" />}
+      {option && <Icon name="tick" boxSize={5} color="white" />}
     </Flex>
   )
 }
@@ -658,7 +657,7 @@ export const QualificationButton = React.forwardRef(
     return (
       <ButtonVariant ref={ref} flex={1} maxW={40} overflow="hidden" {...props}>
         <Stack isInline spacing={2} align="center" justify="center">
-          {isSelected && <Icon name="tick" size={5} />}
+          {isSelected && <Icon name="tick" boxSize={5} />}
           <Text>{children}</Text>
         </Stack>
       </ButtonVariant>
@@ -705,7 +704,7 @@ export function NavButton({type, bg, color, ...props}) {
       overflow="hidden"
       {...props}
     >
-      <PseudoBox
+      <Box
         borderRadius="full"
         cursor="pointer"
         h="full"
@@ -717,7 +716,7 @@ export function NavButton({type, bg, color, ...props}) {
       >
         <Icon
           name="chevron-down"
-          size={5}
+          boxSize={5}
           color={color}
           position="absolute"
           top="50%"
@@ -726,7 +725,7 @@ export function NavButton({type, bg, color, ...props}) {
             isPrev ? '80px' : '-80px'
           }) rotate(${isPrev ? '' : '-'}90deg)`}
         />
-      </PseudoBox>
+      </Box>
     </Box>
   )
 }
@@ -799,7 +798,7 @@ export function Timer(props) {
 }
 
 export function TimerIcon({color, ...props}) {
-  return <Icon name="clock" size={5} color={color} {...props} />
+  return <Icon name="clock" boxSize={5} color={color} {...props} />
 }
 
 export function TimerClock({duration, color}) {
@@ -968,6 +967,7 @@ export function ValidationSoonToast({validationStart}) {
         color="white"
         title={<TimerClock duration={duration} color="white" />}
         description={t('Idena validation will start soon')}
+        duration={null}
       />
     </Snackbar>
   )
@@ -1019,6 +1019,7 @@ export function ValidationRunningToast({currentPeriod, validationStart}) {
         }
         onAction={() => router.push('/validation')}
         actionName={done ? null : t('Validate')}
+        duration={null}
       />
     </Snackbar>
   )
@@ -1034,6 +1035,7 @@ export function AfterLongSessionToast() {
         title={t(
           'Please wait. The network is reaching consensus on validated identities'
         )}
+        duration={null}
       />
     </Snackbar>
   )
@@ -1142,7 +1144,7 @@ export function ReviewValidationDialog({
               px={3}
               py={2}
             >
-              <AlertIcon name="info" color="red.500" size={5} mr={3} />
+              <InfoIcon color="red.500" boxSize={5} mr={3} />
               {t('You may lose rewards. Are you sure?')}
             </Alert>
           )}
@@ -1237,12 +1239,12 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
     <Modal
       isOpen={isOpen}
       isCentered
-      size={664}
+      size="664"
       onClose={onClose}
       initialFocusRef={nextButtonRef}
       {...props}
     >
-      <ModalOverlay bg="xblack.080" />
+      <ModalOverlay />
       <ModalContent
         bg="transparent"
         color="brandGray.500"
@@ -1364,9 +1366,9 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
 
 function BadFlipImage(props) {
   return (
-    <AspectRatioBox ratio={4 / 3} w={132}>
+    <AspectRatio ratio={4 / 3} w={132}>
       <Image {...props} />
-    </AspectRatioBox>
+    </AspectRatio>
   )
 }
 
@@ -1445,12 +1447,12 @@ function BadFlipPartFrame({flipCase, ...props}) {
         bg="red.500"
         borderRadius="full"
         color="white"
-        size={8}
+        boxSize={8}
         position="absolute"
         right={-20}
         bottom={-20}
       >
-        <Icon name="block" size={5} />
+        <Icon name="block" boxSize={5} />
       </Flex>
     </Box>
   )
@@ -1514,7 +1516,7 @@ export function SynchronizingValidationAlert({children, ...props}) {
       {...props}
     >
       <Stack isInline align="center">
-        <AlertIcon name="spinner" size={4} />
+        <Spinner boxSize={4} />
         <Text>{children}</Text>
       </Stack>
     </NotSyncedAlert>

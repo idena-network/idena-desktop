@@ -19,7 +19,7 @@ import {
   IconButton,
   Button,
   useTheme,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useEpochState} from '../../../shared/providers/epoch-context'
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {
@@ -37,6 +37,17 @@ import {
 import {ImageSearchDialog} from './image-search'
 import {colorPickerColor} from '../utils'
 import {useSuccessToast} from '../../../shared/hooks/use-toast'
+import {
+  AddImageIcon,
+  BasketIcon,
+  CropIcon,
+  DrawIcon,
+  EraserIcon,
+  FolderIcon,
+  RedoIcon,
+  SearchIcon,
+  UndoIcon,
+} from '../../../shared/components/icons'
 
 const ImageEditor =
   typeof window !== 'undefined'
@@ -617,7 +628,7 @@ export default function FlipEditor({
   return (
     <Box display={visible ? 'initial' : 'none'}>
       <Flex>
-        <Box>
+        <Box position="relative">
           {(bottomMenuPanel === BottomMenu.Erase ||
             rightMenuPanel === RightMenu.Erase) && (
             <ImageEraseEditor
@@ -698,7 +709,7 @@ export default function FlipEditor({
             <Stack isInline align="center" spacing={3} mt={3}>
               <FlipEditorIcon
                 tooltip={t('Search on web')}
-                icon="search"
+                icon={<SearchIcon />}
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
                     setRightMenuPanel(RightMenu.None)
@@ -720,7 +731,7 @@ export default function FlipEditor({
               <Box ref={leftArrowPortalRef} position="relative">
                 <FlipEditorIcon
                   tooltip={t('Select file')}
-                  icon="folder"
+                  icon={<FolderIcon />}
                   onClick={() => {
                     if (rightMenuPanel === RightMenu.Erase) {
                       setRightMenuPanel(RightMenu.None)
@@ -745,7 +756,7 @@ export default function FlipEditor({
                 <MenuButton>
                   <FlipEditorIcon
                     tooltip={t('Add image')}
-                    icon="add-image"
+                    icon={<AddImageIcon />}
                     onClick={() => {
                       if (rightMenuPanel === RightMenu.Erase) {
                         setRightMenuPanel(RightMenu.None)
@@ -788,13 +799,13 @@ export default function FlipEditor({
               <VDivider h={5} />
 
               <FlipEditorIcon
-                icon="undo"
+                icon={<UndoIcon />}
                 tooltip={`${t('Undo')} (${global.isMac ? 'Cmd+Z' : 'Ctrl+Z'})`}
                 isDisabled={editors[idx] && editors[idx].isEmptyUndoStack()}
                 onClick={handleUndo}
               />
               <FlipEditorIcon
-                icon="redo"
+                icon={<RedoIcon />}
                 tooltip={`${t('Redo')} (${
                   global.isMac ? 'Cmd+Shift+Z' : 'Ctrl+Shift+Z'
                 })`}
@@ -806,7 +817,7 @@ export default function FlipEditor({
 
               <FlipEditorIcon
                 tooltip={t('Crop image')}
-                icon="crop"
+                icon={<CropIcon />}
                 isDisabled={src === null}
                 onClick={() => {
                   editors[idx].startDrawingMode('CROPPER')
@@ -827,7 +838,7 @@ export default function FlipEditor({
                 <FlipEditorIcon
                   tooltip={t('Draw')}
                   isActive={rightMenuPanel === RightMenu.FreeDrawing}
-                  icon="draw"
+                  icon={<DrawIcon />}
                   onClick={() => {
                     setShowArrowHint(false)
                     const editor = editors[idx]
@@ -848,7 +859,7 @@ export default function FlipEditor({
                   activeObjectUrl ? t('Erase') : t('Select image to erase')
                 }
                 isActive={rightMenuPanel === RightMenu.Erase}
-                icon="eraser"
+                icon={<EraserIcon />}
                 onClick={() => {
                   if (rightMenuPanel === RightMenu.Erase) {
                     setRightMenuPanel(RightMenu.None)
@@ -864,7 +875,7 @@ export default function FlipEditor({
 
               <FlipEditorIcon
                 tooltip={t('Clear')}
-                icon="flip-editor-delete"
+                icon={<BasketIcon />}
                 color="red.500"
                 _hover={{color: 'red.500'}}
                 onClick={handleOnClear}
@@ -930,7 +941,7 @@ export default function FlipEditor({
         {rightMenuPanel === RightMenu.FreeDrawing && (
           <Stack align="center" ml={6}>
             <Box>
-              <Menu autoSelect={false}>
+              <Menu autoSelect={false} placement="left-start">
                 <MenuButton
                   bg={`#${brushColor}`}
                   borderWidth={1}
@@ -940,7 +951,7 @@ export default function FlipEditor({
                   h={4}
                   outline="none"
                 />
-                <FlipEditorMenuList placement="left-start" px={2}>
+                <FlipEditorMenuList px={2}>
                   <SimpleGrid columns={4} spacing={1}>
                     {[
                       'ffffff',
@@ -1011,6 +1022,7 @@ export default function FlipEditor({
             />
           </Stack>
         )}
+
         {rightMenuPanel === RightMenu.Erase && (
           <Box ml={6}>
             <Brushes
@@ -1059,10 +1071,14 @@ function Brushes({brush, onChange}) {
           justify="center"
           bg={brush === b ? 'gray.50' : 'none'}
           borderRadius="sm"
-          size={6}
+          boxSize={6}
           onClick={() => onChange(b)}
         >
-          <Box bg="brandGray.500" borderRadius="full" size={rem((i + 1) * 2)} />
+          <Box
+            bg="brandGray.500"
+            borderRadius="full"
+            boxSize={rem((i + 1) * 2)}
+          />
         </Flex>
       ))}
     </Stack>
@@ -1331,9 +1347,9 @@ function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
       bg={isActive ? 'gray.50' : 'unset'}
       color={isActive ? 'brandBlue.500' : 'unset'}
       fontSize={20}
-      size={6}
+      size="6"
       rounded="md"
-      p="1/2"
+      p="0.5"
       _hover={{color: isDisabled ? 'inherit' : 'brandBlue.500'}}
       _active={{bg: 'transparent'}}
       {...props}
@@ -1341,11 +1357,9 @@ function FlipEditorIcon({tooltip, isActive, isDisabled, mr, ...props}) {
   )
   return (
     <Box mr={mr}>
-      {isDisabled ? (
-        <Tooltip content={tooltip}>{icon}</Tooltip>
-      ) : (
-        <Tooltip label={tooltip}>{icon}</Tooltip>
-      )}
+      <Tooltip label={tooltip} shouldWrapChildren>
+        {icon}
+      </Tooltip>
     </Box>
   )
 }
@@ -1386,14 +1400,14 @@ function FlipEditorMenuItem({children, ...props}) {
 }
 
 function FlipEditorMenuItemIcon(props) {
-  return <Icon size={5} color="blue.500" {...props} />
+  return <Icon boxSize={5} color="blue.500" {...props} />
 }
 
 function DrawingToolbarButton(props) {
   return (
     <Button
       variant="link"
-      variantColor="blue"
+      colorScheme="blue"
       fontWeight={500}
       _hover={null}
       _active={null}

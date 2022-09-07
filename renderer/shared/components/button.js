@@ -3,12 +3,13 @@ import React from 'react'
 import {
   Button as ChakraButton,
   IconButton as ChakraIconButton,
-  PseudoBox,
   Icon,
   Stack,
   Text,
-} from '@chakra-ui/core'
+  Box,
+} from '@chakra-ui/react'
 import {rem} from '../theme'
+import {InfoIcon} from './icons'
 
 const BaseButton = React.forwardRef((props, ref) => (
   <ChakraButton
@@ -28,13 +29,13 @@ const BaseButton = React.forwardRef((props, ref) => (
 BaseButton.displayName = 'BaseButton'
 
 export const PrimaryButton = React.forwardRef((props, ref) => (
-  <BaseButton ref={ref} variantColor="brandBlue" color="white" {...props} />
+  <BaseButton ref={ref} colorScheme="brandBlue" color="white" {...props} />
 ))
 PrimaryButton.displayName = 'PrimaryButton'
 
 // eslint-disable-next-line react/display-name
 export const SecondaryButton = React.forwardRef((props, ref) => (
-  <PseudoBox
+  <Box
     ref={ref}
     as="button"
     bg="brandBlue.10"
@@ -66,33 +67,25 @@ export const SecondaryButton = React.forwardRef((props, ref) => (
 ))
 
 // eslint-disable-next-line react/display-name
-export const IconButton2 = React.forwardRef(
-  ({icon, children, ...props}, ref) => (
-    <ChakraButton
-      ref={ref}
-      variant="ghost"
-      variantColor="blue"
-      fontWeight={500}
-      h={8}
-      px={2}
-      py="3/2"
-      justifyContent="flex-start"
-      {...props}
-    >
-      <Stack isInline spacing={2} align="center" w="full">
-        {typeof icon === 'string' ? <Icon name={icon} size={5} mr={2} /> : icon}
-        <Text as="span" isTruncated>
-          {children}
-        </Text>
-      </Stack>
-    </ChakraButton>
-  )
-)
+export const IconButton2 = React.forwardRef(({icon, ...props}, ref) => (
+  <ChakraButton
+    ref={ref}
+    variant="ghost"
+    colorScheme="blue"
+    fontWeight={500}
+    alignItems="center"
+    justifyContent="flex-start"
+    h="8"
+    px="2"
+    leftIcon={React.cloneElement(icon, {boxSize: '5'})}
+    {...props}
+  />
+))
 
 export const InfoButton = React.forwardRef((props, ref) => (
   <ChakraIconButton
     ref={ref}
-    icon="info"
+    icon={<InfoIcon />}
     color="brandBlue.500"
     bg="unset"
     fontSize={rem(20)}

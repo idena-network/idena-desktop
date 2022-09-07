@@ -12,7 +12,7 @@ import {
   Text,
   useClipboard,
   useToast,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import QrCode from 'qrcode.react'
 import {useMachine} from '@xstate/react'
@@ -39,6 +39,7 @@ import {useNodeDispatch} from '../../shared/providers/node-context'
 import {importKey} from '../../shared/api/dna'
 import {useSettingsDispatch} from '../../shared/providers/settings-context'
 import {AVAILABLE_LANGS, isoLangs} from '../../i18n'
+import {EyeIcon, EyeOffIcon} from '../../shared/components/icons'
 
 export function ExportPrivateKeyDialog({onClose, ...props}) {
   const {t} = useTranslation()
@@ -94,7 +95,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
 
   return (
     <Dialog
-      size={400}
+      size="mdx"
       title={t('Export private key')}
       onClose={onClose}
       {...props}
@@ -118,7 +119,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
                 />
                 <InputRightElement h="full">
                   <IconButton
-                    icon={revealPassword ? 'eye-off' : 'eye'}
+                    icon={revealPassword ? <EyeOffIcon /> : <EyeIcon />}
                     size="xs"
                     bg={revealPassword ? 'gray.300' : 'white'}
                     fontSize={20}
@@ -149,7 +150,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
                   <FormLabel>{t('Encrypted private key')}</FormLabel>
                   <Button
                     variant="link"
-                    variantColor="blue"
+                    colorScheme="blue"
                     fontWeight={500}
                     _hover={null}
                     _active={null}
@@ -281,7 +282,7 @@ export function ImportPrivateKeyDialog(props) {
                 />
                 <InputRightElement h="full">
                   <IconButton
-                    icon={revealPassword ? 'eye-off' : 'eye'}
+                    icon={revealPassword ? <EyeOffIcon /> : <EyeIcon />}
                     size="xs"
                     bg={revealPassword ? 'gray.300' : 'white'}
                     w={8}

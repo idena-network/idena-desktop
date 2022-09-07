@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogBody,
   AlertDialogFooter,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useMachine} from '@xstate/react'
 import semver from 'semver'
 import {assign, createMachine} from 'xstate'
@@ -463,7 +463,7 @@ function SyncingApp() {
       <Stack spacing={10} w="md">
         {Boolean(address) && (
           <Stack isInline spacing={6} align="center" py={2}>
-            <Avatar address={address} size={20} />
+            <Avatar address={address} boxSize={20} />
             <Heading fontSize="lg" fontWeight={500} wordBreak="break-all">
               {address}
             </Heading>
@@ -623,7 +623,7 @@ function OfflineApp() {
       {isDownloadingBuiltinNode && (
         <Stack spacing={3} w="md">
           <Stack isInline spacing={4} align="center">
-            <Image src="/static/idena_white.svg" alt="logo" size={12} />
+            <Image src="/static/idena_white.svg" alt="logo" boxSize={12} />
             <Stack spacing={1} flex={1}>
               <Heading fontSize="lg" fontWeight={500}>
                 {t('Downloading Idena Node...')}
@@ -788,7 +788,7 @@ function ForkScreen({
                 <Image
                   src="/static/idena_white.svg"
                   alt={t('Idena logo')}
-                  size={20}
+                  boxSize={20}
                 />
                 <Stack spacing={1}>
                   <Heading fontSize="lg" fontWeight={500} color="white">
@@ -865,7 +865,7 @@ function ForkScreen({
                 }}
               >
                 <Stack isInline align="center">
-                  <Icon name="github" size={4} color="blue.500" />
+                  <Icon name="github" boxSize={4} color="blue.500" />
                   <Text>{t('Check on Github')}</Text>
                 </Stack>
               </SecondaryButton>
@@ -894,7 +894,11 @@ function ForkScreen({
                 }}
               >
                 {t('Activate mining status')}
-                <Icon name="chevron-down" size={4} transform="rotate(-90deg)" />
+                <Icon
+                  name="chevron-down"
+                  boxSize={4}
+                  transform="rotate(-90deg)"
+                />
               </PrimaryButton>
             </Box>
           )}
@@ -975,7 +979,7 @@ function ForkScreen({
             {t('Cancel')}
           </SecondaryButton>
           <PrimaryButton
-            variantColor="red"
+            colorScheme="red"
             onClick={() => {
               onReject()
               onCloseRejectDialog()

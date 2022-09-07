@@ -5,22 +5,22 @@ import {
   Flex,
   FormControl,
   Heading,
-  Icon,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
   Stack,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {
   Drawer,
   DrawerHeader,
   FormLabel,
 } from '../../shared/components/components'
+import {MoreIcon} from '../../shared/components/icons'
 
 export function WalletCardMenu({children, ...props}) {
   return (
-    <Menu autoSelect={false} {...props}>
+    <Menu autoSelect={false} placement="bottom-end" {...props}>
       <MenuButton
         rounded="md"
         p="3/2"
@@ -31,11 +31,10 @@ export function WalletCardMenu({children, ...props}) {
         zIndex="dropdown"
       >
         <Flex align="center" justify="center" w={3}>
-          <Icon name="more" size={5} />
+          <MoreIcon boxSize="5" />
         </Flex>
       </MenuButton>
       <MenuList
-        placement="bottom-end"
         border="none"
         shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
         rounded="lg"
@@ -70,10 +69,6 @@ export function WalletCardMenuItem({children, ...props}) {
   )
 }
 
-export function WalletCardMenuItemIcon(props) {
-  return <Icon size={5} color="blue.500" {...props} />
-}
-
 export function WalletDrawer({title, icon, color, children, ...props}) {
   return (
     <Drawer {...props} closeOnOverlayClick={false}>
@@ -100,26 +95,17 @@ export function WalletDrawerHeader({title, children, ...props}) {
   )
 }
 
-export function WalletDrawerHeaderIconBox({icon, color, children, ...props}) {
+export function WalletDrawerHeaderIconBox({colorScheme, ...props}) {
   return (
     <Flex
       align="center"
       justify="center"
-      bg={`${color}.012`}
+      bg={`${colorScheme}.012`}
       borderRadius="xl"
-      size={12}
+      boxSize={12}
       {...props}
-    >
-      {typeof icon === 'string' && (
-        <WalletDrawerHeaderIcon name={icon} color={color} />
-      )}
-      {children}
-    </Flex>
+    />
   )
-}
-
-export function WalletDrawerHeaderIcon({color, ...props}) {
-  return <Icon size={6} color={`${color}.500`} {...props} />
 }
 
 export function WalletDrawerForm(props) {

@@ -2,13 +2,12 @@ import React from 'react'
 import {
   Stack,
   Text,
-  Icon,
   useDisclosure,
   PopoverTrigger,
   Box,
   Heading,
   Button,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useRouter} from 'next/router'
 import {useIdentityState} from '../shared/providers/identity-context'
@@ -74,6 +73,17 @@ import {useScroll} from '../shared/hooks/use-scroll'
 import {ValidationReportSummary} from '../screens/validation-report/components'
 import {useIdenaBot, useStakingApy} from '../screens/profile/hooks'
 import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
+import {
+  AddUserIcon,
+  ChevronRightIcon,
+  DeleteIcon,
+  InfoIcon,
+  OracleIcon,
+  PhotoIcon,
+  PooIcon,
+  PrivateKeyIcon,
+  TelegramIcon,
+} from '../shared/components/icons'
 
 export default function ProfilePage() {
   const {
@@ -324,7 +334,9 @@ export default function ProfilePage() {
                                     {t(`Join the official Idena public Telegram group and follow instructions in the
                 pinned message.`)}
                                   </Text>
-                                  <OnboardingPopoverContentIconRow icon="telegram">
+                                  <OnboardingPopoverContentIconRow
+                                    icon={<TelegramIcon />}
+                                  >
                                     <Box>
                                       <PrimaryButton
                                         variant="unstyled"
@@ -388,11 +400,7 @@ export default function ProfilePage() {
                               fontWeight={500}
                             >
                               <Text as="span">{t('Send')}</Text>
-                              <Icon
-                                name="chevron-down"
-                                size={4}
-                                transform="rotate(-90deg)"
-                              />
+                              <ChevronRightIcon boxSize={4} />
                             </Stack>
                           </TextLink>
                         </UserStatValue>
@@ -435,11 +443,7 @@ export default function ProfilePage() {
                                   onClick={replenishStakeDisclosure.onOpen}
                                 >
                                   {t('Add stake')}
-                                  <Icon
-                                    name="chevron-down"
-                                    transform="rotate(-90deg)"
-                                    size="4"
-                                  />
+                                  <ChevronRightIcon boxSize="4" />
                                 </Button>
                               </UserStatValue>
                             </UserStat>
@@ -480,12 +484,11 @@ export default function ProfilePage() {
                                       )}
                                       w="130px"
                                     >
-                                      <Icon
-                                        name="info"
-                                        size={4}
+                                      <InfoIcon
+                                        boxSize="4"
                                         color="red.500"
-                                        ml={1}
-                                        mt="-2px"
+                                        ml="1"
+                                        mt="-0.5"
                                       />
                                     </Tooltip>
                                   )}
@@ -558,14 +561,14 @@ export default function ProfilePage() {
                   <Stack spacing={1} align="flex-start">
                     <IconLink
                       href="/oracles/new"
-                      icon={<Icon name="oracle" size={5} />}
+                      icon={<OracleIcon boxSize={5} />}
                       maxW={200}
                     >
                       {t('New voting')}
                     </IconLink>
                     <IconLink
                       href="/flips/new"
-                      icon={<Icon name="photo" size={5} />}
+                      icon={<PhotoIcon boxSize={5} />}
                       isDisabled={!canSubmitFlip}
                       maxW={200}
                     >
@@ -575,23 +578,27 @@ export default function ProfilePage() {
                       href="/contacts?new"
                       isDisabled={!canInvite}
                       maxW={200}
-                      icon={<Icon name="add-user" size={5} />}
+                      icon={<AddUserIcon boxSize={5} />}
                     >
                       {t('Invite')}
                     </IconLink>
                     <IconButton2
-                      icon="poo"
+                      icon={<PooIcon />}
                       maxW={200}
                       onClick={onOpenSpoilForm}
                     >
                       {t('Spoil invite')}
                     </IconButton2>
-                    <IconButton2 icon="key" maxW={200} onClick={onOpenExportPk}>
+                    <IconButton2
+                      icon={<PrivateKeyIcon />}
+                      maxW={200}
+                      onClick={onOpenExportPk}
+                    >
                       {t('Backup private key')}
                     </IconButton2>
                     <IconButton2
                       isDisabled={!canTerminate}
-                      icon="delete"
+                      icon={<DeleteIcon />}
                       maxW={200}
                       onClick={onOpenKillForm}
                     >

@@ -2,9 +2,10 @@
 import React from 'react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {FlipFilter, FlipFilterOption} from '../flips/components'
+import {HStack} from '@chakra-ui/react'
 import Layout from '../../shared/components/layout'
 import {Page, PageTitle} from '../../shared/components/components'
+import {SettingsNavLink} from './components'
 
 export default function SettingsLayout({children}) {
   const router = useRouter()
@@ -14,17 +15,15 @@ export default function SettingsLayout({children}) {
     <Layout skipHardForkScreen>
       <Page>
         <PageTitle>{t('Settings')}</PageTitle>
-        <FlipFilter value={router.pathname} onChange={router.push}>
-          <FlipFilterOption value="/settings/general">
+        <HStack value={router.pathname} onChange={router.push}>
+          <SettingsNavLink href="/settings/general">
             {t('General')}
-          </FlipFilterOption>
-          <FlipFilterOption value="/settings/node">
-            {t('Node')}
-          </FlipFilterOption>
-          <FlipFilterOption value="/settings/advanced">
+          </SettingsNavLink>
+          <SettingsNavLink href="/settings/node">{t('Node')}</SettingsNavLink>
+          <SettingsNavLink href="/settings/advanced">
             {t('Advanced')}
-          </FlipFilterOption>
-        </FlipFilter>
+          </SettingsNavLink>
+        </HStack>
         {children}
       </Page>
     </Layout>

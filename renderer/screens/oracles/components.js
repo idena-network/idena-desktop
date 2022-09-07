@@ -2,7 +2,6 @@
 import React from 'react'
 import {
   Flex,
-  Icon,
   Heading,
   Stack,
   FormControl,
@@ -17,8 +16,9 @@ import {
   Divider,
   Button,
   IconButton,
-  RadioButtonGroup,
-} from '@chakra-ui/core'
+  HStack,
+  RadioGroup,
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {
   DrawerHeader,
@@ -30,10 +30,11 @@ import {
   Tooltip,
 } from '../../shared/components/components'
 import {clampValue} from '../../shared/utils/utils'
+import {ArrowUpIcon, CrossSmallIcon} from '../../shared/components/icons'
 
 export function OracleDrawerHeader({
-  icon,
-  variantColor = 'blue',
+  icon: DrawerIcon,
+  colorScheme = 'blue',
   children,
   ...props
 }) {
@@ -42,12 +43,12 @@ export function OracleDrawerHeader({
       <Flex
         align="center"
         justify="center"
-        bg={`${variantColor}.012`}
+        bg={`${colorScheme}.012`}
         h={12}
         w={12}
         rounded="xl"
       >
-        <Icon name={icon} w={6} h={6} color={`${variantColor}.500`} />
+        <DrawerIcon w="6" h="6" color={`${colorScheme}.500`} />
       </Flex>
       <Heading
         color="brandGray.500"
@@ -293,7 +294,7 @@ export function VotingOptionInput({
           />
         </Stack>
         <IconButton
-          icon="cross-small"
+          icon={<CrossSmallIcon />}
           isDisabled={isDisabled}
           bg="unset"
           color="muted"
@@ -344,8 +345,8 @@ export function VotingSkeleton(props) {
   const {colors} = useTheme()
   return (
     <FullSkeleton
-      colorStart={colors.gray[50]}
-      colorEnd={colors.gray[300]}
+      startColor={colors.gray[50]}
+      endColor={colors.gray[300]}
       {...props}
     />
   )
@@ -432,9 +433,13 @@ export function PresetFormControl({tooltip, children, ...props}) {
 }
 
 // eslint-disable-next-line react/display-name
-export const PresetFormControlOptionList = React.forwardRef((props, ref) => (
-  <RadioButtonGroup ref={ref} isInline {...props} />
-))
+export const PresetFormControlOptionList = React.forwardRef(
+  ({children, ...props}, ref) => (
+    <RadioGroup ref={ref} isInline {...props}>
+      <HStack>{children}</HStack>
+    </RadioGroup>
+  )
+)
 
 // eslint-disable-next-line react/display-name
 export const PresetFormControlOption = React.forwardRef(
@@ -484,7 +489,7 @@ export const OutlineButton = React.forwardRef((props, ref) => (
 ))
 OutlineButton.displayName = 'OutlineButton'
 
-export function ScrollToTop({scrollableRef, children, ...props}) {
+export function ScrollToTop({scrollableRef, ...props}) {
   const [opacity, setOpacity] = React.useState(0)
   const lastOpacity = React.useRef(Number.EPSILON)
 
@@ -529,6 +534,7 @@ export function ScrollToTop({scrollableRef, children, ...props}) {
       p={4}
       py={0}
       opacity={opacity}
+      leftIcon={<ArrowUpIcon boxSize="5" />}
       _focus={{
         boxShadow: 'md',
       }}
@@ -536,12 +542,7 @@ export function ScrollToTop({scrollableRef, children, ...props}) {
         scrollableElement.scrollTo({top: 0, left: 0, behavior: 'smooth'})
       }}
       {...props}
-    >
-      <Stack isInline spacing={1} align="center">
-        <Icon name="arrow-up" size={5} />
-        <Text as="span">{children}</Text>
-      </Stack>
-    </Button>
+    />
   )
 }
 

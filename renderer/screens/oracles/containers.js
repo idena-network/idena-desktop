@@ -33,7 +33,7 @@ import {
   FormControl,
   RadioGroup,
   Radio,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import dayjs from 'dayjs'
 import {
   toLocaleDna,
@@ -93,6 +93,16 @@ import {
   sumAccountableVotes,
   areSameCaseInsensitive,
 } from './utils'
+import {
+  AddFundIcon,
+  ChevronDownIcon,
+  InfoIcon,
+  OracleIcon,
+  SendOutIcon,
+  StarIcon,
+  UserIcon,
+  UserTickIcon,
+} from '../../shared/components/icons'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -227,7 +237,7 @@ export function VotingCard({votingRef, ...props}) {
           px={3}
           mb={6}
         >
-          <Icon name="star" size={5} color="white" />
+          <StarIcon boxSize="5" color="white" />
           <Text fontWeight={500}>
             {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
             {toDna(isClosed ? totalReward : estimatedTotalReward)}
@@ -306,26 +316,22 @@ export function VotingCard({votingRef, ...props}) {
                 borderLeft="1px"
               />
               <Stack isInline spacing={2} align="center">
-                <Icon
-                  name={
-                    eitherIdleState(
-                      VotingStatus.Archived,
-                      VotingStatus.Terminated
-                    ) &&
-                    hasWinner({
-                      votes,
-                      votesCount: voteProofsCount,
-                      winnerThreshold,
-                      quorum,
-                      committeeSize,
-                    })
-                      ? 'user-tick'
-                      : 'user'
-                  }
-                  color="muted"
-                  w={4}
-                  h={4}
-                />
+                {eitherIdleState(
+                  VotingStatus.Archived,
+                  VotingStatus.Terminated
+                ) &&
+                hasWinner({
+                  votes,
+                  votesCount: voteProofsCount,
+                  winnerThreshold,
+                  quorum,
+                  committeeSize,
+                }) ? (
+                  <UserTickIcon boxSize="4" color="muted" />
+                ) : (
+                  <UserIcon boxSize="4" color="muted" />
+                )}
+
                 <Text as="span">
                   {t('{{count}} votes', {
                     count: eitherIdleState(
@@ -427,7 +433,9 @@ export function AddFundDrawer({
 
   return (
     <Drawer {...props}>
-      <OracleDrawerHeader icon="add-fund">{t('Add fund')}</OracleDrawerHeader>
+      <OracleDrawerHeader icon={AddFundIcon}>
+        {t('Add fund')}
+      </OracleDrawerHeader>
       <Box
         as="form"
         onSubmit={e => {
@@ -494,7 +502,7 @@ export function VoteDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="send-out" variantColor="blue">
+      <OracleDrawerHeader icon={SendOutIcon} colorScheme="blue">
         {t('Voting')}: {option}
       </OracleDrawerHeader>
       <Box flex={1} overflowY="auto" mx={-30} px={30}>
@@ -584,7 +592,7 @@ export function ReviewVotingDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={OracleIcon}>
         {t('Create Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -642,6 +650,7 @@ export function ReviewVotingDrawer({
                 borderBottom="dotted 1px"
                 borderBottomColor="muted"
                 cursor="help"
+                w="fit-content"
               >
                 {t('Stake')}
               </Text>
@@ -649,7 +658,7 @@ export function ReviewVotingDrawer({
           </FormLabel>
           <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
         </FormControl>
-        <OracleFormControl>
+        <FormControl>
           <OracleFormHelper
             label={t('Secret voting')}
             value={t('About {{duration}}', {
@@ -663,11 +672,11 @@ export function ReviewVotingDrawer({
             })}
           />
           <OracleFormHelper
-            mt={4}
+            mt="4"
             label={t('Total amount')}
             value={toDna(sendAmount + minStake)}
           />
-        </OracleFormControl>
+        </FormControl>
         <PrimaryButton
           isLoading={isLoading}
           loadingText={t('Publishing')}
@@ -705,9 +714,9 @@ export function VotingInspector({onTerminate, ...contract}) {
     <>
       <Button
         bg="blue.50"
-        rightIcon="info"
+        rightIcon={<InfoIcon />}
         variant="ghost"
-        variantColor="blue"
+        colorScheme="blue"
         onClick={onOpen}
       >
         Open inspector
@@ -729,14 +738,14 @@ export function VotingInspector({onTerminate, ...contract}) {
                     Contract
                   </Heading>
                   <IconButton
-                    icon="chevron-down"
-                    size="sm"
+                    icon={<ChevronDownIcon />}
+                    boxSize="sm"
                     fontSize="lg"
                     ml={1}
                     onClick={onToggleContract}
                   />
                 </Flex>
-                <Collapse isOpen={isOpenContract}>
+                <Collapse in={isOpenContract}>
                   <Debug>{contract}</Debug>
                 </Collapse>
                 <Box mt={2}>
@@ -879,7 +888,7 @@ export function VotingInspector({onTerminate, ...contract}) {
                   </Stack>
                 </Box>
                 <Box ml="auto" mt={6}>
-                  <PrimaryButton variantColor="red" onClick={onTerminate}>
+                  <PrimaryButton colorScheme="red" onClick={onTerminate}>
                     Terminate contact
                   </PrimaryButton>
                 </Box>
@@ -953,7 +962,7 @@ export const VotingFilter = React.forwardRef(
     >
       <Stack isInline spacing={1}>
         {isChecked && (
-          <Icon name="tick" size={4} animation="0.3s both zoomIn" />
+          <Icon name="tick" boxSize={4} animation="0.3s both zoomIn" />
         )}
         <Text>{children}</Text>
       </Stack>
@@ -1076,7 +1085,7 @@ function VotingResultBar({
             w={4}
             h={4}
           >
-            {isMine && <Icon name="ok" size={3} />}
+            {isMine && <Icon name="ok" boxSize={3} />}
           </Flex>
         )}
         <Text isTruncated maxW="sm" title={label.length > 50 ? label : ''}>
@@ -1124,7 +1133,7 @@ export function LaunchDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={OracleIcon}>
         {t('Launch Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1196,7 +1205,7 @@ export function ProlongDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={OracleIcon}>
         {t('Prolong Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1486,7 +1495,7 @@ export function FinishDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={OracleIcon}>
         {isVotingFailed ? t('Claim refunds') : t('Claim rewards')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1541,7 +1550,7 @@ export function TerminateDrawer({
 
   return (
     <Drawer isCloseable={!isLoading} {...props}>
-      <OracleDrawerHeader icon="oracle">
+      <OracleDrawerHeader icon={OracleIcon}>
         {t('Terminate Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
@@ -1604,7 +1613,7 @@ export function Linkify({onClick, children}) {
         part.startsWith('http') ? (
           <Button
             variant="link"
-            variantColor="brandBlue"
+            colorScheme="brandBlue"
             fontWeight={500}
             _hover={{background: 'transparent'}}
             _focus={{
@@ -1630,14 +1639,14 @@ export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
   const [preset, setPreset] = React.useState()
 
   return (
-    <Dialog size={416} onClose={onCancel} {...props}>
+    <Dialog size="416" onClose={onCancel} {...props}>
       <DialogHeader mb={4}>{t('New Oracle voting')}</DialogHeader>
       <DialogBody>
         <Stack>
           <Text color="muted" fontSize="sm">
             {t('Choose an option to vote')}
           </Text>
-          <RadioGroup spacing={0} onChange={e => setPreset(e.target.value)}>
+          <RadioGroup spacing={0} onChange={setPreset}>
             <Radio value="fact" alignItems="baseline" borderColor="gray.100">
               <Stack spacing={1} pt={2} pb={3}>
                 <Text>{t('Fact certification')}</Text>

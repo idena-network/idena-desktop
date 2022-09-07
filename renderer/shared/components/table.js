@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {Box, useTheme} from '@chakra-ui/core'
+import {Box, useTheme} from '@chakra-ui/react'
 import {rem} from '../theme'
 
 export function Table({children, ...props}) {

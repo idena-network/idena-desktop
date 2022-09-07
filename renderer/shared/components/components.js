@@ -18,7 +18,6 @@ import {
   Alert,
   AlertTitle,
   AlertDescription,
-  AlertIcon,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -34,16 +33,20 @@ import {
   Checkbox as ChakraCheckbox,
   Divider,
   Text,
-  Icon,
   InputGroup,
   InputRightAddon,
   Link,
   Progress as ChakraProgress,
   Heading,
   FormControl,
-} from '@chakra-ui/core'
+  LinkBox,
+  LinkOverlay,
+  HStack,
+  keyframes,
+} from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
+import {ChevronRightIcon, GtranslateIcon, InfoIcon} from './icons'
 
 export const Page = React.forwardRef(function Page(props, ref) {
   return (
@@ -237,7 +240,7 @@ export function ChainedInputAddon({isDisabled, bg = 'white', ...props}) {
 export function Avatar({address, ...props}) {
   return (
     <Image
-      size={rem(80)}
+      boxSize={rem(80)}
       src={`https://robohash.idena.io/${address?.toLowerCase()}`}
       bg="gray.50"
       rounded="lg"
@@ -263,14 +266,19 @@ export function Tooltip(props) {
   )
 }
 
+const escape = keyframes`
+  from { right: 0; }
+  to { right: 100%; }
+`
+
 export function Toast({
   title,
   description,
-  icon = 'info',
   status = 'info',
   actionContent,
   actionColor = status === 'error' ? 'red.500' : 'brandBlue.500',
   color,
+  duration = 5000,
   onAction,
   ...props
 }) {
@@ -288,12 +296,13 @@ export function Toast({
       mb={5}
       minH={rem(44)}
       rounded="lg"
+      w="fit-content"
       {...props}
     >
-      <AlertIcon
-        name={icon}
-        size={5}
+      <InfoIcon
+        boxSize="5"
         color={color || (status === 'error' ? 'red.500' : 'blue.500')}
+        mr="2"
       />
       <Flex direction="column" align="flex-start" maxW="sm">
         <AlertTitle fontWeight={500} lineHeight="base">
@@ -325,6 +334,18 @@ export function Toast({
           {actionContent}
         </Button>
       )}
+      {duration !== null && (
+        <Box
+          bg="gray.300"
+          height="3px"
+          roundedBottom={2}
+          pos="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          animation={`${escape} ${duration}ms linear forwards`}
+        />
+      )}
     </Alert>
   )
 }
@@ -338,7 +359,7 @@ export function Dialog({
 }) {
   return (
     <Modal isCentered size="sm" {...props}>
-      <ModalOverlay bg="xblack.080" />
+      <ModalOverlay />
       <ModalContent
         bg="white"
         color="brandGray.500"
@@ -388,7 +409,7 @@ export function SuccessAlert({children, ...props}) {
       py={2}
       {...props}
     >
-      <AlertIcon name="info" color="green.500" size={5} mr={3} />
+      <InfoIcon color="green.500" boxSize="5" mr="3" />
       {children}
     </Alert>
   )
@@ -410,7 +431,7 @@ export function FailAlert({children, ...props}) {
       py={2}
       {...props}
     >
-      <AlertIcon name="info" color="red.500" size={5} mr={3} />
+      <InfoIcon color="red.500" boxSize="5" mr="3" />
       {children}
     </Alert>
   )
@@ -444,7 +465,7 @@ export function ExternalLink({
   return (
     <Button
       variant="link"
-      variantColor="brandBlue"
+      colorScheme="brandBlue"
       fontWeight={500}
       alignSelf="flex-start"
       _hover={{background: 'transparent'}}
@@ -459,11 +480,7 @@ export function ExternalLink({
       <Text as="span" width={width} isTruncated={isTruncated}>
         {children || href}
       </Text>
-      <Icon
-        name="chevron-down"
-        size={4}
-        transform="translateY(1px) rotate(-90deg)"
-      />
+      <ChevronRightIcon boxSize="4" />
     </Button>
   )
 }
@@ -477,7 +494,7 @@ export function GoogleTranslateButton({
 }) {
   return (
     <IconButton2
-      icon="gtranslate"
+      icon={<GtranslateIcon />}
       _hover={{background: 'transparent'}}
       onClick={() => {
         global.openExternal(
@@ -520,29 +537,27 @@ export function SmallText(props) {
 // eslint-disable-next-line react/display-name
 export const IconLink = React.forwardRef(
   ({href, icon, children, ...props}, ref) => (
-    <NextLink ref={ref} href={href} passHref>
-      <Link
-        href={href}
-        color="brandBlue.500"
-        rounded="md"
-        fontWeight={500}
-        display="inline-block"
-        h={8}
-        px={2}
-        py="3/2"
-        _hover={{
-          bg: 'blue.50',
-        }}
-        {...props}
-      >
-        <Stack spacing={2} isInline align="center" w="full">
-          {typeof icon === 'string' ? <Icon name={icon} size={4} /> : icon}
-          <Text as="span" isTruncated>
-            {children}
-          </Text>
-        </Stack>
-      </Link>
-    </NextLink>
+    <LinkBox
+      as={HStack}
+      spacing="2"
+      alignItems="center"
+      color="brandBlue.500"
+      borderRadius="md"
+      fontWeight={500}
+      display="inline-block"
+      h="8"
+      px="2"
+      py="1.5"
+      _hover={{
+        bg: 'blue.50',
+      }}
+      {...props}
+    >
+      {icon}
+      <NextLink ref={ref} href={href} passHref>
+        <LinkOverlay>{children}</LinkOverlay>
+      </NextLink>
+    </LinkBox>
   )
 )
 

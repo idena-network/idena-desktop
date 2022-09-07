@@ -8,7 +8,7 @@ import {
   Stack,
   Text,
   useTheme,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import router from 'next/router'
 import {useTranslation} from 'react-i18next'
 import {UserInlineCard} from '../screens/profile/components'
@@ -36,6 +36,7 @@ import {
   SuccessAlert,
   TextLink,
 } from '../shared/components/components'
+import {SendOutIcon, TimerIcon} from '../shared/components/icons'
 import Layout from '../shared/components/layout'
 import {Table, TableHeaderCol} from '../shared/components/table'
 import {useEpochState} from '../shared/providers/epoch-context'
@@ -103,8 +104,8 @@ export default function ValidationReport() {
           <Box>
             <Skeleton
               isLoaded={!isLoading}
-              colorStart={colors.gray[50]}
-              colorEnd={colors.gray[300]}
+              startColor={colors.gray[50]}
+              endColor={colors.gray[300]}
               alignSelf="start"
             >
               {isValidated ? (
@@ -148,13 +149,13 @@ export default function ValidationReport() {
                           bg={colors.brandGray['005']}
                         />
                       )}
-                      <ValidationReportGaugeIcon icon="timer" />
+                      <ValidationReportGaugeIcon icon={<TimerIcon />} />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
                       <Skeleton
                         isLoaded={!isLoading}
-                        colorStart={colors.brandGray['005']}
-                        colorEnd={colors.gray[300]}
+                        startColor={colors.brandGray['005']}
+                        endColor={colors.gray[300]}
                       >
                         {isValidated ? (
                           <ValidationReportGaugeStatValue>
@@ -168,8 +169,8 @@ export default function ValidationReport() {
                       </Skeleton>
                       <Skeleton
                         isLoaded={!isLoading}
-                        colorStart={colors.brandGray['005']}
-                        colorEnd={colors.gray[300]}
+                        startColor={colors.brandGray['005']}
+                        endColor={colors.gray[300]}
                       >
                         <ValidationReportGaugeStatLabel>
                           {isValidated && t('Total score')}
@@ -190,8 +191,8 @@ export default function ValidationReport() {
                   <Flex justify="space-between">
                     <Skeleton
                       isLoaded={!isLoading}
-                      colorStart={colors.brandGray['005']}
-                      colorEnd={colors.gray[300]}
+                      startColor={colors.brandGray['005']}
+                      endColor={colors.gray[300]}
                     >
                       <ValidationReportStat
                         label={t('Short session')}
@@ -210,8 +211,8 @@ export default function ValidationReport() {
                   <Flex justify="space-between">
                     <Skeleton
                       isLoaded={!isLoading}
-                      colorStart={colors.brandGray['005']}
-                      colorEnd={colors.gray[300]}
+                      startColor={colors.brandGray['005']}
+                      endColor={colors.gray[300]}
                     >
                       <ValidationReportStat
                         label={t('Long session')}
@@ -255,13 +256,13 @@ export default function ValidationReport() {
                           bg={colors.brandGray['005']}
                         />
                       )}
-                      <ValidationReportGaugeIcon icon="send-out" />
+                      <ValidationReportGaugeIcon icon={<SendOutIcon />} />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
                       <Skeleton
                         isLoaded={!isLoading}
-                        colorStart={colors.brandGray['005']}
-                        colorEnd={colors.gray[300]}
+                        startColor={colors.brandGray['005']}
+                        endColor={colors.gray[300]}
                       >
                         {validationResult === ValidationResult.Success ? (
                           <ValidationReportGaugeStatValue>
@@ -281,8 +282,8 @@ export default function ValidationReport() {
                 </Box>
                 <Skeleton
                   isLoaded={!isLoading}
-                  colorStart={colors.brandGray['005']}
-                  colorEnd={colors.gray[300]}
+                  startColor={colors.brandGray['005']}
+                  endColor={colors.gray[300]}
                 >
                   <Stack spacing={4}>
                     <Flex justify="space-between">

@@ -20,7 +20,10 @@ import {
   PopoverArrow,
   PopoverBody,
   Link,
-} from '@chakra-ui/core'
+  LinkOverlay,
+  LinkBox,
+  Image,
+} from '@chakra-ui/react'
 import {useIdentityState} from '../providers/identity-context'
 import {useEpochState} from '../providers/epoch-context'
 import {useChainState} from '../providers/chain-context'
@@ -49,6 +52,18 @@ import {
 import {ExternalLink, Tooltip} from './components'
 import {useTimingState} from '../providers/timing-context'
 import {TodoVotingCountBadge} from '../../screens/oracles/components'
+import {
+  ContactsIcon,
+  GalleryIcon,
+  MoreIcon,
+  OracleIcon,
+  ProfileIcon,
+  SettingsIcon,
+  SyncIcon,
+  TelegramIcon,
+  TimerIcon,
+  WalletIcon,
+} from './icons'
 
 export default function Sidebar({
   isForkAvailable,
@@ -130,7 +145,7 @@ function Status() {
           <Popover trigger="hover" usePortal>
             <PopoverTrigger>
               <Stack isInline align="center" spacing={1} color="red.500">
-                <Icon name="clock" size={5} />
+                <Icon name="clock" boxSize={5} />
                 <Text fontWeight={500}>{t('Wrong time')}</Text>
               </Stack>
             </PopoverTrigger>
@@ -232,10 +247,10 @@ function ConnectionBandwidth() {
 
 function Bandwidth({peersCount, isSyncing, ...props}) {
   return (
-    <Box pt="1/2" px="1px" pb="3px" h={4} w={4} {...props}>
+    <Box pt="0.5" px="px" pb="3px" h="4" w="4" {...props}>
       <Stack
         isInline
-        spacing="1/2"
+        spacing="0.5"
         justify="space-between"
         alignItems="flex-end"
       >
@@ -257,7 +272,7 @@ function BandwidthItem(props) {
   return (
     <Box
       borderRadius="1px"
-      w="2px"
+      w="0.5"
       transition="background 0.3s ease"
       {...props}
     />
@@ -265,7 +280,9 @@ function BandwidthItem(props) {
 }
 
 export function Logo() {
-  return <Icon name="logo" size="56px" mx="auto" my={8} />
+  return (
+    <Image src="/static/logo.svg" alt="Idena logo" w="14" my="8" mx="auto" />
+  )
 }
 
 function Navbar() {
@@ -275,19 +292,19 @@ function Navbar() {
 
   return (
     <Nav>
-      <NavItem href="/profile" icon="profile">
+      <NavItem href="/profile" icon={<ProfileIcon />}>
         {t('My Idena')}
       </NavItem>
-      <NavItem href="/wallets" icon="wallet">
+      <NavItem href="/wallets" icon={<WalletIcon />}>
         {t('Wallets')}
       </NavItem>
-      <NavItem href="/flips/list" icon="gallery">
+      <NavItem href="/flips/list" icon={<GalleryIcon />}>
         {t('Flips')}
       </NavItem>
-      <NavItem href="/contacts" icon="contacts">
+      <NavItem href="/contacts" icon={<ContactsIcon />}>
         {t('Contacts')}
       </NavItem>
-      <NavItem href="/oracles/list" icon="oracle">
+      <NavItem href="/oracles/list" icon={<OracleIcon />}>
         {todoCount > 0 ? (
           <Flex flex={1} align="center" justify="space-between">
             <Text as="span">{t('Oracle voting')}</Text>
@@ -299,7 +316,7 @@ function Navbar() {
           t('Oracle voting')
         )}
       </NavItem>
-      <NavItem href="/settings/general" icon="settings">
+      <NavItem href="/settings/general" icon={<SettingsIcon />}>
         {t('Settings')}
       </NavItem>
     </Nav>
@@ -315,27 +332,28 @@ function NavItem({href, icon, children}) {
   const isActive = pathname.startsWith(href)
 
   return (
-    <NextLink href={href} passHref>
-      <Link
-        bg={isActive ? 'xblack.016' : 'transparent'}
-        borderRadius="md"
-        color={isActive ? 'white' : 'xwhite.050'}
-        fontWeight={500}
-        minH={8}
-        px={2}
-        py="3/2"
-        _hover={{bg: isActive ? 'xblack.016' : 'gray.10', color: 'white'}}
-        _active={{
-          bg: 'xblack.016',
-        }}
-        _focus={{outline: 'none'}}
-      >
-        <Stack isInline spacing={2}>
-          <Icon name={icon} size={5} />
-          <Flex flex={1}>{children}</Flex>
-        </Stack>
-      </Link>
-    </NextLink>
+    <LinkBox
+      as={Stack}
+      direction="row"
+      spacing="2"
+      alignItems="center"
+      bg={isActive ? 'xblack.016' : 'transparent'}
+      borderRadius="md"
+      color={isActive ? 'white' : 'xwhite.050'}
+      fontWeight={500}
+      minH={8}
+      px={2}
+      _hover={{bg: isActive ? 'xblack.016' : 'gray.10', color: 'white'}}
+      _active={{
+        bg: 'xblack.016',
+      }}
+      _focus={{outline: 'none'}}
+    >
+      {React.cloneElement(icon, {boxSize: '5'})}
+      <NextLink href={href} passHref>
+        <LinkOverlay>{children}</LinkOverlay>
+      </NextLink>
+    </LinkBox>
   )
 }
 
@@ -459,7 +477,7 @@ function ActionPanel() {
                 onDismiss={dismissCurrentTask}
               >
                 <Stack spacing={5}>
-                  <OnboardingPopoverContentIconRow icon="telegram">
+                  <OnboardingPopoverContentIconRow icon={<TelegramIcon />}>
                     <Trans i18nKey="onboardingValidateSubscribe" t={t}>
                       <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
                         Subscribe
@@ -467,17 +485,17 @@ function ActionPanel() {
                       to the Idena Announcements (important updates only)
                     </Trans>
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="sync">
+                  <OnboardingPopoverContentIconRow icon={<SyncIcon />}>
                     {t(
                       `Keep your node synchronized in 45-60 minutes before the validation starts.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="timer">
+                  <OnboardingPopoverContentIconRow icon={<TimerIcon />}>
                     {t(
                       `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon="gallery">
+                  <OnboardingPopoverContentIconRow icon={<GalleryIcon />}>
                     <Trans i18nKey="onboardingValidateTest" t={t}>
                       <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
                         Test yourself
@@ -493,22 +511,21 @@ function ActionPanel() {
       </Stack>
 
       {currentPeriod === EpochPeriod.None && (
-        <Menu autoSelect={false}>
+        <Menu autoSelect={false} placement="bottom-end">
           <MenuButton
             rounded="md"
-            py="3/2"
-            px="2px"
+            py="1.5"
+            px="0.5"
             position="absolute"
-            bottom={6}
-            right="1/2"
+            bottom="6"
+            right="1"
             zIndex="popover"
             _expanded={{bg: 'brandGray.500'}}
             _focus={{outline: 0}}
           >
-            <Icon name="more" size={5} />
+            <MoreIcon boxSize="5" />
           </MenuButton>
           <MenuList
-            placement="bottom-end"
             border="none"
             shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
             rounded="lg"
@@ -530,7 +547,12 @@ function ActionPanel() {
                 )
               }}
             >
-              <Icon name="plus-square" size={5} mr={3} color="brandBlue.500" />
+              <Icon
+                name="plus-square"
+                boxSize={5}
+                mr={3}
+                color="brandBlue.500"
+              />
               Add to calendar
             </MenuItem>
           </MenuList>

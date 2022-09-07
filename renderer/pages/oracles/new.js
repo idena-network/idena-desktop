@@ -10,7 +10,7 @@ import {
   Flex,
   CloseButton,
   FormErrorMessage,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useMachine} from '@xstate/react'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -416,7 +416,7 @@ function NewVotingPage() {
               >
                 {t('Advanced settings')}
                 <Icon
-                  size={5}
+                  boxSize={5}
                   name="chevron-down"
                   color="muted"
                   ml={1}
@@ -425,7 +425,7 @@ function NewVotingPage() {
                 />
               </NewVotingFormSubtitle>
 
-              <Collapse isOpen={isOpenAdvanced} mt={2}>
+              <Collapse in={isOpenAdvanced} mt={2}>
                 <Stack spacing={3}>
                   <VotingInlineFormControl
                     pt={1 / 2}

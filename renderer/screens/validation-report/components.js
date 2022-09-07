@@ -15,9 +15,14 @@ import {
   StatNumber,
   Text,
   useTheme,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {SmallText, TextLink} from '../../shared/components/components'
+import {
+  SendOutIcon,
+  TimerIcon,
+  TwitterIcon,
+} from '../../shared/components/icons'
 import {TableCol} from '../../shared/components/table'
 import {useIdentity} from '../../shared/providers/identity-context'
 import {toLocaleDna, toPercent} from '../../shared/utils/utils'
@@ -78,8 +83,8 @@ export function ValidationReportSummary({onClose}) {
       <Stack spacing={6} w="full">
         <Skeleton
           isLoaded={!isLoading}
-          colorStart={colors.gray[50]}
-          colorEnd={colors.gray[300]}
+          startColor={colors.gray[50]}
+          endColor={colors.gray[300]}
           alignSelf="start"
         >
           <AlertTitle fontSize="lg" fontWeight={500}>
@@ -118,7 +123,7 @@ export function ValidationReportSummary({onClose}) {
                       color={colors.red[500]}
                     />
                   )}
-                  <ValidationReportGaugeIcon icon="timer" />
+                  <ValidationReportGaugeIcon icon={<TimerIcon />} />
                 </ValidationReportGaugeBox>
                 <ValidationReportGaugeStat>
                   {isValidated ? (
@@ -164,13 +169,13 @@ export function ValidationReportSummary({onClose}) {
                       color={colors.red[500]}
                     />
                   )}
-                  <ValidationReportGaugeIcon icon="send-out" />
+                  <ValidationReportGaugeIcon icon={<SendOutIcon />} />
                 </ValidationReportGaugeBox>
                 <ValidationReportGaugeStat>
                   <Skeleton
                     isLoaded={!isLoading}
-                    colorStart={colors.gray[50]}
-                    colorEnd={colors.gray[300]}
+                    startColor={colors.gray[50]}
+                    endColor={colors.gray[300]}
                   >
                     {validationResult === ValidationResult.Success ? (
                       <ValidationReportGaugeStatValue>
@@ -199,7 +204,7 @@ export function ValidationReportSummary({onClose}) {
                     <Text as="span">{t('More details')}</Text>
                     <Icon
                       name="chevron-down"
-                      size={4}
+                      boxSize={4}
                       transform="rotate(-90deg)"
                     />
                   </Stack>
@@ -207,7 +212,7 @@ export function ValidationReportSummary({onClose}) {
               </Box>
               <Stack isInline color="muted">
                 <IconButton
-                  icon="twitter"
+                  icon={<TwitterIcon />}
                   size="xs"
                   variant="ghost"
                   color="blue.500"
@@ -318,7 +323,7 @@ export function ValidationReportGaugeIcon({
       transform="translateX(-50%)"
       {...props}
     >
-      <Icon name={icon} size={5} color={color} />
+      <Icon name={icon} boxSize={5} color={color} />
     </Box>
   )
 }

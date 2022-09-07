@@ -13,8 +13,7 @@ import {
   StatLabel,
   useToast,
   CloseButton,
-  PseudoBox,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
@@ -88,6 +87,14 @@ import {
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {useOracleActions} from '../../screens/oracles/hooks'
+import {
+  AddFundIcon,
+  CoinsLgIcon,
+  RefreshIcon,
+  StarIcon,
+  UserIcon,
+  UserTickIcon,
+} from '../../shared/components/icons'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -207,37 +214,36 @@ export default function ViewVotingPage() {
         <Page pt={8}>
           <Stack spacing={10}>
             <VotingSkeleton isLoaded={isLoaded} h={6}>
-              <Stack isInline spacing={2} align="center">
-                <VotingStatusBadge status={status} fontSize="md">
-                  {t(mapVotingStatus(status))}
-                </VotingStatusBadge>
-                <PseudoBox
-                  as={VotingBadge}
-                  bg="gray.300"
-                  color="muted"
-                  fontSize="md"
-                  cursor="pointer"
-                  pl="1/2"
-                  transition="color 0.2s ease"
-                  _hover={{
-                    color: 'brandGray.500',
-                  }}
-                  onClick={() => {
-                    global.openExternal(
-                      `https://scan.idena.io/contract/${contractHash}`
-                    )
-                  }}
-                >
-                  <Stack isInline spacing={1} align="center">
-                    <Avatar w={5} h={5} address={contractHash} />
-                    <Text>{contractHash}</Text>
-                  </Stack>
-                </PseudoBox>
-                <CloseButton
-                  ml="auto"
-                  onClick={() => redirect('/oracles/list')}
-                />
-              </Stack>
+              <Flex align="center" justify="space-between">
+                <Stack isInline spacing={2} align="center">
+                  <VotingStatusBadge status={status} fontSize="md">
+                    {t(mapVotingStatus(status))}
+                  </VotingStatusBadge>
+                  <Box
+                    as={VotingBadge}
+                    bg="gray.300"
+                    color="muted"
+                    fontSize="md"
+                    cursor="pointer"
+                    pl="1/2"
+                    transition="color 0.2s ease"
+                    _hover={{
+                      color: 'brandGray.500',
+                    }}
+                    onClick={() => {
+                      global.openExternal(
+                        `https://scan.idena.io/contract/${contractHash}`
+                      )
+                    }}
+                  >
+                    <Stack isInline spacing={1} align="center">
+                      <Avatar w={5} h={5} address={contractHash} />
+                      <Text>{contractHash}</Text>
+                    </Stack>
+                  </Box>
+                </Stack>
+                <CloseButton onClick={() => redirect('/oracles/list')} />
+              </Flex>
             </VotingSkeleton>
             <Stack isInline spacing={10} w="full">
               <Box minWidth="lg" maxW="lg">
@@ -345,7 +351,7 @@ export default function ViewVotingPage() {
                                     w={4}
                                     h={4}
                                   >
-                                    {isMine && <Icon name="ok" size={3} />}
+                                    {isMine && <Icon name="ok" boxSize={3} />}
                                   </Flex>
 
                                   <Text
@@ -362,33 +368,37 @@ export default function ViewVotingPage() {
                         ) : (
                           <RadioGroup
                             value={String(selectedOption)}
-                            onChange={e => {
+                            onChange={value => {
                               send('SELECT_OPTION', {
-                                option: Number(e.target.value),
+                                option: Number(value),
                               })
                             }}
                           >
-                            {/* eslint-disable-next-line no-shadow */}
-                            {options.map(({id, value}) => (
-                              <VotingOption
-                                key={id}
-                                value={String(id)}
-                                isDisabled={eitherIdleState(
-                                  VotingStatus.Pending,
-                                  VotingStatus.Starting,
-                                  VotingStatus.Voted
-                                )}
-                                annotation={
-                                  isMaxWinnerThreshold
-                                    ? null
-                                    : t('{{count}} min. votes required', {
-                                        count: toPercent(winnerThreshold / 100),
-                                      })
-                                }
-                              >
-                                {value}
-                              </VotingOption>
-                            ))}
+                            <Stack spacing="2">
+                              {/* eslint-disable-next-line no-shadow */}
+                              {options.map(({id, value}) => (
+                                <VotingOption
+                                  key={id}
+                                  value={String(id)}
+                                  isDisabled={eitherIdleState(
+                                    VotingStatus.Pending,
+                                    VotingStatus.Starting,
+                                    VotingStatus.Voted
+                                  )}
+                                  annotation={
+                                    isMaxWinnerThreshold
+                                      ? null
+                                      : t('{{count}} min. votes required', {
+                                          count: toPercent(
+                                            winnerThreshold / 100
+                                          ),
+                                        })
+                                  }
+                                >
+                                  {value}
+                                </VotingOption>
+                              ))}
+                            </Stack>
                           </RadioGroup>
                         )}
                       </Box>
@@ -505,7 +515,7 @@ export default function ViewVotingPage() {
                         ) &&
                           canTerminate && (
                             <PrimaryButton
-                              variantColor="red"
+                              colorScheme="red"
                               onClick={() => send('TERMINATE')}
                             >
                               {t('Terminate')}
@@ -539,19 +549,15 @@ export default function ViewVotingPage() {
                           )}
                         <VDivider />
                         <Stack isInline spacing={2} align="center">
-                          <Icon
-                            name={
-                              eitherIdleState(
-                                VotingStatus.Archived,
-                                VotingStatus.Terminated
-                              ) && didDetermineWinner
-                                ? 'user-tick'
-                                : 'user'
-                            }
-                            color="muted"
-                            w={4}
-                            h={4}
-                          />
+                          {eitherIdleState(
+                            VotingStatus.Archived,
+                            VotingStatus.Terminated
+                          ) && didDetermineWinner ? (
+                            <UserTickIcon boxSize="4" color="muted" />
+                          ) : (
+                            <UserIcon boxSize="4" color="muted" />
+                          )}
+
                           <Text as="span">
                             {eitherIdleState(VotingStatus.Counting) &&
                             !isVotingFailed ? (
@@ -652,7 +658,7 @@ export default function ViewVotingPage() {
                                           name={`arrow-${
                                             isSender ? 'up' : 'down'
                                           }`}
-                                          size={5}
+                                          boxSize={5}
                                         />
                                       </Flex>
                                       <Box isTruncated>
@@ -704,9 +710,8 @@ export default function ViewVotingPage() {
                               <td colSpan={3}>
                                 <FillCenter py={12}>
                                   <Stack spacing={4} align="center">
-                                    <Icon
-                                      name="coins-lg"
-                                      size={20}
+                                    <CoinsLgIcon
+                                      boxSize="20"
                                       color="gray.300"
                                     />
                                     <Text color="muted">
@@ -727,7 +732,7 @@ export default function ViewVotingPage() {
                 <Box mt={3}>
                   <Box mt={-2} mb={4}>
                     <IconButton2
-                      icon="refresh"
+                      icon={<RefreshIcon />}
                       px={1}
                       pr={3}
                       _focus={null}
@@ -743,7 +748,7 @@ export default function ViewVotingPage() {
                     <Stat mb={8}>
                       <StatLabel as="div" color="muted" fontSize="md">
                         <Stack isInline spacing={2} align="center">
-                          <Icon name="star" size={4} color="white" />
+                          <StarIcon boxSize="4" color="white" />
                           <Text fontWeight={500}>{t('Prize pool')}</Text>
                         </Stack>
                       </StatLabel>
@@ -752,7 +757,7 @@ export default function ViewVotingPage() {
                       </StatNumber>
                       <Box mt={1}>
                         <IconButton2
-                          icon="add-fund"
+                          icon={<AddFundIcon />}
                           onClick={() => {
                             send('ADD_FUND')
                           }}

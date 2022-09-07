@@ -12,7 +12,7 @@ import {
   Flex,
   useToast,
   Switch,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {BASE_API_URL} from '../../shared/api/api-client'
 import {
@@ -31,6 +31,7 @@ import {
   SettingsSection,
 } from '../../screens/settings/components'
 import SettingsLayout from '../../screens/settings/layout'
+import {EyeIcon, EyeOffIcon} from '../../shared/components/icons'
 
 function NodeSettings() {
   const {t} = useTranslation()
@@ -244,7 +245,7 @@ function NodeSettings() {
                 <SettingsFormLabel htmlFor="key">
                   {t('Node api key')}
                 </SettingsFormLabel>
-                <InputGroup w="full">
+                <InputGroup>
                   <Input
                     id="key"
                     value={state.apiKey}
@@ -253,13 +254,12 @@ function NodeSettings() {
                       dispatch({type: 'SET_API_KEY', data: e.target.value})
                     }
                   />
-                  <InputRightElement h="full">
+                  <InputRightElement w="6" h="6" m="1">
                     <IconButton
-                      icon={revealApiKey ? 'eye-off' : 'eye'}
                       size="xs"
+                      icon={revealApiKey ? <EyeOffIcon /> : <EyeIcon />}
                       bg={revealApiKey ? 'gray.300' : 'white'}
                       fontSize={20}
-                      w={8}
                       _hover={{
                         bg: revealApiKey ? 'gray.300' : 'white',
                       }}

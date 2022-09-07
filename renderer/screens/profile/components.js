@@ -12,12 +12,10 @@ import {
   Box,
   Flex,
   Button,
-  RadioButtonGroup,
   Radio,
   Icon,
   Switch,
   Alert,
-  AlertIcon,
   AlertDescription,
   List,
   ListItem,
@@ -29,7 +27,9 @@ import {
   PopoverBody,
   Tag,
   FormHelperText,
-} from '@chakra-ui/core'
+  RadioGroup,
+  HStack,
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
 import {useQuery} from 'react-query'
@@ -73,6 +73,11 @@ import {BLOCK_TIME} from '../oracles/utils'
 import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {useTotalValidationScore} from '../validation-report/hooks'
+import {
+  ChevronRightIcon,
+  InfoIcon,
+  UserIcon,
+} from '../../shared/components/icons'
 
 export function UserInlineCard({
   identity: {address, state},
@@ -280,7 +285,7 @@ export const ActivateInviteForm = React.forwardRef(
             <Stack spacing={4} isInline align="center" justify="flex-end">
               <Button
                 variant="link"
-                variantColor="blue"
+                colorScheme="blue"
                 fontWeight={500}
                 _hover={null}
                 _active={null}
@@ -442,12 +447,8 @@ export function ActivateMiningForm({
 export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
   const {t} = useTranslation()
 
-  const {colors} = useTheme()
-
-  const accentColor = isOnline ? 'blue' : 'red'
-
   return (
-    <Stack spacing={3}>
+    <Stack spacing="3">
       <Text fontWeight={500} h={18}>
         {t('Status')}
       </Text>
@@ -457,30 +458,28 @@ export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
         borderColor="gray.300"
         borderWidth={1}
         rounded="md"
-        h={8}
+        h="8"
         px={3}
       >
-        <FormLabel htmlFor="mining" fontWeight="normal" pb={0}>
+        <FormLabel htmlFor="mining" fontWeight="normal" mb={0}>
           {isDelegator ? t('Delegation') : t('Mining')}
         </FormLabel>
-        <Stack isInline align="center">
-          <Text color={`${accentColor}.500`} fontWeight={500}>
+        <Stack direction="row" align="center">
+          <Text color={isOnline ? 'blue.500' : 'red.500'} fontWeight={500}>
             {isOnline ? t('On') : t('Off')}
           </Text>
           <Switch
             id="mining"
             size="sm"
             isChecked={isOnline}
-            color={accentColor}
-            h={4}
-            className="toggle"
+            h="4"
+            sx={{
+              '& > input:not(:checked) + span': {
+                background: 'red.500',
+              },
+            }}
             onChange={onShow}
           />
-          <style jsx global>{`
-            .toggle > input[type='checkbox']:not(:checked) + div {
-              background: ${colors.red[500]};
-            }
-          `}</style>
         </Stack>
       </Flex>
     </Stack>
@@ -520,7 +519,7 @@ export function ActivateMiningDrawer({
           w={12}
           rounded="xl"
         >
-          <Icon name="user" w={6} h={6} color="blue.500" />
+          <UserIcon boxSize="6" color="blue.500" />
         </Flex>
         <Heading
           color="brandGray.500"
@@ -536,36 +535,16 @@ export function ActivateMiningDrawer({
         <Stack spacing={6} mt={30}>
           <FormControl as={Stack} spacing={3}>
             <FormLabel p={0}>{t('Type')}</FormLabel>
-            <RadioButtonGroup
-              spacing={2}
-              isInline
-              d="flex"
-              value={mode}
-              onChange={onChangeMode}
-            >
-              <Radio
-                value={NodeType.Miner}
-                flex={1}
-                borderColor="gray.300"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-                px={3}
-              >
-                {t('Mining')}
-              </Radio>
-              <Radio
-                value={NodeType.Delegator}
-                flex={1}
-                borderColor="gray.300"
-                borderWidth={1}
-                borderRadius="md"
-                p={2}
-                px={3}
-              >
-                {t('Delegation')}
-              </Radio>
-            </RadioButtonGroup>
+            <RadioGroup value={mode} onChange={onChangeMode}>
+              <HStack spacing="2">
+                <Radio value={NodeType.Miner} variant="bordered" flex={1}>
+                  {t('Mining')}
+                </Radio>
+                <Radio value={NodeType.Delegator} variant="bordered" flex={1}>
+                  {t('Delegation')}
+                </Radio>
+              </HStack>
+            </RadioGroup>
           </FormControl>
           {willDelegate ? (
             <Stack spacing={5}>
@@ -663,7 +642,7 @@ export function DeactivateMiningDrawer({
           w={12}
           rounded="xl"
         >
-          <Icon name="user" w={6} h={6} color="blue.500" />
+          <UserIcon boxSize="6" color="blue.500" />
         </Flex>
         <Heading
           color="brandGray.500"
@@ -700,7 +679,7 @@ export function DeactivateMiningDrawer({
               borderColor="red.050"
               borderWidth={1}
             >
-              <AlertIcon name="info" alignSelf="flex-start" color="red.500" />
+              <InfoIcon alignSelf="flex-start" color="red.500" />
               <AlertDescription
                 color="brandGray.500"
                 fontSize="md"
@@ -829,7 +808,7 @@ export function KillForm({onSuccess, onFail}) {
         ml="auto"
         type="submit"
         isLoading={submitting}
-        variantColor="red"
+        colorScheme="red"
         _hover={{
           bg: 'rgb(227 60 60)',
         }}
@@ -888,7 +867,7 @@ export function MyIdenaBotAlert({onConnect, onSkip}) {
           <Flex ml="auto">
             <Button
               variant="link"
-              variantColor="white"
+              colorScheme="white"
               width={12}
               pl={2}
               height={10}
@@ -1039,7 +1018,7 @@ export function ProfileTagList() {
   const formatDna = toLocaleDna(i18n.language, {maximumFractionDigits: 5})
 
   return (
-    <Stack isInline spacing="1" w="full" flexWrap="wrap">
+    <Stack direction="row" spacing="1" w="full" flexWrap="wrap">
       {age > 0 && <ProfileTag label={t('Age')} value={age} />}
 
       {Number.isFinite(score) && (
@@ -1080,7 +1059,7 @@ export function ProfileTagList() {
                     lineHeight="base"
                   >
                     {t('Validation report')}
-                    <Icon name="chevron-down" transform="rotate(-90deg)" />
+                    <ChevronRightIcon />
                   </TextLink>
                 </Stack>
               </Stack>
@@ -1144,7 +1123,7 @@ export function ProfileTagList() {
                 </Text>
                 <TextLink href="/contacts" color="white" lineHeight="base">
                   {t('Check invites')}
-                  <Icon name="chevron-down" transform="rotate(-90deg)" />
+                  <ChevronRightIcon />
                 </TextLink>
               </Stack>
             </ProfileTagPopoverContent>
@@ -1167,7 +1146,7 @@ export const ProfileTag = React.forwardRef(function ProfileTag(
       fontSize="sm"
       px="3"
       minH="6"
-      mt="3/2"
+      mt="1.5"
       {...props}
     >
       <Stack isInline spacing="1">
@@ -1263,7 +1242,7 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
       <DrawerHeader>
         <Stack spacing="4">
           <FillCenter bg="blue.012" h={12} minH={12} w={12} rounded="xl">
-            <Icon name="wallet" size="6" color="blue.500" />
+            <Icon name="wallet" boxSize="6" color="blue.500" />
           </FillCenter>
           <Heading
             color="brandGray.500"

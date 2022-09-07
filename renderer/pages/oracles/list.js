@@ -1,12 +1,17 @@
 import React from 'react'
 import NextLink from 'next/link'
-import {Box, Icon, Stack, Text, useToast} from '@chakra-ui/core'
+import {
+  Box,
+  Button,
+  HStack,
+  Stack,
+  Text,
+  useToast,
+  Wrap,
+  WrapItem,
+} from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
-import {
-  FlipFilter as FilterList,
-  FlipFilterOption as FilterOption,
-} from '../../screens/flips/components'
 import {
   IconLink,
   FloatDebug,
@@ -44,8 +49,9 @@ import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
 import {IdentityStatus} from '../../shared/types'
 import {useVotingNotification} from '../../shared/providers/voting-notification-context'
+import {PlusSolidIcon, UserIcon} from '../../shared/components/icons'
 
-function VotingListPage() {
+export default function VotingListPage() {
   const {t} = useTranslation()
 
   const toast = useToast()
@@ -91,15 +97,12 @@ function VotingListPage() {
         <Stack isInline spacing={20} w="full" flex={1}>
           <Stack spacing={8}>
             <VotingSkeleton isLoaded={!current.matches('preload')}>
-              <FilterList
-                value={filter}
-                display="flex"
-                alignItems="center"
-                onChange={value => {
-                  if (value) send('FILTER', {value})
-                }}
-              >
-                <FilterOption value={VotingListFilter.Todo}>
+              <HStack>
+                <Button
+                  variant="tab"
+                  isActive={filter === VotingListFilter.Todo}
+                  onClick={() => send('FILTER', {value: VotingListFilter.Todo})}
+                >
                   {todoCount > 0 ? (
                     <Stack isInline spacing={1} align="center">
                       <Text as="span">{t('To Do')}</Text>
@@ -108,22 +111,44 @@ function VotingListPage() {
                   ) : (
                     t('To Do')
                   )}
-                </FilterOption>
-                <FilterOption value={VotingListFilter.Voting}>
+                </Button>
+                <Button
+                  variant="tab"
+                  isActive={filter === VotingListFilter.Voting}
+                  onClick={() =>
+                    send('FILTER', {value: VotingListFilter.Voting})
+                  }
+                >
                   {t('Running')}
-                </FilterOption>
-                <FilterOption value={VotingListFilter.Closed}>
+                </Button>
+                <Button
+                  variant="tab"
+                  isActive={filter === VotingListFilter.Closed}
+                  onClick={() =>
+                    send('FILTER', {value: VotingListFilter.Closed})
+                  }
+                >
                   {t('Closed')}
-                </FilterOption>
-                <FilterOption value="all">{t('All')}</FilterOption>
+                </Button>
+                <Button
+                  variant="tab"
+                  isActive={filter === 'all'}
+                  onClick={() => send('FILTER', {value: 'all'})}
+                >
+                  {t('All')}
+                </Button>
                 <VDivider />
-                <FilterOption value="own">
+                <Button
+                  variant="tab"
+                  value={filter === 'own'}
+                  onClick={() => send('FILTER', {value: 'own'})}
+                >
                   <Stack isInline>
-                    <Icon name="user" size={4} />
+                    <UserIcon boxSize="4" />
                     <Text>{t('My votings')}</Text>
                   </Stack>
-                </FilterOption>
-              </FilterList>
+                </Button>
+              </HStack>
             </VotingSkeleton>
             <Stack spacing={6} w="md" flex={1}>
               {current.matches('failure') && (
@@ -185,28 +210,33 @@ function VotingListPage() {
           </Stack>
           <VotingSkeleton isLoaded={!current.matches('preload')}>
             <Stack spacing={8} align="flex-start" w={48}>
-              <IconLink href="/oracles/new" icon="plus-solid" ml={-2}>
+              <IconLink
+                href="/oracles/new"
+                icon={<PlusSolidIcon boxSize="5" />}
+                ml={-2}
+              >
                 {t('New voting')}
               </IconLink>
               <Stack>
                 <Text fontWeight={500}>{t('Tags')}</Text>
                 {!current.matches('preload') && (
-                  <Stack isInline wrap="wrap" spacing={2}>
+                  <Wrap spacing={2}>
                     {votingStatuses(filter).map(status => (
-                      <VotingFilter
-                        key={status}
-                        isChecked={statuses.includes(status)}
-                        status={status}
-                        cursor="pointer"
-                        my={2}
-                        onClick={() => {
-                          send('TOGGLE_STATUS', {value: status})
-                        }}
-                      >
-                        {t(mapVotingStatus(status))}
-                      </VotingFilter>
+                      <WrapItem>
+                        <VotingFilter
+                          key={status}
+                          isChecked={statuses.includes(status)}
+                          status={status}
+                          cursor="pointer"
+                          onClick={() => {
+                            send('TOGGLE_STATUS', {value: status})
+                          }}
+                        >
+                          {t(mapVotingStatus(status))}
+                        </VotingFilter>
+                      </WrapItem>
                     ))}
-                  </Stack>
+                  </Wrap>
                 )}
               </Stack>
             </Stack>
@@ -224,5 +254,3 @@ function VotingListPage() {
     </Layout>
   )
 }
-
-export default VotingListPage

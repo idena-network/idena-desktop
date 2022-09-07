@@ -1,6 +1,6 @@
 import React from 'react'
 import {useTranslation} from 'react-i18next'
-import {Flex, Stack, Box, Heading, Icon, useDisclosure} from '@chakra-ui/core'
+import {Flex, Stack, Box, Heading, useDisclosure} from '@chakra-ui/react'
 import {useWallets} from '../shared/hooks/use-wallets'
 import {IconButton2} from '../shared/components/button'
 import Layout from '../shared/components/layout'
@@ -22,6 +22,7 @@ import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
 import {useIdentityState} from '../shared/providers/identity-context'
 import {areSameCaseInsensitive} from '../screens/oracles/utils'
 import {FillPlaceholder} from '../screens/oracles/components'
+import {SendOutIcon} from '../shared/components/icons'
 
 export default function WalletsPage() {
   const {t} = useTranslation(['translation', 'error'])
@@ -59,18 +60,21 @@ export default function WalletsPage() {
             <Stack isInline spacing={1} align="center" pt={2}>
               <VDivider />
               <IconButton2
-                icon={<Icon name="send-out" size={5} transform="scaleX(-1)" />}
+                icon={<SendOutIcon transform="scaleX(-1)" />}
                 onClick={onOpenSendDnaDrawer}
               >
                 {t('Send')}
               </IconButton2>
               <VDivider />
-              <IconButton2 icon="send-out" onClick={onOpenReceiveDnaDrawer}>
+              <IconButton2
+                icon={<SendOutIcon />}
+                onClick={onOpenReceiveDnaDrawer}
+              >
                 {t('Receive')}
               </IconButton2>
             </Stack>
           </Flex>
-          <Stack isInline spacing={6}>
+          <Stack isInline spacing="6">
             {wallets.map(wallet => (
               <WalletCard
                 key={wallet.address + wallet.name}
