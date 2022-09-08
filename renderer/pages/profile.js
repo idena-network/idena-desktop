@@ -260,7 +260,7 @@ export default function ProfilePage() {
 
           <Page>
             <Stack spacing={8}>
-              <Stack isInline spacing={10}>
+              <Stack isInline spacing="10">
                 <Box>
                   <Stack spacing={8} w="md" ref={activateInviteRef}>
                     <UserInlineCard identity={identity} h={24}>
@@ -512,7 +512,7 @@ export default function ProfilePage() {
                   </Stack>
                   <StakingAlert mt="2" w="md" />
                 </Box>
-                <Stack spacing={10} w={200}>
+                <Stack spacing="10" w={200}>
                   <Box minH={62} mt={6}>
                     <OnboardingPopover
                       isOpen={eitherOnboardingState(
@@ -549,6 +549,13 @@ export default function ProfilePage() {
                       </PopoverTrigger>
                       <OnboardingPopoverContent
                         title={t('Activate mining status')}
+                        w={
+                          eitherOnboardingState(
+                            onboardingShowingStep(OnboardingStep.ActivateMining)
+                          )
+                            ? 'xs'
+                            : '2xs'
+                        }
                         onDismiss={nextOnboardingTask}
                       >
                         <Text>

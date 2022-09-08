@@ -105,6 +105,8 @@ export default function Layout({
   )
 
   React.useEffect(() => {
+    if (global.isDev) return
+
     const handleMouseWheel = e => {
       if (e.ctrlKey) {
         e.preventDefault()
@@ -122,6 +124,8 @@ export default function Layout({
   }, [])
 
   React.useEffect(() => {
+    if (global.isDev) return
+
     if (Number.isFinite(zoomLevel)) {
       global.setZoomLevel(zoomLevel)
       persistItem('settings', 'zoomLevel', zoomLevel)
