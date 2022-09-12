@@ -59,8 +59,8 @@ import {
   TextLink,
   Toast,
 } from './components'
-import {ActivateMiningDrawer} from '../../screens/profile/components'
-import {activateMiningMachine} from '../../screens/profile/machines'
+import {ActivateMiningDrawer} from '../../screens/home/components'
+import {activateMiningMachine} from '../../screens/home/machines'
 import {
   callRpc,
   eitherState,

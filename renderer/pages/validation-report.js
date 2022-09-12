@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react'
 import router from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {UserInlineCard} from '../screens/profile/components'
+import {UserInlineCard} from '../screens/home/components'
 import {
   TableValidationDesc,
   ValidationReportBlockOverview,
@@ -101,7 +101,7 @@ export default function ValidationReport() {
           <PageTitle m={0}>
             {t('Epoch #{{epochNumber}} validation report', {epochNumber})}
           </PageTitle>
-          <CloseButton onClick={() => router.push('/profile')} />
+          <CloseButton onClick={() => router.push('/home')} />
         </Flex>
         <Stack spacing={6} w="full">
           <Box>
@@ -403,7 +403,7 @@ export default function ValidationReport() {
                         />
                       </ValidationReportColumn>
                       <ValidationReportColumn display={['none', 'table-cell']}>
-                        <TextLink href="/profile?replenishStake">
+                        <TextLink href="/home?replenishStake">
                           {t('Add stake')}
                           <ChevronRightIcon />
                         </TextLink>

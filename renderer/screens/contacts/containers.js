@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 /* eslint-disable react/prop-types */
 import * as React from 'react'
 import {
@@ -50,7 +49,7 @@ import {
 import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {IdentityStatus} from '../../shared/types'
 import {VotingSkeleton} from '../oracles/components'
-import {useInviteScore} from '../profile/hooks'
+import {useInviteScore} from '../home/hooks'
 import {
   BasketIcon,
   ChevronDownIcon,
@@ -311,11 +310,14 @@ export function ContactCard({
   const isInviteExpired =
     state === IdentityStatus.Undefined && !canKill && !mining && !activated
 
+  // eslint-disable-next-line no-nested-ternary
   const status = isInviteExpired
     ? t('Expired invitation')
-    : mining
+    : // eslint-disable-next-line no-nested-ternary
+    mining
     ? t('Mining...')
-    : terminating
+    : // eslint-disable-next-line no-nested-ternary
+    terminating
     ? t('Terminating...')
     : state === IdentityStatus.Invite
     ? t('Invitation')

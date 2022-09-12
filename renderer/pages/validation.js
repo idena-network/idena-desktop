@@ -121,7 +121,7 @@ function ValidationSession({
         setTimeout(onCloseExceededTooltip, 3000)
       },
       onValidationSucceeded: () => {
-        router.push('/profile')
+        router.push('/home')
       },
     },
     state: loadValidationState(),
@@ -415,10 +415,7 @@ function ValidationSession({
       )}
 
       {state.matches('validationFailed') && (
-        <ValidationFailedDialog
-          isOpen
-          onSubmit={() => router.push('/profile')}
-        />
+        <ValidationFailedDialog isOpen onSubmit={() => router.push('/home')} />
       )}
 
       <BadFlipDialog

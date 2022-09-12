@@ -295,7 +295,7 @@ function Navbar() {
 
   return (
     <Nav>
-      <NavItem href="/profile" icon={ProfileIcon}>
+      <NavItem href="/home" icon={ProfileIcon}>
         {t('My Idena')}
       </NavItem>
       <NavItem href="/wallets" icon={WalletIcon}>
@@ -424,7 +424,7 @@ function ActionPanel() {
                 OnboardingStep.ActivateMining
               )
             )
-              router.push('/profile')
+              router.push('/home')
             if (eitherOnboardingState(OnboardingStep.CreateFlips))
               router.push('/flips/list')
 
