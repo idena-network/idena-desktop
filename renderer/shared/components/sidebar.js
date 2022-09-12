@@ -528,7 +528,8 @@ function ActionPanel() {
             bottom="6"
             right="1"
             zIndex="popover"
-            _expanded={{bg: 'brandGray.500'}}
+            _hover={{bg: 'unset'}}
+            _expanded={{bg: 'gray.500'}}
             _focus={{outline: 0}}
           >
             <MoreIcon boxSize="5" />
@@ -541,10 +542,10 @@ function ActionPanel() {
             minWidth="145px"
           >
             <MenuItem
-              color="brandGray.500"
+              color="gray.500"
               fontWeight={500}
-              px={3}
-              py={2}
+              px="3"
+              py="2"
               _hover={{bg: 'gray.50'}}
               _focus={{bg: 'gray.50'}}
               _selected={{bg: 'gray.50'}}

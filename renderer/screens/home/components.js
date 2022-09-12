@@ -6,7 +6,6 @@ import {
   Stat,
   StatLabel,
   StatNumber,
-  useTheme,
   FormControl,
   Text,
   Box,
@@ -146,13 +145,14 @@ export function AnnotatedUserStat({
   children,
   ...props
 }) {
-  const {colors} = useTheme()
   return (
     <UserStat {...props}>
       <UserStatLabel
-        borderBottom={`dotted 1px ${colors.muted}`}
+        borderBottom="dotted 1px"
+        borderBottomColor="muted"
         cursor="help"
         fontWeight={500}
+        w="fit-content"
       >
         <UserStatLabelTooltip label={annotation}>{label}</UserStatLabelTooltip>
       </UserStatLabel>
@@ -1007,10 +1007,10 @@ function IdenaBotFeatureList({features, listSeparator = ';'}) {
 }
 
 export function ProfileTagList() {
-  const {t, i18n} = useTranslation()
+  const {t} = useTranslation()
 
   const [
-    {age, penalty, penaltySeconds, totalShortFlipPoints, totalQualifiedFlips},
+    {age, penaltySeconds, totalShortFlipPoints, totalQualifiedFlips},
   ] = useIdentity()
 
   const epoch = useEpochState()
@@ -1018,8 +1018,6 @@ export function ProfileTagList() {
   const score = useTotalValidationScore()
 
   const inviteScore = useInviteScore()
-
-  const formatDna = toLocaleDna(i18n.language, {maximumFractionDigits: 5})
 
   return (
     <Stack direction="row" spacing="1" w="full" flexWrap="wrap">
@@ -1070,16 +1068,6 @@ export function ProfileTagList() {
             </ProfileTagPopoverContent>
           </Popover>
         </Box>
-      )}
-
-      {/* TODO: remove after fork 0.30.0 */}
-      {penalty > 0 && (
-        <ProfileTag
-          label={t('Mining penalty')}
-          value={formatDna(penalty)}
-          bg="red.012"
-          color="red.500"
-        />
       )}
 
       {penaltySeconds > 0 && (

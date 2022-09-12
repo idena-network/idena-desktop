@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverFooter,
   PopoverHeader,
+  Portal,
   Stack,
   useTheme,
 } from '@chakra-ui/react'
@@ -47,41 +48,43 @@ export function OnboardingPopoverContent({
   const {t} = useTranslation()
 
   return (
-    <PopoverContent
-      bg="blue.500"
-      border="none"
-      color="white"
-      px={3}
-      py={2}
-      zIndex="popover"
-      {...props}
-    >
-      <PopoverArrow />
-      <Box p={2}>
-        <Stack spacing={3}>
-          <PopoverHeader
-            borderBottom="none"
-            fontWeight={500}
-            fontSize="md"
-            p={0}
-            mb={0}
-          >
-            {title}
-          </PopoverHeader>
-          <PopoverBody fontSize="sm" p={0}>
-            {children}
-          </PopoverBody>
-          <PopoverFooter as={Stack} border="none" p={0}>
-            <Stack isInline spacing={6} justify="flex-end">
-              {additionFooterActions}
-              <Button variant="unstyled" onClick={onDismiss}>
-                {t('Okay, got it')}
-              </Button>
-            </Stack>
-          </PopoverFooter>
-        </Stack>
-      </Box>
-    </PopoverContent>
+    <Portal>
+      <PopoverContent
+        bg="blue.500"
+        border="none"
+        color="white"
+        px={3}
+        py={2}
+        zIndex="popover"
+        {...props}
+      >
+        <PopoverArrow bg="blue.500" boxShadow="none !important" />
+        <Box p={2}>
+          <Stack spacing={3}>
+            <PopoverHeader
+              borderBottom="none"
+              fontWeight={500}
+              fontSize="md"
+              p={0}
+              mb={0}
+            >
+              {title}
+            </PopoverHeader>
+            <PopoverBody fontSize="sm" p={0}>
+              {children}
+            </PopoverBody>
+            <PopoverFooter as={Stack} border="none" p={0}>
+              <Stack isInline spacing={6} justify="flex-end">
+                {additionFooterActions}
+                <Button variant="unstyled" onClick={onDismiss}>
+                  {t('Okay, got it')}
+                </Button>
+              </Stack>
+            </PopoverFooter>
+          </Stack>
+        </Box>
+      </PopoverContent>
+    </Portal>
   )
 }
 
