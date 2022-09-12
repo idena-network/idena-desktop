@@ -451,9 +451,9 @@ function WalletTxStatus({
         minW={8}
       >
         {direction === 'Sent' ? (
-          <ArrowDownIcon boxSize="5" />
-        ) : (
           <ArrowUpIcon boxSize="5" />
+        ) : (
+          <ArrowDownIcon boxSize="5" />
         )}
       </Flex>
       <Box>

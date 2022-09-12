@@ -658,7 +658,7 @@ export default function FlipEditor({
               />
 
               {showArrowHint && (
-                <Portal container={leftArrowPortalRef.current}>
+                <Portal containerRef={leftArrowPortalRef}>
                   <ArrowHint
                     hint={t('Start from uploading an image')}
                     leftHanded
@@ -767,7 +767,7 @@ export default function FlipEditor({
               />
 
               {showArrowHint && (
-                <Portal container={rightArrowPortalRef.current}>
+                <Portal containerRef={rightArrowPortalRef}>
                   <ArrowHint hint={t('Or start drawing')} />
                 </Portal>
               )}
@@ -1074,15 +1074,15 @@ function ArrowHint({hint, leftHanded}) {
               borderColor="transparent"
               borderTopColor="blue.500"
               position="absolute"
-              right={-5}
+              right={-1}
               w={0}
               h={0}
             />
             <Box
               color="muted"
               fontWeight={400}
-              w={52}
-              minW={52}
+              w="52px"
+              minW="52px"
               position="absolute"
               left="-58px"
               top="-25px"
