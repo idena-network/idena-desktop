@@ -28,6 +28,8 @@ import {
   RadioGroup,
   HStack,
   useBoolean,
+  WrapItem,
+  Wrap,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -95,7 +97,7 @@ export function UserInlineCard({
         borderWidth={1}
         borderColor="gray.016"
       />
-      <Stack spacing={0} w="full">
+      <Stack spacing="1.5" w="full">
         <Stack spacing={1}>
           <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
             {mapToFriendlyStatus(state)}
@@ -1020,72 +1022,81 @@ export function ProfileTagList() {
   const inviteScore = useInviteScore()
 
   return (
-    <Stack direction="row" spacing="1" w="full" flexWrap="wrap">
-      {age > 0 && <ProfileTag label={t('Age')} value={age} />}
+    <Wrap spacing="1" w="full">
+      {age > 0 && (
+        <WrapItem>
+          <SimpleProfileTag label={t('Age')} value={age} />
+        </WrapItem>
+      )}
 
       {Number.isFinite(score) && (
-        <Box>
+        <WrapItem>
           <Popover placement="top" arrowShadowColor="transparent">
             <PopoverTrigger>
               <Box>
-                <ProfileTag
+                <SimpleProfileTag
                   label={t('Score')}
                   value={toPercent(score)}
                   cursor="help"
                 />
               </Box>
             </PopoverTrigger>
-            <ProfileTagPopoverContent>
-              <Stack>
-                <Stack spacing="2px">
-                  <Text color="muted" lineHeight="shorter">
-                    {t('Total score')}
-                  </Text>
-                  <Text color="white" lineHeight="base">
-                    {t(
-                      `{{totalShortFlipPoints}} out of {{totalQualifiedFlips}}`,
-                      {
-                        totalShortFlipPoints,
-                        totalQualifiedFlips,
-                      }
-                    )}
-                  </Text>
+            <PopoverContent border="none" fontSize="sm" w="max-content">
+              <PopoverArrow bg="graphite.500" />
+              <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
+                <Stack>
+                  <Stack spacing="0.5">
+                    <Text color="muted" lineHeight="shorter">
+                      {t('Total score')}
+                    </Text>
+                    <Text color="white" lineHeight="4">
+                      {t(
+                        `{{totalShortFlipPoints}} out of {{totalQualifiedFlips}}`,
+                        {
+                          totalShortFlipPoints,
+                          totalQualifiedFlips,
+                        }
+                      )}
+                    </Text>
+                  </Stack>
+                  <Stack spacing="0.5">
+                    <Text color="muted" lineHeight="shorter">
+                      {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
+                    </Text>
+                    <TextLink
+                      href="/validation-report"
+                      color="white"
+                      lineHeight="4"
+                    >
+                      {t('Validation report')}
+                      <ChevronRightIcon />
+                    </TextLink>
+                  </Stack>
                 </Stack>
-                <Stack spacing="2px">
-                  <Text color="muted" lineHeight="shorter">
-                    {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
-                  </Text>
-                  <TextLink
-                    href="/validation-report"
-                    color="white"
-                    lineHeight="base"
-                  >
-                    {t('Validation report')}
-                    <ChevronRightIcon />
-                  </TextLink>
-                </Stack>
-              </Stack>
-            </ProfileTagPopoverContent>
+              </PopoverBody>
+            </PopoverContent>
           </Popover>
-        </Box>
+        </WrapItem>
       )}
 
       {penaltySeconds > 0 && (
-        <ProfileTag
-          label={t('Mining penalty')}
-          value={humanizeDuration(penaltySeconds)}
-          bg="red.012"
-          color="red.500"
-        />
+        <WrapItem>
+          <ProfileTag bg={[null, 'red.012']}>
+            <ProfileTagLabel color="red.500">
+              {t('Mining penalty')}
+            </ProfileTagLabel>
+            <ProfileTagValue color="red.500">
+              {humanizeDuration(penaltySeconds)}
+            </ProfileTagValue>
+          </ProfileTag>
+        </WrapItem>
       )}
 
       {inviteScore > 0 && (
-        <Box>
+        <WrapItem>
           <ProfileTagPopover>
             <ProfileTagPopoverTrigger>
               <ProfileTag
-                label={t('Invitation rewards')}
-                value={toPercent(inviteScore)}
                 cursor="help"
                 bg={
                   // eslint-disable-next-line no-nested-ternary
@@ -1103,7 +1114,10 @@ export function ProfileTagList() {
                     ? 'orange.500'
                     : 'green.500'
                 }
-              />
+              >
+                <ProfileTagLabel>{t('Invitation rewards')}</ProfileTagLabel>
+                <ProfileTagValue>{toPercent(inviteScore)}</ProfileTagValue>
+              </ProfileTag>
             </ProfileTagPopoverTrigger>
             <ProfileTagPopoverContent>
               <Stack spacing="2px" w={40}>
@@ -1120,32 +1134,51 @@ export function ProfileTagList() {
               </Stack>
             </ProfileTagPopoverContent>
           </ProfileTagPopover>
-        </Box>
+        </WrapItem>
       )}
-    </Stack>
+    </Wrap>
   )
 }
 
-export const ProfileTag = React.forwardRef(function ProfileTag(
+function ProfileTag({children, ...props}) {
+  return (
+    <Tag
+      bg={[null, 'gray.016']}
+      borderRadius={[null, 'xl']}
+      borderBottomWidth={[1, 0]}
+      borderBottomColor="gray.100"
+      color="gray.500"
+      fontSize={['base', 'sm']}
+      px={[null, '3']}
+      pt={['2', 0]}
+      pb={['2.5', 0]}
+      w={['full', null]}
+      {...props}
+    >
+      <Stack direction={['column', 'row']} spacing={['1.5', '1']} w={['full']}>
+        {children}
+      </Stack>
+    </Tag>
+  )
+}
+
+function ProfileTagLabel(props) {
+  return <Text {...props} />
+}
+
+function ProfileTagValue(props) {
+  return <Text color={['muted', 'inherit']} {...props} />
+}
+
+const SimpleProfileTag = React.forwardRef(function SimpleProfileTag(
   {label, value, ...props},
   ref
 ) {
   return (
-    <Tag
-      ref={ref}
-      bg="gray.016"
-      borderRadius="xl"
-      fontSize="sm"
-      px="3"
-      minH="6"
-      mt="1.5"
-      {...props}
-    >
-      <Stack isInline spacing="1">
-        <Text>{label}</Text>
-        <Text>{value}</Text>
-      </Stack>
-    </Tag>
+    <ProfileTag ref={ref} {...props}>
+      <ProfileTagLabel>{label}</ProfileTagLabel>
+      <ProfileTagValue>{value}</ProfileTagValue>
+    </ProfileTag>
   )
 })
 
