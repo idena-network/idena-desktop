@@ -7,7 +7,6 @@ import {
   Box,
   Flex,
   Button,
-  Icon,
   Menu,
   MenuButton,
   MenuItem,
@@ -23,6 +22,7 @@ import {
   LinkOverlay,
   LinkBox,
   Image,
+  Icon,
 } from '@chakra-ui/react'
 import {useIdentityState} from '../providers/identity-context'
 import {useEpochState} from '../providers/epoch-context'
@@ -54,10 +54,12 @@ import {useTimingState} from '../providers/timing-context'
 import {TodoVotingCountBadge} from '../../screens/oracles/components'
 import {
   AdsIcon,
+  ClockIcon,
   ContactsIcon,
   GalleryIcon,
   MoreIcon,
   OracleIcon,
+  PlusSolidIcon,
   ProfileIcon,
   SettingsIcon,
   SyncIcon,
@@ -146,7 +148,7 @@ function Status() {
           <Popover trigger="hover" usePortal>
             <PopoverTrigger>
               <Stack isInline align="center" spacing={1} color="red.500">
-                <Icon name="clock" boxSize={5} />
+                <ClockIcon boxSize="5" />
                 <Text fontWeight={500}>{t('Wrong time')}</Text>
               </Stack>
             </PopoverTrigger>
@@ -293,19 +295,19 @@ function Navbar() {
 
   return (
     <Nav>
-      <NavItem href="/profile" icon={<ProfileIcon />}>
+      <NavItem href="/profile" icon={ProfileIcon}>
         {t('My Idena')}
       </NavItem>
-      <NavItem href="/wallets" icon={<WalletIcon />}>
+      <NavItem href="/wallets" icon={WalletIcon}>
         {t('Wallets')}
       </NavItem>
-      <NavItem href="/flips/list" icon={<GalleryIcon />}>
+      <NavItem href="/flips/list" icon={GalleryIcon}>
         {t('Flips')}
       </NavItem>
-      <NavItem href="/contacts" icon={<ContactsIcon />}>
+      <NavItem href="/contacts" icon={ContactsIcon}>
         {t('Contacts')}
       </NavItem>
-      <NavItem href="/oracles/list" icon={<OracleIcon />} display>
+      <NavItem href="/oracles/list" icon={OracleIcon} display>
         {todoCount > 0 ? (
           <Flex flex={1} align="center" justify="space-between">
             <Text as="span">{t('Oracle voting')}</Text>
@@ -317,10 +319,10 @@ function Navbar() {
           t('Oracle voting')
         )}
       </NavItem>
-      <NavItem href="/adn/list" icon={<AdsIcon />}>
+      <NavItem href="/adn/list" icon={AdsIcon}>
         {t('Ads')}
       </NavItem>
-      <NavItem href="/settings/general" icon={<SettingsIcon />}>
+      <NavItem href="/settings/general" icon={SettingsIcon}>
         {t('Settings')}
       </NavItem>
     </Nav>
@@ -353,7 +355,7 @@ function NavItem({href, icon, children}) {
       }}
       _focus={{outline: 'none'}}
     >
-      {React.cloneElement(icon, {boxSize: '5'})}
+      <Icon as={icon} boxSize="5" />
       <NextLink href={href} passHref>
         <LinkOverlay display="block" w="full">
           {children}
@@ -483,7 +485,7 @@ function ActionPanel() {
                 onDismiss={dismissCurrentTask}
               >
                 <Stack spacing={5}>
-                  <OnboardingPopoverContentIconRow icon={<TelegramIcon />}>
+                  <OnboardingPopoverContentIconRow icon={TelegramIcon}>
                     <Trans i18nKey="onboardingValidateSubscribe" t={t}>
                       <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
                         Subscribe
@@ -491,17 +493,17 @@ function ActionPanel() {
                       to the Idena Announcements (important updates only)
                     </Trans>
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={<SyncIcon />}>
+                  <OnboardingPopoverContentIconRow icon={SyncIcon}>
                     {t(
                       `Keep your node synchronized in 45-60 minutes before the validation starts.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={<TimerIcon />}>
+                  <OnboardingPopoverContentIconRow icon={TimerIcon}>
                     {t(
                       `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={<GalleryIcon />}>
+                  <OnboardingPopoverContentIconRow icon={GalleryIcon}>
                     <Trans i18nKey="onboardingValidateTest" t={t}>
                       <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
                         Test yourself
@@ -553,13 +555,8 @@ function ActionPanel() {
                 )
               }}
             >
-              <Icon
-                name="plus-square"
-                boxSize={5}
-                mr={3}
-                color="brandBlue.500"
-              />
-              Add to calendar
+              <PlusSolidIcon boxSize="5" mr="3" color="blue.500" />
+              {t('Add to calendar')}
             </MenuItem>
           </MenuList>
         </Menu>

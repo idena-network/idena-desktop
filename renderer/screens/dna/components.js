@@ -1,15 +1,8 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react'
-import {
-  Box,
-  Stack,
-  Text,
-  Stat,
-  StatLabel,
-  StatNumber,
-  Icon,
-} from '@chakra-ui/react'
+import {Box, Stack, Text, Stat, StatLabel, StatNumber} from '@chakra-ui/react'
 import {Avatar, Dialog} from '../../shared/components/components'
+import {InfoIcon} from '../../shared/components/icons'
 
 export function DnaDialog(props) {
   return <Dialog closeOnOverlayClick={false} closeOnEsc={false} {...props} />
@@ -28,7 +21,7 @@ export function DnaDialogAlert({children, ...props}) {
       py={2}
       {...props}
     >
-      <Icon name="info" boxSize={4} color="red.500" />
+      <InfoIcon boxSize="4" color="red.500" />
       <Text fontWeight={500}>{children}</Text>
     </Stack>
   )

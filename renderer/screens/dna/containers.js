@@ -6,7 +6,6 @@ import {
   AlertTitle,
   Box,
   Flex,
-  Icon,
   Image,
   Stack,
   Text,
@@ -48,7 +47,12 @@ import {callRpc, toLocaleDna} from '../../shared/utils/utils'
 import {bufferToHex} from '../../shared/utils/string'
 import {useFormatDna} from '../../shared/hooks/hooks'
 import {TxType} from '../../shared/types'
-import {DeleteIcon, InfoIcon} from '../../shared/components/icons'
+import {
+  DeleteIcon,
+  ExclamationMarkIcon,
+  GlobeIcon,
+  InfoIcon,
+} from '../../shared/components/icons'
 
 export function DnaSignInDialog({
   token,
@@ -103,7 +107,7 @@ export function DnaSignInDialog({
                   w={10}
                 />
               ) : (
-                <Icon name="globe" color="blue.500" boxSize={10} />
+                <GlobeIcon color="blue.500" boxSize="10" />
               )}
             </MediaDnaDialogStat>
             <MediaDnaDialogStat label={t('My address')} value={address}>
@@ -218,11 +222,7 @@ export function DnaSendDialog({
                     <Tooltip
                       label={t('The amount is larger than your balance')}
                     >
-                      <Icon
-                        name="exclamation-mark"
-                        boxSize={4}
-                        color="red.500"
-                      />
+                      <ExclamationMarkIcon boxSize="4" color="red.500" />
                     </Tooltip>
                   </Stack>
                 ) : (
@@ -431,11 +431,7 @@ export function DnaRawDialog({
                           <Tooltip
                             label={t('The amount is larger than your balance')}
                           >
-                            <Icon
-                              name="exclamation-mark"
-                              color="red.500"
-                              boxSize={4}
-                            />
+                            <ExclamationMarkIcon color="red.500" boxSize="4" />
                           </Tooltip>
                         </Stack>
                       ) : (

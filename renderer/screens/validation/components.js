@@ -6,7 +6,6 @@ import {
   Stack,
   Text,
   Heading,
-  Icon,
   Alert,
   Button,
   useTheme,
@@ -50,7 +49,17 @@ import {
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {useInterval} from '../../shared/hooks/use-interval'
 import {FillCenter} from '../oracles/components'
-import {InfoIcon} from '../../shared/components/icons'
+import {
+  BlockIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ClockIcon,
+  CrossSmallIcon,
+  DeleteIcon,
+  InfoIcon,
+  TickIcon,
+  ZoomFlipIcon,
+} from '../../shared/components/icons'
 
 const Scroll = require('react-scroll')
 
@@ -206,7 +215,7 @@ export function Flip({
                     onOpenFlipZoom()
                   }}
                 >
-                  <Icon name="zoom-flip" boxSize={5} />
+                  <ZoomFlipIcon boxSize="5" />
                 </Flex>
               </div>
             )}
@@ -255,11 +264,10 @@ export function Flip({
                 color="white"
               />
             </Flex>
-            <Icon
+            <CrossSmallIcon
               position="absolute"
               right={6}
               top={6}
-              name="cross-small"
               color="white"
               boxSize={8}
               onClick={onCloseFlipZoom}
@@ -566,7 +574,7 @@ function FailedThumbnail() {
       bg="rgb(89 89 89 / 0.95)"
       borderRadius="xl"
     >
-      <Icon name="delete" boxSize={5} color="white" />
+      <DeleteIcon boxSize="5" color="white" />
     </Flex>
   )
 }
@@ -592,7 +600,7 @@ function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
       }
       borderRadius="xl"
     >
-      {option && <Icon name="tick" boxSize={5} color="white" />}
+      {option && <TickIcon boxSize="5" color="white" />}
     </Flex>
   )
 }
@@ -657,7 +665,7 @@ export const QualificationButton = React.forwardRef(
     return (
       <ButtonVariant ref={ref} flex={1} maxW={40} overflow="hidden" {...props}>
         <Stack isInline spacing={2} align="center" justify="center">
-          {isSelected && <Icon name="tick" boxSize={5} />}
+          {isSelected && <TickIcon boxSize="5" />}
           <Text>{children}</Text>
         </Stack>
       </ButtonVariant>
@@ -714,17 +722,25 @@ export function NavButton({type, bg, color, ...props}) {
         transition="all 0.5s ease-out"
         _hover={{bg}}
       >
-        <Icon
-          name="chevron-down"
-          boxSize={5}
-          color={color}
-          position="absolute"
-          top="50%"
-          left="50%"
-          transform={`translate(-50%, -50%) translateX(${
-            isPrev ? '80px' : '-80px'
-          }) rotate(${isPrev ? '' : '-'}90deg)`}
-        />
+        {isPrev ? (
+          <ChevronLeftIcon
+            boxSize="5"
+            color={color}
+            position="absolute"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%) translateX(80px)"
+          />
+        ) : (
+          <ChevronRightIcon
+            boxSize="5"
+            color={color}
+            position="absolute"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%) translateX(-80px)"
+          />
+        )}
       </Box>
     </Box>
   )
@@ -797,8 +813,8 @@ export function Timer(props) {
   )
 }
 
-export function TimerIcon({color, ...props}) {
-  return <Icon name="clock" boxSize={5} color={color} {...props} />
+export function TimerIcon(props) {
+  return <ClockIcon boxSize={5} {...props} />
 }
 
 export function TimerClock({duration, color}) {
@@ -1452,7 +1468,7 @@ function BadFlipPartFrame({flipCase, ...props}) {
         right={-20}
         bottom={-20}
       >
-        <Icon name="block" boxSize={5} />
+        <BlockIcon boxSize="5" />
       </Flex>
     </Box>
   )

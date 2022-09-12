@@ -19,6 +19,7 @@ import {
 import {useTranslation} from 'react-i18next'
 import {SmallText, TextLink} from '../../shared/components/components'
 import {
+  ChevronRightIcon,
   SendOutIcon,
   TimerIcon,
   TwitterIcon,
@@ -123,7 +124,7 @@ export function ValidationReportSummary({onClose}) {
                       color={colors.red[500]}
                     />
                   )}
-                  <ValidationReportGaugeIcon icon={<TimerIcon />} />
+                  <ValidationReportGaugeIcon as={TimerIcon} />
                 </ValidationReportGaugeBox>
                 <ValidationReportGaugeStat>
                   {isValidated ? (
@@ -169,7 +170,7 @@ export function ValidationReportSummary({onClose}) {
                       color={colors.red[500]}
                     />
                   )}
-                  <ValidationReportGaugeIcon icon={<SendOutIcon />} />
+                  <ValidationReportGaugeIcon as={SendOutIcon} />
                 </ValidationReportGaugeBox>
                 <ValidationReportGaugeStat>
                   <Skeleton
@@ -202,11 +203,7 @@ export function ValidationReportSummary({onClose}) {
                 >
                   <Stack isInline spacing={0} align="center">
                     <Text as="span">{t('More details')}</Text>
-                    <Icon
-                      name="chevron-down"
-                      boxSize={4}
-                      transform="rotate(-90deg)"
-                    />
+                    <ChevronRightIcon boxSize="4" />
                   </Stack>
                 </TextLink>
               </Box>
@@ -307,9 +304,9 @@ export function ValidationReportGaugeBar({value, bg, color}) {
 }
 
 export function ValidationReportGaugeIcon({
-  icon,
   bg = 'gray.50',
   color = 'muted',
+  as,
   ...props
 }) {
   return (
@@ -323,7 +320,7 @@ export function ValidationReportGaugeIcon({
       transform="translateX(-50%)"
       {...props}
     >
-      <Icon name={icon} boxSize={5} color={color} />
+      <Icon as={as} boxSize="5" color={color} />
     </Box>
   )
 }

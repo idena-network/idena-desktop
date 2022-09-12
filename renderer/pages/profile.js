@@ -336,7 +336,7 @@ export default function ProfilePage() {
                 pinned message.`)}
                                   </Text>
                                   <OnboardingPopoverContentIconRow
-                                    icon={<TelegramIcon />}
+                                    icon={TelegramIcon}
                                   >
                                     <Box>
                                       <PrimaryButton

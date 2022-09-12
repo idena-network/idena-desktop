@@ -11,7 +11,6 @@ import {
   Heading,
   List,
   ListItem,
-  Icon,
   useDisclosure,
   RadioGroup,
   Radio,
@@ -81,6 +80,7 @@ import {viewVotingHref} from '../../screens/oracles/utils'
 import {useFork} from '../../screens/hardfork/hooks'
 import {AdBanner} from '../../screens/ads/containers'
 import {useRotatingAds} from '../../screens/ads/hooks'
+import {ChevronRightIcon, GithubIcon} from './icons'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -876,7 +876,7 @@ function ForkScreen({
                 }}
               >
                 <Stack isInline align="center">
-                  <Icon name="github" boxSize={4} color="blue.500" />
+                  <GithubIcon boxSize="4" color="blue.500" />
                   <Text>{t('Check on Github')}</Text>
                 </Stack>
               </SecondaryButton>
@@ -905,11 +905,7 @@ function ForkScreen({
                 }}
               >
                 {t('Activate mining status')}
-                <Icon
-                  name="chevron-down"
-                  boxSize={4}
-                  transform="rotate(-90deg)"
-                />
+                <ChevronRightIcon boxSize="4" />
               </PrimaryButton>
             </Box>
           )}

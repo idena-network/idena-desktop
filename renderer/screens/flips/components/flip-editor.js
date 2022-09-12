@@ -13,12 +13,12 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  Icon,
   SimpleGrid,
   Portal,
   IconButton,
   Button,
   useTheme,
+  Icon,
 } from '@chakra-ui/react'
 import {useInterval} from '../../../shared/hooks/use-interval'
 import {
@@ -39,7 +39,10 @@ import {useSuccessToast} from '../../../shared/hooks/use-toast'
 import {
   AddImageIcon,
   BasketIcon,
+  ClipboardIcon,
+  CopyIcon,
   CropIcon,
+  DeleteIcon,
   DrawIcon,
   EraserIcon,
   FolderIcon,
@@ -708,7 +711,7 @@ export default function FlipEditor({
                       setShowImageSearch(true)
                     }}
                   >
-                    <FlipEditorMenuItemIcon name="search" />
+                    <FlipEditorMenuItemIcon as={SearchIcon} />
                     {t('Search on web')}
                   </FlipEditorMenuItem>
                   <FlipEditorMenuItem
@@ -717,7 +720,7 @@ export default function FlipEditor({
                       uploaderRef.current.click()
                     }}
                   >
-                    <FlipEditorMenuItemIcon name="folder" />
+                    <FlipEditorMenuItemIcon as={FolderIcon} />
                     {t('Select file')}
                   </FlipEditorMenuItem>
                   <FlipEditorMenuItem
@@ -725,7 +728,7 @@ export default function FlipEditor({
                       handleImageFromClipboard(INSERT_OBJECT_IMAGE)
                     }}
                   >
-                    <FlipEditorMenuItemIcon name="clipboard" />
+                    <FlipEditorMenuItemIcon as={ClipboardIcon} />
                     {t('Paste image')}
                   </FlipEditorMenuItem>
                 </FlipEditorMenuList>
@@ -1108,12 +1111,12 @@ function EditorContextMenu({
     <Menu {...props}>
       <FlipEditorMenuList position="absolute" top={y} left={x} zIndex="popover">
         <FlipEditorMenuItem onClick={onCopy}>
-          <FlipEditorMenuItemIcon name="copy" />
+          <FlipEditorMenuItemIcon as={CopyIcon} />
           {`${t('Copy')} (${global.isMac ? 'Cmd+C' : 'Ctrl+C'})`}
         </FlipEditorMenuItem>
 
         <FlipEditorMenuItem onClick={onPaste}>
-          <FlipEditorMenuItemIcon name="clipboard" />
+          <FlipEditorMenuItemIcon as={ClipboardIcon} />
           {`${t('Paste image')} (${global.isMac ? 'Cmd+V' : 'Ctrl+V'})`}
         </FlipEditorMenuItem>
 
@@ -1122,7 +1125,7 @@ function EditorContextMenu({
           onClick={onDelete}
           color="red.500"
         >
-          <FlipEditorMenuItemIcon name="delete" />
+          <FlipEditorMenuItemIcon as={DeleteIcon} />
           {t('Delete')}
         </FlipEditorMenuItem>
       </FlipEditorMenuList>
@@ -1335,7 +1338,7 @@ function FlipEditorMenuItem({children, ...props}) {
 }
 
 function FlipEditorMenuItemIcon(props) {
-  return <Icon boxSize={5} color="blue.500" {...props} />
+  return <Icon boxSize="5" color="blue.500" {...props} />
 }
 
 function DrawingToolbarButton(props) {

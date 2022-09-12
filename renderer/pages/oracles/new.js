@@ -6,7 +6,6 @@ import {
   Collapse,
   useDisclosure,
   useToast,
-  Icon,
   Flex,
   CloseButton,
   FormErrorMessage,
@@ -62,6 +61,7 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import Layout from '../../shared/components/layout'
 import {useChainState} from '../../shared/providers/chain-context'
+import {ChevronDownIcon, ChevronUpIcon} from '../../shared/components/icons'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
@@ -415,14 +415,11 @@ function NewVotingPage() {
                 onClick={onToggleAdvanced}
               >
                 {t('Advanced settings')}
-                <Icon
-                  boxSize={5}
-                  name="chevron-down"
-                  color="muted"
-                  ml={1}
-                  transform={isOpenAdvanced ? 'rotate(180deg)' : ''}
-                  transition="all 0.2s ease-in-out"
-                />
+                {isOpenAdvanced ? (
+                  <ChevronUpIcon boxSize="5" color="muted" ml="1" />
+                ) : (
+                  <ChevronDownIcon boxSize="5" color="muted" ml="1" />
+                )}
               </NewVotingFormSubtitle>
 
               <Collapse in={isOpenAdvanced} mt={2}>

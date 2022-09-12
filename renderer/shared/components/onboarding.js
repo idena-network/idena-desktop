@@ -88,11 +88,9 @@ export function OnboardingPopoverContent({
 export function OnboardingPopoverContentIconRow({icon, children, ...props}) {
   return (
     <Stack isInline spacing={4} align="center" {...props}>
-      {typeof icon === 'string' ? (
-        <Icon name={icon} boxSize={5} />
-      ) : (
-        <Box>{icon}</Box>
-      )}
+      <Box>
+        <Icon as={icon} boxSize={5} />
+      </Box>
       <Box color="white">{children}</Box>
     </Stack>
   )

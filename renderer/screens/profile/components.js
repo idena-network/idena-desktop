@@ -13,7 +13,6 @@ import {
   Flex,
   Button,
   Radio,
-  Icon,
   Switch,
   Alert,
   AlertDescription,
@@ -77,6 +76,7 @@ import {useTotalValidationScore} from '../validation-report/hooks'
 import {
   ChevronRightIcon,
   InfoIcon,
+  TelegramIcon,
   UserIcon,
   WalletIcon,
 } from '../../shared/components/icons'
@@ -863,7 +863,7 @@ export function MyIdenaBotAlert({onConnect, onSkip}) {
         <Flex flexGrow={1}>
           <Flex flexGrow={1} alignItems="center" justifyContent="center">
             <Box ml={6}>
-              <Icon name="telegram" boxSize={6} mr={1} />
+              <TelegramIcon boxSize="6" mr="1" />
               {t(`Subscribe to @MyIdenaBot to get personalized notifications based on
         your status`)}
             </Box>

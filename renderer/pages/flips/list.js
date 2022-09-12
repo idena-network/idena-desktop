@@ -211,12 +211,12 @@ export default function FlipListPage() {
                     in the next validation ceremony. Follow step-by-step
                     instructions.`)}
                   </Text>
-                  <OnboardingPopoverContentIconRow icon={<RewardIcon />}>
+                  <OnboardingPopoverContentIconRow icon={RewardIcon}>
                     {t(
                       `You'll get rewarded for every successfully qualified flip.`
                     )}
                   </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={<PenaltyIcon />}>
+                  <OnboardingPopoverContentIconRow icon={PenaltyIcon}>
                     {t(`Read carefully "What is a bad flip" rules to avoid
                       penalty.`)}
                   </OnboardingPopoverContentIconRow>

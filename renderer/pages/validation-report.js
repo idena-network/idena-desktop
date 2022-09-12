@@ -3,7 +3,6 @@ import {
   CloseButton,
   Flex,
   Heading,
-  Icon,
   Skeleton,
   Stack,
   Text,
@@ -36,7 +35,11 @@ import {
   SuccessAlert,
   TextLink,
 } from '../shared/components/components'
-import {SendOutIcon, TimerIcon} from '../shared/components/icons'
+import {
+  ChevronRightIcon,
+  SendOutIcon,
+  TimerIcon,
+} from '../shared/components/icons'
 import Layout from '../shared/components/layout'
 import {Table, TableHeaderCol} from '../shared/components/table'
 import {useEpochState} from '../shared/providers/epoch-context'
@@ -149,7 +152,7 @@ export default function ValidationReport() {
                           bg={colors.brandGray['005']}
                         />
                       )}
-                      <ValidationReportGaugeIcon icon={<TimerIcon />} />
+                      <ValidationReportGaugeIcon as={TimerIcon} />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
                       <Skeleton
@@ -256,7 +259,7 @@ export default function ValidationReport() {
                           bg={colors.brandGray['005']}
                         />
                       )}
-                      <ValidationReportGaugeIcon icon={<SendOutIcon />} />
+                      <ValidationReportGaugeIcon as={SendOutIcon} />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
                       <Skeleton
@@ -402,10 +405,7 @@ export default function ValidationReport() {
                       <ValidationReportColumn display={['none', 'table-cell']}>
                         <TextLink href="/profile?replenishStake">
                           {t('Add stake')}
-                          <Icon
-                            name="chevron-down"
-                            transform="rotate(-90deg)"
-                          />
+                          <ChevronRightIcon />
                         </TextLink>
                       </ValidationReportColumn>
                     </tr>

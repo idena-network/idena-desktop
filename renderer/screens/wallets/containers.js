@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Flex,
-  Icon,
   Stack,
   Stat,
   StatLabel,
@@ -44,6 +43,7 @@ import {
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  ExclamationMarkIcon,
   LockIcon,
   ReceiveIcon,
   SendOutIcon,
@@ -468,7 +468,7 @@ function WalletTxStatus({
                 <Tooltip
                   label={`${t('Smart contract failed')}: ${receipt?.error}`}
                 >
-                  <Icon name="exclamation-mark" color="red.500" boxSize={5} />
+                  <ExclamationMarkIcon boxSize="5" color="red.500" />
                 </Tooltip>
               )}
             </Stack>
