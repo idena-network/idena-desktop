@@ -99,7 +99,7 @@ const createMainWindow = () => {
     show: false,
   })
 
-  loadRoute(mainWindow, 'profile')
+  loadRoute(mainWindow, 'home')
 
   // Protocol handler for win32 and linux
   // eslint-disable-next-line no-cond-assign

@@ -3,7 +3,7 @@ import React from 'react'
 import NextLink from 'next/link'
 import {
   SimpleGrid,
-  Image as ChakraImage,
+  Image,
   Text,
   Box,
   Flex,
@@ -208,13 +208,13 @@ export function FlipCard({flipService, onDelete}) {
 
 export function FlipCardImage(props) {
   return (
-    <ChakraImage
+    <Image
       objectFit="cover"
-      borderWidth="1px"
-      borderColor="brandGray.016"
-      // boxShadow={`0 0 0 1px ${colors.brandGray['016']}`}
+      border="solid 1px"
+      borderColor="gray.016"
       rounded="lg"
       height="full"
+      ignoreFallback
       {...props}
     />
   )
@@ -760,7 +760,7 @@ export function FlipProtectStep({
           ))}
         </FlipImageList>
         <Box>
-          <ChakraImage
+          <Image
             h="330px"
             w="440px"
             borderRadius="8px"
@@ -1062,7 +1062,7 @@ export function FlipImage({
       {...props}
     >
       {src ? (
-        <ChakraImage
+        <Image
           src={src}
           objectFit={objectFit}
           fallbackSrc="/static/flips-cant-icn.svg"
@@ -1408,9 +1408,9 @@ export function PublishFlipDrawer({isPending, flip, onSubmit, ...props}) {
               {flip.originalOrder.map((num, idx) => (
                 <FlipImageListItem
                   key={num}
-                  src={flip?.images[num]}
+                  src={flip?.protectedImages[num]}
                   isFirst={idx === 0}
-                  isLast={idx === flip?.images.length - 1}
+                  isLast={idx === flip?.protectedImages.length - 1}
                   w="24"
                 />
               ))}
@@ -1419,9 +1419,9 @@ export function PublishFlipDrawer({isPending, flip, onSubmit, ...props}) {
               {flip.order.map((num, idx) => (
                 <FlipImageListItem
                   key={num}
-                  src={flip?.images[num]}
+                  src={flip?.protectedImages[num]}
                   isFirst={idx === 0}
-                  isLast={idx === flip?.images.length - 1}
+                  isLast={idx === flip?.protectedImages.length - 1}
                   w="24"
                 />
               ))}

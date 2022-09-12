@@ -22,6 +22,7 @@ import {
   FlipSubmitStep,
   CommunityTranslationUnavailable,
   FlipProtectStep,
+  PublishFlipDrawer,
 } from '../../screens/flips/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
 import {flipMasterMachine} from '../../screens/flips/machines'
@@ -44,6 +45,8 @@ import {BadFlipDialog} from '../../screens/validation/components'
 import {requestDb} from '../../shared/utils/db'
 import {useFailToast} from '../../shared/hooks/use-toast'
 import {InfoIcon, RefreshIcon} from '../../shared/components/icons'
+import {useTrackTx} from '../../screens/ads/hooks'
+import {eitherState} from '../../shared/utils/utils'
 
 export default function NewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -126,10 +129,13 @@ export default function NewFlipPage() {
     showTranslation,
     isCommunityTranslationsExpanded,
     didShowBadFlip,
+    txHash,
   } = current.context
 
   const not = state => !current.matches({editing: state})
   const is = state => current.matches({editing: state})
+  const either = (...states) =>
+    eitherState(current, ...states.map(s => ({editing: s})))
 
   const isOffline = is('keywords.loaded.fetchTranslationsFailed')
 
@@ -138,6 +144,15 @@ export default function NewFlipPage() {
     onOpen: onOpenBadFlipDialog,
     onClose: onCloseBadFlipDialog,
   } = useDisclosure()
+
+  const publishDrawerDisclosure = useDisclosure()
+
+  useTrackTx(txHash, {
+    onMined: React.useCallback(() => {
+      send({type: 'FLIP_MINED'})
+      router.push('/flips/list')
+    }, [router, send]),
+  })
 
   return (
     <Layout>
@@ -370,7 +385,7 @@ export default function NewFlipPage() {
                   failToast('Can not submit flip. Node is offline')
                   return
                 }
-                send('SUBMIT')
+                publishDrawerDisclosure.onOpen()
               }}
             >
               {t('Submit')}
@@ -388,6 +403,20 @@ export default function NewFlipPage() {
             await global.sub(requestDb(), 'flips').put('didShowBadFlip', 1)
             send('SKIP_BAD_FLIP')
             onCloseBadFlipDialog()
+          }}
+        />
+
+        <PublishFlipDrawer
+          {...publishDrawerDisclosure}
+          isPending={either('submit.submitting', 'submit.mining')}
+          flip={{
+            keywords: showTranslation ? keywords.translations : keywords.words,
+            protectedImages,
+            originalOrder,
+            order,
+          }}
+          onSubmit={() => {
+            send('SUBMIT')
           }}
         />
 
