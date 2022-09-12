@@ -104,12 +104,16 @@ export function WalletCard({
             <LockIcon boxSize="4" color="muted" />
           ) : (
             <WalletCardMenu>
-              <WalletCardMenuItem onClick={onSend}>
-                <SendOutIcon />
+              <WalletCardMenuItem
+                icon={<SendOutIcon boxSize="4" color="blue.500" />}
+                onClick={onSend}
+              >
                 {t('Send')}
               </WalletCardMenuItem>
-              <WalletCardMenuItem onClick={onReceive}>
-                <ReceiveIcon />
+              <WalletCardMenuItem
+                icon={<ReceiveIcon boxSize="4" color="blue.500" />}
+                onClick={onReceive}
+              >
                 {t('Receive')}
               </WalletCardMenuItem>
             </WalletCardMenu>

@@ -16,11 +16,10 @@ import {
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 
-export function OnboardingPopover({children, ...props}) {
+export function OnboardingPopover({isOpen, children, ...props}) {
   return (
     <>
-      {/* eslint-disable-next-line react/destructuring-assignment */}
-      {props.isOpen && (
+      {isOpen && (
         <Box
           bg="xblack.080"
           position="fixed"
@@ -31,7 +30,7 @@ export function OnboardingPopover({children, ...props}) {
           zIndex={2}
         />
       )}
-      <Popover closeOnBlur={false} {...props}>
+      <Popover closeOnBlur={false} isOpen={isOpen} {...props}>
         {children}
       </Popover>
     </>
@@ -41,6 +40,7 @@ export function OnboardingPopover({children, ...props}) {
 export function OnboardingPopoverContent({
   title,
   additionFooterActions,
+  isOpen,
   children,
   onDismiss,
   ...props
@@ -56,6 +56,7 @@ export function OnboardingPopoverContent({
         px={3}
         py={2}
         zIndex="popover"
+        display={isOpen ? 'block' : 'none'}
         {...props}
       >
         <PopoverArrow bg="blue.500" boxShadow="none !important" />

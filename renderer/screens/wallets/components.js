@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react'
 import {
-  Box,
   Flex,
   FormControl,
   Heading,
@@ -20,14 +19,14 @@ export function WalletCardMenu({children, ...props}) {
     <Menu autoSelect={false} placement="bottom-end" {...props}>
       <MenuButton
         rounded="md"
-        p="3/2"
-        mt={-2}
-        mr={-2}
+        p="1.5"
+        mt="-2"
+        mr="-2"
         _expanded={{bg: 'gray.100'}}
         _focus={{outline: 0}}
         zIndex="dropdown"
       >
-        <Flex align="center" justify="center" w={3}>
+        <Flex align="center" justify="center" w="3">
           <MoreIcon boxSize="5" />
         </Flex>
       </MenuButton>
@@ -44,25 +43,19 @@ export function WalletCardMenu({children, ...props}) {
   )
 }
 
-export function WalletCardMenuItem({children, ...props}) {
+export function WalletCardMenuItem(props) {
   return (
     <MenuItem
-      color="brandGray.500"
+      color="gray.500"
       fontWeight={500}
-      px={3}
-      py={2}
+      px="3"
+      py="2"
       _hover={{bg: 'gray.50'}}
       _focus={{bg: 'gray.50'}}
       _selected={{bg: 'gray.50'}}
       _active={{bg: 'gray.50'}}
       {...props}
-    >
-      <Stack isInline spacing={2} align="center">
-        {React.Children.map(children, child => (
-          <Box>{child}</Box>
-        ))}
-      </Stack>
-    </MenuItem>
+    />
   )
 }
 
