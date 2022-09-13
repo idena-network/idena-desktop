@@ -66,10 +66,13 @@ export default function LotteryPage() {
             color="white"
             onClick={() => {
               if (identity && epoch) {
-                sessionStorage.setItem('didCloseLotteryScreen', {
-                  address: identity.address,
-                  epoch: epoch.epoch,
-                })
+                sessionStorage.setItem(
+                  'didCloseLotteryScreen',
+                  JSON.stringify({
+                    address: identity.address,
+                    epoch: epoch.epoch,
+                  })
+                )
               }
             }}
           />

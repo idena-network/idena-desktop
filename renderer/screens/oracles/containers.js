@@ -1150,6 +1150,7 @@ export function LaunchDrawer({
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
+        id="launchVoting"
         onSubmit={e => {
           e.preventDefault()
 
@@ -1192,16 +1193,19 @@ export function LaunchDrawer({
             value={dna(ownerRefund)}
           />
         </OracleFormControl>
+      </OracleDrawerBody>
+      <DrawerFooter>
         <PrimaryButton
+          type="submit"
+          form="launchVoting"
           isLoading={isLoading}
           loadingText={t('Launching')}
-          type="submit"
           mt={3}
           ml="auto"
         >
           {t('Launch')}
         </PrimaryButton>
-      </OracleDrawerBody>
+      </DrawerFooter>
     </AdDrawer>
   )
 }
@@ -1222,6 +1226,7 @@ export function ProlongDrawer({
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
+        id="prolongVoting"
         onSubmit={e => {
           e.preventDefault()
           const {fromInput} = e.target.elements
@@ -1241,17 +1246,19 @@ export function ProlongDrawer({
             value={toLocaleDna(i18n.language)(available)}
           />
         </OracleFormControl>
-
+      </OracleDrawerBody>
+      <DrawerFooter>
         <PrimaryButton
+          type="submit"
+          form="prolongVoting"
           isLoading={isLoading}
           loadingText={t('Prolonging')}
-          type="submit"
           mt={3}
           ml="auto"
         >
           {t('Prolong')}
         </PrimaryButton>
-      </OracleDrawerBody>
+      </DrawerFooter>
     </AdDrawer>
   )
 }
