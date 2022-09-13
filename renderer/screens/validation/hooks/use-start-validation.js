@@ -35,7 +35,22 @@ export function useAutoStartLottery() {
   useInterval(
     () => {
       if (epoch?.currentPeriod === EpochPeriod.FlipLottery) {
-        router.push('/validation/lottery')
+        try {
+          const didCloseLotteryScreen = JSON.parse(
+            sessionStorage.getItem('didCloseLotteryScreen')
+          )
+
+          const isSameIdentityEpoch =
+            didCloseLotteryScreen?.address === identity?.address &&
+            didCloseLotteryScreen?.epoch === epoch?.epoch
+
+          if (!isSameIdentityEpoch) router.push('/validation/lottery')
+        } catch (e) {
+          console.error(e)
+          global.logger.error(e?.message)
+
+          router.push('/validation/lottery')
+        }
       }
     },
     isCandidate ? 1000 : null

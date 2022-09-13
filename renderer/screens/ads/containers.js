@@ -79,8 +79,8 @@ import {
 } from './hooks'
 import {
   AdsIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
   DeleteIcon,
   EditIcon,
   EyeIcon,
@@ -422,7 +422,7 @@ export function AdDrawer({isMining = true, children, ...props}) {
               <IconButton
                 variant="unstyled"
                 color="xwhite.050"
-                icon={<ChevronLeftIcon />}
+                icon={<ArrowLeftIcon boxSize="5" />}
                 _hover={{
                   color: 'white',
                 }}
@@ -434,7 +434,7 @@ export function AdDrawer({isMining = true, children, ...props}) {
               <IconButton
                 variant="unstyled"
                 color="xwhite.050"
-                icon={<ChevronRightIcon transform="rotate(90deg)" />}
+                icon={<ArrowRightIcon boxSize="5" />}
                 _hover={{
                   color: 'white',
                 }}

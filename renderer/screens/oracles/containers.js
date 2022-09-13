@@ -1512,6 +1512,7 @@ export function FinishDrawer({
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
+        id="finishVoting"
         onSubmit={e => {
           e.preventDefault()
           const {fromInput} = e.target.elements
@@ -1537,17 +1538,19 @@ export function FinishDrawer({
             value={toLocaleDna(i18n.language)(available)}
           />
         </OracleFormControl>
-
+      </OracleDrawerBody>
+      <DrawerFooter>
         <PrimaryButton
+          type="submit"
+          form="finishVoting"
           isLoading={isLoading}
           loadingText={t('Claiming')}
-          type="submit"
           mt={3}
           ml="auto"
         >
           {isVotingFailed ? t('Claim refunds') : t('Claim rewards')}
         </PrimaryButton>
-      </OracleDrawerBody>
+      </DrawerFooter>
     </AdDrawer>
   )
 }
@@ -1567,6 +1570,7 @@ export function TerminateDrawer({
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
+        id="terminateVoting"
         onSubmit={e => {
           e.preventDefault()
           onTerminate()
@@ -1581,17 +1585,19 @@ export function TerminateDrawer({
         <OracleFormControl label={t('Smart contract address')}>
           <Input defaultValue={contractAddress} isDisabled />
         </OracleFormControl>
-
+      </OracleDrawerBody>
+      <DrawerFooter>
         <PrimaryButton
+          type="submit"
+          form="terminateVoting"
           isLoading={isLoading}
           loadingText={t('Terminating')}
-          type="submit"
           mt={3}
           ml="auto"
         >
           {t('Terminate')}
         </PrimaryButton>
-      </OracleDrawerBody>
+      </DrawerFooter>
     </AdDrawer>
   )
 }

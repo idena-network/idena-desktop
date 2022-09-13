@@ -16,6 +16,7 @@ import QrCode from 'qrcode.react'
 import {PrimaryButton} from '../../shared/components/button'
 import {
   Avatar,
+  Drawer,
   DrawerBody,
   DrawerFooter,
   ExternalLink,
@@ -276,13 +277,13 @@ export function ReceiveDnaDrawer({address, ...props}) {
   const {onCopy} = useClipboard(address)
 
   return (
-    <WalletDrawer {...props}>
+    <Drawer {...props}>
       <WalletDrawerHeader title={t('Receive iDNA')}>
         <WalletDrawerHeaderIconBox colorScheme="blue">
           <ReceiveIcon color="blue.500" />
         </WalletDrawerHeaderIconBox>
       </WalletDrawerHeader>
-      <DrawerBody mt={5}>
+      <DrawerBody mt="5">
         <Stack spacing={10}>
           <Box
             boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
@@ -314,7 +315,7 @@ export function ReceiveDnaDrawer({address, ...props}) {
           </WalletDrawerFormControl>
         </Stack>
       </DrawerBody>
-    </WalletDrawer>
+    </Drawer>
   )
 }
 

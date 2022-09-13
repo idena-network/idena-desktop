@@ -65,7 +65,7 @@ export function ValidationAdPromotion() {
       <Stack spacing="4">
         <Box position="relative">
           <AdNavButton
-            icon={<ArrowLeftIcon />}
+            icon={<ArrowLeftIcon boxSize="5" />}
             position="absolute"
             left="-12"
             top="50%"
@@ -101,6 +101,8 @@ export function ValidationAdPromotion() {
                       color="blue.500"
                       fontWeight={500}
                       noOfLines={2}
+                      lineHeight="4"
+                      h="8"
                     >
                       {currentAd?.url}
                     </Link>
@@ -134,7 +136,7 @@ export function ValidationAdPromotion() {
             </Stack>
           </Box>
           <AdNavButton
-            icon={<ArrowRightIcon />}
+            icon={<ArrowRightIcon boxSize="5" />}
             position="absolute"
             right="-12"
             top="50%"

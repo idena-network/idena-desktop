@@ -44,9 +44,10 @@ export default function AdOfferList() {
     <Layout skipBanner>
       <Page>
         <PageHeader>
-          <PageTitle mb={4}>{t('All offers')}</PageTitle>
+          <PageTitle mb={0}>{t('All offers')}</PageTitle>
           <PageCloseButton href="/adn/list" />
         </PageHeader>
+
         <Table>
           <Thead>
             <Tr>
