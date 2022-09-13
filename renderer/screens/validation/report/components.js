@@ -17,16 +17,16 @@ import {
   useTheme,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
-import {SmallText, TextLink} from '../../shared/components/components'
+import {SmallText, TextLink} from '../../../shared/components/components'
 import {
   ChevronRightIcon,
   SendOutIcon,
   TimerIcon,
   TwitterIcon,
-} from '../../shared/components/icons'
-import {TableCol} from '../../shared/components/table'
-import {useIdentity} from '../../shared/providers/identity-context'
-import {toLocaleDna, toPercent} from '../../shared/utils/utils'
+} from '../../../shared/components/icons'
+import {TableCol} from '../../../shared/components/table'
+import {useIdentity} from '../../../shared/providers/identity-context'
+import {toLocaleDna, toPercent} from '../../../shared/utils/utils'
 import {useValidationReportSummary} from './hooks'
 import {ValidationResult} from './types'
 
@@ -197,7 +197,7 @@ export function ValidationReportSummary({onClose}) {
             <Flex justify="space-between">
               <Box>
                 <TextLink
-                  href="/validation-report"
+                  href="/validation/report"
                   fontWeight={500}
                   display="inline-block"
                 >

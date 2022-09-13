@@ -108,7 +108,7 @@ export default function Sidebar({
   )
 }
 
-function Status() {
+export function Status() {
   const {t} = useTranslation()
 
   const {loading, syncing, offline} = useChainState()

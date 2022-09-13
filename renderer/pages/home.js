@@ -70,7 +70,7 @@ import {onboardingShowingStep} from '../shared/utils/onboarding'
 import {createProfileDb} from '../screens/home/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 import {useScroll} from '../shared/hooks/use-scroll'
-import {ValidationReportSummary} from '../screens/validation-report/components'
+import {ValidationReportSummary} from '../screens/validation/report/components'
 import {useIdenaBot, useStakingApy} from '../screens/home/hooks'
 import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
 import {

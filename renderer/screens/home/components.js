@@ -47,7 +47,7 @@ import {
   DialogFooter,
   DialogBody,
   Dialog,
-  FailAlert,
+  ErrorAlert,
   TextLink,
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
@@ -73,7 +73,7 @@ import {getStakingWarning, validateInvitationCode} from './utils'
 import {BLOCK_TIME} from '../oracles/utils'
 import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
-import {useTotalValidationScore} from '../validation-report/hooks'
+import {useTotalValidationScore} from '../validation/report/hooks'
 import {
   ChevronRightIcon,
   InfoIcon,
@@ -564,14 +564,14 @@ export function ActivateMiningDrawer({
               </FormControl>
 
               {pendingUndelegation ? (
-                <FailAlert>
+                <ErrorAlert>
                   {t(
                     'You have recently disabled delegation. You need to wait for {{count}} epochs to delegate to a new address.',
                     {count: waitForDelegationEpochs}
                   )}
-                </FailAlert>
+                </ErrorAlert>
               ) : (
-                <FailAlert>
+                <ErrorAlert>
                   <Text>
                     {t(
                       'You can lose your stake, all your mining and validation rewards if you delegate your mining status.'
@@ -582,7 +582,7 @@ export function ActivateMiningDrawer({
                       'Disabling delegation could be done at the next epoch only.'
                     )}
                   </Text>
-                </FailAlert>
+                </ErrorAlert>
               )}
             </Stack>
           ) : (
@@ -1064,7 +1064,7 @@ export function ProfileTagList() {
                       {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
                     </Text>
                     <TextLink
-                      href="/validation-report"
+                      href="/validation/report"
                       color="white"
                       lineHeight="4"
                     >
@@ -1474,7 +1474,7 @@ export function StakingAlert(props) {
   const warning = useStakingAlert()
 
   return warning ? (
-    <FailAlert {...props}>
+    <ErrorAlert {...props}>
       {Array.isArray(warning) ? (
         <Stack spacing={0}>
           {warning.map((message, idx) => (
@@ -1486,6 +1486,6 @@ export function StakingAlert(props) {
       ) : (
         warning
       )}
-    </FailAlert>
+    </ErrorAlert>
   ) : null
 }

@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, {useEffect, useMemo, useRef, useState} from 'react'
+import React, {useEffect, useRef} from 'react'
 import {
   Box,
   Flex,
@@ -21,19 +21,14 @@ import {
   Tooltip,
   ModalBody,
 } from '@chakra-ui/react'
-import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
-import {useRouter} from 'next/router'
-import {State} from 'xstate'
+import durationPlugin from 'dayjs/plugin/duration'
 import useHover from '@react-hook/hover'
 import mousetrap from 'mousetrap'
 import {reorderList} from '../../shared/utils/arr'
 import {rem} from '../../shared/theme'
-import {loadValidationStateDefinition} from './utils'
-import {EpochPeriod, RelevanceType} from '../../shared/types'
-import {useTimingState} from '../../shared/providers/timing-context'
-import {createTimerMachine} from '../../shared/machines'
+import {RelevanceType} from '../../shared/types'
 import {
   EmptyFlipImage,
   FlipKeywordPanel,
@@ -43,8 +38,6 @@ import {
   Dialog,
   DialogBody,
   DialogFooter,
-  Snackbar,
-  Toast,
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {useInterval} from '../../shared/hooks/use-interval'
@@ -60,6 +53,10 @@ import {
   TickIcon,
   ZoomFlipIcon,
 } from '../../shared/components/icons'
+import {adjustDurationInSeconds} from './machine'
+import {useTimer} from '../../shared/hooks/use-timer'
+
+dayjs.extend(durationPlugin)
 
 const Scroll = require('react-scroll')
 
@@ -785,15 +782,15 @@ export function WelcomeKeywordsQualificationDialog(props) {
 }
 
 export function ValidationTimer({validationStart, duration, color}) {
-  const endTime = useMemo(() => dayjs(validationStart).add(duration, 's'), [
-    duration,
-    validationStart,
-  ])
+  const adjustedDuration = React.useMemo(
+    () => adjustDurationInSeconds(validationStart, duration) * 1000,
+    [duration, validationStart]
+  )
 
   return (
     <Timer>
       <TimerIcon color="red.500" />
-      <TimerClock2 endTime={endTime} color={color || 'red.500'} />
+      <TimerClock duration={adjustedDuration} color={color} />
     </Timer>
   )
 }
@@ -818,49 +815,13 @@ export function TimerIcon(props) {
 }
 
 export function TimerClock({duration, color}) {
-  const [state, send] = useMachine(
-    useMemo(() => createTimerMachine(duration), [duration])
-  )
-
-  React.useEffect(() => {
-    send('DURATION_UPDATE', {duration})
-  }, [duration, send])
-
-  const {elapsed} = state.context
-  const remaining = duration - elapsed
+  const [{remaining, isStopped, isRunning}] = useTimer(duration)
 
   return (
     <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: 37}}>
-      <Text color={color} fontSize="md" fontWeight={600}>
-        {state.matches('stopped') && '00:00'}
-        {state.matches('running') &&
-          [Math.floor(remaining / 60), remaining % 60]
-            .map(t => t.toString().padStart(2, 0))
-            .join(':')}
-      </Text>
-    </Box>
-  )
-}
-
-export function TimerClock2({endTime, color}) {
-  const [state, setState] = useState(0)
-
-  useInterval(
-    () => {
-      setState(dayjs(endTime).diff(dayjs(), 's'))
-    },
-    state >= 0 ? 1000 : null,
-    true
-  )
-
-  return (
-    <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: 37}}>
-      <Text color={color} fontSize="md" fontWeight={600}>
-        {state <= 0 && '00:00'}
-        {state > 0 &&
-          [Math.floor(state / 60), state % 60]
-            .map(t => t.toString().padStart(2, 0))
-            .join(':')}
+      <Text color={color ?? 'red.500'} fontSize="md" fontWeight={600}>
+        {isStopped && '00:00'}
+        {isRunning && dayjs.duration(remaining).format('mm:ss')}
       </Text>
     </Box>
   )
@@ -939,121 +900,6 @@ function ValidationDialogFooter({submitText, onSubmit, props}) {
     <DialogFooter {...props}>
       <PrimaryButton onClick={onSubmit}>{submitText}</PrimaryButton>
     </DialogFooter>
-  )
-}
-
-export function ValidationToast({epoch: {currentPeriod, nextValidation}}) {
-  switch (currentPeriod) {
-    case EpochPeriod.FlipLottery:
-      return <ValidationSoonToast validationStart={nextValidation} />
-    case EpochPeriod.ShortSession:
-    case EpochPeriod.LongSession:
-      return (
-        <ValidationRunningToast
-          key={currentPeriod}
-          currentPeriod={currentPeriod}
-          validationStart={nextValidation}
-        />
-      )
-    case EpochPeriod.AfterLongSession:
-      return <AfterLongSessionToast />
-    default:
-      return null
-  }
-}
-
-export function ValidationSoonToast({validationStart}) {
-  const timerMachine = React.useMemo(
-    () => createTimerMachine(dayjs(validationStart).diff(dayjs(), 's')),
-    [validationStart]
-  )
-
-  const [
-    {
-      context: {duration},
-    },
-  ] = useMachine(timerMachine)
-
-  const {t} = useTranslation()
-
-  return (
-    <Snackbar>
-      <Toast
-        bg="red.500"
-        color="white"
-        title={<TimerClock duration={duration} color="white" />}
-        description={t('Idena validation will start soon')}
-        duration={null}
-      />
-    </Snackbar>
-  )
-}
-
-export function ValidationRunningToast({currentPeriod, validationStart}) {
-  const {shortSession, longSession} = useTimingState()
-  const sessionDuration =
-    currentPeriod === EpochPeriod.ShortSession
-      ? shortSession
-      : shortSession + longSession
-
-  const validationStateDefinition = loadValidationStateDefinition()
-  const done = validationStateDefinition
-    ? State.create(validationStateDefinition).done
-    : false
-
-  const router = useRouter()
-
-  const {t} = useTranslation()
-
-  const timerMachine = React.useMemo(
-    () =>
-      createTimerMachine(
-        dayjs(validationStart)
-          .add(sessionDuration, 's')
-          .diff(dayjs(), 's')
-      ),
-    [validationStart, sessionDuration]
-  )
-
-  const [
-    {
-      context: {duration},
-    },
-  ] = useMachine(timerMachine)
-
-  return (
-    <Snackbar>
-      <Toast
-        bg={done ? 'green.500' : 'blue.500'}
-        color="white"
-        actionColor="white"
-        title={<TimerClock duration={duration} color="white" />}
-        description={
-          done
-            ? t('Waiting for the end of {{currentPeriod}}', {currentPeriod})
-            : t('Idena validation is in progress')
-        }
-        onAction={() => router.push('/validation')}
-        actionName={done ? null : t('Validate')}
-        duration={null}
-      />
-    </Snackbar>
-  )
-}
-
-export function AfterLongSessionToast() {
-  const {t} = useTranslation()
-  return (
-    <Snackbar>
-      <Toast
-        bg="green.500"
-        color="white"
-        title={t(
-          'Please wait. The network is reaching consensus on validated identities'
-        )}
-        duration={null}
-      />
-    </Snackbar>
   )
 }
 

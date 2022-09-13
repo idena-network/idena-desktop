@@ -467,6 +467,44 @@ export const theme = {
         },
       },
     },
+    Alert: {
+      variants: {
+        validation: ({colorScheme}) => ({
+          container: {
+            bg: `${colorScheme}.500`,
+            color: 'white',
+            borderRadius: 'lg',
+            boxShadow:
+              '0 3px 12px 0 rgba(255, 102, 102, 0.1), 0 2px 3px 0 rgba(255, 102, 102, 0.2)',
+            px: '4',
+            py: '1',
+            minH: '42px',
+          },
+          title: {
+            fontSize: 'md',
+            fontWeight: 400,
+            lineHeight: '5',
+            marginEnd: ['2', '6'],
+            maxW: ['48', 'none'],
+          },
+          description: {
+            lineHeight: '5',
+          },
+          icon: {
+            flexShrink: 0,
+            marginEnd: '3',
+            w: '5',
+            h: '5',
+          },
+          spinner: {
+            flexShrink: 0,
+            marginEnd: '3',
+            w: '5',
+            h: '5',
+          },
+        }),
+      },
+    },
   },
 }
 

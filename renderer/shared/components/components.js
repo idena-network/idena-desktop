@@ -457,7 +457,7 @@ export function SuccessAlert({children, ...props}) {
   )
 }
 
-export function FailAlert({children, ...props}) {
+export function ErrorAlert({children, ...props}) {
   return (
     <Alert
       status="error"
@@ -469,8 +469,8 @@ export function FailAlert({children, ...props}) {
       fontSize="md"
       fontWeight={500}
       rounded="md"
-      px={3}
-      py={2}
+      px="3"
+      py="2"
       {...props}
     >
       <InfoIcon color="red.500" boxSize="5" mr="3" />

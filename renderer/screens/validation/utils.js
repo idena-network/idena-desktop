@@ -111,7 +111,7 @@ export function clearValidationState() {
 // - Epoch is fetched AND is SHORT SESSION BUT NOT VALID IDENTITY do NOTHING
 // - Epoch is fetched AND is SHORT SESSION AND IDENTITY IS VALID go further
 //
-// TODO: add tests you cowards 👊
+// TODO: add tests
 export function shouldStartValidation(epoch, identity) {
   const isValidationRunning =
     epoch &&

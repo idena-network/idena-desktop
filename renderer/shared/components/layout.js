@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {useRouter} from 'next/router'
 import {Trans, useTranslation} from 'react-i18next'
 import {
   Flex,
@@ -31,8 +30,6 @@ import NextLink from 'next/link'
 import Sidebar from './sidebar'
 import {useDebounce} from '../hooks/use-debounce'
 import {useEpochState} from '../providers/epoch-context'
-import {shouldStartValidation} from '../../screens/validation/utils'
-import {useIdentityState} from '../providers/identity-context'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {
   DnaSignInDialog,
@@ -41,7 +38,6 @@ import {
   DnaSendFailedDialog,
   DnaSendSucceededDialog,
 } from '../../screens/dna/containers'
-import {ValidationToast} from '../../screens/validation/components'
 import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
@@ -81,6 +77,12 @@ import {useFork} from '../../screens/hardfork/hooks'
 import {AdBanner} from '../../screens/ads/containers'
 import {useRotatingAds} from '../../screens/ads/hooks'
 import {ChevronRightIcon, GithubIcon} from './icons'
+import {
+  useAutoStartLottery,
+  useAutoStartValidation,
+} from '../../screens/validation/hooks/use-start-validation'
+import {useValidationToast} from '../../screens/validation/hooks/use-validation-toast'
+import {useIdentityState} from '../providers/identity-context'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -272,15 +274,12 @@ function LayoutContainer(props) {
 function NormalApp({skipBanner, children}) {
   const {t} = useTranslation()
 
-  const router = useRouter()
-
   const epoch = useEpochState()
 
-  const identity = useIdentityState()
+  useAutoStartLottery()
+  useAutoStartValidation()
 
-  React.useEffect(() => {
-    if (shouldStartValidation(epoch, identity)) router.push('/validation')
-  }, [epoch, identity, router])
+  useValidationToast()
 
   const [
     validationNotificationEpoch,
@@ -363,8 +362,6 @@ function NormalApp({skipBanner, children}) {
       {hasRotatingAds && !skipBanner && <AdBanner />}
 
       {children}
-
-      {epoch && <ValidationToast epoch={epoch} identity={identity} />}
 
       <DnaSendDialog
         {...dnaSendParams}

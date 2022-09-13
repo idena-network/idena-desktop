@@ -1,7 +1,7 @@
 import {useMachine} from '@xstate/react'
 import React from 'react'
-import {useEpochState} from '../../shared/providers/epoch-context'
-import {useIdentity} from '../../shared/providers/identity-context'
+import {useEpochState} from '../../../shared/providers/epoch-context'
+import {useIdentity} from '../../../shared/providers/identity-context'
 import {validationReportMachine} from './machines'
 
 export function useTotalValidationScore() {

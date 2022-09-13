@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react'
 import router from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {UserInlineCard} from '../screens/home/components'
+import {UserInlineCard} from '../../screens/home/components'
 import {
   TableValidationDesc,
   ValidationReportBlockOverview,
@@ -24,28 +24,28 @@ import {
   ValidationReportGaugeStatLabel,
   ValidationReportGaugeStatValue,
   ValidationReportStat,
-} from '../screens/validation-report/components'
-import {useValidationReportSummary} from '../screens/validation-report/hooks'
-import {ValidationResult} from '../screens/validation-report/types'
+} from '../../screens/validation/report/components'
+import {useValidationReportSummary} from '../../screens/validation/report/hooks'
+import {ValidationResult} from '../../screens/validation/report/types'
 import {
   ExternalLink,
-  FailAlert,
+  ErrorAlert,
   Page,
   PageTitle,
   SuccessAlert,
   TextLink,
-} from '../shared/components/components'
+} from '../../shared/components/components'
 import {
   ChevronRightIcon,
   SendOutIcon,
   TimerIcon,
-} from '../shared/components/icons'
-import Layout from '../shared/components/layout'
-import {Table, TableHeaderCol} from '../shared/components/table'
-import {useEpochState} from '../shared/providers/epoch-context'
-import {useIdentity} from '../shared/providers/identity-context'
-import {IdentityStatus} from '../shared/types'
-import {toLocaleDna, toPercent} from '../shared/utils/utils'
+} from '../../shared/components/icons'
+import Layout from '../../shared/components/layout'
+import {Table, TableHeaderCol} from '../../shared/components/table'
+import {useEpochState} from '../../shared/providers/epoch-context'
+import {useIdentity} from '../../shared/providers/identity-context'
+import {IdentityStatus} from '../../shared/types'
+import {toLocaleDna, toPercent} from '../../shared/utils/utils'
 
 export default function ValidationReport() {
   const {t, i18n} = useTranslation()
@@ -119,7 +119,7 @@ export default function ValidationReport() {
                     t('Validated')}
                 </SuccessAlert>
               ) : (
-                <FailAlert>{t('Validation failed')}</FailAlert>
+                <ErrorAlert>{t('Validation failed')}</ErrorAlert>
               )}
             </Skeleton>
           </Box>

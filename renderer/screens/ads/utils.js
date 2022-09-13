@@ -244,7 +244,7 @@ function validateAdTitle(title) {
     return i18n.t('Title cannot be empty')
   }
 
-  if (title.trim() > 40) {
+  if (title.trim().length > 40) {
     return i18n.t('Title should be less than 40 characters long')
   }
 }
