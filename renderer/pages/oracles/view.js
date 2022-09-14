@@ -330,11 +330,7 @@ export default function ViewVotingPage() {
                             )}
                           </>
                         ) : (
-                          <Text
-                            noOfLines={1}
-                            lineHeight="tall"
-                            whiteSpace="pre-wrap"
-                          >
+                          <Text lineHeight="tall" whiteSpace="pre-wrap">
                             <Linkify
                               onClick={url => {
                                 send('FOLLOW_LINK', {url})
