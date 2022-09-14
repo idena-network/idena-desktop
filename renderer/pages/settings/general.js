@@ -1,15 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {useTranslation} from 'react-i18next'
-import {
-  Box,
-  Button,
-  Flex,
-  Stack,
-  Text,
-  useDisclosure,
-  useToast,
-} from '@chakra-ui/react'
+import {Box, Flex, Stack, Text, useDisclosure, useToast} from '@chakra-ui/react'
 import SettingsLayout from '../../screens/settings/layout'
 import {useSettingsState} from '../../shared/providers/settings-context'
 import {archiveFlips} from '../../screens/flips/utils'
@@ -19,9 +11,6 @@ import {
   SettingsLinkButton,
 } from '../../screens/settings/components'
 import {
-  DrawerBody,
-  DrawerFooter,
-  DrawerHeader,
   FormLabel,
   HDivider,
   Toast,
@@ -34,7 +23,6 @@ import {
   LocaleSwitcher,
 } from '../../screens/settings/containers'
 import {PrivateKeyIcon} from '../../shared/components/icons'
-import {AdDrawer} from '../../screens/ads/containers'
 
 const {clear: clearFlips} = global.flipStore || {}
 const inviteDb = global.invitesDb || {}
@@ -160,27 +148,8 @@ function Settings() {
         isOpen={isOpenImportPk}
         onClose={onCloseImportPk}
       />
-
-      <AdDrawerTester />
     </SettingsLayout>
   )
 }
 
 export default Settings
-
-function AdDrawerTester() {
-  const disclosure = useDisclosure()
-
-  return (
-    <>
-      <Button onClick={disclosure.onOpen}>brr</Button>
-      <AdDrawer isMining {...disclosure}>
-        <DrawerHeader>Ad drawer</DrawerHeader>
-        <DrawerBody>Here we go</DrawerBody>
-        <DrawerFooter>
-          <Button onClick={disclosure.onClose}>Close</Button>
-        </DrawerFooter>
-      </AdDrawer>
-    </>
-  )
-}
