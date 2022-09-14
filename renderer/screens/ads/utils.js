@@ -351,3 +351,17 @@ export const validateAdVoting = ({ad, voting}) => {
 
   return false
 }
+
+export function calculateTotalAdScore({target, burnAmount}) {
+  return burnAmount * calculateTargetScore(target)
+}
+
+export function calculateTargetScore(target) {
+  return (
+    calculateTargetParamWeight(target?.language, 22) *
+    calculateTargetParamWeight(target?.os, 5)
+  )
+}
+
+export const calculateTargetParamWeight = (param, weight) =>
+  param ? weight : 1

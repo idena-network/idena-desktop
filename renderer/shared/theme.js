@@ -134,6 +134,7 @@ export const theme = {
   },
   sizes: {
     sm: rem(360),
+    mdx: '400px',
     md: rem(480),
   },
   radii: {

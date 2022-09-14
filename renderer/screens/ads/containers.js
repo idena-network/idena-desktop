@@ -81,6 +81,7 @@ import {
   AdsIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
+  ChevronRightIcon,
   DeleteIcon,
   EditIcon,
   EyeIcon,
@@ -107,6 +108,9 @@ import {AVAILABLE_LANGS} from '../../i18n'
 import {
   adFallbackSrc,
   adImageThumbSrc,
+  calculateTargetParamWeight,
+  calculateTargetScore,
+  calculateTotalAdScore,
   compressAdImage,
   isValidImage,
   OS,
@@ -502,9 +506,9 @@ function AdPromotion({cid, title, desc, url, media, author}) {
       rounded="lg"
       px="10"
       py="4"
-      // pb="10"
-      // w="sm"
-      h="xl"
+      pb="10"
+      w="mdx"
+      h="620px"
     >
       <Stack spacing="4">
         <Stack spacing="2">
@@ -518,7 +522,8 @@ function AdPromotion({cid, title, desc, url, media, author}) {
               fontWeight="semibold"
               fontSize="md"
               lineHeight="5"
-              isTruncated
+              maxW="80"
+              noOfLines={1}
             >
               {title}
             </Heading>
@@ -526,7 +531,13 @@ function AdPromotion({cid, title, desc, url, media, author}) {
 
           <Stack spacing="1.5" minH={62}>
             <Skeleton isLoaded={Boolean(desc)} minH={5}>
-              <Text color="muted" fontSize="md" lineHeight="5">
+              <Text
+                color="muted"
+                fontSize="md"
+                lineHeight="5"
+                maxW="80"
+                noOfLines={2}
+              >
                 {desc}
               </Text>
             </Skeleton>
@@ -552,7 +563,7 @@ function AdPromotion({cid, title, desc, url, media, author}) {
               global.openExternal(url)
             }}
           >
-            <AdImage src={media} w="280px" />
+            <AdImage src={media} w="80" />
           </LinkOverlay>
         </LinkBox>
       </Stack>
@@ -1731,6 +1742,8 @@ export function AdOfferListItem({
                 fontSize="sm"
                 fontWeight={500}
                 lineHeight="shorter"
+                w="32"
+                noOfLines={1}
               >
                 {ad.author}
               </Text>
@@ -1739,54 +1752,81 @@ export function AdOfferListItem({
         </HStack>
       </Td>
       <Td borderColor="gray.300">
-        <Link target="_blank" color="blue.500">
+        <Link target="_blank" color="blue.500" maxW="40" noOfLines={2}>
           {ad.url}
         </Link>
       </Td>
       <Td borderColor="gray.300">
         {targetValues.some(Boolean) ? (
-          <>
-            {t('Set')}{' '}
-            <Tooltip
-              label={
-                <InlineAdStatGroup labelWidth="16">
-                  <SmallInlineAdStat
-                    label={t('Language')}
-                    value={ad.language || 'Any'}
-                  />
-                  <SmallInlineAdStat label={t('OS')} value={ad.os || 'Any'} />
-                  <SmallInlineAdStat label={t('Age')} value={ad.age ?? 'Any'} />
-                  <SmallInlineAdStat
-                    label={t('Stake')}
-                    value={ad.stake ?? 'Any'}
-                  />
-                </InlineAdStatGroup>
-              }
-              placement="right-start"
-              arrowSize={8}
-              offset={[-8, 6]}
-            >
-              <Button
-                variant="link"
-                rightIcon={<ChevronRightIcon />}
-                iconSpacing="0"
-                color="blue.500"
-                cursor="pointer"
-                _hover={{
-                  textDecoration: 'none',
-                }}
+          <Stack spacing="1">
+            <Text>{calculateTargetScore(ad)}</Text>
+            <HStack align="baseline" spacing="1">
+              <Text>{t('Set')}</Text>
+              <Tooltip
+                label={
+                  <InlineAdStatGroup labelWidth="16">
+                    <SmallInlineAdStat
+                      label={t('Language')}
+                      value={`${ad.language ||
+                        'Any'} (${calculateTargetParamWeight(
+                        ad.language,
+                        22
+                      )})`}
+                    />
+                    <SmallInlineAdStat
+                      label={t('OS')}
+                      value={`${ad.os || 'Any'} (${calculateTargetParamWeight(
+                        ad.os,
+                        5
+                      )})`}
+                    />
+                    <SmallInlineAdStat
+                      label={t('Age')}
+                      value={ad.age ?? 'Any'}
+                    />
+                    <SmallInlineAdStat
+                      label={t('Stake')}
+                      value={ad.stake ?? 'Any'}
+                    />
+                  </InlineAdStatGroup>
+                }
+                placement="right-start"
+                arrowSize={8}
+                offset={[-8, 6]}
               >
-                {t('{{count}} targets', {
-                  count: targetValues.filter(Boolean).length,
-                })}
-              </Button>
-            </Tooltip>
-          </>
+                <Button
+                  variant="link"
+                  rightIcon={<ChevronRightIcon />}
+                  iconSpacing="0"
+                  color="blue.500"
+                  cursor="pointer"
+                  _hover={{
+                    textDecoration: 'none',
+                  }}
+                >
+                  {t('{{count}} targets', {
+                    count: targetValues.filter(Boolean).length,
+                  })}
+                </Button>
+              </Tooltip>
+            </HStack>
+          </Stack>
         ) : (
-          t('Not set')
+          <Stack spacing="1">
+            <Text>
+              <Text>{calculateTargetScore(ad)}</Text>
+            </Text>
+            <Text>{t('Not set')}</Text>
+          </Stack>
         )}
       </Td>
       <Td borderColor="gray.300">{formatDna(amount)}</Td>
+      <Td borderColor="gray.300">
+        {calculateTotalAdScore({
+          target: decodeAdTarget(target),
+          burnAmount: amount,
+        })}
+      </Td>
       <Td borderColor="gray.300">
         {isSelfAuthor ? (
           <SecondaryButton
