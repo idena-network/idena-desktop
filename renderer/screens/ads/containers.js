@@ -547,6 +547,7 @@ function AdPromotion({cid, title, desc, url, media, author}) {
                 fontWeight="semibold"
                 display="flex"
                 maxW="80"
+                noOfLines={1}
                 textProps={{h: '4', lineHeight: '4'}}
               >
                 {url}
