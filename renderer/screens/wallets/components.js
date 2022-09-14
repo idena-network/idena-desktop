@@ -98,15 +98,11 @@ export function WalletDrawerHeaderIconBox({colorScheme, ...props}) {
   )
 }
 
-export function WalletDrawerForm(props) {
-  return <Flex as="form" direction="column" flex={1} mt={6} {...props} />
-}
-
 export function WalletDrawerFormControl({label, children, ...props}) {
   return (
     <FormControl {...props}>
-      <Stack spacing={2}>
-        {label && <FormLabel p={0}>{label}</FormLabel>}
+      <Stack spacing="2">
+        {label && <FormLabel mb={0}>{label}</FormLabel>}
         {children}
       </Stack>
     </FormControl>

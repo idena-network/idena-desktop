@@ -29,7 +29,6 @@ import {
   WalletCardMenu,
   WalletCardMenuItem,
   WalletDrawer,
-  WalletDrawerForm,
   WalletDrawerFormControl,
   WalletDrawerHeader,
   WalletDrawerHeaderIconBox,
@@ -148,14 +147,17 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
 
   const [state, dispatch] = React.useReducer(
     (prevState, action) => {
-      const {type = typeof action === 'string' && action} = action
+      const {
+        type = typeof action === 'string' && action,
+        ...actionParams
+      } = action
 
       switch (type) {
         case 'submit':
         case 'mine': {
           return {
             ...prevState,
-            ...action,
+            ...actionParams,
             status: 'pending',
           }
         }
@@ -204,69 +206,73 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
           <SendOutIcon color="red.500" />
         </WalletDrawerHeaderIconBox>
       </WalletDrawerHeader>
-      <WalletDrawerForm
-        onSubmit={async e => {
-          e.preventDefault()
+      <DrawerBody>
+        <Box mt="6">
+          <form
+            id="sendDna"
+            onSubmit={async e => {
+              e.preventDefault()
 
-          dispatch('submit')
+              dispatch('submit')
 
-          const {
-            from: {value: from},
-            to: {value: to},
-            amount: {value: amount},
-          } = e.target.elements
+              const {from, to, amount} = Object.fromEntries(
+                new FormData(e.target)
+              )
 
-          if (!isAddress(to)) {
-            return onFail(`Incorrect 'To' address: ${to}`)
-          }
+              if (!isAddress(to)) {
+                return onFail(`Incorrect 'To' address: ${to}`)
+              }
 
-          if (amount <= 0) {
-            return onFail(`Incorrect Amount: ${amount}`)
-          }
+              if (amount <= 0) {
+                return onFail(`Incorrect Amount: ${amount}`)
+              }
 
-          try {
-            const result = await callRpc('dna_sendTransaction', {
-              to,
-              from,
-              amount,
-            })
-            onSend(result)
-            dispatch({type: 'submit', to, amount, hash: result})
-          } catch (error) {
-            dispatch({type: 'error', error: error.message})
-            onFail(error.message)
-          }
-        }}
-      >
-        <DrawerBody>
-          <Stack spacing={6}>
-            <WalletDrawerFormControl label={t('From')}>
-              <Input id="from" value={address} isDisabled />
-            </WalletDrawerFormControl>
-            <WalletDrawerFormControl label={t('To')}>
-              <Input id="to" placeholder={t('Enter address')} />
-            </WalletDrawerFormControl>
-            <WalletDrawerFormControl label={t('Amount, iDNA')} id="amount">
-              <Input
-                type="number"
-                min={0}
-                step="any"
-                id="amount"
-                placeholder={t('Enter amount')}
-              />
-            </WalletDrawerFormControl>
-          </Stack>
-        </DrawerBody>
-        <DrawerFooter>
-          <PrimaryButton
-            type="submit"
-            isLoading={isPending}
-            loadingText={t('Sending')}
+              try {
+                const result = await callRpc('dna_sendTransaction', {
+                  to,
+                  from,
+                  amount,
+                })
+                // eslint-disable-next-line no-unused-expressions
+                onSend?.(result)
+                dispatch({type: 'mine', hash: result})
+              } catch (error) {
+                dispatch({type: 'error', error: error.message})
+                // eslint-disable-next-line no-unused-expressions
+                onFail?.(error.message)
+              }
+            }}
           >
-            {t('Send')}
-          </PrimaryButton>
-        </DrawerFooter>
-      </WalletDrawerForm>
+            <Stack spacing="6">
+              <WalletDrawerFormControl label={t('From')}>
+                <Input name="from" defaultValue={address} isReadOnly />
+              </WalletDrawerFormControl>
+              <WalletDrawerFormControl label={t('To')}>
+                <Input name="to" placeholder={t('Enter address')} />
+              </WalletDrawerFormControl>
+              <WalletDrawerFormControl label={t('Amount, iDNA')}>
+                <Input
+                  type="number"
+                  min={0}
+                  step="any"
+                  name="amount"
+                  placeholder={t('Enter amount')}
+                />
+              </WalletDrawerFormControl>
+            </Stack>
+          </form>
+        </Box>
+      </DrawerBody>
+      <DrawerFooter>
+        <PrimaryButton
+          type="submit"
+          form="sendDna"
+          isLoading={isPending}
+          loadingText={t('Sending')}
+        >
+          {t('Send')}
+        </PrimaryButton>
+      </DrawerFooter>
     </WalletDrawer>
   )
 }
