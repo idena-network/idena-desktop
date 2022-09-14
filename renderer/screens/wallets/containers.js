@@ -48,7 +48,7 @@ import {
   ReceiveIcon,
   SendOutIcon,
 } from '../../shared/components/icons'
-import {useTrackTx} from '../ads/hooks'
+import {useFormatDna, useTrackTx} from '../ads/hooks'
 
 export function TotalAmount({address, amount}) {
   const {t, i18n} = useTranslation()
@@ -328,14 +328,16 @@ export function ReceiveDnaDrawer({address, ...props}) {
 export function WalletTransactionList({txs = []}) {
   const {t} = useTranslation(['translation', 'error'])
 
+  const formatDna = useFormatDna({maximumFractionDigits: 5})
+
   return (
     <Table>
       <thead>
         <TableRow>
-          <TableHeaderCol style={{width: '210px'}}>
+          <TableHeaderCol style={{width: '144px'}}>
             {t('Transaction')}
           </TableHeaderCol>
-          <TableHeaderCol style={{width: '210px'}}>
+          <TableHeaderCol style={{width: '240px'}}>
             {t('Address')}
           </TableHeaderCol>
           <TableHeaderCol>{t('Amount, iDNA')}</TableHeaderCol>
@@ -350,15 +352,15 @@ export function WalletTransactionList({txs = []}) {
             </TableCol>
             <TableCol>
               {(!tx.to && '\u2013') || (
-                <Stack isInline spacing={3} align="center">
+                <Stack isInline spacing="3" align="center">
                   <Avatar
                     address={tx.counterParty}
                     boxSize={8}
                     bg="white"
-                    borderColor="brandGray.016"
-                    borderWidth={1}
+                    border="solid 1px"
+                    borderColor="gray.016"
                   />
-                  <Box w={60}>
+                  <Box w="48">
                     <Text fontWeight={500} whiteSpace="nowrap">
                       {tx.direction === 'Sent' ? t('To') : t('From')}{' '}
                       {/* eslint-disable-next-line no-nested-ternary */}
@@ -398,7 +400,7 @@ export function WalletTransactionList({txs = []}) {
                   <>
                     {Number(tx.usedFee) > 0 && (
                       <SmallText>
-                        {t('Fee')} {tx.usedFee}
+                        {t('Fee')} {formatDna(tx.usedFee)}
                       </SmallText>
                     )}
                   </>
@@ -425,7 +427,7 @@ export function WalletTransactionList({txs = []}) {
                   href={`https://scan.idena.io/transaction/${tx.hash}`}
                   fontSize="sm"
                   isTruncated
-                  w={16}
+                  w="24"
                 >
                   {tx.hash}
                 </ExternalLink>
