@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {
-  AspectRatio,
   Box,
+  Center,
   Image,
   InputGroup,
   InputLeftElement,
@@ -90,13 +90,13 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
 
   return (
     <Dialog
-      size="38rem"
+      size="440"
       initialFocusRef={searchInputRef}
       closeOnOverlayClick={false}
       onClose={onClose}
       {...props}
     >
-      <DialogBody d="flex">
+      <DialogBody display="flex">
         <Stack minH="sm" maxH="sm" spacing={4} flex={1}>
           <Stack
             isInline
@@ -107,8 +107,8 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
             }}
           >
             <InputGroup w="full">
-              <InputLeftElement w={5} h={5} top="3/2" left={3}>
-                <SearchIcon boxSize="3" color="gray.100" />
+              <InputLeftElement w={5} h={5} top="1.5" left={3}>
+                <SearchIcon boxSize="5" color="gray.100" />
               </InputLeftElement>
               <Input
                 ref={searchInputRef}
@@ -124,6 +124,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
             </InputGroup>
             <PrimaryButton type="submit">Search</PrimaryButton>
           </Stack>
+
           {eitherState(current, 'idle') && (
             <FillCenter>
               <Stack spacing={4} align="center" w="3xs">
@@ -138,13 +139,23 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
               </Stack>
             </FillCenter>
           )}
+
           {eitherState(current, 'done') && (
-            <SimpleGrid columns={4} spacing={2} overflow="auto" mx={-6} px={6}>
+            <SimpleGrid
+              columns={4}
+              spacing={2}
+              overflow="auto"
+              px="8"
+              sx={{
+                marginInlineStart: '-32px !important',
+                marginInlineEnd: '-32px !important',
+              }}
+            >
               {images.map(({thumbnail, image}, idx) => (
-                <AspectRatio
+                <Center
                   key={`${image}-${idx}`}
-                  ratio={1}
-                  w={32}
+                  h="88px"
+                  w="88px"
                   bg={thumbnail === selectedImage ? 'blue.032' : 'white'}
                   borderColor={
                     thumbnail === selectedImage ? 'blue.500' : 'gray.50'
@@ -152,7 +163,6 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
                   borderWidth={1}
                   borderRadius="md"
                   overflow="hidden"
-                  position="relative"
                   transition="all 0.6s cubic-bezier(0.16, 1, 0.3, 1)"
                   onClick={() => {
                     send('PICK', {image: thumbnail})
@@ -170,8 +180,9 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
                     }
                     borderWidth={1}
                     borderRadius="md"
+                    w="88px"
                   />
-                </AspectRatio>
+                </Center>
               ))}
             </SimpleGrid>
           )}

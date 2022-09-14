@@ -155,6 +155,11 @@ export const theme = {
             maxW: '400px',
           },
         },
+        440: {
+          dialog: {
+            maxW: '440px',
+          },
+        },
         md: {
           dialog: {
             maxW: '480px',
