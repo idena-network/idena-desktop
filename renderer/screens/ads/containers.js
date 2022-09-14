@@ -505,10 +505,10 @@ function AdPromotion({cid, title, desc, url, media, author}) {
       bg="white"
       rounded="lg"
       px="10"
-      py="4"
-      pb="10"
+      pt="37px"
+      pb="44px"
       w="mdx"
-      h="620px"
+      minH="620px"
     >
       <Stack spacing="4">
         <Stack spacing="2">
@@ -1216,7 +1216,7 @@ export function BurnDrawer({ad, onBurn, ...props}) {
               <AdImage src={adImageThumbSrc(ad)} w="10" />
               <Box>
                 <Text fontWeight={500}>{ad.title}</Text>
-                <ExternalLink href={ad.url} maxW="48">
+                <ExternalLink href={ad.url} maxW="48" noOfLines={2}>
                   {ad.url}
                 </ExternalLink>
               </Box>
@@ -1713,7 +1713,7 @@ export function AdOfferListItem({
   if (isLoading || isError) {
     return (
       <Tr fontWeight={500}>
-        <Td colSpan={5} px={0}>
+        <Td colSpan={6} px={0}>
           <Skeleton h="10" />
         </Td>
       </Tr>

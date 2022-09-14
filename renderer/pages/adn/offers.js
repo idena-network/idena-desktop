@@ -37,10 +37,13 @@ export default function AdOfferList() {
 
   const orderedBurntCoins = React.useMemo(
     () =>
-      burntCoins
-        .map(({target, ...burn}) => ({
+      (burntCoins ?? [])
+        .map(burn => ({
           ...burn,
-          totalScore: calculateTotalAdScore(decodeAdTarget(target)),
+          totalScore: calculateTotalAdScore({
+            target: decodeAdTarget(burn?.target),
+            burnAmount: burn?.amount,
+          }),
         }))
         .sort((a, b) => b.totalScore - a.totalScore),
     [burntCoins, decodeAdTarget]
