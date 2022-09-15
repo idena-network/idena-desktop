@@ -815,7 +815,11 @@ export function TimerIcon(props) {
 }
 
 export function TimerClock({duration, color}) {
-  const [{remaining, isStopped, isRunning}] = useTimer(duration)
+  const [{remaining, isStopped, isRunning}, {reset}] = useTimer(duration)
+
+  React.useEffect(() => {
+    reset(duration)
+  }, [duration, reset])
 
   return (
     <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: 37}}>

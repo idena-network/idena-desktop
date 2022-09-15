@@ -1,4 +1,4 @@
 {
-  "mainWindowUrl": "http://localhost:8000/profile",
+  "mainWindowUrl": "http://localhost:8000/home",
   "appPath": "./"
 }

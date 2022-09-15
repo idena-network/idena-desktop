@@ -4,7 +4,11 @@ import React from 'react'
 import {useTimer} from '../../../shared/hooks/use-timer'
 
 export function ValidationCountdown({duration}) {
-  const [{remainingSeconds}] = useTimer(duration)
+  const [{remainingSeconds}, {reset}] = useTimer(duration)
+
+  React.useEffect(() => {
+    reset(duration)
+  }, [duration, reset])
 
   return (
     <HStack spacing="3">

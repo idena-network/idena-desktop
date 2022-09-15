@@ -592,7 +592,7 @@ ipcMain.on('node-log', ({sender}, message) => {
 })
 
 ipcMain.on('reload', () => {
-  loadRoute(mainWindow, 'dashboard')
+  loadRoute(mainWindow, 'home')
 })
 
 ipcMain.on('showMainWindow', () => {

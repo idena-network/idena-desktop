@@ -3,7 +3,7 @@ const dayjs = require('dayjs')
 const node = require('./node')
 
 fixture`ValidationPagePreviews`
-  .page('http://localhost:8000/profile')
+  .page('http://localhost:8000/home')
   .beforeEach(async () => {
     await waitForReact()
   })
