@@ -93,22 +93,29 @@ export async function getAdVoting(address) {
 }
 
 async function fetchAdVoting(address) {
-  const readContractKey = createContractDataReader(address)
+  const batchData = await callRpc('contract_batchReadData', address, [
+    {key: 'state', format: 'byte'},
+    {key: 'fact', format: 'hex'},
+    {key: 'result', format: 'byte'},
+  ])
 
   try {
-    const [state, fact, result] = await Promise.all([
-      readContractKey('state', 'byte').catch(e => {
-        if (e.message === 'data is nil') return VotingStatus.Terminated
-        throw e
-      }),
-      readContractKey('fact', 'hex'),
-      readContractKey('result', 'byte'),
-    ])
+    const {value: state, error: stateError} = batchData.find(
+      x => x.key === 'state'
+    )
+
+    if (Boolean(stateError) && stateError !== 'data is nil')
+      throw new Error(stateError)
+
+    const status =
+      stateError === 'data is nil'
+        ? VotingStatus.Terminated
+        : mapToVotingStatus(state)
 
     return {
-      status: mapToVotingStatus(state),
-      ...hexToObject(fact),
-      result,
+      status,
+      ...hexToObject(batchData.find(x => x.key === 'fact').value),
+      result: batchData.find(x => x.key === 'result').value,
       isFetched: true,
     }
   } catch (e) {
