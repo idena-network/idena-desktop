@@ -1319,7 +1319,7 @@ export function VotingPhase({canFinish, canProlong, canTerminate, service}) {
     winnerThreshold,
     quorum,
     committeeSize,
-    finishTime,
+    estimatedTerminationTime,
     terminationTime,
   } = current.context
 
@@ -1385,7 +1385,7 @@ export function VotingPhase({canFinish, canProlong, canTerminate, service}) {
     ? [canFinish ? t('End counting') : t('Waiting for prolongation'), null]
     : // eslint-disable-next-line no-nested-ternary
     eitherIdleState(VotingStatus.Archived, VotingStatus.Terminating)
-    ? [t('Waiting for termination'), finishTime]
+    ? [t('Waiting for termination'), estimatedTerminationTime]
     : eitherIdleState(VotingStatus.Terminated)
     ? [t('Terminated'), terminationTime]
     : []
