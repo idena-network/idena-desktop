@@ -73,7 +73,7 @@ import {
   useDnaLinkRedirect,
 } from '../../screens/dna/hooks'
 import {viewVotingHref} from '../../screens/oracles/utils'
-import {useFork} from '../../screens/hardfork/hooks'
+import {useHardFork} from '../../screens/hardfork/hooks'
 import {AdBanner} from '../../screens/ads/containers'
 import {useRotatingAds} from '../../screens/ads/hooks'
 import {ChevronRightIcon, GithubIcon} from './icons'
@@ -147,7 +147,7 @@ export default function Layout({
       didReject: didRejectFork,
     },
     {reject: rejectFork, reset: resetForkVoting},
-  ] = useFork()
+  ] = useHardFork()
 
   const isFork =
     !loading &&
@@ -227,7 +227,7 @@ export default function Layout({
 
       {((isFork && !isSyncing && !isOffline) ||
         (isFork && isSyncing && didActivateFork)) && (
-        <ForkScreen
+        <HardForkScreen
           {...forkDetails}
           version={nodeRemoteVersion}
           didActivateFork={didActivateFork}
@@ -236,7 +236,7 @@ export default function Layout({
         />
       )}
 
-      {isSyncing && <SyncingApp />}
+      {isSyncing && !isFork && <SyncingApp />}
       {isOffline && <OfflineApp />}
       {isReady && !isFork && <NormalApp {...props} />}
 
@@ -734,7 +734,7 @@ function OfflineApp() {
   )
 }
 
-function ForkScreen({
+function HardForkScreen({
   version,
   changes,
   didActivateFork,
@@ -821,7 +821,7 @@ function ForkScreen({
                   <Stack spacing={5} p={3} h={188} overflowY="auto">
                     <Stack spacing={3}>
                       <Text color="white">{t('Changes')}</Text>
-                      <List styleType="unordered" spacing={2}>
+                      <List spacing="3">
                         {changes.map(change => (
                           <ListItem key={change}>{change}</ListItem>
                         ))}
@@ -832,7 +832,7 @@ function ForkScreen({
                       <Text color="white">
                         {t('Hard fork activation schedule')}
                       </Text>
-                      <List styleType="unordered" spacing={2}>
+                      <List spacing="2">
                         <ListItem>
                           {t(
                             'Hard fork will be activated at any date after {{startActivationDate}}',
