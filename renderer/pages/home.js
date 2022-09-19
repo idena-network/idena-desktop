@@ -549,13 +549,6 @@ export default function ProfilePage() {
                       </PopoverTrigger>
                       <OnboardingPopoverContent
                         title={t('Activate mining status')}
-                        w={
-                          eitherOnboardingState(
-                            onboardingShowingStep(OnboardingStep.ActivateMining)
-                          )
-                            ? 'xs'
-                            : '2xs'
-                        }
                         onDismiss={nextOnboardingTask}
                       >
                         <Text>

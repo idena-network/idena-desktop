@@ -270,7 +270,7 @@ export default function ViewVotingPage() {
       <Layout syncing={syncing} offline={offline}>
         <Page pt={8}>
           <Stack spacing={10}>
-            <VotingSkeleton isLoaded={isLoaded} h={6}>
+            <VotingSkeleton isLoaded={isLoaded} h="8">
               <Flex align="center" justify="space-between">
                 <Stack isInline spacing={2} align="center">
                   <VotingStatusBadge status={status} fontSize="md">
@@ -330,7 +330,11 @@ export default function ViewVotingPage() {
                             )}
                           </>
                         ) : (
-                          <Text lineHeight="tall" whiteSpace="pre-wrap">
+                          <Text
+                            overflow="hidden"
+                            lineHeight="tall"
+                            whiteSpace="pre-wrap"
+                          >
                             <Linkify
                               onClick={url => {
                                 send('FOLLOW_LINK', {url})

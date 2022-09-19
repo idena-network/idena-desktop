@@ -75,9 +75,10 @@ export const Page = React.forwardRef(function Page(props, ref) {
       flexGrow={999}
       maxH="100vh"
       minW="50%"
-      px={20}
-      py={6}
+      px="20"
+      py="6"
       overflowY="auto"
+      position="relative"
       {...props}
     />
   )

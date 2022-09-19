@@ -1418,7 +1418,7 @@ export function VotingPhase({canFinish, canProlong, canTerminate, service}) {
           py={2}
           pb={4}
         >
-          <PopoverArrow />
+          <PopoverArrow bg="graphite.500" />
           <PopoverHeader borderBottom="none" p={0} mb={3}>
             <Text color="white" fontWeight={500}>
               {t('Voting timeline')}
@@ -1646,7 +1646,7 @@ export function Linkify({onClick, children}) {
         part.startsWith('http') ? (
           <Button
             variant="link"
-            colorScheme="brandBlue"
+            colorScheme="blue"
             fontWeight={500}
             _hover={{background: 'transparent'}}
             _focus={{
