@@ -917,7 +917,7 @@ export function ReviewAdDrawer({
           </Heading>
         </Stack>
       </DrawerHeader>
-      <DrawerBody overflowY="auto" mx={-6} mb={10}>
+      <DrawerBody overflowY="auto" mx={-6}>
         <Stack spacing={6} color="gray.500" fontSize="md" p={6} pt={0}>
           <Stack spacing={3}>
             <Text>
