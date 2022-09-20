@@ -6,11 +6,13 @@ import {
   Heading,
   Stack,
   Text,
+  chakra,
 } from '@chakra-ui/react'
 import dayjs from 'dayjs'
 import NextLink from 'next/link'
 import React from 'react'
 import {useTranslation} from 'react-i18next'
+import {motion, isValidMotionProp} from 'framer-motion'
 import {ValidationAdPromotion} from '../../screens/validation/components/ads'
 import {useAutoStartValidation} from '../../screens/validation/hooks/use-start-validation'
 import {ValidationCountdown} from '../../screens/validation/components/countdown'
@@ -21,6 +23,13 @@ import {EpochPeriod, IdentityStatus} from '../../shared/types'
 import {canValidate} from '../../screens/validation/utils'
 import {useIdentity} from '../../shared/providers/identity-context'
 import {Status} from '../../shared/components/sidebar'
+
+const shouldForwardProp = prop =>
+  isValidMotionProp(prop) || ['children'].includes(prop)
+
+const MotionBox = chakra(motion.div, {
+  shouldForwardProp,
+})
 
 export default function LotteryPage() {
   const {t} = useTranslation()
@@ -79,43 +88,73 @@ export default function LotteryPage() {
         </NextLink>
       </Flex>
 
-      <Center minH="100vh">
+      <Center minH="100vh" overflow="hidden">
         <Stack spacing="12" w={['xs', '640px']}>
-          <Stack spacing="6">
-            <Stack spacing="2">
-              <Heading fontSize="lg" fontWeight={500}>
-                {t('Idena validation will start soon')}
-              </Heading>
-              <Text color="xwhite.050" fontSize="mdx">
-                {t(
-                  'Get ready! Make sure you have a stable internet connection'
-                )}
-              </Text>
-            </Stack>
-
-            {epoch ? (
-              <ValidationCountdown
-                duration={
-                  epoch.currentPeriod === EpochPeriod.FlipLottery
-                    ? dayjs(epoch.nextValidation).diff(dayjs())
-                    : 0
-                }
-              />
-            ) : null}
-
-            {isIneligible && (
-              <ErrorAlert>
-                {isValidated
-                  ? t(
-                      'Can not start validation session because you did not submit flips'
-                    )
-                  : t(
-                      'Can not start validation session because you did not activate invite'
+          <Box>
+            <MotionBox
+              initial={{
+                y: 180,
+              }}
+              animate={{
+                y: 0,
+              }}
+              transition={{
+                delay: 0.5,
+                duration: 0.5,
+              }}
+            >
+              <Stack spacing="6">
+                <Stack spacing="2">
+                  <Heading fontSize="lg" fontWeight={500}>
+                    {t('Idena validation will start soon')}
+                  </Heading>
+                  <Text color="xwhite.050" fontSize="mdx">
+                    {t(
+                      'Get ready! Make sure you have a stable internet connection'
                     )}
-              </ErrorAlert>
-            )}
-          </Stack>
-          <ValidationAdPromotion />
+                  </Text>
+                </Stack>
+
+                {epoch ? (
+                  <ValidationCountdown
+                    duration={
+                      epoch.currentPeriod === EpochPeriod.FlipLottery
+                        ? dayjs(epoch.nextValidation).diff(dayjs())
+                        : 0
+                    }
+                  />
+                ) : null}
+
+                {isIneligible && (
+                  <ErrorAlert>
+                    {isValidated
+                      ? t(
+                          'Can not start validation session because you did not submit flips'
+                        )
+                      : t(
+                          'Can not start validation session because you did not activate invite'
+                        )}
+                  </ErrorAlert>
+                )}
+              </Stack>
+            </MotionBox>
+          </Box>
+          <Box>
+            <MotionBox
+              initial={{
+                x: 1499,
+              }}
+              animate={{
+                x: 0,
+              }}
+              transition={{
+                duration: 1,
+                delay: 1,
+              }}
+            >
+              <ValidationAdPromotion />
+            </MotionBox>
+          </Box>
         </Stack>
       </Center>
     </Box>

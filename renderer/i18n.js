@@ -806,7 +806,7 @@ export const isoLangs = {
 }
 
 i18n.use(initReactI18next).init({
-  debug: global.isDev,
+  debug: false,
   resources: {
     en: {translation: en_translation, error: en_error},
     id: {translation: ri_translation, error: ri_error},
