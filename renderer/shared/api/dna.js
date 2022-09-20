@@ -45,7 +45,7 @@ export async function fetchIdentities() {
  * Fetch identity info for the address
  *
  * @param {string} address Address
- * @returns {Identity} Identity details
+ * @returns {Promise<Identity>} Identity details
  */
 export async function fetchIdentity(address) {
   const {data} = await api().post('/', {
@@ -55,6 +55,7 @@ export async function fetchIdentity(address) {
   })
   const {result, error} = data
   if (error) throw new Error(error.message)
+
   return result
 }
 

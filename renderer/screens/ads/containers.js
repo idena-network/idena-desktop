@@ -561,7 +561,6 @@ function AdPromotion({cid, title, desc, url, media, author}) {
         <LinkBox>
           <LinkOverlay
             href="#"
-            isExternal
             onClick={() => {
               global.openExternal(url)
             }}

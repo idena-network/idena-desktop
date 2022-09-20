@@ -311,7 +311,7 @@ export function useApprovedBurntCoins() {
 export function useProfileAds() {
   const rpcFetcher = useRpcFetcher()
 
-  const [{profileHash}] = useIdentity()
+  const [{profileHash}, {forceUpdate}] = useIdentity()
 
   const {decodeProfile, decodeAd, decodeAdTarget} = useProtoProfileDecoder()
 
@@ -378,8 +378,7 @@ export function useProfileAds() {
   return {
     data: profileAds.map(({data}) => data) ?? [],
     status,
-    // TODO: update refetch logic
-    refetch: () => {},
+    refetch: forceUpdate,
   }
 }
 
