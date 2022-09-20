@@ -54,6 +54,7 @@ import {
   Select as ChakraSelect,
   Th,
   useBreakpointValue,
+  FormHelperText,
 } from '@chakra-ui/react'
 import {rem} from '../theme'
 import {IconButton2} from './button'
@@ -753,4 +754,21 @@ export function RoundedTh({isLeft, isRight, children, ...props}) {
       />
     </Th>
   )
+}
+
+export function DrawerFormHelper({label, value, ...props}) {
+  return (
+    <Flex justify="space-between" {...props}>
+      <DrawerFormHelperText>{label}</DrawerFormHelperText>
+      <DrawerFormHelperValue>{value}</DrawerFormHelperValue>
+    </Flex>
+  )
+}
+
+export function DrawerFormHelperText(props) {
+  return <FormHelperText color="muted" fontSize="md" {...props} />
+}
+
+export function DrawerFormHelperValue(props) {
+  return <FormHelperText color="gray.500" fontSize="md" {...props} />
 }
