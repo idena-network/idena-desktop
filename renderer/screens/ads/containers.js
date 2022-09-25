@@ -869,6 +869,7 @@ export function ReviewAdDrawer({
   const [rewardsFund, setRewardsFund] = React.useState(100)
 
   const {submit} = useReviewAd({
+    rewardsFund,
     onBeforeSubmit: setIsPendingOn,
     onDeployContract,
     onStartVoting: React.useCallback(
@@ -968,7 +969,7 @@ export function ReviewAdDrawer({
               }
 
               if (deployAmount && startAmount) {
-                const requiredAmount = deployAmount + startAmount
+                const requiredAmount = deployAmount + startAmount + rewardsFund
 
                 if (balance > requiredAmount) {
                   try {

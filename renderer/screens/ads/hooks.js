@@ -449,6 +449,7 @@ export function useIpfsAd(cid, options) {
 }
 
 export function useReviewAd({
+  rewardsFund,
   onBeforeSubmit,
   onDeployContract,
   onStartVoting,
@@ -461,6 +462,7 @@ export function useReviewAd({
   })
 
   const {data: startVotingHash, mutate: startVoting} = useStartAdVoting({
+    rewardsFund,
     onError,
   })
 
@@ -543,7 +545,7 @@ function useDeployAdContract({onBeforeSubmit, onSubmit, onError}) {
   )
 }
 
-function useStartAdVoting({onError}) {
+function useStartAdVoting({rewardsFund, onError}) {
   const coinbase = useCoinbase()
 
   const {data: startAmount} = useStartAdVotingAmount()
@@ -553,12 +555,12 @@ function useStartAdVoting({onError}) {
       const callerArgs = {
         contractHash: startParams?.contract,
         from: coinbase,
-        amount: startAmount,
+        amount: startAmount + rewardsFund,
       }
 
       let callContract = createContractCaller(callerArgs)
 
-      const {error, gasCost, txFee, ...result} = await callContract(
+      const {error, gasCost, txFee} = await callContract(
         'startVoting',
         ContractRpcMode.Estimate
       )
@@ -568,13 +570,6 @@ function useStartAdVoting({onError}) {
         ...callerArgs,
         gasCost: Number(gasCost),
         txFee: Number(txFee),
-      })
-
-      console.log({
-        error,
-        gasCost,
-        txFee,
-        result,
       })
 
       return callContract('startVoting')
