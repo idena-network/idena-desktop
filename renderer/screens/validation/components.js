@@ -1113,16 +1113,15 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
       <ModalOverlay />
       <ModalContent
         bg="transparent"
-        color="brandGray.500"
+        color="gray.500"
         fontSize="md"
         rounded="lg"
       >
-        <Stack isInline spacing={28}>
+        <Stack isInline spacing="9">
           <Stack
             spacing={0}
-            borderColor="brandGray.016"
+            borderColor="gray.016"
             borderWidth={1}
-            minW={120}
             position="relative"
           >
             <BadFlipPartFrame flipCase={flipCase} />
@@ -1137,7 +1136,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
             spacing={7}
             bg="white"
             borderRadius="lg"
-            p={8}
+            p="8"
             w={440}
           >
             <Stack spacing={4}>
@@ -1232,7 +1231,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
 
 function BadFlipImage(props) {
   return (
-    <AspectRatio ratio={4 / 3} w={132}>
+    <AspectRatio ratio={4 / 3} w="132px">
       <Image {...props} />
     </AspectRatio>
   )
@@ -1288,8 +1287,8 @@ function BadFlipPartFrame({flipCase, ...props}) {
     {},
     {},
     {},
-    {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
-    {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
+    {top: `${100 * 1 - 4}px`, bottom: `${100 * 2 - 4}px`},
+    {top: `${100 * 1 - 4}px`, bottom: `${100 * 2 - 4}px`},
   ]
   return (
     <Box
@@ -1298,10 +1297,10 @@ function BadFlipPartFrame({flipCase, ...props}) {
       borderColor="red.500"
       borderRadius="md"
       boxShadow="0 0 0 4px rgba(255, 102, 102, 0.25)"
-      top={-4}
-      left={-4}
-      right={-4}
-      bottom={-4}
+      top="-1"
+      left="-1"
+      right="-1"
+      bottom="-1"
       {...framePosition[flipCase]}
       transition="all 0.2s ease-out"
       zIndex={1}
@@ -1315,8 +1314,8 @@ function BadFlipPartFrame({flipCase, ...props}) {
         color="white"
         boxSize={8}
         position="absolute"
-        right={-20}
-        bottom={-20}
+        right="-5"
+        bottom="-5"
       >
         <BlockIcon boxSize="5" />
       </Flex>

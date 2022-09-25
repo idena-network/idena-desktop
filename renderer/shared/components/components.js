@@ -467,7 +467,6 @@ export function ErrorAlert({children, ...props}) {
       bg="red.010"
       borderWidth="1px"
       borderColor="red.050"
-      color="red.500"
       fontSize="md"
       fontWeight={500}
       rounded="md"
