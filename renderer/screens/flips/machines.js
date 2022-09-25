@@ -783,8 +783,8 @@ export const flipMasterMachine = Machine(
                   '': [
                     {
                       target: 'protecting',
-                      cond: ({protectedImages}) =>
-                        !protectedImages.some(x => x),
+                      cond: ({images, protectedImages}) =>
+                        images.some(x => x) && !protectedImages.some(x => x),
                     },
                   ],
                 },
