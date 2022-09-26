@@ -553,6 +553,9 @@ export const flipMasterMachine = Machine(
           }),
         ],
       },
+      SET_EPOCH_NUMBER: {
+        actions: ['assignEpochNumber', log()],
+      },
     },
     initial: 'idle',
     states: {
@@ -560,11 +563,7 @@ export const flipMasterMachine = Machine(
         on: {
           SET_EPOCH_NUMBER: {
             target: 'prepare',
-            actions: [
-              assign({
-                epochNumber: (_, {epochNumber}) => epochNumber,
-              }),
-            ],
+            actions: 'assignEpochNumber',
           },
         },
       },
@@ -721,12 +720,8 @@ export const flipMasterMachine = Machine(
                       image,
                       ...images.slice(currentIndex + 1),
                     ],
-                    protectedImages: ({images}, {image, currentIndex}) => [
-                      ...images.slice(0, currentIndex),
-                      image,
-                      ...images.slice(currentIndex + 1),
-                    ],
                   }),
+                  'assignProtectedImages',
                   log(),
                 ],
               },
@@ -744,7 +739,7 @@ export const flipMasterMachine = Machine(
               NEXT: [
                 {
                   target: 'protect',
-                  cond: ({epochNumber}) => checkIfFlipNoiseEnabled(epochNumber),
+                  cond: 'isFlipNoiseEnabled',
                 },
                 {
                   target: 'shuffle',
@@ -866,7 +861,15 @@ export const flipMasterMachine = Machine(
                 actions: ['changeOrder', log()],
               },
               NEXT: 'submit',
-              PREV: 'protect',
+              PREV: [
+                {
+                  target: 'protect',
+                  cond: 'isFlipNoiseEnabled',
+                },
+                {
+                  target: 'images',
+                },
+              ],
             },
             initial: 'idle',
             states: {
@@ -1017,6 +1020,26 @@ export const flipMasterMachine = Machine(
       persistFlip: context => {
         global.flipStore.updateDraft(context)
       },
+      assignEpochNumber: assign({
+        epochNumber: (_, {epochNumber}) => epochNumber,
+      }),
+      assignProtectedImages: assign({
+        protectedImages: (
+          {images, protectedImages, epochNumber},
+          {image, currentIndex}
+        ) =>
+          checkIfFlipNoiseEnabled(epochNumber)
+            ? protectedImages
+            : [
+                ...images.slice(0, currentIndex),
+                image,
+                ...images.slice(currentIndex + 1),
+              ],
+      }),
+    },
+    guards: {
+      isFlipNoiseEnabled: ({epochNumber}) =>
+        checkIfFlipNoiseEnabled(epochNumber),
     },
   }
 )
