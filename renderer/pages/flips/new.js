@@ -31,6 +31,7 @@ import {
   isPendingKeywordPair,
   getRandomKeywordPair,
   protectFlip,
+  checkIfFlipNoiseEnabled,
 } from '../../screens/flips/utils'
 import {Step} from '../../screens/flips/types'
 import {
@@ -45,7 +46,7 @@ import {BadFlipDialog} from '../../screens/validation/components'
 import {requestDb} from '../../shared/utils/db'
 import {useFailToast} from '../../shared/hooks/use-toast'
 import {InfoIcon, RefreshIcon} from '../../shared/components/icons'
-import {useTrackTx} from '../../screens/ads/hooks'
+import {useRpc, useTrackTx} from '../../screens/ads/hooks'
 import {eitherState} from '../../shared/utils/utils'
 
 export default function NewFlipPage() {
@@ -154,6 +155,12 @@ export default function NewFlipPage() {
     }, [router, send]),
   })
 
+  const {data: epochData} = useRpc('dna_epoch', [], {
+    onSuccess: data => {
+      send({type: 'SET_EPOCH_NUMBER', epochNumber: data.epoch})
+    },
+  })
+
   return (
     <Layout>
       <Page p={0}>
@@ -200,18 +207,20 @@ export default function NewFlipPage() {
                 >
                   {t('Select images')}
                 </FlipMasterNavbarItem>
-                <FlipMasterNavbarItem
-                  step={
-                    // eslint-disable-next-line no-nested-ternary
-                    is('protect')
-                      ? Step.Active
-                      : is('keywords') || is('images')
-                      ? Step.Next
-                      : Step.Completed
-                  }
-                >
-                  {t('Protect images')}
-                </FlipMasterNavbarItem>
+                {checkIfFlipNoiseEnabled(epochData?.epoch) ? (
+                  <FlipMasterNavbarItem
+                    step={
+                      // eslint-disable-next-line no-nested-ternary
+                      is('protect')
+                        ? Step.Active
+                        : is('keywords') || is('images')
+                        ? Step.Next
+                        : Step.Completed
+                    }
+                  >
+                    {t('Protect images')}
+                  </FlipMasterNavbarItem>
+                ) : null}
                 <FlipMasterNavbarItem
                   step={
                     // eslint-disable-next-line no-nested-ternary

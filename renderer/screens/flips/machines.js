@@ -10,6 +10,7 @@ import {
   DEFAULT_FLIP_ORDER,
   updateFlipTypeByHash,
   handleOutdatedFlips,
+  checkIfFlipNoiseEnabled,
 } from './utils'
 import {callRpc, HASH_IN_MEMPOOL, loadKeyword} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
@@ -553,8 +554,20 @@ export const flipMasterMachine = Machine(
         ],
       },
     },
-    initial: 'prepare',
+    initial: 'idle',
     states: {
+      idle: {
+        on: {
+          SET_EPOCH_NUMBER: {
+            target: 'prepare',
+            actions: [
+              assign({
+                epochNumber: (_, {epochNumber}) => epochNumber,
+              }),
+            ],
+          },
+        },
+      },
       prepare: {
         invoke: {
           src: 'prepareFlip',
@@ -708,6 +721,11 @@ export const flipMasterMachine = Machine(
                       image,
                       ...images.slice(currentIndex + 1),
                     ],
+                    protectedImages: ({images}, {image, currentIndex}) => [
+                      ...images.slice(0, currentIndex),
+                      image,
+                      ...images.slice(currentIndex + 1),
+                    ],
                   }),
                   log(),
                 ],
@@ -723,7 +741,15 @@ export const flipMasterMachine = Machine(
                 ],
               },
               PAINTING: '.painting',
-              NEXT: 'protect',
+              NEXT: [
+                {
+                  target: 'protect',
+                  cond: ({epochNumber}) => checkIfFlipNoiseEnabled(epochNumber),
+                },
+                {
+                  target: 'shuffle',
+                },
+              ],
               PREV: 'keywords',
             },
             initial: 'idle',
