@@ -92,6 +92,9 @@ export async function getAdVoting(address) {
   return voting
 }
 
+const findContractBatchDataByKey = (batchData, key) =>
+  batchData.find(x => x.key === key)
+
 async function fetchAdVoting(address) {
   const batchData = await callRpc('contract_batchReadData', address, [
     {key: 'state', format: 'byte'},
@@ -100,9 +103,17 @@ async function fetchAdVoting(address) {
   ])
 
   try {
-    const {value: state, error: stateError} = batchData.find(
-      x => x.key === 'state'
+    const {value: state, error: stateError} = findContractBatchDataByKey(
+      batchData,
+      'state'
     )
+
+    const fact = findContractBatchDataByKey(batchData, 'fact')
+    const result = findContractBatchDataByKey(batchData, 'result')
+
+    if (Boolean(fact.error) || Boolean(result.error)) {
+      throw new Error('Voting does not exist')
+    }
 
     if (Boolean(stateError) && stateError !== 'data is nil')
       throw new Error(stateError)
@@ -114,12 +125,12 @@ async function fetchAdVoting(address) {
 
     return {
       status,
-      ...hexToObject(batchData.find(x => x.key === 'fact').value),
-      result: batchData.find(x => x.key === 'result').value,
+      ...hexToObject(fact.value),
+      result: result.value,
       isFetched: true,
     }
   } catch (e) {
-    console.error(e)
+    console.error(e, address)
   }
 }
 

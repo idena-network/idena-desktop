@@ -1113,7 +1113,9 @@ export const createViewVotingMachine = (id, epoch, address) =>
             },
           },
           on: {
-            ADD_FUND: 'funding',
+            ADD_FUND: {
+              target: 'funding',
+            },
             SELECT_OPTION: {
               actions: ['selectOption', log()],
             },

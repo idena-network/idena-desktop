@@ -854,7 +854,7 @@ export default function ViewVotingPage() {
                         <IconButton2
                           icon={<AddFundIcon />}
                           onClick={() => {
-                            send('ADD_FUND')
+                            send({type: 'ADD_FUND'})
                           }}
                         >
                           {t('Add funds')}

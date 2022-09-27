@@ -356,7 +356,6 @@ function FullSkeleton(props) {
 export const VotingOption = React.forwardRef(
   ({value, annotation, children = value, ...props}, ref) => (
     <Flex
-      title={children.length > 50 ? children : ''}
       align="center"
       justify="space-between"
       border="1px"
@@ -365,8 +364,18 @@ export const VotingOption = React.forwardRef(
       px={3}
       py={2}
     >
-      <Radio ref={ref} borderColor="gray.100" value={value} {...props}>
-        <Text maxW="xs" isTruncated>
+      <Radio
+        ref={ref}
+        value={value}
+        title={children.length > 50 ? children : ''}
+        borderColor="gray.100"
+        {...props}
+      >
+        <Text
+          title={children.length > 50 ? children : ''}
+          maxW="xs"
+          isTruncated
+        >
           {children}
         </Text>
       </Radio>

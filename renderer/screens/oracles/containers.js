@@ -440,14 +440,15 @@ export function AddFundDrawer({
       <OracleDrawerHeader icon={AddFundIcon}>
         {t('Add fund')}
       </OracleDrawerHeader>
-      <Box
-        as="form"
-        onSubmit={e => {
-          e.preventDefault()
-          onAddFund({amount, from})
-        }}
-      >
-        <OracleDrawerBody>
+      <OracleDrawerBody>
+        <form
+          id="addFund"
+          onSubmit={e => {
+            e.preventDefault()
+
+            onAddFund({amount, from})
+          }}
+        >
           <OracleFormControl label={t('Transfer from')}>
             <Input name="fromInput" defaultValue={from} isDisabled />
             <OracleFormHelper label={t('Available')} value={toDna(available)} />
@@ -458,6 +459,7 @@ export function AddFundDrawer({
           <OracleFormControl label={t('Amount')}>
             <DnaInput
               name="amountInput"
+              value={amount}
               onChange={e => {
                 setAmount(Number(e.target.value))
               }}
@@ -471,17 +473,18 @@ export function AddFundDrawer({
               value={toDna(currentOwnerFee)}
             />
           </OracleFormControl>
-          <PrimaryButton
-            type="submit"
-            isLoading={isLoading}
-            loadingText={t('Sending')}
-            mt={3}
-            ml="auto"
-          >
-            {t('Send')}
-          </PrimaryButton>
-        </OracleDrawerBody>
-      </Box>
+        </form>
+      </OracleDrawerBody>
+      <DrawerFooter>
+        <PrimaryButton
+          type="submit"
+          form="addFund"
+          isLoading={isLoading}
+          loadingText={t('Sending')}
+        >
+          {t('Send')}
+        </PrimaryButton>
+      </DrawerFooter>
     </AdDrawer>
   )
 }
