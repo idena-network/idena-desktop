@@ -849,7 +849,5 @@ export async function protectFlip({images}) {
   return {protectedImages: protectedFlips}
 }
 
-export const FLIP_NOISE_EPOCH_START = 95
-
 export const checkIfFlipNoiseEnabled = epochNumber =>
-  epochNumber >= FLIP_NOISE_EPOCH_START
+  epochNumber >= global.env.FLIP_NOISE_EPOCH_START ?? 95
