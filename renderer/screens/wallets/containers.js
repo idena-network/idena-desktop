@@ -219,15 +219,15 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
                 new FormData(e.target)
               )
 
-              if (!isAddress(to)) {
-                return onFail(`Incorrect 'To' address: ${to}`)
-              }
-
-              if (amount <= 0) {
-                return onFail(`Incorrect Amount: ${amount}`)
-              }
-
               try {
+                if (!isAddress(to)) {
+                  throw new Error(`Incorrect 'To' address: ${to}`)
+                }
+
+                if (amount <= 0) {
+                  throw new Error(`Incorrect Amount: ${amount}`)
+                }
+
                 const result = await callRpc('dna_sendTransaction', {
                   to,
                   from,
