@@ -92,8 +92,7 @@ export async function getAdVoting(address) {
   return voting
 }
 
-const findContractBatchDataByKey = (batchData, key) =>
-  batchData.find(x => x.key === key)
+const findContractData = (batchData, key) => batchData.find(x => x.key === key)
 
 async function fetchAdVoting(address) {
   const batchData = await callRpc('contract_batchReadData', address, [
@@ -103,13 +102,13 @@ async function fetchAdVoting(address) {
   ])
 
   try {
-    const {value: state, error: stateError} = findContractBatchDataByKey(
+    const {value: state, error: stateError} = findContractData(
       batchData,
       'state'
     )
 
-    const fact = findContractBatchDataByKey(batchData, 'fact')
-    const result = findContractBatchDataByKey(batchData, 'result')
+    const fact = findContractData(batchData, 'fact')
+    const result = findContractData(batchData, 'result')
 
     if (Boolean(fact.error) || Boolean(result.error)) {
       throw new Error('Voting does not exist')

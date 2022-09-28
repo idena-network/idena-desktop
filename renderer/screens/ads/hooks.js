@@ -153,7 +153,7 @@ export function useRotatingAds(limit = 3) {
     .slice(0, limit)
 }
 
-export function useCurrentBannerAd() {
+export function useCurrentAd() {
   const ads = useRotatingAds()
 
   const timing = React.useMemo(() => [12, 10, 8], [])

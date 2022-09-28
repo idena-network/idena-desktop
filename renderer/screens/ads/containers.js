@@ -59,7 +59,7 @@ import {
   DrawerFormHelper,
 } from '../../shared/components/components'
 import {
-  useCurrentBannerAd,
+  useCurrentAd,
   useRotatingAds,
   useRotateAds,
   useAdStatusColor,
@@ -131,7 +131,7 @@ export function AdBanner() {
 
   const router = useRouter()
 
-  const activeAd = useCurrentBannerAd()
+  const activeAd = useCurrentAd()
 
   return (
     <Flex
