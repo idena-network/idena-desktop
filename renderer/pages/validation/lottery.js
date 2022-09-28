@@ -23,6 +23,7 @@ import {EpochPeriod, IdentityStatus} from '../../shared/types'
 import {canValidate} from '../../screens/validation/utils'
 import {useIdentity} from '../../shared/providers/identity-context'
 import {Status} from '../../shared/components/sidebar'
+import {useRotatingAds} from '../../screens/ads/hooks'
 
 const shouldForwardProp = prop =>
   isValidMotionProp(prop) || ['children'].includes(prop)
@@ -48,6 +49,10 @@ export default function LotteryPage() {
   useAutoStartValidation()
 
   useAutoCloseValidationToast()
+
+  const ads = useRotatingAds()
+
+  const isRotatingAds = ads.length > 0
 
   return (
     <Box
@@ -93,13 +98,13 @@ export default function LotteryPage() {
           <Box>
             <MotionBox
               initial={{
-                y: 180,
+                y: isRotatingAds ? 180 : 0,
               }}
               animate={{
                 y: 0,
               }}
               transition={{
-                delay: 0.5,
+                delay: 2.5,
                 duration: 0.5,
               }}
             >
@@ -142,14 +147,14 @@ export default function LotteryPage() {
           <Box>
             <MotionBox
               initial={{
-                x: 1499,
+                x: isRotatingAds ? 1499 : 0,
               }}
               animate={{
                 x: 0,
               }}
               transition={{
                 duration: 1,
-                delay: 1,
+                delay: 3,
               }}
             >
               <ValidationAdPromotion />
