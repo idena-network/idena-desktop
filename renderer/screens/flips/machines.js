@@ -69,10 +69,12 @@ export const flipsMachine = Machine(
             if (missingFlips.length) {
               const keywords = await Promise.all(
                 availableKeywords
-                  .filter(({id}) =>
-                    persistedFlips.some(
-                      ({keywordPairId}) => keywordPairId !== id
-                    )
+                  .filter(
+                    ({id, used}) =>
+                      used &&
+                      persistedFlips.some(
+                        ({keywordPairId}) => keywordPairId !== id
+                      )
                   )
                   .map(async ({id, words}) => ({
                     id,
@@ -721,7 +723,6 @@ export const flipMasterMachine = Machine(
                       ...images.slice(currentIndex + 1),
                     ],
                   }),
-                  'assignProtectedImages',
                   log(),
                 ],
               },
@@ -955,6 +956,7 @@ export const flipMasterMachine = Machine(
           order,
           orderPermutations,
           images,
+          protectedImages,
           keywords,
           type,
           createdAt,
@@ -974,6 +976,7 @@ export const flipMasterMachine = Machine(
             order,
             orderPermutations,
             images,
+            protectedImages,
             keywords,
           }
 
@@ -1022,19 +1025,6 @@ export const flipMasterMachine = Machine(
       },
       assignEpochNumber: assign({
         epochNumber: (_, {epochNumber}) => epochNumber,
-      }),
-      assignProtectedImages: assign({
-        protectedImages: (
-          {images, protectedImages, epochNumber},
-          {image, currentIndex}
-        ) =>
-          checkIfFlipNoiseEnabled(epochNumber)
-            ? protectedImages
-            : [
-                ...images.slice(0, currentIndex),
-                image,
-                ...images.slice(currentIndex + 1),
-              ],
       }),
     },
     guards: {

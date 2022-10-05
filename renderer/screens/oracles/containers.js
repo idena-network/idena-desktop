@@ -185,7 +185,7 @@ export function VotingCard({votingRef, ...props}) {
             bg="gray.50"
             color="muted"
             cursor="pointer"
-            pl="1/2"
+            pl="0.5"
             onClick={() => {
               router.push(viewHref)
             }}

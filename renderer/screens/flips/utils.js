@@ -175,32 +175,60 @@ export async function publishFlip({
   keywordPairId,
   pics,
   compressedPics,
-  protectedImages = compressedPics || pics,
+  images = compressedPics || pics,
+  protectedImages,
   originalOrder,
   order,
   orderPermutations,
   hint,
+  epochNumber,
 }) {
-  if (protectedImages.some(x => !x))
+  const isFlipNoiseEnabled = checkIfFlipNoiseEnabled(epochNumber)
+
+  const flipsToPublish = isFlipNoiseEnabled ? protectedImages : images
+
+  if (flipsToPublish.some(x => !x))
     throw new Error(i18n.t('You must use 4 images for a flip'))
 
   const flips = global.flipStore.getFlips()
 
   if (
-    flips.some(
-      flip =>
+    flips.some(flip => {
+      if (isFlipNoiseEnabled) {
+        return (
+          flip.type === FlipType.Published &&
+          flip.protectedImages &&
+          areSame(flip.protectedImages, protectedImages)
+        )
+      }
+
+      return (
         flip.type === FlipType.Published &&
-        flip.protectedImages &&
-        areSame(flip.protectedImages, protectedImages)
-    )
+        flip.images &&
+        areSame(flip.images, images)
+      )
+    })
   )
     throw new Error(i18n.t('You already submitted this flip'))
 
   if (areEual(order, hint ? DEFAULT_FLIP_ORDER : originalOrder))
     throw new Error(i18n.t('You must shuffle flip before submit'))
 
+  const compressedImages = checkIfFlipNoiseEnabled(epochNumber)
+    ? protectedImages
+    : await Promise.all(
+        images.map(image =>
+          Jimp.read(image).then(raw =>
+            raw
+              .resize(240, 180)
+              .quality(60) // jpeg quality
+              .getBase64Async('image/jpeg')
+          )
+        )
+      )
+
   const [publicHex, privateHex] = flipToHex(
-    hint ? protectedImages : originalOrder.map(num => protectedImages[num]),
+    hint ? compressedImages : originalOrder.map(num => compressedImages[num]),
     hint ? order : orderPermutations
   )
 

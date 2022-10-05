@@ -77,6 +77,8 @@ export default function EditFlipPage() {
           compressedPics,
           // eslint-disable-next-line no-shadow
           images = compressedPics || pics,
+          // eslint-disable-next-line no-shadow
+          protectedImages,
           hint,
           keywordPairId = hint ? Math.max(hint.id, 0) : 0,
           ...flip
@@ -90,7 +92,14 @@ export default function EditFlipPage() {
             )
           : [{id: 0, words: flip.keywords.words.map(w => w.id)}]
 
-        return {...flip, images, keywordPairId, availableKeywords, hint}
+        return {
+          ...flip,
+          images,
+          protectedImages,
+          keywordPairId,
+          availableKeywords,
+          hint,
+        }
       },
       protectFlip: async flip => protectFlip(flip),
       submitFlip: async flip => publishFlip(flip),
@@ -114,6 +123,7 @@ export default function EditFlipPage() {
     showTranslation,
     isCommunityTranslationsExpanded,
     txHash,
+    epochNumber,
   } = current.context
 
   const not = state => !current?.matches({editing: state})
@@ -138,11 +148,14 @@ export default function EditFlipPage() {
     }, [router, send]),
   })
 
-  const {data: epochData} = useRpc('dna_epoch', [], {
+  useRpc('dna_epoch', [], {
     onSuccess: data => {
       send({type: 'SET_EPOCH_NUMBER', epochNumber: data.epoch})
     },
   })
+
+  const isFlipNoiseEnabled = checkIfFlipNoiseEnabled(epochNumber)
+  const maybeProtectedImages = isFlipNoiseEnabled ? protectedImages : images
 
   return (
     <Layout>
@@ -191,7 +204,7 @@ export default function EditFlipPage() {
                   {t('Select images')}
                 </FlipMasterNavbarItem>
 
-                {checkIfFlipNoiseEnabled(epochData?.epoch) ? (
+                {isFlipNoiseEnabled ? (
                   <FlipMasterNavbarItem
                     step={
                       // eslint-disable-next-line no-nested-ternary
@@ -317,7 +330,7 @@ export default function EditFlipPage() {
               )}
               {is('shuffle') && (
                 <FlipShuffleStep
-                  images={protectedImages}
+                  images={maybeProtectedImages}
                   originalOrder={originalOrder}
                   order={order}
                   onShuffle={() => send('SHUFFLE')}
@@ -335,7 +348,7 @@ export default function EditFlipPage() {
                   onSwitchLocale={() => send('SWITCH_LOCALE')}
                   originalOrder={originalOrder}
                   order={order}
-                  images={protectedImages}
+                  images={maybeProtectedImages}
                 />
               )}
             </FlipMaster>
@@ -394,7 +407,7 @@ export default function EditFlipPage() {
           isPending={either('submit.submitting', 'submit.mining')}
           flip={{
             keywords: showTranslation ? keywords.translations : keywords.words,
-            protectedImages,
+            images: maybeProtectedImages,
             originalOrder,
             order,
           }}

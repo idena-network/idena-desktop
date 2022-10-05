@@ -26,7 +26,6 @@ import {
   FormHelperText,
   Tr,
   Td,
-  Link,
   useBoolean,
   ModalOverlay,
   Portal,
@@ -1785,6 +1784,7 @@ export function AdOfferListItem({
           colorScheme="blue"
           maxW="40"
           noOfLines={2}
+          _active={{}}
           onClick={() => {
             global.openExternal(ad.url)
           }}

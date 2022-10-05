@@ -1029,7 +1029,7 @@ export const createValidationMachine = ({
           Math.max(
             adjustDurationInSeconds(
               validationStart,
-              global.env.BUMP_EXTRA_FLIPS || 35
+              global.env?.BUMP_EXTRA_FLIPS ?? 35
             ),
             5
           ) * 1000,
@@ -1038,7 +1038,7 @@ export const createValidationMachine = ({
           Math.max(
             adjustDurationInSeconds(
               validationStart,
-              global.env.FINALIZE_FLIPS || 90
+              global.env?.FINALIZE_FLIPS ?? 90
             ),
             5
           ) * 1000,
@@ -1291,10 +1291,22 @@ const stepStates = {
 }
 
 function mergeFlipsByHash(flips, anotherFlips) {
-  return flips.map(flip => ({
-    ...flip,
-    ...anotherFlips.find(({hash}) => hash === flip.hash),
-  }))
+  return flips.map(flip => {
+    const anotherFlip = anotherFlips.find(({hash}) => hash === flip.hash)
+
+    if (anotherFlip) {
+      const relevance =
+        anotherFlip?.relevance ?? (flip?.relevance || RelevanceType.Abstained)
+
+      return {
+        ...flip,
+        ...anotherFlip,
+        relevance,
+      }
+    }
+
+    return flip
+  })
 }
 
 async function fetchWords(hash) {

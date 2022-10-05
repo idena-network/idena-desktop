@@ -99,7 +99,9 @@ export default function ViewFlipPage() {
     type,
   } = current.context
 
-  const images = protectedImages ?? originalImages
+  const images = protectedImages?.every(Boolean)
+    ? protectedImages
+    : originalImages
 
   if (!id) return null
 

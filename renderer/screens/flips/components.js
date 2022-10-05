@@ -800,6 +800,7 @@ export function FlipShuffleStep({
   onReset,
 }) {
   const {t} = useTranslation()
+
   return (
     <FlipStep alignSelf="stretch">
       <FlipStepHeader>
@@ -1401,16 +1402,16 @@ export function PublishFlipDrawer({isPending, flip, onSubmit, ...props}) {
           </Heading>
         </Stack>
       </DrawerHeader>
-      <DrawerBody overflowY="auto" mx={-6} mt="3" mb={10}>
+      <DrawerBody overflowY="auto" mx={-6} mt="3">
         <Stack spacing={6} fontSize="md" px={6} align="center">
           <HStack spacing="3">
             <FlipImageList>
               {flip.originalOrder.map((num, idx) => (
                 <FlipImageListItem
                   key={num}
-                  src={flip?.protectedImages[num]}
+                  src={flip?.images[num]}
                   isFirst={idx === 0}
-                  isLast={idx === flip?.protectedImages.length - 1}
+                  isLast={idx === flip?.images.length - 1}
                   w="24"
                 />
               ))}
@@ -1419,9 +1420,9 @@ export function PublishFlipDrawer({isPending, flip, onSubmit, ...props}) {
               {flip.order.map((num, idx) => (
                 <FlipImageListItem
                   key={num}
-                  src={flip?.protectedImages[num]}
+                  src={flip?.images[num]}
                   isFirst={idx === 0}
-                  isLast={idx === flip?.protectedImages.length - 1}
+                  isLast={idx === flip?.images.length - 1}
                   w="24"
                 />
               ))}
