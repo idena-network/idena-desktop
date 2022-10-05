@@ -282,10 +282,10 @@ export default function ViewVotingPage() {
                     color="muted"
                     fontSize="md"
                     cursor="pointer"
-                    pl="1/2"
+                    pl="0.5"
                     transition="color 0.2s ease"
                     _hover={{
-                      color: 'brandGray.500',
+                      color: 'gray.500',
                     }}
                     onClick={() => {
                       global.openExternal(

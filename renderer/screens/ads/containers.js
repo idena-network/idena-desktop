@@ -1135,7 +1135,7 @@ export function PublishAdDrawer({ad, onPublish, ...props}) {
               <AdImage src={adImageThumbSrc(ad)} w="10" />
               <Box>
                 <Text fontWeight={500}>{ad.title}</Text>
-                <ExternalLink href={ad.url} maxW="48">
+                <ExternalLink href={ad.url} maxW="48" noOfLines={1}>
                   {ad.url}
                 </ExternalLink>
               </Box>
@@ -1243,7 +1243,7 @@ export function BurnDrawer({ad, onBurn, ...props}) {
               <AdImage src={adImageThumbSrc(ad)} w="10" />
               <Box>
                 <Text fontWeight={500}>{ad.title}</Text>
-                <ExternalLink href={ad.url} maxW="48" noOfLines={2}>
+                <ExternalLink href={ad.url} maxW="48" noOfLines={1}>
                   {ad.url}
                 </ExternalLink>
               </Box>
@@ -1299,6 +1299,7 @@ export function BurnDrawer({ad, onBurn, ...props}) {
                   name="amount"
                   min={0}
                   max={Number.MAX_SAFE_INTEGER}
+                  step="any"
                   addon={t('iDNA')}
                 />
               </Stack>
@@ -1779,9 +1780,17 @@ export function AdOfferListItem({
         </HStack>
       </Td>
       <Td borderColor="gray.300">
-        <Link target="_blank" color="blue.500" maxW="40" noOfLines={2}>
+        <Button
+          variant="link"
+          colorScheme="blue"
+          maxW="40"
+          noOfLines={2}
+          onClick={() => {
+            global.openExternal(ad.url)
+          }}
+        >
           {ad.url}
-        </Link>
+        </Button>
       </Td>
       <Td borderColor="gray.300">
         {targetValues.some(Boolean) ? (
