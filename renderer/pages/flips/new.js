@@ -105,7 +105,9 @@ export default function NewFlipPage() {
       submitFlip: async flip => publishFlip(flip),
     },
     actions: {
-      onSubmitted: () => router.push('/flips/list'),
+      onMined: () => {
+        router.push('/flips/list')
+      },
       onError: (
         _,
         {data, error = data.response?.data?.error ?? data.message}
@@ -152,8 +154,7 @@ export default function NewFlipPage() {
   useTrackTx(txHash, {
     onMined: React.useCallback(() => {
       send({type: 'FLIP_MINED'})
-      router.push('/flips/list')
-    }, [router, send]),
+    }, [send]),
   })
 
   useRpc('dna_epoch', [], {

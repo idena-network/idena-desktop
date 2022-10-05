@@ -904,7 +904,7 @@ export const flipMasterMachine = Machine(
                 invoke: {
                   src: 'submitFlip',
                   onDone: {
-                    target: 'done',
+                    target: 'mining',
                     actions: [
                       assign((context, {data: {txHash, hash}}) => ({
                         ...context,
@@ -918,8 +918,13 @@ export const flipMasterMachine = Machine(
                   onError: {target: 'failure', actions: [log()]},
                 },
               },
+              mining: {
+                on: {
+                  FLIP_MINED: 'done',
+                },
+              },
               done: {
-                entry: ['onSubmitted', log()],
+                entry: ['onMined', log()],
               },
               failure: {entry: ['onError']},
             },
