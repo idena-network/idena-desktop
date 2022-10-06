@@ -207,18 +207,18 @@ export function useStakingApy() {
       const proposerAndCommitteeProbability =
         proposerOnlyProbability * committeeOnlyProbability
 
-      const epochDays = dayjs(epoch?.nextValidation).diff(
-        prevEpochData?.validationTime,
-        'day'
-      )
-
       const estimatedReward =
-        ((85000 * epochDays) / 21.0) *
+        85000 *
         (proposerOnlyProbability * proposerOnlyReward +
           committeeOnlyProbability * committeeOnlyReward +
           proposerAndCommitteeProbability * proposerAndCommitteeReward)
 
       const epy = (estimatedReward + epochReward) / stake
+
+      const epochDays = dayjs(epoch?.nextValidation).diff(
+        prevEpochData?.validationTime,
+        'day'
+      )
 
       return (epy / Math.max(1, epochDays)) * 366
     }
