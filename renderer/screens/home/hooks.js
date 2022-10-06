@@ -129,9 +129,9 @@ export function useStakingApy() {
   const epoch = useEpochState()
 
   const fetcher = React.useCallback(async ({queryKey}) => {
-    const {result, error} = await (
-      await fetch(apiUrl(queryKey.join('/').toLowerCase()))
-    ).json()
+    const {result, error} = await (await fetch(
+      apiUrl(queryKey.join('/').toLowerCase())
+    )).json()
 
     if (error) throw new Error(error.message)
 
@@ -207,18 +207,18 @@ export function useStakingApy() {
       const proposerAndCommitteeProbability =
         proposerOnlyProbability * committeeOnlyProbability
 
+      const epochDays = dayjs(epoch?.nextValidation).diff(
+        prevEpochData?.validationTime,
+        'day'
+      )
+
       const estimatedReward =
-        85000 *
+        ((85000 * epochDays) / 21.0) *
         (proposerOnlyProbability * proposerOnlyReward +
           committeeOnlyProbability * committeeOnlyReward +
           proposerAndCommitteeProbability * proposerAndCommitteeReward)
 
       const epy = (estimatedReward + epochReward) / stake
-
-      const epochDays = dayjs(epoch?.nextValidation).diff(
-        prevEpochData?.validationTime,
-        'day'
-      )
 
       return (epy / Math.max(1, epochDays)) * 366
     }
