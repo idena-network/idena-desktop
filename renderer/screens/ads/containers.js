@@ -1390,7 +1390,7 @@ export function CreateCampaignDrawer({ad, onSuccess, ...props}) {
               <AdImage src={ad ? adImageThumbSrc(ad) : null} w="10" />
               <Box>
                 <Text fontWeight={500}>{ad?.title}</Text>
-                <ExternalLink href={ad?.url} maxW="48">
+                <ExternalLink href={ad?.url} maxW="48" noOfLines={1}>
                   {ad?.url}
                 </ExternalLink>
               </Box>
