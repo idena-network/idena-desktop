@@ -129,9 +129,9 @@ export function useStakingApy() {
   const epoch = useEpochState()
 
   const fetcher = React.useCallback(async ({queryKey}) => {
-    const {result, error} = await (await fetch(
-      apiUrl(queryKey.join('/').toLowerCase())
-    )).json()
+    const {result, error} = await (
+      await fetch(apiUrl(queryKey.join('/').toLowerCase()))
+    ).json()
 
     if (error) throw new Error(error.message)
 
