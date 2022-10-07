@@ -85,24 +85,21 @@ export default function AdOfferList() {
         <Table>
           <Thead>
             <Tr>
-              <RoundedTh isLeft>{t('Banner/author')}</RoundedTh>
+              <RoundedTh isLeft>{t('Ad')}</RoundedTh>
               <RoundedTh>{t('Website')}</RoundedTh>
               <RoundedTh>
-                <Text w="16">
-                  {t('Targeting coeff')}{' '}
-                  <Tooltip
-                    label="Coeff = iif(language, 22, 1) * iif(os, 5, 1)"
-                    placement="top"
-                  >
+                <Text w="24">
+                  {t('Targeting coefficient')}{' '}
+                  <Tooltip label="Targeting coefficient increases total score if targeting parameters are set">
                     <InfoIcon cursor="help" flex={1} />
                   </Tooltip>
                 </Text>
               </RoundedTh>
               <RoundedTh>{t('Burn')}</RoundedTh>
-              <RoundedTh cursor="help">
+              <RoundedTh>
                 <Text w="14">
                   {t('Total score')}{' '}
-                  <Tooltip label="Total score = burn * coeff" placement="top">
+                  <Tooltip label="Total score = Burn * Coefficient">
                     <InfoIcon cursor="help" />
                   </Tooltip>
                 </Text>

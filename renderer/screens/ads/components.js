@@ -32,7 +32,7 @@ import {useTranslation} from 'react-i18next'
 import {rem} from '../../shared/theme'
 import {FormLabel, HDivider, Skeleton} from '../../shared/components/components'
 import {omit, pick} from '../../shared/utils/utils'
-import {adFallbackSrc} from './utils'
+import {adFallbackSrc, calculateTargetParamWeight} from './utils'
 
 export function AdStatLabel(props) {
   return <StatLabel color="muted" fontSize="md" {...props} />
@@ -318,6 +318,71 @@ function AdListItemSkeleton() {
           minH="4"
         />
       </Stack>
+    </HStack>
+  )
+}
+
+export function AdOfferTargetingTooltip({ad}) {
+  const {t} = useTranslation()
+
+  const isTargeted = React.useMemo(
+    () =>
+      Object.values({
+        language: ad.language,
+        os: ad.os,
+        age: ad.age,
+        stake: ad.stake,
+      }).some(Boolean),
+    [ad]
+  )
+
+  return isTargeted ? (
+    <Stack>
+      <AdOfferTargetingTooltipItem
+        label={t('Language')}
+        value={ad.language || 'Any'}
+        coefficient={calculateTargetParamWeight(ad.language, 22)}
+      />
+      <AdOfferTargetingTooltipItem
+        label={t('OS')}
+        value={ad.os || 'Any'}
+        coefficient={calculateTargetParamWeight(ad.os, 5)}
+      />
+      <AdOfferTargetingTooltipItem
+        label={t('Age')}
+        value={ad.age || 'Any'}
+        coefficient={1}
+      />
+      <AdOfferTargetingTooltipItem
+        label={t('Stake')}
+        value={ad.stake || 'Any'}
+        coefficient={1}
+      />
+    </Stack>
+  ) : (
+    <Stack>
+      <AdOfferTargetingTooltipItem
+        label={t('Language')}
+        value="Any"
+        coefficient={1}
+      />
+      <AdOfferTargetingTooltipItem
+        label={t('OS')}
+        value="Any"
+        coefficient={1}
+      />
+    </Stack>
+  )
+}
+
+function AdOfferTargetingTooltipItem({label, value, coefficient}) {
+  return (
+    <HStack>
+      <Text color="muted" w="16">
+        {label}
+      </Text>
+      <Text w="14">{value}</Text>
+      <Text>x{coefficient}</Text>
     </HStack>
   )
 }

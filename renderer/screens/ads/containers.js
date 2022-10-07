@@ -30,6 +30,7 @@ import {
   ModalOverlay,
   Portal,
   IconButton,
+  Link,
 } from '@chakra-ui/react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
@@ -101,6 +102,7 @@ import {
   InputCharacterCount,
   AdNumberInput,
   AdFormError,
+  AdOfferTargetingTooltip,
 } from './components'
 import {hasImageType} from '../../shared/utils/img'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
@@ -108,7 +110,6 @@ import {AVAILABLE_LANGS} from '../../i18n'
 import {
   adFallbackSrc,
   adImageThumbSrc,
-  calculateTargetParamWeight,
   calculateTargetScore,
   calculateTotalAdScore,
   compressAdImage,
@@ -1753,7 +1754,7 @@ export function AdOfferListItem({
         <HStack>
           <AdImage src={adImageThumbSrc(ad)} boxSize="10" />
           <Stack spacing="1.5">
-            <Text lineHeight={4} isTruncated>
+            <Text lineHeight={4} maxW="60" noOfLines={2}>
               {ad.title}
             </Text>
             <HStack spacing={1}>
@@ -1779,18 +1780,17 @@ export function AdOfferListItem({
         </HStack>
       </Td>
       <Td borderColor="gray.300">
-        <Button
-          variant="link"
-          colorScheme="blue"
-          maxW="40"
+        <Link
+          href="#"
+          color="blue.500"
+          maxW="44"
           noOfLines={2}
-          _active={{}}
           onClick={() => {
             global.openExternal(ad.url)
           }}
         >
           {ad.url}
-        </Button>
+        </Link>
       </Td>
       <Td borderColor="gray.300">
         {targetValues.some(Boolean) ? (
@@ -1799,33 +1799,7 @@ export function AdOfferListItem({
             <HStack align="baseline" spacing="1">
               <Text>{t('Set')}</Text>
               <Tooltip
-                label={
-                  <InlineAdStatGroup labelWidth="16">
-                    <SmallInlineAdStat
-                      label={t('Language')}
-                      value={`${ad.language ||
-                        'Any'} (${calculateTargetParamWeight(
-                        ad.language,
-                        22
-                      )})`}
-                    />
-                    <SmallInlineAdStat
-                      label={t('OS')}
-                      value={`${ad.os || 'Any'} (${calculateTargetParamWeight(
-                        ad.os,
-                        5
-                      )})`}
-                    />
-                    <SmallInlineAdStat
-                      label={t('Age')}
-                      value={ad.age ?? 'Any'}
-                    />
-                    <SmallInlineAdStat
-                      label={t('Stake')}
-                      value={ad.stake ?? 'Any'}
-                    />
-                  </InlineAdStatGroup>
-                }
+                label={<AdOfferTargetingTooltip ad={ad} />}
                 placement="right-start"
                 arrowSize={8}
                 offset={[-8, 6]}
@@ -1835,7 +1809,6 @@ export function AdOfferListItem({
                   rightIcon={<ChevronRightIcon />}
                   iconSpacing="0"
                   color="blue.500"
-                  cursor="pointer"
                   _hover={{
                     textDecoration: 'none',
                   }}
@@ -1849,10 +1822,26 @@ export function AdOfferListItem({
           </Stack>
         ) : (
           <Stack spacing="1">
-            <Text>
-              <Text>{calculateTargetScore(ad)}</Text>
-            </Text>
-            <Text>{t('Not set')}</Text>
+            <Text>{calculateTargetScore(ad)}</Text>
+            <Tooltip
+              label={<AdOfferTargetingTooltip ad={ad} />}
+              placement="right-start"
+              arrowSize={8}
+              offset={[-8, 6]}
+            >
+              <Button
+                variant="link"
+                rightIcon={<ChevronRightIcon />}
+                iconSpacing="0"
+                color="blue.500"
+                w="fit-content"
+                _hover={{
+                  textDecoration: 'none',
+                }}
+              >
+                {t('Not set')}
+              </Button>
+            </Tooltip>
           </Stack>
         )}
       </Td>

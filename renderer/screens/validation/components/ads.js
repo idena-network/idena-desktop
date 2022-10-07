@@ -91,7 +91,7 @@ export function ValidationAdPromotion() {
                       >
                         {currentAd?.title}
                       </Heading>
-                      <Text color="muted" noOfLines={2}>
+                      <Text color="muted" noOfLines={2} h="10" maxH="10">
                         {currentAd?.desc}
                       </Text>
                     </Stack>
@@ -103,6 +103,7 @@ export function ValidationAdPromotion() {
                       noOfLines={2}
                       lineHeight="4"
                       h="8"
+                      maxH="8"
                     >
                       {currentAd?.url}
                     </Link>
