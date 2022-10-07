@@ -720,23 +720,23 @@ export function NavButton({type, bg, color, ...props}) {
         _hover={{bg}}
       >
         {isPrev ? (
-          <ChevronLeftIcon
-            boxSize="5"
-            color={color}
+          <Box
             position="absolute"
             top="50%"
             left="50%"
             transform="translate(-50%, -50%) translateX(80px)"
-          />
+          >
+            <ChevronLeftIcon boxSize="5" color={color} />
+          </Box>
         ) : (
-          <ChevronRightIcon
-            boxSize="5"
-            color={color}
+          <Box
             position="absolute"
             top="50%"
             left="50%"
             transform="translate(-50%, -50%) translateX(-80px)"
-          />
+          >
+            <ChevronRightIcon boxSize="5" color={color} />
+          </Box>
         )}
       </Box>
     </Box>
