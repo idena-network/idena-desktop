@@ -371,6 +371,16 @@ export function AdOfferTargetingTooltip({ad}) {
         value="Any"
         coefficient={1}
       />
+      <AdOfferTargetingTooltipItem
+        label={t('Age')}
+        value="Any"
+        coefficient={1}
+      />
+      <AdOfferTargetingTooltipItem
+        label={t('Stake')}
+        value="Any"
+        coefficient={1}
+      />
     </Stack>
   )
 }
