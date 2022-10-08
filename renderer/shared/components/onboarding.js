@@ -10,7 +10,6 @@ import {
   PopoverContent,
   PopoverFooter,
   PopoverHeader,
-  Portal,
   Stack,
   useTheme,
 } from '@chakra-ui/react'
@@ -40,7 +39,6 @@ export function OnboardingPopover({isOpen, children, ...props}) {
 export function OnboardingPopoverContent({
   title,
   additionFooterActions,
-  isOpen,
   children,
   onDismiss,
   ...props
@@ -48,44 +46,50 @@ export function OnboardingPopoverContent({
   const {t} = useTranslation()
 
   return (
-    <Portal>
-      <PopoverContent
-        bg="blue.500"
-        border="none"
-        color="white"
-        px={3}
-        py={2}
-        zIndex="popover"
-        display={isOpen ? 'block' : 'none'}
-        {...props}
-      >
-        <PopoverArrow bg="blue.500" boxShadow="none !important" />
-        <Box p={2}>
-          <Stack spacing={3}>
-            <PopoverHeader
-              borderBottom="none"
-              fontWeight={500}
-              fontSize="md"
-              p={0}
-              mb={0}
-            >
-              {title}
-            </PopoverHeader>
-            <PopoverBody fontSize="sm" p={0}>
-              {children}
-            </PopoverBody>
-            <PopoverFooter as={Stack} border="none" p={0}>
-              <Stack isInline spacing={6} justify="flex-end">
-                {additionFooterActions}
-                <Button variant="unstyled" onClick={onDismiss}>
-                  {t('Okay, got it')}
-                </Button>
-              </Stack>
-            </PopoverFooter>
-          </Stack>
-        </Box>
-      </PopoverContent>
-    </Portal>
+    <PopoverContent
+      bg="blue.500"
+      border="none"
+      color="white"
+      px={3}
+      py={2}
+      zIndex="popover"
+      // TODO: remove after upgrading to Electron/Chromium version supporting `inset: 0`
+      rootProps={{
+        style: {
+          top: 0,
+          left: 0,
+        },
+      }}
+      top={0}
+      left={0}
+      {...props}
+    >
+      <PopoverArrow bg="blue.500" boxShadow="none !important" />
+      <Box p={2}>
+        <Stack spacing={3}>
+          <PopoverHeader
+            borderBottom="none"
+            fontWeight={500}
+            fontSize="md"
+            p={0}
+            mb={0}
+          >
+            {title}
+          </PopoverHeader>
+          <PopoverBody fontSize="sm" p={0}>
+            {children}
+          </PopoverBody>
+          <PopoverFooter as={Stack} border="none" p={0}>
+            <Stack isInline spacing={6} justify="flex-end">
+              {additionFooterActions}
+              <Button variant="unstyled" onClick={onDismiss}>
+                {t('Okay, got it')}
+              </Button>
+            </Stack>
+          </PopoverFooter>
+        </Stack>
+      </Box>
+    </PopoverContent>
   )
 }
 
