@@ -24,7 +24,6 @@ import {
 import {
   useBalance,
   useCoinbase,
-  useFormatDna,
   usePersistedAds,
   useProfileAds,
 } from '../../screens/ads/hooks'
@@ -44,6 +43,7 @@ import {PlusSolidIcon, RefreshIcon} from '../../shared/components/icons'
 import {SecondaryButton} from '../../shared/components/button'
 import {useClosableToast, useFailToast} from '../../shared/hooks/use-toast'
 import {dexieDb} from '../../shared/utils/dexieDb'
+import {useFormatDna} from '../../shared/hooks/hooks'
 
 export default function AdListPage() {
   const {t} = useTranslation()

@@ -48,7 +48,8 @@ import {
   ReceiveIcon,
   SendOutIcon,
 } from '../../shared/components/icons'
-import {useFormatDna, useTrackTx} from '../ads/hooks'
+import {useTrackTx} from '../ads/hooks'
+import {useFormatDna} from '../../shared/hooks/hooks'
 
 export function TotalAmount({address, amount}) {
   const {t, i18n} = useTranslation()

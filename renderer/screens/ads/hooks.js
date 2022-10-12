@@ -11,12 +11,7 @@ import {
   useIdentity,
   useIdentityState,
 } from '../../shared/providers/identity-context'
-import {
-  callRpc,
-  toLocaleDna,
-  prependHex,
-  HASH_IN_MEMPOOL,
-} from '../../shared/utils/utils'
+import {callRpc, prependHex, HASH_IN_MEMPOOL} from '../../shared/utils/utils'
 import {AdRotationStatus, AdStatus} from './types'
 import {
   adFallbackSrc,
@@ -763,14 +758,6 @@ export function useStartVotingAmount(committeeSize) {
     async ({queryKey: [, committeeSize]}) =>
       (await calculateMinOracleReward()) * committeeSize
   )
-}
-
-export function useFormatDna(options) {
-  const {
-    i18n: {language},
-  } = useTranslation()
-
-  return React.useCallback(toLocaleDna(language, options), [language, options])
 }
 
 export function useProtoProfileEncoder() {

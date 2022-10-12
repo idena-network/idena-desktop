@@ -107,6 +107,7 @@ import {
 } from '../../shared/components/icons'
 import {AdImage} from '../ads/components'
 import {AdDrawer} from '../ads/containers'
+import {useFormatDna} from '../../shared/hooks/hooks'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -142,7 +143,9 @@ export function VotingCard({votingRef, ...props}) {
     isNew,
   } = current.context
 
-  const toDna = toLocaleDna(i18n.language)
+  const formatPrizePool = useFormatDna({
+    maximumFractionDigits: 4,
+  })
 
   const viewHref = viewVotingHref(id)
 
@@ -244,7 +247,7 @@ export function VotingCard({votingRef, ...props}) {
           <StarIcon boxSize="5" color="white" />
           <Text fontWeight={500}>
             {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
-            {toDna(isClosed ? totalReward : estimatedTotalReward)}
+            {formatPrizePool(isClosed ? totalReward : estimatedTotalReward)}
           </Text>
           {!isClosed && (
             <Text color="orange.500">

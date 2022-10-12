@@ -113,6 +113,7 @@ import {
 } from '../../screens/ads/utils'
 import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {AdStatus} from '../../screens/ads/types'
+import {useFormatDna} from '../../shared/hooks/hooks'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -159,7 +160,11 @@ export default function ViewVotingPage() {
     refetchActions,
   ] = useOracleActions(id)
 
-  const toDna = toLocaleDna(i18n.language)
+  const formatDna = useFormatDna()
+
+  const formatPrizePool = useFormatDna({
+    maximumFractionDigits: 4,
+  })
 
   const {
     title,
@@ -792,7 +797,7 @@ export default function ViewVotingPage() {
                                     </Text>
                                     {isSender && (
                                       <SmallText>
-                                        {t('Fee')} {toDna(fee + tips)}
+                                        {t('Fee')} {formatDna(fee + tips)}
                                       </SmallText>
                                     )}
                                   </TableCol>
@@ -848,7 +853,7 @@ export default function ViewVotingPage() {
                         </Stack>
                       </StatLabel>
                       <StatNumber fontSize="base" fontWeight={500}>
-                        {toDna(estimatedTotalReward)}
+                        {formatPrizePool(estimatedTotalReward)}
                       </StatNumber>
                       <Box mt={1}>
                         <IconButton2
@@ -890,7 +895,7 @@ export default function ViewVotingPage() {
                           </Tooltip>
                         </StatLabel>
                         <StatNumber fontSize="base" fontWeight={500}>
-                          {toDna(votingMinPayment)}
+                          {formatDna(votingMinPayment)}
                         </StatNumber>
                       </Stat>
                     )}
@@ -912,7 +917,7 @@ export default function ViewVotingPage() {
                           </Tooltip>
                         </StatLabel>
                         <StatNumber fontSize="base" fontWeight={500}>
-                          {toDna(estimatedOracleReward)}
+                          {formatDna(estimatedOracleReward)}
                         </StatNumber>
                       </Stat>
                     )}
@@ -940,7 +945,7 @@ export default function ViewVotingPage() {
                           )}
                         </StatLabel>
                         <StatNumber fontSize="base" fontWeight={500}>
-                          {toDna(estimatedMaxOracleReward)}
+                          {formatDna(estimatedMaxOracleReward)}
                         </StatNumber>
                       </Stat>
                     )}
@@ -965,7 +970,7 @@ export default function ViewVotingPage() {
                     {isClosed && (
                       <AsideStat
                         label={t('Prize paid')}
-                        value={toDna(totalReward)}
+                        value={formatDna(totalReward)}
                       />
                     )}
                   </Stack>

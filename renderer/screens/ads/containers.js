@@ -64,7 +64,6 @@ import {
   useRotateAds,
   useAdStatusColor,
   useAdStatusText,
-  useFormatDna,
   useReviewAd,
   useDeployContractAmount,
   useStartAdVotingAmount,
@@ -125,6 +124,7 @@ import {useIdentity} from '../../shared/providers/identity-context'
 import {pick} from '../../shared/utils/utils'
 import {dexieDb} from '../../shared/utils/dexieDb'
 import {DnaInput} from '../oracles/components'
+import {useFormatDna} from '../../shared/hooks/hooks'
 
 export function AdBanner() {
   const {t} = useTranslation()

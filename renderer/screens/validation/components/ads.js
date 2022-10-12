@@ -24,10 +24,11 @@ import {
   ArrowRightIcon,
   InfoIcon,
 } from '../../../shared/components/icons'
+import {useFormatDna} from '../../../shared/hooks/hooks'
 import {useLanguage} from '../../../shared/hooks/use-language'
 import {AdBurnKey} from '../../../shared/models/adBurnKey'
 import {AdImage} from '../../ads/components'
-import {useBurntCoins, useFormatDna, useRotateAds} from '../../ads/hooks'
+import {useBurntCoins, useRotateAds} from '../../ads/hooks'
 
 export function ValidationAdPromotion() {
   const {t} = useTranslation()

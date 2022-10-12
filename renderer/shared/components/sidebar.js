@@ -23,6 +23,7 @@ import {
   LinkBox,
   Image,
   Icon,
+  Portal,
 } from '@chakra-ui/react'
 import {useIdentityState} from '../providers/identity-context'
 import {useEpochState} from '../providers/epoch-context'
@@ -467,52 +468,54 @@ function ActionPanel() {
                   </ActionItem>
                 </Box>
               </PopoverTrigger>
-              <OnboardingPopoverContent
-                title={t('Schedule your next validation')}
-                maxW="sm"
-                additionFooterActions={
-                  <Button
-                    variant="unstyled"
-                    onClick={() => {
-                      global.openExternal(
-                        'https://medium.com/idena/how-do-i-start-using-idena-c49418e01a06'
-                      )
-                    }}
-                  >
-                    {t('Read more')}
-                  </Button>
-                }
-                onDismiss={dismissCurrentTask}
-              >
-                <Stack spacing={5}>
-                  <OnboardingPopoverContentIconRow icon={TelegramIcon}>
-                    <Trans i18nKey="onboardingValidateSubscribe" t={t}>
-                      <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
-                        Subscribe
-                      </OnboardingLinkButton>{' '}
-                      to the Idena Announcements (important updates only)
-                    </Trans>
-                  </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={SyncIcon}>
-                    {t(
-                      `Keep your node synchronized in 45-60 minutes before the validation starts.`
-                    )}
-                  </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={TimerIcon}>
-                    {t(
-                      `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
-                    )}
-                  </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={GalleryIcon}>
-                    <Trans i18nKey="onboardingValidateTest" t={t}>
-                      <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
-                        Test yourself
-                      </OnboardingLinkButton>{' '}
-                      before the validation
-                    </Trans>
-                  </OnboardingPopoverContentIconRow>
-                </Stack>
-              </OnboardingPopoverContent>
+              <Portal>
+                <OnboardingPopoverContent
+                  title={t('Schedule your next validation')}
+                  maxW="sm"
+                  additionFooterActions={
+                    <Button
+                      variant="unstyled"
+                      onClick={() => {
+                        global.openExternal(
+                          'https://medium.com/idena/how-do-i-start-using-idena-c49418e01a06'
+                        )
+                      }}
+                    >
+                      {t('Read more')}
+                    </Button>
+                  }
+                  onDismiss={dismissCurrentTask}
+                >
+                  <Stack spacing={5}>
+                    <OnboardingPopoverContentIconRow icon={TelegramIcon}>
+                      <Trans i18nKey="onboardingValidateSubscribe" t={t}>
+                        <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
+                          Subscribe
+                        </OnboardingLinkButton>{' '}
+                        to the Idena Announcements (important updates only)
+                      </Trans>
+                    </OnboardingPopoverContentIconRow>
+                    <OnboardingPopoverContentIconRow icon={SyncIcon}>
+                      {t(
+                        `Keep your node synchronized in 45-60 minutes before the validation starts.`
+                      )}
+                    </OnboardingPopoverContentIconRow>
+                    <OnboardingPopoverContentIconRow icon={TimerIcon}>
+                      {t(
+                        `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
+                      )}
+                    </OnboardingPopoverContentIconRow>
+                    <OnboardingPopoverContentIconRow icon={GalleryIcon}>
+                      <Trans i18nKey="onboardingValidateTest" t={t}>
+                        <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
+                          Test yourself
+                        </OnboardingLinkButton>{' '}
+                        before the validation
+                      </Trans>
+                    </OnboardingPopoverContentIconRow>
+                  </Stack>
+                </OnboardingPopoverContent>
+              </Portal>
             </OnboardingPopover>
           </>
         )}
@@ -540,6 +543,7 @@ function ActionPanel() {
             rounded="lg"
             py={2}
             minWidth="145px"
+            zIndex="popover"
           >
             <MenuItem
               color="gray.500"
