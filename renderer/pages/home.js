@@ -29,7 +29,7 @@ import {
   ProfileTagList,
   ReplenishStakeDrawer,
   AnnotatedUserStat,
-} from '../screens/profile/components'
+} from '../screens/home/components'
 import {
   PrimaryButton,
   IconButton2,
@@ -67,14 +67,15 @@ import {
 } from '../shared/components/onboarding'
 import {useOnboarding} from '../shared/providers/onboarding-context'
 import {onboardingShowingStep} from '../shared/utils/onboarding'
-import {createProfileDb} from '../screens/profile/utils'
+import {createProfileDb} from '../screens/home/utils'
 import {ExportPrivateKeyDialog} from '../screens/settings/containers'
 import {useScroll} from '../shared/hooks/use-scroll'
-import {ValidationReportSummary} from '../screens/validation-report/components'
-import {useIdenaBot, useStakingApy} from '../screens/profile/hooks'
+import {ValidationReportSummary} from '../screens/validation/report/components'
+import {useIdenaBot, useStakingApy} from '../screens/home/hooks'
 import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
 import {
   AddUserIcon,
+  AdsIcon,
   ChevronRightIcon,
   DeleteIcon,
   InfoIcon,
@@ -236,7 +237,7 @@ export default function ProfilePage() {
   React.useEffect(() => {
     if (Object.keys(router.query).find(q => q === 'replenishStake')) {
       onOpenReplenishStakeDisclosure()
-      router.push('/profile')
+      router.push('/home')
     }
   }, [onOpenReplenishStakeDisclosure, router])
 
@@ -259,7 +260,7 @@ export default function ProfilePage() {
 
           <Page>
             <Stack spacing={8}>
-              <Stack isInline spacing={10}>
+              <Stack isInline spacing="10">
                 <Box>
                   <Stack spacing={8} w="md" ref={activateInviteRef}>
                     <UserInlineCard identity={identity} h={24}>
@@ -335,7 +336,7 @@ export default function ProfilePage() {
                 pinned message.`)}
                                   </Text>
                                   <OnboardingPopoverContentIconRow
-                                    icon={<TelegramIcon />}
+                                    icon={TelegramIcon}
                                   >
                                     <Box>
                                       <PrimaryButton
@@ -473,7 +474,7 @@ export default function ProfilePage() {
                                   {stakingApy > 0
                                     ? toPercent(stakingApy)
                                     : '--'}
-                                  {canMine && !online && !delegatee && (
+                                  {canMine && !online && (
                                     <Tooltip
                                       shouldWrapChildren
                                       bg="graphite.500"
@@ -511,7 +512,7 @@ export default function ProfilePage() {
                   </Stack>
                   <StakingAlert mt="2" w="md" />
                 </Box>
-                <Stack spacing={10} w={200}>
+                <Stack spacing="10" w={200}>
                   <Box minH={62} mt={6}>
                     <OnboardingPopover
                       isOpen={eitherOnboardingState(
@@ -565,6 +566,13 @@ export default function ProfilePage() {
                       maxW={200}
                     >
                       {t('New voting')}
+                    </IconLink>
+                    <IconLink
+                      href="/adn/new"
+                      icon={<AdsIcon boxSize="5" />}
+                      maxW={200}
+                    >
+                      {t('New ad')}
                     </IconLink>
                     <IconLink
                       href="/flips/new"
@@ -636,16 +644,7 @@ export default function ProfilePage() {
 
             <ReplenishStakeDrawer
               {...replenishStakeDisclosure}
-              onSuccess={React.useCallback(
-                hash => {
-                  toast({
-                    title: t('Transaction sent'),
-                    description: hash,
-                  })
-                  onCloseReplenishStakeDisclosure()
-                },
-                [onCloseReplenishStakeDisclosure, t, toast]
-              )}
+              onMined={onCloseReplenishStakeDisclosure}
               onError={failToast}
             />
           </Page>

@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import api from './api-client'
 import {strip} from '../utils/obj'
+import {callRpc} from '../utils/utils'
 
 export async function sendInvite({to, amount}) {
   const {data} = await api().post('/', {
@@ -44,7 +45,7 @@ export async function fetchIdentities() {
  * Fetch identity info for the address
  *
  * @param {string} address Address
- * @returns {Identity} Identity details
+ * @returns {Promise<Identity>} Identity details
  */
 export async function fetchIdentity(address) {
   const {data} = await api().post('/', {
@@ -54,6 +55,7 @@ export async function fetchIdentity(address) {
   })
   const {result, error} = data
   if (error) throw new Error(error.message)
+
   return result
 }
 
@@ -226,4 +228,9 @@ export async function importKey(key, password) {
     id: 1,
   })
   return data
+}
+
+export async function fetchNetworkSize() {
+  const {networkSize} = await callRpc('dna_globalState')
+  return networkSize
 }

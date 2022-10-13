@@ -28,6 +28,7 @@ import {
   ChainedInputGroup,
   ChainedInputAddon,
   Tooltip,
+  SmallText,
 } from '../../shared/components/components'
 import {clampValue} from '../../shared/utils/utils'
 import {ArrowUpIcon, CrossSmallIcon} from '../../shared/components/icons'
@@ -95,18 +96,14 @@ export function OracleFormHelperText(props) {
 }
 
 export function OracleFormHelperValue(props) {
-  return <FormHelperText color="brandGray.500" fontSize="md" {...props} />
+  return <FormHelperText color="gray.500" fontSize="md" {...props} />
 }
 
 export function OracleFormHelperSmall({label, value, ...props}) {
   return (
     <Flex {...props}>
-      <OracleFormHelperText fontSize="sm" mt={0} w={24}>
-        {label}
-      </OracleFormHelperText>
-      <OracleFormHelperValue fontSize="sm" mt={0}>
-        {value}
-      </OracleFormHelperValue>
+      <SmallText w="24">{label}</SmallText>
+      <SmallText color="gray.500">{value}</SmallText>
     </Flex>
   )
 }
@@ -369,12 +366,16 @@ export const VotingOption = React.forwardRef(
     >
       <Radio
         ref={ref}
-        borderColor="gray.100"
         value={value}
         title={children.length > 50 ? children : ''}
+        borderColor="gray.100"
         {...props}
       >
-        <Text maxW="xs" isTruncated>
+        <Text
+          title={children.length > 50 ? children : ''}
+          maxW="xs"
+          isTruncated
+        >
           {children}
         </Text>
       </Radio>

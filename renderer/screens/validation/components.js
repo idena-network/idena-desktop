@@ -1,12 +1,11 @@
 /* eslint-disable react/prop-types */
-import React, {useEffect, useMemo, useRef, useState} from 'react'
+import React, {useEffect, useRef} from 'react'
 import {
   Box,
   Flex,
   Stack,
   Text,
   Heading,
-  Icon,
   Alert,
   Button,
   useTheme,
@@ -22,19 +21,14 @@ import {
   Tooltip,
   ModalBody,
 } from '@chakra-ui/react'
-import {useMachine} from '@xstate/react'
 import {Trans, useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
-import {useRouter} from 'next/router'
-import {State} from 'xstate'
+import durationPlugin from 'dayjs/plugin/duration'
 import useHover from '@react-hook/hover'
 import mousetrap from 'mousetrap'
 import {reorderList} from '../../shared/utils/arr'
 import {rem} from '../../shared/theme'
-import {loadValidationStateDefinition} from './utils'
-import {EpochPeriod, RelevanceType} from '../../shared/types'
-import {useTimingState} from '../../shared/providers/timing-context'
-import {createTimerMachine} from '../../shared/machines'
+import {RelevanceType} from '../../shared/types'
 import {
   EmptyFlipImage,
   FlipKeywordPanel,
@@ -44,13 +38,25 @@ import {
   Dialog,
   DialogBody,
   DialogFooter,
-  Snackbar,
-  Toast,
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {useInterval} from '../../shared/hooks/use-interval'
 import {FillCenter} from '../oracles/components'
-import {InfoIcon} from '../../shared/components/icons'
+import {
+  BlockIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ClockIcon,
+  CrossSmallIcon,
+  DeleteIcon,
+  InfoIcon,
+  TickIcon,
+  ZoomFlipIcon,
+} from '../../shared/components/icons'
+import {adjustDurationInSeconds} from './machine'
+import {useTimer} from '../../shared/hooks/use-timer'
+
+dayjs.extend(durationPlugin)
 
 const Scroll = require('react-scroll')
 
@@ -206,7 +212,7 @@ export function Flip({
                     onOpenFlipZoom()
                   }}
                 >
-                  <Icon name="zoom-flip" boxSize={5} />
+                  <ZoomFlipIcon boxSize="5" />
                 </Flex>
               </div>
             )}
@@ -255,11 +261,10 @@ export function Flip({
                 color="white"
               />
             </Flex>
-            <Icon
+            <CrossSmallIcon
               position="absolute"
               right={6}
               top={6}
-              name="cross-small"
               color="white"
               boxSize={8}
               onClick={onCloseFlipZoom}
@@ -566,7 +571,7 @@ function FailedThumbnail() {
       bg="rgb(89 89 89 / 0.95)"
       borderRadius="xl"
     >
-      <Icon name="delete" boxSize={5} color="white" />
+      <DeleteIcon boxSize="5" color="white" />
     </Flex>
   )
 }
@@ -592,7 +597,7 @@ function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
       }
       borderRadius="xl"
     >
-      {option && <Icon name="tick" boxSize={5} color="white" />}
+      {option && <TickIcon boxSize="5" color="white" />}
     </Flex>
   )
 }
@@ -657,7 +662,7 @@ export const QualificationButton = React.forwardRef(
     return (
       <ButtonVariant ref={ref} flex={1} maxW={40} overflow="hidden" {...props}>
         <Stack isInline spacing={2} align="center" justify="center">
-          {isSelected && <Icon name="tick" boxSize={5} />}
+          {isSelected && <TickIcon boxSize="5" />}
           <Text>{children}</Text>
         </Stack>
       </ButtonVariant>
@@ -714,17 +719,25 @@ export function NavButton({type, bg, color, ...props}) {
         transition="all 0.5s ease-out"
         _hover={{bg}}
       >
-        <Icon
-          name="chevron-down"
-          boxSize={5}
-          color={color}
-          position="absolute"
-          top="50%"
-          left="50%"
-          transform={`translate(-50%, -50%) translateX(${
-            isPrev ? '80px' : '-80px'
-          }) rotate(${isPrev ? '' : '-'}90deg)`}
-        />
+        {isPrev ? (
+          <Box
+            position="absolute"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%) translateX(80px)"
+          >
+            <ChevronLeftIcon boxSize="5" color={color} />
+          </Box>
+        ) : (
+          <Box
+            position="absolute"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%) translateX(-80px)"
+          >
+            <ChevronRightIcon boxSize="5" color={color} />
+          </Box>
+        )}
       </Box>
     </Box>
   )
@@ -769,15 +782,15 @@ export function WelcomeKeywordsQualificationDialog(props) {
 }
 
 export function ValidationTimer({validationStart, duration, color}) {
-  const endTime = useMemo(() => dayjs(validationStart).add(duration, 's'), [
-    duration,
-    validationStart,
-  ])
+  const adjustedDuration = React.useMemo(
+    () => adjustDurationInSeconds(validationStart, duration) * 1000,
+    [duration, validationStart]
+  )
 
   return (
     <Timer>
       <TimerIcon color="red.500" />
-      <TimerClock2 endTime={endTime} color={color || 'red.500'} />
+      <TimerClock duration={adjustedDuration} color={color} />
     </Timer>
   )
 }
@@ -797,54 +810,22 @@ export function Timer(props) {
   )
 }
 
-export function TimerIcon({color, ...props}) {
-  return <Icon name="clock" boxSize={5} color={color} {...props} />
+export function TimerIcon(props) {
+  return <ClockIcon boxSize={5} {...props} />
 }
 
 export function TimerClock({duration, color}) {
-  const [state, send] = useMachine(
-    useMemo(() => createTimerMachine(duration), [duration])
-  )
+  const [{remaining, isStopped, isRunning}, {reset}] = useTimer(duration)
 
   React.useEffect(() => {
-    send('DURATION_UPDATE', {duration})
-  }, [duration, send])
-
-  const {elapsed} = state.context
-  const remaining = duration - elapsed
+    reset(duration)
+  }, [duration, reset])
 
   return (
     <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: 37}}>
-      <Text color={color} fontSize="md" fontWeight={600}>
-        {state.matches('stopped') && '00:00'}
-        {state.matches('running') &&
-          [Math.floor(remaining / 60), remaining % 60]
-            .map(t => t.toString().padStart(2, 0))
-            .join(':')}
-      </Text>
-    </Box>
-  )
-}
-
-export function TimerClock2({endTime, color}) {
-  const [state, setState] = useState(0)
-
-  useInterval(
-    () => {
-      setState(dayjs(endTime).diff(dayjs(), 's'))
-    },
-    state >= 0 ? 1000 : null,
-    true
-  )
-
-  return (
-    <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: 37}}>
-      <Text color={color} fontSize="md" fontWeight={600}>
-        {state <= 0 && '00:00'}
-        {state > 0 &&
-          [Math.floor(state / 60), state % 60]
-            .map(t => t.toString().padStart(2, 0))
-            .join(':')}
+      <Text color={color ?? 'red.500'} fontSize="md" fontWeight={600}>
+        {isStopped && '00:00'}
+        {isRunning && dayjs.duration(remaining).format('mm:ss')}
       </Text>
     </Box>
   )
@@ -923,121 +904,6 @@ function ValidationDialogFooter({submitText, onSubmit, props}) {
     <DialogFooter {...props}>
       <PrimaryButton onClick={onSubmit}>{submitText}</PrimaryButton>
     </DialogFooter>
-  )
-}
-
-export function ValidationToast({epoch: {currentPeriod, nextValidation}}) {
-  switch (currentPeriod) {
-    case EpochPeriod.FlipLottery:
-      return <ValidationSoonToast validationStart={nextValidation} />
-    case EpochPeriod.ShortSession:
-    case EpochPeriod.LongSession:
-      return (
-        <ValidationRunningToast
-          key={currentPeriod}
-          currentPeriod={currentPeriod}
-          validationStart={nextValidation}
-        />
-      )
-    case EpochPeriod.AfterLongSession:
-      return <AfterLongSessionToast />
-    default:
-      return null
-  }
-}
-
-export function ValidationSoonToast({validationStart}) {
-  const timerMachine = React.useMemo(
-    () => createTimerMachine(dayjs(validationStart).diff(dayjs(), 's')),
-    [validationStart]
-  )
-
-  const [
-    {
-      context: {duration},
-    },
-  ] = useMachine(timerMachine)
-
-  const {t} = useTranslation()
-
-  return (
-    <Snackbar>
-      <Toast
-        bg="red.500"
-        color="white"
-        title={<TimerClock duration={duration} color="white" />}
-        description={t('Idena validation will start soon')}
-        duration={null}
-      />
-    </Snackbar>
-  )
-}
-
-export function ValidationRunningToast({currentPeriod, validationStart}) {
-  const {shortSession, longSession} = useTimingState()
-  const sessionDuration =
-    currentPeriod === EpochPeriod.ShortSession
-      ? shortSession
-      : shortSession + longSession
-
-  const validationStateDefinition = loadValidationStateDefinition()
-  const done = validationStateDefinition
-    ? State.create(validationStateDefinition).done
-    : false
-
-  const router = useRouter()
-
-  const {t} = useTranslation()
-
-  const timerMachine = React.useMemo(
-    () =>
-      createTimerMachine(
-        dayjs(validationStart)
-          .add(sessionDuration, 's')
-          .diff(dayjs(), 's')
-      ),
-    [validationStart, sessionDuration]
-  )
-
-  const [
-    {
-      context: {duration},
-    },
-  ] = useMachine(timerMachine)
-
-  return (
-    <Snackbar>
-      <Toast
-        bg={done ? 'green.500' : 'blue.500'}
-        color="white"
-        actionColor="white"
-        title={<TimerClock duration={duration} color="white" />}
-        description={
-          done
-            ? t('Waiting for the end of {{currentPeriod}}', {currentPeriod})
-            : t('Idena validation is in progress')
-        }
-        onAction={() => router.push('/validation')}
-        actionName={done ? null : t('Validate')}
-        duration={null}
-      />
-    </Snackbar>
-  )
-}
-
-export function AfterLongSessionToast() {
-  const {t} = useTranslation()
-  return (
-    <Snackbar>
-      <Toast
-        bg="green.500"
-        color="white"
-        title={t(
-          'Please wait. The network is reaching consensus on validated identities'
-        )}
-        duration={null}
-      />
-    </Snackbar>
   )
 }
 
@@ -1247,16 +1113,15 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
       <ModalOverlay />
       <ModalContent
         bg="transparent"
-        color="brandGray.500"
+        color="gray.500"
         fontSize="md"
         rounded="lg"
       >
-        <Stack isInline spacing={28}>
+        <Stack isInline spacing="9">
           <Stack
             spacing={0}
-            borderColor="brandGray.016"
+            borderColor="gray.016"
             borderWidth={1}
-            minW={120}
             position="relative"
           >
             <BadFlipPartFrame flipCase={flipCase} />
@@ -1271,7 +1136,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
             spacing={7}
             bg="white"
             borderRadius="lg"
-            p={8}
+            p="8"
             w={440}
           >
             <Stack spacing={4}>
@@ -1366,7 +1231,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
 
 function BadFlipImage(props) {
   return (
-    <AspectRatio ratio={4 / 3} w={132}>
+    <AspectRatio ratio={4 / 3} w="132px">
       <Image {...props} />
     </AspectRatio>
   )
@@ -1422,8 +1287,8 @@ function BadFlipPartFrame({flipCase, ...props}) {
     {},
     {},
     {},
-    {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
-    {top: 100 * 1 - 4, bottom: 100 * 2 - 4},
+    {top: `${100 * 1 - 4}px`, bottom: `${100 * 2 - 4}px`},
+    {top: `${100 * 1 - 4}px`, bottom: `${100 * 2 - 4}px`},
   ]
   return (
     <Box
@@ -1432,10 +1297,10 @@ function BadFlipPartFrame({flipCase, ...props}) {
       borderColor="red.500"
       borderRadius="md"
       boxShadow="0 0 0 4px rgba(255, 102, 102, 0.25)"
-      top={-4}
-      left={-4}
-      right={-4}
-      bottom={-4}
+      top="-1"
+      left="-1"
+      right="-1"
+      bottom="-1"
       {...framePosition[flipCase]}
       transition="all 0.2s ease-out"
       zIndex={1}
@@ -1449,10 +1314,10 @@ function BadFlipPartFrame({flipCase, ...props}) {
         color="white"
         boxSize={8}
         position="absolute"
-        right={-20}
-        bottom={-20}
+        right="-5"
+        bottom="-5"
       >
-        <Icon name="block" boxSize={5} />
+        <BlockIcon boxSize="5" />
       </Flex>
     </Box>
   )

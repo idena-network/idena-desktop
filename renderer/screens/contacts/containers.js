@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 /* eslint-disable react/prop-types */
 import * as React from 'react'
 import {
@@ -9,7 +8,6 @@ import {
   Button,
   useClipboard,
   Box,
-  Icon,
   useDisclosure,
   Collapse,
   IconButton,
@@ -51,14 +49,17 @@ import {
 import {useSuccessToast} from '../../shared/hooks/use-toast'
 import {IdentityStatus} from '../../shared/types'
 import {VotingSkeleton} from '../oracles/components'
-import {useInviteScore} from '../profile/hooks'
+import {useInviteScore} from '../home/hooks'
 import {
   BasketIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
   DeleteIcon,
   EditIcon,
   InfoIcon,
   PlusSolidIcon,
 } from '../../shared/components/icons'
+import {AdDrawer} from '../ads/containers'
 
 export function ContactListSidebar({
   selectedContactId,
@@ -270,6 +271,7 @@ export function ContactCard({
   onRemoveContact,
   onRecoverContact,
   onKillContact,
+  onInviteMined,
 }) {
   const {
     t,
@@ -299,14 +301,23 @@ export function ContactCard({
 
   const successToast = useSuccessToast()
 
+  React.useEffect(() => {
+    if (state === IdentityStatus.Invite) {
+      onInviteMined()
+    }
+  }, [onInviteMined, state])
+
   const isInviteExpired =
     state === IdentityStatus.Undefined && !canKill && !mining && !activated
 
+  // eslint-disable-next-line no-nested-ternary
   const status = isInviteExpired
     ? t('Expired invitation')
-    : mining
+    : // eslint-disable-next-line no-nested-ternary
+    mining
     ? t('Mining...')
-    : terminating
+    : // eslint-disable-next-line no-nested-ternary
+    terminating
     ? t('Terminating...')
     : state === IdentityStatus.Invite
     ? t('Invitation')
@@ -369,9 +380,11 @@ export function ContactCard({
             {canKill && !terminating && !mining && (
               <>
                 <VDivider />
-                <IconButton2
-                  icon={<DeleteIcon />}
+                <Button
+                  variant="ghost"
                   colorScheme="red"
+                  leftIcon={<DeleteIcon />}
+                  px="1"
                   _active={{
                     bg: 'red.012',
                   }}
@@ -381,7 +394,7 @@ export function ContactCard({
                   onClick={onKillContact}
                 >
                   {t('Terminate invitation')}
-                </IconButton2>
+                </Button>
               </>
             )}
           </Stack>
@@ -428,6 +441,7 @@ export function ContactCard({
 
 export function IssueInviteDrawer({
   inviteeAddress,
+  isMining,
   onIssue,
   onIssueFail,
   ...props
@@ -444,7 +458,7 @@ export function IssueInviteDrawer({
   const [isSubmitting, setIsSubmitting] = React.useState()
 
   return (
-    <Drawer {...props}>
+    <AdDrawer isMining={isMining} {...props}>
       <DrawerHeader>
         <ContactDrawerHeader address={dummyAddress}>
           {t('Invite new person')}
@@ -501,14 +515,11 @@ export function IssueInviteDrawer({
               onClick={onToggleAdvancedOptions}
             >
               {t('Advanced')}
-              <Icon
-                boxSize={5}
-                name="chevron-down"
-                color="muted"
-                ml={2}
-                transform={isOpenAdvancedOptions ? 'rotate(180deg)' : ''}
-                transition="all 0.2s ease-in-out"
-              />
+              {isOpenAdvancedOptions ? (
+                <ChevronUpIcon boxSize="5" color="muted" ml={2} />
+              ) : (
+                <ChevronDownIcon boxSize="5" color="muted" ml={2} />
+              )}
             </Button>
             <Collapse in={isOpenAdvancedOptions} mt={4}>
               <FormControl>
@@ -526,7 +537,7 @@ export function IssueInviteDrawer({
           </PrimaryButton>
         </Stack>
       </DrawerBody>
-    </Drawer>
+    </AdDrawer>
   )
 }
 export function EditContactDrawer({contact, onRename, ...props}) {

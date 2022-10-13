@@ -127,6 +127,16 @@ export function IdentityProvider({children}) {
     [identity]
   )
 
+  const forceUpdate = React.useCallback(async () => {
+    if (identity.address) {
+      const nextIdentity = await fetchIdentity()
+
+      if (!deepEqual(identity, nextIdentity)) {
+        setIdentity({...identity, ...nextIdentity})
+      }
+    }
+  }, [identity])
+
   return (
     <IdentityStateContext.Provider
       value={{
@@ -144,7 +154,7 @@ export function IdentityProvider({children}) {
         canInvite: identity?.invites > 0,
       }}
     >
-      <IdentityDispatchContext.Provider value={{killMe}}>
+      <IdentityDispatchContext.Provider value={{killMe, forceUpdate}}>
         {children}
       </IdentityDispatchContext.Provider>
     </IdentityStateContext.Provider>

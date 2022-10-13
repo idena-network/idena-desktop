@@ -57,10 +57,13 @@ import {InfoButton, PrimaryButton} from '../shared/components/button'
 import {FloatDebug, Tooltip} from '../shared/components/components'
 import {useChainState} from '../shared/providers/chain-context'
 import {FullscreenIcon} from '../shared/components/icons'
+import {useAutoCloseValidationToast} from '../screens/validation/hooks/use-validation-toast'
 
 export default function ValidationPage() {
   const epoch = useEpochState()
   const timing = useTimingState()
+
+  useAutoCloseValidationToast()
 
   if (epoch && timing && timing.shortSession)
     return (
@@ -121,7 +124,7 @@ function ValidationSession({
         setTimeout(onCloseExceededTooltip, 3000)
       },
       onValidationSucceeded: () => {
-        router.push('/profile')
+        router.push('/validation/after')
       },
     },
     state: loadValidationState(),
@@ -415,10 +418,7 @@ function ValidationSession({
       )}
 
       {state.matches('validationFailed') && (
-        <ValidationFailedDialog
-          isOpen
-          onSubmit={() => router.push('/profile')}
-        />
+        <ValidationFailedDialog isOpen onSubmit={() => router.push('/home')} />
       )}
 
       <BadFlipDialog

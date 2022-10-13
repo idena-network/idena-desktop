@@ -170,3 +170,31 @@ export const isAddress = address =>
 
 export const humanizeDuration = (d, unit = 's') =>
   dayjs.duration(d, unit).humanize()
+
+export function pick(obj, keys) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([k]) => keys.includes(k))
+  )
+}
+
+export function omit(obj, keys) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([k]) => !keys.includes(k))
+  )
+}
+
+export const prependHex = hex => (hex?.startsWith('0x') ? hex : `0x${hex}`)
+
+export function areSameCaseInsensitive(a, b) {
+  return a?.toUpperCase() === b?.toUpperCase()
+}
+
+export function hexToObject(hex) {
+  try {
+    return JSON.parse(
+      new TextDecoder().decode(Buffer.from(hex.substring(2), 'hex'))
+    )
+  } catch {
+    return {}
+  }
+}

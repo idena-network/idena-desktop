@@ -7,7 +7,6 @@ import {
   Box,
   Flex,
   Button,
-  Icon,
   Menu,
   MenuButton,
   MenuItem,
@@ -23,6 +22,8 @@ import {
   LinkOverlay,
   LinkBox,
   Image,
+  Icon,
+  Portal,
 } from '@chakra-ui/react'
 import {useIdentityState} from '../providers/identity-context'
 import {useEpochState} from '../providers/epoch-context'
@@ -53,10 +54,13 @@ import {ExternalLink, Tooltip} from './components'
 import {useTimingState} from '../providers/timing-context'
 import {TodoVotingCountBadge} from '../../screens/oracles/components'
 import {
+  AdsIcon,
+  ClockIcon,
   ContactsIcon,
   GalleryIcon,
   MoreIcon,
   OracleIcon,
+  PlusSolidIcon,
   ProfileIcon,
   SettingsIcon,
   SyncIcon,
@@ -105,7 +109,7 @@ export default function Sidebar({
   )
 }
 
-function Status() {
+export function Status() {
   const {t} = useTranslation()
 
   const {loading, syncing, offline} = useChainState()
@@ -145,7 +149,7 @@ function Status() {
           <Popover trigger="hover" usePortal>
             <PopoverTrigger>
               <Stack isInline align="center" spacing={1} color="red.500">
-                <Icon name="clock" boxSize={5} />
+                <ClockIcon boxSize="5" />
                 <Text fontWeight={500}>{t('Wrong time')}</Text>
               </Stack>
             </PopoverTrigger>
@@ -292,19 +296,19 @@ function Navbar() {
 
   return (
     <Nav>
-      <NavItem href="/profile" icon={<ProfileIcon />}>
+      <NavItem href="/home" icon={ProfileIcon}>
         {t('My Idena')}
       </NavItem>
-      <NavItem href="/wallets" icon={<WalletIcon />}>
+      <NavItem href="/wallets" icon={WalletIcon}>
         {t('Wallets')}
       </NavItem>
-      <NavItem href="/flips/list" icon={<GalleryIcon />}>
+      <NavItem href="/flips/list" icon={GalleryIcon}>
         {t('Flips')}
       </NavItem>
-      <NavItem href="/contacts" icon={<ContactsIcon />}>
+      <NavItem href="/contacts" icon={ContactsIcon}>
         {t('Contacts')}
       </NavItem>
-      <NavItem href="/oracles/list" icon={<OracleIcon />}>
+      <NavItem href="/oracles/list" icon={OracleIcon} display>
         {todoCount > 0 ? (
           <Flex flex={1} align="center" justify="space-between">
             <Text as="span">{t('Oracle voting')}</Text>
@@ -316,7 +320,10 @@ function Navbar() {
           t('Oracle voting')
         )}
       </NavItem>
-      <NavItem href="/settings/general" icon={<SettingsIcon />}>
+      <NavItem href="/adn/list" icon={AdsIcon}>
+        {t('Ads')}
+      </NavItem>
+      <NavItem href="/settings/general" icon={SettingsIcon}>
         {t('Settings')}
       </NavItem>
     </Nav>
@@ -349,9 +356,11 @@ function NavItem({href, icon, children}) {
       }}
       _focus={{outline: 'none'}}
     >
-      {React.cloneElement(icon, {boxSize: '5'})}
+      <Icon as={icon} boxSize="5" />
       <NextLink href={href} passHref>
-        <LinkOverlay>{children}</LinkOverlay>
+        <LinkOverlay display="block" w="full">
+          {children}
+        </LinkOverlay>
       </NextLink>
     </LinkBox>
   )
@@ -416,7 +425,7 @@ function ActionPanel() {
                 OnboardingStep.ActivateMining
               )
             )
-              router.push('/profile')
+              router.push('/home')
             if (eitherOnboardingState(OnboardingStep.CreateFlips))
               router.push('/flips/list')
 
@@ -459,52 +468,54 @@ function ActionPanel() {
                   </ActionItem>
                 </Box>
               </PopoverTrigger>
-              <OnboardingPopoverContent
-                title={t('Schedule your next validation')}
-                maxW="sm"
-                additionFooterActions={
-                  <Button
-                    variant="unstyled"
-                    onClick={() => {
-                      global.openExternal(
-                        'https://medium.com/idena/how-do-i-start-using-idena-c49418e01a06'
-                      )
-                    }}
-                  >
-                    {t('Read more')}
-                  </Button>
-                }
-                onDismiss={dismissCurrentTask}
-              >
-                <Stack spacing={5}>
-                  <OnboardingPopoverContentIconRow icon={<TelegramIcon />}>
-                    <Trans i18nKey="onboardingValidateSubscribe" t={t}>
-                      <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
-                        Subscribe
-                      </OnboardingLinkButton>{' '}
-                      to the Idena Announcements (important updates only)
-                    </Trans>
-                  </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={<SyncIcon />}>
-                    {t(
-                      `Keep your node synchronized in 45-60 minutes before the validation starts.`
-                    )}
-                  </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={<TimerIcon />}>
-                    {t(
-                      `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
-                    )}
-                  </OnboardingPopoverContentIconRow>
-                  <OnboardingPopoverContentIconRow icon={<GalleryIcon />}>
-                    <Trans i18nKey="onboardingValidateTest" t={t}>
-                      <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
-                        Test yourself
-                      </OnboardingLinkButton>{' '}
-                      before the validation
-                    </Trans>
-                  </OnboardingPopoverContentIconRow>
-                </Stack>
-              </OnboardingPopoverContent>
+              <Portal>
+                <OnboardingPopoverContent
+                  title={t('Schedule your next validation')}
+                  maxW="sm"
+                  additionFooterActions={
+                    <Button
+                      variant="unstyled"
+                      onClick={() => {
+                        global.openExternal(
+                          'https://medium.com/idena/how-do-i-start-using-idena-c49418e01a06'
+                        )
+                      }}
+                    >
+                      {t('Read more')}
+                    </Button>
+                  }
+                  onDismiss={dismissCurrentTask}
+                >
+                  <Stack spacing={5}>
+                    <OnboardingPopoverContentIconRow icon={TelegramIcon}>
+                      <Trans i18nKey="onboardingValidateSubscribe" t={t}>
+                        <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
+                          Subscribe
+                        </OnboardingLinkButton>{' '}
+                        to the Idena Announcements (important updates only)
+                      </Trans>
+                    </OnboardingPopoverContentIconRow>
+                    <OnboardingPopoverContentIconRow icon={SyncIcon}>
+                      {t(
+                        `Keep your node synchronized in 45-60 minutes before the validation starts.`
+                      )}
+                    </OnboardingPopoverContentIconRow>
+                    <OnboardingPopoverContentIconRow icon={TimerIcon}>
+                      {t(
+                        `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
+                      )}
+                    </OnboardingPopoverContentIconRow>
+                    <OnboardingPopoverContentIconRow icon={GalleryIcon}>
+                      <Trans i18nKey="onboardingValidateTest" t={t}>
+                        <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
+                          Test yourself
+                        </OnboardingLinkButton>{' '}
+                        before the validation
+                      </Trans>
+                    </OnboardingPopoverContentIconRow>
+                  </Stack>
+                </OnboardingPopoverContent>
+              </Portal>
             </OnboardingPopover>
           </>
         )}
@@ -520,7 +531,8 @@ function ActionPanel() {
             bottom="6"
             right="1"
             zIndex="popover"
-            _expanded={{bg: 'brandGray.500'}}
+            _hover={{bg: 'unset'}}
+            _expanded={{bg: 'gray.500'}}
             _focus={{outline: 0}}
           >
             <MoreIcon boxSize="5" />
@@ -531,12 +543,13 @@ function ActionPanel() {
             rounded="lg"
             py={2}
             minWidth="145px"
+            zIndex="popover"
           >
             <MenuItem
-              color="brandGray.500"
+              color="gray.500"
               fontWeight={500}
-              px={3}
-              py={2}
+              px="3"
+              py="2"
               _hover={{bg: 'gray.50'}}
               _focus={{bg: 'gray.50'}}
               _selected={{bg: 'gray.50'}}
@@ -547,13 +560,8 @@ function ActionPanel() {
                 )
               }}
             >
-              <Icon
-                name="plus-square"
-                boxSize={5}
-                mr={3}
-                color="brandBlue.500"
-              />
-              Add to calendar
+              <PlusSolidIcon boxSize="5" mr="3" color="blue.500" />
+              {t('Add to calendar')}
             </MenuItem>
           </MenuList>
         </Menu>

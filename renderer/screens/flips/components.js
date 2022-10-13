@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
-import React, {useEffect} from 'react'
+import React from 'react'
 import NextLink from 'next/link'
 import {
   SimpleGrid,
-  Image as ChakraImage,
+  Image,
   Text,
   Box,
   Flex,
@@ -28,6 +28,7 @@ import {
   RadioGroup,
   HStack,
   Icon,
+  Center,
 } from '@chakra-ui/react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
@@ -36,7 +37,11 @@ import Jimp from 'jimp'
 import FlipEditor from './components/flip-editor'
 import {Step} from './types'
 import {formatKeywords, protectFlipImage} from './utils'
-import {PrimaryButton, IconButton2} from '../../shared/components/button'
+import {
+  PrimaryButton,
+  IconButton2,
+  SecondaryButton,
+} from '../../shared/components/button'
 import {rem} from '../../shared/theme'
 import {capitalize} from '../../shared/utils/string'
 import {reorder} from '../../shared/utils/arr'
@@ -49,6 +54,7 @@ import {
   FormLabel,
   GoogleTranslateButton,
   PageTitle,
+  DrawerFooter,
 } from '../../shared/components/components'
 import {
   ChevronDownIcon,
@@ -64,11 +70,13 @@ import {
   OkIcon,
   PicIcon,
   PlusSolidIcon,
+  PublishFlipIcon,
   SwitchIcon,
   UndoIcon,
   UploadIcon,
   UpvoteIcon,
 } from '../../shared/components/icons'
+import {AdDrawer} from '../ads/containers'
 
 export function FlipPageTitle({onClose, ...props}) {
   return (
@@ -200,13 +208,13 @@ export function FlipCard({flipService, onDelete}) {
 
 export function FlipCardImage(props) {
   return (
-    <ChakraImage
+    <Image
       objectFit="cover"
-      borderWidth="1px"
-      borderColor="brandGray.016"
-      // boxShadow={`0 0 0 1px ${colors.brandGray['016']}`}
+      border="solid 1px"
+      borderColor="gray.016"
       rounded="lg"
       height="full"
+      ignoreFallback
       {...props}
     />
   )
@@ -752,7 +760,7 @@ export function FlipProtectStep({
           ))}
         </FlipImageList>
         <Box>
-          <ChakraImage
+          <Image
             h="330px"
             w="440px"
             borderRadius="8px"
@@ -792,6 +800,7 @@ export function FlipShuffleStep({
   onReset,
 }) {
   const {t} = useTranslation()
+
   return (
     <FlipStep alignSelf="stretch">
       <FlipStepHeader>
@@ -1054,7 +1063,7 @@ export function FlipImage({
       {...props}
     >
       {src ? (
-        <ChakraImage
+        <Image
           src={src}
           objectFit={objectFit}
           fallbackSrc="/static/flips-cant-icn.svg"
@@ -1365,9 +1374,87 @@ export function DeleteFlipDrawer({hash, cover, isMissing, onDelete, ...props}) {
           }}
           onClick={onDelete}
         >
-          Delete
+          {t('Delete')}
         </PrimaryButton>
       </DrawerBody>
     </Drawer>
+  )
+}
+
+export function PublishFlipDrawer({isPending, flip, onSubmit, ...props}) {
+  const {t} = useTranslation()
+
+  return (
+    <AdDrawer isMining={isPending} {...props}>
+      <DrawerHeader>
+        <Stack spacing={4}>
+          <Center
+            alignSelf="flex-start"
+            bg="blue.012"
+            w={12}
+            minH={12}
+            rounded="xl"
+          >
+            <PublishFlipIcon boxSize={6} color="blue.500" />
+          </Center>
+          <Heading color="gray.500" fontSize="lg" fontWeight={500}>
+            {t('Submit flip')}
+          </Heading>
+        </Stack>
+      </DrawerHeader>
+      <DrawerBody overflowY="auto" mx={-6} mt="3">
+        <Stack spacing={6} fontSize="md" px={6} align="center">
+          <HStack spacing="3">
+            <FlipImageList>
+              {flip.originalOrder.map((num, idx) => (
+                <FlipImageListItem
+                  key={num}
+                  src={flip?.images[num]}
+                  isFirst={idx === 0}
+                  isLast={idx === flip?.images.length - 1}
+                  w="24"
+                />
+              ))}
+            </FlipImageList>
+            <FlipImageList>
+              {flip.order.map((num, idx) => (
+                <FlipImageListItem
+                  key={num}
+                  src={flip?.images[num]}
+                  isFirst={idx === 0}
+                  isLast={idx === flip?.images.length - 1}
+                  w="24"
+                />
+              ))}
+            </FlipImageList>
+          </HStack>
+          <FlipKeywordPanel w="full">
+            <Stack spacing="4">
+              {flip.keywords.map(word => (
+                <FlipKeyword key={word.id}>
+                  <FlipKeywordName>{word.name}</FlipKeywordName>
+                  <FlipKeywordDescription>{word.desc}</FlipKeywordDescription>
+                </FlipKeyword>
+              ))}
+            </Stack>
+          </FlipKeywordPanel>
+        </Stack>
+      </DrawerBody>
+      <DrawerFooter>
+        <HStack>
+          {/* eslint-disable-next-line react/destructuring-assignment */}
+          <SecondaryButton onClick={props.onClose}>
+            {t('Not now')}
+          </SecondaryButton>
+          <PrimaryButton
+            isLoading={isPending}
+            loadingText={t('Mining...')}
+            onClick={onSubmit}
+          >
+            {t('Submit')}
+          </PrimaryButton>
+        </HStack>
+      </DrawerFooter>
+    </AdDrawer>
   )
 }

@@ -99,7 +99,7 @@ const createMainWindow = () => {
     show: false,
   })
 
-  loadRoute(mainWindow, 'profile')
+  loadRoute(mainWindow, 'home')
 
   // Protocol handler for win32 and linux
   // eslint-disable-next-line no-cond-assign
@@ -592,7 +592,7 @@ ipcMain.on('node-log', ({sender}, message) => {
 })
 
 ipcMain.on('reload', () => {
-  loadRoute(mainWindow, 'dashboard')
+  loadRoute(mainWindow, 'home')
 })
 
 ipcMain.on('showMainWindow', () => {

@@ -16,7 +16,6 @@ import {
   votingFinishDate,
   votingStatuses,
   fetchContractBalanceUpdates,
-  fetchNetworkSize,
   stripOptions,
   hasValuableOptions,
   fetchVoting,
@@ -28,8 +27,8 @@ import {
 import {VotingStatus} from '../../shared/types'
 import {callRpc, HASH_IN_MEMPOOL, isAddress} from '../../shared/utils/utils'
 import {epochDb, requestDb} from '../../shared/utils/db'
-
 import {ContractRpcMode, VotingListFilter} from './types'
+import {fetchNetworkSize} from '../../shared/api/dna'
 
 export const votingListMachine = Machine(
   {
@@ -1114,7 +1113,9 @@ export const createViewVotingMachine = (id, epoch, address) =>
             },
           },
           on: {
-            ADD_FUND: 'funding',
+            ADD_FUND: {
+              target: 'funding',
+            },
             SELECT_OPTION: {
               actions: ['selectOption', log()],
             },
@@ -1379,7 +1380,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           const payload = {
             from,
             contract: contractHash,
-            args: buildDynamicArgs({value: issuer}),
+            args: buildDynamicArgs([{value: issuer}]),
           }
 
           const {error, gasCost, txFee} = await callRpc(

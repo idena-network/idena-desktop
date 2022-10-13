@@ -3,7 +3,6 @@ import {
   CloseButton,
   Flex,
   Heading,
-  Icon,
   Skeleton,
   Stack,
   Text,
@@ -11,7 +10,7 @@ import {
 } from '@chakra-ui/react'
 import router from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {UserInlineCard} from '../screens/profile/components'
+import {UserInlineCard} from '../../screens/home/components'
 import {
   TableValidationDesc,
   ValidationReportBlockOverview,
@@ -25,24 +24,28 @@ import {
   ValidationReportGaugeStatLabel,
   ValidationReportGaugeStatValue,
   ValidationReportStat,
-} from '../screens/validation-report/components'
-import {useValidationReportSummary} from '../screens/validation-report/hooks'
-import {ValidationResult} from '../screens/validation-report/types'
+} from '../../screens/validation/report/components'
+import {useValidationReportSummary} from '../../screens/validation/report/hooks'
+import {ValidationResult} from '../../screens/validation/report/types'
 import {
   ExternalLink,
-  FailAlert,
+  ErrorAlert,
   Page,
   PageTitle,
   SuccessAlert,
   TextLink,
-} from '../shared/components/components'
-import {SendOutIcon, TimerIcon} from '../shared/components/icons'
-import Layout from '../shared/components/layout'
-import {Table, TableHeaderCol} from '../shared/components/table'
-import {useEpochState} from '../shared/providers/epoch-context'
-import {useIdentity} from '../shared/providers/identity-context'
-import {IdentityStatus} from '../shared/types'
-import {toLocaleDna, toPercent} from '../shared/utils/utils'
+} from '../../shared/components/components'
+import {
+  ChevronRightIcon,
+  SendOutIcon,
+  TimerIcon,
+} from '../../shared/components/icons'
+import Layout from '../../shared/components/layout'
+import {Table, TableHeaderCol} from '../../shared/components/table'
+import {useEpochState} from '../../shared/providers/epoch-context'
+import {useIdentity} from '../../shared/providers/identity-context'
+import {IdentityStatus} from '../../shared/types'
+import {toLocaleDna, toPercent} from '../../shared/utils/utils'
 
 export default function ValidationReport() {
   const {t, i18n} = useTranslation()
@@ -98,7 +101,7 @@ export default function ValidationReport() {
           <PageTitle m={0}>
             {t('Epoch #{{epochNumber}} validation report', {epochNumber})}
           </PageTitle>
-          <CloseButton onClick={() => router.push('/profile')} />
+          <CloseButton onClick={() => router.push('/home')} />
         </Flex>
         <Stack spacing={6} w="full">
           <Box>
@@ -116,7 +119,7 @@ export default function ValidationReport() {
                     t('Validated')}
                 </SuccessAlert>
               ) : (
-                <FailAlert>{t('Validation failed')}</FailAlert>
+                <ErrorAlert>{t('Validation failed')}</ErrorAlert>
               )}
             </Skeleton>
           </Box>
@@ -149,7 +152,7 @@ export default function ValidationReport() {
                           bg={colors.brandGray['005']}
                         />
                       )}
-                      <ValidationReportGaugeIcon icon={<TimerIcon />} />
+                      <ValidationReportGaugeIcon as={TimerIcon} />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
                       <Skeleton
@@ -256,7 +259,7 @@ export default function ValidationReport() {
                           bg={colors.brandGray['005']}
                         />
                       )}
-                      <ValidationReportGaugeIcon icon={<SendOutIcon />} />
+                      <ValidationReportGaugeIcon as={SendOutIcon} />
                     </ValidationReportGaugeBox>
                     <ValidationReportGaugeStat>
                       <Skeleton
@@ -400,12 +403,9 @@ export default function ValidationReport() {
                         />
                       </ValidationReportColumn>
                       <ValidationReportColumn display={['none', 'table-cell']}>
-                        <TextLink href="/profile?replenishStake">
+                        <TextLink href="/home?replenishStake">
                           {t('Add stake')}
-                          <Icon
-                            name="chevron-down"
-                            transform="rotate(-90deg)"
-                          />
+                          <ChevronRightIcon />
                         </TextLink>
                       </ValidationReportColumn>
                     </tr>

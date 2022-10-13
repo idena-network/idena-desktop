@@ -21,6 +21,7 @@ import {
   FlipShuffleStep,
   FlipSubmitStep,
   CommunityTranslationUnavailable,
+  PublishFlipDrawer,
   FlipProtectStep,
 } from '../../screens/flips/components'
 import {useIdentityState} from '../../shared/providers/identity-context'
@@ -29,6 +30,7 @@ import {
   publishFlip,
   isPendingKeywordPair,
   protectFlip,
+  checkIfFlipNoiseEnabled,
 } from '../../screens/flips/utils'
 import {Step} from '../../screens/flips/types'
 import {
@@ -42,6 +44,8 @@ import {BadFlipDialog} from '../../screens/validation/components'
 import {useFailToast} from '../../shared/hooks/use-toast'
 import {useChainState} from '../../shared/providers/chain-context'
 import {InfoIcon, RefreshIcon} from '../../shared/components/icons'
+import {useRpc, useTrackTx} from '../../screens/ads/hooks'
+import {eitherState} from '../../shared/utils/utils'
 
 export default function EditFlipPage() {
   const {t, i18n} = useTranslation()
@@ -73,6 +77,8 @@ export default function EditFlipPage() {
           compressedPics,
           // eslint-disable-next-line no-shadow
           images = compressedPics || pics,
+          // eslint-disable-next-line no-shadow
+          protectedImages,
           hint,
           keywordPairId = hint ? Math.max(hint.id, 0) : 0,
           ...flip
@@ -86,13 +92,22 @@ export default function EditFlipPage() {
             )
           : [{id: 0, words: flip.keywords.words.map(w => w.id)}]
 
-        return {...flip, images, keywordPairId, availableKeywords, hint}
+        return {
+          ...flip,
+          images,
+          protectedImages,
+          keywordPairId,
+          availableKeywords,
+          hint,
+        }
       },
       protectFlip: async flip => protectFlip(flip),
       submitFlip: async flip => publishFlip(flip),
     },
     actions: {
-      onSubmitted: () => router.push('/flips/list'),
+      onMined: () => {
+        router.push('/flips/list')
+      },
       onError: (
         _,
         {data, error = data.response?.data?.error ?? data.message}
@@ -109,10 +124,14 @@ export default function EditFlipPage() {
     order,
     showTranslation,
     isCommunityTranslationsExpanded,
+    txHash,
+    epochNumber,
   } = current.context
 
   const not = state => !current?.matches({editing: state})
   const is = state => current?.matches({editing: state})
+  const either = (...states) =>
+    eitherState(current, ...states.map(s => ({editing: s})))
 
   const isOffline = is('keywords.loaded.fetchTranslationsFailed')
 
@@ -121,6 +140,23 @@ export default function EditFlipPage() {
     onOpen: onOpenBadFlipDialog,
     onClose: onCloseBadFlipDialog,
   } = useDisclosure()
+
+  const publishDrawerDisclosure = useDisclosure()
+
+  useTrackTx(txHash, {
+    onMined: React.useCallback(() => {
+      send({type: 'FLIP_MINED'})
+    }, [send]),
+  })
+
+  useRpc('dna_epoch', [], {
+    onSuccess: data => {
+      send({type: 'SET_EPOCH_NUMBER', epochNumber: data.epoch})
+    },
+  })
+
+  const isFlipNoiseEnabled = checkIfFlipNoiseEnabled(epochNumber)
+  const maybeProtectedImages = isFlipNoiseEnabled ? protectedImages : images
 
   return (
     <Layout>
@@ -168,18 +204,21 @@ export default function EditFlipPage() {
                 >
                   {t('Select images')}
                 </FlipMasterNavbarItem>
-                <FlipMasterNavbarItem
-                  step={
-                    // eslint-disable-next-line no-nested-ternary
-                    is('protect')
-                      ? Step.Active
-                      : is('keywords') || is('images')
-                      ? Step.Next
-                      : Step.Completed
-                  }
-                >
-                  {t('Protect images')}
-                </FlipMasterNavbarItem>
+
+                {isFlipNoiseEnabled ? (
+                  <FlipMasterNavbarItem
+                    step={
+                      // eslint-disable-next-line no-nested-ternary
+                      is('protect')
+                        ? Step.Active
+                        : is('keywords') || is('images')
+                        ? Step.Next
+                        : Step.Completed
+                    }
+                  >
+                    {t('Protect images')}
+                  </FlipMasterNavbarItem>
+                ) : null}
                 <FlipMasterNavbarItem
                   step={
                     // eslint-disable-next-line no-nested-ternary
@@ -292,7 +331,7 @@ export default function EditFlipPage() {
               )}
               {is('shuffle') && (
                 <FlipShuffleStep
-                  images={protectedImages}
+                  images={maybeProtectedImages}
                   originalOrder={originalOrder}
                   order={order}
                   onShuffle={() => send('SHUFFLE')}
@@ -310,7 +349,7 @@ export default function EditFlipPage() {
                   onSwitchLocale={() => send('SWITCH_LOCALE')}
                   originalOrder={originalOrder}
                   order={order}
-                  images={protectedImages}
+                  images={maybeProtectedImages}
                 />
               )}
             </FlipMaster>
@@ -347,7 +386,7 @@ export default function EditFlipPage() {
                   failToast('Can not submit flip. Node is offline')
                   return
                 }
-                send('SUBMIT')
+                publishDrawerDisclosure.onOpen()
               }}
             >
               {t('Submit')}
@@ -362,6 +401,20 @@ export default function EditFlipPage() {
             'Please read the rules carefully. You can lose all your validation rewards if any of your flips is reported.'
           )}
           onClose={onCloseBadFlipDialog}
+        />
+
+        <PublishFlipDrawer
+          {...publishDrawerDisclosure}
+          isPending={either('submit.submitting', 'submit.mining')}
+          flip={{
+            keywords: showTranslation ? keywords.translations : keywords.words,
+            images: maybeProtectedImages,
+            originalOrder,
+            order,
+          }}
+          onSubmit={() => {
+            send('SUBMIT')
+          }}
         />
 
         {global.isDev && <FloatDebug>{current.value}</FloatDebug>}

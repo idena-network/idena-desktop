@@ -18,7 +18,7 @@ import {
   WalletCard,
   WalletTransactionList,
 } from '../screens/wallets/containers'
-import {useFailToast, useSuccessToast} from '../shared/hooks/use-toast'
+import {useFailToast} from '../shared/hooks/use-toast'
 import {useIdentityState} from '../shared/providers/identity-context'
 import {areSameCaseInsensitive} from '../screens/oracles/utils'
 import {FillPlaceholder} from '../screens/oracles/components'
@@ -33,11 +33,8 @@ export default function WalletsPage() {
 
   const {wallets, totalAmount, txs} = useWallets()
 
-  const {
-    isOpen: isOpenSendDnaDrawer,
-    onOpen: onOpenSendDnaDrawer,
-    onClose: onCloseSendDnaDrawer,
-  } = useDisclosure()
+  const sendDnaDisclosure = useDisclosure()
+  const {onOpen: onOpenSendDnaDrawer} = sendDnaDisclosure
 
   const {
     isOpen: isOpenReceiveDnaDrawer,
@@ -45,7 +42,6 @@ export default function WalletsPage() {
     onClose: onCloseReceiveDnaDrawer,
   } = useDisclosure()
 
-  const successToast = useSuccessToast()
   const failToast = useFailToast()
 
   return (
@@ -113,16 +109,8 @@ export default function WalletsPage() {
         </Stack>
 
         <SendDnaDrawer
+          {...sendDnaDisclosure}
           address={address}
-          isOpen={isOpenSendDnaDrawer}
-          onClose={onCloseSendDnaDrawer}
-          onSend={hash => {
-            onCloseSendDnaDrawer()
-            successToast({
-              title: t('Transaction sent'),
-              description: hash,
-            })
-          }}
           onFail={error => {
             failToast({
               title: t('Error while sending transaction'),

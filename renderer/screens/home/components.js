@@ -1,19 +1,17 @@
 /* eslint-disable react/prop-types */
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 import {
   Stack,
   Heading,
   Stat,
   StatLabel,
   StatNumber,
-  useTheme,
   FormControl,
   Text,
   Box,
   Flex,
   Button,
   Radio,
-  Icon,
   Switch,
   Alert,
   AlertDescription,
@@ -29,6 +27,9 @@ import {
   FormHelperText,
   RadioGroup,
   HStack,
+  useBoolean,
+  WrapItem,
+  Wrap,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -46,7 +47,7 @@ import {
   DialogFooter,
   DialogBody,
   Dialog,
-  FailAlert,
+  ErrorAlert,
   TextLink,
 } from '../../shared/components/components'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
@@ -72,12 +73,16 @@ import {getStakingWarning, validateInvitationCode} from './utils'
 import {BLOCK_TIME} from '../oracles/utils'
 import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
-import {useTotalValidationScore} from '../validation-report/hooks'
+import {useTotalValidationScore} from '../validation/report/hooks'
 import {
   ChevronRightIcon,
   InfoIcon,
+  TelegramIcon,
   UserIcon,
+  WalletIcon,
 } from '../../shared/components/icons'
+import {AdDrawer} from '../ads/containers'
+import {useTrackTx} from '../ads/hooks'
 
 export function UserInlineCard({
   identity: {address, state},
@@ -92,7 +97,7 @@ export function UserInlineCard({
         borderWidth={1}
         borderColor="gray.016"
       />
-      <Stack spacing={0} w="full">
+      <Stack spacing="1.5" w="full">
         <Stack spacing={1}>
           <Heading as="h2" fontSize="lg" fontWeight={500} lineHeight="short">
             {mapToFriendlyStatus(state)}
@@ -142,13 +147,14 @@ export function AnnotatedUserStat({
   children,
   ...props
 }) {
-  const {colors} = useTheme()
   return (
     <UserStat {...props}>
       <UserStatLabel
-        borderBottom={`dotted 1px ${colors.muted}`}
+        borderBottom="dotted 1px"
+        borderBottomColor="muted"
         cursor="help"
         fontWeight={500}
+        w="fit-content"
       >
         <UserStatLabelTooltip label={annotation}>{label}</UserStatLabelTooltip>
       </UserStatLabel>
@@ -509,7 +515,7 @@ export function ActivateMiningDrawer({
       : 3 - (currentEpoch - delegationEpoch)
 
   return (
-    <Drawer onClose={onClose} {...props}>
+    <AdDrawer isMining={isLoading} onClose={onClose} {...props}>
       <DrawerHeader>
         <Flex
           align="center"
@@ -558,14 +564,14 @@ export function ActivateMiningDrawer({
               </FormControl>
 
               {pendingUndelegation ? (
-                <FailAlert>
+                <ErrorAlert>
                   {t(
                     'You have recently disabled delegation. You need to wait for {{count}} epochs to delegate to a new address.',
                     {count: waitForDelegationEpochs}
                   )}
-                </FailAlert>
+                </ErrorAlert>
               ) : (
-                <FailAlert>
+                <ErrorAlert>
                   <Text>
                     {t(
                       'You can lose your stake, all your mining and validation rewards if you delegate your mining status.'
@@ -576,7 +582,7 @@ export function ActivateMiningDrawer({
                       'Disabling delegation could be done at the next epoch only.'
                     )}
                   </Text>
-                </FailAlert>
+                </ErrorAlert>
               )}
             </Stack>
           ) : (
@@ -615,7 +621,7 @@ export function ActivateMiningDrawer({
           </PrimaryButton>
         </Stack>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -632,7 +638,7 @@ export function DeactivateMiningDrawer({
   const isDelegator = typeof delegatee === 'string'
 
   return (
-    <Drawer onClose={onClose} {...props}>
+    <AdDrawer isMining={isLoading} onClose={onClose} {...props}>
       <DrawerHeader>
         <Flex
           align="center"
@@ -704,7 +710,7 @@ export function DeactivateMiningDrawer({
           </PrimaryButton>
         </Stack>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -859,7 +865,7 @@ export function MyIdenaBotAlert({onConnect, onSkip}) {
         <Flex flexGrow={1}>
           <Flex flexGrow={1} alignItems="center" justifyContent="center">
             <Box ml={6}>
-              <Icon name="telegram" boxSize={6} mr={1} />
+              <TelegramIcon boxSize="6" mr="1" />
               {t(`Subscribe to @MyIdenaBot to get personalized notifications based on
         your status`)}
             </Box>
@@ -1003,10 +1009,10 @@ function IdenaBotFeatureList({features, listSeparator = ';'}) {
 }
 
 export function ProfileTagList() {
-  const {t, i18n} = useTranslation()
+  const {t} = useTranslation()
 
   const [
-    {age, penalty, penaltySeconds, totalShortFlipPoints, totalQualifiedFlips},
+    {age, penaltySeconds, totalShortFlipPoints, totalQualifiedFlips},
   ] = useIdentity()
 
   const epoch = useEpochState()
@@ -1015,85 +1021,82 @@ export function ProfileTagList() {
 
   const inviteScore = useInviteScore()
 
-  const formatDna = toLocaleDna(i18n.language, {maximumFractionDigits: 5})
-
   return (
-    <Stack direction="row" spacing="1" w="full" flexWrap="wrap">
-      {age > 0 && <ProfileTag label={t('Age')} value={age} />}
+    <Wrap spacing="1" w="full">
+      {age > 0 && (
+        <WrapItem>
+          <SimpleProfileTag label={t('Age')} value={age} />
+        </WrapItem>
+      )}
 
       {Number.isFinite(score) && (
-        <Box>
+        <WrapItem>
           <Popover placement="top" arrowShadowColor="transparent">
             <PopoverTrigger>
               <Box>
-                <ProfileTag
+                <SimpleProfileTag
                   label={t('Score')}
                   value={toPercent(score)}
                   cursor="help"
                 />
               </Box>
             </PopoverTrigger>
-            <ProfileTagPopoverContent>
-              <Stack>
-                <Stack spacing="2px">
-                  <Text color="muted" lineHeight="shorter">
-                    {t('Total score')}
-                  </Text>
-                  <Text color="white" lineHeight="base">
-                    {t(
-                      `{{totalShortFlipPoints}} out of {{totalQualifiedFlips}}`,
-                      {
-                        totalShortFlipPoints,
-                        totalQualifiedFlips,
-                      }
-                    )}
-                  </Text>
+            <PopoverContent border="none" fontSize="sm" w="max-content">
+              <PopoverArrow bg="graphite.500" />
+              <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
+                <Stack>
+                  <Stack spacing="0.5">
+                    <Text color="muted" lineHeight="shorter">
+                      {t('Total score')}
+                    </Text>
+                    <Text color="white" lineHeight="4">
+                      {t(
+                        `{{totalShortFlipPoints}} out of {{totalQualifiedFlips}}`,
+                        {
+                          totalShortFlipPoints,
+                          totalQualifiedFlips,
+                        }
+                      )}
+                    </Text>
+                  </Stack>
+                  <Stack spacing="0.5">
+                    <Text color="muted" lineHeight="shorter">
+                      {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
+                    </Text>
+                    <TextLink
+                      href="/validation/report"
+                      color="white"
+                      lineHeight="4"
+                    >
+                      {t('Validation report')}
+                      <ChevronRightIcon />
+                    </TextLink>
+                  </Stack>
                 </Stack>
-                <Stack spacing="2px">
-                  <Text color="muted" lineHeight="shorter">
-                    {t('Epoch #{{epoch}}', {epoch: epoch?.epoch})}
-                  </Text>
-                  <TextLink
-                    href="/validation-report"
-                    color="white"
-                    lineHeight="base"
-                  >
-                    {t('Validation report')}
-                    <ChevronRightIcon />
-                  </TextLink>
-                </Stack>
-              </Stack>
-            </ProfileTagPopoverContent>
+              </PopoverBody>
+            </PopoverContent>
           </Popover>
-        </Box>
-      )}
-
-      {/* TODO: remove after fork 0.30.0 */}
-      {penalty > 0 && (
-        <ProfileTag
-          label={t('Mining penalty')}
-          value={formatDna(penalty)}
-          bg="red.012"
-          color="red.500"
-        />
+        </WrapItem>
       )}
 
       {penaltySeconds > 0 && (
-        <ProfileTag
-          label={t('Mining penalty')}
-          value={humanizeDuration(penaltySeconds)}
-          bg="red.012"
-          color="red.500"
-        />
+        <WrapItem>
+          <ProfileTag bg={[null, 'red.012']}>
+            <ProfileTagLabel color="red.500">
+              {t('Mining penalty')}
+            </ProfileTagLabel>
+            <ProfileTagValue color="red.500">
+              {humanizeDuration(penaltySeconds)}
+            </ProfileTagValue>
+          </ProfileTag>
+        </WrapItem>
       )}
 
       {inviteScore > 0 && (
-        <Box>
+        <WrapItem>
           <ProfileTagPopover>
             <ProfileTagPopoverTrigger>
               <ProfileTag
-                label={t('Invitation rewards')}
-                value={toPercent(inviteScore)}
                 cursor="help"
                 bg={
                   // eslint-disable-next-line no-nested-ternary
@@ -1111,7 +1114,10 @@ export function ProfileTagList() {
                     ? 'orange.500'
                     : 'green.500'
                 }
-              />
+              >
+                <ProfileTagLabel>{t('Invitation rewards')}</ProfileTagLabel>
+                <ProfileTagValue>{toPercent(inviteScore)}</ProfileTagValue>
+              </ProfileTag>
             </ProfileTagPopoverTrigger>
             <ProfileTagPopoverContent>
               <Stack spacing="2px" w={40}>
@@ -1128,32 +1134,51 @@ export function ProfileTagList() {
               </Stack>
             </ProfileTagPopoverContent>
           </ProfileTagPopover>
-        </Box>
+        </WrapItem>
       )}
-    </Stack>
+    </Wrap>
   )
 }
 
-export const ProfileTag = React.forwardRef(function ProfileTag(
+function ProfileTag({children, ...props}) {
+  return (
+    <Tag
+      bg={[null, 'gray.016']}
+      borderRadius={[null, 'xl']}
+      borderBottomWidth={[1, 0]}
+      borderBottomColor="gray.100"
+      color="gray.500"
+      fontSize={['base', 'sm']}
+      px={[null, '3']}
+      pt={['2', 0]}
+      pb={['2.5', 0]}
+      w={['full', null]}
+      {...props}
+    >
+      <Stack direction={['column', 'row']} spacing={['1.5', '1']} w={['full']}>
+        {children}
+      </Stack>
+    </Tag>
+  )
+}
+
+function ProfileTagLabel(props) {
+  return <Text {...props} />
+}
+
+function ProfileTagValue(props) {
+  return <Text color={['muted', 'inherit']} {...props} />
+}
+
+const SimpleProfileTag = React.forwardRef(function SimpleProfileTag(
   {label, value, ...props},
   ref
 ) {
   return (
-    <Tag
-      ref={ref}
-      bg="gray.016"
-      borderRadius="xl"
-      fontSize="sm"
-      px="3"
-      minH="6"
-      mt="1.5"
-      {...props}
-    >
-      <Stack isInline spacing="1">
-        <Text>{label}</Text>
-        <Text>{value}</Text>
-      </Stack>
-    </Tag>
+    <ProfileTag ref={ref} {...props}>
+      <ProfileTagLabel>{label}</ProfileTagLabel>
+      <ProfileTagValue>{value}</ProfileTagValue>
+    </ProfileTag>
   )
 })
 
@@ -1188,7 +1213,7 @@ function ProfileTagPopoverContent({children}) {
   )
 }
 
-export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
+export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
   const {t, i18n} = useTranslation()
 
   const {address, state, age} = useIdentityState()
@@ -1202,22 +1227,41 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
     notifyOnChangeProps: 'tracked',
   })
 
-  const [sendValue, setSendValue] = useState('')
+  const [sendValue, setSendValue] = React.useState('')
 
-  const {submit} = useReplenishStake({onSuccess, onError})
+  const [isMining, setIsMining] = useBoolean()
+  const {off: setIsMiningOff} = setIsMining
+
+  const {data: hash, submit} = useReplenishStake({
+    onSuccess,
+    onError: React.useCallback(
+      e => {
+        setIsMiningOff()
+        onError(e)
+      },
+      [onError, setIsMiningOff]
+    ),
+  })
+
+  useTrackTx(hash, {
+    onMined: React.useCallback(() => {
+      setIsMiningOff()
+      onMined()
+    }, [onMined, setIsMiningOff]),
+  })
 
   const formatDna = toLocaleDna(i18n.language, {
     maximumFractionDigits: 5,
   })
 
-  const [checkboxes, setCheckboxes] = useState({
+  const [checkboxes, setCheckboxes] = React.useState({
     cb1: {show: false, value: false},
     cb2: {show: false, value: false},
     cb3: {show: false, value: false},
     cb4: {show: false, value: false},
   })
 
-  useEffect(() => {
+  React.useEffect(() => {
     setCheckboxes({
       cb1: {show: true, value: false},
       cb2: {
@@ -1230,7 +1274,7 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
       },
       cb4: {show: !!getStakingWarning(t, state, age), value: false},
     })
-  }, [age, state, isOpen, t])
+  }, [age, state, t])
 
   const allChecked = Object.entries(checkboxes).reduce(
     (prev, current) => prev && (current[1].show ? current[1].value : true),
@@ -1238,11 +1282,11 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
   )
 
   return (
-    <Drawer isOpen={isOpen} {...props}>
+    <AdDrawer isMining={isMining} {...props}>
       <DrawerHeader>
         <Stack spacing="4">
           <FillCenter bg="blue.012" h={12} minH={12} w={12} rounded="xl">
-            <Icon name="wallet" boxSize="6" color="blue.500" />
+            <WalletIcon boxSize="6" color="blue.500" />
           </FillCenter>
           <Heading
             color="brandGray.500"
@@ -1269,11 +1313,13 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
               })}
             </Text>
           </Stack>
-          <Stack spacing="2.5" px={1}>
+          <Stack spacing="2.5">
             <form
               id="replenishStake"
               onSubmit={e => {
                 e.preventDefault()
+
+                setIsMining.on()
 
                 submit({amount: sendValue})
               }}
@@ -1283,7 +1329,7 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                   {t('Amount')}
                 </FormLabel>
                 <DnaInput
-                  name="amount"
+                  value={sendValue}
                   onChange={e => setSendValue(Number(e.target.value))}
                 />
                 <FormHelperText fontSize="md">
@@ -1300,18 +1346,22 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
               <Stack mt={4} spacing={2}>
                 <FormControl>
                   <Checkbox
-                    className="custom-checkbox"
                     alignItems="flex-start"
+                    sx={{
+                      '& input+span': {
+                        marginTop: '2px',
+                      },
+                    }}
                     isChecked={checkboxes.cb1.value}
-                    onChange={e => {
-                      setCheckboxes({
-                        ...checkboxes,
+                    onChange={e =>
+                      setCheckboxes(prev => ({
+                        ...prev,
                         cb1: {
-                          ...checkboxes.cb1,
+                          ...prev.cb1,
                           value: e.target.checked,
                         },
-                      })
-                    }}
+                      }))
+                    }
                   >
                     {t(
                       'I understand that I can only withdraw my stake by terminating my identity'
@@ -1321,17 +1371,21 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                 {checkboxes.cb2.show && (
                   <FormControl>
                     <Checkbox
-                      className="custom-checkbox"
                       alignItems="flex-start"
+                      sx={{
+                        '& input+span': {
+                          marginTop: '2px',
+                        },
+                      }}
                       isChecked={checkboxes.cb2.value}
                       onChange={e =>
-                        setCheckboxes({
-                          ...checkboxes,
+                        setCheckboxes(prev => ({
+                          ...prev,
                           cb2: {
-                            ...checkboxes.cb2,
+                            ...prev.cb2,
                             value: e.target.checked,
                           },
-                        })
+                        }))
                       }
                     >
                       {t(
@@ -1343,17 +1397,21 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                 {checkboxes.cb3.show && (
                   <FormControl>
                     <Checkbox
-                      className="custom-checkbox"
                       alignItems="flex-start"
+                      sx={{
+                        '& input+span': {
+                          marginTop: '2px',
+                        },
+                      }}
                       isChecked={checkboxes.cb3.value}
                       onChange={e =>
-                        setCheckboxes({
-                          ...checkboxes,
+                        setCheckboxes(prev => ({
+                          ...prev,
                           cb3: {
-                            ...checkboxes.cb3,
+                            ...prev.cb3,
                             value: e.target.checked,
                           },
-                        })
+                        }))
                       }
                     >
                       {t(
@@ -1365,17 +1423,21 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                 {checkboxes.cb4.show && (
                   <FormControl>
                     <Checkbox
-                      className="custom-checkbox"
                       alignItems="flex-start"
+                      sx={{
+                        '& input+span': {
+                          marginTop: '2px',
+                        },
+                      }}
                       isChecked={checkboxes.cb4.value}
                       onChange={e =>
-                        setCheckboxes({
-                          ...checkboxes,
+                        setCheckboxes(prev => ({
+                          ...prev,
                           cb4: {
-                            ...checkboxes.cb4,
+                            ...prev.cb4,
                             value: e.target.checked,
                           },
-                        })
+                        }))
                       }
                     >
                       {getStakingWarning(t, state, age)}
@@ -1383,11 +1445,6 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
                   </FormControl>
                 )}
               </Stack>
-              <style jsx global>{`
-                .custom-checkbox > input + div {
-                  margin-top: 2px;
-                }
-              `}</style>
             </form>
           </Stack>
         </Stack>
@@ -1402,12 +1459,14 @@ export function ReplenishStakeDrawer({onSuccess, onError, isOpen, ...props}) {
             form="replenishStake"
             type="submit"
             isDisabled={!allChecked || !sendValue}
+            isLoading={isMining}
+            loadingText={t('Mining...')}
           >
             {t('Add stake')}
           </PrimaryButton>
         </Stack>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -1415,7 +1474,7 @@ export function StakingAlert(props) {
   const warning = useStakingAlert()
 
   return warning ? (
-    <FailAlert {...props}>
+    <ErrorAlert {...props}>
       {Array.isArray(warning) ? (
         <Stack spacing={0}>
           {warning.map((message, idx) => (
@@ -1427,6 +1486,6 @@ export function StakingAlert(props) {
       ) : (
         warning
       )}
-    </FailAlert>
+    </ErrorAlert>
   ) : null
 }

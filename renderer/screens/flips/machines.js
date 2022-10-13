@@ -10,6 +10,7 @@ import {
   DEFAULT_FLIP_ORDER,
   updateFlipTypeByHash,
   handleOutdatedFlips,
+  checkIfFlipNoiseEnabled,
 } from './utils'
 import {callRpc, HASH_IN_MEMPOOL, loadKeyword} from '../../shared/utils/utils'
 import {shuffle} from '../../shared/utils/arr'
@@ -68,10 +69,12 @@ export const flipsMachine = Machine(
             if (missingFlips.length) {
               const keywords = await Promise.all(
                 availableKeywords
-                  .filter(({id}) =>
-                    persistedFlips.some(
-                      ({keywordPairId}) => keywordPairId !== id
-                    )
+                  .filter(
+                    ({id, used}) =>
+                      used &&
+                      persistedFlips.some(
+                        ({keywordPairId}) => keywordPairId !== id
+                      )
                   )
                   .map(async ({id, words}) => ({
                     id,
@@ -552,9 +555,20 @@ export const flipMasterMachine = Machine(
           }),
         ],
       },
+      SET_EPOCH_NUMBER: {
+        actions: ['assignEpochNumber', log()],
+      },
     },
-    initial: 'prepare',
+    initial: 'idle',
     states: {
+      idle: {
+        on: {
+          SET_EPOCH_NUMBER: {
+            target: 'prepare',
+            actions: 'assignEpochNumber',
+          },
+        },
+      },
       prepare: {
         invoke: {
           src: 'prepareFlip',
@@ -723,7 +737,15 @@ export const flipMasterMachine = Machine(
                 ],
               },
               PAINTING: '.painting',
-              NEXT: 'protect',
+              NEXT: [
+                {
+                  target: 'protect',
+                  cond: 'isFlipNoiseEnabled',
+                },
+                {
+                  target: 'shuffle',
+                },
+              ],
               PREV: 'keywords',
             },
             initial: 'idle',
@@ -783,8 +805,8 @@ export const flipMasterMachine = Machine(
                   '': [
                     {
                       target: 'protecting',
-                      cond: ({protectedImages}) =>
-                        !protectedImages.some(x => x),
+                      cond: ({images, protectedImages}) =>
+                        images.some(x => x) && !protectedImages.some(x => x),
                     },
                   ],
                 },
@@ -840,7 +862,15 @@ export const flipMasterMachine = Machine(
                 actions: ['changeOrder', log()],
               },
               NEXT: 'submit',
-              PREV: 'protect',
+              PREV: [
+                {
+                  target: 'protect',
+                  cond: 'isFlipNoiseEnabled',
+                },
+                {
+                  target: 'images',
+                },
+              ],
             },
             initial: 'idle',
             states: {
@@ -874,7 +904,7 @@ export const flipMasterMachine = Machine(
                 invoke: {
                   src: 'submitFlip',
                   onDone: {
-                    target: 'done',
+                    target: 'mining',
                     actions: [
                       assign((context, {data: {txHash, hash}}) => ({
                         ...context,
@@ -888,8 +918,13 @@ export const flipMasterMachine = Machine(
                   onError: {target: 'failure', actions: [log()]},
                 },
               },
+              mining: {
+                on: {
+                  FLIP_MINED: 'done',
+                },
+              },
               done: {
-                entry: ['onSubmitted', log()],
+                entry: ['onMined', log()],
               },
               failure: {entry: ['onError']},
             },
@@ -926,6 +961,7 @@ export const flipMasterMachine = Machine(
           order,
           orderPermutations,
           images,
+          protectedImages,
           keywords,
           type,
           createdAt,
@@ -945,6 +981,7 @@ export const flipMasterMachine = Machine(
             order,
             orderPermutations,
             images,
+            protectedImages,
             keywords,
           }
 
@@ -991,6 +1028,13 @@ export const flipMasterMachine = Machine(
       persistFlip: context => {
         global.flipStore.updateDraft(context)
       },
+      assignEpochNumber: assign({
+        epochNumber: (_, {epochNumber}) => epochNumber,
+      }),
+    },
+    guards: {
+      isFlipNoiseEnabled: ({epochNumber}) =>
+        checkIfFlipNoiseEnabled(epochNumber),
     },
   }
 )

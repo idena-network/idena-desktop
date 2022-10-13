@@ -17,15 +17,16 @@ import {
   useTheme,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
-import {SmallText, TextLink} from '../../shared/components/components'
+import {SmallText, TextLink} from '../../../shared/components/components'
 import {
+  ChevronRightIcon,
   SendOutIcon,
   TimerIcon,
   TwitterIcon,
-} from '../../shared/components/icons'
-import {TableCol} from '../../shared/components/table'
-import {useIdentity} from '../../shared/providers/identity-context'
-import {toLocaleDna, toPercent} from '../../shared/utils/utils'
+} from '../../../shared/components/icons'
+import {TableCol} from '../../../shared/components/table'
+import {useIdentity} from '../../../shared/providers/identity-context'
+import {toLocaleDna, toPercent} from '../../../shared/utils/utils'
 import {useValidationReportSummary} from './hooks'
 import {ValidationResult} from './types'
 
@@ -69,8 +70,9 @@ export function ValidationReportSummary({onClose}) {
       }
       borderRadius="md"
       boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
-      px={8}
-      py={6}
+      px="8"
+      pt="6"
+      pb="6"
     >
       <CloseButton
         w={6}
@@ -123,7 +125,7 @@ export function ValidationReportSummary({onClose}) {
                       color={colors.red[500]}
                     />
                   )}
-                  <ValidationReportGaugeIcon icon={<TimerIcon />} />
+                  <ValidationReportGaugeIcon as={TimerIcon} />
                 </ValidationReportGaugeBox>
                 <ValidationReportGaugeStat>
                   {isValidated ? (
@@ -169,7 +171,7 @@ export function ValidationReportSummary({onClose}) {
                       color={colors.red[500]}
                     />
                   )}
-                  <ValidationReportGaugeIcon icon={<SendOutIcon />} />
+                  <ValidationReportGaugeIcon as={SendOutIcon} />
                 </ValidationReportGaugeBox>
                 <ValidationReportGaugeStat>
                   <Skeleton
@@ -196,17 +198,13 @@ export function ValidationReportSummary({onClose}) {
             <Flex justify="space-between">
               <Box>
                 <TextLink
-                  href="/validation-report"
+                  href="/validation/report"
                   fontWeight={500}
                   display="inline-block"
                 >
                   <Stack isInline spacing={0} align="center">
                     <Text as="span">{t('More details')}</Text>
-                    <Icon
-                      name="chevron-down"
-                      boxSize={4}
-                      transform="rotate(-90deg)"
-                    />
+                    <ChevronRightIcon boxSize="4" />
                   </Stack>
                 </TextLink>
               </Box>
@@ -307,9 +305,9 @@ export function ValidationReportGaugeBar({value, bg, color}) {
 }
 
 export function ValidationReportGaugeIcon({
-  icon,
   bg = 'gray.50',
   color = 'muted',
+  as,
   ...props
 }) {
   return (
@@ -323,7 +321,7 @@ export function ValidationReportGaugeIcon({
       transform="translateX(-50%)"
       {...props}
     >
-      <Icon name={icon} boxSize={5} color={color} />
+      <Icon as={as} boxSize="5" color={color} />
     </Box>
   )
 }

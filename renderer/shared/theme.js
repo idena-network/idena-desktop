@@ -25,13 +25,19 @@ export const theme = {
     },
     gray: {
       '016': 'rgb(83 86 92 /0.16)',
+      '030': 'rgb(83 86 92 /0.30)',
+      '064': 'rgb(83 86 92 /0.64)',
+      '080': 'rgb(83 86 92 /0.80)',
       10: 'rgba(255,255,255,0.1)',
-      50: 'rgb(245, 246, 247)',
+      50: 'rgb(245 246 247)',
       100: 'rgb(210, 212, 217)',
-      200: '#53565c',
+      200: 'rgb(210 212 217)',
+      212: 'rgb(210 212 217 /0.12)',
       300: 'rgb(232, 234, 237)',
-      400: 'rgb(232, 234, 237)',
-      500: 'rgb(232, 234, 237)',
+      500: 'rgb(83 86 92)',
+      600: 'rgb(83 86 92)',
+      800: 'rgb(83 86 92)',
+      900: 'rgb(17 17 17)',
       980: 'rgba(17 17 17 /0.80)',
     },
     red: {
@@ -128,6 +134,7 @@ export const theme = {
   },
   sizes: {
     sm: rem(360),
+    mdx: '400px',
     md: rem(480),
   },
   radii: {
@@ -146,6 +153,11 @@ export const theme = {
         mdx: {
           dialog: {
             maxW: '400px',
+          },
+        },
+        440: {
+          dialog: {
+            maxW: '440px',
           },
         },
         md: {
@@ -167,6 +179,59 @@ export const theme = {
           dialog: {
             maxW: '30%',
           },
+        },
+      },
+    },
+    Drawer: {
+      baseStyle: {
+        overlay: {
+          bg: 'xblack.080',
+        },
+        footer: {
+          borderTopWidth: 1,
+          borderTopColor: 'gray.300',
+          py: 3,
+          paddingX: 4,
+          justify: 'flex-end',
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+        },
+      },
+    },
+    Menu: {
+      baseStyle: {
+        button: {
+          borderRadius: 'md',
+          h: 8,
+          w: 6,
+          _hover: {bg: 'gray.50'},
+          _expanded: {bg: 'gray.50'},
+        },
+        list: {
+          border: 'none',
+          borderRadius: 'lg',
+          py: 2,
+          minW: '145px',
+          shadow:
+            '0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)',
+          '&:focus:not([data-focus-visible-added])': {
+            shadow:
+              '0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)',
+          },
+        },
+        item: {
+          fontWeight: 500,
+          px: 3,
+          py: '1.5',
+          _hover: {bg: 'gray.50'},
+          _focus: {bg: 'gray.50'},
+        },
+        divider: {
+          borderColor: 'gray.300',
+          borderWidth: 1,
+          my: '2',
         },
       },
     },
@@ -192,7 +257,76 @@ export const theme = {
       baseStyle: {
         fontWeight: 500,
       },
+      sizes: {
+        md: {
+          h: '8',
+        },
+        mdx: {
+          h: '10',
+        },
+        lg: {
+          h: '12',
+          px: '3',
+          borderRadius: 'lg',
+          fontSize: '15px',
+          fontWeight: 400,
+        },
+        lgx: {
+          h: '14',
+          px: '3',
+          borderRadius: '14px',
+          fontSize: '20px',
+          fontWeight: 500,
+        },
+      },
       variants: {
+        primary: {
+          bg: 'blue.500',
+          color: 'white',
+          borderRadius: 6,
+          px: 4,
+          _hover: {
+            bg: 'rgb(68, 124, 235)',
+            _disabled: {
+              bg: 'blue.500',
+            },
+          },
+          _active: {
+            bg: 'rgb(68, 124, 235)',
+          },
+        },
+        secondary: {
+          bg: 'blue.012',
+          color: 'blue.500',
+          borderRadius: 6,
+          px: 4,
+          _hover: {
+            bg: 'blue.024',
+            _disabled: {
+              bg: 'gray.100',
+            },
+          },
+          _active: {
+            bg: 'blue.024',
+          },
+          _disabled: {
+            bg: 'gray.100',
+            color: 'gray.300',
+          },
+        },
+        primaryFlat: {
+          bg: 'transparent',
+          color: 'brandBlue.500',
+          borderRadius: 8,
+        },
+        secondaryFlat: {
+          bg: 'transparent',
+          color: 'muted',
+          borderRadius: '8',
+          _disabled: {
+            color: 'gray.300',
+          },
+        },
         tab: {
           color: 'muted',
           borderRadius: '6',
@@ -210,6 +344,183 @@ export const theme = {
             bg: 'gray.50',
             color: 'blue.500',
           },
+        },
+      },
+    },
+    Input: {
+      sizes: {
+        md: {
+          field: {
+            h: 8,
+            px: 3,
+            borderRadius: 'md',
+            fontSize: 'md',
+          },
+        },
+        lg: {
+          field: {
+            h: 12,
+            px: 3,
+            borderRadius: 'lg',
+            fontSize: '15px',
+          },
+        },
+      },
+      variants: {
+        outline: {
+          field: {
+            borderColor: 'gray.300',
+            _hover: {
+              borderColor: 'gray.300',
+            },
+            _placeholder: {
+              color: 'muted',
+            },
+            _disabled: {
+              bg: 'gray.50',
+              color: 'muted',
+              '-webkit-text-fill-color': '#96999E',
+              opacity: 1,
+            },
+            _readOnly: {
+              bg: 'gray.50',
+              color: 'muted',
+              '-webkit-text-fill-color': '#96999E',
+            },
+          },
+        },
+      },
+    },
+    NumberInput: {
+      sizes: {
+        md: {
+          field: {
+            h: 8,
+            px: 3,
+          },
+        },
+      },
+      variants: {
+        outline: {
+          field: {
+            borderColor: 'gray.300',
+            _hover: {
+              borderColor: 'gray.300',
+            },
+            _placeholder: {
+              color: 'muted',
+            },
+            _disabled: {
+              bg: 'gray.50',
+              color: 'muted',
+              '-webkit-text-fill-color': '#96999E',
+              opacity: 1,
+            },
+          },
+        },
+      },
+    },
+    Textarea: {
+      sizes: {
+        md: {
+          px: 3,
+          py: 2,
+          minH: '16',
+        },
+      },
+      variants: {
+        outline: {
+          borderColor: 'gray.300',
+          _hover: {
+            borderColor: 'gray.300',
+          },
+          _placeholder: {
+            color: 'muted',
+          },
+        },
+      },
+    },
+    Select: {
+      sizes: {
+        md: {
+          field: {
+            px: '2',
+          },
+        },
+      },
+    },
+    FormError: {
+      baseStyle: {
+        text: {
+          fontSize: 'md',
+          lineHeight: '4',
+        },
+        icon: {
+          boxSize: '3',
+          marginEnd: '1',
+        },
+      },
+    },
+    Table: {
+      baseStyle: {
+        table: {
+          fontVariantNumeric: 'normal',
+          width: '100%',
+        },
+      },
+      sizes: {
+        md: {
+          td: {
+            px: 3,
+            py: 2,
+            lineHeight: 'inherit',
+          },
+        },
+      },
+    },
+    Alert: {
+      variants: {
+        validation: ({colorScheme}) => ({
+          container: {
+            bg: `${colorScheme}.500`,
+            color: 'white',
+            borderRadius: 'lg',
+            boxShadow:
+              '0 3px 12px 0 rgba(255, 102, 102, 0.1), 0 2px 3px 0 rgba(255, 102, 102, 0.2)',
+            px: '4',
+            py: '1',
+            minH: '42px',
+          },
+          title: {
+            fontSize: 'md',
+            fontWeight: 400,
+            lineHeight: '5',
+            marginEnd: ['2', '6'],
+            maxW: ['48', 'none'],
+          },
+          description: {
+            lineHeight: '5',
+          },
+          icon: {
+            flexShrink: 0,
+            marginEnd: '3',
+            w: '5',
+            h: '5',
+          },
+          spinner: {
+            flexShrink: 0,
+            marginEnd: '3',
+            w: '5',
+            h: '5',
+          },
+        }),
+      },
+    },
+    Form: {
+      baseStyle: {
+        container: {
+          px: 'px',
+          pb: 'px',
         },
       },
     },

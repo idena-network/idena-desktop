@@ -33,7 +33,7 @@ const HardforkVotingStatus = {
   Unknown: 'unknown',
 }
 
-export function useFork() {
+export function useHardFork() {
   const {nodeCurrentVersion, nodeRemoteVersion} = useAutoUpdateState()
 
   const statusDb = React.useMemo(

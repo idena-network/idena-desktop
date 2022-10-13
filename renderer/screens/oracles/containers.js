@@ -9,7 +9,6 @@ import {
   Box,
   Stack,
   Text,
-  Icon,
   Flex,
   Divider,
   useDisclosure,
@@ -33,6 +32,7 @@ import {
   FormControl,
   RadioGroup,
   Radio,
+  HStack,
 } from '@chakra-ui/react'
 import dayjs from 'dayjs'
 import {
@@ -48,10 +48,10 @@ import {
   DialogBody,
   DialogFooter,
   DialogHeader,
-  Drawer,
   DrawerBody,
   DrawerFooter,
   DrawerHeader,
+  ExternalLink,
   FormLabel,
   Input,
   Tooltip,
@@ -97,12 +97,17 @@ import {
   AddFundIcon,
   ChevronDownIcon,
   InfoIcon,
+  OkIcon,
   OracleIcon,
   SendOutIcon,
   StarIcon,
+  TickIcon,
   UserIcon,
   UserTickIcon,
 } from '../../shared/components/icons'
+import {AdImage} from '../ads/components'
+import {AdDrawer} from '../ads/containers'
+import {useFormatDna} from '../../shared/hooks/hooks'
 
 export function VotingCard({votingRef, ...props}) {
   const router = useRouter()
@@ -138,7 +143,9 @@ export function VotingCard({votingRef, ...props}) {
     isNew,
   } = current.context
 
-  const toDna = toLocaleDna(i18n.language)
+  const formatPrizePool = useFormatDna({
+    maximumFractionDigits: 4,
+  })
 
   const viewHref = viewVotingHref(id)
 
@@ -163,10 +170,10 @@ export function VotingCard({votingRef, ...props}) {
           bg="gray.50"
           rounded="lg"
           position="absolute"
-          top={-16}
-          left={-16}
-          right={-16}
-          bottom={-16}
+          top="-4"
+          left="-4"
+          right="-4"
+          bottom="-4"
           opacity={0.5}
           zIndex="base"
         />
@@ -181,7 +188,7 @@ export function VotingCard({votingRef, ...props}) {
             bg="gray.50"
             color="muted"
             cursor="pointer"
-            pl="1/2"
+            pl="0.5"
             onClick={() => {
               router.push(viewHref)
             }}
@@ -240,7 +247,7 @@ export function VotingCard({votingRef, ...props}) {
           <StarIcon boxSize="5" color="white" />
           <Text fontWeight={500}>
             {isClosed ? t('Oracles rewards paid') : t('Prize pool')}:{' '}
-            {toDna(isClosed ? totalReward : estimatedTotalReward)}
+            {formatPrizePool(isClosed ? totalReward : estimatedTotalReward)}
           </Text>
           {!isClosed && (
             <Text color="orange.500">
@@ -432,18 +439,19 @@ export function AddFundDrawer({
   const currentOracleRewards = cleanRewards + dirtyRewards
 
   return (
-    <Drawer {...props}>
+    <AdDrawer isMining={isLoading} {...props}>
       <OracleDrawerHeader icon={AddFundIcon}>
         {t('Add fund')}
       </OracleDrawerHeader>
-      <Box
-        as="form"
-        onSubmit={e => {
-          e.preventDefault()
-          onAddFund({amount, from})
-        }}
-      >
-        <OracleDrawerBody>
+      <OracleDrawerBody>
+        <form
+          id="addFund"
+          onSubmit={e => {
+            e.preventDefault()
+
+            onAddFund({amount, from})
+          }}
+        >
           <OracleFormControl label={t('Transfer from')}>
             <Input name="fromInput" defaultValue={from} isDisabled />
             <OracleFormHelper label={t('Available')} value={toDna(available)} />
@@ -454,6 +462,7 @@ export function AddFundDrawer({
           <OracleFormControl label={t('Amount')}>
             <DnaInput
               name="amountInput"
+              value={amount}
               onChange={e => {
                 setAmount(Number(e.target.value))
               }}
@@ -467,18 +476,19 @@ export function AddFundDrawer({
               value={toDna(currentOwnerFee)}
             />
           </OracleFormControl>
-          <PrimaryButton
-            type="submit"
-            isLoading={isLoading}
-            loadingText={t('Sending')}
-            mt={3}
-            ml="auto"
-          >
-            {t('Send')}
-          </PrimaryButton>
-        </OracleDrawerBody>
-      </Box>
-    </Drawer>
+        </form>
+      </OracleDrawerBody>
+      <DrawerFooter>
+        <PrimaryButton
+          type="submit"
+          form="addFund"
+          isLoading={isLoading}
+          loadingText={t('Sending')}
+        >
+          {t('Send')}
+        </PrimaryButton>
+      </DrawerFooter>
+    </AdDrawer>
   )
 }
 
@@ -501,7 +511,7 @@ export function VoteDrawer({
   const toDna = toLocaleDna(i18n.language, {maximumFractionDigits: 4})
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon={SendOutIcon} colorScheme="blue">
         {t('Voting')}: {option}
       </OracleDrawerHeader>
@@ -549,7 +559,7 @@ export function VoteDrawer({
           {t('Send')}
         </PrimaryButton>
       </DrawerFooter>
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -591,103 +601,116 @@ export function ReviewVotingDrawer({
   const oraclesReward = Math.max(0, sendAmount - ownerRefund)
 
   return (
-    <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
+    <AdDrawer
+      isMining={isLoading}
+      isCloseable={!isLoading}
+      isOpen={isOpen}
+      {...props}
+    >
       <OracleDrawerHeader icon={OracleIcon}>
         {t('Create Oracle Voting')}
       </OracleDrawerHeader>
-      <OracleDrawerBody
-        as="form"
-        onSubmit={e => {
-          e.preventDefault()
-          if (hasRequiredAmount && sendAmount < ownerDeposit) {
-            return onError({
-              data: {message: 'Insufficient funds to start the voting'},
-            })
-          }
+      <OracleDrawerBody>
+        <form
+          id="publishVoting"
+          onSubmit={e => {
+            e.preventDefault()
+            if (hasRequiredAmount && sendAmount < ownerDeposit) {
+              return onError({
+                data: {message: 'Insufficient funds to start the voting'},
+              })
+            }
 
-          onConfirm({
-            from,
-            balance: sendAmount,
-            stake: minStake,
-          })
-        }}
-      >
-        <OracleFormControl label={t('Transfer from')}>
-          <Input name="fromInput" defaultValue={from} isDisabled />
-          <OracleFormHelper label={t('Available')} value={toDna(available)} />
-        </OracleFormControl>
-        <OracleFormControl label={t('Send')}>
-          <DnaInput
-            name="balanceInput"
-            value={sendAmount}
-            onChange={e => setSendAmount(Number(e.target.value))}
-            isInvalid={hasRequiredAmount && sendAmount < ownerDeposit}
-          />
-          <OracleFormHelper
-            label={t('Required to launch')}
-            value={toDna(ownerDeposit)}
-          />
-          <OracleFormHelper
-            mt={4}
-            label={t('Oracles rewards')}
-            value={toDna(oraclesReward)}
-          />
-          <OracleFormHelper
-            label={t('Owner refund')}
-            value={toDna(ownerRefund)}
-          />
-        </OracleFormControl>
-        <FormControl>
-          <FormLabel mb={2}>
-            <Tooltip
-              label={t(
-                '50% of the stake will be refunded to your address after termination'
-              )}
-              placement="top"
-              zIndex="tooltip"
-            >
-              <Text
-                borderBottom="dotted 1px"
-                borderBottomColor="muted"
-                cursor="help"
-                w="fit-content"
-              >
-                {t('Stake')}
-              </Text>
-            </Tooltip>
-          </FormLabel>
-          <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
-        </FormControl>
-        <FormControl>
-          <OracleFormHelper
-            label={t('Secret voting')}
-            value={t('About {{duration}}', {
-              duration: humanizeDuration(votingDuration),
-            })}
-          />
-          <OracleFormHelper
-            label={t('Public voting')}
-            value={t('About {{duration}}', {
-              duration: humanizeDuration(publicVotingDuration),
-            })}
-          />
-          <OracleFormHelper
-            mt="4"
-            label={t('Total amount')}
-            value={toDna(sendAmount + minStake)}
-          />
-        </FormControl>
+            onConfirm({
+              from,
+              balance: sendAmount,
+              stake: minStake,
+            })
+          }}
+        >
+          <Stack spacing="5">
+            <OracleFormControl label={t('Transfer from')}>
+              <Input name="fromInput" defaultValue={from} isDisabled />
+              <OracleFormHelper
+                label={t('Available')}
+                value={toDna(available)}
+              />
+            </OracleFormControl>
+            <OracleFormControl label={t('Send')}>
+              <DnaInput
+                name="balanceInput"
+                value={sendAmount}
+                onChange={e => setSendAmount(Number(e.target.value))}
+                isInvalid={hasRequiredAmount && sendAmount < ownerDeposit}
+              />
+              <OracleFormHelper
+                label={t('Required to launch')}
+                value={toDna(ownerDeposit)}
+              />
+              <OracleFormHelper
+                mt={4}
+                label={t('Oracles rewards')}
+                value={toDna(oraclesReward)}
+              />
+              <OracleFormHelper
+                label={t('Owner refund')}
+                value={toDna(ownerRefund)}
+              />
+            </OracleFormControl>
+            <FormControl>
+              <FormLabel mb={2}>
+                <Tooltip
+                  label={t(
+                    '50% of the stake will be refunded to your address after termination'
+                  )}
+                  placement="top"
+                  zIndex="tooltip"
+                >
+                  <Text
+                    borderBottom="dotted 1px"
+                    borderBottomColor="muted"
+                    cursor="help"
+                    w="fit-content"
+                  >
+                    {t('Stake')}
+                  </Text>
+                </Tooltip>
+              </FormLabel>
+              <DnaInput name="stakeInput" defaultValue={minStake} isDisabled />
+            </FormControl>
+            <FormControl>
+              <OracleFormHelper
+                label={t('Secret voting')}
+                value={t('About {{duration}}', {
+                  duration: humanizeDuration(votingDuration),
+                })}
+              />
+              <OracleFormHelper
+                label={t('Public voting')}
+                value={t('About {{duration}}', {
+                  duration: humanizeDuration(publicVotingDuration),
+                })}
+              />
+              <OracleFormHelper
+                mt="4"
+                label={t('Total amount')}
+                value={toDna(sendAmount + minStake)}
+              />
+            </FormControl>
+          </Stack>
+        </form>
+      </OracleDrawerBody>
+      <DrawerFooter>
         <PrimaryButton
+          type="submit"
+          form="publishVoting"
           isLoading={isLoading}
           loadingText={t('Publishing')}
-          type="submit"
-          mt={3}
-          ml="auto"
         >
           {t('Confirm')}
         </PrimaryButton>
-      </OracleDrawerBody>
-    </Drawer>
+      </DrawerFooter>
+    </AdDrawer>
   )
 }
 
@@ -961,9 +984,7 @@ export const VotingFilter = React.forwardRef(
       {...props}
     >
       <Stack isInline spacing={1}>
-        {isChecked && (
-          <Icon name="tick" boxSize={4} animation="0.3s both zoomIn" />
-        )}
+        {isChecked && <TickIcon boxSize="4" animation="0.3s both zoomIn" />}
         <Text>{children}</Text>
       </Stack>
       <style jsx global>{`
@@ -1085,7 +1106,7 @@ function VotingResultBar({
             w={4}
             h={4}
           >
-            {isMine && <Icon name="ok" boxSize={3} />}
+            {isMine && <OkIcon boxSize="3" />}
           </Flex>
         )}
         <Text isTruncated maxW="sm" title={label.length > 50 ? label : ''}>
@@ -1132,12 +1153,18 @@ export function LaunchDrawer({
   const oraclesReward = Math.max(0, sendAmount - ownerRefund)
 
   return (
-    <Drawer isCloseable={!isLoading} isOpen={isOpen} {...props}>
+    <AdDrawer
+      isMining={isLoading}
+      isCloseable={!isLoading}
+      isOpen={isOpen}
+      {...props}
+    >
       <OracleDrawerHeader icon={OracleIcon}>
         {t('Launch Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
+        id="launchVoting"
         onSubmit={e => {
           e.preventDefault()
 
@@ -1180,17 +1207,20 @@ export function LaunchDrawer({
             value={dna(ownerRefund)}
           />
         </OracleFormControl>
+      </OracleDrawerBody>
+      <DrawerFooter>
         <PrimaryButton
+          type="submit"
+          form="launchVoting"
           isLoading={isLoading}
           loadingText={t('Launching')}
-          type="submit"
           mt={3}
           ml="auto"
         >
           {t('Launch')}
         </PrimaryButton>
-      </OracleDrawerBody>
-    </Drawer>
+      </DrawerFooter>
+    </AdDrawer>
   )
 }
 
@@ -1204,12 +1234,13 @@ export function ProlongDrawer({
   const {t, i18n} = useTranslation()
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon={OracleIcon}>
         {t('Prolong Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
+        id="prolongVoting"
         onSubmit={e => {
           e.preventDefault()
           const {fromInput} = e.target.elements
@@ -1229,18 +1260,20 @@ export function ProlongDrawer({
             value={toLocaleDna(i18n.language)(available)}
           />
         </OracleFormControl>
-
+      </OracleDrawerBody>
+      <DrawerFooter>
         <PrimaryButton
+          type="submit"
+          form="prolongVoting"
           isLoading={isLoading}
           loadingText={t('Prolonging')}
-          type="submit"
           mt={3}
           ml="auto"
         >
           {t('Prolong')}
         </PrimaryButton>
-      </OracleDrawerBody>
-    </Drawer>
+      </DrawerFooter>
+    </AdDrawer>
   )
 }
 
@@ -1292,7 +1325,7 @@ export function VotingPhase({canFinish, canProlong, canTerminate, service}) {
     winnerThreshold,
     quorum,
     committeeSize,
-    finishTime,
+    estimatedTerminationTime,
     terminationTime,
   } = current.context
 
@@ -1358,7 +1391,7 @@ export function VotingPhase({canFinish, canProlong, canTerminate, service}) {
     ? [canFinish ? t('End counting') : t('Waiting for prolongation'), null]
     : // eslint-disable-next-line no-nested-ternary
     eitherIdleState(VotingStatus.Archived, VotingStatus.Terminating)
-    ? [t('Waiting for termination'), finishTime]
+    ? [t('Waiting for termination'), estimatedTerminationTime]
     : eitherIdleState(VotingStatus.Terminated)
     ? [t('Terminated'), terminationTime]
     : []
@@ -1391,7 +1424,7 @@ export function VotingPhase({canFinish, canProlong, canTerminate, service}) {
           py={2}
           pb={4}
         >
-          <PopoverArrow />
+          <PopoverArrow bg="graphite.500" />
           <PopoverHeader borderBottom="none" p={0} mb={3}>
             <Text color="white" fontWeight={500}>
               {t('Voting timeline')}
@@ -1494,12 +1527,13 @@ export function FinishDrawer({
   const {t, i18n} = useTranslation()
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon={OracleIcon}>
         {isVotingFailed ? t('Claim refunds') : t('Claim rewards')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
+        id="finishVoting"
         onSubmit={e => {
           e.preventDefault()
           const {fromInput} = e.target.elements
@@ -1525,18 +1559,20 @@ export function FinishDrawer({
             value={toLocaleDna(i18n.language)(available)}
           />
         </OracleFormControl>
-
+      </OracleDrawerBody>
+      <DrawerFooter>
         <PrimaryButton
+          type="submit"
+          form="finishVoting"
           isLoading={isLoading}
           loadingText={t('Claiming')}
-          type="submit"
           mt={3}
           ml="auto"
         >
           {isVotingFailed ? t('Claim refunds') : t('Claim rewards')}
         </PrimaryButton>
-      </OracleDrawerBody>
-    </Drawer>
+      </DrawerFooter>
+    </AdDrawer>
   )
 }
 
@@ -1549,12 +1585,13 @@ export function TerminateDrawer({
   const {t} = useTranslation()
 
   return (
-    <Drawer isCloseable={!isLoading} {...props}>
+    <AdDrawer isMining={isLoading} isCloseable={!isLoading} {...props}>
       <OracleDrawerHeader icon={OracleIcon}>
         {t('Terminate Oracle Voting')}
       </OracleDrawerHeader>
       <OracleDrawerBody
         as="form"
+        id="terminateVoting"
         onSubmit={e => {
           e.preventDefault()
           onTerminate()
@@ -1569,18 +1606,20 @@ export function TerminateDrawer({
         <OracleFormControl label={t('Smart contract address')}>
           <Input defaultValue={contractAddress} isDisabled />
         </OracleFormControl>
-
+      </OracleDrawerBody>
+      <DrawerFooter>
         <PrimaryButton
+          type="submit"
+          form="terminateVoting"
           isLoading={isLoading}
           loadingText={t('Terminating')}
-          type="submit"
           mt={3}
           ml="auto"
         >
           {t('Terminate')}
         </PrimaryButton>
-      </OracleDrawerBody>
-    </Drawer>
+      </DrawerFooter>
+    </AdDrawer>
   )
 }
 
@@ -1613,7 +1652,7 @@ export function Linkify({onClick, children}) {
         part.startsWith('http') ? (
           <Button
             variant="link"
-            colorScheme="brandBlue"
+            colorScheme="blue"
             fontWeight={500}
             _hover={{background: 'transparent'}}
             _focus={{
@@ -1692,5 +1731,66 @@ export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
         </PrimaryButton>
       </DialogFooter>
     </Dialog>
+  )
+}
+
+export function OracleAdDescription({ad}) {
+  const {t} = useTranslation()
+
+  return (
+    <Stack spacing="7" bg="white" rounded="lg" p="6" pt="4">
+      <Stack spacing="2">
+        <Stack spacing="1">
+          <Text fontWeight={500}>{ad.title}</Text>
+          <Text color="muted">{ad.desc}</Text>
+        </Stack>
+        <Stack alignItems="flex-start" spacing={4}>
+          <ExternalLink
+            href={ad.url}
+            fontWeight={500}
+            withArrow={false}
+            textProps={{wordBreak: 'break-all', whiteSpace: 'normal'}}
+            noOfLines={1}
+            maxW="full"
+          >
+            {ad.url}
+          </ExternalLink>
+        </Stack>
+      </Stack>
+      <HStack spacing="6">
+        <HStack spacing="4">
+          <AdImage src={ad.media} w="10" objectFit="cover" />
+          <Box>
+            <Text>{t('Media')}</Text>
+            <Text fontSize="sm" color="muted">
+              {t('640x640px')}
+            </Text>
+          </Box>
+        </HStack>
+        <HStack spacing="4">
+          <AdImage src={ad.thumb} w="10" objectFit="cover" />
+          <Box>
+            <Text>{t('Thumbnail')}</Text>
+            <Text fontSize="sm" color="muted">
+              {t('80x80 px')}
+            </Text>
+          </Box>
+        </HStack>
+      </HStack>
+    </Stack>
+  )
+}
+
+export function MaliciousAdOverlay({children}) {
+  return (
+    <Box position="relative" filter="blur(2px)">
+      <Box
+        position="absolute"
+        inset={0}
+        backdropFilter="blur(2px)"
+        zIndex="banner"
+      />
+      {children}
+    </Box>
   )
 }

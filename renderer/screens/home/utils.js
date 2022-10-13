@@ -1,5 +1,5 @@
-import {requestDb} from '../../shared/utils/db'
 import {IdentityStatus} from '../../shared/types'
+import {requestDb} from '../../shared/utils/db'
 
 export function createProfileDb(epoch) {
   const requestProfileDb = () => global.sub(requestDb(), 'profile')
@@ -49,23 +49,6 @@ export function stripHexPrefix(str) {
 
 const isHexPrefixed = str => str.slice(0, 2) === '0x'
 
-function calcPercent(age) {
-  switch (age) {
-    case 5:
-      return 5
-    case 6:
-      return 4
-    case 7:
-      return 3
-    case 8:
-      return 2
-    case 9:
-      return 1
-    default:
-      return 100
-  }
-}
-
 export function getStakingWarning(t, state, age) {
   if ([IdentityStatus.Candidate, IdentityStatus.Newbie].includes(state)) {
     return t(
@@ -95,4 +78,21 @@ export function getStakingWarning(t, state, age) {
     )
   }
   return null
+}
+
+function calcPercent(age) {
+  switch (age) {
+    case 5:
+      return 5
+    case 6:
+      return 4
+    case 7:
+      return 3
+    case 8:
+      return 2
+    case 9:
+      return 1
+    default:
+      return 100
+  }
 }

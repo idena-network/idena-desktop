@@ -60,6 +60,7 @@ export function useReplenishStake({onSuccess, onError}) {
   )
 
   return {
+    data: mutation.data,
     submit: mutation.mutate,
   }
 }
@@ -179,7 +180,6 @@ export function useStakingApy() {
       const epochStakingRewardFund = Number(staking) || 0.9 * Number(validation)
       const epochReward = (stake ** 0.9 / weight) * epochStakingRewardFund
 
-      // mining staking
       const myStakeWeight = stake ** 0.9
 
       const proposerOnlyReward =
@@ -207,18 +207,18 @@ export function useStakingApy() {
       const proposerAndCommitteeProbability =
         proposerOnlyProbability * committeeOnlyProbability
 
+      const epochDays = dayjs(epoch?.nextValidation).diff(
+        prevEpochData?.validationTime,
+        'day'
+      )
+
       const estimatedReward =
-        85000 *
+        ((85000 * epochDays) / 21.0) *
         (proposerOnlyProbability * proposerOnlyReward +
           committeeOnlyProbability * committeeOnlyReward +
           proposerAndCommitteeProbability * proposerAndCommitteeReward)
 
       const epy = (estimatedReward + epochReward) / stake
-
-      const epochDays = dayjs(epoch?.nextValidation).diff(
-        prevEpochData?.validationTime,
-        'day'
-      )
 
       return (epy / Math.max(1, epochDays)) * 366
     }

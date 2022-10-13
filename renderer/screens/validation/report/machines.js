@@ -1,6 +1,6 @@
 import {assign, createMachine} from 'xstate'
 import {log} from 'xstate/lib/actions'
-import {apiUrl} from '../../shared/api/api-client'
+import {apiUrl} from '../../../shared/api/api-client'
 import {ValidationResult} from './types'
 
 export const validationReportMachine = createMachine({

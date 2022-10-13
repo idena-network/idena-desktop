@@ -108,11 +108,6 @@ export async function fetchContractBalanceUpdates({
   )
 }
 
-export async function fetchNetworkSize() {
-  const {networkSize} = await callRpc('dna_globalState')
-  return networkSize
-}
-
 export async function fetchVoting({id, contractHash = id, address}) {
   const {result, error} = await (
     await fetch(
@@ -142,7 +137,7 @@ export const createContractCaller = ({
     maxFee: isCalling ? contractMaxFee(gasCost, txFee) : null,
     amount: isCalling && method === 'sendVote' ? null : amount,
     broadcastBlock: isCalling && method === 'sendVote' ? broadcastBlock : null,
-    args: buildDynamicArgs(...args),
+    args: buildDynamicArgs(args),
   })
 
   return callRpc(isCalling ? 'contract_call' : 'contract_estimateCall', payload)
@@ -159,7 +154,7 @@ export const createContractReadonlyCaller = ({contractHash}) => (
       contract: contractHash,
       method,
       format,
-      args: buildDynamicArgs(...args),
+      args: buildDynamicArgs(args),
     })
   )
 
@@ -202,6 +197,7 @@ export function buildContractDeploymentArgs(
     isCustomOwnerAddress,
     ownerAddress,
     rewardsFund,
+    adCid,
   },
   {from, stake, gasCost, txFee},
   mode = ContractRpcMode.Call
@@ -212,12 +208,13 @@ export function buildContractDeploymentArgs(
     amount: stake,
     maxFee:
       mode === ContractRpcMode.Call ? contractMaxFee(gasCost, txFee) : null,
-    args: buildDynamicArgs(
+    args: buildDynamicArgs([
       {
         value: `0x${objectToHex({
           title,
           desc,
           options: stripOptions(options),
+          adCid,
         })}`,
       },
       {
@@ -235,12 +232,12 @@ export function buildContractDeploymentArgs(
       },
       {value: ownerFee, format: 'byte'},
       {value: rewardsFund, format: 'dna'},
-      {value: isCustomOwnerAddress ? ownerAddress : null}
-    ),
+      {value: isCustomOwnerAddress ? ownerAddress : null},
+    ]),
   })
 }
 
-export function buildDynamicArgs(...args) {
+export function buildDynamicArgs(args = []) {
   return args
     .map(({format = 'hex', value}, index) => ({
       index,

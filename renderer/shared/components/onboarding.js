@@ -15,11 +15,10 @@ import {
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 
-export function OnboardingPopover({children, ...props}) {
+export function OnboardingPopover({isOpen, children, ...props}) {
   return (
     <>
-      {/* eslint-disable-next-line react/destructuring-assignment */}
-      {props.isOpen && (
+      {isOpen && (
         <Box
           bg="xblack.080"
           position="fixed"
@@ -30,7 +29,7 @@ export function OnboardingPopover({children, ...props}) {
           zIndex={2}
         />
       )}
-      <Popover closeOnBlur={false} usePortal {...props}>
+      <Popover closeOnBlur={false} isOpen={isOpen} {...props}>
         {children}
       </Popover>
     </>
@@ -54,9 +53,18 @@ export function OnboardingPopoverContent({
       px={3}
       py={2}
       zIndex="popover"
+      // TODO: remove after upgrading to Electron/Chromium version supporting `inset: 0`
+      rootProps={{
+        style: {
+          top: 0,
+          left: 0,
+        },
+      }}
+      top={0}
+      left={0}
       {...props}
     >
-      <PopoverArrow />
+      <PopoverArrow bg="blue.500" boxShadow="none !important" />
       <Box p={2}>
         <Stack spacing={3}>
           <PopoverHeader
@@ -88,11 +96,9 @@ export function OnboardingPopoverContent({
 export function OnboardingPopoverContentIconRow({icon, children, ...props}) {
   return (
     <Stack isInline spacing={4} align="center" {...props}>
-      {typeof icon === 'string' ? (
-        <Icon name={icon} boxSize={5} />
-      ) : (
-        <Box>{icon}</Box>
-      )}
+      <Box>
+        <Icon as={icon} boxSize={5} />
+      </Box>
       <Box color="white">{children}</Box>
     </Stack>
   )

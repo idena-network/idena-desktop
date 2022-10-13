@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
-import {useRouter} from 'next/router'
 import {Trans, useTranslation} from 'react-i18next'
 import {
   Flex,
@@ -11,7 +10,6 @@ import {
   Heading,
   List,
   ListItem,
-  Icon,
   useDisclosure,
   RadioGroup,
   Radio,
@@ -32,8 +30,6 @@ import NextLink from 'next/link'
 import Sidebar from './sidebar'
 import {useDebounce} from '../hooks/use-debounce'
 import {useEpochState} from '../providers/epoch-context'
-import {shouldStartValidation} from '../../screens/validation/utils'
-import {useIdentityState} from '../providers/identity-context'
 import {loadPersistentStateValue, persistItem} from '../utils/persist'
 import {
   DnaSignInDialog,
@@ -42,7 +38,6 @@ import {
   DnaSendFailedDialog,
   DnaSendSucceededDialog,
 } from '../../screens/dna/containers'
-import {ValidationToast} from '../../screens/validation/components'
 import {
   useAutoUpdateState,
   useAutoUpdateDispatch,
@@ -60,8 +55,8 @@ import {
   TextLink,
   Toast,
 } from './components'
-import {ActivateMiningDrawer} from '../../screens/profile/components'
-import {activateMiningMachine} from '../../screens/profile/machines'
+import {ActivateMiningDrawer} from '../../screens/home/components'
+import {activateMiningMachine} from '../../screens/home/machines'
 import {
   callRpc,
   eitherState,
@@ -78,7 +73,16 @@ import {
   useDnaLinkRedirect,
 } from '../../screens/dna/hooks'
 import {viewVotingHref} from '../../screens/oracles/utils'
-import {useFork} from '../../screens/hardfork/hooks'
+import {useHardFork} from '../../screens/hardfork/hooks'
+import {AdBanner} from '../../screens/ads/containers'
+import {useRotatingAds} from '../../screens/ads/hooks'
+import {ChevronRightIcon, GithubIcon} from './icons'
+import {
+  useAutoStartLottery,
+  useAutoStartValidation,
+} from '../../screens/validation/hooks/use-start-validation'
+import {useValidationToast} from '../../screens/validation/hooks/use-validation-toast'
+import {useIdentityState} from '../providers/identity-context'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -103,6 +107,8 @@ export default function Layout({
   )
 
   React.useEffect(() => {
+    if (global.isDev) return
+
     const handleMouseWheel = e => {
       if (e.ctrlKey) {
         e.preventDefault()
@@ -120,6 +126,8 @@ export default function Layout({
   }, [])
 
   React.useEffect(() => {
+    if (global.isDev) return
+
     if (Number.isFinite(zoomLevel)) {
       global.setZoomLevel(zoomLevel)
       persistItem('settings', 'zoomLevel', zoomLevel)
@@ -139,7 +147,7 @@ export default function Layout({
       didReject: didRejectFork,
     },
     {reject: rejectFork, reset: resetForkVoting},
-  ] = useFork()
+  ] = useHardFork()
 
   const isFork =
     !loading &&
@@ -219,7 +227,7 @@ export default function Layout({
 
       {((isFork && !isSyncing && !isOffline) ||
         (isFork && isSyncing && didActivateFork)) && (
-        <ForkScreen
+        <HardForkScreen
           {...forkDetails}
           version={nodeRemoteVersion}
           didActivateFork={didActivateFork}
@@ -228,7 +236,7 @@ export default function Layout({
         />
       )}
 
-      {isSyncing && <SyncingApp />}
+      {isSyncing && !isFork && <SyncingApp />}
       {isOffline && <OfflineApp />}
       {isReady && !isFork && <NormalApp {...props} />}
 
@@ -263,18 +271,15 @@ function LayoutContainer(props) {
   )
 }
 
-function NormalApp({children}) {
+function NormalApp({skipBanner, children}) {
   const {t} = useTranslation()
-
-  const router = useRouter()
 
   const epoch = useEpochState()
 
-  const identity = useIdentityState()
+  useAutoStartLottery()
+  useAutoStartValidation()
 
-  React.useEffect(() => {
-    if (shouldStartValidation(epoch, identity)) router.push('/validation')
-  }, [epoch, identity, router])
+  useValidationToast()
 
   const [
     validationNotificationEpoch,
@@ -349,11 +354,14 @@ function NormalApp({children}) {
     }
   )
 
+  const ads = useRotatingAds()
+  const hasRotatingAds = ads?.length > 0
+
   return (
     <Flex as="section" direction="column" flex={1} h="100vh" overflowY="auto">
-      {children}
+      {hasRotatingAds && !skipBanner && <AdBanner />}
 
-      {epoch && <ValidationToast epoch={epoch} identity={identity} />}
+      {children}
 
       <DnaSendDialog
         {...dnaSendParams}
@@ -726,7 +734,7 @@ function OfflineApp() {
   )
 }
 
-function ForkScreen({
+function HardForkScreen({
   version,
   changes,
   didActivateFork,
@@ -813,7 +821,7 @@ function ForkScreen({
                   <Stack spacing={5} p={3} h={188} overflowY="auto">
                     <Stack spacing={3}>
                       <Text color="white">{t('Changes')}</Text>
-                      <List styleType="unordered" spacing={2}>
+                      <List spacing="3">
                         {changes.map(change => (
                           <ListItem key={change}>{change}</ListItem>
                         ))}
@@ -824,7 +832,7 @@ function ForkScreen({
                       <Text color="white">
                         {t('Hard fork activation schedule')}
                       </Text>
-                      <List styleType="unordered" spacing={2}>
+                      <List spacing="2">
                         <ListItem>
                           {t(
                             'Hard fork will be activated at any date after {{startActivationDate}}',
@@ -865,7 +873,7 @@ function ForkScreen({
                 }}
               >
                 <Stack isInline align="center">
-                  <Icon name="github" boxSize={4} color="blue.500" />
+                  <GithubIcon boxSize="4" color="blue.500" />
                   <Text>{t('Check on Github')}</Text>
                 </Stack>
               </SecondaryButton>
@@ -894,11 +902,7 @@ function ForkScreen({
                 }}
               >
                 {t('Activate mining status')}
-                <Icon
-                  name="chevron-down"
-                  boxSize={4}
-                  transform="rotate(-90deg)"
-                />
+                <ChevronRightIcon boxSize="4" />
               </PrimaryButton>
             </Box>
           )}

@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react'
 import {
-  Box,
   Flex,
   FormControl,
   Heading,
@@ -11,26 +10,23 @@ import {
   MenuList,
   Stack,
 } from '@chakra-ui/react'
-import {
-  Drawer,
-  DrawerHeader,
-  FormLabel,
-} from '../../shared/components/components'
+import {DrawerHeader, FormLabel} from '../../shared/components/components'
 import {MoreIcon} from '../../shared/components/icons'
+import {AdDrawer} from '../ads/containers'
 
 export function WalletCardMenu({children, ...props}) {
   return (
     <Menu autoSelect={false} placement="bottom-end" {...props}>
       <MenuButton
         rounded="md"
-        p="3/2"
-        mt={-2}
-        mr={-2}
+        p="1.5"
+        mt="-2"
+        mr="-2"
         _expanded={{bg: 'gray.100'}}
         _focus={{outline: 0}}
         zIndex="dropdown"
       >
-        <Flex align="center" justify="center" w={3}>
+        <Flex align="center" justify="center" w="3">
           <MoreIcon boxSize="5" />
         </Flex>
       </MenuButton>
@@ -47,38 +43,32 @@ export function WalletCardMenu({children, ...props}) {
   )
 }
 
-export function WalletCardMenuItem({children, ...props}) {
+export function WalletCardMenuItem(props) {
   return (
     <MenuItem
-      color="brandGray.500"
+      color="gray.500"
       fontWeight={500}
-      px={3}
-      py={2}
+      px="3"
+      py="2"
       _hover={{bg: 'gray.50'}}
       _focus={{bg: 'gray.50'}}
       _selected={{bg: 'gray.50'}}
       _active={{bg: 'gray.50'}}
       {...props}
-    >
-      <Stack isInline spacing={2} align="center">
-        {React.Children.map(children, child => (
-          <Box>{child}</Box>
-        ))}
-      </Stack>
-    </MenuItem>
+    />
   )
 }
 
 export function WalletDrawer({title, icon, color, children, ...props}) {
   return (
-    <Drawer {...props} closeOnOverlayClick={false}>
+    <AdDrawer {...props} closeOnOverlayClick={false}>
       {title && (
         <WalletDrawerHeader title={title}>
           <WalletDrawerHeaderIconBox icon={icon} color={color} />
         </WalletDrawerHeader>
       )}
       {children}
-    </Drawer>
+    </AdDrawer>
   )
 }
 
@@ -108,15 +98,11 @@ export function WalletDrawerHeaderIconBox({colorScheme, ...props}) {
   )
 }
 
-export function WalletDrawerForm(props) {
-  return <Flex as="form" direction="column" flex={1} mt={6} {...props} />
-}
-
 export function WalletDrawerFormControl({label, children, ...props}) {
   return (
     <FormControl {...props}>
-      <Stack spacing={2}>
-        {label && <FormLabel p={0}>{label}</FormLabel>}
+      <Stack spacing="2">
+        {label && <FormLabel mb={0}>{label}</FormLabel>}
         {children}
       </Stack>
     </FormControl>

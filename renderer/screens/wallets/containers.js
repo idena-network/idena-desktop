@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Flex,
-  Icon,
   Stack,
   Stat,
   StatLabel,
@@ -17,6 +16,7 @@ import QrCode from 'qrcode.react'
 import {PrimaryButton} from '../../shared/components/button'
 import {
   Avatar,
+  Drawer,
   DrawerBody,
   DrawerFooter,
   ExternalLink,
@@ -29,7 +29,6 @@ import {
   WalletCardMenu,
   WalletCardMenuItem,
   WalletDrawer,
-  WalletDrawerForm,
   WalletDrawerFormControl,
   WalletDrawerHeader,
   WalletDrawerHeaderIconBox,
@@ -44,10 +43,13 @@ import {
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  ExclamationMarkIcon,
   LockIcon,
   ReceiveIcon,
   SendOutIcon,
 } from '../../shared/components/icons'
+import {useTrackTx} from '../ads/hooks'
+import {useFormatDna} from '../../shared/hooks/hooks'
 
 export function TotalAmount({address, amount}) {
   const {t, i18n} = useTranslation()
@@ -103,12 +105,16 @@ export function WalletCard({
             <LockIcon boxSize="4" color="muted" />
           ) : (
             <WalletCardMenu>
-              <WalletCardMenuItem onClick={onSend}>
-                <SendOutIcon />
+              <WalletCardMenuItem
+                icon={<SendOutIcon boxSize="4" color="blue.500" />}
+                onClick={onSend}
+              >
                 {t('Send')}
               </WalletCardMenuItem>
-              <WalletCardMenuItem onClick={onReceive}>
-                <ReceiveIcon />
+              <WalletCardMenuItem
+                icon={<ReceiveIcon boxSize="4" color="blue.500" />}
+                onClick={onReceive}
+              >
                 {t('Receive')}
               </WalletCardMenuItem>
             </WalletCardMenu>
@@ -140,77 +146,134 @@ export function WalletCard({
 export function SendDnaDrawer({address, onSend, onFail, ...props}) {
   const {t} = useTranslation()
 
-  const [isSubmitting, setIsSubmitting] = React.useState()
+  const [state, dispatch] = React.useReducer(
+    (prevState, action) => {
+      const {
+        type = typeof action === 'string' && action,
+        ...actionParams
+      } = action
+
+      switch (type) {
+        case 'submit':
+        case 'mine': {
+          return {
+            ...prevState,
+            ...actionParams,
+            status: 'pending',
+          }
+        }
+        case 'done':
+          return {
+            ...prevState,
+            hash: null,
+            amount: null,
+            to: null,
+            status: 'done',
+          }
+        case 'error':
+          return {...prevState, error: action.error, status: 'error'}
+
+        default:
+          return prevState
+      }
+    },
+    {
+      status: 'idle',
+    }
+  )
+
+  const {onClose} = props
+
+  useTrackTx(state.hash, {
+    onMined: React.useCallback(() => {
+      dispatch('done')
+      onClose()
+    }, [onClose]),
+  })
+
+  const isPending = state.status === 'pending'
 
   return (
-    <WalletDrawer {...props}>
+    <WalletDrawer
+      isMining={isPending}
+      onClose={() => {
+        dispatch('done')
+        props.onClose()
+      }}
+      {...props}
+    >
       <WalletDrawerHeader title={t('Send iDNA')}>
         <WalletDrawerHeaderIconBox colorScheme="red">
           <SendOutIcon color="red.500" />
         </WalletDrawerHeaderIconBox>
       </WalletDrawerHeader>
-      <WalletDrawerForm
-        onSubmit={async e => {
-          e.preventDefault()
+      <DrawerBody>
+        <Box mt="6">
+          <form
+            id="sendDna"
+            onSubmit={async e => {
+              e.preventDefault()
 
-          const {
-            from: {value: from},
-            to: {value: to},
-            amount: {value: amount},
-          } = e.target.elements
+              dispatch('submit')
 
-          if (!isAddress(to)) {
-            return onFail(`Incorrect 'To' address: ${to}`)
-          }
+              const {from, to, amount} = Object.fromEntries(
+                new FormData(e.target)
+              )
 
-          if (amount <= 0) {
-            return onFail(`Incorrect Amount: ${amount}`)
-          }
+              try {
+                if (!isAddress(to)) {
+                  throw new Error(`Incorrect 'To' address: ${to}`)
+                }
 
-          try {
-            setIsSubmitting(true)
-            const result = await callRpc('dna_sendTransaction', {
-              to,
-              from,
-              amount,
-            })
-            onSend(result)
-            setIsSubmitting(false)
-          } catch (error) {
-            setIsSubmitting(false)
-            onFail(error.message)
-          }
-        }}
-      >
-        <DrawerBody>
-          <Stack spacing={6}>
-            <WalletDrawerFormControl label={t('From')}>
-              <Input id="from" value={address} isDisabled />
-            </WalletDrawerFormControl>
-            <WalletDrawerFormControl label={t('To')}>
-              <Input id="to" placeholder={t('Enter address')} />
-            </WalletDrawerFormControl>
-            <WalletDrawerFormControl label={t('Amount, iDNA')} id="amount">
-              <Input
-                type="number"
-                min={0}
-                step="any"
-                id="amount"
-                placeholder={t('Enter amount')}
-              />
-            </WalletDrawerFormControl>
-          </Stack>
-        </DrawerBody>
-        <DrawerFooter>
-          <PrimaryButton
-            type="submit"
-            isLoading={isSubmitting}
-            loadingText={t('Sending')}
+                if (amount <= 0) {
+                  throw new Error(`Incorrect Amount: ${amount}`)
+                }
+
+                const result = await callRpc('dna_sendTransaction', {
+                  to,
+                  from,
+                  amount,
+                })
+                // eslint-disable-next-line no-unused-expressions
+                onSend?.(result)
+                dispatch({type: 'mine', hash: result})
+              } catch (error) {
+                dispatch({type: 'error', error: error.message})
+                // eslint-disable-next-line no-unused-expressions
+                onFail?.(error.message)
+              }
+            }}
           >
-            {t('Send')}
-          </PrimaryButton>
-        </DrawerFooter>
-      </WalletDrawerForm>
+            <Stack spacing="6">
+              <WalletDrawerFormControl label={t('From')}>
+                <Input name="from" defaultValue={address} isReadOnly />
+              </WalletDrawerFormControl>
+              <WalletDrawerFormControl label={t('To')}>
+                <Input name="to" placeholder={t('Enter address')} />
+              </WalletDrawerFormControl>
+              <WalletDrawerFormControl label={t('Amount, iDNA')}>
+                <Input
+                  type="number"
+                  min={0}
+                  step="any"
+                  name="amount"
+                  placeholder={t('Enter amount')}
+                />
+              </WalletDrawerFormControl>
+            </Stack>
+          </form>
+        </Box>
+      </DrawerBody>
+      <DrawerFooter>
+        <PrimaryButton
+          type="submit"
+          form="sendDna"
+          isLoading={isPending}
+          loadingText={t('Sending')}
+        >
+          {t('Send')}
+        </PrimaryButton>
+      </DrawerFooter>
     </WalletDrawer>
   )
 }
@@ -221,13 +284,13 @@ export function ReceiveDnaDrawer({address, ...props}) {
   const {onCopy} = useClipboard(address)
 
   return (
-    <WalletDrawer {...props}>
+    <Drawer {...props}>
       <WalletDrawerHeader title={t('Receive iDNA')}>
         <WalletDrawerHeaderIconBox colorScheme="blue">
           <ReceiveIcon color="blue.500" />
         </WalletDrawerHeaderIconBox>
       </WalletDrawerHeader>
-      <DrawerBody mt={5}>
+      <DrawerBody mt="5">
         <Stack spacing={10}>
           <Box
             boxShadow="0 3px 12px 0 rgba(83, 86, 92, 0.1), 0 2px 3px 0 rgba(83, 86, 92, 0.2)"
@@ -259,21 +322,23 @@ export function ReceiveDnaDrawer({address, ...props}) {
           </WalletDrawerFormControl>
         </Stack>
       </DrawerBody>
-    </WalletDrawer>
+    </Drawer>
   )
 }
 
 export function WalletTransactionList({txs = []}) {
   const {t} = useTranslation(['translation', 'error'])
 
+  const formatDna = useFormatDna({maximumFractionDigits: 5})
+
   return (
     <Table>
       <thead>
         <TableRow>
-          <TableHeaderCol style={{width: '210px'}}>
+          <TableHeaderCol style={{width: '144px'}}>
             {t('Transaction')}
           </TableHeaderCol>
-          <TableHeaderCol style={{width: '210px'}}>
+          <TableHeaderCol style={{width: '240px'}}>
             {t('Address')}
           </TableHeaderCol>
           <TableHeaderCol>{t('Amount, iDNA')}</TableHeaderCol>
@@ -288,15 +353,15 @@ export function WalletTransactionList({txs = []}) {
             </TableCol>
             <TableCol>
               {(!tx.to && '\u2013') || (
-                <Stack isInline spacing={3} align="center">
+                <Stack isInline spacing="3" align="center">
                   <Avatar
                     address={tx.counterParty}
                     boxSize={8}
                     bg="white"
-                    borderColor="brandGray.016"
-                    borderWidth={1}
+                    border="solid 1px"
+                    borderColor="gray.016"
                   />
-                  <Box w={60}>
+                  <Box w="48">
                     <Text fontWeight={500} whiteSpace="nowrap">
                       {tx.direction === 'Sent' ? t('To') : t('From')}{' '}
                       {/* eslint-disable-next-line no-nested-ternary */}
@@ -336,7 +401,7 @@ export function WalletTransactionList({txs = []}) {
                   <>
                     {Number(tx.usedFee) > 0 && (
                       <SmallText>
-                        {t('Fee')} {tx.usedFee}
+                        {t('Fee')} {formatDna(tx.usedFee)}
                       </SmallText>
                     )}
                   </>
@@ -363,7 +428,7 @@ export function WalletTransactionList({txs = []}) {
                   href={`https://scan.idena.io/transaction/${tx.hash}`}
                   fontSize="sm"
                   isTruncated
-                  w={16}
+                  w="24"
                 >
                   {tx.hash}
                 </ExternalLink>
@@ -396,9 +461,9 @@ function WalletTxStatus({
         minW={8}
       >
         {direction === 'Sent' ? (
-          <ArrowDownIcon boxSize="5" />
-        ) : (
           <ArrowUpIcon boxSize="5" />
+        ) : (
+          <ArrowDownIcon boxSize="5" />
         )}
       </Flex>
       <Box>
@@ -417,7 +482,7 @@ function WalletTxStatus({
                 <Tooltip
                   label={`${t('Smart contract failed')}: ${receipt?.error}`}
                 >
-                  <Icon name="exclamation-mark" color="red.500" boxSize={5} />
+                  <ExclamationMarkIcon boxSize="5" color="red.500" />
                 </Tooltip>
               )}
             </Stack>

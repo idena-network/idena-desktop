@@ -54,6 +54,7 @@ export const createValidationMachine = ({
         locale,
         translations: {},
         reports: new Set(),
+        submitLongAnswersHash: null,
       },
       states: {
         shortSession: {
@@ -925,6 +926,11 @@ export const createValidationMachine = ({
                                 epoch
                               ),
                             onDone: {
+                              actions: [
+                                assign({
+                                  submitLongAnswersHash: (_, {data}) => data,
+                                }),
+                              ],
                               target: '#validation.validationSucceeded',
                             },
                             onError: [
@@ -1021,28 +1027,35 @@ export const createValidationMachine = ({
         // eslint-disable-next-line no-shadow
         BUMP_EXTRA_FLIPS: ({validationStart}) =>
           Math.max(
-            adjustDuration(validationStart, global.env.BUMP_EXTRA_FLIPS || 35),
+            adjustDurationInSeconds(
+              validationStart,
+              global.env?.BUMP_EXTRA_FLIPS ?? 35
+            ),
             5
           ) * 1000,
         // eslint-disable-next-line no-shadow
         FINALIZE_FLIPS: ({validationStart}) =>
           Math.max(
-            adjustDuration(validationStart, global.env.FINALIZE_FLIPS || 90),
+            adjustDurationInSeconds(
+              validationStart,
+              global.env?.FINALIZE_FLIPS ?? 90
+            ),
             5
           ) * 1000,
         // eslint-disable-next-line no-shadow
         SHORT_SESSION_AUTO_SUBMIT: ({validationStart, shortSessionDuration}) =>
-          adjustDuration(validationStart, shortSessionDuration - 10) * 1000,
+          adjustDurationInSeconds(validationStart, shortSessionDuration - 10) *
+          1000,
         // eslint-disable-next-line no-shadow
         LONG_SESSION_CHECK: ({validationStart, longSessionDuration}) =>
-          adjustDuration(
+          adjustDurationInSeconds(
             validationStart,
             shortSessionDuration - 10 + longSessionDuration
           ) * 1000,
         // eslint-disable-next-line no-shadow
         FINALIZE_LONG_FLIPS: ({validationStart, shortSessionDuration}) =>
           Math.max(
-            adjustDuration(
+            adjustDurationInSeconds(
               validationStart,
               shortSessionDuration + (global.env.FINALIZE_LONG_FLIPS || 4 * 60)
             ),
@@ -1051,7 +1064,7 @@ export const createValidationMachine = ({
         // eslint-disable-next-line no-shadow
         FINALIZE_ALL_LONG_FLIPS: ({validationStart, shortSessionDuration}) =>
           Math.max(
-            adjustDuration(
+            adjustDurationInSeconds(
               validationStart,
               shortSessionDuration +
                 (global.env.FINALIZE_ALL_LONG_FLIPS || 25 * 60)
@@ -1278,10 +1291,22 @@ const stepStates = {
 }
 
 function mergeFlipsByHash(flips, anotherFlips) {
-  return flips.map(flip => ({
-    ...flip,
-    ...anotherFlips.find(({hash}) => hash === flip.hash),
-  }))
+  return flips.map(flip => {
+    const anotherFlip = anotherFlips.find(({hash}) => hash === flip.hash)
+
+    if (anotherFlip) {
+      const relevance =
+        anotherFlip?.relevance ?? (flip?.relevance || RelevanceType.Abstained)
+
+      return {
+        ...flip,
+        ...anotherFlip,
+        relevance,
+      }
+    }
+
+    return flip
+  })
 }
 
 async function fetchWords(hash) {
@@ -1294,7 +1319,7 @@ async function fetchWords(hash) {
   ).data
 }
 
-export function adjustDuration(validationStart, duration) {
+export function adjustDurationInSeconds(validationStart, duration) {
   return dayjs(validationStart)
     .add(duration, 's')
     .diff(dayjs(), 's')

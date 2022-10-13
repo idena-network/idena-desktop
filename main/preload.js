@@ -53,6 +53,7 @@ process.once('loaded', () => {
     BUMP_EXTRA_FLIPS: process.env.BUMP_EXTRA_FLIPS,
     FINALIZE_FLIPS: process.env.FINALIZE_FLIPS,
     INDEXER_URL: process.env.INDEXER_URL,
+    FLIP_NOISE_EPOCH_START: process.env.FLIP_NOISE_EPOCH_START,
   }
 
   global.toggleFullScreen = () => {
