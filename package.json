@@ -114,7 +114,7 @@
     "google-protobuf": "^3.14.0",
     "i18next": "^19.0.1",
     "idena-sdk-js": "^0.1.0",
-    "jimp": "^0.9.6",
+    "jimp": "^0.16.2",
     "leveldown": "^5.6.0",
     "levelup": "^4.4.0",
     "lowdb": "^1.0.0",
