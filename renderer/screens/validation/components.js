@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, {useEffect, useRef} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {
   Box,
   Flex,
@@ -50,6 +50,7 @@ import {
   CrossSmallIcon,
   DeleteIcon,
   InfoIcon,
+  NewStarIcon,
   TickIcon,
   ZoomFlipIcon,
 } from '../../shared/components/icons'
@@ -484,14 +485,32 @@ export function Thumbnail({
   option,
   relevance,
   isCurrent,
+  isBest,
   onPick,
 }) {
   const isQualified = !!relevance
   const hasIrrelevantWords = relevance === RelevanceType.Irrelevant
 
+  const [bestRewardTooltipShowed, setBestRewardTooltipShowed] = useState(false)
+  const [bestRewardTooltipOpen, setBestRewardTooltipOpen] = useState(false)
+  useEffect(() => {
+    if (isBest && isCurrent && !bestRewardTooltipShowed) {
+      setBestRewardTooltipOpen(true)
+      setBestRewardTooltipShowed(true)
+    }
+  }, [isBest, isCurrent])
+  useEffect(() => {
+    if (bestRewardTooltipOpen) {
+      setTimeout(() => {
+        setBestRewardTooltipOpen(false)
+      }, 5000)
+    }
+  }, [bestRewardTooltipOpen])
+
   return (
     <ThumbnailHolder
       isCurrent={isCurrent}
+      isBest={isBest}
       borderColor={
         // eslint-disable-next-line no-nested-ternary
         isCurrent
@@ -516,6 +535,30 @@ export function Thumbnail({
               hasIrrelevantWords={hasIrrelevantWords}
             />
           )}
+          <Flex
+            justify="center"
+            align={['flex-end', 'flex-start']}
+            w="100%"
+            h="100%"
+            position="absolute"
+          >
+            <Box>
+              <Tooltip
+                isOpen={bestRewardTooltipOpen}
+                label="This flip will be rewarded with an 8x reward if other members also mark it as the best"
+                fontSize="mdx"
+                fontWeight={400}
+                mb={2}
+                px={3}
+                py="10px"
+                placement="top-start"
+                openDelay={100}
+                hasArrow
+              >
+                {' '}
+              </Tooltip>
+            </Box>
+          </Flex>
           <FlipImage
             src={images[0]}
             objectFit="cover"
@@ -530,7 +573,7 @@ export function Thumbnail({
   )
 }
 
-function ThumbnailHolder({isCurrent, children, ...props}) {
+function ThumbnailHolder({isCurrent, isBest, children, ...props}) {
   return (
     <Flex
       justify="center"
@@ -548,6 +591,22 @@ function ThumbnailHolder({isCurrent, children, ...props}) {
         m={1}
         position="relative"
       >
+        {isBest && (
+          <Flex
+            position="absolute"
+            top="-8px"
+            right="-8px"
+            w={5}
+            h={5}
+            align="center"
+            justify="center"
+            borderRadius="50%"
+            backgroundColor="white"
+            zIndex={2}
+          >
+            <NewStarIcon w={2} h={2} color="white" />
+          </Flex>
+        )}
         {children}
       </Flex>
     </Flex>

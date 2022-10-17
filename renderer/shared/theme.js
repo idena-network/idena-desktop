@@ -345,6 +345,12 @@ export const theme = {
             color: 'blue.500',
           },
         },
+        bordered: {
+          bg: 'transparent',
+          border: 'solid 1px #d2d4d9',
+          color: 'brandGray.500',
+          borderRadius: 6,
+        },
       },
     },
     Input: {

@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, {useMemo, useEffect} from 'react'
+import React, {useMemo, useEffect, useState} from 'react'
 import {useMachine} from '@xstate/react'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
@@ -9,6 +9,9 @@ import {
   IconButton,
   Heading,
   Stack,
+  Button,
+  Divider,
+  SlideFade,
   useDisclosure,
 } from '@chakra-ui/react'
 import {createValidationMachine} from '../screens/validation/machine'
@@ -56,7 +59,11 @@ import {useTimingState} from '../shared/providers/timing-context'
 import {InfoButton, PrimaryButton} from '../shared/components/button'
 import {FloatDebug, Tooltip} from '../shared/components/components'
 import {useChainState} from '../shared/providers/chain-context'
-import {FullscreenIcon} from '../shared/components/icons'
+import {
+  FullscreenIcon,
+  HollowStarIcon,
+  NewStarIcon,
+} from '../shared/components/icons'
 import {useAutoCloseValidationToast} from '../screens/validation/hooks/use-validation-toast'
 
 export default function ValidationPage() {
@@ -135,6 +142,7 @@ function ValidationSession({
 
   const {
     currentIndex,
+    bestFlipHashes,
     translations,
     reports,
     longFlips,
@@ -166,6 +174,25 @@ function ValidationSession({
     shortSessionDuration,
     longSessionDuration,
   }
+
+  const [bestRewardTipOpen, setBestRewardTipOpen] = useState(false)
+  useEffect(() => {
+    if (currentFlip && currentFlip.relevance === RelevanceType.Relevant) {
+      setBestRewardTipOpen(true)
+    }
+  }, [currentFlip])
+  useEffect(() => {
+    if (bestFlipHashes[currentFlip?.hash]) {
+      setBestRewardTipOpen(false)
+    }
+  }, [bestFlipHashes, currentFlip])
+  useEffect(() => {
+    if (bestRewardTipOpen) {
+      setTimeout(() => {
+        setBestRewardTipOpen(false)
+      }, 5000)
+    }
+  }, [bestRewardTipOpen, currentFlip])
 
   return (
     <ValidationScene bg={isShortSession(state) ? 'black' : 'white'}>
@@ -322,6 +349,50 @@ function ValidationSession({
                       </QualificationButton>
                     </Tooltip>
                   </QualificationActions>
+                  <SlideFade
+                    direction="top"
+                    offsetY="80px"
+                    in={
+                      currentFlip.relevance === RelevanceType.Relevant &&
+                      (Object.keys(bestFlipHashes).length < 1 ||
+                        bestFlipHashes[currentFlip.hash])
+                    }
+                  >
+                    <Divider mt={1} />
+                    <Flex direction="column" align="center">
+                      <Button
+                        mt={5}
+                        variant="bordered"
+                        w={['100%', 'auto']}
+                        onClick={() =>
+                          send({
+                            type: 'FAVORITE',
+                            hash: currentFlip.hash,
+                          })
+                        }
+                      >
+                        {bestFlipHashes[currentFlip.hash] ? (
+                          <NewStarIcon
+                            h="12.5px"
+                            w="13px"
+                            mr="5.5px"
+                            fill="brandGray.500"
+                          />
+                        ) : (
+                          <HollowStarIcon
+                            h="12.5px"
+                            w="13px"
+                            mr="5.5px"
+                            fill="brandGray.500"
+                          />
+                        )}
+                        {t('Mark as the best')}
+                      </Button>
+                      <Text fontSize="8px" color="#B8BABC" mt={2}>
+                        {t('You can mark this flip as the best')}
+                      </Text>
+                    </Flex>
+                  </SlideFade>
                 </Stack>
               </FlipWords>
             )}
@@ -379,6 +450,7 @@ function ValidationSession({
             key={flip.hash}
             {...flip}
             isCurrent={currentIndex === idx}
+            isBest={bestFlipHashes[flip.hash]}
             onPick={() => send({type: 'PICK', index: idx})}
           />
         ))}
