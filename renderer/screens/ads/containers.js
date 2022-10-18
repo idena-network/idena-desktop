@@ -1749,7 +1749,7 @@ export function AdOfferListItem({
   }
 
   return (
-    <Tr fontWeight={500} borderColor="red.200">
+    <Tr fontWeight={500}>
       <Td borderColor="gray.300">
         <HStack>
           <AdImage src={adImageThumbSrc(ad)} boxSize="10" />
@@ -1762,7 +1762,7 @@ export function AdOfferListItem({
                 address={ad.author}
                 boxSize="4"
                 borderWidth={1}
-                borderColor="brandGray.016"
+                borderColor="gray.016"
                 borderRadius={['mobile', 'sm']}
               />
               <Text
