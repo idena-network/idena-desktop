@@ -25,10 +25,11 @@ import {
   Link,
   MenuDivider,
   Alert,
-  RadioGroup,
   HStack,
   Icon,
   Center,
+  useRadio,
+  useRadioGroup,
 } from '@chakra-ui/react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
@@ -1102,6 +1103,13 @@ export function CommunityTranslations({
     setDescriptionCharactersCount,
   ] = React.useState(150)
 
+  const {getRadioProps, getRootProps} = useRadioGroup({
+    defaultValue: wordIdx.toString(),
+    onChange: value => {
+      setWordIdx(Number(value))
+    },
+  })
+
   const translations = keywords.translations[wordIdx]
 
   const lastTranslationId =
@@ -1123,15 +1131,19 @@ export function CommunityTranslations({
       </IconButton2>
       <Collapse in={isOpen}>
         <Stack spacing={8}>
-          <RadioGroup value={wordIdx} onChange={setWordIdx}>
-            <HStack>
-              {keywords.words.map(({id, name}, i) => (
-                <FlipKeywordRadio key={id} value={i} isChecked={i === wordIdx}>
-                  {name && capitalize(name)}
-                </FlipKeywordRadio>
-              ))}
-            </HStack>
-          </RadioGroup>
+          <HStack {...getRootProps()}>
+            {keywords.words.map(({id, name}, idx) => (
+              <FlipKeywordRadio
+                key={id}
+                {...getRadioProps({
+                  value: idx.toString(),
+                })}
+              >
+                {name && capitalize(name)}
+              </FlipKeywordRadio>
+            ))}
+          </HStack>
+
           {translations.map(({id, name, desc, score}) => (
             <Flex key={id} justify="space-between">
               <FlipKeyword>
@@ -1191,11 +1203,11 @@ export function CommunityTranslations({
                       ? capitalize(keywords.words[wordIdx].name)
                       : 'Name'
                   }
-                  px={3}
-                  pt="3/2"
-                  pb={2}
+                  px="3"
+                  pt="1.5"
+                  pb="2"
                   borderColor="gray.300"
-                  mb={2}
+                  mb="2"
                   _placeholder={{
                     color: 'muted',
                   }}
@@ -1210,10 +1222,10 @@ export function CommunityTranslations({
                       : 'Description'
                   }
                   borderColor="gray.300"
-                  px={3}
-                  pt="3/2"
-                  pb={2}
-                  mb={6}
+                  px="3"
+                  pt="1.5"
+                  pb="2"
+                  mb="6"
                   _placeholder={{
                     color: 'muted',
                   }}
@@ -1248,31 +1260,29 @@ export function CommunityTranslations({
   )
 }
 
-export const FlipKeywordRadio = React.forwardRef(
-  ({isChecked, ...props}, ref) => {
-    const stateProps = {
-      bg: isChecked ? 'blue.500' : 'transparent',
-      color: isChecked ? 'white' : 'brandGray.500',
-    }
+export function FlipKeywordRadio(props) {
+  const {getInputProps, getCheckboxProps} = useRadio(props)
 
-    return (
-      <PrimaryButton
-        ref={ref}
-        aria-checked={isChecked}
-        role="radio"
-        {...stateProps}
-        _hover={{
-          ...stateProps,
+  return (
+    <Box as="label" cursor="pointer">
+      <input {...getInputProps()} hidden />
+      <Box
+        {...getCheckboxProps()}
+        borderRadius="md"
+        fontWeight={500}
+        _checked={{
+          bg: 'blue.500',
+          color: 'white',
         }}
-        _active={{
-          ...stateProps,
-        }}
-        {...props}
-      />
-    )
-  }
-)
-FlipKeywordRadio.displayName = 'FlipKeywordRadio'
+        px="4"
+        py="2"
+      >
+        {/* eslint-disable-next-line react/destructuring-assignment */}
+        {props.children}
+      </Box>
+    </Box>
+  )
+}
 
 export function VoteButton(props) {
   return (
