@@ -135,7 +135,10 @@ export function useRotatingAds(limit = 3) {
           if (burn) {
             return {
               ...data,
-              totalScore: calculateTotalAdScore(decodeAdTarget(burn.target)),
+              totalScore: calculateTotalAdScore({
+                target: decodeAdTarget(burn.target),
+                burnAmount: burn.amount,
+              }),
             }
           }
 
