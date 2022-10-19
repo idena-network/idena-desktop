@@ -500,12 +500,15 @@ export function Thumbnail({
     }
   }, [isBest, isCurrent])
   useEffect(() => {
+    if (!isCurrent) {
+      setBestRewardTooltipOpen(false)
+    }
     if (bestRewardTooltipOpen) {
       setTimeout(() => {
         setBestRewardTooltipOpen(false)
       }, 5000)
     }
-  }, [bestRewardTooltipOpen])
+  }, [bestRewardTooltipOpen, isCurrent])
 
   return (
     <ThumbnailHolder
