@@ -498,7 +498,7 @@ export function Thumbnail({
       setBestRewardTooltipOpen(true)
       setBestRewardTooltipShowed(true)
     }
-  }, [isBest, isCurrent])
+  }, [isBest, isCurrent, bestRewardTooltipShowed])
   useEffect(() => {
     if (!isCurrent) {
       setBestRewardTooltipOpen(false)
