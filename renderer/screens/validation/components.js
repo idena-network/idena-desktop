@@ -491,12 +491,14 @@ export function Thumbnail({
   const isQualified = !!relevance
   const hasIrrelevantWords = relevance === RelevanceType.Irrelevant
 
+  const [bestRewardTooltipShowed, setBestRewardTooltipShowed] = useState(false)
   const [bestRewardTooltipOpen, setBestRewardTooltipOpen] = useState(false)
   useEffect(() => {
-    if (isBest && isCurrent) {
+    if (isBest && isCurrent && !bestRewardTooltipShowed) {
       setBestRewardTooltipOpen(true)
+      setBestRewardTooltipShowed(true)
     }
-  }, [isBest, isCurrent])
+  }, [isBest, isCurrent, bestRewardTooltipShowed])
   useEffect(() => {
     if (!isCurrent || !isBest) {
       setBestRewardTooltipOpen(false)
