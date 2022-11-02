@@ -410,7 +410,7 @@ function ValidationSession({
                         )}
                         {t('Mark as the best')}
                       </Button>
-                      <Text fontSize="8px" color="#B8BABC" mt={2}>
+                      <Text fontSize="11px" color="#B8BABC" mt={2}>
                         {t('You can mark this flip as the best')}
                       </Text>
                     </Flex>
