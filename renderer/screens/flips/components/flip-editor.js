@@ -505,7 +505,7 @@ export default function FlipEditor({
       containerEl.parentElement.style.height = rem(328)
       containerEl.addEventListener('contextmenu', e => {
         e.preventDefault()
-        setContextMenuCursor({x: e.clientX, y: e.clientY})
+        setContextMenuCursor({x: e.layerX, y: e.layerY})
         setShowContextMenu(true)
         setRightMenuPanel(RightMenu.None)
         if (editors[idx]) {
