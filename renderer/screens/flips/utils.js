@@ -3,15 +3,15 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-shadow */
-import { encode } from 'rlp'
+import {encode} from 'rlp'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import Jimp from 'jimp'
-import { loadPersistentStateValue, persistItem } from '../../shared/utils/persist'
-import { FlipType } from '../../shared/types'
-import { areSame, areEual } from '../../shared/utils/arr'
-import { submitFlip } from '../../shared/api/dna'
-import { signNonce } from '../dna/utils'
+import {loadPersistentStateValue, persistItem} from '../../shared/utils/persist'
+import {FlipType} from '../../shared/types'
+import {areSame, areEual} from '../../shared/utils/arr'
+import {submitFlip} from '../../shared/api/dna'
+import {signNonce} from '../dna/utils'
 import i18n from '../../i18n'
 import ImageAccess from './ImageAccess'
 
@@ -30,12 +30,12 @@ export function getRandomKeywordPair() {
     return Math.floor(Math.random() * (max - min)) + min
   }
 
-  return { id: 0, words: [getRandomInt(3300, 3939), getRandomInt(3300, 3939)] }
+  return {id: 0, words: [getRandomInt(3300, 3939), getRandomInt(3300, 3939)]}
 }
 
 export function isPendingKeywordPair(flips, id) {
   return flips.find(
-    ({ type, keywordPairId }) =>
+    ({type, keywordPairId}) =>
       type === FlipType.Publishing && keywordPairId === id
   )
 }
@@ -47,24 +47,24 @@ export function didArchiveFlips(epoch) {
 }
 
 export function archiveFlips() {
-  const { getFlips, saveFlips } = global.flipStore
+  const {getFlips, saveFlips} = global.flipStore
   saveFlips(
     getFlips().map(flip =>
       flip.type === FlipType.Archived
         ? flip
-        : { ...flip, type: FlipType.Archived }
+        : {...flip, type: FlipType.Archived}
     )
   )
 }
 
-export const freshFlip = ({ createdAt, modifiedAt = createdAt }) =>
+export const freshFlip = ({createdAt, modifiedAt = createdAt}) =>
   dayjs().diff(modifiedAt, 'day') < 30
 
-export const outdatedFlip = ({ createdAt, modifiedAt = createdAt }) =>
+export const outdatedFlip = ({createdAt, modifiedAt = createdAt}) =>
   dayjs().diff(modifiedAt, 'day') >= 30
 
 export function handleOutdatedFlips() {
-  const { getFlips, saveFlips } = global.flipStore
+  const {getFlips, saveFlips} = global.flipStore
   const flips = getFlips()
   if (flips.filter(outdatedFlip).length > 0) saveFlips(flips.filter(freshFlip))
 }
@@ -147,26 +147,26 @@ export function flipToHex(pics, order) {
   return [publicRlp, privateRlp].map(x => `0x${x.toString('hex')}`)
 }
 
-export function updateFlipType(flips, { id, type }) {
+export function updateFlipType(flips, {id, type}) {
   return flips.map(flip =>
     flip.id === id
       ? {
-        ...flip,
-        type,
-        ref: flip.ref,
-      }
+          ...flip,
+          type,
+          ref: flip.ref,
+        }
       : flip
   )
 }
 
-export function updateFlipTypeByHash(flips, { hash, type }) {
+export function updateFlipTypeByHash(flips, {hash, type}) {
   return flips.map(flip =>
     flip.hash === hash
       ? {
-        ...flip,
-        type,
-        ref: flip.ref,
-      }
+          ...flip,
+          type,
+          ref: flip.ref,
+        }
       : flip
   )
 }
@@ -217,15 +217,15 @@ export async function publishFlip({
   const compressedImages = checkIfFlipNoiseEnabled(epochNumber)
     ? protectedImages
     : await Promise.all(
-      images.map(image =>
-        Jimp.read(image).then(raw =>
-          raw
-            .resize(240, 180)
-            .quality(60) // jpeg quality
-            .getBase64Async('image/jpeg')
+        images.map(image =>
+          Jimp.read(image).then(raw =>
+            raw
+              .resize(240, 180)
+              .quality(60) // jpeg quality
+              .getBase64Async('image/jpeg')
+          )
         )
       )
-    )
 
   const [publicHex, privateHex] = flipToHex(
     hint ? compressedImages : originalOrder.map(num => compressedImages[num]),
@@ -235,10 +235,10 @@ export async function publishFlip({
   if (publicHex.length + privateHex.length > 2 * 1024 * 1024)
     throw new Error(i18n.t('Cannot submit flip, content is too big'))
 
-  const { result, error } = await submitFlip(publicHex, privateHex, keywordPairId)
+  const {result, error} = await submitFlip(publicHex, privateHex, keywordPairId)
 
   if (error) {
-    const { message } = error
+    const {message} = error
 
     if (message.includes('candidate'))
       throw new Error(
@@ -257,7 +257,7 @@ export async function publishFlip({
 
 export function formatKeywords(keywords) {
   return keywords
-    .map(({ name: [f, ...rest] }) => f?.toUpperCase() + rest.join(''))
+    .map(({name: [f, ...rest]}) => f?.toUpperCase() + rest.join(''))
     .join(' / ')
 }
 
@@ -272,7 +272,7 @@ export async function fetchKeywordTranslations(ids, locale) {
         ).json()
       )
     )
-  ).map(({ translations }) =>
+  ).map(({translations}) =>
     (translations || []).map(
       ({
         id,
@@ -305,15 +305,15 @@ export async function fetchConfirmedKeywordTranslations(ids, locale) {
         ).json()
       )
     )
-  ).map(({ translation }) => translation)
+  ).map(({translation}) => translation)
 }
 
-export async function voteForKeywordTranslation({ id, up }) {
+export async function voteForKeywordTranslation({id, up}) {
   const timestamp = new Date().toISOString()
   const signature = await signNonce(id.concat(up).concat(timestamp))
 
   const {
-    data: { resCode, upVotes, downVotes, error },
+    data: {resCode, upVotes, downVotes, error},
   } = await axios.post(`https://translation.idena.io/vote`, {
     signature,
     timestamp,
@@ -323,7 +323,7 @@ export async function voteForKeywordTranslation({ id, up }) {
 
   if (resCode > 0 && error) throw new Error(error)
 
-  return { id, ups: upVotes - downVotes }
+  return {id, ups: upVotes - downVotes}
 }
 
 export async function suggestKeywordTranslation({
@@ -344,7 +344,7 @@ export async function suggestKeywordTranslation({
   )
 
   const {
-    data: { resCode, translationId, error },
+    data: {resCode, translationId, error},
   } = await axios.post(`https://translation.idena.io/translation`, {
     word: wordId,
     name,
@@ -376,7 +376,7 @@ export async function protectFlipImage(imgSrc) {
     const extractColors = require('extract-colors').default
     palette = await extractColors(imgSrc)
     // eslint-disable-next-line no-empty
-  } catch (e) { }
+  } catch (e) {}
   const getImageData = image => {
     const vMin = 0
     const vMax = 1
@@ -529,7 +529,7 @@ export async function protectFlipImage(imgSrc) {
 
     const getOverlayImg = image => {
       const img = image
-      const { data } = img
+      const {data} = img
       const len = data.length
       for (let i = 0; i < len; i++) data[i] = data[i] === 0 ? 1 : 0
 
@@ -551,7 +551,7 @@ export async function protectFlipImage(imgSrc) {
      *	creates histogram of image
      *	result in array h
      */
-    const hist = function (image, h) {
+    const hist = function(image, h) {
       let v
 
       for (let i = 0; i <= 255; i++) {
@@ -576,7 +576,7 @@ export async function protectFlipImage(imgSrc) {
      *	result in arrays frq, pos, hmin, hmax,
      *
      */
-    const frqfunc = function (h, frq, pos) {
+    const frqfunc = function(h, frq, pos) {
       levels = 0
       frq[0] = h[0]
       if (h[0] !== 0) {
@@ -602,7 +602,7 @@ export async function protectFlipImage(imgSrc) {
      *		needed (calculated by frqfunc)
      *	results stored in arrays: PixelValue, pixelX, pixelY, pixelPos
      */
-    const sort = function (image, pos, pixelValue, pixelX, pixelY, pixelPos) {
+    const sort = function(image, pos, pixelValue, pixelX, pixelY, pixelPos) {
       let v
       const len = pos.length
       const position = []
@@ -626,7 +626,7 @@ export async function protectFlipImage(imgSrc) {
     /*
      *	THE ACTUAL WATERSHED 4-connected
      */
-    const flooding4 = function (
+    const flooding4 = function(
       input,
       h,
       pos,
@@ -774,7 +774,7 @@ export async function protectFlipImage(imgSrc) {
      *	In neigh[3] there is the pixel(x, y+1)
      *	In neigh[4] there is the pixel(x, y)	// central point
      */
-    const getNeighborhood34connect = function (x, y, neigh) {
+    const getNeighborhood34connect = function(x, y, neigh) {
       let index = x + (y - 1) * nx
       neigh[0] = outPixels[index]
       index += nx - 1
@@ -850,17 +850,17 @@ export async function protectFlipImage(imgSrc) {
   return resultCanvas.toDataURL()
 }
 
-export async function protectFlip({ images }) {
+export async function protectFlip({images}) {
   const protectedFlips = []
   const compressedImages = await Promise.all(
     images.map(image =>
       image
         ? Jimp.read(image).then(raw =>
-          raw
-            .resize(240, 180)
-            .quality(60) // jpeg quality
-            .getBase64Async('image/jpeg')
-        )
+            raw
+              .resize(240, 180)
+              .quality(60) // jpeg quality
+              .getBase64Async('image/jpeg')
+          )
         : image
     )
   )
@@ -874,7 +874,7 @@ export async function protectFlip({ images }) {
       protectedFlips[i] = compressedImages[i]
     }
   }
-  return { protectedImages: protectedFlips }
+  return {protectedImages: protectedFlips}
 }
 
 export const checkIfFlipNoiseEnabled = epochNumber =>
