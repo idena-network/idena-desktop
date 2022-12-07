@@ -852,8 +852,18 @@ export async function protectFlipImage(imgSrc) {
 
 export async function protectFlip({images}) {
   const protectedFlips = []
+
+  for (let i = 0; i < images.length; i++) {
+    if (images[i]) {
+      const protectedImageSrc = await protectFlipImage(images[i])
+      protectedFlips[i] = protectedImageSrc
+    } else {
+      protectedFlips[i] = images[i]
+    }
+  }
+
   const compressedImages = await Promise.all(
-    images.map(image =>
+    protectedFlips.map(image =>
       image
         ? Jimp.read(image).then(raw =>
             raw
@@ -865,16 +875,7 @@ export async function protectFlip({images}) {
     )
   )
 
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < images.length; i++) {
-    if (compressedImages[i]) {
-      const protectedImageSrc = await protectFlipImage(compressedImages[i])
-      protectedFlips[i] = protectedImageSrc
-    } else {
-      protectedFlips[i] = compressedImages[i]
-    }
-  }
-  return {protectedImages: protectedFlips}
+  return {protectedImages: compressedImages}
 }
 
 export const checkIfFlipNoiseEnabled = epochNumber =>

@@ -717,9 +717,14 @@ export function FlipProtectStep({
 
   const regenerateImage = async () => {
     onProtecting()
+
+    const protectedImageSrc = await protectFlipImage(
+      images[originalOrder[currentIndex]]
+    )
+
     const compressedImage = await new Promise(resolve =>
       resolve(
-        Jimp.read(images[originalOrder[currentIndex]]).then(raw =>
+        Jimp.read(protectedImageSrc).then(raw =>
           raw
             .resize(240, 180)
             .quality(60) // jpeg quality
@@ -727,8 +732,8 @@ export function FlipProtectStep({
         )
       )
     )
-    const protectedImageSrc = await protectFlipImage(compressedImage)
-    onProtectImage(protectedImageSrc, originalOrder[currentIndex])
+
+    onProtectImage(compressedImage, originalOrder[currentIndex])
   }
 
   return (
