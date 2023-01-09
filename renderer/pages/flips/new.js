@@ -48,6 +48,8 @@ import {useFailToast} from '../../shared/hooks/use-toast'
 import {InfoIcon, RefreshIcon} from '../../shared/components/icons'
 import {useRpc, useTrackTx} from '../../screens/ads/hooks'
 import {eitherState} from '../../shared/utils/utils'
+import {checkIfNewBadFlipRules} from '../../screens/validation/utils'
+import {useEpochState} from '../../shared/providers/epoch-context'
 
 export default function NewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -58,9 +60,12 @@ export default function NewFlipPage() {
 
   const {syncing, offline} = useChainState()
 
+  const epoch = useEpochState()
   const {flipKeyWordPairs} = useIdentityState()
 
   const failToast = useFailToast()
+
+  const isNewFlipRules = checkIfNewBadFlipRules(epoch?.epoch)
 
   const [current, send] = useMachine(flipMasterMachine, {
     context: {
@@ -74,7 +79,7 @@ export default function NewFlipPage() {
         try {
           didShowBadFlip = await global
             .sub(requestDb(), 'flips')
-            .get('didShowBadFlip')
+            .get(isNewFlipRules ? 'didShowBadFlipNew' : 'didShowBadFlip')
         } catch {
           didShowBadFlip = false
         }
@@ -413,8 +418,11 @@ export default function NewFlipPage() {
           subtitle={t(
             'Please read the rules carefully. You can lose all your validation rewards if any of your flips is reported.'
           )}
+          epochNum={epochNumber}
           onClose={async () => {
-            await global.sub(requestDb(), 'flips').put('didShowBadFlip', 1)
+            await global
+              .sub(requestDb(), 'flips')
+              .put(isNewFlipRules ? 'didShowBadFlipNew' : 'didShowBadFlip', 1)
             send('SKIP_BAD_FLIP')
             onCloseBadFlipDialog()
           }}

@@ -56,6 +56,7 @@ import {
 } from '../../shared/components/icons'
 import {adjustDurationInSeconds} from './machine'
 import {useTimer} from '../../shared/hooks/use-timer'
+import {checkIfNewBadFlipRules} from './utils'
 
 dayjs.extend(durationPlugin)
 
@@ -1141,9 +1142,17 @@ export function EncourageReportDialog({...props}) {
   )
 }
 
-export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
+export function BadFlipDialog({
+  title,
+  subtitle,
+  epochNum,
+  isOpen,
+  onClose,
+  ...props
+}) {
   const {t} = useTranslation()
 
+  const isNewFlipRules = checkIfNewBadFlipRules(epochNum)
   const [flipCase, setFlipCase] = React.useState(0)
 
   const dirs = [
@@ -1152,7 +1161,14 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
     '3-enums',
     '4-text',
     '5-inappropriate-content',
+    '6-unrelated-stories',
+    '7-waking-up',
+    '8-thumbs-up',
+    '9-painter',
   ]
+
+  const examplesLength = isNewFlipRules ? 8 : 4
+
   // eslint-disable-next-line no-shadow
   const flipUrl = (flipCase, idx) =>
     `/static/flips/${dirs[flipCase]}/${idx}.jpg`
@@ -1179,19 +1195,32 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
         fontSize="md"
         rounded="lg"
       >
-        <Stack isInline spacing="9">
-          <Stack
-            spacing={0}
-            borderColor="gray.016"
-            borderWidth={1}
-            position="relative"
+        <Stack
+          isInline
+          spacing={isNewFlipRules ? 0 : 9}
+          bg={isNewFlipRules ? 'white' : 'transparent'}
+          borderRadius="8px"
+        >
+          <Flex
+            justify="center"
+            align="center"
+            bg={isNewFlipRules ? 'red.016' : 'transparent'}
+            px={isNewFlipRules ? 14 : 'auto'}
+            w={isNewFlipRules ? '240px' : 120}
           >
-            <BadFlipPartFrame flipCase={flipCase} />
-            <BadFlipImage src={flipUrl(flipCase, 1)} roundedTop="md" />
-            <BadFlipImage src={flipUrl(flipCase, 2)} />
-            <BadFlipImage src={flipUrl(flipCase, 3)} />
-            <BadFlipImage src={flipUrl(flipCase, 4)} roundedBottom="md" />
-          </Stack>
+            <Stack
+              spacing={0}
+              borderColor="gray.016"
+              borderWidth={1}
+              position="relative"
+            >
+              <BadFlipPartFrame flipCase={flipCase} />
+              <BadFlipImage src={flipUrl(flipCase, 1)} roundedTop="md" />
+              <BadFlipImage src={flipUrl(flipCase, 2)} />
+              <BadFlipImage src={flipUrl(flipCase, 3)} />
+              <BadFlipImage src={flipUrl(flipCase, 4)} roundedBottom="md" />
+            </Stack>
+          </Flex>
           <Flex
             direction="column"
             justify="space-between"
@@ -1199,14 +1228,16 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
             bg="white"
             borderRadius="lg"
             p="8"
-            w={440}
+            w={isNewFlipRules ? 512 : 440}
           >
             <Stack spacing={4}>
               <Box>
                 <Heading fontSize="lg" fontWeight={500} lineHeight="32px">
                   {title}
                 </Heading>
-                <Text color="muted">{subtitle}</Text>
+                <Text fontSize={isNewFlipRules ? 'mdx' : 'md'} color="muted">
+                  {subtitle}
+                </Text>
               </Box>
               <List as="ul">
                 <BadFlipListItem
@@ -1225,7 +1256,9 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
                     setFlipCase(0)
                   }}
                 >
-                  {t('One of the keywords is not clearly visible in the story')}
+                  {t(
+                    'One of the keywords is not clearly visible in the images'
+                  )}
                 </BadFlipListItem>
                 <BadFlipListItem
                   flipCase={1}
@@ -1234,7 +1267,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
                     setFlipCase(1)
                   }}
                 >
-                  {t('There are numbers or letters indicating the order')}
+                  {t('Numbers or letters indicating the order')}
                 </BadFlipListItem>
                 <BadFlipListItem
                   flipCase={2}
@@ -1243,21 +1276,19 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
                     setFlipCase(2)
                   }}
                 >
-                  {t('There is a sequence of enumerated objects')}
+                  {t('Sequence of enumerated objects')}
                 </BadFlipListItem>
                 <BadFlipListItem
                   flipCase={3}
                   description={t(
-                    'Some of the Idena users can not not read the text in your local language'
+                    'Some of the Idena users can not not read your the text in your local language'
                   )}
                   isActive={flipCase === 3}
                   onClick={() => {
                     setFlipCase(3)
                   }}
                 >
-                  {t(
-                    'There is text that is necessary to read to solve the flip'
-                  )}
+                  {t('Text necessary to read to solve the flip')}
                 </BadFlipListItem>
                 <BadFlipListItem
                   flipCase={4}
@@ -1268,18 +1299,64 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
                 >
                   {t('There is inappropriate content')}
                 </BadFlipListItem>
+                {isNewFlipRules && (
+                  <BadFlipListItem
+                    flipCase={5}
+                    isActive={flipCase === 5}
+                    onClick={() => {
+                      setFlipCase(5)
+                    }}
+                  >
+                    {t('Several unrelated stories')}
+                  </BadFlipListItem>
+                )}
+                {isNewFlipRules && (
+                  <BadFlipListItem
+                    flipCase={6}
+                    isActive={flipCase === 6}
+                    onClick={() => {
+                      setFlipCase(6)
+                    }}
+                  >
+                    {t('Waking up template')}
+                  </BadFlipListItem>
+                )}
+                {isNewFlipRules && (
+                  <BadFlipListItem
+                    flipCase={7}
+                    isActive={flipCase === 7}
+                    onClick={() => {
+                      setFlipCase(7)
+                    }}
+                  >
+                    {t('Thumbs up/down image at the end')}
+                  </BadFlipListItem>
+                )}
+                {isNewFlipRules && (
+                  <BadFlipListItem
+                    flipCase={8}
+                    isActive={flipCase === 8}
+                    onClick={() => {
+                      setFlipCase(8)
+                    }}
+                  >
+                    {t(
+                      'Images of both keywords are inserted into a page/screen/painting'
+                    )}
+                  </BadFlipListItem>
+                )}
               </List>
             </Stack>
-            <Stack isInline justify="flex-end">
+            <Stack isInline mt={isNewFlipRules ? 8 : 'auto'} justify="flex-end">
               <SecondaryButton onClick={onClose}>{t('Skip')}</SecondaryButton>
               <PrimaryButton
                 ref={nextButtonRef}
                 onClick={() => {
-                  if (flipCase === dirs.length - 1) onClose()
+                  if (flipCase === examplesLength) onClose()
                   else setFlipCase(flipCase + 1)
                 }}
               >
-                {flipCase === dirs.length - 1
+                {flipCase === examplesLength
                   ? t('Ok, I understand')
                   : t('Next')}
               </PrimaryButton>
@@ -1351,6 +1428,10 @@ function BadFlipPartFrame({flipCase, ...props}) {
     {},
     {top: `${100 * 1 - 4}px`, bottom: `${100 * 2 - 4}px`},
     {top: `${100 * 1 - 4}px`, bottom: `${100 * 2 - 4}px`},
+    {},
+    {top: `${100 * 0 - 4}px`, bottom: `${100 * 3 - 4}px`},
+    {top: `${100 * 3 - 4}px`, bottom: `${100 * 0 - 4}px`},
+    {},
   ]
   return (
     <Box
