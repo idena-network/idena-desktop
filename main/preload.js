@@ -54,6 +54,7 @@ process.once('loaded', () => {
     FINALIZE_FLIPS: process.env.FINALIZE_FLIPS,
     INDEXER_URL: process.env.INDEXER_URL,
     FLIP_NOISE_EPOCH_START: process.env.FLIP_NOISE_EPOCH_START,
+    NEW_FLIP_RULES_START: process.env.NEW_FLIP_RULES_START,
   }
 
   global.toggleFullScreen = () => {
