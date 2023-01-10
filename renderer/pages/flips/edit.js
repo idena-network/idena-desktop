@@ -400,6 +400,7 @@ export default function EditFlipPage() {
           subtitle={t(
             'Please read the rules carefully. You can lose all your validation rewards if any of your flips is reported.'
           )}
+          epochNum={epochNumber}
           onClose={onCloseBadFlipDialog}
         />
 
