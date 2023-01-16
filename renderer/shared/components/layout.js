@@ -83,7 +83,8 @@ import {
 } from '../../screens/validation/hooks/use-start-validation'
 import {useValidationToast} from '../../screens/validation/hooks/use-validation-toast'
 import {useIdentityState} from '../providers/identity-context'
-import {OfflineBanner, TroubleshootingScreen} from './layout/offline'
+import {OfflineBanner} from './layout/offline'
+import {TroubleshootingScreen} from '../../screens/troubleshooting'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -603,7 +604,7 @@ function OfflineApp() {
     !nodeFailed &&
     nodeProgress
 
-  const isExternalNodeOffline = false && (useExternalNode || !runInternalNode)
+  const isExternalNodeOffline = useExternalNode || !runInternalNode
 
   const isStartingBuiltinNode =
     !useExternalNode &&
@@ -611,7 +612,7 @@ function OfflineApp() {
     !unsupportedMacosVersion &&
     (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress))
 
-  const isFailedBuiltinNode = true || (nodeFailed && !useExternalNode)
+  const isFailedBuiltinNode = nodeFailed && !useExternalNode
 
   const isUnsupportedMacosVersion =
     runInternalNode && !useExternalNode && unsupportedMacosVersion

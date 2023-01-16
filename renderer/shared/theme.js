@@ -323,6 +323,10 @@ export const theme = {
               bg: 'red.500',
             },
           },
+          _focus: {
+            ring: 2,
+            ringColor: 'red.050',
+          },
           _active: {
             bg: 'red.500',
           },
