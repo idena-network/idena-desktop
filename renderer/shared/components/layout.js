@@ -83,6 +83,7 @@ import {
 } from '../../screens/validation/hooks/use-start-validation'
 import {useValidationToast} from '../../screens/validation/hooks/use-validation-toast'
 import {useIdentityState} from '../providers/identity-context'
+import {OfflineBanner, TroubleshootingScreen} from './layout/offline'
 
 global.getZoomLevel = global.getZoomLevel || {}
 
@@ -584,10 +585,7 @@ function LoadingApp() {
 }
 
 function OfflineApp() {
-  const [
-    {nodeReady, nodeFailed, unsupportedMacosVersion},
-    {tryRestartNode},
-  ] = useNode()
+  const [{nodeReady, nodeFailed, unsupportedMacosVersion}] = useNode()
 
   const [
     {useExternalNode, runInternalNode},
@@ -605,7 +603,7 @@ function OfflineApp() {
     !nodeFailed &&
     nodeProgress
 
-  const isExternalNodeOffline = useExternalNode || !runInternalNode
+  const isExternalNodeOffline = false && (useExternalNode || !runInternalNode)
 
   const isStartingBuiltinNode =
     !useExternalNode &&
@@ -613,7 +611,7 @@ function OfflineApp() {
     !unsupportedMacosVersion &&
     (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress))
 
-  const isFailedBuiltinNode = nodeFailed && !useExternalNode
+  const isFailedBuiltinNode = true || (nodeFailed && !useExternalNode)
 
   const isUnsupportedMacosVersion =
     runInternalNode && !useExternalNode && unsupportedMacosVersion
@@ -625,19 +623,7 @@ function OfflineApp() {
 
   return (
     <FillCenter bg="graphite.500" color="white" position="relative">
-      <Flex
-        align="center"
-        justify="center"
-        bg="red.500"
-        py={3}
-        fontWeight={500}
-        position="absolute"
-        top={0}
-        left={0}
-        w="full"
-      >
-        {t('Offline')}
-      </Flex>
+      <OfflineBanner />
 
       {isDownloadingBuiltinNode && (
         <Stack spacing={3} w="md">
@@ -702,24 +688,7 @@ function OfflineApp() {
         </Heading>
       )}
 
-      {isFailedBuiltinNode && (
-        <Stack spacing={5} w={416}>
-          <Heading fontSize="lg" fontWeight={500}>
-            {t('Your built-in node is failed')}
-          </Heading>
-          <Stack spacing={4} align="flex-start">
-            <PrimaryButton onClick={tryRestartNode}>
-              {t('Restart built-in node')}
-            </PrimaryButton>
-            <Text color="xwhite.050" fontSize="mdx">
-              <Trans i18nKey="builtinNodeFailed" t={t}>
-                If problem still exists, restart your app or check your
-                connection <TextLink href="/settings/node">settings</TextLink>
-              </Trans>
-            </Text>
-          </Stack>
-        </Stack>
-      )}
+      {isFailedBuiltinNode && <TroubleshootingScreen />}
 
       {isUnsupportedMacosVersion && (
         <Stack spacing={5} w={416}>
