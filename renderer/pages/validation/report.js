@@ -494,6 +494,43 @@ export default function ValidationReport() {
                 <tr>
                   <ValidationReportColumn>
                     <ValidationReportCategoryLabel
+                      label={t('Flips')}
+                      description={t(
+                        'Rewards for submitted and qualified flips'
+                      )}
+                    />
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {maybeDna(flipReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    <Text color={missedFlipReward > 0 ? 'red.500' : ''}>
+                      {maybeDna(missedFlipReward)}
+                    </Text>
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {/* eslint-disable-next-line no-nested-ternary */}
+                    {validationResult === ValidationResult.Penalty ? (
+                      <Text color="red.500">
+                        {t('Your flips were reported.')}
+                      </Text>
+                    ) : // eslint-disable-next-line no-nested-ternary
+                    missedFlipReward > 0 ? (
+                      <Text color="red.500">
+                        {t('Make all flips carefully')}
+                      </Text>
+                    ) : flipReward ? (
+                      <Text color="green.500">
+                        {t('Great job! You have earned maximum reward')}
+                      </Text>
+                    ) : (
+                      '–'
+                    )}
+                  </ValidationReportColumn>
+                </tr>
+                <tr>
+                  <ValidationReportColumn>
+                    <ValidationReportCategoryLabel
                       label={t('Extra flips')}
                       description={t('Rewards for qualified extra flips')}
                     />
@@ -527,43 +564,6 @@ export default function ValidationReport() {
                           <ChevronRightIcon />
                         </TextLink>
                       </>
-                    ) : (
-                      '–'
-                    )}
-                  </ValidationReportColumn>
-                </tr>
-                <tr>
-                  <ValidationReportColumn>
-                    <ValidationReportCategoryLabel
-                      label={t('Flips')}
-                      description={t(
-                        'Rewards for submitted and qualified flips'
-                      )}
-                    />
-                  </ValidationReportColumn>
-                  <ValidationReportColumn>
-                    {maybeDna(flipReward)}
-                  </ValidationReportColumn>
-                  <ValidationReportColumn>
-                    <Text color={missedFlipReward > 0 ? 'red.500' : ''}>
-                      {maybeDna(missedFlipReward)}
-                    </Text>
-                  </ValidationReportColumn>
-                  <ValidationReportColumn>
-                    {/* eslint-disable-next-line no-nested-ternary */}
-                    {validationResult === ValidationResult.Penalty ? (
-                      <Text color="red.500">
-                        {t('Your flips were reported.')}
-                      </Text>
-                    ) : // eslint-disable-next-line no-nested-ternary
-                    missedFlipReward > 0 ? (
-                      <Text color="red.500">
-                        {t('Make all flips carefully')}
-                      </Text>
-                    ) : flipReward ? (
-                      <Text color="green.500">
-                        {t('Great job! You have earned maximum reward')}
-                      </Text>
                     ) : (
                       '–'
                     )}
