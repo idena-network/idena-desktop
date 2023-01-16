@@ -22,15 +22,18 @@ const getNodeDir = () => path.join(appDataPath('userData'), 'node')
 
 const getNodeDataDir = () => path.join(getNodeDir(), 'datadir')
 
-const getNodeFile = () => path.join(getNodeDir(), idenaBin + getBinarySuffix())
+export const getNodeFile = () =>
+  path.join(getNodeDir(), idenaBin + getBinarySuffix())
 
 const getNodeConfigFile = () => path.join(getNodeDir(), 'config.json')
 
 const getTempNodeFile = () =>
   path.join(getNodeDir(), `new-${idenaBin}${getBinarySuffix()}`)
 
-const getNodeChainDbFolder = () =>
+export const getNodeChainDbFolder = () =>
   path.join(getNodeDataDir(), idenaChainDbFolder)
+
+export const getNodeIpfsDir = () => path.join(getNodeDataDir(), 'ipfs')
 
 const getNodeLogsFile = () => path.join(getNodeDataDir(), 'logs', 'output.log')
 
