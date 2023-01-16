@@ -315,6 +315,18 @@ export const theme = {
             color: 'gray.300',
           },
         },
+        danger: {
+          bg: 'red.500',
+          _hover: {
+            bg: 'red.500',
+            _disabled: {
+              bg: 'red.500',
+            },
+          },
+          _active: {
+            bg: 'red.500',
+          },
+        },
         primaryFlat: {
           bg: 'transparent',
           color: 'brandBlue.500',
