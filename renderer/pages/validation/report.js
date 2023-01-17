@@ -67,8 +67,12 @@ export default function ValidationReport() {
     missedValidationReward,
     invitationReward,
     missedInvitationReward,
+    inviteeReward,
+    missedInviteeReward,
     flipReward,
     missedFlipReward,
+    extraFlipReward,
+    missedExtraFlipReward,
     flipReportReward,
     missedFlipReportReward,
     totalMissedReward,
@@ -335,16 +339,46 @@ export default function ValidationReport() {
                 </tr>
               </thead>
               <tbody>
+                {(!!inviteeReward || !!missedInviteeReward) && (
+                  <tr>
+                    <ValidationReportColumn>
+                      <ValidationReportCategoryLabel
+                        label={t('Newbie reward')}
+                        description={t('Reward based on your inviter stake')}
+                      />
+                    </ValidationReportColumn>
+                    <ValidationReportColumn>
+                      {maybeDna(inviteeReward)}
+                    </ValidationReportColumn>
+                    <ValidationReportColumn>
+                      <Text color={missedInviteeReward > 0 ? 'red.500' : ''}>
+                        {maybeDna(missedInviteeReward)}
+                      </Text>
+                    </ValidationReportColumn>
+                    <ValidationReportColumn>
+                      {/* eslint-disable-next-line no-nested-ternary */}
+                      {missedInviteeReward > 0 ? (
+                        <Text color="red.500">
+                          {t('Your inviter was reported or failed validation')}
+                        </Text>
+                      ) : inviteeReward ? (
+                        <Text color="green.500">
+                          {t('Great job! You have passed validation')}
+                        </Text>
+                      ) : (
+                        '–'
+                      )}
+                    </ValidationReportColumn>
+                  </tr>
+                )}
                 {stakingReward === 0 && candidateReward === 0 ? (
                   <tr>
                     <ValidationReportColumn>
                       <ValidationReportCategoryLabel
                         isFirst
                         label={t('Validation')}
-                        description={t(
-                          'Rewards for the successfull validation'
-                        )}
-                        info={t('Rewards for the successfull validation')}
+                        description={t('Rewards for the successful validation')}
+                        info={t('Rewards for the successful validation')}
                       />
                     </ValidationReportColumn>
                     <ValidationReportColumn>
@@ -489,6 +523,47 @@ export default function ValidationReport() {
                       <Text color="green.500">
                         {t('Great job! You have earned maximum reward')}
                       </Text>
+                    ) : (
+                      '–'
+                    )}
+                  </ValidationReportColumn>
+                </tr>
+                <tr>
+                  <ValidationReportColumn>
+                    <ValidationReportCategoryLabel
+                      label={t('Extra flips')}
+                      description={t('Rewards for qualified extra flips')}
+                    />
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {maybeDna(extraFlipReward)}
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    <Text color={missedExtraFlipReward > 0 ? 'red.500' : ''}>
+                      {maybeDna(missedExtraFlipReward)}
+                    </Text>
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    {/* eslint-disable-next-line no-nested-ternary */}
+                    {validationResult === ValidationResult.Penalty ? (
+                      <Text color="red.500">
+                        {t('Your flips were reported.')}
+                      </Text>
+                    ) : // eslint-disable-next-line no-nested-ternary
+                    missedExtraFlipReward > 0 ? (
+                      <Text color="red.500">
+                        {t('Make all flips carefully')}
+                      </Text>
+                    ) : extraFlipReward ? (
+                      <>
+                        <Text color="green.500">
+                          {t('Great job! To increase your rewards ')}
+                        </Text>
+                        <TextLink href="/home">
+                          {t('Add stake')}
+                          <ChevronRightIcon />
+                        </TextLink>
+                      </>
                     ) : (
                       '–'
                     )}
