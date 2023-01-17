@@ -13,8 +13,6 @@ import {
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
-import {Machine} from 'xstate'
-import {assign, log} from 'xstate/lib/actions'
 import {PrimaryButton, SecondaryButton} from '../../../shared/components/button'
 import {
   Dialog,
@@ -25,66 +23,18 @@ import {
 import {eitherState} from '../../../shared/utils/utils'
 import {FillCenter} from '../../oracles/components'
 import {SearchIcon} from '../../../shared/components/icons'
+import {imageSearchMachine} from '../machines'
 
 export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
   const {t} = useTranslation()
 
   const searchInputRef = React.useRef()
 
-  const [current, send] = useMachine(
-    Machine({
-      context: {
-        images: [],
-        query: '',
-      },
-      initial: 'idle',
-      states: {
-        idle: {},
-        searching: {
-          invoke: {
-            // eslint-disable-next-line no-shadow
-            src: ({query}) => global.ipcRenderer.invoke('search-image', query),
-            onDone: {
-              target: 'done',
-              actions: [
-                assign({
-                  images: (_, {data}) => data,
-                }),
-                log(),
-              ],
-            },
-            onError: 'fail',
-          },
-        },
-        done: {
-          on: {
-            PICK: {
-              actions: [
-                assign({
-                  selectedImage: (_, {image}) => image,
-                }),
-                log(),
-              ],
-            },
-          },
-        },
-        fail: {
-          entry: [(_, {data: {message}}) => onError(message), log()],
-        },
-      },
-      on: {
-        SEARCH: 'searching',
-        TYPE: {
-          actions: [
-            assign({
-              // eslint-disable-next-line no-shadow
-              query: (_, {query}) => query,
-            }),
-          ],
-        },
-      },
-    })
-  )
+  const [current, send] = useMachine(imageSearchMachine, {
+    actions: {
+      onError: (_, {data: {message}}) => onError(message),
+    },
+  })
 
   const {images, query, selectedImage} = current.context
 
