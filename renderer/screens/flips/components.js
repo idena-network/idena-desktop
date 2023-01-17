@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, {useEffect} from 'react'
 import NextLink from 'next/link'
 import {
   SimpleGrid,
@@ -30,6 +30,11 @@ import {
   Center,
   useRadio,
   useRadioGroup,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverBody,
 } from '@chakra-ui/react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
@@ -37,7 +42,7 @@ import {useService} from '@xstate/react'
 import Jimp from 'jimp'
 import FlipEditor from './components/flip-editor'
 import {Step} from './types'
-import {formatKeywords, protectFlipImage} from './utils'
+import {formatKeywords, getAdversarialImage, protectFlipImage} from './utils'
 import {
   PrimaryButton,
   IconButton2,
@@ -62,10 +67,12 @@ import {
   CommunityIcon,
   CycleIcon,
   DeleteIcon,
+  FlatCycleIcon,
   EditIcon,
   EyeIcon,
   InfoIcon,
   InfoSolidIcon,
+  LockedImageIcon,
   MoreIcon,
   MoveIcon,
   OkIcon,
@@ -145,7 +152,12 @@ export function FlipCard({flipService, onDelete}) {
             </FlipOverlayStatus>
           </FlipOverlay>
         )}
-        <FlipCardImage src={images[originalOrder ? originalOrder[0] : 0]} />
+        <FlipCardImage
+          src={
+            images[originalOrder ? originalOrder[0] : 0] ||
+            images[originalOrder ? originalOrder[1] : 1]
+          }
+        />
       </FlipCardImageBox>
       <Flex justifyContent="space-between" alignItems="flex-start" mt={4}>
         <Box>
@@ -483,9 +495,7 @@ export function FlipStoryStep({children}) {
       <FlipStepHeader mb={8}>
         <FlipStepTitle>{t('Think up a story')}</FlipStepTitle>
         <FlipStepSubtitle>
-          {t(
-            `Think up a short story about someone/something related to the two key words below according to the template "Before — Something happens — After"`
-          )}
+          {t(`Think up a single logical storyline related to both keywords`)}
         </FlipStepSubtitle>
       </FlipStepHeader>
       {children}
@@ -598,9 +608,11 @@ export function FlipEditorStep({
   showTranslation,
   originalOrder,
   images,
+  adversarialImageId,
   onChangeImage,
   onChangeOriginalOrder,
   onPainting,
+  onChangeAdversarialId,
 }) {
   const {t} = useTranslation()
 
@@ -616,9 +628,11 @@ export function FlipEditorStep({
   return (
     <FlipStep>
       <FlipStepHeader>
-        <FlipStepTitle>{t('Select 4 images to tell your story')}</FlipStepTitle>
+        <FlipStepTitle>{t('Select images to tell your story')}</FlipStepTitle>
         <FlipStepSubtitle>
-          {t(`Use keywords for the story`)}{' '}
+          {t(
+            `To confuse bots, make up a story that only a human can interpret. Both`
+          )}{' '}
           <Text as="mark">
             {formatKeywords(
               hasBothTranslations && showTranslation
@@ -629,9 +643,7 @@ export function FlipEditorStep({
                 : words
             )}
           </Text>{' '}
-          {t(`and template "Before
-          – Something happens – After"`)}
-          .
+          {t(`should be clearly visible.`)}
         </FlipStepSubtitle>
       </FlipStepHeader>
       <Stack isInline spacing={10}>
@@ -672,6 +684,7 @@ export function FlipEditorStep({
                         <FlipImageListItem
                           isFirst={idx === 0}
                           isLast={idx === images.length - 1}
+                          isLocked={num === adversarialImageId}
                           src={images[num]}
                         />
                       </SelectableItem>
@@ -690,10 +703,12 @@ export function FlipEditorStep({
               idx={num}
               visible={currentIndex === idx}
               src={images[num]}
+              adversarialId={adversarialImageId}
               onChange={url => {
                 onChangeImage(url, num)
               }}
               onChanging={onPainting}
+              onChangeAdversarial={onChangeAdversarialId}
             />
           ))}
         </Box>
@@ -706,8 +721,13 @@ export function FlipProtectStep({
   originalOrder,
   images,
   protectedImages,
+  adversarialImages,
+  adversarialImageId,
+  didShowShuffleAdversarial,
   onProtecting,
   onProtectImage,
+  onChangeAdversarial,
+  onShowAdversarialShuffle,
 }) {
   const {t} = useTranslation()
   const BLANK_IMAGE_DATAURL =
@@ -715,35 +735,63 @@ export function FlipProtectStep({
 
   const [currentIndex, setCurrentIdx] = React.useState(0)
 
-  const regenerateImage = async () => {
+  const regenerateImage = React.useCallback(async () => {
+    if (!images.some(x => x)) {
+      return
+    }
     onProtecting()
+    let advImageScr
+    let imageSrc
+    if (originalOrder[currentIndex] === adversarialImageId) {
+      advImageScr = await getAdversarialImage(adversarialImages)
+      imageSrc = advImageScr.slice()
+    } else {
+      imageSrc = images[originalOrder[currentIndex]]
+    }
 
-    const protectedImageSrc = await protectFlipImage(
-      images[originalOrder[currentIndex]]
+    if (!imageSrc) return
+
+    const regeneratedImageSrc = await protectFlipImage(imageSrc)
+
+    const compressedImage = await Jimp.read(regeneratedImageSrc).then(raw =>
+      raw
+        .resize(240, 180)
+        .quality(60) // jpeg quality
+        .getBase64Async('image/jpeg')
     )
-
-    const compressedImage = await new Promise(resolve =>
-      resolve(
-        Jimp.read(protectedImageSrc).then(raw =>
-          raw
-            .resize(240, 180)
-            .quality(60) // jpeg quality
-            .getBase64Async('image/jpeg')
-        )
-      )
-    )
-
+    if (advImageScr) {
+      onChangeAdversarial(advImageScr)
+    }
     onProtectImage(compressedImage, originalOrder[currentIndex])
-  }
+  }, [
+    adversarialImageId,
+    adversarialImages,
+    currentIndex,
+    images,
+    onChangeAdversarial,
+    onProtectImage,
+    onProtecting,
+    originalOrder,
+  ])
+
+  useEffect(() => {
+    if (!didShowShuffleAdversarial) {
+      setTimeout(() => {
+        onShowAdversarialShuffle()
+      }, 5000)
+    }
+  }, [didShowShuffleAdversarial, onShowAdversarialShuffle])
 
   return (
     <FlipStep>
       <FlipStepHeader>
         <FlipStepTitle>
-          {t('Protect your images with adversarial noise')}
+          {t('Protect your flip with anti-bot techniques')}
         </FlipStepTitle>
         <FlipStepSubtitle>
-          {t(`Adversarial noise makes your flip more AI-resistant`)}
+          {t(
+            `Adversarial noise makes your flip more resistant to bots. Please make sure your images are still recognizable.`
+          )}
         </FlipStepSubtitle>
       </FlipStepHeader>
       <Stack isInline spacing={10}>
@@ -755,17 +803,48 @@ export function FlipProtectStep({
               isLast={idx === images.length - 1}
               onClick={() => setCurrentIdx(idx)}
             >
+              <Flex
+                justify="flex-end"
+                align="center"
+                w="100%"
+                h="100%"
+                position="absolute"
+              >
+                <Box>
+                  <Tooltip
+                    isOpen={
+                      !didShowShuffleAdversarial &&
+                      originalOrder[idx] === adversarialImageId &&
+                      protectedImages.some(x => x) &&
+                      images.some(x => x)
+                    }
+                    label="Nonsense image is successfully generated and shuffled"
+                    fontSize="mdx"
+                    fontWeight={400}
+                    mt={[2, 0]}
+                    mb={[0, 2]}
+                    px={3}
+                    py={[2, '10px']}
+                    w={['228px', 'auto']}
+                    placement="right"
+                    openDelay={100}
+                  >
+                    {' '}
+                  </Tooltip>
+                </Box>
+              </Flex>
               <FlipImageListItem
                 key={num}
                 src={protectedImages[num]}
                 isFirst={idx === 0}
                 isLast={idx === images.length - 1}
+                isLocked={num === adversarialImageId}
                 onClick={() => setCurrentIdx(idx)}
               />
             </SelectableItem>
           ))}
         </FlipImageList>
-        <Box>
+        <Box minH="330px" minW="440px">
           <Image
             h="330px"
             w="440px"
@@ -776,15 +855,27 @@ export function FlipProtectStep({
               BLANK_IMAGE_DATAURL
             }
           />
-          <Box mt={2}>
-            <Tooltip label={t('Regenerate adversarial noise')}>
-              <CycleIcon
-                boxSize={5}
-                color="blue.500"
-                onClick={regenerateImage}
-              />
+          <Flex justify="space-between" mt={2}>
+            <Text fontSize="md" fontWeight={500}>
+              {originalOrder[currentIndex] === adversarialImageId
+                ? t('Nonsense image')
+                : t('Adversarial noise')}
+            </Text>
+            <Tooltip
+              label={
+                originalOrder[currentIndex] === adversarialImageId
+                  ? t('Regenerate nonsense image')
+                  : t('Regenerate adversarial noise')
+              }
+            >
+              <Flex onClick={regenerateImage} align="center" cursor="pointer">
+                <FlatCycleIcon boxSize={3} color="blue.500" />
+                <Text ml="6px" fontSize="md" fontWeight={500} color="blue.500">
+                  {t('Regenerate')}
+                </Text>
+              </Flex>
             </Tooltip>
-          </Box>
+          </Flex>
         </Box>
       </Stack>
     </FlipStep>
@@ -812,7 +903,9 @@ export function FlipShuffleStep({
       <FlipStepHeader>
         <FlipStepTitle>{t('Shuffle images')}</FlipStepTitle>
         <FlipStepSubtitle>
-          {t('Shuffle images in order to make a nonsense sequence of images')}
+          {t(
+            'To prevent bots from solving the flip, make the shuffled story meaningless to humans only'
+          )}
         </FlipStepSubtitle>
       </FlipStepHeader>
       <Stack isInline spacing={10} align="center" mx="auto">
@@ -1039,9 +1132,10 @@ function DraggableItem({draggableId, index, ...props}) {
   )
 }
 
-export function FlipImageListItem({isFirst, isLast, ...props}) {
+export function FlipImageListItem({isFirst, isLast, isLocked, ...props}) {
   return (
     <FlipImage
+      isLocked={isLocked}
       roundedTop={isFirst ? 'md' : 0}
       roundedBottom={isLast ? 'md' : 0}
       borderBottomWidth={isLast ? '1px' : 0}
@@ -1056,6 +1150,7 @@ export function FlipImage({
   objectFit = 'scale-down',
   roundedTop,
   roundedBottom,
+  isLocked,
   ...props
 }) {
   return (
@@ -1068,6 +1163,7 @@ export function FlipImage({
       roundedBottom={roundedBottom}
       {...props}
     >
+      {/* eslint-disable-next-line no-nested-ternary */}
       {src ? (
         <Image
           src={src}
@@ -1076,6 +1172,8 @@ export function FlipImage({
           roundedTop={roundedTop}
           roundedBottom={roundedBottom}
         />
+      ) : isLocked ? (
+        <LockedFlipImage />
       ) : (
         <EmptyFlipImage />
       )}
@@ -1087,6 +1185,14 @@ export function EmptyFlipImage(props) {
   return (
     <Flex align="center" justify="center" px={10} py={6} {...props}>
       <PicIcon boxSize="10" color="gray.100" />
+    </Flex>
+  )
+}
+
+export function LockedFlipImage(props) {
+  return (
+    <Flex align="center" justify="center" px={10} py={6} {...props}>
+      <LockedImageIcon boxSize={8} color="gray.200" />
     </Flex>
   )
 }
@@ -1471,5 +1577,21 @@ export function PublishFlipDrawer({isPending, flip, onSubmit, ...props}) {
         </HStack>
       </DrawerFooter>
     </AdDrawer>
+  )
+}
+
+export function ShuffleAdversarialPopover({label, children, ...props}) {
+  return (
+    <Popover placement="right">
+      <PopoverTrigger>{children}</PopoverTrigger>
+      <PopoverContent border="none" fontSize="sm" w="max-content">
+        <PopoverArrow bg="graphite.500" />
+        <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
+          <Text color="white" fontSize="sm">
+            {label}
+          </Text>
+        </PopoverBody>
+      </PopoverContent>
+    </Popover>
   )
 }
