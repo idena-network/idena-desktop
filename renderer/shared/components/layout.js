@@ -145,6 +145,7 @@ export default function Layout({
       isAvailable: isForkAvailable,
       didActivate: didActivateFork,
       didReject: didRejectFork,
+      votingStatus,
     },
     {reject: rejectFork, reset: resetForkVoting},
   ] = useHardFork()
@@ -214,6 +215,16 @@ export default function Layout({
     },
   })
 
+  React.useEffect(() => {
+    console.log({
+      isSyncing,
+      isFork,
+      didActivateFork,
+      didRejectFork,
+      votingStatus,
+    })
+  }, [isSyncing, isFork, didActivateFork, didRejectFork, votingStatus])
+
   return (
     <LayoutContainer>
       <Sidebar
@@ -236,7 +247,7 @@ export default function Layout({
         />
       )}
 
-      {isSyncing && !isFork && <SyncingApp />}
+      {isSyncing && (!isFork || (isFork && !didActivateFork)) && <SyncingApp />}
       {isOffline && <OfflineApp />}
       {isReady && !isFork && <NormalApp {...props} />}
 

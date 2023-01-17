@@ -37,7 +37,16 @@ export function useHardFork() {
   const {nodeCurrentVersion, nodeRemoteVersion} = useAutoUpdateState()
 
   const statusDb = React.useMemo(
-    () => skipSSR(() => createVotingStatusDb(nodeRemoteVersion)),
+    () =>
+      skipSSR(async () => {
+        const db = createVotingStatusDb(nodeRemoteVersion)
+
+        console.log({
+          didRejectHf: await db.get(`hardForkVoting!!${nodeRemoteVersion}`),
+        })
+
+        return db
+      }),
     [nodeRemoteVersion]
   )
 
