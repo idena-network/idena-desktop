@@ -10,6 +10,7 @@ const lineReader = require('reverse-line-reader')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const appDataPath = require('./app-data-path')
 const {sleep} = require('./utils')
+const logger = require('./logger')
 
 const idenaBin = 'idena-go'
 const idenaNodeReleasesUrl =
@@ -31,6 +32,8 @@ const getTempNodeFile = () =>
 
 const getNodeChainDbFolder = () =>
   path.join(getNodeDataDir(), idenaChainDbFolder)
+
+const getNodeIpfsDir = () => path.join(getNodeDataDir(), 'ipfs')
 
 const getNodeLogsFile = () => path.join(getNodeDataDir(), 'logs', 'output.log')
 
@@ -307,6 +310,23 @@ function getLastLogs() {
   })
 }
 
+async function tryStopNode(node, {onSuccess, onFail}) {
+  try {
+    if (node) {
+      const log = await stopNode(node)
+      logger.info(log)
+      if (onSuccess) {
+        onSuccess()
+      }
+    }
+  } catch (e) {
+    logger.error('error while stopping node', e.toString())
+    if (onFail) {
+      onFail()
+    }
+  }
+}
+
 module.exports = {
   downloadNode,
   getCurrentVersion,
@@ -317,4 +337,8 @@ module.exports = {
   nodeExists,
   cleanNodeState,
   getLastLogs,
+  getNodeFile,
+  getNodeChainDbFolder,
+  getNodeIpfsDir,
+  tryStopNode,
 }

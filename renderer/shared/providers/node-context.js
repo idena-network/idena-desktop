@@ -8,11 +8,17 @@ const NODE_FAILED = 'NODE_FAILED'
 const NODE_START = 'NODE_START'
 const NODE_STOP = 'NODE_STOP'
 const NODE_REINIT = 'NODE_REINIT'
+const UNSUPPORTED_MACOS_VERSION = 'UNSUPPORTED_MACOS_VERSION'
+
+const TROUBLESHOOTING_RESTART_NODE = 'TROUBLESHOOTING_RESTART_NODE'
+const TROUBLESHOOTING_UPDATE_NODE = 'TROUBLESHOOTING_UPDATE_NODE'
+const TROUBLESHOOTING_RESET_NODE = 'TROUBLESHOOTING_RESET_NODE'
 
 const initialState = {
   nodeStarted: false,
   nodeReady: false,
   nodeFailed: false,
+  runningTroubleshooter: false,
   logs: [],
 }
 
@@ -36,6 +42,7 @@ function nodeReducer(state, action) {
       return {
         ...state,
         nodeStarted: true,
+        runningTroubleshooter: false,
       }
     }
     case NODE_STOP: {
@@ -51,12 +58,22 @@ function nodeReducer(state, action) {
         nodeFailed: false,
       }
     }
-    case 'UNSUPPORTED_MACOS_VERSION': {
+    case UNSUPPORTED_MACOS_VERSION: {
       return {
         ...state,
         unsupportedMacosVersion: true,
       }
     }
+    case TROUBLESHOOTING_RESTART_NODE:
+    case TROUBLESHOOTING_UPDATE_NODE:
+    case TROUBLESHOOTING_RESET_NODE: {
+      return {
+        ...state,
+        nodeFailed: false,
+        runningTroubleshooter: true,
+      }
+    }
+
     default:
       throw new Error(`Unknown action ${action.type}`)
   }
@@ -93,9 +110,29 @@ export function NodeProvider({children}) {
           dispatch({type: NODE_REINIT, data})
           break
         case 'unsupported-macos-version':
-          dispatch({type: 'UNSUPPORTED_MACOS_VERSION'})
+          dispatch({type: UNSUPPORTED_MACOS_VERSION})
           break
+
+        case 'troubleshooting-restart-node': {
+          dispatch({type: TROUBLESHOOTING_RESTART_NODE})
+          return global.ipcRenderer.send(NODE_COMMAND, 'start-local-node', {
+            rpcPort: settings.internalPort,
+            tcpPort: settings.tcpPort,
+            ipfsPort: settings.ipfsPort,
+            apiKey: settings.internalApiKey,
+            autoActivateMining: settings.autoActivateMining,
+          })
+        }
+        case 'troubleshooting-update-node': {
+          return dispatch({type: TROUBLESHOOTING_UPDATE_NODE})
+        }
+        case 'troubleshooting-reset-node': {
+          dispatch({type: TROUBLESHOOTING_RESET_NODE})
+          return global.ipcRenderer.send(NODE_COMMAND, 'init-local-node')
+        }
+
         default:
+          break
       }
     }
 
@@ -139,7 +176,7 @@ export function NodeProvider({children}) {
   ])
 
   useEffect(() => {
-    if (state.nodeReady || state.nodeFailed) {
+    if (state.nodeReady || state.nodeFailed || state.runningTroubleshooter) {
       return
     }
     if (settings.runInternalNode) {
@@ -154,6 +191,7 @@ export function NodeProvider({children}) {
     state.nodeStarted,
     state.nodeReady,
     state.nodeFailed,
+    state.runningTroubleshooter,
   ])
 
   const tryRestartNode = () => {

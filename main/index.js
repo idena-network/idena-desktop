@@ -53,6 +53,10 @@ const {
   getCurrentVersion,
   cleanNodeState,
   getLastLogs,
+  getNodeChainDbFolder,
+  getNodeFile,
+  getNodeIpfsDir,
+  tryStopNode,
 } = require('./idena-node')
 
 const NodeUpdater = require('./node-updater')
@@ -384,9 +388,9 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
   switch (command) {
     case 'init-local-node': {
       if (macosVersion.isMacOS && macosVersion.is('<10.15')) {
-        sendMainWindowMsg(NODE_EVENT, 'unsupported-macos-version')
-        return
+        return sendMainWindowMsg(NODE_EVENT, 'unsupported-macos-version')
       }
+
       getCurrentVersion()
         .then(version => {
           sendMainWindowMsg(NODE_EVENT, 'node-ready', version)
@@ -497,6 +501,7 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
           sendMainWindowMsg(NODE_EVENT, 'node-failed')
           logger.error('error while stopping node', e.toString())
         })
+
       break
     }
     case 'get-last-logs': {
@@ -507,6 +512,66 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
         .catch(e => {
           logger.error('error while reading logs', e.toString())
         })
+      break
+    }
+
+    case 'troubleshooting-restart-node': {
+      await tryStopNode(node, {
+        onSuccess() {
+          node = null
+        },
+      })
+
+      return sendMainWindowMsg(NODE_EVENT, 'troubleshooting-restart-node')
+    }
+
+    case 'troubleshooting-update-node': {
+      if (nodeDownloadPromise) return
+
+      await tryStopNode(node, {
+        onSuccess() {
+          node = null
+        },
+      })
+
+      sendMainWindowMsg(NODE_EVENT, 'troubleshooting-update-node')
+
+      nodeDownloadPromise = downloadNode(info => {
+        sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-download-progress', info)
+      })
+        .then(async () => {
+          await updateNode()
+          sendMainWindowMsg(NODE_EVENT, 'node-ready')
+        })
+        .catch(err => {
+          sendMainWindowMsg(NODE_EVENT, 'node-failed')
+          logger.error('error while downloading node', err.toString())
+        })
+        .finally(() => {
+          nodeDownloadPromise = null
+        })
+
+      break
+    }
+
+    case 'troubleshooting-reset-node': {
+      await tryStopNode(node, {
+        onSuccess() {
+          node = null
+        },
+      })
+
+      try {
+        await fs.remove(getNodeFile())
+        await fs.remove(getNodeChainDbFolder())
+        await fs.remove(getNodeIpfsDir())
+
+        sendMainWindowMsg(NODE_EVENT, 'troubleshooting-reset-node')
+      } catch (e) {
+        logger.error('error deleting idenachain.db', e.toString())
+        sendMainWindowMsg(NODE_EVENT, 'node-failed')
+      }
+
       break
     }
     default:
