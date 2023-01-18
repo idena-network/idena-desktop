@@ -601,7 +601,7 @@ function OfflineApp() {
     !unsupportedMacosVersion &&
     (nodeReady || (!nodeReady && !nodeFailed && !nodeProgress))
 
-  const isFailedBuiltinNode = nodeFailed && !useExternalNode
+  const isFailedBuiltinNode = nodeFailed && runInternalNode && !useExternalNode
 
   const isUnsupportedMacosVersion =
     runInternalNode && !useExternalNode && unsupportedMacosVersion
