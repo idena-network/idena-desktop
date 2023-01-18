@@ -434,7 +434,7 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
           sendMainWindowMsg(NODE_EVENT, 'node-log', log)
         },
         (msg, code) => {
-          if (code || code === null) {
+          if (code) {
             logger.error(msg)
             node = null
             sendMainWindowMsg(NODE_EVENT, 'node-failed')
