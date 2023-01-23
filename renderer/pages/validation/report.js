@@ -384,7 +384,6 @@ export default function ValidationReport() {
                     <ValidationReportColumn>
                       <ValidationReportCategoryLabel
                         label={maybeDna(validationReward)}
-                        description={t('Earned')}
                       />
                     </ValidationReportColumn>
                     <ValidationReportColumn>
@@ -396,7 +395,6 @@ export default function ValidationReport() {
                             {maybeDna(missedValidationReward)}
                           </Text>
                         }
-                        description={t('Missed')}
                       />
                     </ValidationReportColumn>
                     <ValidationReportColumn display={['none', 'table-cell']}>
