@@ -244,15 +244,31 @@ export function ValidationReportGaugeBox(props) {
 }
 
 export function ValidationReportGaugeStat(props) {
-  return <Stack as={Stat} spacing={1} align="center" pr={0} {...props} />
+  return (
+    <Flex
+      direction="column"
+      justifyContent="space-between"
+      alignItems="center"
+      w="100%"
+      {...props}
+    />
+  )
 }
 
 export function ValidationReportGaugeStatLabel(props) {
-  return <StatLabel color="muted" fontSize="mdx" fontWeight={500} {...props} />
+  return (
+    <Text
+      color="muted"
+      textAlign="center"
+      fontSize="mdx"
+      fontWeight={500}
+      {...props}
+    />
+  )
 }
 
 export function ValidationReportGaugeStatValue(props) {
-  return <StatNumber fontSize="lg" fontWeight={500} {...props} />
+  return <Box fontSize="lg" fontWeight={500} {...props} />
 }
 
 export function ValidationReportGaugeBar({value, bg, color}) {
