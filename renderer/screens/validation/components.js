@@ -1030,39 +1030,19 @@ export function ReviewValidationDialog({
                 />
               )}
             </Stack>
-            {(areFlipsUnanswered || areReportsMissing) && (
-              <Stack>
-                {areFlipsUnanswered && (
-                  <Text color="muted">
-                    <Trans i18nKey="reviewMissingFlips" t={t}>
-                      You need to answer{' '}
-                      <ReviewValidationDialog.LinkButton
-                        onClick={onMisingAnswers}
-                      >
-                        all flips
-                      </ReviewValidationDialog.LinkButton>{' '}
-                      otherwise you may fail the validation.
-                    </Trans>
-                  </Text>
-                )}
-                {areReportsMissing && (
-                  <Text color="muted">
-                    <Trans i18nKey="reviewMissingReports" t={t}>
-                      Use{' '}
-                      <ReviewValidationDialog.LinkButton
-                        variant="link"
-                        onClick={onMisingReports}
-                      >
-                        all available reports
-                      </ReviewValidationDialog.LinkButton>
-                      to get maximum rewards.
-                    </Trans>
-                  </Text>
-                )}
-              </Stack>
+            {areFlipsUnanswered && (
+              <Text color="muted">
+                <Trans i18nKey="reviewMissingFlips" t={t}>
+                  You need to answer{' '}
+                  <ReviewValidationDialog.LinkButton onClick={onMisingAnswers}>
+                    all flips
+                  </ReviewValidationDialog.LinkButton>{' '}
+                  otherwise you may fail the validation.
+                </Trans>
+              </Text>
             )}
           </Stack>
-          {areReportsMissing && (
+          {areFlipsUnanswered && (
             <Alert
               status="error"
               bg="red.010"
