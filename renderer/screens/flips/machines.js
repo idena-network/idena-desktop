@@ -1036,6 +1036,7 @@ export const flipMasterMachine = Machine(
           orderPermutations,
           images,
           protectedImages,
+          adversarialImageId,
           keywords,
           type,
           createdAt,
@@ -1056,6 +1057,7 @@ export const flipMasterMachine = Machine(
             orderPermutations,
             images,
             protectedImages,
+            adversarialImageId,
             keywords,
           }
 
