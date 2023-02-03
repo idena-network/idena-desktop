@@ -419,7 +419,6 @@ export default function ValidationReport() {
                       <ValidationReportColumn>
                         <ValidationReportCategoryLabel
                           label={maybeDna(stakingReward)}
-                          description={t('Earned')}
                         />
                       </ValidationReportColumn>
                       <ValidationReportColumn>
@@ -431,7 +430,6 @@ export default function ValidationReport() {
                               {maybeDna(missedStakingReward)}
                             </Text>
                           }
-                          description={t('Missed')}
                         />
                       </ValidationReportColumn>
                       <ValidationReportColumn display={['none', 'table-cell']}>
@@ -459,7 +457,6 @@ export default function ValidationReport() {
                           <ValidationReportColumn>
                             <ValidationReportCategoryLabel
                               label={maybeDna(candidateReward)}
-                              description={t('Earned')}
                             />
                           </ValidationReportColumn>
                           <ValidationReportColumn>
@@ -473,7 +470,6 @@ export default function ValidationReport() {
                                   {maybeDna(missedCandidateReward)}
                                 </Text>
                               }
-                              description={t('Missed')}
                             />
                           </ValidationReportColumn>
                           <ValidationReportColumn

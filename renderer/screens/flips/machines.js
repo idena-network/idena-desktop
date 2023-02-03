@@ -1,4 +1,4 @@
-import {Machine, assign, spawn, sendParent} from 'xstate'
+import {Machine, assign, spawn, sendParent, createMachine} from 'xstate'
 import {log, send} from 'xstate/lib/actions'
 import nanoid from 'nanoid'
 import {
@@ -87,6 +87,7 @@ export const flipsMachine = Machine(
                 keywords: keywords[idx],
                 images: Array.from({length: 4}),
                 protectedImages: Array.from({length: 4}),
+                adversarialImages: Array.from({length: 8}),
               }))
             }
 
@@ -542,9 +543,12 @@ export const flipMasterMachine = Machine(
       },
       images: Array.from({length: 4}),
       protectedImages: Array.from({length: 4}),
+      adversarialImage: '',
+      adversarialImages: Array.from({length: 8}),
       originalOrder: DEFAULT_FLIP_ORDER,
       order: DEFAULT_FLIP_ORDER,
       orderPermutations: DEFAULT_FLIP_ORDER,
+      adversarialImageId: 3,
       didShowBadFlip: true,
     },
     on: {
@@ -606,6 +610,8 @@ export const flipMasterMachine = Machine(
                     const {id} = availableKeywords[nextIdx]
                     return id
                   },
+                  adversarialImage: '',
+                  adversarialImages: Array.from({length: 8}),
                 }),
               },
               TOGGLE_COMMUNITY_TRANSLATIONS: {
@@ -736,6 +742,11 @@ export const flipMasterMachine = Machine(
                   log(),
                 ],
               },
+              CHANGE_ADVERSARIAL_ID: {
+                actions: assign({
+                  adversarialImageId: ({newIndex}) => newIndex,
+                }),
+              },
               PAINTING: '.painting',
               NEXT: [
                 {
@@ -748,9 +759,17 @@ export const flipMasterMachine = Machine(
               ],
               PREV: 'keywords',
             },
-            initial: 'idle',
+            initial: 'loading',
             states: {
               idle: {},
+              loading: {
+                invoke: {
+                  src: 'loadAdversarial',
+                  onDone: {
+                    target: 'idle',
+                  },
+                },
+              },
               painting: {},
               persisting: {
                 invoke: {
@@ -787,6 +806,23 @@ export const flipMasterMachine = Machine(
                   log(),
                 ],
               },
+              CHANGE_ADVERSARIAL_IMAGE: {
+                actions: [
+                  assign({
+                    adversarialImage: ({image}) => image,
+                  }),
+                  log(),
+                ],
+              },
+              CHANGE_ADVERSARIAL_POSITION: {
+                actions: [
+                  assign({
+                    originalOrder: (_, {order}) => order,
+                    order: (_, {order}) => order,
+                  }),
+                  log(),
+                ],
+              },
               PROTECTING: '.protecting',
               NEXT: 'shuffle',
               PREV: {
@@ -804,23 +840,45 @@ export const flipMasterMachine = Machine(
                 on: {
                   '': [
                     {
-                      target: 'protecting',
+                      target: 'shuffling',
                       cond: ({images, protectedImages}) =>
                         images.some(x => x) && !protectedImages.some(x => x),
                     },
                   ],
                 },
               },
-              protecting: {
+              protecting: {},
+              shuffling: {
+                invoke: {
+                  src: 'shuffleAdversarial',
+                  onDone: {
+                    target: 'preparing',
+                    actions: [
+                      assign({
+                        originalOrder: (_, {data: {order}}) => order,
+                        order: (_, {data: {order}}) => order,
+                      }),
+                      log(),
+                    ],
+                  },
+                },
+              },
+              preparing: {
                 invoke: {
                   src: 'protectFlip',
                   onDone: {
                     target: 'idle',
                     actions: [
-                      assign((context, {data: {protectedImages}}) => ({
-                        ...context,
-                        protectedImages,
-                      })),
+                      assign(
+                        (
+                          context,
+                          {data: {protectedImages, adversarialImage}}
+                        ) => ({
+                          ...context,
+                          protectedImages,
+                          adversarialImage,
+                        })
+                      ),
                       log(),
                     ],
                   },
@@ -937,6 +995,21 @@ export const flipMasterMachine = Machine(
           PICK_SHUFFLE: '.shuffle',
           PICK_SUBMIT: '.submit',
           SKIP_BAD_FLIP: {actions: [assign({didShowBadFlip: () => true})]},
+          CHANGE_ADVERSARIAL: {
+            actions: [
+              assign({
+                adversarialImages: (
+                  {adversarialImages},
+                  {image, currentIndex}
+                ) => [
+                  ...adversarialImages.slice(0, currentIndex),
+                  image,
+                  ...adversarialImages.slice(currentIndex + 1),
+                ],
+              }),
+              log(),
+            ],
+          },
         },
       },
     },
@@ -962,6 +1035,7 @@ export const flipMasterMachine = Machine(
           orderPermutations,
           images,
           protectedImages,
+          adversarialImageId,
           keywords,
           type,
           createdAt,
@@ -982,6 +1056,7 @@ export const flipMasterMachine = Machine(
             orderPermutations,
             images,
             protectedImages,
+            adversarialImageId,
             keywords,
           }
 
@@ -1167,3 +1242,56 @@ export const createViewFlipMachine = id =>
       },
     }
   )
+
+export const imageSearchMachine = createMachine({
+  context: {
+    images: [],
+    query: '',
+  },
+  initial: 'idle',
+  states: {
+    idle: {},
+    searching: {
+      invoke: {
+        // eslint-disable-next-line no-shadow
+        src: ({query}) => global.ipcRenderer.invoke('search-image', query),
+        onDone: {
+          target: 'done',
+          actions: [
+            assign({
+              images: (_, {data}) => data,
+            }),
+            log(),
+          ],
+        },
+        onError: 'fail',
+      },
+    },
+    done: {
+      on: {
+        PICK: {
+          actions: [
+            assign({
+              selectedImage: (_, {image}) => image,
+            }),
+            log(),
+          ],
+        },
+      },
+    },
+    fail: {
+      entry: ['onError', log()],
+    },
+  },
+  on: {
+    SEARCH: 'searching',
+    TYPE: {
+      actions: [
+        assign({
+          // eslint-disable-next-line no-shadow
+          query: (_, {query}) => query,
+        }),
+      ],
+    },
+  },
+})
