@@ -744,8 +744,7 @@ export const flipMasterMachine = Machine(
               },
               CHANGE_ADVERSARIAL_ID: {
                 actions: assign({
-                  adversarialImageId: ({adversarialImageId}, {newIndex}) =>
-                    newIndex,
+                  adversarialImageId: ({newIndex}) => newIndex,
                 }),
               },
               PAINTING: '.painting',
@@ -810,7 +809,7 @@ export const flipMasterMachine = Machine(
               CHANGE_ADVERSARIAL_IMAGE: {
                 actions: [
                   assign({
-                    adversarialImage: ({adversarialImage}, {image}) => image,
+                    adversarialImage: ({image}) => image,
                   }),
                   log(),
                 ],
