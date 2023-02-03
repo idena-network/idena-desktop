@@ -76,9 +76,7 @@ export default function NewFlipPage() {
 
   const [currentSearch, sendSearch] = useMachine(imageSearchMachine, {
     actions: {
-      onError: (_, {data: {message}}) => {
-        console.log(`ERROR ${message}`)
-      },
+      onError: () => {},
     },
   })
 
@@ -162,7 +160,7 @@ export default function NewFlipPage() {
         send
       ).catch(() => {})
     }
-  }, [currentSearch])
+  }, [currentSearch, send])
 
   const {
     availableKeywords,
