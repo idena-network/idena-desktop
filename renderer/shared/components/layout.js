@@ -904,12 +904,14 @@ function HardForkScreen({
                     {t('Choose an option to vote')}
                   </Text>
                   <RadioGroup name="votingOption">
-                    <Radio value="approve" borderColor="gray.100">
-                      {t('Yes, use node version {{version}}', {version})}
-                    </Radio>
-                    <Radio value="reject" borderColor="gray.100">
-                      {t('No, reject node {{version}}', {version})}
-                    </Radio>
+                    <Stack spacing="2">
+                      <Radio value="approve" borderColor="gray.100">
+                        {t('Yes, use node version {{version}}', {version})}
+                      </Radio>
+                      <Radio value="reject" borderColor="gray.100">
+                        {t('No, reject node {{version}}', {version})}
+                      </Radio>
+                    </Stack>
                   </RadioGroup>
                 </Stack>
                 <Box alignSelf="flex-end">
