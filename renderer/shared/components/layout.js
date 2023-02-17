@@ -8,7 +8,7 @@ import {
   Image,
   Box,
   Heading,
-  List,
+  UnorderedList,
   ListItem,
   useDisclosure,
   RadioGroup,
@@ -791,18 +791,18 @@ function HardForkScreen({
                   <Stack spacing={5} p={3} h={188} overflowY="auto">
                     <Stack spacing={3}>
                       <Text color="white">{t('Changes')}</Text>
-                      <List spacing="3">
+                      <UnorderedList spacing="2" pl="4">
                         {changes.map(change => (
                           <ListItem key={change}>{change}</ListItem>
                         ))}
                         {changes.length === 0 && <Text>No changes 🤷‍♂️</Text>}
-                      </List>
+                      </UnorderedList>
                     </Stack>
                     <Stack spacing={3}>
                       <Text color="white">
                         {t('Hard fork activation schedule')}
                       </Text>
-                      <List spacing="2">
+                      <UnorderedList spacing="2" pl="4">
                         <ListItem>
                           {t(
                             'Hard fork will be activated at any date after {{startActivationDate}}',
@@ -823,7 +823,7 @@ function HardForkScreen({
                             }
                           )}
                         </ListItem>
-                      </List>
+                      </UnorderedList>
                     </Stack>
                   </Stack>
                 </Box>

@@ -37,7 +37,7 @@ export function useHardFork() {
   const {nodeCurrentVersion, nodeRemoteVersion} = useAutoUpdateState()
 
   const statusDb = React.useMemo(
-    () => skipSSR(async () => createVotingStatusDb(nodeRemoteVersion)),
+    () => skipSSR(() => createVotingStatusDb(nodeRemoteVersion)),
     [nodeRemoteVersion]
   )
 
@@ -115,7 +115,7 @@ export function useHardFork() {
               },
             },
           },
-          failed: {},
+          failed: {entry: [log()]},
         },
       },
       {
@@ -128,8 +128,9 @@ export function useHardFork() {
   )
 
   React.useEffect(() => {
-    if (isFork(nodeCurrentVersion, nodeRemoteVersion))
+    if (isFork(nodeCurrentVersion, nodeRemoteVersion)) {
       send('FETCH', {version: nodeRemoteVersion})
+    }
   }, [nodeCurrentVersion, nodeRemoteVersion, send])
 
   const {
