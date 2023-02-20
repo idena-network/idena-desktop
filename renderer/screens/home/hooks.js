@@ -12,6 +12,7 @@ import {IdentityStatus, TxType} from '../../shared/types'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useChainState} from '../../shared/providers/chain-context'
 import {apiUrl} from '../../shared/api/api-client'
+import {useRpcFetcher} from '../ads/hooks'
 
 export function useIdenaBot() {
   const [connected, setConnected] = useState(true)
@@ -124,7 +125,7 @@ export function useCalculateStakeLoss() {
 }
 
 export function useStakingApy() {
-  const {stake} = useIdentityState()
+  const {stake, invites, invitees, state} = useIdentityState()
 
   const epoch = useEpochState()
 
@@ -137,6 +138,7 @@ export function useStakingApy() {
 
     return result
   }, [])
+  const rpcFetcher = useRpcFetcher()
 
   const {data: stakingData} = useQuery({
     queryKey: ['staking'],
@@ -166,6 +168,33 @@ export function useStakingApy() {
     notifyOnChangeProps: 'tracked',
   })
 
+  const lastInvitee = invitees && invitees.reverse()[0].TxHash
+  const secondToLastInvitee =
+    invitees && invitees.length > 1 && invitees.reverse()[1].TxHash
+  const maxInvitesCount =
+    // eslint-disable-next-line no-nested-ternary
+    state === IdentityStatus.Human
+      ? 2
+      : state === IdentityStatus.Verified
+      ? 1
+      : 0
+
+  const {data: lastInviteTx} = useQuery({
+    queryKey: ['bcn_transaction', [lastInvitee]],
+    queryFn: rpcFetcher,
+    enabled: maxInvitesCount - invites > 0 && Boolean(lastInvitee),
+    staleTime: Infinity,
+    notifyOnChangeProps: 'tracked',
+  })
+
+  const {data: secondToLastInviteTx} = useQuery({
+    queryKey: ['bcn_transaction', [secondToLastInvitee]],
+    queryFn: rpcFetcher,
+    enabled: maxInvitesCount - invites > 1 && Boolean(secondToLastInvitee),
+    staleTime: Infinity,
+    notifyOnChangeProps: 'tracked',
+  })
+
   return React.useMemo(() => {
     if (
       stakingData &&
@@ -173,14 +202,59 @@ export function useStakingApy() {
       prevEpochData &&
       validationRewardsSummaryData
     ) {
-      const {weight, averageMinerWeight} = stakingData
-      const {validation, staking} = validationRewardsSummaryData
+      const {
+        weight,
+        averageMinerWeight,
+        extraFlipsWeight,
+        invitationsWeight,
+      } = stakingData
+      const {
+        validation,
+        staking,
+        extraFlips,
+        invitations,
+      } = validationRewardsSummaryData
 
       // epoch staking
       const epochStakingRewardFund = Number(staking) || 0.9 * Number(validation)
       const epochReward = (stake ** 0.9 / weight) * epochStakingRewardFund
 
       const myStakeWeight = stake ** 0.9
+
+      // available extra flips count
+      const extraFlipsCount =
+        // eslint-disable-next-line no-nested-ternary
+        state === IdentityStatus.Human
+          ? 2
+          : state === IdentityStatus.Verified
+          ? 1
+          : 0
+      const extraFlipsReward =
+        extraFlipsCount * (myStakeWeight / extraFlipsWeight) * extraFlips
+
+      // available invites count
+      let invitesCount = invites
+      const hasMoreInvites =
+        (state === IdentityStatus.Human && invitesCount < 2) ||
+        (state === IdentityStatus.Verified && invitesCount < 1)
+      if (
+        hasMoreInvites &&
+        lastInviteTx &&
+        lastInviteTx.epoch === epoch?.epoch
+      ) {
+        // eslint-disable-next-line no-plusplus
+        invitesCount++
+        if (
+          hasMoreInvites &&
+          secondToLastInviteTx &&
+          secondToLastInviteTx.epoch === epoch?.epoch
+        ) {
+          // eslint-disable-next-line no-plusplus
+          invitesCount++
+        }
+      }
+      const invitationReward =
+        invitesCount * ((myStakeWeight / invitationsWeight) * invitations)
 
       const proposerOnlyReward =
         (6 * myStakeWeight * 20) /
@@ -218,16 +292,22 @@ export function useStakingApy() {
           committeeOnlyProbability * committeeOnlyReward +
           proposerAndCommitteeProbability * proposerAndCommitteeReward)
 
-      const epy = (estimatedReward + epochReward) / stake
+      const epy =
+        (estimatedReward + epochReward + extraFlipsReward + invitationReward) /
+        stake
 
       return (epy / Math.max(1, epochDays)) * 366
     }
   }, [
     epoch,
+    invites,
+    lastInviteTx,
     onlineMinersCount,
     prevEpochData,
+    secondToLastInviteTx,
     stake,
     stakingData,
+    state,
     validationRewardsSummaryData,
   ])
 }
