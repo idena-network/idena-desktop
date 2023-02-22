@@ -181,6 +181,9 @@ export default function ProfilePage() {
 
   const toDna = toLocaleDna(language, {maximumFractionDigits: 4})
 
+  const maybeDna = amount =>
+    !amount || Number.isNaN(amount) ? '–' : toDna(amount)
+
   const {
     isOpen: isOpenExportPk,
     onOpen: onOpenExportPk,
@@ -392,7 +395,7 @@ export default function ProfilePage() {
                       <UserStat>
                         <UserStatLabel>{t('Balance')}</UserStatLabel>
                         <UserStatValue>
-                          {toDna(balance)}
+                          {maybeDna(balance)}
                           <TextLink href="/wallets">
                             <Stack
                               isInline
@@ -418,11 +421,11 @@ export default function ProfilePage() {
                                 fontWeight={500}
                                 lineHeight="base"
                               >
-                                {t('Balance')}
+                                {t('Staked')}
                               </UserStatLabel>
                               <UserStatValue lineHeight="base">
                                 <Text>
-                                  {toDna(
+                                  {maybeDna(
                                     status === IdentityStatus.Newbie
                                       ? (stake - (replenishedStake ?? 0)) * 0.25
                                       : stake
@@ -454,7 +457,7 @@ export default function ProfilePage() {
                                   'You need to get Verified status to get the locked funds into the normal wallet'
                                 )}
                                 label={t('Locked')}
-                                value={toDna(
+                                value={maybeDna(
                                   (stake - (replenishedStake ?? 0)) * 0.75
                                 )}
                               />
