@@ -232,6 +232,8 @@ export default function ProfilePage() {
 
   const replenishStakeDisclosure = useDisclosure()
 
+  const lockedNewbieStake = (stake - (replenishedStake ?? 0)) * 0.75
+
   const {
     onOpen: onOpenReplenishStakeDisclosure,
     onClose: onCloseReplenishStakeDisclosure,
@@ -427,7 +429,7 @@ export default function ProfilePage() {
                                 <Text>
                                   {maybeDna(
                                     status === IdentityStatus.Newbie
-                                      ? (stake - (replenishedStake ?? 0)) * 0.25
+                                      ? stake - lockedNewbieStake
                                       : stake
                                   )}
                                 </Text>
@@ -457,9 +459,7 @@ export default function ProfilePage() {
                                   'You need to get Verified status to get the locked funds into the normal wallet'
                                 )}
                                 label={t('Locked')}
-                                value={maybeDna(
-                                  (stake - (replenishedStake ?? 0)) * 0.75
-                                )}
+                                value={maybeDna(lockedNewbieStake)}
                               />
                             )}
                           </Stack>
@@ -500,7 +500,7 @@ export default function ProfilePage() {
                                 <ExternalLink
                                   href={`https://idena.io/staking?amount=${Math.floor(
                                     status === IdentityStatus.Newbie
-                                      ? (stake - (replenishedStake ?? 0)) * 0.25
+                                      ? stake - lockedNewbieStake
                                       : stake
                                   )}`}
                                 >
