@@ -173,42 +173,25 @@ export function updateFlipTypeByHash(flips, {hash, type}) {
 
 export async function publishFlip({
   keywordPairId,
-  pics,
-  compressedPics,
-  images = compressedPics || pics,
   protectedImages,
   originalOrder,
   order,
   adversarialImageId,
   orderPermutations,
   hint,
-  epochNumber,
 }) {
-  const isFlipNoiseEnabled = checkIfFlipNoiseEnabled(epochNumber)
-
-  const flipsToPublish = isFlipNoiseEnabled ? protectedImages : images
-
-  if (flipsToPublish.some(x => !x))
+  if (protectedImages.some(x => !x))
     throw new Error(i18n.t('You must use 4 images for a flip'))
 
   const flips = global.flipStore.getFlips()
 
   if (
-    flips.some(flip => {
-      if (isFlipNoiseEnabled) {
-        return (
-          flip.type === FlipType.Published &&
-          flip.protectedImages &&
-          areSame(flip.protectedImages, protectedImages)
-        )
-      }
-
-      return (
+    flips.some(
+      flip =>
         flip.type === FlipType.Published &&
-        flip.images &&
-        areSame(flip.images, images)
-      )
-    })
+        flip.protectedImages &&
+        areSame(flip.protectedImages, protectedImages)
+    )
   )
     throw new Error(i18n.t('You already submitted this flip'))
 
@@ -222,21 +205,8 @@ export async function publishFlip({
   )
     throw new Error(i18n.t('You must shuffle flip before submit'))
 
-  const compressedImages = checkIfFlipNoiseEnabled(epochNumber)
-    ? protectedImages
-    : await Promise.all(
-        images.map(image =>
-          Jimp.read(image).then(raw =>
-            raw
-              .resize(240, 180)
-              .quality(60) // jpeg quality
-              .getBase64Async('image/jpeg')
-          )
-        )
-      )
-
   const [publicHex, privateHex] = flipToHex(
-    hint ? compressedImages : originalOrder.map(num => compressedImages[num]),
+    hint ? protectedImages : originalOrder.map(num => protectedImages[num]),
     hint ? order : orderPermutations
   )
 
@@ -951,9 +921,6 @@ export async function protectFlip({
     adversarialImage: adversarialImg,
   }
 }
-
-export const checkIfFlipNoiseEnabled = epochNumber =>
-  epochNumber >= (global.env?.FLIP_NOISE_EPOCH_START ?? 95)
 
 export async function prepareAdversarialImages(images, send) {
   const ids = []
