@@ -34,7 +34,6 @@ import {
   isPendingKeywordPair,
   getRandomKeywordPair,
   protectFlip,
-  checkIfFlipNoiseEnabled,
   prepareAdversarialImages,
   shuffleAdversarial,
 } from '../../screens/flips/utils'
@@ -53,8 +52,6 @@ import {useFailToast} from '../../shared/hooks/use-toast'
 import {InfoIcon, RefreshIcon} from '../../shared/components/icons'
 import {useRpc, useTrackTx} from '../../screens/ads/hooks'
 import {eitherState} from '../../shared/utils/utils'
-import {checkIfNewBadFlipRules} from '../../screens/validation/utils'
-import {useEpochState} from '../../shared/providers/epoch-context'
 
 export default function NewFlipPage() {
   const {t, i18n} = useTranslation()
@@ -65,7 +62,6 @@ export default function NewFlipPage() {
 
   const {syncing, offline} = useChainState()
 
-  const epoch = useEpochState()
   const {flipKeyWordPairs} = useIdentityState()
 
   const failToast = useFailToast()
@@ -80,8 +76,6 @@ export default function NewFlipPage() {
     },
   })
 
-  const isNewFlipRules = checkIfNewBadFlipRules(epoch?.epoch)
-
   const [current, send] = useMachine(flipMasterMachine, {
     context: {
       locale: i18n.language,
@@ -94,7 +88,7 @@ export default function NewFlipPage() {
         try {
           didShowBadFlip = await global
             .sub(requestDb(), 'flips')
-            .get(isNewFlipRules ? 'didShowBadFlipNew' : 'didShowBadFlip')
+            .get('didShowBadFlipNew')
         } catch {
           didShowBadFlip = false
         }
@@ -176,7 +170,6 @@ export default function NewFlipPage() {
     isCommunityTranslationsExpanded,
     didShowBadFlip,
     txHash,
-    epochNumber,
   } = current.context
 
   const not = state => !current.matches({editing: state})
@@ -205,9 +198,6 @@ export default function NewFlipPage() {
       send({type: 'SET_EPOCH_NUMBER', epochNumber: data.epoch})
     },
   })
-
-  const isFlipNoiseEnabled = checkIfFlipNoiseEnabled(epochNumber)
-  const maybeProtectedImages = isFlipNoiseEnabled ? protectedImages : images
 
   return (
     <Layout>
@@ -255,20 +245,18 @@ export default function NewFlipPage() {
                 >
                   {t('Select images')}
                 </FlipMasterNavbarItem>
-                {isFlipNoiseEnabled ? (
-                  <FlipMasterNavbarItem
-                    step={
-                      // eslint-disable-next-line no-nested-ternary
-                      is('protect')
-                        ? Step.Active
-                        : is('keywords') || is('images')
-                        ? Step.Next
-                        : Step.Completed
-                    }
-                  >
-                    {t('Protect images')}
-                  </FlipMasterNavbarItem>
-                ) : null}
+                <FlipMasterNavbarItem
+                  step={
+                    // eslint-disable-next-line no-nested-ternary
+                    is('protect')
+                      ? Step.Active
+                      : is('keywords') || is('images')
+                      ? Step.Next
+                      : Step.Completed
+                  }
+                >
+                  {t('Protect images')}
+                </FlipMasterNavbarItem>
                 <FlipMasterNavbarItem
                   step={
                     // eslint-disable-next-line no-nested-ternary
@@ -400,7 +388,7 @@ export default function NewFlipPage() {
               )}
               {is('shuffle') && (
                 <FlipShuffleStep
-                  images={maybeProtectedImages}
+                  images={protectedImages}
                   originalOrder={originalOrder}
                   order={order}
                   onShuffle={() => send('SHUFFLE')}
@@ -418,7 +406,7 @@ export default function NewFlipPage() {
                   onSwitchLocale={() => send('SWITCH_LOCALE')}
                   originalOrder={originalOrder}
                   order={order}
-                  images={maybeProtectedImages}
+                  images={protectedImages}
                 />
               )}
             </FlipMaster>
@@ -479,11 +467,8 @@ export default function NewFlipPage() {
           subtitle={t(
             'Please read the rules carefully. You can lose all your validation rewards if any of your flips is reported.'
           )}
-          epochNum={epochNumber}
           onClose={async () => {
-            await global
-              .sub(requestDb(), 'flips')
-              .put(isNewFlipRules ? 'didShowBadFlipNew' : 'didShowBadFlip', 1)
+            await global.sub(requestDb(), 'flips').put('didShowBadFlipNew', 1)
             send('SKIP_BAD_FLIP')
             onCloseBadFlipDialog()
           }}
@@ -494,7 +479,7 @@ export default function NewFlipPage() {
           isPending={either('submit.submitting', 'submit.mining')}
           flip={{
             keywords: showTranslation ? keywords.translations : keywords.words,
-            images: maybeProtectedImages,
+            images: protectedImages,
             originalOrder,
             order,
           }}

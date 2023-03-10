@@ -33,7 +33,6 @@ import {
   publishFlip,
   isPendingKeywordPair,
   protectFlip,
-  checkIfFlipNoiseEnabled,
   prepareAdversarialImages,
   shuffleAdversarial,
 } from '../../screens/flips/utils'
@@ -163,7 +162,6 @@ export default function EditFlipPage() {
     showTranslation,
     isCommunityTranslationsExpanded,
     txHash,
-    epochNumber,
   } = current.context
 
   const not = state => !current?.matches({editing: state})
@@ -192,9 +190,6 @@ export default function EditFlipPage() {
       send({type: 'SET_EPOCH_NUMBER', epochNumber: data.epoch})
     },
   })
-
-  const isFlipNoiseEnabled = checkIfFlipNoiseEnabled(epochNumber)
-  const maybeProtectedImages = isFlipNoiseEnabled ? protectedImages : images
 
   return (
     <Layout>
@@ -243,20 +238,18 @@ export default function EditFlipPage() {
                   {t('Select images')}
                 </FlipMasterNavbarItem>
 
-                {isFlipNoiseEnabled ? (
-                  <FlipMasterNavbarItem
-                    step={
-                      // eslint-disable-next-line no-nested-ternary
-                      is('protect')
-                        ? Step.Active
-                        : is('keywords') || is('images')
-                        ? Step.Next
-                        : Step.Completed
-                    }
-                  >
-                    {t('Protect images')}
-                  </FlipMasterNavbarItem>
-                ) : null}
+                <FlipMasterNavbarItem
+                  step={
+                    // eslint-disable-next-line no-nested-ternary
+                    is('protect')
+                      ? Step.Active
+                      : is('keywords') || is('images')
+                      ? Step.Next
+                      : Step.Completed
+                  }
+                >
+                  {t('Protect images')}
+                </FlipMasterNavbarItem>
                 <FlipMasterNavbarItem
                   step={
                     // eslint-disable-next-line no-nested-ternary
@@ -382,7 +375,7 @@ export default function EditFlipPage() {
               )}
               {is('shuffle') && (
                 <FlipShuffleStep
-                  images={maybeProtectedImages}
+                  images={protectedImages}
                   originalOrder={originalOrder}
                   order={order}
                   onShuffle={() => send('SHUFFLE')}
@@ -400,7 +393,7 @@ export default function EditFlipPage() {
                   onSwitchLocale={() => send('SWITCH_LOCALE')}
                   originalOrder={originalOrder}
                   order={order}
-                  images={maybeProtectedImages}
+                  images={protectedImages}
                 />
               )}
             </FlipMaster>
@@ -461,7 +454,6 @@ export default function EditFlipPage() {
           subtitle={t(
             'Please read the rules carefully. You can lose all your validation rewards if any of your flips is reported.'
           )}
-          epochNum={epochNumber}
           onClose={onCloseBadFlipDialog}
         />
 
@@ -470,7 +462,7 @@ export default function EditFlipPage() {
           isPending={either('submit.submitting', 'submit.mining')}
           flip={{
             keywords: showTranslation ? keywords.translations : keywords.words,
-            images: maybeProtectedImages,
+            images: protectedImages,
             originalOrder,
             order,
           }}

@@ -524,7 +524,6 @@ function ValidationSession({
         subtitle={t(
           'Report bad flips and get rewarded if these flips are reported by more than 50% of other participants'
         )}
-        epochNum={epoch}
         onClose={() => {
           if (state.matches('longSession.solve.answer.finishFlips'))
             send('START_KEYWORDS_QUALIFICATION')

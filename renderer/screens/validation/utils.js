@@ -275,6 +275,3 @@ export function canValidate(identity) {
     ].includes(state)
   )
 }
-
-export const checkIfNewBadFlipRules = epochNumber =>
-  epochNumber >= (global.env?.NEW_FLIP_RULES_START ?? 100)

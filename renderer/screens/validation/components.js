@@ -56,7 +56,6 @@ import {
 } from '../../shared/components/icons'
 import {adjustDurationInSeconds} from './machine'
 import {useTimer} from '../../shared/hooks/use-timer'
-import {checkIfNewBadFlipRules} from './utils'
 
 dayjs.extend(durationPlugin)
 
@@ -1122,17 +1121,9 @@ export function EncourageReportDialog({...props}) {
   )
 }
 
-export function BadFlipDialog({
-  title,
-  subtitle,
-  epochNum,
-  isOpen,
-  onClose,
-  ...props
-}) {
+export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
   const {t} = useTranslation()
 
-  const isNewFlipRules = checkIfNewBadFlipRules(epochNum)
   const [flipCase, setFlipCase] = React.useState(0)
 
   const dirs = [
@@ -1147,7 +1138,7 @@ export function BadFlipDialog({
     '9-painter',
   ]
 
-  const examplesLength = isNewFlipRules ? 8 : 4
+  const examplesLength = 8
 
   // eslint-disable-next-line no-shadow
   const flipUrl = (flipCase, idx) =>
@@ -1175,19 +1166,8 @@ export function BadFlipDialog({
         fontSize="md"
         rounded="lg"
       >
-        <Stack
-          isInline
-          spacing={isNewFlipRules ? 0 : 9}
-          bg={isNewFlipRules ? 'white' : 'transparent'}
-          borderRadius="8px"
-        >
-          <Flex
-            justify="center"
-            align="center"
-            bg={isNewFlipRules ? 'red.016' : 'transparent'}
-            px={isNewFlipRules ? 14 : 'auto'}
-            w={isNewFlipRules ? '240px' : 120}
-          >
+        <Stack isInline spacing={0} bg="white" borderRadius="8px">
+          <Flex justify="center" align="center" bg="red.016" px={14} w="240px">
             <Stack
               spacing={0}
               borderColor="gray.016"
@@ -1208,14 +1188,14 @@ export function BadFlipDialog({
             bg="white"
             borderRadius="lg"
             p="8"
-            w={isNewFlipRules ? 512 : 440}
+            w={512}
           >
             <Stack spacing={4}>
               <Box>
                 <Heading fontSize="lg" fontWeight={500} lineHeight="32px">
                   {title}
                 </Heading>
-                <Text fontSize={isNewFlipRules ? 'mdx' : 'md'} color="muted">
+                <Text fontSize="mdx" color="muted">
                   {subtitle}
                 </Text>
               </Box>
@@ -1279,55 +1259,47 @@ export function BadFlipDialog({
                 >
                   {t('There is inappropriate content')}
                 </BadFlipListItem>
-                {isNewFlipRules && (
-                  <BadFlipListItem
-                    flipCase={5}
-                    isActive={flipCase === 5}
-                    onClick={() => {
-                      setFlipCase(5)
-                    }}
-                  >
-                    {t('Several unrelated stories')}
-                  </BadFlipListItem>
-                )}
-                {isNewFlipRules && (
-                  <BadFlipListItem
-                    flipCase={6}
-                    isActive={flipCase === 6}
-                    onClick={() => {
-                      setFlipCase(6)
-                    }}
-                  >
-                    {t('Waking up template')}
-                  </BadFlipListItem>
-                )}
-                {isNewFlipRules && (
-                  <BadFlipListItem
-                    flipCase={7}
-                    isActive={flipCase === 7}
-                    onClick={() => {
-                      setFlipCase(7)
-                    }}
-                  >
-                    {t('Thumbs up/down image at the end')}
-                  </BadFlipListItem>
-                )}
-                {isNewFlipRules && (
-                  <BadFlipListItem
-                    flipCase={8}
-                    isActive={flipCase === 8}
-                    onClick={() => {
-                      setFlipCase(8)
-                    }}
-                  >
-                    {t(
-                      'Images of both keywords are inserted into a page/screen/painting'
-                    )}
-                  </BadFlipListItem>
-                )}
+                <BadFlipListItem
+                  flipCase={5}
+                  isActive={flipCase === 5}
+                  onClick={() => {
+                    setFlipCase(5)
+                  }}
+                >
+                  {t('Several unrelated stories')}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  flipCase={6}
+                  isActive={flipCase === 6}
+                  onClick={() => {
+                    setFlipCase(6)
+                  }}
+                >
+                  {t('Waking up template')}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  flipCase={7}
+                  isActive={flipCase === 7}
+                  onClick={() => {
+                    setFlipCase(7)
+                  }}
+                >
+                  {t('Thumbs up/down image at the end')}
+                </BadFlipListItem>
+                <BadFlipListItem
+                  flipCase={8}
+                  isActive={flipCase === 8}
+                  onClick={() => {
+                    setFlipCase(8)
+                  }}
+                >
+                  {t(
+                    'Images of both keywords are inserted into a page/screen/painting'
+                  )}
+                </BadFlipListItem>
               </List>
             </Stack>
-            <Stack isInline mt={isNewFlipRules ? 8 : 'auto'} justify="flex-end">
+            <Stack isInline mt={8} justify="flex-end">
               <SecondaryButton onClick={onClose}>{t('Skip')}</SecondaryButton>
               <PrimaryButton
                 ref={nextButtonRef}
