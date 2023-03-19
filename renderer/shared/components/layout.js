@@ -856,17 +856,25 @@ function HardForkScreen({
           </Stack>
 
           {shouldActivateMining && (
-            <Box bg="xwhite.010" rounded="lg" py={4} px={6}>
+            <Stack
+              spacing="2.5"
+              align="flex-start"
+              bg="xwhite.010"
+              rounded="lg"
+              py={4}
+              px={6}
+            >
               <Text color="xwhite.050" fontSize="mdx">
                 {t(`You can not vote for the hard fork update since your mining status is deactivated.
                 Please activate your mining status to vote or update the node.`)}
               </Text>
               <PrimaryButton
                 variant="link"
+                color="white"
                 fontSize="sm"
                 textDecoration="none"
-                _active={null}
-                _focus={{shadow: 'none'}}
+                _active={{}}
+                _focus={{}}
                 onClick={() => {
                   sendActivateMining('SHOW')
                 }}
@@ -874,7 +882,7 @@ function HardForkScreen({
                 {t('Activate mining status')}
                 <ChevronRightIcon boxSize="4" />
               </PrimaryButton>
-            </Box>
+            </Stack>
           )}
 
           {canVote && (

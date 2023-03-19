@@ -7,6 +7,7 @@ import {
   Box,
   Heading,
   Button,
+  Flex,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useRouter} from 'next/router'
@@ -25,7 +26,6 @@ import {
   KillIdentityDrawer,
   KillForm,
   MyIdenaBotAlert,
-  StakingAlert,
   ProfileTagList,
   ReplenishStakeDrawer,
   AnnotatedUserStat,
@@ -47,6 +47,7 @@ import {
   Page,
   TextLink,
   Tooltip,
+  HDivider,
 } from '../shared/components/components'
 import {IdentityStatus, OnboardingStep} from '../shared/types'
 import {
@@ -85,6 +86,7 @@ import {
   PrivateKeyIcon,
   TelegramIcon,
 } from '../shared/components/icons'
+import {StakeProtectionBadge} from '../screens/home/stake-protection'
 
 export default function ProfilePage() {
   const {
@@ -230,10 +232,14 @@ export default function ProfilePage() {
     {persist: persistIdenaBot, skip: skipIdenaBot},
   ] = useIdenaBot()
 
-  const replenishStakeDisclosure = useDisclosure()
+  const showActivateMiningStatusIcon = canMine && !online && !delegatee
+  const showValidateIdentityIcon = !canMine && Number(stake) > 0
 
   const lockedNewbieStake = (stake - (replenishedStake ?? 0)) * 0.75
+  const availableStake =
+    status === IdentityStatus.Newbie ? stake - lockedNewbieStake : stake
 
+  const replenishStakeDisclosure = useDisclosure()
   const {
     onOpen: onOpenReplenishStakeDisclosure,
     onClose: onCloseReplenishStakeDisclosure,
@@ -415,106 +421,104 @@ export default function ProfilePage() {
 
                     {Boolean(status) && status !== IdentityStatus.Undefined && (
                       <UserStatList title={t('Stake')}>
-                        <Stack isInline spacing={0}>
-                          <Stack spacing={1} flex={1}>
-                            <UserStat>
-                              <UserStatLabel
-                                color="muted"
-                                fontWeight={500}
-                                lineHeight="base"
-                              >
-                                {t('Staked')}
-                              </UserStatLabel>
-                              <UserStatValue lineHeight="base">
-                                <Text>
-                                  {maybeDna(
-                                    status === IdentityStatus.Newbie
-                                      ? stake - lockedNewbieStake
-                                      : stake
-                                  )}
-                                </Text>
-                                <Button
-                                  variant="link"
-                                  color="blue.500"
-                                  fontWeight={500}
-                                  lineHeight="base"
-                                  w="fit-content"
-                                  _hover={{
-                                    background: 'transparent',
-                                    textDecoration: 'underline',
-                                  }}
-                                  _focus={{
-                                    outline: 'none',
-                                  }}
-                                  onClick={replenishStakeDisclosure.onOpen}
-                                >
-                                  {t('Add stake')}
-                                  <ChevronRightIcon boxSize="4" />
-                                </Button>
-                              </UserStatValue>
-                            </UserStat>
-                            {stake > 0 && status === IdentityStatus.Newbie && (
-                              <AnnotatedUserStat
-                                annotation={t(
-                                  'You need to get Verified status to get the locked funds into the normal wallet'
+                        <Stack spacing="6">
+                          <Stack direction="row" spacing="2">
+                            <Stack spacing="4" flex={1}>
+                              <UserStat>
+                                <Stack spacing="1">
+                                  <UserStatLabel fontWeight={500}>
+                                    {t('Amount')}
+                                  </UserStatLabel>
+                                  <UserStatValue>
+                                    {toDna(availableStake)}
+                                  </UserStatValue>
+                                </Stack>
+                              </UserStat>
+                              {stake > 0 &&
+                                status === IdentityStatus.Newbie && (
+                                  <AnnotatedUserStat
+                                    label={t('Locked')}
+                                    value={toDna(lockedNewbieStake)}
+                                    tooltip={t(
+                                      'You need to get Verified status to get the locked funds into the normal wallet'
+                                    )}
+                                  />
                                 )}
-                                label={t('Locked')}
-                                value={maybeDna(lockedNewbieStake)}
-                              />
-                            )}
-                          </Stack>
-                          <Stack spacing={1} flex={1}>
-                            <UserStat>
-                              <UserStatLabel
-                                color="muted"
-                                fontWeight={500}
-                                lineHeight="base"
-                              >
-                                {t('APY')}
-                              </UserStatLabel>
-                              <UserStatValue lineHeight="base">
-                                <Text>
-                                  {stakingApy > 0
-                                    ? toPercent(stakingApy)
-                                    : '--'}
-                                  {canMine && !online && (
-                                    <Tooltip
-                                      shouldWrapChildren
-                                      bg="graphite.500"
-                                      placement="top"
-                                      hasArrow
-                                      label={t(
-                                        'Please activate your mining status to earn the staking rewards'
+                            </Stack>
+                            <UserStat flex={1}>
+                              <Stack spacing="1">
+                                <UserStatLabel fontWeight={500}>
+                                  {t('APY')}
+                                </UserStatLabel>
+                                <UserStatValue>
+                                  <Stack direction="row" spacing="2">
+                                    <Text as="span">
+                                      {stakingApy > 0
+                                        ? toPercent(stakingApy)
+                                        : '--'}
+                                      {(showActivateMiningStatusIcon ||
+                                        showValidateIdentityIcon) && (
+                                        <Tooltip
+                                          shouldWrapChildren
+                                          placement="top"
+                                          hasArrow
+                                          label={
+                                            showActivateMiningStatusIcon
+                                              ? t(
+                                                  'Please activate your mining status to earn the staking rewards'
+                                                )
+                                              : t(
+                                                  'Please validate your account to earn the staking rewards'
+                                                )
+                                          }
+                                          w="130px"
+                                        >
+                                          <InfoIcon
+                                            boxSize="4"
+                                            color="red.500"
+                                            mt="-0.5"
+                                            ml="1"
+                                          />
+                                        </Tooltip>
                                       )}
-                                      w="130px"
+                                    </Text>
+                                    <ExternalLink
+                                      href={`https://idena.io/staking?amount=${Math.floor(
+                                        availableStake
+                                      )}`}
+                                      alignSelf="center"
                                     >
-                                      <InfoIcon
-                                        boxSize="4"
-                                        color="red.500"
-                                        ml="1"
-                                        mt="-0.5"
-                                      />
-                                    </Tooltip>
-                                  )}
-                                </Text>
-                                <ExternalLink
-                                  href={`https://idena.io/staking?amount=${Math.floor(
-                                    status === IdentityStatus.Newbie
-                                      ? stake - lockedNewbieStake
-                                      : stake
-                                  )}`}
-                                >
-                                  {t('Staking calculator')}
-                                </ExternalLink>
-                              </UserStatValue>
+                                      {t('Calculator')}
+                                    </ExternalLink>
+                                  </Stack>
+                                </UserStatValue>
+                              </Stack>
                             </UserStat>
                           </Stack>
+
+                          {Number(stake) > 0 && (
+                            <Stack direction="row" spacing="2">
+                              <StakeProtectionBadge type="miss" />
+                              <StakeProtectionBadge type="fail" />
+                            </Stack>
+                          )}
+
+                          <HDivider />
+
+                          <Flex justify="flex-end">
+                            <Button
+                              variant="outline"
+                              onClick={replenishStakeDisclosure.onOpen}
+                            >
+                              Add stake
+                            </Button>
+                          </Flex>
                         </Stack>
                       </UserStatList>
                     )}
                   </Stack>
-                  <StakingAlert mt="2" w="md" />
                 </Box>
+
                 <Stack spacing="10" w={200}>
                   <Box minH={62} mt={6}>
                     <OnboardingPopover

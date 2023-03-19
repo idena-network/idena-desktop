@@ -71,7 +71,7 @@ import {useEpochState} from '../../shared/providers/epoch-context'
 import {useFailToast, useSuccessToast} from '../../shared/hooks/use-toast'
 import {getStakingWarning, validateInvitationCode} from './utils'
 import {BLOCK_TIME} from '../oracles/utils'
-import {useInviteScore, useReplenishStake, useStakingAlert} from './hooks'
+import {useInviteScore, useReplenishStake} from './hooks'
 import {DnaInput, FillCenter} from '../oracles/components'
 import {useTotalValidationScore} from '../validation/report/hooks'
 import {
@@ -120,11 +120,11 @@ export function UserInlineCard({
 
 export function UserStatList({title, children, ...props}) {
   return (
-    <Stack spacing={4} {...props}>
+    <Stack spacing="4" {...props}>
       <Heading as="h4" fontSize="lg" fontWeight={500}>
         {title}
       </Heading>
-      <Stack spacing={4} bg="gray.50" px={10} py={8} rounded="lg">
+      <Stack spacing="4" bg="gray.50" px="10" py="8" rounded="lg">
         {children}
       </Stack>
     </Stack>
@@ -140,50 +140,50 @@ export function SimpleUserStat({label, value, ...props}) {
   )
 }
 
-export function AnnotatedUserStat({
-  annotation,
-  label,
-  value,
-  children,
-  ...props
-}) {
+export function AnnotatedUserStat({label, value, tooltip}) {
   return (
-    <UserStat {...props}>
-      <UserStatLabel
-        borderBottom="dotted 1px"
-        borderBottomColor="muted"
-        cursor="help"
-        fontWeight={500}
-        w="fit-content"
-      >
-        <UserStatLabelTooltip label={annotation}>{label}</UserStatLabelTooltip>
-      </UserStatLabel>
-      {value && <UserStatValue>{value}</UserStatValue>}
-      {children}
+    <UserStat>
+      <Stack spacing="1">
+        <UserStatLabelTooltip label={tooltip}>
+          <UserStatLabel
+            color="muted"
+            fontWeight={500}
+            lineHeight="19px"
+            borderBottom="dotted 1px"
+            borderBottomColor="muted"
+            cursor="help"
+          >
+            {label}
+          </UserStatLabel>
+        </UserStatLabelTooltip>
+        {value && <UserStatValue>{value}</UserStatValue>}
+      </Stack>
     </UserStat>
   )
 }
 
 export function UserStat(props) {
-  return <Stat as={Stack} spacing="3px" {...props} />
+  return <Stat as={Stack} spacing="1" {...props} />
 }
 
-export function UserStatLabel(props) {
+export const UserStatLabel = React.forwardRef(function UserStatLabel(
+  props,
+  ref
+) {
   return (
     <StatLabel
+      ref={ref}
       color="muted"
       alignSelf="flex-start"
       fontSize="md"
-      lineHeight="short"
+      lineHeight="5"
       {...props}
     />
   )
-}
+})
 
 export function UserStatValue(props) {
-  return (
-    <StatNumber fontSize="md" fontWeight={500} lineHeight="base" {...props} />
-  )
+  return <StatNumber fontSize="md" fontWeight={500} lineHeight="5" {...props} />
 }
 
 export function UserStatLabelTooltip(props) {
@@ -571,17 +571,19 @@ export function ActivateMiningDrawer({
                   )}
                 </ErrorAlert>
               ) : (
-                <ErrorAlert>
-                  <Text>
-                    {t(
-                      'You can lose your stake, all your mining and validation rewards if you delegate your mining status.'
-                    )}
-                  </Text>
-                  <Text>
-                    {t(
-                      'Disabling delegation could be done at the next epoch only.'
-                    )}
-                  </Text>
+                <ErrorAlert alignItems="flex-start">
+                  <Stack spacing="1">
+                    <Text>
+                      {t(
+                        'You can lose your stake, all your mining and validation rewards if you delegate your mining status.'
+                      )}
+                    </Text>
+                    <Text>
+                      {t(
+                        'Disabling delegation could be done at the next epoch only.'
+                      )}
+                    </Text>
+                  </Stack>
                 </ErrorAlert>
               )}
             </Stack>
@@ -1468,24 +1470,4 @@ export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
       </DrawerFooter>
     </AdDrawer>
   )
-}
-
-export function StakingAlert(props) {
-  const warning = useStakingAlert()
-
-  return warning ? (
-    <ErrorAlert {...props}>
-      {Array.isArray(warning) ? (
-        <Stack spacing={0}>
-          {warning.map((message, idx) => (
-            <Text key={idx} as="span">
-              {message}
-            </Text>
-          ))}
-        </Stack>
-      ) : (
-        warning
-      )}
-    </ErrorAlert>
-  ) : null
 }
