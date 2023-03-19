@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {Box, createIcon, Stack, Text, useTheme} from '@chakra-ui/react'
 import React, {useMemo} from 'react'
 import {Tooltip} from '../../shared/components/components'
