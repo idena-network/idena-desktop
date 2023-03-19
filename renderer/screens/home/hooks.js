@@ -1,13 +1,8 @@
 import React, {useEffect, useState} from 'react'
-import {useTranslation} from 'react-i18next'
 import dayjs from 'dayjs'
 import {useMutation, useQuery} from 'react-query'
 import {useIdentityState} from '../../shared/providers/identity-context'
-import {
-  calculateInvitationRewardRatio,
-  callRpc,
-  toPercent,
-} from '../../shared/utils/utils'
+import {calculateInvitationRewardRatio, callRpc} from '../../shared/utils/utils'
 import {IdentityStatus, TxType} from '../../shared/types'
 import {useEpochState} from '../../shared/providers/epoch-context'
 import {useChainState} from '../../shared/providers/chain-context'
@@ -66,68 +61,6 @@ export function useReplenishStake({onSuccess, onError}) {
   }
 }
 
-export function useStakingAlert() {
-  const {t} = useTranslation()
-
-  const {state, age, stake} = useIdentityState()
-
-  const calculateStakeLoss = useCalculateStakeLoss()
-
-  return React.useMemo(() => {
-    if (stake && Number(stake) === 0) {
-      return null
-    }
-
-    if ([IdentityStatus.Candidate, IdentityStatus.Newbie].includes(state)) {
-      return t(
-        'You will lose 100% of the stake if you fail or miss the upcoming validation.'
-      )
-    }
-
-    if (state === IdentityStatus.Verified) {
-      return t(
-        'You will lose 100% of the stake if you fail the upcoming validation.'
-      )
-    }
-
-    if (state === IdentityStatus.Zombie) {
-      return age >= 10
-        ? t(
-            'You will lose 100% of the Stake if you miss the upcoming validation.'
-          )
-        : [
-            t(
-              `You will lose {{ratio}} of the stake if you fail the upcoming validation.`,
-              {
-                ratio: toPercent(calculateStakeLoss(age)),
-              }
-            ),
-            t(
-              'You will lose 100% of the stake if you miss the upcoming validation.'
-            ),
-          ]
-    }
-
-    if (state === IdentityStatus.Suspended && age < 10) {
-      return t(
-        'You will lose {{ratio}} of the stake if you fail the upcoming validation.',
-        {
-          ratio: toPercent(calculateStakeLoss(age)),
-        }
-      )
-    }
-
-    return null
-  }, [stake, state, age, t, calculateStakeLoss])
-}
-
-export function useCalculateStakeLoss() {
-  return React.useCallback(
-    age => Math.max(age === 4 ? 1 : (10 - age) / 100, 0),
-    []
-  )
-}
-
 export function useStakingApy() {
   const {stake, invites, invitees, state} = useIdentityState()
 
@@ -142,6 +75,7 @@ export function useStakingApy() {
 
     return result
   }, [])
+
   const rpcFetcher = useRpcFetcher()
 
   const {data: stakingData} = useQuery({
