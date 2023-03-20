@@ -229,7 +229,7 @@ function TooltipLabel({type}) {
               Risk: Low
             </Text>
             <Text color="white" lineHeight="4">
-              If you ${action} the upcoming validation your stake will be
+              If you {action} the upcoming validation your stake will be
               protected
             </Text>
           </Stack>
