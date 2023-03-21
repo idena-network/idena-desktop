@@ -255,21 +255,23 @@ export function useInviteScore() {
 
   const epoch = useEpochState()
 
-  const {canInvite} = useIdentityState()
+  const {canInvite, invitees} = useIdentityState()
+
+  const inviteesAddresses = (invitees || []).map(x => x.Address)
+
+  const {data: hasNotActivatedInvite} = useQuery({
+    queryKey: ['invitesStatuses', ...inviteesAddresses],
+    queryFn: () =>
+      Promise.all(inviteesAddresses.map(addr => callRpc('dna_identity', addr))),
+    select: React.useCallback(
+      data => data.some(x => x.state === IdentityStatus.Invite),
+      []
+    ),
+  })
 
   return React.useMemo(() => {
-    const pendingInvites =
-      global.invitesDb
-        ?.getInvites()
-        .filter(
-          ({activated, terminatedHash, deletedAt}) =>
-            !activated && !terminatedHash && !deletedAt
-        ) ?? []
-
-    const hasPendingInvites = canInvite || pendingInvites.length > 0
-
-    if (epoch && highestBlock && hasPendingInvites) {
+    if (epoch && highestBlock && (canInvite || hasNotActivatedInvite)) {
       return calculateInvitationRewardRatio(epoch, {highestBlock})
     }
-  }, [canInvite, epoch, highestBlock])
+  }, [canInvite, epoch, hasNotActivatedInvite, highestBlock])
 }
