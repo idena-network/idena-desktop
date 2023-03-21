@@ -1681,46 +1681,62 @@ export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
     <Dialog size="416" onClose={onCancel} {...props}>
       <DialogHeader mb={4}>{t('New Oracle voting')}</DialogHeader>
       <DialogBody>
-        <Stack>
+        <Stack spacing="2">
           <Text color="muted" fontSize="sm">
             {t('Choose an option to vote')}
           </Text>
-          <RadioGroup spacing={0} onChange={setPreset}>
-            <Radio value="fact" alignItems="baseline" borderColor="gray.100">
-              <Stack spacing={1} pt={2} pb={3}>
-                <Text>{t('Fact certification')}</Text>
-                <Text color="muted">
-                  {t(
-                    'Oracles who vote against the majority are penalized. Voting will be started in a future date.'
-                  )}
-                </Text>
-              </Stack>
-            </Radio>
-            <Radio value="poll" alignItems="baseline" borderColor="gray.100">
-              <Stack spacing={1} pt={2} pb={3}>
-                <Text>{t('Poll')}</Text>
-                <Text color="muted">
-                  {t(
-                    'Oracles can vote for any option. Rewards will be paid to everyone regardless of the outcome of the vote.'
-                  )}
-                </Text>
-              </Stack>
-            </Radio>
-            <Radio
-              value="decision"
-              alignItems="baseline"
-              borderColor="gray.100"
-            >
-              <Stack spacing={1} pt={2} pb={3}>
-                <Text>{t('Making decision')}</Text>
-                <Text color="muted">
-                  {t('51% consensus is required to make a decision')}
-                </Text>
-              </Stack>
-            </Radio>
-            <Radio value="custom" borderColor="gray.100">
-              {t('Custom')}
-            </Radio>
+          <RadioGroup onChange={setPreset}>
+            <Stack spacing="0">
+              <Radio
+                value="fact"
+                alignItems="flex-start"
+                borderColor="gray.100"
+                pt="2"
+                pb="3"
+              >
+                <Stack spacing="1" mt="-0.5">
+                  <Text>{t('Fact certification')}</Text>
+                  <Text color="muted">
+                    {t(
+                      'Oracles who vote against the majority are penalized. Voting will be started in a future date.'
+                    )}
+                  </Text>
+                </Stack>
+              </Radio>
+              <Radio
+                value="poll"
+                alignItems="flex-start"
+                borderColor="gray.100"
+                pt="2"
+                pb="3"
+              >
+                <Stack spacing="1" mt="-0.5">
+                  <Text>{t('Poll')}</Text>
+                  <Text color="muted">
+                    {t(
+                      'Oracles can vote for any option. Rewards will be paid to everyone regardless of the outcome of the vote.'
+                    )}
+                  </Text>
+                </Stack>
+              </Radio>
+              <Radio
+                value="decision"
+                alignItems="flex-start"
+                borderColor="gray.100"
+                pt="2"
+                pb="3"
+              >
+                <Stack spacing="1" mt="-0.5">
+                  <Text>{t('Making decision')}</Text>
+                  <Text color="muted">
+                    {t('51% consensus is required to make a decision')}
+                  </Text>
+                </Stack>
+              </Radio>
+              <Radio value="custom" borderColor="gray.100" pt="2" pb="3">
+                {t('Custom')}
+              </Radio>
+            </Stack>
           </RadioGroup>
         </Stack>
       </DialogBody>
