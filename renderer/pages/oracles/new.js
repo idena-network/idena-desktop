@@ -354,7 +354,6 @@ function NewVotingPage() {
                 tooltip={t(
                   'Refunded when voting in majority and lost when voting in minority'
                 )}
-                isDisabled={isFreeVoting}
                 mt={2}
               >
                 <Stack spacing={3} flex={1}>
