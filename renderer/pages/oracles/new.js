@@ -9,6 +9,8 @@ import {
   Flex,
   CloseButton,
   FormErrorMessage,
+  RadioGroup,
+  HStack,
 } from '@chakra-ui/react'
 import {useMachine} from '@xstate/react'
 import duration from 'dayjs/plugin/duration'
@@ -36,7 +38,6 @@ import {
   NewVotingFormSubtitle,
   PercentInput,
   PresetFormControl,
-  PresetFormControlOptionList,
   PresetFormControlOption,
   PresetFormControlInputBox,
   NumberInput,
@@ -499,7 +500,7 @@ function NewVotingPage() {
                       'The minimum share of the votes which an option requires to achieve before it becomes the voting outcome'
                     )}
                   >
-                    <PresetFormControlOptionList
+                    <RadioGroup
                       value={winnerThreshold}
                       onChange={value => {
                         send('CHANGE', {
@@ -508,16 +509,18 @@ function NewVotingPage() {
                         })
                       }}
                     >
-                      <PresetFormControlOption value="51">
-                        {t('Simple majority')}
-                      </PresetFormControlOption>
-                      <PresetFormControlOption value="66">
-                        {t('Super majority')}
-                      </PresetFormControlOption>
-                      <PresetFormControlOption value="100">
-                        {t('N/A (polls)')}
-                      </PresetFormControlOption>
-                    </PresetFormControlOptionList>
+                      <HStack spacing="3">
+                        <PresetFormControlOption value="51">
+                          {t('Simple majority')}
+                        </PresetFormControlOption>
+                        <PresetFormControlOption value="66">
+                          {t('Super majority')}
+                        </PresetFormControlOption>
+                        <PresetFormControlOption value="100">
+                          {t('N/A (polls)')}
+                        </PresetFormControlOption>
+                      </HStack>
+                    </RadioGroup>
 
                     <PresetFormControlInputBox>
                       <PercentInput

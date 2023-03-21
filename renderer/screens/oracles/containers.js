@@ -67,7 +67,6 @@ import {
   OracleFormHelperText,
   PresetFormControl,
   DnaInput,
-  PresetFormControlOptionList,
   PresetFormControlOption,
   PresetFormControlHelperText,
   PresetFormControlInputBox,
@@ -939,19 +938,24 @@ export function VotingDurationInput({
 
   return (
     <PresetFormControl tooltip={tooltip} {...props}>
-      <PresetFormControlOptionList
-        value={value}
+      <RadioGroup
+        value={String(value)}
         // eslint-disable-next-line no-shadow
         onChange={value => {
           send('CHANGE', {id, value})
         }}
       >
-        {presets.map(({label, value: presetValue}) => (
-          <PresetFormControlOption key={presetValue} value={presetValue}>
-            {label}
-          </PresetFormControlOption>
-        ))}
-      </PresetFormControlOptionList>
+        <HStack spacing="3">
+          {presets.map(({label, value: presetValue}) => (
+            <PresetFormControlOption
+              key={presetValue}
+              value={String(presetValue)}
+            >
+              {label}
+            </PresetFormControlOption>
+          ))}
+        </HStack>
+      </RadioGroup>
       <PresetFormControlInputBox>
         <BlockInput
           id={id}
@@ -1675,7 +1679,7 @@ export function Linkify({onClick, children}) {
 export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
   const {t} = useTranslation()
 
-  const [preset, setPreset] = React.useState()
+  const [preset, setPreset] = React.useState('fact')
 
   return (
     <Dialog size="416" onClose={onCancel} {...props}>
@@ -1685,7 +1689,7 @@ export function NewOraclePresetDialog({onChoosePreset, onCancel, ...props}) {
           <Text color="muted" fontSize="sm">
             {t('Choose an option to vote')}
           </Text>
-          <RadioGroup onChange={setPreset}>
+          <RadioGroup value={preset} onChange={setPreset}>
             <Stack spacing="0">
               <Radio
                 value="fact"
