@@ -5,9 +5,6 @@ import {
   Heading,
   HStack,
   IconButton,
-  Link,
-  LinkBox,
-  LinkOverlay,
   Stack,
   Text,
 } from '@chakra-ui/react'
@@ -75,11 +72,12 @@ export function ValidationAdPromotion() {
           />
           <Box bg="gray.500" borderRadius="lg" p="10" w="full">
             <Stack direction="row" spacing="8" {...swipeProps}>
-              <LinkBox>
-                <LinkOverlay href={currentAd?.url} isExternal>
-                  <AdImage src={currentAd?.media} w="212px" h="212px" />
-                </LinkOverlay>
-              </LinkBox>
+              <AdImage
+                src={currentAd?.media}
+                w="212px"
+                h="212px"
+                onClick={() => global.openExternal(currentAd?.url)}
+              />
               <Stack spacing="7">
                 <Stack spacing="5">
                   <Stack spacing="1.5" width="xs">
@@ -96,18 +94,21 @@ export function ValidationAdPromotion() {
                         {currentAd?.desc}
                       </Text>
                     </Stack>
-                    <Link
-                      href={currentAd?.url}
-                      target="_blank"
+                    <Text
+                      noOfLines={2}
                       color="blue.500"
                       fontWeight={500}
-                      noOfLines={2}
-                      lineHeight="4"
-                      h="8"
-                      maxH="8"
+                      cursor="pointer"
+                      h="38px"
+                      _hover={{
+                        textDecoration: 'underline',
+                      }}
+                      onClick={() => {
+                        global.openExternal(currentAd?.url)
+                      }}
                     >
                       {currentAd?.url}
-                    </Link>
+                    </Text>
                   </Stack>
                   <Stack direction="row" spacing="8">
                     <AdStat label={t('Sponsored by')} maxW="24">
