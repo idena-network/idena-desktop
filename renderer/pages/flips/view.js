@@ -6,6 +6,8 @@ import {
   useDisclosure,
   CloseButton,
   useToast,
+  Text,
+  HStack,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {useMachine} from '@xstate/react'
@@ -187,12 +189,10 @@ export default function ViewFlipPage() {
                     else send('ARCHIVE')
                   }}
                 >
-                  <FlipCardMenuItemIcon
-                    icon={DeleteIcon}
-                    mr="2"
-                    color="red.500"
-                  />
-                  {t('Delete flip')}
+                  <HStack spacing="2">
+                    <FlipCardMenuItemIcon icon={DeleteIcon} color="red.500" />
+                    <Text as="span">{t('Delete flip')}</Text>
+                  </HStack>
                 </FlipCardMenuItem>
               </FlipCardMenu>
             </FlipMasterFooter>

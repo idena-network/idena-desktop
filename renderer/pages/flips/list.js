@@ -350,12 +350,13 @@ export default function FlipListPage() {
                             openDeleteForm()
                           }}
                         >
-                          <FlipCardMenuItemIcon
-                            icon={DeleteIcon}
-                            mr="2"
-                            color="red.500"
-                          />
-                          {t('Delete flip')}
+                          <HStack spacing="2">
+                            <FlipCardMenuItemIcon
+                              icon={DeleteIcon}
+                              color="red.500"
+                            />
+                            <Text as="span">{t('Delete flip')}</Text>
+                          </HStack>
                         </FlipCardMenuItem>
                       </FlipCardMenu>
                     </Flex>
