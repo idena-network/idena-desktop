@@ -30,11 +30,6 @@ import {
   Center,
   useRadio,
   useRadioGroup,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverArrow,
-  PopoverBody,
 } from '@chakra-ui/react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
@@ -174,29 +169,31 @@ export function FlipCard({flipService, onDelete}) {
           <FlipCardMenu>
             {isSubmittable && (
               <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
-                <FlipCardMenuItemIcon icon={UploadIcon} mr={2} />
-                {t('Submit flip')}
+                <HStack spacing="2">
+                  <FlipCardMenuItemIcon icon={UploadIcon} />
+                  <Text as="span">{t('Submit flip')}</Text>
+                </HStack>
               </FlipCardMenuItem>
             )}
             {isViewable && (
-              <FlipCardMenuItem>
-                <NextLink href={`/flips/view?id=${id}`}>
-                  <Flex>
-                    <FlipCardMenuItemIcon icon={EyeIcon} mr={2} />
-                    {t('View flip')}
-                  </Flex>
-                </NextLink>
-              </FlipCardMenuItem>
+              <NextLink href={`/flips/view?id=${id}`}>
+                <FlipCardMenuItem>
+                  <HStack spacing="2">
+                    <FlipCardMenuItemIcon icon={EyeIcon} />
+                    <Text as="span">{t('View flip')}</Text>
+                  </HStack>
+                </FlipCardMenuItem>
+              </NextLink>
             )}
             {isEditable && (
-              <FlipCardMenuItem>
-                <NextLink href={`/flips/edit?id=${id}`}>
-                  <Flex>
-                    <FlipCardMenuItemIcon icon={EditIcon} mr={2} />
-                    {t('Edit flip')}
-                  </Flex>
-                </NextLink>
-              </FlipCardMenuItem>
+              <NextLink href={`/flips/edit?id=${id}`}>
+                <FlipCardMenuItem>
+                  <HStack spacing="2">
+                    <FlipCardMenuItemIcon icon={EditIcon} />
+                    <Text as="span">{t('Edit flip')}</Text>
+                  </HStack>
+                </FlipCardMenuItem>
+              </NextLink>
             )}
             {(isSubmittable || isEditable) && isDeletable && (
               <MenuDivider color="gray.300" my={2} width={rem(145)} />
@@ -204,12 +201,10 @@ export function FlipCard({flipService, onDelete}) {
 
             {isDeletable && (
               <FlipCardMenuItem onClick={onDelete}>
-                <FlipCardMenuItemIcon
-                  icon={DeleteIcon}
-                  mr={2}
-                  color="red.500"
-                />
-                {t('Delete flip')}
+                <HStack spacing="2">
+                  <FlipCardMenuItemIcon icon={DeleteIcon} color="red.500" />
+                  <Text as="span">{t('Delete flip')}</Text>
+                </HStack>
               </FlipCardMenuItem>
             )}
           </FlipCardMenu>
@@ -278,7 +273,7 @@ export function FlipCardMenuItem(props) {
   return (
     <Box
       as={MenuItem}
-      color="brandGray.500"
+      color="gray.500"
       fontWeight={500}
       px={3}
       py="3/2"
@@ -292,7 +287,7 @@ export function FlipCardMenuItem(props) {
 }
 
 export function FlipCardMenuItemIcon({icon: MenuIcon, ...props}) {
-  return <MenuIcon boxSize="5" mr="3" color="blue.500" {...props} />
+  return <MenuIcon color="blue.500" h="5" w="5" {...props} />
 }
 
 export function RequiredFlipPlaceholder({title}) {
@@ -1232,7 +1227,7 @@ export function CommunityTranslations({
     <Stack spacing={isOpen ? 8 : 0}>
       <IconButton2
         icon={<CommunityIcon />}
-        color="brandGray.500"
+        color="gray.500"
         px={0}
         _hover={{background: 'transparent'}}
         onClick={onToggle}
@@ -1399,7 +1394,7 @@ export function VoteButton(props) {
   return (
     <IconButton
       bg="transparent"
-      color="brandGray.500"
+      color="gray.500"
       fontSize={rem(20)}
       h={5}
       w={5}
@@ -1445,13 +1440,13 @@ export function DeleteFlipDrawer({hash, cover, isMissing, onDelete, ...props}) {
         >
           <DeleteIcon boxSize="6" color="red.500" />
         </Flex>
-        <Heading fontSize="lg" fontWeight={500} color="brandGray.500" mt={4}>
+        <Heading fontSize="lg" fontWeight={500} color="gray.500" mt="4">
           {t('Delete flip')}
         </Heading>
       </DrawerHeader>
       <DrawerBody>
         {!isMissing && (
-          <Text color="brandGray.500" fontSize="md">
+          <Text color="gray.500" fontSize="md">
             {t('Deleted flip will be moved to the drafts.')}
           </Text>
         )}
@@ -1577,21 +1572,5 @@ export function PublishFlipDrawer({isPending, flip, onSubmit, ...props}) {
         </HStack>
       </DrawerFooter>
     </AdDrawer>
-  )
-}
-
-export function ShuffleAdversarialPopover({label, children, ...props}) {
-  return (
-    <Popover placement="right">
-      <PopoverTrigger>{children}</PopoverTrigger>
-      <PopoverContent border="none" fontSize="sm" w="max-content">
-        <PopoverArrow bg="graphite.500" />
-        <PopoverBody bg="graphite.500" borderRadius="sm" p="2" pt="1">
-          <Text color="white" fontSize="sm">
-            {label}
-          </Text>
-        </PopoverBody>
-      </PopoverContent>
-    </Popover>
   )
 }
