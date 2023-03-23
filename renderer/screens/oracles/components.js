@@ -16,8 +16,6 @@ import {
   Divider,
   Button,
   IconButton,
-  HStack,
-  RadioGroup,
 } from '@chakra-ui/react'
 import {useTranslation} from 'react-i18next'
 import {
@@ -433,30 +431,13 @@ export function PresetFormControl({tooltip, children, ...props}) {
   )
 }
 
-// eslint-disable-next-line react/display-name
-export const PresetFormControlOptionList = React.forwardRef(
-  ({children, ...props}, ref) => (
-    <RadioGroup ref={ref} isInline {...props}>
-      <HStack>{children}</HStack>
-    </RadioGroup>
+export function PresetFormControlOption(props) {
+  return (
+    <Box borderColor="gray.300" borderWidth={1} borderRadius="md" px="3" py="2">
+      <Radio {...props} />
+    </Box>
   )
-)
-
-// eslint-disable-next-line react/display-name
-export const PresetFormControlOption = React.forwardRef(
-  ({isChecked, ...props}, ref) => (
-    <Radio
-      ref={ref}
-      borderColor="gray.300"
-      borderWidth={1}
-      borderRadius="md"
-      p={2}
-      px={3}
-      isChecked={isChecked}
-      {...props}
-    />
-  )
-)
+}
 
 export function PresetFormControlInputBox(props) {
   return <Box {...props} />

@@ -63,8 +63,6 @@ export default function ValidationReport() {
     totalScore,
     earnings,
     earningsScore,
-    validationReward,
-    missedValidationReward,
     invitationReward,
     missedInvitationReward,
     inviteeReward,
@@ -309,7 +307,9 @@ export default function ValidationReport() {
                     <Flex justify="space-between">
                       <ValidationReportStat
                         label={t('Missed flip earnings')}
-                        value={maybeLocaleDna(missedFlipReward)}
+                        value={maybeLocaleDna(
+                          missedFlipReward + missedExtraFlipReward
+                        )}
                       />
                     </Flex>
                   </Stack>
