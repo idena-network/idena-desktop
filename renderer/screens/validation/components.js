@@ -1152,7 +1152,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
     <Modal
       isOpen={isOpen}
       isCentered
-      size="664"
+      size="3xl"
       onClose={onClose}
       initialFocusRef={nextButtonRef}
       {...props}
@@ -1165,7 +1165,14 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
         rounded="lg"
       >
         <Stack isInline spacing={0} bg="white" borderRadius="8px">
-          <Flex justify="center" align="center" bg="red.016" px={14} w="240px">
+          <Flex
+            justify="center"
+            align="center"
+            bg="red.016"
+            px="14"
+            py="20"
+            w="240px"
+          >
             <Stack
               spacing={0}
               borderColor="gray.016"
@@ -1297,7 +1304,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
                 </BadFlipListItem>
               </List>
             </Stack>
-            <Stack isInline mt={8} justify="flex-end">
+            <Stack isInline justify="flex-end">
               <SecondaryButton onClick={onClose}>{t('Skip')}</SecondaryButton>
               <PrimaryButton
                 ref={nextButtonRef}
@@ -1320,7 +1327,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
 
 function BadFlipImage(props) {
   return (
-    <AspectRatio ratio={4 / 3} w="132px">
+    <AspectRatio ratio={4 / 3} w="133px">
       <Image {...props} />
     </AspectRatio>
   )
