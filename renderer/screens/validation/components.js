@@ -976,7 +976,6 @@ export function ReviewValidationDialog({
   isSubmitting,
   onSubmit,
   onMisingAnswers,
-  onMisingReports,
   onCancel,
   ...props
 }) {
@@ -985,7 +984,6 @@ export function ReviewValidationDialog({
   const answeredFlipsCount = flips.filter(({option}) => option > 0).length
 
   const areFlipsUnanswered = answeredFlipsCount < flips.length
-  const areReportsMissing = reportedFlipsCount < availableReportsCount
 
   const approvedCount = flips.filter(
     flip => flip.relevance === RelevanceType.Relevant
@@ -1131,7 +1129,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
     '2-numbers',
     '3-enums',
     '4-text',
-    '5-inappropriate-content',
+    '5-adult',
     '6-unrelated-stories',
     '7-waking-up',
     '8-thumbs-up',
@@ -1257,7 +1255,7 @@ export function BadFlipDialog({title, subtitle, isOpen, onClose, ...props}) {
                     setFlipCase(4)
                   }}
                 >
-                  {t('There is inappropriate content')}
+                  {t('There is adult content (NSFW)')}
                 </BadFlipListItem>
                 <BadFlipListItem
                   flipCase={5}
