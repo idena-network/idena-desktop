@@ -118,7 +118,7 @@ export async function loadKeyword(index) {
   try {
     const resp = await queryClient.fetchQuery({
       queryKey: ['bcn_keyWord', index],
-      queryFn: ({queryKey: [, pairIndex]}) => callRpc('bcn_keyWord', pairIndex),
+      queryFn: ({queryKey: [, wordIndex]}) => callRpc('bcn_keyWord', wordIndex),
       staleTime: Infinity,
     })
     return {name: resp.Name, desc: resp.Desc}
