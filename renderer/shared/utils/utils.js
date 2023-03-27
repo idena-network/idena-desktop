@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import {QueryClient} from 'react-query'
 import i18n from '../../i18n'
 import {getRpcParams} from '../api/api-client'
 import {EpochPeriod} from '../types'
@@ -10,6 +11,8 @@ dayjs.extend(relativeTime)
 
 export const HASH_IN_MEMPOOL =
   '0x0000000000000000000000000000000000000000000000000000000000000000'
+
+export const queryClient = new QueryClient()
 
 export function createRpcCaller({url, key}) {
   return async function(method, ...params) {
@@ -113,8 +116,12 @@ export function formatValidationDate(nextValidation, locale) {
 
 export async function loadKeyword(index) {
   try {
-    const {Name: name, Desc: desc} = await callRpc('bcn_keyWord', index)
-    return {name, desc}
+    const resp = await queryClient.fetchQuery({
+      queryKey: ['bcn_keyWord', index],
+      queryFn: ({queryKey: [, pairIndex]}) => callRpc('bcn_keyWord', pairIndex),
+      staleTime: Infinity,
+    })
+    return {name: resp.Name, desc: resp.Desc}
   } catch (error) {
     global.logger.error('Unable to receive keyword', index)
     return {name: '', desc: ''}

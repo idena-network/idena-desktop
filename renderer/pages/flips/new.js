@@ -326,7 +326,9 @@ export default function NewFlipPage() {
                     <FlipStoryAside>
                       <IconButton2
                         icon={<RefreshIcon />}
-                        isDisabled={availableKeywords.length < 2}
+                        isDisabled={
+                          availableKeywords.length < 2 || is('keywords.loading')
+                        }
                         onClick={() => send('CHANGE_KEYWORDS')}
                       >
                         {t('Change words')}{' '}
@@ -432,7 +434,8 @@ export default function NewFlipPage() {
                 is('images.painting') ||
                 is('protect.protecting') ||
                 is('protect.shuffling') ||
-                is('protect.preparing')
+                is('protect.preparing') ||
+                is('keywords.loading')
               }
               onClick={() => send('NEXT')}
             >
