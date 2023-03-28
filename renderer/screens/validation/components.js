@@ -665,9 +665,11 @@ function ThumbnailOverlay({option, isQualified, hasIrrelevantWords}) {
 }
 
 export function FlipWords({
+  validationStart,
   currentFlip: {words = []},
   translations = {},
   children,
+  onSkip,
 }) {
   const {t, i18n} = useTranslation()
 
@@ -682,8 +684,8 @@ export function FlipWords({
   const shouldShowTranslation = showTranslation && hasApprovedTranslation
 
   return (
-    <Box fontSize="md" color="brandGray.500" ml={rem(32)} w={rem(320)}>
-      <FlipKeywordPanel w={rem(320)} mb={8}>
+    <Box fontSize="md" color="gray.500" ml="8" w={320}>
+      <FlipKeywordPanel w={320} mb={8}>
         {words.length ? (
           <FlipKeywordTranslationSwitch
             keywords={{
@@ -696,20 +698,61 @@ export function FlipWords({
             isInline={false}
           />
         ) : (
-          <>
-            <Box color="brandGray.500" fontWeight={500}>
+          <Stack spacing="2">
+            <Box lineHeight="5" fontWeight={500} textAlign="center">
               {t(`Getting flip keywords...`)}
             </Box>
-            <Box color="muted" mt={2}>
+            <Box color="muted" lineHeight="5" mt={2} textAlign="center">
               {t(
-                'Can not load the flip keywords to moderate the story. Please wait or skip this flip.'
+                'The author of the flip has not published the keywords yet. Please wait or skip this flip.'
               )}
             </Box>
-          </>
+            <Box pt="2" alignSelf="center">
+              <FlipWordsTimer
+                validationStart={validationStart}
+                duration={210}
+                onSkip={onSkip}
+              />
+            </Box>
+          </Stack>
         )}
       </FlipKeywordPanel>
       {children}
     </Box>
+  )
+}
+
+function FlipWordsTimer({validationStart, duration, onSkip}) {
+  const {t} = useTranslation()
+  const adjustedDuration = React.useMemo(
+    () => adjustDurationInSeconds(validationStart, duration) * 1000,
+    [duration, validationStart]
+  )
+
+  const [{remaining}, {reset}] = useTimer(adjustedDuration)
+
+  useEffect(() => {
+    reset(adjustedDuration)
+  }, [adjustedDuration, reset])
+
+  return remaining > 0 ? (
+    <Box style={{fontVariantNumeric: 'tabular-nums', minWidth: rem(37)}}>
+      <Text color="gray.500" fontSize="md" fontWeight={500}>
+        {dayjs.duration(remaining).format('mm:ss')}
+      </Text>
+    </Box>
+  ) : (
+    <Button
+      variant="outline"
+      borderColor="gray.200"
+      color="gray.500"
+      onClick={() => onSkip?.()}
+      _active={{
+        bg: 'unset',
+      }}
+    >
+      {t('Skip')}
+    </Button>
   )
 }
 
