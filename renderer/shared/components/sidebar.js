@@ -801,7 +801,7 @@ export function Version({
         </VersionText>
       </Stack>
       <Stack>
-        {!clientUpdating && canUpdateClient && (
+        {!canUpdateNode && !clientUpdating && canUpdateClient && (
           <UpdateButton
             version={uiRemoteVersion}
             onClick={() => {
