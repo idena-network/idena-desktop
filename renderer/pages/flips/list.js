@@ -284,7 +284,7 @@ export default function FlipListPage() {
 
         {current.matches('ready.dirty') && (
           <FlipCardList>
-            {filterFlips().map(flip => (
+            {filterFlips().map((flip) => (
               <FlipCard
                 key={flip.id}
                 flipService={flip.ref}
@@ -305,7 +305,7 @@ export default function FlipListPage() {
                   <Box key={idx}>
                     <EmptyFlipBox position="relative">
                       {[FlipType.Deleting, FlipType.Invalid].some(
-                        x => x === flip.type
+                        (x) => x === flip.type
                       ) && (
                         <FlipOverlay
                           backgroundImage={
@@ -372,8 +372,9 @@ export default function FlipListPage() {
                 {Array.from({length: remainingOptionalFlips}, (flip, idx) => (
                   <OptionalFlipPlaceholder
                     key={idx}
-                    title={`Flip #${availableFlipsNumber -
-                      (remainingOptionalFlips - idx - 1)}`}
+                    title={`Flip #${
+                      availableFlipsNumber - (remainingOptionalFlips - idx - 1)
+                    }`}
                     {...flip}
                     isDisabled={remainingRequiredFlips > 0}
                   />

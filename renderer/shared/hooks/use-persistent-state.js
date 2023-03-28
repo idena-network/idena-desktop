@@ -31,7 +31,7 @@ export function usePersistentState(dbName, key, initialValue) {
 export function usePersistence([state, dispatch], name, on) {
   const actionRef = useRef()
 
-  const newDispatchRef = useRef(action => {
+  const newDispatchRef = useRef((action) => {
     actionRef.current = action
     dispatch(action)
   })

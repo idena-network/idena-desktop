@@ -6,7 +6,7 @@ export const reorder = (list, startIndex, endIndex) => {
   return result
 }
 
-export const shuffle = arr => {
+export const shuffle = (arr) => {
   let currentIndex = arr.length
   let temporaryValue
   let randomIndex
@@ -28,7 +28,7 @@ export const shuffle = arr => {
 
 export const reorderList = (list, nextOrder) => {
   const nextList = []
-  nextOrder.forEach(ord => {
+  nextOrder.forEach((ord) => {
     nextList.push(list[ord])
   })
   return nextList
@@ -36,7 +36,7 @@ export const reorderList = (list, nextOrder) => {
 
 export function areSame(arr1, arr2) {
   const b = new Set(arr2)
-  return arr1.every(x => b.has(x)) && arr1.length === arr2.length
+  return arr1.every((x) => b.has(x)) && arr1.length === arr2.length
 }
 
 export function areEqual(arr1, arr2) {
@@ -58,8 +58,8 @@ export function areEqual(arr1, arr2) {
 export function areEqualExceptOne(arr1, arr2, ignoreId) {
   const newArr1 = [...arr1]
   const newArr2 = [...arr2]
-  const ignoreIdx1 = arr1.findIndex(x => x === ignoreId)
-  const ignoreIdx2 = arr2.findIndex(x => x === ignoreId)
+  const ignoreIdx1 = arr1.findIndex((x) => x === ignoreId)
+  const ignoreIdx2 = arr2.findIndex((x) => x === ignoreId)
   newArr1.splice(ignoreIdx1, 1)
   newArr2.splice(ignoreIdx2, 1)
 

@@ -9,7 +9,6 @@ const kill = require('tree-kill')
 const lineReader = require('reverse-line-reader')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const appDataPath = require('./app-data-path')
-const {sleep} = require('./utils')
 const logger = require('./logger')
 
 const idenaBin = 'idena-go'
@@ -52,7 +51,7 @@ const getReleaseUrl = async () => {
     default:
   }
 
-  const asset = data.assets.filter(x => x.name.startsWith(assetName))
+  const asset = data.assets.filter((x) => x.name.startsWith(assetName))
 
   return asset.length ? asset[0].browser_download_url : null
 }
@@ -69,6 +68,7 @@ const getRemoteVersion = async () => {
 }
 
 async function downloadNode(onProgress) {
+  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     try {
       const url = await getReleaseUrl()
@@ -93,13 +93,13 @@ async function downloadNode(onProgress) {
         length: parseInt(response.headers['content-length'], 10),
       })
 
-      str.on('progress', function(p) {
+      str.on('progress', (p) => {
         onProgress({...p, version})
       })
 
       response.data.pipe(str).pipe(writer)
     } catch (error) {
-      return reject(error)
+      reject(error)
     }
   })
 }
@@ -121,6 +121,7 @@ async function startNode(
   ipfsPort,
   apiKey,
   autoActivateMining,
+  // eslint-disable-next-line default-param-last
   useLogging = true,
   onLog,
   onExit
@@ -152,24 +153,24 @@ async function startNode(
 
   const idenaNode = spawn(getNodeFile(), parameters)
 
-  idenaNode.stdout.on('data', data => {
+  idenaNode.stdout.on('data', (data) => {
     const str = data.toString()
-    if (onLog) onLog(str.split('\n').filter(x => x))
+    if (onLog) onLog(str.split('\n').filter((x) => x))
     if (useLogging) {
       console.log(str)
     }
   })
 
-  idenaNode.stderr.on('data', err => {
+  idenaNode.stderr.on('data', (err) => {
     const str = err.toString()
     writeError(str)
-    if (onLog) onLog(str.split('\n').filter(x => x))
+    if (onLog) onLog(str.split('\n').filter((x) => x))
     if (useLogging) {
       console.error(str)
     }
   })
 
-  idenaNode.on('exit', code => {
+  idenaNode.on('exit', (code) => {
     if (useLogging) {
       console.info(`child process exited with code ${code}`)
     }
@@ -182,16 +183,16 @@ async function startNode(
 }
 
 async function stopNode(node) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       if (!node) {
-        return resolve('node process not found')
+        resolve('node process not found')
       }
       if (node.exitCode != null) {
-        return resolve(`node already exited with code ${node.exitCode}`)
+        resolve(`node already exited with code ${node.exitCode}`)
       }
       if (process.platform !== 'win32') {
-        kill(node.pid, 'SIGINT', function(err) {
+        kill(node.pid, 'SIGINT', (err) => {
           if (err) {
             return reject(err)
           }
@@ -203,7 +204,7 @@ async function stopNode(node) {
         node.kill()
       }
     } catch (e) {
-      return reject(e)
+      reject(e)
     }
   })
 }
@@ -214,7 +215,7 @@ function getCurrentVersion(tempNode) {
 
     try {
       const nodeVersion = spawn(node, ['--version'])
-      nodeVersion.stdout.on('data', data => {
+      nodeVersion.stdout.on('data', (data) => {
         const {version} = semver.coerce(data.toString())
         return semver.valid(version)
           ? resolve(version)
@@ -225,13 +226,13 @@ function getCurrentVersion(tempNode) {
             )
       })
 
-      nodeVersion.stderr.on('data', data =>
+      nodeVersion.stderr.on('data', (data) =>
         reject(
           new Error(`cannot resolve node version, stderr: ${data.toString()}`)
         )
       )
 
-      nodeVersion.on('exit', code => {
+      nodeVersion.on('exit', (code) => {
         if (code) {
           return reject(
             new Error(`cannot resolve node version, exit code ${code}`)
@@ -239,15 +240,15 @@ function getCurrentVersion(tempNode) {
         }
       })
 
-      nodeVersion.on('error', err => reject(err))
+      nodeVersion.on('error', (err) => reject(err))
     } catch (e) {
-      return reject(e)
+      reject(e)
     }
   })
 }
 
 function updateNode() {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       const currentNode = getNodeFile()
       const tempNode = getTempNodeFile()
@@ -260,22 +261,22 @@ function updateNode() {
           }
           done = true
         } catch (e) {
-          await sleep(1000)
+          console.error('error checking current node')
         } finally {
           num -= 1
         }
       }
       if (!done) {
-        return reject(new Error('cannot remove old idena-go file'))
+        reject(new Error('cannot remove old idena-go file'))
       }
 
       fs.renameSync(tempNode, currentNode)
       if (process.platform !== 'win32') {
         fs.chmodSync(currentNode, '755')
       }
-      return resolve()
+      resolve()
     } catch (e) {
-      return reject(e)
+      reject(e)
     }
   })
 }
@@ -296,7 +297,7 @@ function getLastLogs() {
   return new Promise((resolve, reject) => {
     try {
       const logs = []
-      lineReader.eachLine(getNodeLogsFile(), function(line, last) {
+      lineReader.eachLine(getNodeLogsFile(), (line, last) => {
         logs.push(line)
         if (logs.length === number || last) {
           resolve(logs.reverse())

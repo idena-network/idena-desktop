@@ -9,12 +9,12 @@ export class AdTarget {
     this.stake = stake
   }
 
-  static fromBytes = bytes => {
+  static fromBytes = (bytes) => {
     const protoAdKey = root.ProtoAdTarget.deserializeBinary(bytes)
     return new AdTarget(protoAdKey.toObject())
   }
 
-  static fromHex = hex =>
+  static fromHex = (hex) =>
     AdTarget.fromBytes(Buffer.from(stripHexPrefix(hex), 'hex'))
 
   toBytes() {

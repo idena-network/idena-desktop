@@ -6,21 +6,21 @@ export class Profile {
     this.ads = profile?.ads ?? []
   }
 
-  static fromBytes = bytes =>
+  static fromBytes = (bytes) =>
     new Profile({
       ads: root.ProtoProfile.deserializeBinary(bytes)
         .getAdsList()
-        .map(ad => ad.toObject()),
+        .map((ad) => ad.toObject()),
     })
 
-  static fromHex = hex =>
+  static fromHex = (hex) =>
     Profile.fromBytes(Buffer.from(stripHexPrefix(hex), 'hex'))
 
   toBytes() {
     const protoProfile = new root.ProtoProfile()
 
     protoProfile.setAdsList(
-      this.ads.map(ad => {
+      this.ads.map((ad) => {
         const profileAd = new root.ProtoProfile.ProtoProfileAd()
 
         profileAd.setCid(ad.cid)

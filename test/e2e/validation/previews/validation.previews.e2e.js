@@ -13,7 +13,7 @@ fixture`ValidationPagePreviews`
     await node.start()
   })
 
-test('check preview states changing', async t => {
+test('check preview states changing', async (t) => {
   await t.setPageLoadTimeout(10000).wait(15000)
 
   node.sessionStartDate = dayjs()

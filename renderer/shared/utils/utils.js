@@ -15,7 +15,7 @@ export const HASH_IN_MEMPOOL =
 export const queryClient = new QueryClient()
 
 export function createRpcCaller({url, key}) {
-  return async function(method, ...params) {
+  return async function (method, ...params) {
     const {result, error} = await (
       await fetch(url, {
         method: 'POST',
@@ -52,25 +52,29 @@ export const toLocaleDna = (locale, options) => {
     maximumFractionDigits: 18,
     ...options,
   })
-  return value => `${formatter.format(value)} iDNA`
+  return (value) => `${formatter.format(value)} iDNA`
 }
 
 export const eitherState = (current, ...states) => states.some(current.matches)
 
-export const merge = predicate => (...lists) =>
-  lists.reduce(
-    (agg, curr) =>
-      agg.length
-        ? agg.map(item => ({
-            ...item,
-            ...curr.find(predicate(item)),
-          }))
-        : curr,
-    []
-  )
+export const merge =
+  (predicate) =>
+  (...lists) =>
+    lists.reduce(
+      (agg, curr) =>
+        agg.length
+          ? agg.map((item) => ({
+              ...item,
+              ...curr.find(predicate(item)),
+            }))
+          : curr,
+      []
+    )
 
-export const byId = ({id: givenId}) => ({id: currentId}) =>
-  currentId === givenId
+export const byId =
+  ({id: givenId}) =>
+  ({id: currentId}) =>
+    currentId === givenId
 
 export const mergeById = (...items) => merge(byId)(...items)
 
@@ -172,7 +176,7 @@ export function skipSSR(expr) {
     : expr
 }
 
-export const isAddress = address =>
+export const isAddress = (address) =>
   address && address.length === 42 && address.substr(0, 2) === '0x'
 
 export const humanizeDuration = (d, unit = 's') =>
@@ -190,7 +194,7 @@ export function omit(obj, keys) {
   )
 }
 
-export const prependHex = hex => (hex?.startsWith('0x') ? hex : `0x${hex}`)
+export const prependHex = (hex) => (hex?.startsWith('0x') ? hex : `0x${hex}`)
 
 export function areSameCaseInsensitive(a, b) {
   return a?.toUpperCase() === b?.toUpperCase()

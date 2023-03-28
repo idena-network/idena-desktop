@@ -111,10 +111,10 @@ export default function Layout({
   React.useEffect(() => {
     if (global.isDev) return
 
-    const handleMouseWheel = e => {
+    const handleMouseWheel = (e) => {
       if (e.ctrlKey) {
         e.preventDefault()
-        setZoomLevel(level =>
+        setZoomLevel((level) =>
           Math.min(Math.max(-5, level + e.deltaY * -0.01), 5)
         )
       }
@@ -283,12 +283,10 @@ function NormalApp({skipBanner, children}) {
 
   useValidationToast()
 
-  const [
-    validationNotificationEpoch,
-    setValidationNotificationEpoch,
-  ] = React.useState(
-    () => loadPersistentStateValue('validationNotification', 'epoch') || 0
-  )
+  const [validationNotificationEpoch, setValidationNotificationEpoch] =
+    React.useState(
+      () => loadPersistentStateValue('validationNotification', 'epoch') || 0
+    )
 
   React.useEffect(() => {
     if (
@@ -417,13 +415,8 @@ function NormalApp({skipBanner, children}) {
 function SyncingApp() {
   const {t} = useTranslation()
 
-  const {
-    currentBlock,
-    highestBlock,
-    genesisBlock,
-    wrongTime,
-    message,
-  } = useChainState()
+  const {currentBlock, highestBlock, genesisBlock, wrongTime, message} =
+    useChainState()
 
   const {address} = useIdentityState()
 
@@ -606,7 +599,7 @@ function OfflineApp() {
   const isUnsupportedMacosVersion =
     runInternalNode && !useExternalNode && unsupportedMacosVersion
 
-  const toMb = b =>
+  const toMb = (b) =>
     (b / (1024 * 1024)).toLocaleString(undefined, {
       maximumFractionDigits: 2,
     })
@@ -792,7 +785,7 @@ function HardForkScreen({
                     <Stack spacing={3}>
                       <Text color="white">{t('Changes')}</Text>
                       <UnorderedList spacing="2" pl="4">
-                        {changes.map(change => (
+                        {changes.map((change) => (
                           <ListItem key={change}>{change}</ListItem>
                         ))}
                         {changes.length === 0 && <Text>No changes 🤷‍♂️</Text>}
@@ -887,7 +880,7 @@ function HardForkScreen({
 
           {canVote && (
             <form
-              onSubmit={e => {
+              onSubmit={(e) => {
                 e.preventDefault()
 
                 const {votingOption} = e.target.elements
@@ -937,7 +930,7 @@ function HardForkScreen({
           isOpen={eitherState(currentActivateMining, 'showing')}
           isCloseable={false}
           isLoading={eitherState(currentActivateMining, 'showing.mining')}
-          onChangeMode={value => {
+          onChangeMode={(value) => {
             sendActivateMining({type: 'CHANGE_MODE', mode: value})
           }}
           // eslint-disable-next-line no-shadow

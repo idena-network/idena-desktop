@@ -51,7 +51,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
           <Stack
             isInline
             as="form"
-            onSubmit={e => {
+            onSubmit={(e) => {
               e.preventDefault()
               send('SEARCH')
             }}
@@ -67,7 +67,7 @@ export function ImageSearchDialog({onPick, onClose, onError, ...props}) {
                 placeholder={t('Search the picture on the web')}
                 bg="gray.50"
                 pl={10}
-                onChange={e => {
+                onChange={(e) => {
                   send('TYPE', {query: e.target.value})
                 }}
               />

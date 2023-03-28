@@ -70,7 +70,7 @@ export function TimingProvider(props) {
   )
 
   React.useEffect(() => {
-    setTiming(prevTiming => ({
+    setTiming((prevTiming) => ({
       ...prevTiming,
       wrongClientTime,
     }))

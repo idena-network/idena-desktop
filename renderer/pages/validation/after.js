@@ -72,7 +72,7 @@ export default function AfterValidationPage() {
   useAutoCloseValidationToast()
 
   useTrackEpochPeriod({
-    onChangeCurrentPeriod: period => {
+    onChangeCurrentPeriod: (period) => {
       if ([EpochPeriod.None, EpochPeriod.FlipLottery].includes(period)) {
         router.push('/home')
       }

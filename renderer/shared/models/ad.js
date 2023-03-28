@@ -7,7 +7,7 @@ export class Ad {
     Object.assign(this, {title, desc, url, thumb, media, version, votingParams})
   }
 
-  static fromBytes = bytes => {
+  static fromBytes = (bytes) => {
     const protoAd = root.ProtoAd.deserializeBinary(bytes)
 
     const thumb = protoAd.getThumb()
@@ -33,7 +33,8 @@ export class Ad {
     })
   }
 
-  static fromHex = hex => Ad.fromBytes(Buffer.from(stripHexPrefix(hex), 'hex'))
+  static fromHex = (hex) =>
+    Ad.fromBytes(Buffer.from(stripHexPrefix(hex), 'hex'))
 
   toBytes() {
     const data = new root.ProtoAd()
@@ -48,12 +49,8 @@ export class Ad {
 
     const votingParamsMessage = new root.ProtoAdVotingParams()
 
-    const {
-      votingDuration,
-      publicVotingDuration,
-      quorum,
-      committeeSize,
-    } = this.votingParams
+    const {votingDuration, publicVotingDuration, quorum, committeeSize} =
+      this.votingParams
 
     votingParamsMessage.setVotingduration(votingDuration)
     votingParamsMessage.setPublicvotingduration(publicVotingDuration)

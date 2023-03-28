@@ -188,20 +188,21 @@ export default function FlipEditor({
 
         let replaceObjectProps
         if (data.replaceObjectId) {
-          replaceObjectProps = editors[
-            idx
-          ].getObjectProperties(data.replaceObjectId, ['left', 'top', 'angle'])
+          replaceObjectProps = editors[idx].getObjectProperties(
+            data.replaceObjectId,
+            ['left', 'top', 'angle']
+          )
           editors[idx].execute('removeObject', data.replaceObjectId)
         }
 
-        Jimp.read(url).then(image => {
-          image.getBase64Async('image/png').then(nextUrl => {
+        Jimp.read(url).then((image) => {
+          image.getBase64Async('image/png').then((nextUrl) => {
             const resizedNextUrl = imageResize(
               global.nativeImage.createFromDataURL(nextUrl),
               IMAGE_WIDTH,
               IMAGE_HEIGHT
             )
-            editor.addImageObject(resizedNextUrl).then(objectProps => {
+            editor.addImageObject(resizedNextUrl).then((objectProps) => {
               if (data.replaceObjectId) {
                 editors[idx].setObjectPropertiesQuietly(
                   objectProps.id,
@@ -225,7 +226,7 @@ export default function FlipEditor({
 
       if (nextInsertMode === INSERT_BACKGROUND_IMAGE) {
         editor.loadImageFromURL(BLANK_IMAGE, 'blank').then(() => {
-          editor.addImageObject(url).then(objectProps => {
+          editor.addImageObject(url).then((objectProps) => {
             const {id} = objectProps
             const {width, height} = editor.getObjectProperties(id, [
               'left',
@@ -248,7 +249,7 @@ export default function FlipEditor({
               opacity: 0.5,
             })
             editor.loadImageFromURL(editor.toDataURL(), 'BlurBkgd').then(() => {
-              editor.addImageObject(url).then(async objectProps2 => {
+              editor.addImageObject(url).then(async (objectProps2) => {
                 const {id: id2} = objectProps2
 
                 editor.setObjectPropertiesQuietly(id2, {
@@ -283,14 +284,14 @@ export default function FlipEditor({
   } = useDisclosure()
 
   // File upload handling
-  const handleUpload = e => {
+  const handleUpload = (e) => {
     e.preventDefault()
     const file = e.target.files[0]
     if (!file || !file.type.startsWith('image')) {
       return
     }
     const reader = new FileReader()
-    reader.addEventListener('loadend', re => {
+    reader.addEventListener('loadend', (re) => {
       const img = global.nativeImage.createFromDataURL(re.target.result)
       const url = imageResize(img, IMAGE_WIDTH, IMAGE_HEIGHT)
       setImageUrl({url})
@@ -310,7 +311,7 @@ export default function FlipEditor({
         // Auto detect insert mode by image size
         let img = new Image()
         img.src = url
-        img.onload = function() {
+        img.onload = function () {
           if (img.width === IMAGE_WIDTH && img.height === IMAGE_HEIGHT) {
             setImageUrl({url, insertMode: INSERT_BACKGROUND_IMAGE})
           } else {
@@ -381,25 +382,25 @@ export default function FlipEditor({
   }
 
   if (visible) {
-    mousetrap.bind(['command+v', 'ctrl+v'], function(e) {
+    mousetrap.bind(['command+v', 'ctrl+v'], (e) => {
       handleOnPaste()
       e.stopImmediatePropagation()
       return false
     })
 
-    mousetrap.bind(['command+c', 'ctrl+c'], function(e) {
+    mousetrap.bind(['command+c', 'ctrl+c'], (e) => {
       handleOnCopy()
       e.stopImmediatePropagation()
       return false
     })
 
-    mousetrap.bind(['command+z', 'ctrl+z'], function(e) {
+    mousetrap.bind(['command+z', 'ctrl+z'], (e) => {
       handleUndo()
       e.stopImmediatePropagation()
       return false
     })
 
-    mousetrap.bind(['shift+ctrl+z', 'shift+command+z'], function(e) {
+    mousetrap.bind(['shift+ctrl+z', 'shift+command+z'], (e) => {
       handleRedo()
       e.stopImmediatePropagation()
       return false
@@ -451,7 +452,7 @@ export default function FlipEditor({
 
   // init editor
   React.useEffect(() => {
-    const updateEvents = e => {
+    const updateEvents = (e) => {
       if (!e) return
       e.on({
         mousedown() {
@@ -531,7 +532,7 @@ export default function FlipEditor({
 
     if (containerEl) {
       containerEl.parentElement.style.height = rem(328)
-      containerEl.addEventListener('contextmenu', e => {
+      containerEl.addEventListener('contextmenu', (e) => {
         e.preventDefault()
         setContextMenuCursor({x: e.layerX, y: e.layerY})
         setShowContextMenu(true)
@@ -613,7 +614,7 @@ export default function FlipEditor({
                   })
                 }
               }}
-              onDone={url => {
+              onDone={(url) => {
                 if (url) {
                   if (editors[idx] && activeObjectId) {
                     setChangesCnt(NOCHANGES)
@@ -970,7 +971,7 @@ export default function FlipEditor({
                       '27d980dd',
                       'ffd763dd',
                       'ffa366dd',
-                    ].map(color => (
+                    ].map((color) => (
                       <FlipEditorMenuItem
                         justifyContent="center"
                         borderRadius="sm"
@@ -1018,7 +1019,7 @@ export default function FlipEditor({
 
             <Brushes
               brush={brush}
-              onChange={b => {
+              onChange={(b) => {
                 setBrush(b)
                 if (!editors[idx]) return
                 editors[idx].setBrush({width: b, color: brushColor})
@@ -1031,7 +1032,7 @@ export default function FlipEditor({
           <Box ml={6}>
             <Brushes
               brush={brush}
-              onChange={b => {
+              onChange={(b) => {
                 setBrush(b)
                 if (!editors[idx]) return
                 editors[idx].setBrush({width: b, color: brushColor})
@@ -1043,7 +1044,7 @@ export default function FlipEditor({
 
       <ImageSearchDialog
         isOpen={showImageSearch}
-        onPick={url => {
+        onPick={(url) => {
           if (visible) {
             setImageUrl({url})
           }
@@ -1053,7 +1054,7 @@ export default function FlipEditor({
         onClose={() => {
           setShowImageSearch(false)
         }}
-        onError={error =>
+        onError={(error) =>
           toast({
             // eslint-disable-next-line react/display-name
             render: () => <Toast title={error} status="error" />,
@@ -1072,7 +1073,7 @@ export default function FlipEditor({
                 'We recommend using 3 images to tell your story so a generated nonsense image could be added to mislead bots.'
               )}
             </Text>
-            <Flex w="100%" justify="flex-end"></Flex>
+            <Flex w="100%" justify="flex-end" />
           </Flex>
         </DialogBody>
         <DialogFooter>
@@ -1252,7 +1253,7 @@ function ImageEraseEditor({
   }, [isDone])
 
   const handleMouseMove = useCallback(
-    e => {
+    (e) => {
       const ctx = canvasRef.current && canvasRef.current.getContext('2d')
 
       const x = e.nativeEvent.offsetX
@@ -1288,7 +1289,7 @@ function ImageEraseEditor({
         let img = new Image()
         img.setAttribute('crossOrigin', 'anonymous')
         img.src = url
-        img.onload = function() {
+        img.onload = function () {
           const width =
             img.width * ((imageObjectProps && imageObjectProps.scaleX) || 1)
           const height =
@@ -1311,12 +1312,16 @@ function ImageEraseEditor({
   }, [canvasRef])
 
   const left =
+    // eslint-disable-next-line no-unsafe-optional-chaining
     imageObjectProps?.x -
+    // eslint-disable-next-line no-unsafe-optional-chaining
     (imageObjectProps?.width * imageObjectProps?.scaleX) / 2 +
     1
 
   const top =
+    // eslint-disable-next-line no-unsafe-optional-chaining
     imageObjectProps?.y -
+    // eslint-disable-next-line no-unsafe-optional-chaining
     (imageObjectProps?.height * imageObjectProps?.scaleY) / 2 +
     1
 
@@ -1349,7 +1354,7 @@ function ImageEraseEditor({
             left={`${left}px`}
             top={`${top}px`}
             transform={`rotate(${angle}deg)`}
-            onMouseMove={e => handleMouseMove(e)}
+            onMouseMove={(e) => handleMouseMove(e)}
           />
         </Box>
       </Box>
@@ -1427,7 +1432,7 @@ function FlipEditorMenuItem({children, ...props}) {
       {...props}
     >
       <Stack isInline spacing={2} align="center">
-        {React.Children.map(children, child => (
+        {React.Children.map(children, (child) => (
           <Box>{child}</Box>
         ))}
       </Stack>

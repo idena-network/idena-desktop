@@ -39,7 +39,7 @@ class NodeBase {
 
   start() {
     return new Promise((resolve, reject) => {
-      this.server.listen(PORT, err => {
+      this.server.listen(PORT, (err) => {
         if (err) {
           console.log(`> Node error ${err}`)
           reject(err)

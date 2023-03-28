@@ -66,9 +66,8 @@ export default function NewFlipPage() {
 
   const failToast = useFailToast()
 
-  const [didShowShuffleAdversarial, setDidShowShuffleAdversarial] = useState(
-    false
-  )
+  const [didShowShuffleAdversarial, setDidShowShuffleAdversarial] =
+    useState(false)
 
   const [currentSearch, sendSearch] = useMachine(imageSearchMachine, {
     actions: {
@@ -115,10 +114,10 @@ export default function NewFlipPage() {
 
         return {keywordPairId, availableKeywords, didShowBadFlip}
       },
-      protectFlip: async flip => protectFlip(flip),
-      loadAdversarial: async flip => {
+      protectFlip: async (flip) => protectFlip(flip),
+      loadAdversarial: async (flip) => {
         if (
-          !flip.adversarialImages.some(x => x) &&
+          !flip.adversarialImages.some((x) => x) &&
           !eitherState(currentSearch, 'searching')
         ) {
           currentSearch.context.query = `${flip.keywords.words[0]?.name} ${flip.keywords.words[1]?.name}`
@@ -126,9 +125,9 @@ export default function NewFlipPage() {
         }
         return Promise.resolve()
       },
-      shuffleAdversarial: async flip =>
+      shuffleAdversarial: async (flip) =>
         shuffleAdversarial(flip, setDidShowShuffleAdversarial),
-      submitFlip: async flip => publishFlip(flip),
+      submitFlip: async (flip) => publishFlip(flip),
     },
     actions: {
       onMined: () => {
@@ -149,10 +148,9 @@ export default function NewFlipPage() {
 
   useEffect(() => {
     if (eitherState(currentSearch, 'done')) {
-      prepareAdversarialImages(
-        currentSearch.context.images,
-        send
-      ).catch(() => {})
+      prepareAdversarialImages(currentSearch.context.images, send).catch(
+        () => {}
+      )
     }
   }, [currentSearch, send])
 
@@ -172,10 +170,10 @@ export default function NewFlipPage() {
     txHash,
   } = current.context
 
-  const not = state => !current.matches({editing: state})
-  const is = state => current.matches({editing: state})
+  const not = (state) => !current.matches({editing: state})
+  const is = (state) => current.matches({editing: state})
   const either = (...states) =>
-    eitherState(current, ...states.map(s => ({editing: s})))
+    eitherState(current, ...states.map((s) => ({editing: s})))
 
   const isOffline = is('keywords.loaded.fetchTranslationsFailed')
 
@@ -194,7 +192,7 @@ export default function NewFlipPage() {
   })
 
   useRpc('dna_epoch', [], {
-    onSuccess: data => {
+    onSuccess: (data) => {
       send({type: 'SET_EPOCH_NUMBER', epochNumber: data.epoch})
     },
   })
@@ -212,7 +210,7 @@ export default function NewFlipPage() {
         >
           <FlipPageTitle
             onClose={() => {
-              if (images.some(x => x))
+              if (images.some((x) => x))
                 toast({
                   status: 'success',
                   // eslint-disable-next-line react/display-name
@@ -299,8 +297,8 @@ export default function NewFlipPage() {
                                   />
                                   <CommunityTranslations
                                     keywords={keywords}
-                                    onVote={e => send('VOTE', e)}
-                                    onSuggest={e => send('SUGGEST', e)}
+                                    onVote={(e) => send('VOTE', e)}
+                                    onSuggest={(e) => send('SUGGEST', e)}
                                     isOpen={isCommunityTranslationsExpanded}
                                     isPending={is(
                                       'keywords.loaded.fetchedTranslations.suggesting'
@@ -357,11 +355,11 @@ export default function NewFlipPage() {
                     send('CHANGE_IMAGES', {image, currentIndex})
                   }
                   // eslint-disable-next-line no-shadow
-                  onChangeOriginalOrder={order =>
+                  onChangeOriginalOrder={(order) =>
                     send('CHANGE_ORIGINAL_ORDER', {order})
                   }
                   onPainting={() => send('PAINTING')}
-                  onChangeAdversarialId={newIndex => {
+                  onChangeAdversarialId={(newIndex) => {
                     send('CHANGE_ADVERSARIAL_ID', {newIndex})
                   }}
                 />
@@ -380,7 +378,7 @@ export default function NewFlipPage() {
                   onProtectImage={(image, currentIndex) =>
                     send('CHANGE_PROTECTED_IMAGES', {image, currentIndex})
                   }
-                  onChangeAdversarial={image =>
+                  onChangeAdversarial={(image) =>
                     send('CHANGE_ADVERSARIAL_IMAGE', {image})
                   }
                   onShowAdversarialShuffle={() =>
@@ -394,7 +392,7 @@ export default function NewFlipPage() {
                   originalOrder={originalOrder}
                   order={order}
                   onShuffle={() => send('SHUFFLE')}
-                  onManualShuffle={nextOrder =>
+                  onManualShuffle={(nextOrder) =>
                     send('MANUAL_SHUFFLE', {order: nextOrder})
                   }
                   onReset={() => send('RESET_SHUFFLE')}

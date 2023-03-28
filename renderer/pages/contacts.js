@@ -27,10 +27,8 @@ export default function ContactsPage() {
   const [selectedContact, setSelectedContact] = React.useState(null)
 
   const sendInviteDisclosure = useDisclosure()
-  const {
-    onOpen: onOpenInviteDrawer,
-    onClose: onCloseInviteDrawer,
-  } = sendInviteDisclosure
+  const {onOpen: onOpenInviteDrawer, onClose: onCloseInviteDrawer} =
+    sendInviteDisclosure
 
   const {
     isOpen: isOpenEditContactDrawer,
@@ -84,7 +82,7 @@ export default function ContactsPage() {
                   onRemoveContact={() => {
                     setSelectedContact(null)
                   }}
-                  onRecoverContact={contact => {
+                  onRecoverContact={(contact) => {
                     setSelectedContact(contact)
                   }}
                   onKillContact={onOpenKillContactDrawer}
@@ -102,7 +100,7 @@ export default function ContactsPage() {
             inviteeAddress={query.address}
             isMining={isMining}
             {...sendInviteDisclosure}
-            onIssue={invite => {
+            onIssue={(invite) => {
               successToast({
                 title: t('Invitation code created'),
                 description: invite.hash,
@@ -110,7 +108,7 @@ export default function ContactsPage() {
               setSelectedContact(invite)
               sendInviteDisclosure.onClose()
             }}
-            onIssueFail={error => {
+            onIssueFail={(error) => {
               failToast(error ?? t('Something went wrong'))
             }}
           />
@@ -119,7 +117,7 @@ export default function ContactsPage() {
             contact={selectedContact ?? {}}
             isOpen={isOpenEditContactDrawer}
             onRename={({firstName, lastName}) => {
-              setSelectedContact(contact => ({
+              setSelectedContact((contact) => ({
                 ...contact,
                 firstName,
                 lastName,
@@ -138,7 +136,7 @@ export default function ContactsPage() {
               successToast('Invite terminated')
               onCloseKillContactDrawer()
             }}
-            onFail={error => {
+            onFail={(error) => {
               failToast({
                 title: 'Failed to terminate invite',
                 description: error,

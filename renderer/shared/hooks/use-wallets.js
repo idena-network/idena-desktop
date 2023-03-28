@@ -47,8 +47,8 @@ function transactionType(tx) {
 async function fetchWallets(address) {
   const accounts = await fetchAccountList(address)
   return Promise.all(
-    accounts.map(account =>
-      fetchBalance(account.address).then(resp => ({
+    accounts.map((account) =>
+      fetchBalance(account.address).then((resp) => ({
         ...account,
         balance: resp && (account.isStake ? resp.stake : resp.balance),
         name: account.isStake ? 'Stake' : 'Main',
@@ -68,9 +68,9 @@ async function fetchTxs({address, wallets}) {
   const txs = !txsResp
     ? []
     : await Promise.all(
-        txsResp.map(tx => {
-          if (hasReceipt.find(type => tx.type === type))
-            return fetchTransactionReceipt(tx.hash).then(resp => {
+        txsResp.map((tx) => {
+          if (hasReceipt.find((type) => tx.type === type))
+            return fetchTransactionReceipt(tx.hash).then((resp) => {
               const receipt = resp && resp.result
               const nextTx = {
                 ...tx,
@@ -94,10 +94,10 @@ async function fetchTxs({address, wallets}) {
   ]
 
   return joinedTxs
-    .filter(tx => tx && !hiddenTypes.find(type => tx.type === type))
-    .map(tx => {
-      const fromWallet = wallets.find(wallet => wallet.address === tx.from)
-      const toWallet = wallets.find(wallet => wallet.address === tx.to)
+    .filter((tx) => tx && !hiddenTypes.find((type) => tx.type === type))
+    .map((tx) => {
+      const fromWallet = wallets.find((wallet) => wallet.address === tx.from)
+      const toWallet = wallets.find((wallet) => wallet.address === tx.to)
 
       const direction = fromWallet ? 'Sent' : 'Received'
 
@@ -183,7 +183,7 @@ export function useWallets() {
           if (canceled) return
           dispatch({type: 'RESOLVE', wallets, txs})
         })
-        .catch(error => {
+        .catch((error) => {
           if (canceled) return
           dispatch({type: 'REJECT', error})
         })

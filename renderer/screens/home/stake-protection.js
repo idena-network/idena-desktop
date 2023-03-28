@@ -6,7 +6,8 @@ import {useIdentity} from '../../shared/providers/identity-context'
 import {IdentityStatus} from '../../shared/types'
 import {toPercent} from '../../shared/utils/utils'
 
-const calculateStakeLoss = age => Math.max(age === 4 ? 1 : (10 - age) / 100, 0)
+const calculateStakeLoss = (age) =>
+  Math.max(age === 4 ? 1 : (10 - age) / 100, 0)
 
 /**
  * @typedef { "miss" | "fail" } Reason

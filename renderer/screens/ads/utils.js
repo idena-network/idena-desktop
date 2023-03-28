@@ -71,7 +71,7 @@ export const areCompetingAds = (targetA, targetB) =>
 export const compareNullish = (field, targetField, condition) =>
   field ? condition(field, targetField) : true
 
-export const selectProfileHash = data => data.profileHash
+export const selectProfileHash = (data) => data.profileHash
 
 export async function getAdVoting(address) {
   const persistedAdVoting = await dexieDb
@@ -92,7 +92,8 @@ export async function getAdVoting(address) {
   return voting
 }
 
-const findContractData = (batchData, key) => batchData.find(x => x.key === key)
+const findContractData = (batchData, key) =>
+  batchData.find((x) => x.key === key)
 
 async function fetchAdVoting(address) {
   const batchData = await callRpc('contract_batchReadData', address, [
@@ -133,10 +134,10 @@ async function fetchAdVoting(address) {
   }
 }
 
-export const createContractDataReader = address => (key, format) =>
+export const createContractDataReader = (address) => (key, format) =>
   callRpc('contract_readData', address, key, format)
 
-const mapToVotingStatus = status => {
+const mapToVotingStatus = (status) => {
   switch (status) {
     case 0:
       return VotingStatus.Pending
@@ -149,7 +150,7 @@ const mapToVotingStatus = status => {
   }
 }
 
-const buildAdReviewVotingOption = option => ({
+const buildAdReviewVotingOption = (option) => ({
   id: AdVotingOptionId[option],
   value: option,
 })
@@ -192,33 +193,33 @@ export async function fetchProfileAds(address) {
   }
 }
 
-export const isApprovedVoting = voting =>
+export const isApprovedVoting = (voting) =>
   isFinalVoting(voting) &&
   isApprovedAd(voting) &&
   voting.title === adVotingDefaults.title
 
-export const isRejectedVoting = voting =>
+export const isRejectedVoting = (voting) =>
   isFinalVoting(voting) && isRejectedAd(voting)
 
-const isFinalVoting = voting =>
+const isFinalVoting = (voting) =>
   [VotingStatus.Archived, VotingStatus.Terminated].includes(voting?.status)
 
-const isApprovedAd = voting =>
+const isApprovedAd = (voting) =>
   isValidAdOption(
-    voting?.options?.find(option => option?.id === voting?.result),
+    voting?.options?.find((option) => option?.id === voting?.result),
     AdVotingOption.Approve
   )
 
-const isRejectedAd = voting =>
+const isRejectedAd = (voting) =>
   isValidAdOption(
-    voting?.options?.find(option => option?.id === voting?.result),
+    voting?.options?.find((option) => option?.id === voting?.result),
     AdVotingOption.Reject
   )
 
 export const isValidAdOption = (option, targetValue) =>
   option?.id === AdVotingOptionId[targetValue] && option?.value === targetValue
 
-export const adImageThumbSrc = ad =>
+export const adImageThumbSrc = (ad) =>
   typeof ad.thumb === 'string'
     ? ad.thumb
     : ad.thumb && URL.createObjectURL(ad.thumb)
@@ -316,10 +317,10 @@ function isExceededImageSize(image) {
 
 export const adFallbackSrc = '/static/body-medium-pic-icn.svg'
 
-export const isMiningTx = txData =>
+export const isMiningTx = (txData) =>
   (txData?.blockHash ?? HASH_IN_MEMPOOL) === HASH_IN_MEMPOOL
 
-export const isMinedTx = txData =>
+export const isMinedTx = (txData) =>
   (txData?.blockHash ?? HASH_IN_MEMPOOL) !== HASH_IN_MEMPOOL
 
 export async function sendTx(params) {
@@ -351,7 +352,7 @@ export const validateAdVoting = ({ad, voting}) => {
       'quorum',
       'committeeSize',
     ].every(
-      prop =>
+      (prop) =>
         ad.votingParams[prop] === voting[prop] &&
         ad.votingParams[prop] === adVotingDefaults[prop] &&
         voting[prop] === adVotingDefaults[prop]

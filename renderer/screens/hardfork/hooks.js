@@ -61,7 +61,7 @@ export function useHardFork() {
           fetching: {
             invoke: {
               src: async (_, {version}) => {
-                const fetchJsonResult = async path =>
+                const fetchJsonResult = async (path) =>
                   (await (await fetch(apiUrl(path))).json()).result
 
                 const forkChangelog = await fetchJsonResult(

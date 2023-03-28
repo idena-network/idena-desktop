@@ -145,7 +145,7 @@ export default function ProfilePage() {
     if (epoch && shouldExpectValidationResults(epochNumber)) {
       profileDb
         .getDidShowValidationResults()
-        .then(seen => {
+        .then((seen) => {
           setShowValidationResults(!seen)
         })
         .catch(() => {
@@ -163,26 +163,24 @@ export default function ProfilePage() {
     if (epoch && isValidated) {
       profileDb
         .getDidPlanNextValidation()
-        .then(didPlan => {
+        .then((didPlan) => {
           if (!didPlan) onOpenNextValidationDialog()
         })
-        .catch(error => {
+        .catch((error) => {
           if (error?.notFound) onOpenNextValidationDialog()
         })
     }
   }, [epoch, isValidated, onOpenNextValidationDialog, profileDb])
 
-  const [
-    currentOnboarding,
-    {dismissCurrentTask, next: nextOnboardingTask},
-  ] = useOnboarding()
+  const [currentOnboarding, {dismissCurrentTask, next: nextOnboardingTask}] =
+    useOnboarding()
 
   const eitherOnboardingState = (...states) =>
     eitherState(currentOnboarding, ...states)
 
   const toDna = toLocaleDna(language, {maximumFractionDigits: 4})
 
-  const maybeDna = amount =>
+  const maybeDna = (amount) =>
     !amount || Number.isNaN(amount) ? '–' : toDna(amount)
 
   const {
@@ -226,10 +224,8 @@ export default function ProfilePage() {
     IdentityStatus.Newbie,
   ].includes(status)
 
-  const [
-    didConnectIdenaBot,
-    {persist: persistIdenaBot, skip: skipIdenaBot},
-  ] = useIdenaBot()
+  const [didConnectIdenaBot, {persist: persistIdenaBot, skip: skipIdenaBot}] =
+    useIdenaBot()
 
   const showActivateMiningStatusIcon = canMine && !online && !delegatee
   const showValidateIdentityIcon = !canMine && Number(stake) > 0
@@ -245,7 +241,7 @@ export default function ProfilePage() {
   } = replenishStakeDisclosure
 
   React.useEffect(() => {
-    if (Object.keys(router.query).find(q => q === 'replenishStake')) {
+    if (Object.keys(router.query).find((q) => q === 'replenishStake')) {
       onOpenReplenishStakeDisclosure()
       router.push('/home')
     }
@@ -636,7 +632,7 @@ export default function ProfilePage() {
               onClose={onCloseSpoilForm}
             >
               <SpoilInviteForm
-                onSpoil={async key => {
+                onSpoil={async (key) => {
                   try {
                     await callRpc('dna_activateInviteToRandAddr', {key})
                     toast(t('Invitation is successfully spoiled'))

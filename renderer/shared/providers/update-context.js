@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, {useCallback, useEffect, useMemo} from 'react'
 import {AUTO_UPDATE_EVENT, AUTO_UPDATE_COMMAND} from '../../../main/channels'
 import {useSettingsState} from './settings-context'
 import {useInterval} from '../hooks/use-interval'
@@ -182,14 +182,14 @@ export function AutoUpdateProvider({children}) {
     global.ipcRenderer.send(AUTO_UPDATE_COMMAND, 'update-ui')
   }
 
-  const updateNode = () => {
+  const updateNode = useCallback(() => {
     if (settings.useExternalNode) {
       dispatch({type: SHOW_EXTERNAL_UPDATE_MODAL})
     } else {
       global.ipcRenderer.send(AUTO_UPDATE_COMMAND, 'update-node')
       dispatch({type: NODE_UPDATE_START})
     }
-  }
+  }, [settings.useExternalNode])
 
   const hideExternalNodeUpdateModal = () => {
     dispatch({type: HIDE_EXTERNAL_UPDATE_MODAL})
@@ -197,18 +197,24 @@ export function AutoUpdateProvider({children}) {
 
   return (
     <AutoUpdateStateContext.Provider
-      value={{
-        ...state,
-        canUpdateClient,
-        canUpdateNode,
-      }}
+      value={useMemo(
+        () => ({
+          ...state,
+          canUpdateClient,
+          canUpdateNode,
+        }),
+        [canUpdateClient, canUpdateNode, state]
+      )}
     >
       <AutoUpdateDispatchContext.Provider
-        value={{
-          updateClient,
-          updateNode,
-          hideExternalNodeUpdateModal,
-        }}
+        value={useMemo(
+          () => ({
+            updateClient,
+            updateNode,
+            hideExternalNodeUpdateModal,
+          }),
+          [updateNode]
+        )}
       >
         {children}
       </AutoUpdateDispatchContext.Provider>

@@ -86,7 +86,8 @@ export const createValidationMachine = ({
                                           shortFlips,
                                           data.filter(({hash}) =>
                                             shortFlips.find(
-                                              f => f.hash === hash && !f.flipped
+                                              (f) =>
+                                                f.hash === hash && !f.flipped
                                             )
                                           )
                                         )
@@ -162,26 +163,28 @@ export const createValidationMachine = ({
                 extraFlips: {
                   entry: log('bump extra flips'),
                   invoke: {
-                    src: ({shortFlips}) => cb => {
-                      const extraFlips = shortFlips.filter(availableExtraFlip)
-                      const replacingFlips = shortFlips.filter(failedFlip)
-                      cb({
-                        type: 'EXTRA_FLIPS_PULLED',
-                        flips:
-                          extraFlips.length >= replacingFlips.length
-                            ? replacingFlips
-                                .map(flipExtraFlip)
-                                .concat(
-                                  extraFlips
-                                    .slice(0, replacingFlips.length)
-                                    .map(flipExtraFlip)
-                                )
-                            : replacingFlips
-                                .slice(0, extraFlips.length)
-                                .map(flipExtraFlip)
-                                .concat(extraFlips.map(flipExtraFlip)),
-                      })
-                    },
+                    src:
+                      ({shortFlips}) =>
+                      (cb) => {
+                        const extraFlips = shortFlips.filter(availableExtraFlip)
+                        const replacingFlips = shortFlips.filter(failedFlip)
+                        cb({
+                          type: 'EXTRA_FLIPS_PULLED',
+                          flips:
+                            extraFlips.length >= replacingFlips.length
+                              ? replacingFlips
+                                  .map(flipExtraFlip)
+                                  .concat(
+                                    extraFlips
+                                      .slice(0, replacingFlips.length)
+                                      .map(flipExtraFlip)
+                                  )
+                              : replacingFlips
+                                  .slice(0, extraFlips.length)
+                                  .map(flipExtraFlip)
+                                  .concat(extraFlips.map(flipExtraFlip)),
+                        })
+                      },
                   },
                   on: {
                     EXTRA_FLIPS_PULLED: {
@@ -204,7 +207,7 @@ export const createValidationMachine = ({
                   actions: [
                     assign({
                       shortFlips: ({shortFlips}) =>
-                        shortFlips.map(flip => ({
+                        shortFlips.map((flip) => ({
                           ...flip,
                           fetched: false,
                           decoded: false,
@@ -228,7 +231,7 @@ export const createValidationMachine = ({
                       shortFlips: ({shortFlips}) =>
                         mergeFlipsByHash(
                           shortFlips,
-                          shortFlips.filter(failedFlip).map(flip => ({
+                          shortFlips.filter(failedFlip).map((flip) => ({
                             ...flip,
                             failed: true,
                           }))
@@ -382,9 +385,8 @@ export const createValidationMachine = ({
                               {
                                 target: 'confirm',
                                 cond: ({shortFlips}) => {
-                                  const solvableFlips = filterRegularFlips(
-                                    shortFlips
-                                  )
+                                  const solvableFlips =
+                                    filterRegularFlips(shortFlips)
                                   return (
                                     solvableFlips.length === 0 ||
                                     solvableFlips.some(
@@ -553,8 +555,10 @@ export const createValidationMachine = ({
                             'fetching missing hashes'
                           ),
                           invoke: {
-                            src: ({longFlips}) => cb =>
-                              fetchFlips(missingHashes(longFlips), cb),
+                            src:
+                              ({longFlips}) =>
+                              (cb) =>
+                                fetchFlips(missingHashes(longFlips), cb),
                             onDone: 'check',
                           },
                         },
@@ -610,7 +614,7 @@ export const createValidationMachine = ({
                       actions: [
                         assign({
                           longFlips: ({longFlips}) =>
-                            longFlips.map(flip => ({
+                            longFlips.map((flip) => ({
                               ...flip,
                               fetched: false,
                               decoded: false,
@@ -648,7 +652,7 @@ export const createValidationMachine = ({
                               longFlips,
                               longFlips
                                 .filter(({ready}) => !ready)
-                                .map(flip => ({
+                                .map((flip) => ({
                                   ...flip,
                                   failed: true,
                                 }))
@@ -664,7 +668,7 @@ export const createValidationMachine = ({
                           longFlips: ({longFlips}) =>
                             mergeFlipsByHash(
                               longFlips,
-                              longFlips.map(flip => ({
+                              longFlips.map((flip) => ({
                                 ...flip,
                                 failed: true,
                               }))
@@ -687,7 +691,7 @@ export const createValidationMachine = ({
                                 .then(async ({result}) => ({
                                   hash,
                                   words: await Promise.all(
-                                    result?.words.map(async id => ({
+                                    result?.words.map(async (id) => ({
                                       id,
                                       ...(await loadKeyword(id)),
                                     })) ?? []
@@ -867,7 +871,7 @@ export const createValidationMachine = ({
                       },
                     },
                     keywords: {
-                      invoke: {src: () => cb => cb({type: 'PICK', index: 0})},
+                      invoke: {src: () => (cb) => cb({type: 'PICK', index: 0})},
                       on: {
                         ANSWER: {
                           actions: [
@@ -1025,18 +1029,22 @@ export const createValidationMachine = ({
     {
       services: {
         fetchShortHashes: () => fetchFlipHashes(SessionType.Short),
-        fetchShortFlips: ({shortFlips}) => cb =>
-          fetchFlips(
-            shortFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
-            cb
-          ),
+        fetchShortFlips:
+          ({shortFlips}) =>
+          (cb) =>
+            fetchFlips(
+              shortFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
+              cb
+            ),
         fetchLongHashes: () => fetchFlipHashes(SessionType.Long),
-        fetchLongFlips: ({longFlips}) => cb =>
-          fetchFlips(
-            longFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
-            cb,
-            1000
-          ),
+        fetchLongFlips:
+          ({longFlips}) =>
+          (cb) =>
+            fetchFlips(
+              longFlips.filter(readyNotFetchedFlip).map(({hash}) => hash),
+              cb,
+              1000
+            ),
         // eslint-disable-next-line no-shadow
         fetchTranslations: ({longFlips, currentIndex, locale}) =>
           fetchConfirmedKeywordTranslations(
@@ -1096,7 +1104,7 @@ export const createValidationMachine = ({
       actions: {
         approveFlip: assign({
           bestFlipHashes: ({longFlips, bestFlipHashes}, {hash}) => {
-            const flip = longFlips.find(x => x.hash === hash)
+            const flip = longFlips.find((x) => x.hash === hash)
             if (
               flip.relevance === RelevanceType.Relevant &&
               bestFlipHashes[hash]
@@ -1106,7 +1114,7 @@ export const createValidationMachine = ({
             return bestFlipHashes
           },
           longFlips: ({longFlips}, {hash}) => {
-            const flip = longFlips.find(x => x.hash === hash)
+            const flip = longFlips.find((x) => x.hash === hash)
             return mergeFlipsByHash(longFlips, [
               {
                 hash,
@@ -1135,7 +1143,7 @@ export const createValidationMachine = ({
                   return bestFlipHashes
                 },
                 longFlips: ({longFlips}, {hash}) => {
-                  const flip = longFlips.find(x => x.hash === hash)
+                  const flip = longFlips.find((x) => x.hash === hash)
                   return mergeFlipsByHash(longFlips, [
                     {
                       hash,
@@ -1229,7 +1237,7 @@ export const createValidationMachine = ({
         didFetchShortFlips: ({shortFlips}) => {
           const regularFlips = filterRegularFlips(shortFlips)
           return (
-            regularFlips.some(x => x) &&
+            regularFlips.some((x) => x) &&
             regularFlips.every(
               ({ready, fetched, decoded}) => ready && fetched && decoded
             )
@@ -1244,7 +1252,7 @@ export const createValidationMachine = ({
 
 function fetchFlips(hashes, cb, delay = 0) {
   global.logger.debug(`Calling flip_get rpc for hashes`, hashes)
-  return forEachAsync(hashes, hash =>
+  return forEachAsync(hashes, (hash) =>
     fetchFlip(hash)
       .then(({result, error}) => {
         global.logger.debug(`Get flip_get response`, hash)
@@ -1289,10 +1297,10 @@ function decodeFlip({hash, hex, publicHex, privateHex}) {
     return {
       hash,
       decoded: true,
-      images: images.map(buffer =>
+      images: images.map((buffer) =>
         URL.createObjectURL(new Blob([buffer], {type: 'image/png'}))
       ),
-      orders: orders.map(order => order.map(([idx = 0]) => idx)),
+      orders: orders.map((order) => order.map(([idx = 0]) => idx)),
       hex: '',
     }
   } catch {
@@ -1334,7 +1342,7 @@ const stepStates = {
 }
 
 function mergeFlipsByHash(flips, anotherFlips) {
-  return flips.map(flip => {
+  return flips.map((flip) => {
     const anotherFlip = anotherFlips.find(({hash}) => hash === flip.hash)
 
     if (anotherFlip) {
@@ -1363,7 +1371,5 @@ async function fetchWords(hash) {
 }
 
 export function adjustDurationInSeconds(validationStart, duration) {
-  return dayjs(validationStart)
-    .add(duration, 's')
-    .diff(dayjs(), 's')
+  return dayjs(validationStart).add(duration, 's').diff(dayjs(), 's')
 }

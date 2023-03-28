@@ -145,7 +145,7 @@ export function Flip({
     return () => mousetrap.unbind('esc', 'keyup')
   }, [isOpenFlipZoom, onCloseFlipZoom])
 
-  const scrollToZoomedFlip = flipId => {
+  const scrollToZoomedFlip = (flipId) => {
     scroller.scrollTo(`flipId-${flipId}`, {
       container: refContainer.current?.firstChild,
       horizontal: false,
@@ -183,7 +183,7 @@ export function Flip({
             height="calc((100vh - 260px) / 4)"
             position="relative"
             overflow="hidden"
-            onClick={e => {
+            onClick={(e) => {
               if (e.ctrlKey || e.metaKey) {
                 onOpenFlipZoom()
                 setTimeout(() => scrollToZoomedFlip(idx), 100)
@@ -208,7 +208,7 @@ export function Flip({
                   opacity={0.5}
                   _hover={{opacity: 1}}
                   zIndex={2}
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation()
                     onOpenFlipZoom()
                   }}
@@ -469,8 +469,9 @@ export function ThumbnailList({currentIndex, ...props}) {
       minH={12}
       position="relative"
       zIndex={1}
-      transform={`translateX(50%) translateX(-${totalThumbWidth *
-        (currentIndex + 1 / 2)}px)`}
+      transform={`translateX(50%) translateX(-${
+        totalThumbWidth * (currentIndex + 1 / 2)
+      }px)`}
       transition="transform .3s ease-out"
       {...props}
     />
@@ -690,7 +691,7 @@ export function FlipWords({
           <FlipKeywordTranslationSwitch
             keywords={{
               words,
-              translations: wordTranslations.map(x => (x ? [x] : [])),
+              translations: wordTranslations.map((x) => (x ? [x] : [])),
             }}
             showTranslation={shouldShowTranslation}
             locale={i18n.language}
@@ -1029,11 +1030,11 @@ export function ReviewValidationDialog({
   const areFlipsUnanswered = answeredFlipsCount < flips.length
 
   const approvedCount = flips.filter(
-    flip => flip.relevance === RelevanceType.Relevant
+    (flip) => flip.relevance === RelevanceType.Relevant
   ).length
 
   const abstainedCount = flips.filter(
-    flip =>
+    (flip) =>
       (flip.relevance ?? RelevanceType.Abstained) === RelevanceType.Abstained
   ).length
 

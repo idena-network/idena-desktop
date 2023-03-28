@@ -55,7 +55,7 @@ describe('buildDeploymentArgs', () => {
     })
 
     it('should respect valid value', () => {
-      ;[10, 22, 33, 51, 65, 77, 99].forEach(v =>
+      ;[10, 22, 33, 51, 65, 77, 99].forEach((v) =>
         expect(
           buildContractDeploymentArgs(
             {

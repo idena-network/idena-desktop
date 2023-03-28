@@ -68,28 +68,30 @@ export const activateMiningMachine = createMachine({
         },
         mining: {
           invoke: {
-            src: ({hash}) => cb => {
-              let timeoutId
+            src:
+              ({hash}) =>
+              (cb) => {
+                let timeoutId
 
-              const fetchStatus = async () => {
-                try {
-                  const result = await callRpc('bcn_transaction', hash)
-                  if (result.blockHash !== HASH_IN_MEMPOOL) {
-                    cb({type: 'MINED'})
-                  } else {
-                    timeoutId = setTimeout(fetchStatus, 10 * 1000)
+                const fetchStatus = async () => {
+                  try {
+                    const result = await callRpc('bcn_transaction', hash)
+                    if (result.blockHash !== HASH_IN_MEMPOOL) {
+                      cb({type: 'MINED'})
+                    } else {
+                      timeoutId = setTimeout(fetchStatus, 10 * 1000)
+                    }
+                  } catch (error) {
+                    global.logger.error('Error retrieving tx', hash)
                   }
-                } catch (error) {
-                  global.logger.error('Error retrieving tx', hash)
                 }
-              }
 
-              timeoutId = setTimeout(fetchStatus, 10 * 1000)
+                timeoutId = setTimeout(fetchStatus, 10 * 1000)
 
-              return () => {
-                clearTimeout(timeoutId)
-              }
-            },
+                return () => {
+                  clearTimeout(timeoutId)
+                }
+              },
           },
           on: {
             MINED: {

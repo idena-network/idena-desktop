@@ -74,9 +74,9 @@ export function hexToUint8Array(hexString) {
 export function toHexString(byteArray, withPrefix) {
   return (
     (withPrefix ? '0x' : '') +
-    Array.from(byteArray, function(byte) {
+    Array.from(byteArray, (byte) =>
       // eslint-disable-next-line no-bitwise
-      return `0${(byte & 0xff).toString(16)}`.slice(-2)
-    }).join('')
+      `0${(byte & 0xff).toString(16)}`.slice(-2)
+    ).join('')
   )
 }

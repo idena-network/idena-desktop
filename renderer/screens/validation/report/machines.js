@@ -58,13 +58,15 @@ export const validationReportMachine = createMachine({
               },
             }
           ) => {
-            const safeNumber = num => Number(num ?? 0)
+            const safeNumber = (num) => Number(num ?? 0)
 
-            const maybePenaltyReward = (cond => plannedReward =>
-              cond ? 0 : plannedReward)(penalized)
+            const maybePenaltyReward = (
+              (cond) => (plannedReward) =>
+                cond ? 0 : plannedReward
+            )(penalized)
 
-            const earnedReward = k => safeNumber(rewards[k].earned)
-            const missedReward = k => safeNumber(rewards[k].missed)
+            const earnedReward = (k) => safeNumber(rewards[k].earned)
+            const missedReward = (k) => safeNumber(rewards[k].missed)
 
             const {totalEarnedReward, totalMissedReward} = Object.keys(
               rewards

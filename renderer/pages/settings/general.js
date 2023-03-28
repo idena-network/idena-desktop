@@ -32,7 +32,7 @@ function Settings() {
 
   const toast = useToast()
 
-  const showSuccessToast = title =>
+  const showSuccessToast = (title) =>
     toast({
       // eslint-disable-next-line react/display-name
       render: () => <Toast title={title} />,

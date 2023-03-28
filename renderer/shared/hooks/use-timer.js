@@ -18,7 +18,7 @@ export function useTimer(duration) {
 
   const reset = React.useCallback(
     // eslint-disable-next-line no-shadow
-    duration => {
+    (duration) => {
       send('RESET', {duration})
     },
     [send]
@@ -63,13 +63,15 @@ const timerMachine = createMachine({
         }),
       ],
       invoke: {
-        src: ({interval}) => cb => {
-          const intervalId = setInterval(() => {
-            cb('TICK')
-          }, interval)
+        src:
+          ({interval}) =>
+          (cb) => {
+            const intervalId = setInterval(() => {
+              cb('TICK')
+            }, interval)
 
-          return () => clearInterval(intervalId)
-        },
+            return () => clearInterval(intervalId)
+          },
       },
       on: {
         TICK: {

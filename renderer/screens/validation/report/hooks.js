@@ -21,7 +21,7 @@ export function useValidationReportSummary() {
   React.useEffect(() => {
     if (epoch && identity?.address)
       send('FETCH', {
-        epochNumber: epoch?.epoch - 1,
+        epochNumber: epoch.epoch - 1,
         identity,
       })
   }, [epoch, identity, send])

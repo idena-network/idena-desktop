@@ -198,9 +198,10 @@ function StatusContent(props) {
   )
 }
 
-const StatusText = React.forwardRef(function StatusText(props, ref) {
-  return <Text ref={ref} fontWeight={500} {...props} />
-})
+// eslint-disable-next-line react/display-name
+const StatusText = React.forwardRef((props, ref) => (
+  <Text ref={ref} fontWeight={500} {...props} />
+))
 
 function ConnectionBandwidth() {
   const {t} = useTranslation()
@@ -378,10 +379,8 @@ function ActionPanel() {
   const identity = useIdentityState()
   const epoch = useEpochState()
 
-  const [
-    currentOnboarding,
-    {showCurrentTask, dismissCurrentTask},
-  ] = useOnboarding()
+  const [currentOnboarding, {showCurrentTask, dismissCurrentTask}] =
+    useOnboarding()
 
   if (syncing || !epoch) {
     return null
@@ -444,80 +443,78 @@ function ActionPanel() {
         </Box>
 
         {currentPeriod === EpochPeriod.None && (
-          <>
-            <OnboardingPopover
-              isOpen={eitherOnboardingState(
-                onboardingShowingStep(OnboardingStep.Validate)
-              )}
-              placement="right"
-            >
-              <PopoverTrigger>
-                <Box
-                  bg={
-                    eitherOnboardingState(
-                      onboardingShowingStep(OnboardingStep.Validate)
-                    )
-                      ? 'rgba(216, 216, 216, .1)'
-                      : 'transparent'
-                  }
-                  position="relative"
-                  zIndex={9}
-                >
-                  <ActionItem title={t('Next validation')}>
-                    {formatValidationDate(nextValidation, language)}
-                  </ActionItem>
-                </Box>
-              </PopoverTrigger>
-              <Portal>
-                <OnboardingPopoverContent
-                  title={t('Schedule your next validation')}
-                  maxW="sm"
-                  additionFooterActions={
-                    <Button
-                      variant="unstyled"
-                      onClick={() => {
-                        global.openExternal(
-                          'https://medium.com/idena/how-do-i-start-using-idena-c49418e01a06'
-                        )
-                      }}
-                    >
-                      {t('Read more')}
-                    </Button>
-                  }
-                  onDismiss={dismissCurrentTask}
-                >
-                  <Stack spacing={5}>
-                    <OnboardingPopoverContentIconRow icon={TelegramIcon}>
-                      <Trans i18nKey="onboardingValidateSubscribe" t={t}>
-                        <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
-                          Subscribe
-                        </OnboardingLinkButton>{' '}
-                        to the Idena Announcements (important updates only)
-                      </Trans>
-                    </OnboardingPopoverContentIconRow>
-                    <OnboardingPopoverContentIconRow icon={SyncIcon}>
-                      {t(
-                        `Keep your node synchronized in 45-60 minutes before the validation starts.`
-                      )}
-                    </OnboardingPopoverContentIconRow>
-                    <OnboardingPopoverContentIconRow icon={TimerIcon}>
-                      {t(
-                        `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
-                      )}
-                    </OnboardingPopoverContentIconRow>
-                    <OnboardingPopoverContentIconRow icon={GalleryIcon}>
-                      <Trans i18nKey="onboardingValidateTest" t={t}>
-                        <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
-                          Test yourself
-                        </OnboardingLinkButton>{' '}
-                        before the validation
-                      </Trans>
-                    </OnboardingPopoverContentIconRow>
-                  </Stack>
-                </OnboardingPopoverContent>
-              </Portal>
-            </OnboardingPopover>
-          </>
+          <OnboardingPopover
+            isOpen={eitherOnboardingState(
+              onboardingShowingStep(OnboardingStep.Validate)
+            )}
+            placement="right"
+          >
+            <PopoverTrigger>
+              <Box
+                bg={
+                  eitherOnboardingState(
+                    onboardingShowingStep(OnboardingStep.Validate)
+                  )
+                    ? 'rgba(216, 216, 216, .1)'
+                    : 'transparent'
+                }
+                position="relative"
+                zIndex={9}
+              >
+                <ActionItem title={t('Next validation')}>
+                  {formatValidationDate(nextValidation, language)}
+                </ActionItem>
+              </Box>
+            </PopoverTrigger>
+            <Portal>
+              <OnboardingPopoverContent
+                title={t('Schedule your next validation')}
+                maxW="sm"
+                additionFooterActions={
+                  <Button
+                    variant="unstyled"
+                    onClick={() => {
+                      global.openExternal(
+                        'https://medium.com/idena/how-do-i-start-using-idena-c49418e01a06'
+                      )
+                    }}
+                  >
+                    {t('Read more')}
+                  </Button>
+                }
+                onDismiss={dismissCurrentTask}
+              >
+                <Stack spacing={5}>
+                  <OnboardingPopoverContentIconRow icon={TelegramIcon}>
+                    <Trans i18nKey="onboardingValidateSubscribe" t={t}>
+                      <OnboardingLinkButton href="https://t.me/IdenaAnnouncements">
+                        Subscribe
+                      </OnboardingLinkButton>{' '}
+                      to the Idena Announcements (important updates only)
+                    </Trans>
+                  </OnboardingPopoverContentIconRow>
+                  <OnboardingPopoverContentIconRow icon={SyncIcon}>
+                    {t(
+                      `Keep your node synchronized in 45-60 minutes before the validation starts.`
+                    )}
+                  </OnboardingPopoverContentIconRow>
+                  <OnboardingPopoverContentIconRow icon={TimerIcon}>
+                    {t(
+                      `Solve the flips quickly when validation starts. The first 6 flips must be submitted in less than 2 minutes.`
+                    )}
+                  </OnboardingPopoverContentIconRow>
+                  <OnboardingPopoverContentIconRow icon={GalleryIcon}>
+                    <Trans i18nKey="onboardingValidateTest" t={t}>
+                      <OnboardingLinkButton href="https://flips.idena.io/?pass=idena.io">
+                        Test yourself
+                      </OnboardingLinkButton>{' '}
+                      before the validation
+                    </Trans>
+                  </OnboardingPopoverContentIconRow>
+                </Stack>
+              </OnboardingPopoverContent>
+            </Portal>
+          </OnboardingPopover>
         )}
       </Stack>
 
@@ -580,6 +577,7 @@ function PulseFrame({isActive, children, ...props}) {
           animation="pulseFrame 1.2s infinite"
         >
           {children}
+          {/* eslint-disable-next-line react/no-unknown-property */}
           <style jsx global>{`
             @keyframes pulseFrame {
               0% {
@@ -821,26 +819,29 @@ export function Version({
           </Text>
         )}
 
-        {canUpdateNode && (!nodeProgress || nodeProgress.percentage === 100) && (
-          <>
-            {isForkAvailable ? (
-              <>
-                {didActivateFork || !didRejectFork ? null : (
-                  <UpdateButton
-                    version={nodeRemoteVersion}
-                    onClick={onResetForkVoting}
-                  >
-                    {t('Update Node Version')}
-                  </UpdateButton>
-                )}
-              </>
-            ) : (
-              <UpdateButton version={nodeRemoteVersion} onClick={updateNode}>
-                {t('Update Node Version')}
-              </UpdateButton>
-            )}
-          </>
-        )}
+        {canUpdateNode &&
+          (!nodeProgress || nodeProgress.percentage === 100) && (
+            // eslint-disable-next-line react/jsx-no-useless-fragment
+            <>
+              {isForkAvailable ? (
+                // eslint-disable-next-line react/jsx-no-useless-fragment
+                <>
+                  {didActivateFork || !didRejectFork ? null : (
+                    <UpdateButton
+                      version={nodeRemoteVersion}
+                      onClick={onResetForkVoting}
+                    >
+                      {t('Update Node Version')}
+                    </UpdateButton>
+                  )}
+                </>
+              ) : (
+                <UpdateButton version={nodeRemoteVersion} onClick={updateNode}>
+                  {t('Update Node Version')}
+                </UpdateButton>
+              )}
+            </>
+          )}
       </Stack>
     </Stack>
   )

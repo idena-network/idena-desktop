@@ -18,9 +18,7 @@ module.exports = {
     return getContacts().value()
   },
   getContact(id) {
-    return getContacts()
-      .find({id})
-      .read()
+    return getContacts().find({id}).read()
   },
   addContact(contact) {
     return getContacts()
@@ -28,8 +26,6 @@ module.exports = {
       .write()
   },
   removeContact(id) {
-    return getContacts()
-      .remove({id})
-      .write()
+    return getContacts().remove({id}).write()
   },
 }

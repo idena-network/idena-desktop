@@ -166,12 +166,12 @@ export const theme = {
             maxW: '480px',
           },
         },
-        '416': {
+        416: {
           dialog: {
             maxW: '416px',
           },
         },
-        '664': {
+        664: {
           dialog: {
             maxW: '664px',
           },

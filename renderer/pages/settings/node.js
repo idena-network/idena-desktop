@@ -223,7 +223,7 @@ function NodeSettings() {
             <Stack
               spacing={3}
               as="form"
-              onSubmit={e => {
+              onSubmit={(e) => {
                 e.preventDefault()
                 setConnectionDetails(state)
                 notify()
@@ -236,7 +236,7 @@ function NodeSettings() {
                 <Input
                   id="url"
                   value={state.url}
-                  onChange={e =>
+                  onChange={(e) =>
                     dispatch({type: 'SET_URL', data: e.target.value})
                   }
                 />
@@ -250,7 +250,7 @@ function NodeSettings() {
                     id="key"
                     value={state.apiKey}
                     type={revealApiKey ? 'text' : 'password'}
-                    onChange={e =>
+                    onChange={(e) =>
                       dispatch({type: 'SET_API_KEY', data: e.target.value})
                     }
                   />

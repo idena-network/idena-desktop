@@ -17,7 +17,7 @@ export function requestDb(name = 'db') {
   return idenaDb
 }
 
-export const epochDb = (db, epoch = -1, options) => {
+export const epochDb = (db, epoch = -1, options = {}) => {
   const epochPrefix = `epoch${epoch}`
 
   const nextOptions = {
@@ -71,7 +71,7 @@ export const epochDb = (db, epoch = -1, options) => {
       }
 
       const savedItems = await Promise.all(
-        ids.map(async id => {
+        ids.map(async (id) => {
           const normalizedId = normalizeId(id)
           return {
             ...(await targetDb.get(normalizedId)),
@@ -83,7 +83,7 @@ export const epochDb = (db, epoch = -1, options) => {
       for (const {id, ...item} of savedItems) {
         batch = batch.put(id, {
           ...item,
-          ...items.find(x => x.id === id),
+          ...items.find((x) => x.id === id),
         })
       }
 
@@ -103,7 +103,7 @@ export async function loadPersistedItems(db) {
   const ids = (await db.get('ids')).map(normalizeId)
 
   return Promise.all(
-    ids.map(async id => ({
+    ids.map(async (id) => ({
       id,
       ...(await db.get(id)),
     }))
@@ -113,11 +113,7 @@ export async function loadPersistedItems(db) {
 export async function addPersistedItem(db, {id = nanoid(), ...item}) {
   const ids = [...(await safeReadIds(db)), id]
 
-  await db
-    .batch()
-    .put('ids', ids)
-    .put(id, item)
-    .write()
+  await db.batch().put('ids', ids).put(id, item).write()
 
   return {...item, id}
 }
@@ -136,7 +132,7 @@ export async function updatePersistedItem(db, id, item) {
 export async function deletePersistedItem(db, id) {
   return db
     .batch()
-    .put('ids', await safeReadIds(db).filter(x => x !== id))
+    .put('ids', await safeReadIds(db).filter((x) => x !== id))
     .del(id)
     .write()
 }

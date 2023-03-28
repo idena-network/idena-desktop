@@ -502,7 +502,7 @@ function NewVotingPage() {
                   >
                     <RadioGroup
                       value={winnerThreshold}
-                      onChange={value => {
+                      onChange={(value) => {
                         send('CHANGE', {
                           id: 'winnerThreshold',
                           value,
@@ -582,12 +582,12 @@ function NewVotingPage() {
               stake,
             })
           }
-          onError={e => send('ERROR', e)}
+          onError={(e) => send('ERROR', e)}
         />
 
         <NewOraclePresetDialog
           isOpen={eitherState(current, 'choosingPreset')}
-          onChoosePreset={preset => send('CHOOSE_PRESET', {preset})}
+          onChoosePreset={(preset) => send('CHOOSE_PRESET', {preset})}
           onCancel={() => send('CANCEL')}
         />
 

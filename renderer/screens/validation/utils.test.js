@@ -107,7 +107,7 @@ describe('hasEnoughAnswers', () => {
 
 describe('exponentialBackoff', () => {
   it('works!', () => {
-    ;[0, 1, 2, 3].forEach(n => {
+    ;[0, 1, 2, 3].forEach((n) => {
       expect(exponentialBackoff(n)).toBeLessThan(2 ** n + 1)
       expect(exponentialBackoff(n)).toBeGreaterThan(2 ** n)
     })
@@ -134,12 +134,9 @@ describe('shouldTranslate', () => {
   })
 
   it('should not translate if words are nullish', () => {
-    ;[
-      {words: {}},
-      {words: []},
-      {words: null},
-      {words: undefined},
-    ].forEach(flip => expect(shouldTranslate(null, flip)).toBeFalsy())
+    ;[{words: {}}, {words: []}, {words: null}, {words: undefined}].forEach(
+      (flip) => expect(shouldTranslate(null, flip)).toBeFalsy()
+    )
   })
 
   it('should translate if some word has missing translation, or both', () => {
@@ -206,7 +203,11 @@ describe('merge', () => {
     ])
 
     expect(
-      merge(x => ({hash}) => hash === x.hash)(
+      merge(
+        (x) =>
+          ({hash}) =>
+            hash === x.hash
+      )(
         [{hash: 'a', foo: 'foo'}, {hash: 'b'}, {hash: 'c'}],
         [{hash: 'a', bar: 'bar'}, {hash: 'b'}, {hash: 'c'}],
         [{hash: 'a', foobar: 'foobar'}, {hash: 'b'}, {hash: 'c'}]

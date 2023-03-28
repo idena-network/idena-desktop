@@ -1,5 +1,6 @@
+/* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, {useMemo} from 'react'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import ReactDOM from 'react-dom'
 import NextLink from 'next/link'
@@ -66,24 +67,22 @@ import {
   MoreIcon,
 } from './icons'
 
-export const Page = React.forwardRef(function Page(props, ref) {
-  return (
-    <Flex
-      ref={ref}
-      flexDirection="column"
-      align="flex-start"
-      flexBasis={0}
-      flexGrow={999}
-      maxH="100vh"
-      minW="50%"
-      px="20"
-      py="6"
-      overflowY="auto"
-      position="relative"
-      {...props}
-    />
-  )
-})
+export const Page = React.forwardRef((props, ref) => (
+  <Flex
+    ref={ref}
+    flexDirection="column"
+    align="flex-start"
+    flexBasis={0}
+    flexGrow={999}
+    maxH="100vh"
+    minW="50%"
+    px="20"
+    py="6"
+    overflowY="auto"
+    position="relative"
+    {...props}
+  />
+))
 
 export function PageTitle(props) {
   return (
@@ -480,22 +479,20 @@ export function ErrorAlert({children, ...props}) {
   )
 }
 
-export const VDivider = React.forwardRef(function VDivider(props, ref) {
-  return (
-    <Divider
-      ref={ref}
-      orientation="vertical"
-      borderColor="gray.300"
-      h={6}
-      mx={0}
-      {...props}
-    />
-  )
-})
+export const VDivider = React.forwardRef((props, ref) => (
+  <Divider
+    ref={ref}
+    orientation="vertical"
+    borderColor="gray.300"
+    h={6}
+    mx={0}
+    {...props}
+  />
+))
 
-export const HDivider = React.forwardRef(function HDivider(props, ref) {
-  return <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
-})
+export const HDivider = React.forwardRef((props, ref) => (
+  <Divider ref={ref} borderColor="gray.300" my={0} {...props} />
+))
 
 export function ExternalLink({
   href,
@@ -697,7 +694,9 @@ const FilterContext = React.createContext()
 export function FilterButtonList({value, onChange, children, ...props}) {
   return (
     <HStack {...props}>
-      <FilterContext.Provider value={{value, onChange}}>
+      <FilterContext.Provider
+        value={useMemo(() => ({value, onChange}), [onChange, value])}
+      >
         {children}
       </FilterContext.Provider>
     </HStack>
@@ -705,16 +704,14 @@ export function FilterButtonList({value, onChange, children, ...props}) {
 }
 
 export function FilterButton({value, onClick, ...props}) {
-  const {
-    value: currentValue,
-    onChange: onChangeCurrentValue,
-  } = React.useContext(FilterContext)
+  const {value: currentValue, onChange: onChangeCurrentValue} =
+    React.useContext(FilterContext)
 
   return (
     <Button
       variant="tab"
       isActive={value === currentValue}
-      onClick={e => {
+      onClick={(e) => {
         onChangeCurrentValue(value)
         if (onClick) onClick(e)
       }}

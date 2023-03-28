@@ -159,6 +159,7 @@ export function AdNumberInput({addon, ...props}) {
   )
 }
 
+// eslint-disable-next-line react/display-name
 export const NewAdFormTab = React.forwardRef((props, ref) => {
   const tabProps = useTab({...props, ref})
   const isSelected = Boolean(tabProps['aria-selected'])

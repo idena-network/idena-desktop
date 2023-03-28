@@ -11,7 +11,7 @@ function getFlips() {
 }
 
 function getFlip(id) {
-  return store.get(keyName, []).find(draft => draft.id === id)
+  return store.get(keyName, []).find((draft) => draft.id === id)
 }
 
 function saveFlips(flips) {
@@ -42,7 +42,7 @@ function deleteDraft(id) {
   const drafts = store.get(keyName, [])
   store.set(
     keyName,
-    drafts.map(flip =>
+    drafts.map((flip) =>
       flip.id === id ? flip : {...flip, type: 'Removed', images: null}
     )
   )
