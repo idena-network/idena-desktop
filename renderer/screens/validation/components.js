@@ -684,8 +684,8 @@ export function FlipWords({
   const shouldShowTranslation = showTranslation && hasApprovedTranslation
 
   return (
-    <Box fontSize="md" color="gray.500" ml="8" w="40">
-      <FlipKeywordPanel w="40" mb={8}>
+    <Box fontSize="md" color="gray.500" ml="8" w={320}>
+      <FlipKeywordPanel w={320} mb={8}>
         {words.length ? (
           <FlipKeywordTranslationSwitch
             keywords={{
@@ -707,7 +707,7 @@ export function FlipWords({
                 'The author of the flip has not published the keywords yet. Please wait or skip this flip.'
               )}
             </Box>
-            <Box pt="2">
+            <Box pt="2" alignSelf="center">
               <FlipWordsTimer
                 validationStart={validationStart}
                 duration={210}
