@@ -16,7 +16,7 @@ import {
   List,
   ListItem,
   AspectRatio,
-  Spinner,
+  Spinner as SpinnerPrimitive,
   useDisclosure,
   Tooltip,
   ModalBody,
@@ -358,7 +358,7 @@ function LoadingFlip() {
   return (
     <FlipHolder cursor="not-allowed">
       <FillCenter>
-        <Spinner size="lg" thickness={4} color="blue.500" />
+        <Spinner size="lg" />
       </FillCenter>
     </FlipHolder>
   )
@@ -617,7 +617,7 @@ function ThumbnailHolder({isCurrent, isBest, children, ...props}) {
 }
 
 function LoadingThumbnail() {
-  return <Spinner color="blue.500" thickness={4} />
+  return <Spinner />
 }
 
 function FailedThumbnail() {
@@ -1524,7 +1524,7 @@ export function SynchronizingValidationAlert({children, ...props}) {
       {...props}
     >
       <Stack isInline align="center">
-        <Spinner boxSize={4} />
+        <Spinner color="white" size="xs" thickness="2px" />
         <Text>{children}</Text>
       </Stack>
     </NotSyncedAlert>
@@ -1555,6 +1555,17 @@ function NotSyncedAlert(props) {
       top={2}
       left={2}
       right={2}
+      {...props}
+    />
+  )
+}
+
+function Spinner(props) {
+  return (
+    <SpinnerPrimitive
+      speed="1.2s"
+      thickness="4px"
+      color="blue.500"
       {...props}
     />
   )
