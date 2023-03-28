@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/router'
 import {useTranslation} from 'react-i18next'
-import {useService} from '@xstate/react'
+import {useActor} from '@xstate/react'
 import {
   Box,
   Stack,
@@ -113,7 +113,7 @@ export function VotingCard({votingRef, ...props}) {
 
   const {t, i18n} = useTranslation()
 
-  const [current, send] = useService(votingRef)
+  const [current, send] = useActor(votingRef)
 
   const {
     id,
@@ -934,7 +934,7 @@ export function VotingDurationInput({
 }) {
   const {t} = useTranslation()
 
-  const [, send] = useService(service)
+  const [, send] = useActor(service)
 
   return (
     <PresetFormControl tooltip={tooltip} {...props}>
@@ -1010,7 +1010,7 @@ export const VotingFilter = React.forwardRef(
 VotingFilter.displayName = 'VotingFilter'
 
 export function VotingResult({votingService, ...props}) {
-  const [current] = useService(votingService)
+  const [current] = useActor(votingService)
 
   const {
     status,
@@ -1285,7 +1285,7 @@ export function ProlongDrawer({
 export function LaunchVotingDrawer({votingService}) {
   const identity = useIdentityState()
 
-  const [current, send] = useService(votingService)
+  const [current, send] = useActor(votingService)
 
   const {balance, ownerDeposit, rewardsFund, ownerFee} = current.context
 
@@ -1317,7 +1317,7 @@ export function LaunchVotingDrawer({votingService}) {
 export function VotingPhase({canFinish, canProlong, canTerminate, service}) {
   const {t} = useTranslation()
 
-  const [current] = useService(service)
+  const [current] = useActor(service)
 
   const {
     createDate,

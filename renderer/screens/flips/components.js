@@ -33,7 +33,7 @@ import {
 } from '@chakra-ui/react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
-import {useService} from '@xstate/react'
+import {useActor} from '@xstate/react'
 import Jimp from 'jimp'
 import FlipEditor from './components/flip-editor'
 import {Step} from './types'
@@ -97,7 +97,7 @@ export function FlipCardList(props) {
 export function FlipCard({flipService, onDelete}) {
   const {t} = useTranslation()
 
-  const [current, send] = useService(flipService)
+  const [current, send] = useActor(flipService)
   const {
     id,
     keywords,
