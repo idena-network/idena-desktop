@@ -6,7 +6,7 @@ import GoogleFonts from 'next-google-fonts'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'tui-image-editor/dist/tui-image-editor.css'
 import '../i18n'
-import {QueryClient, QueryClientProvider} from 'react-query'
+import {QueryClientProvider} from 'react-query'
 import {theme} from '../shared/theme'
 import {NodeProvider} from '../shared/providers/node-context'
 import {SettingsProvider} from '../shared/providers/settings-context'
@@ -17,6 +17,7 @@ import {EpochProvider} from '../shared/providers/epoch-context'
 import {IdentityProvider} from '../shared/providers/identity-context'
 import {VotingNotificationProvider} from '../shared/providers/voting-notification-context'
 import {OnboardingProvider} from '../shared/providers/onboarding-context'
+import {queryClient} from '../shared/utils/utils'
 
 // err is a workaround for https://github.com/zeit/next.js/issues/8592
 export default function App({Component, err, ...pageProps}) {
@@ -35,8 +36,6 @@ export default function App({Component, err, ...pageProps}) {
     </>
   )
 }
-
-const queryClient = new QueryClient()
 
 function AppProviders(props) {
   return (
