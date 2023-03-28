@@ -116,6 +116,7 @@
     "next": "^9.5.1",
     "next-google-fonts": "^1.2.1",
     "pino": "^5.13.2",
+    "prettier": "^2.8.7",
     "progress-stream": "^2.0.0",
     "qrcode.react": "^0.9.3",
     "react": "^16.8.4",
