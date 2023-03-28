@@ -16,6 +16,8 @@ const fs = require('fs-extra')
 const i18next = require('i18next')
 const {image_search: imageSearch} = require('duckduckgo-images-api')
 const macosVersion = require('macos-version')
+const semver = require('semver')
+const axios = require('axios')
 const {zoomIn, zoomOut, resetZoom} = require('./utils')
 const loadRoute = require('./utils/routes')
 const {getI18nConfig} = require('./language')
@@ -35,9 +37,11 @@ if (isWin) {
   app.setAppLogsPath(join(app.getPath('userData'), 'logs'))
 }
 
+const appVersion = global.appVersion || app.getVersion()
+
 const logger = require('./logger')
 
-logger.info('idena started', global.appVersion || app.getVersion())
+logger.info('idena started', appVersion)
 
 const {
   AUTO_UPDATE_EVENT,
@@ -633,6 +637,9 @@ ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
   }
 })
 
+const RELEASE_URL =
+  'https://api.github.com/repos/idena-network/idena-desktop/releases/latest'
+
 function checkForUpdates() {
   if (isDev) {
     return
@@ -640,7 +647,20 @@ function checkForUpdates() {
 
   async function runCheck() {
     try {
-      await autoUpdater.checkForUpdates()
+      if (isMac) {
+        const {data} = await axios.get(RELEASE_URL)
+        const {tag_name: tag, prerelease} = data
+
+        if (!prerelease && semver.gt(semver.clean(tag), appVersion)) {
+          setTimeout(() => {
+            sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-update-ready', {
+              version: tag,
+            })
+          }, 30000)
+        }
+      } else {
+        await autoUpdater.checkForUpdates()
+      }
     } catch (e) {
       logger.error('error while checking UI update', e.toString())
     } finally {

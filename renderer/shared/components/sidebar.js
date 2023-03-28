@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
+import React, {useState} from 'react'
 import NextLink from 'next/link'
 import {useRouter} from 'next/router'
 import {Trans, useTranslation} from 'react-i18next'
@@ -784,9 +784,11 @@ export function Version({
     {updateClient, updateNode},
   ] = useAutoUpdate()
 
+  const [clientUpdating, setClientUpdating] = useState(false)
+
   return (
-    <Stack spacing={3}>
-      <Stack spacing="1px" m={2}>
+    <Stack spacing="2">
+      <Stack spacing="px" mx="2">
         <VersionText>
           {t('Client version: {{version}}', {
             version: global.appVersion,
@@ -800,22 +802,26 @@ export function Version({
           })}
         </VersionText>
       </Stack>
-      <Box>
-        {nodeUpdating && (
+      <Stack>
+        {!clientUpdating && canUpdateClient && (
+          <UpdateButton
+            version={uiRemoteVersion}
+            onClick={() => {
+              setClientUpdating(!global.isMac)
+              updateClient()
+            }}
+          >
+            {t('Update Client Version')}
+          </UpdateButton>
+        )}
+
+        {(nodeUpdating || clientUpdating) && (
           <Text color="xwhite.050" mx={2}>
-            {t('Updating Node...')}
+            {t('Updating...')}
           </Text>
         )}
 
-        {canUpdateClient ? (
-          <UpdateButton version={uiRemoteVersion} onClick={updateClient}>
-            {t('Update Client Version')}
-          </UpdateButton>
-        ) : null}
-
-        {!canUpdateClient &&
-        canUpdateNode &&
-        (!nodeProgress || nodeProgress.percentage === 100) ? (
+        {canUpdateNode && (!nodeProgress || nodeProgress.percentage === 100) && (
           <>
             {isForkAvailable ? (
               <>
@@ -834,8 +840,8 @@ export function Version({
               </UpdateButton>
             )}
           </>
-        ) : null}
-      </Box>
+        )}
+      </Stack>
     </Stack>
   )
 }
