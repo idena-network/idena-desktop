@@ -1223,7 +1223,7 @@ function EditorContextMenu({
           onClick={onDelete}
           color="red.500"
         >
-          <FlipEditorMenuItemIcon as={DeleteIcon} />
+          <FlipEditorMenuItemIcon as={DeleteIcon} color="red.500" />
           {t('Delete')}
         </FlipEditorMenuItem>
       </FlipEditorMenuList>
@@ -1406,7 +1406,7 @@ function FlipEditorMenuList(props) {
       border="none"
       shadow="0 4px 6px 0 rgba(83, 86, 92, 0.24), 0 0 2px 0 rgba(83, 86, 92, 0.2)"
       rounded="lg"
-      py={2}
+      py="2"
       minW={145}
       {...props}
     />
@@ -1416,10 +1416,10 @@ function FlipEditorMenuList(props) {
 function FlipEditorMenuItem({children, ...props}) {
   return (
     <MenuItem
-      color="brandGray.500"
+      color="gray.500"
       fontWeight={500}
-      px={3}
-      py="3/2"
+      px="3"
+      py="1.5"
       _hover={{bg: 'gray.50'}}
       _focus={{bg: 'gray.50'}}
       _selected={{bg: 'gray.50'}}
