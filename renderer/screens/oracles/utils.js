@@ -7,16 +7,22 @@ import {strip} from '../../shared/utils/obj'
 import {ContractRpcMode, VotingListFilter} from './types'
 import {apiUrl} from '../../shared/api/api-client'
 
-export const isVotingStatus = targetStatus => ({status}) =>
-  areSameCaseInsensitive(status, targetStatus)
+export const isVotingStatus =
+  (targetStatus) =>
+  ({status}) =>
+    areSameCaseInsensitive(status, targetStatus)
 
-export const isVotingMiningStatus = targetStatus => ({status, txHash}) =>
-  status === targetStatus && Boolean(txHash)
+export const isVotingMiningStatus =
+  (targetStatus) =>
+  ({status, txHash}) =>
+    status === targetStatus && Boolean(txHash)
 
-export const eitherStatus = (...statuses) => ({status}) =>
-  statuses.some(s => areSameCaseInsensitive(s, status))
+export const eitherStatus =
+  (...statuses) =>
+  ({status}) =>
+    statuses.some((s) => areSameCaseInsensitive(s, status))
 
-export const setVotingStatus = status =>
+export const setVotingStatus = (status) =>
   assign({
     prevStatus: ({status: currentStatus}) => currentStatus,
     status,
@@ -120,46 +126,45 @@ export async function fetchVoting({id, contractHash = id, address}) {
   return result
 }
 
-export const createContractCaller = ({
-  from,
-  contractHash,
-  gasCost,
-  txFee,
-  amount,
-  broadcastBlock,
-}) => (method, mode = ContractRpcMode.Call, ...args) => {
-  const isCalling = mode === ContractRpcMode.Call
+export const createContractCaller =
+  ({from, contractHash, gasCost, txFee, amount, broadcastBlock}) =>
+  (method, mode = ContractRpcMode.Call, ...args) => {
+    const isCalling = mode === ContractRpcMode.Call
 
-  const payload = strip({
-    from,
-    contract: contractHash,
-    method,
-    maxFee: isCalling ? contractMaxFee(gasCost, txFee) : null,
-    amount: isCalling && method === 'sendVote' ? null : amount,
-    broadcastBlock: isCalling && method === 'sendVote' ? broadcastBlock : null,
-    args: buildDynamicArgs(args),
-  })
-
-  return callRpc(isCalling ? 'contract_call' : 'contract_estimateCall', payload)
-}
-
-export const createContractReadonlyCaller = ({contractHash}) => (
-  method,
-  format = 'hex',
-  ...args
-) =>
-  callRpc(
-    'contract_readonlyCall',
-    strip({
+    const payload = strip({
+      from,
       contract: contractHash,
       method,
-      format,
+      maxFee: isCalling ? contractMaxFee(gasCost, txFee) : null,
+      amount: isCalling && method === 'sendVote' ? null : amount,
+      broadcastBlock:
+        isCalling && method === 'sendVote' ? broadcastBlock : null,
       args: buildDynamicArgs(args),
     })
-  )
 
-export const createContractDataReader = ({contractHash}) => (key, format) =>
-  callRpc('contract_readData', contractHash, key, format)
+    return callRpc(
+      isCalling ? 'contract_call' : 'contract_estimateCall',
+      payload
+    )
+  }
+
+export const createContractReadonlyCaller =
+  ({contractHash}) =>
+  (method, format = 'hex', ...args) =>
+    callRpc(
+      'contract_readonlyCall',
+      strip({
+        contract: contractHash,
+        method,
+        format,
+        args: buildDynamicArgs(args),
+      })
+    )
+
+export const createContractDataReader =
+  ({contractHash}) =>
+  (key, format) =>
+    callRpc('contract_readData', contractHash, key, format)
 
 export function objectToHex(obj) {
   return Buffer.from(stringToHex(JSON.stringify(obj)))
@@ -268,7 +273,7 @@ export function viewVotingHref(id) {
   return `/oracles/view?id=${id}`
 }
 
-export const byContractHash = a => b =>
+export const byContractHash = (a) => (b) =>
   areSameCaseInsensitive(a.contractHash, b.contractHash)
 
 export function areSameCaseInsensitive(a, b) {
@@ -282,7 +287,7 @@ export function oracleReward({
   committeeSize,
   ownerFee,
 }) {
-  if ([balance, votesCount, quorum, committeeSize].some(v => Number.isNaN(v)))
+  if ([balance, votesCount, quorum, committeeSize].some((v) => Number.isNaN(v)))
     return undefined
 
   return (
@@ -391,7 +396,7 @@ export function votingStatuses(filter) {
   }
 }
 
-export const humanizeDuration = duration =>
+export const humanizeDuration = (duration) =>
   dayjs.duration(duration * BLOCK_TIME, 's').humanize()
 
 export const humanError = (
@@ -522,8 +527,8 @@ export function getUrls(text) {
   return text.match(urlRegex()) || []
 }
 
-export const sumAccountableVotes = votes =>
-  votes?.reduce((agg, curr) => agg + curr?.count, 0) ?? 0
+export const sumAccountableVotes = (votes) =>
+  votes?.reduce((agg, curr) => agg + (curr?.count ?? 0), 0) ?? 0
 
 export const minOwnerDeposit = (networkSize, commiteeSize) =>
   Math.min(

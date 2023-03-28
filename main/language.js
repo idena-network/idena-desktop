@@ -54,7 +54,7 @@ const getCurrentLang = () => {
   return local
 }
 
-const getI18nConfig = isDev => ({
+const getI18nConfig = (isDev) => ({
   debug: isDev,
   resources: {
     en: {translation: enTranslation, error: enError},

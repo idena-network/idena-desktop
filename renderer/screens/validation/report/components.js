@@ -281,8 +281,9 @@ export function ValidationReportGaugeBar({value, bg, color}) {
 
   const arc = circumference * (angle / 360)
   const dashArray = `${arc} ${circumference}`
-  const transform = `rotate(${180 -
-    Math.max(angle - 180, 0) / 2}, ${radius}, ${radius})`
+  const transform = `rotate(${
+    180 - Math.max(angle - 180, 0) / 2
+  }, ${radius}, ${radius})`
 
   const percentNormalized = Math.min(Math.max(value, 0), 100)
   const offset = arc - (percentNormalized / 100) * arc

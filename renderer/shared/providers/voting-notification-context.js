@@ -101,11 +101,14 @@ export function VotingNotificationProvider(props) {
   return (
     <VotingNotificationStateContext.Provider value={current.context}>
       <VotingNotificationDispatchContext.Provider
-        value={{
-          resetLastVotingTimestamp() {
-            send('RESET')
-          },
-        }}
+        value={React.useMemo(
+          () => ({
+            resetLastVotingTimestamp() {
+              send('RESET')
+            },
+          }),
+          [send]
+        )}
         {...props}
       />
     </VotingNotificationStateContext.Provider>

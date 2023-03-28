@@ -89,10 +89,10 @@ export default function ValidationReport() {
 
   const dna = toLocaleDna(i18n.language, {maximumFractionDigits: 3})
 
-  const maybeLocaleDna = amount =>
+  const maybeLocaleDna = (amount) =>
     !amount || Number.isNaN(amount) ? '–' : dna(amount)
 
-  const maybeDna = amount =>
+  const maybeDna = (amount) =>
     !amount || Number.isNaN(amount)
       ? '–'
       : amount.toLocaleString(i18n.language, {maximumFractionDigits: 3})
@@ -374,84 +374,74 @@ export default function ValidationReport() {
                     </ValidationReportColumn>
                   </tr>
                 )}
-                <>
-                  <tr>
-                    <ValidationReportColumn>
-                      <ValidationReportCategoryLabel
-                        isFirst
-                        label={t('Staking')}
-                        description={t('Quadratic staking rewards')}
-                        info={t('Quadratic staking rewards')}
-                      />
-                    </ValidationReportColumn>
-                    <ValidationReportColumn>
-                      <ValidationReportCategoryLabel
-                        label={maybeDna(stakingReward)}
-                      />
-                    </ValidationReportColumn>
-                    <ValidationReportColumn>
-                      <ValidationReportCategoryLabel
-                        label={
-                          <Text
-                            color={missedStakingReward > 0 ? 'red.500' : ''}
-                          >
-                            {maybeDna(missedStakingReward)}
-                          </Text>
-                        }
-                      />
-                    </ValidationReportColumn>
-                    <ValidationReportColumn display={['none', 'table-cell']}>
-                      <TextLink href="/home?replenishStake">
-                        {t('Add stake')}
-                        <ChevronRightIcon />
-                      </TextLink>
-                    </ValidationReportColumn>
-                  </tr>
-                  {state === IdentityStatus.Newbie &&
-                    prevState === IdentityStatus.Candidate && (
-                      <tr>
-                        <ValidationReportColumn>
-                          <ValidationReportCategoryLabel
-                            isFirst
-                            label={t('Validation')}
-                            description={t(
-                              'Rewards for the 1st successful validation'
-                            )}
-                            info={t(
-                              'Rewards for the 1st successful validation'
-                            )}
-                          />
-                        </ValidationReportColumn>
-                        <ValidationReportColumn>
-                          <ValidationReportCategoryLabel
-                            label={maybeDna(candidateReward)}
-                          />
-                        </ValidationReportColumn>
-                        <ValidationReportColumn>
-                          <ValidationReportCategoryLabel
-                            label={
-                              <Text
-                                color={
-                                  missedCandidateReward > 0 ? 'red.500' : ''
-                                }
-                              >
-                                {maybeDna(missedCandidateReward)}
-                              </Text>
-                            }
-                          />
-                        </ValidationReportColumn>
-                        <ValidationReportColumn
-                          display={['none', 'table-cell']}
-                        >
-                          <TableValidationDesc
-                            t={t}
-                            validationResult={validationResult}
-                            missedValidationReward={missedCandidateReward}
-                          />
-                        </ValidationReportColumn>
-                      </tr>
-                    )}
-                </>
+                <tr>
+                  <ValidationReportColumn>
+                    <ValidationReportCategoryLabel
+                      isFirst
+                      label={t('Staking')}
+                      description={t('Quadratic staking rewards')}
+                      info={t('Quadratic staking rewards')}
+                    />
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    <ValidationReportCategoryLabel
+                      label={maybeDna(stakingReward)}
+                    />
+                  </ValidationReportColumn>
+                  <ValidationReportColumn>
+                    <ValidationReportCategoryLabel
+                      label={
+                        <Text color={missedStakingReward > 0 ? 'red.500' : ''}>
+                          {maybeDna(missedStakingReward)}
+                        </Text>
+                      }
+                    />
+                  </ValidationReportColumn>
+                  <ValidationReportColumn display={['none', 'table-cell']}>
+                    <TextLink href="/home?replenishStake">
+                      {t('Add stake')}
+                      <ChevronRightIcon />
+                    </TextLink>
+                  </ValidationReportColumn>
+                </tr>
+                {state === IdentityStatus.Newbie &&
+                  prevState === IdentityStatus.Candidate && (
+                    <tr>
+                      <ValidationReportColumn>
+                        <ValidationReportCategoryLabel
+                          isFirst
+                          label={t('Validation')}
+                          description={t(
+                            'Rewards for the 1st successful validation'
+                          )}
+                          info={t('Rewards for the 1st successful validation')}
+                        />
+                      </ValidationReportColumn>
+                      <ValidationReportColumn>
+                        <ValidationReportCategoryLabel
+                          label={maybeDna(candidateReward)}
+                        />
+                      </ValidationReportColumn>
+                      <ValidationReportColumn>
+                        <ValidationReportCategoryLabel
+                          label={
+                            <Text
+                              color={missedCandidateReward > 0 ? 'red.500' : ''}
+                            >
+                              {maybeDna(missedCandidateReward)}
+                            </Text>
+                          }
+                        />
+                      </ValidationReportColumn>
+                      <ValidationReportColumn display={['none', 'table-cell']}>
+                        <TableValidationDesc
+                          t={t}
+                          validationResult={validationResult}
+                          missedValidationReward={missedCandidateReward}
+                        />
+                      </ValidationReportColumn>
+                    </tr>
+                  )}
                 <tr>
                   <ValidationReportColumn>
                     <ValidationReportCategoryLabel

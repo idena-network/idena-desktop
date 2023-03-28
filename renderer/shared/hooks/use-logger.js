@@ -8,7 +8,7 @@ const EXPLICIT_REDACTIONS = ['SET_EXTERNAL_KEY', 'SET_INTERNAL_KEY']
 export default function useLogger([state, dispatch]) {
   const actionRef = React.useRef()
 
-  const newDispatchRef = React.useRef(action => {
+  const newDispatchRef = React.useRef((action) => {
     actionRef.current = action
     dispatch(action)
   })

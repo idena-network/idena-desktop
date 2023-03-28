@@ -54,7 +54,7 @@ export function useRotatingAds(limit = 3) {
   const addresses = [...new Set(burntCoins?.map(({address}) => address))]
 
   const profileHashes = useQueries(
-    addresses.map(address => ({
+    addresses.map((address) => ({
       queryKey: ['dna_identity', [address]],
       queryFn: rpcFetcher,
       staleTime: 5 * 60 * 1000,
@@ -80,12 +80,12 @@ export function useRotatingAds(limit = 3) {
     profiles
       .map(({data}) => data?.ads)
       .flat()
-      .map(ad => ({
+      .map((ad) => ({
         queryKey: ['profileAdVoting', ad?.contract],
         queryFn: () => getAdVoting(ad?.contract),
         enabled: Boolean(ad?.contract),
         staleTime: 5 * 60 * 1000,
-        select: data => ({...data, cid: ad?.cid}),
+        select: (data) => ({...data, cid: ad?.cid}),
       }))
   )
 
@@ -144,6 +144,8 @@ export function useRotatingAds(limit = 3) {
 
           return data
         }
+
+        return undefined
       })
       .filter(Boolean) ?? []
   )
@@ -216,7 +218,7 @@ export function useTargetedAds() {
 
   return React.useMemo(
     () =>
-      approvedBurntCoins?.filter(burn =>
+      approvedBurntCoins?.filter((burn) =>
         isTargetedAd(
           decodeAdTarget(AdBurnKey.fromHex(burn.key).target),
           currentTarget
@@ -233,7 +235,7 @@ export function useCompetingAds(cid, target) {
 
   return React.useMemo(() => {
     if (Boolean(cid) && Boolean(target)) {
-      return approvedBurntCoins?.filter(burn => {
+      return approvedBurntCoins?.filter((burn) => {
         const key = AdBurnKey.fromHex(burn.key)
         return (
           cid !== key.cid &&
@@ -259,7 +261,7 @@ export function useApprovedBurntCoins() {
   const {decodeProfile, decodeAdBurnKey} = useProtoProfileDecoder()
 
   const {data: burntCoins, status: burntCoinsStatus} = useBurntCoins({
-    select: data =>
+    select: (data) =>
       data?.map(({address, key, amount}) => ({
         address,
         key,
@@ -275,7 +277,7 @@ export function useApprovedBurntCoins() {
     queryKey: ['approvedAdOffers'],
     queryFn: () =>
       Promise.all(
-        burntCoins.map(async burn => {
+        burntCoins.map(async (burn) => {
           const identity = await queryClient.fetchQuery({
             queryKey: ['dna_identity', [burn.address]],
             queryFn: rpcFetcher,
@@ -301,7 +303,7 @@ export function useApprovedBurntCoins() {
         })
       ),
     enabled: burntCoinsStatus === 'success',
-    select: React.useCallback(data => data.filter(Boolean), []),
+    select: React.useCallback((data) => data.filter(Boolean), []),
     notifyOnChangeProps: 'tracked',
   })
 }
@@ -369,8 +371,8 @@ export function useProfileAds() {
     (profileHash === undefined
       ? true
       : Boolean(profileHash) && profileStatus === 'idle') ||
-    decodedProfileAds.some(ad => ad.status === 'loading') ||
-    profileAds.some(ad => ad.status === 'loading')
+    decodedProfileAds.some((ad) => ad.status === 'loading') ||
+    profileAds.some((ad) => ad.status === 'loading')
       ? 'loading'
       : 'done'
 
@@ -387,10 +389,7 @@ export function usePersistedAds(options) {
   return useQuery(
     'usePersistedAds',
     async () => {
-      const ads = await dexieDb
-        .table('ads')
-        .where({author: coinbase})
-        .toArray()
+      const ads = await dexieDb.table('ads').where({author: coinbase}).toArray()
 
       return Promise.all(
         ads.map(async ({status, contract, thumb, media, ...ad}) => {
@@ -431,7 +430,7 @@ export function usePersistedAds(options) {
 export function usePersistedAd(id) {
   return usePersistedAds({
     enabled: Boolean(id),
-    select: data => data.find(ad => ad.id === id),
+    select: (data) => data.find((ad) => ad.id === id),
   })
 }
 
@@ -492,7 +491,7 @@ function useDeployAdContract({onBeforeSubmit, onSubmit, onError}) {
   const {data: deployAmount} = useDeployContractAmount()
 
   return useMutation(
-    async ad => {
+    async (ad) => {
       const unpublishedVoting = buildAdReviewVoting({title: ad.title})
 
       const {cid} = await sendToIpfs(
@@ -550,7 +549,7 @@ function useStartAdVoting({rewardsFund, onError}) {
   const {data: startAmount} = useStartAdVotingAmount()
 
   return useMutation(
-    async startParams => {
+    async (startParams) => {
       const callerArgs = {
         contractHash: startParams?.contract,
         from: coinbase,
@@ -583,7 +582,7 @@ export function usePublishAd({onBeforeSubmit, onMined, onError}) {
   const coinbase = useCoinbase()
 
   const {data, mutate} = useMutation(
-    async ad => {
+    async (ad) => {
       const profileAds = await fetchProfileAds(coinbase)
 
       const encodedProfile = encodeProfile({
@@ -638,7 +637,11 @@ export function useBurnAd({onBeforeSubmit, onMined, onError}) {
 
   const coinbase = useCoinbase()
 
-  const {data: hash, mutate, reset} = useMutation(
+  const {
+    data: hash,
+    mutate,
+    reset,
+  } = useMutation(
     async ({ad, amount}) =>
       sendTx({
         type: TxType.BurnTx,
@@ -682,7 +685,7 @@ export function useTrackTx(hash, {onMined, ...options} = {}) {
   return useLiveRpc('bcn_transaction', [hash], {
     enabled,
     // eslint-disable-next-line no-shadow
-    onSuccess: data => {
+    onSuccess: (data) => {
       if (data.blockHash !== HASH_IN_MEMPOOL) {
         // eslint-disable-next-line no-unused-expressions
         onMined?.(data)
@@ -765,10 +768,13 @@ export function useStartVotingAmount(committeeSize) {
 
 export function useProtoProfileEncoder() {
   return {
-    encodeAd: React.useCallback(ad => new Ad(ad).toHex(), []),
-    encodeAdTarget: React.useCallback(adKey => new AdTarget(adKey).toHex(), []),
+    encodeAd: React.useCallback((ad) => new Ad(ad).toHex(), []),
+    encodeAdTarget: React.useCallback(
+      (adKey) => new AdTarget(adKey).toHex(),
+      []
+    ),
     encodeProfile: React.useCallback(
-      profile => new Profile(profile).toHex(),
+      (profile) => new Profile(profile).toHex(),
       []
     ),
   }
@@ -776,10 +782,10 @@ export function useProtoProfileEncoder() {
 
 export function useProtoProfileDecoder() {
   return {
-    decodeAd: React.useCallback(Ad.fromHex, []),
-    decodeAdTarget: React.useCallback(AdTarget.fromHex, []),
-    decodeProfile: React.useCallback(Profile.fromHex, []),
-    decodeAdBurnKey: React.useCallback(AdBurnKey.fromHex, []),
+    decodeAd: React.useCallback((hex) => Ad.fromHex(hex), []),
+    decodeAdTarget: React.useCallback((hex) => AdTarget.fromHex(hex), []),
+    decodeProfile: React.useCallback((hex) => Profile.fromHex(hex), []),
+    decodeAdBurnKey: React.useCallback((hex) => AdBurnKey.fromHex(hex), []),
   }
 }
 

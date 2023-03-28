@@ -71,7 +71,7 @@ export default function WalletsPage() {
             </Stack>
           </Flex>
           <Stack isInline spacing="6">
-            {wallets.map(wallet => (
+            {wallets.map((wallet) => (
               <WalletCard
                 key={wallet.address + wallet.name}
                 wallet={wallet}
@@ -111,7 +111,7 @@ export default function WalletsPage() {
         <SendDnaDrawer
           {...sendDnaDisclosure}
           address={address}
-          onFail={error => {
+          onFail={(error) => {
             failToast({
               title: t('Error while sending transaction'),
               description: error,

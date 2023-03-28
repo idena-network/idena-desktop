@@ -80,13 +80,8 @@ export default function VotingListPage() {
     },
   })
 
-  const {
-    votings,
-    filter,
-    statuses,
-    continuationToken,
-    startingVotingRef,
-  } = current.context
+  const {votings, filter, statuses, continuationToken, startingVotingRef} =
+    current.context
 
   const [{todoCount}] = useVotingNotification()
 
@@ -221,7 +216,7 @@ export default function VotingListPage() {
                 <Text fontWeight={500}>{t('Tags')}</Text>
                 {!current.matches('preload') && (
                   <Wrap spacing={2}>
-                    {votingStatuses(filter).map(status => (
+                    {votingStatuses(filter).map((status) => (
                       <WrapItem>
                         <VotingFilter
                           key={status}

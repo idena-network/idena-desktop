@@ -166,7 +166,7 @@ export const votingListMachine = Machine(
     actions: {
       applyVotings: assign({
         votings: ({epoch, address}, {data: {votings}}) =>
-          votings.map(voting => ({
+          votings.map((voting) => ({
             ...voting,
             ref: spawn(
               // eslint-disable-next-line no-use-before-define
@@ -179,7 +179,7 @@ export const votingListMachine = Machine(
       applyMoreVotings: assign({
         votings: ({votings, epoch, address}, {data: {votings: nextVotings}}) =>
           votings.concat(
-            nextVotings.map(voting => ({
+            nextVotings.map((voting) => ({
               ...voting,
               ref: spawn(
                 // eslint-disable-next-line no-use-before-define
@@ -207,7 +207,7 @@ export const votingListMachine = Machine(
       applyStatuses: assign({
         statuses: ({statuses}, {value}) =>
           statuses.includes(value)
-            ? statuses.filter(s => s !== value)
+            ? statuses.filter((s) => s !== value)
             : statuses.concat(value),
         continuationToken: null,
       }),
@@ -225,21 +225,19 @@ export const votingListMachine = Machine(
     },
     services: {
       loadVotings: async ({address, filter, statuses, continuationToken}) => {
-        const {
-          result,
-          continuationToken: nextContinuationToken,
-        } = await fetchVotings({
-          all: [VotingListFilter.All, VotingListFilter.Own].some(
-            s => s === filter
-          ),
-          own: filter === VotingListFilter.Own,
-          oracle: address,
-          'states[]': (statuses.length
-            ? statuses
-            : votingStatuses(filter)
-          ).join(','),
-          continuationToken,
-        })
+        const {result, continuationToken: nextContinuationToken} =
+          await fetchVotings({
+            all: [VotingListFilter.All, VotingListFilter.Own].some(
+              (s) => s === filter
+            ),
+            own: filter === VotingListFilter.Own,
+            oracle: address,
+            'states[]': (statuses.length
+              ? statuses
+              : votingStatuses(filter)
+            ).join(','),
+            continuationToken,
+          })
 
         const knownVotings = (result ?? []).map(mapVoting)
 
@@ -439,7 +437,7 @@ export const votingMachine = Machine(
         miningStatus: null,
       }),
       // eslint-disable-next-line no-shadow
-      persist: context => {
+      persist: (context) => {
         epochDb('votings').put(context)
       },
       applyOwnerDeposit: assign({
@@ -449,28 +447,30 @@ export const votingMachine = Machine(
     services: {
       ...votingServices(),
       loadOwnerDeposit,
-      pollStatus: ({txHash}) => cb => {
-        let timeoutId
+      pollStatus:
+        ({txHash}) =>
+        (cb) => {
+          let timeoutId
 
-        const fetchStatus = async () => {
-          try {
-            const result = await callRpc('bcn_transaction', txHash)
-            if (result.blockHash !== HASH_IN_MEMPOOL) {
-              cb('MINED')
-            } else {
-              timeoutId = setTimeout(fetchStatus, 10 * 1000)
+          const fetchStatus = async () => {
+            try {
+              const result = await callRpc('bcn_transaction', txHash)
+              if (result.blockHash !== HASH_IN_MEMPOOL) {
+                cb('MINED')
+              } else {
+                timeoutId = setTimeout(fetchStatus, 10 * 1000)
+              }
+            } catch (error) {
+              cb('TX_NULL', {error})
             }
-          } catch (error) {
-            cb('TX_NULL', {error})
           }
-        }
 
-        timeoutId = setTimeout(fetchStatus, 10 * 1000)
+          timeoutId = setTimeout(fetchStatus, 10 * 1000)
 
-        return () => {
-          clearTimeout(timeoutId)
-        }
-      },
+          return () => {
+            clearTimeout(timeoutId)
+          }
+        },
     },
     guards: {
       ...votingStatusGuards(),
@@ -536,9 +536,7 @@ export const createNewVotingMachine = (epoch, address) =>
                       assign({
                         shouldStartImmediately: false,
                         winnerThreshold: String(51),
-                        startDate: dayjs()
-                          .add(1, 'w')
-                          .toString(),
+                        startDate: dayjs().add(1, 'w').toString(),
                         quorum: 5,
                       }),
                     ],
@@ -640,8 +638,8 @@ export const createNewVotingMachine = (epoch, address) =>
                         isCustomOwnerAddress && !isAddress(ownerAddress)
                           ? 'ownerAddress'
                           : null,
-                        ...['title', 'desc'].filter(f => !context[f]),
-                      ].filter(v => v),
+                        ...['title', 'desc'].filter((f) => !context[f]),
+                      ].filter((v) => v),
                     })
                   ),
                   log(),
@@ -829,7 +827,7 @@ export const createNewVotingMachine = (epoch, address) =>
         })),
         setOptions: assign({
           options: ({options}, {id, value}) => {
-            const idx = options.findIndex(o => o.id === id)
+            const idx = options.findIndex((o) => o.id === id)
             return [
               ...options.slice(0, idx),
               {...options[idx], value},
@@ -844,7 +842,7 @@ export const createNewVotingMachine = (epoch, address) =>
             }),
         }),
         removeOption: assign({
-          options: ({options}, {id}) => options.filter(o => o.id !== id),
+          options: ({options}, {id}) => options.filter((o) => o.id !== id),
         }),
         setDirty: assign({
           dirtyBag: ({dirtyBag}, {id, ids = []}) => ({
@@ -862,7 +860,7 @@ export const createNewVotingMachine = (epoch, address) =>
         setPending: setVotingStatus(VotingStatus.Pending),
         setRunning: setVotingStatus(VotingStatus.Open),
         // eslint-disable-next-line no-shadow
-        persist: context => {
+        persist: (context) => {
           epochDb('votings').put(context)
         },
       },
@@ -911,29 +909,31 @@ export const createNewVotingMachine = (epoch, address) =>
 
           return {txHash, voting: nextVoting, from, balance}
         },
-        pollStatus: ({txHash}, {data: {from, balance}}) => cb => {
-          let timeoutId
+        pollStatus:
+          ({txHash}, {data: {from, balance}}) =>
+          (cb) => {
+            let timeoutId
 
-          const fetchStatus = async () => {
-            try {
-              const result = await callRpc('bcn_transaction', txHash)
-              if (result.blockHash !== HASH_IN_MEMPOOL) {
-                cb({type: 'MINED', from, balance})
-              } else {
-                timeoutId = setTimeout(fetchStatus, 10 * 1000)
+            const fetchStatus = async () => {
+              try {
+                const result = await callRpc('bcn_transaction', txHash)
+                if (result.blockHash !== HASH_IN_MEMPOOL) {
+                  cb({type: 'MINED', from, balance})
+                } else {
+                  timeoutId = setTimeout(fetchStatus, 10 * 1000)
+                }
+              } catch (error) {
+                cb('TX_NULL', {error: error?.message})
               }
-            } catch (error) {
-              cb('TX_NULL', {error: error?.message})
             }
-          }
 
-          timeoutId = setTimeout(fetchStatus, 10 * 1000)
+            timeoutId = setTimeout(fetchStatus, 10 * 1000)
 
-          return () => {
-            clearTimeout(timeoutId)
-          }
-        },
-        persist: context => epochDb('votings').put(context),
+            return () => {
+              clearTimeout(timeoutId)
+            }
+          },
+        persist: (context) => epochDb('votings').put(context),
       },
       guards: {
         shouldStartImmediately: ({
@@ -1224,7 +1224,7 @@ export const createViewVotingMachine = (id, epoch, address) =>
           selectedOption: (_, {option}) => option,
         }),
         // eslint-disable-next-line no-shadow
-        persist: context => {
+        persist: (context) => {
           epochDb('votings').put(context)
         },
         applyOwnerDeposit: assign({
@@ -1394,28 +1394,30 @@ export const createViewVotingMachine = (id, epoch, address) =>
             maxFee: contractMaxFee(gasCost, txFee),
           })
         },
-        pollStatus: ({txHash}) => cb => {
-          let timeoutId
+        pollStatus:
+          ({txHash}) =>
+          (cb) => {
+            let timeoutId
 
-          const fetchStatus = async () => {
-            try {
-              const result = await callRpc('bcn_transaction', txHash)
-              if (result.blockHash !== HASH_IN_MEMPOOL) {
-                cb('MINED')
-              } else {
-                timeoutId = setTimeout(fetchStatus, 10 * 1000)
+            const fetchStatus = async () => {
+              try {
+                const result = await callRpc('bcn_transaction', txHash)
+                if (result.blockHash !== HASH_IN_MEMPOOL) {
+                  cb('MINED')
+                } else {
+                  timeoutId = setTimeout(fetchStatus, 10 * 1000)
+                }
+              } catch (error) {
+                cb('TX_NULL', {error: error?.message})
               }
-            } catch (error) {
-              cb('TX_NULL', {error: error?.message})
             }
-          }
 
-          timeoutId = setTimeout(fetchStatus, 10 * 1000)
+            timeoutId = setTimeout(fetchStatus, 10 * 1000)
 
-          return () => {
-            clearTimeout(timeoutId)
-          }
-        },
+            return () => {
+              clearTimeout(timeoutId)
+            }
+          },
       },
       guards: {
         // eslint-disable-next-line no-use-before-define

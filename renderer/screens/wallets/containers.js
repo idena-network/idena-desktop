@@ -148,10 +148,8 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
 
   const [state, dispatch] = React.useReducer(
     (prevState, action) => {
-      const {
-        type = typeof action === 'string' && action,
-        ...actionParams
-      } = action
+      const {type = typeof action === 'string' && action, ...actionParams} =
+        action
 
       switch (type) {
         case 'submit':
@@ -211,7 +209,7 @@ export function SendDnaDrawer({address, onSend, onFail, ...props}) {
         <Box mt="6">
           <form
             id="sendDna"
-            onSubmit={async e => {
+            onSubmit={async (e) => {
               e.preventDefault()
 
               dispatch('submit')
@@ -398,6 +396,7 @@ export function WalletTransactionList({txs = []}) {
 
               <Box fontWeight={500}>
                 {!tx.isMining || tx.maxFee === '0' ? (
+                  // eslint-disable-next-line react/jsx-no-useless-fragment
                   <>
                     {Number(tx.usedFee) > 0 && (
                       <SmallText>

@@ -200,10 +200,10 @@ export default function ViewVotingPage() {
 
   const isLoaded = !current.matches('loading')
 
-  const sameString = a => b => areSameCaseInsensitive(a, b)
+  const sameString = (a) => (b) => areSameCaseInsensitive(a, b)
 
   const eitherIdleState = (...states) =>
-    eitherState(current, ...states.map(s => `idle.${s}`.toLowerCase())) ||
+    eitherState(current, ...states.map((s) => `idle.${s}`.toLowerCase())) ||
     states.some(sameString(status))
 
   const isClosed = eitherIdleState(
@@ -325,6 +325,7 @@ export default function ViewVotingPage() {
                             : title}
                         </Heading>
                         {ad ? (
+                          // eslint-disable-next-line react/jsx-no-useless-fragment
                           <>
                             {isMaliciousAdVoting ? (
                               <MaliciousAdOverlay>
@@ -341,7 +342,7 @@ export default function ViewVotingPage() {
                             whiteSpace="pre-wrap"
                           >
                             <Linkify
-                              onClick={url => {
+                              onClick={(url) => {
                                 send('FOLLOW_LINK', {url})
                               }}
                             >
@@ -468,7 +469,7 @@ export default function ViewVotingPage() {
                         ) : (
                           <RadioGroup
                             value={String(selectedOption)}
-                            onChange={value => {
+                            onChange={(value) => {
                               send('SELECT_OPTION', {
                                 option: Number(value),
                               })
@@ -1038,10 +1039,10 @@ export default function ViewVotingPage() {
         from={identity.address}
         available={identity.balance}
         isLoading={current.matches(`mining.${VotingStatus.Starting}`)}
-        onLaunch={e => {
+        onLaunch={(e) => {
           send('START_VOTING', e)
         }}
-        onError={e => send('ERROR', e)}
+        onError={(e) => send('ERROR', e)}
       />
 
       <FinishDrawer

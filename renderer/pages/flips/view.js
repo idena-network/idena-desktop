@@ -63,9 +63,8 @@ export default function ViewFlipPage() {
     services: {
       // eslint-disable-next-line no-shadow
       loadFlip: async ({id}) => {
-        const {hint, pics, compressedPics, ...flip} = global.flipStore?.getFlip(
-          id
-        )
+        const {hint, pics, compressedPics, ...flip} =
+          global.flipStore?.getFlip(id) ?? {}
 
         return hint
           ? {
@@ -158,7 +157,7 @@ export default function ViewFlipPage() {
                             key={num}
                             src={images?.[num]}
                             isFirst={idx === 0}
-                            isLast={idx === images?.length - 1}
+                            isLast={idx === (images ?? []).length - 1}
                             width={130}
                           />
                         ))}
@@ -169,7 +168,7 @@ export default function ViewFlipPage() {
                             key={num}
                             src={images?.[num]}
                             isFirst={idx === 0}
-                            isLast={idx === images?.length - 1}
+                            isLast={idx === (images ?? []).length - 1}
                             width={130}
                           />
                         ))}

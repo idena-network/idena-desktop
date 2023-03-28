@@ -76,7 +76,7 @@ let dnaUrl
 
 const isFirstInstance = app.requestSingleInstanceLock()
 
-const extractDnaUrl = argv => argv.find(item => item.startsWith('dna://'))
+const extractDnaUrl = (argv) => argv.find((item) => item.startsWith('dna://'))
 
 if (isFirstInstance) {
   app.on('second-instance', (e, argv) => {
@@ -91,7 +91,6 @@ if (isFirstInstance) {
   })
 } else {
   app.quit()
-  return
 }
 
 const createMainWindow = () => {
@@ -119,7 +118,7 @@ const createMainWindow = () => {
     mainWindow.show()
   })
 
-  mainWindow.on('close', e => {
+  mainWindow.on('close', (e) => {
     if (mainWindow.forceClose) {
       return
     }
@@ -322,7 +321,7 @@ app.on('ready', async () => {
   await prepareNext('./renderer')
   const i18nConfig = getI18nConfig()
 
-  i18next.init(i18nConfig, function(err) {
+  i18next.init(i18nConfig, (err) => {
     if (err) {
       logger.error(err)
     }
@@ -344,9 +343,9 @@ if (!app.isDefaultProtocolClient('dna')) {
   app.setAsDefaultProtocolClient('dna')
 }
 
-app.on('will-finish-launching', function() {
+app.on('will-finish-launching', () => {
   // Protocol handler for osx
-  app.on('open-url', function(event, url) {
+  app.on('open-url', (event, url) => {
     event.preventDefault()
     dnaUrl = url
     if (dnaUrl && mainWindow) {
@@ -358,7 +357,7 @@ app.on('will-finish-launching', function() {
 
 let didConfirmQuit = false
 
-app.on('before-quit', e => {
+app.on('before-quit', (e) => {
   if (mainWindow) {
     mainWindow.show()
     mainWindow.focus()
@@ -396,19 +395,19 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
       }
 
       getCurrentVersion()
-        .then(version => {
+        .then((version) => {
           sendMainWindowMsg(NODE_EVENT, 'node-ready', version)
         })
-        .catch(e => {
+        .catch((e) => {
           logger.error('error while getting current node version', e.toString())
           if (nodeDownloadPromise) {
             return
           }
-          nodeDownloadPromise = downloadNode(info => {
+          nodeDownloadPromise = downloadNode((info) => {
             sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-download-progress', info)
           })
             .then(() => {
-              stopNode(node).then(async log => {
+              stopNode(node).then(async (log) => {
                 logger.info(log)
                 node = null
                 sendMainWindowMsg(NODE_EVENT, 'node-stopped')
@@ -416,7 +415,7 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
                 sendMainWindowMsg(NODE_EVENT, 'node-ready')
               })
             })
-            .catch(err => {
+            .catch((err) => {
               sendMainWindowMsg(NODE_EVENT, 'node-failed')
               logger.error('error while downloading node', err.toString())
             })
@@ -434,7 +433,7 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
         data.apiKey,
         data.autoActivateMining,
         isDev,
-        log => {
+        (log) => {
           sendMainWindowMsg(NODE_EVENT, 'node-log', log)
         },
         (msg, code) => {
@@ -447,7 +446,7 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
           }
         }
       )
-        .then(n => {
+        .then((n) => {
           logger.info(
             `node started, PID: ${n.pid}, previous PID: ${
               node ? node.pid : 'undefined'
@@ -456,7 +455,7 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
           node = n
           sendMainWindowMsg(NODE_EVENT, 'node-started')
         })
-        .catch(e => {
+        .catch((e) => {
           sendMainWindowMsg(NODE_EVENT, 'node-failed')
           logger.error('error while starting node', e.toString())
         })
@@ -464,12 +463,12 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
     }
     case 'stop-local-node': {
       stopNode(node)
-        .then(log => {
+        .then((log) => {
           logger.info(log)
           node = null
           sendMainWindowMsg(NODE_EVENT, 'node-stopped')
         })
-        .catch(e => {
+        .catch((e) => {
           sendMainWindowMsg(NODE_EVENT, 'node-failed')
           logger.error('error while stopping node', e.toString())
         })
@@ -477,14 +476,14 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
     }
     case 'clean-state': {
       stopNode(node)
-        .then(log => {
+        .then((log) => {
           logger.info(log)
           node = null
           sendMainWindowMsg(NODE_EVENT, 'node-stopped')
           cleanNodeState()
           sendMainWindowMsg(NODE_EVENT, 'state-cleaned')
         })
-        .catch(e => {
+        .catch((e) => {
           sendMainWindowMsg(NODE_EVENT, 'node-failed')
           logger.error('error while stopping node', e.toString())
         })
@@ -492,16 +491,21 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
     }
     case 'restart-node': {
       stopNode(node)
-        .then(log => {
+        .then((log) => {
           logger.info(log)
           node = null
           sendMainWindowMsg(NODE_EVENT, 'node-stopped')
         })
-        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+        .then(
+          () =>
+            new Promise((resolve) => {
+              setTimeout(resolve, 1000)
+            })
+        )
         .then(() => {
           sendMainWindowMsg(NODE_EVENT, 'restart-node')
         })
-        .catch(e => {
+        .catch((e) => {
           sendMainWindowMsg(NODE_EVENT, 'node-failed')
           logger.error('error while stopping node', e.toString())
         })
@@ -510,10 +514,10 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
     }
     case 'get-last-logs': {
       getLastLogs()
-        .then(logs => {
+        .then((logs) => {
           sendMainWindowMsg(NODE_EVENT, 'last-node-logs', logs)
         })
-        .catch(e => {
+        .catch((e) => {
           logger.error('error while reading logs', e.toString())
         })
       break
@@ -540,14 +544,14 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
 
       sendMainWindowMsg(NODE_EVENT, 'troubleshooting-update-node')
 
-      nodeDownloadPromise = downloadNode(info => {
+      nodeDownloadPromise = downloadNode((info) => {
         sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-download-progress', info)
       })
         .then(async () => {
           await updateNode()
           sendMainWindowMsg(NODE_EVENT, 'node-ready')
         })
-        .catch(err => {
+        .catch((err) => {
           sendMainWindowMsg(NODE_EVENT, 'node-failed')
           logger.error('error while downloading node', err.toString())
         })
@@ -582,23 +586,23 @@ ipcMain.on(NODE_COMMAND, async (_event, command, data) => {
   }
 })
 
-nodeUpdater.on('update-available', info => {
+nodeUpdater.on('update-available', (info) => {
   sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-available', info)
 })
 
-nodeUpdater.on('download-progress', info => {
+nodeUpdater.on('download-progress', (info) => {
   sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-download-progress', info)
 })
 
-nodeUpdater.on('update-downloaded', info => {
+nodeUpdater.on('update-downloaded', (info) => {
   sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-ready', info)
 })
 
-autoUpdater.on('download-progress', info => {
+autoUpdater.on('download-progress', (info) => {
   sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-download-progress', info)
 })
 
-autoUpdater.on('update-downloaded', info => {
+autoUpdater.on('update-downloaded', (info) => {
   sendMainWindowMsg(AUTO_UPDATE_EVENT, 'ui-update-ready', info)
 })
 
@@ -626,7 +630,7 @@ ipcMain.on(AUTO_UPDATE_COMMAND, async (event, command, data) => {
           sendMainWindowMsg(NODE_EVENT, 'node-ready')
           sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-updated')
         })
-        .catch(e => {
+        .catch((e) => {
           sendMainWindowMsg(NODE_EVENT, 'node-failed')
           sendMainWindowMsg(AUTO_UPDATE_EVENT, 'node-update-failed')
           logger.error('error while updating node', e.toString())

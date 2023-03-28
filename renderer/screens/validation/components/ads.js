@@ -41,9 +41,11 @@ export function ValidationAdPromotion() {
   const orderedBurntCoins =
     burntCoins
       ?.sort((a, b) => b.amount - a.amount)
-      .map(burn => ({...burn, ...AdBurnKey.fromHex(burn?.key)})) ?? []
+      .map((burn) => ({...burn, ...AdBurnKey.fromHex(burn?.key)})) ?? []
 
-  const maybeBurn = orderedBurntCoins.find(burn => burn.cid === currentAd?.cid)
+  const maybeBurn = orderedBurntCoins.find(
+    (burn) => burn.cid === currentAd?.cid
+  )
 
   const formatDna = useFormatDna()
 

@@ -43,7 +43,7 @@ process.once('loaded', () => {
   ;[global.locale] = app.getLocale().split('-')
 
   global.getZoomLevel = () => webFrame.getZoomLevel()
-  global.setZoomLevel = level => webFrame.setZoomLevel(level)
+  global.setZoomLevel = (level) => webFrame.setZoomLevel(level)
 
   global.appVersion = app.getVersion()
 

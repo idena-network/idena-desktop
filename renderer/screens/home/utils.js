@@ -47,7 +47,7 @@ export function stripHexPrefix(str) {
   return isHexPrefixed(str) ? str.slice(2) : str
 }
 
-const isHexPrefixed = str => str.slice(0, 2) === '0x'
+const isHexPrefixed = (str) => str.slice(0, 2) === '0x'
 
 export function getStakingWarning(t, state, age) {
   if ([IdentityStatus.Candidate, IdentityStatus.Newbie].includes(state)) {

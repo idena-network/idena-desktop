@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import {useMachine} from '@xstate/react'
-import React from 'react'
+import React, {useMemo} from 'react'
 import {createMachine} from 'xstate'
 import {assign, choose} from 'xstate/lib/actions'
 import {canValidate} from '../../screens/validation/utils'
@@ -176,20 +176,23 @@ export function OnboardingProvider({children}) {
 
   return (
     <OnboardingContext.Provider
-      value={[
-        current,
-        {
-          showCurrentTask() {
-            send('SHOW')
+      value={useMemo(
+        () => [
+          current,
+          {
+            showCurrentTask() {
+              send('SHOW')
+            },
+            dismissCurrentTask() {
+              send('DISMISS')
+            },
+            next() {
+              send('NEXT')
+            },
           },
-          dismissCurrentTask() {
-            send('DISMISS')
-          },
-          next() {
-            send('NEXT')
-          },
-        },
-      ]}
+        ],
+        [current, send]
+      )}
     >
       {children}
     </OnboardingContext.Provider>

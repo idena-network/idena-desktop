@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, {useCallback, useEffect, useMemo} from 'react'
 import semver from 'semver'
 import {usePersistence} from '../hooks/use-persistent-state'
 import {loadPersistentState} from '../utils/persist'
@@ -15,15 +15,9 @@ const SET_CONNECTION_DETAILS = 'SET_CONNECTION_DETAILS'
 const TOGGLE_AUTO_ACTIVATE_MINING = 'TOGGLE_AUTO_ACTIVATE_MINING'
 
 const randomKey = () =>
-  Math.random()
-    .toString(36)
-    .substring(2, 13) +
-  Math.random()
-    .toString(36)
-    .substring(2, 13) +
-  Math.random()
-    .toString(36)
-    .substring(2, 15)
+  Math.random().toString(36).substring(2, 13) +
+  Math.random().toString(36).substring(2, 13) +
+  Math.random().toString(36).substring(2, 15)
 
 const CHANGE_LANGUAGE = 'CHANGE_LANGUAGE'
 
@@ -141,32 +135,50 @@ export function SettingsProvider({children}) {
     }
   })
 
-  const toggleUseExternalNode = enable => {
-    dispatch({type: TOGGLE_USE_EXTERNAL_NODE, data: enable})
-  }
+  const toggleUseExternalNode = useCallback(
+    () => (enable) => {
+      dispatch({type: TOGGLE_USE_EXTERNAL_NODE, data: enable})
+    },
+    [dispatch]
+  )
 
-  const toggleRunInternalNode = run => {
-    dispatch({type: TOGGLE_RUN_INTERNAL_NODE, data: run})
-  }
+  const toggleRunInternalNode = useCallback(
+    () => (run) => {
+      dispatch({type: TOGGLE_RUN_INTERNAL_NODE, data: run})
+    },
+    [dispatch]
+  )
 
-  const changeLanguage = lng => dispatch({type: CHANGE_LANGUAGE, lng})
+  const changeLanguage = useCallback(
+    (lng) => dispatch({type: CHANGE_LANGUAGE, lng}),
+    [dispatch]
+  )
 
-  function toggleAutoActivateMining() {
+  const toggleAutoActivateMining = useCallback(() => {
     dispatch({type: TOGGLE_AUTO_ACTIVATE_MINING})
-  }
+  }, [dispatch])
 
   return (
     <SettingsStateContext.Provider value={state}>
       <SettingsDispatchContext.Provider
-        value={{
-          toggleUseExternalNode,
-          toggleRunInternalNode,
-          changeLanguage,
-          setConnectionDetails({url, apiKey}) {
-            dispatch({type: SET_CONNECTION_DETAILS, url, apiKey})
-          },
-          toggleAutoActivateMining,
-        }}
+        value={useMemo(
+          () => ({
+            toggleUseExternalNode,
+            toggleRunInternalNode,
+            changeLanguage,
+            setConnectionDetails({url, apiKey}) {
+              dispatch({type: SET_CONNECTION_DETAILS, url, apiKey})
+            },
+            toggleAutoActivateMining,
+          }),
+          [
+            changeLanguage,
+            dispatch,
+            toggleAutoActivateMining,
+            toggleRunInternalNode,
+            toggleUseExternalNode,
+          ]
+        )}
       >
         {children}
       </SettingsDispatchContext.Provider>

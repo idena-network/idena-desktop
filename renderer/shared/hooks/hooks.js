@@ -7,5 +7,8 @@ export function useFormatDna(options) {
     i18n: {language},
   } = useTranslation()
 
-  return useCallback(toLocaleDna(language, options), [language, options])
+  return useCallback(
+    (value) => toLocaleDna(language, options)(value),
+    [language, options]
+  )
 }

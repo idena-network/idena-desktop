@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, {useCallback, useEffect, useMemo} from 'react'
 import {NODE_EVENT, NODE_COMMAND} from '../../../main/channels'
 import {useSettingsState} from './settings-context'
 import useLogger from '../hooks/use-logger'
@@ -194,11 +194,11 @@ export function NodeProvider({children}) {
     state.runningTroubleshooter,
   ])
 
-  const tryRestartNode = () => {
+  const tryRestartNode = useCallback(() => {
     dispatch({type: NODE_REINIT})
-  }
+  }, [dispatch])
 
-  const importNodeKey = shouldResetNode => {
+  const importNodeKey = (shouldResetNode) => {
     global.ipcRenderer.send(
       NODE_COMMAND,
       shouldResetNode ? 'clean-state' : 'restart-node'
@@ -207,7 +207,12 @@ export function NodeProvider({children}) {
 
   return (
     <NodeStateContext.Provider value={state}>
-      <NodeDispatchContext.Provider value={{tryRestartNode, importNodeKey}}>
+      <NodeDispatchContext.Provider
+        value={useMemo(
+          () => ({tryRestartNode, importNodeKey}),
+          [tryRestartNode]
+        )}
+      >
         {children}
       </NodeDispatchContext.Provider>
     </NodeStateContext.Provider>

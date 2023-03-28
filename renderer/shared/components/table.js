@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unknown-property */
 /* eslint-disable react/prop-types */
 import React from 'react'
 import {Box, useTheme} from '@chakra-ui/react'

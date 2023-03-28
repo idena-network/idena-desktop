@@ -6,7 +6,7 @@ export const VotingListFilter = {
   Own: 'own',
 }
 
-export const wrapUnexpectedTxType = type => `Unexpected tx type: ${type}`
+export const wrapUnexpectedTxType = (type) => `Unexpected tx type: ${type}`
 
 export const ContractTransactionType = {
   CallContract: 'Call contract',

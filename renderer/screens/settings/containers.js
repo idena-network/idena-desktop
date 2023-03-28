@@ -87,7 +87,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
 
   const {password, encodedPrivateKey} = current.context
 
-  const is = state => eitherState(current, state)
+  const is = (state) => eitherState(current, state)
 
   const [revealPassword, setRevealPassword] = React.useState()
 
@@ -113,7 +113,7 @@ export function ExportPrivateKeyDialog({onClose, ...props}) {
                   id="password"
                   type={revealPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={e => {
+                  onChange={(e) => {
                     send('CHANGE_PASSWORD', {value: e.target.value})
                   }}
                 />
@@ -255,9 +255,10 @@ export function ImportPrivateKeyDialog(props) {
   return (
     <Dialog title={t('Import private key')} {...props}>
       <form
-        onSubmit={async e => {
+        onSubmit={async (e) => {
           e.preventDefault()
           await submit()
+          // eslint-disable-next-line react/destructuring-assignment
           props.onClose()
         }}
       >
@@ -268,7 +269,7 @@ export function ImportPrivateKeyDialog(props) {
               <Input
                 value={key}
                 type="text"
-                onChange={e => setKey(e.target.value)}
+                onChange={(e) => setKey(e.target.value)}
               />
             </FormControl>
             <FormControl>
@@ -278,7 +279,7 @@ export function ImportPrivateKeyDialog(props) {
                   id="password"
                   value={password}
                   type={revealPassword ? 'text' : 'password'}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <InputRightElement h="full">
                   <IconButton
@@ -300,7 +301,7 @@ export function ImportPrivateKeyDialog(props) {
               <Stack isInline>
                 <Checkbox
                   isChecked={shouldResetNode}
-                  onChange={e => {
+                  onChange={(e) => {
                     setShouldResetNode(e.target.checked)
                   }}
                 >
@@ -342,13 +343,13 @@ export function LocaleSwitcher() {
       value={i18n.language}
       borderColor="gray.300"
       h={8}
-      onChange={e => {
+      onChange={(e) => {
         const nextLanguage = e.target.value
         i18n.changeLanguage(nextLanguage)
         changeLanguage(nextLanguage)
       }}
     >
-      {AVAILABLE_LANGS.map(lang => (
+      {AVAILABLE_LANGS.map((lang) => (
         <option key={lang} value={lang}>
           {isoLangs[lang].nativeName} ({lang.toUpperCase()})
         </option>

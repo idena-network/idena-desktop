@@ -24,7 +24,7 @@ export function useValidationToast() {
   const closeToast = useCloseToast()
 
   useTrackEpochPeriod({
-    onChangeCurrentPeriod: nextPeriod => {
+    onChangeCurrentPeriod: (nextPeriod) => {
       for (const toastId of [
         EpochPeriod.FlipLottery,
         EpochPeriod.ShortSession,

@@ -44,7 +44,7 @@ export default function EditAdPage() {
             ref={adFormRef}
             id="adForm"
             ad={ad}
-            onSubmit={async nextAd => {
+            onSubmit={async (nextAd) => {
               await dexieDb.table('ads').update(ad.id, nextAd)
               router.push('/adn/list')
             }}

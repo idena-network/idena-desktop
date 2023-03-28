@@ -88,9 +88,9 @@ export default function AdListPage() {
   const ads = [
     ...profileAds,
     ...(persistedAds?.filter(
-      a => profileAds.findIndex(b => a?.cid === b?.cid) < 0
+      (a) => profileAds.findIndex((b) => a?.cid === b?.cid) < 0
     ) ?? []),
-  ].filter(ad => ad?.status === filter)
+  ].filter((ad) => ad?.status === filter)
 
   const [selectedAd, setSelectedAd] = React.useState({})
 
@@ -199,15 +199,12 @@ export default function AdListPage() {
   )
 
   const handleRemoveAd = React.useCallback(
-    async ad => {
+    async (ad) => {
       try {
         if (ad.id) {
           await dexieDb.table('ads').delete(ad.id)
         } else {
-          await dexieDb
-            .table('ads')
-            .where({cid: ad.cid})
-            .delete()
+          await dexieDb.table('ads').where({cid: ad.cid}).delete()
         }
       } catch {
         console.error({ad}, 'failed to delete ad')
@@ -291,7 +288,7 @@ export default function AdListPage() {
 
         {loadingStatus === 'done' && (
           <AdList spacing={4} w="full" my="8">
-            {ads.map(ad => (
+            {ads.map((ad) => (
               <AdListItem
                 key={`${ad.cid}!!${ad.id}!!${ad.target}`}
                 ad={ad}

@@ -49,7 +49,7 @@ class NodeUpdater extends events.EventEmitter {
         if (this.isInternalNode) {
           if (!this.downloadPromise) {
             promiseTimeout(5000, getCurrentVersion(true))
-              .then(version => {
+              .then((version) => {
                 this.logger.info('got local temp version', version)
                 if (semver.lt(version, remoteVersion)) {
                   this.downloadNode(remoteVersion)
@@ -82,14 +82,14 @@ class NodeUpdater extends events.EventEmitter {
       !!this.downloadPromise
     )
     if (this.downloadPromise) return
-    this.downloadPromise = downloadNode(progress => {
+    this.downloadPromise = downloadNode((progress) => {
       this.emit('download-progress', progress)
     })
       .then(() => {
         this.downloadPromise = null
         this.emit('update-downloaded', {version: remoteVersion})
       })
-      .catch(e => {
+      .catch((e) => {
         this.downloadPromise = null
         this.logger.error('error while downloading update', e.toString())
         this.emit('update-failed')

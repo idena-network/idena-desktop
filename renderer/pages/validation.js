@@ -253,7 +253,7 @@ function ValidationSession({
               {...currentFlip}
               variant={AnswerType.Left}
               timerDetails={flipTimerDetails}
-              onChoose={hash =>
+              onChoose={(hash) =>
                 send({
                   type: 'ANSWER',
                   hash,
@@ -265,7 +265,7 @@ function ValidationSession({
               {...currentFlip}
               variant={AnswerType.Right}
               timerDetails={flipTimerDetails}
-              onChoose={hash =>
+              onChoose={(hash) =>
                 send({
                   type: 'ANSWER',
                   hash,
@@ -590,13 +590,13 @@ function isShortSession(state) {
 
 function isLongSessionFlips(state) {
   return ['flips', 'finishFlips']
-    .map(substate => `longSession.solve.answer.${substate}`)
+    .map((substate) => `longSession.solve.answer.${substate}`)
     .some(state.matches)
 }
 
 function isLongSessionKeywords(state) {
   return ['keywords', 'submitLongSession']
-    .map(substate => `longSession.solve.answer.${substate}`)
+    .map((substate) => `longSession.solve.answer.${substate}`)
     .some(state.matches)
 }
 
@@ -623,13 +623,13 @@ function isSubmitFailed(state) {
 
 function isFirstFlip(state) {
   return ['shortSession', 'longSession']
-    .map(substate => `${substate}.solve.nav.firstFlip`)
+    .map((substate) => `${substate}.solve.nav.firstFlip`)
     .some(state.matches)
 }
 
 function isLastFlip(state) {
   return ['shortSession', 'longSession']
-    .map(type => `${type}.solve.nav.lastFlip`)
+    .map((type) => `${type}.solve.nav.lastFlip`)
     .some(state.matches)
 }
 

@@ -15,7 +15,7 @@ export function useIdenaBot() {
   useEffect(() => {
     global.ipcRenderer
       .invoke('get-data', 'idena-bot')
-      .then(data => {
+      .then((data) => {
         setConnected(
           data || JSON.parse(localStorage.getItem('connectIdenaBot')) || false
         )
@@ -91,6 +91,7 @@ export function useStakingApy() {
   })
 
   const {data: prevEpochData} = useQuery({
+    // eslint-disable-next-line no-unsafe-optional-chaining
     queryKey: ['epoch', epoch?.epoch - 1],
     queryFn: fetcher,
     staleTime: Infinity,
@@ -99,6 +100,7 @@ export function useStakingApy() {
   })
 
   const {data: validationRewardsSummaryData} = useQuery({
+    // eslint-disable-next-line no-unsafe-optional-chaining
     queryKey: ['epoch', epoch?.epoch - 1, 'rewardsSummary'],
     queryFn: fetcher,
     enabled: Boolean(epoch),
@@ -140,18 +142,10 @@ export function useStakingApy() {
       prevEpochData &&
       validationRewardsSummaryData
     ) {
-      const {
-        weight,
-        averageMinerWeight,
-        extraFlipsWeight,
-        invitationsWeight,
-      } = stakingData
-      const {
-        validation,
-        staking,
-        extraFlips,
-        invitations,
-      } = validationRewardsSummaryData
+      const {weight, averageMinerWeight, extraFlipsWeight, invitationsWeight} =
+        stakingData
+      const {validation, staking, extraFlips, invitations} =
+        validationRewardsSummaryData
 
       // epoch staking
       const epochStakingRewardFund = Number(staking) || 0.9 * Number(validation)
@@ -257,14 +251,16 @@ export function useInviteScore() {
 
   const {canInvite, invitees} = useIdentityState()
 
-  const inviteesAddresses = (invitees || []).map(x => x.Address)
+  const inviteesAddresses = (invitees || []).map((x) => x.Address)
 
   const {data: hasNotActivatedInvite} = useQuery({
     queryKey: ['invitesStatuses', ...inviteesAddresses],
     queryFn: () =>
-      Promise.all(inviteesAddresses.map(addr => callRpc('dna_identity', addr))),
+      Promise.all(
+        inviteesAddresses.map((addr) => callRpc('dna_identity', addr))
+      ),
     select: React.useCallback(
-      data => data.some(x => x.state === IdentityStatus.Invite),
+      (data) => data.some((x) => x.state === IdentityStatus.Invite),
       []
     ),
   })

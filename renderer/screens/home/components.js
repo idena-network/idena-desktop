@@ -166,21 +166,17 @@ export function UserStat(props) {
   return <Stat as={Stack} spacing="1" {...props} />
 }
 
-export const UserStatLabel = React.forwardRef(function UserStatLabel(
-  props,
-  ref
-) {
-  return (
-    <StatLabel
-      ref={ref}
-      color="muted"
-      alignSelf="flex-start"
-      fontSize="md"
-      lineHeight="5"
-      {...props}
-    />
-  )
-})
+// eslint-disable-next-line react/display-name
+export const UserStatLabel = React.forwardRef((props, ref) => (
+  <StatLabel
+    ref={ref}
+    color="muted"
+    alignSelf="flex-start"
+    fontSize="md"
+    lineHeight="5"
+    {...props}
+  />
+))
 
 export function UserStatValue(props) {
   return <StatNumber fontSize="md" fontWeight={500} lineHeight="5" {...props} />
@@ -211,7 +207,7 @@ export const ActivateInviteForm = React.forwardRef(
       <Box
         ref={ref}
         as="form"
-        onSubmit={async e => {
+        onSubmit={async (e) => {
           e.preventDefault()
           try {
             const trimmedCode = code?.trim()
@@ -225,7 +221,7 @@ export const ActivateInviteForm = React.forwardRef(
           } catch ({message}) {
             failToast(
               // eslint-disable-next-line no-nested-ternary
-              ['missing', 'invalid'].some(errorCode =>
+              ['missing', 'invalid'].some((errorCode) =>
                 message.includes(errorCode)
               )
                 ? t('Invitation code is not valid')
@@ -284,7 +280,7 @@ export const ActivateInviteForm = React.forwardRef(
                   _placeholder={{
                     color: 'muted',
                   }}
-                  onChange={e => setCode(e.target.value)}
+                  onChange={(e) => setCode(e.target.value)}
                 />
               </Stack>
             </FormControl>
@@ -349,7 +345,7 @@ export function SpoilInviteForm({onSpoil}) {
     <Stack
       as="form"
       spacing={6}
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault()
         onSpoil(e.target.elements.key.value)
       }}
@@ -434,7 +430,7 @@ export function ActivateMiningForm({
           isOpen={eitherState(current, 'showing')}
           isCloseable={false}
           isLoading={eitherState(current, 'showing.mining')}
-          onChangeMode={value => {
+          onChangeMode={(value) => {
             send({type: 'CHANGE_MODE', mode: value})
           }}
           // eslint-disable-next-line no-shadow
@@ -759,7 +755,7 @@ export function KillForm({onSuccess, onFail}) {
     <Stack
       as="form"
       spacing={6}
-      onSubmit={async e => {
+      onSubmit={async (e) => {
         e.preventDefault()
 
         try {
@@ -845,7 +841,7 @@ export function MyIdenaBotAlert({onConnect, onSkip}) {
   const connectButtonRef = React.useRef()
 
   // eslint-disable-next-line no-shadow
-  const eitherState = (...states) => states.some(s => s === state)
+  const eitherState = (...states) => states.some((s) => s === state)
 
   return (
     <>
@@ -882,7 +878,7 @@ export function MyIdenaBotAlert({onConnect, onSkip}) {
               fontWeight={500}
               _hover={null}
               _active={null}
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation()
                 onSkip()
               }}
@@ -968,7 +964,7 @@ export function MyIdenaBotAlert({onConnect, onSkip}) {
           <Checkbox
             borderColor="gray.100"
             isChecked={doNotShowAgain}
-            onChange={e => {
+            onChange={(e) => {
               setDoNotShowAgain(e.target.checked)
             }}
           >
@@ -1013,9 +1009,8 @@ function IdenaBotFeatureList({features, listSeparator = ';'}) {
 export function ProfileTagList() {
   const {t} = useTranslation()
 
-  const [
-    {age, penaltySeconds, totalShortFlipPoints, totalQualifiedFlips},
-  ] = useIdentity()
+  const [{age, penaltySeconds, totalShortFlipPoints, totalQualifiedFlips}] =
+    useIdentity()
 
   const epoch = useEpochState()
 
@@ -1172,17 +1167,13 @@ function ProfileTagValue(props) {
   return <Text color={['muted', 'inherit']} {...props} />
 }
 
-const SimpleProfileTag = React.forwardRef(function SimpleProfileTag(
-  {label, value, ...props},
-  ref
-) {
-  return (
-    <ProfileTag ref={ref} {...props}>
-      <ProfileTagLabel>{label}</ProfileTagLabel>
-      <ProfileTagValue>{value}</ProfileTagValue>
-    </ProfileTag>
-  )
-})
+// eslint-disable-next-line react/display-name
+const SimpleProfileTag = React.forwardRef(({label, value, ...props}, ref) => (
+  <ProfileTag ref={ref} {...props}>
+    <ProfileTagLabel>{label}</ProfileTagLabel>
+    <ProfileTagValue>{value}</ProfileTagValue>
+  </ProfileTag>
+))
 
 export function ProfileTagPopover(props) {
   return <Popover placement="top" arrowShadowColor="transparent" {...props} />
@@ -1237,7 +1228,7 @@ export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
   const {data: hash, submit} = useReplenishStake({
     onSuccess,
     onError: React.useCallback(
-      e => {
+      (e) => {
         setIsMiningOff()
         onError(e)
       },
@@ -1318,7 +1309,7 @@ export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
           <Stack spacing="2.5">
             <form
               id="replenishStake"
-              onSubmit={e => {
+              onSubmit={(e) => {
                 e.preventDefault()
 
                 setIsMining.on()
@@ -1332,7 +1323,7 @@ export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
                 </FormLabel>
                 <DnaInput
                   value={sendValue}
-                  onChange={e => setSendValue(Number(e.target.value))}
+                  onChange={(e) => setSendValue(Number(e.target.value))}
                 />
                 <FormHelperText fontSize="md">
                   <Flex justify="space-between">
@@ -1355,8 +1346,8 @@ export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
                       },
                     }}
                     isChecked={checkboxes.cb1.value}
-                    onChange={e =>
-                      setCheckboxes(prev => ({
+                    onChange={(e) =>
+                      setCheckboxes((prev) => ({
                         ...prev,
                         cb1: {
                           ...prev.cb1,
@@ -1380,8 +1371,8 @@ export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
                         },
                       }}
                       isChecked={checkboxes.cb2.value}
-                      onChange={e =>
-                        setCheckboxes(prev => ({
+                      onChange={(e) =>
+                        setCheckboxes((prev) => ({
                           ...prev,
                           cb2: {
                             ...prev.cb2,
@@ -1406,8 +1397,8 @@ export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
                         },
                       }}
                       isChecked={checkboxes.cb3.value}
-                      onChange={e =>
-                        setCheckboxes(prev => ({
+                      onChange={(e) =>
+                        setCheckboxes((prev) => ({
                           ...prev,
                           cb3: {
                             ...prev.cb3,
@@ -1432,8 +1423,8 @@ export function ReplenishStakeDrawer({onSuccess, onMined, onError, ...props}) {
                         },
                       }}
                       isChecked={checkboxes.cb4.value}
-                      onChange={e =>
-                        setCheckboxes(prev => ({
+                      onChange={(e) =>
+                        setCheckboxes((prev) => ({
                           ...prev,
                           cb4: {
                             ...prev.cb4,

@@ -70,9 +70,10 @@ export function DnaSignInDialog({
 
   const {address} = useIdentityState()
 
-  const callbackUrlObject = React.useMemo(() => new URL(callbackUrl), [
-    callbackUrl,
-  ])
+  const callbackUrlObject = React.useMemo(
+    () => new URL(callbackUrl),
+    [callbackUrl]
+  )
 
   const callbackFaviconUrl = React.useMemo(
     () => faviconUrl || new URL('favicon.ico', callbackUrlObject.origin),
@@ -131,7 +132,7 @@ export function DnaSignInDialog({
               address,
             })
               .then(signNonce)
-              .then(signature =>
+              .then((signature) =>
                 authenticate(authenticationEndpoint, {
                   token,
                   signature,
@@ -181,15 +182,15 @@ export function DnaSendDialog({
 
   const [confirmationAmount, setConfirmationAmount] = React.useState()
 
-  const areSameAmounts = React.useMemo(() => +confirmationAmount === +amount, [
-    amount,
-    confirmationAmount,
-  ])
+  const areSameAmounts = React.useMemo(
+    () => +confirmationAmount === +amount,
+    [amount, confirmationAmount]
+  )
 
-  const isExceededBalance = React.useMemo(() => +amount > balance, [
-    amount,
-    balance,
-  ])
+  const isExceededBalance = React.useMemo(
+    () => +amount > balance,
+    [amount, balance]
+  )
 
   const [isSubmitting, setIsSubmitting] = React.useState()
 
@@ -241,7 +242,7 @@ export function DnaSendDialog({
               <Input
                 isDisabled={isExceededBalance}
                 value={confirmationAmount}
-                onChange={e => setConfirmationAmount(e.target.value)}
+                onChange={(e) => setConfirmationAmount(e.target.value)}
               />
               {Number.isFinite(+confirmationAmount) && !areSameAmounts && (
                 <DnaDialogAlertText>
@@ -260,15 +261,16 @@ export function DnaSendDialog({
           onClick={async () => {
             new Promise((resolve, reject) => {
               if (shouldConfirmTx) {
-                return areSameAmounts
-                  ? resolve()
-                  : reject(
-                      new Error(
-                        t('Entered amount does not match target amount')
-                      )
-                    )
+                if (areSameAmounts) {
+                  resolve()
+                } else {
+                  reject(
+                    new Error(t('Entered amount does not match target amount'))
+                  )
+                }
               }
-              return resolve()
+
+              resolve()
             })
               .then(() => setIsSubmitting(true))
               .then(() =>
@@ -311,7 +313,7 @@ export function DnaSendDialog({
                       })
                     },
                   })
-                    .catch(error => {
+                    .catch((error) => {
                       global.logger.error(error)
                       onDepositError({
                         error: error?.message,
@@ -390,10 +392,10 @@ export function DnaRawDialog({
     [amount, confirmationAmount]
   )
 
-  const isExceededBalance = React.useMemo(() => +amount > balance, [
-    amount,
-    balance,
-  ])
+  const isExceededBalance = React.useMemo(
+    () => +amount > balance,
+    [amount, balance]
+  )
 
   const [isSubmitting, setIsSubmitting] = React.useState()
 
@@ -482,7 +484,7 @@ export function DnaRawDialog({
                 <Input
                   isDisabled={isExceededBalance}
                   value={confirmationAmount}
-                  onChange={e => setConfirmationAmount(e.target.value)}
+                  onChange={(e) => setConfirmationAmount(e.target.value)}
                 />
                 {Number.isFinite(+confirmationAmount) && !didConfirmAmount && (
                   <DnaDialogAlertText>
@@ -508,19 +510,20 @@ export function DnaRawDialog({
           onClick={async () => {
             new Promise((resolve, reject) => {
               if (shouldConfirmTx) {
-                return didConfirmAmount
-                  ? resolve()
-                  : reject(
-                      new Error(
-                        t('Entered amount does not match target amount')
-                      )
-                    )
+                if (didConfirmAmount) {
+                  resolve()
+                } else {
+                  reject(
+                    new Error(t('Entered amount does not match target amount'))
+                  )
+                }
               }
-              return resolve()
+
+              resolve()
             })
               .then(() => setIsSubmitting(true))
               .then(() => callRpc('dna_sendTransaction', parsedTx))
-              .then(async hash => {
+              .then(async (hash) => {
                 if (isValidUrl(callbackUrl)) {
                   const callbackUrlWithHash = appendTxHash(callbackUrl, hash)
 
@@ -549,7 +552,7 @@ export function DnaRawDialog({
                     // eslint-disable-next-line no-shadow
                     onHtml: ({url}) => onSendSuccess({hash, url}),
                   })
-                    .catch(error => {
+                    .catch((error) => {
                       global.logger.error(error)
                       onSendError({
                         error: error?.message,
@@ -688,7 +691,7 @@ export function DnaSendFailedDialog({
                   })
                 }
               },
-            }).catch(error => {
+            }).catch((error) => {
               global.logger.error(error)
               onRetryFailed({
                 error: error?.message,

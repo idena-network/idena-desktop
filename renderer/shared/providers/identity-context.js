@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, {useCallback} from 'react'
+import React, {useCallback, useMemo} from 'react'
 import deepEqual from 'dequal'
 import {useInterval} from '../hooks/use-interval'
 import {fetchIdentity, killIdentity} from '../api/dna'
@@ -139,22 +139,34 @@ export function IdentityProvider({children}) {
 
   return (
     <IdentityStateContext.Provider
-      value={{
-        ...identity,
-        ...balanceResult,
-        canActivateInvite,
-        canSubmitFlip,
-        canMine,
-        canTerminate,
-        isValidated: [
-          IdentityStatus.Newbie,
-          IdentityStatus.Verified,
-          IdentityStatus.Human,
-        ].includes(identity?.state),
-        canInvite: identity?.invites > 0,
-      }}
+      value={useMemo(
+        () => ({
+          ...identity,
+          ...balanceResult,
+          canActivateInvite,
+          canSubmitFlip,
+          canMine,
+          canTerminate,
+          isValidated: [
+            IdentityStatus.Newbie,
+            IdentityStatus.Verified,
+            IdentityStatus.Human,
+          ].includes(identity?.state),
+          canInvite: identity?.invites > 0,
+        }),
+        [
+          balanceResult,
+          canActivateInvite,
+          canMine,
+          canSubmitFlip,
+          canTerminate,
+          identity,
+        ]
+      )}
     >
-      <IdentityDispatchContext.Provider value={{killMe, forceUpdate}}>
+      <IdentityDispatchContext.Provider
+        value={useMemo(() => ({killMe, forceUpdate}), [forceUpdate, killMe])}
+      >
         {children}
       </IdentityDispatchContext.Provider>
     </IdentityStateContext.Provider>

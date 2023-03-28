@@ -42,7 +42,7 @@ export default function NewAdPage() {
           <AdForm
             ref={adFormRef}
             id="adForm"
-            onSubmit={async ad => {
+            onSubmit={async (ad) => {
               await dexieDb.table('ads').add({
                 ...ad,
                 id: nanoid(),

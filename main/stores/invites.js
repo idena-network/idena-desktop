@@ -18,9 +18,7 @@ module.exports = {
     return getInvites().value()
   },
   getInvite(id) {
-    return getInvites()
-      .find({id})
-      .value()
+    return getInvites().find({id}).value()
   },
   addInvite(invite) {
     const id = nanoid()
@@ -40,14 +38,10 @@ module.exports = {
   },
 
   removeInvite({id}) {
-    getInvites()
-      .remove({id})
-      .write()
+    getInvites().remove({id}).write()
   },
   clearInvites() {
-    getInvites()
-      .remove()
-      .write()
+    getInvites().remove().write()
   },
   getActivationTx() {
     return db.get('activationTx').value()
