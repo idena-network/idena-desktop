@@ -563,7 +563,7 @@ export function FlipKeywordTranslationSwitch({
 
 export function FlipKeywordPanel(props) {
   return (
-    <Box bg="gray.50" px={10} py={8} rounded="lg" w="480px" {...props}></Box>
+    <Box bg="gray.50" px="10" py="8" rounded="lg" w="480px" {...props}></Box>
   )
 }
 

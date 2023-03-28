@@ -282,6 +282,14 @@ function ValidationSession({
                 key={currentFlip.hash}
                 currentFlip={currentFlip}
                 translations={translations}
+                validationStart={validationStart}
+                onSkip={() => {
+                  if (isLastFlip(state)) {
+                    send({type: 'SUBMIT'})
+                  } else {
+                    send({type: 'NEXT'})
+                  }
+                }}
               >
                 <Stack spacing={4}>
                   <Stack isInline spacing={1} align="center">
