@@ -24,17 +24,17 @@ export const validationReportMachine = createMachine({
       entry: [assign({identity: (_, {identity}) => identity})],
       invoke: {
         src: async (_, {epochNumber, identity: {address}}) => {
-          const validationSummary = await (
-            await (
-              await fetch(
-                apiUrl(
-                  `Epoch/${epochNumber}/Identity/${address}/ValidationSummary`
-                )
+          const {result, error} = await (
+            await fetch(
+              apiUrl(
+                `Epoch/${epochNumber}/Identity/${address}/ValidationSummary`
               )
-            ).json()
-          ).result
+            )
+          ).json()
 
-          return validationSummary
+          if (error) throw new Error(error)
+
+          return result
         },
         onDone: 'fetched',
         onError: 'failed',

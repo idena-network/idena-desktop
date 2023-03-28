@@ -43,7 +43,6 @@ import {
   DialogFooter,
   DialogHeader,
   ExternalLink,
-  FloatDebug,
   Page,
   TextLink,
   Tooltip,
@@ -726,8 +725,6 @@ export default function ProfilePage() {
         isOpen={isOpenExportPk}
         onClose={onCloseExportPk}
       />
-
-      {global.isDev && <FloatDebug>{currentOnboarding.value}</FloatDebug>}
     </>
   )
 }
