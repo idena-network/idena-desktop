@@ -128,15 +128,6 @@ export function clearValidationState() {
   persistState('validation2', null)
 }
 
-// Here below some guides that just make sense
-// You can start validation in any case tho, but it just guarantees 100% failure
-//
-// Options:
-// - Epoch is not fetched or failed, do NOTHING
-// - Epoch is fetched but is NOT SHORT SESSION, do NOTHING
-// - Epoch is fetched AND is SHORT SESSION BUT NOT VALID IDENTITY do NOTHING
-// - Epoch is fetched AND is SHORT SESSION AND IDENTITY IS VALID go further
-//
 // TODO: add tests
 export function shouldStartValidation(epoch, identity) {
   const isValidationRunning =
@@ -146,45 +137,24 @@ export function shouldStartValidation(epoch, identity) {
     )
 
   if (isValidationRunning && canValidate(identity)) {
-    // Hooray! We're in but still need to check against persisted validation state and epoch
     const validationStateDefinition = loadValidationStateDefinition()
     if (validationStateDefinition) {
       const persistedValidationState = State.create(validationStateDefinition)
-      const isDone = persistedValidationState.done // is it DONE? any positive or negative, validation-wise
+      const isDone = persistedValidationState.done
 
-      // One possible way to break this kinda magic case is stucking with node version before the fork
-      if (epoch.epoch >= persistedValidationState.context.epoch) {
-        const isSameEpoch =
-          epoch.epoch === persistedValidationState.context.epoch // is it still SAME epoch?
+      const isSameEpoch = epoch.epoch === persistedValidationState.context.epoch
 
-        if (!isSameEpoch) {
-          clearValidationState()
-        }
-        return !isDone || !isSameEpoch
-
-        // Below cases simplified
-        //
-        // DONE but NOT SAME EPOCH
-        // Validation started in next epoch
-        // if (isDone && !isSameEpoch) return true
-
-        // DONE and SAME EPOCH
-        // We're done! Keep calm and wait for results
-        // if (isDone && isSameEpoch) return false
-
-        // NOT DONE and NOT SAME EPOCH
-        // Not finised prev validation. Even more, still in the middle of PREV validation! Not sure it makes sense to proceed, clearing
-        // if (!isDone && !isSameEpoch) return true
-
-        // NOT DONE and SAME EPOCH
-        // Just bumping persisted state, let's say after restarting the app
-        // if (!isDone && isSameEpoch) return true
+      if (!isSameEpoch) {
+        clearValidationState()
       }
-    } else {
-      // Don't have any persisted state, typically means fresh user = 1st validation
-      return true
+
+      return !isDone || !isSameEpoch
     }
-  } else return false
+
+    return true
+  }
+
+  return false
 }
 
 export function didValidate(currentEpoch) {
