@@ -128,7 +128,6 @@ export function clearValidationState() {
   persistState('validation2', null)
 }
 
-// TODO: add tests
 export function shouldStartValidation(epoch, identity) {
   const isValidationRunning =
     epoch &&

@@ -200,7 +200,7 @@ function StatusContent(props) {
 
 // eslint-disable-next-line react/display-name
 const StatusText = React.forwardRef((props, ref) => (
-  <Text ref={ref} fontWeight={500} {...props} />
+  <Text ref={ref} fontWeight={500} noOfLines={1} {...props} />
 ))
 
 function ConnectionBandwidth() {

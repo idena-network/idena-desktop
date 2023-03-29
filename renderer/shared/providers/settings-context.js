@@ -136,14 +136,14 @@ export function SettingsProvider({children}) {
   })
 
   const toggleUseExternalNode = useCallback(
-    () => (enable) => {
+    (enable) => {
       dispatch({type: TOGGLE_USE_EXTERNAL_NODE, data: enable})
     },
     [dispatch]
   )
 
   const toggleRunInternalNode = useCallback(
-    () => (run) => {
+    (run) => {
       dispatch({type: TOGGLE_RUN_INTERNAL_NODE, data: run})
     },
     [dispatch]
@@ -158,6 +158,13 @@ export function SettingsProvider({children}) {
     dispatch({type: TOGGLE_AUTO_ACTIVATE_MINING})
   }, [dispatch])
 
+  const setConnectionDetails = useCallback(
+    ({url, apiKey}) => {
+      dispatch({type: SET_CONNECTION_DETAILS, url, apiKey})
+    },
+    [dispatch]
+  )
+
   return (
     <SettingsStateContext.Provider value={state}>
       <SettingsDispatchContext.Provider
@@ -166,14 +173,12 @@ export function SettingsProvider({children}) {
             toggleUseExternalNode,
             toggleRunInternalNode,
             changeLanguage,
-            setConnectionDetails({url, apiKey}) {
-              dispatch({type: SET_CONNECTION_DETAILS, url, apiKey})
-            },
+            setConnectionDetails,
             toggleAutoActivateMining,
           }),
           [
             changeLanguage,
-            dispatch,
+            setConnectionDetails,
             toggleAutoActivateMining,
             toggleRunInternalNode,
             toggleUseExternalNode,

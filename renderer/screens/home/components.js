@@ -463,7 +463,7 @@ export function ActivateMiningSwitch({isOnline, isDelegator, onShow}) {
         h="8"
         px={3}
       >
-        <FormLabel htmlFor="mining" fontWeight="normal" mb={0}>
+        <FormLabel htmlFor="mining" fontWeight="normal" mb={0} noOfLines={1}>
           {isDelegator ? t('Delegation') : t('Mining')}
         </FormLabel>
         <Stack direction="row" align="center">
