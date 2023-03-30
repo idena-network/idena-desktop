@@ -505,7 +505,7 @@ export function ScrollToTop({scrollableRef, ...props}) {
       display="inline-flex"
       alignItems="center"
       justifyContent="center"
-      position="absolute"
+      position="fixed"
       bottom={4}
       right={4}
       borderRadius="lg"
