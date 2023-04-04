@@ -1248,7 +1248,8 @@ export const imageSearchMachine = createMachine({
     searching: {
       invoke: {
         // eslint-disable-next-line no-shadow
-        src: ({query}) => global.ipcRenderer.invoke('search-image', query),
+        src: ({query}, {query: queryParam}) =>
+          global.ipcRenderer.invoke('search-image', query || queryParam),
         onDone: {
           target: 'done',
           actions: [

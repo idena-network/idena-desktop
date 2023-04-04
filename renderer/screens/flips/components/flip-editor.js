@@ -973,6 +973,7 @@ export default function FlipEditor({
                       'ffa366dd',
                     ].map((color) => (
                       <FlipEditorMenuItem
+                        key={color}
                         justifyContent="center"
                         borderRadius="sm"
                         p={1}

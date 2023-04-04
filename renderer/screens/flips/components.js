@@ -790,6 +790,7 @@ export function FlipProtectStep({
         <FlipImageList>
           {originalOrder.map((num, idx) => (
             <SelectableItem
+              key={num}
               isActive={idx === currentIndex}
               isFirst={idx === 0}
               isLast={idx === images.length - 1}
