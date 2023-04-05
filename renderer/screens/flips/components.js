@@ -2,7 +2,6 @@
 import React, {useEffect} from 'react'
 import NextLink from 'next/link'
 import {
-  SimpleGrid,
   Image,
   Text,
   Box,
@@ -30,6 +29,8 @@ import {
   Center,
   useRadio,
   useRadioGroup,
+  Wrap,
+  WrapItem,
 } from '@chakra-ui/react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import {useTranslation} from 'react-i18next'
@@ -91,7 +92,7 @@ export function FlipPageTitle({onClose, ...props}) {
 }
 
 export function FlipCardList(props) {
-  return <SimpleGrid columns={4} spacing={10} {...props} />
+  return <Wrap spacing="39px" {...props} />
 }
 
 export function FlipCard({flipService, onDelete}) {
@@ -122,95 +123,97 @@ export function FlipCard({flipService, onDelete}) {
   const isDeletable = [FlipType.Published, FlipType.Draft].includes(type)
 
   return (
-    <Box position="relative">
-      <FlipCardImageBox>
-        {[FlipType.Publishing, FlipType.Deleting, FlipType.Invalid].some(
-          (x) => x === type
-        ) && (
-          <FlipOverlay
-            backgroundImage={
-              // eslint-disable-next-line no-nested-ternary
-              [FlipType.Publishing, FlipType.Deleting].some((x) => x === type)
-                ? `linear-gradient(to top, ${colors.warning[500]}, transparent)`
-                : type === FlipType.Invalid
-                ? `linear-gradient(to top, ${colors.red[500]}, transparent)`
-                : ''
+    <WrapItem>
+      <Box w={150} position="relative">
+        <FlipCardImageBox>
+          {[FlipType.Publishing, FlipType.Deleting, FlipType.Invalid].some(
+            (x) => x === type
+          ) && (
+            <FlipOverlay
+              backgroundImage={
+                // eslint-disable-next-line no-nested-ternary
+                [FlipType.Publishing, FlipType.Deleting].some((x) => x === type)
+                  ? `linear-gradient(to top, ${colors.warning[500]}, transparent)`
+                  : type === FlipType.Invalid
+                  ? `linear-gradient(to top, ${colors.red[500]}, transparent)`
+                  : ''
+              }
+            >
+              <FlipOverlayStatus>
+                <InfoSolidIcon boxSize="5" />
+                <FlipOverlayText>
+                  {type === FlipType.Publishing && t('Mining...')}
+                  {type === FlipType.Deleting && t('Deleting...')}
+                  {type === FlipType.Invalid && t('Mining error')}
+                </FlipOverlayText>
+              </FlipOverlayStatus>
+            </FlipOverlay>
+          )}
+          <FlipCardImage
+            src={
+              images[originalOrder ? originalOrder[0] : 0] ||
+              images[originalOrder ? originalOrder[1] : 1]
             }
-          >
-            <FlipOverlayStatus>
-              <InfoSolidIcon boxSize="5" />
-              <FlipOverlayText>
-                {type === FlipType.Publishing && t('Mining...')}
-                {type === FlipType.Deleting && t('Deleting...')}
-                {type === FlipType.Invalid && t('Mining error')}
-              </FlipOverlayText>
-            </FlipOverlayStatus>
-          </FlipOverlay>
-        )}
-        <FlipCardImage
-          src={
-            images[originalOrder ? originalOrder[0] : 0] ||
-            images[originalOrder ? originalOrder[1] : 1]
-          }
-        />
-      </FlipCardImageBox>
-      <Flex justifyContent="space-between" alignItems="flex-start" mt={4}>
-        <Box>
-          <FlipCardTitle>
-            {keywords.words && keywords.words.length
-              ? formatKeywords(keywords.words)
-              : t('Missing keywords')}
-          </FlipCardTitle>
-          <FlipCardSubtitle>
-            {new Date(modifiedAt).toLocaleString()}
-          </FlipCardSubtitle>
-        </Box>
-        {isActionable && (
-          <FlipCardMenu>
-            {isSubmittable && (
-              <FlipCardMenuItem onClick={() => send('PUBLISH', {id})}>
-                <HStack spacing="2">
-                  <FlipCardMenuItemIcon icon={UploadIcon} />
-                  <Text as="span">{t('Submit flip')}</Text>
-                </HStack>
-              </FlipCardMenuItem>
-            )}
-            {isViewable && (
-              <NextLink href={`/flips/view?id=${id}`}>
-                <FlipCardMenuItem>
+          />
+        </FlipCardImageBox>
+        <Flex justifyContent="space-between" alignItems="flex-start" mt={4}>
+          <Box>
+            <FlipCardTitle>
+              {keywords.words && keywords.words.length
+                ? formatKeywords(keywords.words)
+                : t('Missing keywords')}
+            </FlipCardTitle>
+            <FlipCardSubtitle>
+              {new Date(modifiedAt).toLocaleString()}
+            </FlipCardSubtitle>
+          </Box>
+          {isActionable && (
+            <FlipCardMenu>
+              {isSubmittable && (
+                <FlipCardMenuItem onClick={() => send({type: 'PUBLISH', id})}>
                   <HStack spacing="2">
-                    <FlipCardMenuItemIcon icon={EyeIcon} />
-                    <Text as="span">{t('View flip')}</Text>
+                    <FlipCardMenuItemIcon icon={UploadIcon} />
+                    <Text as="span">{t('Submit flip')}</Text>
                   </HStack>
                 </FlipCardMenuItem>
-              </NextLink>
-            )}
-            {isEditable && (
-              <NextLink href={`/flips/edit?id=${id}`}>
-                <FlipCardMenuItem>
-                  <HStack spacing="2">
-                    <FlipCardMenuItemIcon icon={EditIcon} />
-                    <Text as="span">{t('Edit flip')}</Text>
-                  </HStack>
-                </FlipCardMenuItem>
-              </NextLink>
-            )}
-            {(isSubmittable || isEditable) && isDeletable && (
-              <MenuDivider color="gray.300" my={2} width={rem(145)} />
-            )}
+              )}
+              {isViewable && (
+                <NextLink href={`/flips/view?id=${id}`}>
+                  <FlipCardMenuItem>
+                    <HStack spacing="2">
+                      <FlipCardMenuItemIcon icon={EyeIcon} />
+                      <Text as="span">{t('View flip')}</Text>
+                    </HStack>
+                  </FlipCardMenuItem>
+                </NextLink>
+              )}
+              {isEditable && (
+                <NextLink href={`/flips/edit?id=${id}`}>
+                  <FlipCardMenuItem>
+                    <HStack spacing="2">
+                      <FlipCardMenuItemIcon icon={EditIcon} />
+                      <Text as="span">{t('Edit flip')}</Text>
+                    </HStack>
+                  </FlipCardMenuItem>
+                </NextLink>
+              )}
+              {(isSubmittable || isEditable) && isDeletable && (
+                <MenuDivider color="gray.300" my={2} width={rem(145)} />
+              )}
 
-            {isDeletable && (
-              <FlipCardMenuItem onClick={onDelete}>
-                <HStack spacing="2">
-                  <FlipCardMenuItemIcon icon={DeleteIcon} color="red.500" />
-                  <Text as="span">{t('Delete flip')}</Text>
-                </HStack>
-              </FlipCardMenuItem>
-            )}
-          </FlipCardMenu>
-        )}
-      </Flex>
-    </Box>
+              {isDeletable && (
+                <FlipCardMenuItem onClick={onDelete}>
+                  <HStack spacing="2">
+                    <FlipCardMenuItemIcon icon={DeleteIcon} color="red.500" />
+                    <Text as="span">{t('Delete flip')}</Text>
+                  </HStack>
+                </FlipCardMenuItem>
+              )}
+            </FlipCardMenu>
+          )}
+        </Flex>
+      </Box>
+    </WrapItem>
   )
 }
 
@@ -263,6 +266,7 @@ export function FlipCardMenu(props) {
         rounded="lg"
         py="2"
         minWidth="145px"
+        zIndex="dropdown"
         {...props}
       />
     </Menu>

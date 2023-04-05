@@ -302,7 +302,7 @@ export default function FlipListPage() {
             {current.matches('ready.dirty.active') && (
               <>
                 {missingFlips.map(({keywords, ...flip}, idx) => (
-                  <Box key={idx}>
+                  <Box key={idx} w={150}>
                     <EmptyFlipBox position="relative">
                       {[FlipType.Deleting, FlipType.Invalid].some(
                         (x) => x === flip.type
