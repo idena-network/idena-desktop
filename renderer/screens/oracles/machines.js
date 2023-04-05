@@ -1091,25 +1091,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
                 CANCEL: 'hist',
               },
             },
-            redirecting: {
-              entry: [
-                assign({
-                  redirectUrl: (_, {url}) => url,
-                }),
-                log(),
-              ],
-              on: {
-                CONTINUE: {
-                  target: 'hist',
-                  actions: [
-                    ({redirectUrl}) => global.openExternal(redirectUrl),
-                  ],
-                },
-                CANCEL: 'hist',
-              },
-            },
             hist: {
-              type: 'hist',
+              type: 'history',
             },
           },
           on: {
@@ -1140,7 +1123,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
             },
             REVIEW_PROLONG_VOTING: 'prolong',
             REVIEW_FINISH_VOTING: 'finish',
-            FOLLOW_LINK: '.redirecting',
           },
         },
         review: {
