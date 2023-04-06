@@ -135,6 +135,13 @@ export const validationReportMachine = createMachine({
         ),
       ],
     },
-    failed: {},
+    failed: {
+      entry: [
+        assign({
+          validationResult: ({identity: {isValidated}}) =>
+            isValidated ? ValidationResult.Success : ValidationResult.Fail,
+        }),
+      ],
+    },
   },
 })
