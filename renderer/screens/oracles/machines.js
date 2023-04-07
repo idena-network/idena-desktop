@@ -1,4 +1,4 @@
-import {Machine, assign, spawn} from 'xstate'
+import {assign, spawn, createMachine} from 'xstate'
 import {choose, log, send, sendParent} from 'xstate/lib/actions'
 import dayjs from 'dayjs'
 import {
@@ -30,7 +30,7 @@ import {epochDb, requestDb} from '../../shared/utils/db'
 import {ContractRpcMode, VotingListFilter} from './types'
 import {fetchNetworkSize} from '../../shared/api/dna'
 
-export const votingListMachine = Machine(
+export const votingListMachine = createMachine(
   {
     context: {
       votings: [],
@@ -294,7 +294,7 @@ export const votingListMachine = Machine(
   }
 )
 
-export const votingMachine = Machine(
+export const votingMachine = createMachine(
   {
     id: 'voting',
     initial: 'unknown',
@@ -479,7 +479,7 @@ export const votingMachine = Machine(
 )
 
 export const createNewVotingMachine = (epoch, address) =>
-  Machine(
+  createMachine(
     {
       context: {
         epoch,
@@ -963,7 +963,7 @@ export const createNewVotingMachine = (epoch, address) =>
   )
 
 export const createViewVotingMachine = (id, epoch, address) =>
-  Machine(
+  createMachine(
     {
       id: 'viewVoting',
       context: {
@@ -1091,25 +1091,8 @@ export const createViewVotingMachine = (id, epoch, address) =>
                 CANCEL: 'hist',
               },
             },
-            redirecting: {
-              entry: [
-                assign({
-                  redirectUrl: (_, {url}) => url,
-                }),
-                log(),
-              ],
-              on: {
-                CONTINUE: {
-                  target: 'hist',
-                  actions: [
-                    ({redirectUrl}) => global.openExternal(redirectUrl),
-                  ],
-                },
-                CANCEL: 'hist',
-              },
-            },
             hist: {
-              type: 'hist',
+              type: 'history',
             },
           },
           on: {
@@ -1140,7 +1123,6 @@ export const createViewVotingMachine = (id, epoch, address) =>
             },
             REVIEW_PROLONG_VOTING: 'prolong',
             REVIEW_FINISH_VOTING: 'finish',
-            FOLLOW_LINK: '.redirecting',
           },
         },
         review: {

@@ -120,8 +120,9 @@ export default function NewFlipPage() {
           !flip.adversarialImages.some((x) => x) &&
           !eitherState(currentSearch, 'searching')
         ) {
-          currentSearch.context.query = `${flip.keywords.words[0]?.name} ${flip.keywords.words[1]?.name}`
-          sendSearch('SEARCH')
+          sendSearch('SEARCH', {
+            query: `${flip.keywords.words[0]?.name} ${flip.keywords.words[1]?.name}`,
+          })
         }
         return Promise.resolve()
       },

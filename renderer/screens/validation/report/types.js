@@ -4,4 +4,5 @@ export const ValidationResult = {
   LateSubmission: 'late',
   MissedValidation: 'missed',
   WrongAnswers: 'wrong',
+  Fail: 'fail',
 }

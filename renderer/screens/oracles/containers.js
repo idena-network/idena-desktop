@@ -942,7 +942,7 @@ export function VotingDurationInput({
         value={String(value)}
         // eslint-disable-next-line no-shadow
         onChange={(value) => {
-          send('CHANGE', {id, value})
+          send({type: 'CHANGE', id, value})
         }}
       >
         <HStack spacing="3">
@@ -961,7 +961,8 @@ export function VotingDurationInput({
           id={id}
           value={value}
           onChange={({target}) => {
-            send('CHANGE', {
+            send({
+              type: 'CHANGE',
               id,
               value: Number(target.value),
             })
@@ -1307,9 +1308,9 @@ export function LaunchVotingDrawer({votingService}) {
       available={identity.balance}
       isLoading={current.matches(`mining.${VotingStatus.Starting}`)}
       onLaunch={(e) => {
-        send('START_VOTING', e)
+        send({type: 'START_VOTING', ...e})
       }}
-      onError={(e) => send('ERROR', e)}
+      onError={(e) => send({type: 'ERROR', ...e})}
     />
   )
 }

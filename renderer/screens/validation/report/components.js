@@ -96,8 +96,13 @@ export function ValidationReportSummary({onClose}) {
                   return t('Successfully validated')
                 case ValidationResult.Penalty:
                   return t('Validated')
-                default:
+                case ValidationResult.LateSubmission:
+                case ValidationResult.WrongAnswers:
+                case ValidationResult.MissedValidation:
+                case ValidationResult.Fail:
                   return t('Validation failed')
+                default:
+                  return ''
               }
             })()}
           </AlertTitle>

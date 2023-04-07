@@ -302,7 +302,7 @@ export default function FlipListPage() {
             {current.matches('ready.dirty.active') && (
               <>
                 {missingFlips.map(({keywords, ...flip}, idx) => (
-                  <Box key={idx}>
+                  <Box key={idx} w={150}>
                     <EmptyFlipBox position="relative">
                       {[FlipType.Deleting, FlipType.Invalid].some(
                         (x) => x === flip.type
@@ -313,7 +313,7 @@ export default function FlipListPage() {
                             flip.type === FlipType.Deleting
                               ? `linear-gradient(to top, ${colors.warning[500]}, transparent)`
                               : flip.type === FlipType.Invalid
-                              ? `linear-gradient(to top, ${colors.red[500]}, ${colors.red[500]})`
+                              ? `linear-gradient(to top, ${colors.red[500]}, transparent)`
                               : ''
                           }
                         >

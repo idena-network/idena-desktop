@@ -270,6 +270,9 @@ export default function ViewVotingPage() {
     })
   }, [onCloseCampaignDisclosure, redirect, successToast, t])
 
+  const redirectDisclosure = useDisclosure()
+  const [redirectUrl, setRedirectUrl] = React.useState()
+
   return (
     <>
       <Layout syncing={syncing} offline={offline}>
@@ -343,7 +346,8 @@ export default function ViewVotingPage() {
                           >
                             <Linkify
                               onClick={(url) => {
-                                send('FOLLOW_LINK', {url})
+                                setRedirectUrl(url)
+                                redirectDisclosure.onOpen()
                               }}
                             >
                               {desc}
@@ -1105,20 +1109,22 @@ export default function ViewVotingPage() {
         />
       )}
 
-      <Dialog
-        isOpen={eitherIdleState('redirecting')}
-        onClose={() => send('CANCEL')}
-      >
+      <Dialog {...redirectDisclosure}>
         <DialogHeader>{t('Leaving Idena')}</DialogHeader>
         <DialogBody>
           <Text>{t(`You're about to leave Idena.`)}</Text>
           <Text>{t(`Are you sure?`)}</Text>
         </DialogBody>
         <DialogFooter>
-          <SecondaryButton onClick={() => send('CANCEL')}>
+          <SecondaryButton onClick={redirectDisclosure.onClose}>
             {t('Cancel')}
           </SecondaryButton>
-          <PrimaryButton onClick={() => send('CONTINUE')}>
+          <PrimaryButton
+            onClick={() => {
+              global.openExternal(redirectUrl)
+              redirectDisclosure.onClose()
+            }}
+          >
             {t('Continue')}
           </PrimaryButton>
         </DialogFooter>
