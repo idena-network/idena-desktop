@@ -33,6 +33,7 @@ import {
   DNA_SEND_CONFIRM_TRESHOLD,
   appendTxHash,
   handleCallbackUrl,
+  appendParam,
 } from './utils'
 import {
   Dialog,
@@ -145,6 +146,99 @@ export function DnaSignInDialog({
               .catch(({message}) => {
                 global.logger.error(message)
                 if (onSignInError) onSignInError(message)
+              })
+              .finally(onClose)
+          }}
+        >
+          {t('Confirm')}
+        </PrimaryButton>
+      </DialogFooter>
+    </DnaDialog>
+  )
+}
+
+export function DnaSignDialog({
+  message,
+  format,
+  callbackUrl,
+  faviconUrl,
+  onSignError,
+  onClose,
+  ...props
+}) {
+  const {t} = useTranslation()
+
+  const initialRef = React.useRef()
+
+  const {address} = useIdentityState()
+
+  const callbackUrlObject = React.useMemo(
+    () => new URL(callbackUrl),
+    [callbackUrl]
+  )
+
+  const callbackFaviconUrl = React.useMemo(
+    () => faviconUrl || new URL('favicon.ico', callbackUrlObject.origin),
+    [callbackUrlObject.origin, faviconUrl]
+  )
+
+  return (
+    <DnaDialog
+      initialFocusRef={initialRef}
+      title={t('Confirm signature')}
+      onClose={onClose}
+      {...props}
+    >
+      <DialogBody>
+        <Stack spacing={5}>
+          <Text>{t('Please confirm that you want to sign the message')}</Text>
+          <Stack spacing="px" borderRadius="lg" overflow="hidden">
+            <MediaDnaDialogStat
+              label={t('Website')}
+              value={callbackUrlObject.hostname || callbackUrl}
+            >
+              {callbackFaviconUrl ? (
+                <Image
+                  src={callbackFaviconUrl}
+                  ignoreFallback
+                  borderRadius="md"
+                  h={10}
+                  w={10}
+                />
+              ) : (
+                <GlobeIcon color="blue.500" boxSize="10" />
+              )}
+            </MediaDnaDialogStat>
+            <MediaDnaDialogStat label={t('My address')} value={address}>
+              <DnaDialogAvatar address={address} />
+            </MediaDnaDialogStat>
+            <SimpleDnaDialogStat label={t('Message')} value={message} />
+          </Stack>
+        </Stack>
+      </DialogBody>
+      <DialogFooter>
+        <SecondaryButton onClick={onClose}>{t('Cancel')}</SecondaryButton>
+        <PrimaryButton
+          maxH={8}
+          maxW={48}
+          overflow="hidden"
+          wordBreak="break-all"
+          ref={initialRef}
+          onClick={async () => {
+            signNonce(message, format)
+              .then((signature) => {
+                if (isValidUrl(callbackUrl)) {
+                  const callbackUrlWithSignature = appendParam(
+                    callbackUrl,
+                    'signature',
+                    signature
+                  )
+                  global.openExternal(callbackUrlWithSignature.href)
+                } else onSignError('Invalid callback URL')
+              })
+              .catch(({message: errorMessage}) => {
+                global.logger.error(errorMessage)
+                if (onSignError) onSignError(errorMessage)
               })
               .finally(onClose)
           }}

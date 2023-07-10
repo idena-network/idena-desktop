@@ -59,12 +59,16 @@ export async function startSession(nonceEndpoint, {token, address}) {
   throw new Error(`You must start prefix with ${DNA_NONCE_PREFIX}`)
 }
 
-export async function signNonce(nonce) {
+export async function signNonce(nonce, format) {
+  const params = [nonce]
+  if (format) {
+    params.push(format)
+  }
   const {
     data: {result, error},
   } = await apiClient().post('/', {
     method: 'dna_sign',
-    params: [nonce],
+    params,
     id: 1,
   })
   if (error) throw new Error(error.message)
@@ -104,8 +108,12 @@ export async function sendDna({from, to, amount, comment}) {
 }
 
 export function appendTxHash(url, hash) {
+  return appendParam(url, 'tx', hash)
+}
+
+export function appendParam(url, name, value) {
   const txUrl = new URL(url)
-  txUrl.searchParams.append('tx', hash)
+  txUrl.searchParams.append(name, value)
   return txUrl
 }
 

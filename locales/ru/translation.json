@@ -951,5 +951,8 @@
   "Ads": "Ads",
   "Client version: {{version}}": "Client version: {{version}}",
   "Node version: {{version}}": "Node version: {{version}}",
-  "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake.": "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake."
+  "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake.": "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake.",
+  "Confirm signature": "Confirm signature",
+  "Please confirm that you want to sign the message": "Please confirm that you want to sign the message",
+  "Message": "Message"
 }
