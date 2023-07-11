@@ -763,7 +763,7 @@
   "An invitation can be provided by validated participants": "Позивницу могу дати валидирани учесници",
   "Your flips were reported.": "Твоји флипови су пријављени.",
   "Make all flips carefully": "Направи све флипове пажљиво",
-  "Withdraw stake, iDNA": "Повуци улог, iDNA",
+  "Withdraw stake": "Повуци улог",
   "To take part in the validation, you need an invitation code. Invitations can be provided by validated identities.": "Да бисте учествовали у валидацији, потребан вам је позивни код. Позивнице могу доставити потврђени идентитети.",
   "How to get an invitation code": "Како добити позивницу",
   "Successfully sent": "Успешно послато",
@@ -956,5 +956,6 @@
   "Show status": "Прикажи статус",
   "Ads": "Рекламе",
   "Client version: {{version}}": "Верзија клијента: {{version}}",
-  "Node version: {{version}}": "Верзија нода: {{version}}"
+  "Node version: {{version}}": "Верзија нода: {{version}}",
+  "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake.": "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake."
 }

@@ -753,7 +753,7 @@
   "An invitation can be provided by validated participants": "An invitation can be provided by validated participants",
   "Your flips were reported.": "Your flips were reported.",
   "Make all flips carefully": "Make all flips carefully",
-  "Withdraw stake, iDNA": "Withdraw stake, iDNA",
+  "Withdraw stake": "Withdraw stake",
   "To take part in the validation, you need an invitation code. Invitations can be provided by validated identities.": "To take part in the validation, you need an invitation code. Invitations can be provided by validated identities.",
   "How to get an invitation code": "How to get an invitation code",
   "Successfully sent": "Successfully sent",
@@ -943,5 +943,6 @@
   "Show status": "Show status",
   "Ads": "Ads",
   "Client version: {{version}}": "Client version: {{version}}",
-  "Node version: {{version}}": "Node version: {{version}}"
+  "Node version: {{version}}": "Node version: {{version}}",
+  "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake.": "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake."
 }

@@ -755,7 +755,7 @@
   "An invitation can be provided by validated participants": "Davetiyeler yalnızca doğrulanmış kullanıcılar tarafından sağlanabilir",
   "Your flips were reported.": "Anahtarlamalarınız rapor(şikayet) edildi",
   "Make all flips carefully": "Tüm Anahtarlamaları dikkatlice oluşturun",
-  "Withdraw stake, iDNA": "Stake Bakiyesini Çek, iDNA",
+  "Withdraw stake": "Stake Bakiyesini Çek",
   "To take part in the validation, you need an invitation code. Invitations can be provided by validated identities.": "Doğrulamaya katılmak için, doğrulanmış kullanıcılardan bir davet kodu temin etmeniz gerekmektedir.",
   "How to get an invitation code": "Davetiye kodu nasıl alınır",
   "Successfully sent": "Başarıyla gönderildi",
@@ -945,5 +945,6 @@
   "Show status": "Show status",
   "Ads": "Ads",
   "Client version: {{version}}": "Client version: {{version}}",
-  "Node version: {{version}}": "Node version: {{version}}"
+  "Node version: {{version}}": "Node version: {{version}}",
+  "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake.": "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake."
 }
