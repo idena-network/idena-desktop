@@ -37,6 +37,7 @@ import {
   DnaRawDialog,
   DnaSendFailedDialog,
   DnaSendSucceededDialog,
+  DnaSignDialog,
 } from '../../screens/dna/containers'
 import {
   useAutoUpdateState,
@@ -216,6 +217,24 @@ export default function Layout({
     },
   })
 
+  const {onOpen: onOpenSignDialog, ...dnaSignDisclosure} = useDisclosure()
+
+  const handleReceiveDnaSignLink = React.useCallback(() => {
+    if (isNotOffline) onOpenSignDialog()
+  }, [isNotOffline, onOpenSignDialog])
+
+  const {
+    params: {message: dnaSignMessage, ...dnaSignParams},
+  } = useDnaLinkMethod(DnaLinkMethod.Sign, {
+    onReceive: handleReceiveDnaSignLink,
+    onInvalidLink: () => {
+      failToast({
+        title: t('Invalid DNA link'),
+        description: t(`You must provide valid URL including protocol version`),
+      })
+    },
+  })
+
   return (
     <LayoutContainer>
       <Sidebar
@@ -250,6 +269,15 @@ export default function Layout({
           {...dnaSignInParams}
           {...dnaSignInDisclosure}
           onSignInError={failToast}
+        />
+      )}
+
+      {Boolean(dnaSignMessage) && (
+        <DnaSignDialog
+          message={dnaSignMessage}
+          {...dnaSignParams}
+          {...dnaSignDisclosure}
+          onSignError={failToast}
         />
       )}
 
