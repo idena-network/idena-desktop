@@ -172,14 +172,18 @@ export function DnaSignDialog({
 
   const {address} = useIdentityState()
 
+  const isValidCallbackUrl = isValidUrl(callbackUrl)
+
   const callbackUrlObject = React.useMemo(
-    () => new URL(callbackUrl),
-    [callbackUrl]
+    () => isValidCallbackUrl && new URL(callbackUrl),
+    [callbackUrl, isValidCallbackUrl]
   )
 
   const callbackFaviconUrl = React.useMemo(
-    () => faviconUrl || new URL('favicon.ico', callbackUrlObject.origin),
-    [callbackUrlObject.origin, faviconUrl]
+    () =>
+      faviconUrl ||
+      (callbackUrlObject && new URL('favicon.ico', callbackUrlObject.origin)),
+    [callbackUrlObject, faviconUrl]
   )
 
   return (
@@ -227,7 +231,7 @@ export function DnaSignDialog({
           onClick={async () => {
             signNonce(message, format)
               .then((signature) => {
-                if (isValidUrl(callbackUrl)) {
+                if (isValidCallbackUrl) {
                   const callbackUrlWithSignature = appendParam(
                     callbackUrl,
                     'signature',
