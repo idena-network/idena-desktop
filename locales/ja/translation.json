@@ -751,7 +751,7 @@
   "An invitation can be provided by validated participants": "有効な参加者から招待状を受け取ることができます。",
   "Your flips were reported.": "あなたのフリップが報告されました。",
   "Make all flips carefully": "すべてのフリップを慎重に作成する",
-  "Withdraw stake, iDNA": "ステークの引き出し, iDNA",
+  "Withdraw stake": "ステークの引き出し",
   "To take part in the validation, you need an invitation code. Invitations can be provided by validated identities.": "認証を受けるためには、招待コードが必要です。招待コードは、認証済みのIDから提供されます。",
   "How to get an invitation code": "招待コードの入手方法",
   "Successfully sent": "正常に送信されました",
@@ -941,5 +941,6 @@
   "Show status": "Show status",
   "Ads": "Ads",
   "Client version: {{version}}": "Client version: {{version}}",
-  "Node version: {{version}}": "Node version: {{version}}"
+  "Node version: {{version}}": "Node version: {{version}}",
+  "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake.": "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake."
 }

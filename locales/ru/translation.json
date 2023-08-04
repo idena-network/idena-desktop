@@ -757,7 +757,7 @@
   "An invitation can be provided by validated participants": "Приглашение может быть предоставлено проверенными участниками",
   "Your flips were reported.": "О твоих флипах сообщили.",
   "Make all flips carefully": "Делайте все флипы осторожно",
-  "Withdraw stake, iDNA": "Вывод стейка, iDNA",
+  "Withdraw stake": "Вывод стейка",
   "To take part in the validation, you need an invitation code. Invitations can be provided by validated identities.": "Чтобы принять участие в валидации, вам нужен код приглашения. Приглашения могут быть предоставлены подтвержденными участиками.",
   "How to get an invitation code": "Как получить код приглашения",
   "Successfully sent": "Успешно отправлено",
@@ -950,5 +950,6 @@
   "Show status": "Show status",
   "Ads": "Ads",
   "Client version: {{version}}": "Client version: {{version}}",
-  "Node version: {{version}}": "Node version: {{version}}"
+  "Node version: {{version}}": "Node version: {{version}}",
+  "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake.": "Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake."
 }

@@ -712,7 +712,13 @@ export function DeactivateMiningDrawer({
   )
 }
 
-export function KillIdentityDrawer({address, children, ...props}) {
+export function KillIdentityDrawer({
+  address,
+  lockedStake,
+  age,
+  children,
+  ...props
+}) {
   const {t} = useTranslation()
 
   return (
@@ -742,14 +748,19 @@ export function KillIdentityDrawer({address, children, ...props}) {
 }
 
 export function KillForm({onSuccess, onFail}) {
-  const {t} = useTranslation(['translation', 'error'])
+  const {t, i18n} = useTranslation(['translation', 'error'])
 
-  const [{address, stake}, {killMe}] = useIdentity()
+  const [{address, stake, lockedStake, age}, {killMe}] = useIdentity()
+  const stakeToWithdraw = Number(lockedStake) > 0 ? stake - lockedStake : stake
 
   const toastSuccess = useSuccessToast()
   const toastFail = useFailToast()
 
   const [submitting, setSubmitting] = React.useState(false)
+
+  const formatDna = toLocaleDna(i18n.language, {
+    maximumFractionDigits: 5,
+  })
 
   return (
     <Stack
@@ -786,16 +797,39 @@ export function KillForm({onSuccess, onFail}) {
         }
       }}
     >
+      {Number(lockedStake) > 0 && (
+        <>
+          <FormControl>
+            <FormHelperText fontSize="md">
+              <Flex justify="space-between">
+                <Box as="span" color="muted">
+                  {t('Burn')}
+                </Box>
+                <Box as="span" color="brandGray.500">
+                  {formatDna(lockedStake)}
+                </Box>
+              </Flex>
+            </FormHelperText>
+          </FormControl>
+          <Text fontSize="md" mb={6}>
+            {t(
+              'Get validated for {{epochs}} more epoch(s) to be able to withdraw the full amount of the stake.',
+              {epochs: 10 - age}
+            )}
+          </Text>
+        </>
+      )}
       <FormControl>
-        <FormLabel htmlFor="stake">{t('Withdraw stake, iDNA')}</FormLabel>
-        <Input
-          id="stake"
-          value={stake}
-          isDisabled
-          _disabled={{
-            bg: 'gray.50',
-          }}
-        />
+        <FormHelperText fontSize="md">
+          <Flex justify="space-between">
+            <Box as="span" color="muted">
+              {t('Withdraw stake')}
+            </Box>
+            <Box as="span" color="brandGray.500">
+              {formatDna(stakeToWithdraw)}
+            </Box>
+          </Flex>
+        </FormHelperText>
       </FormControl>
 
       <Text fontSize="md" mb={6}>
