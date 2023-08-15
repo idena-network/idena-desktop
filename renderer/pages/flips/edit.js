@@ -50,6 +50,7 @@ import {useChainState} from '../../shared/providers/chain-context'
 import {InfoIcon, RefreshIcon} from '../../shared/components/icons'
 import {useRpc, useTrackTx} from '../../screens/ads/hooks'
 import {eitherState} from '../../shared/utils/utils'
+import {writeTextToClipboard} from '../../shared/utils/clipboard'
 
 export default function EditFlipPage() {
   const {t, i18n} = useTranslation()
@@ -430,24 +431,45 @@ export default function EditFlipPage() {
             </PrimaryButton>
           )}
           {is('submit') && (
-            <PrimaryButton
-              isDisabled={is('submit.submitting')}
-              isLoading={is('submit.submitting')}
-              loadingText={t('Publishing')}
-              onClick={() => {
-                if (syncing) {
-                  failToast('Can not submit flip while node is synchronizing')
-                  return
+            <>
+              <SecondaryButton
+                onClick={async () =>
+                  (await writeTextToClipboard(
+                    JSON.stringify({
+                      originalOrder,
+                      order,
+                      images: protectedImages,
+                    })
+                  ))
+                    ? toast({
+                        status: 'success',
+                        // eslint-disable-next-line react/display-name
+                        render: () => <Toast title={t('Copied')} />,
+                      })
+                    : failToast('Failed to copy')
                 }
-                if (offline) {
-                  failToast('Can not submit flip. Node is offline')
-                  return
-                }
-                publishDrawerDisclosure.onOpen()
-              }}
-            >
-              {t('Submit')}
-            </PrimaryButton>
+              >
+                {t('Copy to clipboard')}
+              </SecondaryButton>
+              <PrimaryButton
+                isDisabled={is('submit.submitting')}
+                isLoading={is('submit.submitting')}
+                loadingText={t('Publishing')}
+                onClick={() => {
+                  if (syncing) {
+                    failToast('Can not submit flip while node is synchronizing')
+                    return
+                  }
+                  if (offline) {
+                    failToast('Can not submit flip. Node is offline')
+                    return
+                  }
+                  publishDrawerDisclosure.onOpen()
+                }}
+              >
+                {t('Submit')}
+              </PrimaryButton>
+            </>
           )}
         </FlipMasterFooter>
 

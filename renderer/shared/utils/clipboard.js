@@ -14,3 +14,13 @@ export function writeImageURLToClipboard(url) {
   const img = global.nativeImage.createFromDataURL(url)
   global.clipboard.writeImage(img)
 }
+
+export async function writeTextToClipboard(text) {
+  try {
+    await global.clipboard.writeText(text)
+    return true
+  } catch (err) {
+    console.error('Failed to copy: ', err)
+    return false
+  }
+}
