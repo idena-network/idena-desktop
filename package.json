@@ -91,7 +91,6 @@
     "dayjs": "^1.9.6",
     "dequal": "^1.0.0",
     "dexie": "^3.2.2",
-    "duckduckgo-images-api": "^1.0.5",
     "electron-is-dev": "^1.0.1",
     "electron-next": "^3.1.5",
     "electron-store": "^3.2.0",
@@ -140,5 +139,10 @@
     "semi": false,
     "singleQuote": true,
     "bracketSpacing": false
+  },
+  "overrides": {
+    "fabric": {
+      "jsdom": "16.7.0"
+    }
   }
 }
